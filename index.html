@@ -3,31 +3,95 @@
 <head>
     <meta charset="utf-8">
     <title>Chipster</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Mobile Viewport optimized-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Chipster Web Tool for Data Processing and Visalization">
     <meta name="author" content="Rumana Quazi">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/app.css" rel="stylesheet">
-    <link rel="shortcut icon" href="../assets/ico/favicon.png">
-</head>
+
+    <!--Bootstrap CSS-->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="includes/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+    <!--Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="css/app.css">
+ 
+</head><!--end of head-->
 
 <body>
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" href="#/">Chipster</a>
-        </div>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <div class="span12" ng-view ng-animate="{enter: 'fade-enter'}">
-        </div>
-    </div>
-</div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
-<script src="js/app.js"></script>
+<div class="container" id="main">
+        <div class="navbar navbar-fixed-top">
+
+            <div class="container">
+                <a class="navbar-brand" href="/">Chipster</a>
+                <div class="nav-collapse collapse navbar-responsive-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active">
+                            <a href="#">Dataset</a>
+                        </li>
+                        <li>
+                            <a href="#">Analysis Tools</a>
+                        </li>
+                         <li>
+                            <a href="#">Workflow</a>
+                        </li>
+                        <li>
+                            <a href="#">Visualization</a>
+                        </li>
+                    </ul><!--end nav-->
+
+                    <form class="navbar-form pull-left">
+                        <input type="text" class="form-control" placeholder="Serch this site.." id="searchInput">
+                    </form><!--end navbar form-->
+                    <ul class="nav navbar-nav pull-right">
+                        <li>
+                            <a href="#">Login</a>
+                        </li>
+                    </ul><!--end nav pull right-->
+
+                </div><!--end nav-collapse-->
+            </div><!--end container-->
+
+        </div><!--end navbar-->
+
+
+        <div class="carousel slide" id="infoContainer">
+        </div><!--end infoContainer-->
+
+
+        <div class="row" id="dataToolContainer">
+        </div><!--end row dataToolContainer-->
+
+
+        <div class="row" id="visalizationContainer">
+        </div><!--end visualizationContainer-->
+
+    </div><!--end container-->
+
+    <footer>
+    </footer><!--end of footer-->
+
+
+    <!-- All Javascript at the bottom of the page for faster page loading -->
+        
+    <!-- First try for the online version of jQuery-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    
+    <!-- If no online access, fallback to our hardcoded version of jQuery -->
+    <script>window.jQuery || document.write('<script src="includes/js/jquery-1.8.2.min.js"><\/script>')</script>
+    
+    <!-- Bootstrap JS -->
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    
+    <!--Angular Js-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js">
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/app.js"></script>
 </body>
 </html>
