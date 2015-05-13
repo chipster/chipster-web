@@ -102,10 +102,76 @@
         </div><!--end of chipsterInfoContainer-->
 
 
-
-
         <div class="row" id="dataToolContainer">
-        </div><!--end row dataToolContainer-->
+            <div class="col-sm-6">
+                <div class="panel">
+                <div class="panel-heading">
+                        <h3 class="panel-title">Load Dataset</h3>
+                    </div><!--end of panel heading-->
+                <p>To start working with Chipster, you need to load data fisrt</p>
+                <div class="list-group">
+                    <a href="#" class="list-group-item">
+                            <h5 class="list-group-item-heading">Import Files</h5>
+                            
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <h5 class="list-group-item-heading">Import Folders</h5>
+                            
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <h5 class="list-group-item-heading">Import from Url</h5>
+                            
+                        </a>
+                </div><!--end of list group-->
+            </div><!--end of data set panel-->
+            </div><!--end of dataset view-->
+
+            <div class="col-sm-6">
+                <div class="panel">
+                <div class="panel-heading">
+                        <h3 class="panel-title">Analysis Tools</h3>
+                    </div><!--end of panel heading-->
+                <div class="tabbable">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab1" data-toggle="tab">Microarrays</a>
+                        </li><!--end of microarray tab tab--> 
+                        <li><a href="#tab2" data-toggle="tab">NGS</a>
+                        </li>    
+                        <li><a href="#tab3" data-toggle="tab">Misc</a></li>
+                    </ul><!--end of tab header list-->
+
+                        <div class="tab-content" id="tabContent">
+                            <div class="tab-pane active" id="tab1">
+                                <!--wiil contanin the list of microarry tools list here, ng-repeat-->
+                                <h5>this are micorarry tools</h5>
+                                    <ul class="list-group">
+                                        <li class="list-group-item">PreProcessing</li>
+                                        <li class="list-group-item">Normalisation</li>
+                                        <li class="list-group-item">Clustering</li>
+                                    </ul>
+                                
+                            </div><!--end of microarry items-->
+                            <div class="tab-pane" id="tab2">
+                                <!--will contain NGS items-->
+                                <p>This are NGS tools.</p>
+                                <ul class="list-group">
+                                        <li class="list-group-item">Quality Control</li>
+                                        <li class="list-group-item">Preprocessing</li>
+                                        <li class="list-group-item">Utilities</li>
+                                    </ul>
+                            </div><!--end of NGS items-->
+                            <div class="tab-pane" id="tab3">
+                                <!--will contain the misc items-->
+                                <p>This are Miscellenious tools</p>
+                            </div>
+
+                        </div><!--end of tab content-->           
+                    </div><!--end of tabble-->
+                </div><!--end of tool panel-->
+            </div><!--end of toolset view-->
+        </div><!--end of dataToolContainer-->
+
+        
 
 
         <div class="row" id="visalizationContainer">
@@ -134,6 +200,9 @@
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
+
+    <!--angular UI bootstrap-->
+     <script src="includes/js/ui-bootstrap-tpls-0.13.0.min.js"></script>
 
     <!-- Custom JS -->
     <script src="js/app.js"></script>

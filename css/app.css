@@ -7,11 +7,18 @@ body{
     padding-top: 80px;
 }
 
-
 /*-------------------------
 	Layout
 -------------------------*/
 #chipsterInfoContainer{
 	text-align: center;
+}
+
+#tabContent{
+	padding: 20px;
+}
+
+#dataToolContainer{
+	margin-top: 40px;
 }
 

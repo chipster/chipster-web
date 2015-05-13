@@ -3,3 +3,5 @@ angular.module('ChipsterWeb').config(['$routeProvider', function ($routeProvider
                   .when('/profile',  {templateUrl: 'views/profile.html'});
 }]);
 
+
+
