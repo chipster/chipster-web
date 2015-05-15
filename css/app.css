@@ -10,6 +10,20 @@ body{
 /*-------------------------
 	Layout
 -------------------------*/
+
+footer {
+	background: #333;
+	color: #eee;
+	font-size: 11px;
+	padding: 20px;
+}
+
+ul.unstyled {
+	list-style: none;
+	padding: 0;
+}
+
+
 #chipsterInfoContainer{
 	text-align: center;
 }
@@ -20,5 +34,13 @@ body{
 
 #dataToolContainer{
 	margin-top: 40px;
+}
+
+#toolButtonGroup{
+	margin: 20px;
+}
+
+#runButton{
+	margin:20px;
 }
 
