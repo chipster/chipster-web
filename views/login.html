@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ChipsterWeb">
+<head>
+    <meta charset="utf-8">
+    <title>Chipster</title>
+
+    <!-- Mobile Viewport optimized-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Chipster Web Tool for Data Processing and Visalization">
+    <meta name="author" content="Rumana Quazi">
+
+    <!--Bootstrap CSS-->
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/includes/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+    <!--Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="/css/app.css">
+ 
+</head><!--end of head-->
+
+<body>
+
+<div class="container" id="main">
+        <div class="navbar navbar-fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">Chipster</a>
+                <div class="nav-collapse collapse navbar-responsive-collapse">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="#dataToolContainer">Dataset</a>
+                        </li>
+                        <li>
+                            <a href="#dataToolContainer">Analysis Tools</a>
+                        </li>
+                         <li>
+                            <a href="#">Workflow</a>
+                        </li>
+                        <li>
+                            <a href="#visalizationContainer">Visualization</a>
+                        </li>
+                    </ul><!--end nav-->
+
+                    <form class="navbar-form pull-left">
+                        <input type="text" class="form-control" placeholder="Search this site.." id="searchInput">
+                    </form><!--end navbar form-->
+                    <ul class="nav navbar-nav pull-right">
+                        <li class="active">
+                            <a href="views/login.html">Login</a>
+                        </li>
+                    </ul><!--end nav pull right-->
+
+                </div><!--end nav-collapse-->
+            </div><!--end container-->
+
+        </div><!--end navbar-->
+
+        <!--Login module-->
+        <div class="row">
+            <div class="span12">
+                <div class="" id="loginModal">
+                    <div class="modal-header">
+                        <h3>Alreday a Chipster User?</h3>
+                    </div>
+                <div class="modal-body">
+            <div class="well">
+                  <ul class="nav nav-tabs">
+                        <li class="active"><a href="#login" data-toggle="tab">Login</a></li>
+                        <li><a href="#create" data-toggle="tab">Create Account</a></li>
+                  </ul>
+                  <div id="myTabContent" class="tab-content">
+                    <div class="tab-pane active in" id="login">
+                      <form class="form-horizontal" action='' method="POST">
+                        <fieldset>
+                            <hr>
+                          <div id="legend">
+                            <legend class="">Login</legend>
+                          </div>    
+                          <div class="control-group">
+                            <!-- Username -->
+                            <label class="control-label"  for="username">Username</label>
+                            <div class="controls">
+                              <input type="text" id="username" name="username" placeholder="" class="input-xlarge">
+                            </div>
+                          </div>
+     
+                          <div class="control-group">
+                            <!-- Password-->
+                            <label class="control-label" for="password">Password</label>
+                            <div class="controls">
+                              <input type="password" id="password" name="password" placeholder="" class="input-xlarge">
+                            </div>
+                          </div>
+                          <div class="control-group">
+                            <hr>
+                            <!-- Button -->
+                            <div class="controls">
+                              <button class="btn btn-success">Login</button>
+                            </div>
+                          </div>
+                        </fieldset>
+                      </form>                
+                    </div>
+                    <div class="tab-pane fade" id="create">
+                    <form class="form-horizontal" action='' method="POST">
+                        <fieldset>
+                            <hr>
+                          <div id="legend">
+                            <legend class="">Create Account</legend>
+                          </div>    
+                          <div class="control-group">
+                            <!-- Username -->
+                            <label class="control-label"  for="username">Username</label>
+                            <div class="controls">
+                              <input type="text" id="username" name="username" placeholder="" class="input-xlarge">
+                            </div>
+                          </div>
+                          <div class="control-group">
+                            <!-- Password-->
+                            <label class="control-label">Fisrt Name</label>
+                            <div class="controls">
+                              <input type="text" id="fn" class="input-xlarge">
+                            </div>
+                          </div>
+                           <div class="control-group">
+                            <!-- Password-->
+                            <label class="control-label">Last Name</label>
+                            <div class="controls">
+                              <input type="text" id="ln" class="input-xlarge">
+                            </div>
+                          </div>
+     
+                          <div class="control-group">
+                            <!-- Password-->
+                            <label class="control-label" for="password">Password</label>
+                            <div class="controls">
+                              <input type="password" id="password" name="password" placeholder="" class="input-xlarge">
+                            </div>
+                          </div>
+                          <div class="control-group">
+                            <hr>
+                          </div>
+                        </fieldset>
+                      </form>                
+                    
+
+                        <div>
+                        <button class="btn btn-primary">Create Account</button>
+                        </div>
+                      </form>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    </div><!--end of main container-->
+
+    
+
+
+    <!-- All Javascript at the bottom of the page for faster page loading -->
+        
+    <!-- First try for the online version of jQuery-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    
+    <!-- If no online access, fallback to our hardcoded version of jQuery -->
+    <script>window.jQuery || document.write('<script src="includes/js/jquery-1.8.2.min.js"><\/script>')</script>
+    
+    <!-- Bootstrap JS -->
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    
+    <!--Angular Js-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js">
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/app.js"></script>
+</body>
+</html>
