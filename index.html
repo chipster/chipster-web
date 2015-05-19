@@ -15,19 +15,26 @@
 
     <!--Custom CSS-->
     <link rel="stylesheet" type="text/css" href="css/app.css">
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
+    <script src="script.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/app.js"></script>
  
 </head><!--end of head-->
 
-<body>
+<body ng-controller="mainController">
+<!--header and Navbar-->
 
-<div class="container" id="main">
-        <div class="navbar navbar-fixed-top">
+<div class="navbar navbar-fixed-top">
             <div class="container">
-                <a class="navbar-brand" href="/">Chipster</a>
+                <a class="navbar-brand active" href="/">Chipster</a>
                 <div class="nav-collapse collapse navbar-responsive-collapse">
                     <ul class="nav navbar-nav">
-                        <li class="active">
-                            <a href="#dataToolContainer">Dataset</a>
+                        <li>
+                            <a href="#dataset">Dataset</a>
                         </li>
                         <li>
                             <a href="#dataToolContainer">Analysis Tools</a>
@@ -45,232 +52,24 @@
                     </form><!--end navbar form-->
                     <ul class="nav navbar-nav pull-right">
                         <li>
-                            <a href="views/login.html">Login</a>
+                            <a href="#login">Login</a>
                         </li>
                     </ul><!--end nav pull right-->
 
                 </div><!--end nav-collapse-->
             </div><!--end container-->
-
-        </div><!--end navbar-->
-
-        <!--later we should port this part of html to a different file for clarity-->
-        <div class="row" id="chipsterInfoHeading">
-            <div class="col-12">
-                <h2>About Chipster</h2>
-                <p class="lead">Chipster is a user-friendly analysis software for high-throughput data. It contains over 340 analysis tools for next generation sequencing (NGS), microarray, proteomics and sequence data. Users can save and share automatic analysis workflows, and visualize data interactively using a built-in genome browser and many other visualizations.</p>
-            </div><!--end of col-12-->
-        </div><!--end chipsterInfoHeading-->
-
-        <div class="row" id="chipsterInfoContainer">
-            <div class="col-sm-4 chipsterInfo">
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Using Chipster</h3>
-                    </div><!--end of panel heading-->
-                    <p>If you would like to use the Chipster server running at CSC, you need a user account. If you would just like to have a quick look and not run anything, you can log in with the username guest. To know more</p>
-
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info btn-block">Learn how to Access</a>
-                </div><!--end of fisrt panel-->
-            </div><!--end of first chipsterInfo column-->
-
-            <div class="col-sm-4 chipsterInfo">
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Analysis Tools</h3>
-                    </div><!--end of panel heading-->
-                    <p>Chipster provides hundreds of tools for different type of data analysis and sequencing. It also provides preprocessing tools and filtering of dataser.To know more</p>
-
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/features.shtml" target="_blank" class="btn btn-info btn-block">Learn About Toolset</a>
-                </div><!--end of second panel-->
-            </div><!--end of second chipsterInfo column-->
-
-            <div class="col-sm-4 chipsterInfo">
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Visualizations</h3>
-                    </div><!--end of panel heading-->
-                    <p>Chipster offers different ways of visualization techniques for different type of data analysis and sequencing. Choose the best suited technique of visalization for your analysis.To know more</p>
-
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/screenshots.shtml" target="_blank" class="btn btn-info btn-block">Explore Visualizations</a>
-                </div><!--end of third panel-->
-            </div><!--end of third chipsterInfo column-->       
-
-        </div><!--end of chipsterInfoContainer-->
+</div><!--end navbar-->
 
 
-        <div class="row row-eq-height" id="dataToolContainer">
-            <div class="col-sm-6">
-                <div class="panel">
-                <div class="panel-heading">
-                        <h3 class="panel-title">Load Dataset</h3>
-                    </div><!--end of panel heading-->
-                <p>To start working with Chipster, you need to load data fisrt</p>
-                <div class="list-group">
-                    <a href="#" class="list-group-item">
-                            <h5 class="list-group-item-heading">Import Files</h5>
-                            
-                        </a>
-                        <a href="#" class="list-group-item">
-                            <h5 class="list-group-item-heading">Import Folders</h5>
-                            
-                        </a>
-                        <a href="#" class="list-group-item">
-                            <h5 class="list-group-item-heading">Import from Url</h5>
-                            
-                        </a>
-                </div><!--end of list group-->
-            </div><!--end of data set panel-->
-            </div><!--end of dataset view-->
 
-            <div class="col-sm-6">
-                <div class="panel">
-                <div class="panel-heading">
-                        <h3 class="panel-title">Analysis Tools</h3>
-                    </div><!--end of panel heading-->
-                <div class="tabbable">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#tab1" data-toggle="tab">Microarrays</a>
-                        </li><!--end of microarray tab tab--> 
-                        <li><a href="#tab2" data-toggle="tab">NGS</a>
-                        </li>    
-                        <li><a href="#tab3" data-toggle="tab">Misc</a></li>
-                    </ul><!--end of tab header list-->
+    <!--Main content and injected view-->
+    <div id="main">
+        <!--andgular templating-->
+        <!--This is where the contents will be injected-->
+        <div ng-view></div>       
+    </div><!--end of main container-->
 
-                        <div class="tab-content" id="tabContent">
-                            <div class="tab-pane active" id="tab1">
-                                <!--wiil contanin the list of microarry tools list here, ng-repeat-->
-                                <h4>This are micorarry tools</h4>
-                                    <ul class="list-group">
-                                        <li class="list-group-item">PreProcessing</li>
-                                        <li class="list-group-item">Normalisation</li>
-                                        <li class="list-group-item">Clustering</li>
-                                    </ul>
-                                
-                            </div><!--end of microarry items-->
-                            <div class="tab-pane" id="tab2">
-                                <!--will contain NGS items-->
-                                <h4>This are NGS tools.</h4>
-                                <ul class="list-group">
-                                        <li class="list-group-item">Quality Control</li>
-                                        <li class="list-group-item">Preprocessing</li>
-                                        <li class="list-group-item">Utilities</li>
-                                    </ul>
-                            </div><!--end of NGS items-->
-                            <div class="tab-pane" id="tab3">
-                                <!--will contain the misc items-->
-                                <p>This are Miscellenious tools</p>
-                            </div>
-
-                        </div><!--end of tab content-->           
-                    </div><!--end of tabble-->
-                 <!--button area-->    
-                    <div class="container" id="toolButtonGroup">
-                        <!--Tool source-->
-                        <a href="#myModal" role="button" class="btn btn-info" data-toggle="modal">Show Tool Source Code</a>
-                        <div class="modal" id="myModal">
-                           <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button class="close" data-dismiss="modal">&times;</button><!--end of close button-->
-                                        <h4 class="modal-title">Tool Source Code</h4>
-                                    </div><!--end of modal header-->
-                                <div class="modal-body">
-                                    <h4>PCA Source Code</h4>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                                </div>
-
-                    </div><!--end of modal content-->
-
-                </div><!--end of modal dialog-->
-            </div><!--end of modal-->
-                        <!--Parameter-->
-                        <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
-                    </div>                     
-                    <div class="container" id="runButton">
-                        <button type="button" class="btn btn-success btn-block">Run</button>
-                    </div>
-                        
-
-                </div><!--end of tool panel-->
-            </div><!--end of toolset view-->
-        </div><!--end of dataToolContainer-->
-
-        
-
-    <!--Visualization panel-->
-
-        <div class="row" id="visalizationContainer">
-            <div class="panel">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Visualization</h3>
-                </div><!--end of panel heading-->
-                <div class="row">
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                </div><!--end of visualization option row-->
-               
-            </div><!--end of panel-->
-        </div><!--end visualizationContainer-->
-
-    </div><!--end container-->
-
-    <footer>
+<footer>
         <div class="container">
             <div class="row">
                 <div class="col-sm-2">
@@ -303,28 +102,11 @@
 
         </div><!--end of conatiner-->
 
-    </footer><!--end of footer-->
+</footer><!--end of footer-->
 
 
-    <!-- All Javascript at the bottom of the page for faster page loading -->
+
         
-    <!-- First try for the online version of jQuery-->
-    <script src="http://code.jquery.com/jquery.js"></script>
-    
-    <!-- If no online access, fallback to our hardcoded version of jQuery -->
-    <script>window.jQuery || document.write('<script src="includes/js/jquery-1.8.2.min.js"><\/script>')</script>
-    
-    <!-- Bootstrap JS -->
-    <script src="bootstrap/js/bootstrap.min.js"></script>
-    
-    <!--Angular Js-->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js">
-    </script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
-
-    <!-- Custom JS -->
-    <script src="js/app.js"></script>
 </body>
 </html>
