@@ -1,0 +1,79 @@
+  <div class="row row-eq-height" id="dataToolContainer">
+    <div class="col-sm-6">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Load Dataset</h3>
+            </div><!--end of panel heading-->
+            <p>To start working with Chipster, you need to load data fisrt</p>
+            <div class="list-group">
+                <a href="#" class="list-group-item">
+                  <h5 class="list-group-item-heading">Import Files</h5>             
+                </a>
+                <a href="#" class="list-group-item">
+                    <h5 class="list-group-item-heading">Import Folders</h5>                 
+                </a>
+                <a href="#" class="list-group-item">
+                    <h5 class="list-group-item-heading">Import from Url</h5>                   
+                </a>
+            </div><!--end of list group-->
+        </div><!--end of data set panel-->
+    </div><!--end of dataset view-->
+
+    <div class="col-sm-6">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Analysis Tools</h3>
+            </div><!--end of panel heading-->
+            
+            <div ng-controller="AnalysisToolTabController">
+                <p>Testing Tab works or not</p>
+                <hr/>
+                <tabset id="toolContainer">
+                    <tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active" disable="tab.disabled">
+                        {{tab.content}}
+                        <div ng-controller="AnalysisToolOptionController">
+                            <p>Testing Accordion</p>
+                            <accordion close-others="oneAtATime">
+                                <accordion-group heading="PreProcessing,initially expanded" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+                                this content is static and not change
+                            </accordion-group>
+                            <!--Second Accordion Group-->
+                            <accordion-group ng-repeat="group in groups" heading="{{group.title}}">
+                            {{group.content}}
+                        </accordion-group>
+                    </accordion>
+                </div>
+            </tab>
+        </tabset>
+    </div><!--end of tabset div-->
+
+
+    <!--button area-->    
+    <div class="container" id="toolButtonGroup">
+        <!--Tool source-->
+        <a href="#myModal" role="button" class="btn btn-info" data-toggle="modal">Show Tool Source Code</a>
+        <div class="modal fade" id="myModal">
+         <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button><!--end of close button-->
+                    <h4 class="modal-title">Tool Source Code</h4>
+                </div><!--end of modal header-->
+                <div class="modal-body">
+                    <h4>PCA Source Code</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+
+            </div><!--end of modal content-->
+
+        </div><!--end of modal dialog-->
+    </div><!--end of modal-->
+    <!--Parameter-->
+    <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
+</div>                     
+<div class="container" id="runButton">
+    <button type="button" class="btn btn-success btn-block">Run</button>
+</div>
+</div><!--end of tool panel-->
+</div><!--end of toolset view-->
+</div><!--end of dataToolContainer-->

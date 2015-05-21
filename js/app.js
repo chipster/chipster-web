@@ -16,13 +16,8 @@ chipsterWeb.config(['$routeProvider',
 		})
 		.when('/dataset',{
 			templateUrl:'partials/dataset.html'
-		})
-		.when('/analysisTools',{
-			templateUrl:'partials/toolSource.html'
-		})
-		.when('/visualization',{
-			templateUrl:'partials/visualization.html'
 		});
+		
 }]);
 
 //main controller
