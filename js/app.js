@@ -14,6 +14,9 @@ chipsterWeb.config(['$routeProvider',
 				templateUrl:'partials/login.html',
 				controller:'LoginController'
 		})
+		.when('/visualization',{
+			templateUrl:'partials/visualization.html'
+		})
 		.when('/dataset',{
 			templateUrl:'partials/dataset.html'
 		});

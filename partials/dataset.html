@@ -26,16 +26,13 @@
             </div><!--end of panel heading-->
             
             <div ng-controller="AnalysisToolTabController">
-                <p>Testing Tab works or not</p>
                 <hr/>
                 <tabset id="toolContainer">
                     <tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active" disable="tab.disabled">
-                        {{tab.content}}
                         <div ng-controller="AnalysisToolOptionController">
-                            <p>Testing Accordion</p>
                             <accordion close-others="oneAtATime">
-                                <accordion-group heading="PreProcessing,initially expanded" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
-                                this content is static and not change
+                                <accordion-group heading="PreProcessing" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+                                    Filter reads for several criteria with PRINSRQ
                             </accordion-group>
                             <!--Second Accordion Group-->
                             <accordion-group ng-repeat="group in groups" heading="{{group.title}}">
