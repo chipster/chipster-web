@@ -1,0 +1,56 @@
+[
+  {
+    "id": "xx",
+    "name": "spreadsheet",
+    "specification": [
+      {
+        "value1": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "value2": [
+          "c",
+          "d",
+          "e"
+        ]
+      },
+      {
+        "value3": [
+          "e",
+          "f",
+          "g"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xx",
+    "name": "spreadsheet",
+    "specification": [
+      {
+        "value1": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "value2": [
+          "c",
+          "d",
+          "e"
+        ]
+      },
+      {
+        "value3": [
+          "e",
+          "f",
+          "g"
+        ]
+      }
+    ]
+  }
+]
