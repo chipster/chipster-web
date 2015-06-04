@@ -1,0 +1,145 @@
+{  
+   "ToolType":[  
+      "MicroArray":[  
+         "ToolSet":[  
+            {  
+               "id":"001",
+               "name":"Normalization",
+               "AnalysisMethod":{  
+                  "name":"Affymetrix basic",
+                  "description":"lorel ipsum bla bla",
+                  "parameterset":[  
+                     {  
+                        "parameter1":"1001",
+                        "type":"Custom Chiptype",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter2":"1002",
+                        "type":"Image Width",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter3":"1003",
+                        "type":"Image height",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     }
+                  ]
+               },
+               {  
+                  "Affymetrix -using RLE and NUSE":[  
+                     {  
+                        "parameter1":"1001",
+                        "type":"Custom Chiptype",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter2":"1002",
+                        "type":"Image Width",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter3":"1003",
+                        "type":"Image height",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     }
+                  ]
+               }
+            },
+            {  
+               "id":"002",
+               "name":"QualityControl",
+               "AnalysisMethod":{  
+                  "Affymetrix basic":[  
+                     {  
+                        "parameter1":"1001",
+                        "type":"Custom Chiptype",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter2":"1002",
+                        "type":"Image Width",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter3":"1003",
+                        "type":"Image height",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     }
+                  ]
+               },
+               {  
+                  "Affymetrix -using RLE and NUSE":[  
+                     {  
+                        "parameter1":"1001",
+                        "type":"Custom Chiptype",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter2":"1002",
+                        "type":"Image Width",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     },
+                     {  
+                        "parameter3":"1003",
+                        "type":"Image height",
+                        "values":[  
+                           "v1",
+                           "v2",
+                           "v3"
+                        ]
+                     }
+                  ]
+               }
+            }            //end of analysis Methos
+         ]
+      ]      //end of microarraytype
+   ]
+}
+
+
+

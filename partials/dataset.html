@@ -4,7 +4,7 @@
             <div class="panel-heading">
                 <h3 class="panel-title">Load Dataset</h3>
             </div><!--end of panel heading-->
-            <p>To start working with Chipster, you need to load data fisrt</p>
+            <p>To start working with Chipster, you need to load data first</p>
             <div class="list-group">
                 <a href="#" class="list-group-item">
                   <h5 class="list-group-item-heading">Import Files</h5>             
@@ -19,9 +19,6 @@
         </div><!--end of data set panel-->
     </div><!--end of dataset view-->
 
-    <div ng-controller="AnalysisToolOptionController">
-        <p> Here is the json output</p>
-    </div>
 
     <div class="col-sm-6">
         <div class="panel">
@@ -32,14 +29,14 @@
             <div ng-controller="AnalysisToolTabController">
                 <hr/>
                 <tabset id="toolContainer">
-                    <tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active" disable="tab.disabled">
+                    <tab ng-repeat="tab in tabs" heading="{{tab.name}}" active="tab.active" disable="tab.disabled">
                         <div ng-controller="AnalysisToolOptionController">
                             <accordion close-others="oneAtATime">
                                 <accordion-group heading="PreProcessing" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
                                     Filter reads for several criteria with PRINSRQ
                             </accordion-group>
                             <!--Second Accordion Group-->
-                            <accordion-group ng-repeat="group in groups" heading="{{group.title}}">
+                            <accordion-group ng-repeat="group in groups" heading="{{group.name}}">
                             {{group.content}}
                         </accordion-group>
                     </accordion>

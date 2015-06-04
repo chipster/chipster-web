@@ -1,56 +1,24 @@
 [
-  {
-    "id": "xx",
-    "name": "spreadsheet",
-    "specification": [
-      {
-        "value1": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "value2": [
-          "c",
-          "d",
-          "e"
-        ]
-      },
-      {
-        "value3": [
-          "e",
-          "f",
-          "g"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "xx",
-    "name": "spreadsheet",
-    "specification": [
-      {
-        "value1": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "value2": [
-          "c",
-          "d",
-          "e"
-        ]
-      },
-      {
-        "value3": [
-          "e",
-          "f",
-          "g"
-        ]
-      }
-    ]
-  }
+  { "name":"Normalization", "availableMethodNum":"10"},
+ 
+  { "name":"Quality Control", "availableMethodNum":"5"},
+
+  { "name":"Preprocessing", "availableMethodNum":"5"},
+
+  { "name":"Statistics", "availableMethodNum":"5"},
+
+  { "name":"Clustering", "availableMethodNum":"5"},
+
+  { "name":"Annotation", "availableMethodNum":"5"},
+
+  { "name":"Pathways", "availableMethodNum":"5"},
+
+  { "name":"Promoter Analysis", "availableMethodNum":"5"},
+
+  { "name":"Copy number aberrations", "availableMethodNum":"5"},
+
+  { "name":"Visualization", "availableMethodNum":"5"},
+
+  { "name":"Utilities", "availableMethodNum":"5"}
+
 ]

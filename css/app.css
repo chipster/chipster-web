@@ -3,14 +3,16 @@ Custom CSS for Chipster Web
 */
 
 
+html,
 body{
-    padding-top: 80px;
-    margin: 20px;
-}
+    height: 100%;
+}/* the html
 
 /*-------------------------
 	Layout
 -------------------------*/
+
+
 
 footer {
 	position: absolute;
@@ -46,5 +48,16 @@ ul.unstyled {
 
 #runButton{
 	margin:20px;
+}
+
+/*wrapper for page content to push down the footer*/
+#wrap{
+	min-height: 100%;
+	height: auto;
+	/*Negative in*/
+	margin:0 auto -60px;
+	padding: 0 0 60px;
+
+
 }
 

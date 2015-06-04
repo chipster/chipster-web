@@ -1,11 +1,6 @@
-chipsterWeb.controller("AnalysisToolSetController",['$scope','$http',function($scope,$http){
-
-	$http.get('js/json/toolSet.json').success(function(data){
-
-		$scope.toolset=data;
-		console.log(data);
-	})
-
-
-
-}]);
+chipsterWeb.controller('AnalysisToolSetController', function($scope, $http) {
+  $http.get('js/json/toolSet.json')
+       .then(function(res){
+          $scope.toolset = res.data;                
+        });
+});
