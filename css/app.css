@@ -15,13 +15,10 @@ body{
 
 
 footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
 	background: #333;
+	height:auto;
 	color: #eee;
 	font-size: 11px;
-	padding: 20px;
 }
 
 ul.unstyled {
@@ -50,12 +47,13 @@ ul.unstyled {
 	margin:20px;
 }
 
-/*wrapper for page content to push down the footer*/
+/*wrapper for page content to push down the footer, fix for the sticky footer*/
 #wrap{
 	min-height: 100%;
 	height: auto;
-	/*Negative in*/
+	/* Negative indent footer by its height */
 	margin:0 auto -60px;
+	/* bottom padding by footer height*/
 	padding: 0 0 60px;
 
 
