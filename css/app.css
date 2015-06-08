@@ -6,7 +6,46 @@ Custom CSS for Chipster Web
 html,
 body{
     height: 100%;
-}/* the html
+}
+
+/*----Spreadsheet specific styles, inspired by graunked(Github Repo)----*/
+.output,input{
+
+	font-size: 10pt;
+	position: absolute;
+	height: 1.2em;
+	width: 50pt;
+	height: 16pt;
+	overflow: hidden;
+	padding-left: 4pt;
+}
+
+input{border: none;}
+.output{
+	background: white;
+	pointer-events:none;
+	padding-top: 2pt;
+	height: 14pt;
+}
+
+
+table{
+	border-collapse: collapse;
+}
+
+td > div{
+	width: 55pt;
+	height: 16pt;
+}
+
+td{
+	border:1px solid #EEE;
+}
+.column-label >td, .row-label{
+	text-align: :center;
+	background: #EEE;
+}
+.row-label{width: 2em}
 
 /*-------------------------
 	Layout
@@ -56,6 +95,11 @@ ul.unstyled {
 	/* bottom padding by footer height*/
 	padding: 0 0 60px;
 
+
+}
+
+#visalizationContainer{
+	margin: 10px;
 
 }
 

@@ -59,6 +59,31 @@
                         </div><!--end of thumbnails-->
                     </div><!--end of column-->
                 </div><!--end of visualization option row-->
+                
                
             </div><!--end of panel-->
+
+            <!--Excel sheet in visualization page-->
+                <div ng-controller="SpreadSheetController">
+                    <p>SpreadSheet Test</p>
+                    <table>
+                        <tr class="column-label">
+                            <td></td>
+                            <td ng-repeat="column in columns">{{column}}</td>
+                        </tr><!--end of colmn label row-->
+                        <tr ng-repeat="row in rows">
+                            <td class="row-label">{{row}}</td>
+                            <td ng-repeat="column in columns">
+                                <div>
+                                    <input ng-model="cells[column+row]"></input>
+                                    <div ng-bind="compute(column+row)" class="output"></div>
+
+                                </div><!--end of ng model div-->
+
+                        </tr>
+
+                    </table><!--end of spreadsheet table
+                   
+
+                </div><!--end of spreadsheet view-->
         </div><!--end visualization row-->
