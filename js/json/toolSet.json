@@ -2,6 +2,7 @@
   { "name":"Affymetrix", "toolGroup":"Normalization", "toolSource":"norm-affy.R", "datasetType":"microarray"},
   { "name":"Affymetrix", "toolGroup":"Normalization", "toolSource":"norm-affy.R", "datasetType":"microarray"},
   { "name":"Affymetrix", "toolGroup":"Normalization", "toolSource":"norm-affy.R", "datasetType":"microarray"},
- 
+  { "name":"Affymetrix", "toolGroup":"Normalization", "toolSource":"norm-affy.R", "datasetType":"microarray"}
   
+
 ]
