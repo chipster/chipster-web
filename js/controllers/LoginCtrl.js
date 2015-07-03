@@ -1,4 +1,4 @@
 //login controller
-chipsterWeb.controller('loginController',function($scope){
+chipsterWeb.controller('LoginCtrl',function($scope){
 	$scope.message="This is login screen";
 });

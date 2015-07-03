@@ -1,7 +1,76 @@
 
   <div class="row row-eq-height" id="dataToolContainer">
 
-    <div class="row" ng-controller="WorkflowController">
+    
+
+    <!--div for upload dataset button-->
+    <div flow-init>
+        <div flow-prevent-drop
+             flow-drag-enter="style={border:'5px solid green'}"
+             flow-drag-leave="style={}"
+             ng-style="style">
+            <div class="container">
+                <h3>Upload DataSet</h3>
+                <hr class="soften"/>
+
+                <div class="row">
+                    <div class="span6">
+                        <span class="btn" flow-btn><i class="icon icon-file"></i>Uplaod File</span>
+                        <span class="btn" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
+                    </div>
+                </div><!--end of row-->
+                <hr class="soften">
+                <h3>Uploads</h3>
+                <p>
+                    <a class="btn btn-small btn-success" ng-click="$flow.resume()">Resume</a>
+                    <a class="btn btn-small btn-danger" ng-click="$flow.pause()">Pause</a>
+                    <a class="btn btn-small btn-info" ng-click="$flow.cancel()">Cancel</a>
+                </p><!--end of upload options area-->
+                <table class="table table-hover table-bordered table.striped" flow-transfers>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Relative Path</th>
+                            <th>Unique Identifier</th>
+                            <th>#Chunks</th>
+                            <th>Progress</th>
+                            <th>Paused</th>
+                            <th>Uploading</th>
+                            <th>Completed</th>
+                            <th>Settings</th>
+                        </tr>
+                    </thead><!--end of table header-->
+                    <tbody>
+                        <tr ng-repeat="file in transfers">
+                            <td>{{$index+1}}</td>
+                            <td>{{file.name}}</td>
+                            <td>{{file.size}}</td>
+                            <td>{{file.relativePath}}</td>
+                            <td>{{file.uniqueIdentifier}}</td>
+                            <td>{{file.chunks.length}}</td>
+                            <td>{{file.progress()}}</td>
+                            <td>{{file.paused}}</td>
+                            <td>{{file.isUploading}}</td>
+                            <td>{{file.isComplete()}}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-mini btn-danger" ng-click="file.cancel()">
+                                        Cancel
+                                    </a>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table><!--end of flow transfer table-->
+                <hr class="soften">
+                
+            </div><!--end of file uplaod element container-->
+        </div>
+    </div><!--end of flow-init directive-->
+    <div class="row" ng-controller="WorkflowCtrl">
             <d3-tree-layout data="d3Data" 
                 node-title="size" node-description="name" 
                 node-class="type" node-width="120" node-height="60" 
@@ -15,11 +84,11 @@
                 <h3 class="panel-title">Analysis Tools</h3>
             </div><!--end of panel heading-->
             
-            <div ng-controller="AnalysisToolTabController">
+            <div ng-controller="AnalysisToolTabCtrl">
                 <hr/>
                 <tabset id="toolContainer">
                     <tab ng-repeat="tab in tabs" heading="{{tab.name}}" active="tab.active" disable="tab.disabled">
-                        <div ng-controller="AnalysisToolOptionController">
+                        <div ng-controller="AnalysisToolOptionCtrl">
                             <accordion close-others="oneAtATime">
                                 <accordion-group heading="PreProcessing" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
                                     Filter reads for several criteria with PRINSRQ

@@ -1,4 +1,4 @@
-chipsterWeb.controller('SpreadSheetController', function($scope) {
+chipsterWeb.controller('SpreadSheetCtrl', function($scope) {
 
 	$scope.columns=['A','B','C','D','E','F'];// Defining how many columns with colum labels
 	$scope.rows=[1,2,3,4,5,6];//Defining how many rows

@@ -1,5 +1,5 @@
 //Controller for specific processing tools
-chipsterWeb.controller('AnalysisToolOptionController', function($scope,$http){
+chipsterWeb.controller('AnalysisToolOptionCtrl', function($scope,$http){
 	$scope.oneAtATime=true;
 
 

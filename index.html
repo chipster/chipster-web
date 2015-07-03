@@ -11,6 +11,8 @@
 
     <!--Bootstrap CSS-->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+        rel="stylesheet"/>
    
 
     <!--Custom CSS-->
@@ -18,7 +20,7 @@
 
 </head><!--end of head-->
 
-<body ng-controller="mainController">
+<body ng-controller="mainCtrl">
     <!--header and Navbar-->
 
     <div id="wrap">
@@ -106,15 +108,25 @@
     <script src="http://d3js.org/d3.v2.js"></script>
     <script src="js/vendors/jquery.min.js"></script>
 
+    <!--file and folder uploader-->
+    <script src="js/vendors/ng-flow-standalone.js"></script>
+
     <!-- Custom JS -->
     <script type="text/javascript" src="js/app.js"></script>
-    <script type="text/javascript" src="js/controllers/AnalysisToolOptionController.js"></script>
-    <script type="text/javascript" src="js/controllers/AnalysisToolTabController.js"></script>
-    <script type="text/javascript" src="js/controllers/AnalysisToolSetController.js"></script>
-    <script type="text/javascript" src="js/controllers/SpreadSheetController.js"></script>
-    <script type="text/javascript" src="js/controllers/D3BarController.js"></script>
-    <script type="text/javascript" src="js/directives/d3TreeLayout.js"></script>
-    <script type="text/javascript" src="js/controllers/WorkflowController.js"></script>
+
+    <!--Controllers-->
+    <script type="text/javascript" src="js/controllers/AnalysisToolOptionCtrl.js"></script>
+    <script type="text/javascript" src="js/controllers/AnalysisToolTabCtrl.js"></script>
+    <script type="text/javascript" src="js/controllers/AnalysisToolSetCtrl.js"></script>
+    <script type="text/javascript" src="js/controllers/SpreadSheetCtrl.js"></script>
+    <script type="text/javascript" src="js/controllers/D3BarCtrl.js"></script>
+     <script type="text/javascript" src="js/controllers/WorkflowCtrl.js"></script>
+    <script type="text/javascript" src="js/controllers/UploadDialogCtrl.js"></script>
+
+    <!--Directives-->
+    <script type="text/javascript" src="js/directives/chipstermodal.js"></script>
+    <script type="text/javascript" src="js/directives/mymodal.js"></script>
+   
    
 
 </body>

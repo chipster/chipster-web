@@ -1,7 +1,4 @@
-
-
-  
-  chipsterWeb.controller('WorkflowController', ['$scope', function($scope){
+chipsterWeb.controller('WorkflowCtrl', ['$scope', function($scope){
       
       $scope.showObj = function(item){
         $scope.item = item;
@@ -47,7 +44,7 @@
       //### Start Return Directive  ###
       return {
       restrict: 'EA',
-      template:"<svg width='850' height='800'></svg>",
+      template:"<svg height='500' width='800'></svg>",
       scope: {
         data: "=",
         nodeTitle: "@",

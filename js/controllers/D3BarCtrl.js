@@ -1,4 +1,4 @@
-chipsterWeb.controller('D3BarController', ['$scope','$interval', function($scope, $interval){
+chipsterWeb.controller('D3BarCtrl', ['$scope','$interval', function($scope, $interval){
     $scope.salesData=[
         {hour: 1,sales: 54},
         {hour: 2,sales: 66},
