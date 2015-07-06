@@ -70,11 +70,8 @@
             </div><!--end of file uplaod element container-->
         </div>
     </div><!--end of flow-init directive-->
-    <div class="row" ng-controller="WorkflowCtrl">
-            <d3-tree-layout data="d3Data" 
-                node-title="size" node-description="name" 
-                node-class="type" node-width="120" node-height="60" 
-                node-text-length="15" node-numbers-of-lines="2"
+    <div class="col-sm-8" ng-controller="WorkflowGraphCtrl">
+            <d3-graph-layout data="d3Data" 
                 on-click="click(item)"/>
     </div>
 
@@ -127,14 +124,14 @@
     <!--Parameter-->
     <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
 </div>                     
-<div class="container" id="runButton">
+<div id="runButton">
     <button type="button" class="btn btn-success btn-block">Run</button>
 </div>
 </div><!--end of tool panel-->
 </div><!--end of toolset view-->
 
 <!--Visualization Panel-->
- <div class="col-sm-8">
+ <div class="row">
         <div class="panel">
             <div class="panel-heading">
                 <h3 class="panel-title">Visualization</h3>
