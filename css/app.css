@@ -108,6 +108,8 @@ ul.unstyled {
 }
 
 
+
+
 .node {
     cursor: pointer;
     }
@@ -116,9 +118,22 @@ ul.unstyled {
       fill: #fff;
       stroke-width: 3px;
     }
+ .node text{
+ 	font: 9px helvetica;
+ 	color: #f00;
+ }
 
 
 .link {     
       stroke: #ccc;     
     }
+
+ .d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
 

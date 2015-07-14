@@ -70,9 +70,11 @@
             </div><!--end of file uplaod element container-->
         </div>
     </div><!--end of flow-init directive-->
-    <div class="col-sm-8" ng-controller="WorkflowGraphCtrl">
+
+    <div class="row">
+    <div class="col-sm-8" ng-controller="WorkflowGraphCtrl" id="workflowGraph">
             <d3-graph-layout data="d3Data" 
-                on-click="click(item)"/>
+                />
     </div>
 
     <div class="col-sm-4">
@@ -129,6 +131,8 @@
 </div>
 </div><!--end of tool panel-->
 </div><!--end of toolset view-->
+
+</div><!--end of graph and tool row-->
 
 <!--Visualization Panel-->
  <div class="row">
