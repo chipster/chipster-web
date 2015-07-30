@@ -39,7 +39,10 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
 
             // addng x y positions for the data
             angular.forEach(graphData.nodes,function(elem,index){
-              elem.x=elem.c_id*100+100;
+
+              var add_x=(index%2)==0?10:-10;
+
+              elem.x=elem.c_id*100+add_x+100;
               console.log(elem.x);
               elem.y=elem.level*50+elem.group*20;
             });

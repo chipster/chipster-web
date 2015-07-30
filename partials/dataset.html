@@ -88,15 +88,18 @@
                 <tabset id="toolContainer">
                     <tab ng-repeat="tab in tabs" heading="{{tab.name}}" active="tab.active" disable="tab.disabled">
                         <div ng-controller="AnalysisToolOptionCtrl">
-                            <accordion close-others="oneAtATime">
-                                <accordion-group heading="PreProcessing" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
-                                    Filter reads for several criteria with PRINSRQ
-                            </accordion-group>
-                            <!--Second Accordion Group-->
-                            <accordion-group ng-repeat="group in groups" heading="{{group.name}}">
-                            {{group.content}}
-                        </accordion-group>
-                    </accordion>
+                            <accordion close-others="true">
+                                <accordion-group is-open="isopen"
+                                    ng-repeat="item in items"
+                                    ng-controller="ItemController">
+                                    <accordion-heading>
+                                        {{item.desc}}
+                                        <i class="pull-right glyphicon"
+                                            ng-class="{'glyphicon-chevron-down':isopen,'glyphicon-chevron-right:!isopen'}"></i>
+                                    </accordion-heading><!--end of accordion heading-->
+                                    <div ng-repeat="subitem in item.subitems">{{subitem.desc}}</div>
+                                </accordion-group>
+                            </accordion>    
                 </div>
             </tab>
         </tabset>
