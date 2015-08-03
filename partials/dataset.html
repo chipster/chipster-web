@@ -1,171 +1,189 @@
 
-  <div class="row row-eq-height" id="dataToolContainer">
+      <div class="row row-eq-height" id="dataToolContainer">
 
-    
+        
 
-    <!--div for upload dataset button-->
-    <div flow-init>
-        <div flow-prevent-drop
-             flow-drag-enter="style={border:'5px solid green'}"
-             flow-drag-leave="style={}"
-             ng-style="style">
-            <div class="container">
-                <h3>Upload DataSet</h3>
-                <hr class="soften"/>
+        <!--div for upload dataset button-->
+        <div flow-init>
+            <div flow-prevent-drop
+                 flow-drag-enter="style={border:'5px solid green'}"
+                 flow-drag-leave="style={}"
+                 ng-style="style">
+                <div class="container">
+                    <h3>Upload DataSet</h3>
+                    <hr class="soften"/>
 
-                <div class="row">
-                    <div class="span6">
-                        <span class="btn" flow-btn><i class="icon icon-file"></i>Uplaod File</span>
-                        <span class="btn" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
-                    </div>
-                </div><!--end of row-->
-                <hr class="soften">
-                <h3>Uploads</h3>
-                <p>
-                    <a class="btn btn-small btn-success" ng-click="$flow.resume()">Resume</a>
-                    <a class="btn btn-small btn-danger" ng-click="$flow.pause()">Pause</a>
-                    <a class="btn btn-small btn-info" ng-click="$flow.cancel()">Cancel</a>
-                </p><!--end of upload options area-->
-                <table class="table table-hover table-bordered table.striped" flow-transfers>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Size</th>
-                            <th>Relative Path</th>
-                            <th>Unique Identifier</th>
-                            <th>#Chunks</th>
-                            <th>Progress</th>
-                            <th>Paused</th>
-                            <th>Uploading</th>
-                            <th>Completed</th>
-                            <th>Settings</th>
-                        </tr>
-                    </thead><!--end of table header-->
-                    <tbody>
-                        <tr ng-repeat="file in transfers">
-                            <td>{{$index+1}}</td>
-                            <td>{{file.name}}</td>
-                            <td>{{file.size}}</td>
-                            <td>{{file.relativePath}}</td>
-                            <td>{{file.uniqueIdentifier}}</td>
-                            <td>{{file.chunks.length}}</td>
-                            <td>{{file.progress()}}</td>
-                            <td>{{file.paused}}</td>
-                            <td>{{file.isUploading}}</td>
-                            <td>{{file.isComplete()}}</td>
-                            <td>
-                                <div class="btn-group">
-                                    <a class="btn btn-mini btn-danger" ng-click="file.cancel()">
-                                        Cancel
-                                    </a>
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table><!--end of flow transfer table-->
-                <hr class="soften">
-                
-            </div><!--end of file uplaod element container-->
+                    <div class="row">
+                        <div class="span6">
+                            <span class="btn" flow-btn><i class="icon icon-file"></i>Uplaod File</span>
+                            <span class="btn" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
+                        </div>
+                    </div><!--end of row-->
+                    <hr class="soften">
+                    <h3>Uploads</h3>
+                    <p>
+                        <a class="btn btn-small btn-success" ng-click="$flow.resume()">Resume</a>
+                        <a class="btn btn-small btn-danger" ng-click="$flow.pause()">Pause</a>
+                        <a class="btn btn-small btn-info" ng-click="$flow.cancel()">Cancel</a>
+                    </p><!--end of upload options area-->
+                    <table class="table table-hover table-bordered table.striped" flow-transfers>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Relative Path</th>
+                                <th>Unique Identifier</th>
+                                <th>#Chunks</th>
+                                <th>Progress</th>
+                                <th>Paused</th>
+                                <th>Uploading</th>
+                                <th>Completed</th>
+                                <th>Settings</th>
+                            </tr>
+                        </thead><!--end of table header-->
+                        <tbody>
+                            <tr ng-repeat="file in transfers">
+                                <td>{{$index+1}}</td>
+                                <td>{{file.name}}</td>
+                                <td>{{file.size}}</td>
+                                <td>{{file.relativePath}}</td>
+                                <td>{{file.uniqueIdentifier}}</td>
+                                <td>{{file.chunks.length}}</td>
+                                <td>{{file.progress()}}</td>
+                                <td>{{file.paused}}</td>
+                                <td>{{file.isUploading}}</td>
+                                <td>{{file.isComplete()}}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a class="btn btn-mini btn-danger" ng-click="file.cancel()">
+                                            Cancel
+                                        </a>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table><!--end of flow transfer table-->
+                    <hr class="soften">
+                    
+                </div><!--end of file uplaod element container-->
+            </div>
+        </div><!--end of flow-init directive-->
+
+        <div class="row">
+        <div class="col-sm-8" ng-controller="NgsWorkflowCtrl">
+                <ngs-graph-layout data="d3Data" 
+                    />
         </div>
-    </div><!--end of flow-init directive-->
 
-    <div class="row">
-    <div class="col-sm-8" ng-controller="NgsWorkflowCtrl">
-            <ngs-graph-layout data="d3Data" 
-                />
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Analysis Tools</h3>
+                </div><!--end of panel heading-->
+                <div class="panel-body">
+               
+                <div ng-controller="AnalysisToolTabCtrl">
+                    <ul class="nav nav-tabs">
+                          <li role="presentation" class="active"><a href="">Microarray</a></li>
+                          <li role="presentation"><a href="">NGS</a></li>
+                          <li role="presentation"><a href="">Misc</a></li>
+                    </ul>
+                    
+                            <!--the tree should come here-->
+                            <div id="tabContent" ng-controller="AnalysisToolOptionCtrl">
+                                <script type="text/ng-template" id="nodes_renderer.html">
+                                    <div ui-tree-handle class="tree-node tree-node-content">
+                                        <a class="btn btn-success btn-xs" ng-if="node.nodes && node.nodes.length>0"
+                                            ng-click="toggle(this)">
+                                            <span class="glyphicon"
+                                            ng-class="{
+                                                'glyphicon-chevron-right': collapsed,
+                                                'glyphicon-chevron-down': !collapsed
+                                            }">
+                                            </span> </a>
+                                            {{node.title}}
+                                            
+                                    </div>
+                                    <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: collapsed}">
+                                            <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
+                                            </li>
+                                    </ol>
+                                </script><!--end of script-->
+                                <div ui-tree id="tree-root">
+                                    <ol ui-tree-nodes ng-model="data">
+                                        <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'">
+                                        </li><!--end of data list-->
+                                    </ol>
+                                </div>
+                          </div><!--end of angular tree directive-->
+
+        </div><!--end of tabset div-->
+
+
+
+        <!--button area-->    
+        <div class="container" id="toolButtonGroup">
+            <!--Tool source-->
+            <a href="#myModal" role="button" class="btn btn-info" data-toggle="modal">Show Tool Source Code</a>
+            <div class="modal fade" id="myModal">
+             <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" data-dismiss="modal">&times;</button><!--end of close button-->
+                        <h4 class="modal-title">Tool Source Code</h4>
+                    </div><!--end of modal header-->
+                    <div class="modal-body">
+                        <h4>PCA Source Code</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
+
+                </div><!--end of modal content-->
+
+            </div><!--end of modal dialog-->
+        </div><!--end of modal-->
+        <!--Parameter-->
+        <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
+    </div>                     
+    <div id="runButton">
+        <button type="button" class="btn btn-success btn-block">Run</button>
     </div>
+    </div><!--end of panel body-->
+    </div><!--end of tool panel-->
+    </div><!--end of toolset view-->
 
-    <div class="col-sm-4">
-        <div class="panel">
-            <div class="panel-heading">
-                <h3 class="panel-title">Analysis Tools</h3>
-            </div><!--end of panel heading-->
-            
-            <div ng-controller="AnalysisToolTabCtrl">
-                <hr/>
-                <tabset id="toolContainer">
-                    <tab ng-repeat="tab in tabs" heading="{{tab.name}}" active="tab.active" disable="tab.disabled">
-                        <div ng-controller="AnalysisToolOptionCtrl">
-                            <accordion close-others="true">
-                                <accordion-group is-open="isopen"
-                                    ng-repeat="item in items"
-                                    ng-controller="ItemController">
-                                    <accordion-heading>
-                                        {{item.desc}}
-                                        <i class="pull-right glyphicon"
-                                            ng-class="{'glyphicon-chevron-down':isopen,'glyphicon-chevron-right:!isopen'}"></i>
-                                    </accordion-heading><!--end of accordion heading-->
-                                    <div ng-repeat="subitem in item.subitems">{{subitem.desc}}</div>
-                                </accordion-group>
-                            </accordion>    
-                </div>
-            </tab>
-        </tabset>
-    </div><!--end of tabset div-->
+    </div><!--end of graph and tool row-->
 
+    <!--Visualization Panel-->
+     <div class="row">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Visualization</h3>
+                </div><!--end of panel heading-->
+                <div class="panel-body">
+                     <div class="row">
+                        <div class="col-sm-2 col-md-4">
+                            <div class="thumbnail">
+                                <img src="icons/graph_icon.jpg" alt="...">
+                                <div class="caption">
+                                    <h5>Visualization Label</h5>
+                                    <p>Some thing about the technique</p>
+                                </div><!--end of caption-->
+                            </div><!--end of thumbnails-->
+                        </div><!--end of column-->
+                        <div class="col-sm-2 col-md-4">
+                            <div class="thumbnail">
+                                <img src="icons/graph_icon.jpg" alt="...">
+                                <div class="caption">
+                                    <h5>Visualization Label</h5>
+                                    <p>Some thing about the technique</p>
+                                </div><!--end of caption-->
+                            </div><!--end of thumbnails-->
+                        </div><!--end of column-->
+                    </div><!--end of row-->
+                </div><!--end of panel body-->         
+            </div><!--end of visualization panel-->
+    </div><!--end of visualization view-->
 
-    <!--button area-->    
-    <div class="container" id="toolButtonGroup">
-        <!--Tool source-->
-        <a href="#myModal" role="button" class="btn btn-info" data-toggle="modal">Show Tool Source Code</a>
-        <div class="modal fade" id="myModal">
-         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close" data-dismiss="modal">&times;</button><!--end of close button-->
-                    <h4 class="modal-title">Tool Source Code</h4>
-                </div><!--end of modal header-->
-                <div class="modal-body">
-                    <h4>PCA Source Code</h4>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                </div>
-
-            </div><!--end of modal content-->
-
-        </div><!--end of modal dialog-->
-    </div><!--end of modal-->
-    <!--Parameter-->
-    <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
-</div>                     
-<div id="runButton">
-    <button type="button" class="btn btn-success btn-block">Run</button>
-</div>
-</div><!--end of tool panel-->
-</div><!--end of toolset view-->
-
-</div><!--end of graph and tool row-->
-
-<!--Visualization Panel-->
- <div class="row">
-        <div class="panel">
-            <div class="panel-heading">
-                <h3 class="panel-title">Visualization</h3>
-            </div><!--end of panel heading-->
-            <div class="panel-body">
-                 <div class="row">
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                    <div class="col-sm-2 col-md-4">
-                        <div class="thumbnail">
-                            <img src="icons/graph_icon.jpg" alt="...">
-                            <div class="caption">
-                                <h5>Visualization Label</h5>
-                                <p>Some thing about the technique</p>
-                            </div><!--end of caption-->
-                        </div><!--end of thumbnails-->
-                    </div><!--end of column-->
-                </div><!--end of row-->
-            </div><!--end of panel body-->         
-        </div><!--end of visualization panel-->
-</div><!--end of visualization view-->
-
-</div><!--end of dataToolContainer-->
+    </div><!--end of dataToolContainer-->

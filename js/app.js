@@ -1,4 +1,4 @@
-var chipsterWeb=angular.module('ChipsterWeb',['ngRoute','ui.bootstrap','flow']);
+var chipsterWeb=angular.module('ChipsterWeb',['ngRoute','flow','ui.tree']);
 
 //configure our route
 chipsterWeb

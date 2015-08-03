@@ -6,13 +6,12 @@
 
     <!-- Mobile Viewport optimized-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Chipster Web Tool for Data Processing and Visalization">
+    <meta name="description" content="Chipster Web Tool for Data Processing and Visualization">
     <meta name="author" content="Rumana Quazi">
 
     <!--Bootstrap CSS-->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
-        rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="css/angular-ui-tree.min.css">
    
 
     <!--Custom CSS-->
@@ -25,40 +24,38 @@
 
     <div id="wrap">
 
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+              <a class="navbar-brand active" href="/">Chipster</a>
+            </div>
 
-    <div class="navbar navbar-fixed-top">
-        <div class="container">
-            <a class="navbar-brand active" href="/">Chipster</a>
-            <div class="nav-collapse collapse navbar-responsive-collapse">
-                <ul class="nav navbar-nav">
-                    <li>
-                        <a href="#dataset">Dataset</a>
-                    </li>
-                    <li>
-                        <a href="#visualization">Visualization</a>
-                    </li>
-                </ul><!--end nav-->
-
-                <form class="navbar-form pull-left">
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#dataset">Dataset</a></li>
+        <li><a href="#">Visualization</a></li>
+        
+      </ul>
+      
+      <form class="navbar-form pull-left">
                     <input type="text" class="form-control" placeholder="Search this site.." id="searchInput">
                 </form><!--end navbar form-->
-                <ul class="nav navbar-nav pull-right">
-                    <li>
-                        <a href="#login">Login</a>
-                    </li>
-                </ul><!--end nav pull right-->
-
-            </div><!--end nav-collapse-->
-        </div><!--end container-->
-    </div><!--end navbar-->
-
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#login">Login</a></li>
+        
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
 
 
     <!--Main content and injected view-->
     <div id="main">
         <!--andgular templating-->
         <!--This is where the contents will be injected-->
-        <div ng-view></div>       
+        <div ng-view></div>   
     </div><!--end of main container-->
 </div><!--end of wrap-->
 
@@ -103,10 +100,13 @@
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
 
-    <script src="js/vendors/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="js/vendors/jquery.min.js"></script>
+    <script src="js/vendors/bootstrap.min.js"></script>
+    <script src="js/vendors/bootstrap.js"></script>
+    <script src="js/vendors/angular-ui-tree.min.js"></script>
     <!--defining d3 element-->
     <script src="http://d3js.org/d3.v2.js"></script>
-    <script src="js/vendors/jquery.min.js"></script>
+    
     <script src="js/vendors/fisheye.js"></script>
 
     <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
@@ -115,6 +115,8 @@
 
     <!--file and folder uploader-->
     <script src="js/vendors/ng-flow-standalone.js"></script>
+
+
 
     <!-- Custom JS -->
     <script type="text/javascript" src="js/app.js"></script>
