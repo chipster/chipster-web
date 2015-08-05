@@ -78,35 +78,30 @@
         </div>
 
         <div class="col-sm-4">
-            <div class="panel panel-default">
+            <div class="panel panel-default" ng-controller="AnalysisToolTabCtrl as tab">
                 <div class="panel-heading">
                     <h3 class="panel-title">Analysis Tools</h3>
                 </div><!--end of panel heading-->
                 <div class="panel-body">
-               
-        <section>
-                <ul class="nav nav-pills" ng-controller="AnalysisToolTabCtrl as tab">
-                    <li ng-class="{active:tab.isSet(1)}"> 
-                        <a href ng-click="tab.setTab(1)">Microarray</a>    
-                    </li>
-                    <li ng-class="{active:tab.isSet(2)}"> 
-                        <a href ng-click="tab.setTab(2)">NGS</a> 
-                    </li>
-                    <li ng-class="{active:tab.isSet(3)}"> 
-                        <a href ng-click="tab.setTab(3)">Misc</a> 
-                    </li>
-                    <br><br>
-                    <p ng-show="tab.isSet(1)"> Microarray Tools </p>
-                    <p ng-show="tab.isSet(2)"> NGS Tools </p>
-                    <p ng-show="tab.isSet(3)"> Misc</p>
-                </ul>       
-    </section>      
+                    <div>
+                        <ul class="nav nav-pills">
+                            <li ng-class="{active:tab.isSet(1)}"> 
+                                <a href ng-click="tab.setTab(1)">Microarray</a>    
+                            </li>
+                            <li ng-class="{active:tab.isSet(2)}"> 
+                                <a href ng-click="tab.setTab(2)">NGS</a> 
+                            </li>
+                            <li ng-class="{active:tab.isSet(3)}"> 
+                                <a href ng-click="tab.setTab(3)">Misc</a> 
+                            </li>
+                        </ul>       
+                    </div>      
             
                     <!--the tree should come here-->
-                    <div id="tabContent" ng-controller="AnalysisToolOptionCtrl">
+                    <div id="tabContent">
                         <script type="text/ng-template" id="nodes_renderer.html">
                             <div ui-tree-handle class="tree-node tree-node-content">
-                                <a class="btn btn-success btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
+                                <a class="btn btn-info btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
                                     ng-click="toggle(this)">
                                     <span class="glyphicon"
                                     ng-class="{
@@ -114,10 +109,10 @@
                                         'glyphicon-chevron-down': !collapsed
                                     }">
                                     </span> </a>
-                                    {{node.title}}
+                                    {{node.name}}
                                     
                             </div>
-                            <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: collapsed}">
+                            <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: !collapsed}">
                                     <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
                                     </li>
                             </ol>
@@ -131,8 +126,6 @@
                   </div><!--end of angular tree directive-->
 
         </div><!--end of tabset div-->
-
-
 
         <!--button area-->    
         <div class="container" id="toolButtonGroup">
@@ -156,10 +149,10 @@
         </div><!--end of modal-->
         <!--Parameter-->
         <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info">Show Parameter</a>  
-    </div>                     
-    <div id="runButton">
-        <button type="button" class="btn btn-success btn-block">Run</button>
-    </div>
+        </div>                     
+        <div id="runButton">
+            <button type="button" class="btn btn-success btn-block">Run</button>
+        </div>
     </div><!--end of panel body-->
     </div><!--end of tool panel-->
     </div><!--end of toolset view-->
