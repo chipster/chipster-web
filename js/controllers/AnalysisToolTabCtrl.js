@@ -1,9 +1,19 @@
 //Controller for different toolse
 chipsterWeb.controller('AnalysisToolTabCtrl', function($scope,$http){
 
-	$http.get('js/json/toolType.json')
-	.then(function(res){
-		$scope.tabs=res.data;
-	});
+		this.tab = 1;
+
+        this.setTab = function (activeTab) {
+            this.tab = activeTab;
+            console.log('tab clicked');
+
+        };
+
+        this.isSet = function (checkTab) {
+            return this.tab === checkTab;
+        };
+
+
+	
 
 });

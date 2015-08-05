@@ -84,40 +84,51 @@
                 </div><!--end of panel heading-->
                 <div class="panel-body">
                
-                <div ng-controller="AnalysisToolTabCtrl">
-                    <ul class="nav nav-tabs">
-                          <li role="presentation" class="active"><a href="">Microarray</a></li>
-                          <li role="presentation"><a href="">NGS</a></li>
-                          <li role="presentation"><a href="">Misc</a></li>
-                    </ul>
-                    
-                            <!--the tree should come here-->
-                            <div id="tabContent" ng-controller="AnalysisToolOptionCtrl">
-                                <script type="text/ng-template" id="nodes_renderer.html">
-                                    <div ui-tree-handle class="tree-node tree-node-content">
-                                        <a class="btn btn-success btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
-                                            ng-click="toggle(this)">
-                                            <span class="glyphicon"
-                                            ng-class="{
-                                                'glyphicon-chevron-right': collapsed,
-                                                'glyphicon-chevron-down': !collapsed
-                                            }">
-                                            </span> </a>
-                                            {{node.title}}
-                                            
-                                    </div>
-                                    <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: collapsed}">
-                                            <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
-                                            </li>
-                                    </ol>
-                                </script><!--end of script-->
-                                <div ui-tree  data-drag-enabled="false" id="tree-root">
-                                    <ol ui-tree-nodes ng-model="data">
-                                        <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'">
-                                        </li><!--end of data list-->
-                                    </ol>
-                                </div>
-                          </div><!--end of angular tree directive-->
+        <section>
+                <ul class="nav nav-pills" ng-controller="AnalysisToolTabCtrl as tab">
+                    <li ng-class="{active:tab.isSet(1)}"> 
+                        <a href ng-click="tab.setTab(1)">Microarray</a>    
+                    </li>
+                    <li ng-class="{active:tab.isSet(2)}"> 
+                        <a href ng-click="tab.setTab(2)">NGS</a> 
+                    </li>
+                    <li ng-class="{active:tab.isSet(3)}"> 
+                        <a href ng-click="tab.setTab(3)">Misc</a> 
+                    </li>
+                    <br><br>
+                    <p ng-show="tab.isSet(1)"> Microarray Tools </p>
+                    <p ng-show="tab.isSet(2)"> NGS Tools </p>
+                    <p ng-show="tab.isSet(3)"> Misc</p>
+                </ul>       
+    </section>      
+            
+                    <!--the tree should come here-->
+                    <div id="tabContent" ng-controller="AnalysisToolOptionCtrl">
+                        <script type="text/ng-template" id="nodes_renderer.html">
+                            <div ui-tree-handle class="tree-node tree-node-content">
+                                <a class="btn btn-success btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
+                                    ng-click="toggle(this)">
+                                    <span class="glyphicon"
+                                    ng-class="{
+                                        'glyphicon-chevron-right': collapsed,
+                                        'glyphicon-chevron-down': !collapsed
+                                    }">
+                                    </span> </a>
+                                    {{node.title}}
+                                    
+                            </div>
+                            <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: collapsed}">
+                                    <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
+                                    </li>
+                            </ol>
+                        </script><!--end of script-->
+                        <div ui-tree  data-drag-enabled="false" id="tree-root">
+                            <ol ui-tree-nodes ng-model="data">
+                                <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'">
+                                </li><!--end of data list-->
+                            </ol>
+                        </div>
+                  </div><!--end of angular tree directive-->
 
         </div><!--end of tabset div-->
 
