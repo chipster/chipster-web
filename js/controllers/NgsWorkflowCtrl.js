@@ -90,6 +90,20 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
                       .attr("dy", ".25em")
                       .text(function(d) { return d.name });
 
+            function transform(d){
+               return "translate(" + d.x + "," + d.y + ")";
+            }
+
+
+            function dragstarted(d){
+              d3.event.sourceEvent.stopPropagation();
+              svg.classed("dragging",true);
+            }
+
+            function dragended(d){
+              svg.classed("dragging",false);
+            }
+
             var drag = d3.behavior.drag()
                   .on("drag", function(d,i) {
                           d.x += d3.event.dx
@@ -104,7 +118,9 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
                         } 
                         text.attr("transform", transform);
                     });
-                });
+                })
+                .on("dragstart",dragstarted)
+                .on("dragend",dragended);
 
 
             var link=svg.selectAll("link")
@@ -142,16 +158,23 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
                         .attr("fill",function(d,i){return c20(d.group)})
                         .call(drag);
 
-
             text.attr("transform", transform);
-            
-            function transform(d){
-               return "translate(" + d.x + "," + d.y + ")";
+
+            //Applying zoon to svg
+            function zoom(){
+              svg.attr("transform","translate("+d3.event.translate+")scale("+d3.event.scale+")");
+
             }
 
+            //Define teh zoom listener
+            var zoomListener=d3.behavior.zoom().scaleExtent([0.5,2]).on("zoom",function(d){
+              zoom();
+            });
 
+
+            svg.call(zoomListener);
               
-              }
+            }
 
           });
     }//end of link function
