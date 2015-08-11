@@ -19,7 +19,6 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
       //### Start Return Directive  ###
       return {
       restrict: 'EA',
-      template:"<svg height='800' width='1200'></svg>",
       scope: {
         data: "=",
         onClick: "&"
@@ -49,17 +48,13 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
 
 
           // ************** Generate the graph diagram  *****************
-            var margin = {top: 20, right: 120, bottom: 20, left: 120},
-              width = 1200 - margin.right - margin.left,
-              height = 800 - margin.top - margin.bottom;
-            
+            var margin = {top: 20, right: 10, bottom: 20, left: 20};
+             
         
-            var rawSvg=iElement.find('svg');
-
-
-            var svg = d3.select(rawSvg[0]).append("svg")
-                .attr("width", width + margin.right + margin.left)
-                .attr("height", height + margin.top + margin.bottom);
+            var svg=d3.select(iElement[0])
+                      .append('svg')
+                      .attr('width','100%')
+                      .attr('height','800');
           
            
 

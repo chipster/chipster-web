@@ -72,9 +72,16 @@
         </div><!--end of flow-init directive-->
 
         <div class="row">
-        <div class="col-sm-8" ng-controller="NgsWorkflowCtrl">
-                <ngs-graph-layout data="d3Data" 
-                    />
+        <div class="col-sm-8">
+                <div class="panel panel-default" ng-controller="NgsWorkflowCtrl">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Workflow</h3>
+                    </div><!--end of panel heading-->
+                    <div class="panel-body">
+                         <ngs-graph-layout data="d3Data"/>
+                    </div><!--end of panel body-->               
+                </div>
+                
         </div>
 
         <div class="col-sm-4">
