@@ -1,4 +1,4 @@
-chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$http){
+chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',function($scope,$http,PanZoomService){
     
 
       $http.get('js/json/workflow.json')
@@ -7,7 +7,20 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
            }); 
 
 
-      //End of json file
+      // The panzoom config model can be used to override default configuration values
+        $scope.panzoomConfig = {
+            zoomLevels: 12,
+            neutralZoomLevel: 5,
+            scalePerZoomLevel: 1.5
+  
+        };
+
+        // The panzoom model should initialle be empty; it is initialized by the <panzoom>
+        // directive. It can be used to read the current state of pan and zoom. Also, it will
+        // contain methods for manipulating this state.
+        $scope.panzoomModel = {};
+
+
 
     }]);
 
@@ -53,8 +66,10 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
         
             var svg=d3.select(iElement[0])
                       .append('svg')
-                      .attr('width','100%')
+                      .attr('width','1000')
                       .attr('height','800');
+
+            
           
            
 
@@ -155,19 +170,6 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', function($scope,$htt
 
             text.attr("transform", transform);
 
-            //Applying zoon to svg
-            function zoom(){
-              svg.attr("transform","translate("+d3.event.translate+")scale("+d3.event.scale+")");
-
-            }
-
-            //Define teh zoom listener
-            var zoomListener=d3.behavior.zoom().scaleExtent([0.5,2]).on("zoom",function(d){
-              zoom();
-            });
-
-
-            svg.call(zoomListener);
               
             }
 

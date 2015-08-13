@@ -1,4 +1,4 @@
-var chipsterWeb=angular.module('ChipsterWeb',['ngRoute','flow','ui.tree']);
+var chipsterWeb=angular.module('ChipsterWeb',['ngRoute','flow','ui.tree','panzoom','panzoomwidget']);
 
 //configure our route
 chipsterWeb
@@ -32,7 +32,7 @@ chipsterWeb.config(['flowFactoryProvider',function (flowFactoryProvider){
 			simultaneousUploads:4
 
 			};
-			flowFactoryProvider.on('catthAll', function (event){
+			flowFactoryProvider.on('catchAll', function (event){
 				console.log('catchAll', arguments)
 			});
 

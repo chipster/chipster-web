@@ -64,35 +64,25 @@
             </div><!--end of panel-->
 
             <!--Excel sheet in visualization page-->
-                <div ng-controller="SpreadSheetCtrl">
-                    <p>SpreadSheet Test</p>
-                    <table>
-                        <tr class="column-label">
-                            <td></td>
-                            <td ng-repeat="column in columns">{{column}}</td>
-                        </tr><!--end of colmn label row-->
-                        <tr ng-repeat="row in rows">
-                            <td class="row-label">{{row}}</td>
-                            <td ng-repeat="column in columns">
-                                <div>
-                                    <input ng-model="cells[column+row]"></input>
-                                    <div ng-bind="compute(column+row)" class="output"></div>
+            <div>
+                    <div ng-controller="SpreadSheetCtrl">
+                        <p>SpreadSheet Test</p>
+                        <table>
+                            <tr class="column-label">
+                                <td></td>
+                                <td ng-repeat="column in columns">{{column}}</td>
+                            </tr><!--end of colmn label row-->
+                            <tr ng-repeat="row in rows">
+                                <td class="row-label">{{row}}</td>
+                                <td ng-repeat="column in columns">
+                                    <div>
+                                        <input ng-model="cells[column+row]"></input>
+                                        <div ng-bind="compute(column+row)" class="output"></div>
 
-                                </div><!--end of ng model div-->
-
-                        </tr>
-
-                    </table><!--end of spreadsheet table-->
-                   
-
-                </div><!--end of spreadsheet view-->
-
-
-                <!--trying out D3 component-->
-                <div ng-controller="D3BarCtrl">
-                     <div linear-chart chart-data="salesData"></div>
-                </div>
-
-               
-
+                                    </div><!--end of ng model div-->
+                            </tr>
+                        </table><!--end of spreadsheet table-->                
+                    </div><!--end of spreadsheet view-->
+            </div><!--end of Spread Sheet CTRL Div-->
+                
         </div><!--end visualization row-->

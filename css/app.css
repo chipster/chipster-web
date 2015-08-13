@@ -175,5 +175,9 @@ ul.unstyled {
     color: #FFF !important;
 }
 
+.pan-zoom-frame {
+            border: 2px #EEE;
+        }
+
 
 
