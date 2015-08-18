@@ -88,11 +88,14 @@ ul.unstyled {
 }
 
 #toolButtonGroup{
-	margin: 20px;
+	margin-top: 20px
 }
 
 #runButton{
-	margin:20px;
+	margin-top:20px;
+	margin-bottom:20px;
+	margin-left:50px;
+	margin-right:50px;
 }
 
 /*wrapper for page content to push down the footer, fix for the sticky footer*/
@@ -114,6 +117,11 @@ ul.unstyled {
 
 #dataToolContainer{
 	margin: 10px;
+}
+#flow-button-group{
+	margin: 20px;
+	position: center;
+
 }
 
 .node {
@@ -178,6 +186,8 @@ ul.unstyled {
 .pan-zoom-frame {
             border: 2px #EEE;
         }
+
+
 
 
 

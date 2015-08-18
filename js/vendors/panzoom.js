@@ -61,6 +61,7 @@ function ($document, PanZoomService) {
 
                             var W = $element.width();
                             var H = $element.height();
+                            console.log(W);
                             var w = rect.width;
                             var h = rect.height;
 

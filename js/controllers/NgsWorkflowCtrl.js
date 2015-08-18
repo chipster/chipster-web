@@ -1,4 +1,4 @@
-chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',function($scope,$http,PanZoomService){
+chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http','PanZoomService',function($scope,$http,$window,PanZoomService){
     
 
       $http.get('js/json/workflow.json')
@@ -43,6 +43,11 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',fun
 
         var c20 = d3.scale.category20();
 
+        $window.onresize=function(){
+              
+                scope.$apply();
+            }
+
         scope.$watch('data',function(data){
 
           if(data){
@@ -54,24 +59,25 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',fun
 
               var add_x=(index%2)==0?10:-10;
 
-              elem.x=elem.c_id*100+add_x+100;
-              elem.y=elem.level*50+elem.group*20;
+              elem.x=elem.c_id*80+add_x+80;
+              elem.y=elem.level*40+elem.group*20;
             });
 
 
 
           // ************** Generate the graph diagram  *****************
-            var margin = {top: 20, right: 10, bottom: 20, left: 20};
+            var margin = {top: 10, right: 10, bottom: 10, left: 10};
+
+            console.log(iElement[0].offsetWidth);
+            console.log(iElement[0].offsetHeight);
              
         
             var svg=d3.select(iElement[0])
                       .append('svg')
-                      .attr('width','1000')
+                      .attr('width','800')
                       .attr('height','800');
 
-            
-          
-           
+              
 
            //appending arrow for the links
 
@@ -97,7 +103,7 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',fun
                       .data(graphData.nodes)
                       .enter().append("text")
                       .attr("dx", 15)
-                      .attr("dy", ".25em")
+                      .attr("dy", ".20em")
                       .text(function(d) { return d.name });
 
             function transform(d){
@@ -164,7 +170,7 @@ chipsterWeb.controller('NgsWorkflowCtrl',['$scope','$http', 'PanZoomService',fun
                         .attr("class","node")
                         .attr("cx",function(d){return d.x})
                         .attr("cy",function(d){return d.y})
-                        .attr("r",15)
+                        .attr("r",10)
                         .attr("fill",function(d,i){return c20(d.group)})
                         .call(drag);
 
