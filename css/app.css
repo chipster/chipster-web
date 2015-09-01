@@ -3,12 +3,6 @@ Custom CSS for Chipster Web
 */
 
 
-@font-face {
-            font-family: 'Glyphicons Halflings';
-            src: url('fonts/glyphicons-halflings-regular.eot');
-            src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
-        }
-
 html,
 body{
     height: 100%;
@@ -153,14 +147,13 @@ ul.unstyled {
 
 
 .btn {
-    margin-right: 8px;
+    margin-right: 5px;
 }
 
 .angular-ui-tree-handle {
     background: #f8faff;
-    border: 1px solid #dae2ea;
     color: #7c9eb2;
-    padding: 10px 10px;
+    padding: 2px 2px;
 }
 
 .angular-ui-tree-handle:hover {

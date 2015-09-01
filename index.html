@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="ChipsterWeb">
+<html lang="en" ng-app="chipster-web">
 <head>
     <meta charset="utf-8">
     <title>Chipster</title>
@@ -10,11 +10,12 @@
     <meta name="author" content="Rumana Quazi">
 
     <!--Bootstrap CSS-->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     <!--Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="css/angular-ui-tree.min.css">
-    <link rel="stylesheet" type="text/css" href="css/panzoomwidget.css">
+    <link rel="stylesheet" type="text/css" href="/bower_components/angular-ui-tree/dist/angular-ui-tree.min.css">
+    <link rel="stylesheet" type="text/css" href="/bower_components/angular-pan-zoom/panzoomwidget.css">
 
    
 
@@ -105,34 +106,30 @@
     
 
 
-    <script src="js/vendors/jquery.js"></script>
-    <script src="js/vendors/hamster.js"></script>
-    <script src="js/vendors/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
-    <script src="js/vendors/mousewheel.js"></script>
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/angular/angular.js"></script>
+    <script src="/bower_components/angular-route/angular-route.js"></script>
+    <script src="/bower_components/angular-mocks/angular-mocks.js"></script>
+    <script src="/bower_components/angular-resource/angular-resource.js"></script>
 
-    <script src="js/vendors/bootstrap.min.js"></script>
-    <script src="js/vendors/bootstrap.js"></script>
-    <script src="js/vendors/angular-ui-tree.min.js"></script>
-    <!--defining d3 element-->
-    <script src="http://d3js.org/d3.v2.js"></script>
+    <script src="/bower_components/hamsterjs/hamster.js"></script>
+    <script src="/bower_components/angular-mousewheel/mousewheel.js"></script>
+
+    <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
     
-    <script src="js/vendors/fisheye.js"></script>
-
-    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-
+    <script src="/bower_components/angular-ui-tree/dist/angular-ui-tree.js"></script>
+    <!--defining d3 element-->
+    <script src="/bower_components/d3/d3.js"></script>
+    
    
 
     <!--file and folder uploader-->
-    <script src="js/vendors/ng-flow-standalone.js"></script>
+    <script src="/bower_components/ng-flow/dist/ng-flow-standalone.js"></script>
 
     <!--modules for pan zoom-->
     <!--library for cross browser mouse wheel support--> 
-    <script src="js/vendors/panzoom.js"></script>
-    <script src="js/vendors/panzoomwidget.js"></script>
-
+    <script src="/bower_components/angular-pan-zoom/release/panzoom.js"></script>
     
-
 
     <!-- Custom JS -->
     <script type="text/javascript" src="js/app.js"></script>
@@ -147,8 +144,6 @@
     <script type="text/javascript" src="js/controllers/WorkflowGraphCtrl.js"></script>
     <script type="text/javascript" src="js/controllers/NgsWorkflowCtrl.js"></script>
     
-
-
 
     <!--Directives-->
     <script type="text/javascript" src="js/directives/chipstermodal.js"></script>
