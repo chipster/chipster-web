@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <style>
+        .form-element label {
+            display: inline-block;
+            width: 150px;
+        }
+        #error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
 <h1>Session storage client</h1>
+<div class="form-element">
+    <label for="serviceLocatorUri">Service locator URI</label>
+    <input id="serviceLocatorUri" value="http://localhost:8082/servicelocator" size=30 /><br>
+    <label for="username">Username</label>
+    <input id="username" value="client" size=30 /><br>
+    <label for="password">Password</label>
+    <input id="password" value="clientPassword" size=30 /><br>
+    <label></label>
+    <a href="#" id="connect" onclick="connect();">Connect</a>
+</div>
+<ul id="error"></ul>
 <h2>Sessions</h2>
 <ul id="sessionUl"></ul>
 <a href="#" onclick=newSession();>Add</a>
@@ -26,8 +46,44 @@
 <ul id="eventUl"></ul>
 <script src="chipster-rest-api.js"></script>
 <script>
-    var client = new ChipsterClient("http://localhost:8082/servicelocator", "client", "clientPassword");
-    updateSessions();
+    var client = null;
+    function connect() {
+        client = new ChipsterClient(
+                document.getElementById("serviceLocatorUri").value,
+                document.getElementById("username").value,
+                document.getElementById("password").value);
+        clear(document.getElementById("error"));
+        updateSessions();
+    }
+
+    function showError(name, status, statusText, method, uri) {
+        var msg = name;
+        if (status === 0) {
+            msg += " unavailable";
+        } else if (status) {
+            msg += " error: " + status;
+        }
+        if (statusText) {
+            msg += " " + statusText;
+        }
+        if (method && uri) {
+            msg += " (" + method + " " + uri + ")";
+        }
+        var text = document.createTextNode(msg);
+        var li = document.createElement("li");
+        var ul = document.getElementById("error");
+        li.appendChild(text);
+        ul.appendChild(li);
+        var clearA = document.createElement("a");
+        clearA.onclick = clearError;
+        clearA.setAttribute("href", "#");
+        clearA.appendChild(document.createTextNode(" Clear"));
+        ul.appendChild(clearA);
+    }
+
+    function clearError() {
+        clear(document.getElementById("error"));
+    }
 
     function updateSessions() {
         client.getSessions(function (sessions) {
@@ -38,14 +94,14 @@
                 function deleteSession() {
                     client.deleteSession(s.sessionId, function () {
                         updateSessions();
-                    });
+                    }, showError);
                 }
                 ul.appendChild(listItem(
                         s.name,
                         function () {showSession(s.sessionId)},
                         deleteSession));
             });
-        });
+        }, showError);
     }
 
     function updateDatasets(sessionId) {
@@ -71,7 +127,7 @@
                             function () {showDataset(d.datasetId, sessionId)},
                             function () {client.deleteDataset(sessionId, d.datasetId)}));
                 });
-            });
+            }, showError);
         } else {
             clear(datasetUl);
         }
@@ -100,7 +156,7 @@
                             function () {showJob(j.jobId, sessionId)},
                             function () {client.deleteJob(sessionId, j.jobId)}));
                 });
-            });
+            }, showError);
         } else {
             clear(jobUl);
         }
@@ -110,7 +166,7 @@
         setJson(null);
         var eventUl = document.getElementById("eventUl");
         clear(eventUl);
-        document.getElementById("sessionName").innerText = "";
+        clear(document.getElementById("sessionName"));
 
         updateDatasets(sessionId);
         updateJobs(sessionId);
@@ -118,7 +174,8 @@
         console.log("showSession " + sessionId);
         if (sessionId) {
             client.getSession(sessionId, function (session) {
-                document.getElementById("sessionName").innerText = session.name;
+                var nameText = document.createTextNode(session.name);
+                document.getElementById("sessionName").appendChild(nameText);
                 setJson(session);
                 enableLink("updateLink", !!session, function () {
                     client.putSession(sessionId, getJson(), function () {
@@ -132,7 +189,8 @@
             client.closeSessionEventListener();
             client.setSessionEventListener(sessionId, function (event) {
                 var li = document.createElement("li");
-                li.innerText = event.type + " " + event.resourceType + " " + event.resourceId;
+                var liText = document.createTextNode(event.type + " " + event.resourceType + " " + event.resourceId);
+                li.appendChild(liText);
                 ul.appendChild(li);
                 switch (event.resourceType) {
                     case "SESSION":
@@ -150,6 +208,9 @@
                     default:
                         console.log("Unknown event type");
                 }
+            }, showError, function () {
+                // successful reconnect
+                clearError();
             });
         }
     }
@@ -161,7 +222,7 @@
                 client.putDataset(sessionId, dataset.datasetId, getJson(), function () {
                 });
             });
-        });
+        }, showError);
     }
 
     function showJob(jobId, sessionId) {
@@ -170,7 +231,7 @@
             enableLink("updateLink", !!jobId, function () {
                 client.putJob(sessionId, job.jobId, getJson(), function () {});
             });
-        });
+        }, showError);
     }
 
     function newSession() {
@@ -180,7 +241,7 @@
             client.postSession(getJson(), function (sessionId) {
                 updateSessions();
                 showSession(sessionId);
-            });
+            }, showError);
         });
     }
 
@@ -195,12 +256,14 @@
         var a = document.createElement("a");
         a.setAttribute("href", "#");
         a.onclick = onclick;
-        a.innerText = name;
+        var aText = document.createTextNode(name);
+        a.appendChild(aText);
         li.appendChild(a);
         var del = document.createElement("a");
         del.setAttribute("href", "#");
         del.onclick = ondelete;
-        del.innerText = " (delete)";
+        var delText = document.createTextNode(" (delete)");
+        del.appendChild(delText);
         li.appendChild(del);
         return li;
     }

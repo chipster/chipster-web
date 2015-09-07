@@ -14,11 +14,17 @@ function ChipsterClient (serviceLocatorUri, username, password) {
     this.serviceCache = {};
 }
 
-ChipsterClient.prototype.httpRequest = function (method, uri, body, username, password, callback) {
+ChipsterClient.prototype.httpRequest = function (method, uri, body, username, password, callback, onerror, name) {
     var xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-        if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 300) {
-            callback(xhr);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                callback(xhr);
+            } else {
+                if (onerror) {
+                    onerror(name, xhr.status, xhr.statusText, method, uri);
+                }
+            }
         }
     };
     if (username) {
@@ -35,7 +41,7 @@ ChipsterClient.prototype.httpRequest = function (method, uri, body, username, pa
     xhr.send(body);
 };
 
-ChipsterClient.prototype.getServices = function (type, callback) {
+ChipsterClient.prototype.getServices = function (type, callback, onerror) {
     if (this.serviceCache[type]) {
         callback(this.serviceCache[type]);
     } else {
@@ -46,12 +52,11 @@ ChipsterClient.prototype.getServices = function (type, callback) {
             });
             this.serviceCache[type] = filtered;
             callback(filtered);
-        }.bind(this));
+        }.bind(this), onerror, "service locator");
     }
 };
 
-ChipsterClient.prototype.getToken = function (callback) {
-    console.log(this.token + typeof this.token);
+ChipsterClient.prototype.getToken = function (callback, onerror) {
     if (this.token) {
         callback(this.token);
     } else {
@@ -63,21 +68,21 @@ ChipsterClient.prototype.getToken = function (callback) {
                 this.username = null;
                 this.password = null;
                 callback(this.token);
-            }.bind(this));
-        }.bind(this));
+            }.bind(this), onerror, "authentication service");
+        }.bind(this), onerror);
     }
 };
 
-ChipsterClient.prototype.sessionStorage = function (method, path, body, callback) {
+ChipsterClient.prototype.sessionStorage = function (method, path, body, callback, onerror) {
     this.getServices(this.SESSION_STORAGE, function (services) {
         this.getToken(function (token) {
             //TODO try others if this fails
             var uri = services[0].uri + "sessions/" + path;
             this.httpRequest(method, uri, body, "token", token.tokenKey, function (xhr) {
                 this.handleResponse(method, xhr, callback);
-            }.bind(this));
-        }.bind(this));
-    }.bind(this));
+            }.bind(this), onerror, "session storage");
+        }.bind(this), onerror);
+    }.bind(this), onerror);
 };
 
 ChipsterClient.prototype.getLocation = function (xhr) {
@@ -105,7 +110,7 @@ ChipsterClient.prototype.handleResponse = function (method, xhr, callback) {
 
 // Events
 
-ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback) {
+ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback, onerror, onopen) {
     if (!!window.EventSource) {
         this.getToken(function (token) {
             if (this.eventSource) {
@@ -116,16 +121,20 @@ ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback
                 var event = JSON.parse(e.data);
                 callback(event);
             });
-            this.eventSource.addEventListener("open", function (e) {
-                //console.log("Event connection is open");
+            this.eventSource.addEventListener("open", function () {
+                if (onopen) {
+                    onopen();
+                }
             });
             this.eventSource.addEventListener("error", function (e) {
-                if (e.readyState === EventSource.CLOSED) {
-                    console.log("Event connection closed");
-                } else {
-                    // There seeems to be no more information what kind of
-                    // error happened
-                    console.log("Event connection error");
+                if (onerror) {
+                    if (e.readyState === EventSource.CLOSED) {
+                        onerror("session storage event connection", null, "closed", null);
+                    } else {
+                        // There doesn't seeem to be any information of what kind of
+                        // error happened
+                        onerror("session storage event connection", null, "error", null);
+                    }
                 }
             }.bind(this));
         }.bind(this));
@@ -146,66 +155,66 @@ ChipsterClient.prototype.closeSessionEventListener = function () {
 
 // Sessions
 
-ChipsterClient.prototype.getSessions = function (callback) {
-    this.sessionStorage("GET", "", null, callback);
+ChipsterClient.prototype.getSessions = function (callback, onerror) {
+    this.sessionStorage("GET", "", null, callback, onerror);
 };
 
-ChipsterClient.prototype.getSession = function (sessionId, callback) {
-    this.sessionStorage("GET", sessionId, null, callback);
+ChipsterClient.prototype.getSession = function (sessionId, callback, onerror) {
+    this.sessionStorage("GET", sessionId, null, callback, onerror);
 };
 
-ChipsterClient.prototype.postSession = function (json, callback) {
-    this.sessionStorage("POST", "", json, callback);
+ChipsterClient.prototype.postSession = function (json, callback, onerror) {
+    this.sessionStorage("POST", "", json, callback, onerror);
 };
 
-ChipsterClient.prototype.putSession = function (sessionId, json, callback) {
-    this.sessionStorage("PUT", sessionId, json, callback);
+ChipsterClient.prototype.putSession = function (sessionId, json, callback, onerror) {
+    this.sessionStorage("PUT", sessionId, json, callback, onerror);
 };
 
-ChipsterClient.prototype.deleteSession = function (sessionId, callback) {
-    this.sessionStorage("DELETE", sessionId, null, callback);
+ChipsterClient.prototype.deleteSession = function (sessionId, callback, onerror) {
+    this.sessionStorage("DELETE", sessionId, null, callback, onerror);
 };
 
 // Datasets
 
-ChipsterClient.prototype.getDatasets = function (sessionId, callback) {
-    this.sessionStorage("GET", sessionId + "/datasets", null, callback);
+ChipsterClient.prototype.getDatasets = function (sessionId, callback, onerror) {
+    this.sessionStorage("GET", sessionId + "/datasets", null, callback, onerror);
 };
 
-ChipsterClient.prototype.getDataset = function (sessionId, datasetId, callback) {
-    this.sessionStorage("GET", sessionId + "/datasets/" + datasetId, null, callback);
+ChipsterClient.prototype.getDataset = function (sessionId, datasetId, callback, onerror) {
+    this.sessionStorage("GET", sessionId + "/datasets/" + datasetId, null, callback, onerror);
 };
 
-ChipsterClient.prototype.postDataset = function (sessionId, json, callback) {
-    this.sessionStorage("POST", sessionId + "/datasets/", json, callback);
+ChipsterClient.prototype.postDataset = function (sessionId, json, callback, onerror) {
+    this.sessionStorage("POST", sessionId + "/datasets/", json, callback, onerror);
 };
 
-ChipsterClient.prototype.putDataset = function (sessionId, datasetId, json, callback) {
-    this.sessionStorage("PUT", sessionId + "/datasets/" + datasetId, json, callback);
+ChipsterClient.prototype.putDataset = function (sessionId, datasetId, json, callback, onerror) {
+    this.sessionStorage("PUT", sessionId + "/datasets/" + datasetId, json, callback, onerror);
 };
 
-ChipsterClient.prototype.deleteDataset = function (sessionId, datasetId, callback) {
-    this.sessionStorage("DELETE", sessionId + "/datasets/" + datasetId, null, callback);
+ChipsterClient.prototype.deleteDataset = function (sessionId, datasetId, callback, onerror) {
+    this.sessionStorage("DELETE", sessionId + "/datasets/" + datasetId, null, callback, onerror);
 };
 
 // Jobs
 
-ChipsterClient.prototype.getJobs = function (sessionId, callback) {
-    this.sessionStorage("GET", sessionId + "/jobs/", null, callback);
+ChipsterClient.prototype.getJobs = function (sessionId, callback, onerror) {
+    this.sessionStorage("GET", sessionId + "/jobs/", null, callback, onerror);
 };
 
-ChipsterClient.prototype.getJob = function (sessionId, jobId, callback) {
-    this.sessionStorage("GET", sessionId + "/jobs/" + jobId, null, callback);
+ChipsterClient.prototype.getJob = function (sessionId, jobId, callback, onerror) {
+    this.sessionStorage("GET", sessionId + "/jobs/" + jobId, null, callback, onerror);
 };
 
-ChipsterClient.prototype.postJob = function (sessionId, json, callback) {
-    this.sessionStorage("POST", sessionId + "/jobs/", json, callback);
+ChipsterClient.prototype.postJob = function (sessionId, json, callback, onerror) {
+    this.sessionStorage("POST", sessionId + "/jobs/", json, callback, onerror);
 };
 
-ChipsterClient.prototype.putJob = function (sessionId, jobId, json, callback) {
-    this.sessionStorage("PUT", sessionId + "/jobs/" + jobId, json, callback);
+ChipsterClient.prototype.putJob = function (sessionId, jobId, json, callback, onerror) {
+    this.sessionStorage("PUT", sessionId + "/jobs/" + jobId, json, callback, onerror);
 };
 
-ChipsterClient.prototype.deleteJob = function (sessionId, jobId, callback) {
-    this.sessionStorage("DELETE", sessionId + "/jobs/" + jobId, null, callback);
+ChipsterClient.prototype.deleteJob = function (sessionId, jobId, callback, onerror) {
+    this.sessionStorage("DELETE", sessionId + "/jobs/" + jobId, null, callback, onerror);
 };
