@@ -112,44 +112,52 @@ ChipsterClient.prototype.handleResponse = function (method, xhr, callback) {
 
 ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback, onerror, onopen) {
     if (!!window.EventSource) {
-        this.getToken(function (token) {
-            if (this.eventSource) {
-                this.eventSource.close();
-            }
-            this.eventSource = new EventSource("http://localhost:8080/sessionstorage/sessions/" + sessionId + "/events?token=" + token.tokenKey);
-            this.eventSource.addEventListener("SessionEvent", function (e) {
-                var event = JSON.parse(e.data);
-                callback(event);
-            });
-            this.eventSource.addEventListener("open", function () {
-                if (onopen) {
-                    onopen();
+        this.getServices(this.SESSION_STORAGE, function (services) {
+            this.getToken(function (token) {
+                if (this.eventSource) {
+                    this.eventSource.close();
                 }
-            });
-            this.eventSource.addEventListener("error", function (e) {
-                if (onerror) {
-                    if (e.readyState === EventSource.CLOSED) {
-                        onerror("session storage event connection", null, "closed", null);
-                    } else {
-                        // There doesn't seeem to be any information of what kind of
-                        // error happened
-                        onerror("session storage event connection", null, "error", null);
+                //TODO try others if this fails
+                var uri = services[0].uri + "sessions/" + sessionId + "/events?token=" + token.tokenKey;
+                this.eventSource = new EventSource(uri);
+                this.eventSource.addEventListener("SessionEvent", function (e) {
+                    var event = JSON.parse(e.data);
+                    callback(event);
+                });
+                this.eventSource.addEventListener("open", function () {
+                    if (onopen) {
+                        onopen();
                     }
-                }
+                });
+                this.eventSource.addEventListener("error", function (e) {
+                    if (onerror) {
+                        if (e.readyState === EventSource.CLOSED) {
+                            onerror("session storage event connection", null, "closed", null);
+                        } else {
+                            // There doesn't seeem to be any information of what kind of
+                            // error happened
+                            onerror("session storage event connection", null, "error", null);
+                        }
+                    }
+                }.bind(this));
             }.bind(this));
         }.bind(this));
     } else {
-        throw "EventSourceNotAvailable";
+        if (onerror) {
+            onerror("session storage event connection", null, "unavailable", null);
+        }
     }
 };
 
-ChipsterClient.prototype.closeSessionEventListener = function () {
+ChipsterClient.prototype.closeSessionEventListener = function (onerror) {
     if (!!window.EventSource) {
         if (this.eventSource) {
             this.eventSource.close();
         }
     } else {
-        throw "EventSourceNotAvailable";
+        if (onerror) {
+            onerror("session storage event connection", null, "unavailable", null);
+        }
     }
 };
 
