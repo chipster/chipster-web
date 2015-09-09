@@ -118,25 +118,33 @@ ul.unstyled {
 
 }
 
+/* D3 graph related styles*/
 .node {
-    cursor: pointer;
+ 	stroke: #fff;
+  	stroke-width: 1px;
     }
 
-.node circle {
-      fill: #fff;
-      stroke-width: 3px;
-    }
+.node .selected {
+  stroke: black;
+}
+
  .node text{
- 	font: 9px helvetica;
+ 	font: 8px helvetica;
  	color: #f00;
  }
 
 
 .link {     
-      stroke: #ccc;     
-    }
+      stroke: #999;     
+}
 
- .d3-tip {
+.brush .extent {
+  fill-opacity: .1;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.d3-tip {
   line-height: 1;
   font-weight: bold;
   padding: 12px;
