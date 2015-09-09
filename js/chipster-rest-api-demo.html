@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .form-element label {
+            display: inline-block;
+            width: 150px;
+        }
+        #error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Session storage client</h1>
+<div class="form-element">
+    <label for="serviceLocatorUri">Service locator URI</label>
+    <input id="serviceLocatorUri" value="http://localhost:8082/servicelocator" size=30 /><br>
+    <label for="username">Username</label>
+    <input id="username" value="client" size=30 /><br>
+    <label for="password">Password</label>
+    <input id="password" value="clientPassword" size=30 /><br>
+    <label></label>
+    <a href="#" id="connect" onclick="connect();">Connect</a>
+</div>
+<ul id="error"></ul>
+<h2>Sessions</h2>
+<ul id="sessionUl"></ul>
+<a href="#" onclick=newSession();>Add</a>
+<a href="#" onclick=updateSessions();>Refresh</a>
+<h2 id="sessionName"></h2>
+<h3>Datasets</h3>
+<ul id="datasetUl"></ul>
+<a id="datasetTemplate">Add</a>
+<h3>Jobs</h3>
+<ul id="jobUl"></ul>
+<a id="jobTemplate">Add</a>
+<h3>Details</h3>
+<label for="textarea"></label>
+<textarea rows="20" cols="80" id="textarea"></textarea><br>
+<a id="createLink">Create</a>
+<a id="updateLink">Update</a>
+<h3>Events</h3>
+<ul id="eventUl"></ul>
+<script src="chipster-rest-api.js"></script>
+<script>
+    var client = null;
+    function connect() {
+        client = new ChipsterClient(
+                document.getElementById("serviceLocatorUri").value,
+                document.getElementById("username").value,
+                document.getElementById("password").value);
+        clear(document.getElementById("error"));
+        updateSessions();
+    }
+
+    function showError(name, status, statusText, method, uri) {
+        var msg = name;
+        if (status === 0) {
+            msg += " unavailable";
+        } else if (status) {
+            msg += " error: " + status;
+        }
+        if (statusText) {
+            msg += " " + statusText;
+        }
+        if (method && uri) {
+            msg += " (" + method + " " + uri + ")";
+        }
+        var text = document.createTextNode(msg);
+        var li = document.createElement("li");
+        var ul = document.getElementById("error");
+        li.appendChild(text);
+        ul.appendChild(li);
+        var clearA = document.createElement("a");
+        clearA.onclick = clearError;
+        clearA.setAttribute("href", "#");
+        clearA.appendChild(document.createTextNode(" Clear"));
+        ul.appendChild(clearA);
+    }
+
+    function clearError() {
+        clear(document.getElementById("error"));
+    }
+
+    function updateSessions() {
+        client.getSessions(function (sessions) {
+            var ul = document.getElementById("sessionUl");
+            clear(ul);
+            sessions.forEach(function (s) {
+
+                function deleteSession() {
+                    client.deleteSession(s.sessionId, function () {
+                        updateSessions();
+                    }, showError);
+                }
+                ul.appendChild(listItem(
+                        s.name,
+                        function () {showSession(s.sessionId)},
+                        deleteSession));
+            });
+        }, showError);
+    }
+
+    function updateDatasets(sessionId) {
+        var datasetUl = document.getElementById("datasetUl");
+
+        enableLink("datasetTemplate", !!sessionId, function () {
+            setJson(getDatasetTemplate());
+            enableLink("createLink", true, function () {
+                client.postDataset(sessionId, getJson(), function (datasetId) {
+                    updateDatasets(sessionId);
+                    showDataset(datasetId, sessionId);
+                });
+            });
+        });
+
+        if (sessionId) {
+            client.getDatasets(sessionId, function (datasets) {
+                clear(datasetUl);
+
+                datasets.forEach(function (d) {
+                    datasetUl.appendChild(listItem(
+                            d.name,
+                            function () {showDataset(d.datasetId, sessionId)},
+                            function () {client.deleteDataset(sessionId, d.datasetId)}));
+                });
+            }, showError);
+        } else {
+            clear(datasetUl);
+        }
+    }
+
+    function updateJobs(sessionId) {
+        var jobUl = document.getElementById("jobUl");
+
+        enableLink("jobTemplate", !!sessionId, function () {
+            setJson(getJobTemplate());
+            enableLink("createLink", true, function () {
+                client.postJob(sessionId, getJson(), function (jobId) {
+                    updateJobs(sessionId);
+                    showJob(jobId, sessionId);
+                });
+            });
+        });
+
+        if (sessionId) {
+            client.getJobs(sessionId, function (jobs) {
+                clear(jobUl);
+
+                jobs.forEach(function (j) {
+                    jobUl.appendChild(listItem(
+                            j.toolName,
+                            function () {showJob(j.jobId, sessionId)},
+                            function () {client.deleteJob(sessionId, j.jobId)}));
+                });
+            }, showError);
+        } else {
+            clear(jobUl);
+        }
+    }
+
+    function showSession(sessionId) {
+        setJson(null);
+        var eventUl = document.getElementById("eventUl");
+        clear(eventUl);
+        clear(document.getElementById("sessionName"));
+
+        updateDatasets(sessionId);
+        updateJobs(sessionId);
+
+        console.log("showSession " + sessionId);
+        if (sessionId) {
+            client.getSession(sessionId, function (session) {
+                var nameText = document.createTextNode(session.name);
+                document.getElementById("sessionName").appendChild(nameText);
+                setJson(session);
+                enableLink("updateLink", !!session, function () {
+                    client.putSession(sessionId, getJson(), function () {
+                        updateSessions();
+                    });
+                });
+            });
+
+            // listen for events
+            var ul = document.getElementById("eventUl");
+            client.closeSessionEventListener();
+            client.setSessionEventListener(sessionId, function (event) {
+                var li = document.createElement("li");
+                var liText = document.createTextNode(event.type + " " + event.resourceType + " " + event.resourceId);
+                li.appendChild(liText);
+                ul.appendChild(li);
+                switch (event.resourceType) {
+                    case "SESSION":
+                        updateSessions();
+                        if (sessionId === event.resourceId) {
+                            showSession(sessionId);
+                        }
+                        break;
+                    case "DATASET":
+                        updateDatasets(sessionId);
+                        break;
+                    case "JOB":
+                        updateJobs(sessionId);
+                        break;
+                    default:
+                        console.log("Unknown event type");
+                }
+            }, showError, function () {
+                // successful reconnect
+                clearError();
+            });
+        }
+    }
+
+    function showDataset(datasetId, sessionId) {
+        client.getDataset(sessionId, datasetId, function (dataset) {
+            setJson(dataset);
+            enableLink("updateLink", !!datasetId, function () {
+                client.putDataset(sessionId, dataset.datasetId, getJson(), function () {
+                });
+            });
+        }, showError);
+    }
+
+    function showJob(jobId, sessionId) {
+        client.getJob(sessionId, jobId, function (job) {
+            setJson(job);
+            enableLink("updateLink", !!jobId, function () {
+                client.putJob(sessionId, job.jobId, getJson(), function () {});
+            });
+        }, showError);
+    }
+
+    function newSession() {
+        showSession(null);
+        setJson(getSessionTemplate());
+        enableLink("createLink", true, function () {
+            client.postSession(getJson(), function (sessionId) {
+                updateSessions();
+                showSession(sessionId);
+            }, showError);
+        });
+    }
+
+    function clear(element) {
+        while (element.lastChild) {
+            element.removeChild(element.lastChild);
+        }
+    }
+
+    function listItem(name, onclick, ondelete) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.setAttribute("href", "#");
+        a.onclick = onclick;
+        var aText = document.createTextNode(name);
+        a.appendChild(aText);
+        li.appendChild(a);
+        var del = document.createElement("a");
+        del.setAttribute("href", "#");
+        del.onclick = ondelete;
+        var delText = document.createTextNode(" (delete)");
+        del.appendChild(delText);
+        li.appendChild(del);
+        return li;
+    }
+
+    function enableLink(id, enabled, onclick) {
+        var a = document.getElementById(id);
+        if (enabled) {
+            a.setAttribute("href", "#");
+            a.onclick = onclick;
+        } else {
+            a.removeAttribute("href");
+            a.onclick = null;
+        }
+    }
+
+    function getJson() {
+        return document.getElementById("textarea").value;
+    }
+
+    function setJson(obj) {
+        document.getElementById("textarea").value = JSON.stringify(obj, null, 2);
+        enableLink("createLink", false);
+        enableLink("updateLink", false);
+    }
+
+    function getSessionTemplate() {
+        var s = {};
+        s.sessionId = null;
+        s.name = "Example session";
+        s.owner = "me";
+        s.notes = "Example session demonstrating REST API";
+        s.created = "2015-08-27T17:53:10.331Z";
+        s.accessed = "2015-08-27T17:53:10.331Z";
+        return s;
+    }
+
+    function getDatasetTemplate() {
+        var d = {};
+        d.datasetId = null;
+        d.name = "Raw input data";
+        d.x = 100;
+        d.y = 100;
+        d.sourceJob = "j163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
+        d.fileId = "3c2806ed-ed94-42d1-bda9-542947f669ac";
+        d.size = 0;
+        d.checksum = "xyz";
+        return d;
+    }
+
+    function getJobTemplate() {
+        var j = {};
+        j.jobId = null;
+        j.toolId = "sort.py";
+        j.state = "COMPLETED";
+        j.toolCategory = "Utilities";
+        j.toolName = "Sort file";
+        j.toolDescription = "Imaginary sort tool";
+        j.startTime = "2015-08-27T17:53:10.504Z";
+        j.endTime = "2015-08-27T17:53:10.503Z";
+
+        j.parameters = [];
+        var p1 = {};
+        p1.parameterId = "sortCol";
+        p1.displayName = "Sort column";
+        p1.description = "Sort the file according to this column";
+        p1.type = "STRING";
+        p1.value = "chr";
+
+        j.parameters.push(p1);
+
+        var p2 = {};
+        p2.parameterId = "order";
+        p2.displayName = "Sort order";
+        p2.description = "Ascending or descending";
+        p2.type = "STRING";
+        p2.value = "asc";
+
+        j.parameters.push(p2);
+
+
+        j.inputs = [];
+        var i1 = {};
+        i1.inputId = "inFile";
+        i1.displayName = "Input file";
+        i1.description = "File to sort";
+        i1.type = "GENERIC";
+        i1.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
+        j.inputs.push(i1);
+
+        var i2 = {};
+        i2.inputId = "extraFile";
+        i2.displayName = "Extra file";
+        i2.description = "Useless extra file";
+        i2.type = "GENERIC";
+        i2.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
+        j.inputs.push(i2);
+
+        return j;
+    }
+</script>
+</body>
+</html>
