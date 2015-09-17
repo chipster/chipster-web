@@ -38,6 +38,7 @@ ChipsterClient.prototype.httpRequest = function (method, uri, body, username, pa
     if (body) {
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     }
+    console.log(xhr);
     xhr.send(body);
 };
 

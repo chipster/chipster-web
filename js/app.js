@@ -1,8 +1,42 @@
-var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzoom','panzoomwidget']);
+var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzoom','panzoomwidget','restangular']);
 
 //configure our route
 chipsterWeb
-.config(['$routeProvider',function ($routeProvider){
+	.config(['$routeProvider','RestangularProvider',function ($routeProvider,RestangularProvider){
+	//Config the base url
+	RestangularProvider.setBaseUrl('http://localhost:8082/servicelocator');
+	
+	//Before redirection to specific pages, check if the user is authenticated or not
+
+
+	var redirectIfAuthenticatedUser=function(route){
+		return function($location, $q, AuthenticationService){
+			var deferred=$q.defer();
+			if(AuthenticationService.getToken()){
+				deferred.reject();
+				$location.path(route);
+			}else{
+				deferred.resolve();
+			}
+			return deferred.promise;
+		};
+	};
+
+	var redirectIfNotAuthenticatedUser=function(route){
+		return function($location, $q, AuthenticationService){
+			var deferred=$q.defer();
+			if(!AuthenticationService.getToken()){
+				deferred.reject();
+				$location.path(route);
+			}else{
+				deferred.resolve();
+			}
+			return deferred.promise;
+		};
+	};
+
+
+
 	$routeProvider
 		//route for home page
 		.when('/',{
@@ -18,7 +52,14 @@ chipsterWeb
 			templateUrl:'partials/visualization.html'
 		})
 		.when('/dataset',{
-			templateUrl:'partials/dataset.html'
+			templateUrl:'partials/dataset.html',
+			resolve:{
+				redirectIfNotAuthenticatedUser:redirectIfNotAuthenticatedUser('/')
+			}
+
+		})
+		.when('/session',{
+			templateUrl:'partials/session.html'				
 		});
 
 	}]);
