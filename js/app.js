@@ -1,4 +1,4 @@
-var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzoom','panzoomwidget','restangular']);
+var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzoom','panzoomwidget','restangular','LocalStorageModule']);
 
 //configure our route
 chipsterWeb

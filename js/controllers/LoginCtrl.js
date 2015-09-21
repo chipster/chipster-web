@@ -1,4 +1,5 @@
-chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','AuthenticationService', function($scope, $location, $http, AuthenticationService) {
+chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','AuthenticationService', 
+              function($scope, $location, $http, AuthenticationService) {
  
   $scope.authUrl="";
   $scope.serviceUrl="";

@@ -38,7 +38,6 @@ ChipsterClient.prototype.httpRequest = function (method, uri, body, username, pa
     if (body) {
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     }
-    console.log(xhr);
     xhr.send(body);
 };
 
@@ -66,6 +65,7 @@ ChipsterClient.prototype.getToken = function (callback, onerror) {
             var uri = auths[0].uri;
             this.httpRequest("POST", uri + "tokens", null, this.username, this.password, function (xhr) {
                 this.token = JSON.parse(xhr.responseText);
+                console.log(this.token);
                 this.username = null;
                 this.password = null;
                 callback(this.token);
@@ -77,6 +77,7 @@ ChipsterClient.prototype.getToken = function (callback, onerror) {
 ChipsterClient.prototype.sessionStorage = function (method, path, body, callback, onerror) {
     this.getServices(this.SESSION_STORAGE, function (services) {
         this.getToken(function (token) {
+            console.log(token.tokenKey);
             //TODO try others if this fails
             var uri = services[0].uri + "sessions/" + path;
             this.httpRequest(method, uri, body, "token", token.tokenKey, function (xhr) {

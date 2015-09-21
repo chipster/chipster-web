@@ -1,4 +1,4 @@
- <div class="row">
+ <div class="row" ng-controller="SessionCtrl" ng-init="getSessions()">
 
      <div flow-init>
         <div class="panel panel-default">
@@ -7,13 +7,6 @@
             </div>
             <div class="panel-body">
                 <p> To start working with Chipster, you need to load data first</p>
-                <ul>
-                    <li style="margin:5px"><a href="#">Open Example Session</a></li>
-                    <li style="margin:5px"><a href="#">Open Local Session</a></li>
-                    <li style="margin:5px"><a href="#">Add Session</a></li>
-                    <li style="margin:5px"><a href="#">Refresh Local Session</a></li>
-
-                </ul>
                 <div flow-prevent-drop
                 flow-drag-enter="style={border:'5px solid green'}"
                 flow-drag-leave="style={}"
@@ -28,6 +21,26 @@
                     </div>
                 </div><!--end of row-->
                 <hr class="soften">
+                 <ul>
+                    <li ng-repeat="exSession in exSessions">
+                        <h5><a href="" ng-click="showDetails = !showDetails"> 
+                            {{exSession.name}}
+                        </a></h5>
+                        <div id="session-detail" ng-show="showDetails">
+                            <p>ID: {{exSession.sessionId}}</p>
+                            <p>Name: {{exSession.name}}</p>
+                            <p>Notes: {{exSession.notes}}</p>
+                            <p>Created: {{exSession.created}}</p>
+                            <p>Accessed: {{exSession.accessed}}</p>
+                        </div>
+                       </li>
+                </ul> 
+                <div>
+                    <button class="btn btn-primary" ng-click="createSession()">Create New Session</button>
+
+                </div>              
+
+
                
             </div>
         </div>

@@ -1,12 +1,6 @@
-chipsterWeb.factory('AuthenticationService',['$q','Restangular', function($q, $window, $rootScope,
-	Restangular) {
+chipsterWeb.factory('AuthenticationService',['localStorageService', function(localStorageService) {
 
-	//Set event listener for token change if there are multiple tabs
-	angular.element($window).on('storgae', function(event){
-		if(event.key==='auth-token'){
-			$rootScope.$apply();
-		}
-	});
+	
 
 	return{
 		//Do the authentication here based on userid and password
@@ -17,18 +11,18 @@ chipsterWeb.factory('AuthenticationService',['$q','Restangular', function($q, $w
 		},
 
 		logout:function(){
-
+			localStorageService.clearAll();
 		},
 
 		setAuthToken:function(val){
-			console.log(val);
-			$window.localStorage && $window.localStorage.setItem('auth-token',val);
-			return this;
+			localStorageService.set('auth-token', val);
 		},
 
 		getToken:function(){
-			return $window.localStorage && $window.localStorage.getItem('auth-token');
+			return localStorageService.get('auth-token');
 		}
+
+		
 
 	};
 }]);
