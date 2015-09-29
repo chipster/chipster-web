@@ -1,47 +1,59 @@
- <div class="row" ng-controller="SessionCtrl" ng-init="getSessions()">
-
-     <div flow-init>
-        <div class="panel panel-default">
+ <div class="row" ng-controller="SessionListCtrl" ng-init="getSessions()">
+         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">DataSets</h4>
+                <h4 class="panel-title">Sessions</h4>
             </div>
             <div class="panel-body">
-                <p> To start working with Chipster, you need to load data first</p>
-                <div flow-prevent-drop
-                flow-drag-enter="style={border:'5px solid green'}"
-                flow-drag-leave="style={}"
-                ng-style="style">
-
-                <div class="row" id="flow-button-group">
-                    <div class="span6">
-                        <span class="btn btn-xs btn-info" flow-btn><i class="icon icon-file"></i>Uplaod File</span>
-                        <span class="btn btn-xs btn-info" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
-                        <span class="btn btn-xs btn-info" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Import from URL</span>
-                        <span class="btn btn-xs btn-info" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Import from URL Directly to server</span>
-                    </div>
-                </div><!--end of row-->
+               
+            
                 <hr class="soften">
-                 <ul>
-                    <li ng-repeat="exSession in exSessions">
-                        <h5><a href="" ng-click="showDetails = !showDetails"> 
-                            {{exSession.name}}
-                        </a></h5>
-                        <div id="session-detail" ng-show="showDetails">
-                            <p>ID: {{exSession.sessionId}}</p>
-                            <p>Name: {{exSession.name}}</p>
-                            <p>Notes: {{exSession.notes}}</p>
-                            <p>Created: {{exSession.created}}</p>
-                            <p>Accessed: {{exSession.accessed}}</p>
+                <div class="col-md-6">
+                    <div class="session-item" ng-repeat="exSession in exSessions"
+                        <a href="" ng-click="setCurEditedSession(exSession)"          
+                        ng-class="{'active':isCurrentSession(exSession.id)}">
+                          <h4>{{exSession.name}}</h4>
+                            <p><strong>{{exSession.description}}</strong></p></a>
+                    </div><!--end of session List-->
+                </div><!--end of session list column-->
+                <div class="col-md-6">
+                    <!--create item form-->
+                    <div ng-if="!isEditing">
+                        <h4>Create a New Session</h4>
+                        <form class="create-form" role="form" ng-submit="createSession()" novalidate>
+                        <div class="form-group">
+                            <label>Session Name</label>
+                            <input type="text" class="form-control" ng-model="newSession.name" placeholder="Enter name">
                         </div>
-                       </li>
-                </ul> 
-                <div>
-                    <button class="btn btn-primary" ng-click="createSession()">Create New Session</button>
+                        <hr/>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control" ng-model="newSession.description" placeholder="Enter description">
+                        </div>
+                        <hr/>
+                        <button type="submit" class="btn btn-info">Create</button>
+                    </div>
+                    <div ng-if="isEditing">
+                        <h4>Editing {{edSession.name}}</h4>
+                         <!--Edit item form-->
+                        <form class="edit-form" role="form" ng-submit="updateSession(curSession)" novalidate>
+                        <div class="form-group">
+                            <label>Session Name</label>
+                            <input type="text" class="form-control" ng-model="curSession.name" placeholder="Enter name">
+                        </div>
+                        <hr/>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control" ng-model="curSession.description" placeholder="Enter Description">
+                        </div>
+                        <hr/>
+                        <button type="submit" class="btn btn-info">Save</button>
+                        <button type="button" class="btn btn-default pull-right" ng-click="cancelEditing()">Cancel</button>
+                         </form>
+                    </div>
+                    <hr/>
 
-                </div>              
-
-
+                    <!--edit item form-->
+                </div><!--end of create and edit form-->
                
             </div>
-        </div>
     </div><!--end of file upload panel-->
