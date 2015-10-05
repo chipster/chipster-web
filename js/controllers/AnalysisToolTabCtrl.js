@@ -5,7 +5,6 @@ chipsterWeb.controller('AnalysisToolTabCtrl', function($scope,$http){
 	
     $http.get('js/json/microarray.json')
         .then(function(res){
-          console.log(res);
           $scope.data = res.data;         
       });
 

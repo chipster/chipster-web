@@ -1,0 +1,29 @@
+ <div class="row" ng-controller="SessionListCtrl" ng-init="getSessions()">
+     <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">Sessions</h4>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-6">
+                <button type="button" class="btn btn-info" ng-click="createSession()">Create New Session</button>
+                <hr/>
+                <h5>Session List</h5>
+                <table class="table table-hover" >
+                  <tbody>
+                    <tr ng-repeat="exSession in exSessions" >
+                    <td class="text-left text-nowrap" ng-click="showDetails=!showDetails">
+                        <a href="">{{exSession.name}}</a>
+                        <div class="session-detail" ng-show="showDetails">
+                           {{exSession.notes}}
+                        </div>
+                    </td>
+                    <td class="text-right text-nowrap">
+                        <button class="btn btn-xs btn-info" ng-click="setCurClickedSession(exSession)">Open</button>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+  </div><!--end of column-md-6-->
+</div><!--end of  panel body-->
+</div><!--end of panel-->
+</div><!--end of row-->

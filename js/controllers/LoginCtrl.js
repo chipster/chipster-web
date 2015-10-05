@@ -38,7 +38,7 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
                 if(response.data.tokenKey){
                   AuthenticationService.setAuthToken(response.data.tokenKey);
                   //Route to Session creation page
-                  $location.path("/session");
+                  $location.path("/sessions");
 
                 }
 

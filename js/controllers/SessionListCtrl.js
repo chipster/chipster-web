@@ -5,7 +5,7 @@ chipsterWeb.controller('SessionListCtrl', ['$scope', '$http', '$location','Templ
 
 //Set the edit session variables;
 $scope.curSession=null;
-$scope.isEditing=false;
+$scope.isClicked=false;
 
 $scope.exSessions=[];
 
@@ -26,9 +26,7 @@ $scope.exSessions=[];
               })
               .then(function (response) {
                 if(response.data){
-
-                	 $location.path("/dataset");
-
+                	 $location.path("/session");
                 }
               });
 
@@ -77,22 +75,22 @@ $scope.exSessions=[];
 	};
 
 
-	$scope.setCurEditedSession=function(edSession){
+	$scope.setCurClickedSession=function(exSession){
 
-		$scope.curSession=angular.copy(edSession);
-		$scope.isEditing=true;
-		console.log(edSession.sessionId);
-		$location.path("/dataset" + "/" + edSession.sessionId);
+		$scope.curSession=angular.copy(exSession);
+		$scope.isClicked=true;
+		console.log(exSession.sessionId);
+		$location.path("/session" + "/" + exSession.sessionId);
 	};
 
-	$scope.cancelEditing=function(){
+	$scope.cancelClick=function(){
 		$scope.curSession=null;
-		$scope.isEditing=false;
+		$scope.isClicked=false;
 	}
 
 	$scope.isCurrentSession=function(sessionID){
 
-		return $scope.edSession!=null && $scope.edSession.is==sessionID;
+		return $scope.curSession!=null && $scope.curSession.id==sessionID;
 
 	}
 
@@ -106,40 +104,9 @@ $scope.exSessions=[];
 		//localhost:8080/sessionstorage/sessions/70ef2895-059e-4ff1-a1a1-e9e55c15a632/events
 	};
 
-	$scope.addDataset=function(){
-		//create dataset template
-		//Post to server
-		console.log(curSession.name);
+	
 
-		var curDataset=TemplateService.getJobTemplate();
-		//--user token:72891c2d-b855-4606-a8b2-da08a99c9015 -X POST http://localhost:8080/sessionstorage/sessions/
-		//70ef2895-059e-4ff1-a1a1-e9e55c15a632/datasets
-
-		$http({
-			url:'http://localhost:8080/sessionstorage/sessions/'+curSession.sessionId+'/'+datasets,
-			method:"POST",
-			withCredentials:true,
-			headers:{'Authorization': 'Basic ' + btoa("token" + ":"+ AuthenticationService.getToken())},
-			data:curDataset
-		});
-
-		//get created location from the response and save the datasetID
-		//http://localhost:8080/sessionstorage/sessions/70ef2895-059e-4ff1-a1a1-e9e55c15a632/
-		//datasets/bc56439a-0ad9-40b6-8878-64fda9052478 
-
-	};
-
-	$scope.deleteDataset=function(){
-
-	};
-
-	$scope.updateDataset=function(){
-
-	};
-
-	$scope.addJob=function(){
-
-	};
+	
 
 
 }]);

@@ -4,6 +4,7 @@ var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzo
 chipsterWeb
 	.config(['$routeProvider','RestangularProvider',function ($routeProvider,RestangularProvider){
 	//Config the base url
+	RestangularProvider.setBaseUrl('http://localhost:8082/servicelocator');
 	
 	//Before redirection to specific pages, check if the user is authenticated or not
 
@@ -42,20 +43,20 @@ chipsterWeb
 			templateUrl:'partials/home.html',
 			controller:'mainController'
 		})
+		.when('/home',{
+			templateUrl:'partials/home.html'
+		})
 		//route for login page
 		.when('/login',{
 			templateUrl:'partials/login.html',
 			controller:'LoginCtrl'
 		})
-		.when('/visualization',{
-			templateUrl:'partials/visualization.html'
-		})
-		.when('/dataset/:sessionId',{
-			templateUrl:'partials/dataset.html'
+		.when('/session/:sessionId',{
+			templateUrl:'partials/session.html'
 			
 		})
-		.when('/session',{
-			templateUrl:'partials/session.html'				
+		.when('/sessions',{
+			templateUrl:'partials/sessionlist.html'				
 		});
 
 	}]);

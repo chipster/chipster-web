@@ -84,11 +84,19 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 		},
 
 		getWorflowNodeTemplate:function(){
+			var node={};
 
+            node.name= "";
+            node.group=0;
+            node.c_id=0;
+            node.level=0;
+
+            return node;
+                
 		},
 
 		getWorkflowLinkTemplate:function(){
-			
+
 		}
 
 

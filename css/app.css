@@ -188,15 +188,6 @@ ul.unstyled {
             border: 2px #EEE;
         }
 
-.session-item {
-    cursor: pointer;
-    border-top: 1px #CCC solid;
-    border-bottom: 1px #CCC solid;
-    border-left: 1px #CCC solid;
-    border-right: 1px #CCC solid;
-    margin: 0px;
-    padding: 5px;
-}
 
 .active {
     background-color: #CCC;
