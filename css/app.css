@@ -9,27 +9,6 @@ body{
 }
 
 
-/*----Spreadsheet specific styles, inspired by graunked(Github Repo)----*/
-.output,input{
-
-	font-size: 10pt;
-	position: absolute;
-	height: 1.2em;
-	width: 50pt;
-	height: 16pt;
-	overflow: hidden;
-	padding-left: 4pt;
-}
-
-input{border: none;}
-.output{
-	background: white;
-	pointer-events:none;
-	padding-top: 2pt;
-	height: 14pt;
-}
-
-
 table{
 	border-collapse: collapse;
 }

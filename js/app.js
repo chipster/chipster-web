@@ -4,7 +4,7 @@ var chipsterWeb=angular.module('chipster-web',['ngRoute','flow','ui.tree','panzo
 chipsterWeb
 	.config(['$routeProvider','RestangularProvider',function ($routeProvider,RestangularProvider){
 	//Config the base url
-	RestangularProvider.setBaseUrl('http://localhost:8082/servicelocator');
+	RestangularProvider.setBaseUrl('http://vm0179.kaj.pouta.csc.fi/servicelocator');
 	
 	//Before redirection to specific pages, check if the user is authenticated or not
 

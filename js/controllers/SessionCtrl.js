@@ -2,13 +2,18 @@ chipsterWeb.controller('SessionCtrl',
 							function($http, $scope,$routeParams, TemplateService, SessionRestangular, AuthenticationService,$window,PanZoomService){
 
 
-	$scope.sessionId=$routeParams.sessionId;
 	//SessionRestangular is a restangular object with configured baseUrl and authorization header
-	$scope.sessionUrl=SessionRestangular.one($scope.sessionId);
+	$scope.sessionUrl=SessionRestangular.one($routeParams.sessionId);
+ 
+  //creating a session object
+  $scope.session={
+    sessionId:$routeParams.sessionId,
+    sessionName:"",
+    sessionDetail:"",
+    workflowData:{}
+  };
+  console.log($scope.session);
 
-
-	$scope.sessionName="";
-	$scope.sessionDetail="";
 	$scope.d3Data={};
 
 
@@ -39,8 +44,8 @@ chipsterWeb.controller('SessionCtrl',
 
 		//get session detail
 		$scope.sessionUrl.get().then(function(result){
-			$scope.sessionName=result.name;
-			$scope.sessionDetail=result.notes;
+			$scope.session.sessionName=result.name;
+			$scope.session.sessionDetail=result.notes;
 			
 		}, function(error){
 			console.log(error);
@@ -55,14 +60,27 @@ chipsterWeb.controller('SessionCtrl',
 				 angular.forEach($scope.d3Data,function(elem,index){
               			elem.group=1;
               			elem.c_id=0;
-              			elem.level=1;
+              			elem.level=index;
               			elem.x=index*150+50;
+                    elem.y=index*100+50;
 
             });
 		});
 		
 	
 	}
+
+
+  $scope.editSession=function(){
+    var sessionObj=TemplateService.getSessionTemplate();
+    
+    sessionObj.sessionId=$scope.session.sessionId;
+    sessionObj.name=$scope.session.sessionName;
+    sessionObj.notes=$scope.session.sessionDetail;
+
+    $scope.sessionUrl.customPUT(sessionObj);
+
+  }
 
 	$scope.getDataSets=function(){
 		$scope.datalist=$scope.sessionUrl.all('datasets').getList().$object;
@@ -77,7 +95,7 @@ chipsterWeb.controller('SessionCtrl',
 		var newDataset=TemplateService.getDatasetTemplate();
 		console.log(newDataset);
 
-		var datasetUrl=SessionRestangular.all($scope.sessionId).one('datasets');
+		var datasetUrl=SessionRestangular.all($scope.session.sessionId).one('datasets');
 		datasetUrl.customPOST(newDataset);
 
 
@@ -230,7 +248,26 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
         	graphData={};
         	
             graphData.nodes=scope.data;
-            graphData.links=[];
+            console.log(graphData.nodes[0]);
+            //graphData.links=[];
+
+            
+            graphData.links=[{
+              source:0,
+              target:2,
+              value: 4
+
+            },
+
+            {
+            source:1,
+              target:3,
+              value: 4
+            }
+
+
+            ];
+            console.log(graphData.links);
 
             /*addng x y positions for the data
             angular.forEach(graphData.nodes,function(elem,index){

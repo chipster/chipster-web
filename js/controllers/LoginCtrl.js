@@ -5,7 +5,7 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
   $scope.serviceUrl="";
 
   $scope.connect=function(){
-    $http.get('http://localhost:8082/servicelocator/services')
+    $http.get('http://vm0179.kaj.pouta.csc.fi:8082/servicelocator/services')
       .then(function(res){
   
        angular.forEach(res.data,function(elem,index){

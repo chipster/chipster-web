@@ -18,7 +18,7 @@ $scope.exSessions=[];
 			curSession=angular.copy(newSession); //assign it as the curSession
 
 			$http({
-              url:'http://localhost:8080/sessionstorage/sessions/',
+              url:'http://vm0179.kaj.pouta.csc.fi:8080/sessionstorage/sessions/',
               method: "POST",
               withCredentials:true,
               headers: {'Authorization': 'Basic ' + btoa('token' + ':' +AuthenticationService.getToken())},
@@ -44,7 +44,7 @@ $scope.exSessions=[];
 		console.log(encodedString);
 		
 		$http({
-              url:'http://localhost:8080/sessionstorage/sessions/',
+              url:'http://vm0179.kaj.pouta.csc.fi:8080/sessionstorage/sessions/',
               method: "GET",
               withCredentials:true,
               headers: {'Authorization': 'Basic ' + btoa(encodedString)}                   
@@ -65,7 +65,7 @@ $scope.exSessions=[];
 		console.log(exSession);
 
 		$http({
-			url:'http://localhost:8080/sessionstorage/sessions/'+exSession.sessionId,
+			url:'http://vm0179.kaj.pouta.csc.fi:8080/sessionstorage/sessions/'+exSession.sessionId,
 			method:"PUT",
 			withCredentials:true,
 			headers:{'Authorization': 'Basic ' + btoa("token" + ":"+ AuthenticationService.getToken())},
