@@ -3,6 +3,7 @@ chipsterWeb.controller('SessionCtrl',
 
 
 	//SessionRestangular is a restangular object with configured baseUrl and authorization header
+
 	$scope.sessionUrl=SessionRestangular.one($routeParams.sessionId);
  
   //creating a session object
@@ -14,7 +15,7 @@ chipsterWeb.controller('SessionCtrl',
   };
   console.log($scope.session);
 
-	$scope.d3Data={};
+	$scope.d3Data={nodes:[],links:[]};
 
 
 
@@ -49,25 +50,46 @@ chipsterWeb.controller('SessionCtrl',
 			
 		}, function(error){
 			console.log(error);
-		});
+		})
 
 
 		//getDataset list for this session
 		$scope.sessionUrl.all('datasets').getList()
 			.then(function(res){
-				console.log(res.plain());
-				$scope.d3Data=res.plain();
-				 angular.forEach($scope.d3Data,function(elem,index){
+			  var node=res.plain();
+				 angular.forEach(node,function(elem,index){
               			elem.group=1;
               			elem.c_id=0;
               			elem.level=index;
               			elem.x=index*150+50;
                     elem.y=index*100+50;
-
             });
+
+        var link=
+         [{
+              source:0,
+              target:2,
+              value: 4
+
+            },
+
+            {
+            source:1,
+              target:3,
+              value: 4
+            }
+
+
+         ];
+
+         $scope.d3Data={nodes:node,links:link};
+         console.log($scope.d3Data);
+        
+
+
+
 		});
 		
-	
 	}
 
 
@@ -84,7 +106,7 @@ chipsterWeb.controller('SessionCtrl',
 
 	$scope.getDataSets=function(){
 		$scope.datalist=$scope.sessionUrl.all('datasets').getList().$object;
-		console.log(scope.datalist.object)
+		console.log(scope.datalist.object);
 		 
 
 	}
@@ -97,7 +119,6 @@ chipsterWeb.controller('SessionCtrl',
 
 		var datasetUrl=SessionRestangular.all($scope.session.sessionId).one('datasets');
 		datasetUrl.customPOST(newDataset);
-
 
 	}
 });
@@ -155,7 +176,7 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
              var text = svg.append("g")
                       .attr("class", "labels")
                       .selectAll("text")
-                      .data(graphData.nodes)
+                      .data(scope.data.nodes)
                       .enter().append("text")
                       .attr("dx", 15)
                       .attr("dy", ".20em")
@@ -195,17 +216,17 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
 
 
             var link=svg.selectAll("link")
-                      .data(graphData.links)
+                      .data(scope.data.links)
                       .enter().append("line")
                       .attr("class","link")
                       .attr("x1",function(l){
-                         var sourceNode=graphData.nodes.filter(function(d,i)
+                         var sourceNode=scope.data.nodes.filter(function(d,i)
                          { return i==l.source})[0];
                          d3.select(this).attr("y1",sourceNode.y);
                          return sourceNode.x;
                         })
                       .attr("x2",function(l){
-                        var targetNode=graphData.nodes.filter(function(d,i)
+                        var targetNode=scope.data.nodes.filter(function(d,i)
                           {return i==l.target})[0];
                         d3.select(this).attr("y2",targetNode.y);
                         return (targetNode.x)
@@ -218,7 +239,7 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
 
 
             var node=svg.selectAll("node")
-                        .data(graphData.nodes)
+                        .data(scope.data.nodes)
                         .enter()
                         .append("circle")
                         .attr("class","node")
@@ -245,41 +266,8 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
 
         scope.$watch('data',function(data){
         if(data){
-        	graphData={};
-        	
-            graphData.nodes=scope.data;
-            console.log(graphData.nodes[0]);
-            //graphData.links=[];
-
-            
-            graphData.links=[{
-              source:0,
-              target:2,
-              value: 4
-
-            },
-
-            {
-            source:1,
-              target:3,
-              value: 4
-            }
-
-
-            ];
-            console.log(graphData.links);
-
-            /*addng x y positions for the data
-            angular.forEach(graphData.nodes,function(elem,index){
-              var add_x=(index%2)==0?10:-10;
-
-              elem.x=elem.c_id*80+add_x+80;
-              elem.y=elem.level*40+elem.group*20;
-            });
-            */
-
-            renderGraph(width,height);
-            console.log('render is called');
+          console.log(data);
+          renderGraph(width,height);
             
             }
 
