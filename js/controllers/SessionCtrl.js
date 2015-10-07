@@ -52,44 +52,59 @@ chipsterWeb.controller('SessionCtrl',
 			console.log(error);
 		})
 
+        // get datasets and jobs in parallel
+        Promise.all([$scope.sessionUrl.all('datasets').getList(), $scope.sessionUrl.all('jobs').getList()])
+                .then(function(resultArray) {
 
-		//getDataset list for this session
-		$scope.sessionUrl.all('datasets').getList()
-			.then(function(res){
-			  var node=res.plain();
-				 angular.forEach(node,function(elem,index){
-              			elem.group=1;
-              			elem.c_id=0;
-              			elem.level=index;
-              			elem.x=index*150+50;
-                    elem.y=index*100+50;
+            var datasets = resultArray[0].plain();
+            var jobs = resultArray[1].plain();
+
+            // create dicts
+            var datasetDict = {};
+            datasets.forEach(function(dataset) {
+                datasetDict[dataset.datasetId] = dataset;
             });
 
-        var link=
-         [{
-              source:0,
-              target:2,
-              value: 4
+            var jobDict = {};
+            jobs.forEach(function(job) {
+                jobDict[job.jobId] = job;
+            });
 
-            },
+            // assign indexes to datasets
+            angular.forEach(datasets, function(dataset, index) {
+                dataset.index = index;
+            });
 
-            {
-            source:1,
-              target:3,
-              value: 4
-            }
+            // create links
+            var links = [];
+            datasets.forEach(function(targetDataset) {
+                if (!targetDataset.sourceJob) {
+                    return; // continue
+                }
+                if (!(targetDataset.sourceJob in jobDict)) {
+                    console.log("source job of dataset " + dataset.name + " isn't found");
+                    return; // continue
+                }
+                var sourceJob = jobDict[targetDataset.sourceJob];
+                // iterate over the inputs of the source job
+                sourceJob.inputs.forEach(function(input) {
+                    var sourceDataset = datasetDict[input.datasetId];
+                    links.push({source: sourceDataset.index, target: targetDataset.index, value: 4});
+                    //console.log("link created: " + sourceDataset.name + " -> " + targetDataset.name);
+                });
+            });
 
+            // set groups and levels
+            angular.forEach(datasets,function(elem,index) {
+                elem.group=1;
+                elem.c_id=0;
+                elem.level=index;
+            });
 
-         ];
-
-         $scope.d3Data={nodes:node,links:link};
-         console.log($scope.d3Data);
-        
-
-
-
-		});
-		
+            // we are done
+            $scope.d3Data={nodes:datasets,links:links};
+            //console.log($scope.d3Data);
+        });
 	}
 
 
