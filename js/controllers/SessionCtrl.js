@@ -2,11 +2,12 @@ chipsterWeb.controller('SessionCtrl',
  function($http, $scope,$routeParams, TemplateService, SessionRestangular, AuthenticationService,$window,PanZoomService){
 
 
-	//SessionRestangular is a restangular object with configured baseUrl and authorization header
+	// SessionRestangular is a restangular object with configured baseUrl and
+	// authorization header
 
 	$scope.sessionUrl=SessionRestangular.one('sessions',$routeParams.sessionId);
 
-  //creating a session object
+  // creating a session object
   $scope.session={
     sessionId:$routeParams.sessionId,
     sessionName:"",
@@ -17,9 +18,7 @@ chipsterWeb.controller('SessionCtrl',
 
   $scope.d3Data={nodes:[],links:[]};
 
-
-
-	// The panzoom config model can be used to override default configuration values
+// The panzoom config model can be used to override default configuration values
   $scope.panzoomConfig = {
     zoomLevels: 12,
     neutralZoomLevel: 5,
@@ -27,38 +26,27 @@ chipsterWeb.controller('SessionCtrl',
 
   };
 
-   // The panzoom model should initialle be empty; it is initialized by the <panzoom>
-   // directive. It can be used to read the current state of pan and zoom. Also, it will
-   // contain methods for manipulating this state.
-    $scope.panzoomModel = {};
-
-
-	
-
-	$scope.getJobs=function(){
-		
-		$scope.sessionUrl.getList('jobs');
-
-	}
+  
+  $scope.panzoomModel = {};
 
 	$scope.getSessionDetail=function(){
 
-		//get session detail
+		// get session detail
 		$scope.sessionUrl.get().then(function(result){
-			$scope.session.sessionName=result.name;
-			$scope.session.sessionDetail=result.notes;
+			$scope.session.sessionName=result.data.name;
+			$scope.session.sessionDetail=result.data.notes;
 			
 		}, function(error){
 			console.log(error);
-		})
+		});
 
         // get datasets and jobs in parallel
         Promise.all([$scope.sessionUrl.all('datasets').getList(), $scope.sessionUrl.all('jobs').getList()])
                 .then(function(resultArray) {
 
-            var datasets = resultArray[0].plain();
-            var jobs = resultArray[1].plain();
-
+            var datasets = resultArray[0].data;
+            var jobs = resultArray[1].data;
+        
             // create dicts
             var datasetDict = {};
             datasets.forEach(function(dataset) {
@@ -82,7 +70,7 @@ chipsterWeb.controller('SessionCtrl',
                     return; // continue
                 }
                 if (!(targetDataset.sourceJob in jobDict)) {
-                    console.log("source job of dataset " + dataset.name + " isn't found");
+                    console.log("source job of dataset " + targetDataset.name + " isn't found");
                     return; // continue
                 }
                 var sourceJob = jobDict[targetDataset.sourceJob];
@@ -90,7 +78,8 @@ chipsterWeb.controller('SessionCtrl',
                 sourceJob.inputs.forEach(function(input) {
                     var sourceDataset = datasetDict[input.datasetId];
                     links.push({source: sourceDataset.index, target: targetDataset.index, value: 4});
-                    //console.log("link created: " + sourceDataset.name + " -> " + targetDataset.name);
+                    // console.log("link created: " + sourceDataset.name + " ->
+					// " + targetDataset.name);
                 });
             });
 
@@ -102,9 +91,10 @@ chipsterWeb.controller('SessionCtrl',
             });
             // we are done
             $scope.d3Data={nodes:datasets,links:links};
-            //console.log($scope.d3Data);
-        });
-	}
+            // console.log($scope.d3Data);
+    
+	});// End of promise function
+}
 
  $scope.editSession=function(){
   var sessionObj=TemplateService.getSessionTemplate();
@@ -114,17 +104,11 @@ chipsterWeb.controller('SessionCtrl',
   sessionObj.notes=$scope.session.sessionDetail;
 
   $scope.sessionUrl.customPUT(sessionObj);
-            // we are done
-            $scope.d3Data={nodes:datasets,links:links};
-            //console.log($scope.d3Data);
-        });
-	}
-
+            
 }
 
 $scope.getDataSets=function(){
   $scope.datalist=$scope.sessionUrl.all('datasets').getList().$object;		 
-
 }
 
 
@@ -137,9 +121,13 @@ $scope.addDataset=function(){
   datasetUrl.customPOST(newDataset);
 
 }
+
+
+$scope.getJobs=function(){
+  $scope.sessionUrl.getList('jobs');
+}
+
 });
-
-
 
 chipsterWeb.directive('ngsGraphLayout',function($window) {
       return {
@@ -169,7 +157,7 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
           .attr('width',width)
           .attr('height',height);              
 
-           //appending arrow for the links
+           // appending arrow for the links
 
            svg.append("defs").selectAll("marker")
            .data(["suit","licensing","resolved"])
@@ -266,11 +254,11 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
           text.attr("transform", transform);
         }
 
-        //Making the SVG Responsive
+        // Making the SVG Responsive
 
         $window.onresize=function(){
           scope.$apply(function(){
-            //Need to put some interval here
+            // Need to put some interval here
             renderGraph(window.innerWidth/2-30,height);
           });
         }
@@ -282,7 +270,7 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
 
         });
 
-  }//end of link function
+  }// end of link function
 
 }
 

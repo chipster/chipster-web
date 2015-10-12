@@ -1,254 +1,334 @@
-chipsterWeb.directive('workflowGraphLayout', function($window){
-	return {
-		restrict: 'EA',
-		scope: {
-			data: "=",
-			onClick: "&"
-		},
-		link: function(scope, iElement, iAttrs) {
+chipsterWeb
+		.directive(
+				'workflowGraphLayout',
+				function($window) {
+					return {
+						restrict : 'EA',
+						scope : {
+							data : "=",
+							onClick : "&"
+						},
+						link : function(scope, iElement, iAttrs) {
 
-        // Calculate total nodes, max label length
-        var d3=$window.d3;
+							// Calculate total nodes, max label length
+							var d3 = $window.d3;
+							var c20 = d3.scale.category20();
+							var width = window.innerWidth / 2 - 30, height = 800, shiftKey, ctrlKey;
+							/*
+							 * $window.onresize=function(){
+							 * scope.$apply(function(){ //Need to put some
+							 * interval here
+							 * 
+							 * renderGraph(window.innerWidth/2-30,height); }); }
+							 */
 
-        var c20 = d3.scale.category20();
+							scope.$watch('data', function(data) {
+								if (data) {
+									renderGraph(width, height);
+								}
 
-        var width=window.innerWidth/2-30,
-        height=800,
-        shiftKey,ctrlKey;
+							});
 
-        $window.onresize=function(){
-        	scope.$apply(function(){
-            //Need to put some interval here
+							function renderGraph(width,height) {
 
-            renderGraph(window.innerWidth/2-30,height);
-        });
-        }
+								var graph = {};
 
-        scope.$watch('data',function(data){
-        	if(data){
-        		renderGraph(width,height);
-        	}
+								var xScale = d3.scale.linear().domain(
+										[ 0, width ]).range([ 0, width ]);
+								var yScale = d3.scale.linear().domain(
+										[ 0, height ]).range([ 0, height ]);
+								
+								d3.select('svg').remove();
 
-        });
+								var svg = d3.select(iElement[0]).attr(
+										"tabindex", 1).on("keydown.brush",
+										keydown).on("keyup.brush", keyup).each(
+										function() {
+											this.focus();
+										}).append("svg").attr("width", width)
+										.attr("height", height);
 
+								var zoomer = d3.behavior.zoom().scaleExtent(
+										[ 0.1, 10 ]).x(xScale).y(yScale).on(
+										"zoomstart", zoomstart).on("zoom",
+										redraw);
 
-        function renderGraph(width,height){
-        	graphdata={};
-        	graphdata=scope.data;
+								function zoomstart() {
+									node.each(function(d) {
+										d.selected = false;
+										d.previouslySelected = false;
+									});
+									node.classed("selected", false);
+								}
 
-        	var margin = {top: 10, right: 10, bottom: 10, left: 30};     
+								function redraw() {
+									vis.attr("transform", "translate("
+											+ d3.event.translate + ")"
+											+ "scale(" + d3.event.scale + ")");
+								}
 
-        	d3.select('svg').remove();
+								var brusher = d3.svg
+										.brush()
+										.x(xScale)
+										.y(yScale)
+										.on(
+												"brushstart",
+												function(d) {
+													node
+															.each(function(d) {
+																d.previouslySelected = shiftKey
+																		&& d.selected;
 
-        	var xScale=d3.scale.linear().domain([0,width]).range([0,width]);
-        	var yScale=d3.scale.linear().domain([0,height]).range([0,height]);
+															});
+												})
+										.on(
+												"brush",
+												function() {
+													var extent = d3.event.target
+															.extent();
+													node
+															.classed(
+																	"selected",
+																	function(d) {
+																		return d.selected = d.previouslySelected
+																				^ (extent[0][0] <= d.x
+																						&& d.x < extent[1][0]
+																						&& extent[0][1] <= d.y && d.y < extent[1][1]);
+																	});
+												}).on(
+												"brushend",
+												function() {
+													d3.event.target.clear();
+													d3.select(this).call(
+															d3.event.target);
+												});
 
-        	var svg=d3.select(iElement[0])
-        	.attr("tabindex",1)
-        	.on("keydown.brush",keydown)
-        	.on("keyup.brush",keyup)
-        	.each(function(){this.focus();})
-        	.append('svg')
-        	.attr('width',width)
-        	.attr('height',height);              
+								var svg_graph = svg.append('svg:g')
+										.call(zoomer)
 
-          
-           var zoomer=d3.behavior.zoom()
-           .scaleExtent([0.1,10])
-           .x(xScale)
-           .y(yScale)
-           .on("zoomstart",zoomstart)
-           .on("zoom",redraw);
+								var rect = svg_graph.append('svg:rect').attr(
+										'width', width).attr('height', height)
+										.attr('fill', 'transparent').attr(
+												'stroke', 'transparent').attr(
+												'stroke-width', 1).attr("id",
+												"zrect") // gave html id
 
-           function zoomstart(){
-           	node.each(function(d){
-           		d.selcted=false;
-           		d.previouslySelected=false;
-           	});
-           	node.classed("selected",false);
-           } //End of zoomstart
+								var brush = svg_graph.append("g").datum(
+										function() {
+											return {
+												selected : false,
+												previouslySelected : false
+											};
+										}).attr("class", "brush");
 
-           function redraw(){
-           	vis.attr("transform",
-           		"translate("+d3.event.translate+")"+"scale("+d3.event.scale+")");
-           }//end of redraw
+								var vis = svg_graph.append("svg:g");
 
-           var brusher=d3.svg.brush()
-           .x(xScale)
-           .y(yScale)
-           .on("brushstart",function(d){
-           	node.each(function(d){
-           		d.previouslySelected=shiftKey && d.selected;
+								vis.attr('fill','red').attr('stroke', 'black')
+										.attr('stroke-width', 1).attr(
+												'opacity', 0.5).attr('id',
+												'vis')
 
-           	});
-           })
-           .on("brush",function(){
-           	var extent=d3.event.target.extent();
-           	node.classed("selected",function(d){
-           		return d.selected=d.previouslySelected ^(extent[0][0]<=d.x && d.x<extent[1][0]
-           			&& extent[0][1]<=d.y&&d.y<extent[1][1]);
-           	});
-           })
-           .on("brushend",function(){
-           	d3.event.target.clear();
-           	d3.select(this).call(d3.event.target);
-           });
+								brush.call(brusher).on("mousedown.brush", null)
+										.on("touchstart.brush", null).on(
+												"touchmove.brush", null).on(
+												"touchend.brush", null);
 
-           var svg_graph=svg.append('svg:g')
-           .call(zoomer);
+								brush.select('.background').style('cursor',
+										'auto');
+								
+								//Defining dataset
+								graph = scope.data;
+								//defining links
+								var link = vis.append("g")
+										.attr("class", "link")
+										.selectAll("line");
+								//defining nodes
+								var node = vis.append("g")
+										.attr("class", "node").selectAll(
+												"rect");
+								//defining labels 
+								var label=vis.append("g")
+								  .selectAll("text")
+								  .data(graph.nodes)
+								  .enter()
+								  .append("text")
+								  .text(function(d){
+									  return d.name;
+								  })
+								  .attr("x",function(d,i){
+									  return d.x+10;
+								  })
+								  .attr("y",function(d,i){
+									  return d.y+5;
+								  })
+								  .attr("font-size", "6px")
+								  .attr("fill","black")
+								  .attr("text-anchor", "middle");
+								  	  
+								
+								function nudge(dx, dy) {
+									node.filter(function(d) {
+										return d.selected;
+									}).attr("x", function(d) {
+										return d.x += dx;
+									}).attr("y", function(d) {
+										return d.y += dy;
+									})
+									
+									link.filter(function(d) {
+										return d.source.selected;
+									}).attr("x1", function(d) {
+										return d.source.x;
+									}).attr("y1", function(d) {
+										return d.source.y;
+									});
 
-           var rect=svg_graph.append('svg:rect')
-           .attr('width',width)
-           .attr('height',height)
-           .attr('fill','transparent')
-           .attr('stroke','transparent')
-           .attr('stroke-width',1)
-		 	.attr("id","zrect") //gave html id
+									link.filter(function(d) {
+										return d.target.selected;
+									}).attr("x2", function(d) {
+										return d.target.x;
+									}).attr("y2", function(d) {
+										return d.target.y;
+									});
+								
+								
+									if(d3.event.preventDefault)
+										d3.event.preventDefault();
+									else{
+										
+									}
+								}
 
-						  var brush=svg_graph.append("g")
-						  .datum(function(){ return{selected:false,previouslySelected:false}; })
-						  .attr("class","brush");
+								graph.links.forEach(function(d) {
+									d.source = graph.nodes[d.source];
+									d.target = graph.nodes[d.target];
+								});
 
-						  var vis=svg_graph.append("svg:g");
+								link = link.data(graph.links).enter().append(
+										"line").attr("x1", function(d) {
+									return d.source.x+10;
+								}).attr("y1", function(d) {
+									return d.source.y;
+								}).attr("x2", function(d) {
+									return d.target.x+10;
+								}).attr("y2", function(d) {
+									return d.target.y;
+								});
 
-						  vis.attr('fill','red')
-						  .attr('stroke','black')
-						  .attr('stroke-width',1)
-						  .attr('opacity',0.5)
-						  .attr('id','vis');
+								node = node
+										.data(graph.nodes)
+										.enter()
+										.append("rect")
+										.attr("x", function(d) {
+											return d.x-5;
+										})
+										.attr("y", function(d) {
+											return d.y-5;
+										})
+										.attr("width",30)
+										.attr("height",20)
+										.attr("fill",function(d,i){return c20(i)})
+										.on("dblclick", function(d) {
+											d3.event.stopPropagation();
+										})
+										.on(
+												"click",
+												function(d) {
+													if (d3.event.defaultPrevented)
+														return;
+													svg.style("cursor","pointer");
 
+													if (!shiftKey) {
+														// if the isnt down,
+														// unselect everything
+														node
+																.classed(
+																		"selected",
+																		function(
+																				p) {
+																			return p.selected = p.previouslySelected = false;
+																		})
 
-						  brush.call(brusher)
-						  .on("mousedown.brush",null)
-						  .on("touchstart.brush",null)
-						  .on("touchmove.brush",null)
-						  .on("touchend.brush",null);
+													}
 
-						  brush.select('.background').style('cursor','auto');
+													//always select this node
+													d3
+															.select(this)
+															.classed(
+																	"selected",
+																	d.selected = !d.previouslySelected);
+												})
+										.on(
+												"mouseup",
+												function(d) {
+													//do something
+													if (d.selected && shiftKey)
+														d3
+																.select(this)
+																.classed(
+																		"selected",
+																		d.selected = false);
+												})
+										.call(
+												d3.behavior
+														.drag()
+														.on(
+																"drag",
+																function(d) {
+																	nudge(
+																			d3.event.dx,
+																			d3.event.dy);
+																}));
+								
+																
 
+								function keydown() {
+									shiftKey = d3.event.shiftKey
+											|| d3.event.metaKey;
+									ctrlKey = d3.event.ctrlKey;
 
-						  var link=vis.append("g")
-						  .attr("class","link")
-						  .selectAll("line");
+									console.log('d3.event', d3.event)
 
-						  var node=vis.append("g")
-						  .attr("class","node")
-						  .selectAll("circle");
+									if (d3.event.keyCode == 67) {
+										//the c key
+									}
 
-					function nudge(dx,dy){
-						  	node.filter(function(d){return d.selected;})
-						  	.attr("cx",function(d){ return d.x += dx; })
-						  	.attr("cy",function(d){ return d.y += dy; })
+									if (shiftKey) {
+										svg_graph.call(zoomer).on(
+												"mousedown.zoom", null).on(
+												"touchstart.zoom", null).on(
+												"touchmove.zoom", null).on(
+												"touchend.zoom", null);
 
-						  	link.filter(function(d){
-						  		return d.source.selected;
-						  	})
-						  	.attr("x1", function(d){ return d.source.x;})
-						  	.attr("y1", function(d){ return d.source.y;});
+										vis.selectAll('g.gnode').on(
+												'mousedown.drag', null);
 
-						  	link.filter(function(d){ 
-						  		return d.target.selected;
-						  	})
-						  	.attr("x2", function(d){ return d.target.x;})
-						  	.attr("y2", function(d){ return d.target.y;});
+										brush.select('.background').style(
+												'cursor', 'crosshair')
+										brush.call(brusher);
 
+									}
+								}
 
+								function keyup() {
+									shiftKey = d3.event.shiftKey
+											|| d3.event.metaKey;
+									ctrlKey = d3.event.ctrlKey;
 
-						  	console.log("drag not working");
+									brush.call(brusher).on("mousedown.brush",
+											null).on("touchstart.brush", null)
+											.on("touchmove.brush", null).on(
+													"touchend.brush", null);
 
-			//d3.event.preventDefault();
+									brush.select('.background').style('cursor',
+											'auto')
+									svg_graph.call(zoomer);
+								}
 
-		}
-		
-		graphdata.links.forEach(function(d){
-			d.source=graphdata.nodes[d.source];
-			d.target=graphdata.nodes[d.target];
-			
-		});
+							}//end of renderGraph
 
+						}//end of link function
 
-		link=link.data(graphdata.links).enter().append("line")
-		.attr("x1",function(d){ return d.source.x;})
-		.attr("y1",function(d){ return d.source.y;})
-		.attr("x2",function(d){ return d.target.x;})
-		.attr("y2",function(d){ return d.target.y;});
+					}//end of return
 
-
-		node=node.data(graphdata.nodes).enter().append("circle")
-		.attr("r",10)
-		.attr("cx",function(d){ return d.x; })
-		.attr("cy",function(d){ return d.y; })
-		.attr("fill",function(d,i){return c20(d)})
-		.on("dblclick",function(d){ d3.event.stopPropagation(); })
-		.on("click",function(d){
-			if(d3.event.defaultPrevented) return;
-
-			if(!shiftKey){
-				 		//if the isnt down, unselect everything
-				node.classed("selected",function(p) { return p.selected=p.previouslySelected=false; })
-
-				 	}
-
-				 	//always select this node
-				 	d3.select(this).classed("selected", d.selected=!d.previouslySelected);
-				 })
-		.on("mouseup",function(d){
-				 	//do something
-				 	if (d.selected && shiftKey) d3.select(this).classed("selected", d.selected = false);
-				 })
-		.call(d3.behavior.drag()
-			.on("drag", function(d){ nudge(d3.event.dx,d3.event.dy);}));
-
-
-}
-
-function keydown(){
-			shiftKey=d3.event.shiftKey||d3.event.metaKey;
-			ctrlKey=d3.event.ctrlKey;
-
-			//console.log('d3.event',d3.event)
-
-			if(d3.event.keyCode == 67){
-				//the c key
-			}
-
-			if(shiftKey){
-				svg_graph.call(zoomer)
-				.on("mousedown.zoom",null)
-				.on("touchstart.zoom",null)
-				.on("touchmove.zoom",null)
-				.on("touchend.zoom",null);
-
-				vis.selectAll('g.gnode')
-				.on('mousedown.drag',null);
-
-				brush.select('.background').style('cursor','crosshair')
-				brush.call(brusher);
-
-
-			}
-		}
-
-		function keyup(){
-			shiftKey=d3.event.shiftKey||d3.event.metaKey;
-			ctrlKey=d3.event.ctrlKey;
-
-			brush.call(brusher)
-			.on("mousedown.brush",null)
-			.on("touchstart.brush",null)
-			.on("touchmove.brush",null)
-			.on("touchend.brush",null);
-
-			brush.select('.background').style('cursor','auto')
-			svg_graph.call(zoomer);
-		}
-
-	
-}//end of render graph
-
-
-
-  }//end of link function
-
-
-});
+				});
