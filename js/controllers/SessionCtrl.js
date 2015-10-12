@@ -30,18 +30,28 @@ chipsterWeb.controller('SessionCtrl',
    // The panzoom model should initialle be empty; it is initialized by the <panzoom>
    // directive. It can be used to read the current state of pan and zoom. Also, it will
    // contain methods for manipulating this state.
-   $scope.panzoomModel = {};
+    $scope.panzoomModel = {};
 
 
+	
 
+	$scope.getJobs=function(){
+		
+		$scope.sessionUrl.getList('jobs');
 
-   $scope.getJobs=function(){
+	}
 
-    $scope.sessionUrl.getList('jobs');
+	$scope.getSessionDetail=function(){
 
-  }
+		//get session detail
+		$scope.sessionUrl.get().then(function(result){
+			$scope.session.sessionName=result.name;
+			$scope.session.sessionDetail=result.notes;
+			
+		}, function(error){
+			console.log(error);
+		})
 
-  $scope.getSessionDetail=function(){
         // get datasets and jobs in parallel
         Promise.all([$scope.sessionUrl.all('datasets').getList(), $scope.sessionUrl.all('jobs').getList()])
                 .then(function(resultArray) {
@@ -49,58 +59,21 @@ chipsterWeb.controller('SessionCtrl',
             var datasets = resultArray[0].plain();
             var jobs = resultArray[1].plain();
 
-		//get session detail
-		$scope.sessionUrl.get()
-    .then(function(res){
-      $scope.session.sessionName=res.data.name;
-      $scope.session.sessionDetail=res.data.notes;
             // create dicts
             var datasetDict = {};
             datasets.forEach(function(dataset) {
                 datasetDict[dataset.datasetId] = dataset;
             });
 
-    }, function(error){
-     console.log(error);
-   });
             var jobDict = {};
             jobs.forEach(function(job) {
                 jobDict[job.jobId] = job;
             });
 
-        // get datasets and jobs in parallel
-        Promise.all([$scope.sessionUrl.all('datasets').getList(), $scope.sessionUrl.all('jobs').getList()])
-                .then(function(resultArray) {
             // assign indexes to datasets
             angular.forEach(datasets, function(dataset, index) {
                 dataset.index = index;
             });
-
-       
-            var datasets = resultArray[0].plain();
-            var jobs = resultArray[1].plain();
-            // create dicts
-            var datasetDict = {};
-            datasets.forEach(function(dataset) {
-                datasetDict[dataset.datasetId] = dataset;
-            });
-            // set groups and levels
-            angular.forEach(datasets,function(elem,index) {
-                elem.group=1;
-                elem.c_id=0;
-                elem.level=index;
-            });
-
-            var jobDict = {};
-            jobs.forEach(function(job) {
-                jobDict[job.jobId] = job;
-            });
-
-           // assign indexes to datasets
-            angular.forEach(datasets, function(dataset, index) {
-                dataset.index = index;
-            });
-
 
             // create links
             var links = [];
@@ -121,24 +94,17 @@ chipsterWeb.controller('SessionCtrl',
                 });
             });
 
-  });
             // set groups and levels
             angular.forEach(datasets,function(elem,index) {
                 elem.group=1;
                 elem.c_id=0;
                 elem.level=index;
             });
-           // we are done
-            $scope.d3Data={nodes:datasets,links:links};
-            //console.log($scope.d3Data);
-        });
             // we are done
             $scope.d3Data={nodes:datasets,links:links};
             //console.log($scope.d3Data);
         });
 	}
- 
-
 
  $scope.editSession=function(){
   var sessionObj=TemplateService.getSessionTemplate();
