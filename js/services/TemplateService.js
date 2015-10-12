@@ -6,7 +6,7 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 			s.sessionId=null;
 			s.name="Example session";
 			s.owner="me";
-			s.notes="Example session created by chipster web clinet";
+			s.notes="Test session created by chipster angular web client";
 			s.created = "2015-08-27T17:53:10.331Z";
         	s.accessed = "2015-08-27T17:53:10.331Z";
 

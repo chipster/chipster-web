@@ -20,6 +20,15 @@ chipsterWeb.factory('AuthenticationService',['localStorageService', function(loc
 
 		getToken:function(){
 			return localStorageService.get('auth-token');
+		},
+
+		setSessionUrl:function(val){
+			console.log(val);
+			localStorageService.set('session-url', val);
+		},
+
+		getSessionUrl:function(){
+			return localStorageService.get('session-url');
 		}
 
 		

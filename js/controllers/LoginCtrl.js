@@ -4,28 +4,29 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
   $scope.authUrl="";
   $scope.serviceUrl="";
 
-  $scope.connect=function(){
+
+  $scope.login=function(){
+
     $http.get('http://vm0179.kaj.pouta.csc.fi:8082/servicelocator/services')
       .then(function(res){
   
        angular.forEach(res.data,function(elem,index){
           if(elem.role==='session-storage'){
             $scope.serviceUrl=elem.uri;
+            AuthenticationService.setSessionUrl($scope.serviceUrl);
+            
           }
           if(elem.role==='authentication-service'){
             $scope.authUrl=elem.uri;
             console.log( $scope.authUrl);
           }
        });
-      });
 
-  };
+       //If the response ok, then request the token
 
-  $scope.login=function(){
+      var string=$scope.username + ":" +$scope.password;
 
-    var string=$scope.username + ":" +$scope.password;
-
-    var encodedString=btoa(string); //Convert it to base64 encoded string
+      var encodedString=btoa(string); //Convert it to base64 encoded string
     
 
     $http({
@@ -44,6 +45,9 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
 
 
               });
+      });
+
+    
   };
 
   

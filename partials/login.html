@@ -1,21 +1,15 @@
 <div class="col-md-6 col-md-offset-3" ng-controller="LoginCtrl">
 
-  <h3>Connect to Service Locator</h2>
-  <button class="btn btn-primary" ng-click="connect()">Connect</button>
-
   <h3>Already a Chipster User?</h2>
   <form name="form" ng-submit="login()" role="form">
     <div class="form-group">
       <label for="username">Username</label>
       <input type="text" name="username" value="client" id="username" class="form-control" ng-model="username" required/>
     </div>
-<hr/>
     <div class="form-group">
       <label for="password">Password</label>
       <input type="password" name="password" value="clientPassword" id="password" class="form-control" ng-model="password" required/>
     </div>
-    <hr/>
-
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Login</button>
        <a href="#/create-account" class="btn btn-link">Create Account</a>

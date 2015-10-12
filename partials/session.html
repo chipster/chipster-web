@@ -17,7 +17,7 @@
                         </button>
                     </span>
                 </p>
-                <hr/>
+                <hr class="soften">
                 <!--session editing modal-->
                 <div id="session-edit-modal" class="modal fade" role="dialog">
                     <div class="modal-dialog">
@@ -36,7 +36,7 @@
                                     <label>Session Description</label>
                                     <input type="text" class="form-control" ng-model="session.sessionDetail" placeholder="Enter description">
                                 </div>
-                                <hr/>
+                              
                                 <button type="submit" class="btn btn-info" data-dismiss="modal">Save</button>
                                 <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>
                             </form>
@@ -47,10 +47,8 @@
 
             </div>  
             <!--end of modal dialog-->
-
-
-
-            <div class="dataset-list" ng-repeat="data in d3Data">
+            </hr>
+            <div class="dataset-list" ng-repeat="data in d3Data.nodes">
               <h5>{{data.name}}</h5>
               <p>{{data.datasetId}}</p>
           </div><!--end of dataset List-->
@@ -152,11 +150,11 @@
                 <h3 class="panel-title">Workflow</h3>
             </div><!--end of panel heading-->
             <div class="panel-body">
-                <panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1">
+                <!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1">
                 </panzoomwidget>
-                <panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px">
-                    <ngs-graph-layout data="d3Data"/>
-                </panzoom-->
+                <panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
+                    <workflow-graph-layout data="d3Data"/>
+                <!--/panzoom-->
             </div><!--end of panel body-->               
         </div>
     </div>
