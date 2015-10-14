@@ -118,7 +118,7 @@
 
                 </div>
                 <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: !collapsed}">
-                    <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
+                    <li ng-repeat="node in node.nodes" ng-click="selectedTool(node)" ui-tree-node ng-include="'nodes_renderer.html'">
                     </li>
                 </ol>
             </script><!--end of script-->
@@ -132,7 +132,7 @@
 
     </div><!--end of tabset div-->
     <div id="runButton">
-        <button type="button" class="btn btn-sm btn-success btn-block">Run</button>
+        <button type="button" class="btn btn-sm btn-success btn-block" ng-click="runJob()">Run</button>
     </div>
 </div><!--end of tab content-->
 </div><!--end of graph and tool row-->
@@ -150,9 +150,9 @@
                 <h3 class="panel-title">Workflow</h3>
             </div><!--end of panel heading-->
             <div class="panel-body">
-                <!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1">
-                </panzoomwidget>
-                <panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
+                <!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1"-->
+                <!--  /panzoomwidget-->
+                <!--panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
                     <workflow-graph-layout data="d3Data"/>
                 <!--/panzoom-->
             </div><!--end of panel body-->               

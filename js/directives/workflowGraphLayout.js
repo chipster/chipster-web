@@ -4,11 +4,13 @@ chipsterWeb
 				function($window) {
 					return {
 						restrict : 'EA',
+						require:"^ngController",
 						scope : {
 							data : "=",
+							selectedDataset:"=",
 							onClick : "&"
 						},
-						link : function(scope, iElement, iAttrs) {
+						link : function(scope, iElement, iAttrs, parentController) {
 
 							// Calculate total nodes, max label length
 							var d3 = $window.d3;
@@ -34,7 +36,7 @@ chipsterWeb
 								var graph = {};
 
 								var xScale = d3.scale.linear().domain(
-										[ 0, width ]).range([ 0, width ]);
+										[ 0, width ]).range([0, width ]);
 								var yScale = d3.scale.linear().domain(
 										[ 0, height ]).range([ 0, height ]);
 								
@@ -125,7 +127,7 @@ chipsterWeb
 
 								vis.attr('fill','red').attr('stroke', 'black')
 										.attr('stroke-width', 1).attr(
-												'opacity', 0.5).attr('id',
+												'opacity', 1.0).attr('id',
 												'vis')
 
 								brush.call(brusher).on("mousedown.brush", null)
@@ -161,13 +163,58 @@ chipsterWeb
 								  .attr("y",function(d,i){
 									  return d.y+5;
 								  })
-								  .attr("font-size", "6px")
+								  .attr("font-size", "8px")
 								  .attr("fill","black")
-								  .attr("text-anchor", "middle");
+								  .attr("text-anchor", "middle")
+								  .on("click",
+											function(d) {
+												if (d3.event.defaultPrevented)
+													return;
+												svg.style("cursor","pointer");
+
+												if (!shiftKey) {
+													// if the isnt down,
+													// unselect everything
+													node.classed(
+																	"selected",
+																	function(
+																			p) {
+																		return p.selected = p.previouslySelected = false;
+																		console.log(p);
+																	})
+
+												}
+
+												//always select this node
+												d3.select(this)
+														.classed(
+																"selected",
+																d.selected = !d.previouslySelected);
+												console.log("label clicked");
+												
+											}).call(
+													d3.behavior
+													.drag()
+													.on(
+															"drag",
+															function(d) {
+																nudge(
+																		d3.event.dx,
+																		d3.event.dy);
+															}));;
+								
 								  	  
 								
 								function nudge(dx, dy) {
 									node.filter(function(d) {
+										return d.selected;
+									}).attr("x", function(d) {
+										return d.x += dx;
+									}).attr("y", function(d) {
+										return d.y += dy;
+									})
+									
+									label.filter(function(d) {
 										return d.selected;
 									}).attr("x", function(d) {
 										return d.x += dx;
@@ -190,13 +237,10 @@ chipsterWeb
 									}).attr("y2", function(d) {
 										return d.target.y;
 									});
-								
-								
+									
 									if(d3.event.preventDefault)
 										d3.event.preventDefault();
-									else{
-										
-									}
+	
 								}
 
 								graph.links.forEach(function(d) {
@@ -225,8 +269,8 @@ chipsterWeb
 										.attr("y", function(d) {
 											return d.y-5;
 										})
-										.attr("width",30)
-										.attr("height",20)
+										.attr("width",40)
+										.attr("height",30)
 										.attr("fill",function(d,i){return c20(i)})
 										.on("dblclick", function(d) {
 											d3.event.stopPropagation();
@@ -241,8 +285,7 @@ chipsterWeb
 													if (!shiftKey) {
 														// if the isnt down,
 														// unselect everything
-														node
-																.classed(
+														node.classed(
 																		"selected",
 																		function(
 																				p) {
@@ -257,6 +300,9 @@ chipsterWeb
 															.classed(
 																	"selected",
 																	d.selected = !d.previouslySelected);
+													console.log("node clicked");
+													parentController.setDatasetId(d.datasetId);
+													
 												})
 										.on(
 												"mouseup",

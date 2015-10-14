@@ -1,11 +1,10 @@
 chipsterWeb.controller('SessionCtrl',
  function($http, $scope,$routeParams, TemplateService, SessionRestangular, AuthenticationService,$window,PanZoomService){
 
+//SessionRestangular is a restangular object with configured baseUrl and
+// authorization header
 
-	// SessionRestangular is a restangular object with configured baseUrl and
-	// authorization header
-
-	$scope.sessionUrl=SessionRestangular.one('sessions',$routeParams.sessionId);
+  $scope.sessionUrl=SessionRestangular.one('sessions',$routeParams.sessionId);
 
   // creating a session object
   $scope.session={
@@ -14,22 +13,14 @@ chipsterWeb.controller('SessionCtrl',
     sessionDetail:"",
     workflowData:{}
   };
-
-
+  
+  //Dataset and tool for posting jobs
+  $scope.selectedDatasetId="";
+  $scope.selectedToolId="";
+  
   $scope.d3Data={nodes:[],links:[]};
 
-// The panzoom config model can be used to override default configuration values
-  $scope.panzoomConfig = {
-    zoomLevels: 12,
-    neutralZoomLevel: 5,
-    scalePerZoomLevel: 1.5
-
-  };
-
-  
-  $scope.panzoomModel = {};
-
-	$scope.getSessionDetail=function(){
+  $scope.getSessionDetail=function(){
 
 		// get session detail
 		$scope.sessionUrl.get().then(function(result){
@@ -70,7 +61,7 @@ chipsterWeb.controller('SessionCtrl',
                     return; // continue
                 }
                 if (!(targetDataset.sourceJob in jobDict)) {
-                    console.log("source job of dataset " + targetDataset.name + " isn't found");
+                    //console.log("source job of dataset " + targetDataset.name + " isn't found");
                     return; // continue
                 }
                 var sourceJob = jobDict[targetDataset.sourceJob];
@@ -94,39 +85,73 @@ chipsterWeb.controller('SessionCtrl',
             // console.log($scope.d3Data);
     
 	});// End of promise function
-}
+};
 
- $scope.editSession=function(){
-  var sessionObj=TemplateService.getSessionTemplate();
+	 $scope.editSession=function(){
+	  var sessionObj=TemplateService.getSessionTemplate();
+	
+	  sessionObj.sessionId=$scope.session.sessionId;
+	  sessionObj.name=$scope.session.sessionName;
+	  sessionObj.notes=$scope.session.sessionDetail;
+	
+	  $scope.sessionUrl.customPUT(sessionObj);
+	            
+	};
 
-  sessionObj.sessionId=$scope.session.sessionId;
-  sessionObj.name=$scope.session.sessionName;
-  sessionObj.notes=$scope.session.sessionDetail;
-
-  $scope.sessionUrl.customPUT(sessionObj);
-            
-}
-
-$scope.getDataSets=function(){
-  $scope.datalist=$scope.sessionUrl.all('datasets').getList().$object;		 
-}
-
-
-$scope.addDataset=function(){
-
-  var newDataset=TemplateService.getDatasetTemplate();
-  console.log(newDataset);
-
-  var datasetUrl=$scope.sessionUrl.one('datasets');
-  datasetUrl.customPOST(newDataset);
-
-}
+	$scope.getDataSets=function(){
+	  $scope.datalist=$scope.sessionUrl.all('datasets').getList();		 
+	};
 
 
-$scope.getJobs=function(){
-  $scope.sessionUrl.getList('jobs');
-}
+	$scope.addDataset=function(){
+	
+	  var newDataset=TemplateService.getDatasetTemplate();
+	  console.log(newDataset);
+	
+	  var datasetUrl=$scope.sessionUrl.one('datasets');
+	  datasetUrl.customPOST(newDataset).then(function(response){
+		  alert("Dataset has been added");
+		  //Add this new dataset to d3Data.node,this should update the dataset list and the graph also
+	  });
+	
+	};
 
+
+	$scope.getJobs=function(){
+	  $scope.sessionUrl.getList('jobs');
+	};
+	
+	$scope.runJob=function(){
+		
+		var newJob=TemplateService.getJobTemplate();
+		//edit the fields with selected parameter
+		newJob.toolId=$scope.selectedToolId.tool;
+		newJob.toolName=$scope.selectedToolId.name;
+		
+		console.log(newJob);
+		
+		newJob.inputs[0].datasetId=$scope.selectedDataset;
+		
+		console.log(newJob);
+		
+		var postJobUrl=$scope.sessionUrl.one('jobs');
+		postJobUrl.customPOST(newJob).then(function(response){
+			alert("Job Submitted to server");
+		});
+			
+	};
+	
+	// Binding datasetId from workflow graph directive
+	this.setDatasetId=function(datasetId){
+		$scope.selectedDataset=datasetId;
+		
+		console.log(datasetId);
+	};
+	
+	$scope.selectedTool=function(tool){
+		$scope.selectedToolId=tool;
+		console.log(tool);
+	};
 });
 
 chipsterWeb.directive('ngsGraphLayout',function($window) {
@@ -182,7 +207,7 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
            .enter().append("text")
            .attr("dx", 10)
            .attr("dy", ".20em")
-           .text(function(d) { return d.name });
+           .text(function(d) { return d.name;});
 
            function transform(d){
              return "translate(" + d.x + "," + d.y + ")";
@@ -200,8 +225,8 @@ chipsterWeb.directive('ngsGraphLayout',function($window) {
 
           var drag = d3.behavior.drag()
           .on("drag", function(d,i) {
-            d.x += d3.event.dx
-            d.y += d3.event.dy
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
 
             d3.select(this).attr("cx", d.x).attr("cy",d.y);
             link.each(function(l,li){ 

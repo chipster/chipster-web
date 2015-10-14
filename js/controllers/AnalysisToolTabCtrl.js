@@ -62,7 +62,6 @@ chipsterWeb.controller('AnalysisToolTabCtrl', function($scope, $http) {
 	$scope.expandAll = function() {
 		$scope.$broadcast('expandAll');
 	};
-
 });
 
 chipsterWeb.factory('tools', function($http, $q) {

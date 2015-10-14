@@ -24,7 +24,7 @@
 
 </head><!--end of head-->
 
-<body ng-controller="mainCtrl">
+<body ng-controller="MainCtrl">
     <!--header and Navbar-->
 
     <div id="wrap">
@@ -47,7 +47,8 @@
                     <input type="text" class="form-control" placeholder="Search this site.." id="searchInput">
                 </form><!--end navbar form-->
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#login">Login</a></li>
+        <li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
+        <li><a href="#home" ng-show="isLoggedIn()" ng-click="logout()" >Logout</a></li>
         
       </ul>
     </div><!-- /.navbar-collapse -->
@@ -139,6 +140,7 @@
     <script type="text/javascript" src="js/app.js"></script>
 
     <!--Controllers-->
+    <script type="text/javascript" src="js/controllers/MainCtrl.js"></script>
     <script type="text/javascript" src="js/controllers/AnalysisToolTabCtrl.js"></script>
     <script type="text/javascript" src="js/controllers/UploadDialogCtrl.js"></script>
     <script type="text/javascript" src="js/controllers/LoginCtrl.js"></script>
