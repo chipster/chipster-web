@@ -7,7 +7,7 @@ chipsterWeb
 						require:"^ngController",
 						scope : {
 							data : "=",
-							selectedDataset:"=",
+							selectedDatasetId:"=",
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
@@ -24,11 +24,12 @@ chipsterWeb
 							 * renderGraph(window.innerWidth/2-30,height); }); }
 							 */
 
-							scope.$watch('data', function(data) {
+							scope.$watch('data',function(data) {
 								if (data) {
-									renderGraph(width, height);
+									console.log('render is called');
+										renderGraph(width, height);
+									
 								}
-
 							});
 
 							function renderGraph(width,height) {
@@ -140,6 +141,7 @@ chipsterWeb
 								
 								//Defining dataset
 								graph = scope.data;
+								
 								//defining links
 								var link = vis.append("g")
 										.attr("class", "link")
@@ -314,6 +316,7 @@ chipsterWeb
 																.classed(
 																		"selected",
 																		d.selected = false);
+													
 												})
 										.call(
 												d3.behavior

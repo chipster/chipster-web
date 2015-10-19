@@ -5,7 +5,104 @@
         <div class="row">
          <div class="col-sm-6">
 
-            <div class="panel panel-default">
+           
+<!--file info or tool info panel-->
+
+<!--starting of Workflow div-->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Workflow</h3>
+            </div><!--end of panel heading-->
+            <div class="panel-body">
+                <!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1"-->
+                <!--  /panzoomwidget-->
+                <!--panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
+                    <workflow-graph-layout data="d3Data"/>
+                <!--/panzoom-->
+            </div><!--end of panel body-->               
+        </div>
+</div><!--end of column-sm-6-->
+
+
+<div class="col-sm-6">
+    <div class="panel panel-default" ng-controller="AnalysisToolTabCtrl as tab">
+        <div class="panel-heading">
+            <h3 class="panel-title">Analysis Tools</h3>
+        </div><!--end of panel heading-->
+        <div class="panel-body">
+            <div>
+                <ul class="nav nav-pills">
+                    <li ng-class="{active:tab.isSet(1)}"> 
+                        <a href ng-click="tab.setTab(1)">Microarray</a>    
+                    </li>
+                    <li ng-class="{active:tab.isSet(2)}"> 
+                        <a href ng-click="tab.setTab(2)">NGS</a> 
+                    </li>
+                    <li ng-class="{active:tab.isSet(3)}"> 
+                        <a href ng-click="tab.setTab(3)">Misc</a> 
+                    </li>
+                </ul>       
+            </div>      
+
+            <!--the tree should come here-->
+            <div id="tabContent">
+                <script type="text/ng-template" id="nodes_renderer.html">
+                    <div ui-tree-handle class="tree-node tree-node-content">
+                        <a class="btn btn-info btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
+                            ng-click="toggle(this)">
+                            <span class="glyphicon"
+                            ng-class="{
+                            'glyphicon-chevron-right': collapsed,
+                            'glyphicon-chevron-down': !collapsed
+                        }">
+                    </span> </a>
+                    {{node.name}}
+
+                </div>
+                <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: !collapsed}">
+                    <li ng-repeat="node in node.nodes" ng-click="selectedTool(node,$index)" ng-class="{ 'selected-class-name': $index === selectedToolIndex }" ui-tree-node ng-include="'nodes_renderer.html'">
+                    </li>
+                </ol>
+            </script><!--end of script-->
+            <div ui-tree  data-drag-enabled="false" id="tree-root">
+                <ol ui-tree-nodes ng-model="data">
+                    <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'">
+                    </li><!--end of data list-->
+                </ol>
+            </div>
+        </div><!--end of angular tree directive-->
+
+    </div><!--end of tabset div-->
+    <div id="runButton">
+        <button type="button" class="btn btn-sm btn-success btn-block" ng-click="runJob()">Run</button>
+    </div>
+</div><!--end of tool panel-->
+
+<div ng-show="showToolDescription()" class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">Tool Description</h4>
+    </div>
+    <div class="panel-body">
+        <!--will be the tool description-->
+        	{{selectedToolId.tool}}
+        	 <p>{{selectedToolId.name}}</p>
+        <!--button area-->    
+        <div class="container" id="toolButtonGroup">
+            <!--Tool source-->
+            <a href="#myModal" role="button" class="btn btn-sm btn-info" data-toggle="modal">Show Tool Source Code</a>                  
+            <!--Parameter-->
+            <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn btn-sm btn-info">Show Parameter</a>  
+        </div><!--end of tool button group-->                
+    </div><!--end of panel body-->
+</div><!--end of class panel panel-default-->
+
+</div><!--end of tool column-->
+</div><!-- end of workflow and tool row -->
+
+    
+ <div class="row">
+         <div class="col-sm-6">
+ <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">{{session.sessionName}}</h4>
                 </div>
@@ -58,109 +155,8 @@
         </div>
     </div>
 </div>
-
-<!--file info or tool info panel-->
-
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h4 class="panel-title">Tool Description</h4>
-    </div>
-    <div class="panel-body">
-        <!--will be the tool description-->
-        Filters genes according to their coefficient of variation. Specify what percentage of the genes showing the lowest coefficient of variation should be filtered out. The default is 50%.
-        <!--button area-->    
-        <div class="container" id="toolButtonGroup">
-            <!--Tool source-->
-            <a href="#myModal" role="button" class="btn btn-sm btn-info" data-toggle="modal">Show Tool Source Code</a>                  
-            <!--Parameter-->
-            <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn btn-sm btn-info">Show Parameter</a>  
-        </div><!--end of tool button group-->                
-    </div><!--end of panel body-->
-</div><!--end of class panel panel-default-->
-
-
-</div><!--end of column-sm-6-->
-
-
-<div class="col-sm-6">
-    <div class="panel panel-default" ng-controller="AnalysisToolTabCtrl as tab">
-        <div class="panel-heading">
-            <h3 class="panel-title">Analysis Tools</h3>
-        </div><!--end of panel heading-->
-        <div class="panel-body">
-            <div>
-                <ul class="nav nav-pills">
-                    <li ng-class="{active:tab.isSet(1)}"> 
-                        <a href ng-click="tab.setTab(1)">Microarray</a>    
-                    </li>
-                    <li ng-class="{active:tab.isSet(2)}"> 
-                        <a href ng-click="tab.setTab(2)">NGS</a> 
-                    </li>
-                    <li ng-class="{active:tab.isSet(3)}"> 
-                        <a href ng-click="tab.setTab(3)">Misc</a> 
-                    </li>
-                </ul>       
-            </div>      
-
-            <!--the tree should come here-->
-            <div id="tabContent">
-                <script type="text/ng-template" id="nodes_renderer.html">
-                    <div ui-tree-handle class="tree-node tree-node-content">
-                        <a class="btn btn-info btn-xs" ng-if="node.nodes && node.nodes.length>0" data-nodrag
-                            ng-click="toggle(this)">
-                            <span class="glyphicon"
-                            ng-class="{
-                            'glyphicon-chevron-right': collapsed,
-                            'glyphicon-chevron-down': !collapsed
-                        }">
-                    </span> </a>
-                    {{node.name}}
-
-                </div>
-                <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: !collapsed}">
-                    <li ng-repeat="node in node.nodes" ng-click="selectedTool(node)" ui-tree-node ng-include="'nodes_renderer.html'">
-                    </li>
-                </ol>
-            </script><!--end of script-->
-            <div ui-tree  data-drag-enabled="false" id="tree-root">
-                <ol ui-tree-nodes ng-model="data">
-                    <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'">
-                    </li><!--end of data list-->
-                </ol>
-            </div>
-        </div><!--end of angular tree directive-->
-
-    </div><!--end of tabset div-->
-    <div id="runButton">
-        <button type="button" class="btn btn-sm btn-success btn-block" ng-click="runJob()">Run</button>
-    </div>
-</div><!--end of tab content-->
-</div><!--end of graph and tool row-->
 </div>
-</div><!--end of data and tool row-->
-
-
-
-
-<!--starting of Workflow div-->
-<div class="row">
-    <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Workflow</h3>
-            </div><!--end of panel heading-->
-            <div class="panel-body">
-                <!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1"-->
-                <!--  /panzoomwidget-->
-                <!--panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
-                    <workflow-graph-layout data="d3Data"/>
-                <!--/panzoom-->
-            </div><!--end of panel body-->               
-        </div>
-    </div>
-
-    
-
+	
 
     <!--Visualization Panel-->
     <div class="col-sm-6">
@@ -192,7 +188,8 @@
         </div><!--end of panel body-->         
     </div><!--end of visualization panel-->
 </div><!--end of visualization view-->
-</div><!--end of workflow and visualization tree-->
+</div><!--end of session detail and visualization tree-->
 
 </div><!--end of dataToolContainer-->
 </div>
+

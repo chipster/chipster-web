@@ -15,14 +15,16 @@ chipsterWeb.controller('SessionCtrl',
   };
   
   //Dataset and tool for posting jobs
-  $scope.selectedDatasetId="";
-  $scope.selectedToolId="";
-  
+  $scope.selectedDatasetId=[];
+  $scope.selectedToolId=null;
+  $scope.selectedToolIndex=0;
+  $scope.istoolselected=false;
+    
   $scope.d3Data={nodes:[],links:[]};
 
+  	 
   $scope.getSessionDetail=function(){
-
-		// get session detail
+		//get session detail
 		$scope.sessionUrl.get().then(function(result){
 			$scope.session.sessionName=result.data.name;
 			$scope.session.sessionDetail=result.data.notes;
@@ -34,9 +36,12 @@ chipsterWeb.controller('SessionCtrl',
         // get datasets and jobs in parallel
         Promise.all([$scope.sessionUrl.all('datasets').getList(), $scope.sessionUrl.all('jobs').getList()])
                 .then(function(resultArray) {
-
-            var datasets = resultArray[0].data;
-            var jobs = resultArray[1].data;
+                	
+           
+            var datasets = resultArray[0].data.plain();
+            console.log(datasets);
+            var jobs = resultArray[1].data.plain();
+            console.log(jobs);
         
             // create dicts
             var datasetDict = {};
@@ -69,8 +74,7 @@ chipsterWeb.controller('SessionCtrl',
                 sourceJob.inputs.forEach(function(input) {
                     var sourceDataset = datasetDict[input.datasetId];
                     links.push({source: sourceDataset.index, target: targetDataset.index, value: 4});
-                    // console.log("link created: " + sourceDataset.name + " ->
-					// " + targetDataset.name);
+                    console.log("link created: " + sourceDataset.name + "->" + targetDataset.name);
                 });
             });
 
@@ -82,7 +86,8 @@ chipsterWeb.controller('SessionCtrl',
             });
             // we are done
             $scope.d3Data={nodes:datasets,links:links};
-            // console.log($scope.d3Data);
+
+            console.log($scope.d3Data);
     
 	});// End of promise function
 };
@@ -123,17 +128,26 @@ chipsterWeb.controller('SessionCtrl',
 	
 	$scope.runJob=function(){
 		
+		if($scope.selectedDatasetId.length<1){
+			alert("No dataset selected");
+			return;	
+		}
 		var newJob=TemplateService.getJobTemplate();
+		
+		if(!$scope.selectedToolId){
+			alert("No tool selected");
+			return;		
+		}
 		//edit the fields with selected parameter
 		newJob.toolId=$scope.selectedToolId.tool;
 		newJob.toolName=$scope.selectedToolId.name;
-		
+	
+		angular.forEach($scope.selectedDatasetId, function(selectedDataId, index) {
+			 newJob.inputs[index].datasetId=selectedDataId;
+         });
+
 		console.log(newJob);
-		
-		newJob.inputs[0].datasetId=$scope.selectedDataset;
-		
-		console.log(newJob);
-		
+			
 		var postJobUrl=$scope.sessionUrl.one('jobs');
 		postJobUrl.customPOST(newJob).then(function(response){
 			alert("Job Submitted to server");
@@ -143,160 +157,32 @@ chipsterWeb.controller('SessionCtrl',
 	
 	// Binding datasetId from workflow graph directive
 	this.setDatasetId=function(datasetId){
-		$scope.selectedDataset=datasetId;
-		
-		console.log(datasetId);
+		$scope.selectedDatasetId.push(datasetId);
+		console.log($scope.selectedDatasetId);
 	};
 	
-	$scope.selectedTool=function(tool){
-		$scope.selectedToolId=tool;
-		console.log(tool);
+	this.cancelDatasetSelection=function(datasetId){
+		var index=$scope.selectedDatasetId.indexOf(datasetId);
+		$scope.selectedDatasetId.splice(index,1);
 	};
+	
+	
+	$scope.selectedTool=function(tool,$index){
+		$scope.selectedToolId=tool;
+		$scope.selectedToolIndex = $index;
+		$scope.istoolselected=true;
+		console.log($scope.selectedToolIndex);
+	};
+	
+	$scope.showToolDescription=function(){
+		console.log( $scope.istoolselected);
+		return $scope.istoolselected;
+	}
+	
+	$scope.toggleToolSelection=function(){
+		$scope.istoolselected=false;
+		$scope.selectedToolIndex = 0;
+	}
+	
 });
 
-chipsterWeb.directive('ngsGraphLayout',function($window) {
-      return {
-        restrict: 'EA',
-        scope: {
-          data: "=",
-          onClick: "&"
-        },
-        link: function(scope, iElement, iAttrs) {
-
-        // Calculate total nodes, max label length
-        var d3=$window.d3;
-
-        var c20 = d3.scale.category20();
-
-        var width=window.innerWidth/2-30,
-        height=800;
-
-        function renderGraph(width,height){
-
-          var margin = {top: 10, right: 10, bottom: 10, left: 30};     
-
-          d3.select('svg').remove();
-
-          var svg=d3.select(iElement[0])
-          .append('svg')
-          .attr('width',width)
-          .attr('height',height);              
-
-           // appending arrow for the links
-
-           svg.append("defs").selectAll("marker")
-           .data(["suit","licensing","resolved"])
-           .enter().append("marker")
-           .attr("id",function(d){return d;})
-           .attr("viewBox","0 -5 10 10")
-           .attr("refX",25)
-           .attr("refY",0)
-           .attr("markerWidth",6)
-           .attr("markerHeight",6)
-           .attr("orient","auto")
-           .append("path")
-           .attr("d", "M0,-5L10,0L0,5 L10,0 L0, -5")
-           .style("stroke","#4679BD")
-           .style("opacity","0.6");
-
-
-           var text = svg.append("g")
-           .attr("class", "labels")
-           .selectAll("text")
-           .data(scope.data.nodes)
-           .enter().append("text")
-           .attr("dx", 10)
-           .attr("dy", ".20em")
-           .text(function(d) { return d.name;});
-
-           function transform(d){
-             return "translate(" + d.x + "," + d.y + ")";
-           }
-
-
-           function dragstarted(d){
-            d3.event.sourceEvent.stopPropagation();
-            svg.classed("dragging",true);
-          }
-
-          function dragended(d){
-            svg.classed("dragging",false);
-          }
-
-          var drag = d3.behavior.drag()
-          .on("drag", function(d,i) {
-            d.x += d3.event.dx;
-            d.y += d3.event.dy;
-
-            d3.select(this).attr("cx", d.x).attr("cy",d.y);
-            link.each(function(l,li){ 
-              if(l.source==i){
-                d3.select(this).attr("x1",d.x).attr("y1",d.y);        
-              } else if(l.target==i){
-                d3.select(this).attr("x2",d.x).attr("y2",d.y);
-              } 
-              text.attr("transform", transform);
-            });
-          })
-          .on("dragstart",dragstarted)
-          .on("dragend",dragended);
-
-
-          var link=svg.selectAll("link")
-          .data(scope.data.links)
-          .enter().append("line")
-          .attr("class","link")
-          .attr("x1",function(l){
-           var sourceNode=scope.data.nodes.filter(function(d,i)
-             { return i==l.source})[0];
-           d3.select(this).attr("y1",sourceNode.y);
-           return sourceNode.x;
-         })
-          .attr("x2",function(l){
-            var targetNode=scope.data.nodes.filter(function(d,i)
-              {return i==l.target})[0];
-            d3.select(this).attr("y2",targetNode.y);
-            return (targetNode.x)
-
-          })
-          .attr("fill","none")
-          .attr("stroke","white")
-          .style("marker-end","url(#suit)");
-
-
-
-          var node=svg.selectAll("node")
-          .data(scope.data.nodes)
-          .enter()
-          .append("circle")
-          .attr("class","node")
-          .attr("cx",function(d){return d.x})
-          .attr("cy",function(d){return d.y})
-          .attr("r",10)
-          .attr("fill",function(d,i){return c20(d)})
-          .call(drag);
-
-          text.attr("transform", transform);
-        }
-
-        // Making the SVG Responsive
-
-        $window.onresize=function(){
-          scope.$apply(function(){
-            // Need to put some interval here
-            renderGraph(window.innerWidth/2-30,height);
-          });
-        }
-
-        scope.$watch('data',function(data){
-          if(data){
-            renderGraph(width,height);
-          }
-
-        });
-
-  }// end of link function
-
-}
-
-});
