@@ -24,15 +24,14 @@ chipsterWeb
 							 * renderGraph(window.innerWidth/2-30,height); }); }
 							 */
 
-							scope.$watch('data',function(data) {
-								if (data) {
-									console.log('render is called');
-										renderGraph(width, height);
-									
-								}
-							});
+							scope.$watch('data',function() {
+								if(scope.data){
+										console.log('render is called');
+										renderGraph(scope.data,width, height);
+									}									
+								});
 
-							function renderGraph(width,height) {
+							function renderGraph(data,width,height) {
 
 								var graph = {};
 
@@ -140,7 +139,7 @@ chipsterWeb
 										'auto');
 								
 								//Defining dataset
-								graph = scope.data;
+								graph = data;
 								
 								//defining links
 								var link = vis.append("g")
