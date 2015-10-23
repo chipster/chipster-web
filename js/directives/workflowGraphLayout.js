@@ -32,6 +32,56 @@ chipsterWeb
 								});
 
 							function renderGraph(data,width,height) {
+								
+								var label;
+								var menu=[{
+									title:'Visualize',
+									action: function(elem,d,i){
+									}
+								},
+									{
+										title:'link to phenodata',
+										action:function(elm,d,i){
+										}
+									},
+									{
+										title:'link between selected',
+										action:function(elm,d,i){
+										}
+									},{
+										title:'Rename',
+										action:function(elm,d,i){									
+											 var result = prompt('Change the name of the node',d.name);
+										        if(result) {
+										            d.name = result; 							 
+										        }
+										      
+											parentController.renameDataset(d,result);
+											svg.selectAll("text").remove();
+											drawLabel();
+											
+										}
+									},
+									{
+										title:'Delete',
+										action:function(elm,d,i){
+											console.log(d);
+											
+										}
+									},
+									{
+										title:'Export',
+										action:function(elm,d,i){
+											
+										}
+									},
+									{
+										title:'View History as text',
+										action:function(elm,d,i){
+										}
+									}
+									
+								] ;
 
 								var graph = {};
 
@@ -149,8 +199,12 @@ chipsterWeb
 								var node = vis.append("g")
 										.attr("class", "node").selectAll(
 												"rect");
+							
+								drawLabel();
 								//defining labels 
-								var label=vis.append("g")
+								function drawLabel(){
+								
+								label=vis.append("g")
 								  .selectAll("text")
 								  .data(graph.nodes)
 								  .enter()
@@ -202,8 +256,10 @@ chipsterWeb
 																nudge(
 																		d3.event.dx,
 																		d3.event.dy);
-															}));;
+															}))
+												.on("contextmenu",d3.contextMenu(menu));
 								
+								};
 								  	  
 								
 								function nudge(dx, dy) {
@@ -326,7 +382,9 @@ chipsterWeb
 																	nudge(
 																			d3.event.dx,
 																			d3.event.dy);
-																}));
+																}))
+										.on("contextmenu",d3.contextMenu(menu));
+										
 								
 																
 

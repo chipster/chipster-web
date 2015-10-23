@@ -20,7 +20,7 @@ chipsterWeb.controller('SessionListCtrl',
 					if(res.headers){
 						var sessionLocation=res.headers('Location');
 						var sessionId=sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
-						$location.path("/session" + "/" + sessionId)
+						$location.path("/session" + "/" + sessionId);
                 	}
 				});
 		
@@ -47,9 +47,7 @@ chipsterWeb.controller('SessionListCtrl',
 	};
 
 	$scope.isCurrentSession=function(sessionID){
-
-		return $scope.curSession!=null && $scope.curSession.id==sessionID;
-
+		return $scope.curSession!==null && $scope.curSession.id==sessionID;
 	};
 
 
@@ -59,14 +57,16 @@ chipsterWeb.controller('SessionListCtrl',
 		//user token:72891c2d-b855-4606-a8b2-da08a99c9015 -X GET http:
 		//localhost:8080/sessionstorage/sessions/70ef2895-059e-4ff1-a1a1-e9e55c15a632/events
 	};
-
-
 	
+	$scope.deleteSession=function(exSession){
+		var dlteSessionUrl=SessionRestangular.one('sessions').one(exSession.sessionId);
+		console.log(dlteSessionUrl.getRestangularUrl());
 	
-
-	
-
-
+		dlteSessionUrl.remove().then(function(res){
+			var index = $scope.exSessions.indexOf(exSession);
+			$scope.exSessions.splice(index, 1);
+		});
+	};
 });
 
 

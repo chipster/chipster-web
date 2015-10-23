@@ -35,10 +35,9 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 					$scope.session.sessionDetail=res[0].data.notes;
 					
 					//craete the workflow 
-					var datasets = res[1].data;
-					console.log(datasets);
+					var datasets = res[1].data;			
 					var jobs = res[2].data;
-					console.log(jobs);
+					
 
 					// create dicts
 					var datasetDict = {};
@@ -101,8 +100,9 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		sessionObj.sessionId = $scope.session.sessionId;
 		sessionObj.name = $scope.session.sessionName;
 		sessionObj.notes = $scope.session.sessionDetail;
-
-		$scope.sessionUrl.customPUT(sessionObj);
+		$scope.sessionUrl.customPUT(sessionObj).then(function(res){
+			console.log(res);
+		});
 
 	};
 
@@ -124,6 +124,13 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 			$scope.getSessionDetail();
 		});
 
+	};
+	
+	$scope.deleteDataset=function(datasetId){
+		var datasetUrl=$scope.sessionUrl.one('datasets').one(datasetId);
+		datasetUrl.remove().then(function(res){
+			console.log(res);
+		});
 	};
 
 	$scope.getJobs = function() {
@@ -170,7 +177,8 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		var index = $scope.selectedDatasetId.indexOf(datasetId);
 		$scope.selectedDatasetId.splice(index, 1);
 	};
-
+	
+	
 	$scope.selectedTool = function(tool, $index) {
 		$scope.selectedToolId = tool;
 		$scope.selectedToolIndex = $index;
@@ -187,5 +195,23 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		$scope.istoolselected = false;
 		$scope.selectedToolIndex = 0;
 	};
-
+	
+	//implementing right click options for data nodes
+	this.renameDataset=function(datasetObj,name){
+		var datasetUrl=$scope.sessionUrl.one('datasets').one(datasetObj.datasetId);
+		var renamedObj=angular.copy(datasetObj);
+		renamedObj.name=name;
+		
+		//console.log(datasetObj);
+		datasetUrl.customPUT(renamedObj).then(function(res){
+			var index = $scope.d3Data.nodes.indexOf(datasetObj);
+			console.log(index);
+			$scope.d3Data.nodes.splice(index, 1,renamedObj);
+			//$scope.getSessionDetail();
+				
+		});	
+		
+		
+	
+	};
 });

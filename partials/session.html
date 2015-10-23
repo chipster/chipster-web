@@ -1,11 +1,8 @@
 <div class="row" id="workflowview" ng-controller="SessionCtrl" ng-init="getSessionDetail()">
     <div class="row row-eq-height" id="dataToolContainer" >
-
         <!--div dataset and tool-->
         <div class="row">
-         <div class="col-sm-6">
-
-           
+         <div class="col-sm-6">       
 <!--file info or tool info panel-->
 
 <!--starting of Workflow div-->
@@ -124,7 +121,7 @@
                                 <h4 class="modal-title">Edit Session</h4>
                             </div><!--end of modal header-->
                             <div class="modal-body">
-                                <form class="edit-form" role="form" ng-submit="editSession()" novalidate>
+                                <form class="edit-form" role="form" novalidate>
                                   <div class="form-group">
                                     <label>Session Name</label>
                                     <input type="text" class="form-control" ng-model="session.sessionName" placeholder="Edit name">
@@ -133,8 +130,7 @@
                                     <label>Session Description</label>
                                     <input type="text" class="form-control" ng-model="session.sessionDetail" placeholder="Enter description">
                                 </div>
-                              
-                                <button type="submit" class="btn btn-info" data-dismiss="modal">Save</button>
+                                <button type="button" class="btn btn-info"  ng-click="editSession()" data-dismiss="modal">Save</button>
                                 <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>
                             </form>
                         </div><!--end of modal body-->
