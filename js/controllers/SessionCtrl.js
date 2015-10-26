@@ -2,7 +2,7 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
-	// authorization header
+	//authorization header
 
 	$scope.sessionUrl = SessionRestangular.one('sessions',
 			$routeParams.sessionId);
@@ -111,9 +111,11 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 	};
 
 	$scope.addDataset = function() {
-
+		console.log('add clicked');
 		var newDataset = TemplateService.getDatasetTemplate();
-	
+		newDataset.x=TemplateService.getrandomX();
+		newDataset.y=TemplateService.getrandomY();
+		console.log(newDataset);
 		var datasetUrl = $scope.sessionUrl.one('datasets');
 		datasetUrl.customPOST(newDataset).then(function(response) {
 			alert("Dataset has been added");
@@ -126,11 +128,22 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 
 	};
 	
-	$scope.deleteDataset=function(datasetId){
-		var datasetUrl=$scope.sessionUrl.one('datasets').one(datasetId);
-		datasetUrl.remove().then(function(res){
-			console.log(res);
-		});
+	$scope.deleteDataset=function(datasetObj){
+		
+		//changing the file Id first
+		var datasetUrl=$scope.sessionUrl.one('datasets').one(datasetObj.datasetId);
+		datasetObj.fileId=TemplateService.getRandomFileID();
+		
+		console.log(datasetObj);
+		//after that attempting to delete
+		datasetUrl.customPUT(datasetObj).then(function(res){
+			datasetUrl.remove().then(function(res){
+				console.log(res);
+			});
+				
+		});	
+		
+		
 	};
 
 	$scope.getJobs = function() {
@@ -183,11 +196,9 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		$scope.selectedToolId = tool;
 		$scope.selectedToolIndex = $index;
 		$scope.istoolselected = true;
-		console.log($scope.selectedToolIndex);
 	};
 
 	$scope.showToolDescription = function() {
-		console.log($scope.istoolselected);
 		return $scope.istoolselected;
 	};
 
@@ -195,6 +206,15 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		$scope.istoolselected = false;
 		$scope.selectedToolIndex = 0;
 	};
+	
+	$scope.selectedDataset=function(datasetObj){
+		
+	};
+	
+	$scope.showDatasetDetail=function(){
+		
+	}
+	
 	
 	//implementing right click options for data nodes
 	this.renameDataset=function(datasetObj,name){
@@ -210,8 +230,5 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 			//$scope.getSessionDetail();
 				
 		});	
-		
-		
-	
 	};
 });

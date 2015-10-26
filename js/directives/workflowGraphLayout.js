@@ -33,7 +33,7 @@ chipsterWeb
 
 							function renderGraph(data,width,height) {
 								
-								var label;
+								var nodeWidth=40,nodeHeight=30;
 								var menu=[{
 									title:'Visualize',
 									action: function(elem,d,i){
@@ -199,7 +199,9 @@ chipsterWeb
 								var node = vis.append("g")
 										.attr("class", "node").selectAll(
 												"rect");
-							
+								
+								var label=[];
+										
 								drawLabel();
 								//defining labels 
 								function drawLabel(){
@@ -213,10 +215,10 @@ chipsterWeb
 									  return d.name;
 								  })
 								  .attr("x",function(d,i){
-									  return d.x+10;
+									  return d.x+nodeWidth/2;
 								  })
 								  .attr("y",function(d,i){
-									  return d.y+5;
+									  return d.y+nodeHeight/2;
 								  })
 								  .attr("font-size", "8px")
 								  .attr("fill","black")
@@ -230,7 +232,7 @@ chipsterWeb
 												if (!shiftKey) {
 													// if the isnt down,
 													// unselect everything
-													node.classed(
+													label.classed(
 																	"selected",
 																	function(
 																			p) {
@@ -245,19 +247,19 @@ chipsterWeb
 														.classed(
 																"selected",
 																d.selected = !d.previouslySelected);
-												console.log("label clicked");
 												
-											}).call(
-													d3.behavior
-													.drag()
-													.on(
-															"drag",
-															function(d) {
-																nudge(
-																		d3.event.dx,
-																		d3.event.dy);
-															}))
-												.on("contextmenu",d3.contextMenu(menu));
+											})
+											.call(
+												d3.behavior
+														.drag()
+														.on(
+																"drag",
+																function(d) {
+																	nudge(
+																			d3.event.dx,
+																			d3.event.dy);
+																}))
+											.on("contextmenu",d3.contextMenu(menu));
 								
 								};
 								  	  
@@ -271,18 +273,20 @@ chipsterWeb
 										return d.y += dy;
 									})
 									
+									
+									
 									label.filter(function(d) {
 										return d.selected;
 									}).attr("x", function(d) {
-										return d.x += dx;
+										return d.x+dx+nodeWidth/2;
 									}).attr("y", function(d) {
-										return d.y += dy;
+										return d.y+dy+nodeHeight/2;
 									})
 									
 									link.filter(function(d) {
 										return d.source.selected;
 									}).attr("x1", function(d) {
-										return d.source.x;
+										return d.source.x+nodeWidth/2;
 									}).attr("y1", function(d) {
 										return d.source.y;
 									});
@@ -290,7 +294,7 @@ chipsterWeb
 									link.filter(function(d) {
 										return d.target.selected;
 									}).attr("x2", function(d) {
-										return d.target.x;
+										return d.target.x+nodeWidth/2;
 									}).attr("y2", function(d) {
 										return d.target.y;
 									});
@@ -307,11 +311,11 @@ chipsterWeb
 
 								link = link.data(graph.links).enter().append(
 										"line").attr("x1", function(d) {
-									return d.source.x+10;
+									return d.source.x+nodeWidth/2;
 								}).attr("y1", function(d) {
 									return d.source.y;
 								}).attr("x2", function(d) {
-									return d.target.x+10;
+									return d.target.x+nodeWidth/2;
 								}).attr("y2", function(d) {
 									return d.target.y;
 								});
@@ -321,13 +325,13 @@ chipsterWeb
 										.enter()
 										.append("rect")
 										.attr("x", function(d) {
-											return d.x-5;
+											return d.x;
 										})
 										.attr("y", function(d) {
-											return d.y-5;
+											return d.y;
 										})
-										.attr("width",40)
-										.attr("height",30)
+										.attr("width",nodeWidth)
+										.attr("height",nodeHeight)
 										.attr("fill",function(d,i){return c20(i)})
 										.on("dblclick", function(d) {
 											d3.event.stopPropagation();

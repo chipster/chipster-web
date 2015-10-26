@@ -97,6 +97,26 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 
 		getWorkflowLinkTemplate:function(){
 
+		},
+		
+		//creating a random ID
+		getRandomFileID:function(){
+			var d = new Date().getTime();
+		    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		        var r = (d + Math.random()*16)%16 | 0;
+		        d = Math.floor(d/16);
+		        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+		    });
+		    return uuid;
+		},
+		
+		
+		getrandomX:function() {
+			  return Math.floor(Math.random() * (600 - 100 + 1)) + 100;
+		},
+		
+		getrandomY:function() {
+			  return Math.floor(Math.random() * (800 - 100 + 1)) + 100;
 		}
 
 
