@@ -12,14 +12,21 @@
 						<h3 class="panel-title">{{session.sessionName}}</h3>
 					</div>
 					<!--end of panel heading-->
-					<div class="panel-body">
-						<!--panzoomwidget panzoom-id="PanZoom" style="position:absolute;top:60px;left:40px;z-index:1"-->
-						<!--  /panzoomwidget-->
-						<!--panzoom id="PanZoom" config="panzoomConfig" model="panzoomModel" style="width:800px; height: 800px"-->
+					<div class="panel-body" >		
 						<workflow-graph-layout data="d3Data" />
-						<!--/panzoom-->
 					</div>
 					<!--end of panel body-->
+				</div>
+				<div class="panel panel-default" ng-show="showDatasetDetail()">
+					<div class="panel-heading">
+						<h5 class="panel-title">{{dataNode.name}}</h5>								
+					</div><!-- End of panel heading -->
+					<div class="panel-body">
+						<p>SourceJob: {{dataNode.sourceJob}}</p>
+						<p>File ID: {{dataNode.fileId}}</p>	
+						<p>Size: {{dataNode.size}}</p>		
+					</div><!-- end of panel body -->
+				
 				</div>
 			</div>
 			<!--end of column-sm-6-->

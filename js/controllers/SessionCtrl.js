@@ -21,6 +21,11 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 	$scope.selectedToolIndex = -1;
 	$scope.istoolselected = false;
 	
+	//Dataset Detail showing
+	$scope.dataNode=null;
+	$scope.isDataNodeSelected=false;
+	
+	
 	$scope.d3Data={nodes:[],links:[]};
 
 	$scope.getSessionDetail = function() {
@@ -207,14 +212,6 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		$scope.selectedToolIndex = 0;
 	};
 	
-	$scope.selectedDataset=function(datasetObj){
-		
-	};
-	
-	$scope.showDatasetDetail=function(){
-		
-	}
-	
 	
 	//implementing right click options for data nodes
 	this.renameDataset=function(datasetObj,name){
@@ -231,4 +228,18 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 				
 		});	
 	};
+	
+	this.getSelectedDataNode=function(dataNode){
+		$scope.dataNode=dataNode;
+		console.log($scope.dataNode.name);
+		$scope.isDataNodeSelected=true;
+		
+	};
+	
+	$scope.showDatasetDetail=function(){
+		return $scope.isDataNodeSelected;
+	};
+	
+	
+
 });

@@ -11,11 +11,13 @@ chipsterWeb
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
+							
 
 							// Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = window.innerWidth / 2 - 30, height = 800, shiftKey, ctrlKey;
+							var width = window.innerWidth / 2 - 30, height = 600, shiftKey, ctrlKey;
+							
 							/*
 							 * $window.onresize=function(){
 							 * scope.$apply(function(){ //Need to put some
@@ -23,6 +25,7 @@ chipsterWeb
 							 * 
 							 * renderGraph(window.innerWidth/2-30,height); }); }
 							 */
+							
 
 							scope.$watch('data',function() {
 								if(scope.data){
@@ -147,7 +150,10 @@ chipsterWeb
 																						&& d.x < extent[1][0]
 																						&& extent[0][1] <= d.y && d.y < extent[1][1]);
 																	});
-												}).on(
+													
+													
+												})
+												.on(
 												"brushend",
 												function() {
 													d3.event.target.clear();
@@ -164,6 +170,7 @@ chipsterWeb
 												'stroke', 'transparent').attr(
 												'stroke-width', 1).attr("id",
 												"zrect") // gave html id
+												
 
 								var brush = svg_graph.append("g").datum(
 										function() {
@@ -179,6 +186,7 @@ chipsterWeb
 										.attr('stroke-width', 1).attr(
 												'opacity', 1.0).attr('id',
 												'vis')
+					
 
 								brush.call(brusher).on("mousedown.brush", null)
 										.on("touchstart.brush", null).on(
@@ -187,6 +195,7 @@ chipsterWeb
 
 								brush.select('.background').style('cursor',
 										'auto');
+								
 								
 								//Defining dataset
 								graph = data;
@@ -228,6 +237,7 @@ chipsterWeb
 												if (d3.event.defaultPrevented)
 													return;
 												svg.style("cursor","pointer");
+												d3.event.stopPropagation();
 
 												if (!shiftKey) {
 													// if the isnt down,
@@ -237,7 +247,7 @@ chipsterWeb
 																	function(
 																			p) {
 																		return p.selected = p.previouslySelected = false;
-																		console.log(p);
+					
 																	})
 
 												}
@@ -346,24 +356,22 @@ chipsterWeb
 													if (!shiftKey) {
 														// if the isnt down,
 														// unselect everything
-														node.classed(
-																		"selected",
-																		function(
-																				p) {
-																			return p.selected = p.previouslySelected = false;
-																		})
-
+														node.classed("selected",function(p) {
+															return p.selected = p.previouslySelected = false;	
+														})
 													}
-
 													//always select this node
-													d3
-															.select(this)
-															.classed(
+													d3.select(this).classed(
 																	"selected",
 																	d.selected = !d.previouslySelected);
-													console.log("node clicked");
-													parentController.setDatasetId(d.datasetId);
+													//console.log("node clicked");
 													
+													parentController.setDatasetId(d.datasetId);
+													//For showing dataset detail
+													scope.$apply(function(){
+														parentController.getSelectedDataNode(d);
+													});
+							
 												})
 										.on(
 												"mouseup",
@@ -383,6 +391,7 @@ chipsterWeb
 														.on(
 																"drag",
 																function(d) {
+																	parentController.cancelDatasetSelection(d.datasetId);
 																	nudge(
 																			d3.event.dx,
 																			d3.event.dy);
