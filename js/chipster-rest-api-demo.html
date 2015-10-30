@@ -30,6 +30,7 @@
 <ul id="sessionUl"></ul>
 <a href="#" onclick=newSession();>Add</a>
 <a href="#" onclick=updateSessions();>Refresh</a>
+<a href="#" onclick=deleteAllSessions();>Delete all</a>
 <h2 id="sessionName"></h2>
 <h3>Datasets</h3>
 <ul id="datasetUl"></ul>
@@ -104,6 +105,16 @@
         }, showError);
     }
 
+    function deleteAllSessions() {
+        client.getSessions(function (sessions) {
+            sessions.forEach(function (s) {
+                client.deleteSession(s.sessionId, function () {
+                    updateSessions();
+                }, showError);
+            });
+        }, showError);
+    }
+
     function updateDatasets(sessionId) {
         var datasetUl = document.getElementById("datasetUl");
 
@@ -171,7 +182,6 @@
         updateDatasets(sessionId);
         updateJobs(sessionId);
 
-        console.log("showSession " + sessionId);
         if (sessionId) {
             client.getSession(sessionId, function (session) {
                 var nameText = document.createTextNode(session.name);
@@ -306,8 +316,8 @@
         d.name = "Raw input data";
         d.x = 100;
         d.y = 100;
-        d.sourceJob = "j163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
-        d.fileId = "3c2806ed-ed94-42d1-bda9-542947f669ac";
+        d.sourceJob = "163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
+        d.fileId =    "3c2806ed-ed94-42d1-bda9-542947f669ac";
         d.size = 0;
         d.checksum = "xyz";
         return d;
