@@ -7,13 +7,12 @@ ChipsterClient.prototype.SESSION_DB = "session-db";
 ChipsterClient.prototype.SESSION_DB_EVENTS = "session-db-events";
 ChipsterClient.prototype.AUTHENTICATION_SERVICE = "authentication-service";
 
-function ChipsterClient (serviceLocatorUri, username, password) {
-    this.serviceLocatorUri = serviceLocatorUri;
+function ChipsterClient (proxyUri, username, password) {
+    this.proxyUri = proxyUri;
     this.username = username;
     this.password = password;
     this.token = null;
     this.webSocket = null;
-    this.serviceCache = {};
 }
 
 ChipsterClient.prototype.httpRequest = function (method, uri, body, username, password, callback, onerror, name) {
@@ -43,18 +42,16 @@ ChipsterClient.prototype.httpRequest = function (method, uri, body, username, pa
     xhr.send(body);
 };
 
-ChipsterClient.prototype.getServices = function (type, callback, onerror) {
-    if (this.serviceCache[type]) {
-        callback(this.serviceCache[type]);
-    } else {
-        this.httpRequest("GET", this.serviceLocatorUri + "/services", null, null, null, function (response) {
-            var services = JSON.parse(response.responseText);
-            var filtered = services.filter(function (service) {
-                return service.role === type;
-            });
-            this.serviceCache[type] = filtered;
-            callback(filtered);
-        }.bind(this), onerror, "service locator");
+ChipsterClient.prototype.getService = function (type, callback) {
+
+    if (type == this.SESSION_DB) {
+        callback(this.proxyUri + "/sessiondb/");
+    }
+    if (type == this.SESSION_DB_EVENTS) {
+        callback(this.proxyUri.replace("http://", "ws://") + "/sessiondbevents/");
+    }
+    if (type == this.AUTHENTICATION_SERVICE) {
+        callback(this.proxyUri + "/auth/");
     }
 };
 
@@ -62,10 +59,8 @@ ChipsterClient.prototype.getToken = function (callback, onerror) {
     if (this.token) {
         callback(this.token);
     } else {
-        this.getServices(this.AUTHENTICATION_SERVICE, function (auths) {
-            //TODO try others auths if this fails
-            var uri = auths[0].uri;
-            this.httpRequest("POST", uri + "tokens", null, this.username, this.password, function (xhr) {
+        this.getService(this.AUTHENTICATION_SERVICE, function (service) {
+            this.httpRequest("POST", service + "tokens", null, this.username, this.password, function (xhr) {
                 this.token = JSON.parse(xhr.responseText);
                 this.username = null;
                 this.password = null;
@@ -76,10 +71,9 @@ ChipsterClient.prototype.getToken = function (callback, onerror) {
 };
 
 ChipsterClient.prototype.sessionStorage = function (method, path, body, callback, onerror) {
-    this.getServices(this.SESSION_DB, function (services) {
+    this.getService(this.SESSION_DB, function (service) {
         this.getToken(function (token) {
-            //TODO try others if this fails
-            var uri = services[0].uri + "sessions/" + path;
+            var uri = service + "sessions/" + path;
             this.httpRequest(method, uri, body, "token", token.tokenKey, function (xhr) {
                 this.handleResponse(method, xhr, callback);
             }.bind(this), onerror, "session-db");
@@ -114,14 +108,13 @@ ChipsterClient.prototype.handleResponse = function (method, xhr, callback) {
 
 ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback, onerror, onopen) {
 
-    this.getServices(this.SESSION_DB_EVENTS, function (services) {
+    this.getService(this.SESSION_DB_EVENTS, function (service) {
         this.getToken(function (token) {
             if (this.webSocket) {
                 this.webSocket.close();
             }
 
-            //TODO try others if this fails
-            var uri = services[0].uri + "events/" + sessionId + "?token=" + token.tokenKey;
+            var uri = service + "events/" + sessionId + "?token=" + token.tokenKey;
             this.webSocket = new WebSocket(uri);
             this.webSocket.onopen = function () {
                 if (onopen) {
@@ -139,7 +132,7 @@ ChipsterClient.prototype.setSessionEventListener = function (sessionId, callback
             this.webSocket.onclose = function (e) {
                 if (onerror) {
                     if (e.wasClean) {
-                        onerror("session-db is", null, "shutting down (" + e.code + ", " + e.reason + ")", null);
+                        onerror("session-db event connection", null, "closed cleanly (" + e.code + ", " + e.reason + ")", null);
                     } else {
                         onerror("session-db event connection", null, "closed (" + e.code + ", " + e.reason + ")", null);
                     }
