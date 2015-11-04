@@ -19,7 +19,7 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 			d.name="Raw input data";
 			d.x=100;
 			d.y=100;
-			d.sourceJob="j163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
+			d.sourceJob="163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
 			d.fileId = "3c2806ed-ed94-42d1-bda9-542947f669ac";
         	d.size = 0;
         	d.checksum = "xyz";

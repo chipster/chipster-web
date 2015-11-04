@@ -10,7 +10,7 @@ chipsterWeb
 				function($routeProvider, RestangularProvider) {
 					// Config the base url
 					RestangularProvider
-							.setBaseUrl('http://localhost:8084/');
+							.setBaseUrl('http://localhost:8000/');
 
 					// Before redirection to specific pages, check if the user
 					// is authenticated or not

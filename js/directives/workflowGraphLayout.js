@@ -16,7 +16,7 @@ chipsterWeb
 							// Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = window.innerWidth / 2 - 30, height = 600, shiftKey, ctrlKey;
+							var width = window.innerWidth / 2 - 50, height = 600, shiftKey, ctrlKey;
 							
 							/*
 							 * $window.onresize=function(){
