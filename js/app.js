@@ -10,7 +10,7 @@ chipsterWeb
 				function($routeProvider, RestangularProvider) {
 					// Config the base url
 					RestangularProvider
-							.setBaseUrl('http://vm0179.kaj.pouta.csc.fi/servicelocator');
+							.setBaseUrl('http://localhost:8084/');
 
 					// Before redirection to specific pages, check if the user
 					// is authenticated or not

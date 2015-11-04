@@ -227,7 +227,7 @@ chipsterWeb
 									  return d.x+nodeWidth/2;
 								  })
 								  .attr("y",function(d,i){
-									  return d.y+nodeHeight/2;
+									  return d.y+nodeHeight+10;
 								  })
 								  .attr("font-size", "8px")
 								  .attr("fill","black")
@@ -357,16 +357,18 @@ chipsterWeb
 														// if the isnt down,
 														// unselect everything
 														node.classed("selected",function(p) {
-															return p.selected = p.previouslySelected = false;	
+															return p.selected = p.previouslySelected = false;
 														})
 													}
 													//always select this node
 													d3.select(this).classed(
 																	"selected",
 																	d.selected = !d.previouslySelected);
-													//console.log("node clicked");
 													
-													parentController.setDatasetId(d.datasetId);
+													if(d.selected){
+														parentController.setDatasetId(d.datasetId);
+													}
+													
 													//For showing dataset detail
 													scope.$apply(function(){
 														parentController.getSelectedDataNode(d);
@@ -406,8 +408,7 @@ chipsterWeb
 											|| d3.event.metaKey;
 									ctrlKey = d3.event.ctrlKey;
 
-									console.log('d3.event', d3.event)
-
+							
 									if (d3.event.keyCode == 67) {
 										//the c key
 									}
@@ -433,7 +434,7 @@ chipsterWeb
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
 									ctrlKey = d3.event.ctrlKey;
-
+									
 									brush.call(brusher).on("mousedown.brush",
 											null).on("touchstart.brush", null)
 											.on("touchmove.brush", null).on(

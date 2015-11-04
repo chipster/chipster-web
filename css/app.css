@@ -137,25 +137,7 @@ ul.unstyled {
     margin-right: 5px;
 }
 
-.angular-ui-tree-handle {
-    background: #f8faff;
-    color: #7c9eb2;
-    padding: 2px 2px;
-}
 
-.angular-ui-tree-handle:hover {
-    color: #438eb9;
-    background: #f4f6f7;
-    border-color: #dce2e8;
-}
-
-.angular-ui-tree-placeholder {
-    background: #f0f9ff;
-    border: 2px dashed #bed2db;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
 
 .selected-class-name{
 	border: 2px dashed #bed2db;
@@ -168,17 +150,66 @@ ul.unstyled {
     color: #FFF !important;
 }
 
-.pan-zoom-frame {
-            border: 2px #EEE;
-        }
+
 
 
 .active {
     background-color: #CCC;
 }
 
+.circle_blue{
+		padding: 2px 3px;	
+        background: blue;
+        width: 2px;
+        border-radius: 2px;
+        width: 1%;
+       
+}
+
+/*Panel related style*/
+.panel.with-nav-tabs .panel-heading{
+	padding:5px 5px 0 5 px;
+}
+
+.panel.with-nav-tabs .nav-tabs{
+	border-bottom:none;
+}
+
+.panel.with-nav-tabs .nav-justified{
+	margin-bottom:-1px;
+}
 
 
+/***Panel Default***/
 
+.with-nav-tabs.panel-default .nav-tabs > li >a,
+.with-nav-tabs.panel-default .nav-tabs > li.active > a:hover,
+.with-nav-tabs.panel-default .nav-tabs > li.active > a:focus{
+	color:#555;
+	background-color:#fff;
+	border-color:#ddd;
+	border-bottom-color:transparent;
+}
+
+.with-nav-tabs.panel-default .nav-tabs >li.dropdown .dropdown-menu{
+	background-color:#f5f5f5;
+	border-color:#ddd;
+}
+
+.with-nav-tabs.panel-default .nav-tabs >li.dropdown .dropdown-menu > li > a{
+	color:#777;
+}
+
+.with-nav-tabs.panel-default .nav-tabs > li.dropdown .dropdown-menu > li > a:hover,
+.with-nav-tabs.panel-default .nav-tabs > li.dropdown .dropdown-menu > li> a:focus{
+	background-color:#555;
+}
+
+.with-nav-tabs.panel-default .nav-tabs > li.dropdown .dropdown-menu > .active > a,
+.with-nav-tabs.panel-default .nav-tabs > li.dropdown .dropdown-menu > .active > a:hover,
+.with-nav-tabs.panel-default .nav-tabs > li.dropdown .dropdown-menu > .active > a:focus {
+    color: #fff;
+    background-color: #555;
+}
 
 

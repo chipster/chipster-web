@@ -1,4 +1,4 @@
-chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
+chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
@@ -95,6 +95,9 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 						nodes : datasets,
 						links : links
 					};
+					
+					
+				$scope.jobs=jobs;
 
 				});
 	};
@@ -152,7 +155,9 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 	};
 
 	$scope.getJobs = function() {
-		$scope.sessionUrl.getList('jobs');
+		$scope.sessionUrl.getList('jobs').then(function(res){
+			
+		});
 	};
 
 	$scope.runJob = function() {
@@ -181,6 +186,7 @@ chipsterWeb.controller('SessionCtrl', function($http, $scope, $routeParams, $q,
 		var postJobUrl = $scope.sessionUrl.one('jobs');
 		postJobUrl.customPOST(newJob).then(function(response) {
 			alert("Job Submitted to server");
+			
 		});
 
 	};

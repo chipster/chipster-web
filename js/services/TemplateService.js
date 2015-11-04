@@ -116,7 +116,7 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 		},
 		
 		getrandomY:function() {
-			  return Math.floor(Math.random() * (800 - 100 + 1)) + 100;
+			  return Math.floor(Math.random() * (600 - 100 + 1)) + 100;
 		}
 
 
