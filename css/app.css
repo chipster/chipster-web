@@ -71,6 +71,10 @@ ul.unstyled {
 	margin-right:50px;
 }
 
+#add{
+	margin-top:10px;
+	float:right;
+}
 /*wrapper for page content to push down the footer, fix for the sticky footer*/
 #wrap{
 	min-height: 100%;

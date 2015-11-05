@@ -166,9 +166,7 @@ chipsterWeb
 
 								var rect = svg_graph.append('svg:rect').attr(
 										'width', width).attr('height', height)
-										.attr('fill', 'transparent').attr(
-												'stroke', 'transparent').attr(
-												'stroke-width', 1).attr("id",
+										.attr('fill', 'transparent').attr("id",
 												"zrect") // gave html id
 												
 

@@ -14,6 +14,16 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		sessionDetail : "",
 		workflowData : {}
 	};
+	
+	//For view manipulation
+	$scope.item=1;
+	$scope.setItem = function(value) {
+		$scope.item=value;
+	};
+
+	$scope.isSet = function(value) {
+		return $scope.item === value;
+	};
 
 	//Dataset and tool for posting jobs
 	$scope.selectedDatasetId = [];
@@ -119,7 +129,6 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 	$scope.addDataset = function() {
-		console.log('add clicked');
 		var newDataset = TemplateService.getDatasetTemplate();
 		newDataset.x=TemplateService.getrandomX();
 		newDataset.y=TemplateService.getrandomY();
@@ -127,7 +136,6 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		var datasetUrl = $scope.sessionUrl.one('datasets');
 		datasetUrl.customPOST(newDataset).then(function(response) {
 			alert("Dataset has been added");
-			console.log(response);
 			$scope.d3Data.nodes.push(newDataset);
 			
 			//Refresh the session page

@@ -5,7 +5,8 @@ chipsterWeb.controller('SessionListCtrl',
 		$scope.curSession=null;
 		$scope.isClicked=false;
 
-		$scope.exSessions=[];
+		$scope.userSessions=[];
+		$scope.showDetail=false;
 
 
 
@@ -29,8 +30,13 @@ chipsterWeb.controller('SessionListCtrl',
 	$scope.getSessions=function(){
 		SessionRestangular.all('sessions').getList()
 			.then(function(res){
-				$scope.exSessions=res.data;
+				$scope.userSessions=res.data;
 			});
+		
+		//For the time being, getting example sessions from local json
+		$http.get('js/json/exampleSession.json').then(function(res) {
+			$scope.localSessions = res.data;
+		});
 	};
 
 
@@ -60,12 +66,18 @@ chipsterWeb.controller('SessionListCtrl',
 	
 	$scope.deleteSession=function(exSession){
 		var dlteSessionUrl=SessionRestangular.one('sessions').one(exSession.sessionId);
-		console.log(dlteSessionUrl.getRestangularUrl());
-	
+		
 		dlteSessionUrl.remove().then(function(res){
 			var index = $scope.exSessions.indexOf(exSession);
-			$scope.exSessions.splice(index, 1);
+			$scope.userSessions.splice(index, 1);
 		});
+	};
+	
+	$scope.showSessionDetail=function(exSession){
+		$scope.curSession=angular.copy(exSession);
+		$scope.showDetail=true;
+		//need to check whether the same session has been clicked again, 
+		//in that case we need to hide the detail
 	};
 });
 
