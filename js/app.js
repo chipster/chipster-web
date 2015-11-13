@@ -1,6 +1,11 @@
 var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow',
 		'ui.tree', 'panzoom', 'panzoomwidget', 'restangular',
-		'LocalStorageModule' ]);
+		'LocalStorageModule','ngWebsocket'])
+		
+var baseURL='http://localhost:8000/';
+
+//defining the base Url as constant
+chipsterWeb.constant('baseURLString',baseURL);
 
 // configure our route
 chipsterWeb
@@ -10,7 +15,7 @@ chipsterWeb
 				function($routeProvider, RestangularProvider) {
 					// Config the base url
 					RestangularProvider
-							.setBaseUrl('http://localhost:8000/');
+							.setBaseUrl(baseURL);
 
 					// Before redirection to specific pages, check if the user
 					// is authenticated or not
@@ -53,7 +58,7 @@ chipsterWeb
 						templateUrl : 'partials/login.html',
 						controller : 'LoginCtrl'
 					}).when('/session/:sessionId', {
-						templateUrl : 'partials/session.html',
+						templateUrl : 'partials/session_tmp.html',
 						authenticated:true
 
 					}).when('/sessions', {
@@ -79,8 +84,7 @@ chipsterWeb.config(['flowFactoryProvider', function(flowFactoryProvider) {
 
 }]);
 
-chipsterWeb.run([ '$rootScope', '$location', 'AuthenticationService',
-		function($rootScope, $location, AuthenticationService){
+chipsterWeb.run(function($rootScope, $location, AuthenticationService){
 			$rootScope.$on("$routeChangeStart",function(event,next,current){
 				if(next.$$route.authenticated){
 					var userAuth=AuthenticationService.getToken();
@@ -89,5 +93,8 @@ chipsterWeb.run([ '$rootScope', '$location', 'AuthenticationService',
 						alert("You need to be logged in to access this page!")
 					}
 				}			
-			});
-}]);
+			}
+		);
+			
+		
+});

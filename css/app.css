@@ -56,10 +56,6 @@ ul.unstyled {
 	padding: 20px;
 }
 
-#dataToolContainer{
-	margin-top: 40px;
-}
-
 #toolButtonGroup{
 	margin-top: 20px
 }
@@ -93,8 +89,15 @@ ul.unstyled {
 }
 
 #dataToolContainer{
-	margin: 10px;
+	margin: 5px;
 }
+
+#toollist{
+	overflow: auto;
+	max-height: 500px;
+}
+
+
 #flow-button-group{
 	margin: 20px;
 	position: center;

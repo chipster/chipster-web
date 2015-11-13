@@ -1,5 +1,5 @@
-chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','AuthenticationService', 
-              function($scope, $location, $http, AuthenticationService) {
+chipsterWeb.controller('LoginCtrl', 
+              function($scope, $location, $http, AuthenticationService,baseURLString) {
 
 
   $scope.login=function(){
@@ -12,7 +12,7 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
       var encodedString=btoa(string); //Convert it to base64 encoded string
      
       $http({
-              url:'http://localhost:8000/auth/tokens',
+              url:baseURLString+'auth'+'/'+'tokens',
               method: "POST",
               withCredentials:true,
               headers: {'Authorization': 'Basic ' + encodedString}                   
@@ -31,4 +31,4 @@ chipsterWeb.controller('LoginCtrl', ['$scope', '$location', '$http','Authenticat
 
   
   
-}]);
+});

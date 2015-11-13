@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
-		TemplateService, SessionRestangular, AuthenticationService) {
+		TemplateService, SessionRestangular, AuthenticationService,$websocket) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
 	//authorization header
@@ -7,6 +7,25 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	$scope.sessionUrl = SessionRestangular.one('sessions',
 			$routeParams.sessionId);
 
+	// creating a websocket object and start listening for the events
+	var ws=$websocket.$new({
+		url:'ws://localhost:8000/'+"sessiondbevents/"+"events/" + $routeParams.sessionId + "?token=" + AuthenticationService.getToken(),
+		protocols: []
+	});
+	
+	 ws.$on('$open', function () {
+		 	console.log('connected through web socket'); 
+		 	console.log(ws.$status()); // it prints ws.$OPEN
+		  })
+		  .$on('$message', function(event) { // it listens for 'incoming event'
+		    console.log(event);
+		    $scope.event=event;
+		  })
+		  .$on('$close',function(){
+			  	console.log(ws.$status());
+				console.log('Connection to web socket is closing');
+		  });
+	 
 	// creating a session model object
 	$scope.session = {
 		sessionId : $routeParams.sessionId,
@@ -139,9 +158,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			$scope.d3Data.nodes.push(newDataset);
 			
 			//Refresh the session page
-			$scope.getSessionDetail();
-		});
-
+			//$scope.getSessionDetail();
+		})
 	};
 	
 	$scope.deleteDataset=function(datasetObj){

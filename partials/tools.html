@@ -1,0 +1,123 @@
+<div class="panel panel-default"
+					ng-controller="AnalysisToolTabCtrl as tab">
+					<div class="panel-heading">
+						Analysis Tools
+					</div>
+					<!--end of panel heading-->
+					<div class="panel-body">
+						<!-- Tools div -->
+						<div ng-show="isViewSet(1)">
+							<div>
+								<ul class="nav nav-pills">
+									<li ng-class="{active:tab.isSet(1)}"><a href
+										ng-click="tab.setTab(1)">Microarray</a></li>
+									<li ng-class="{active:tab.isSet(2)}"><a href
+										ng-click="tab.setTab(2)">NGS</a></li>
+									<li ng-class="{active:tab.isSet(3)}"><a href
+										ng-click="tab.setTab(3)">Misc</a></li>
+								</ul>
+							</div>
+
+							<div id="tabContent">
+								<div class="row row-eq-height">
+									<div class="col-sm-6">
+										<table class="table table-hover" id="toolcat">
+											<tbody>
+												<tr ng-repeat="tool in tools"
+													ng-click="selectedToolCat(tool,$index)"
+													ng-class="{'selected-class-name':$index===selectedTool}">
+													<td><a href="">{{tool.name}}</a></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<!-- end of col-sm-3 for the first table -->
+									<div class="col-sm-6" id="toollist">
+										<table class="table table-hover" >
+											<tbody>
+												<tr ng-repeat="node in currentToolCat.nodes"
+													ng-click="selectedTool(node,$index)">
+													<td>{{node.name}}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<!--end of tabset div-->
+							<div id="runButton">
+								<button type="button" class="btn btn-sm btn-success btn-block"
+									ng-click="runJob()">Run</button>
+							</div>
+						</div>
+						<!-- end of tool div -->
+
+					</div>
+					<!--end of tool panel-->
+
+					<div ng-show="showToolDescription()" class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">Tool Description</h4>
+						</div>
+						<div class="panel-body">
+							<!--will be the tool description-->
+							{{selectedToolId.tool}}
+							<p>{{selectedToolId.name}}</p>
+							<!--button area-->
+							<div class="container" id="toolButtonGroup">
+								<!--Tool source-->
+								<button class="btn  btn-info" data-toggle="modal"
+									data-target="#toolSourceModal">Tool Source Code</button>
+
+								<div id="toolSourceModal" class="modal fade" role="dialog">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal">&times</button>
+												<h4 class="modal-title">{{selectedToolId.tool}}</h4>
+											</div>
+											<!--end of modal header-->
+											<div class="modal-body">
+												<p>Tool source code should be here, will be visible
+													shortly :)</p>
+											</div>
+											<!--end of modal body-->
+										</div>
+										<!--end of modal-content-->
+
+									</div>
+									<!--end of modal-dialog-->
+
+								</div>
+								<!--Parameter-->
+								<button class="btn  btn-info" data-toggle="modal"
+									data-target="#parameterModal">Show Parameter</button>
+
+								<div id="parameterModal" class="modal fade" role="dialog">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal">&times</button>
+												<h4 class="modal-title">{{selectedToolId.tool}}</h4>
+											</div>
+											<!--end of modal header-->
+											<div class="modal-body">
+												<p>Parameter list</p>
+											</div>
+											<!--end of modal body-->
+										</div>
+										<!--end of modal-content-->
+
+									</div>
+									<!--end of modal-dialog-->
+
+								</div>
+
+							</div>
+							<!--end of tool button group-->
+						</div>
+						<!--end of panel body-->
+					</div>
+					<!--end of class panel panel-default-->
+
+				</div>

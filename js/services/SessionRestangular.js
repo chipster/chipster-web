@@ -1,8 +1,8 @@
-chipsterWeb.factory('SessionRestangular',function(Restangular,AuthenticationService){
+chipsterWeb.factory('SessionRestangular',function(Restangular,AuthenticationService,baseURLString){
 
 		return Restangular.withConfig(function(RestangularConfigurer) {
 
-    		RestangularConfigurer.setBaseUrl('http://localhost:8000/sessiondb/');
+    		RestangularConfigurer.setBaseUrl(baseURLString+'sessiondb'+'/');
     		RestangularConfigurer.setDefaultHeaders({
     			'Authorization': 'Basic ' + btoa('token' + ':' +AuthenticationService.getToken())
     		});
