@@ -2,6 +2,7 @@
  [ {
     "id":1,
     "name":"Normalisation",
+    "color":"Sage Green",
     "nodes":
         [
           {
@@ -93,6 +94,7 @@
     {
         "id":2,
         "name":"Utilities",
+        "color":"Camouflage Green",
         "nodes":[
                 {
                   "name": "Search by correlation",
@@ -219,6 +221,7 @@
     {
     "id":3,
     "name":"Preprocessing",
+     "color":"Brown Suger",
     "nodes": 
           [
                {
@@ -266,6 +269,7 @@
       {
       "id":4,
       "name":"Pathways",
+       "color":"BurlyWood",
       "nodes": 
             [
               {
@@ -305,6 +309,7 @@
     {
     "id":5,
     "name":"Copy number aberrations",
+     "color":"Sandy Brown",
     "nodes": [
               {
                 "name": "Import from GEO",
@@ -419,6 +424,7 @@
     {
     "id":6,
     "name":"Quality control",
+    "color":"Sepia",
     "nodes":
            [
             {
@@ -454,6 +460,7 @@
     {
     "id":7,
     "name":"Visualisation",
+    "color":"Shocking Orange",
     "nodes":
             [  
              {
@@ -501,6 +508,7 @@
     {
     "id":8,
     "name":"Clustering",
+     "color":"Dark Turquoise",
     "nodes": [
               {
                 "name": "KNN classification",
@@ -535,6 +543,7 @@
     {
     "id":9,
     "name":"Statistics",
+    "color":"Greenish Blue",
     "nodes": [
            {
               "name": "One sample tests",
@@ -617,6 +626,7 @@
     {
     "id":10,
     "name":"Promoter analysis",
+     "color":"Grayish Turquoise",
     "nodes": [
             {
               "name": "Weeder",
@@ -631,6 +641,7 @@
     {
     "id":11,
     "name":"Annotation",
+    "color":"Bean Red",
     "nodes": [
               {
                 "name": "Agilent, Affymetrix or Illumina genelist",

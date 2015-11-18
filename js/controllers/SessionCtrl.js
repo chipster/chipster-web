@@ -15,15 +15,13 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	
 	 ws.$on('$open', function () {
 		 	console.log('connected through web socket'); 
-		 	console.log(ws.$status()); // it prints ws.$OPEN
 		  })
 		  .$on('$message', function(event) { // it listens for 'incoming event'
 		    console.log(event);
 		    $scope.event=event;
 		  })
 		  .$on('$close',function(){
-			  	console.log(ws.$status());
-				console.log('Connection to web socket is closing');
+			console.log('Connection to web socket is closing');
 		  });
 	 
 	// creating a session model object
