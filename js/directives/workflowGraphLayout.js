@@ -1,3 +1,7 @@
+/**
+* @desc workflowGraphLayout directive that creates the workflow graph for session dataset "d3Data"
+* @example <div><workflow-graph-layout data="d3Data"></div>
+*/
 chipsterWeb
 		.directive(
 				'workflowGraphLayout',

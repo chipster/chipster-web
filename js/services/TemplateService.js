@@ -1,4 +1,4 @@
-chipsterWeb.factory('TemplateService',function($rootScope){
+chipsterWeb.factory('TemplateService',function($rootScope,$window){
 	return {
 
 		getSessionTemplate:function(){
@@ -112,11 +112,13 @@ chipsterWeb.factory('TemplateService',function($rootScope){
 		
 		
 		getrandomX:function() {
-			  return Math.floor(Math.random() * (600 - 100 + 1)) + 100;
+			  var maxWidth=(window.innerWidth / 3) - 60;
+			  console.log(maxWidth);
+			  return Math.floor(Math.random() * (maxWidth - 100 + 1)) + 100;
 		},
 		
 		getrandomY:function() {
-			  return Math.floor(Math.random() * (600 - 100 + 1)) + 100;
+			  return Math.floor(Math.random() * (500 - 100 + 1)) + 100;
 		}
 
 

@@ -9,6 +9,12 @@
 					</span>
 				</p>
 				<hr class="soften">
+				<div id="data-detail" ng-show="showDatasetDetail()">
+					<h5>{{dataNode.name}}</h5>
+					<p>SourceJob: {{dataNode.sourceJob}}</p>
+					<p>File ID: {{dataNode.fileId}}</p>
+					<p>Size: {{dataNode.size}}</p>
+				</div>
 				<!--session editing modal-->
 				<div id="session-edit-modal" class="modal fade" role="dialog">
 					<div class="modal-dialog">

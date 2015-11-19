@@ -25,19 +25,18 @@
 				<div class="row">
 					<div class="col-xs-4">
 						<div id="tooltable">
-							<table class="table table-borderless">
+							<table class="table table-bordered">
 								<tbody>
 									<tr ng-repeat="tool in tools"
 										ng-click="selectedToolCat(tool,$index)"
-										ng-class="{'selected-class-name':$index===selectedTool}">
+										ng-class="{'tool-selected':$index===selectedToolCatIndex}">
 										<td>
-										<div class="circle_blue"></div>
-										</td>
-										<td>
-										<div style="height:18px;line-height:12px;">
-										
-										<a href="">{{tool.name}}</a>
-										</div>
+										<div class="row">
+											<div class="col-xs-2" ><tool-circle toolcolor="tool.color"></div>
+											<div class="col-xs-10" style="height:18px;line-height:12px;">
+												<a href="">{{tool.name}}</a>
+											</div>
+											</div>
 										</td>
 									</tr>
 								</tbody>
@@ -49,7 +48,7 @@
 							<table class="table table-bordered" >
 								<tbody>
 									<tr ng-repeat="node in currentToolCat.nodes"
-										ng-click="selectedTool(node,$index)">
+										ng-click="selectedTool(node,$index)" ng-class="{'tool-selected':$index===selectedToolIndex}">
 										<td><div style="height:16px;">
 										{{node.name}}
 										</div></td>
