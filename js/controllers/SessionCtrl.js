@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
-		TemplateService, SessionRestangular, AuthenticationService,$websocket) {
+		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
 	//authorization header
@@ -297,6 +297,9 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		return $scope.isDataNodeSelected;
 	};
 
-
-
+	$scope.textViewer=function(){
+		FileRestangular.one('sessions',	$routeParams.sessionId).one('datasets', $scope.dataNode.datasetId).get().then(function(resp) {
+			$scope.dataNode.file = resp.data;
+		});
+	};
 });

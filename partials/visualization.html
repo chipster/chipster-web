@@ -14,6 +14,9 @@
 					<p>SourceJob: {{dataNode.sourceJob}}</p>
 					<p>File ID: {{dataNode.fileId}}</p>
 					<p>Size: {{dataNode.size}}</p>
+
+					<a ng-click="textViewer()">Text viewer</a>
+					<p ng-if="dataNode.file">{{dataNode.file}}</p>
 				</div>
 				<!--session editing modal-->
 				<div id="session-edit-modal" class="modal fade" role="dialog">
