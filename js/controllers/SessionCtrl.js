@@ -145,21 +145,48 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.datalist = $scope.sessionUrl.all('datasets').getList();
 	};
 
-	$scope.addDataset = function() {
-		var newDataset = TemplateService.getDatasetTemplate();
-		newDataset.x=TemplateService.getrandomX();
-		newDataset.y=TemplateService.getrandomY();
-		console.log(newDataset);
-		var datasetUrl = $scope.sessionUrl.one('datasets');
-		datasetUrl.customPOST(newDataset).then(function(response) {
-			alert("Dataset has been added");
-			$scope.d3Data.nodes.push(newDataset);
-			
-			//Refresh the session page
-			//$scope.getSessionDetail();
-		})
+	$scope.flowFileAdded = function(file, event, flow) {
+
+		// get a separate target for each file
+		flow.opts.target = function(file, chunk, isTest) {
+			return file.chipsterTarget;
+		};
+
+		$scope.createDataset(file.name).then(function (dataset) {
+			// create an own target for each file
+			file.chipsterTarget = 'http://localhost:8000/'+"filebroker/"+"sessions/" + $routeParams.sessionId + "/datasets/" + dataset.datasetId + "?token=" + AuthenticationService.getToken();
+			file.resume();
+		});
+		// wait for dataset to be created
+		file.pause();
 	};
-	
+
+	$scope.flowFileSuccess = function ( file, message, flow ) {
+		// remove completed files from the list
+		file.cancel();
+	};
+
+	$scope.createDataset = function(name) {
+
+		var d = TemplateService.getDatasetTemplate();
+
+		d.datasetId=null;
+		d.name=name;
+		d.x=TemplateService.getrandomX();
+		d.y=TemplateService.getrandomY();
+		d.sourceJob=null;
+
+		return new Promise(function(resolve, reject) {
+			var datasetUrl = $scope.sessionUrl.one('datasets');
+			datasetUrl.customPOST(d).then(function(response) {
+				var location = response.headers('Location');
+				d.datasetId = location.substr(location.lastIndexOf('/') + 1);
+				$scope.d3Data.nodes.push(d);
+				resolve(d);
+			});
+		});
+	};
+
 	$scope.deleteDataset=function(datasetObj){
 		
 		//changing the file Id first
@@ -269,7 +296,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	$scope.showDatasetDetail=function(){
 		return $scope.isDataNodeSelected;
 	};
-	
-	
+
+
 
 });
