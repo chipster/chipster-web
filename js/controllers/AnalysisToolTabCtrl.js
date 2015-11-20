@@ -3,7 +3,7 @@ chipsterWeb.controller('AnalysisToolTabCtrl', function($scope, $http) {
 
 	this.tab = 1;
 	$scope.tools=[];
-	$scope.selectedToolCatIndex=0;
+	$scope.selectedToolCatIndex=-1;
 	$scope.currentToolCat=null;
 	$scope.selectedView=1;
 	
@@ -44,7 +44,7 @@ chipsterWeb.controller('AnalysisToolTabCtrl', function($scope, $http) {
 	$scope.selectedToolCat=function(tool,$index){
 		$scope.selectedToolCatIndex=$index;
 		$scope.currentToolCat=tool;
-		console.log(tool);
+		console.log($scope.selectedToolCatIndex);
 	};
 
 	$scope.remove = function(scope) {

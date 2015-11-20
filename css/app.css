@@ -13,25 +13,9 @@ table{
 	border-collapse: collapse;
 }
 
-td > div{
-	width: 55pt;
-	height: 16pt;
+.tool-selected{
+	background:#d5c796;
 }
-
-td{
-	border:1px solid #EEE;
-}
-.column-label >td, .row-label{
-	text-align: :center;
-	background: #EEE;
-}
-.row-label{width: 2em}
-
-/*-------------------------
-	Layout
--------------------------*/
-
-
 
 footer {
 	background: #333;
@@ -49,22 +33,15 @@ ul.unstyled {
 
 #chipsterInfoContainer{
 	text-align: center;
-	padding: 20px;
+	padding: 10px;
 }
 
-#tabContent{
-	padding: 20px;
+#mypanel{
+	padding:10px;
 }
 
 #toolButtonGroup{
 	margin-top: 20px
-}
-
-#runButton{
-	margin-top:20px;
-	margin-bottom:20px;
-	margin-left:50px;
-	margin-right:50px;
 }
 
 #add{
@@ -78,24 +55,28 @@ ul.unstyled {
 	/* Negative indent footer by its height */
 	margin:0 auto -60px;
 	/* Top padding for header and bottom padding by footer height*/
-	padding: 40px 0 60px;
+	padding: 0 0 60px;
 
 
 }
 
 #visalizationContainer{
 	margin: 10px;
-
 }
 
 #dataToolContainer{
 	margin: 5px;
 }
 
-#toollist{
+#tooltable{
 	overflow: auto;
-	max-height: 500px;
+	max-height: 450px;
+	margin-top:5px;
 }
+
+
+#toolrow {max-height:10px;}
+
 
 
 #flow-button-group{
@@ -144,38 +125,23 @@ ul.unstyled {
     margin-right: 5px;
 }
 
-
-
-.selected-class-name{
-	border: 2px dashed #bed2db;
-}
-
-
-
 .group-title {
     background-color: #687074 !important;
     color: #FFF !important;
 }
 
-
-
-
 .active {
     background-color: #CCC;
 }
 
-.circle_blue{
-		padding: 2px 3px;	
-        background: blue;
-        width: 2px;
-        border-radius: 2px;
-        width: 1%;
-       
-}
 
 .panel .nav-justified{
 	margin-bottom:-1px;
 }
+
+
+
+
 
 
 

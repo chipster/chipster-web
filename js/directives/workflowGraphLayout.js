@@ -1,3 +1,7 @@
+/**
+* @desc workflowGraphLayout directive that creates the workflow graph for session dataset "d3Data"
+* @example <div><workflow-graph-layout data="d3Data"></div>
+*/
 chipsterWeb
 		.directive(
 				'workflowGraphLayout',
@@ -16,7 +20,7 @@ chipsterWeb
 							// Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 12)*5 - 60, height = 500, shiftKey, ctrlKey;
+							var width = (window.innerWidth / 3) - 60, height = 500, shiftKey, ctrlKey;
 							
 							/*
 							 * $window.onresize=function(){

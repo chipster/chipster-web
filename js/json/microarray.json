@@ -2,6 +2,7 @@
  [ {
     "id":1,
     "name":"Normalisation",
+    "color":"#d5c796",
     "nodes":
         [
           {
@@ -93,6 +94,7 @@
     {
         "id":2,
         "name":"Utilities",
+        "color": "#83010b",
         "nodes":[
                 {
                   "name": "Search by correlation",
@@ -219,6 +221,7 @@
     {
     "id":3,
     "name":"Preprocessing",
+     "color":"#d59f45",
     "nodes": 
           [
                {
@@ -266,6 +269,7 @@
       {
       "id":4,
       "name":"Pathways",
+       "color":"#0177b7",
       "nodes": 
             [
               {
@@ -305,6 +309,7 @@
     {
     "id":5,
     "name":"Copy number aberrations",
+     "color":"#c0d2de",
     "nodes": [
               {
                 "name": "Import from GEO",
@@ -419,6 +424,7 @@
     {
     "id":6,
     "name":"Quality control",
+    "color":"#e7df70",
     "nodes":
            [
             {
@@ -454,6 +460,7 @@
     {
     "id":7,
     "name":"Visualisation",
+    "color":"#a49900",
     "nodes":
             [  
              {
@@ -501,6 +508,7 @@
     {
     "id":8,
     "name":"Clustering",
+     "color": "#d53833",
     "nodes": [
               {
                 "name": "KNN classification",
@@ -535,6 +543,7 @@
     {
     "id":9,
     "name":"Statistics",
+    "color":"#e7881c",
     "nodes": [
            {
               "name": "One sample tests",
@@ -617,6 +626,7 @@
     {
     "id":10,
     "name":"Promoter analysis",
+     "color":"#629a9b",
     "nodes": [
             {
               "name": "Weeder",
@@ -631,6 +641,7 @@
     {
     "id":11,
     "name":"Annotation",
+    "color":"#80a3b7",
     "nodes": [
               {
                 "name": "Agilent, Affymetrix or Illumina genelist",

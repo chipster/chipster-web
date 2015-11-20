@@ -3,27 +3,28 @@
 	<div id="session_tmp" class="row">
 
 		<!-- Start of Tools View -->
-		<div class="col-sm-3 col-lg-3" ng-include="'partials/tools.html'">
+		<div class="col-sm-4 col-lg-4" ng-include="'partials/tools.html'">
 		</div>
 		<!-- End of Tools View -->
 
 
 
 		<!-- Start of Workflow View -->
-		<div class="col-sm-5 col-lg-5" ng-include="'partials/workflow.html'">
+		<div class="col-sm-4 col-lg-4" ng-include="'partials/workflow.html'">
 		</div>
 		<!-- end of workflow -->
 
 
 		<!-- Visualization View -->
-		<div class="col-sm-4 col-lg-4">
-			<div class="panel panel-default">
-				<div class="panel-heading">Visualization</div>
-				<div class="panel-body" ng-include="'partials/visualization.html'"></div>
-			</div>
+		<div class="col-sm-4 col-lg-4" ng-include="'partials/visualization.html'">
+			
 		</div>
 
 		<!-- End of Visualization View -->
 
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">Sesssion Events </div>
+		<div class="panel-body">{{event}}</div>
 	</div>
 </div>
