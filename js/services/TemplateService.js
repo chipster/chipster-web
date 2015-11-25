@@ -5,7 +5,6 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 			var s={};
 			s.sessionId=null;
 			s.name="Example session";
-			s.owner="me";
 			s.notes="Test session created by chipster angular web client";
 			s.created = "2015-08-27T17:53:10.331Z";
         	s.accessed = "2015-08-27T17:53:10.331Z";
@@ -20,9 +19,6 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 			d.x=100;
 			d.y=100;
 			d.sourceJob="163c6fd2-ceb4-42eb-bdf6-c7625fc3992a";
-			d.fileId = "3c2806ed-ed94-42d1-bda9-542947f669ac";
-        	d.size = 0;
-        	d.checksum = "xyz";
         	return d;
 		},
 

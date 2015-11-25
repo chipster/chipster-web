@@ -161,6 +161,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		});
 		// wait for dataset to be created
 		file.pause();
+
 	};
 
 	$scope.flowFileSuccess = function ( file, message, flow ) {
@@ -188,7 +189,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			});
 		});
 	};
-	
+
 	$scope.deleteDataset=function(datasetObj){
 		
 		//changing the file Id first

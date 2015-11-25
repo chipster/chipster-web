@@ -8,10 +8,15 @@
 				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
 			</ul>
 			<ul class="nav nav-pills pull-right">
-				<li><button class="btn btn-xs btn-info pull-right" id="add"
-						ng-click="addDataset()">
+				<li><button class="btn btn-xs btn-info pull-right" data-toggle="modal"
+							data-target="#addDatasetModal">
 						<span class="glyphicon glyphicon-plus-sign"></span>
 					</button></li>
+
+				<div id="addDatasetModal" class="modal fade" role="dialog">
+					<div class="panel-body" ng-include="'partials/fileuploader.html'"></div>
+				</div>
+
 			</ul>
 		</div>
 		<!-- end of panel headings -->
@@ -39,8 +44,7 @@
 				<!--end of dataset List-->
 				<div>
 					<hr class="soften">
-					<button type="button" class="btn btn-sm btn-success"
-						ng-click="addDataset()">Add DataSet</button>
+
 					<button class="btn btn-sm btn-success" data-toggle="modal"
 						data-target="#jobListModal">See Jobs</button>
 
