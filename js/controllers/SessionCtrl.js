@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
-		TemplateService, SessionRestangular, AuthenticationService,$websocket) {
+		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
 	//authorization header
@@ -8,7 +8,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			$routeParams.sessionId);
 
 	// creating a websocket object and start listening for the events
-	var ws=$websocket.$new({
+	/*var ws=$websocket.$new({
 		url:'ws://localhost:8000/'+"sessiondbevents/"+"events/" + $routeParams.sessionId + "?token=" + AuthenticationService.getToken(),
 		protocols: []
 	});
@@ -23,7 +23,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		  .$on('$close',function(){
 			console.log('Connection to web socket is closing');
 		  });
-	 
+	 */
 	// creating a session model object
 	$scope.session = {
 		sessionId : $routeParams.sessionId,
@@ -51,6 +51,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	//Dataset Detail showing
 	$scope.dataNode=null;
 	$scope.isDataNodeSelected=false;
+	
+	$scope.toolDetailList=null;
 	
 	
 	$scope.d3Data={nodes:[],links:[]};
@@ -145,19 +147,46 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.datalist = $scope.sessionUrl.all('datasets').getList();
 	};
 
-	$scope.addDataset = function() {
-		var newDataset = TemplateService.getDatasetTemplate();
-		newDataset.x=TemplateService.getrandomX();
-		newDataset.y=TemplateService.getrandomY();
-		console.log(newDataset);
-		var datasetUrl = $scope.sessionUrl.one('datasets');
-		datasetUrl.customPOST(newDataset).then(function(response) {
-			alert("Dataset has been added");
-			$scope.d3Data.nodes.push(newDataset);
-			
-			//Refresh the session page
-			//$scope.getSessionDetail();
-		})
+	$scope.flowFileAdded = function(file, event, flow) {
+
+		// get a separate target for each file
+		flow.opts.target = function(file, chunk, isTest) {
+			return file.chipsterTarget;
+		};
+
+		$scope.createDataset(file.name).then(function (dataset) {
+			// create an own target for each file
+			file.chipsterTarget = 'http://localhost:8000/'+"filebroker/"+"sessions/" + $routeParams.sessionId + "/datasets/" + dataset.datasetId + "?token=" + AuthenticationService.getToken();
+			file.resume();
+		});
+		// wait for dataset to be created
+		file.pause();
+	};
+
+	$scope.flowFileSuccess = function ( file, message, flow ) {
+		// remove completed files from the list
+		file.cancel();
+	};
+
+	$scope.createDataset = function(name) {
+
+		var d = TemplateService.getDatasetTemplate();
+
+		d.datasetId=null;
+		d.name=name;
+		d.x=TemplateService.getrandomX();
+		d.y=TemplateService.getrandomY();
+		d.sourceJob=null;
+
+		return new Promise(function(resolve, reject) {
+			var datasetUrl = $scope.sessionUrl.one('datasets');
+			datasetUrl.customPOST(d).then(function(response) {
+				var location = response.headers('Location');
+				d.datasetId = location.substr(location.lastIndexOf('/') + 1);
+				$scope.d3Data.nodes.push(d);
+				resolve(d);
+			});
+		});
 	};
 	
 	$scope.deleteDataset=function(datasetObj){
@@ -269,7 +298,10 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	$scope.showDatasetDetail=function(){
 		return $scope.isDataNodeSelected;
 	};
-	
-	
 
+	$scope.textViewer=function(){
+		FileRestangular.one('sessions',	$routeParams.sessionId).one('datasets', $scope.dataNode.datasetId).get().then(function(resp) {
+			$scope.dataNode.file = resp.data;
+		});
+	};
 });
