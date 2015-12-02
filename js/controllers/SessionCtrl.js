@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
-		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular) {
+		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular,$http) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
 	//authorization header
@@ -54,8 +54,17 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	
 	$scope.toolDetailList=null;
 	
+	//For searching dataset in workflowgraph
+	$scope.searched_dataset_name=null;
 	
-	$scope.d3Data={nodes:[],links:[]};
+	
+	
+	
+	//$scope.d3Data={nodes:[],links:[]};
+	$http.get('js/json/workflow.json').then(function(res) {
+		$scope.d3Data = res.data;
+	
+	});
 
 	$scope.getSessionDetail = function() {
 		//get session detail

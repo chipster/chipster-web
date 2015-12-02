@@ -93,6 +93,7 @@ ul.unstyled {
 
 .node .selected {
   stroke: black;
+  stroke-width: 1px;
 }
 
  .node text{

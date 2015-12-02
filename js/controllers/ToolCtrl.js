@@ -12,6 +12,7 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular) {
 	$scope.current_t_cat = null;
 	$scope.is_t_type_selected=false;
 	$scope.selected_t_type_index=-1;
+	$scope.enable_t_parameter=false;
 	
 	$scope.getTools = function() {
 		var promises = [ ToolRestangular.all('modules.json').getList(),
@@ -36,12 +37,14 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular) {
 	
 	//defines which tool category the user have selected
 	$scope.selected_t_category = function(t_cat, $index) {
+		$scope.enable_t_parameter=false;
 		$scope.selected_t_cat_index = $index;
 		$scope.current_t_cat= t_cat;
 		console.log($scope.selectedToolCatIndex);
 	};
 	
 	$scope.selected_tool_type = function(tool,$index) {
+		
 		$scope.selected_t_type = tool;
 		$scope.selected_t_type_index = $index;
 		$scope.is_t_type_selected= true;
@@ -52,7 +55,14 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular) {
 		angular.forEach($scope.t_detail_list, function(elem, index) {
 			if(elem.name.id===tool.id){
 				$scope.selected_t_des=elem.description;
-				console.log($scope.selected_t_des);
+				if(elem.parameters.length>0){
+					$scope.enable_t_parameter=true;
+					$scope.selected_t_parameter_list=elem.parameters;
+					console.log($scope.selected_t_parameter_list[0].selectionOptions);
+				}else{
+					$scope.enable_t_parameter=false;
+				}
+				
 			}
 			
 		});

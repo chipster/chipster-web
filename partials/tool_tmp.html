@@ -82,7 +82,7 @@
 						<div class="modal-content">
 							<div class="modal-header">
 								<button type="button" class="close" data-dismiss="modal">&times</button>
-								<h4 class="modal-title">{{selectedToolId.tool}}</h4>
+								<h4 class="modal-title">{{selected_t_type.name}}</h4>
 							</div>
 							<!--end of modal header-->
 							<div class="modal-body">
@@ -98,14 +98,14 @@
 
 				</div>
 				<!--Parameter-->
-				<button class="btn  btn-info" data-toggle="modal"
+				<button class="btn  btn-info" ng-disabled="!enable_t_parameter" data-toggle="modal"
 					data-target="#parameterModal">Parameter</button>
 				<div id="parameterModal" class="modal fade" role="dialog">
 					<div class="modal-dialog">
 						<div class="modal-content">
 							<div class="modal-header">
 								<button type="button" class="close" data-dismiss="modal">&times</button>
-								<h4 class="modal-title">{{selectedToolId.tool}}</h4>
+								<h4 class="modal-title">{{selected_t_type.name}}</h4>
 							</div>
 							<!--end of modal header-->
 							<div class="modal-body" ng-include="'partials/parametermodal.html'">

@@ -9,9 +9,11 @@ chipsterWeb
 					return {
 						restrict : 'EA',
 						require:"^ngController",
+						templateUrl:"partials/searchinput.html",
 						scope : {
 							data : "=",
 							selectedDatasetId:"=",
+							searched_dataset_name:"=",
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
@@ -20,7 +22,8 @@ chipsterWeb
 							// Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 3) - 60, height = 500, shiftKey, ctrlKey;
+							var width = (window.innerWidth / 3) - 50, height = 500, shiftKey, ctrlKey;
+							var searched_dataset,svg,node,link;
 							
 							/*
 							 * $window.onresize=function(){
@@ -37,10 +40,17 @@ chipsterWeb
 										renderGraph(scope.data,width, height);
 									}									
 								});
+							
+							scope.search_dataset=function(searched_dataset_name){
+								console.log("user serched for"+searched_dataset_name);
+								searched_dataset=searched_dataset_name;
+								searchNode(scope.data);
+							};
 
 							function renderGraph(data,width,height) {
 								
 								var nodeWidth=40,nodeHeight=30;
+
 								var menu=[{
 									title:'Visualize',
 									action: function(elem,d,i){
@@ -99,7 +109,7 @@ chipsterWeb
 								
 								d3.select('svg').remove();
 
-								var svg = d3.select(iElement[0]).attr(
+								svg = d3.select(iElement[0]).attr(
 										"tabindex", 1).on("keydown.brush",
 										keydown).on("keyup.brush", keyup).each(
 										function() {
@@ -126,46 +136,7 @@ chipsterWeb
 											+ "scale(" + d3.event.scale + ")");
 								}
 
-								var brusher = d3.svg
-										.brush()
-										.x(xScale)
-										.y(yScale)
-										.on(
-												"brushstart",
-												function(d) {
-													node
-															.each(function(d) {
-																d.previouslySelected = shiftKey
-																		&& d.selected;
-
-															});
-												})
-										.on(
-												"brush",
-												function() {
-													var extent = d3.event.target
-															.extent();
-													node
-															.classed(
-																	"selected",
-																	function(d) {
-																		return d.selected = d.previouslySelected
-																				^ (extent[0][0] <= d.x
-																						&& d.x < extent[1][0]
-																						&& extent[0][1] <= d.y && d.y < extent[1][1]);
-																	});
-													
-													
-												})
-												.on(
-												"brushend",
-												function() {
-													d3.event.target.clear();
-													d3.select(this).call(
-															d3.event.target);
-												});
-
-								var svg_graph = svg.append('svg:g')
+															var svg_graph = svg.append('svg:g')
 										.call(zoomer)
 
 								var rect = svg_graph.append('svg:rect').attr(
@@ -174,42 +145,32 @@ chipsterWeb
 												"zrect") // gave html id
 												
 
-								var brush = svg_graph.append("g").datum(
-										function() {
-											return {
-												selected : false,
-												previouslySelected : false
-											};
-										}).attr("class", "brush");
 
 								var vis = svg_graph.append("svg:g");
 
 								vis.attr('fill','red').attr('stroke', 'black')
 										.attr('stroke-width', 1).attr(
 												'opacity', 1.0).attr('id',
-												'vis')
-					
-
-								brush.call(brusher).on("mousedown.brush", null)
-										.on("touchstart.brush", null).on(
-												"touchmove.brush", null).on(
-												"touchend.brush", null);
-
-								brush.select('.background').style('cursor',
-										'auto');
-								
+												'vis')								
 								
 								//Defining dataset
 								graph = data;
 								
 								//defining links
-								var link = vis.append("g")
+								link = vis.append("g")
 										.attr("class", "link")
 										.selectAll("line");
 								//defining nodes
-								var node = vis.append("g")
+								node = vis.append("g")
 										.attr("class", "node").selectAll(
 												"rect");
+								
+								//Define the node x y before drawing the label
+								graph.nodes.forEach(function(elem){
+									elem.x=elem.c_id*80+30;
+					      			elem.y=elem.level*40+elem.group*40;
+					    		});
+
 								
 								var label=[];
 										
@@ -229,53 +190,20 @@ chipsterWeb
 									  return d.x+nodeWidth/2;
 								  })
 								  .attr("y",function(d,i){
-									  return d.y+nodeHeight+10;
+									  return d.y+nodeHeight/2;
 								  })
-								  .attr("font-size", "8px")
+								  .attr("font-size", "10px")
 								  .attr("fill","black")
 								  .attr("text-anchor", "middle")
-								  .on("click",
-											function(d) {
-												if (d3.event.defaultPrevented)
-													return;
-												svg.style("cursor","pointer");
-												d3.event.stopPropagation();
-
-												if (!shiftKey) {
-													// if the isnt down,
-													// unselect everything
-													label.classed(
-																	"selected",
-																	function(
-																			p) {
-																		return p.selected = p.previouslySelected = false;
-					
-																	})
-
-												}
-
-												//always select this node
-												d3.select(this)
-														.classed(
-																"selected",
-																d.selected = !d.previouslySelected);
-												
-											})
-											.call(
-												d3.behavior
-														.drag()
-														.on(
-																"drag",
-																function(d) {
-																	nudge(
-																			d3.event.dx,
-																			d3.event.dy);
-																}))
-											.on("contextmenu",d3.contextMenu(menu));
-								
+								  .call(d3.behavior.drag().on("drag",function(d) {
+										nudge(
+											d3.event.dx,
+											d3.event.dy);
+									}))
+									.on("contextmenu",d3.contextMenu(menu));
 								};
 								  	  
-								
+								//Function to describe drag behavior
 								function nudge(dx, dy) {
 									node.filter(function(d) {
 										return d.selected;
@@ -315,11 +243,31 @@ chipsterWeb
 										d3.event.preventDefault();
 	
 								}
-
+								
+								//Define the link source and target
 								graph.links.forEach(function(d) {
+									//console.log(d);
 									d.source = graph.nodes[d.source];
 									d.target = graph.nodes[d.target];
 								});
+								
+								//building the arrows for the link end
+								vis.append("defs").selectAll("marker")
+								   .data(["end"])
+								   .enter().append("marker")
+								   .attr("id", String)
+								   .attr("viewBox","0 -5 12 12")
+								   .attr("refX",20)
+								   .attr("refY",0)
+								   .attr("markerWidth",7)
+								   .attr("markerHeight",7)
+								   .attr("orient","auto")
+								   .append("path")
+								   .attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
+								   .style("stroke","#0177b7");
+								
+								
+								//Define the xy positions of the link					
 
 								link = link.data(graph.links).enter().append(
 										"line").attr("x1", function(d) {
@@ -330,81 +278,89 @@ chipsterWeb
 									return d.target.x+nodeWidth/2;
 								}).attr("y2", function(d) {
 									return d.target.y;
-								});
+								}).style("marker-end","url(#end)");
+								
+								//Set up tooltip
+								var tip=d3.tip()
+										.attr("class","d3-tip")
+										.offset([-10,0])
+										.html(function(d){return d.name+"";})
+								
+								svg.call(tip);
+								
 
+								//Drawing the nodes in the SVG
 								node = node
 										.data(graph.nodes)
 										.enter()
 										.append("rect")
-										.attr("x", function(d) {
-											return d.x;
-										})
-										.attr("y", function(d) {
-											return d.y;
-										})
+										.attr("x", function(d) {return d.x;})
+										.attr("y", function(d) {return d.y;})
 										.attr("width",nodeWidth)
 										.attr("height",nodeHeight)
-										.attr("fill",function(d,i){return c20(i)})
-										.on("dblclick", function(d) {
-											d3.event.stopPropagation();
+										.attr("fill",function(d,i){return c20(i);})
+										.on("dblclick", function(d){
+											//connectedNodes(d);
 										})
-										.on(
-												"click",
-												function(d) {
-													if (d3.event.defaultPrevented)
-														return;
-													svg.style("cursor","pointer");
-
-													if (!shiftKey) {
-														// if the isnt down,
-														// unselect everything
-														node.classed("selected",function(p) {
-															return p.selected = p.previouslySelected = false;
-														})
-													}
-													//always select this node
-													d3.select(this).classed(
-																	"selected",
-																	d.selected = !d.previouslySelected);
-													
-													if(d.selected){
-														parentController.setDatasetId(d.datasetId);
-													}
-													
+										.on("click",
+												function(d) {		
+													d3.select(this).classed("selected",d.selected=!d.selected);
 													//For showing dataset detail
 													scope.$apply(function(){
 														parentController.getSelectedDataNode(d);
 													});
 							
 												})
-										.on(
-												"mouseup",
-												function(d) {
-													//do something
-													if (d.selected && shiftKey)
-														d3
-																.select(this)
-																.classed(
-																		"selected",
-																		d.selected = false);
-													
-												})
+										
 										.call(
 												d3.behavior
 														.drag()
 														.on(
-																"drag",
+															"drag",
 																function(d) {
 																	parentController.cancelDatasetSelection(d.datasetId);
 																	nudge(
 																			d3.event.dx,
 																			d3.event.dy);
 																}))
-										.on("contextmenu",d3.contextMenu(menu));
-										
+										.on("contextmenu",d3.contextMenu(menu))
+										.on("mouseover",tip.show)
+										.on("mouseout",tip.hide);
 								
-																
-
+								//Define initial value for selected
+								node.each(function(d) {
+									d.selected = false;
+								});
+								
+								
+								//Adding the check box with the nodes
+								nodeCheck=vis.append("g")
+								  .attr("class", "check")
+								  .selectAll("check")
+								  .data(graph.nodes)
+								  .enter()
+								  .append("foreignObject")
+								  .attr("width",20)
+								  .attr("height",20)
+								   .attr("x",function(d,i){
+									  return d.x-24;
+								  })
+								  .attr("y",function(d,i){
+									  return d.y;
+								  })	
+								  .append("xhtml:body")
+								  .html("<form><input type=checkbox id=check/></form>")
+								  .on("click",function(d,i){
+									  d.checked=!d.checked;
+									  console.log(d.checked);
+								  });
+								nodeCheck.each(function(d) {
+									d.checked = false;
+								});
+								nodeCheck.classed("checked",false);
+								  
+								  
+								 
 								function keydown() {
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
@@ -424,11 +380,6 @@ chipsterWeb
 
 										vis.selectAll('g.gnode').on(
 												'mousedown.drag', null);
-
-										brush.select('.background').style(
-												'cursor', 'crosshair')
-										brush.call(brusher);
-
 									}
 								}
 
@@ -436,18 +387,40 @@ chipsterWeb
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
 									ctrlKey = d3.event.ctrlKey;
-									
-									brush.call(brusher).on("mousedown.brush",
-											null).on("touchstart.brush", null)
-											.on("touchmove.brush", null).on(
-													"touchend.brush", null);
-
-									brush.select('.background').style('cursor',
-											'auto')
 									svg_graph.call(zoomer);
 								}
+								
+								
+								
+						
 
 							}//end of renderGraph
+							
+							//Method for search a specific data file in the workflow graph
+							function searchNode(data){
+								console.log(searched_dataset);
+								
+								if(searched_dataset==="none"){
+									node.style("stroke","white").style("stroke-width","1");
+								}else{
+									var selected=node.filter(function(d,i){
+										console.log(d.name);
+										return d.name!=searched_dataset;
+									});
+									
+							
+									selected.style("opacity","0");
+									
+								
+									link.style=("opacity","0");
+									node.transition()
+										.duration(10000)
+										.style("opacity",1);
+									link.transition()
+									.duration(10000)
+									.style("opacity",1);
+								}
+							}
 
 						}//end of link function
 
