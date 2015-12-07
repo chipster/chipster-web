@@ -1,160 +1,192 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="chipster-web">
 <head>
-    <meta charset="utf-8">
-    <title>Chipster</title>
+<meta charset="utf-8">
+<title>Chipster</title>
 
-    <!-- Mobile Viewport optimized-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Chipster Web Tool for Data Processing and Visualization">
-    <meta name="author" content="Rumana Quazi">
+<!-- Mobile Viewport optimized-->
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description"
+	content="Chipster Web Tool for Data Processing and Visualization">
+<meta name="author" content="Rumana Quazi">
 
-    <!--Bootstrap CSS-->
-    <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<!--Bootstrap CSS-->
+<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css"
+	rel="stylesheet">
 
 
-    <!--Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="/bower_components/d3-context-menu/css/d3-context-menu.css">
+<!--Vendor CSS-->
+<link rel="stylesheet" type="text/css"
+	href="/bower_components/d3-context-menu/css/d3-context-menu.css">
 
-   
 
-    <!--Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="css/app.css">
 
-</head><!--end of head-->
+<!--Custom CSS-->
+<link rel="stylesheet" type="text/css" href="css/app.css">
+
+</head>
+<!--end of head-->
 
 <body ng-controller="MainCtrl">
-    <!--header and Navbar-->
+	<!--header and Navbar-->
 
-    <div id="wrap">
+	<div id="wrap">
 
-        <nav class="navbar navbar-default">
-          <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-              <a class="navbar-brand active" href="#home">Chipster</a>
-            </div>
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<a class="navbar-brand active" href="#home">Chipster</a>
+				</div>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li><a href="#sessions">SessionList</a></li>   
-      </ul>
-      
-      <form class="navbar-form pull-left">
-                    <input type="text" class="form-control" placeholder="Search this site.." id="searchInput">
-                </form><!--end navbar form-->
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
-        <li><a href="#home" ng-show="isLoggedIn()" ng-click="logout()" >Logout</a></li>
-        
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse"
+					id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li><a href="#sessions">SessionList</a></li>
+					</ul>
 
+					<form class="navbar-form pull-left">
+						<input type="text" class="form-control"
+							placeholder="Search this site.." id="searchInput">
+					</form>
+					<!--end navbar form-->
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
+						<li><a href="#home" ng-show="isLoggedIn()"
+							ng-click="logout()">Logout</a></li>
 
-    <!--Main content and injected view-->
-    <div id="main">
-        <!--andgular templating-->
-        <!--This is where the contents will be injected-->
-        <div ng-view></div>   
-    </div><!--end of main container-->
-</div><!--end of wrap-->
-
-<footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-2">
-                    <h6>Copyright &copy; 2015 xyzx</h6>
-                </div><!--end of col-sm-2-->
-                <div class="col-sm-4">
-                    <h6>About Us</h6>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</p>
-                </div><!--end of col-sm-4-->
-                <div class="col-sm-2">
-                    <h6>Quick Links</h6>
-                    <ul class="unstyled">
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Wiki</a></li>
-                        <li><a href="#">Tools</a></li>
-                        <li><a href="#">Contact</a></li>
-                    </ul>
-                </div><!--end of col-sm-2-->
-                <div class="col-sm-2">
-                    <h6>Follow Us</h6>
-                    <ul class="unstyled">
-                        <li><a href="#">Github</a></li>
-                        <li><a href="#">Twitter</a></li>
-                    </ul>
-                </div><!-- end col-sm-2 -->
-                <div class="col-sm-2">
-                    <h6>Questions Welcome!!</h6>
-                </div><!-- end col-sm-2 -->
-            </div><!--end of row-->
-
-        </div><!--end of conatiner-->
-
-    </footer><!--end of footer-->
+					</ul>
+				</div>
+				<!-- /.navbar-collapse -->
+			</div>
+			<!-- /.container-fluid -->
+		</nav>
 
 
-    
-    <!--js stuff-->
-    <!--script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script-->
-    
+		<!--Main content and injected view-->
+		<div id="main">
+			<!--andgular templating-->
+			<!--This is where the contents will be injected-->
+			<div ng-view></div>
+		</div>
+		<!--end of main container-->
+	</div>
+	<!--end of wrap-->
+
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-2">
+					<h6>Copyright &copy; 2015 xyzx</h6>
+				</div>
+				<!--end of col-sm-2-->
+				<div class="col-sm-4">
+					<h6>About Us</h6>
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+						sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+						Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+						nisi ut aliquip ex ea commodo consequat</p>
+				</div>
+				<!--end of col-sm-4-->
+				<div class="col-sm-2">
+					<h6>Quick Links</h6>
+					<ul class="unstyled">
+						<li><a href="#">Home</a></li>
+						<li><a href="#">Wiki</a></li>
+						<li><a href="#">Tools</a></li>
+						<li><a href="#">Contact</a></li>
+					</ul>
+				</div>
+				<!--end of col-sm-2-->
+				<div class="col-sm-2">
+					<h6>Follow Us</h6>
+					<ul class="unstyled">
+						<li><a href="#">Github</a></li>
+						<li><a href="#">Twitter</a></li>
+					</ul>
+				</div>
+				<!-- end col-sm-2 -->
+				<div class="col-sm-2">
+					<h6>Questions Welcome!!</h6>
+				</div>
+				<!-- end col-sm-2 -->
+			</div>
+			<!--end of row-->
+
+		</div>
+		<!--end of conatiner-->
+
+	</footer>
+	<!--end of footer-->
 
 
-    <script src="/bower_components/jquery/dist/jquery.js"></script>
-    <script src="/bower_components/angular/angular.js"></script>
-    <script src="/bower_components/angular-route/angular-route.js"></script>
-    <script src="/bower_components/angular-mocks/angular-mocks.js"></script>
-    <script src="/bower_components/angular-resource/angular-resource.js"></script>
 
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    
- 
-    <!--defining d3 element-->
-    <script src="/bower_components/d3/d3.js"></script>
-    <script src="/bower_components/d3-context-menu/js/d3-context-menu.js"></script>
-    
-   
+	<!--js stuff-->
+	<!--script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script-->
 
-    <!--file and folder uploader-->
-    <script src="/bower_components/ng-flow/dist/ng-flow-standalone.js"></script>
-    
-    <!--Modules for RestAngular-->
-    <script src="/bower_components/lodash/lodash.js"></script>
-    <script src="/bower_components/restangular/dist/restangular.js"></script>
-    <script src="/bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
-    
-    <!-- Module for Web Socket -->
-    <script src="/bower_components/ng-websocket/ng-websocket.js"></script>
-    
-    <!-- Custom JS -->
-    <script type="text/javascript" src="js/app.js"></script>
 
-    <!--Controllers-->
-    <script type="text/javascript" src="js/controllers/MainCtrl.js"></script>
-    <script type="text/javascript" src="js/controllers/AnalysisToolTabCtrl.js"></script>
-    <script type="text/javascript" src="js/controllers/UploadDialogCtrl.js"></script>
-    <script type="text/javascript" src="js/controllers/LoginCtrl.js"></script>
-    <script type="text/javascript" src="js/controllers/SessionListCtrl.js"></script>
-    <script type="text/javascript" src="js/controllers/SessionCtrl.js"></script> 
-  	<script type="text/javascript" src="js/controllers/SessionViewCtrl.js"></script>
-  	
-  	
-    <!--Directives-->
-    <script type="text/javascript" src="js/directives/chipstermodal.js"></script>
-    <script type="text/javascript" src="js/directives/mymodal.js"></script>
-    <script type="text/javascript" src="js/directives/workflowGraphLayout.js"></script>
-    <script type="text/javascript" src="js/directives/toolcircle.js"></script>
-    
 
-    <!--Services-->
-    <script type="text/javascript" src="js/services/AuthenticationService.js"></script>
-    <script type="text/javascript" src="js/services/TemplateService.js"></script>
-    <script type="text/javascript" src="js/services/SessionRestangular.js"></script>
-    <script type="text/javascript" src="js/services/FileRestangular.js"></script>
+	<script src="/bower_components/jquery/dist/jquery.js"></script>
+	<script src="/bower_components/angular/angular.js"></script>
+	<script src="/bower_components/angular-route/angular-route.js"></script>
+	<script src="/bower_components/angular-mocks/angular-mocks.js"></script>
+	<script src="/bower_components/angular-resource/angular-resource.js"></script>
+
+	<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+
+
+	<!--defining d3 element-->
+	<script src="/bower_components/d3/d3.js"></script>
+	<script src="/bower_components/d3-context-menu/js/d3-context-menu.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"> </script>
+
+
+
+	<!--file and folder uploader-->
+	<script src="/bower_components/ng-flow/dist/ng-flow-standalone.js"></script>
+
+	<!--Modules for RestAngular-->
+	<script src="/bower_components/lodash/lodash.js"></script>
+	<script src="/bower_components/restangular/dist/restangular.js"></script>
+	<script
+		src="/bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+
+	<!-- Module for Web Socket -->
+	<script src="/bower_components/ng-websocket/ng-websocket.js"></script>
+
+	<!-- Custom JS -->
+	<script type="text/javascript" src="js/app.js"></script>
+
+	<!--Controllers-->
+	<script type="text/javascript" src="js/controllers/MainCtrl.js"></script>
+	<script type="text/javascript"
+		src="js/controllers/AnalysisToolTabCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/UploadDialogCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/LoginCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/SessionListCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/SessionCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/SessionViewCtrl.js"></script>
+	<script type="text/javascript" src="js/controllers/ToolCtrl.js"></script>
+
+
+	<!--Directives-->
+	<script type="text/javascript" src="js/directives/chipstermodal.js"></script>
+	<script type="text/javascript" src="js/directives/mymodal.js"></script>
+	<script type="text/javascript"
+		src="js/directives/workflowGraphLayout.js"></script>
+	<script type="text/javascript" src="js/directives/toolcircle.js"></script>
+	<script type="text/javascript" src="js/directives/tooltext.js"></script>
+
+
+	<!--Services-->
+	<script type="text/javascript"
+		src="js/services/AuthenticationService.js"></script>
+	<script type="text/javascript" src="js/services/TemplateService.js"></script>
+	<script type="text/javascript" src="js/services/SessionRestangular.js"></script>
+	<script type="text/javascript" src="js/services/ToolRestangular.js"></script>
+	<script type="text/javascript" src="js/services/FileRestangular.js"></script>
 
 </body>
 </html>

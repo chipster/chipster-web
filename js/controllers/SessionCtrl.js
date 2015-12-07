@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
-		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular) {
+		TemplateService, SessionRestangular, AuthenticationService, $websocket, FileRestangular,$http) {
 
 	//SessionRestangular is a restangular object with configured baseUrl and
 	//authorization header
@@ -8,7 +8,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			$routeParams.sessionId);
 
 	// creating a websocket object and start listening for the events
-	var ws=$websocket.$new({
+	/*var ws=$websocket.$new({
 		url:'ws://localhost:8000/'+"sessiondbevents/"+"events/" + $routeParams.sessionId + "?token=" + AuthenticationService.getToken(),
 		protocols: []
 	});
@@ -23,7 +23,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		  .$on('$close',function(){
 			console.log('Connection to web socket is closing');
 		  });
-	 
+	 */
 	// creating a session model object
 	$scope.session = {
 		sessionId : $routeParams.sessionId,
@@ -52,8 +52,19 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	$scope.dataNode=null;
 	$scope.isDataNodeSelected=false;
 	
+	$scope.toolDetailList=null;
 	
-	$scope.d3Data={nodes:[],links:[]};
+	//For searching dataset in workflowgraph
+	$scope.searched_dataset_name=null;
+	
+	
+	
+	
+	//$scope.d3Data={nodes:[],links:[]};
+	$http.get('js/json/workflow.json').then(function(res) {
+		$scope.d3Data = res.data;
+	
+	});
 
 	$scope.getSessionDetail = function() {
 		//get session detail
@@ -159,6 +170,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		});
 		// wait for dataset to be created
 		file.pause();
+
 	};
 
 	$scope.flowFileSuccess = function ( file, message, flow ) {
