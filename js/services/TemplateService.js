@@ -25,14 +25,14 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 		getJobTemplate:function(){
 			var j={};
 			j.jobId=null;
-			j.toolId="sort.py";
-			j.state="COMPLETED";
+			j.toolId="SortBed.java";
+			j.state="NEW";
 			j.toolCategory="Utilities";
 			j.toolName="Sort file";
 			j.toolDescription="Imaginary sort tool for chipster web client";
 			j.startTime = "2015-08-27T17:53:10.504Z";
         	j.endTime = "2015-08-27T17:53:10.503Z";
-
+/*
         	j.parameters=[];
         	var p1={};
         	p1.parameterId="sortCol";
@@ -52,17 +52,17 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 
         	j.parameters.push(p2);
 
+*/
 
-        	
         	j.inputs = [];
 	        var i1 = {};
-	        i1.inputId = "inFile";
+	        i1.inputId = "regions.bed";
 	        i1.displayName = "Input file";
 	        i1.description = "File to sort";
 	        i1.type = "GENERIC";
 	        i1.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
 	        j.inputs.push(i1);
-
+/*
 	        var i2 = {};
 	        i2.inputId = "extraFile";
 	        i2.displayName = "Extra file";
@@ -70,13 +70,8 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 	        i2.type = "GENERIC";
 	        i2.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
 	        j.inputs.push(i2);
-
+*/
 	        return j;
-
-
-
-
-
 		},
 
 		getWorflowNodeTemplate:function(){
