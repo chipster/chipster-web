@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<div class="panel panel-default" ng-init="loadWorkflowData()">
 	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}</div>
 	<!--end of panel heading-->
 	<div class="panel-body">
@@ -8,7 +8,13 @@
 				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
 			</ul>
 			<ul class="nav nav-pills pull-right">
-				<li><button class="btn btn-xs btn-info pull-right"
+				<li>
+					<button class="btn btn-xs btn-info pull-right"
+						ng-click="changeOrientation()">
+						<span class="glyphicon glyphicon-repeat"></span>
+					</button>
+				</li>
+				<li><button class="btn btn-xs btn-info"
 						data-toggle="modal" data-target="#addDatasetModal">
 						<span class="glyphicon glyphicon-plus-sign"></span>
 					</button></li>
@@ -24,7 +30,7 @@
 		<div id="tabContent">
 			<div ng-show="isSet(1)">
 				<hr />
-				<workflow-graph-layout data="d3Data">
+				<workflow-graph-layout data="d3Data" selectedDataset="selectedDatasetId">
 			</div>
 			<div ng-show="isSet(2)">
 				<hr />

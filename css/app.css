@@ -53,11 +53,10 @@ ul.unstyled {
 	min-height: 100%;
 	height: auto;
 	/* Negative indent footer by its height */
-	margin:0 auto -60px;
+	/*margin:0 auto -60px;*/
 	/* Top padding for header and bottom padding by footer height*/
-	padding: 0 0 60px;
-
-
+	/*padding: 0 0 60px;*/
+	
 }
 
 #visalizationContainer{
@@ -77,13 +76,18 @@ ul.unstyled {
 
 #toolrow {max-height:10px;}
 
-
+#run_btn{
+	margin:20px;
+	width:80%
+}
 
 #flow-button-group{
 	margin: 20px;
 	position: center;
 
 }
+
+
 
 /* D3 graph related styles*/
 .node {
@@ -93,13 +97,8 @@ ul.unstyled {
 
 .node .selected {
   stroke: black;
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
-
- .node text{
- 	font: 8px helvetica;
- 	color: #f00;
- }
 
 
 .link {     

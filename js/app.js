@@ -1,5 +1,5 @@
 var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow','restangular',
-		'LocalStorageModule','ngWebsocket'])
+		'LocalStorageModule','ngWebsocket','angularResizable'])
 		
 var baseURL='http://localhost:8000/';
 
@@ -57,7 +57,7 @@ chipsterWeb
 						templateUrl : 'partials/login.html',
 						controller : 'LoginCtrl'
 					}).when('/session/:sessionId', {
-						templateUrl : 'partials/session_tmp.html',
+						templateUrl : 'partials/session.html',
 						authenticated:true
 
 					}).when('/sessions', {
