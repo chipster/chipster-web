@@ -6,7 +6,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 					return {
 						restrict : 'EA',
 						require:"^ngController",
-						//templateUrl:"partials/searchinput.html",
 						scope : {
 							data : "=",
 							selectedDataset:"=",
@@ -15,26 +14,22 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
+							
+							console.log(parentController);
 			
 							//@ToDO Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
 							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
-							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu;
+							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;
+								
+							scope.$on('resizeWorkFlowGraph',function(event,data){
+								width=data.data.width-50;
+								renderGraph(width, height);
+							});
 							
-							//@ToDO, add the resize div functionality
-							
-							/*
-							 * $window.onresize=function(){
-							 * scope.$apply(function(){ //Need to put some
-							 * interval here
-							 * 
-							 * renderGraph(window.innerWidth/2-30,height); }); }
-							 */
-							
-
 							scope.$watch("data",function() {
 								if(scope.data){
 									graph=scope.data;
@@ -43,9 +38,46 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 									}									
 								});
 							
+							scope.$on('addProgressBar',function(event,data){
+								var tau=2*Math.PI;
+								var arc=d3.svg.arc().innerRadius(10).outerRadius(15).startAngle(0);
+								pb_svg=vis.append("g").attr("width", 50).attr("height", 50).attr("transform", "translate(" + 400 + "," + 400+ ")")
+										
+										
+								//add the background arc
+								var background=pb_svg.append("path").datum({endAngle:tau}).style("fill","#ddd").attr("d",arc);
+												
+												
+								//add the foreground arc
+								var foreground=pb_svg.append("path").datum({endAngle:0.127*tau}).style("fill","blue").attr("d",arc);
+												
+								
+								setInterval(function(){
+									foreground.transition().duration(750).call(arcTween,Math.random()*tau);},1500);
+								
+								function arcTween(transition,newAngle){
+									transition.attrTween("d",function(d){
+										var interpolate=d3.interpolate(d.endAngle,newAngle);
+										return function(t){
+											d.endAngle=interpolate(t);
+											return arc(d);
+										};
+									});
+								}//end of function arcTween
+							});
+							
+							scope.$on('removeProgressBar',function(event,data){
+								pb_svg.remove();
+							});
+							
 							 scope.changeNodeCheck = function(){	 
 								 drawNodeCheck(scope.data);
 						     };
+						     
+						     scope.$on('changeNodeCheck',function(event,data){
+					             scope.changeNodeCheck();
+						     });
+						
 						       
 						    function drawNodeCheck(){
 						    	 //Adding the check box with the nodes
@@ -56,7 +88,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 									   .append("xhtml:body").html("<form><input type=checkbox id=check/></form>")
 									   .on("click",function(d,i){
 										  d.checked=!d.checked;
-										  if(d.checked){parentController.setDatasetId(d);}
+										  if(d.checked){parentController.setDatasetSelection(d);}
 										  else{parentController.cancelDatasetSelection(d);}
 									  });
 									
@@ -65,11 +97,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 									  
 							}
 						     
-						    scope.$on('changeNodeCheck',function(event,data){
-						             scope.changeNodeCheck();
-						     });
-							
-							
 							scope.search_dataset=function(searched_dataset_name){
 								searched_dataset=searched_dataset_name;
 								searchNode(scope.data);

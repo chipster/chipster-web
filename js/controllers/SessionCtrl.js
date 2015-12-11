@@ -1,6 +1,6 @@
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService, $websocket,
-		FileRestangular, $http) {
+		FileRestangular, $http,$window) {
 
 	// SessionRestangular is a restangular object with configured baseUrl and
 	// authorization header
@@ -40,7 +40,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 	// Dataset and tool for posting jobs
-	$scope.selectedDatasetId = [];
+	$scope.selectedDatasets = [];
 	$scope.selectedToolId = null;
 	$scope.selectedToolIndex = -1;
 	$scope.istoolselected = false;
@@ -216,9 +216,10 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		});
 	};
 
+	// Method for submitting the job with tool and dataset
 	$scope.runJob = function() {
 
-		if ($scope.selectedDatasetId.length < 1) {
+		if ($scope.selectedDatasets.length < 1) {
 			alert("No dataset selected");
 			return;
 		}
@@ -232,22 +233,27 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		newJob.toolId = $scope.selectedToolId.tool;
 		newJob.toolName = $scope.selectedToolId.name;
 
-		angular.forEach($scope.selectedDatasetId, function(selectedDataId,
+		angular.forEach($scope.selectedDatasets, function(selectedDataId,
 				index) {
 			newJob.inputs[index].datasetId = selectedDataId;
 
 		});
 
 		var postJobUrl = $scope.sessionUrl.one('jobs');
-		alert("Job Submitted to server");
 		
-		$scope.selectedDatasetId = [];
+		$scope.selectedDatasets = [];
 		$scope.selectedToolId = null;
 		$scope.selectedToolIndex = -1;
 		$scope.istoolselected = false;
 
 		$scope.$broadcast('changeNodeCheck', {});
+		
+		//to show the running job progress
+		$scope.$broadcast('addProgressBar',{});
 
+		//when job finished event is received,remove the progressbar
+		setTimeout(function() {
+		   $scope.$broadcast('removeProgressBar',{});},7000);
 		/*
 		 * postJobUrl.customPOST(newJob).then(function(response) { //Need to
 		 * settle the dataset ID });
@@ -256,14 +262,14 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 	// Binding datasetId from workflow graph directive
-	this.setDatasetId = function(datasetId) {
-		$scope.selectedDatasetId.push(datasetId);
-		console.log($scope.selectedDatasetId);
+	this.setDatasetSelection = function(datasetId) {
+		$scope.selectedDatasets.push(datasetId);
+		console.log($scope.selectedDatasets);
 	};
 
 	this.cancelDatasetSelection = function(datasetId) {
-		var index = $scope.selectedDatasetId.indexOf(datasetId);
-		$scope.selectedDatasetId.splice(index, 1);
+		var index = $scope.selectedDatasets.indexOf(datasetId);
+		$scope.selectedDatasets.splice(index, 1);
 	};
 
 	$scope.selectedTool = function(tool, $index) {
@@ -297,7 +303,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 		});
 	};
-
+	
+	//for showing dataset detail for the selected node
 	this.getSelectedDataNode = function(dataNode) {
 		$scope.dataNode = dataNode;
 		console.log($scope.dataNode.name);
@@ -346,7 +353,15 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 				});
 
 	};
-
+	
+	
+	//We are only handling the resize end event
+	$scope.$on("angular-resizable.resizeEnd",function(event,args){
+		$scope.$broadcast('resizeWorkFlowGraph',{data:args});
+		
+	});
+	
+	
 });
 
 /**
