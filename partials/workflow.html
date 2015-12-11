@@ -1,9 +1,15 @@
-<div class="panel panel-default" ng-init="loadWorkflowData()">
-	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}</div>
+<div class="panel panel-default">
+	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}	
+	<form novalidate class="simple-form pull-right">
+		<input type="text" ng-model="searched_dataset_name"> <input
+			type="submit" ng-click="search_dataset(searched_dataset_name)"
+			value="Search" />
+	</form>	
+	</div>
 	<!--end of panel heading-->
 	<div class="panel-body">
 		<div>
-			<ul class="nav nav-pills pull-left">
+			<ul class="nav nav-tabs pull-left" >
 				<li ng-class="{active:isSet(1)}"><a href ng-click="setItem(1)">Workflow</a></li>
 				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
 			</ul>
@@ -29,15 +35,13 @@
 
 		<div id="tabContent">
 			<div ng-show="isSet(1)">
-				<hr />
 				<workflow-graph-layout data="d3Data" selectedDataset="selectedDatasetId">
 			</div>
 			<div ng-show="isSet(2)">
-				<hr />
 				<div class="dataset-list">
 					<table class="table table-hover">
 						<tbody>
-							<tr ng-repeat="data in d3Data.nodes">
+							<tr ng-repeat="data in d3Data.nodes|searchDataset:searched_dataset_name">
 								<td class="text-left text-nowrap" ng-click=""><a href="">{{data.name}}</a></td>
 								<td class="text-right text-nowrap">
 									<button class="btn btn-xs btn-info"

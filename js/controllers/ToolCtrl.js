@@ -3,7 +3,7 @@
  *       data in UI
  * @example <div ng-controller="ToolCtrl"></div>
  */
-chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular) {
+chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter) {
 	// for the time being,tools have a different URL
 	
 	//initialization
@@ -69,5 +69,43 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular) {
 		
 		
 	};
+	/*
+	$scope.filter_t_modules=$scope.t_modules;
+	$scope.$watch('searchTool',function(val){
+		if(!searchTool){
+			
+		}
+		
+		angular.forEach($scope.t_categories,function(elem){
+			
+		});
+		
+		
+	});*/
 
+});
+
+
+/**
+ * Filter function to search for tool
+ */
+
+chipsterWeb.filter('searchFor',function(){
+	
+	return function(arr,searchTool){
+		if(!searchTool)
+			return arr;
+	
+	var result=[];
+	angular.forEach(arr,function(item){
+		
+		if(item.name.indexOf(searchTool)!==-1){
+			result.push(item);
+		}
+	});
+	
+	console.log(result);
+	return result;
+	}
+	
 });

@@ -6,7 +6,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 					return {
 						restrict : 'EA',
 						require:"^ngController",
-						templateUrl:"partials/searchinput.html",
+						//templateUrl:"partials/searchinput.html",
 						scope : {
 							data : "=",
 							selectedDataset:"=",
@@ -19,7 +19,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 							//@ToDO Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 3) - 50, height = 500, shiftKey, ctrlKey;
+							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
 							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;

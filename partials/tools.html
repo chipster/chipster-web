@@ -1,16 +1,23 @@
 <div class="panel panel-default" ng-controller="ToolCtrl"
 	ng-init="getTools()">
-	<div class="panel-heading">Analysis Tools</div>
+	<div class="panel-heading">Tools
+	<div class="bar pull-right">
+					<input type="text" class="search" ng-model="searchTool" placeholder="search tool"/>
+				</div>
+	
+	</div>
+	
 	<!--end of panel heading-->
 	<div class="panel-body" id="#mypanel">
 		<!-- Tools div -->
 		<div class="row">
-			<ul class="nav nav-pills pull-left" ng-repeat="t_module in t_modules">
+			<ul class="nav nav-tabs pull-left" role="tablist" ng-repeat="t_module in t_modules">
 				<li ng-class="{active:isSet($index)}"><a href
 					ng-click="setTab($index)">{{t_module.name}}</a></li>
 			</ul>
 			<ul class="nav nav-pills pull-right">
-				<li></li>
+				<li>
+				</li>
 			</ul>
 		</div>
 
@@ -21,7 +28,7 @@
 					<div id="tooltable">
 						<table class="table table-bordered">
 							<tbody>
-								<tr ng-repeat="t_cat in t_categories"
+								<tr ng-repeat="t_cat in t_categories|searchFor:searchTool"
 									ng-click="selected_t_category(t_cat,$index)"
 									ng-class="{'tool-selected':$index===selected_t_cat_index}">
 									<td>
@@ -42,7 +49,7 @@
 					<div id="tooltable">
 						<table class="table table-bordered">
 							<tbody>
-								<tr ng-repeat="tool in current_t_cat.tools"
+								<tr ng-repeat="tool in current_t_cat.tools|searchFor:searchTool"
 									ng-click="selected_tool_type(tool,$index);selectedTool(tool,$index)"
 									ng-class="{'tool-selected':$index===selected_t_type_index}">
 									<td><div style="height: 16px;">

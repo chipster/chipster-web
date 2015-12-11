@@ -323,7 +323,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 	};
 
-	// @ToDO This Method will be included in getSessionDetail()
+	// @ToDO This Method will be included in getSessionDetail() to get the right x,y after rotation
 	$scope.loadWorkflowData = function() {
 		$http.get('js/json/workflow.json').then(
 				function(res) {
@@ -348,3 +348,26 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 });
+
+/**
+ * Filter for searching dataset in dataset list view
+ */
+chipsterWeb.filter('searchDataset',function(){
+	return function(arr,searched_dataset_name){
+		if(!searched_dataset_name)
+			return arr;
+	
+	var result=[];
+	angular.forEach(arr,function(item){
+		
+		if(item.name.indexOf(searched_dataset_name)!==-1|item.name.toLowerCase().indexOf(searched_dataset_name)!==-1){
+			result.push(item);
+		}
+	});
+	
+	console.log(result);
+	return result;
+	}
+	
+});
+
