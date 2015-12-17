@@ -1,5 +1,5 @@
 var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow','restangular',
-		'LocalStorageModule','ngWebsocket','angularResizable'])
+		'LocalStorageModule','ngWebsocket','angularResizable','pdf'])
 		
 var baseURL='http://localhost:8000/';
 

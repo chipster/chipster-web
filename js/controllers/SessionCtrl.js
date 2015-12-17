@@ -1,6 +1,10 @@
+/**
+* @desc Controllers that deals with Session Rest calls and post job and other session related details
+* @example <div ng-controller="SessionCtrl"></div>
+*/
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService, $websocket,
-		FileRestangular, $http,$window) {
+		FileRestangular, $http,$window,WorkflowGraphService) {
 
 	// SessionRestangular is a restangular object with configured baseUrl and
 	// authorization header
@@ -29,7 +33,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		workflowData : {}
 	};
 
-	// For view manipulation
+	//For tabbed view manipulation
 	$scope.item = 1;
 	$scope.setItem = function(value) {
 		$scope.item = value;
@@ -177,8 +181,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 		d.datasetId = null;
 		d.name = name;
-		d.x = TemplateService.getrandomX();
-		d.y = TemplateService.getrandomY();
+		d.x = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
+		d.y = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
 		d.sourceJob = null;
 
 		return new Promise(function(resolve, reject) {
@@ -253,7 +257,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 		//when job finished event is received,remove the progressbar
 		setTimeout(function() {
-		   $scope.$broadcast('removeProgressBar',{});},7000);
+		   $scope.$broadcast('removeProgressBar',{});},10000);
 		/*
 		 * postJobUrl.customPOST(newJob).then(function(response) { //Need to
 		 * settle the dataset ID });

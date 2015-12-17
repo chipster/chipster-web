@@ -89,8 +89,8 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 									   .on("click",function(d,i){
 										  d.checked=!d.checked;
 										  if(d.checked){parentController.setDatasetSelection(d);}
-										  else{parentController.cancelDatasetSelection(d);}
-									  });
+										  else{parentController.cancelDatasetSelection(d);}});
+									
 									
 								nodeCheck.each(function(d) {d.checked = false;});
 								nodeCheck.classed("checked",false);
@@ -191,6 +191,10 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 								link.filter(function(d) {return d.target.selected;})
 								.attr("x2", function(d) {return d.target.x+nodeWidth/2;})
 								.attr("y2", function(d) {return d.target.y;});
+								
+								nodeCheck.filter(function(d){return d.selected;})
+								.attr("x", function(d) {return d.x+dx-20;})
+								.attr("y", function(d) {return d.y+dy;});
 								
 								if(d3.event.preventDefault)d3.event.preventDefault();
 

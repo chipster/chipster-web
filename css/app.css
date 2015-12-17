@@ -23,6 +23,15 @@ body{
 	padding:0px;
 }
 
+.panel-tabs {
+    position: relative;
+    bottom: 30px;
+    clear:both;
+    border-bottom: 1px solid transparent;
+}
+
+
+
 table{
 	border-collapse: collapse;
 }
@@ -70,15 +79,6 @@ ul.unstyled {
 	/*margin:0 auto -60px;*/
 	/* Top padding for header and bottom padding by footer height*/
 	/*padding: 0 0 60px;*/
-	
-}
-
-#visalizationContainer{
-	margin: 10px;
-}
-
-#dataToolContainer{
-	margin: 5px;
 }
 
 #tooltable{

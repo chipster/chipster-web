@@ -23,6 +23,7 @@
 <!--Custom CSS-->
 <link rel="stylesheet" type="text/css" href="css/app.css">
 
+
 </head>
 <!--end of head-->
 
@@ -51,6 +52,7 @@
 					</form>
 					<!--end navbar form-->
 					<ul class="nav navbar-nav navbar-right">
+						<li><a href="#jobs">Jobs</a></li>
 						<li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
 						<li><a href="#home" ng-show="isLoggedIn()"
 							ng-click="logout()">Logout</a></li>
@@ -89,7 +91,10 @@
 	<!--defining d3 element-->
 	<script src="/bower_components/d3/d3.js"></script>
 	<script src="/bower_components/d3-context-menu/js/d3-context-menu.js"></script>
-	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"> </script>
+	<script
+		src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js">
+		
+	</script>
 
 
 
@@ -104,9 +109,15 @@
 
 	<!-- Module for Web Socket -->
 	<script src="/bower_components/ng-websocket/ng-websocket.js"></script>
-	
+
 	<!-- Module for Angular Resizable -->
-	<script src="/bower_components/angular-resizable/angular-resizable.min.js"></script>
+	<script
+		src="/bower_components/angular-resizable/angular-resizable.min.js"></script>
+
+	<!-- Module for Angular PDF viewer -->
+	<script src="/bower_components/angular-pdf/dist/angular-pdf.js"></script>
+	<script src="/bower_components/pdfjs-dist/build/pdf.js"></script>
+	<script src="/bower_components/pdfjs-dist/build/pdf.worker.js"></script>
 
 	<!-- Custom JS -->
 	<script type="text/javascript" src="js/app.js"></script>
@@ -121,7 +132,9 @@
 	<script type="text/javascript" src="js/controllers/SessionCtrl.js"></script>
 	<script type="text/javascript" src="js/controllers/SessionViewCtrl.js"></script>
 	<script type="text/javascript" src="js/controllers/ToolCtrl.js"></script>
-	
+	<script type="text/javascript"
+		src="js/controllers/VisualizationCtrl.js"></script>
+
 	<!--Directives-->
 	<script type="text/javascript" src="js/directives/chipstermodal.js"></script>
 	<script type="text/javascript" src="js/directives/mymodal.js"></script>
@@ -138,6 +151,8 @@
 	<script type="text/javascript" src="js/services/SessionRestangular.js"></script>
 	<script type="text/javascript" src="js/services/ToolRestangular.js"></script>
 	<script type="text/javascript" src="js/services/FileRestangular.js"></script>
+	<script type="text/javascript"
+		src="js/services/WorkflowGraphService.js"></script>
 
 </body>
 </html>

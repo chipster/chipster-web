@@ -4,7 +4,7 @@
  * @example <div ng-controller="ToolCtrl"></div>
  */
 chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter) {
-	// for the time being,tools have a different URL
+	// for the time being,tools have a different URL,need to replace with original urls
 	
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning

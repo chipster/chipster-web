@@ -1,9 +1,7 @@
 <div class="panel panel-default">
 	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}	
 	<form novalidate class="simple-form pull-right">
-		<input type="text" ng-model="searched_dataset_name"> <input
-			type="submit" ng-click="search_dataset(searched_dataset_name)"
-			value="Search" />
+		<input type="text" ng-model="searched_dataset_name" placeholder="search data">
 	</form>	
 	</div>
 	<!--end of panel heading-->

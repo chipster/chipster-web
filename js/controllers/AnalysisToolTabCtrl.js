@@ -47,5 +47,4 @@ chipsterWeb.controller('AnalysisToolTabCtrl', function($scope, $http) {
 		console.log($scope.selectedToolCatIndex);
 	};
 
-
 });
