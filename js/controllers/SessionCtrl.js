@@ -4,7 +4,7 @@
 */
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService, $websocket,
-		FileRestangular, $http,$window,WorkflowGraphService) {
+		FileRestangular, $http,$window,WorkflowGraphService,baseURLString) {
 
 	// SessionRestangular is a restangular object with configured baseUrl and
 	// authorization header
@@ -158,7 +158,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.createDataset(file.name).then(
 				function(dataset) {
 					// create an own target for each file
-					file.chipsterTarget = 'http://localhost:8000/'
+					file.chipsterTarget = baseURLString
 							+ "filebroker/" + "sessions/"
 							+ $routeParams.sessionId + "/datasets/"
 							+ dataset.datasetId + "?token="
@@ -181,8 +181,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 		d.datasetId = null;
 		d.name = name;
-		d.x = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
-		d.y = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
+		d.x = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length-1,0);
+		d.y = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length-1,0);
 		d.sourceJob = null;
 
 		return new Promise(function(resolve, reject) {
@@ -233,13 +233,13 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			alert("No tool selected");
 			return;
 		}
-		// edit the fields with selected parameter
-		newJob.toolId = $scope.selectedToolId.tool;
+		// edit the fields with selected parameter		
+		newJob.toolId = $scope.selectedToolId.id;
 		newJob.toolName = $scope.selectedToolId.name;
 
-		angular.forEach($scope.selectedDatasets, function(selectedDataId,
+		angular.forEach($scope.selectedDatasets, function(dataset,
 				index) {
-			newJob.inputs[index].datasetId = selectedDataId;
+			newJob.inputs[index].datasetId = dataset.datasetId;
 
 		});
 
@@ -249,20 +249,21 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.selectedToolId = null;
 		$scope.selectedToolIndex = -1;
 		$scope.istoolselected = false;
-
+		
 		$scope.$broadcast('changeNodeCheck', {});
 		
 		//to show the running job progress
 		$scope.$broadcast('addProgressBar',{});
-
+		
+		postJobUrl.customPOST(newJob).then(function(response) { 
+			console.log(response);
+			//Need to settle the dataset ID 
+		});
+		
 		//when job finished event is received,remove the progressbar
 		setTimeout(function() {
-		   $scope.$broadcast('removeProgressBar',{});},10000);
-		/*
-		 * postJobUrl.customPOST(newJob).then(function(response) { //Need to
-		 * settle the dataset ID });
-		 */
-
+		   $scope.$broadcast('removeProgressBar',{});
+		},10000);
 	};
 
 	// Binding datasetId from workflow graph directive
