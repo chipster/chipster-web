@@ -160,7 +160,10 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.createDataset(file.name).then(
 				function(dataset) {
 					// create an own target for each file
+<<<<<<< HEAD
 					file.chipsterTarget = 'http://vm0179.kaj.pouta.csc.fi:8000/'
+=======
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 					file.chipsterTarget = baseURLString
 							+ "filebroker/" + "sessions/"
 							+ $routeParams.sessionId + "/datasets/"
@@ -184,9 +187,14 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 		d.datasetId = null;
 		d.name = name;
+<<<<<<< HEAD
 		console.log($scope.d3Data.nodes.length);
 		d.x = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length,0);
 		d.y = WorkflowGraphService.calculateYPos($scope.d3Data.nodes.length,0);
+=======
+		d.x = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length-1,0);
+		d.y = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length-1,0);
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 		d.sourceJob = null;
 		console.log(d);
 		$scope.d3Data.nodes.push(d);
@@ -240,18 +248,31 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			alert("No tool selected");
 			return;
 		}
+<<<<<<< HEAD
 		//Edit the fields with selected parameter
 		newJob.toolId = $scope.selectedToolId.tool;
+=======
+		// edit the fields with selected parameter		
+		newJob.toolId = $scope.selectedToolId.id;
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 		newJob.toolName = $scope.selectedToolId.name;
 
+<<<<<<< HEAD
 		angular.forEach($scope.selectedDatasets, function(elem,
+=======
+		angular.forEach($scope.selectedDatasets, function(dataset,
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 				index) {
+<<<<<<< HEAD
 			var input=TemplateService.getInputTemplate();
 			input.datasetId=elem.datasetId;
 			input.inputId=elem.name;
 			
 			console.log(input);
 			newJob.inputs.push(input);
+=======
+			newJob.inputs[index].datasetId = dataset.datasetId;
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 
 		});
 
@@ -279,9 +300,24 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.selectedToolId = null;
 		$scope.selectedToolIndex = -1;
 		$scope.istoolselected = false;
+<<<<<<< HEAD
 
+=======
+		
+		$scope.$broadcast('changeNodeCheck', {});
+		
+		//to show the running job progress
+		$scope.$broadcast('addProgressBar',{});
+		
+		postJobUrl.customPOST(newJob).then(function(response) { 
+			console.log(response);
+			//Need to settle the dataset ID 
+		});
+		
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 		//when job finished event is received,remove the progressbar
 		setTimeout(function() {
+<<<<<<< HEAD
 		   $scope.$broadcast('removeProgressBar',{});},10000);
 		   	
 		/*
@@ -289,6 +325,10 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		 * settle the dataset ID });
 		 */
 
+=======
+		   $scope.$broadcast('removeProgressBar',{});
+		},10000);
+>>>>>>> branch 'master' of https://github.com/chipster/chipster-web.git
 	};
 
 	// Binding datasetId from workflow graph directive
