@@ -4,7 +4,7 @@
 */
 chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		TemplateService, SessionRestangular, AuthenticationService, $websocket,
-		FileRestangular, $http,$window,WorkflowGraphService) {
+		FileRestangular, $http,$window,WorkflowGraphService,baseURLString) {
 
 	// SessionRestangular is a restangular object with configured baseUrl and
 	// authorization header
@@ -149,6 +149,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 	$scope.flowFileAdded = function(file, event, flow) {
+		
+		console.log('file added');
 
 		// get a separate target for each file
 		flow.opts.target = function(file, chunk, isTest) {
@@ -158,7 +160,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 		$scope.createDataset(file.name).then(
 				function(dataset) {
 					// create an own target for each file
-					file.chipsterTarget = 'http://localhost:8000/'
+					file.chipsterTarget = 'http://vm0179.kaj.pouta.csc.fi:8000/'
+					file.chipsterTarget = baseURLString
 							+ "filebroker/" + "sessions/"
 							+ $routeParams.sessionId + "/datasets/"
 							+ dataset.datasetId + "?token="
@@ -176,21 +179,27 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	};
 
 	$scope.createDataset = function(name) {
-
+		console.log('create dataset called');
 		var d = TemplateService.getDatasetTemplate();
 
 		d.datasetId = null;
 		d.name = name;
-		d.x = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
-		d.y = WorkflowGraphService.calculateXPos($scop.d3Data.nodes.length-1,0);
+		console.log($scope.d3Data.nodes.length);
+		d.x = WorkflowGraphService.calculateXPos($scope.d3Data.nodes.length,0);
+		d.y = WorkflowGraphService.calculateYPos($scope.d3Data.nodes.length,0);
 		d.sourceJob = null;
+		console.log(d);
+		$scope.d3Data.nodes.push(d);
 
 		return new Promise(function(resolve, reject) {
 			var datasetUrl = $scope.sessionUrl.one('datasets');
 			datasetUrl.customPOST(d).then(function(response) {
+				console.log(response);
 				var location = response.headers('Location');
 				d.datasetId = location.substr(location.lastIndexOf('/') + 1);
-				$scope.d3Data.nodes.push(d);
+				console.log($scope.d3Data.nodes);
+				//broadcast the new dataset add event to update the workflow graph
+				$scope.$broadcast('datasetAdded',{});
 				resolve(d);
 			});
 		});
@@ -203,7 +212,6 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 				datasetObj.datasetId);
 		datasetObj.fileId = TemplateService.getRandomFileID();
 
-		console.log(datasetObj);
 		// after that attempting to delete
 		datasetUrl.customPUT(datasetObj).then(function(res) {
 			datasetUrl.remove().then(function(res) {
@@ -222,7 +230,6 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 
 	// Method for submitting the job with tool and dataset
 	$scope.runJob = function() {
-
 		if ($scope.selectedDatasets.length < 1) {
 			alert("No dataset selected");
 			return;
@@ -233,31 +240,50 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 			alert("No tool selected");
 			return;
 		}
-		// edit the fields with selected parameter
+		//Edit the fields with selected parameter
 		newJob.toolId = $scope.selectedToolId.tool;
 		newJob.toolName = $scope.selectedToolId.name;
 
-		angular.forEach($scope.selectedDatasets, function(selectedDataId,
+		angular.forEach($scope.selectedDatasets, function(elem,
 				index) {
-			newJob.inputs[index].datasetId = selectedDataId;
+			var input=TemplateService.getInputTemplate();
+			input.datasetId=elem.datasetId;
+			input.inputId=elem.name;
+			
+			console.log(input);
+			newJob.inputs.push(input);
 
 		});
 
 		var postJobUrl = $scope.sessionUrl.one('jobs');
+		$scope.$broadcast('changeNodeCheck', {});
 		
+		//Calculate the possible progress node position from the input datasets positions
+		var progressNode=WorkflowGraphService.getProgressNode($scope.selectedDatasets);
+		console.log(progressNode);
+		//Show the running job progress
+		var progressLinks=WorkflowGraphService.createDummyLinks($scope.selectedDatasets,progressNode);
+		
+		//As progress spinner node, we just need to send the progress node info as other input nodes are already
+		//creating the json data for progress showing node and links from the input nodes
+		var dummyLinkData={node:progressNode,dummyLinks:progressLinks};
+		
+		//Sending event for drawing dummyLinks
+		$scope.$broadcast('addDummyLinks',{data:dummyLinkData});
+		//Sending event for adding progress spinner
+		$scope.$broadcast('addProgressBar',{data:progressNode});
+		
+		
+		//clearing all the dataset and tool selection
 		$scope.selectedDatasets = [];
 		$scope.selectedToolId = null;
 		$scope.selectedToolIndex = -1;
 		$scope.istoolselected = false;
 
-		$scope.$broadcast('changeNodeCheck', {});
-		
-		//to show the running job progress
-		$scope.$broadcast('addProgressBar',{});
-
 		//when job finished event is received,remove the progressbar
 		setTimeout(function() {
 		   $scope.$broadcast('removeProgressBar',{});},10000);
+		   	
 		/*
 		 * postJobUrl.customPOST(newJob).then(function(response) { //Need to
 		 * settle the dataset ID });
@@ -346,10 +372,8 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 							elem.y = elem.level * 40 + elem.group * 40;
 						} else {
 							elem.x = (elem.level - 1) * 80 + 30;
-							elem.y = (elem.c_id * 40 + elem.group * 40)
-									- ((elem.level - 1) * 50);
+							elem.y = (elem.c_id * 40 + elem.group * 40) - ((elem.level - 1) * 50);
 							console.log(elem.y);
-
 						}
 
 					});
@@ -361,6 +385,7 @@ chipsterWeb.controller('SessionCtrl', function($scope, $routeParams, $q,
 	
 	//We are only handling the resize end event
 	$scope.$on("angular-resizable.resizeEnd",function(event,args){
+		
 		$scope.$broadcast('resizeWorkFlowGraph',{data:args});
 		
 	});

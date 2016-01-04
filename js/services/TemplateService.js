@@ -55,13 +55,8 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 */
 
         	j.inputs = [];
-	        var i1 = {};
-	        i1.inputId = "regions.bed";
-	        i1.displayName = "Input file";
-	        i1.description = "File to sort";
-	        i1.type = "GENERIC";
-	        i1.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
-	        j.inputs.push(i1);
+        //Moved the Input File Description to getInputTemplate to make it more generic
+	       
 /*
 	        var i2 = {};
 	        i2.inputId = "extraFile";
@@ -72,6 +67,16 @@ chipsterWeb.factory('TemplateService',function($rootScope,$window){
 	        j.inputs.push(i2);
 */
 	        return j;
+		},
+		
+		getInputTemplate:function(){
+			 var i1 = {};
+		        i1.inputId = "regions.bed";
+		        i1.displayName = "Input file";
+		        i1.description = "File to sort";
+		        i1.type = "GENERIC";
+		        i1.datasetId = "187b16a1-99f1-42fd-a56e-5cb2f585a1d6";
+		        return i1;
 		},
 
 		getWorflowNodeTemplate:function(){

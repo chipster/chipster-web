@@ -15,8 +15,8 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter)
 	$scope.enable_t_parameter=false;
 	
 	$scope.getTools = function() {
-		var promises = [ ToolRestangular.all('modules.json').getList(),
-				ToolRestangular.all('tools.json').getList() ];
+		var promises = [ ToolRestangular.all('modules').getList(),
+				ToolRestangular.all('tools').getList() ];
 		$q.all(promises).then(function(response) {
 			$scope.t_modules = response[0].data;
 			$scope.t_detail_list = response[1].data;
@@ -40,7 +40,6 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter)
 		$scope.enable_t_parameter=false;
 		$scope.selected_t_cat_index = $index;
 		$scope.current_t_cat= t_cat;
-		console.log($scope.selectedToolCatIndex);
 	};
 	
 	$scope.selected_tool_type = function(tool,$index) {
@@ -48,7 +47,7 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter)
 		$scope.selected_t_type = tool;
 		$scope.selected_t_type_index = $index;
 		$scope.is_t_type_selected= true;
-		console.log($scope.selected_t_type);
+		
 		
 		//find the relevant description
 		
@@ -58,7 +57,6 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular,$filter)
 				if(elem.parameters.length>0){
 					$scope.enable_t_parameter=true;
 					$scope.selected_t_parameter_list=elem.parameters;
-					console.log($scope.selected_t_parameter_list[0].selectionOptions);
 				}else{
 					$scope.enable_t_parameter=false;
 				}

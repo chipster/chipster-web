@@ -1,6 +1,6 @@
 /**
-* @desc toolCircle directive for generating colored coded circle icon for each tool category
-* @example <div><tool-circle toolcolor="tool.color"></div>
+* @desc toolText directive for generating styled tool names for the tool table
+* @example <div><tool-text toolname="tool.name"></div>
 **/
  chipsterWeb.directive('toolText',function(){
 	return{

@@ -18,6 +18,7 @@ chipsterWeb.controller('LoginCtrl',
               headers: {'Authorization': 'Basic ' + encodedString}                   
               })
               .then(function (response) {
+            	  console.log(response);
                 if(response.data.tokenKey){
                   AuthenticationService.setAuthToken(response.data.tokenKey);
                   //Route to Session creation page

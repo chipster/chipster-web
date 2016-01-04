@@ -1,6 +1,4 @@
-/*
-Custom CSS for Chipster Web
-*/
+/*Custom CSS for Chipster Web*/
 
 
 html,
@@ -10,7 +8,7 @@ body{
 
 .navbar{
 	margin-bottom:2px;
-	height:40px;
+	height:50px;
 	min-height:40px;
 }
 .navbar-brand{
@@ -117,6 +115,10 @@ ul.unstyled {
 
 .link {     
       stroke: #999;     
+}
+
+.dummylink{
+	stroke:#999;
 }
 
 .brush .extent {

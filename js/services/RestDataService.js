@@ -1,10 +1,9 @@
 /**
- * @Desc Rest data service to make to make all the Rest Data calls to server
+ * @Desc RestData service to make to make all the Rest Data calls to server
  * @Todo Move all the rest calls from controllers to this service
  */
 chipsterWeb.factory('RestDataService',function(ToolRestangular,SessionRestangular) {
 
-	
 
 	return{
 		
@@ -35,8 +34,5 @@ chipsterWeb.factory('RestDataService',function(ToolRestangular,SessionRestangula
 		getExampleSessionList:function(){
 			
 		}
-		
-		
-
 	};
 });

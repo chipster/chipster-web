@@ -2,7 +2,7 @@
 * @desc workflowGraphLayout directive that creates the workflow graph for session dataset "d3Data"
 * @example <div><workflow-graph-layout data="d3Data"></div>
 */
-chipsterWeb.directive('workflowGraphLayout',function($window) {
+chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphService) {
 					return {
 						restrict : 'EA',
 						require:"^ngController",
@@ -10,18 +10,14 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 							data : "=",
 							selectedDataset:"=",
 							searched_dataset_name:"=",	
-							orientv:"=",
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
-							
-							console.log(parentController);
-			
-							//@ToDO Calculate total nodes, max label length
+				
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
 							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
-							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg;
+							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg,dLinks;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;
 								
@@ -37,37 +33,87 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 										renderGraph(width, height);
 									}									
 								});
+							//Trigger updating the graph for new dataset
+							scope.$on('datasetAdded',function(){
+								if(scope.data){
+									graph=scope.data;
+									renderGraph(width, height);
+								}
+							});
+							
+							//creating dummy temporary links for progress node in the graph
+							scope.$on('addDummyLinks',function(event,data){
+								console.log(data.data);
+								dummyLinkData=data.data;
+								dLinks = vis.append("g").attr("class", "dummylink").selectAll("line");
+								
+								//Define the link source and target
+								dummyLinkData.dummyLinks.forEach(function(d) {
+									d.source = graph.nodes[d.source];
+									d.target = dummyLinkData.node;
+									console.log(d.source);
+								});
+								
+								//building the arrows for the link end
+								vis.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
+								   .attr("id", String).attr("viewBox","0 -5 12 12").attr("refX",20).attr("refY",0)
+								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
+								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
+								   .style("stroke","#0177b7");
+								//Define the xy positions of the link
+								dLinks = dLinks.data(dummyLinkData.dummyLinks).enter().append("line")
+									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
+									  .attr("y1", function(d) {return d.source.y+nodeHeight;})
+									  .attr("x2", function(d) {return d.target.x+nodeWidth/2;})
+									  .attr("y2", function(d) {return d.target.y;})
+									  .style("marker-end","url(#end)");
+								
+							});
 							
 							scope.$on('addProgressBar',function(event,data){
-								var tau=2*Math.PI;
+								//data 
+								console.log(data);
+								renderLinks();
+								var twoPi=2*Math.PI;
 								var arc=d3.svg.arc().innerRadius(10).outerRadius(15).startAngle(0);
-								pb_svg=vis.append("g").attr("width", 50).attr("height", 50).attr("transform", "translate(" + 400 + "," + 400+ ")")
+								pb_svg=vis.append("g").attr("transform", "translate(" + data.data.x + "," + data.data.y+ ")");
+								
+								var rect=pb_svg.append("rect").attr("width",nodeWidth).attr("height",nodeHeight).style("stroke", 'black')
+				                .style("fill", "none")
+				                .style("stroke-width", 1);
 										
 										
 								//add the background arc
-								var background=pb_svg.append("path").datum({endAngle:tau}).style("fill","#ddd").attr("d",arc);
-												
-												
-								//add the foreground arc
-								var foreground=pb_svg.append("path").datum({endAngle:0.127*tau}).style("fill","blue").attr("d",arc);
-												
+								var background=pb_svg.append("path").datum({endAngle:0.75*twoPi}).style("fill","#4d4ddd").attr("d",arc);
+													
 								
-								setInterval(function(){
-									foreground.transition().duration(750).call(arcTween,Math.random()*tau);},1500);
+								background.call(spin, 1500);
+														
+												
+								function spin(selection,duration){
+									selection.transition().ease("linear").duration(duration).attrTween("transform", function() {
+								        return d3.interpolateString(
+								                "translate(20,15)rotate(0)",
+								                "translate(20,15)rotate(360)"
+								              );
+								            });
+									setTimeout(function(){ spin(selection,duration);},duration);
+								}
 								
-								function arcTween(transition,newAngle){
-									transition.attrTween("d",function(d){
-										var interpolate=d3.interpolate(d.endAngle,newAngle);
-										return function(t){
-											d.endAngle=interpolate(t);
-											return arc(d);
-										};
-									});
-								}//end of function arcTween
+								function transitionFunction(path) {
+							        path.transition()
+							            .duration(7500)
+							            .attrTween("stroke-dasharray", tweenDash)
+							            .each("end", function() { d3.select(this).call(transition); });
+							    };
+												
+							
+						
 							});
 							
 							scope.$on('removeProgressBar',function(event,data){
 								pb_svg.remove();
+								dLinks.remove();
 							});
 							
 							 scope.changeNodeCheck = function(){	 
@@ -139,7 +185,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 							function renderLabels(){
 								console.log("rendering label");
 								label=vis.append("g").selectAll("text").data(graph.nodes).enter()
-								     .append("text").text(function(d){return d.name;})
+								     .append("text").text(function(d){return WorkflowGraphService.getFileExtension(d.name);})
 								     .attr("x",function(d,i){return d.x+nodeWidth/2;})
 								     .attr("y",function(d,i){return d.y+nodeHeight/2;})
 								     .attr("font-size", "10px").attr("fill","black").attr("text-anchor", "middle")
@@ -224,8 +270,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 								var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
 								var yScale = d3.scale.linear().domain([ 0, height ]).range([ 0, height ]);
 								
-								svg = d3.select(iElement[0]).attr("tabindex", 1).on("keydown.brush",keydown).on("keyup.brush", keyup)
-									.each(function() {this.focus();}).append("svg").attr("width", width).attr("height", height);
+								svg = d3.select(iElement[0]).append("svg").attr("width", width).attr("height", height);
 
 								var zoomer = d3.behavior.zoom().scaleExtent([ 1, 4 ]).x(xScale).y(yScale).on("zoomstart", zoomstart).on("zoom",redraw);
 
@@ -238,11 +283,11 @@ chipsterWeb.directive('workflowGraphLayout',function($window) {
 								var svg_graph = svg.append('svg:g').call(zoomer)
 
 								var rect = svg_graph.append('svg:rect').attr('width', width).attr('height', height)
-										   .attr('fill', 'transparent').attr("id","zrect") // gave html id
+										   .attr('fill', 'transparent')
 												
 								vis = svg_graph.append("svg:g");
 
-								vis.attr('fill','red').attr('stroke', 'black').attr('stroke-width', 1)
+								vis.attr('fill','red')
 								   .attr('opacity', 1.0).attr('id','vis')	
 								//Rendering the graph elements  
 								defineRightClickMenu();
