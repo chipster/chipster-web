@@ -322,7 +322,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								var searchedDataesets=data.data;
 								searchedDataesets.forEach(function(elem){
 									searchNode(elem.name);
-									console.log(elem.name);
 								});
 								
 							});
