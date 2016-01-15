@@ -9,11 +9,9 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						scope : {
 							data : "=",
 							selectedDataset:"=",
-							searched_dataset_name:"=",	
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
-				
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
 							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
@@ -29,10 +27,10 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 							scope.$watch("data",function() {
 								if(scope.data){
 									graph=scope.data;
-									console.log("watching data");
 										renderGraph(width, height);
 									}									
 								});
+							
 							//Trigger updating the graph for new dataset
 							scope.$on('datasetAdded',function(){
 								if(scope.data){
@@ -81,12 +79,9 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								var rect=pb_svg.append("rect").attr("width",nodeWidth).attr("height",nodeHeight).style("stroke", 'black')
 				                .style("fill", "none")
 				                .style("stroke-width", 1);
-										
-										
+												
 								//add the background arc
-								var background=pb_svg.append("path").datum({endAngle:0.75*twoPi}).style("fill","#4d4ddd").attr("d",arc);
-													
-								
+								var background=pb_svg.append("path").datum({endAngle:0.75*twoPi}).style("fill","#4d4ddd").attr("d",arc);						
 								background.call(spin, 1500);
 														
 												
@@ -111,20 +106,17 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						
 							});
 							
+							// When the job is finished, remove both the progress node and dummy links
 							scope.$on('removeProgressBar',function(event,data){
 								pb_svg.remove();
 								dLinks.remove();
 							});
-							
-							 scope.changeNodeCheck = function(){	 
-								 drawNodeCheck(scope.data);
-						     };
-						     
-						     scope.$on('changeNodeCheck',function(event,data){
-					             scope.changeNodeCheck();
+													     
+						    scope.$on('changeNodeCheck',function(event,data){
+						    	 drawNodeCheck(scope.data);
 						     });
 						
-						       
+						    //For drawing the checkboxes
 						    function drawNodeCheck(){
 						    	 //Adding the check box with the nodes
 								nodeCheck=vis.append("g").attr("class", "check").selectAll("check").data(graph.nodes)
@@ -143,12 +135,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 									  
 							}
 						     
-							scope.search_dataset=function(searched_dataset_name){
-								searched_dataset=searched_dataset_name;
-								searchNode(scope.data);
-							};
-							
-							
 							function renderNodes(){
 								node = vis.append("g").attr("class", "node").selectAll("rect");
 	
@@ -330,33 +316,57 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								
 							}//end of renderGraph
 						
-							//Method for search a specific data file in the workflow graph
-							function searchNode(data){
-								if(searched_dataset==="none"){
+							
+							//Method for search data file in the workflow graph
+							scope.$on('searchDatasets', function(event,data){
+								var searchedDataesets=data.data;
+								searchedDataesets.forEach(function(elem){
+									searchNode(elem.name);
+								});
+								
+							});
+							
+							function searchNode(datasetName){
+								if(datasetName==="none"){
 									node.style("stroke","white").style("stroke-width","1");
 								}else{
-									var selected=node.filter(function(d,i){
-										return d.name!=searched_dataset;
+									//Selected and not selected nodes
+									var notSelected=node.filter(function(d,i){
+										return d.name!=datasetName;
 									
 									});
 									
-									var selectedCheckBox=nodeCheck.filter(function(d,i){
-										return d.name!=searched_dataset;
+									var Selected=node.filter(function(d,i){
+										return d.name===datasetName;
 									});
 									
-									var selectedLabel=label.filter(function(d,i){
-										return d.name!=searched_dataset;
+									//Selected and not selected checkbox
+									var notSelectedCheckBox=nodeCheck.filter(function(d,i){
+										return d.name!=datasetName;
 									});
-								
-									selected.style("opacity","0");
-									selectedCheckBox.style("opacity","0");
-									link.style("opacity","0");
-									selectedLabel.style("opacity","0");
 									
-									node.transition().duration(10000).style("opacity",1);
-									link.transition().duration(10000).style("opacity",1);
-									nodeCheck.transition().duration(10000).style("opacity",1);
-									label.transition().duration(10000).style("opacity",1);
+									var SelectedCheckBox=nodeCheck.filter(function(d,i){
+										return d.name===datasetName;
+									});
+									
+									//Selected and not selected label
+									var notSelectedLabel=label.filter(function(d,i){
+										return d.name!=datasetName;
+									});
+									
+									var SelectedLabel=label.filter(function(d,i){
+										return d.name===datasetName;
+									});
+									
+									notSelected.style("opacity","0.25");
+									notSelectedCheckBox.style("opacity","0.25");
+									link.style("opacity","0.25");
+									notSelectedLabel.style("opacity","0.25");
+									
+									Selected.style("opacity","1.0");
+									SelectedCheckBox.style("opacity","1.0");
+									SelectedLabel.style("opacity","1.0");
+									
 								}
 							}
 
