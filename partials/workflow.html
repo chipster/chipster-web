@@ -1,15 +1,25 @@
 <div class="panel panel-default">
-	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}	
-	<form novalidate class="simple-form pull-right">
-		<input type="text" ng-model="searched_dataset_name" placeholder="search data">
-	</form>	
+	<div class="panel-heading" ng-click="editName()">Data
+		<form novalidate class="simple-form pull-right">
+			<input type="text" ng-model="searched_dataset_name" placeholder="search data">
+		</form>
 	</div>
+
+	<!--
+	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}
+		<form novalidate class="simple-form pull-right">
+			<input type="text" ng-model="searched_dataset_name" placeholder="search data">
+		</form>
+	</div>
+	-->
 	<!--end of panel heading-->
+
 	<div class="panel-body">
 		<div>
-			<ul class="nav nav-tabs pull-left" >
+			<ul class="nav nav-tabs" >
 				<li ng-class="{active:isSet(1)}"><a href ng-click="setItem(1)">Workflow</a></li>
 				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
+				<li ng-class="{active:isSet(3)}"><a href ng-click="setItem(3)">Notes</a></li>
 			</ul>
 			<ul class="nav nav-pills pull-right">
 				<li>
@@ -86,6 +96,18 @@
 						</div>
 						<!--end of modal-dialog-->
 					</div>
+				</div>
+			</div>
+			<div ng-show="isSet(3)">
+				<div>
+					<p>
+						{{session.sessionDetail}} <span class="pull-right">
+							<button class="btn btn-xs btn-info" data-toggle="modal"
+								data-target="#session-edit-modal">
+								<span class="glyphicon glyphicon-edit"></span>
+							</button>
+						</span>
+					</p>
 				</div>
 			</div>
 		</div>
