@@ -154,7 +154,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 													d3.select(this).classed("selected",d.selected=!d.selected);
 													//For showing dataset detail
 													scope.$apply(function(){
-														parentController.getSelectedDataNode(d);
+														parentController.setSelectedDataNode(d);
 													});
 										})
 										.call(d3.behavior.drag().on("drag",function(d) {

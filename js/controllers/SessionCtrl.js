@@ -391,7 +391,7 @@ chipsterWeb
 					};
 
 					// for showing dataset detail for the selected node
-					this.getSelectedDataNode = function(dataNode) {
+					this.setSelectedDataNode = function(dataNode) {
 						$scope.dataNode = dataNode;
 						console.log($scope.dataNode.name);
 						$scope.isDataNodeSelected = true;
