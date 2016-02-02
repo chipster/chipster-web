@@ -1,60 +1,72 @@
-<div class="panel panel-default">
+<div class="panel panel-default" ng-controller="VisualizationCtrl">
 	<div class="panel-heading">Visualization</div>
 	<div class="panel-body">
-		<p>{{session.sessionDetail}} <span class="pull-right">
-						<button class="btn btn-xs btn-info" data-toggle="modal"
-							data-target="#session-edit-modal">
-							<span class="glyphicon glyphicon-edit"></span>
-						</button>
-					</span>
-				</p>
-				<hr class="soften">
-				<div id="data-detail" ng-show="showDatasetDetail()">
-					<h5>{{dataNode.name}}</h5>
-					<p>SourceJob: {{dataNode.sourceJob}}</p>
-					<p>File ID: {{dataNode.fileId}}</p>
-					<p>Size: {{dataNode.size}}</p>
+		<p>
+			{{session.sessionDetail}} <span class="pull-right">
+				<button class="btn btn-xs btn-info" data-toggle="modal"
+					data-target="#session-edit-modal">
+					<span class="glyphicon glyphicon-edit"></span>
+				</button>
+			</span>
+		</p>
+		<hr class="soften">
+		<div id="data-detail" ng-show="showDatasetDetail()">
+			<h5>{{dataNode.name}}</h5>
+			<p>SourceJob: {{dataNode.sourceJob}}</p>
+			<p>File ID: {{dataNode.fileId}}</p>
+			<p>Size: {{dataNode.size}}</p>
 
-					<a ng-click="textViewer()">Text viewer</a>
-					<p ng-if="dataNode.file">{{dataNode.file}}</p>
-				</div>
-				<!--session editing modal-->
-				<div id="session-edit-modal" class="modal fade" role="dialog">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal">&times</button>
-								<h4 class="modal-title">Edit Session</h4>
-							</div>
-							<!--end of modal header-->
-							<div class="modal-body">
-								<form class="edit-form" role="form" novalidate>
-									<div class="form-group">
-										<label>Session Name</label> <input type="text"
-											class="form-control" ng-model="session.sessionName"
-											placeholder="Edit name">
-									</div>
-									<div class="form-group">
-										<label>Session Description</label> <input type="text"
-											class="form-control" ng-model="session.sessionDetail"
-											placeholder="Enter description">
-									</div>
-									<button type="button" class="btn btn-info"
-										ng-click="editSession()" data-dismiss="modal">Save</button>
-									<button type="button" class="btn btn-default pull-right"
-										data-dismiss="modal">Cancel</button>
-								</form>
-							</div>
-							<!--end of modal body-->
-						</div>
-						<!--end of modal-content-->
-
+			<a ng-click="textViewer()">Text viewer</a>
+			<p ng-if="dataNode.file">{{dataNode.file}}</p>
+		</div>
+		<!--session editing modal-->
+		<div id="session-edit-modal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times</button>
+						<h4 class="modal-title">Edit Session</h4>
 					</div>
-					<!--end of modal-dialog-->
-
+					<!--end of modal header-->
+					<div class="modal-body">
+						<form class="edit-form" role="form" novalidate>
+							<div class="form-group">
+								<label>Session Name</label> <input type="text"
+									class="form-control" ng-model="session.sessionName"
+									placeholder="Edit name">
+							</div>
+							<div class="form-group">
+								<label>Session Description</label> <input type="text"
+									class="form-control" ng-model="session.sessionDetail"
+									placeholder="Enter description">
+							</div>
+							<button type="button" class="btn btn-info"
+								ng-click="editSession()" data-dismiss="modal">Save</button>
+							<button type="button" class="btn btn-default pull-right"
+								data-dismiss="modal">Cancel</button>
+						</form>
+					</div>
+					<!--end of modal body-->
 				</div>
-				<!--end of modal dialog-->
-				</hr>
+				<!--end of modal-content-->
+
+			</div>
+			<!--end of modal-dialog-->
+
+		</div>
+		<!--end of modal dialog-->
+		<div class="row">
+			<div class="col-sm-4">PDF</div>
+			<div class="col-sm-4">Image</div>
+			<div class="col-sm-4">SpreadSheet</div>
+		</div>
+		</hr>
+		<!-- PDF viewer block -->
+		<div class="wrapper">
+			<ng-pdf template-url="partials/viewer.html" scale="page-fit"></ng-pdf>
+
+
+		</div>
 	</div>
 </div>
 

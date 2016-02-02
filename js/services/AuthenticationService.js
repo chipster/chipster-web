@@ -1,37 +1,32 @@
-chipsterWeb.factory('AuthenticationService',['localStorageService', function(localStorageService) {
+chipsterWeb.factory('AuthenticationService', [ 'localStorageService',
+		function(localStorageService) {
+			return {
+				// Do the authentication here based on userid and password
 
-	
+				login : function(username, password) {
 
-	return{
-		//Do the authentication here based on userid and password
+				},
 
+				logout : function() {
+					localStorageService.clearAll();
+				},
 
-		login:function(username,password){
-			
-		},
+				setAuthToken : function(val) {
+					localStorageService.set('auth-token', val);
+				},
 
-		logout:function(){
-			localStorageService.clearAll();
-		},
+				getToken : function() {
+					return localStorageService.get('auth-token');
+				},
 
-		setAuthToken:function(val){
-			localStorageService.set('auth-token', val);
-		},
+				setSessionUrl : function(val) {
+					console.log(val);
+					localStorageService.set('session-url', val);
+				},
 
-		getToken:function(){
-			return localStorageService.get('auth-token');
-		},
+				getSessionUrl : function() {
+					return localStorageService.get('session-url');
+				}
 
-		setSessionUrl:function(val){
-			console.log(val);
-			localStorageService.set('session-url', val);
-		},
-
-		getSessionUrl:function(){
-			return localStorageService.get('session-url');
-		}
-
-		
-
-	};
-}]);
+			};
+		} ]);

@@ -14,7 +14,7 @@
     "url": "git+https://github.com/chipster/chipster-web.git"
   },
   "author": "Rumana Quazi",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/chipster/chipster-web/issues"
   },

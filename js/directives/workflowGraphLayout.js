@@ -2,123 +2,263 @@
 * @desc workflowGraphLayout directive that creates the workflow graph for session dataset "d3Data"
 * @example <div><workflow-graph-layout data="d3Data"></div>
 */
-chipsterWeb
-		.directive(
-				'workflowGraphLayout',
-				function($window) {
+chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphService) {
 					return {
 						restrict : 'EA',
 						require:"^ngController",
 						scope : {
 							data : "=",
-							selectedDatasetId:"=",
+							selectedDataset:"=",
 							onClick : "&"
 						},
 						link : function(scope, iElement, iAttrs, parentController) {
-							
-
-							// Calculate total nodes, max label length
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 3) - 60, height = 500, shiftKey, ctrlKey;
+							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
+							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg,dLinks;
+							var graph;
+							var nodeWidth=40,nodeHeight=30;
+								
+							scope.$on('resizeWorkFlowGraph',function(event,data){
+								width=data.data.width-50;
+								renderGraph(width, height);
+							});
 							
-							/*
-							 * $window.onresize=function(){
-							 * scope.$apply(function(){ //Need to put some
-							 * interval here
-							 * 
-							 * renderGraph(window.innerWidth/2-30,height); }); }
-							 */
-							
-
-							scope.$watch('data',function() {
+							scope.$watch("data",function() {
 								if(scope.data){
-										console.log('render is called');
-										renderGraph(scope.data,width, height);
+									graph=scope.data;
+										renderGraph(width, height);
 									}									
 								});
-
-							function renderGraph(data,width,height) {
-								
-								var nodeWidth=40,nodeHeight=30;
-								var menu=[{
-									title:'Visualize',
-									action: function(elem,d,i){
-									}
-								},
-									{
-										title:'link to phenodata',
-										action:function(elm,d,i){
-										}
-									},
-									{
-										title:'link between selected',
-										action:function(elm,d,i){
-										}
-									},{
-										title:'Rename',
-										action:function(elm,d,i){									
-											 var result = prompt('Change the name of the node',d.name);
-										        if(result) {
-										            d.name = result; 							 
-										        }
-										      
-											parentController.renameDataset(d,result);
-											svg.selectAll("text").remove();
-											drawLabel();
-											
-										}
-									},
-									{
-										title:'Delete',
-										action:function(elm,d,i){
-											console.log(d);
-											
-										}
-									},
-									{
-										title:'Export',
-										action:function(elm,d,i){
-											
-										}
-									},
-									{
-										title:'View History as text',
-										action:function(elm,d,i){
-										}
-									}
-									
-								] ;
-
-								var graph = {};
-
-								var xScale = d3.scale.linear().domain(
-										[ 0, width ]).range([0, width ]);
-								var yScale = d3.scale.linear().domain(
-										[ 0, height ]).range([ 0, height ]);
-								
-								d3.select('svg').remove();
-
-								var svg = d3.select(iElement[0]).attr(
-										"tabindex", 1).on("keydown.brush",
-										keydown).on("keyup.brush", keyup).each(
-										function() {
-											this.focus();
-										}).append("svg").attr("width", width)
-										.attr("height", height);
-
-								var zoomer = d3.behavior.zoom().scaleExtent(
-										[ 0.1, 10 ]).x(xScale).y(yScale).on(
-										"zoomstart", zoomstart).on("zoom",
-										redraw);
-
-								function zoomstart() {
-									node.each(function(d) {
-										d.selected = false;
-										d.previouslySelected = false;
-									});
-									node.classed("selected", false);
+							
+							//Trigger updating the graph for new dataset
+							scope.$on('datasetAdded',function(){
+								if(scope.data){
+									graph=scope.data;
+									renderGraph(width, height);
 								}
+							});
+							
+							//creating dummy temporary links for progress node in the graph
+							scope.$on('addDummyLinks',function(event,data){
+								console.log(data.data);
+								dummyLinkData=data.data;
+								dLinks = vis.append("g").attr("class", "dummylink").selectAll("line");
+								
+								//Define the link source and target
+								dummyLinkData.dummyLinks.forEach(function(d) {
+									d.source = graph.nodes[d.source];
+									d.target = dummyLinkData.node;
+									console.log(d.source);
+								});
+								
+								//building the arrows for the link end
+								vis.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
+								   .attr("id", String).attr("viewBox","0 -5 12 12").attr("refX",20).attr("refY",0)
+								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
+								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
+								   .style("stroke","#0177b7");
+								//Define the xy positions of the link
+								dLinks = dLinks.data(dummyLinkData.dummyLinks).enter().append("line")
+									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
+									  .attr("y1", function(d) {return d.source.y+nodeHeight;})
+									  .attr("x2", function(d) {return d.target.x+nodeWidth/2;})
+									  .attr("y2", function(d) {return d.target.y;})
+									  .style("marker-end","url(#end)");
+								
+							});
+							
+							scope.$on('addProgressBar',function(event,data){
+								//data 
+								console.log(data);
+								renderLinks();
+								var twoPi=2*Math.PI;
+								var arc=d3.svg.arc().innerRadius(10).outerRadius(15).startAngle(0);
+								pb_svg=vis.append("g").attr("transform", "translate(" + data.data.x + "," + data.data.y+ ")");
+								
+								var rect=pb_svg.append("rect").attr("width",nodeWidth).attr("height",nodeHeight).style("stroke", 'black')
+				                .style("fill", "none")
+				                .style("stroke-width", 1);
+												
+								//add the background arc
+								var background=pb_svg.append("path").datum({endAngle:0.75*twoPi}).style("fill","#4d4ddd").attr("d",arc);						
+								background.call(spin, 1500);
+														
+												
+								function spin(selection,duration){
+									selection.transition().ease("linear").duration(duration).attrTween("transform", function() {
+								        return d3.interpolateString(
+								                "translate(20,15)rotate(0)",
+								                "translate(20,15)rotate(360)"
+								              );
+								            });
+									setTimeout(function(){ spin(selection,duration);},duration);
+								}
+								
+								function transitionFunction(path) {
+							        path.transition()
+							            .duration(7500)
+							            .attrTween("stroke-dasharray", tweenDash)
+							            .each("end", function() { d3.select(this).call(transition); });
+							    };
+												
+							
+						
+							});
+							
+							// When the job is finished, remove both the progress node and dummy links
+							scope.$on('removeProgressBar',function(event,data){
+								pb_svg.remove();
+								dLinks.remove();
+							});
+													     
+						    scope.$on('changeNodeCheck',function(event,data){
+						    	 drawNodeCheck(scope.data);
+						     });
+						
+						    //For drawing the checkboxes
+						    function drawNodeCheck(){
+						    	 //Adding the check box with the nodes
+								nodeCheck=vis.append("g").attr("class", "check").selectAll("check").data(graph.nodes)
+									   .enter().append("foreignObject").attr("width",20).attr("height",20)
+									   .attr("x",function(d,i){return d.x-20;})
+									   .attr("y",function(d,i){return d.y;})	
+									   .append("xhtml:body").html("<form><input type=checkbox id=check/></form>")
+									   .on("click",function(d,i){
+										  d.checked=!d.checked;
+										  if(d.checked){parentController.setDatasetSelection(d);}
+										  else{parentController.cancelDatasetSelection(d);}});
+									
+									
+								nodeCheck.each(function(d) {d.checked = false;});
+								nodeCheck.classed("checked",false);
+									  
+							}
+						     
+							function renderNodes(){
+								node = vis.append("g").attr("class", "node").selectAll("rect");
+	
+								var tip=d3.tip().attr("class","d3-tip").offset([-10,0]).html(function(d){return d.name+"";});
+								svg.call(tip);
+								
+								//Drawing the nodes in the SVG
+								node = node.data(graph.nodes).enter().append("rect")
+										.attr("x", function(d) {return d.x;})
+										.attr("y", function(d) {return d.y;})
+										.attr("width",nodeWidth).attr("height",nodeHeight)
+										.attr("fill",function(d,i){return c20(i);})
+										.on("dblclick", function(d){
+											//connectedNodes(d);
+										})
+										.on("click",function(d) {		
+													d3.select(this).classed("selected",d.selected=!d.selected);
+													//For showing dataset detail
+													scope.$apply(function(){
+														parentController.setSelectedDataNode(d);
+													});
+										})
+										.call(d3.behavior.drag().on("drag",function(d) {
+												   parentController.cancelDatasetSelection(d.datasetId);
+												   dragNodes(d3.event.dx,d3.event.dy);}))
+										.on("contextmenu",d3.contextMenu(menu))
+										.on("mouseover",tip.show)
+										.on("mouseout",tip.hide);
+								
+								//Define initial value for selected
+								node.each(function(d) {d.selected = false;});
+								}
+							
+							function renderLabels(){
+								console.log("rendering label");
+								label=vis.append("g").selectAll("text").data(graph.nodes).enter()
+								     .append("text").text(function(d){return WorkflowGraphService.getFileExtension(d.name);})
+								     .attr("x",function(d,i){return d.x+nodeWidth/2;})
+								     .attr("y",function(d,i){return d.y+nodeHeight/2;})
+								     .attr("font-size", "10px").attr("fill","black").attr("text-anchor", "middle")
+								     .call(d3.behavior.drag().on("drag",function(d) {
+								    	 dragNodes(d3.event.dx,d3.event.dy);}))
+									 .on("contextmenu",d3.contextMenu(menu));	
+							}
+							
+							function renderLinks(){
+								//defining links
+								link = vis.append("g").attr("class", "link").selectAll("line");
+								
+								//Define the link source and target
+								graph.links.forEach(function(d) {
+									d.source = graph.nodes[d.source];
+									d.target = graph.nodes[d.target];
+								});
+								
+								//building the arrows for the link end
+								vis.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
+								   .attr("id", String).attr("viewBox","0 -5 12 12").attr("refX",20).attr("refY",0)
+								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
+								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
+								   .style("stroke","#0177b7");
+								//Define the xy positions of the link
+								link = link.data(graph.links).enter().append("line")
+									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
+									  .attr("y1", function(d) {return d.source.y;})
+									  .attr("x2", function(d) {return d.target.x+nodeWidth/2;})
+									  .attr("y2", function(d) {return d.target.y;})
+									  .style("marker-end","url(#end)");
+							}
+							
+							
+							//Function to describe drag behavior
+							function dragNodes(dx,dy) {
+								node.filter(function(d) {return d.selected;})
+								.attr("x", function(d) {return d.x += dx;})
+								.attr("y", function(d) {return d.y += dy;});
+								
+								label.filter(function(d) {return d.selected;})
+								.attr("x", function(d) {return d.x+dx+nodeWidth/2;})
+								.attr("y", function(d) {return d.y+dy+nodeHeight/2;});
+								
+								link.filter(function(d) {return d.source.selected;})
+								.attr("x1", function(d) {return d.source.x+nodeWidth/2;})
+								.attr("y1", function(d) {return d.source.y;});
+
+								link.filter(function(d) {return d.target.selected;})
+								.attr("x2", function(d) {return d.target.x+nodeWidth/2;})
+								.attr("y2", function(d) {return d.target.y;});
+								
+								nodeCheck.filter(function(d){return d.selected;})
+								.attr("x", function(d) {return d.x+dx-20;})
+								.attr("y", function(d) {return d.y+dy;});
+								
+								if(d3.event.preventDefault)d3.event.preventDefault();
+
+							}
+							
+							function defineRightClickMenu(){
+								
+								menu=[{title:'Visualize',action: function(elem,d,i){}},
+									      {title:'link to phenodata',action:function(elm,d,i){}},
+									      {title:'link between selected',action:function(elm,d,i){}},
+									{title:'Rename',action:function(elm,d,i){									
+											 var result = prompt('Change the name of the node',d.name);
+										     if(result) {d.name = result;}
+										     parentController.renameDataset(d,result);
+											 svg.selectAll("text").remove();
+											 renderLabels();		
+										}},
+									{title:'Delete',action:function(elm,d,i){}},
+									{title:'Export',action:function(elm,d,i){}},
+									{title:'View History as text',action:function(elm,d,i){}}
+									] ;
+							}
+							
+							function renderGraph(width,height) {
+								d3.select('svg').remove();
+															
+								var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
+								var yScale = d3.scale.linear().domain([ 0, height ]).range([ 0, height ]);
+								
+								svg = d3.select(iElement[0]).append("svg").attr("width", width).attr("height", height);
+
+								var zoomer = d3.behavior.zoom().scaleExtent([ 1, 4 ]).x(xScale).y(yScale).on("zoomstart", zoomstart).on("zoom",redraw);
 
 								function redraw() {
 									vis.attr("transform", "translate("
@@ -126,309 +266,44 @@ chipsterWeb
 											+ "scale(" + d3.event.scale + ")");
 								}
 
-								var brusher = d3.svg
-										.brush()
-										.x(xScale)
-										.y(yScale)
-										.on(
-												"brushstart",
-												function(d) {
-													node
-															.each(function(d) {
-																d.previouslySelected = shiftKey
-																		&& d.selected;
+								var svg_graph = svg.append('svg:g').call(zoomer)
 
-															});
-												})
-										.on(
-												"brush",
-												function() {
-													var extent = d3.event.target
-															.extent();
-													node
-															.classed(
-																	"selected",
-																	function(d) {
-																		return d.selected = d.previouslySelected
-																				^ (extent[0][0] <= d.x
-																						&& d.x < extent[1][0]
-																						&& extent[0][1] <= d.y && d.y < extent[1][1]);
-																	});
-													
-													
-												})
-												.on(
-												"brushend",
-												function() {
-													d3.event.target.clear();
-													d3.select(this).call(
-															d3.event.target);
-												});
-
-								var svg_graph = svg.append('svg:g')
-										.call(zoomer)
-
-								var rect = svg_graph.append('svg:rect').attr(
-										'width', width).attr('height', height)
-										.attr('fill', 'transparent').attr("id",
-												"zrect") // gave html id
+								var rect = svg_graph.append('svg:rect').attr('width', width).attr('height', height)
+										   .attr('fill', 'transparent')
 												
+								vis = svg_graph.append("svg:g");
 
-								var brush = svg_graph.append("g").datum(
-										function() {
-											return {
-												selected : false,
-												previouslySelected : false
-											};
-										}).attr("class", "brush");
-
-								var vis = svg_graph.append("svg:g");
-
-								vis.attr('fill','red').attr('stroke', 'black')
-										.attr('stroke-width', 1).attr(
-												'opacity', 1.0).attr('id',
-												'vis')
-					
-
-								brush.call(brusher).on("mousedown.brush", null)
-										.on("touchstart.brush", null).on(
-												"touchmove.brush", null).on(
-												"touchend.brush", null);
-
-								brush.select('.background').style('cursor',
-										'auto');
+								vis.attr('fill','red')
+								   .attr('opacity', 1.0).attr('id','vis')	
+								//Rendering the graph elements  
+								defineRightClickMenu();
+								renderLinks();
+								renderNodes();
+								drawNodeCheck();
+								renderLabels();
 								
-								
-								//Defining dataset
-								graph = data;
-								
-								//defining links
-								var link = vis.append("g")
-										.attr("class", "link")
-										.selectAll("line");
-								//defining nodes
-								var node = vis.append("g")
-										.attr("class", "node").selectAll(
-												"rect");
-								
-								var label=[];
-										
-								drawLabel();
-								//defining labels 
-								function drawLabel(){
-								
-								label=vis.append("g")
-								  .selectAll("text")
-								  .data(graph.nodes)
-								  .enter()
-								  .append("text")
-								  .text(function(d){
-									  return d.name;
-								  })
-								  .attr("x",function(d,i){
-									  return d.x+nodeWidth/2;
-								  })
-								  .attr("y",function(d,i){
-									  return d.y+nodeHeight+10;
-								  })
-								  .attr("font-size", "8px")
-								  .attr("fill","black")
-								  .attr("text-anchor", "middle")
-								  .on("click",
-											function(d) {
-												if (d3.event.defaultPrevented)
-													return;
-												svg.style("cursor","pointer");
-												d3.event.stopPropagation();
-
-												if (!shiftKey) {
-													// if the isnt down,
-													// unselect everything
-													label.classed(
-																	"selected",
-																	function(
-																			p) {
-																		return p.selected = p.previouslySelected = false;
-					
-																	})
-
-												}
-
-												//always select this node
-												d3.select(this)
-														.classed(
-																"selected",
-																d.selected = !d.previouslySelected);
-												
-											})
-											.call(
-												d3.behavior
-														.drag()
-														.on(
-																"drag",
-																function(d) {
-																	nudge(
-																			d3.event.dx,
-																			d3.event.dy);
-																}))
-											.on("contextmenu",d3.contextMenu(menu));
-								
-								};
-								  	  
-								
-								function nudge(dx, dy) {
-									node.filter(function(d) {
-										return d.selected;
-									}).attr("x", function(d) {
-										return d.x += dx;
-									}).attr("y", function(d) {
-										return d.y += dy;
-									})
-									
-									
-									
-									label.filter(function(d) {
-										return d.selected;
-									}).attr("x", function(d) {
-										return d.x+dx+nodeWidth/2;
-									}).attr("y", function(d) {
-										return d.y+dy+nodeHeight/2;
-									})
-									
-									link.filter(function(d) {
-										return d.source.selected;
-									}).attr("x1", function(d) {
-										return d.source.x+nodeWidth/2;
-									}).attr("y1", function(d) {
-										return d.source.y;
+								function zoomstart() {
+									node.each(function(d) {
+										d.selected = false;
+										d.previouslySelected = false;
 									});
-
-									link.filter(function(d) {
-										return d.target.selected;
-									}).attr("x2", function(d) {
-										return d.target.x+nodeWidth/2;
-									}).attr("y2", function(d) {
-										return d.target.y;
-									});
-									
-									if(d3.event.preventDefault)
-										d3.event.preventDefault();
-	
+								node.classed("selected", false);
 								}
-
-								graph.links.forEach(function(d) {
-									d.source = graph.nodes[d.source];
-									d.target = graph.nodes[d.target];
-								});
-
-								link = link.data(graph.links).enter().append(
-										"line").attr("x1", function(d) {
-									return d.source.x+nodeWidth/2;
-								}).attr("y1", function(d) {
-									return d.source.y;
-								}).attr("x2", function(d) {
-									return d.target.x+nodeWidth/2;
-								}).attr("y2", function(d) {
-									return d.target.y;
-								});
-
-								node = node
-										.data(graph.nodes)
-										.enter()
-										.append("rect")
-										.attr("x", function(d) {
-											return d.x;
-										})
-										.attr("y", function(d) {
-											return d.y;
-										})
-										.attr("width",nodeWidth)
-										.attr("height",nodeHeight)
-										.attr("fill",function(d,i){return c20(i)})
-										.on("dblclick", function(d) {
-											d3.event.stopPropagation();
-										})
-										.on(
-												"click",
-												function(d) {
-													if (d3.event.defaultPrevented)
-														return;
-													svg.style("cursor","pointer");
-
-													if (!shiftKey) {
-														// if the isnt down,
-														// unselect everything
-														node.classed("selected",function(p) {
-															return p.selected = p.previouslySelected = false;
-														})
-													}
-													//always select this node
-													d3.select(this).classed(
-																	"selected",
-																	d.selected = !d.previouslySelected);
-													
-													if(d.selected){
-														parentController.setDatasetId(d.datasetId);
-													}
-													
-													//For showing dataset detail
-													scope.$apply(function(){
-														parentController.getSelectedDataNode(d);
-													});
 							
-												})
-										.on(
-												"mouseup",
-												function(d) {
-													//do something
-													if (d.selected && shiftKey)
-														d3
-																.select(this)
-																.classed(
-																		"selected",
-																		d.selected = false);
-													
-												})
-										.call(
-												d3.behavior
-														.drag()
-														.on(
-																"drag",
-																function(d) {
-																	parentController.cancelDatasetSelection(d.datasetId);
-																	nudge(
-																			d3.event.dx,
-																			d3.event.dy);
-																}))
-										.on("contextmenu",d3.contextMenu(menu));
-										
-								
-																
-
 								function keydown() {
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
 									ctrlKey = d3.event.ctrlKey;
 
-							
 									if (d3.event.keyCode == 67) {
 										//the c key
 									}
 
 									if (shiftKey) {
-										svg_graph.call(zoomer).on(
-												"mousedown.zoom", null).on(
-												"touchstart.zoom", null).on(
-												"touchmove.zoom", null).on(
-												"touchend.zoom", null);
+										svg_graph.call(zoomer).on("mousedown.zoom", null).on("touchstart.zoom", null)
+										.on("touchmove.zoom", null).on("touchend.zoom", null);
 
-										vis.selectAll('g.gnode').on(
-												'mousedown.drag', null);
-
-										brush.select('.background').style(
-												'cursor', 'crosshair')
-										brush.call(brusher);
-
+										vis.selectAll('g.gnode').on('mousedown.drag', null);
 									}
 								}
 
@@ -436,18 +311,64 @@ chipsterWeb
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
 									ctrlKey = d3.event.ctrlKey;
-									
-									brush.call(brusher).on("mousedown.brush",
-											null).on("touchstart.brush", null)
-											.on("touchmove.brush", null).on(
-													"touchend.brush", null);
-
-									brush.select('.background').style('cursor',
-											'auto')
 									svg_graph.call(zoomer);
 								}
-
+								
 							}//end of renderGraph
+						
+							
+							//Method for search data file in the workflow graph
+							scope.$on('searchDatasets', function(event,data){
+								var searchedDataesets=data.data;
+								searchedDataesets.forEach(function(elem){
+									searchNode(elem.name);
+								});
+								
+							});
+							
+							function searchNode(datasetName){
+								if(datasetName==="none"){
+									node.style("stroke","white").style("stroke-width","1");
+								}else{
+									//Selected and not selected nodes
+									var notSelected=node.filter(function(d,i){
+										return d.name!=datasetName;
+									
+									});
+									
+									var Selected=node.filter(function(d,i){
+										return d.name===datasetName;
+									});
+									
+									//Selected and not selected checkbox
+									var notSelectedCheckBox=nodeCheck.filter(function(d,i){
+										return d.name!=datasetName;
+									});
+									
+									var SelectedCheckBox=nodeCheck.filter(function(d,i){
+										return d.name===datasetName;
+									});
+									
+									//Selected and not selected label
+									var notSelectedLabel=label.filter(function(d,i){
+										return d.name!=datasetName;
+									});
+									
+									var SelectedLabel=label.filter(function(d,i){
+										return d.name===datasetName;
+									});
+									
+									notSelected.style("opacity","0.25");
+									notSelectedCheckBox.style("opacity","0.25");
+									link.style("opacity","0.25");
+									notSelectedLabel.style("opacity","0.25");
+									
+									Selected.style("opacity","1.0");
+									SelectedCheckBox.style("opacity","1.0");
+									SelectedLabel.style("opacity","1.0");
+									
+								}
+							}
 
 						}//end of link function
 

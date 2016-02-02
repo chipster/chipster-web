@@ -1,0 +1,22 @@
+<div class="row">
+	<div>
+		<table class="table table-borderless">
+			<tr ng-repeat="parameter in selected_t_parameter_list">
+				<td><label>{{parameter.name.displayName}}</label></td>
+				
+				<td>
+					<select name="repeatSelect">
+							<option ng-repeat="option in parameter.selectionOptions"			
+								value="option.id">{{option.displayName}}</option>
+								
+					</select>
+				</td>
+			</tr>
+		</table>
+		
+		<div class="row">
+		<!-- need to put the description -->
+		</div>
+	</div>
+
+</div>
