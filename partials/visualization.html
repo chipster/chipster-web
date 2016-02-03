@@ -1,24 +1,51 @@
 <div class="panel panel-default" ng-controller="VisualizationCtrl">
 	<div class="panel-heading">Visualization</div>
 	<div class="panel-body">
-		<p>
-			{{session.sessionDetail}} <span class="pull-right">
-				<button class="btn btn-xs btn-info" data-toggle="modal"
-					data-target="#session-edit-modal">
-					<span class="glyphicon glyphicon-edit"></span>
-				</button>
-			</span>
-		</p>
-		<hr class="soften">
-		<div id="data-detail" ng-show="showDatasetDetail()">
-			<h5>{{dataNode.name}}</h5>
-			<p>SourceJob: {{dataNode.sourceJob}}</p>
-			<p>File ID: {{dataNode.fileId}}</p>
-			<p>Size: {{dataNode.size}}</p>
 
-			<a ng-click="textViewer()">Text viewer</a>
-			<p ng-if="dataNode.file">{{dataNode.file}}</p>
+		<ul class="nav nav-tabs" >
+			<li ng-class="{active:isTab(1)}"><a href ng-click="setTab(1)">Details</a></li>
+			<li ng-class="{active:isTab(2)}"><a href ng-click="setTab(2)">Visualization</a></li>
+		</ul>
+
+		<div id="tabContent">
+			<div ng-show="isTab(1)">
+				<div class="col-sm-8" id="data-detail">
+
+					<h5>{{dataNode.name}}</h5>
+					<p>Source job: {{dataNode.sourceJob}}</p>
+					<!-- <p>File ID: {{dataNode.fileId}}</p> -->
+					<p>Size: {{dataNode.size}}</p>
+
+				</div>
+
+				<div class="coll-sm-4 btn-group-vertical" role="group">
+					<br/>
+					<button type="button" class="btn btn-default" ng-click="showText()">
+						<span class="glyphicon glyphicon-font" aria-hidden="true"></span> <br>Text
+					</button>
+					<button type="button" class="btn btn-default" ng-click="showImage()">
+						<span class="glyphicon glyphicon-picture" aria-hidden="true"></span> <br>Image
+					</button>
+					<button type="button" class="btn btn-default" ng-click="showPdf()">
+						<span class="glyphicon glyphicon-book" aria-hidden="true"></span> <br>PDF
+					</button>
+					<button type="button" class="btn btn-default" ng-click="showSpreadsheet()">
+						<span class="glyphicon glyphicon-th" aria-hidden="true"></span> <br>Spreadsheet
+					</button>
+					<button type="button" class="btn btn-default" ng-click="showPhenodata()">
+						<span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <br>Phenodata
+					</button>
+					<button type="button" class="btn btn-default" ng-click="showHistogram()">
+						<span class="glyphicon glyphicon-equalizer" aria-hidden="true"></span> <br>Histogram
+					</button>
+				</div>
+
+			</div>
+			<div ng-show="isTab(2)">
+				<div ng-include="visualizationTemplate"/>
+			</div>
 		</div>
+
 		<!--session editing modal-->
 		<div id="session-edit-modal" class="modal fade" role="dialog">
 			<div class="modal-dialog">
@@ -55,18 +82,6 @@
 
 		</div>
 		<!--end of modal dialog-->
-		<div class="row">
-			<div class="col-sm-4">PDF</div>
-			<div class="col-sm-4">Image</div>
-			<div class="col-sm-4">SpreadSheet</div>
-		</div>
-		</hr>
-		<!-- PDF viewer block -->
-		<div class="wrapper">
-			<ng-pdf template-url="partials/viewer.html" scale="page-fit"></ng-pdf>
-
-
-		</div>
 	</div>
 </div>
 

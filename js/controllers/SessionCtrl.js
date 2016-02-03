@@ -8,7 +8,7 @@ chipsterWeb
 				'SessionCtrl',
 				function($scope, $routeParams, $q, TemplateService,
 						SessionRestangular, AuthenticationService, $websocket,
-						FileRestangular, $http, $window, WorkflowGraphService,
+						$http, $window, WorkflowGraphService,
 						baseURLString, $filter) {
 
 					// SessionRestangular is a restangular object with
@@ -400,14 +400,6 @@ chipsterWeb
 
 					$scope.showDatasetDetail = function() {
 						return $scope.isDataNodeSelected;
-					};
-
-					$scope.textViewer = function() {
-						FileRestangular.one('sessions', $routeParams.sessionId)
-								.one('datasets', $scope.dataNode.datasetId)
-								.get().then(function(resp) {
-									$scope.dataNode.file = resp.data;
-								});
 					};
 
 					$scope.orientVert = true;
