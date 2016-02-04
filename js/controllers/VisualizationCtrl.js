@@ -19,7 +19,10 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 
 
 	$scope.showText = function() {
-		$scope.getDatasetData();
+		$scope.getDatasetData().then(function(resp) {
+			$scope.dataNode.file = resp.data;
+		});
+
 		$scope.visualizationTemplate = "partials/visualizations/text.html";
 		$scope.setTab(2)
 	};
@@ -32,7 +35,7 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 
 	$scope.showPdf = function() {
 		$scope.visualizationTemplate = "partials/visualizations/pdf.html";
-		$scope.setTab(2)
+		$scope.setTab(2);
 
 		//blocks for the visualization controlling
 		$scope.pdfFileName='Theory of Relativity';//name of the pdf result file to view
@@ -59,13 +62,27 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 		};
 	};
 
-	$scope.getDatasetData = function() {
-		FileRestangular.one('sessions', $routeParams.sessionId)
-			.one('datasets', $scope.dataNode.datasetId)
-			.get().then(function(resp) {
-			console.log(resp);
-			$scope.dataNode.file = resp.data;
+	$scope.showSpreadsheet = function() {
+		$scope.visualizationTemplate = "partials/visualizations/spreadsheet.html";
+		$scope.getDatasetData().then(function (resp) {
+			parserConfig = {
+				separator: '\t'
+			};
+			$.csv.toArrays(resp.data, parserConfig, function (err, data) {
+				$scope.db = {
+					items: data
+				};
+			});
 		});
+		$scope.setTab(2)
+	};
+
+
+
+	$scope.getDatasetData = function() {
+		return FileRestangular.one('sessions', $routeParams.sessionId)
+			.one('datasets', $scope.dataNode.datasetId)
+			.get();
 	};
 
 	$scope.getDatasetUrl = function() {

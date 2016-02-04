@@ -1,8 +1,9 @@
 var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow',
 		'restangular', 'LocalStorageModule', 'ngWebsocket', 'angularResizable',
-		'pdf' ])
+		'pdf', 'ngHandsontable' ]);
 
 var baseURL = 'http://vm0179.kaj.pouta.csc.fi:8000/';
+//var baseURL = 'http://localhost:8000/';
 
 // defining the base Url as constant
 chipsterWeb.constant('baseURLString', baseURL);

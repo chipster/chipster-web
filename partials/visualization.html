@@ -35,14 +35,11 @@
 					<button type="button" class="btn btn-default" ng-click="showPhenodata()">
 						<span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <br>Phenodata
 					</button>
-					<button type="button" class="btn btn-default" ng-click="showHistogram()">
-						<span class="glyphicon glyphicon-equalizer" aria-hidden="true"></span> <br>Histogram
-					</button>
 				</div>
 
 			</div>
 			<div ng-show="isTab(2)">
-				<div ng-include="visualizationTemplate"/>
+				<div ng-include="visualizationTemplate"></div>
 			</div>
 		</div>
 
