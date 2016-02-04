@@ -20,26 +20,13 @@
 
 				<div class="coll-sm-4 btn-group-vertical" role="group">
 					<br/>
-					<button type="button" class="btn btn-default" ng-click="showText()">
-						<span class="glyphicon glyphicon-font" aria-hidden="true"></span> <br>Text
-					</button>
-					<button type="button" class="btn btn-default" ng-click="showImage()">
-						<span class="glyphicon glyphicon-picture" aria-hidden="true"></span> <br>Image
-					</button>
-					<button type="button" class="btn btn-default" ng-click="showPdf()">
-						<span class="glyphicon glyphicon-book" aria-hidden="true"></span> <br>PDF
-					</button>
-					<button type="button" class="btn btn-default" ng-click="showSpreadsheet()">
-						<span class="glyphicon glyphicon-th" aria-hidden="true"></span> <br>Spreadsheet
-					</button>
-					<button type="button" class="btn btn-default" ng-click="showPhenodata()">
-						<span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <br>Phenodata
+					<button type="button" class="btn btn-default" ng-click="show(vis.directive)" ng-repeat="vis in visualizations" ng-show="isCompatible(vis)">
+						<span class="glyphicon {{vis.icon}}" aria-hidden="true"></span> <br>{{vis.name}}
 					</button>
 				</div>
-
 			</div>
 			<div ng-show="isTab(2)">
-				<div ng-include="visualizationTemplate"></div>
+				<div id="visualizationArea"></div>
 			</div>
 		</div>
 

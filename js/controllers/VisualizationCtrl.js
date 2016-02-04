@@ -3,7 +3,7 @@
  * @example <div ng-controller="VisualizationCtrl"></div>
  */
 
-chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRestangular, baseURLString, AuthenticationService){
+chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRestangular, baseURLString, AuthenticationService, $compile){
 
 	$scope.setTab = function(value) {
 		$scope.tab = value;
@@ -17,72 +17,61 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 		$scope.setTab(1);
 	});
 
+	$scope.visualizations = [
+		// when adding a new visualization, remember to include it in the index.html file
+		{
+			directive: 'chipster-image',
+			icon: 'glyphicon-picture',
+			name: 'Image',
+			extensions: ['png', "jpg", "jpeg"]
+		},
+		{
+			directive: 'chipster-pdf',
+			icon: 'glyphicon-book',
+			name: 'PDF',
+			extensions: ['pdf']
+		},
+		{
+			directive: 'chipster-spreadsheet',
+			icon: 'glyphicon-th',
+			name: 'Spreadsheet',
+			extensions: ['tsv', 'bed']
+		},
+		{
+			directive: 'chipster-Phenodata',
+			icon: 'glyphicon-edit',
+			name: 'Text',
+			extensions: ['tsv']
+		},
+		{
+			directive: 'chipster-text',
+			icon: 'glyphicon-font',
+			name: 'Text',
+			extensions: ['txt', 'tsv', 'bed']
+		},
+	];
 
-	$scope.showText = function() {
-		$scope.getDatasetData().then(function(resp) {
-			$scope.dataNode.file = resp.data;
-		});
-
-		$scope.visualizationTemplate = "partials/visualizations/text.html";
-		$scope.setTab(2)
+	// check if the visualization is compatible with the selected dataset
+	$scope.isCompatible = function (visualization) {
+		if ($scope.dataNode) {
+			var extension = $scope.dataNode.name.split('.').pop();
+			return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
+		}
+		return false;
 	};
 
-	$scope.showImage = function() {
-		$scope.visualizationTemplate = "partials/visualizations/image.html";
-		$scope.dataNode.url = $scope.getDatasetUrl();
-		$scope.setTab(2)
-	};
-
-	$scope.showPdf = function() {
-		$scope.visualizationTemplate = "partials/visualizations/pdf.html";
+	// compile the selected visualization directive and show it
+	$scope.show = function (directiveName) {
+		console.log(directiveName);
 		$scope.setTab(2);
-
-		//blocks for the visualization controlling
-		$scope.pdfFileName='Theory of Relativity';//name of the pdf result file to view
-		$scope.pdfUrl=$scope.getDatasetUrl();
-		$scope.scroll=0;
-		$scope.loading='loading';
-
-		$scope.getNavStyle=function(scroll){
-			if(scroll>100) return 'pdf-controls fixed';
-			else return 'pdf-controls';
-
-		};
-
-		$scope.onError=function(error){
-			console.log(error);
-		};
-
-		$scope.onLoad=function(){
-			$scope.loading='';
-		};
-
-		$scope.onProgress=function(progress){
-
-		};
-	};
-
-	$scope.showSpreadsheet = function() {
-		$scope.visualizationTemplate = "partials/visualizations/spreadsheet.html";
-		$scope.getDatasetData().then(function (resp) {
-			parserConfig = {
-				separator: '\t'
-			};
-			$.csv.toArrays(resp.data, parserConfig, function (err, data) {
-				$scope.db = {
-					items: data
-				};
-			});
-		});
-		$scope.setTab(2)
-	};
-
-
-
-	$scope.getDatasetData = function() {
-		return FileRestangular.one('sessions', $routeParams.sessionId)
-			.one('datasets', $scope.dataNode.datasetId)
-			.get();
+		var directive = angular.element('<' + directiveName + '/>');
+		directive.attr('src', "'" + $scope.getDatasetUrl() + "'");
+		directive.attr('dataset-id', "'" + $scope.dataNode.datasetId + "'");
+		directive.attr('session-id', "'" + $routeParams.sessionId + "'");
+		var area = angular.element(document.getElementById("visualizationArea"));
+		area.empty();
+		area.append(directive);
+		$compile(directive)($scope);
 	};
 
 	$scope.getDatasetUrl = function() {
