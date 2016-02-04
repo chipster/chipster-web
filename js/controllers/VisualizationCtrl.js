@@ -38,9 +38,9 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 			extensions: ['tsv', 'bed']
 		},
 		{
-			directive: 'chipster-Phenodata',
+			directive: 'chipster-phenodata',
 			icon: 'glyphicon-edit',
-			name: 'Text',
+			name: 'Phenodata',
 			extensions: ['tsv']
 		},
 		{
