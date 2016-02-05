@@ -6,14 +6,28 @@ body{
     height: 100%;
 }
 
+#main-navbar {
+	margin-bottom:5px;
+
+}
+
+#workflow-panel {
+    max-height: 550px;
+}
+
+
+
 .navbar{
 	margin-bottom:2px;
 	height:50px;
 	min-height:40px;
 }
+
 .navbar-brand{
 	height:40px;
 }
+
+/*
 
 .form-control{
 	margin:2px;
@@ -27,12 +41,13 @@ body{
     clear:both;
     border-bottom: 1px solid transparent;
 }
+*/
 
-
-
+/*
 table{
 	border-collapse: collapse;
 }
+*/
 
 .tool-selected{
 	background:#c0d2de;
@@ -45,11 +60,11 @@ footer {
 	font-size: 11px;
 }
 
+/*
 ul.unstyled {
 	list-style: none;
 	padding: 0;
 }
-
 
 
 #chipsterInfoContainer{
@@ -69,6 +84,9 @@ ul.unstyled {
 	margin-top:10px;
 	float:right;
 }
+
+*/
+
 /*wrapper for page content to push down the footer, fix for the sticky footer*/
 #wrap{
 	min-height: 100%;
@@ -79,6 +97,8 @@ ul.unstyled {
 	/*padding: 0 0 60px;*/
 }
 
+
+/*
 #tooltable{
 	overflow: auto;
 	max-height: 550px;
@@ -99,6 +119,7 @@ ul.unstyled {
 
 }
 
+*/
 
 
 /* D3 graph related styles*/
@@ -113,8 +134,8 @@ ul.unstyled {
 }
 
 
-.link {     
-      stroke: #999;     
+.link {
+      stroke: #999;
 }
 
 .dummylink{
@@ -136,21 +157,16 @@ ul.unstyled {
   border-radius: 2px;
 }
 
-
-.btn {
-    margin-right: 5px;
-}
-
 .group-title {
     background-color: #687074 !important;
     color: #FFF !important;
 }
 
-
+/*
 .panel .nav-justified{
 	margin-bottom:-1px;
 }
-
+*/
 
 
 
