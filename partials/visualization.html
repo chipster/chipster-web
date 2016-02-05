@@ -4,7 +4,17 @@
 
 		<ul class="nav nav-tabs" >
 			<li ng-class="{active:isTab(1)}"><a href ng-click="setTab(1)">Details</a></li>
-			<li ng-class="{active:isTab(2)}"><a href ng-click="setTab(2)">Visualization</a></li>
+
+			<li role="presentation" class="dropdown" ng-class="{active:isTab(2)}" ng-show="currentVisualization">
+				<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					{{currentVisualization.name}} <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+					<li ng-repeat="vis in visualizations" ng-show="isCompatible(vis)"> <a ng-click="show(vis)">{{vis.name}}</a></li>
+				</ul>
+			</li>
+
+
 		</ul>
 
 		<div id="tabContent">
@@ -20,7 +30,7 @@
 
 				<div class="coll-sm-4 btn-group-vertical" role="group">
 					<br/>
-					<button type="button" class="btn btn-default" ng-click="show(vis.directive)" ng-repeat="vis in visualizations" ng-show="isCompatible(vis)">
+					<button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in visualizations" ng-show="isCompatible(vis)">
 						<span class="glyphicon {{vis.icon}}" aria-hidden="true"></span> <br>{{vis.name}}
 					</button>
 				</div>
