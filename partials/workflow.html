@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<div id="workflow-panel" class="panel panel-default">
 	<div class="panel-heading" ng-click="editName()">Data
 		<form novalidate class="simple-form pull-right">
 			<input type="text" ng-model="searched_dataset_name" placeholder="search data">
@@ -115,3 +115,15 @@
 	</div>
 	<!-- end of panel body -->
 </div>
+
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h4 class="panel-title">{{dataNode.name}}</h4>
+	</div>
+	<div class="panel-body">
+		<p>Dataset details here</p>
+	</div>
+	<!--end of panel body-->
+</div>
+<!--end of class panel panel-default-->
