@@ -18,7 +18,7 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 	});
 
 	$scope.visualizations = [
-		// when adding a new visualization, remember to include it in the index.html file
+		// when adding a new visualization, remember to include it (the directive) in the index.html file
 		{
 			directive: 'chipster-image',
 			icon: 'glyphicon-picture',
