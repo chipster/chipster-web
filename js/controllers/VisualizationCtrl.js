@@ -51,6 +51,8 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 		},
 	];
 
+	$scope.currentVisualization = null;
+
 	// check if the visualization is compatible with the selected dataset
 	$scope.isCompatible = function (visualization) {
 		if ($scope.dataNode) {
@@ -61,10 +63,11 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 	};
 
 	// compile the selected visualization directive and show it
-	$scope.show = function (directiveName) {
-		console.log(directiveName);
+	$scope.show = function (vis) {
+		console.log(vis.directive);
 		$scope.setTab(2);
-		var directive = angular.element('<' + directiveName + '/>');
+		$scope.currentVisualization = vis;
+		var directive = angular.element('<' + vis.directive + '/>');
 		directive.attr('src', "'" + $scope.getDatasetUrl() + "'");
 		directive.attr('dataset-id', "'" + $scope.dataNode.datasetId + "'");
 		directive.attr('session-id', "'" + $routeParams.sessionId + "'");
