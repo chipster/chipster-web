@@ -1,18 +1,13 @@
 <div class="row" id="dataToolContainer" ng-controller="SessionCtrl" ng-init="getSessionDetail()">
 
 	<!-- Start of Workflow View -->
-	<div class="col-sm-4 col-lg-4" resizable r-directions="['right']" r-flex="false" ng-include="'partials/workflow.html'" >
+	<div class="col-md-5" resizable r-directions="['right']" r-flex="false" ng-include="'partials/workflow.html'" >
 	</div>
 	<!-- end of workflow -->
 
 	<!-- Visualization View -->
-	<div class="col-sm-4 col-lg-4" resizable r-directions="['right']" r-flex="false" ng-include="'partials/visualization.html'"></div>
+	<div class="col-md-7" ng-include="'partials/visualization.html'"></div>
 	<!-- End of Visualization View -->
-
-	<!-- Start of Tools View -->
-	<div class="col-sm-4 col-lg-4" ng-include="'partials/tools.html'"></div>
-	<!-- End of Tools View -->
-
 
 	<!--
 	<div class="panel panel-default">

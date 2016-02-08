@@ -1,48 +1,27 @@
 <div id="workflow-panel" class="panel panel-default">
-	<div class="panel-heading" ng-click="editName()">Data
-		<form novalidate class="simple-form pull-right">
-			<input type="text" ng-model="searched_dataset_name" placeholder="search data">
-		</form>
-	</div>
-
-	<!--
-	<div class="panel-heading" ng-click="editName()">{{session.sessionName}}
-		<form novalidate class="simple-form pull-right">
-			<input type="text" ng-model="searched_dataset_name" placeholder="search data">
-		</form>
-	</div>
-	-->
-	<!--end of panel heading-->
 
 	<div class="panel-body">
+		<form novalidate class="bar pull-right">
+			<input type="text" ng-model="searched_dataset_name" placeholder="search dataset">
+		</form>
+
 		<div>
 			<ul class="nav nav-tabs" >
 				<li ng-class="{active:isSet(1)}"><a href ng-click="setItem(1)">Workflow</a></li>
 				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
 				<li ng-class="{active:isSet(3)}"><a href ng-click="setItem(3)">Notes</a></li>
 			</ul>
-			<ul class="nav nav-pills pull-right">
-				<li>
-					<button class="btn btn-xs btn-info pull-right"
-						ng-click="changeOrientation()">
-						<span class="glyphicon glyphicon-repeat"></span>
-					</button>
-				</li>
-				<li><button class="btn btn-xs btn-info"
-						data-toggle="modal" data-target="#addDatasetModal">
-						<span class="glyphicon glyphicon-plus-sign"></span>
-					</button></li>
-
-				<div id="addDatasetModal" class="modal fade" role="dialog">
-					<div class="panel-body" ng-include="'partials/fileuploader.html'"></div>
-				</div>
-
-			</ul>
 		</div>
 		<!-- end of panel headings -->
 
 		<div id="tabContent">
 			<div ng-show="isSet(1)">
+				<div class="pull-right">
+				<button class="btn btn-xs btn-info"
+						ng-click="changeOrientation()">
+					<span class="glyphicon glyphicon-repeat"></span>
+				</button>
+				</div>
 				<workflow-graph-layout data="d3Data" selectedDataset="selectedDatasetId">
 			</div>
 			<div ng-show="isSet(2)">
@@ -50,7 +29,9 @@
 					<table class="table table-hover">
 						<tbody>
 							<tr ng-repeat="data in d3Data.nodes|searchDataset:searched_dataset_name">
-								<td class="text-left text-nowrap" ng-click=""><a href="">{{data.name}}</a></td>
+								<td class="text-left text-nowrap" ng-click="">
+									<a href="">{{data.name}}</a>
+								</td>
 								<td class="text-right text-nowrap">
 									<button class="btn btn-xs btn-info"
 										ng-click="deleteDataset(data)">Delete</button>
@@ -110,20 +91,69 @@
 					</p>
 				</div>
 			</div>
+			<div ng-show="isSet(1) || isSet(2)">
+					<div class="pull-right">
+						<button class="btn btn-lg btn-success btn-circle link-btn"
+								data-toggle="modal" data-target="#addDatasetModal">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+					</div>
+
+					<div id="addDatasetModal" class="modal fade" role="dialog">
+						<div class="panel-body" ng-include="'partials/fileuploader.html'"></div>
+					</div>
+
+			</div>
 		</div>
 		<!-- end of tab content -->
 	</div>
 	<!-- end of panel body -->
+
+	<!--session editing modal-->
+	<div id="session-edit-modal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times</button>
+					<h4 class="modal-title">Edit Session</h4>
+				</div>
+				<!--end of modal header-->
+				<div class="modal-body">
+					<form class="edit-form" role="form" novalidate>
+						<div class="form-group">
+							<label>Session Name</label> <input type="text"
+															   class="form-control" ng-model="session.sessionName"
+															   placeholder="Edit name">
+						</div>
+						<div class="form-group">
+							<label>Session Description</label> <input type="text"
+																	  class="form-control" ng-model="session.sessionDetail"
+																	  placeholder="Enter description">
+						</div>
+						<button type="button" class="btn btn-info"
+								ng-click="editSession()" data-dismiss="modal">Save</button>
+						<button type="button" class="btn btn-default pull-right"
+								data-dismiss="modal">Cancel</button>
+					</form>
+				</div>
+				<!--end of modal body-->
+			</div>
+			<!--end of modal-content-->
+
+		</div>
+		<!--end of modal-dialog-->
+
+	</div>
+	<!--end of modal dialog-->
 </div>
 
-
-<div class="panel panel-default">
+<!--
+<div class="panel panel-default main-panel-left-bottom">
 	<div class="panel-heading">
 		<h4 class="panel-title">{{dataNode.name}}</h4>
 	</div>
 	<div class="panel-body">
 		<p>Dataset details here</p>
 	</div>
-	<!--end of panel body-->
-</div>
+</div> -->
 <!--end of class panel panel-default-->

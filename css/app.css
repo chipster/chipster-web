@@ -1,21 +1,60 @@
 /*Custom CSS for Chipster Web*/
 
 
-html,
-body{
-    height: 100%;
+@media (min-width: 1000px) {
+	html,
+	body {
+		height: 100vh;
+		overflow-y: hidden;
+		overflow-x: hidden;
+	}
 }
 
+/*
 #main-navbar {
 	margin-bottom:5px;
-
 }
+*/
 
 #workflow-panel {
-    max-height: 550px;
+    height: 90vh;
 }
 
+.main-panel-right {
+	height: 90vh;
+}
 
+.main-panel-left-bottom {
+	height: 18vh;
+}
+
+.visualization-area {
+	height: 80vh; /* %-height of the viewport */
+	overflow-y: scroll;
+}
+
+#data-detail {
+	height: 30vh;
+}
+
+#tooltable{
+	overflow-y: auto;
+	overflow-x: hidden;
+	max-height: 38vh;
+	margin-left: -15px;
+}
+
+.tool-description {
+	overflow-y: auto;
+	height: 28vh;
+	margin-bottom: 5px;
+}
+
+.nav-tabs {
+	margin-bottom: 10px;
+}
+
+/*
 
 .navbar{
 	margin-bottom:2px;
@@ -26,7 +65,7 @@ body{
 .navbar-brand{
 	height:40px;
 }
-
+*/
 /*
 
 .form-control{
@@ -97,14 +136,7 @@ ul.unstyled {
 	/*padding: 0 0 60px;*/
 }
 
-
 /*
-#tooltable{
-	overflow: auto;
-	max-height: 550px;
-	margin-top:5px;
-}
-
 
 #toolrow {max-height:10px;}
 
@@ -168,60 +200,44 @@ ul.unstyled {
 }
 */
 
-
-/*
-* link-btn style: looks normally like a link, but changes to button on hover
-*
-* http://stackoverflow.com/questions/21636690/custom-bootstraps-link-to-show-as-a-button-on-hover-only
-*/
-.link-btn {
-	font-weight: normal;
-	color: #333333;
-	cursor: pointer;
-}
-
-.link-btn:hover,
-.link-btn:focus,
-.link-btn:active,
-.link-btn.active,
-.open .dropdown-toggle.link-btn {
-	color: #333333;
-	background-color: #ebebeb;
-	border-color: #adadad;
-}
-
-.link-btn:active,
-.link-btn.active,
-.open .dropdown-toggle.link-btn {
-	background-image: none;
-}
-
-.link-btn.disabled,
-.link-btn[disabled],
-fieldset[disabled] .link-btn,
-.link-btn.disabled:hover,
-.link-btn[disabled]:hover,
-fieldset[disabled] .link-btn:hover,
-.link-btn.disabled:focus,
-.link-btn[disabled]:focus,
-fieldset[disabled] .link-btn:focus,
-.link-btn.disabled:active,
-.link-btn[disabled]:active,
-fieldset[disabled] .link-btn:active,
-.link-btn.disabled.active,
-.btn-default[disabled].active,
-fieldset[disabled] .btn-default.active {
-	background-color: #ffffff;
-	border-color: #cccccc;
-}
-
-/*
-* end of link-btn style
-*/
-
 .phenodata-header-button {
 	margin-left: 15px;
+	color: gray;
 }
+
+.phenodata-add-column-button {
+	margin-bottom: 10px;
+	margin-right: 30px;
+}
+
+/* http://bootsnipp.com/snippets/featured/circle-button */
+
+.btn-circle {
+	width: 30px;
+	height: 30px;
+	text-align: center;
+	padding: 6px 0;
+	font-size: 12px;
+	line-height: 1.428571429;
+	border-radius: 15px;
+}
+.btn-circle.btn-lg {
+	width: 50px;
+	height: 50px;
+	padding: 10px 16px;
+	font-size: 18px;
+	line-height: 1.33;
+	border-radius: 25px;
+}
+.btn-circle.btn-xl {
+	width: 70px;
+	height: 70px;
+	padding: 10px 16px;
+	font-size: 24px;
+	line-height: 1.33;
+	border-radius: 35px;
+}
+
 
 
 

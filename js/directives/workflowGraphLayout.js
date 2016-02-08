@@ -14,7 +14,8 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						link : function(scope, iElement, iAttrs, parentController) {
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 3) - 50, height = (window.innerHeight-50), shiftKey, ctrlKey;
+							var width = (window.innerWidth / 3) - 50;
+							var height = (window.innerHeight-300), shiftKey, ctrlKey;
 							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg,dLinks;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;
@@ -100,7 +101,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 							            .duration(7500)
 							            .attrTween("stroke-dasharray", tweenDash)
 							            .each("end", function() { d3.select(this).call(transition); });
-							    };
+							    }
 												
 							
 						
@@ -266,15 +267,15 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 											+ "scale(" + d3.event.scale + ")");
 								}
 
-								var svg_graph = svg.append('svg:g').call(zoomer)
+								var svg_graph = svg.append('svg:g').call(zoomer);
 
 								var rect = svg_graph.append('svg:rect').attr('width', width).attr('height', height)
-										   .attr('fill', 'transparent')
+										   .attr('fill', 'transparent');
 												
 								vis = svg_graph.append("svg:g");
 
 								vis.attr('fill','red')
-								   .attr('opacity', 1.0).attr('id','vis')	
+								   .attr('opacity', 1.0).attr('id','vis');
 								//Rendering the graph elements  
 								defineRightClickMenu();
 								renderLinks();
@@ -372,6 +373,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 						}//end of link function
 
-					}//end of return
+					};//end of return
 
 				});
