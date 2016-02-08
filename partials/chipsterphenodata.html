@@ -1,0 +1,40 @@
+
+<div class="row">
+    <button class="btn btn-default btn-xs pull-right phenodata-add-column-button" data-toggle="modal" data-target="#add-column-modal">
+        <span class="glyphicon glyphicon-plus"></span>
+        Add column
+    </button>
+</div>
+
+<div class="row" id="tableContainer"></div>
+
+<div id="add-column-modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times</button>
+                <h4 class="modal-title">Add new column</h4>
+            </div>
+            <!--end of modal header-->
+            <div class="modal-body">
+                <form class="edit-form" role="form" novalidate>
+                    <div class="form-group">
+                        <label>Column name</label>
+                        <input type="text"
+                               class="form-control" ng-model="colName"
+                               placeholder="">
+                    </div>
+
+                    <button type="button" class="btn btn-info"
+                            ng-click="addColumn()" data-dismiss="modal">Add</button>
+                    <button type="button" class="btn btn-default pull-right"
+                            data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+            <!--end of modal body-->
+        </div>
+        <!--end of modal-content-->
+
+    </div>
+    <!--end of modal-dialog-->
+</div>
