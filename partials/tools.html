@@ -1,15 +1,12 @@
 <div ng-controller="ToolCtrl" ng-init="getTools()">
 
-	<hr/>
-
-
     <div class="bar pull-right">
         <input type="text" class="search" ng-model="searchTool" placeholder="search tool"/>
     </div>
 
     <!-- Tools div -->
     <div class="row">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-pills btn-xs">
             <li ng-class="{active:isSet($index)}" ng-repeat="t_module in t_modules">
                 <a href ng-click="setTab($index)">{{t_module.name}}</a>
             </li>
@@ -17,9 +14,9 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="tab-content">
+    <div>
         <div class="row">
-            <div class="col-xs-4">
+            <div class="col-xs-4 no-padding">
                 <div id="category-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>
@@ -40,7 +37,7 @@
                 </div>
             </div>
             <!-- end of tool category table with column width 4 -->
-            <div class="col-xs-4">
+            <div class="col-xs-4" style="padding-left: 0">
                 <div id="tool-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>

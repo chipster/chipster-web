@@ -4,9 +4,10 @@
 @media (min-width: 1000px) {
 	html,
 	body {
-		height: 100vh;
 		overflow-y: hidden;
 		overflow-x: hidden;
+		padding-left: 2px;
+		padding-right: 2px;
 	}
 }
 
@@ -17,42 +18,50 @@
 */
 
 #workflow-panel {
-    height: calc(100vh - 80px);
-	margin-right: -15px;
 }
 
 .add-dataset-button {
 	position: absolute;
-	bottom: 35px;
-	right: 30px;
+	bottom: 15px;
+	right: 15px;
 }
 
 .main-panel-right {
-	height: calc(100vh - 80px);
 }
 
 .visualization-area {
-	height: calc(100vh - 160px);
-	overflow-y: scroll;
+	height: calc(100vh - 110px);
+}
+
+.scrollable {
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
 }
 
 #data-detail {
-	height: calc((100vh - 260px) * 0.4);
+	height: calc((100vh - 220px) * 0.4);
 }
 
 .tool-height {
-	height: calc((100vh - 260px) * 0.6);
+	height: calc((100vh - 220px) * 0.6);
+}
+
+.no-margin {
+	margin: 0;
+}
+
+.no-padding {
+	padding: 0;
 }
 
 #tool-table{
 	overflow-y: auto;
-	margin-left: -15px;
 }
 
 #category-table{
 	overflow-y: auto;
 	overflow-x: hidden;
-	margin-left: -15px;
 }
 
 #tool-details-panel {
@@ -66,12 +75,12 @@
 	padding-left: 0;
 }
 
-.nav-tabs {
+.nav-pills {
 	margin-bottom: 10px;
 }
 
 .navbar{
-	margin-bottom: 15px;
+	margin-bottom: 10px;
 }
 
 /*
@@ -214,7 +223,7 @@ ul.unstyled {
 }
 
 .phenodata-add-column-button {
-	margin-bottom: 10px;
+	margin: 15px;
 	margin-right: 30px;
 }
 
@@ -247,7 +256,24 @@ ul.unstyled {
 }
 
 
+.tab-content {
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+	padding: 10px;
+	height: calc(100vh - 110px);
+}
 
+.tab-content-without-padding {
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+	height: calc(100vh - 110px);
+}
+
+.nav-tabs {
+	margin-bottom: 0;
+}
 
 
 

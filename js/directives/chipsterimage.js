@@ -2,8 +2,8 @@ chipsterWeb.directive('chipsterImage',function(){
     return{
         restrict:'E',
         scope : {
-            src: "="
+            src: '='
         },
-        template: "<img ng-src='{{src}}'/>"
+        template: '<div class="scrollable"><img ng-src="{{src}}"/></div>'
     };
 });

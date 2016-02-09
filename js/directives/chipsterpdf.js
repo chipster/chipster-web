@@ -6,7 +6,7 @@ chipsterWeb.directive('chipsterPdf',function(){
             sessionId: "=",
             src: "="
         },
-        template: '<div class="wrapper"><ng-pdf template-url="partials/viewer.html" scale="page-fit"></ng-pdf></div>',
+        template: '<div class="wrapper scrollable"><ng-pdf template-url="partials/viewer.html" scale="page-fit"></ng-pdf></div>',
         link: function ($scope,element,attrs) {
 
             //blocks for the visualization controlling

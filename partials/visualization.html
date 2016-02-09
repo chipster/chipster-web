@@ -1,6 +1,8 @@
-<div class="panel panel-default main-panel-right" ng-controller="VisualizationCtrl">
+<!-- <div class="panel panel-default main-panel-right" ng-controller="VisualizationCtrl">
+	<div class="panel-body"> -->
 
-	<div class="panel-body">
+<div class="main-panel-right" ng-controller="VisualizationCtrl">
+	<div>
 
 		<ul class="nav nav-tabs" >
 			<li ng-class="{active:isTab(1)}"><a href ng-click="setTab(1)">Details</a></li>
@@ -13,12 +15,11 @@
 					<li ng-repeat="vis in visualizations" ng-show="isCompatible(vis)"> <a ng-click="show(vis)">{{vis.name}}</a></li>
 				</ul>
 			</li>
-
-
 		</ul>
 
-		<div id="tabContent">
-			<div ng-show="isTab(1)">
+		<div>
+			<div ng-show="isTab(1)" class="tab-content">
+
 				<div class="col-sm-8" id="data-detail">
 
 					<h5>{{dataNode.name}}</h5>
@@ -29,18 +30,22 @@
 				</div>
 
 				<div class="coll-sm-4 btn-group-vertical" role="group">
-					<br/>
-					<button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in visualizations" ng-show="isCompatible(vis)">
+					<button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in visualizations"
+							ng-show="isCompatible(vis)">
 						<span class="glyphicon {{vis.icon}}" aria-hidden="true"></span> <br>{{vis.name}}
 					</button>
 				</div>
 
+				<div class="col-sm-12">
+					<hr/>
+					<div ng-include="'partials/tools.html'"></div>
+				</div>
+
 				<!-- Start of Tools View -->
-				<div class="col-sm-12" ng-include="'partials/tools.html'"></div>
 				<!-- End of Tools View -->
 
 			</div>
-			<div ng-show="isTab(2)">
+			<div ng-show="isTab(2)" class="tab-content-without-padding">
 				<div id="visualizationArea" class="visualization-area"></div>
 			</div>
 		</div>
