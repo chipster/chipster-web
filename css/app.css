@@ -26,11 +26,26 @@
 	right: 15px;
 }
 
-.main-panel-right {
+#main-panel-left {
+	padding-right: 0;
 }
 
 .visualization-area {
 	height: calc(100vh - 110px);
+}
+
+.thumbnail-button {
+	height: 28vh;
+	width: 22vw;
+}
+
+.thumbnail {
+	/* align to center */
+	display: inherit;
+	max-height: 100%;
+	max-width: 100%;
+	overflow: hidden;
+	margin: 0;
 }
 
 .scrollable {

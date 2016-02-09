@@ -20,7 +20,7 @@
 		<div>
 			<div ng-show="isTab(1)" class="tab-content">
 
-				<div class="col-sm-8" id="data-detail">
+				<div class="col-sm-7" id="data-detail">
 
 					<h5>{{dataNode.name}}</h5>
 					<p>Source job: {{dataNode.sourceJob}}</p>
@@ -29,11 +29,28 @@
 
 				</div>
 
-				<div class="coll-sm-4 btn-group-vertical" role="group">
-					<button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in visualizations"
-							ng-show="isCompatible(vis)">
-						<span class="glyphicon {{vis.icon}}" aria-hidden="true"></span> <br>{{vis.name}}
-					</button>
+				<div class="coll-sm-5">
+					<div ng-if="showPreview()">
+						<button type="button" class="btn btn-default no-padding thumbnail-button" ng-click="show(vis)"
+								ng-repeat="vis in getVisualizations()">
+							<img ng-src="{{getDatasetUrl()}}" ng-if="vis.directive == 'chipster-image'" class="thumbnail"/>
+
+							<div ng-if="vis.directive == 'chipster-pdf'" class="thumbnail">
+								<!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
+								{{pdfUrl=getDatasetUrl();""}}
+								<ng-pdf scale="page-fit" template-url="partials/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
+								</ng-pdf>
+							</div>
+						</button>
+					</div>
+
+					 <div ng-if="!showPreview()" class="btn-group-vertical" role="group">
+						<button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in getVisualizations()">
+							<span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
+							<br>
+							{{vis.name}}
+						</button>
+					 </div>
 				</div>
 
 				<div class="col-sm-12">

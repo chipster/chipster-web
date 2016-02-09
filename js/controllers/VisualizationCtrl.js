@@ -23,32 +23,37 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 			directive: 'chipster-image',
 			icon: 'glyphicon-picture',
 			name: 'Image',
-			extensions: ['png', "jpg", "jpeg"]
+			extensions: ['png', "jpg", "jpeg"],
+			preview: true
 		},
 		{
 			directive: 'chipster-pdf',
 			icon: 'glyphicon-book',
 			name: 'PDF',
-			extensions: ['pdf']
+			extensions: ['pdf'],
+			preview: true
 		},
 		{
 			directive: 'chipster-spreadsheet',
 			icon: 'glyphicon-th',
 			name: 'Spreadsheet',
-			extensions: ['tsv', 'bed']
+			extensions: ['tsv', 'bed'],
+			preview: false
 		},
 		{
 			directive: 'chipster-phenodata',
 			icon: 'glyphicon-edit',
 			name: 'Phenodata',
-			extensions: ['tsv']
+			extensions: ['tsv'],
+			preview: false
 		},
 		{
 			directive: 'chipster-text',
 			icon: 'glyphicon-font',
 			name: 'Text',
-			extensions: ['txt', 'tsv', 'bed']
-		},
+			extensions: ['txt', 'tsv', 'bed'],
+			preview: false
+		}
 	];
 
 	$scope.currentVisualization = null;
@@ -60,6 +65,17 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 			return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
 		}
 		return false;
+	};
+
+	$scope.getVisualizations = function () {
+		return $scope.visualizations.filter( function (visualization) {
+			return $scope.isCompatible(visualization);
+		});
+	};
+
+	$scope.showPreview = function () {
+		var visualizations = $scope.getVisualizations();
+		return visualizations.length === 1 && visualizations[0].preview;
 	};
 
 	// compile the selected visualization directive and show it
