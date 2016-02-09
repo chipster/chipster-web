@@ -14,9 +14,10 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						link : function(scope, iElement, iAttrs, parentController) {
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 3) - 50;
-							var height = (window.innerHeight-300), shiftKey, ctrlKey;
-							var searched_dataset,svg,node,link,nodeCheck,label,vis,menu,pb_svg,dLinks;
+							var width = (window.innerWidth / 2) - 50;
+							var height = (window.innerHeight-300);
+							var shiftKey, ctrlKey;
+							var searched_dataset,svg,node,link,label,vis,menu,pb_svg,dLinks;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;
 								
@@ -112,29 +113,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								pb_svg.remove();
 								dLinks.remove();
 							});
-													     
-						    scope.$on('changeNodeCheck',function(event,data){
-						    	 drawNodeCheck(scope.data);
-						     });
-						
-						    //For drawing the checkboxes
-						    function drawNodeCheck(){
-						    	 //Adding the check box with the nodes
-								nodeCheck=vis.append("g").attr("class", "check").selectAll("check").data(graph.nodes)
-									   .enter().append("foreignObject").attr("width",20).attr("height",20)
-									   .attr("x",function(d,i){return d.x-20;})
-									   .attr("y",function(d,i){return d.y;})	
-									   .append("xhtml:body").html("<form><input type=checkbox id=check/></form>")
-									   .on("click",function(d,i){
-										  d.checked=!d.checked;
-										  if(d.checked){parentController.setDatasetSelection(d);}
-										  else{parentController.cancelDatasetSelection(d);}});
-									
-									
-								nodeCheck.each(function(d) {d.checked = false;});
-								nodeCheck.classed("checked",false);
-									  
-							}
 						     
 							function renderNodes(){
 								node = vis.append("g").attr("class", "node").selectAll("rect");
@@ -225,10 +203,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								.attr("x2", function(d) {return d.target.x+nodeWidth/2;})
 								.attr("y2", function(d) {return d.target.y;});
 								
-								nodeCheck.filter(function(d){return d.selected;})
-								.attr("x", function(d) {return d.x+dx-20;})
-								.attr("y", function(d) {return d.y+dy;});
-								
 								if(d3.event.preventDefault)d3.event.preventDefault();
 
 							}
@@ -280,7 +254,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								defineRightClickMenu();
 								renderLinks();
 								renderNodes();
-								drawNodeCheck();
 								renderLabels();
 								
 								function zoomstart() {
@@ -340,16 +313,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 									var Selected=node.filter(function(d,i){
 										return d.name===datasetName;
 									});
-									
-									//Selected and not selected checkbox
-									var notSelectedCheckBox=nodeCheck.filter(function(d,i){
-										return d.name!=datasetName;
-									});
-									
-									var SelectedCheckBox=nodeCheck.filter(function(d,i){
-										return d.name===datasetName;
-									});
-									
+
 									//Selected and not selected label
 									var notSelectedLabel=label.filter(function(d,i){
 										return d.name!=datasetName;
@@ -360,12 +324,10 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 									});
 									
 									notSelected.style("opacity","0.25");
-									notSelectedCheckBox.style("opacity","0.25");
 									link.style("opacity","0.25");
 									notSelectedLabel.style("opacity","0.25");
 									
 									Selected.style("opacity","1.0");
-									SelectedCheckBox.style("opacity","1.0");
 									SelectedLabel.style("opacity","1.0");
 									
 								}

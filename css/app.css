@@ -17,55 +17,63 @@
 */
 
 #workflow-panel {
-    height: 90vh;
+    height: calc(100vh - 80px);
+	margin-right: -15px;
+}
+
+.add-dataset-button {
+	position: absolute;
+	bottom: 35px;
+	right: 30px;
 }
 
 .main-panel-right {
-	height: 90vh;
-}
-
-.main-panel-left-bottom {
-	height: 18vh;
+	height: calc(100vh - 80px);
 }
 
 .visualization-area {
-	height: 80vh; /* %-height of the viewport */
+	height: calc(100vh - 160px);
 	overflow-y: scroll;
 }
 
 #data-detail {
-	height: 30vh;
+	height: calc((100vh - 260px) * 0.4);
 }
 
-#tooltable{
+.tool-height {
+	height: calc((100vh - 260px) * 0.6);
+}
+
+#tool-table{
+	overflow-y: auto;
+	margin-left: -15px;
+}
+
+#category-table{
 	overflow-y: auto;
 	overflow-x: hidden;
-	max-height: 38vh;
 	margin-left: -15px;
+}
+
+#tool-details-panel {
+	padding-right: 0;
 }
 
 .tool-description {
 	overflow-y: auto;
-	height: 28vh;
+	height: calc(100% - 80px);
 	margin-bottom: 5px;
+	padding-left: 0;
 }
 
 .nav-tabs {
 	margin-bottom: 10px;
 }
 
-/*
-
 .navbar{
-	margin-bottom:2px;
-	height:50px;
-	min-height:40px;
+	margin-bottom: 15px;
 }
 
-.navbar-brand{
-	height:40px;
-}
-*/
 /*
 
 .form-control{
@@ -218,7 +226,7 @@ ul.unstyled {
 	text-align: center;
 	padding: 6px 0;
 	font-size: 12px;
-	line-height: 1.428571429;
+	line-height: 1.42;
 	border-radius: 15px;
 }
 .btn-circle.btn-lg {

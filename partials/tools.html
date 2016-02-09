@@ -20,7 +20,7 @@
     <div class="tab-content">
         <div class="row">
             <div class="col-xs-4">
-                <div id="tooltable">
+                <div id="category-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>
                             <tr ng-repeat="t_cat in t_categories|searchFor:searchTool"
@@ -41,7 +41,7 @@
             </div>
             <!-- end of tool category table with column width 4 -->
             <div class="col-xs-4">
-                <div id="tooltable">
+                <div id="tool-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>
                             <tr ng-repeat="tool in current_t_cat.tools|searchFor:searchTool"
@@ -55,30 +55,28 @@
                     </table>
                 </div>
             </div>
-            <div class="row col-xs-4">
-                <button class="btn btn-info" ng-disabled="!enable_t_parameter"
+            <div class="row col-xs-4 tool-height" id="tool-details-panel">
+
+                <button class="btn btn-info col-xs-5" ng-disabled="!enable_t_parameter"
                     data-toggle="modal" data-target="#parameterModal">Parameters</button>
-                <button class="btn btn-success pull-right"
+                <button class="btn btn-success col-xs-6 col-xs-offset-1"
                     ng-click="runJob()">
                     <span class="glyphicon glyphicon-play"> Run</span>
                 </button>
 
                 <!-- Tool Description div -->
-                <div class="tool-description">
+                <div class="tool-description col-xs-12">
                     <!-- <h4>{{selected_t_type.name}}</h4> -->
                     <!--will be the tool description-->
                     {{selected_t_des}}
                     <!--button area-->
                     <!--end of tool button group-->
                 </div>
-                <div class="container" id="toolButtonGroup">
-                    <!--Tool source-->
-                    <button class="btn  btn-info" data-toggle="modal"
-                            data-target="#toolSourceModal">Source Code</button>
-                    <!--Parameter-->
 
-                </div>
-                <!--end of class panel panel-default-->
+                <!--Tool source-->
+                <button class="btn  btn-info btn-sm col-xs-5" data-toggle="modal"
+                        data-target="#toolSourceModal">Source Code</button>
+                <!--Parameter-->
             </div>
         </div>
     </div>
