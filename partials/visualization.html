@@ -22,10 +22,29 @@
 
 				<div class="col-sm-7" id="data-detail">
 
-					<h5>{{dataNode.name}}</h5>
-					<p>Source job: {{dataNode.sourceJob}}</p>
-					<!-- <p>File ID: {{dataNode.fileId}}</p> -->
-					<p>Size: {{dataNode.size}}</p>
+					<div ng-if="dataNode">
+						<h5>{{dataNode.name}}</h5>
+						<!-- <h5>Normalisation / Affymetrix: {{dataNode.name}}</h5> -->
+						<!-- <p><strong>{{dataNode.name}}</strong> created by <strong>{{getJob(dataNode.sourceJob).toolCategory}} / {{getJob(dataNode.sourceJob).toolName}}</strong></p> -->
+
+						<div class="indented">
+							<p style="font-size: smaller">{{dataNode.size}}, {{dataNode.session.created}}</p>
+							<!-- <p>Source job: {{dataNode.sourceJob}}</p> -->
+							<!-- <p>File ID: {{dataNode.fileId}}</p> -->
+							<textarea style="border: none; width: 100%">{{dataNode.notes}}</textarea>
+						</div>
+
+						<h5>{{getJob(dataNode.sourceJob).toolCategory}} / {{getJob(dataNode.sourceJob).toolName}}</h5>
+						<div class="indented">
+							<p ng-repeat="param in getJob(dataNode.sourceJob).parameters">{{param.displayName}}: {{param.value}}</p>
+						</div>
+					</div>
+
+					<div ng-if="!dataNode">
+						<p>{{session.sessionDetail}}</p>
+					</div>
+
+
 
 				</div>
 

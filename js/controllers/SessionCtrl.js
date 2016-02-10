@@ -100,6 +100,8 @@ chipsterWeb
 												jobDict[job.jobId] = job;
 											});
 
+											$scope.jobsMap = jobDict;
+
 											// assign indexes to datasets
 											angular.forEach(datasets, function(
 													dataset, index) {
@@ -267,6 +269,11 @@ chipsterWeb
 
 						});
 					};
+
+					$scope.getJob = function(jobId) {
+						return $scope.jobsMap[jobId];
+					};
+
 
 					// Method for submitting the job with tool and dataset
 					$scope.runJob = function() {
