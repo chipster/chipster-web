@@ -18,7 +18,6 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular){
                     columnSorting: true,
                     manualColumnResize: true,
                     sortIndicator: true,
-                    removeRowPlugin: true,
 
                     afterGetColHeader: function(col, TH) {
                         if (array[0][col] === 'sample' || array[0][col] === 'original_name') {
