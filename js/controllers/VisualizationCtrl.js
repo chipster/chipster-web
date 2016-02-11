@@ -84,13 +84,14 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 		$scope.setTab(2);
 		$scope.currentVisualization = vis;
 		var directive = angular.element('<' + vis.directive + '/>');
-		directive.attr('src', "'" + $scope.getDatasetUrl() + "'");
-		directive.attr('dataset-id', "'" + $scope.dataNode.datasetId + "'");
+		directive.attr('src', 'getDatasetUrl()');
+		directive.attr('dataset-id', 'dataNode.datasetId');
 		directive.attr('session-id', "'" + $routeParams.sessionId + "'");
+		directive.attr('selected-datasets', '[dataNode]');
+		$compile(directive)($scope);
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();
 		area.append(directive);
-		$compile(directive)($scope);
 	};
 
 	$scope.getDatasetUrl = function() {
