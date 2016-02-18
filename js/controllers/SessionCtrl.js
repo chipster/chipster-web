@@ -37,8 +37,11 @@ chipsterWeb
                 sessionId: $routeParams.sessionId,
                 sessionName: "",
                 sessionDetail: "",
+                jobsMap: new Map(),
+                datasetsMap: new Map(),
                 workflowData: {}
             };
+
 
             // For tabbed view manipulation
             $scope.item = 1;
@@ -71,95 +74,83 @@ chipsterWeb
             // For searching dataset in workflowgraph
             $scope.searched_dataset_name = null;
 
-            $scope.getSessionDetail = function () {
+
+            $scope.loadSession = function () {
                 // get session detail
-                var promises = [$scope.sessionUrl.get(),
+                var promises = [
+                    $scope.sessionUrl.get(),
                     $scope.sessionUrl.all('datasets').getList(),
                     $scope.sessionUrl.all('jobs').getList()];
 
-                $q
-                    .all(promises)
-                    .then(
-                        function (res) {
-                            $scope.session.sessionName = res[0].data.name;
-                            $scope.session.sessionDetail = res[0].data.notes;
+                $q.all(promises).then(function (res) {
 
-                            // craete the workflow
-                            var datasets = res[1].data;
-                            var jobs = res[2].data;
+                    var session = res[0].data;
+                    var datasets = res[1].data;
+                    var jobs = res[2].data;
 
-                            // create dicts
-                            var datasetDict = {};
-                            datasets
-                                .forEach(function (dataset) {
-                                    datasetDict[dataset.datasetId] = dataset;
-                                });
+                    // store session properties
+                    $scope.session.sessionName = session.name;
+                    $scope.session.sessionDetail = session.notes;
 
-                            var jobDict = {};
-                            jobs.forEach(function (job) {
-                                jobDict[job.jobId] = job;
+                    // store datasets
+                    var datasetsMap = new Map();
+                    datasets.forEach(function (dataset) {
+                        datasetsMap.set(dataset.datasetId, dataset);
+                    });
+                    $scope.session.datasetsMap = datasetsMap;
+
+                    // store jobs
+                    var jobsMap = new Map();
+                    jobs.forEach(function (job) {
+                        jobsMap.set(job.jobId, job);
+                    });
+                    $scope.session.jobsMap = jobsMap;
+
+
+                    // create links
+
+                    // assign indexes to datasets
+                    angular.forEach(datasets, function (dataset, index) {
+                        dataset.index = index;
+                    });
+
+                    // links
+                    var links = [];
+                    datasets.forEach(function (targetDataset) {
+                        if (!targetDataset.sourceJob) {
+                            return; // continue
+                        }
+                        if (!(jobsMap.has(targetDataset.sourceJob))) {
+                            console.log("source job of dataset " + targetDataset.name + " not found");
+                            return; // continue
+                        }
+                        var sourceJob = jobsMap.get(targetDataset.sourceJob);
+                        // iterate over the inputs of the source job
+                        sourceJob.inputs.forEach(function (input) {
+                            var sourceDataset = datasetsMap.get(input.datasetId);
+                            links.push({
+                                source: sourceDataset.index,
+                                target: targetDataset.index,
+                                value: 4
                             });
-
-                            $scope.jobsMap = jobDict;
-
-                            // assign indexes to datasets
-                            angular.forEach(datasets, function (dataset, index) {
-                                dataset.index = index;
-                            });
-
-                            // create links
-                            var links = [];
-                            datasets
-                                .forEach(function (targetDataset) {
-                                    if (!targetDataset.sourceJob) {
-                                        return; // continue
-                                    }
-                                    if (!(targetDataset.sourceJob in jobDict)) {
-                                        // console.log("source
-                                        // job of dataset "
-                                        // +
-                                        // targetDataset.name
-                                        // + " isn't
-                                        // found");
-                                        return; // continue
-                                    }
-                                    var sourceJob = jobDict[targetDataset.sourceJob];
-                                    // iterate over the
-                                    // inputs of the source
-                                    // job
-                                    sourceJob.inputs
-                                        .forEach(function (input) {
-                                            var sourceDataset = datasetDict[input.datasetId];
-                                            links
-                                                .push({
-                                                    source: sourceDataset.index,
-                                                    target: targetDataset.index,
-                                                    value: 4
-                                                });
-                                            console
-                                                .log("link created: "
-                                                    + sourceDataset.name
-                                                    + "->"
-                                                    + targetDataset.name);
-                                        });
-                                });
-
-                            // set groups and levels
-                            angular.forEach(datasets, function (elem, index) {
-                                elem.group = 1;
-                                elem.c_id = 0;
-                                elem.level = index;
-
-                            });
-                            // we are done
-                            $scope.d3Data = {
-                                nodes: datasets,
-                                links: links
-                            };
-                            //Define the node positions
-                            $scope.jobs = jobs;
-
                         });
+                    });
+
+                    // set groups and levels
+                    angular.forEach(datasets, function (elem, index) {
+                        elem.group = 1;
+                        elem.c_id = 0;
+                        elem.level = index;
+
+                    });
+
+                    // store links data
+                    $scope.d3Data = {
+                        nodes: datasets,
+                        links: links
+                    };
+
+                });
             };
 
             $scope.editSession = function () {
@@ -260,14 +251,8 @@ chipsterWeb
 
             };
 
-            $scope.getJobs = function () {
-                $scope.sessionUrl.getList('jobs').then(function (res) {
-
-                });
-            };
-
             $scope.getJob = function (jobId) {
-                return $scope.jobsMap[jobId];
+                return $scope.session.jobsMap.get(jobId);
             };
 
 
@@ -388,7 +373,7 @@ chipsterWeb
                         console.log(index);
                         $scope.d3Data.nodes.splice(index, 1,
                             renamedObj);
-                        // $scope.getSessionDetail();
+                        // $scope.loadSession();
 
                     });
             };
@@ -412,7 +397,7 @@ chipsterWeb
 
             };
 
-            // @ToDO This Method will be included in getSessionDetail()
+            // @ToDO This Method will be included in loadSession()
             // to get the right x,y after rotation, may be the calculation still not very right, need to work on that
             $scope.loadWorkflowData = function () {
                 $scope.d3Data.nodes.forEach(function (elem) {
