@@ -242,9 +242,8 @@ ul.unstyled {
 	color: gray;
 }
 
-.phenodata-add-column-button {
+.phenodata-button-group {
 	margin: 15px;
-	margin-right: 30px;
 }
 
 /* http://bootsnipp.com/snippets/featured/circle-button */

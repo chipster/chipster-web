@@ -12,19 +12,6 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
 
         link: function ($scope,element,attrs) {
 
-            /*FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
-
-                // parse the file data using the JQuery-cvs library
-                parserConfig = {
-                    separator: '\t'
-                };
-                $.csv.toArrays(resp.data, parserConfig, function (err, array) {
-
-                    var container = document.getElementById('tableContainer');
-                    $scope.hot = new Handsontable(container, $scope.getSettings(array));
-                });
-            });*/
-
             $scope.getSettings = function (array, headers) {
                 return {
                     data: array,
@@ -42,7 +29,22 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                     },
 
                     afterChange: function(changes, source) {
-                        $scope.updateDatasets(array, headers);
+                        /*
+                        Cut two-way binding loops here.
+
+                         If the user edited the table (source === 'edit'),
+                         then the scope and server must be updated also. The same applies for
+                         'paste' and 'autofill'. The latter are created when copying cells by
+                         dragging the small rectangle in the corner of the selection.
+
+                         But if the change came from the scope (source === 'loadData'), then
+                         we must not update the scope, because it would create an infinite
+                         loop.
+                         */
+                        //console.log(source);
+                        if (source === 'edit' || source === 'autofill' || source === 'paste') {
+                            $scope.updateDatasets();
+                        }
                     }
                 }
             };
@@ -74,105 +76,96 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                    colHeaders: colHeaders
                 });
                 $scope.colName = '';
+
+                $scope.updateDatasets();
             };
 
             $scope.removeColumn = function (index) {
                 $scope.hot.alter('remove_col', index);
+
+                $scope.updateDatasets();
             };
 
-            $scope.getHeaders = function (metadata) {
-                return Object.keys(metadata);
+            $scope.reset = function() {
+                angular.forEach($scope.datasets, $scope.resetDataset);
             };
 
-            /*
-            Convert metadata object to an array row
-             */
-            $scope.getRow = function (metadata, headers, datasetId, columnName) {
-                var row = [];
-                angular.forEach(headers, function(colName) {
-                    row.push(metadata[colName]);
-                });
+            $scope.resetDataset = function(dataset) {
+                FileRestangular.getData($scope.sessionId, dataset.datasetId).then(function (resp) {
 
-                // store datasetId and columnName as properties to hide them from the table
-                row.datasetId = datasetId;
-                row.columnName = columnName;
+                    // parse the file data using the JQuery-cvs library
+                    parserConfig = {
+                        separator: '\t'
+                    };
+                    $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
 
-                return row;
-            };
+                        var metadata = [];
 
-            /*
-            Convert an array to object keys with value 'true'. Effectively removes all duplicates,
-             i.e. creates a set.
-             */
-            $scope.arrayToSet = function (array) {
-                var obj = {};
-                angular.forEach(array, function (item) {
-                  obj[item] = true;
-                });
-                return obj;
-            };
+                        var fileHeaders = fileArray[0].filter( function(header) {
+                            return $scope.startsWith(header, "chip.");
+                        });
 
-            $scope.getAllHeaders = function (datasets) {
-                // collect all headers
-                var allHeaders = {};
-                angular.forEach(datasets, function(dataset) {
-                    angular.forEach(dataset.columns, function(column) {
-                        var headers = $scope.getHeaders(column.metadata);
-                        angular.extend(allHeaders, $scope.arrayToSet(headers));
+                        angular.forEach(fileHeaders, function(fileHeader) {
+                            var entry = {
+                                column: fileHeader,
+                                key: 'sample',
+                                value: fileHeader
+                            };
+                            metadata.push(entry);
+                        });
+
+                        dataset.metadata = metadata;
+
+                        $scope.updateView();
+                        $scope.updateDatasets();
                     });
-                    var headers = $scope.getHeaders(dataset.metadata);
-                    angular.extend(allHeaders, $scope.arrayToSet(headers));
                 });
-                return Object.keys(allHeaders);
             };
 
-            $scope.getAllRows = function (datasets, headers) {
+            $scope.startsWith = function(data, start) {
+                return data.substring(0, start.length) === start;
+            };
 
-                // create a row for all metadata columns and datasets
+            $scope.getHeaders = function (datasets) {
+                // collect all headers
+                var headers = {};
+                angular.forEach(datasets, function(dataset) {
+                    angular.forEach(dataset.metadata, function(entry) {
+                        headers[entry.key] = true;
+                    });
+                });
+                return Object.keys(headers);
+            };
+
+            $scope.getRows = function (datasets, headers) {
+
                 var array = [];
 
+                function getRow(datasetId, column) {
+                    for (var i = 0; i < array.length; i++) {
+                        if (array[i].datasetId === datasetId && array[i].columnName === column) {
+                            return array[i];
+                        }
+                    }
+
+                    row = [];
+
+                    // store datasetId and columnName as properties to hide them from the table
+                    row.datasetId = datasetId;
+                    row.columnName = column;
+
+                    array.push(row);
+                    return row;
+                }
+
                 angular.forEach(datasets, function(dataset) {
-                    angular.forEach(dataset.columns, function(column) {
-                        array.push($scope.getRow(column.metadata, headers, dataset.datasetId, column.name));
+
+                    angular.forEach(dataset.metadata, function(entry) {
+                        var row = getRow(dataset.datasetId, entry.column);
+                        row[headers.indexOf(entry.key)] = entry.value;
                     });
-                    array.push($scope.getRow(dataset.metadata, headers, dataset.datasetId, null));
                 });
                 return array;
-            };
-
-            /*
-            convert an array row to metadata object
-             */
-            $scope.getMetadata = function(row, headers) {
-                var metadata = {};
-                for (var i = 0; i < headers.length; i++) {
-                    metadata[headers[i]] = row[i];
-                }
-                return metadata;
-            };
-
-            /*
-            Get a dataset with a given id from the array.
-             */
-            $scope.getDataset = function(datasets, datasetId) {
-                for (var i = 0; i < datasets.length; i++) {
-                    var dataset = datasets[i];
-                    if (dataset.datasetId === datasetId) {
-                        return dataset;
-                    }
-                }
-            };
-
-            /*
-            Get a column with a given name from the array.
-             */
-            $scope.getColumn = function(columns, columnName) {
-                for (var i = 0; i < columns.length; i++) {
-                    var column = columns[i];
-                    if (column.name === columnName) {
-                        return column;
-                    }
-                }
             };
 
             $scope.updateDataset = function(dataset) {
@@ -183,31 +176,103 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 });
             };
 
-            $scope.updateDatasets = function (array, headers) {
+            $scope.updateDatasets = function () {
+
+                $scope.latestEdit = new Date().getTime();
+
+                var metadataMap = {};
+                var array = $scope.array;
+                var headers = $scope.headers;
 
                 array.forEach( function(row) {
-                    var dataset = $scope.getDataset($scope.datasets, row.datasetId);
 
-                    if (row.columnName) {
-                        var column = $scope.getColumn(dataset.columns, row.columnName);
-                        angular.extend(column.metadata, $scope.getMetadata(row, headers));
-                    } else {
-                        angular.extend(dataset.metadata, $scope.getMetadata(row, headers));
+                    for (var i = 0; i < headers.length; i++) {
+                        var entry = {
+                            column: row.columnName,
+                            key: headers[i],
+                            value: row[i]
+                        };
+
+                        if (!metadataMap[row.datasetId]) {
+                            metadataMap[row.datasetId] = [];
+                        }
+
+                        metadataMap[row.datasetId].push(entry);
                     }
                 });
 
-
                 angular.forEach($scope.datasets, function(dataset) {
+                    dataset.metadata = metadataMap[dataset.datasetId];
                     $scope.updateDataset(dataset);
                 });
             };
 
-            var headers = $scope.getAllHeaders($scope.datasets);
-            var array = $scope.getAllRows($scope.datasets, headers);
+            $scope.updateView = function() {
 
-            var container = document.getElementById('tableContainer');
-            console.log(array);
-            $scope.hot = new Handsontable(container, $scope.getSettings(array, headers));
+                var headers = $scope.getHeaders($scope.datasets);
+                var array = $scope.getRows($scope.datasets, headers);
+
+                if (!angular.equals(headers, $scope.headers)) {
+                    $scope.headers = headers;
+
+                    // remove old table if this is an update
+                    var container = document.getElementById('tableContainer');
+                    while (container.firstChild) {
+                        container.removeChild(container.firstChild);
+                    }
+
+                    $scope.hot = new Handsontable(container, $scope.getSettings($scope.array, $scope.headers));
+                }
+
+                $scope.array = array;
+                $scope.hot.loadData($scope.array);
+            };
+
+            $scope.updateViewLater = function() {
+                function isEditingNow() {
+                    return new Date().getTime() - $scope.latestEdit < 1000;
+                }
+
+                if (!isEditingNow()) {
+                    $scope.updateView();
+
+                } else {
+
+                    /*
+                     Defer updates when the table is being edited
+
+                     Imagine the following sequence of events:
+                     1. user fills in row 1
+                     2. the changes are pushed to the server
+                     3. user fills in row 2
+                     4. we receive a notification about the first dataset change and update the table,
+                     reverting the users changes on the line 2
+                     5. user fills in row 3
+                     6. the changes are pushed to the server, including the reverted line 2
+
+                     This is now fixed by delaying the updates in stage 4 when the table is being edited.
+                     The other option would be to save some edit timestamps or edit sources on the server
+                     so that we could recognize the events that we have create ourselves and wouldn't have
+                     to apply them to the table.
+                     */
+
+                    if (!$scope.deferredUpdatesTimer) {
+                        $scope.deferredUpdatesTimer = setInterval(function () {
+                            if (!isEditingNow()) {
+                                clearInterval($scope.deferredUpdatesTimer);
+                                $scope.deferredUpdatesTimer = undefined;
+                                $scope.updateView();
+                            }
+                        }, 100);
+                    }
+                }
+            };
+
+            $scope.$watch('datasets', function (newValue, oldValue) {
+                $scope.updateViewLater();
+            }, true);
+
+            $scope.updateView();
         }
     };
 });

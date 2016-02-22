@@ -1,6 +1,11 @@
 
-<div class="row">
-    <button class="btn btn-default btn-xs pull-right phenodata-add-column-button" data-toggle="modal" data-target="#add-column-modal">
+<div class="btn-group phenodata-button-group">
+
+    <button class="btn btn-default" ng-click="reset()">
+        <span class="glyphicon glyphicon-asterisk"></span>
+        Reset
+    </button>
+    <button class="btn btn-default" data-toggle="modal" data-target="#add-column-modal">
         <span class="glyphicon glyphicon-plus"></span>
         Add column
     </button>
@@ -22,10 +27,10 @@
                         <label>Column name</label>
                         <input type="text"
                                class="form-control" ng-model="colName"
-                               placeholder="">
+                               placeholder="" autofocus>
                     </div>
-
-                    <button type="button" class="btn btn-info"
+                    <!-- type "submit" reacts to enter key -->
+                    <button type="submit" class="btn btn-info"
                             ng-click="addColumn()" data-dismiss="modal">Add</button>
                     <button type="button" class="btn btn-default pull-right"
                             data-dismiss="modal">Cancel</button>
