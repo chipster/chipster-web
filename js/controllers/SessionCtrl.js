@@ -42,6 +42,14 @@ chipsterWeb
                 workflowData: {}
             };
 
+            $scope.getDatasetsList =  function () {
+                var list = [];
+                $scope.session.datasetsMap.forEach(function(value, key, map) {
+                    list.push(value);
+                });
+                return list;
+            };
+
 
             // For tabbed view manipulation
             $scope.item = 1;
