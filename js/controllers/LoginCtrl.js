@@ -1,35 +1,23 @@
-chipsterWeb.controller('LoginCtrl', 
-              function($scope, $location, $http, AuthenticationService,baseURLString) {
+chipsterWeb.controller('LoginCtrl',
+    function ($scope, $location, $http, AuthenticationService, baseURLString) {
 
 
-  $scope.login=function(){
+        $scope.login = function () {
 
-   
-       //If the response ok, then request the token
-
-      var string=$scope.username + ":" +$scope.password;
-
-      var encodedString=btoa(string); //Convert it to base64 encoded string
-     
-      $http({
-              url:baseURLString+'auth'+'/'+'tokens',
-              method: "POST",
-              withCredentials:true,
-              headers: {'Authorization': 'Basic ' + encodedString}                   
-              })
-              .then(function (response) {
-            	  console.log(response);
-                if(response.data.tokenKey){
-                  AuthenticationService.setAuthToken(response.data.tokenKey);
-                  //Route to Session creation page
-                  $location.path("/sessions");
-
+            AuthenticationService.login($scope.username, $scope.password).then( function() {
+                //Route to Session creation page
+                $location.path("/sessions");
+            }, function (response) {
+                console.log('login failed', response, baseURLString);
+                if (response) {
+                    if (response.status === 403) {
+                        $scope.error = 'Incorrect username or password.';
+                    } else {
+                        $scope.error = response.data;
+                    }
+                } else {
+                    $scope.error = 'Could not connect to the server ' + baseURLString;
                 }
-
-
-              });
-  };
-
-  
-  
-});
+            });
+        };
+    });

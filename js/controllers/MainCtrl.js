@@ -1,4 +1,8 @@
-chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationService){
+chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationService, SessionRestangular, baseURLString){
+
+	$scope.getHost = function () {
+		return baseURLString;
+	};
 
 	$scope.isLoggedOut=function(){	
 		if(AuthenticationService.getToken()===null){
@@ -16,5 +20,4 @@ chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationSer
 			return true;
 		}
 	};
-	
 });

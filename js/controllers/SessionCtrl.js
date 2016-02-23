@@ -9,7 +9,7 @@ chipsterWeb
         function ($scope, $routeParams, $q, TemplateService,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  baseURLString, $filter) {
+                  baseURLString) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -35,9 +35,10 @@ chipsterWeb
 
             ws.$on('$open', function () {
                 console.log('websocket connected');
-                $scope.wsKeepaliveTimer = setInterval( function() {
-                    //ws.$emit('ping');
+                /*$scope.wsKeepaliveTimer = setInterval( function() {
+                    ws.$emit('ping');
                 }, 5000);
+                */
 
             }).$on('$message', function(event) {
 
@@ -55,9 +56,13 @@ chipsterWeb
 
             }).$on('$close',function(){
                 console.log('websocket closed');
-                clearInterval($scope.wsKeepaliveTimer);
+                /*clearInterval($scope.wsKeepaliveTimer);*/
             });
 
+            // stop listening when leaving this view
+            $scope.$on("$destroy", function(){
+                ws.$close();
+            });
 
             // creating a session model object
             $scope.session = {
@@ -203,7 +208,7 @@ chipsterWeb
                 console.log('file added');
 
                 // get a separate target for each file
-                flow.opts.target = function (file, chunk, isTest) {
+                flow.opts.target = function (file) {
                     return file.chipsterTarget;
                 };
 
@@ -223,7 +228,7 @@ chipsterWeb
 
             };
 
-            $scope.flowFileSuccess = function (file, message, flow) {
+            $scope.flowFileSuccess = function (file) {
                 // remove completed files from the list
                 file.cancel();
             };
@@ -243,7 +248,7 @@ chipsterWeb
                 console.log(d);
                 $scope.d3Data.nodes.push(d);
 
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     var datasetUrl = $scope.sessionUrl.one('datasets');
                     datasetUrl.customPOST(d).then(
                         function (response) {
@@ -269,7 +274,7 @@ chipsterWeb
                 datasetObj.fileId = TemplateService.getRandomFileID();
 
                 // after that attempting to delete
-                datasetUrl.customPUT(datasetObj).then(function (res) {
+                datasetUrl.customPUT(datasetObj).then(function () {
                     datasetUrl.remove().then(function (res) {
                         console.log(res);
                     });
@@ -300,8 +305,7 @@ chipsterWeb
                 newJob.toolId = $scope.selectedToolId.tool;
                 newJob.toolName = $scope.selectedToolId.name;
 
-                angular.forEach($scope.selectedDatasets, function (elem,
-                                                                   index) {
+                angular.forEach($scope.selectedDatasets, function (elem) {
                     var input = TemplateService.getInputTemplate();
                     input.datasetId = elem.datasetId;
                     input.inputId = elem.name;
@@ -394,7 +398,7 @@ chipsterWeb
 
                 // console.log(datasetObj);
                 datasetUrl.customPUT(renamedObj).then(
-                    function (res) {
+                    function () {
                         var index = $scope.d3Data.nodes
                             .indexOf(datasetObj);
                         console.log(index);
@@ -468,7 +472,7 @@ chipsterWeb.filter('searchDataset', function ($rootScope) {
             function (item) {
 
                 if (item.name.indexOf(searched_dataset_name) !== -1
-                    | item.name.toLowerCase().indexOf(
+                    || item.name.toLowerCase().indexOf(
                         searched_dataset_name) !== -1) {
                     result.push(item);
                 }

@@ -71,12 +71,12 @@ chipsterWeb.config([
 		} ]);
 
 chipsterWeb.run(function($rootScope, $location, AuthenticationService) {
-	$rootScope.$on("$routeChangeStart", function(event, next, current) {
+	$rootScope.$on("$routeChangeStart", function(event, next) {
 		if (next.$$route.authenticated) {
 			var userAuth = AuthenticationService.getToken();
 			if (!userAuth) {
-				$location.path('/');
-				alert("You need to be logged in to access this page!")
+				console.log('token not found, forward to login');
+				$location.path('/login');
 			}
 		}
 	});

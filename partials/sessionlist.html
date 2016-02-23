@@ -5,19 +5,19 @@
         </div>
         <div class="panel-body">
             <div class="col-md-6">
-                <button type="button" class="btn btn-info" ng-click="createSession()">Create New Session</button>
+                <button type="button" class="btn btn-info" ng-click="createSession()">Create new session</button>
                 <hr/>
                 <!-- User Sessions -->
                 <h5>User Session</h5>
                 <table class="table table-hover" >
                   <tbody>
                     <tr ng-repeat="exSession in userSessions" >
-	                    <td class="text-left text-nowrap" ng-click="showSessionDetail(exSession)">
-	                        <a href="">{{exSession.name}}</a>
+	                    <td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)" >
+	                        <a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
 	                    </td>
-	                    <td class="text-right text-nowrap">
-	                        <button class="btn btn-xs btn-info" ng-click="setCurClickedSession(exSession)">Open</button>
-	                  </td>
+	                    <!-- <td class="text-right text-nowrap">
+	                        <button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
+	                  </td>-->
               		</tr>
           		</tbody>
       		</table>
@@ -26,12 +26,12 @@
                 <table class="table table-hover" >
                   <tbody>
                     <tr ng-repeat="exSession in localSessions" >
-	                    <td class="text-left text-nowrap" ng-click="showSessionDetail(exSession)">
-	                        <a href="">{{exSession.name}}</a>
-	                    </td>
-	                    <td class="text-right text-nowrap">
-	                        <button class="btn btn-xs btn-info" ng-click="setCurClickedSession(exSession)">Open</button>
-	                  </td>
+						<td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)" >
+							<a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
+						</td>
+						<!--<td class="text-right text-nowrap">
+							<button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
+						</td>-->
               		</tr>
           		</tbody>
       		</table>
@@ -40,7 +40,7 @@
 		  	<h5>Session Detail</h5>
 		  	{{curSession.notes}}
 		  	<hr/>
-	  		<button class="btn btn-xs btn-info" ng-click="deleteSession(exSession)">Delete</button>
+	  		<button class="btn btn-xs btn-info" ng-click="deleteSession(curSession)">Delete</button>
 	   </div>
 </div><!--end of  panel body-->
 </div><!--end of panel-->
