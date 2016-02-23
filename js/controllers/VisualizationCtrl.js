@@ -13,7 +13,7 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 		return $scope.tab === value;
 	};
 
-	$scope.$watch("dataNode", function(newValue, oldValue) {
+	$scope.$watch("selectedDatasets", function(newValue, oldValue) {
 		$scope.setTab(1);
 	});
 
@@ -60,8 +60,8 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 
 	// check if the visualization is compatible with the selected dataset
 	$scope.isCompatible = function (visualization) {
-		if ($scope.dataNode) {
-			var extension = $scope.dataNode.name.split('.').pop();
+		if ($scope.isSingleDatasetSelected()) {
+			var extension = $scope.selectedDatasets[0].name.split('.').pop();
 			return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
 		}
 		return false;
@@ -79,15 +79,20 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 	};
 
 	// compile the selected visualization directive and show it
+	// only for a single dataset for now
 	$scope.show = function (vis) {
-		console.log(vis.directive);
+		if (!$scope.isSingleDatasetSelected) {
+			console.log("trying to show visualization, but " + $scope.selectedDatasets.length + " datasets selected");
+			return;
+		}
+
 		$scope.setTab(2);
 		$scope.currentVisualization = vis;
 		var directive = angular.element('<' + vis.directive + '/>');
 		directive.attr('src', 'getDatasetUrl()');
-		directive.attr('dataset-id', 'dataNode.datasetId');
+		directive.attr('dataset-id', 'selectedDatasets[0].datasetId');
 		directive.attr('session-id', "'" + $routeParams.sessionId + "'");
-		directive.attr('selected-datasets', '[dataNode]');
+		directive.attr('selected-datasets', '[selectedDatasets[0]]');
 		$compile(directive)($scope);
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();
@@ -97,9 +102,10 @@ chipsterWeb.controller('VisualizationCtrl',function($scope, $routeParams, FileRe
 	$scope.getDatasetUrl = function() {
 		//TODO can Restangular build this?
 		//TODO should we have separate read-only tokens for datasets?
+		//TODO check if dataset(s) selected?
 		return baseURLString
 			+ 'filebroker/sessions/' + $routeParams.sessionId
-			+ '/datasets/' + $scope.dataNode.datasetId
+			+ '/datasets/' + $scope.selectedDatasets[0].datasetId
 			+ '?token=' + AuthenticationService.getToken();
 	};
 });
