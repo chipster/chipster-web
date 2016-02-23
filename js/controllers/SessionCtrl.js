@@ -44,7 +44,7 @@ chipsterWeb
 
             $scope.getDatasetsList =  function () {
                 var list = [];
-                $scope.session.datasetsMap.forEach(function(value, key, map) {
+                $scope.session.datasetsMap.forEach(function(value) {
                     list.push(value);
                 });
                 return list;
@@ -67,15 +67,43 @@ chipsterWeb
             };
             $scope.filterNodes = [];
 
-            // Dataset and tool for posting jobs
+
+            // dataset selections
             $scope.selectedDatasets = [];
+
+            $scope.isDatasetSelected = function() {
+                return $scope.selectedDatasets.length > 0;
+            };
+
+            $scope.isSingleDatasetSelected = function() {
+                return $scope.selectedDatasets.length == 1;
+            };
+
+            $scope.isMultipleDatasetsSelected = function() {
+                return $scope.selectedDatasets.length > 1;
+            };
+
+            this.selectSingleDataset = function(data) {
+                $scope.selectedDatasets = [];
+                $scope.selectedDatasets.push(data);
+            };
+
+            $scope.addToDatasetSelection = function(data) {
+                $scope.selectedDatasets.push(data);
+            };
+
+            // TODO remove
+            this.cancelDatasetSelection = function (datasetId) {
+                var index = $scope.selectedDatasets.indexOf(datasetId);
+                $scope.selectedDatasets.splice(index, 1);
+            };
+
+
+
+            // tool selection
             $scope.selectedToolId = null;
             $scope.selectedToolIndex = -1;
             $scope.istoolselected = false;
-
-            // Dataset Detail showing
-            $scope.dataNode = null;
-            $scope.isDataNodeSelected = false;
 
             $scope.toolDetailList = null;
 
@@ -278,7 +306,7 @@ chipsterWeb
                 }
 
                 // Edit the fields with selected parameter
-                newJob.toolId = $scope.selectedToolId.tool;
+                newJob.toolId = $scope.selectedToolId.id;
                 newJob.toolName = $scope.selectedToolId.name;
 
                 angular.forEach($scope.selectedDatasets, function (elem,
@@ -340,17 +368,6 @@ chipsterWeb
 
             };
 
-            // Binding datasetId from workflow graph directive
-            this.setDatasetSelection = function (datasetId) {
-                $scope.selectedDatasets.push(datasetId);
-                console.log($scope.selectedDatasets);
-            };
-
-            this.cancelDatasetSelection = function (datasetId) {
-                var index = $scope.selectedDatasets.indexOf(datasetId);
-                $scope.selectedDatasets.splice(index, 1);
-            };
-
             $scope.selectedTool = function (tool, $index) {
                 $scope.selectedToolId = tool;
                 $scope.selectedToolIndex = $index;
@@ -386,17 +403,6 @@ chipsterWeb
                     });
             };
 
-            // for showing dataset detail for the selected node
-            this.setSelectedDataNode = function (dataNode) {
-                $scope.dataNode = dataNode;
-                console.log($scope.dataNode.name);
-                $scope.isDataNodeSelected = true;
-
-            };
-
-            $scope.showDatasetDetail = function () {
-                return $scope.isDataNodeSelected;
-            };
 
             $scope.orientVert = true;
             $scope.changeOrientation = function () {
@@ -448,9 +454,8 @@ chipsterWeb.filter('searchDataset', function ($rootScope) {
         angular.forEach(arr,
             function (item) {
 
-                if (item.name.indexOf(searched_dataset_name) !== -1
-                    | item.name.toLowerCase().indexOf(
-                        searched_dataset_name) !== -1) {
+                if (item.name.indexOf(searched_dataset_name) !== -1 ||
+                    item.name.toLowerCase().indexOf(searched_dataset_name) !== -1) {
                     result.push(item);
                 }
             });

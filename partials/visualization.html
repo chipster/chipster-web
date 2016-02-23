@@ -22,25 +22,28 @@
 
 				<div class="col-sm-7" id="data-detail">
 
-					<div ng-if="dataNode">
-						<h5>{{dataNode.name}}</h5>
-						<!-- <h5>Normalisation / Affymetrix: {{dataNode.name}}</h5> -->
-						<!-- <p><strong>{{dataNode.name}}</strong> created by <strong>{{getJob(dataNode.sourceJob).toolCategory}} / {{getJob(dataNode.sourceJob).toolName}}</strong></p> -->
+					<!-- single selection -->
+					<div ng-if="isSingleDatasetSelected()">
+						<h5>{{selectedDatasets[0].name}}</h5>
 
 						<div class="indented">
-							<p style="font-size: smaller">{{dataNode.size}}, {{dataNode.session.created}}</p>
-							<!-- <p>Source job: {{dataNode.sourceJob}}</p> -->
-							<!-- <p>File ID: {{dataNode.fileId}}</p> -->
-							<textarea style="border: none; width: 100%">{{dataNode.notes}}</textarea>
+							<p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].session.created}}</p>
+							<textarea style="border: none; width: 100%">{{selectedDatasets[0].notes}}</textarea>
 						</div>
 
-						<h5>{{getJob(dataNode.sourceJob).toolCategory}} / {{getJob(dataNode.sourceJob).toolName}}</h5>
+						<h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
 						<div class="indented">
-							<p ng-repeat="param in getJob(dataNode.sourceJob).parameters">{{param.displayName}}: {{param.value}}</p>
+							<p ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">{{param.displayName}}: {{param.value}}</p>
 						</div>
 					</div>
 
-					<div ng-if="!dataNode">
+					<!-- multiple selection -->
+					<div ng-if="!isMultipleDatasetsSelected()">
+						<h5 ng-repeat="data in selectedDatasets">{{data.name}}</h5>
+					</div>
+
+					<!-- no selection -->
+					<div ng-if="!isDatasetSelected()">
 						<p>{{session.sessionDetail}}</p>
 					</div>
 
