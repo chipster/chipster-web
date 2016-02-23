@@ -20,18 +20,45 @@ chipsterWeb
 
             // creating a websocket object and start listening for the
             // events
-            /*
-             * var ws=$websocket.$new({
-             * url:'ws://localhost:8000/'+"sessiondbevents/"+"events/" +
-             * $routeParams.sessionId + "?token=" +
-             * AuthenticationService.getToken(), protocols: [] });
-             *
-             * ws.$on('$open', function () { console.log('connected
-             * through web socket'); }) .$on('$message', function(event) { //
-             * it listens for 'incoming event' console.log(event);
-             * $scope.event=event; }) .$on('$close',function(){
-             * console.log('Connection to web socket is closing'); });
-             */
+
+            var eventUrl = $scope.sessionUrl.getRestangularUrl()
+                .replace('http://', 'ws://')
+                .replace('https://', 'wss://')
+                .replace('/sessiondb/sessions/', '/sessiondbevents/events/');
+
+
+            console.log(eventUrl);
+
+            var ws = $websocket.$new({
+                url: eventUrl + "?token=" + AuthenticationService.getToken(), protocols: []
+            });
+
+            ws.$on('$open', function () {
+                console.log('websocket connected');
+                $scope.wsKeepaliveTimer = setInterval( function() {
+                    //ws.$emit('ping');
+                }, 5000);
+
+            }).$on('$message', function(event) {
+
+                console.log('websocket event');
+                console.log(event);
+
+                if (event.type === 'UPDATE' && event.resourceType === 'DATASET') {
+                    //FIXME updates now only the selected dataset
+                    if (event.resourceId === $scope.dataNode.datasetId) {
+                        $scope.sessionUrl.one('datasets', event.resourceId).get().then( function(resp) {
+                            $scope.dataNode.metadata = resp.data.metadata;
+                        });
+                    }
+                }
+
+            }).$on('$close',function(){
+                console.log('websocket closed');
+                clearInterval($scope.wsKeepaliveTimer);
+            });
+
+
             // creating a session model object
             $scope.session = {
                 sessionId: $routeParams.sessionId,
