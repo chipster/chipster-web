@@ -55,7 +55,7 @@
 
 					<!--end navbar form-->
 					<ul class="nav navbar-nav navbar-right">
-						<li><a>{{getHost()}}</a></li>
+						<li><p class="navbar-text" ng-bind="getHost()"></p></li>
 						<li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
 						<li><a href="#home" ng-show="isLoggedIn()" ng-click="logout()">Logout</a></li>
 					</ul>
