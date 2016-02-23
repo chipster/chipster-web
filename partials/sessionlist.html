@@ -1,5 +1,5 @@
- <div class="row" ng-controller="SessionListCtrl" ng-init="getSessions()">
-     <div class="panel panel-default">
+<div class="row" ng-controller="SessionListCtrl" ng-init="getSessions()">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">Sessions</h4>
         </div>
@@ -8,40 +8,42 @@
                 <button type="button" class="btn btn-info" ng-click="createSession()">Create new session</button>
                 <hr/>
                 <!-- User Sessions -->
+                <div class="scrollable session-list">
                 <h5>User Session</h5>
-                <table class="table table-hover" >
-                  <tbody>
-                    <tr ng-repeat="exSession in userSessions" >
-	                    <td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)" >
-	                        <a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
-	                    </td>
-	                    <!-- <td class="text-right text-nowrap">
-	                        <button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
-	                  </td>-->
-              		</tr>
-          		</tbody>
-      		</table>
-      		<!-- Example Sessions -->
-      		 <h5>Example Session</h5>
-                <table class="table table-hover" >
-                  <tbody>
-                    <tr ng-repeat="exSession in localSessions" >
-						<td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)" >
-							<a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
-						</td>
-						<!--<td class="text-right text-nowrap">
-							<button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
-						</td>-->
-              		</tr>
-          		</tbody>
-      		</table>
-  		</div><!--end of column-md-6-->
-	  	<div class="col-md-6" ng-show="showDetail"><!-- Session Detail -->
-		  	<h5>Session Detail</h5>
-		  	{{curSession.notes}}
-		  	<hr/>
-	  		<button class="btn btn-xs btn-info" ng-click="deleteSession(curSession)">Delete</button>
-	   </div>
-</div><!--end of  panel body-->
-</div><!--end of panel-->
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr ng-repeat="exSession in userSessions">
+                            <td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)">
+                                <a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
+                            </td>
+                            <!-- <td class="text-right text-nowrap">
+                                <button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
+                          </td>-->
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!-- Example Sessions -->
+                    <h5>Example Session</h5>
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr ng-repeat="exSession in localSessions">
+                            <td class="text-left text-nowrap" ng-mouseover="showSessionDetail(exSession)">
+                                <a href="" ng-click="setCurClickedSession(exSession)">{{exSession.name}}</a>
+                            </td>
+                            <!--<td class="text-right text-nowrap">
+                                <button class="btn btn-xs btn-info" ng-mouseover="showSessionDetail(exSession)">View</button>
+                            </td>-->
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--end of column-md-6-->
+            <div class="col-md-6" ng-show="showDetail"><!-- Session Detail -->
+                <h5>Session Detail</h5>
+                {{curSession.notes}}
+                <hr/>
+                <button class="btn btn-xs btn-info" ng-click="deleteSession(curSession)">Delete</button>
+            </div>
+        </div><!--end of  panel body-->
+    </div><!--end of panel-->
 </div><!--end of row-->

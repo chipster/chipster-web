@@ -103,6 +103,10 @@
 	margin-bottom: 10px;
 }
 
+.session-list {
+	height: calc(100vh - 220px);
+}
+
 /*
 
 .form-control{
