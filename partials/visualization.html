@@ -38,7 +38,7 @@
 					</div>
 
 					<!-- multiple selection -->
-					<div ng-if="!isMultipleDatasetsSelected()">
+					<div ng-if="isMultipleDatasetsSelected()">
 						<h5 ng-repeat="data in selectedDatasets">{{data.name}}</h5>
 					</div>
 
