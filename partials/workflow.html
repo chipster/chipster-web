@@ -34,7 +34,7 @@
 <!-- 					<button type="button" class="list-group-item" ng-repeat="data in d3Data.nodes|searchDataset:searched_dataset_name" -->
 
 					<button type="button" class="list-group-item"
-							ng-repeat="data in getDatasetsList() | searchDataset:searched_dataset_name" ng-click="">
+							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name" ng-click="">
 						{{data.name}}
 					</button>
 
