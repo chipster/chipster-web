@@ -115,14 +115,24 @@ chipsterWeb
                 return $scope.selectedDatasets.length > 1;
             };
 
-            this.selectSingleDataset = function(data) {
+            $scope.selectSingleDataset = function(data) {
                 $scope.selectedDatasets = [];
                 $scope.selectedDatasets.push(data);
             };
 
-            $scope.addToDatasetSelection = function(data) {
-                $scope.selectedDatasets.push(data);
+            $scope.selectDataset = function(data) {
+                if (!$scope.isSelectedDataset(data)) {
+                    $scope.selectedDatasets.push(data);
+                }
             };
+
+            $scope.deselectDataset = function(data) {
+                var index = $scope.selectedDatasets.indexOf(data);
+                if (index != -1) {
+                    $scope.selectedDatasets.splice(index, 1);
+                }
+            };
+
 
             // TODO remove
             this.cancelDatasetSelection = function (datasetId) {
@@ -130,7 +140,26 @@ chipsterWeb
                 $scope.selectedDatasets.splice(index, 1);
             };
 
+            $scope.toggleDataset = function($event, data) {
+                console.log($event.metaKey);
+                console.log(data.name);
 
+                if ($event.metaKey) {
+                    if ($scope.isSelectedDataset(data)) {
+                        $scope.deselectDataset(data);
+                    } else {
+                        $scope.selectDataset(data);
+                    }
+
+                } else {
+                    $scope.selectSingleDataset(data);
+                }
+
+            };
+
+            $scope.isSelectedDataset = function(data) {
+                return $scope.selectedDatasets.indexOf(data) !== -1;
+            };
 
             // tool selection
             $scope.selectedToolId = null;
