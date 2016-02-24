@@ -141,9 +141,6 @@ chipsterWeb
             };
 
             $scope.toggleDataset = function($event, data) {
-                console.log($event.metaKey);
-                console.log(data.name);
-
                 if ($event.metaKey) {
                     if ($scope.isSelectedDataset(data)) {
                         $scope.deselectDataset(data);
@@ -154,7 +151,6 @@ chipsterWeb
                 } else {
                     $scope.selectSingleDataset(data);
                 }
-
             };
 
             $scope.isSelectedDataset = function(data) {
