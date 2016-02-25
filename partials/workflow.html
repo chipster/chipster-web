@@ -29,12 +29,9 @@
 				<workflow-graph-layout data="d3Data" selectedDataset="selectedDatasetId">
 			</div>
 			<div ng-show="isSet(2)">
-				<div class="list-group">
-
-<!-- 					<button type="button" class="list-group-item" ng-repeat="data in d3Data.nodes|searchDataset:searched_dataset_name" -->
-
-					<button type="button" class="list-group-item"
-							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name" ng-click="">
+				<div class="list-group" data-toggle="buttons">
+					<button type="button" class="list-group-item" ng-class="{active:isSelectedDataset(data)}" ng-click="toggleDataset($event, data)"
+							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name">
 						{{data.name}}
 					</button>
 
