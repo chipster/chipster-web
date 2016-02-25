@@ -11,8 +11,13 @@ $.ajax({
 	async: false,
 	dataType: 'json',
 	success: function (response) {
-		// empty string means that the same proxy is serving both client files and the API
-		baseURL = response.api[0];
+		var apiHost = response.api[0];
+		if (apiHost === "") {
+			// empty string if the same proxy is serving both client files and the API
+			baseURL = "";
+		} else {
+			baseURL = 'http://' + apiHost + '/';
+		}
 	}
 });
 
