@@ -2,8 +2,19 @@ var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow',
 		'restangular', 'LocalStorageModule', 'ngWebsocket', 'angularResizable',
 		'pdf', 'ngHandsontable' ]);
 
-var baseURL = 'http://vm0179.kaj.pouta.csc.fi:8000/';
-//var baseURL = 'http://localhost:8000/';
+
+// read the API address from the file
+// wait until the config is loaded
+// http://hippieitgeek.blogspot.fi/2013/06/load-json-files-synchronously-with.html
+$.ajax({
+	url: '/js/json/config.json',
+	async: false,
+	dataType: 'json',
+	success: function (response) {
+		// empty string means that the same proxy is serving both client files and the API
+		baseURL = response.api[0];
+	}
+});
 
 // defining the base Url as constant
 chipsterWeb.constant('baseURLString', baseURL);

@@ -9,7 +9,7 @@ chipsterWeb
         function ($scope, $routeParams, $q, TemplateService,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  baseURLString) {
+                  baseURLString, $location) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -21,11 +21,17 @@ chipsterWeb
             // creating a websocket object and start listening for the
             // events
 
+            // different api server
             var eventUrl = $scope.sessionUrl.getRestangularUrl()
                 .replace('http://', 'ws://')
                 .replace('https://', 'wss://')
-                .replace('/sessiondb/sessions/', '/sessiondbevents/events/');
+                .replace('sessiondb/sessions/', 'sessiondbevents/events/');
 
+            // api and client served from the same host
+            if (baseURLString === "") {
+                eventUrl = "ws://" + $location.host() + ":" + $location.port()
+                    + "/sessiondbevents/events/" + $routeParams.sessionId;
+            }
 
             console.log(eventUrl);
 
