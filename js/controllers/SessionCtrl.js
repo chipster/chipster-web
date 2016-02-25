@@ -140,12 +140,32 @@ chipsterWeb
                 $scope.selectedDatasets.splice(index, 1);
             };
 
-            $scope.toggleDataset = function($event, data) {
-                if ($event.metaKey) {
+            $scope.toggleDatasetSelection = function($event, data) {
+                if ($event.metaKey || $event.ctrlKey) {
                     if ($scope.isSelectedDataset(data)) {
                         $scope.deselectDataset(data);
                     } else {
                         $scope.selectDataset(data);
+                    }
+                } else if ($event.shiftKey) {
+                    if ($scope.isDatasetSelected()) {
+                        var indexOfLastSelection = $scope.getDatasetList().indexOf($scope.selectedDatasets[$scope.selectedDatasets.length - 1]);
+                        var indexOfNewSelection = $scope.getDatasetList().indexOf(data);
+                        var from, to;
+                        if (indexOfLastSelection < indexOfNewSelection) {
+                            from = indexOfLastSelection + 1;
+                            to = indexOfNewSelection + 1;
+                        } else {
+                            from = indexOfNewSelection;
+                            to = indexOfLastSelection;
+                        }
+
+                        for (var i = from; i < to; i++) {
+                            $scope.selectDataset($scope.getDatasetList()[i]);
+                        }
+
+                    } else {
+                        $scope.selectSingleDataset(data);
                     }
 
                 } else {

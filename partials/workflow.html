@@ -30,7 +30,8 @@
 			</div>
 			<div ng-show="isSet(2)">
 				<div class="list-group" data-toggle="buttons">
-					<button type="button" class="list-group-item" ng-class="{active:isSelectedDataset(data)}" ng-click="toggleDataset($event, data)"
+					<button type="button" class="list-group-item" ng-class="{active:isSelectedDataset(data)}"
+							ng-click="toggleDatasetSelection($event, data)"
 							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name">
 						{{data.name}}
 					</button>
