@@ -103,14 +103,35 @@ chipsterWeb
             // dataset selections
             $scope.selectedDatasets = [];
 
+            /**
+             * Check if there are one or more dataset selected
+             * @returns {boolean}
+             */
             $scope.isDatasetSelected = function() {
                 return $scope.selectedDatasets.length > 0;
             };
 
+            /**
+             * Check if given dataset is selected
+             * @param data
+             * @returns {boolean}
+             */
+            $scope.isSelectedDataset = function(data) {
+                return $scope.selectedDatasets.indexOf(data) !== -1;
+            };
+
+            /**
+             * Check if single dataset is selected
+             * @returns {boolean}
+             */
             $scope.isSingleDatasetSelected = function() {
                 return $scope.selectedDatasets.length == 1;
             };
 
+            /**
+             * Check if there are more than one datasets selected
+             * @returns {boolean}
+             */
             $scope.isMultipleDatasetsSelected = function() {
                 return $scope.selectedDatasets.length > 1;
             };
@@ -118,6 +139,11 @@ chipsterWeb
             $scope.selectSingleDataset = function(data) {
                 $scope.selectedDatasets = [];
                 $scope.selectedDatasets.push(data);
+            };
+
+            // TODO temp fix for workflow
+            this.selectSingleDataset = function(data) {
+                $scope.selectSingleDataset(data);
             };
 
             $scope.selectDataset = function(data) {
@@ -171,10 +197,6 @@ chipsterWeb
                 } else {
                     $scope.selectSingleDataset(data);
                 }
-            };
-
-            $scope.isSelectedDataset = function(data) {
-                return $scope.selectedDatasets.indexOf(data) !== -1;
             };
 
             // tool selection
