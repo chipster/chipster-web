@@ -11,7 +11,7 @@ $.ajax({
 	async: false,
 	dataType: 'json',
 	success: function (response) {
-		var apiHost = response.api[0];
+		var apiHost = response.proxies[0];
 		if (apiHost === "") {
 			// empty string if the same proxy is serving both client files and the API
 			baseURL = "";
