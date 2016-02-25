@@ -3,9 +3,7 @@ chipsterWeb.factory('FileRestangular',function(Restangular,AuthenticationService
 		var service = Restangular.withConfig(function(RestangularConfigurer) {
 
 			RestangularConfigurer.setBaseUrl(baseURLString + 'filebroker' + '/');
-			RestangularConfigurer.setDefaultHeaders({
-				'Authorization': 'Basic ' + btoa('token' + ':' + AuthenticationService.getToken())
-			});
+			RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
 			RestangularConfigurer.setFullResponse(true);
 		});
 
