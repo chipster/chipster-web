@@ -18,7 +18,7 @@
 		</div>
 		<!-- end of panel headings -->
 
-		<div class="tab-content">
+		<div id="workflow-dataset-panel" class="tab-content">
 			<div ng-show="isSet(1)">
 				<div class="pull-right">
 				<button class="btn btn-xs btn-info"
@@ -29,7 +29,7 @@
 				<workflow-graph-layout data="d3Data" selectedDataset="selectedDatasetId">
 			</div>
 			<div ng-show="isSet(2)">
-				<div class="list-group" data-toggle="buttons">
+				<div id="dataset-list" class="list-group" data-toggle="buttons">
 					<button type="button" class="list-group-item" ng-class="{active:isSelectedDataset(data)}"
 							ng-click="toggleDatasetSelection($event, data)"
 							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name">
