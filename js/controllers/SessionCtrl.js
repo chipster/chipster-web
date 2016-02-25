@@ -109,14 +109,35 @@ chipsterWeb
             // dataset selections
             $scope.selectedDatasets = [];
 
+            /**
+             * Check if there are one or more dataset selected
+             * @returns {boolean}
+             */
             $scope.isDatasetSelected = function() {
                 return $scope.selectedDatasets.length > 0;
             };
 
+            /**
+             * Check if given dataset is selected
+             * @param data
+             * @returns {boolean}
+             */
+            $scope.isSelectedDataset = function(data) {
+                return $scope.selectedDatasets.indexOf(data) !== -1;
+            };
+
+            /**
+             * Check if single dataset is selected
+             * @returns {boolean}
+             */
             $scope.isSingleDatasetSelected = function() {
                 return $scope.selectedDatasets.length == 1;
             };
 
+            /**
+             * Check if there are more than one datasets selected
+             * @returns {boolean}
+             */
             $scope.isMultipleDatasetsSelected = function() {
                 return $scope.selectedDatasets.length > 1;
             };
@@ -124,6 +145,11 @@ chipsterWeb
             $scope.selectSingleDataset = function(data) {
                 $scope.selectedDatasets = [];
                 $scope.selectedDatasets.push(data);
+            };
+
+            // TODO temp fix for workflow
+            this.selectSingleDataset = function(data) {
+                $scope.selectSingleDataset(data);
             };
 
             $scope.selectDataset = function(data) {
@@ -146,21 +172,37 @@ chipsterWeb
                 $scope.selectedDatasets.splice(index, 1);
             };
 
-            $scope.toggleDataset = function($event, data) {
-                if ($event.metaKey) {
+            $scope.toggleDatasetSelection = function($event, data) {
+                if ($event.metaKey || $event.ctrlKey) {
                     if ($scope.isSelectedDataset(data)) {
                         $scope.deselectDataset(data);
                     } else {
                         $scope.selectDataset(data);
                     }
+                } else if ($event.shiftKey) {
+                    if ($scope.isDatasetSelected()) {
+                        var indexOfLastSelection = $scope.getDatasetList().indexOf($scope.selectedDatasets[$scope.selectedDatasets.length - 1]);
+                        var indexOfNewSelection = $scope.getDatasetList().indexOf(data);
+                        var from, to;
+                        if (indexOfLastSelection < indexOfNewSelection) {
+                            from = indexOfLastSelection + 1;
+                            to = indexOfNewSelection + 1;
+                        } else {
+                            from = indexOfNewSelection;
+                            to = indexOfLastSelection;
+                        }
+
+                        for (var i = from; i < to; i++) {
+                            $scope.selectDataset($scope.getDatasetList()[i]);
+                        }
+
+                    } else {
+                        $scope.selectSingleDataset(data);
+                    }
 
                 } else {
                     $scope.selectSingleDataset(data);
                 }
-            };
-
-            $scope.isSelectedDataset = function(data) {
-                return $scope.selectedDatasets.indexOf(data) !== -1;
             };
 
             // tool selection
