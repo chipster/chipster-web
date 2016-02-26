@@ -46,19 +46,8 @@ chipsterWeb
                 }, 5000);
                 */
 
-            }).$on('$message', function(event) {
-
-                console.log('websocket event');
-                console.log(event);
-
-                if (event.type === 'UPDATE' && event.resourceType === 'DATASET') {
-                    //FIXME updates now only the selected dataset
-                    if (event.resourceId === $scope.dataNode.datasetId) {
-                        $scope.sessionUrl.one('datasets', event.resourceId).get().then( function(resp) {
-                            $scope.dataNode.metadata = resp.data.metadata;
-                        });
-                    }
-                }
+            }).$on('$message', function (event) {
+                $scope.handleEvent(event);
 
             }).$on('$close',function(){
                 console.log('websocket closed');
@@ -69,6 +58,58 @@ chipsterWeb
             $scope.$on("$destroy", function(){
                 ws.$close();
             });
+
+            $scope.handleEvent = function(event) {
+                console.log('websocket event');
+                console.log(event);
+
+                if (event.resourceType === 'DATASET') {
+
+                    if (event.type === 'CREATE') {
+                        $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+                            $scope.session.datasetsMap.set(event.resourceId, resp.data);
+                        });
+
+                    } else if (event.type === 'UPDATE') {
+                        $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+                            var local = $scope.session.datasetsMap.get(event.resourceId);
+                            var remote = resp.data;
+                            // update the original instance
+                            angular.copy(remote, local);
+                        });
+
+                    } else if (event.type === 'DELETE') {
+                        $scope.session.datasetsMap.delete(event.resourceId);
+
+                    } else {
+                        console.log("unknown event type", event);
+                    }
+
+                } else if (event.resourceType === 'JOB') {
+
+                    if (event.type === 'CREATE') {
+                        $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+                            $scope.session.jobsMap.set(event.resourceId, resp.data);
+                        });
+
+                    } else if (event.type === 'UPDATE') {
+                        $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+                            var local = $scope.session.jobsMap.get(event.resourceId);
+                            var remote = resp.data;
+                            // update the original instance
+                            angular.copy(remote, local);
+                        });
+
+                    } else if (event.type === 'DELETE') {
+                        $scope.session.jobsMap.delete(event.resourceId);
+
+                    } else {
+                        console.log("unknown event type", event);
+                    }
+                } else {
+                    console.log("unknwon resource type", event);
+                }
+            };
 
             // creating a session model object
             $scope.session = {

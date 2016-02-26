@@ -1,4 +1,4 @@
-chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionRestangular){
+chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionRestangular, Utils){
 
     return {
         restrict:'E',
@@ -43,6 +43,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                          */
                         //console.log(source);
                         if (source === 'edit' || source === 'autofill' || source === 'paste') {
+                            $scope.latestEdit = new Date().getTime();
                             $scope.updateDatasets();
                         }
                     }
@@ -87,10 +88,19 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
             };
 
             $scope.reset = function() {
-                angular.forEach($scope.datasets, $scope.resetDataset);
+                angular.forEach($scope.datasets, function(dataset) {
+                    if (Utils.getFileExtension(dataset.name) === 'tsv') {
+                        $scope.resetTsv(dataset);
+                    } else {
+                        $scope.resetGenericFile(dataset);
+                    }
+                });
+
+                $scope.updateView();
+                $scope.updateDatasets(true);
             };
 
-            $scope.resetDataset = function(dataset) {
+            $scope.resetTsv = function(dataset) {
                 FileRestangular.getData($scope.sessionId, dataset.datasetId).then(function (resp) {
 
                     // parse the file data using the JQuery-cvs library
@@ -115,11 +125,19 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                         });
 
                         dataset.metadata = metadata;
-
-                        $scope.updateView();
-                        $scope.updateDatasets();
                     });
                 });
+            };
+
+            $scope.resetGenericFile = function(dataset) {
+
+                var metadata = [{
+                    column: null,
+                    key: 'sample',
+                    value: dataset.name
+                }];
+
+                dataset.metadata = metadata;
             };
 
             $scope.startsWith = function(data, start) {
@@ -141,20 +159,25 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
 
                 var array = [];
 
+                // get the row of a specific dataset and column if it exists already
+                // or create a new row
                 function getRow(datasetId, column) {
+                    // find the existing row
                     for (var i = 0; i < array.length; i++) {
                         if (array[i].datasetId === datasetId && array[i].columnName === column) {
                             return array[i];
                         }
                     }
 
-                    row = [];
+                    // create a new row
+                    // fill the row with undefined values
+                    row = Array.apply(null, Array(headers.length)).map(function () {return undefined});
 
                     // store datasetId and columnName as properties to hide them from the table
                     row.datasetId = datasetId;
                     row.columnName = column;
-
                     array.push(row);
+
                     return row;
                 }
 
@@ -176,9 +199,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 });
             };
 
-            $scope.updateDatasets = function () {
-
-                $scope.latestEdit = new Date().getTime();
+            $scope.updateDatasets = function (updateAll) {
 
                 var metadataMap = {};
                 var array = $scope.array;
@@ -202,8 +223,11 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 });
 
                 angular.forEach($scope.datasets, function(dataset) {
-                    dataset.metadata = metadataMap[dataset.datasetId];
-                    $scope.updateDataset(dataset);
+                    var newMetadata = metadataMap[dataset.datasetId];
+                    if (updateAll || !angular.equals(newMetadata, dataset.metadata)) {
+                        dataset.metadata = newMetadata;
+                        $scope.updateDataset(dataset);
+                    }
                 });
             };
 
@@ -250,7 +274,9 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                      5. user fills in row 3
                      6. the changes are pushed to the server, including the reverted line 2
 
-                     This is now fixed by delaying the updates in stage 4 when the table is being edited.
+                     The probability of this is now considerably reduced by delaying the updates in stage
+                     4 when the table is being edited.
+
                      The other option would be to save some edit timestamps or edit sources on the server
                      so that we could recognize the events that we have create ourselves and wouldn't have
                      to apply them to the table.
