@@ -10,7 +10,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
         },
         templateUrl: 'partials/chipsterphenodata.html',
 
-        link: function ($scope,element,attrs) {
+        link: function ($scope) {
 
             $scope.getSettings = function (array, headers) {
                 return {
@@ -57,7 +57,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 span.className = 'glyphicon glyphicon-remove';
                 button.appendChild(span);
 
-                Handsontable.Dom.addEvent(button, 'click', function (event) {
+                Handsontable.Dom.addEvent(button, 'click', function () {
                     $scope.removeColumn(col);
                 });
 
@@ -95,9 +95,6 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                         $scope.resetGenericFile(dataset);
                     }
                 });
-
-                $scope.updateView();
-                $scope.updateDatasets(true);
             };
 
             $scope.resetTsv = function(dataset) {
@@ -125,19 +122,23 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                         });
 
                         dataset.metadata = metadata;
+
+                        $scope.updateView();
+                        $scope.updateDatasets(true);
                     });
                 });
             };
 
             $scope.resetGenericFile = function(dataset) {
 
-                var metadata = [{
+                dataset.metadata = [{
                     column: null,
                     key: 'sample',
                     value: dataset.name
                 }];
 
-                dataset.metadata = metadata;
+                $scope.updateView();
+                $scope.updateDatasets(true);
             };
 
             $scope.startsWith = function(data, start) {
@@ -171,7 +172,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
 
                     // create a new row
                     // fill the row with undefined values
-                    row = Array.apply(null, Array(headers.length)).map(function () {return undefined});
+                    row = Array.apply(null, new Array(headers.length)).map(function () {return undefined});
 
                     // store datasetId and columnName as properties to hide them from the table
                     row.datasetId = datasetId;
@@ -294,7 +295,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 }
             };
 
-            $scope.$watch('datasets', function (newValue, oldValue) {
+            $scope.$watch('datasets', function () {
                 $scope.updateViewLater();
             }, true);
 
