@@ -7,8 +7,8 @@
     <!-- Tools div -->
     <div class="row">
         <ul class="nav nav-pills btn-xs">
-            <li ng-class="{active:isSet($index)}" ng-repeat="t_module in t_modules">
-                <a href ng-click="setTab($index)">{{t_module.name}}</a>
+            <li ng-class="{active:isSet($index)}" ng-repeat="module in modules">
+                <a href ng-click="setTab($index)">{{module.name}}</a>
             </li>
         </ul>
     </div>
@@ -20,15 +20,12 @@
                 <div id="category-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>
-                            <tr ng-repeat="t_cat in t_categories|searchFor:searchTool"
-                                ng-click="selected_t_category(t_cat,$index)"
-                                ng-class="{'tool-selected':$index===selected_t_cat_index}">
+                            <tr ng-repeat="category in categories|searchFor:searchTool"
+                                ng-click="selectCategory(category,$index)"
+                                ng-class="{'tool-selected':$index===selectedCategoryIndex}">
                                 <td>
                                     <div class="row" style="height: 16px;">
-                                        <!-- 											<div class="col-xs-2"> -->
-                                        <tool-circle toolcolor="t_cat.color" toolname="t_cat.name">
-                                        <!-- 											<div class="col-xs-11" --> <!-- 												style="height: 18px; line-height: 12px;"> -->
-                                        <!-- 												<a href="">{{t_cat.name}}</a> --> <!-- 											</div> -->
+                                        <tool-circle toolcolor="category.color" toolname="category.name">
                                     </div>
                                 </td>
                             </tr>
@@ -41,12 +38,12 @@
                 <div id="tool-table" class="tool-height">
                     <table class="table table-bordered">
                         <tbody>
-                            <tr ng-repeat="tool in current_t_cat.tools|searchFor:searchTool"
-                                ng-click="selected_tool_type(tool,$index);selectedTool(tool,$index)"
-                                ng-class="{'tool-selected':$index===selected_t_type_index}">
+                            <tr ng-repeat="tool in selectedCategory.tools|searchFor:searchTool"
+                                ng-click="selectTool(tool.id, $index)"
+                                ng-class="{'tool-selected':$index===selectedToolIndex}">
                                 <td><div style="height: 16px;">
-                                        <tool-text toolname="tool.name">
-                                    </div></td>
+                                    <tool-text toolname="tool.name">
+                                </div></td>
                             </tr>
                         </tbody>
                     </table>
@@ -54,25 +51,27 @@
             </div>
             <div class="row col-xs-4 tool-height" id="tool-details-panel">
 
-                <button class="btn btn-info col-xs-5" ng-disabled="!enable_t_parameter"
-                    data-toggle="modal" data-target="#parameterModal">Parameters</button>
+                <button class="btn btn-info col-xs-5" ng-disabled="!isParametersEnabled()"
+                    data-toggle="modal" data-target="#parameterModal">
+                    Parameters
+                </button>
                 <button class="btn btn-success col-xs-6 col-xs-offset-1"
-                    ng-click="runJob()">
-                    <span class="glyphicon glyphicon-play"> Run</span>
+                    ng-click="runJob()" ng-disabled="!isRunEnabled()">
+                    <span class="glyphicon glyphicon-play">
+                        Run
+                    </span>
                 </button>
 
                 <!-- Tool Description div -->
                 <div class="tool-description col-xs-12">
-                    <!-- <h4>{{selected_t_type.name}}</h4> -->
-                    <!--will be the tool description-->
-                    {{selected_t_des}}
-                    <!--button area-->
-                    <!--end of tool button group-->
+                    {{selectedTool.description}}
                 </div>
 
                 <!--Tool source-->
                 <button class="btn  btn-info btn-sm col-xs-5" data-toggle="modal"
-                        data-target="#toolSourceModal">Source Code</button>
+                        data-target="#toolSourceModal" ng-disabled="!selectedTool">
+                    Source Code
+                </button>
                 <!--Parameter-->
             </div>
         </div>
@@ -84,7 +83,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times</button>
-                    <h4 class="modal-title">{{selected_t_type.name}}</h4>
+                    <h4 class="modal-title">{{selectedTool.name.displayName}}</h4>
                 </div>
                 <!--end of modal header-->
                 <div class="modal-body"
@@ -103,12 +102,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times</button>
-                    <h4 class="modal-title">{{selected_t_type.name}}</h4>
+                    <h4 class="modal-title">{{selectedTool.name.displayName}}</h4>
                 </div>
                 <!--end of modal header-->
                 <div class="modal-body">
-                    <p>Tool source code should be here, will be visible shortly
-                        :)</p>
+                    <pre>Tool source code should be here, will be visible shortly :)</pre>
                 </div>
                 <!--end of modal body-->
             </div>
@@ -116,7 +114,27 @@
 
         </div>
         <!--end of modal-dialog-->
+    </div>
 
+    <div id="toolErrorModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times</button>
+                    <h4 class="modal-title">{{toolErrorTitle}}</h4>
+                </div>
+                <!--end of modal header-->
+                <div class="modal-body">
+                    <h5>Error details</h5>
+                    <pre>{{toolError.stateDetail}}</pre>
+                    <h5>Screen output</h5>
+                    <pre>{{toolError.screenOutput}}</pre>
+                </div>
+                <!--end of modal body-->
+            </div>
+            <!--end of modal-content-->
+        </div>
+        <!--end of modal-dialog-->
     </div>
 </div>
 

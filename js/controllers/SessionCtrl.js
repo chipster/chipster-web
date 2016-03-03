@@ -74,6 +74,7 @@ chipsterWeb
                         $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
                             var local = $scope.session.datasetsMap.get(event.resourceId);
                             var remote = resp.data;
+
                             // update the original instance
                             angular.copy(remote, local);
                         });
@@ -96,6 +97,21 @@ chipsterWeb
                         $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
                             var local = $scope.session.jobsMap.get(event.resourceId);
                             var remote = resp.data;
+
+                            // if the job has just failed
+                            if (remote.state === 'FAILED' && local.state !== 'FAILED') {
+                                $scope.toolErrorTitle = 'Job failed';
+                                $scope.toolError = remote;
+                                $('#toolErrorModal').modal('show');
+                                console.log(remote);
+                            }
+                            if (remote.state === 'ERROR' && local.state !== 'ERROR') {
+                                $scope.toolErrorTitle = 'Job error';
+                                $scope.toolError = remote;
+                                $('#toolErrorModal').modal('show');
+                                console.log(remote);
+                            }
+
                             // update the original instance
                             angular.copy(remote, local);
                         });
@@ -247,7 +263,7 @@ chipsterWeb
             };
 
             // tool selection
-            $scope.selectedToolId = null;
+            $scope.selectedTool = null;
             $scope.selectedToolIndex = -1;
             $scope.istoolselected = false;
 
@@ -435,97 +451,6 @@ chipsterWeb
 
             $scope.getJob = function (jobId) {
                 return $scope.session.jobsMap.get(jobId);
-            };
-
-
-            // Method for submitting the job with tool and dataset
-            $scope.runJob = function () {
-                if ($scope.selectedDatasets.length < 1) {
-                    alert("No dataset selected");
-                    return;
-                }
-                var newJob = TemplateService.getJobTemplate();
-
-                if (!$scope.selectedToolId) {
-                    alert("No tool selected");
-                    return;
-                }
-
-                // Edit the fields with selected parameter
-                newJob.toolId = $scope.selectedToolId.id;
-                newJob.toolName = $scope.selectedToolId.name;
-
-                angular.forEach($scope.selectedDatasets, function (elem) {
-                    var input = TemplateService.getInputTemplate();
-                    input.datasetId = elem.datasetId;
-                    input.inputId = elem.name;
-
-                    console.log(input);
-                    newJob.inputs.push(input);
-                });
-
-                var postJobUrl = $scope.sessionUrl.one('jobs');
-                $scope.$broadcast('changeNodeCheck', {});
-
-                // Calculate the possible progress node position from
-                // the input datasets positions
-                var progressNode = WorkflowGraphService
-                    .getProgressNode($scope.selectedDatasets);
-                console.log(progressNode);
-                // Show the running job progress
-                var progressLinks = WorkflowGraphService
-                    .createDummyLinks($scope.selectedDatasets,
-                        progressNode);
-
-                // As progress spinner node, we just need to send the
-                // progress node info as other input nodes are already
-                // creating the json data for progress showing node and
-                // links from the input nodes
-                var dummyLinkData = {
-                    node: progressNode,
-                    dummyLinks: progressLinks
-                };
-
-                // Sending event for drawing dummyLinks
-                $scope.$broadcast('addDummyLinks', {
-                    data: dummyLinkData
-                });
-                // Sending event for adding progress spinner
-                $scope.$broadcast('addProgressBar', {
-                    data: progressNode
-                });
-
-                // clearing all the dataset and tool selection
-                $scope.selectedDatasets = [];
-                $scope.selectedToolId = null;
-                $scope.selectedToolIndex = -1;
-                $scope.istoolselected = false;
-
-                postJobUrl.customPOST(newJob).then(function (response) {
-                    console.log(response);
-                });
-
-                // when job finished event is received,remove the
-                // progressbar
-                setTimeout(function () {
-                    $scope.$broadcast('removeProgressBar', {});
-                }, 10000);
-
-            };
-
-            $scope.selectedTool = function (tool, $index) {
-                $scope.selectedToolId = tool;
-                $scope.selectedToolIndex = $index;
-                $scope.istoolselected = true;
-            };
-
-            $scope.showToolDescription = function () {
-                return $scope.istoolselected;
-            };
-
-            $scope.toggleToolSelection = function () {
-                $scope.istoolselected = false;
-                $scope.selectedToolIndex = 0;
             };
 
             // implementing right click options for data nodes
