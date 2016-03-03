@@ -34,7 +34,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 							});
 
 							scope.$watch("selectedDatasets", function () {
-								console.log("wathing selectedDatasets: " + scope.selectedDatasets.length);
 								if (scope.d3Data) {
 									graph = scope.d3Data;
 									renderGraph(width, height);
@@ -127,8 +126,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 							function renderNodes(){
 								node = vis.append("g").attr("class", "node").selectAll("rect");
 
-								console.log(node.length);
-
 								var tip=d3.tip().attr("class","d3-tip").offset([-10,0]).html(function(d){return d.name+"";});
 								svg.call(tip);
 								
@@ -180,7 +177,6 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 
 							function renderLabels(){
-								console.log("rendering label");
 								label=vis.append("g").selectAll("text").data(graph.nodes).enter()
 								     .append("text").text(function(d){return WorkflowGraphService.getFileExtension(d.name);})
 								     .attr("x",function(d,i){return d.x+nodeWidth/2;})
@@ -207,6 +203,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
 								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
 								   .style("stroke","#0177b7");
+
 								//Define the xy positions of the link
 								link = link.data(graph.links).enter().append("line")
 									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
@@ -283,7 +280,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								vis.attr('fill','red').attr('opacity', 1.0).attr('id','vis');
 								//Rendering the graph elements  
 								defineRightClickMenu();
-								renderLinks();
+								//renderLinks();
 								renderNodes();
 								renderLabels();
 
