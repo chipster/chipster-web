@@ -12,6 +12,8 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
 
         link: function ($scope) {
 
+            var unremovableColumns = [ 'sample', 'original_name', 'dataset', 'column'];
+
             $scope.getSettings = function (array, headers) {
                 return {
                     data: array,
@@ -21,7 +23,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                     sortIndicator: true,
 
                     afterGetColHeader: function(col, TH) {
-                        if (headers[col] === 'sample' || headers[col] === 'original_name') {
+                        if (unremovableColumns.indexOf(headers[col]) !== -1) {
                             // removal not allowed
                             return;
                         }
@@ -109,14 +111,14 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                         var metadata = [];
 
                         var fileHeaders = fileArray[0].filter( function(header) {
-                            return $scope.startsWith(header, "chip.");
+                            return Utils.startsWith(header, 'chip.');
                         });
 
                         angular.forEach(fileHeaders, function(fileHeader) {
                             var entry = {
                                 column: fileHeader,
                                 key: 'sample',
-                                value: fileHeader
+                                value: fileHeader.replace('chip.', '')
                             };
                             metadata.push(entry);
                         });
@@ -141,13 +143,21 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 $scope.updateDatasets(true);
             };
 
-            $scope.startsWith = function(data, start) {
-                return data.substring(0, start.length) === start;
+            $scope.remove = function(dataset) {
+                angular.forEach($scope.datasets, function(dataset) {
+                    dataset.metadata = null;
+                });
+
+                $scope.updateView();
+                $scope.updateDatasets(true);
             };
 
             $scope.getHeaders = function (datasets) {
                 // collect all headers
-                var headers = {};
+                var headers = {
+                    dataset: true,
+                    column: true
+                };
                 angular.forEach(datasets, function(dataset) {
                     angular.forEach(dataset.metadata, function(entry) {
                         headers[entry.key] = true;
@@ -162,10 +172,10 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
 
                 // get the row of a specific dataset and column if it exists already
                 // or create a new row
-                function getRow(datasetId, column) {
+                function getRow(dataset, column) {
                     // find the existing row
                     for (var i = 0; i < array.length; i++) {
-                        if (array[i].datasetId === datasetId && array[i].columnName === column) {
+                        if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
                             return array[i];
                         }
                     }
@@ -175,8 +185,10 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                     row = Array.apply(null, new Array(headers.length)).map(function () {return undefined});
 
                     // store datasetId and columnName as properties to hide them from the table
-                    row.datasetId = datasetId;
+                    row.datasetId = dataset.datasetId;
                     row.columnName = column;
+                    row[0] = dataset.name;
+                    row[1] = column;
                     array.push(row);
 
                     return row;
@@ -185,7 +197,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 angular.forEach(datasets, function(dataset) {
 
                     angular.forEach(dataset.metadata, function(entry) {
-                        var row = getRow(dataset.datasetId, entry.column);
+                        var row = getRow(dataset, entry.column);
                         row[headers.indexOf(entry.key)] = entry.value;
                     });
                 });

@@ -6,5 +6,9 @@ chipsterWeb.factory('Utils', function () {
         return name.split('.').pop();
     };
 
+    service.startsWith = function(data, start) {
+        return data.substring(0, start.length) === start;
+    };
+
     return service;
 });
