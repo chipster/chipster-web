@@ -6,33 +6,42 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 					return {
 						restrict : 'EA',
 						require:"^ngController",
-						scope : {
-							data : "=",
-							selectedDataset:"=",
-							onClick : "&"
-						},
+						//scope : {
+						//	data : "=",
+						//	selectedDataset:"=",
+						//	onClick : "&"
+						//},
 						link : function(scope, iElement, iAttrs, parentController) {
 							var d3 = $window.d3;
 							var c20 = d3.scale.category20();
 							var width = (window.innerWidth / 2) - 50;
 							var height = (window.innerHeight-300);
 							var shiftKey, ctrlKey;
-							var searched_dataset,svg,node,link,label,vis,menu,pb_svg,dLinks;
+							var searched_dataset, svg, node, link, label, vis, menu, pb_svg, dLinks;
 							var graph;
 							var nodeWidth=40,nodeHeight=30;
-								
+
 							scope.$on('resizeWorkFlowGraph',function(event,data){
 								width=data.data.width-50;
 								renderGraph(width, height);
 							});
-							
-							scope.$watch("data",function() {
-								if(scope.data){
-									graph=scope.data;
-										renderGraph(width, height);
-									}									
-								});
-							
+
+							scope.$watch("d3Data", function () {
+								if (scope.d3Data) {
+									graph = scope.d3Data;
+									renderGraph(width, height);
+								}
+							});
+
+							scope.$watch("selectedDatasets", function () {
+								if (scope.d3Data) {
+									graph = scope.d3Data;
+									renderGraph(width, height);
+								}
+							}, true);
+
+
+
 							//Trigger updating the graph for new dataset
 							scope.$on('datasetAdded',function(){
 								if(scope.data){
@@ -116,7 +125,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						     
 							function renderNodes(){
 								node = vis.append("g").attr("class", "node").selectAll("rect");
-	
+
 								var tip=d3.tip().attr("class","d3-tip").offset([-10,0]).html(function(d){return d.name+"";});
 								svg.call(tip);
 								
@@ -129,12 +138,26 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 										.on("dblclick", function(d){
 											//connectedNodes(d);
 										})
-										.on("click",function(d) {		
-													d3.select(this).classed("selected",d.selected=!d.selected);
-													//For showing dataset detail
-													scope.$apply(function(){
-														parentController.selectSingleDataset(d);
-													});
+										.on("click",function(d) {
+											d3.select(this).classed("selected",d.selected=!d.selected);
+											//scope.selectSingleDataset(d);
+											if (d3.event.ctrlKey || d3.event.metaKey) {
+												scope.$apply(function() {
+													scope.selectDataset(d);
+												});
+
+											} else {
+												scope.$apply(function() {
+													scope.selectSingleDataset(d);
+												});
+											}
+
+											tip.hide(d);
+
+											//For showing dataset detail
+											//scope.$apply(function(){
+											//	parentController.selectSingleDataset(d);
+											//});
 										})
 										.call(d3.behavior.drag().on("drag",function(d) {
 												   parentController.cancelDatasetSelection(d.datasetId);
@@ -144,11 +167,16 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 										.on("mouseout",tip.hide);
 								
 								//Define initial value for selected
-								node.each(function(d) {d.selected = false;});
-								}
-							
+								//node.each(function(d) {d.selected = false;});
+								node.each(function(d) {
+									d3.select(this).classed("selected", scope.isSelectedDataset(d));
+								});
+
+							}
+
+
+
 							function renderLabels(){
-								console.log("rendering label");
 								label=vis.append("g").selectAll("text").data(graph.nodes).enter()
 								     .append("text").text(function(d){return WorkflowGraphService.getFileExtension(d.name);})
 								     .attr("x",function(d,i){return d.x+nodeWidth/2;})
@@ -175,6 +203,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
 								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
 								   .style("stroke","#0177b7");
+
 								//Define the xy positions of the link
 								link = link.data(graph.links).enter().append("line")
 									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
@@ -248,22 +277,21 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 												
 								vis = svg_graph.append("svg:g");
 
-								vis.attr('fill','red')
-								   .attr('opacity', 1.0).attr('id','vis');
+								vis.attr('fill','red').attr('opacity', 1.0).attr('id','vis');
 								//Rendering the graph elements  
 								defineRightClickMenu();
-								renderLinks();
+								//renderLinks();
 								renderNodes();
 								renderLabels();
-								
+
 								function zoomstart() {
-									node.each(function(d) {
-										d.selected = false;
-										d.previouslySelected = false;
-									});
-								node.classed("selected", false);
+									//node.each(function(d) {
+									//	d.selected = false;
+									//	d.previouslySelected = false;
+									//});
+									//node.classed("selected", false);
 								}
-							
+
 								function keydown() {
 									shiftKey = d3.event.shiftKey
 											|| d3.event.metaKey;
