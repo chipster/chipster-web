@@ -1,368 +1,494 @@
 /**
-* @desc workflowGraphLayout directive that creates the workflow graph for session dataset "d3Data"
-* @example <div><workflow-graph-layout data="d3Data"></div>
-*/
-chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphService) {
-					return {
-						restrict : 'EA',
-						require:"^ngController",
-						//scope : {
-						//	data : "=",
-						//	selectedDataset:"=",
-						//	onClick : "&"
-						//},
-						link : function(scope, iElement, iAttrs, parentController) {
-							var d3 = $window.d3;
-							var c20 = d3.scale.category20();
-							var width = (window.innerWidth / 2) - 50;
-							var height = (window.innerHeight-300);
-							var shiftKey, ctrlKey;
-							var searched_dataset, svg, node, link, label, vis, menu, pb_svg, dLinks;
-							var graph;
-							var nodeWidth=40,nodeHeight=30;
+ * @desc workflowGraphLayout directive that creates the workflow graph for session dataset 'd3Data'
+ * @example <div><workflow-graph-layout data='d3Data'></div>
+ */
+chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphService, Utils) {
+	return {
+		restrict : 'EA',
+		require:'^ngController',
 
-							scope.$on('resizeWorkFlowGraph',function(event,data){
-								width=data.data.width-50;
-								renderGraph(width, height);
-							});
+		link : function(scope, iElement) {
+			var d3 = $window.d3;
+			var width = (window.innerWidth / 2) - 50;
+			var height = (window.innerHeight-150);
+			var shiftKey, ctrlKey;
+			var svg, nodes, link, label, vis, menu, pb_svg;
+			var graph;
+			var nodeWidth=40,nodeHeight=25;
 
-							scope.$watch("d3Data", function () {
-								if (scope.d3Data) {
-									graph = scope.d3Data;
-									renderGraph(width, height);
-								}
-							});
+			scope.$on('resizeWorkFlowGraph',function(event,data){
+				width=data.data.width-50;
+				renderGraph(width, height);
+			});
 
-							scope.$watch("selectedDatasets", function () {
-								if (scope.d3Data) {
-									graph = scope.d3Data;
-									renderGraph(width, height);
-								}
-							}, true);
+			//Method for search data file in the workflow graph
+			scope.$on('searchDatasets', function(event,data){
+				graph.filter = Utils.arrayToMap(data.data, 'datasetId');
+				renderGraph(width, height);
+			});
 
+			scope.$watch('selectedDatasets', function () {
+				if (graph) {
+					renderGraph(width, height);
+				}
+			}, true);
 
+			scope.$watch('session.datasetsMap.size', function () {
+				// why the watch below doesn't notice deletions?
+				console.log('watch4');
+				scope.update();
+			});
 
-							//Trigger updating the graph for new dataset
-							scope.$on('datasetAdded',function(){
-								if(scope.data){
-									graph=scope.data;
-									renderGraph(width, height);
-								}
-							});
-							
-							//creating dummy temporary links for progress node in the graph
-							scope.$on('addDummyLinks',function(event,data){
-								console.log(data.data);
-								dummyLinkData=data.data;
-								dLinks = vis.append("g").attr("class", "dummylink").selectAll("line");
-								
-								//Define the link source and target
-								dummyLinkData.dummyLinks.forEach(function(d) {
-									d.source = graph.nodes[d.source];
-									d.target = dummyLinkData.node;
-									console.log(d.source);
-								});
-								
-								//building the arrows for the link end
-								vis.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
-								   .attr("id", String).attr("viewBox","0 -5 12 12").attr("refX",20).attr("refY",0)
-								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
-								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
-								   .style("stroke","#0177b7");
-								//Define the xy positions of the link
-								dLinks = dLinks.data(dummyLinkData.dummyLinks).enter().append("line")
-									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
-									  .attr("y1", function(d) {return d.source.y+nodeHeight;})
-									  .attr("x2", function(d) {return d.target.x+nodeWidth/2;})
-									  .attr("y2", function(d) {return d.target.y;})
-									  .style("marker-end","url(#end)");
-								
-							});
-							
-							scope.$on('addProgressBar',function(event,data){
-								//data 
-								console.log(data);
-								renderLinks();
-								var twoPi=2*Math.PI;
-								var arc=d3.svg.arc().innerRadius(10).outerRadius(15).startAngle(0);
-								pb_svg=vis.append("g").attr("transform", "translate(" + data.data.x + "," + data.data.y+ ")");
-								
-								var rect=pb_svg.append("rect").attr("width",nodeWidth).attr("height",nodeHeight).style("stroke", 'black')
-				                .style("fill", "none")
-				                .style("stroke-width", 1);
-												
-								//add the background arc
-								var background=pb_svg.append("path").datum({endAngle:0.75*twoPi}).style("fill","#4d4ddd").attr("d",arc);						
-								background.call(spin, 1500);
-														
-												
-								function spin(selection,duration){
-									selection.transition().ease("linear").duration(duration).attrTween("transform", function() {
-								        return d3.interpolateString(
-								                "translate(20,15)rotate(0)",
-								                "translate(20,15)rotate(360)"
-								              );
-								            });
-									setTimeout(function(){ spin(selection,duration);},duration);
-								}
-								
-								function transitionFunction(path) {
-							        path.transition()
-							            .duration(7500)
-							            .attrTween("stroke-dasharray", tweenDash)
-							            .each("end", function() { d3.select(this).call(transition); });
-							    }
-												
-							
-						
-							});
-							
-							// When the job is finished, remove both the progress node and dummy links
-							scope.$on('removeProgressBar',function(event,data){
-								pb_svg.remove();
-								dLinks.remove();
-							});
-						     
-							function renderNodes(){
-								node = vis.append("g").attr("class", "node").selectAll("rect");
+			scope.$watch('selectedDatasets', function () {
+				// why the watch below doesn't notice dataset rename?
+				console.log('watch3');
+				scope.update();
+			}, true);
 
-								var tip=d3.tip().attr("class","d3-tip").offset([-10,0]).html(function(d){return d.name+"";});
-								svg.call(tip);
-								
-								//Drawing the nodes in the SVG
-								node = node.data(graph.nodes).enter().append("rect")
-										.attr("x", function(d) {return d.x;})
-										.attr("y", function(d) {return d.y;})
-										.attr("width",nodeWidth).attr("height",nodeHeight)
-										.attr("fill",function(d,i){return c20(i);})
-										.on("dblclick", function(d){
-											//connectedNodes(d);
-										})
-										.on("click",function(d) {
-											d3.select(this).classed("selected",d.selected=!d.selected);
-											//scope.selectSingleDataset(d);
-											if (d3.event.ctrlKey || d3.event.metaKey) {
-												scope.$apply(function() {
-													scope.selectDataset(d);
-												});
+			scope.$watch('session.jobsMap.size', function () {
+				console.log('watch2');
+				scope.update();
+			});
 
-											} else {
-												scope.$apply(function() {
-													scope.selectSingleDataset(d);
-												});
-											}
+			scope.$watchGroup(['session.datasetsMap', 'session.jobsMap', 'modulesMap'], function () {
+				console.log('watch');
+				scope.update();
+			}, true);
 
-											tip.hide(d);
+			scope.update = function() {
+				var datasetNodes = scope.getDatasetNodes(scope.session.datasetsMap, scope.session.jobsMap, scope.modulesMap, scope.filter);
+				var jobNodes = scope.getJobNodes(scope.session.jobsMap, scope.session.datasetsMap);
 
-											//For showing dataset detail
-											//scope.$apply(function(){
-											//	parentController.selectSingleDataset(d);
-											//});
-										})
-										.call(d3.behavior.drag().on("drag",function(d) {
-												   parentController.cancelDatasetSelection(d.datasetId);
-												   dragNodes(d3.event.dx,d3.event.dy);}))
-										.on("contextmenu",d3.contextMenu(menu))
-										.on("mouseover",tip.show)
-										.on("mouseout",tip.hide);
-								
-								//Define initial value for selected
-								//node.each(function(d) {d.selected = false;});
-								node.each(function(d) {
-									d3.select(this).classed("selected", scope.isSelectedDataset(d));
-								});
+				var allNodes = [];
+				angular.extend(allNodes, datasetNodes);
+				angular.extend(allNodes, jobNodes);
 
+				var links = scope.getLinks(allNodes, scope.session.datasetsMap);
+
+				graph = {
+					nodes: datasetNodes,
+					jobNodes: jobNodes,
+					links: links
+				};
+				renderGraph(width, height);
+			};
+
+			function renderJobs() {
+
+				var arc=d3.svg.arc().innerRadius(8).outerRadius(12).startAngle(0).endAngle(0.75*2*Math.PI);
+
+				pb_svg=vis.append('g').attr('class', 'job').selectAll('rect');
+
+				// create a box for each job
+				var rect=pb_svg.data(graph.jobNodes).enter().append('rect')
+					.attr('rx', 6)
+					.attr('ry', 6)
+					.attr('width',nodeWidth)
+					.attr('height',nodeHeight)
+					.attr('transform', function(d) {
+						return 'translate(' + d.x + ',' + d.y + ')'
+					})
+					.style('fill', function(d) {
+						return d.bgColor;
+					})
+					.on('click',function(d) {
+						scope.$apply(function() {
+							scope.selectJob(d3.event, d.job);
+						});
+					});
+					//.style('stroke', 'black')
+					//.style('stroke-width', 1);
+
+				// create an arc for each job
+				pb_svg.data(graph.jobNodes).enter().append('path')
+					.style('fill', function(d) {
+						return d.color;
+					})
+					.attr('opacity', 0.5)
+					.style('pointer-events', 'none')
+					.attr('d', arc)
+					.call(spin, 1500);
+
+				function spin(selection,duration){
+
+					// first round
+					selection
+						.transition()
+						.ease('linear')
+						.duration(duration)
+						.attrTween('transform', function(d) {
+
+							var x = d.x + nodeWidth / 2;
+							var y = d.y + nodeHeight / 2;
+
+							if (d.spin) {
+								return d3.interpolateString(
+									'translate(' + x + ',' + y + ')rotate(0)',
+									'translate(' + x + ',' + y + ')rotate(360)'
+								);
+							} else {
+								return d3.interpolateString(
+									'translate(' + x + ',' + y + ')',
+									'translate(' + x + ',' + y + ')'
+								);
 							}
+						});
 
+					// schedule the next round
+					setTimeout(function () {
+						spin(selection, duration);
+					}, duration);
+				}
+			}
 
+			function renderBackground() {
 
-							function renderLabels(){
-								label=vis.append("g").selectAll("text").data(graph.nodes).enter()
-								     .append("text").text(function(d){return WorkflowGraphService.getFileExtension(d.name);})
-								     .attr("x",function(d,i){return d.x+nodeWidth/2;})
-								     .attr("y",function(d,i){return d.y+nodeHeight/2;})
-								     .attr("font-size", "10px").attr("fill","black").attr("text-anchor", "middle")
-								     .call(d3.behavior.drag().on("drag",function(d) {
-								    	 dragNodes(d3.event.dx,d3.event.dy);}))
-									 .on("contextmenu",d3.contextMenu(menu));	
-							}
-							
-							function renderLinks(){
-								//defining links
-								link = vis.append("g").attr("class", "link").selectAll("line");
-								
-								//Define the link source and target
-								graph.links.forEach(function(d) {
-									d.source = graph.nodes[d.source];
-									d.target = graph.nodes[d.target];
-								});
-								
-								//building the arrows for the link end
-								vis.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
-								   .attr("id", String).attr("viewBox","0 -5 12 12").attr("refX",20).attr("refY",0)
-								   .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
-								   .append("path").attr("d","M0,-5L10,0L0,5 L10,0 L0, -5")
-								   .style("stroke","#0177b7");
+				// invisible rect for listening background clicks
+				vis.append('rect')
+					.attr('x', 0)
+					.attr('y', 0)
+					.attr('width', width)
+					.attr('height', height)
+					.attr('opacity', 0)
+					.on('click', function() {
+						scope.$apply(function() {
+							scope.clearDatasetSelection();
+						});
+					});
+			}
 
-								//Define the xy positions of the link
-								link = link.data(graph.links).enter().append("line")
-									  .attr("x1", function(d) {return d.source.x+nodeWidth/2;})
-									  .attr("y1", function(d) {return d.source.y;})
-									  .attr("x2", function(d) {return d.target.x+nodeWidth/2;})
-									  .attr("y2", function(d) {return d.target.y;})
-									  .style("marker-end","url(#end)");
-							}
-							
-							
-							//Function to describe drag behavior
-							function dragNodes(dx,dy) {
-								node.filter(function(d) {return d.selected;})
-								.attr("x", function(d) {return d.x += dx;})
-								.attr("y", function(d) {return d.y += dy;});
-								
-								label.filter(function(d) {return d.selected;})
-								.attr("x", function(d) {return d.x+dx+nodeWidth/2;})
-								.attr("y", function(d) {return d.y+dy+nodeHeight/2;});
-								
-								link.filter(function(d) {return d.source.selected;})
-								.attr("x1", function(d) {return d.source.x+nodeWidth/2;})
-								.attr("y1", function(d) {return d.source.y;});
+			function renderNodes(){
 
-								link.filter(function(d) {return d.target.selected;})
-								.attr("x2", function(d) {return d.target.x+nodeWidth/2;})
-								.attr("y2", function(d) {return d.target.y;});
-								
-								if(d3.event.preventDefault)d3.event.preventDefault();
+				nodes = vis.append('g').attr('class', 'node').selectAll('rect');
 
-							}
-							
-							function defineRightClickMenu(){
-								
-								menu=[{title:'Visualize',action: function(elem,d,i){}},
-									      {title:'link to phenodata',action:function(elm,d,i){}},
-									      {title:'link between selected',action:function(elm,d,i){}},
-									{title:'Rename',action:function(elm,d,i){									
-											 var result = prompt('Change the name of the node',d.name);
-										     if(result) {d.name = result;}
-										     parentController.renameDataset(d,result);
-											 svg.selectAll("text").remove();
-											 renderLabels();		
-										}},
-									{title:'Delete',action:function(elm,d,i){}},
-									{title:'Export',action:function(elm,d,i){}},
-									{title:'View History as text',action:function(elm,d,i){}}
-									] ;
-							}
-							
-							function renderGraph(width,height) {
-								d3.select('svg').remove();
-															
-								var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
-								var yScale = d3.scale.linear().domain([ 0, height ]).range([ 0, height ]);
-								
-								svg = d3.select(iElement[0]).append("svg").attr("width", width).attr("height", height);
+				var tip=d3.tip().attr('class','d3-tip').offset([-10,0]).html(function(d){return d.name+'';});
+				svg.call(tip);
 
-								var zoomer = d3.behavior.zoom().scaleExtent([ 1, 4 ]).x(xScale).y(yScale).on("zoomstart", zoomstart).on("zoom",redraw);
+				//Drawing the nodes in the SVG
+				nodes = nodes.data(graph.nodes).enter().append('rect')
+					.attr('x', function(d) {return d.x;})
+					.attr('y', function(d) {return d.y;})
+					.attr('rx', 6)
+					.attr('ry', 6)
+					.attr('width',nodeWidth).attr('height',nodeHeight)
+					.attr('fill', function(d) {
+						return d.color;
+					})
+					.attr('opacity', function(d) {
+						if (d.filter) {
+							return 1.0;
+						} else {
+							return 0.25;
+						}
+					})
+					.on('dblclick', scope.showDefaultVisualization)
+					.on('click',function(d) {
+						scope.$apply(function() {
+							scope.toggleDatasetSelection(d3.event, d.dataset);
+						});
 
-								function redraw() {
-									vis.attr("transform", "translate("
-											+ d3.event.translate + ")"
-											+ "scale(" + d3.event.scale + ")");
-								}
+						tip.hide(d);
+					})
+					.call(d3.behavior.drag()
+						.on('drag',function() {
+							dragNodes(d3.event.dx,d3.event.dy);
+							// set defaultPrevented flag to disable scrolling
+							d3.event.sourceEvent.preventDefault();
+						})
+						.on('dragend', dragEnd)
+					)
+					.on('contextmenu',d3.contextMenu(menu))
+					.on('mouseover',tip.show)
+					.on('mouseout',tip.hide);
 
-								var svg_graph = svg.append('svg:g').call(zoomer);
-
-								var rect = svg_graph.append('svg:rect').attr('width', width).attr('height', height)
-										   .attr('fill', 'transparent');
-												
-								vis = svg_graph.append("svg:g");
-
-								vis.attr('fill','red').attr('opacity', 1.0).attr('id','vis');
-								//Rendering the graph elements  
-								defineRightClickMenu();
-								//renderLinks();
-								renderNodes();
-								renderLabels();
-
-								function zoomstart() {
-									//node.each(function(d) {
-									//	d.selected = false;
-									//	d.previouslySelected = false;
-									//});
-									//node.classed("selected", false);
-								}
-
-								function keydown() {
-									shiftKey = d3.event.shiftKey
-											|| d3.event.metaKey;
-									ctrlKey = d3.event.ctrlKey;
-
-									if (d3.event.keyCode == 67) {
-										//the c key
-									}
-
-									if (shiftKey) {
-										svg_graph.call(zoomer).on("mousedown.zoom", null).on("touchstart.zoom", null)
-										.on("touchmove.zoom", null).on("touchend.zoom", null);
-
-										vis.selectAll('g.gnode').on('mousedown.drag', null);
-									}
-								}
-
-								function keyup() {
-									shiftKey = d3.event.shiftKey
-											|| d3.event.metaKey;
-									ctrlKey = d3.event.ctrlKey;
-									svg_graph.call(zoomer);
-								}
-								
-							}//end of renderGraph
-						
-							
-							//Method for search data file in the workflow graph
-							scope.$on('searchDatasets', function(event,data){
-								var searchedDataesets=data.data;
-								searchedDataesets.forEach(function(elem){
-									searchNode(elem.name);
-								});
-								
-							});
-							
-							function searchNode(datasetName){
-								if(datasetName==="none"){
-									node.style("stroke","white").style("stroke-width","1");
-								}else{
-									//Selected and not selected nodes
-									var notSelected=node.filter(function(d,i){
-										return d.name!=datasetName;
-									
-									});
-									
-									var Selected=node.filter(function(d,i){
-										return d.name===datasetName;
-									});
-
-									//Selected and not selected label
-									var notSelectedLabel=label.filter(function(d,i){
-										return d.name!=datasetName;
-									});
-									
-									var SelectedLabel=label.filter(function(d,i){
-										return d.name===datasetName;
-									});
-									
-									notSelected.style("opacity","0.25");
-									link.style("opacity","0.25");
-									notSelectedLabel.style("opacity","0.25");
-									
-									Selected.style("opacity","1.0");
-									SelectedLabel.style("opacity","1.0");
-									
-								}
-							}
-
-						}//end of link function
-
-					};//end of return
-
+				// highlight selected datasets
+				nodes.each(function(d) {
+					d3.select(this).classed('selected', scope.isSelectedDataset(d.dataset));
 				});
+			}
+
+			function renderLabels(){
+				var fontSize = 12;
+				label=vis.append('g').selectAll('text').data(graph.nodes).enter()
+					.append('text').text(function(d){return Utils.getFileExtension(d.name);})
+					.attr('x',function(d){return d.x+nodeWidth/2;})
+					.attr('y',function(d){return d.y+nodeHeight/2 + fontSize / 4;})
+					.attr('font-size', fontSize + 'px').attr('fill','black').attr('text-anchor', 'middle')
+					.style('pointer-events', 'none')
+			}
+
+			function renderLinks(){
+				//defining links
+				link = vis.append('g').attr('class', 'link').selectAll('line');
+
+				//building the arrows for the link end
+				vis.append('defs').selectAll('marker').data(['end']).enter().append('marker')
+					.attr('id', String).attr('viewBox','0 -5 12 12').attr('refX',12).attr('refY',0)
+					.attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto')
+					.append('path').attr('d','M0,-5L10,0L0,5 L10,0 L0, -5')
+					.style('stroke','gray');
+
+				//Define the xy positions of the link
+				link = link.data(graph.links).enter().append('line')
+					.attr('x1', function(d) {return d.source.x + nodeWidth/2;})
+					.attr('y1', function(d) {return d.source.y + nodeHeight;})
+					.attr('x2', function(d) {return d.target.x + nodeWidth/2;})
+					.attr('y2', function(d) {return d.target.y;})
+					.style('marker-end','url(#end)');
+			}
+
+
+			//Function to describe drag behavior
+			function dragNodes(dx, dy) {
+
+				nodes.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+					.attr('x', function(d) {return d.x += dx;})
+					.attr('y', function(d) {return d.y += dy;});
+
+				label.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+					.attr('x', function(d) {return d.x+dx+nodeWidth/2;})
+					.attr('y', function(d) {return d.y+dy+nodeHeight/2;});
+
+				link.filter(function(d) {return scope.isSelectedDataset(d.source.dataset)})
+					.attr('x1', function(d) {return d.source.x+nodeWidth/2;})
+					.attr('y1', function(d) {return d.source.y;});
+
+				link.filter(function(d) {return scope.isSelectedDataset(d.target.dataset)})
+					.attr('x2', function(d) {return d.target.x+nodeWidth/2;})
+					.attr('y2', function(d) {return d.target.y;});
+			}
+
+			function dragEnd() {
+				// update positions of all selected datasets to the server
+				nodes.filter(function(d) {
+					return scope.isSelectedDataset(d.dataset);
+
+				}).each(function(d) {
+					if (d.dataset) {
+						d.dataset.x = d.x;
+						d.dataset.y = d.y;
+						scope.updateDataset(d.dataset);
+					}
+				});
+			}
+
+			function defineRightClickMenu(){
+
+				menu=[{title:'Visualize',action: function(){
+					scope.showDefaultVisualization();
+				}},
+					{title:'Rename',action:function(elm,d){
+						scope.renameDatasetDialog(d.dataset);
+					}},
+					{title:'Delete',action:function(elm,d){
+						scope.deleteDatasets(scope.selectedDatasets);
+					}},
+					{title:'Export',action:function(elm,d){
+						scope.exportDatasets(scope.selectedDatasets);
+					}},
+					{title:'View History as text',action:function(){
+						scope.showHistory();
+					}}
+				] ;
+			}
+
+			function renderGraph(width,height) {
+				d3.select('svg').remove();
+
+				var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
+				var yScale = d3.scale.linear().domain([ 0, height ]).range([ 0, height ]);
+
+				svg = d3.select(iElement[0]).append('svg').attr('width', width).attr('height', height);
+
+				var zoomer = d3.behavior.zoom().scaleExtent([ 0.2, 1 ]).x(xScale).y(yScale).on('zoom',redraw);
+
+				var lastScale = null;
+
+				function redraw() {
+
+					// let zoom events go through, because those have always defaultPrevented === true
+					if (d3.event.scale === lastScale) {
+						// disable scrolling when dragging nodes
+						if (d3.event.sourceEvent && d3.event.sourceEvent.defaultPrevented) {
+							return;
+						}
+					}
+					lastScale = d3.event.scale;
+
+					// prevent scrolling over the top and left edges
+					d3.event.translate[0] = Math.min(0, d3.event.translate[0]);
+					d3.event.translate[1] = Math.min(0, d3.event.translate[1]);
+
+					vis.attr('transform', 'translate('
+						+ d3.event.translate + ')'
+						+ 'scale(' + d3.event.scale + ')');
+				}
+
+				var svg_graph = svg.append('svg:g').call(zoomer);
+
+				var rect = svg_graph.append('svg:rect').attr('width', width).attr('height', height)
+					.attr('fill', 'transparent');
+
+				vis = svg_graph.append('svg:g');
+
+				//Rendering the graph elements
+				renderBackground();
+				defineRightClickMenu();
+				renderLinks();
+				renderNodes();
+				renderLabels();
+				renderJobs();
+
+				/*
+				function keydown() {
+					shiftKey = d3.event.shiftKey
+						|| d3.event.metaKey;
+					ctrlKey = d3.event.ctrlKey;
+
+					if (d3.event.keyCode == 67) {
+						//the c key
+					}
+
+					if (shiftKey) {
+						svg_graph.call(zoomer).on('mousedown.zoom', null).on('touchstart.zoom', null)
+							.on('touchmove.zoom', null).on('touchend.zoom', null);
+
+						vis.selectAll('g.gnode').on('mousedown.drag', null);
+					}
+				}
+
+				function keyup() {
+					shiftKey = d3.event.shiftKey
+						|| d3.event.metaKey;
+					ctrlKey = d3.event.ctrlKey;
+					svg_graph.call(zoomer);
+				}
+				*/
+
+			}//end of renderGraph
+
+			scope.getDatasetNodes = function(datasetsMap, jobsMap, modulesMap, filter) {
+
+				var datasetNodes = [];
+				datasetsMap.forEach(function (targetDataset) {
+
+					var color = 'gray';
+
+					if (targetDataset.sourceJob) {
+						if (jobsMap.has(targetDataset.sourceJob)) {
+							var sourceJob = jobsMap.get(targetDataset.sourceJob);
+
+							var module = modulesMap.get(sourceJob.module);
+							if (module) {
+								var category = module.categoriesMap.get(sourceJob.toolCategory);
+								if (category) {
+									color = category.color;
+								}
+							}
+						} else {
+							console.log('source job of dataset ' + targetDataset.name + ' not found');
+						}
+					}
+
+					datasetNodes.push({
+						x: targetDataset.x,
+						y: targetDataset.y,
+						name: targetDataset.name,
+						extension: Utils.getFileExtension(targetDataset.name),
+						sourceJob: sourceJob,
+						color: color,
+						filter: !filter || filter.get(d.datasetId),
+						dataset: targetDataset
+					});
+				});
+
+				return datasetNodes;
+			};
+
+			scope.getJobNodes = function(jobsMap, datasetsMap) {
+
+				var jobNodes = [];
+				jobsMap.forEach( function(job) {
+					// no need to show completed jobs
+					if (job.state !== 'COMPLETED') {
+
+						// find inputs for the layout calculation
+						var inputDatasets = [];
+						angular.forEach(job.inputs, function(input) {
+							var dataset = datasetsMap.get(input.datasetId);
+							inputDatasets.push(dataset);
+						});
+
+						// find out better place for new root nodes
+						var x = jobNodes.length * nodeWidth;
+						var y = 0;
+
+						if (inputDatasets[0]) {
+							x = inputDatasets[0].x;
+							y = inputDatasets[0].y + nodeHeight * 2;
+						}
+
+						var color = '#4d4ddd';
+						var bgColor = 'lightGray';
+						var spin = true;
+
+						if (job.state === 'FAILED') {
+							color = 'yellow';
+							spin = false;
+						}
+
+						if (job.state === 'ERROR') {
+							color = 'red';
+							spin = false;
+						}
+
+						jobNodes.push({
+							x: x,
+							y: y,
+							color: color,
+							bgColor: bgColor,
+							spin: spin,
+							job: job,
+							sourceJob: job // to create links
+						});
+					}
+				});
+				return jobNodes;
+			};
+
+			scope.getLinks = function(nodes) {
+
+				var links = [];
+
+				// map for searching source
+				var datasetNodesMap = new Map();
+				angular.forEach(nodes, function(node) {
+					if (node.dataset) {
+						datasetNodesMap.set(node.dataset.datasetId, node);
+					}
+				});
+
+				angular.forEach(nodes, function (targetNode) {
+					if (targetNode.sourceJob) {
+						var sourceJob = targetNode.sourceJob;
+						// iterate over the inputs of the source job
+						sourceJob.inputs.forEach(function (input) {
+							var sourceNode = datasetNodesMap.get(input.datasetId);
+							if (sourceNode && targetNode) {
+								links.push({
+									source: sourceNode,
+									target: targetNode
+								});
+							}
+						});
+					}
+				});
+
+				return links;
+			};
+
+		}//end of link function
+
+	};//end of return
+
+});

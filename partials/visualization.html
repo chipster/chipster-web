@@ -24,30 +24,110 @@
 
 					<!-- single selection -->
 					<div ng-if="isSingleDatasetSelected()">
-						<h5>{{selectedDatasets[0].name}}</h5>
+						<div>
+							<div class="col-sm-4">
+								<h5>{{selectedDatasets[0].name}}</h5>
+							</div>
 
-						<div class="indented">
-							<p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].session.created}}</p>
-							<textarea style="border: none; width: 100%">{{selectedDatasets[0].notes}}</textarea>
-						</div>
+							<div class="col-sm-8">
+								 <div class="btn-group btn-group-sm pull-right">
+								<button type="button" class="btn btn-default" ng-click="renameDatasetDialog(selectedDatasets[0])">
+									Rename
+								</button>
+								<button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">
+									Delete
+								</button>
+								<button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">
+									Export
+								</button>
+								<button type="button" class="btn btn-default" ng-click="showHistory()">
+									History
+								</button>
+								 </div>
+							</div>
 
-						<h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
-						<div class="indented">
-							<p ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">{{param.displayName}}: {{param.value}}</p>
+							<div class="col-sm-12">
+								<div class="indented">
+									<p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].session.created}}</p>
+									<textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes">{{selectedDatasets[0].notes}}</textarea>
+								</div>
+
+								<h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
+								<div>
+									<table class="table">
+										<tr ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">
+											<td class="parameters">{{param.displayName}}</td>
+											<td class="parameters">{{param.value}}</td>
+										</tr>
+									</table>
+								</div>
+							</div>
 						</div>
 					</div>
 
 					<!-- multiple selection -->
 					<div ng-if="isMultipleDatasetsSelected()">
-						<h5 ng-repeat="data in selectedDatasets">{{data.name}}</h5>
+
+						<div class="col-sm-4">
+							<h5 ng-repeat="data in selectedDatasets">{{data.name}}</h5>
+						</div>
+
+						<div class="col-sm-8">
+							<div class="btn-group btn-group-sm pull-right">
+								<button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">
+									Delete
+								</button>
+								<button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">
+									Export
+								</button>
+								<button type="button" class="btn btn-default" ng-click="showHistory()">
+									History
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div ng-if="selectedJobs.length > 0">
+						<div>
+							<div class="col-sm-8">
+								<h5>{{selectedJobs[0].toolCategory}} / {{selectedJobs[0].toolName}}</h5>
+							</div>
+
+							<div class="col-sm-4">
+								<div class="btn-group btn-group-sm pull-right">
+									<button type="button" class="btn btn-default" ng-click="deleteJobs(selectedJobs)">
+										Cancel
+									</button>
+								</div>
+							</div>
+
+							<div class="col-sm-12">
+								<div class="indented">
+									<p>Status: {{selectedJobs[0].state.toLowerCase()}}
+										<span ng-show="selectedJobs[0].stateDetail">
+											({{selectedJobs[0].stateDetail}})
+										</span>
+									</p>
+									<!--<p>{{selectedJobs[0].toolDescription}}</p> -->
+								</div>
+
+								<h5>Parameters</h5>
+								<div>
+									<table class="table">
+										<tr ng-repeat="param in selectedJobs[0].parameters">
+											<td class="parameters">{{param.displayName}}</td>
+											<td class="parameters">{{param.value}}</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<!-- no selection -->
-					<div ng-if="!isDatasetSelected()">
+					<div ng-if="!isDatasetSelected() && selectedJobs.length === 0">
 						<p>{{session.sessionDetail}}</p>
 					</div>
-
-
 
 				</div>
 

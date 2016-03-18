@@ -8,7 +8,7 @@ chipsterWeb.factory('WorkflowGraphService', function(TemplateService) {
 	var initValue = 30;
 	return {
 
-		calculateXPos : function(nodeIndex, level) {
+		calculateXPos : function(nodeIndex) {
 			// For the uploaded input set,we consider index as cluster ID
 			if (nodeIndex === 0)
 				return initValue; // return a default initial position for the
@@ -27,11 +27,6 @@ chipsterWeb.factory('WorkflowGraphService', function(TemplateService) {
 				return 50;
 			else
 				return level * 100;
-		},
-
-		getFileExtension : function(fileName) {
-			return fileName.split('.').pop();
-
 		},
 
 		sortByPosition : function(inputset, key) {
@@ -82,11 +77,6 @@ chipsterWeb.factory('WorkflowGraphService', function(TemplateService) {
 			console.log(dummyLinks);
 			return dummyLinks;
 
-		},
-		
-		getOutputNodePosition:function(outputset,inputset){
-			
 		}
-
 	}
 });

@@ -9,7 +9,7 @@ chipsterWeb
         function ($scope, $routeParams, $q, TemplateService,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  baseURLString, $location) {
+                  baseURLString, $location, Utils, ToolRestangular) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -80,7 +80,9 @@ chipsterWeb
                         });
 
                     } else if (event.type === 'DELETE') {
-                        $scope.session.datasetsMap.delete(event.resourceId);
+                        $scope.$apply(function() {
+                            $scope.session.datasetsMap.delete(event.resourceId);
+                        });
 
                     } else {
                         console.log("unknown event type", event);
@@ -138,11 +140,7 @@ chipsterWeb
             };
 
             $scope.getDatasetList = function () {
-                var list = [];
-                $scope.session.datasetsMap.forEach(function(value) {
-                    list.push(value);
-                });
-                return list;
+                return Utils.mapValues($scope.session.datasetsMap);
             };
 
 
@@ -156,15 +154,9 @@ chipsterWeb
                 return $scope.item === value;
             };
 
-            $scope.d3Data = {
-                nodes: [],
-                links: []
-            };
-            $scope.filterNodes = [];
-
-
-            // dataset selections
+            // selections
             $scope.selectedDatasets = [];
+            $scope.selectedJobs = [];
 
             /**
              * Check if there are one or more dataset selected
@@ -204,11 +196,6 @@ chipsterWeb
                 $scope.selectedDatasets.push(data);
             };
 
-            // TODO temp fix for workflow
-            this.selectSingleDataset = function(data) {
-                $scope.selectSingleDataset(data);
-            };
-
             $scope.selectDataset = function(data) {
                 if (!$scope.isSelectedDataset(data)) {
                     $scope.selectedDatasets.push(data);
@@ -222,11 +209,9 @@ chipsterWeb
                 }
             };
 
-
-            // TODO remove
-            this.cancelDatasetSelection = function (datasetId) {
-                var index = $scope.selectedDatasets.indexOf(datasetId);
-                $scope.selectedDatasets.splice(index, 1);
+            $scope.clearDatasetSelection = function() {
+                $scope.selectedDatasets.length = 0;
+                $scope.selectedJobs.length = 0;
             };
 
             $scope.toggleDatasetSelection = function($event, data) {
@@ -262,6 +247,21 @@ chipsterWeb
                 }
             };
 
+            $scope.selectJob = function(event, job) {
+                $scope.clearDatasetSelection();
+                $scope.selectedJobs = [job];
+            };
+
+            $scope.deleteJobs = function (jobs) {
+
+                angular.forEach(jobs, function(job) {
+                    var url = $scope.sessionUrl.one('jobs').one(job.jobId);
+                    url.remove().then(function (res) {
+                        console.log(res);
+                    });
+                });
+            };
+
             // tool selection
             $scope.selectedTool = null;
             $scope.selectedToolIndex = -1;
@@ -278,76 +278,43 @@ chipsterWeb
                 var promises = [
                     $scope.sessionUrl.get(),
                     $scope.sessionUrl.all('datasets').getList(),
-                    $scope.sessionUrl.all('jobs').getList()];
+                    $scope.sessionUrl.all('jobs').getList(),
+                    ToolRestangular.all('modules').getList(),
+                    ToolRestangular.all('tools').getList()
+                ];
 
                 $q.all(promises).then(function (res) {
 
                     var session = res[0].data;
                     var datasets = res[1].data;
                     var jobs = res[2].data;
+                    var modules = res[3].data;
+                    var tools = res[4].data;
+
 
                     // store session properties
                     $scope.session.sessionName = session.name;
                     $scope.session.sessionDetail = session.notes;
 
-                    // store datasets
-                    var datasetsMap = new Map();
-                    datasets.forEach(function (dataset) {
-                        datasetsMap.set(dataset.datasetId, dataset);
-                    });
-                    $scope.session.datasetsMap = datasetsMap;
+                    $scope.session.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+                    $scope.session.jobsMap = Utils.arrayToMap(jobs, 'jobId');
 
-                    // store jobs
-                    var jobsMap = new Map();
-                    jobs.forEach(function (job) {
-                        jobsMap.set(job.jobId, job);
-                    });
-                    $scope.session.jobsMap = jobsMap;
+                    $scope.modules = modules;
+                    $scope.tools = tools;
 
+                    // build maps for modules and categories
 
-                    // create links
-
-                    // assign indexes to datasets
-                    angular.forEach(datasets, function (dataset, index) {
-                        dataset.index = index;
+                    // generate moduleIds
+                    modules.map(function(m) {
+                        m.moduleId = m.name.toLowerCase();
+                        return m;
                     });
 
-                    // links
-                    var links = [];
-                    datasets.forEach(function (targetDataset) {
-                        if (!targetDataset.sourceJob) {
-                            return; // continue
-                        }
-                        if (!(jobsMap.has(targetDataset.sourceJob))) {
-                            console.log("source job of dataset " + targetDataset.name + " not found");
-                            return; // continue
-                        }
-                        var sourceJob = jobsMap.get(targetDataset.sourceJob);
-                        // iterate over the inputs of the source job
-                        sourceJob.inputs.forEach(function (input) {
-                            var sourceDataset = datasetsMap.get(input.datasetId);
-                            links.push({
-                                source: sourceDataset.index,
-                                target: targetDataset.index,
-                                value: 4
-                            });
-                        });
+                    $scope.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+
+                    $scope.modulesMap.forEach(function(module) {
+                        module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
                     });
-
-                    // set groups and levels
-                    angular.forEach(datasets, function (elem, index) {
-                        elem.group = 1;
-                        elem.c_id = 0;
-                        elem.level = index;
-
-                    });
-
-                    // store links data
-                    $scope.d3Data = {
-                        nodes: datasets,
-                        links: links
-                    };
-
                 });
             };
 
@@ -432,47 +399,38 @@ chipsterWeb
                 });
             };
 
-            $scope.deleteDataset = function (datasetObj) {
+            $scope.deleteDatasets = function (datasets) {
 
-                // changing the file Id first
-                var datasetUrl = $scope.sessionUrl.one('datasets').one(
-                    datasetObj.datasetId);
-                datasetObj.fileId = TemplateService.getRandomFileID();
-
-                // after that attempting to delete
-                datasetUrl.customPUT(datasetObj).then(function () {
+                angular.forEach(datasets, function(dataset) {
+                    var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
                     datasetUrl.remove().then(function (res) {
                         console.log(res);
                     });
-
                 });
-
             };
 
             $scope.getJob = function (jobId) {
                 return $scope.session.jobsMap.get(jobId);
             };
 
+            $scope.renameDatasetDialog = function(dataset) {
+                var result = prompt('Change the name of the node',dataset.name);
+                if(result) {dataset.name = result;}
+                $scope.renameDataset(dataset, result);
+            };
+
             // implementing right click options for data nodes
-            this.renameDataset = function (datasetObj, name) {
-                var datasetUrl = $scope.sessionUrl.one('datasets').one(
-                    datasetObj.datasetId);
+            $scope.renameDataset = function (datasetObj, name) {
                 var renamedObj = angular.copy(datasetObj);
                 renamedObj.name = name;
 
-                // console.log(datasetObj);
-                datasetUrl.customPUT(renamedObj).then(
-                    function () {
-                        var index = $scope.d3Data.nodes
-                            .indexOf(datasetObj);
-                        console.log(index);
-                        $scope.d3Data.nodes.splice(index, 1,
-                            renamedObj);
-                        // $scope.loadSession();
-
-                    });
+                $scope.updateDataset(dataset);
             };
 
+            $scope.updateDataset = function(dataset) {
+                var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
+                datasetUrl.customPUT(dataset);
+            };
 
             $scope.orientVert = true;
             $scope.changeOrientation = function () {
@@ -499,6 +457,30 @@ chipsterWeb
 
             };
 
+            $scope.getDatasetUrl = function() {
+                //TODO can Restangular build this?
+                //TODO should we have separate read-only tokens for datasets?
+                //TODO check if dataset(s) selected?
+                return baseURLString
+                    + 'filebroker/sessions/' + $routeParams.sessionId
+                    + '/datasets/' + $scope.selectedDatasets[0].datasetId
+                    + '?token=' + AuthenticationService.getToken();
+            };
+
+            $scope.showDefaultVisualization = function() {
+                $scope.$broadcast('showDefaultVisualization', {});
+            };
+
+            $scope.exportDatasets = function(datasets) {
+                angular.forEach(datasets, function(d) {
+                    $window.open($scope.getDatasetUrl(d), "_blank")
+                });
+            };
+
+            $scope.showHistory = function() {
+                $('#historyModal').modal('show');
+            };
+
             // We are only handling the resize end event, currently only
             // working in workflow graph div
             $scope.$on("angular-resizable.resizeEnd", function (event,
@@ -515,20 +497,22 @@ chipsterWeb
  * Filter for searching dataset in dataset list view
  */
 chipsterWeb.filter('searchDataset', function ($rootScope) {
-    return function (arr, searched_dataset_name) {
-
-        if (!searched_dataset_name)
-            return arr;
+    return function (array, expression) {
 
         var result = [];
-        angular.forEach(arr,
-            function (item) {
 
-                if (item.name.indexOf(searched_dataset_name) !== -1 ||
-                    item.name.toLowerCase().indexOf(searched_dataset_name) !== -1) {
+        if (!expression) {
+            result = array;
+
+        } else {
+            angular.forEach(array, function (item) {
+
+                if (item.name.toLowerCase().indexOf(expression.toLowerCase()) !== -1) {
                     result.push(item);
                 }
             });
+        }
+
         //Here I am braodcasting the filtered result with rootScope to send it to workflowgraph directive, but there might be
         //a better way to make this communication
         $rootScope.$broadcast('searchDatasets', {data: result});

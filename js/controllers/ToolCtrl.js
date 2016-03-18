@@ -10,16 +10,13 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 	$scope.selectedCategoryIndex = -1;
 	$scope.selectedCategory = null;
 	$scope.selectedToolIndex = -1;
-	
-	$scope.getTools = function() {
-		var promises = [ ToolRestangular.all('modules').getList(),
-				ToolRestangular.all('tools').getList() ];
-		$q.all(promises).then(function(response) {
-			$scope.modules = response[0].data;
-			$scope.tools = response[1].data;
-			$scope.categories = $scope.modules[$scope.activeTab].categories;
-		});
-	};
+
+	$scope.$watch('modules', function () {
+		// select the first module when the tools are loaded
+		if ($scope.modules) {
+			$scope.setTab($scope.activeTab);
+		}
+	});
 
 	$scope.setTab=function($index){
 		$scope.activeTab = $index;

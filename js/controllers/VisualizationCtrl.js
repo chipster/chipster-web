@@ -18,6 +18,13 @@ chipsterWeb.controller('VisualizationCtrl',function(
 		$scope.setTab(1);
 	});
 
+	$scope.$on('showDefaultVisualization', function() {
+		var visualizations = $scope.getVisualizations();
+		if (visualizations.length > 0) {
+			$scope.show(visualizations[0]);
+		}
+	});
+
 	$scope.visualizations = [
 		// when adding a new visualization, remember to include it (the directive) in the index.html file
 		{
@@ -100,6 +107,7 @@ chipsterWeb.controller('VisualizationCtrl',function(
 	// compile the selected visualization directive and show it
 	// only for a single dataset for now
 	$scope.show = function (vis) {
+
 		if (!$scope.isSingleDatasetSelected) {
 			console.log("trying to show visualization, but " + $scope.selectedDatasets.length + " datasets selected");
 			return;
@@ -116,15 +124,5 @@ chipsterWeb.controller('VisualizationCtrl',function(
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();
 		area.append(directive);
-	};
-
-	$scope.getDatasetUrl = function() {
-		//TODO can Restangular build this?
-		//TODO should we have separate read-only tokens for datasets?
-		//TODO check if dataset(s) selected?
-		return baseURLString
-			+ 'filebroker/sessions/' + $routeParams.sessionId
-			+ '/datasets/' + $scope.selectedDatasets[0].datasetId
-			+ '?token=' + AuthenticationService.getToken();
 	};
 });

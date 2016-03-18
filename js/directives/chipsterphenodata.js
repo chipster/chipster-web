@@ -143,7 +143,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
                 $scope.updateDatasets(true);
             };
 
-            $scope.remove = function(dataset) {
+            $scope.remove = function() {
                 angular.forEach($scope.datasets, function(dataset) {
                     dataset.metadata = null;
                 });
@@ -308,7 +308,9 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
             };
 
             $scope.$watch('datasets', function () {
-                $scope.updateViewLater();
+                if (datasets.length > 0) {
+                    $scope.updateViewLater();
+                }
             }, true);
 
             $scope.updateView();
