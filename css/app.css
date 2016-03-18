@@ -200,10 +200,6 @@ ul.unstyled {
 
 
 /* D3 graph related styles*/
-.node {
- 	stroke: #fff;
-  	stroke-width: 1px;
-    }
 
 .node .selected {
   stroke: black;
@@ -212,17 +208,7 @@ ul.unstyled {
 
 
 .link {
-      stroke: #999;
-}
-
-.dummylink{
-	stroke:#999;
-}
-
-.brush .extent {
-  fill-opacity: .1;
-  stroke: #fff;
-  shape-rendering: crispEdges;
+	stroke: #999;
 }
 
 .d3-tip {
@@ -232,11 +218,6 @@ ul.unstyled {
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
   border-radius: 2px;
-}
-
-.group-title {
-    background-color: #687074 !important;
-    color: #FFF !important;
 }
 
 /*

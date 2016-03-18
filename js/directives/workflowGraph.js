@@ -2,85 +2,87 @@
  * @desc workflowGraphLayout directive that creates the workflow graph for session dataset 'd3Data'
  * @example <div><workflow-graph-layout data='d3Data'></div>
  */
-chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphService, Utils) {
+chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Utils) {
 	return {
 		restrict : 'EA',
 		require:'^ngController',
 
 		link : function(scope, iElement) {
 			var d3 = $window.d3;
-			var width = (window.innerWidth / 2) - 50;
-			var height = (window.innerHeight-150);
-			var shiftKey, ctrlKey;
-			var svg, nodes, link, label, vis, menu, pb_svg;
+			//var shiftKey, ctrlKey;
+			var svg, d3Links, d3Labels, vis, menu, d3JobNodes;
 			var graph;
-			var nodeWidth=40,nodeHeight=25;
+			var nodeWidth=WorkflowGraphService.nodeWidth;
+			var nodeHeight=WorkflowGraphService.nodeHeight;
 
-			scope.$on('resizeWorkFlowGraph',function(event,data){
-				width=data.data.width-50;
-				renderGraph(width, height);
-			});
+			scope.$on('resizeWorkFlowGraph', scope.renderGraph);
 
 			//Method for search data file in the workflow graph
 			scope.$on('searchDatasets', function(event,data){
-				graph.filter = Utils.arrayToMap(data.data, 'datasetId');
-				renderGraph(width, height);
+				if (graph) {
+					graph.filter = Utils.arrayToMap(data.data, 'datasetId');
+					renderGraph();
+				}
 			});
 
 			scope.$watch('selectedDatasets', function () {
 				if (graph) {
-					renderGraph(width, height);
+					renderGraph();
 				}
 			}, true);
 
-			scope.$watch('session.datasetsMap.size', function () {
-				// why the watch below doesn't notice deletions?
-				console.log('watch4');
+			scope.$on('datasetsMapChanged', function () {
 				scope.update();
 			});
 
-			scope.$watch('selectedDatasets', function () {
-				// why the watch below doesn't notice dataset rename?
-				console.log('watch3');
-				scope.update();
-			}, true);
-
-			scope.$watch('session.jobsMap.size', function () {
-				console.log('watch2');
+			scope.$on('jobsMapChanged', function () {
 				scope.update();
 			});
 
 			scope.$watchGroup(['session.datasetsMap', 'session.jobsMap', 'modulesMap'], function () {
-				console.log('watch');
+				// this will notice only the initial loading
 				scope.update();
 			}, true);
 
 			scope.update = function() {
-				var datasetNodes = scope.getDatasetNodes(scope.session.datasetsMap, scope.session.jobsMap, scope.modulesMap, scope.filter);
-				var jobNodes = scope.getJobNodes(scope.session.jobsMap, scope.session.datasetsMap);
 
+				var datasetNodes = scope.getDatasetNodes(scope.session.datasetsMap, scope.session.jobsMap, scope.modulesMap);
+				var jobNodes = scope.getJobNodes(scope.session.jobsMap);
+
+
+				// add datasets before jobs, because the layout will be done in this order
+				// jobs should make space for the datasets in the layout, because
+				// the jobs are only temporary
 				var allNodes = [];
-				angular.extend(allNodes, datasetNodes);
-				angular.extend(allNodes, jobNodes);
 
-				var links = scope.getLinks(allNodes, scope.session.datasetsMap);
+				angular.forEach(datasetNodes, function(n) {
+					allNodes.push(n);
+				});
+
+				angular.forEach(jobNodes, function(n) {
+					allNodes.push(n);
+				});
+
+				var links = scope.getLinks(allNodes);
+
+				scope.doLayout(links, allNodes);
 
 				graph = {
 					nodes: datasetNodes,
 					jobNodes: jobNodes,
 					links: links
 				};
-				renderGraph(width, height);
+				renderGraph();
 			};
 
 			function renderJobs() {
 
 				var arc=d3.svg.arc().innerRadius(8).outerRadius(12).startAngle(0).endAngle(0.75*2*Math.PI);
 
-				pb_svg=vis.append('g').attr('class', 'job').selectAll('rect');
+				d3JobNodes=vis.append('g').attr('class', 'job').selectAll('rect');
 
 				// create a box for each job
-				var rect=pb_svg.data(graph.jobNodes).enter().append('rect')
+				var rect=d3JobNodes.data(graph.jobNodes).enter().append('rect')
 					.attr('rx', 6)
 					.attr('ry', 6)
 					.attr('width',nodeWidth)
@@ -100,7 +102,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 					//.style('stroke-width', 1);
 
 				// create an arc for each job
-				pb_svg.data(graph.jobNodes).enter().append('path')
+				d3JobNodes.data(graph.jobNodes).enter().append('path')
 					.style('fill', function(d) {
 						return d.color;
 					})
@@ -159,13 +161,13 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 			function renderNodes(){
 
-				nodes = vis.append('g').attr('class', 'node').selectAll('rect');
+				svgDatasetNodes = vis.append('g').attr('class', 'node').selectAll('rect');
 
 				var tip=d3.tip().attr('class','d3-tip').offset([-10,0]).html(function(d){return d.name+'';});
 				svg.call(tip);
 
 				//Drawing the nodes in the SVG
-				nodes = nodes.data(graph.nodes).enter().append('rect')
+				svgDatasetNodes = svgDatasetNodes.data(graph.nodes).enter().append('rect')
 					.attr('x', function(d) {return d.x;})
 					.attr('y', function(d) {return d.y;})
 					.attr('rx', 6)
@@ -175,7 +177,7 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						return d.color;
 					})
 					.attr('opacity', function(d) {
-						if (d.filter) {
+						if (!graph.filter || graph.filter.has(d.dataset.datasetId)) {
 							return 1.0;
 						} else {
 							return 0.25;
@@ -202,14 +204,14 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 					.on('mouseout',tip.hide);
 
 				// highlight selected datasets
-				nodes.each(function(d) {
+				svgDatasetNodes.each(function(d) {
 					d3.select(this).classed('selected', scope.isSelectedDataset(d.dataset));
 				});
 			}
 
 			function renderLabels(){
 				var fontSize = 12;
-				label=vis.append('g').selectAll('text').data(graph.nodes).enter()
+				d3Labels=vis.append('g').selectAll('text').data(graph.nodes).enter()
 					.append('text').text(function(d){return Utils.getFileExtension(d.name);})
 					.attr('x',function(d){return d.x+nodeWidth/2;})
 					.attr('y',function(d){return d.y+nodeHeight/2 + fontSize / 4;})
@@ -219,17 +221,22 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 			function renderLinks(){
 				//defining links
-				link = vis.append('g').attr('class', 'link').selectAll('line');
+				d3Links = vis.append('g').attr('class', 'link').selectAll('line');
 
 				//building the arrows for the link end
 				vis.append('defs').selectAll('marker').data(['end']).enter().append('marker')
-					.attr('id', String).attr('viewBox','0 -5 12 12').attr('refX',12).attr('refY',0)
-					.attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto')
-					.append('path').attr('d','M0,-5L10,0L0,5 L10,0 L0, -5')
-					.style('stroke','gray');
+					.attr('id', String)
+					.attr('viewBox','-7 -7 14 14')
+					.attr('refX', 6)
+					.attr('refY', 0)
+					.attr('markerWidth', 7)
+					.attr('markerHeight', 7)
+					.attr('orient','auto')
+					.append('path').attr('d', 'M 0,0 m -7,-7 L 7,0 L -7,7 Z')
+					.style('fill','#999');
 
 				//Define the xy positions of the link
-				link = link.data(graph.links).enter().append('line')
+				d3Links = d3Links.data(graph.links).enter().append('line')
 					.attr('x1', function(d) {return d.source.x + nodeWidth/2;})
 					.attr('y1', function(d) {return d.source.y + nodeHeight;})
 					.attr('x2', function(d) {return d.target.x + nodeWidth/2;})
@@ -241,26 +248,26 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 			//Function to describe drag behavior
 			function dragNodes(dx, dy) {
 
-				nodes.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+				svgDatasetNodes.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
 					.attr('x', function(d) {return d.x += dx;})
 					.attr('y', function(d) {return d.y += dy;});
 
-				label.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+				d3Labels.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
 					.attr('x', function(d) {return d.x+dx+nodeWidth/2;})
 					.attr('y', function(d) {return d.y+dy+nodeHeight/2;});
 
-				link.filter(function(d) {return scope.isSelectedDataset(d.source.dataset)})
+				d3Links.filter(function(d) {return scope.isSelectedDataset(d.source.dataset)})
 					.attr('x1', function(d) {return d.source.x+nodeWidth/2;})
 					.attr('y1', function(d) {return d.source.y;});
 
-				link.filter(function(d) {return scope.isSelectedDataset(d.target.dataset)})
+				d3Links.filter(function(d) {return scope.isSelectedDataset(d.target.dataset)})
 					.attr('x2', function(d) {return d.target.x+nodeWidth/2;})
 					.attr('y2', function(d) {return d.target.y;});
 			}
 
 			function dragEnd() {
 				// update positions of all selected datasets to the server
-				nodes.filter(function(d) {
+				svgDatasetNodes.filter(function(d) {
 					return scope.isSelectedDataset(d.dataset);
 
 				}).each(function(d) {
@@ -280,10 +287,10 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 					{title:'Rename',action:function(elm,d){
 						scope.renameDatasetDialog(d.dataset);
 					}},
-					{title:'Delete',action:function(elm,d){
+					{title:'Delete',action:function(){
 						scope.deleteDatasets(scope.selectedDatasets);
 					}},
-					{title:'Export',action:function(elm,d){
+					{title:'Export',action:function(){
 						scope.exportDatasets(scope.selectedDatasets);
 					}},
 					{title:'View History as text',action:function(){
@@ -292,7 +299,12 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 				] ;
 			}
 
-			function renderGraph(width,height) {
+			function renderGraph() {
+
+				var element = document.getElementById('workflow-dataset-panel');
+
+				width = graph.width = element.offsetWidth - 20;
+				height = graph.height = element.offsetHeight - 50;
 				d3.select('svg').remove();
 
 				var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
@@ -367,16 +379,16 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 			}//end of renderGraph
 
-			scope.getDatasetNodes = function(datasetsMap, jobsMap, modulesMap, filter) {
+			scope.getDatasetNodes = function(datasetsMap, jobsMap, modulesMap) {
 
 				var datasetNodes = [];
-				datasetsMap.forEach(function (targetDataset) {
+				datasetsMap.forEach(function (dataset) {
 
 					var color = 'gray';
 
-					if (targetDataset.sourceJob) {
-						if (jobsMap.has(targetDataset.sourceJob)) {
-							var sourceJob = jobsMap.get(targetDataset.sourceJob);
+					if (dataset.sourceJob) {
+						if (jobsMap.has(dataset.sourceJob)) {
+							var sourceJob = jobsMap.get(dataset.sourceJob);
 
 							var module = modulesMap.get(sourceJob.module);
 							if (module) {
@@ -386,47 +398,30 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 								}
 							}
 						} else {
-							console.log('source job of dataset ' + targetDataset.name + ' not found');
+							console.log('source job of dataset ' + dataset.name + ' not found');
 						}
 					}
 
 					datasetNodes.push({
-						x: targetDataset.x,
-						y: targetDataset.y,
-						name: targetDataset.name,
-						extension: Utils.getFileExtension(targetDataset.name),
+						x: dataset.x,
+						y: dataset.y,
+						name: dataset.name,
+						extension: Utils.getFileExtension(dataset.name),
 						sourceJob: sourceJob,
 						color: color,
-						filter: !filter || filter.get(d.datasetId),
-						dataset: targetDataset
+						dataset: dataset
 					});
 				});
 
 				return datasetNodes;
 			};
 
-			scope.getJobNodes = function(jobsMap, datasetsMap) {
+			scope.getJobNodes = function(jobsMap) {
 
 				var jobNodes = [];
 				jobsMap.forEach( function(job) {
 					// no need to show completed jobs
 					if (job.state !== 'COMPLETED') {
-
-						// find inputs for the layout calculation
-						var inputDatasets = [];
-						angular.forEach(job.inputs, function(input) {
-							var dataset = datasetsMap.get(input.datasetId);
-							inputDatasets.push(dataset);
-						});
-
-						// find out better place for new root nodes
-						var x = jobNodes.length * nodeWidth;
-						var y = 0;
-
-						if (inputDatasets[0]) {
-							x = inputDatasets[0].x;
-							y = inputDatasets[0].y + nodeHeight * 2;
-						}
 
 						var color = '#4d4ddd';
 						var bgColor = 'lightGray';
@@ -443,8 +438,8 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 						}
 
 						jobNodes.push({
-							x: x,
-							y: y,
+							x: null,
+							y: null,
 							color: color,
 							bgColor: bgColor,
 							spin: spin,
@@ -486,6 +481,29 @@ chipsterWeb.directive('workflowGraphLayout',function($window,WorkflowGraphServic
 
 				return links;
 			};
+
+			scope.doLayout = function(links, nodes) {
+
+				// layout nodes that don't yet have a position
+
+				// layout nodes with parents (assumes that a parent precedes its childrens in the array)
+				angular.forEach(links, function(link) {
+					if (!link.target.x || !link.target.y) {
+						var pos = WorkflowGraphService.newPosition(nodes, link.source.x, link.source.y);
+						link.target.x = pos.x;
+						link.target.y = pos.y;
+					}
+				});
+
+				// layout orphan nodes
+				angular.forEach(nodes, function(node) {
+					if (!node.x || !node.y) {
+						var pos = WorkflowGraphService.newRootPosition(nodes);
+						node.x = pos.x;
+						node.y = pos.y;
+					}
+				});
+			}
 
 		}//end of link function
 

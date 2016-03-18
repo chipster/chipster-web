@@ -68,6 +68,7 @@ chipsterWeb
                     if (event.type === 'CREATE') {
                         $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
                             $scope.session.datasetsMap.set(event.resourceId, resp.data);
+                            $scope.$broadcast('datasetsMapChanged', {});
                         });
 
                     } else if (event.type === 'UPDATE') {
@@ -77,11 +78,13 @@ chipsterWeb
 
                             // update the original instance
                             angular.copy(remote, local);
+                            $scope.$broadcast('datasetsMapChanged', {});
                         });
 
                     } else if (event.type === 'DELETE') {
                         $scope.$apply(function() {
                             $scope.session.datasetsMap.delete(event.resourceId);
+                            $scope.$broadcast('datasetsMapChanged', {});
                         });
 
                     } else {
@@ -93,6 +96,7 @@ chipsterWeb
                     if (event.type === 'CREATE') {
                         $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
                             $scope.session.jobsMap.set(event.resourceId, resp.data);
+                            $scope.$broadcast('jobsMapChanged', {});
                         });
 
                     } else if (event.type === 'UPDATE') {
@@ -116,10 +120,12 @@ chipsterWeb
 
                             // update the original instance
                             angular.copy(remote, local);
+                            $scope.$broadcast('jobsMapChanged', {});
                         });
 
                     } else if (event.type === 'DELETE') {
                         $scope.session.jobsMap.delete(event.resourceId);
+                        $scope.$broadcast('jobsMapChanged', {});
 
                     } else {
                         console.log("unknown event type", event);
@@ -367,35 +373,35 @@ chipsterWeb
             };
 
             $scope.createDataset = function (name) {
-                console.log('create dataset called');
-                var d = TemplateService.getDatasetTemplate();
 
-                d.datasetId = null;
-                d.name = name;
-                console.log($scope.d3Data.nodes.length);
-                d.x = WorkflowGraphService.calculateXPos(
-                    $scope.d3Data.nodes.length, 0);
-                d.y = WorkflowGraphService.calculateYPos(
-                    $scope.d3Data.nodes.length, 0);
-                d.sourceJob = null;
+                var d = {
+                    datasetId: null,
+                    name: name,
+                    x: null,
+                    y: null,
+                    sourceJob: null
+                };
+
                 console.log(d);
-                $scope.d3Data.nodes.push(d);
 
                 return new Promise(function (resolve) {
                     var datasetUrl = $scope.sessionUrl.one('datasets');
-                    datasetUrl.customPOST(d).then(
-                        function (response) {
-                            console.log(response);
-                            var location = response
-                                .headers('Location');
-                            d.datasetId = location.substr(location
-                                    .lastIndexOf('/') + 1);
-                            console.log($scope.d3Data.nodes);
-                            // broadcast the new dataset add event
-                            // to update the workflow graph
-                            $scope.$broadcast('datasetAdded', {});
-                            resolve(d);
-                        });
+                    datasetUrl.customPOST(d).then(function (response) {
+                        console.log(response);
+                        var location = response.headers('Location');
+                        d.datasetId = location.substr(location.lastIndexOf('/') + 1);
+
+                        // put datasets immediately to datasetsMap not to position all uploaded files
+                        // to the same place
+                        var pos = WorkflowGraphService.newRootPosition(Utils.mapValues($scope.session.datasetsMap));
+                        d.x = pos.x;
+                        d.y = pos.y;
+                        $scope.session.datasetsMap.set(d.datasetId, d);
+
+                        $scope.updateDataset(d);
+
+                        resolve(d);
+                    });
                 });
             };
 
@@ -414,16 +420,8 @@ chipsterWeb
             };
 
             $scope.renameDatasetDialog = function(dataset) {
-                var result = prompt('Change the name of the node',dataset.name);
+                var result = prompt('Change the name of the node', dataset.name);
                 if(result) {dataset.name = result;}
-                $scope.renameDataset(dataset, result);
-            };
-
-            // implementing right click options for data nodes
-            $scope.renameDataset = function (datasetObj, name) {
-                var renamedObj = angular.copy(datasetObj);
-                renamedObj.name = name;
-
                 $scope.updateDataset(dataset);
             };
 
@@ -483,14 +481,13 @@ chipsterWeb
 
             // We are only handling the resize end event, currently only
             // working in workflow graph div
-            $scope.$on("angular-resizable.resizeEnd", function (event,
-                                                                args) {
-                $scope.$broadcast('resizeWorkFlowGraph', {
-                    data: args
-                });
-
+            $scope.$on("angular-resizable.resizeEnd", function () {
+                $scope.$broadcast('resizeWorkFlowGraph', {});
             });
 
+            angular.element($window).bind('resize', function() {
+                $scope.$broadcast('resizeWorkFlowGraph', {});
+            });
         });
 
 /**

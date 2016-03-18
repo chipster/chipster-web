@@ -3,7 +3,7 @@
  *       data in UI
  * @example <div ng-controller="ToolCtrl"></div>
  */
-chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter, Utils, WorkflowGraphService) {
+chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter, Utils) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
@@ -152,48 +152,10 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 			inputs: $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets)
 		};
 
-		console.log(newJob);
-
-		$scope.$broadcast('changeNodeCheck', {});
-
-		// Calculate the possible progress node position from
-		// the input datasets positions
-		var progressNode = WorkflowGraphService
-			.getProgressNode($scope.selectedDatasets);
-
-		// Show the running job progress
-		var progressLinks = WorkflowGraphService
-			.createDummyLinks($scope.selectedDatasets,
-				progressNode);
-
-		// As progress spinner node, we just need to send the
-		// progress node info as other input nodes are already
-		// creating the json data for progress showing node and
-		// links from the input nodes
-		var dummyLinkData = {
-			node: progressNode,
-			dummyLinks: progressLinks
-		};
-
-		// Sending event for drawing dummyLinks
-		$scope.$broadcast('addDummyLinks', {
-			data: dummyLinkData
-		});
-		// Sending event for adding progress spinner
-		$scope.$broadcast('addProgressBar', {
-			data: progressNode
-		});
-
 		var postJobUrl = $scope.sessionUrl.one('jobs');
 		postJobUrl.customPOST(newJob).then(function (response) {
 			console.log(response);
 		});
-
-		// when job finished event is received,remove the
-		// progressbar
-		setTimeout(function () {
-			$scope.$broadcast('removeProgressBar', {});
-		}, 10000);
 	};
 });
 
