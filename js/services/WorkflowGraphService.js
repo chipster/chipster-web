@@ -7,8 +7,8 @@ chipsterWeb.factory('WorkflowGraphService', function() {
 
 	var service = {
 
-		nodeHeight: 25,
-		nodeWidth: 40
+		nodeHeight: 20,
+		nodeWidth: 32
 	};
 
 	service.xMargin = service.nodeWidth / 4;

@@ -258,6 +258,10 @@ chipsterWeb
                 $scope.selectedJobs = [job];
             };
 
+            $scope.isSelectedJob = function(data) {
+                return $scope.selectedJobs.indexOf(data) !== -1;
+            };
+
             $scope.deleteJobs = function (jobs) {
 
                 angular.forEach(jobs, function(job) {

@@ -201,14 +201,19 @@ ul.unstyled {
 
 /* D3 graph related styles*/
 
+.node {
+	stroke: black;
+	stroke-width: 1px;
+}
+
 .node .selected {
-  stroke: black;
-  stroke-width: 2px;
+	stroke: black;
+	stroke-width: 2px;
 }
 
 
 .link {
-	stroke: #999;
+	stroke: #555;
 }
 
 .d3-tip {
