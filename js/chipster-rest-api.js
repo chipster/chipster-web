@@ -156,7 +156,7 @@ ChipsterClient.prototype.closeSessionEventListener = function () {
 
 // Sessions
 
-ChipsterClient.prototype.getSessions = function (callback, onerror) {
+ChipsterClient.prototype.updateSessions = function (callback, onerror) {
     this.sessionStorage("GET", "", null, callback, onerror);
 };
 

@@ -54,10 +54,10 @@
 
 								<h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
 								<div>
-									<table class="table">
+									<table class="table table-condensed parameter-table">
 										<tr ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">
-											<td class="parameters">{{param.displayName}}</td>
-											<td class="parameters">{{param.value}}</td>
+											<td>{{param.displayName}}</td>
+											<td>{{param.value}}</td>
 										</tr>
 									</table>
 								</div>
@@ -113,10 +113,10 @@
 
 								<h5>Parameters</h5>
 								<div>
-									<table class="table">
+									<table class="table table-condensed parameter-table">
 										<tr ng-repeat="param in selectedJobs[0].parameters">
-											<td class="parameters">{{param.displayName}}</td>
-											<td class="parameters">{{param.value}}</td>
+											<td>{{param.displayName}}</td>
+											<td>{{param.value}}</td>
 										</tr>
 									</table>
 								</div>
@@ -125,7 +125,7 @@
 					</div>
 
 					<!-- no selection -->
-					<div ng-if="!isDatasetSelected() && selectedJobs.length === 0">
+					<div ng-if="!isDatasetSelected() && !isJobSelected()">
 						<p>{{session.sessionDetail}}</p>
 					</div>
 

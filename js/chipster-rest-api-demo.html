@@ -87,7 +87,7 @@
     }
 
     function updateSessions() {
-        client.getSessions(function (sessions) {
+        client.updateSessions(function (sessions) {
             var ul = document.getElementById("sessionUl");
             clear(ul);
             sessions.forEach(function (s) {
@@ -106,7 +106,7 @@
     }
 
     function deleteAllSessions() {
-        client.getSessions(function (sessions) {
+        client.updateSessions(function (sessions) {
             sessions.forEach(function (s) {
                 client.deleteSession(s.sessionId, function () {
                     updateSessions();

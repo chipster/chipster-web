@@ -1,4 +1,5 @@
-chipsterWeb.factory('SessionRestangular', function (Restangular, AuthenticationService, baseURLString) {
+chipsterWeb.factory('SessionRestangular', function (
+	Restangular, AuthenticationService, baseURLString, ToolRestangular, $q, Utils) {
 
 	var service = Restangular.withConfig(function (RestangularConfigurer) {
 
@@ -20,6 +21,59 @@ chipsterWeb.factory('SessionRestangular', function (Restangular, AuthenticationS
 		}
 		return elem;
 	});
+
+	service.loadSession = function (sessionId) {
+
+		var sessionUrl = service.one('sessions',  sessionId);
+		// get session detail
+		var promises = [
+			sessionUrl.get(),
+			sessionUrl.all('datasets').getList(),
+			sessionUrl.all('jobs').getList(),
+			ToolRestangular.all('modules').getList(),
+			ToolRestangular.all('tools').getList()
+		];
+
+		return promise = new Promise(function(resolve) {
+
+			$q.all(promises).then(function (res) {
+
+				//var session = res[0].data;
+				var datasets = res[1].data;
+				var jobs = res[2].data;
+				var modules = res[3].data;
+				var tools = res[4].data;
+
+
+				// store session properties
+				var session = {};
+				session.sessionName = session.name;
+				session.sessionDetail = session.notes;
+
+				session.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+				session.jobsMap = Utils.arrayToMap(jobs, 'jobId');
+
+				session.modules = modules;
+				session.tools = tools;
+
+				// build maps for modules and categories
+
+				// generate moduleIds
+				modules.map(function (m) {
+					m.moduleId = m.name.toLowerCase();
+					return m;
+				});
+
+				session.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+
+				session.modulesMap.forEach(function (module) {
+					module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
+				});
+
+				resolve(session);
+			});
+		});
+	};
 
 	return service;
 });

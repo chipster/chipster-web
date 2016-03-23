@@ -11,16 +11,16 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 	$scope.selectedCategory = null;
 	$scope.selectedToolIndex = -1;
 
-	$scope.$watch('modules', function () {
+	$scope.$watch('session.modules', function () {
 		// select the first module when the tools are loaded
-		if ($scope.modules) {
+		if ($scope.session.modules) {
 			$scope.setTab($scope.activeTab);
 		}
 	});
 
 	$scope.setTab=function($index){
 		$scope.activeTab = $index;
-		$scope.categories = $scope.modules[$index].categories;
+		$scope.categories = $scope.session.modules[$index].categories;
 		$scope.selectedCategory = null;
 		$scope.selectedCategoryIndex = -1;
 	};
@@ -40,7 +40,7 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 		$scope.selectedToolIndex = $index;
 
 		//find the relevant tool
-		angular.forEach($scope.tools, function(tool) {
+		angular.forEach($scope.session.tools, function(tool) {
 			if(tool.name.id === toolId) {
 				$scope.selectedTool = tool;
 

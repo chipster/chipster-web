@@ -7,7 +7,7 @@
     <!-- Tools div -->
     <div class="row">
         <ul class="nav nav-pills btn-xs">
-            <li ng-class="{active:isSet($index)}" ng-repeat="module in modules">
+            <li ng-class="{active:isSet($index)}" ng-repeat="module in session.modules">
                 <a href ng-click="setTab($index)">{{module.name}}</a>
             </li>
         </ul>
@@ -18,60 +18,57 @@
         <div class="row">
             <div class="col-xs-4 no-padding">
                 <div id="category-table" class="tool-height">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr ng-repeat="category in categories|searchFor:searchTool"
+                    <div id="category-list" class="list-group" data-toggle="buttons">
+                        <button type="button" class="list-group-item thin-list-group-item"
+                                ng-class="{'active':$index===selectedCategoryIndex}"
                                 ng-click="selectCategory(category,$index)"
-                                ng-class="{'tool-selected':$index===selectedCategoryIndex}">
-                                <td>
-                                    <div class="row" style="height: 16px;">
-                                        <tool-circle toolcolor="category.color" toolname="category.name">
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                ng-repeat="category in categories | searchFor:searchTool">
+                            <span><tool-circle toolcolor="category.color"></span>
+                            {{category.name}}
+                        </button>
+                    </div>
                 </div>
             </div>
             <!-- end of tool category table with column width 4 -->
-            <div class="col-xs-4" style="padding-left: 0">
+            <div class="col-xs-4">
                 <div id="tool-table" class="tool-height">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr ng-repeat="tool in selectedCategory.tools|searchFor:searchTool"
+                    <div id="tool-list" class="list-group" data-toggle="buttons">
+                        <button type="button" class="list-group-item thin-list-group-item"
+                                ng-class="{'active':$index===selectedToolIndex}"
                                 ng-click="selectTool(tool.id, $index)"
-                                ng-class="{'tool-selected':$index===selectedToolIndex}">
-                                <td><div style="height: 16px;">
-                                    <tool-text toolname="tool.name">
-                                </div></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                ng-repeat="tool in selectedCategory.tools|searchFor:searchTool">
+                            {{tool.name}}
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="row col-xs-4 tool-height" id="tool-details-panel">
+            <div class="col-xs-4 tool-height no-padding" id="tool-details-panel">
 
-                <button class="btn btn-info col-xs-5" ng-disabled="!isParametersEnabled()"
-                    data-toggle="modal" data-target="#parameterModal">
-                    Parameters
-                </button>
-                <button class="btn btn-success col-xs-6 col-xs-offset-1"
-                    ng-click="runJob()" ng-disabled="!isRunEnabled()">
-                    <span class="glyphicon glyphicon-play">
-                        Run
-                    </span>
-                </button>
-
-                <!-- Tool Description div -->
-                <div class="tool-description col-xs-12">
-                    {{selectedTool.description}}
+                <div class="btn-group btn-group-justified"  role="group">
+                    <button class="btn btn-default" style="width: 50%"
+                        ng-disabled="!isParametersEnabled()"
+                        data-toggle="modal" data-target="#parameterModal">
+                        Parameters
+                    </button>
+                    <button class="btn btn-success" style="width: 50%"
+                        ng-click="runJob()" ng-disabled="!isRunEnabled()">
+                        <span class="glyphicon glyphicon-play">
+                            Run
+                        </span>
+                    </button>
                 </div>
 
-                <!--Tool source-->
-                <button class="btn  btn-info btn-sm col-xs-5" data-toggle="modal"
-                        data-target="#toolSourceModal" ng-disabled="!selectedTool">
-                    Source Code
-                </button>
+                <!-- Tool Description div -->
+                <div class="tool-description" ng-show="selectedTool">
+                    <p>{{selectedTool.description}}</p>
+                    <!--Tool source-->
+                    <p>
+                        <a data-toggle="modal" data-target="#toolSourceModal" ng-disabled="!selectedTool">
+                            Source code
+                        </a>
+                    </p>
+                </div>
+
                 <!--Parameter-->
             </div>
         </div>

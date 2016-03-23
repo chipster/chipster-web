@@ -6,8 +6,17 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 	return {
 		restrict : 'EA',
 		require:'^ngController',
+		scope: {
+			datasetsMap: '=datasetsMap',
+			jobsMap: '=jobsMap',
+			modulesMap: '=modulesMap',
+			callback: '=callback',
+			zoom: '=zoom',
+			enabled: '=enabled'
+		},
+		template: '<div id="workflow-container" class="fill"></div>',
 
-		link : function(scope, iElement) {
+		link : function(scope) {
 			var d3 = $window.d3;
 			//var shiftKey, ctrlKey;
 			var svg, d3Links, d3Labels, vis, menu, d3JobNodes;
@@ -15,6 +24,7 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 			var nodeWidth=WorkflowGraphService.nodeWidth;
 			var nodeHeight=WorkflowGraphService.nodeHeight;
 			var fontSize = 14;
+			var nodeRadius = 4;
 
 			scope.$on('resizeWorkFlowGraph', scope.renderGraph);
 
@@ -40,15 +50,16 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 				scope.update();
 			});
 
-			scope.$watchGroup(['session.datasetsMap', 'session.jobsMap', 'modulesMap'], function () {
+			//scope.$watchGroup(['session.datasetsMap', 'session.jobsMap', 'modulesMap'], function () {
+			scope.$watchGroup(['datasetsMap', 'jobsMap', 'modulesMap'], function () {
 				// this will notice only the initial loading
 				scope.update();
 			}, true);
 
 			scope.update = function() {
 
-				var datasetNodes = scope.getDatasetNodes(scope.session.datasetsMap, scope.session.jobsMap, scope.modulesMap);
-				var jobNodes = scope.getJobNodes(scope.session.jobsMap);
+				var datasetNodes = scope.getDatasetNodes(scope.datasetsMap, scope.jobsMap, scope.modulesMap);
+				var jobNodes = scope.getJobNodes(scope.jobsMap);
 
 
 				// add datasets before jobs, because the layout will be done in this order
@@ -84,8 +95,8 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 
 				// create a box for each job
 				var rect=d3JobNodes.data(graph.jobNodes).enter().append('rect')
-					.attr('rx', 6)
-					.attr('ry', 6)
+					.attr('rx', nodeRadius)
+					.attr('ry', nodeRadius)
 					.attr('width',nodeWidth)
 					.attr('height',nodeHeight)
 					.attr('transform', function(d) {
@@ -95,8 +106,11 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 						return getGradient(d, 'job'+i);
 					})
 					.on('click',function(d) {
+						if (!scope.enabled) {
+							return;
+						}
 						scope.$apply(function() {
-							scope.selectJob(d3.event, d.job);
+							scope.callback.selectJob(d3.event, d.job);
 						});
 					})
 					.on('mouseover', function() {
@@ -108,7 +122,7 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 
 				// highlight selected datasets
 				rect.each(function(d) {
-					d3.select(this).classed('selected', scope.isSelectedJob(d.job));
+					d3.select(this).classed('selected', scope.enabled && scope.callback.isSelectedJob(d.job));
 				});
 
 				// create an arc for each job
@@ -164,8 +178,11 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 					.attr('height', height)
 					.attr('opacity', 0)
 					.on('click', function() {
+						if (!scope.enabled) {
+							return;
+						}
 						scope.$apply(function() {
-							scope.clearDatasetSelection();
+							scope.callback.clearSelection();
 						});
 					});
 			}
@@ -182,8 +199,8 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 				svgDatasetNodes = svgDatasetNodes.data(graph.nodes).enter().append('rect')
 					.attr('x', function(d) {return d.x;})
 					.attr('y', function(d) {return d.y;})
-					.attr('rx', 6)
-					.attr('ry', 6)
+					.attr('rx', nodeRadius)
+					.attr('ry', nodeRadius)
 					.attr('width',nodeWidth).attr('height',nodeHeight)
 					.style("fill", getGradient)
 					//.style('filter', 'url(#drop-shadow)')
@@ -194,15 +211,29 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 							return 0.25;
 						}
 					})
-					.on('dblclick', scope.showDefaultVisualization)
+					.on('dblclick', function() {
+						if (!scope.enabled) {
+							return;
+						}
+						scope.callback.showDefaultVisualization();
+					})
 					.on('click',function(d) {
+						if (!scope.enabled) {
+							return;
+						}
 						scope.$apply(function() {
-							scope.toggleDatasetSelection(d3.event, d.dataset);
+							if (!Utils.isCtrlKey(d3.event)) {
+								scope.callback.clearSelection();
+							}
+							scope.callback.toggleDatasetSelection(d3.event, d.dataset);
 						});
 						tip.hide(d);
 					})
 					.call(d3.behavior.drag()
 						.on('drag',function() {
+							if (!scope.enabled) {
+								return;
+							}
 							dragNodes(d3.event.dx,d3.event.dy);
 							// set defaultPrevented flag to disable scrolling
 							d3.event.sourceEvent.preventDefault();
@@ -211,17 +242,23 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 					)
 					.on('contextmenu',d3.contextMenu(menu))
 					.on('mouseover', function(d) {
+						if (!scope.enabled) {
+							return;
+						}
 						d3.select(this).style('filter', 'url(#drop-shadow)');
 						tip.show(d);
 					})
 					.on('mouseout', function(d) {
+						if (!scope.enabled) {
+							return;
+						}
 						d3.select(this).style('filter', null);
 						tip.hide(d);
 					});
 
 				// highlight selected datasets
 				svgDatasetNodes.each(function(d) {
-					d3.select(this).classed('selected', scope.isSelectedDataset(d.dataset));
+					d3.select(this).classed('selected', scope.enabled && scope.callback.isSelectedDataset(d.dataset));
 				});
 			}
 
@@ -266,19 +303,19 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 			//Function to describe drag behavior
 			function dragNodes(dx, dy) {
 
-				svgDatasetNodes.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+				svgDatasetNodes.filter(function(d) {return scope.callback.isSelectedDataset(d.dataset);})
 					.attr('x', function(d) {return d.x += dx;})
 					.attr('y', function(d) {return d.y += dy;});
 
-				d3Labels.filter(function(d) {return scope.isSelectedDataset(d.dataset);})
+				d3Labels.filter(function(d) {return scope.callback.isSelectedDataset(d.dataset);})
 					.attr('x', function(d) {return d.x+dx+nodeWidth/2;})
 					.attr('y', function(d) {return d.y+dy+nodeHeight/2 +  + fontSize / 4;});
 
-				d3Links.filter(function(d) {return scope.isSelectedDataset(d.source.dataset)})
+				d3Links.filter(function(d) {return scope.callback.isSelectedDataset(d.source.dataset)})
 					.attr('x1', function(d) {return d.source.x+nodeWidth/2;})
 					.attr('y1', function(d) {return d.source.y + nodeHeight;});
 
-				d3Links.filter(function(d) {return scope.isSelectedDataset(d.target.dataset)})
+				d3Links.filter(function(d) {return scope.callback.isSelectedDataset(d.target.dataset)})
 					.attr('x2', function(d) {return d.target.x+nodeWidth/2;})
 					.attr('y2', function(d) {return d.target.y;});
 			}
@@ -286,13 +323,13 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 			function dragEnd() {
 				// update positions of all selected datasets to the server
 				svgDatasetNodes.filter(function(d) {
-					return scope.isSelectedDataset(d.dataset);
+					return scope.callback.isSelectedDataset(d.dataset);
 
 				}).each(function(d) {
 					if (d.dataset) {
 						d.dataset.x = d.x;
 						d.dataset.y = d.y;
-						scope.updateDataset(d.dataset);
+						scope.callback.updateDataset(d.dataset);
 					}
 				});
 			}
@@ -300,41 +337,46 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 			function defineRightClickMenu(){
 
 				menu=[{title:'Visualize',action: function(){
-					scope.showDefaultVisualization();
+					scope.callback.showDefaultVisualization();
 				}},
 					{title:'Rename',action:function(elm,d){
-						scope.renameDatasetDialog(d.dataset);
+						scope.callback.renameDatasetDialog(d.dataset);
 					}},
 					{title:'Delete',action:function(){
-						scope.deleteDatasets(scope.selectedDatasets);
+						scope.callback.deleteDatasets(scope.callback.selectedDatasets);
 					}},
 					{title:'Export',action:function(){
-						scope.exportDatasets(scope.selectedDatasets);
+						scope.callback.exportDatasets(scope.callback.selectedDatasets);
 					}},
 					{title:'View History as text',action:function(){
-						scope.showHistory();
+						scope.callback.showHistory();
 					}}
 				] ;
 			}
 
 			function renderGraph() {
 
-				var element = document.getElementById('workflow-dataset-panel');
+				var element = document.getElementById('workflow-container');
 
-				width = graph.width = element.offsetWidth - 20;
-				height = graph.height = element.offsetHeight - 50;
+				width = graph.width = Math.max(100, element.offsetWidth);
+				height = graph.height = Math.max(100, element.offsetHeight);
 				d3.select('svg').remove();
 
 				var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);
 				var yScale = d3.scale.linear().domain([ 0, height ]).range([ 0, height ]);
 
-				svg = d3.select(iElement[0]).append('svg').attr('width', width).attr('height', height);
+				svg = d3.select(element).append('svg').attr('width', width).attr('height', height);
 
 				var zoomer = d3.behavior.zoom().scaleExtent([ 0.2, 1 ]).x(xScale).y(yScale).on('zoom',redraw);
 
 				var lastScale = null;
 
 				function redraw() {
+
+					// allow default zoom level to be set even when disabled
+					if (!scope.enabled && d3.event.scale !== scope.zoom) {
+						return;
+					}
 
 					// let zoom events go through, because those have always defaultPrevented === true
 					if (d3.event.scale === lastScale) {
@@ -361,11 +403,16 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 
 				vis = svg_graph.append('svg:g');
 
+				zoomer.scale(scope.zoom);
+				zoomer.event(svg);
+
 				//Rendering the graph elements
 
 				createShadowFilter();
 				renderBackground();
-				defineRightClickMenu();
+				if (scope.enabled) {
+					defineRightClickMenu();
+				}
 				renderLinks();
 				renderNodes();
 				renderLabels();

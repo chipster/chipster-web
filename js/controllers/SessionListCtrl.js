@@ -1,31 +1,29 @@
 chipsterWeb.controller('SessionListCtrl',
-				function($scope, $http, $location,SessionRestangular,TemplateService){
+				function($scope, $http, $location,SessionRestangular, ToolRestangular, $q, Utils){
 
-		//Set the edit session variables;
-		$scope.curSession=null;
-		$scope.isClicked=false;
-
-		$scope.userSessions=[];
-		$scope.showDetail=false;
+	$scope.selectedSessions = [];
+	$scope.userSessions=[];
 
 	$scope.createSession=function(){
 			
-			var newSession=TemplateService.getSessionTemplate();		
-			curSession=angular.copy(newSession); //assign it as the curSession
+		var session = {
+			sessionId: null,
+			name: 'New session',
+			notes: '',
+			created: '2015-08-27T17:53:10.331Z',
+			accessed: '2015-08-27T17:53:10.331Z'
+		};
 
-
-			SessionRestangular.one('sessions').customPOST(curSession)
-				.then(function(res){
-					if(res.headers){
-						var sessionLocation=res.headers('Location');
-						var sessionId=sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
-						$location.path("/session" + "/" + sessionId);
-                	}
-				});
-		
+		SessionRestangular.one('sessions').customPOST(session).then(function(res){
+			if(res.headers){
+				var sessionLocation=res.headers('Location');
+				session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
+				$scope.openSession(session);
+			}
+		});
 	};
 
-	$scope.getSessions=function(){
+	$scope.updateSessions = function(){
 
 		SessionRestangular.all('sessions').getList().then(function(res){
 			$scope.userSessions=res.data;
@@ -42,44 +40,46 @@ chipsterWeb.controller('SessionListCtrl',
 		});
 	};
 
-
-
-	$scope.setCurClickedSession=function(exSession){
-		$scope.curSession=angular.copy(exSession);
-		$scope.isClicked=true;
-		$location.path("/session" + "/" + exSession.sessionId);
+	$scope.openSession = function(session){
+		$location.path("/session" + "/" + session.sessionId);
 	};
 
-	$scope.cancelClick=function(){
-		$scope.curSession=null;
-		$scope.isClicked=false;
-	};
+	$scope.deleteSessions = function(sessions){
 
-	$scope.isCurrentSession=function(sessionID){
-		return $scope.curSession!==null && $scope.curSession.id==sessionID;
-	};
-
-
-	$scope.refreshSessionList=function(){
-		//Do the Get
-		//post to event listener at regular interval
-		//user token:72891c2d-b855-4606-a8b2-da08a99c9015 -X GET http:
-		//localhost:8080/sessionstorage/sessions/70ef2895-059e-4ff1-a1a1-e9e55c15a632/events
-	};
-	
-	$scope.deleteSession=function(curSession){
-
-		var dlteSessionUrl=SessionRestangular.one('sessions').one(curSession.sessionId);
-
-		dlteSessionUrl.remove().then(function(){
-			var index = $scope.userSessions.indexOf(curSession);
-			$scope.userSessions.splice(index, 1);
+		angular.forEach(sessions, function(session) {
+			var sessionUrl = SessionRestangular.one('sessions').one(session.sessionId);
+			sessionUrl.remove().then(function(res) {
+				console.log("session deleted", res);
+				$scope.updateSessions();
+			});
 		});
 	};
-	
-	$scope.showSessionDetail=function(curSession){
-		$scope.curSession=angular.copy(curSession);
-		$scope.showDetail=true;
+
+	$scope.selectSession = function(event, session) {
+		Utils.toggleSelection(event, session, $scope.userSessions, $scope.selectedSessions);
+
+		if ($scope.selectedSessions.length === 1) {
+			// hide the old session immediately
+			$scope.session = {};
+			SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function(session) {
+				$scope.$apply(function() {
+					$scope.session = session;
+				});
+			});
+		}
+	};
+
+	$scope.isSessionSelected = function(session) {
+		return $scope.selectedSessions.indexOf(session) !== -1;
+	};
+
+	var callback = {
+		isSelectedDataset: function () {},
+		isSelectedJob: function () {}
+	};
+
+	$scope.getWorkflowCallback = function() {
+		return callback;
 	};
 });
 

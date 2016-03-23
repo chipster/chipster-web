@@ -17,7 +17,9 @@
 }
 */
 
-#workflow-panel {
+.fill {
+	width: 100%;
+	height: 100%;
 }
 
 .add-dataset-button {
@@ -89,14 +91,22 @@
 }
 
 #tool-details-panel {
-	padding-right: 0;
 }
 
 .tool-description {
 	overflow-y: auto;
-	height: calc(100% - 80px);
-	margin-bottom: 5px;
-	padding-left: 0;
+	height: calc(100% - 30px);
+	padding-top: 10px;
+}
+
+.thin-list-group-item {
+	/*height: 2em;*/
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.parameter-table>tbody>tr>td {
+	border-top: none;
 }
 
 .nav-pills {
@@ -109,6 +119,15 @@
 
 .session-list {
 	height: calc(100vh - 220px);
+}
+
+.td-selected {
+	background-color: steelblue;
+}
+
+
+.td-selected>a {
+	color: white;
 }
 
 /*
@@ -132,17 +151,6 @@ table{
 	border-collapse: collapse;
 }
 */
-
-.tool-selected{
-	background:#c0d2de;
-}
-
-footer {
-	background: #333;
-	height:auto;
-	color: #eee;
-	font-size: 11px;
-}
 
 /*
 ul.unstyled {
@@ -170,16 +178,6 @@ ul.unstyled {
 }
 
 */
-
-/*wrapper for page content to push down the footer, fix for the sticky footer*/
-#wrap{
-	min-height: 100%;
-	height: auto;
-	/* Negative indent footer by its height */
-	/*margin:0 auto -60px;*/
-	/* Top padding for header and bottom padding by footer height*/
-	/*padding: 0 0 60px;*/
-}
 
 /*
 

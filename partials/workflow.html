@@ -19,18 +19,24 @@
 		<!-- end of panel headings -->
 
 		<div id="workflow-dataset-panel" class="tab-content">
-			<div ng-show="isSet(1)">
+			<div ng-if="isSet(1)" class="fill">
 				<div class="pull-right">
 				<button class="btn btn-xs btn-info"
 						ng-click="changeOrientation()">
 					<span class="glyphicon glyphicon-repeat"></span>
 				</button>
 				</div>
-				<workflow-graph data="d3Data" selectedDataset="selectedDatasetId">
+				<workflow-graph
+						datasets-map="session.datasetsMap"
+						jobs-map="session.jobsMap"
+						modules-map="session.modulesMap"
+						callback="getWorkflowCallback()"
+						zoom="1"
+						enabled="true">
 			</div>
 			<div ng-show="isSet(2)">
 				<div id="dataset-list" class="list-group" data-toggle="buttons">
-					<button type="button" class="list-group-item" ng-class="{active:isSelectedDataset(data)}"
+					<button type="button" class="list-group-item thin-list-group-item" ng-class="{active:isSelectedDataset(data)}"
 							ng-click="toggleDatasetSelection($event, data)"
 							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name">
 						{{data.name}}
@@ -38,12 +44,6 @@
 
 				</div>
 				<!--end of dataset List-->
-				<div>
-					<hr class="soften">
-
-					<button class="btn btn-sm btn-success" data-toggle="modal"
-						data-target="#jobListModal">See Jobs</button>
-				</div>
 			</div>
 			<div ng-show="isSet(3)">
 				<div>
@@ -111,37 +111,6 @@
 
 	</div>
 	<!--end of modal dialog-->
-
-	<div id="jobListModal" class="modal fade" role="dialog">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal">&times</button>
-					<h4 class="modal-title">Jobs</h4>
-				</div>
-				<!--end of modal header-->
-				<div class="modal-body">
-					<table class="table table-hover">
-						<tbody>
-						<tr>
-							<td>JobId</td>
-							<td>Description</td>
-							<td>Status</td>
-						</tr>
-						<tr ng-repeat="job in jobs">
-							<td class="text-nowrap"><a href="">{{job.jobId}}</a></td>
-							<td class="text-nowrap">{{job.toolId}}</td>
-							<td class="text-nowrap">{{job.state}}</td>
-						</tr>
-						</tbody>
-					</table>
-				</div>
-				<!--end of modal body-->
-			</div>
-			<!--end of modal-content-->
-		</div>
-		<!--end of modal-dialog-->
-	</div>
 </div>
 
 <!--

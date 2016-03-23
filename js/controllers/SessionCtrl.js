@@ -6,10 +6,10 @@
 chipsterWeb
     .controller(
         'SessionCtrl',
-        function ($scope, $routeParams, $q, TemplateService,
+        function ($scope, $routeParams, $q,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  baseURLString, $location, Utils, ToolRestangular) {
+                  baseURLString, $location, Utils) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -145,6 +145,10 @@ chipsterWeb
                 workflowData: {}
             };
 
+            $scope.getWorkflowCallback = function() {
+                return $scope;
+            };
+
             $scope.getDatasetList = function () {
                 return Utils.mapValues($scope.session.datasetsMap);
             };
@@ -173,12 +177,29 @@ chipsterWeb
             };
 
             /**
+             * Check if there are one or more jobs selected
+             * @returns {boolean}
+             */
+            $scope.isJobsSelected = function() {
+                return $scope.selectedJobs.length > 0;
+            };
+
+            /**
              * Check if given dataset is selected
              * @param data
              * @returns {boolean}
              */
             $scope.isSelectedDataset = function(data) {
                 return $scope.selectedDatasets.indexOf(data) !== -1;
+            };
+
+            /**
+             * Check if given job is selected
+             * @param data
+             * @returns {boolean}
+             */
+            $scope.isSelectedJob = function(data) {
+                return $scope.selectedJobs.indexOf(data) !== -1;
             };
 
             /**
@@ -197,69 +218,18 @@ chipsterWeb
                 return $scope.selectedDatasets.length > 1;
             };
 
-            $scope.selectSingleDataset = function(data) {
-                $scope.selectedDatasets = [];
-                $scope.selectedDatasets.push(data);
-            };
-
-            $scope.selectDataset = function(data) {
-                if (!$scope.isSelectedDataset(data)) {
-                    $scope.selectedDatasets.push(data);
-                }
-            };
-
-            $scope.deselectDataset = function(data) {
-                var index = $scope.selectedDatasets.indexOf(data);
-                if (index != -1) {
-                    $scope.selectedDatasets.splice(index, 1);
-                }
-            };
-
-            $scope.clearDatasetSelection = function() {
+            $scope.clearSelection = function() {
                 $scope.selectedDatasets.length = 0;
                 $scope.selectedJobs.length = 0;
             };
 
             $scope.toggleDatasetSelection = function($event, data) {
-                if ($event.metaKey || $event.ctrlKey) {
-                    if ($scope.isSelectedDataset(data)) {
-                        $scope.deselectDataset(data);
-                    } else {
-                        $scope.selectDataset(data);
-                    }
-                } else if ($event.shiftKey) {
-                    if ($scope.isDatasetSelected()) {
-                        var indexOfLastSelection = $scope.getDatasetList().indexOf($scope.selectedDatasets[$scope.selectedDatasets.length - 1]);
-                        var indexOfNewSelection = $scope.getDatasetList().indexOf(data);
-                        var from, to;
-                        if (indexOfLastSelection < indexOfNewSelection) {
-                            from = indexOfLastSelection + 1;
-                            to = indexOfNewSelection + 1;
-                        } else {
-                            from = indexOfNewSelection;
-                            to = indexOfLastSelection;
-                        }
-
-                        for (var i = from; i < to; i++) {
-                            $scope.selectDataset($scope.getDatasetList()[i]);
-                        }
-
-                    } else {
-                        $scope.selectSingleDataset(data);
-                    }
-
-                } else {
-                    $scope.selectSingleDataset(data);
-                }
+                Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
             };
 
             $scope.selectJob = function(event, job) {
-                $scope.clearDatasetSelection();
+                $scope.clearSelection();
                 $scope.selectedJobs = [job];
-            };
-
-            $scope.isSelectedJob = function(data) {
-                return $scope.selectedJobs.indexOf(data) !== -1;
             };
 
             $scope.deleteJobs = function (jobs) {
@@ -282,51 +252,11 @@ chipsterWeb
             // For searching dataset in workflowgraph
             $scope.searched_dataset_name = null;
 
-
-            $scope.loadSession = function () {
-                // get session detail
-                var promises = [
-                    $scope.sessionUrl.get(),
-                    $scope.sessionUrl.all('datasets').getList(),
-                    $scope.sessionUrl.all('jobs').getList(),
-                    ToolRestangular.all('modules').getList(),
-                    ToolRestangular.all('tools').getList()
-                ];
-
-                $q.all(promises).then(function (res) {
-
-                    var session = res[0].data;
-                    var datasets = res[1].data;
-                    var jobs = res[2].data;
-                    var modules = res[3].data;
-                    var tools = res[4].data;
-
-
-                    // store session properties
-                    $scope.session.sessionName = session.name;
-                    $scope.session.sessionDetail = session.notes;
-
-                    $scope.session.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
-                    $scope.session.jobsMap = Utils.arrayToMap(jobs, 'jobId');
-
-                    $scope.modules = modules;
-                    $scope.tools = tools;
-
-                    // build maps for modules and categories
-
-                    // generate moduleIds
-                    modules.map(function(m) {
-                        m.moduleId = m.name.toLowerCase();
-                        return m;
-                    });
-
-                    $scope.modulesMap = Utils.arrayToMap(modules, 'moduleId');
-
-                    $scope.modulesMap.forEach(function(module) {
-                        module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
-                    });
-                });
-            };
+            SessionRestangular.loadSession($routeParams.sessionId).then(function(session) {
+               $scope.$apply(function() {
+                   $scope.session = session;
+               });
+            });
 
             $scope.editSession = function () {
                 var sessionObj = TemplateService.getSessionTemplate();
@@ -434,6 +364,7 @@ chipsterWeb
                 datasetUrl.customPUT(dataset);
             };
 
+            /*
             $scope.orientVert = true;
             $scope.changeOrientation = function () {
                 $scope.orientVert = !$scope.orientVert;
@@ -441,7 +372,6 @@ chipsterWeb
 
             };
 
-            // @ToDO This Method will be included in loadSession()
             // to get the right x,y after rotation, may be the calculation still not very right, need to work on that
             $scope.loadWorkflowData = function () {
                 $scope.d3Data.nodes.forEach(function (elem) {
@@ -457,7 +387,7 @@ chipsterWeb
 
                 });
 
-            };
+            };*/
 
             $scope.getDatasetUrl = function() {
                 //TODO can Restangular build this?
