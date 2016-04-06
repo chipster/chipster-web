@@ -4,7 +4,7 @@
  */
 
 chipsterWeb.controller('VisualizationCtrl',function(
-	$scope, $routeParams, FileRestangular, baseURLString, AuthenticationService, $compile, Utils){
+	$scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils){
 
 	$scope.setTab = function(value) {
 		$scope.tab = value;

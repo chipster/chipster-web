@@ -1,5 +1,5 @@
 chipsterWeb.controller('LoginCtrl',
-    function ($scope, $location, $http, AuthenticationService, baseURLString) {
+    function ($scope, $location, $http, AuthenticationService) {
 
 
         $scope.login = function () {
@@ -8,7 +8,7 @@ chipsterWeb.controller('LoginCtrl',
                 //Route to Session creation page
                 $location.path("/sessions");
             }, function (response) {
-                console.log('login failed', response, baseURLString);
+                console.log('login failed', response);
                 if (response) {
                     if (response.status === 403) {
                         $scope.error = 'Incorrect username or password.';

@@ -9,7 +9,7 @@ chipsterWeb
         function ($scope, $routeParams, $q,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  baseURLString, $location, Utils) {
+                  ConfigService, $location, Utils) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -21,17 +21,7 @@ chipsterWeb
             // creating a websocket object and start listening for the
             // events
 
-            // different api server
-            var eventUrl = $scope.sessionUrl.getRestangularUrl()
-                .replace('http://', 'ws://')
-                .replace('https://', 'wss://')
-                .replace('sessiondb/sessions/', 'sessiondbevents/events/');
-
-            // api and client served from the same host
-            if (baseURLString === "") {
-                eventUrl = "ws://" + $location.host() + ":" + $location.port()
-                    + "/sessiondbevents/events/" + $routeParams.sessionId;
-            }
+            var eventUrl = ConfigService.getSessionDbEventsUrl($routeParams.sessionId);
 
             console.log(eventUrl);
 
@@ -288,11 +278,11 @@ chipsterWeb
                 $scope.createDataset(file.name).then(
                     function (dataset) {
                         // create an own target for each file
-                        file.chipsterTarget = baseURLString
-                            + "filebroker/" + "sessions/"
+                        file.chipsterTarget = ConfigService.getFileBrokerUrl()
+                            + 'sessions/'
                             + $routeParams.sessionId
-                            + "/datasets/" + dataset.datasetId
-                            + "?token="
+                            + '/datasets/' + dataset.datasetId
+                            + '?token='
                             + AuthenticationService.getToken();
                         file.resume();
                     });
@@ -393,8 +383,7 @@ chipsterWeb
                 //TODO can Restangular build this?
                 //TODO should we have separate read-only tokens for datasets?
                 //TODO check if dataset(s) selected?
-                return baseURLString
-                    + 'filebroker/sessions/' + $routeParams.sessionId
+                return ConfigService.getFileBrokerUrl() + 'sessions/' + $routeParams.sessionId
                     + '/datasets/' + $scope.selectedDatasets[0].datasetId
                     + '?token=' + AuthenticationService.getToken();
             };

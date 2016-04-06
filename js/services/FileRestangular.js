@@ -1,8 +1,8 @@
-chipsterWeb.factory('FileRestangular',function(Restangular,AuthenticationService,baseURLString){
+chipsterWeb.factory('FileRestangular',function(Restangular,AuthenticationService, ConfigService){
 
 		var service = Restangular.withConfig(function(RestangularConfigurer) {
 
-			RestangularConfigurer.setBaseUrl(baseURLString + 'filebroker' + '/');
+			RestangularConfigurer.setBaseUrl(ConfigService.getFileBrokerUrl());
 			RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
 			RestangularConfigurer.setFullResponse(true);
 		});

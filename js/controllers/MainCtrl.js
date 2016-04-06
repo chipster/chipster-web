@@ -1,7 +1,7 @@
-chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationService, SessionRestangular, baseURLString){
+chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationService, SessionRestangular, ConfigService){
 
 	$scope.getHost = function () {
-		return baseURLString;
+		return ConfigService.getApiUrl();
 	};
 
 	$scope.isLoggedOut=function(){	

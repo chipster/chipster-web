@@ -1,9 +1,9 @@
 chipsterWeb.factory('SessionRestangular', function (
-	Restangular, AuthenticationService, baseURLString, ToolRestangular, $q, Utils) {
+	Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
 
 	var service = Restangular.withConfig(function (RestangularConfigurer) {
 
-		RestangularConfigurer.setBaseUrl(baseURLString + 'sessiondb' + '/');
+		RestangularConfigurer.setBaseUrl(ConfigService.getSessionDbUrl());
 		// this service is initialized only once, but the Authentication service will update the returned
 		// instance when necessary (login & logout) so that the request is always made with the most up-to-date
 		// credentials

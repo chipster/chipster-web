@@ -2,33 +2,9 @@ var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow',
 		'restangular', 'LocalStorageModule', 'ngWebsocket', 'angularResizable',
 		'pdf', 'ngHandsontable' ]);
 
-
-// read the API address from the file
-// wait until the config is loaded
-// http://hippieitgeek.blogspot.fi/2013/06/load-json-files-synchronously-with.html
-$.ajax({
-	url: '/js/json/config.json',
-	async: false,
-	dataType: 'json',
-	success: function (response) {
-		var apiHost = response.proxies[0];
-		if (apiHost === "") {
-			// empty string if the same proxy is serving both client files and the API
-			baseURL = "";
-		} else {
-			baseURL = 'http://' + apiHost + '/';
-		}
-	}
-});
-
-// defining the base Url as constant
-chipsterWeb.constant('baseURLString', baseURL);
-
 // configure our route
-chipsterWeb.config([ '$routeProvider', 'RestangularProvider',
-		function($routeProvider, RestangularProvider) {
-			// Config the base url
-			RestangularProvider.setBaseUrl(baseURL);
+chipsterWeb.config([ '$routeProvider',
+		function($routeProvider) {
 
 			$routeProvider
 			// route for home page
@@ -86,7 +62,10 @@ chipsterWeb.config([
 			});
 		} ]);
 
-chipsterWeb.run(function($rootScope, $location, AuthenticationService) {
+chipsterWeb.run(function($rootScope, $location, AuthenticationService, ConfigService) {
+
+	ConfigService.init();
+
 	$rootScope.$on("$routeChangeStart", function(event, next) {
 		if (next.$$route.authenticated) {
 			var userAuth = AuthenticationService.getToken();

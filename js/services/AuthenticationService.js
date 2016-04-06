@@ -1,5 +1,5 @@
-chipsterWeb.factory('AuthenticationService', ['localStorageService', '$http', 'baseURLString',
-    function (localStorageService, $http, baseURLString) {
+chipsterWeb.factory('AuthenticationService', ['localStorageService', '$http', 'ConfigService',
+    function (localStorageService, $http, ConfigService) {
 
         var service = {};
 
@@ -29,7 +29,7 @@ chipsterWeb.factory('AuthenticationService', ['localStorageService', '$http', 'b
             var encodedString = btoa(string); //Convert it to base64 encoded string
 
             return promise = $http({
-                url: baseURLString + 'auth' + '/' + 'tokens',
+                url: ConfigService.getAuthUrl() + 'tokens',
                 method: method,
                 withCredentials: true,
                 headers: {'Authorization': 'Basic ' + encodedString}
