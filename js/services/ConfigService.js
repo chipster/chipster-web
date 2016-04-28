@@ -15,6 +15,7 @@ chipsterWeb.factory('ConfigService', ['$location',
                 async: false,
                 dataType: 'json',
                 success: function (response) {
+                    service.config = response;
                     serviceLocatorUrl = response.serviceLocator;
                     console.log('serviceLocator', serviceLocatorUrl);
                 }
@@ -25,37 +26,37 @@ chipsterWeb.factory('ConfigService', ['$location',
                 async: false,
                 dataType: 'json',
                 success: function (response) {
-                    service.config = {};
+                    service.services = {};
                     angular.forEach(response, function(s) {
 
                         var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) {
                             return w.toUpperCase();
                         });
-                        service.config[camelCaseRole] = s.publicUri;
+                        service.services[camelCaseRole] = s.publicUri;
                     });
-                    baseURL = service.config.sessionDb;
-                    console.log('sessionDb', service.config.sessionDb);
+                    baseURL = service.services.sessionDb;
+                    console.log('sessionDb', service.services.sessionDb);
                 }
             });
 
             service.baseUrl = baseURL;
-        }
+        };
 
         service.getApiUrl = function () {
             return service.baseUrl;
         };
 
         service.getSessionDbUrl = function () {
-            if (service.config.sessionDb) {
-                return service.config.sessionDb;
+            if (service.services.sessionDb) {
+                return service.services.sessionDb;
             }
             return service.baseUrl + 'sessiondb' + '/';
         };
 
         service.getSessionDbEventsUrl = function (sessionId) {
 
-            if (service.config.sessionDbEvents) {
-                return service.config.sessionDbEvents
+            if (service.services.sessionDbEvents) {
+                return service.services.sessionDbEvents
                 + 'events/' + sessionId;
             }
 
@@ -75,24 +76,29 @@ chipsterWeb.factory('ConfigService', ['$location',
         };
 
         service.getAuthUrl = function () {
-            if (service.config.authenticationService) {
-                return service.config.authenticationService;
+            if (service.services.authenticationService) {
+                return service.services.authenticationService;
             }
             return service.baseUrl + 'auth' + '/';
         };
 
         service.getFileBrokerUrl = function () {
-            if (service.config.fileBroker) {
-                return service.config.fileBroker;
+            if (service.services.fileBroker) {
+                return service.services.fileBroker;
             }
             return service.baseUrl + 'filebroker' + '/';
         };
 
         service.getToolboxUrl = function () {
-            if (service.config.toolbox) {
-                return service.config.toolbox;
+            if (service.services.toolbox) {
+                return service.services.toolbox;
             }
             return service.baseUrl + 'toolbox/';
+        };
+
+        service.getModules = function () {
+            console.log(service.config);
+            return service.config.modules;
         };
 
         return service;

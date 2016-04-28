@@ -53,6 +53,11 @@ chipsterWeb.factory('SessionRestangular', function (
 				session.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
 				session.jobsMap = Utils.arrayToMap(jobs, 'jobId');
 
+				// show only configured modules
+				modules = modules.filter(function (module) {
+					return ConfigService.getModules().indexOf(module.name) >= 0;
+				});
+
 				session.modules = modules;
 				session.tools = tools;
 
@@ -63,6 +68,8 @@ chipsterWeb.factory('SessionRestangular', function (
 					m.moduleId = m.name.toLowerCase();
 					return m;
 				});
+
+				console.log(modules);
 
 				session.modulesMap = Utils.arrayToMap(modules, 'moduleId');
 

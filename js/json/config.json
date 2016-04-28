@@ -1,3 +1,4 @@
 {
-  "serviceLocator": "http://service-locator-chipster.dac-oso.csc.fi"
+  "serviceLocator": "http://service-locator-chipster.dac-oso.csc.fi",
+  "modules": ["NGS", "Microarray", "Misc"]
 }
