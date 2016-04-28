@@ -354,31 +354,6 @@ chipsterWeb
                 datasetUrl.customPUT(dataset);
             };
 
-            /*
-            $scope.orientVert = true;
-            $scope.changeOrientation = function () {
-                $scope.orientVert = !$scope.orientVert;
-                $scope.loadWorkflowData();
-
-            };
-
-            // to get the right x,y after rotation, may be the calculation still not very right, need to work on that
-            $scope.loadWorkflowData = function () {
-                $scope.d3Data.nodes.forEach(function (elem) {
-                    if ($scope.orientVert) {
-                        elem.x = elem.c_id * 80 + 30;
-                        elem.y = elem.level * 40 + elem.group * 40;
-                    } else {
-                        elem.x = (elem.level - 1) * 80 + 30;
-                        elem.y = (elem.c_id * 40 + elem.group * 40)
-                            - ((elem.level - 1) * 50);
-                        console.log(elem.y);
-                    }
-
-                });
-
-            };*/
-
             $scope.getDatasetUrl = function() {
                 //TODO can Restangular build this?
                 //TODO should we have separate read-only tokens for datasets?
