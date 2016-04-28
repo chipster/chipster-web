@@ -69,8 +69,6 @@ chipsterWeb.factory('SessionRestangular', function (
 					return m;
 				});
 
-				console.log(modules);
-
 				session.modulesMap = Utils.arrayToMap(modules, 'moduleId');
 
 				session.modulesMap.forEach(function (module) {
