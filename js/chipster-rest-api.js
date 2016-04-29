@@ -168,7 +168,7 @@ ChipsterClient.prototype.postSession = function (json, callback, onerror) {
     this.sessionStorage("POST", "", json, callback, onerror);
 };
 
-ChipsterClient.prototype.putSession = function (sessionId, json, callback, onerror) {
+ChipsterClient.prototype.sessionToPut = function (sessionId, json, callback, onerror) {
     this.sessionStorage("PUT", sessionId, json, callback, onerror);
 };
 

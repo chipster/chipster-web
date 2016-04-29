@@ -53,17 +53,38 @@ chipsterWeb
                 console.log('websocket event');
                 console.log(event);
 
-                if (event.resourceType === 'DATASET') {
+                if (event.resourceType === 'SESSION') {
+
+                    if (event.type === 'UPDATE') {
+                        $scope.sessionUrl.get().then(function (resp) {
+                            var local = $scope.data.session;
+                            var remote = resp.data;
+
+                            // update the original instance
+                            angular.copy(remote, local);
+                            $scope.setTitle(remote.name);
+                        });
+
+                    } else if (event.type === 'DELETE') {
+                        $scope.$apply(function() {
+                            alert("The session has been deleted.")
+                        });
+
+                    } else {
+                        console.log("unknown event type", event);
+                    }
+
+                } else if (event.resourceType === 'DATASET') {
 
                     if (event.type === 'CREATE') {
                         $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-                            $scope.session.datasetsMap.set(event.resourceId, resp.data);
+                            $scope.data.datasetsMap.set(event.resourceId, resp.data);
                             $scope.$broadcast('datasetsMapChanged', {});
                         });
 
                     } else if (event.type === 'UPDATE') {
                         $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-                            var local = $scope.session.datasetsMap.get(event.resourceId);
+                            var local = $scope.data.datasetsMap.get(event.resourceId);
                             var remote = resp.data;
 
                             // update the original instance
@@ -73,7 +94,7 @@ chipsterWeb
 
                     } else if (event.type === 'DELETE') {
                         $scope.$apply(function() {
-                            $scope.session.datasetsMap.delete(event.resourceId);
+                            $scope.data.datasetsMap.delete(event.resourceId);
                             $scope.$broadcast('datasetsMapChanged', {});
                         });
 
@@ -85,13 +106,13 @@ chipsterWeb
 
                     if (event.type === 'CREATE') {
                         $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                            $scope.session.jobsMap.set(event.resourceId, resp.data);
+                            $scope.data.jobsMap.set(event.resourceId, resp.data);
                             $scope.$broadcast('jobsMapChanged', {});
                         });
 
                     } else if (event.type === 'UPDATE') {
                         $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                            var local = $scope.session.jobsMap.get(event.resourceId);
+                            var local = $scope.data.jobsMap.get(event.resourceId);
                             var remote = resp.data;
 
                             // if the job has just failed
@@ -114,7 +135,7 @@ chipsterWeb
                         });
 
                     } else if (event.type === 'DELETE') {
-                        $scope.session.jobsMap.delete(event.resourceId);
+                        $scope.data.jobsMap.delete(event.resourceId);
                         $scope.$broadcast('jobsMapChanged', {});
 
                     } else {
@@ -126,10 +147,8 @@ chipsterWeb
             };
 
             // creating a session model object
-            $scope.session = {
+            $scope.data = {
                 sessionId: $routeParams.sessionId,
-                sessionName: "",
-                sessionDetail: "",
                 jobsMap: new Map(),
                 datasetsMap: new Map(),
                 workflowData: {}
@@ -140,7 +159,7 @@ chipsterWeb
             };
 
             $scope.getDatasetList = function () {
-                return Utils.mapValues($scope.session.datasetsMap);
+                return Utils.mapValues($scope.data.datasetsMap);
             };
 
 
@@ -170,7 +189,7 @@ chipsterWeb
              * Check if there are one or more jobs selected
              * @returns {boolean}
              */
-            $scope.isJobsSelected = function() {
+            $scope.isJobSelected = function() {
                 return $scope.selectedJobs.length > 0;
             };
 
@@ -242,24 +261,17 @@ chipsterWeb
             // For searching dataset in workflowgraph
             $scope.searched_dataset_name = null;
 
-            SessionRestangular.loadSession($routeParams.sessionId).then(function(session) {
+            SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
                $scope.$apply(function() {
-                   $scope.session = session;
+                   $scope.data = data;
+                   $scope.setTitle($scope.data.session.name);
+
+                   $scope.$watch('title', function () {
+                       $scope.data.session.name = $scope.title;
+                       $scope.updateSession();
+                   });
                });
             });
-
-            $scope.editSession = function () {
-                var sessionObj = TemplateService.getSessionTemplate();
-
-                sessionObj.sessionId = $scope.session.sessionId;
-                sessionObj.name = $scope.session.sessionName;
-                sessionObj.notes = $scope.session.sessionDetail;
-                $scope.sessionUrl.customPUT(sessionObj).then(
-                    function (res) {
-                        console.log(res);
-                    });
-
-            };
 
             $scope.getDataSets = function () {
                 $scope.datalist = $scope.sessionUrl.all('datasets')
@@ -317,10 +329,10 @@ chipsterWeb
 
                         // put datasets immediately to datasetsMap not to position all uploaded files
                         // to the same place
-                        var pos = WorkflowGraphService.newRootPosition(Utils.mapValues($scope.session.datasetsMap));
+                        var pos = WorkflowGraphService.newRootPosition(Utils.mapValues($scope.data.datasetsMap));
                         d.x = pos.x;
                         d.y = pos.y;
-                        $scope.session.datasetsMap.set(d.datasetId, d);
+                        $scope.data.datasetsMap.set(d.datasetId, d);
 
                         $scope.updateDataset(d);
 
@@ -340,7 +352,7 @@ chipsterWeb
             };
 
             $scope.getJob = function (jobId) {
-                return $scope.session.jobsMap.get(jobId);
+                return $scope.data.jobsMap.get(jobId);
             };
 
             $scope.renameDatasetDialog = function(dataset) {
@@ -352,6 +364,10 @@ chipsterWeb
             $scope.updateDataset = function(dataset) {
                 var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
                 datasetUrl.customPUT(dataset);
+            };
+
+            $scope.updateSession = function() {
+                $scope.sessionUrl.customPUT($scope.data.session);
             };
 
             $scope.getDatasetUrl = function() {

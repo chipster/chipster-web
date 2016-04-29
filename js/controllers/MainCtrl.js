@@ -20,4 +20,8 @@ chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationSer
 			return true;
 		}
 	};
+
+	$scope.setTitle = function (title) {
+		$scope.title = title;
+	}
 });

@@ -97,7 +97,6 @@ chipsterWeb.factory('ConfigService', ['$location',
         };
 
         service.getModules = function () {
-            console.log(service.config);
             return service.config.modules;
         };
 

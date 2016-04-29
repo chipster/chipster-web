@@ -7,7 +7,7 @@
     <!-- Tools div -->
     <div class="row">
         <ul class="nav nav-pills btn-xs">
-            <li ng-class="{active:isSet($index)}" ng-repeat="module in session.modules">
+            <li ng-class="{active:isSet($index)}" ng-repeat="module in data.modules">
                 <a href ng-click="setTab($index)">{{module.name}}</a>
             </li>
         </ul>

@@ -65,6 +65,12 @@
 	overflow-y: auto;
 }
 
+#session-notes {
+	border: none;
+	width: 100%;
+	height: auto;
+}
+
 .tool-height {
 	height: calc((100vh - 220px) * 0.6);
 }

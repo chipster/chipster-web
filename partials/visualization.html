@@ -48,8 +48,12 @@
 
 							<div class="col-sm-12">
 								<div class="indented">
-									<p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].session.created}}</p>
-									<textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes">{{selectedDatasets[0].notes}}</textarea>
+									<p style="font-size: smaller">{{selectedDatasets[0].size}},
+										{{selectedDatasets[0].data.created}}</p>
+									<textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
+											  ng-blur="updateDataset(selectedDatasets[0])"
+											  ng-model="selectedDatasets[0].notes">
+									</textarea>
 								</div>
 
 								<h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
@@ -126,7 +130,10 @@
 
 					<!-- no selection -->
 					<div ng-if="!isDatasetSelected() && !isJobSelected()">
-						<p>{{session.sessionDetail}}</p>
+						<textarea id="session-notes" rows="15" placeholder="Session notes"
+								  ng-blur="updateSession()"
+								  ng-model="data.session.notes">
+						</textarea>
 					</div>
 
 				</div>

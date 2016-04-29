@@ -46,11 +46,19 @@
 
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="collapse navbar-collapse"
-					id="bs-example-navbar-collapse-1">
+					id="bs-example-navbar-collapse-1"
+					style="text-align: center">
 					<ul class="nav navbar-nav">
 						<li><a href="#sessions">Sessions</a></li>
 						<li><a href="#jobs">Jobs</a></li>
 						<li><a href="manual">Manual</a></li>
+					</ul>
+
+					<!-- show session name at the center (also text-align set above for the parent div)
+					http://stackoverflow.com/questions/18777235/center-content-in-responsive-bootstrap-navbar -->
+					<ul class="nav navbar-nav" style="text-align: center; display: inline-block; float: none; vertical-align: top">
+						<li><a ng-bind="title" class="navbar-brand" data-toggle="modal"
+							   data-target="#session-edit-modal" href=""></a></li>
 					</ul>
 
 					<!--end navbar form-->
@@ -75,6 +83,40 @@
 		<!--end of main container-->
 	</div>
 	<!--end of wrap-->
+
+	<!--session editing modal-->
+	<div id="session-edit-modal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times</button>
+					<h4 class="modal-title">Rename session</h4>
+				</div>
+				<!--end of modal header-->
+				<div class="modal-body">
+					<form class="edit-form" role="form" novalidate>
+						<div class="form-group">
+							<label>Session Name</label>
+							<input type="text"
+							   class="form-control" ng-model="newTitle" ng-value="title"
+								   placeholder="Edit name" autofocus>
+						</div>
+						<button type="submit" class="btn btn-info"
+								ng-click="title = newTitle" data-dismiss="modal">Save</button>
+						<button type="button" class="btn btn-default pull-right"
+								data-dismiss="modal" ng-click="newTitle = title">Cancel</button>
+					</form>
+				</div>
+				<!--end of modal body-->
+			</div>
+			<!--end of modal-content-->
+
+		</div>
+		<!--end of modal-dialog-->
+
+	</div>
+	<!--end of modal dialog-->
+
 
 
 	<!--js stuff-->

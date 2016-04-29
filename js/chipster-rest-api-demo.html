@@ -184,11 +184,11 @@
 
         if (sessionId) {
             client.getSession(sessionId, function (session) {
-                var nameText = document.createTextNode(session.name);
+                var nameText = document.createTextNode(data.name);
                 document.getElementById("sessionName").appendChild(nameText);
-                setJson(session);
-                enableLink("updateLink", !!session, function () {
-                    client.putSession(sessionId, getJson(), function () {
+                setJson(data);
+                enableLink("updateLink", !!data, function () {
+                    client.sessionToPut(sessionId, getJson(), function () {
                         updateSessions();
                     });
                 });

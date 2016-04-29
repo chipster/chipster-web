@@ -38,28 +38,25 @@ chipsterWeb.factory('SessionRestangular', function (
 
 			$q.all(promises).then(function (res) {
 
-				//var session = res[0].data;
+				var session = res[0].data;
 				var datasets = res[1].data;
 				var jobs = res[2].data;
 				var modules = res[3].data;
 				var tools = res[4].data;
 
+				var data = {};
 
-				// store session properties
-				var session = {};
-				session.sessionName = session.name;
-				session.sessionDetail = session.notes;
-
-				session.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
-				session.jobsMap = Utils.arrayToMap(jobs, 'jobId');
+				data.session = session;
+				data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+				data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
 
 				// show only configured modules
 				modules = modules.filter(function (module) {
 					return ConfigService.getModules().indexOf(module.name) >= 0;
 				});
 
-				session.modules = modules;
-				session.tools = tools;
+				data.modules = modules;
+				data.tools = tools;
 
 				// build maps for modules and categories
 
@@ -69,13 +66,13 @@ chipsterWeb.factory('SessionRestangular', function (
 					return m;
 				});
 
-				session.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+				data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
 
-				session.modulesMap.forEach(function (module) {
+				data.modulesMap.forEach(function (module) {
 					module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
 				});
 
-				resolve(session);
+				resolve(data);
 			});
 		});
 	};
