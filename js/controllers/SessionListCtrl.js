@@ -1,5 +1,5 @@
 chipsterWeb.controller('SessionListCtrl',
-				function($scope, $http, $location,SessionRestangular, ToolRestangular, $q, Utils){
+				function($scope, $http, $location,SessionRestangular){
 
 	$scope.selectedSessions = [];
 	$scope.userSessions=[];
@@ -51,21 +51,30 @@ chipsterWeb.controller('SessionListCtrl',
 			sessionUrl.remove().then(function(res) {
 				console.log("session deleted", res);
 				$scope.updateSessions();
+				$scope.selectedSessions = [];
 			});
 		});
 	};
 
 	$scope.selectSession = function(event, session) {
-		Utils.toggleSelection(event, session, $scope.userSessions, $scope.selectedSessions);
+		//Utils.toggleSelection(event, session, $scope.userSessions, $scope.selectedSessions);
+
+		$scope.selectedSessions = [session];
 
 		if ($scope.selectedSessions.length === 1) {
-			// hide the old session immediately
-			$scope.session = {};
-			SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function(session) {
-				$scope.$apply(function() {
-					$scope.session = session;
+			if (session !== $scope.previousSession) {
+				// hide the old session immediately
+				$scope.previousSession = session;
+				$scope.session = {};
+				SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function(fullSession) {
+					// don't show if the selection has already changed
+					if ($scope.selectedSessions[0] === session) {
+						$scope.$apply(function() {
+								$scope.session = fullSession;
+						});
+					}
 				});
-			});
+			}
 		}
 	};
 

@@ -77,6 +77,11 @@
 	padding: 0;
 }
 
+.no-border {
+	border: 0 solid transparent;
+	background: transparent;
+}
+
 .indented {
 	margin-left: 1em
 }
@@ -118,7 +123,11 @@
 }
 
 .session-list {
-	height: calc(100vh - 220px);
+	height: calc(100vh - 130px);
+}
+
+#session-preview {
+	height: calc(100vh - 130px);
 }
 
 .td-selected {

@@ -358,8 +358,8 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 
 				var element = document.getElementById('workflow-container');
 
-				width = graph.width = Math.max(100, element.offsetWidth);
-				height = graph.height = Math.max(100, element.offsetHeight);
+				width = graph.width = Math.max(200, element.offsetWidth);
+				height = graph.height = Math.max(200, element.offsetHeight);
 				d3.select('svg').remove();
 
 				var xScale = d3.scale.linear().domain([ 0, width ]).range([0, width ]);

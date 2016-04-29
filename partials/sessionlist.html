@@ -8,15 +8,31 @@
         <div class="scrollable session-list">
             <table class="table table-hover">
                 <tbody>
-                <tr ng-repeat="session in userSessions">
-                    <td class="text-left text-nowrap"
-                        ng-click="selectSession($event, session)"
-                        ng-class="{'td-selected':isSessionSelected(session)}">
-                        <a href="" ng-click="openSession(session)">{{session.name}}</a>
+                <tr ng-repeat="session in userSessions"
+                    ng-mouseover="selectSession($event, session)"
+                    ng-click="openSession(session)">
+                    <td class="text-left text-nowrap">{{session.name}}</td>
+                    <td>
+                        <button class="btn btn-default btn-xs pull-right no-border"
+                                ng-click="deleteSessions([session]); $event.stopImmediatePropagation();"
+                                title="Delete session">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
                     </td>
                 </tr>
                 </tbody>
             </table>
+
+            <div class="btn-group">
+                <button class="btn btn-default"
+                        ng-click="createSession()">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    New session
+                </button>
+            </div>
+            <br>
+            <br>
+
             <!-- Example Sessions -->
             <h5>Example Session</h5>
             <table class="table table-hover">
@@ -30,27 +46,7 @@
             </table>
         </div>
     </div><!--end of column-md-6-->
-    <div class="col-md-6"><!-- Session Detail -->
-        <div class="btn-group">
-            <button class="btn btn-default"
-                    ng-click="createSession()">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                New session
-            </button>
-            <button class="btn btn-default"
-                    ng-click="openSession(selectedSessions[0])"
-                    ng-disabled="selectedSessions.length !== 1">
-                Open session
-            </button>
-            <button class="btn btn-default"
-                    ng-click="deleteSessions(selectedSessions)"
-                    ng-disabled="selectedSessions.length === 0">
-                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                Delete session
-            </button>
-        </div>
-
-        <hr/>
+    <div class="col-md-6" id="session-preview"><!-- Session Detail -->
 
         <h5 ng-repeat="session in selectedSessions">{{session.name}}</h5>
 
