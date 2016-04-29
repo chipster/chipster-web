@@ -23,6 +23,11 @@ chipsterWeb.controller('SessionListCtrl',
 		});
 	};
 
+	$scope.init = function () {
+		$scope.setTitle('Sessions', false);
+		$scope.updateSessions();
+	};
+
 	$scope.updateSessions = function(){
 
 		SessionRestangular.all('sessions').getList().then(function(res){

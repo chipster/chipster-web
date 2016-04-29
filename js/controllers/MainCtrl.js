@@ -21,7 +21,8 @@ chipsterWeb.controller('MainCtrl', function($scope, $location, AuthenticationSer
 		}
 	};
 
-	$scope.setTitle = function (title) {
+	$scope.setTitle = function (title, renameEnabled) {
 		$scope.title = title;
+		$scope.isTitleRenameEnabled = renameEnabled;
 	}
 });

@@ -53,7 +53,19 @@ chipsterWeb
                 console.log('websocket event');
                 console.log(event);
 
-                if (event.resourceType === 'SESSION') {
+                if (event.resourceType === 'AUTHORIZATION') {
+
+                    if (event.type === 'DELETE') {
+                        $scope.$apply(function() {
+                            alert('The session has been deleted.');
+                            $location.path('sessions');
+                        });
+
+                    } else {
+                        console.log("unknown event type", event);
+                    }
+
+                } else if (event.resourceType === 'SESSION') {
 
                     if (event.type === 'UPDATE') {
                         $scope.sessionUrl.get().then(function (resp) {
@@ -62,12 +74,7 @@ chipsterWeb
 
                             // update the original instance
                             angular.copy(remote, local);
-                            $scope.setTitle(remote.name);
-                        });
-
-                    } else if (event.type === 'DELETE') {
-                        $scope.$apply(function() {
-                            alert("The session has been deleted.")
+                            $scope.setTitle(remote.name, true);
                         });
 
                     } else {
@@ -264,7 +271,7 @@ chipsterWeb
             SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
                $scope.$apply(function() {
                    $scope.data = data;
-                   $scope.setTitle($scope.data.session.name);
+                   $scope.setTitle($scope.data.session.name, true);
 
                    $scope.$watch('title', function () {
                        $scope.data.session.name = $scope.title;
