@@ -9,7 +9,7 @@ chipsterWeb
         function ($scope, $routeParams, $q,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  ConfigService, $location, Utils) {
+                  ConfigService, $location, Utils, $filter) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -152,6 +152,36 @@ chipsterWeb
                     console.log("unknwon resource type", event);
                 }
             };
+
+            // create an object for the dataset search value, so that we can access it from here
+            // the search box seems to have a separate child scope, not sure why
+            $scope.datasetSearch = {};
+
+            // have to listen for keypress events to make preventDefault to work
+            $(document).keypress(function(e) {
+                if (e.target.id === 'dataset-search-input') {
+                    if (e.keyCode == 13) { // enter
+                        // select highlighted datasets
+                        $scope.$apply(function () {
+                            var allDatasets = $scope.getDatasetList();
+                            $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
+                        });
+                        e.preventDefault();
+                    }
+                }
+            });
+
+            // escape key doesn't generate keypress events
+            $(document).keyup(function(e) {
+                if (e.target.id === 'dataset-search-input') {
+                    if (e.keyCode == 27) { // escape key
+                        // clear the search
+                        $scope.$apply(function() {
+                            $scope.datasetSearch.value = null;
+                        });
+                    }
+                }
+            });
 
             // creating a session model object
             $scope.data = {
@@ -414,7 +444,7 @@ chipsterWeb
 /**
  * Filter for searching dataset in dataset list view
  */
-chipsterWeb.filter('searchDataset', function ($rootScope) {
+chipsterWeb.filter('searchDatasetFilter', function ($rootScope) {
     return function (array, expression) {
 
         var result = [];

@@ -5,8 +5,12 @@
 <div>
 	<div>
 
-		<form novalidate class="bar pull-right">
-			<input type="text" ng-model="searched_dataset_name" placeholder="search dataset">
+		<form novalidate class="bar pull-right" onsubmit="return false;">
+			<input id="dataset-search-input" type="text" ng-model="datasetSearch.value" placeholder="search dataset">
+			<button id="clear-dataset-search-button" class="no-border" ng-show="datasetSearch.value"
+					ng-click="datasetSearch.value = null">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
 		</form>
 
 		<div>
@@ -31,7 +35,7 @@
 				<div id="dataset-list" class="list-group" data-toggle="buttons">
 					<button type="button" class="list-group-item thin-list-group-item" ng-class="{active:isSelectedDataset(data)}"
 							ng-click="toggleDatasetSelection($event, data)"
-							ng-repeat="data in getDatasetList() | searchDataset:searched_dataset_name">
+							ng-repeat="data in getDatasetList() | searchDatasetFilter:datasetSearch.value">
 						{{data.name}}
 					</button>
 

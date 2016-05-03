@@ -28,6 +28,12 @@
 	right: 15px;
 }
 
+#clear-dataset-search-button {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+}
+
 #main-panel-left {
 	padding-right: 0;
 }
