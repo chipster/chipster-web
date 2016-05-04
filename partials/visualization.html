@@ -140,7 +140,7 @@
 
 				<div class="coll-sm-5">
 					<div ng-if="showPreview()">
-						<button type="button" class="btn btn-default no-padding thumbnail-button" ng-click="show(vis)"
+					<button type="button" class="btn btn-default no-padding thumbnail-button" ng-click="show(vis)"
 								ng-repeat="vis in getVisualizations()">
 							<img ng-src="{{getDatasetUrl()}}" ng-if="vis.directive == 'chipster-image'" class="thumbnail"/>
 
@@ -150,7 +150,10 @@
 								<ng-pdf scale="page-fit" template-url="partials/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
 								</ng-pdf>
 							</div>
+
+							<chipster-html ng-if="vis.directive == 'chipster-html'" src="getDatasetUrl()" class="thumbnail thumbnail-html"></chipster-html>
 						</button>
+
 					</div>
 
 					 <div ng-if="!showPreview()" class="btn-group-vertical" role="group">

@@ -61,6 +61,14 @@ chipsterWeb.controller('VisualizationCtrl',function(
 			multipleDatasets: true
 		},
 		{
+			directive: 'chipster-html',
+			icon: 'glyphicon-globe',
+			name: 'Html',
+			extensions: ['html'],
+			preview: true,
+			multipleDatasets: false
+		},
+		{
 			directive: 'chipster-text',
 			icon: 'glyphicon-font',
 			name: 'Text',

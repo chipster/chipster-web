@@ -45,6 +45,8 @@
 .thumbnail-button {
 	height: 28vh;
 	width: 22vw;
+	z-index: 1; /* disable iframe */
+	position: relative; /* required by z-index */
 }
 
 .thumbnail {
@@ -54,6 +56,17 @@
 	max-width: 100%;
 	overflow: hidden;
 	margin: 0;
+	z-index: -1; /* disable iframe */
+	position: relative; /* required by z-index */
+}
+
+.thumbnail-html {
+	height: 200%;
+	width: 200%;
+	max-height: 200%;
+	max-width: 200%;
+	transform: scale(0.5);
+	transform-origin: 0 0;
 }
 
 .scrollable {
