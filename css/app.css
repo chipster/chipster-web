@@ -28,7 +28,11 @@
 	right: 15px;
 }
 
-#clear-dataset-search-button {
+.search-div {
+	position: relative;
+}
+
+.clear-search-button {
 	position: absolute;
 	top: 2px;
 	right: 2px;

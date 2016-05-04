@@ -5,13 +5,14 @@
 <div>
 	<div>
 
-		<form novalidate class="bar pull-right" onsubmit="return false;">
-			<input id="dataset-search-input" type="text" ng-model="datasetSearch.value" placeholder="search dataset">
-			<button id="clear-dataset-search-button" class="no-border" ng-show="datasetSearch.value"
+		<div class="bar pull-right search-div">
+			<input id="dataset-search-input" type="text" ng-model="datasetSearch.value"
+				   placeholder="search dataset" ng-keyup="datasetSearchKeyEvent($event)">
+			<button class="clear-search-button no-border" ng-show="datasetSearch.value"
 					ng-click="datasetSearch.value = null">
 				<span class="glyphicon glyphicon-remove"></span>
 			</button>
-		</form>
+		</div>
 
 		<div>
 			<ul class="nav nav-tabs" >

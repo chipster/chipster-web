@@ -1,14 +1,19 @@
 <div ng-controller="ToolCtrl">
 
-    <div class="bar pull-right">
-        <input type="text" class="search" ng-model="searchTool" placeholder="search tool"/>
+    <div class="bar pull-right search-div">
+        <input type="text" class="search" ng-model="searchTool" ng-change="selectFirstVisible()"
+               placeholder="search tool" ng-keyup="toolSearchKeyEvent($event)"/>
+        <button class="clear-search-button no-border" ng-show="searchTool"
+                ng-click="searchTool = null">
+            <span class="glyphicon glyphicon-remove"></span>
+        </button>
     </div>
 
     <!-- Tools div -->
     <div class="row">
         <ul class="nav nav-pills btn-xs">
-            <li ng-class="{active:isSet($index)}" ng-repeat="module in data.modules">
-                <a href ng-click="setTab($index)">{{module.name}}</a>
+            <li ng-class="{active:module === selectedModule}" ng-repeat="module in data.modules | moduleFilter:searchTool">
+                <a href ng-click="selectModule(module)">{{module.name}}</a>
             </li>
         </ul>
     </div>
@@ -20,9 +25,9 @@
                 <div id="category-table" class="tool-height">
                     <div id="category-list" class="list-group" data-toggle="buttons">
                         <button type="button" class="list-group-item thin-list-group-item"
-                                ng-class="{'active':$index===selectedCategoryIndex}"
-                                ng-click="selectCategory(category,$index)"
-                                ng-repeat="category in categories | searchFor:searchTool">
+                                ng-class="{'active':category===selectedCategory}"
+                                ng-click="selectCategory(category)"
+                                ng-repeat="category in categories | categoryFilter:searchTool">
                             <span><tool-circle toolcolor="category.color"></span>
                             {{category.name}}
                         </button>
@@ -34,9 +39,10 @@
                 <div id="tool-table" class="tool-height">
                     <div id="tool-list" class="list-group" data-toggle="buttons">
                         <button type="button" class="list-group-item thin-list-group-item"
-                                ng-class="{'active':$index===selectedToolIndex}"
-                                ng-click="selectTool(tool.id, $index)"
-                                ng-repeat="tool in selectedCategory.tools|searchFor:searchTool">
+                                ng-class="{'active':tool.id===selectedTool.name.id}"
+                                ng-click="selectTool(tool.id)"
+                                ng-repeat="tool in selectedCategory.tools|toolFilter:searchTool"
+                                id="tool-button-{{tool.id}}">
                             {{tool.name}}
                         </button>
                     </div>

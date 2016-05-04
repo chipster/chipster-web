@@ -153,35 +153,22 @@ chipsterWeb
                 }
             };
 
-            // create an object for the dataset search value, so that we can access it from here
+            // create an object for the dataset search value, so that we can modify it from here
             // the search box seems to have a separate child scope, not sure why
             $scope.datasetSearch = {};
 
-            // have to listen for keypress events to make preventDefault to work
-            $(document).keypress(function(e) {
-                if (e.target.id === 'dataset-search-input') {
-                    if (e.keyCode == 13) { // enter
-                        // select highlighted datasets
-                        $scope.$apply(function () {
-                            var allDatasets = $scope.getDatasetList();
-                            $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
-                        });
-                        e.preventDefault();
-                    }
+            $scope.datasetSearchKeyEvent = function (e) {
+                if (e.keyCode == 13) { // enter
+                    // select highlighted datasets
+                    var allDatasets = $scope.getDatasetList();
+                    $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
+                    $scope.datasetSearch.value = null;
                 }
-            });
-
-            // escape key doesn't generate keypress events
-            $(document).keyup(function(e) {
-                if (e.target.id === 'dataset-search-input') {
-                    if (e.keyCode == 27) { // escape key
-                        // clear the search
-                        $scope.$apply(function() {
-                            $scope.datasetSearch.value = null;
-                        });
-                    }
+                if (e.keyCode == 27) { // escape key
+                    // clear the search
+                    $scope.datasetSearch.value = null;
                 }
-            });
+            };
 
             // creating a session model object
             $scope.data = {

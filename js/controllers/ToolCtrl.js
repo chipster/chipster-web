@@ -7,37 +7,27 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
-	$scope.selectedCategoryIndex = -1;
 	$scope.selectedCategory = null;
-	$scope.selectedToolIndex = -1;
 
 	$scope.$watch('data.modules', function () {
 		// select the first module when the tools are loaded
 		if ($scope.data.modules) {
-			$scope.setTab($scope.activeTab);
+			$scope.selectModule($scope.data.modules[0]);
 		}
 	});
 
-	$scope.setTab=function($index){
-		$scope.activeTab = $index;
-		$scope.categories = $scope.data.modules[$index].categories;
-		$scope.selectedCategory = null;
-		$scope.selectedCategoryIndex = -1;
-	};
-	
-	$scope.isSet=function($index){
-		return $scope.activeTab === $index;
+	$scope.selectModule = function(module){
+		$scope.selectedModule = module;
+		$scope.categories = module.categories;
+		$scope.selectFirstVisible();
 	};
 	
 	//defines which tool category the user have selected
-	$scope.selectCategory = function(category, $index) {
-		$scope.selectedCategoryIndex = $index;
+	$scope.selectCategory = function(category) {
 		$scope.selectedCategory = category;
 	};
 
-	$scope.selectTool = function(toolId, $index) {
-
-		$scope.selectedToolIndex = $index;
+	$scope.selectTool = function(toolId) {
 
 		//find the relevant tool
 		angular.forEach($scope.data.tools, function(tool) {
@@ -157,6 +147,34 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 			console.log(response);
 		});
 	};
+
+	$scope.selectFirstVisible = function () {
+
+		var filteredModules = $filter('moduleFilter')($scope.data.modules, $scope.searchTool);
+		if (filteredModules && filteredModules.indexOf($scope.selectedModule) < 0 && filteredModules[0]) {
+			$scope.selectModule(filteredModules[0]);
+		}
+
+		var filteredCategories = $filter('categoryFilter')($scope.selectedModule.categories, $scope.searchTool);
+		if (filteredCategories && filteredCategories.indexOf($scope.selectedCategory) < 0 && filteredCategories[0]) {
+			$scope.selectCategory(filteredCategories[0]);
+		}
+	};
+
+	$scope.toolSearchKeyEvent = function (e) {
+		if (e.keyCode == 13) { // enter
+			// select the first result
+			var visibleTools = $filter('toolFilter')($scope.selectedCategory.tools, $scope.searchTool);
+			if (visibleTools[0]) {
+				$scope.searchTool = null;
+				$scope.selectTool(visibleTools[0].id);
+			}
+		}
+		if (e.keyCode == 27) { // escape key
+			// clear the search
+			$scope.searchTool = null;
+		}
+	};
 });
 
 
@@ -164,22 +182,60 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
  * Filter function to search for tool
  */
 
-chipsterWeb.filter('searchFor',function(){
+chipsterWeb.filter('toolFilter',function(){
+
+	return function(arr,searchTool){
+		if(!searchTool)
+			return arr;
+
+		var result=[];
+		angular.forEach(arr,function(item){
+			if(item.name.toLowerCase().indexOf(searchTool.toLowerCase())!==-1){
+				result.push(item);
+			}
+		});
+
+		return result;
+	}
+
+});
+
+chipsterWeb.filter('categoryFilter', function($filter){
 	
 	return function(arr,searchTool){
 		if(!searchTool)
 			return arr;
 	
-	var result=[];
-	angular.forEach(arr,function(item){
-		
-		if(item.name.indexOf(searchTool)!==-1){
-			result.push(item);
-		}
-	});
-	
-	console.log(result);
-	return result;
+		var result=[];
+
+		angular.forEach(arr,function(category){
+			var filteredTools = $filter('toolFilter')(category.tools, searchTool);
+
+			if(filteredTools.length > 0){
+				result.push(category);
+			}
+		});
+
+		return result;
 	}
-	
+});
+
+chipsterWeb.filter('moduleFilter', function($filter){
+
+	return function(arr,searchTool){
+		if(!searchTool)
+			return arr;
+
+		var result=[];
+
+		angular.forEach(arr,function(module){
+			var filteredTools = $filter('categoryFilter')(module.categories, searchTool);
+
+			if(filteredTools.length > 0){
+				result.push(module);
+			}
+		});
+
+		return result;
+	}
 });
