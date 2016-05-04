@@ -56,8 +56,7 @@ chipsterWeb.factory('ConfigService', ['$location',
         service.getSessionDbEventsUrl = function (sessionId) {
 
             if (service.services.sessionDbEvents) {
-                return service.services.sessionDbEvents
-                + 'events/' + sessionId;
+                return URI(service.services.sessionDbEvents).directory('events').filename(sessionId).toString();
             }
 
             // different api server

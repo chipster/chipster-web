@@ -15,7 +15,8 @@
     "angular-local-storage": "~0.2.2",
     "d3-context-menu": "*",
     "ngHandsontable": "^0.7.0",
-    "jquery-csv": "*"
+    "jquery-csv": "*",
+    "urijs": "uri.js#^1.18.0"
   },
   "devDependencies": {
     "restangular": "~1.5.1",

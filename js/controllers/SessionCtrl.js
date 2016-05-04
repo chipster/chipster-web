@@ -26,7 +26,9 @@ chipsterWeb
             console.log(eventUrl);
 
             var ws = $websocket.$new({
-                url: eventUrl + "?token=" + AuthenticationService.getToken(), protocols: []
+
+                url: new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString(),
+                protocols: []
             });
 
             ws.$on('$open', function () {
