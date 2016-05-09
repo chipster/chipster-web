@@ -397,12 +397,11 @@ chipsterWeb
             };
 
             $scope.getDatasetUrl = function() {
-                //TODO can Restangular build this?
                 //TODO should we have separate read-only tokens for datasets?
                 //TODO check if dataset(s) selected?
-                return ConfigService.getFileBrokerUrl() + 'sessions/' + $routeParams.sessionId
-                    + '/datasets/' + $scope.selectedDatasets[0].datasetId
-                    + '?token=' + AuthenticationService.getToken();
+                return URI(ConfigService.getFileBrokerUrl())
+                        .path('sessions/' + $routeParams.sessionId + '/datasets/' + $scope.selectedDatasets[0].datasetId)
+                        .addQuery('token', AuthenticationService.getToken()).toString();
             };
 
             $scope.showDefaultVisualization = function() {

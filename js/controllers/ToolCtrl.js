@@ -175,6 +175,14 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 			$scope.searchTool = null;
 		}
 	};
+
+	$scope.getSource = function () {
+		if ($scope.selectedTool) {
+			ToolRestangular.one('tools', $scope.selectedTool.name.id).customGET('source').then(function (response) {
+				$scope.source = response.data;
+			});
+		}
+	};
 });
 
 
