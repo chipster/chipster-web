@@ -1,4 +1,4 @@
-chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionRestangular, Utils){
+chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionRestangular, Utils, TableService){
 
     return {
         restrict:'E',
@@ -100,34 +100,28 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
             };
 
             $scope.resetTsv = function(dataset) {
-                FileRestangular.getData($scope.sessionId, dataset.datasetId).then(function (resp) {
 
-                    // parse the file data using the JQuery-cvs library
-                    parserConfig = {
-                        separator: '\t'
-                    };
-                    $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
+                TableService.getColumns($scope.sessionId, dataset.datasetId).then(function (fileHeaders) {
 
-                        var metadata = [];
+                    var metadata = [];
 
-                        var fileHeaders = fileArray[0].filter( function(header) {
-                            return Utils.startsWith(header, 'chip.');
-                        });
-
-                        angular.forEach(fileHeaders, function(fileHeader) {
-                            var entry = {
-                                column: fileHeader,
-                                key: 'sample',
-                                value: fileHeader.replace('chip.', '')
-                            };
-                            metadata.push(entry);
-                        });
-
-                        dataset.metadata = metadata;
-
-                        $scope.updateView();
-                        $scope.updateDatasets(true);
+                    var chipHeaders = fileHeaders.filter( function(header) {
+                        return Utils.startsWith(header, 'chip.');
                     });
+
+                    angular.forEach(chipHeaders, function(fileHeader) {
+                        var entry = {
+                            column: fileHeader,
+                            key: 'sample',
+                            value: fileHeader.replace('chip.', '')
+                        };
+                        metadata.push(entry);
+                    });
+
+                    dataset.metadata = metadata;
+
+                    $scope.updateView();
+                    $scope.updateDatasets(true);
                 });
             };
 
@@ -308,7 +302,7 @@ chipsterWeb.directive('chipsterPhenodata',function(FileRestangular, SessionResta
             };
 
             $scope.$watch('datasets', function () {
-                if (datasets.length > 0) {
+                if ($scope.datasets.length > 0) {
                     $scope.updateViewLater();
                 }
             }, true);

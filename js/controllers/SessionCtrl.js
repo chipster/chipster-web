@@ -427,6 +427,10 @@ chipsterWeb
             angular.element($window).bind('resize', function() {
                 $scope.$broadcast('resizeWorkFlowGraph', {});
             });
+
+            $scope.getSessionId = function () {
+                return $routeParams.sessionId;
+            }
         });
 
 /**

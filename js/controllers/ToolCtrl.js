@@ -3,7 +3,7 @@
  *       data in UI
  * @example <div ng-controller="ToolCtrl"></div>
  */
-chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter, Utils) {
+chipsterWeb.controller('ToolCtrl', function($scope, ToolRestangular, $filter, Utils, TableService, $q) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
@@ -34,13 +34,18 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 			if(tool.name.id === toolId) {
 				$scope.selectedTool = tool;
 
-				if(tool.parameters.length>0){
-					$scope.selected_t_parameter_list=tool.parameters;
-				}else{
-					$scope.enable_t_parameter=false;
-				}
+				$scope.job = {
+					toolId: $scope.selectedTool.name.id,
+					toolCategory: $scope.selectedCategory.name,
+					toolName: $scope.selectedTool.name.displayName,
+					toolDescription: $scope.selectedTool.description,
+					state: 'NEW',
+					parameters: $scope.selectedTool.parameters.map($scope.getJobParameter)
+				};
 			}
 		});
+
+		$scope.inputBindings = $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets);
 	};
 
 	$scope.isRunEnabled = function() {
@@ -49,6 +54,12 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 
 	$scope.isParametersEnabled = function() {
 		return $scope.selectedTool && $scope.selectedTool.parameters.length > 0
+	};
+
+	$scope.getCompatibleDatasets = function (toolInput) {
+		return $scope.selectedDatasets.filter( function (dataset) {
+			return $scope.isCompatible(dataset, toolInput.type.name);
+		});
 	};
 
 	$scope.isCompatible = function(dataset, type) {
@@ -92,10 +103,14 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 	};
 
 	$scope.bindInputs = function(tool, datasets) {
+
+		// copy the array so that we can remove items from it
+		var unboundDatasets = datasets.slice();
+
 		// see OperationDefinition.bindInputs()
 		//TODO handle multi-inputs
 
-		var jobInputs = [];
+		var inputBindings = [];
 		for (var j = 0; j < tool.inputs.length; j++) {
 			var toolInput = tool.inputs[j];
 
@@ -106,18 +121,17 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 
 			var found = false;
 
-			for (var i = 0; i < datasets.length; i++) {
+			for (var i = 0; i < unboundDatasets.length; i++) {
 
-				var dataset = datasets[i];
+				var dataset = unboundDatasets[i];
 				if ($scope.isCompatible(dataset, toolInput.type.name)) {
-					console.log(toolInput);
-					var jobInput = {
-						inputId: toolInput.name.id,
-						description: toolInput.description,
-						datasetId: dataset.datasetId,
-						displayName: dataset.name
-					};
-					jobInputs.push(jobInput);
+
+					inputBindings.push({
+						toolInput: toolInput,
+						dataset: dataset
+					});
+					// remove from datasets
+					unboundDatasets.splice(unboundDatasets.indexOf(dataset), 1);
 					found = true;
 					break;
 				}
@@ -127,23 +141,34 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 				return null;
 			}
 		}
-		return jobInputs;
+
+		return inputBindings;
 	};
 
 	// Method for submitting a job
 	$scope.runJob = function () {
 
-		var newJob = {
-			toolId: $scope.selectedTool.name.id,
-			toolCategory: $scope.selectedCategory.name,
-			toolName: $scope.selectedTool.name.displayName,
-			toolDescription: $scope.selectedTool.description,
-			state: 'NEW',
-			inputs: $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets)
-		};
+		var jobToRun = angular.copy($scope.job);
+
+		// toolParameters aren't needed anymore and the server doesn't accept extra fields
+		for (jobParameter of jobToRun.parameters) {
+			delete jobParameter.toolParameter;
+		}
+
+		jobToRun.inputs = [];
+
+		for (inputBinding of $scope.inputBindings) {
+			var jobInput = {
+				inputId: inputBinding.toolInput.name.id,
+				description: inputBinding.toolInput.description,
+				datasetId: inputBinding.dataset.datasetId,
+				displayName: inputBinding.dataset.name
+			};
+			jobToRun.inputs.push(jobInput);
+		}
 
 		var postJobUrl = $scope.sessionUrl.one('jobs');
-		postJobUrl.customPOST(newJob).then(function (response) {
+		postJobUrl.customPOST(jobToRun).then(function (response) {
 			console.log(response);
 		});
 	};
@@ -183,6 +208,105 @@ chipsterWeb.controller('ToolCtrl', function($scope, $q, ToolRestangular, $filter
 			});
 		}
 	};
+
+	$scope.isSelectionParameter = function (parameter) {
+		return parameter.type === 'ENUM' ||
+				parameter.type === 'COLUMN_SEL' ||
+				parameter.type === 'METACOLUMN_SEL';
+	};
+
+	$scope.isNumberParameter = function (parameter) {
+		return parameter.type === 'INTEGER' ||
+				parameter.type === 'DECIMAL' ||
+				parameter.type === 'PERCENT';
+	};
+
+	$scope.getDefaultValue = function (toolParameter) {
+		if($scope.isNumberParameter(toolParameter)) {
+			return Number(toolParameter.defaultValue);
+		} else {
+			return toolParameter.defaultValue;
+		}
+	};
+
+	$scope.getDefaultValueDisplayName = function (toolParameter) {
+		if (toolParameter.selectionOptions) {
+			for (option of toolParameter.selectionOptions) {
+				if (option.id === toolParameter.defaultValue) {
+					return option.displayName || option.id;
+				}
+			}
+		}
+		return toolParameter.defaultValue;
+	};
+
+	$scope.getJobParameter = function (toolParameter) {
+
+		var jobParameter = {
+			parameterId: toolParameter.name.id,
+			displayName: toolParameter.name.displayName,
+			description: toolParameter.description,
+			type: toolParameter.type,
+			value: $scope.getDefaultValue(toolParameter),
+			// access selectionOptions, defaultValue, optional, from and to values from the toolParameter
+			toolParameter: toolParameter
+		};
+
+		if (toolParameter.type === 'COLUMN_SEL') {
+			$scope.getColumns().then( function (columns) {
+				jobParameter.toolParameter.selectionOptions = columns.map( function (column) {
+					return {id: column};
+				});
+			});
+		}
+
+		if (toolParameter.type === 'METACOLUMN_SEL') {
+			jobParameter.toolParameter.selectionOptions = $scope.getMetadataColumns().map( function (column) {
+				return {id: column};
+			});
+		}
+
+		return jobParameter;
+	};
+
+	$scope.getColumns = function () {
+		var promises = [];
+		angular.forEach($scope.selectedDatasets, function (dataset) {
+			if ($scope.isCompatible(dataset, 'TSV')) {
+				promises.push(TableService.getColumns($scope.getSessionId(), dataset.datasetId));
+			}
+		});
+
+		return $q.all(promises).then(function(columnsOfSelectedDatasets) {
+			var columnSet = new Set();
+			for (columns of columnsOfSelectedDatasets) {
+				for (column of columns) {
+					columnSet.add(column);
+				}
+			}
+
+			return Array.from(columnSet);
+
+		}, function(e) {
+			console.log('failed to get columns', e);
+		});
+	};
+
+	$scope.getMetadataColumns = function () {
+
+		var keySet = new Set();
+		angular.forEach($scope.selectedDatasets, function(dataset) {
+			angular.forEach(dataset.metadata, function (entry) {
+				keySet.add(entry.key);
+			});
+		});
+
+		return Array.from(keySet);
+	};
+
+	$scope.showDescription = function (description) {
+		$scope.description = description;
+	}
 });
 
 

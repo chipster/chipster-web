@@ -79,6 +79,14 @@
 	overflow-x: auto;
 }
 
+.non-scrollable-modal {
+	height: calc(100vh - 160px);
+}
+
+.visibility-hidden {
+	visibility: hidden;
+}
+
 #workflow-dataset-panel {
 	overflow-y: auto;
 }
@@ -323,6 +331,3 @@ ul.unstyled {
 .nav-tabs {
 	margin-bottom: 0;
 }
-
-
-
