@@ -93,8 +93,11 @@ chipsterWeb
 
                     } else if (event.type === 'UPDATE') {
                         $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+
                             var local = $scope.data.datasetsMap.get(event.resourceId);
                             var remote = resp.data;
+
+                            console.log('dataset updated', local, remote);
 
                             // update the original instance
                             angular.copy(remote, local);
@@ -316,12 +319,10 @@ chipsterWeb
                 $scope.createDataset(file.name).then(
                     function (dataset) {
                         // create an own target for each file
-                        file.chipsterTarget = ConfigService.getFileBrokerUrl()
-                            + 'sessions/'
-                            + $routeParams.sessionId
-                            + '/datasets/' + dataset.datasetId
-                            + '?token='
-                            + AuthenticationService.getToken();
+                        file.chipsterTarget = URI(ConfigService.getFileBrokerUrl())
+                            .path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId)
+                            .addQuery('token', AuthenticationService.getToken()).toString();
+
                         file.resume();
                     });
                 // wait for dataset to be created
@@ -360,9 +361,9 @@ chipsterWeb
                         d.y = pos.y;
                         $scope.data.datasetsMap.set(d.datasetId, d);
 
-                        $scope.updateDataset(d);
-
-                        resolve(d);
+                        $scope.updateDataset(d).then( function () {
+                            resolve(d);
+                        });
                     });
                 });
             };
@@ -389,7 +390,7 @@ chipsterWeb
 
             $scope.updateDataset = function(dataset) {
                 var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
-                datasetUrl.customPUT(dataset);
+                return datasetUrl.customPUT(dataset);
             };
 
             $scope.updateSession = function() {
