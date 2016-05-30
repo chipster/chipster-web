@@ -27,9 +27,10 @@ chipsterWeb.factory('AuthenticationService', ['localStorageService', '$http', 'C
         service.requestToken = function (method, username, password) {
             var string = username + ":" + password;
             var encodedString = btoa(string); //Convert it to base64 encoded string
+            var url = URI(ConfigService.getAuthUrl()).path('tokens');
 
             return promise = $http({
-                url: ConfigService.getAuthUrl() + 'tokens',
+                url: url,
                 method: method,
                 withCredentials: true,
                 headers: {'Authorization': 'Basic ' + encodedString}
