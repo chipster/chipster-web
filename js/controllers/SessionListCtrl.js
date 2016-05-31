@@ -38,11 +38,6 @@ chipsterWeb.controller('SessionListCtrl',
 				$location.path('/login');
 			}
 		});
-		
-		//For the time being, getting example sessions from local json
-		$http.get('js/json/exampleSession.json').then(function(res) {
-			$scope.localSessions = res.data;
-		});
 	};
 
 	$scope.openSession = function(session){
