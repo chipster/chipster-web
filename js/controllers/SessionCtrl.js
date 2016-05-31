@@ -97,8 +97,6 @@ chipsterWeb
                             var local = $scope.data.datasetsMap.get(event.resourceId);
                             var remote = resp.data;
 
-                            console.log('dataset updated', local, remote);
-
                             // update the original instance
                             angular.copy(remote, local);
                             $scope.$broadcast('datasetsMapChanged', {});
