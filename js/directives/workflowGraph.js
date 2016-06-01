@@ -234,11 +234,18 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 							if (!scope.enabled) {
 								return;
 							}
+							scope.dragStarted = true;
 							dragNodes(d3.event.dx,d3.event.dy);
 							// set defaultPrevented flag to disable scrolling
 							d3.event.sourceEvent.preventDefault();
 						})
-						.on('dragend', dragEnd)
+						.on('dragend', function () {
+							// check the flag to differentiate between drag and click events
+							if (scope.dragStarted) {
+								scope.dragStarted = false;
+								dragEnd();
+							}
+						})
 					)
 					.on('contextmenu',d3.contextMenu(menu))
 					.on('mouseover', function(d) {
@@ -321,6 +328,7 @@ chipsterWeb.directive('workflowGraph',function($window, WorkflowGraphService, Ut
 			}
 
 			function dragEnd() {
+
 				// update positions of all selected datasets to the server
 				svgDatasetNodes.filter(function(d) {
 					return scope.callback.isSelectedDataset(d.dataset);

@@ -14,10 +14,10 @@ chipsterWeb.controller('VisualizationCtrl',function(
 		return $scope.tab === value;
 	};
 
-	$scope.$watch("selectedDatasets", function() {
+	$scope.$watchCollection("selectedDatasets", function() {
 		$scope.setTab(1);
 		$scope.currentVisualization = undefined;
-	}, true);
+	});
 
 	$scope.$on('showDefaultVisualization', function() {
 		var visualizations = $scope.getVisualizations();
