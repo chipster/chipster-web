@@ -166,39 +166,49 @@
 	<script src="/node_modules/urijs/src/URI.js"></script>
 
 	<!-- Custom JS -->
-	<script type="text/javascript" src="js/app.js"></script>
+	<script type="text/javascript" src="app/app.module.js"></script>
+	<script type="text/javascript" src="app/app.run.js"></script>
+	<script type="text/javascript" src="app/routes.config.js"></script>
+
+	<script type="text/javascript" src="app/common/filter/bytes.filter.js"></script>
+	<script type="text/javascript" src="app/common/filter/seconds.filter.js"></script>
+	<script type="text/javascript" src="app/common/filter/module.filter.js"></script>
+	<script type="text/javascript" src="app/common/filter/tool.filter.js"></script>
+	<script type="text/javascript" src="app/common/filter/category.filter.js"></script>
+	<script type="text/javascript" src="app/common/filter/searchdataset.filter.js"></script>
+
 
 	<!--Controllers-->
-	<script type="text/javascript" src="js/controllers/MainCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/UploadDialogCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/LoginCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/SessionListCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/SessionCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/ToolCtrl.js"></script>
-	<script type="text/javascript" src="js/controllers/VisualizationCtrl.js"></script>
+	<script type="text/javascript" src="app/controllers/main.controller.js"></script>
+	<script type="text/javascript" src="app/controllers/uploaddialog.controller.js"></script>
+	<script type="text/javascript" src="app/views/login/login.controller.js"></script>
+	<script type="text/javascript" src="app/views/sessions/sessionlist.controller.js"></script>
+	<script type="text/javascript" src="app/views/sessions/session/session.controller.js"></script>
+	<script type="text/javascript" src="app/views/sessions/session/visualization/tools/tool.controller.js"></script>
+	<script type="text/javascript" src="app/views/sessions/session/visualization/visualization.controller.js"></script>
 
 	<!--Directives-->
-	<script type="text/javascript" src="js/directives/chipstermodal.js"></script>
-	<script type="text/javascript" src="js/directives/workflowGraph.js"></script>
-	<script type="text/javascript" src="js/directives/toolcircle.js"></script>
-	<script type="text/javascript" src="js/directives/tooltext.js"></script>
-	<script type="text/javascript" src="js/directives/chipsterimage.js"></script>
-	<script type="text/javascript" src="js/directives/chipstertext.js"></script>
-	<script type="text/javascript" src="js/directives/chipsterspreadsheet.js"></script>
-	<script type="text/javascript" src="js/directives/chipsterphenodata.js"></script>
-	<script type="text/javascript" src="js/directives/chipsterpdf.js"></script>
-	<script type="text/javascript" src="js/directives/chipsterhtml.js"></script>
+	<script type="text/javascript" src="app/directives/chipstermodal.js"></script>
+	<script type="text/javascript" src="app/directives/workflowGraph.js"></script>
+	<script type="text/javascript" src="app/directives/toolcircle.js"></script>
+	<script type="text/javascript" src="app/directives/tooltext.js"></script>
+	<script type="text/javascript" src="app/directives/chipsterimage.js"></script>
+	<script type="text/javascript" src="app/directives/chipstertext.js"></script>
+	<script type="text/javascript" src="app/directives/chipsterspreadsheet.js"></script>
+	<script type="text/javascript" src="app/directives/chipsterphenodata.js"></script>
+	<script type="text/javascript" src="app/directives/chipsterpdf.js"></script>
+	<script type="text/javascript" src="app/directives/chipsterhtml.js"></script>
 
 
 	<!--Services-->
-	<script type="text/javascript" src="js/services/AuthenticationService.js"></script>
-	<script type="text/javascript" src="js/services/ConfigService.js"></script>
-	<script type="text/javascript" src="js/services/SessionRestangular.js"></script>
-	<script type="text/javascript" src="js/services/ToolRestangular.js"></script>
-	<script type="text/javascript" src="js/services/FileRestangular.js"></script>
-	<script type="text/javascript" src="js/services/WorkflowGraphService.js"></script>
-	<script type="text/javascript" src="js/services/TableService.js"></script>
-	<script type="text/javascript" src="js/services/Utils.js"></script>
+	<script type="text/javascript" src="app/services/AuthenticationService.js"></script>
+	<script type="text/javascript" src="app/services/ConfigService.js"></script>
+	<script type="text/javascript" src="app/services/SessionRestangular.js"></script>
+	<script type="text/javascript" src="app/services/ToolRestangular.js"></script>
+	<script type="text/javascript" src="app/services/FileRestangular.js"></script>
+	<script type="text/javascript" src="app/services/WorkflowGraphService.js"></script>
+	<script type="text/javascript" src="app/services/TableService.js"></script>
+	<script type="text/javascript" src="app/services/Utils.js"></script>
 
 </body>
 </html>

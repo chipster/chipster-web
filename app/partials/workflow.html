@@ -1,0 +1,86 @@
+<!-- <div id="workflow-panel" class="panel panel-default">
+	<div class="panel-body"> -->
+
+
+<div>
+	<div>
+
+		<div class="bar pull-right search-div">
+			<input id="dataset-search-input" type="text" ng-model="datasetSearch.value"
+				   placeholder="search dataset" ng-keyup="datasetSearchKeyEvent($event)">
+			<button class="clear-search-button no-border" ng-show="datasetSearch.value"
+					ng-click="datasetSearch.value = null">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+		</div>
+
+		<div>
+			<ul class="nav nav-tabs" >
+				<li ng-class="{active:isSet(1)}"><a href ng-click="setItem(1)">Workflow</a></li>
+				<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
+			</ul>
+		</div>
+		<!-- end of panel headings -->
+
+		<div id="workflow-dataset-panel" class="tab-content">
+			<div ng-if="isSet(1)" class="fill">
+				<workflow-graph
+						datasets-map="data.datasetsMap"
+						jobs-map="data.jobsMap"
+						modules-map="data.modulesMap"
+						callback="getWorkflowCallback()"
+						zoom="1"
+						enabled="true">
+			</div>
+			<div ng-show="isSet(2)">
+				<div id="dataset-list" class="list-group" data-toggle="buttons">
+					<button type="button" class="list-group-item thin-list-group-item" ng-class="{active:isSelectedDataset(data)}"
+							ng-click="toggleDatasetSelection($event, data)"
+							ng-repeat="data in getDatasetList() | searchDatasetFilter:datasetSearch.value">
+						{{data.name}}
+					</button>
+
+				</div>
+				<!--end of dataset List-->
+			</div>
+			<div ng-show="isSet(3)">
+				<div>
+					<p>
+						{{data.notes}} <span class="pull-right">
+							<button class="btn btn-xs btn-info" data-toggle="modal"
+								data-target="#session-edit-modal">
+								<span class="glyphicon glyphicon-edit"></span>
+							</button>
+						</span>
+					</p>
+				</div>
+			</div>
+			<div ng-show="isSet(1) || isSet(2)">
+					<div class="pull-right add-dataset-button">
+						<button class="btn btn-lg btn-success btn-circle link-btn"
+								data-toggle="modal" data-target="#addDatasetModal">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+					</div>
+
+					<div id="addDatasetModal" class="modal fade" role="dialog">
+						<div class="panel-body" ng-include="'app/partials/fileuploader.html'"></div>
+					</div>
+
+			</div>
+		</div>
+		<!-- end of tab content -->
+	</div>
+	<!-- end of panel body -->
+</div>
+
+<!--
+<div class="panel panel-default main-panel-left-bottom">
+	<div class="panel-heading">
+		<h4 class="panel-title">{{dataNode.name}}</h4>
+	</div>
+	<div class="panel-body">
+		<p>Dataset details here</p>
+	</div>
+</div> -->
+<!--end of class panel panel-default-->
