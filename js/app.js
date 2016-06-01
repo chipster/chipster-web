@@ -1,5 +1,5 @@
 var chipsterWeb = angular.module('chipster-web', [ 'ngRoute', 'flow',
-		'restangular', 'LocalStorageModule', 'ngWebsocket', 'angularResizable',
+		'restangular', 'LocalStorageModule', 'ngWebSocket', 'angularResizable',
 		'pdf', 'ngHandsontable' ]);
 
 // configure our route

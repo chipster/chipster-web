@@ -22,33 +22,25 @@ chipsterWeb
             // events
 
             var eventUrl = ConfigService.getSessionDbEventsUrl($routeParams.sessionId);
-
+            
             console.log(eventUrl);
+            var ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
 
-            var ws = $websocket.$new({
-
-                url: new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString(),
-                protocols: []
+            ws.onOpen(function () {
+                console.log('websocket connected');
             });
 
-            ws.$on('$open', function () {
-                console.log('websocket connected');
-                /*$scope.wsKeepaliveTimer = setInterval( function() {
-                    ws.$emit('ping');
-                }, 5000);
-                */
-
-            }).$on('$message', function (event) {
+            ws.onMessage(function (event) {
                 $scope.handleEvent(event);
+            });
 
-            }).$on('$close',function(){
+            ws.onClose(function(){
                 console.log('websocket closed');
-                /*clearInterval($scope.wsKeepaliveTimer);*/
             });
 
             // stop listening when leaving this view
             $scope.$on("$destroy", function(){
-                ws.$close();
+                ws.close();
             });
 
             $scope.handleEvent = function(event) {
