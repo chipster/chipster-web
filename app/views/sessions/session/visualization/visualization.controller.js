@@ -13,8 +13,18 @@ angular.module('chipster-web').controller('VisualizationCtrl',function(
 
 	$scope.$watchCollection("selectedDatasets", function() {
 		$scope.setTab(1);
-		$scope.currentVisualization = undefined;
+		$scope.setCurrentVisualization(undefined);
 	});
+
+	$scope.setCurrentVisualization = function (newVisualization, directive) {
+
+		if ($scope.currentVisualizationDirective) {
+			$scope.currentVisualizationDirective.remove();
+		}
+
+		$scope.currentVisualization = newVisualization;
+		$scope.currentVisualizationDirective = directive;
+	};
 
 	$scope.$on('showDefaultVisualization', function() {
 		var visualizations = $scope.getVisualizations();
@@ -75,8 +85,7 @@ angular.module('chipster-web').controller('VisualizationCtrl',function(
 		}
 	];
 
-	$scope.currentVisualization = null;
-
+	$scope.setCurrentVisualization(undefined);
 
 	$scope.isCompatibleWithDataset = function(visualization, dataset) {
 		var extension = Utils.getFileExtension(dataset.name);
@@ -119,8 +128,6 @@ angular.module('chipster-web').controller('VisualizationCtrl',function(
 			return;
 		}
 
-		$scope.setTab(2);
-		$scope.currentVisualization = vis;
 		var directive = angular.element('<' + vis.directive + '/>');
 		directive.attr('src', 'getDatasetUrl()');
 		directive.attr('dataset-id', 'selectedDatasets[0].datasetId');
@@ -130,5 +137,8 @@ angular.module('chipster-web').controller('VisualizationCtrl',function(
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();
 		area.append(directive);
+
+		$scope.setTab(2);
+		$scope.setCurrentVisualization(vis, directive);
 	};
 });
