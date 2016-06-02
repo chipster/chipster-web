@@ -381,11 +381,12 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
             };
 
             $scope.getDatasetUrl = function() {
-                //TODO should we have separate read-only tokens for datasets?
-                //TODO check if dataset(s) selected?
-                return URI(ConfigService.getFileBrokerUrl())
+                if ($scope.selectedDatasets && $scope.selectedDatasets.length > 0) {
+                    //TODO should we have separate read-only tokens for datasets?
+                    return URI(ConfigService.getFileBrokerUrl())
                         .path('sessions/' + $routeParams.sessionId + '/datasets/' + $scope.selectedDatasets[0].datasetId)
                         .addQuery('token', AuthenticationService.getToken()).toString();
+                }
             };
 
             $scope.showDefaultVisualization = function() {
