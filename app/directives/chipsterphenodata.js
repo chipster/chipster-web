@@ -10,7 +10,7 @@ angular.module('chipster-web').directive('chipsterPhenodata',function(FileRestan
         },
         templateUrl: 'app/partials/chipsterphenodata.html',
 
-        link: function ($scope) {
+        link: function ($scope, element) {
 
             var unremovableColumns = [ 'sample', 'original_name', 'dataset', 'column'];
 
@@ -306,6 +306,11 @@ angular.module('chipster-web').directive('chipsterPhenodata',function(FileRestan
                     $scope.updateViewLater();
                 }
             }, true);
+
+            // destroy the isolated scope when the element is removed to get rid of $watch listeners
+            element.on('$destroy', function () {
+                $scope.$destroy();
+            });
 
             $scope.updateView();
         }
