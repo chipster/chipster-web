@@ -123,6 +123,10 @@
 	margin-left: 1em
 }
 
+.link-cursor {
+	cursor: pointer;
+}
+
 #tool-table{
 	overflow-y: auto;
 }
