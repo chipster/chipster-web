@@ -1,5 +1,5 @@
-angular.module('chipster-web', [ 'ngRoute', 'flow',
-		'restangular', 'LocalStorageModule', 'ngWebSocket', 'angularResizable',
+angular.module('chipster-web', [ 'ngRoute', 'ngResource', 'ngAnimate', 'flow',
+		'restangular', 'LocalStorageModule', 'ngWebSocket', 'angularResizable', 'ui.bootstrap',
 		'pdf', 'ngHandsontable' ]);
 
 angular.module('chipster-web').config([

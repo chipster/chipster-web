@@ -1,0 +1,17 @@
+
+<div class="modal-header">
+    <button type="button" class="close" ng-click="vm.cancel()">&times</button>
+    <h4 class="modal-title">Rename session</h4>
+</div>
+<div class="modal-body">
+    <form class="edit-form" role="form" novalidate>
+        <div class="form-group">
+            <label>Session Name</label>
+            <input type="text"
+                   class="form-control" ng-model="vm.title"
+                   placeholder="Edit name" autofocus>
+        </div>
+        <button type="submit" class="btn btn-info" ng-click="vm.save()" >Save</button>
+        <button type="button" class="btn btn-default pull-right" ng-click="vm.cancel()">Cancel</button>
+    </form>
+</div>
