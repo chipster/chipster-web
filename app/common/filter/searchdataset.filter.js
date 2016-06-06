@@ -20,7 +20,11 @@ angular.module('chipster-web').filter('searchDatasetFilter', function ($rootScop
 
         //Here I am braodcasting the filtered result with rootScope to send it to workflowgraph directive, but there might be
         //a better way to make this communication
-        $rootScope.$broadcast('searchDatasets', {data: result});
+        if (expression) {
+            $rootScope.$broadcast('searchDatasets', {data: result});
+        } else {
+            $rootScope.$broadcast('searchDatasets', {data: null});
+        }
 
         return result;
     }

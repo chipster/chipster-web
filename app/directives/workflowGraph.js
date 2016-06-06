@@ -28,7 +28,11 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 			//Method for search data file in the workflow graph
 			scope.$on('searchDatasets', function(event,data){
 				if (graph) {
-					graph.filter = Utils.arrayToMap(data.data, 'datasetId');
+					if (data.data) {
+						graph.filter = Utils.arrayToMap(data.data, 'datasetId');
+					} else {
+						graph.filter = null;
+					}
 					renderGraph();
 				}
 			});
@@ -201,12 +205,8 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 					.attr('width',nodeWidth).attr('height',nodeHeight)
 					.style("fill", getGradient)
 					//.style('filter', 'url(#drop-shadow)')
-					.attr('opacity', function(d) {
-						if (!graph.filter || graph.filter.has(d.dataset.datasetId)) {
-							return 1.0;
-						} else {
-							return 0.25;
-						}
+					.attr('opacity', function (d) {
+						return getOpacityForDataset(d.dataset);
 					})
 					.on('dblclick', function() {
 						if (!scope.enabled) {
@@ -266,6 +266,18 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 				});
 			}
 
+			function getOpacityForDataset(d) {
+				return getOpacity(!graph.filter || graph.filter.has(d.datasetId));
+			}
+
+			function getOpacity(isVisible) {
+				if (isVisible) {
+					return 1.0;
+				} else {
+					return 0.25;
+				}
+			}
+
 			function renderLabels(){
 
 				d3Labels=vis.append('g').selectAll('text').data(graph.nodes).enter()
@@ -276,6 +288,9 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 					.attr('y',function(d){return d.y+nodeHeight/2 + fontSize / 4;})
 					.attr('font-size', fontSize + 'px').attr('fill','black').attr('text-anchor', 'middle')
 					.style('pointer-events', 'none')
+					.attr('opacity', function (d) {
+						return getOpacityForDataset(d.dataset);
+					});
 			}
 
 			function renderLinks(){
@@ -300,6 +315,9 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 					.attr('y1', function(d) {return d.source.y + nodeHeight;})
 					.attr('x2', function(d) {return d.target.x + nodeWidth/2;})
 					.attr('y2', function(d) {return d.target.y;})
+					.attr('opacity', function () {
+						return getOpacity(!graph.filter);
+					})
 					.style('marker-end','url(#end)');
 			}
 
