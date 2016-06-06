@@ -2,7 +2,7 @@
 angular.module('chipster-web').controller('SessionCtrl',function ($scope, $routeParams, $q,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  ConfigService, $location, Utils, $filter) {
+                  ConfigService, $location, Utils, $filter, $log) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -16,19 +16,19 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
             var eventUrl = ConfigService.getSessionDbEventsUrl($routeParams.sessionId);
             
-            console.log(eventUrl);
+            $log.debug('eventUrl', eventUrl);
             var ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
 
             ws.onOpen(function () {
-                console.log('websocket connected');
+                $log.info('websocket connected');
             });
 
             ws.onMessage(function (event) {
-                $scope.handleEvent(event);
+                $scope.handleEvent(JSON.parse(event.data));
             });
 
             ws.onClose(function(){
-                console.log('websocket closed');
+                $log.info('websocket closed');
             });
 
             // stop listening when leaving this view
@@ -37,8 +37,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
             });
 
             $scope.handleEvent = function(event) {
-                console.log('websocket event');
-                console.log(event);
+                $log.debug('websocket event', event);
 
                 if (event.resourceType === 'AUTHORIZATION') {
 
@@ -49,7 +48,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                         });
 
                     } else {
-                        console.log("unknown event type", event);
+                        $log.warn("unknown event type", event);
                     }
 
                 } else if (event.resourceType === 'SESSION') {
@@ -65,7 +64,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                         });
 
                     } else {
-                        console.log("unknown event type", event);
+                        $log.warn("unknown event type", event);
                     }
 
                 } else if (event.resourceType === 'DATASET') {
@@ -94,7 +93,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                         });
 
                     } else {
-                        console.log("unknown event type", event);
+                        $log.warn("unknown event type", event);
                     }
 
                 } else if (event.resourceType === 'JOB') {
@@ -115,13 +114,13 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                                 $scope.toolErrorTitle = 'Job failed';
                                 $scope.toolError = remote;
                                 $('#toolErrorModal').modal('show');
-                                console.log(remote);
+                                $log.info(remote);
                             }
                             if (remote.state === 'ERROR' && local.state !== 'ERROR') {
                                 $scope.toolErrorTitle = 'Job error';
                                 $scope.toolError = remote;
                                 $('#toolErrorModal').modal('show');
-                                console.log(remote);
+                                $log.info(remote);
                             }
 
                             // update the original instance
@@ -134,10 +133,10 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                         $scope.$broadcast('jobsMapChanged', {});
 
                     } else {
-                        console.log("unknown event type", event);
+                        $log.warn("unknown event type", event.type, event);
                     }
                 } else {
-                    console.log("unknwon resource type", event);
+                    $log.warn("unknwon resource type", event.resourceType, event);
                 }
             };
 
@@ -258,7 +257,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                 angular.forEach(jobs, function(job) {
                     var url = $scope.sessionUrl.one('jobs').one(job.jobId);
                     url.remove().then(function (res) {
-                        console.log(res);
+                        $log.debug(res);
                     });
                 });
             };
@@ -292,7 +291,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
             $scope.flowFileAdded = function (file, event, flow) {
 
-                console.log('file added');
+                $log.debug('file added');
 
                 // get a separate target for each file
                 flow.opts.target = function (file) {
@@ -328,12 +327,12 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                     sourceJob: null
                 };
 
-                console.log(d);
+                $log.debug('createDataset', d);
 
                 return new Promise(function (resolve) {
                     var datasetUrl = $scope.sessionUrl.one('datasets');
                     datasetUrl.customPOST(d).then(function (response) {
-                        console.log(response);
+                        $log.debug(response);
                         var location = response.headers('Location');
                         d.datasetId = location.substr(location.lastIndexOf('/') + 1);
 
@@ -356,7 +355,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                 angular.forEach(datasets, function(dataset) {
                     var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
                     datasetUrl.remove().then(function (res) {
-                        console.log(res);
+                        $log.debug(res);
                     });
                 });
             };
