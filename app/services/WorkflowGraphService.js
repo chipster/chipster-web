@@ -29,7 +29,7 @@ angular.module('chipster-web').factory('WorkflowGraphService', function() {
 			y = parentY + service.nodeHeight + service.yMargin;
 		}
 
-		while (service.intersectsAny(nodes, x, y)) {
+		while (service.intersectsAny(nodes, x, y, service.nodeWidth, service.nodeHeight)) {
 			x += service.nodeWidth + service.xMargin;
 		}
 
@@ -39,18 +39,18 @@ angular.module('chipster-web').factory('WorkflowGraphService', function() {
 		}
 	};
 
-	service.intersectsAny = function(nodes, x, y) {
+	service.intersectsAny = function(nodes, x, y, w, h) {
 		return !nodes.every(function(node) {
-			return !service.intersectsNode(node, x, y);
+			return !service.intersectsNode(node, x, y, w, h);
 		});
 	};
 
-	service.intersectsNode = function(node, x, y) {
+	service.intersectsNode = function(node, x, y, w, h) {
 		return (
-			x >= node.x &&
-			x < node.x + service.nodeWidth + service.xMargin &&
-			y >= node.y &&
-			y < node.y + service.nodeHeight + service.yMargin);
+			x + w >= node.x &&
+			x < node.x + service.nodeWidth &&
+			y + h >= node.y &&
+			y < node.y + service.nodeHeight);
 	};
 
 	return service;
