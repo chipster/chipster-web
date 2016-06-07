@@ -1,4 +1,4 @@
-angular.module('chipster-web').controller('AddDatasetModalController', function ($log, $uibModalInstance, $routeParams) {
+angular.module('chipster-web').controller('AddDatasetModalController', function ($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
 
     this.flowFileAdded = function (file, event, flow) {
 
@@ -21,6 +21,42 @@ angular.module('chipster-web').controller('AddDatasetModalController', function 
         // wait for dataset to be created
         file.pause();
 
+    };
+
+    this.createDataset = function (name) {
+
+        var sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
+
+        var d = {
+            datasetId: null,
+            name: name,
+            x: null,
+            y: null,
+            sourceJob: null
+        };
+
+        $log.debug('createDataset', d);
+
+        return new Promise(function (resolve) {
+            var datasetUrl = sessionUrl.one('datasets');
+            datasetUrl.customPOST(d).then(function (response) {
+                $log.debug(response);
+                var location = response.headers('Location');
+                d.datasetId = location.substr(location.lastIndexOf('/') + 1);
+
+                // put datasets immediately to datasetsMap not to position all uploaded files
+                // to the same place
+                var pos§§ = WorkflowGraphService.newRootPosition(Utils.mapValues(data.datasetsMap));
+                d.x = pos.x;
+                d.y = pos.y;
+                data.datasetsMap.set(d.datasetId, d);
+
+                var datasetUrl = sessionUrl.one('datasets').one(d.datasetId);
+                datasetUrl.customPUT(d).then(function () {
+                    resolve(d);
+                });
+            });
+        });
     };
 
     this.flowFileSuccess = function (file) {

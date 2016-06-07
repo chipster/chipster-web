@@ -291,38 +291,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
 
 
-            $scope.createDataset = function (name) {
 
-                var d = {
-                    datasetId: null,
-                    name: name,
-                    x: null,
-                    y: null,
-                    sourceJob: null
-                };
-
-                $log.debug('createDataset', d);
-
-                return new Promise(function (resolve) {
-                    var datasetUrl = $scope.sessionUrl.one('datasets');
-                    datasetUrl.customPOST(d).then(function (response) {
-                        $log.debug(response);
-                        var location = response.headers('Location');
-                        d.datasetId = location.substr(location.lastIndexOf('/') + 1);
-
-                        // put datasets immediately to datasetsMap not to position all uploaded files
-                        // to the same place
-                        var pos = WorkflowGraphService.newRootPosition(Utils.mapValues($scope.data.datasetsMap));
-                        d.x = pos.x;
-                        d.y = pos.y;
-                        $scope.data.datasetsMap.set(d.datasetId, d);
-
-                        $scope.updateDataset(d).then( function () {
-                            resolve(d);
-                        });
-                    });
-                });
-            };
 
             $scope.deleteDatasets = function (datasets) {
 
@@ -397,7 +366,12 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                     controller: 'AddDatasetModalController',
                     controllerAs: 'vm',
                     bindToController: true,
-                    size: 'lg'
+                    size: 'lg',
+                    resolve: {
+                        data: function () {
+                            return $scope.data;
+                        }
+                    }
                 });
             };
         });

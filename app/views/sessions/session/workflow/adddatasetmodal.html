@@ -4,8 +4,8 @@
         </div>
 
         <div class="modal-body" flow-init
-             flow-file-added="flowFileAdded( $file, $event, $flow )"
-             flow-file-success="flowFileSuccess( $file, $message, $flow )">
+             flow-file-added="vm.flowFileAdded( $file, $event, $flow )"
+             flow-file-success="vm.flowFileSuccess( $file, $message, $flow )">
 
             <div flow-prevent-drop
                  flow-drag-enter="style={border:'5px solid green'}"
