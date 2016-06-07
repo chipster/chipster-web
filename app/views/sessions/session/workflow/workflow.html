@@ -27,15 +27,10 @@
 			<div ng-show="isSet(1) || isSet(2)">
 				<div class="add-dataset-button">
 					<button class="btn btn-sm btn-success link-btn"
-							data-toggle="modal" data-target="#addDatasetModal"
-							title="Add dataset">
+							ng-click="openAddDatasetModal()">
 						<span class="glyphicon glyphicon-plus"></span>
 						Add dataset
 					</button>
-				</div>
-
-				<div id="addDatasetModal" class="modal fade" role="dialog">
-					<div class="panel-body" ng-include="'app/partials/fileuploader.html'"></div>
 				</div>
 			</div>
 

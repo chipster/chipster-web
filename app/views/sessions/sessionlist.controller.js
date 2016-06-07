@@ -41,7 +41,7 @@ angular.module('chipster-web').controller('SessionListCtrl', function($scope, $h
 	};
 
 	$scope.openSession = function(session){
-		$location.path("/session" + "/" + session.sessionId);
+		$location.path("/sessions" + "/" + session.sessionId);
 	};
 
 	$scope.deleteSessions = function(sessions){

@@ -1,4 +1,4 @@
-angular.module('chipster-web', [ 'ngRoute', 'ngResource', 'ngAnimate', 'flow',
+angular.module('chipster-web', [ 'ngRoute', 'ngAnimate', 'flow',
 		'restangular', 'LocalStorageModule', 'ngWebSocket', 'angularResizable', 'ui.bootstrap',
 		'pdf', 'ngHandsontable' ]);
 

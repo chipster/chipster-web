@@ -9,6 +9,6 @@ angular.module('chipster-web').controller('MainCtrl', function($scope, $location
 	$scope.setTitle = function (title, renameEnabled) {
 		$scope.title = title;
 		$scope.isTitleRenameEnabled = renameEnabled;
-	}
+	};
 
 });

@@ -2,7 +2,7 @@
 angular.module('chipster-web').controller('SessionCtrl',function ($scope, $routeParams, $q,
                   SessionRestangular, AuthenticationService, $websocket,
                   $http, $window, WorkflowGraphService,
-                  ConfigService, $location, Utils, $filter, $log) {
+                  ConfigService, $location, Utils, $filter, $log, $uibModal) {
 
             // SessionRestangular is a restangular object with
             // configured baseUrl and
@@ -289,33 +289,7 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                     .getList();
             };
 
-            $scope.flowFileAdded = function (file, event, flow) {
 
-                $log.debug('file added');
-
-                // get a separate target for each file
-                flow.opts.target = function (file) {
-                    return file.chipsterTarget;
-                };
-
-                $scope.createDataset(file.name).then(
-                    function (dataset) {
-                        // create an own target for each file
-                        file.chipsterTarget = URI(ConfigService.getFileBrokerUrl())
-                            .path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId)
-                            .addQuery('token', AuthenticationService.getToken()).toString();
-
-                        file.resume();
-                    });
-                // wait for dataset to be created
-                file.pause();
-
-            };
-
-            $scope.flowFileSuccess = function (file) {
-                // remove completed files from the list
-                file.cancel();
-            };
 
             $scope.createDataset = function (name) {
 
@@ -414,6 +388,17 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
             $scope.getSessionId = function () {
                 return $routeParams.sessionId;
-            }
+            };
+
+            $scope.openAddDatasetModal = function () {
+                $uibModal.open({
+                    animation: true,
+                    templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal.html',
+                    controller: 'AddDatasetModalController',
+                    controllerAs: 'vm',
+                    bindToController: true,
+                    size: 'lg'
+                });
+            };
         });
 
