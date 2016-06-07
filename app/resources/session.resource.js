@@ -1,4 +1,4 @@
-angular.module('chipster-web').factory('SessionRestangular', function (
+angular.module('chipster-resource').factory('SessionRestangular', function (
 	Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
 
 	var service = Restangular.withConfig(function (RestangularConfigurer) {

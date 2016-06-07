@@ -1,4 +1,4 @@
-angular.module('chipster-web').factory('FileRestangular',function(Restangular,AuthenticationService, ConfigService){
+angular.module('chipster-resource').factory('FileRestangular',function(Restangular,AuthenticationService, ConfigService){
 
 		var service = Restangular.withConfig(function(RestangularConfigurer) {
 
