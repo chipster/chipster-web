@@ -46,7 +46,7 @@ angular.module('chipster-web').controller('AddDatasetModalController', function 
 
                 // put datasets immediately to datasetsMap not to position all uploaded files
                 // to the same place
-                var pos§§ = WorkflowGraphService.newRootPosition(Utils.mapValues(data.datasetsMap));
+                var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(data.datasetsMap));
                 d.x = pos.x;
                 d.y = pos.y;
                 data.datasetsMap.set(d.datasetId, d);
