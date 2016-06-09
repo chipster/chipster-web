@@ -1,4 +1,4 @@
-angular.module('chipster-web').factory('AuthenticationService', ['localStorageService', '$http', 'ConfigService',
+angular.module('chipster-authentication').factory('AuthenticationService', ['localStorageService', '$http', 'ConfigService',
     function (localStorageService, $http, ConfigService) {
 
         var service = {};
