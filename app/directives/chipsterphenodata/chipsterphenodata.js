@@ -8,7 +8,7 @@ angular.module('chipster-web').directive('chipsterPhenodata',function(FileRestan
             sessionId: '=',
             src: '='
         },
-        templateUrl: 'app/partials/chipsterphenodata.html',
+        templateUrl: 'app/directives/chipsterphenodata/chipsterphenodata.html',
 
         link: function ($scope, element) {
 
