@@ -1,5 +1,4 @@
-
-angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolRestangular, $filter, Utils, TableService, $q) {
+angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
@@ -52,52 +51,6 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		return $scope.selectedTool && $scope.selectedTool.parameters.length > 0
 	};
 
-	$scope.getCompatibleDatasets = function (toolInput) {
-		return $scope.selectedDatasets.filter( function (dataset) {
-			return $scope.isCompatible(dataset, toolInput.type.name);
-		});
-	};
-
-	$scope.isCompatible = function(dataset, type) {
-
-		// other than GENERIC should have more strict checks, like in  ChipsterInputTypes.isTypeOf()
-		var alwaysCompatible = ['GENERIC', 'CDNA', 'GENE_EXPRS', 'GENELIST', 'PHENODATA'];
-
-		if (alwaysCompatible.indexOf(type) !== -1) {
-			return true;
-		}
-
-		var types = {
-			// from BasicModule.plugContentTypes()
-			TEXT: ['txt', 'dat', 'wee', 'seq', 'log', 'sam', 'fastq'],
-			TSV: ['tsv'],
-			CSV: ['csv'],
-			PNG: ['png'],
-			GIF: ['gif'],
-			JPEG: ['jpg', 'jpeg'],
-			PDF: ['pdf'],
-			HTML: ['html', 'html'],
-			// from MicroarrayModule.plugContentTypes()
-			TRE: ['tre'],
-			AFFY: ['cel'],
-			BED: ['bed'],
-			GTF: ['gtf', 'gff', 'gff2', 'gff3'],
-			FASTA: ['fasta', 'fa', 'fna', 'fsa', 'mpfa'],
-			FASTQ: ['fastq', 'fq'],
-			GZIP: ['gz'],
-			VCF: ['vcf'],
-			BAM: ['bam'],
-			QUAL: ['qual'],
-			MOTHUR_OLIGOS: ['oligos'],
-			MOTHUR_NAMES: ['names'],
-			MOTHUR_GROUPS: ['groups'],
-			SFF: ['sff']
-		};
-
-		var extension = Utils.getFileExtension(dataset.name);
-		return types[type].indexOf(extension) !== -1;
-	};
-
 	$scope.bindInputs = function(tool, datasets) {
 
 		// copy the array so that we can remove items from it
@@ -120,7 +73,7 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 			for (var i = 0; i < unboundDatasets.length; i++) {
 
 				var dataset = unboundDatasets[i];
-				if ($scope.isCompatible(dataset, toolInput.type.name)) {
+				if (ToolService.isCompatible(dataset, toolInput.type.name)) {
 
 					inputBindings.push({
 						toolInput: toolInput,
@@ -205,37 +158,6 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		}
 	};
 
-	$scope.isSelectionParameter = function (parameter) {
-		return parameter.type === 'ENUM' ||
-				parameter.type === 'COLUMN_SEL' ||
-				parameter.type === 'METACOLUMN_SEL';
-	};
-
-	$scope.isNumberParameter = function (parameter) {
-		return parameter.type === 'INTEGER' ||
-				parameter.type === 'DECIMAL' ||
-				parameter.type === 'PERCENT';
-	};
-
-	$scope.getDefaultValue = function (toolParameter) {
-		if($scope.isNumberParameter(toolParameter)) {
-			return Number(toolParameter.defaultValue);
-		} else {
-			return toolParameter.defaultValue;
-		}
-	};
-
-	$scope.getDefaultValueDisplayName = function (toolParameter) {
-		if (toolParameter.selectionOptions) {
-			for (option of toolParameter.selectionOptions) {
-				if (option.id === toolParameter.defaultValue) {
-					return option.displayName || option.id;
-				}
-			}
-		}
-		return toolParameter.defaultValue;
-	};
-
 	$scope.getJobParameter = function (toolParameter) {
 
 		var jobParameter = {
@@ -243,7 +165,7 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 			displayName: toolParameter.name.displayName,
 			description: toolParameter.description,
 			type: toolParameter.type,
-			value: $scope.getDefaultValue(toolParameter),
+			value: ToolService.getDefaultValue(toolParameter),
 			// access selectionOptions, defaultValue, optional, from and to values from the toolParameter
 			toolParameter: toolParameter
 		};
@@ -300,9 +222,44 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		return Array.from(keySet);
 	};
 
-	$scope.showDescription = function (description) {
-		$scope.description = description;
-	}
+	$scope.openParameterModal = function () {
+		var modalInstance = $uibModal.open({
+			animation: true,
+			templateUrl: 'app/views/sessions/session/tools/parametermodal.html',
+			controller: 'ParameterModalController',
+			controllerAs: 'vm',
+			bindToController: true,
+			size: 'lg',
+			resolve: {
+				selectedTool: function () {
+					return angular.copy($scope.selectedTool);
+				},
+				inputBindings: function () {
+					return angular.copy($scope.inputBindings);
+				},
+				selectedDatasets: function () {
+					return angular.copy($scope.selectedDatasets);
+				},
+				isRunEnabled: function () {
+					return $scope.isRunEnabled();
+				},
+				parameters: function () {
+					return angular.copy($scope.job.parameters)
+				}
+			}
+		});
+
+		modalInstance.result.then(function (result) {
+			// save settings
+			$scope.job.parameters = result.parameters;
+			$scope.inputBindings = result.inputBindings;
+			if (result.run) {
+				$scope.runJob();
+			}
+		}, function () {
+			// modal dismissed
+		});
+	};
 });
 
 

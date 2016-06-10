@@ -53,7 +53,7 @@
                 <div class="btn-group btn-group-justified"  role="group">
                     <button class="btn btn-default" style="width: 50%"
                         ng-disabled="!isParametersEnabled()"
-                        data-toggle="modal" data-target="#parameterModal">
+                        ng-click="openParameterModal()">
                         Parameters
                     </button>
                     <button class="btn btn-success" style="width: 50%"
@@ -80,25 +80,6 @@
         </div>
     </div>
     <!--end of tabset div-->
-
-    <div id="parameterModal" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times</button>
-                    <h4 class="modal-title">{{selectedTool.name.displayName}}</h4>
-                </div>
-                <!--end of modal header-->
-                <div class="modal-body"
-                    ng-include="'app/views/sessions/session/tools/parametermodal.html'"></div>
-                <!--end of modal body-->
-            </div>
-            <!--end of modal-content-->
-
-        </div>
-        <!--end of modal-dialog-->
-
-    </div>
 
     <div id="toolSourceModal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-lg">
