@@ -253,11 +253,11 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		});
 	};
 
-	$scope.openToolSourceModal = function () {
+	$scope.openSourceModal = function () {
 		$uibModal.open({
 			animation: true,
-			templateUrl: 'app/views/sessions/session/tools/toolsourcemodal.html',
-			controller: 'ToolSourceModalController',
+			templateUrl: 'app/views/sessions/session/tools/sourcemodal.html',
+			controller: 'SourceModalController',
 			controllerAs: 'vm',
 			bindToController: true,
 			size: 'lg',

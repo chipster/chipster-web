@@ -111,15 +111,11 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
                             // if the job has just failed
                             if (remote.state === 'FAILED' && local.state !== 'FAILED') {
-                                $scope.toolErrorTitle = 'Job failed';
-                                $scope.toolError = remote;
-                                $('#toolErrorModal').modal('show');
+                                $scope.openErrorModal('Job failed', remote);
                                 $log.info(remote);
                             }
                             if (remote.state === 'ERROR' && local.state !== 'ERROR') {
-                                $scope.toolErrorTitle = 'Job error';
-                                $scope.toolError = remote;
-                                $('#toolErrorModal').modal('show');
+                                $scope.openErrorModal('Job error', remote);
                                 $log.info(remote);
                             }
 
@@ -370,6 +366,25 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                     resolve: {
                         data: function () {
                             return $scope.data;
+                        }
+                    }
+                });
+            };
+
+            $scope.openErrorModal = function (title, toolError) {
+                $uibModal.open({
+                    animation: true,
+                    templateUrl: 'app/views/sessions/session/joberrormodal.html',
+                    controller: 'JobErrorModalController',
+                    controllerAs: 'vm',
+                    bindToController: true,
+                    size: 'lg',
+                    resolve: {
+                        toolErrorTitle: function () {
+                            return angular.copy(title);
+                        },
+                        toolError: function () {
+                            return angular.copy(toolError);
                         }
                     }
                 });

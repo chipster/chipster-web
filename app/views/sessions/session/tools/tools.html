@@ -69,7 +69,7 @@
                     <p>{{selectedTool.description}}</p>
                     <!--Tool source-->
                     <p>
-                        <a href ng-click="openToolSourceModal()" ng-disabled="!selectedTool">
+                        <a href ng-click="openSourceModal()" ng-disabled="!selectedTool">
                             Source code
                         </a>
                     </p>
@@ -80,26 +80,5 @@
         </div>
     </div>
     <!--end of tabset div-->
-
-    <div id="toolErrorModal" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times</button>
-                    <h4 class="modal-title">{{toolErrorTitle}}</h4>
-                </div>
-                <!--end of modal header-->
-                <div class="modal-body">
-                    <h5>Error details</h5>
-                    <pre>{{toolError.stateDetail}}</pre>
-                    <h5>Screen output</h5>
-                    <pre>{{toolError.screenOutput}}</pre>
-                </div>
-                <!--end of modal body-->
-            </div>
-            <!--end of modal-content-->
-        </div>
-        <!--end of modal-dialog-->
-    </div>
 </div>
 
