@@ -150,14 +150,6 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		}
 	};
 
-	$scope.getSource = function () {
-		if ($scope.selectedTool) {
-			ToolRestangular.one('tools', $scope.selectedTool.name.id).customGET('source').then(function (response) {
-				$scope.source = response.data;
-			});
-		}
-	};
-
 	$scope.getJobParameter = function (toolParameter) {
 
 		var jobParameter = {
@@ -258,6 +250,22 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 			}
 		}, function () {
 			// modal dismissed
+		});
+	};
+
+	$scope.openToolSourceModal = function () {
+		$uibModal.open({
+			animation: true,
+			templateUrl: 'app/views/sessions/session/tools/toolsourcemodal.html',
+			controller: 'ToolSourceModalController',
+			controllerAs: 'vm',
+			bindToController: true,
+			size: 'lg',
+			resolve: {
+				selectedTool: function () {
+					return angular.copy($scope.selectedTool);
+				}
+			}
 		});
 	};
 });
