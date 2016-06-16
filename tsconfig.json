@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "es2015",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,
     "inlineSourceMap": true,
@@ -11,5 +11,5 @@
     "rootDir": "./app",
     "outFile": "dist.js"
   },
-  "exclude": ["node_modules", "dependencies", "css", "test"]
+  "exclude": ["node_modules", "dependencies", "css", "test", "dist"]
 }
