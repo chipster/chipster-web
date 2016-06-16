@@ -16,7 +16,7 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		$scope.categories = module.categories;
 		$scope.selectFirstVisible();
 	};
-	
+
 	//defines which tool category the user have selected
 	$scope.selectCategory = function(category) {
 		$scope.selectedCategory = category;
@@ -269,9 +269,3 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		});
 	};
 });
-
-
-
-
-
-
