@@ -59,7 +59,6 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
 
                     // update the original instance
                     angular.copy(remote, local);
-                    $scope.setTitle(remote.name, true);
                 });
 
             } else {
@@ -270,12 +269,6 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
     SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
         $scope.$apply(function() {
             $scope.data = data;
-            $scope.setTitle($scope.data.session.name, true);
-
-            $scope.$watch('title', function () {
-                $scope.data.session.name = $scope.title;
-                $scope.updateSession();
-            });
         });
     });
 
@@ -283,10 +276,6 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
         $scope.datalist = $scope.sessionUrl.all('datasets')
             .getList();
     };
-
-
-
-
 
     $scope.deleteDatasets = function (datasets) {
 
@@ -386,6 +375,31 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
                     return angular.copy(toolError);
                 }
             }
+        });
+    };
+
+    $scope.openSessionEditModal = function () {
+
+        var modalInstance = $uibModal.open({
+            templateUrl: 'app/views/sessions/session/sessioneditmodal.html',
+            controller: 'SessionEditModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            resolve: {
+                title: function () {
+                    return angular.copy($scope.data.session.name);
+                }
+            }
+        });
+
+        modalInstance.result.then(function (result) {
+            if (!result) {
+                result = 'unnamed session';
+            }
+            $scope.data.session.name = result;
+            $scope.updateSession();
+        }, function () {
+            // modal dismissed
         });
     };
 });

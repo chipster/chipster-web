@@ -24,7 +24,6 @@ angular.module('chipster-web').controller('SessionListCtrl', function($scope, $h
 	};
 
 	$scope.init = function () {
-		$scope.setTitle('Sessions', false);
 		$scope.updateSessions();
 	};
 

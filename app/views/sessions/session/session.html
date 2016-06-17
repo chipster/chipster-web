@@ -1,7 +1,11 @@
 <div class="row" id="dataToolContainer" ng-init="loadSession()">
 
 	<!-- Start of Workflow View -->
-	<div id="main-panel-left" class="col-md-4" resizable r-directions="['right']" r-flex="false" ng-include="'app/views/sessions/session/workflow/workflow.html'">
+	<div id="main-panel-left" class="col-md-4" resizable r-directions="['right']" r-flex="false">
+		<h4>
+			<button ng-bind="data.session.name" class="no-border" ng-click="openSessionEditModal()" title="Click to rename the session"></button>
+		</h4>
+		<div ng-include="'app/views/sessions/session/workflow/workflow.html'"></div>
 	</div>
 
 	<!-- end of workflow -->
@@ -9,13 +13,6 @@
 	<!-- Visualization View -->
 	<div class="col-md-8" ng-include="'app/views/sessions/session/visualization/visualization.html'"></div>
 	<!-- End of Visualization View -->
-
-	<!--
-	<div class="panel panel-default">
-		<div class="panel-heading">Sesssion Events </div>
-		<div class="panel-body">{{event}}</div>
-	</div>
-	-->
 
 	<div id="historyModal" class="modal fade" role="dialog">
 		<div class="modal-dialog">
