@@ -372,7 +372,7 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 						scope.callback.exportDatasets(scope.callback.selectedDatasets);
 					}},
 					{title:'View History as text',action:function(){
-						scope.callback.showHistory();
+						scope.callback.openDatasetHistoryModal();
 					}}
 				] ;
 			}

@@ -325,10 +325,6 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
         });
     };
 
-    $scope.showHistory = function() {
-        $('#historyModal').modal('show');
-    };
-
     // We are only handling the resize end event, currently only
     // working in workflow graph div
     $scope.$on("angular-resizable.resizeEnd", function () {
@@ -400,6 +396,20 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
             $scope.updateSession();
         }, function () {
             // modal dismissed
+        });
+    };
+
+    $scope.openDatasetHistoryModal = function() {
+        $uibModal.open({
+            templateUrl: 'app/views/sessions/session/datasethistorymodal.html',
+            controller: 'DatasetHistoryModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            resolve: {
+                selectedDatasets: function () {
+                    return angular.copy($scope.selectedDatasets);
+                }
+            }
         });
     };
 });
