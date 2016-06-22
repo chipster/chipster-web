@@ -1,138 +1,14 @@
-angular.module('chipster-web').controller('SessionCtrl',function ($scope, $routeParams, $q,
-                                                                  SessionRestangular, AuthenticationService, $websocket,
-                                                                  $http, $window, WorkflowGraphService,
-                                                                  ConfigService, $location, Utils, $filter, $log, $uibModal) {
+angular.module('chipster-web').controller('SessionCtrl',function (
+    $scope, $routeParams, $q,
+    SessionRestangular, AuthenticationService, $websocket,
+    $http, $window, WorkflowGraphService,
+    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
 
     // SessionRestangular is a restangular object with
     // configured baseUrl and
     // authorization header
 
-    $scope.sessionUrl = SessionRestangular.one('sessions',
-        $routeParams.sessionId);
-
-    // creating a websocket object and start listening for the
-    // events
-
-    var eventUrl = ConfigService.getSessionDbEventsUrl($routeParams.sessionId);
-
-    $log.debug('eventUrl', eventUrl);
-    var ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
-
-    ws.onOpen(function () {
-        $log.info('websocket connected');
-    });
-
-    ws.onMessage(function (event) {
-        $scope.handleEvent(JSON.parse(event.data));
-    });
-
-    ws.onClose(function(){
-        $log.info('websocket closed');
-    });
-
-    // stop listening when leaving this view
-    $scope.$on("$destroy", function(){
-        ws.close();
-    });
-
-    $scope.handleEvent = function(event) {
-        $log.debug('websocket event', event);
-
-        if (event.resourceType === 'AUTHORIZATION') {
-
-            if (event.type === 'DELETE') {
-                $scope.$apply(function() {
-                    alert('The session has been deleted.');
-                    $location.path('sessions');
-                });
-
-            } else {
-                $log.warn("unknown event type", event);
-            }
-
-        } else if (event.resourceType === 'SESSION') {
-
-            if (event.type === 'UPDATE') {
-                $scope.sessionUrl.get().then(function (resp) {
-                    var local = $scope.data.session;
-                    var remote = resp.data;
-
-                    // update the original instance
-                    angular.copy(remote, local);
-                });
-
-            } else {
-                $log.warn("unknown event type", event);
-            }
-
-        } else if (event.resourceType === 'DATASET') {
-
-            if (event.type === 'CREATE') {
-                $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-                    $scope.data.datasetsMap.set(event.resourceId, resp.data);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-
-            } else if (event.type === 'UPDATE') {
-                $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-
-                    var local = $scope.data.datasetsMap.get(event.resourceId);
-                    var remote = resp.data;
-
-                    // update the original instance
-                    angular.copy(remote, local);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-
-            } else if (event.type === 'DELETE') {
-                $scope.$apply(function() {
-                    $scope.data.datasetsMap.delete(event.resourceId);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-
-            } else {
-                $log.warn("unknown event type", event);
-            }
-
-        } else if (event.resourceType === 'JOB') {
-
-            if (event.type === 'CREATE') {
-                $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                    $scope.data.jobsMap.set(event.resourceId, resp.data);
-                    $scope.$broadcast('jobsMapChanged', {});
-                });
-
-            } else if (event.type === 'UPDATE') {
-                $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                    var local = $scope.data.jobsMap.get(event.resourceId);
-                    var remote = resp.data;
-
-                    // if the job has just failed
-                    if (remote.state === 'FAILED' && local.state !== 'FAILED') {
-                        $scope.openErrorModal('Job failed', remote);
-                        $log.info(remote);
-                    }
-                    if (remote.state === 'ERROR' && local.state !== 'ERROR') {
-                        $scope.openErrorModal('Job error', remote);
-                        $log.info(remote);
-                    }
-
-                    // update the original instance
-                    angular.copy(remote, local);
-                    $scope.$broadcast('jobsMapChanged', {});
-                });
-
-            } else if (event.type === 'DELETE') {
-                $scope.data.jobsMap.delete(event.resourceId);
-                $scope.$broadcast('jobsMapChanged', {});
-
-            } else {
-                $log.warn("unknown event type", event.type, event);
-            }
-        } else {
-            $log.warn("unknwon resource type", event.resourceType, event);
-        }
-    };
+    $scope.sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
 
     // create an object for the dataset search value, so that we can modify it from here
     // the search box seems to have a separate child scope, not sure why
@@ -269,8 +145,46 @@ angular.module('chipster-web').controller('SessionCtrl',function ($scope, $route
     SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
         $scope.$apply(function() {
             $scope.data = data;
+
+            // start listening for remote changes
+            // in theory we may miss an update between the loadSession() and this subscribe(), but
+            // the safe way would be much more complicated:
+            // - subscribe but put the updates in queue
+            // - loadSession().then()
+            // - apply the queued updates
+            var subscription = SessionEventService.subscribe($routeParams.sessionId, $scope.data, $scope.onSessionChange);
+
+            // stop listening when leaving this view
+            $scope.$on("$destroy", function () {
+                subscription.unsubscribe();
+            });
         });
     });
+
+    $scope.onSessionChange = function (event, oldValue, newValue) {
+        if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
+            $scope.$apply(function() {
+                alert('The session has been deleted.');
+                $location.path('sessions');
+            });
+        }
+        if (event.resourceType === 'DATASET') {
+            $scope.$broadcast('datasetsMapChanged', {});
+        }
+        if (event.resourceType === 'JOB') {
+            $scope.$broadcast('jobsMapChanged', {});
+
+            // if the job has just failed
+            if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+                $scope.openErrorModal('Job failed', newValue);
+                $log.info(newValue);
+            }
+            if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+                $scope.openErrorModal('Job error', newValue);
+                $log.info(newValue);
+            }
+        }
+    };
 
     $scope.getDataSets = function () {
         $scope.datalist = $scope.sessionUrl.all('datasets')
