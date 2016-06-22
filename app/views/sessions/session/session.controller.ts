@@ -14,6 +14,30 @@ angular.module('chipster-web').controller('SessionCtrl',function (
     // the search box seems to have a separate child scope, not sure why
     $scope.datasetSearch = {};
 
+    // selections
+    $scope.selectedDatasets = [];
+    $scope.selectedJobs = [];
+
+    // tool selection
+    $scope.selectedTool = null;
+    $scope.selectedToolIndex = -1;
+    $scope.istoolselected = false;
+
+    $scope.selectedTab = 1;
+
+    $scope.toolDetailList = null;
+
+    // For searching dataset in workflowgraph
+    $scope.searched_dataset_name = null;
+
+    // creating a session model object
+    $scope.data = {
+        sessionId: $routeParams.sessionId,
+        jobsMap: new Map(),
+        datasetsMap: new Map(),
+        workflowData: {}
+    };
+
     $scope.datasetSearchKeyEvent = function (e) {
         if (e.keyCode == 13) { // enter
             // select highlighted datasets
@@ -27,14 +51,6 @@ angular.module('chipster-web').controller('SessionCtrl',function (
         }
     };
 
-    // creating a session model object
-    $scope.data = {
-        sessionId: $routeParams.sessionId,
-        jobsMap: new Map(),
-        datasetsMap: new Map(),
-        workflowData: {}
-    };
-
     $scope.getWorkflowCallback = function() {
         return $scope;
     };
@@ -43,20 +59,13 @@ angular.module('chipster-web').controller('SessionCtrl',function (
         return Utils.mapValues($scope.data.datasetsMap);
     };
 
-
-    // For tabbed view manipulation
-    $scope.item = 1;
-    $scope.setItem = function (value) {
-        $scope.item = value;
+    $scope.setTab = function (tab) {
+        $scope.selectedTab = tab;
     };
 
-    $scope.isSet = function (value) {
-        return $scope.item === value;
+    $scope.isTab = function (tab) {
+        return $scope.selectedTab === tab;
     };
-
-    // selections
-    $scope.selectedDatasets = [];
-    $scope.selectedJobs = [];
 
     /**
      * Check if there are one or more dataset selected
@@ -131,16 +140,6 @@ angular.module('chipster-web').controller('SessionCtrl',function (
             });
         });
     };
-
-    // tool selection
-    $scope.selectedTool = null;
-    $scope.selectedToolIndex = -1;
-    $scope.istoolselected = false;
-
-    $scope.toolDetailList = null;
-
-    // For searching dataset in workflowgraph
-    $scope.searched_dataset_name = null;
 
     SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
         $scope.$apply(function() {

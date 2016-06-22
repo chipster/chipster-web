@@ -9,15 +9,15 @@
 
 <div>
 	<ul class="nav nav-tabs" >
-		<li ng-class="{active:isSet(1)}"><a href ng-click="setItem(1)">Workflow</a></li>
-		<li ng-class="{active:isSet(2)}"><a href ng-click="setItem(2)">Datasets</a></li>
+		<li ng-class="{active:isTab(1)}"><a href ng-click="setTab(1)">Workflow</a></li>
+		<li ng-class="{active:isTab(2)}"><a href ng-click="setTab(2)">Datasets</a></li>
 	</ul>
 </div>
 <!-- end of panel headings -->
 
 <div id="workflow-dataset-static-panel">
 	<!-- add dataset button -->
-	<div ng-show="isSet(1) || isSet(2)">
+	<div ng-show="isTab(1) || isTab(2)">
 		<div class="add-dataset-button">
 			<button class="btn btn-sm btn-success link-btn"
 					ng-click="openAddDatasetModal()">
@@ -30,7 +30,7 @@
 	<!-- scrollable panels -->
 	<div id="workflow-dataset-panel" class="tab-content">
 
-		<div ng-if="isSet(1)" class="fill">
+		<div ng-if="isTab(1)" class="fill">
 			<workflow-graph
 					datasets-map="data.datasetsMap"
 					jobs-map="data.jobsMap"
@@ -39,7 +39,7 @@
 					zoom="1"
 					enabled="true">
 		</div>
-		<div ng-show="isSet(2)">
+		<div ng-show="isTab(2)">
 			<div id="dataset-list" class="list-group" data-toggle="buttons">
 				<button type="button" class="list-group-item thin-list-group-item" ng-class="{active:isSelectedDataset(data)}"
 						ng-click="toggleDatasetSelection($event, data)"
