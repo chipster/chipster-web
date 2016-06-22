@@ -1,4 +1,4 @@
-angular.module('chipster-web').directive('chipsterSpreadsheet',function(FileRestangular){
+angular.module('chipster-web').directive('spreadsheetVisualization',function(FileRestangular){
     return{
         restrict:'E',
         scope : {
@@ -7,7 +7,7 @@ angular.module('chipster-web').directive('chipsterSpreadsheet',function(FileRest
             src: '='
         },
         template: '<div class="scrollable" id="tableContainer"></div>',
-        link: function ($scope,element,attrs) {
+        link: function ($scope) {
 
             FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                 // parse the file data using the JQuery-cvs library

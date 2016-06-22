@@ -1,4 +1,4 @@
-angular.module('chipster-web').directive('chipsterPhenodata',function(FileRestangular, SessionRestangular, Utils, TableService){
+angular.module('chipster-web').directive('phenodataVisualization', function(FileRestangular, SessionRestangular, Utils, TableService){
 
     return {
         restrict:'E',
@@ -8,7 +8,7 @@ angular.module('chipster-web').directive('chipsterPhenodata',function(FileRestan
             sessionId: '=',
             src: '='
         },
-        templateUrl: 'app/directives/chipsterphenodata/chipsterphenodata.html',
+        templateUrl: 'app/views/sessions/session/visualization/phenodata/phenodatavisualization.html',
 
         link: function ($scope, element) {
 

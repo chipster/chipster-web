@@ -1,4 +1,4 @@
-angular.module('chipster-web').directive('chipsterHtml',function($sce){
+angular.module('chipster-web').directive('htmlVisualization',function($sce){
     return{
         restrict:'E',
         scope : {

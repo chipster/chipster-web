@@ -24,7 +24,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 	});
 	$scope.visualizations = [
 		{
-			directive: 'chipster-image',
+			directive: 'image-visualization',
 			icon: 'glyphicon-picture',
 			name: 'Image',
 			extensions: ['png', "jpg", "jpeg"],
@@ -32,7 +32,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 			multipleDatasets: false
 		},
 		{
-			directive: 'chipster-pdf',
+			directive: 'pdf-visualization',
 			icon: 'glyphicon-book',
 			name: 'PDF',
 			extensions: ['pdf'],
@@ -40,7 +40,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 			multipleDatasets: false
 		},
 		{
-			directive: 'chipster-spreadsheet',
+			directive: 'spreadsheet-visualization',
 			icon: 'glyphicon-th',
 			name: 'Spreadsheet',
 			extensions: ['tsv', 'bed'],
@@ -48,7 +48,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 			multipleDatasets: false
 		},
 		{
-			directive: 'chipster-phenodata',
+			directive: 'phenodata-visualization',
 			icon: 'glyphicon-edit',
 			name: 'Phenodata',
 			extensions: ['tsv', 'bam'],
@@ -56,7 +56,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 			multipleDatasets: true
 		},
 		{
-			directive: 'chipster-html',
+			directive: 'html-visualization',
 			icon: 'glyphicon-globe',
 			name: 'Html',
 			extensions: ['html'],
@@ -64,7 +64,7 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 			multipleDatasets: false
 		},
 		{
-			directive: 'chipster-text',
+			directive: 'text-visualization',
 			icon: 'glyphicon-font',
 			name: 'Text',
 			extensions: ['txt', 'tsv', 'bed'],

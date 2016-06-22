@@ -1,4 +1,4 @@
-angular.module('chipster-web').directive('chipsterPdf',function(){
+angular.module('chipster-web').directive('pdfVisualization',function(){
     return{
         restrict:'E',
         scope : {
@@ -6,8 +6,8 @@ angular.module('chipster-web').directive('chipsterPdf',function(){
             sessionId: "=",
             src: "="
         },
-        template: '<div class="wrapper scrollable"><ng-pdf template-url="app/directives/chipsterpdf/viewer.html" scale="page-fit"></ng-pdf></div>',
-        link: function ($scope,element,attrs) {
+        template: '<div class="wrapper scrollable"><ng-pdf template-url="app/views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf></div>',
+        link: function ($scope) {
 
             //blocks for the visualization controlling
             $scope.pdfFileName='PDF file';//name of the pdf result file to view
