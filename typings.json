@@ -1,0 +1,9 @@
+{
+  "name": "chipster-web",
+  "dependencies": {},
+  "globalDependencies": {
+    "angular": "registry:dt/angular#1.5.0+20160619025852",
+    "angular-local-storage": "registry:dt/angular-local-storage#0.1.5+20160602154142",
+    "urijs": "registry:dt/urijs#1.15.1+20160526132152"
+  }
+}
