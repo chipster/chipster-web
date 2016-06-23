@@ -1,6 +1,9 @@
+
+
+
 angular.module('chipster-web', [ 'chipster-resource', 'chipster-authentication', 'ngRoute', 'ngAnimate', 'flow',
 		'restangular', 'LocalStorageModule', 'ngWebSocket', 'angularResizable', 'ui.bootstrap',
-		'pdf', 'ngHandsontable' ]);
+	'pdf', 'ngHandsontable' ]);
 
 angular.module('chipster-web').config([
 		'flowFactoryProvider',
@@ -34,4 +37,3 @@ angular.module('chipster-web').config([
 				file.errorMessageDetails = chunk.xhr.responseURL;
 			});
 		} ]);
-

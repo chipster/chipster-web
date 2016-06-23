@@ -4,16 +4,17 @@ Chipster Web client for data processing and visualization.
 
 ###Running Chipster Web Client:
 
-If you have alreday python installed,then start the SimpleHTTPServer provided by python and can view ChipsterWeb pages. Any other HTTP server will also work.
+- Prerequisites
+    - node & npm (tested with node 6.1.0 & npm 3.3.10)
 
-1. cd to /Chipster-Web directory.
-2. python -m SimpleHTTPServer.
-3. Open a browser on provided link by the HTTP server to run Chipster Web Client.
+- Installing tools
+    - npm install typings -g
+    - npm install
+    - typings install
+    - npm install gulp -g
 
-###Features:
-
-###Components:
-
+- Start web server
+    - gulp
 
 
 

@@ -20,80 +20,39 @@ angular.module('chipster-web').config([
             file.errorMessageDetails = chunk.xhr.responseURL;
         });
     }]);
-angular.module('chipster-web').run(function ($rootScope, $location, AuthenticationService, ConfigService) {
-    ConfigService.init();
-    $rootScope.$on("$routeChangeStart", function (event, next) {
-        if (next.$$route.authenticated) {
-            var userAuth = AuthenticationService.getToken();
-            if (!userAuth) {
-                console.log('token not found, forward to login');
-                $location.path('/login');
+angular.module('chipster-web').filter('toolFilter', function () {
+    return function (arr, searchTool) {
+        if (!searchTool)
+            return arr;
+        var result = [];
+        angular.forEach(arr, function (item) {
+            if (item.name.toLowerCase().indexOf(searchTool.toLowerCase()) !== -1) {
+                result.push(item);
             }
+        });
+        return result;
+    };
+});
+angular.module('chipster-web').controller('NavigationController', function ($scope, AuthenticationService, $uibModal, $location, ConfigService) {
+    $scope.isLoggedOut = function () {
+        if (AuthenticationService.getToken() === null) {
+            return true;
         }
-    });
-});
-angular.module('chipster-web').config(function ($routeProvider) {
-    $routeProvider
-        .when('/', { templateUrl: 'app/views/home/home.html' })
-        .when('/home', { templateUrl: 'app/views/home/home.html' })
-        .when('/login', { templateUrl: 'app/views/login/login.html', controller: 'LoginCtrl' })
-        .when('/sessions', { templateUrl: 'app/views/sessions/sessionlist.html', controller: 'SessionListCtrl', authenticated: true })
-        .when('/sessions/:sessionId', { templateUrl: 'app/views/sessions/session/session.html', controller: 'SessionCtrl', authenticated: true })
-        .otherwise({ templateUrl: 'app/views/home/home.html' });
-});
-angular.module('chipster-authentication', ['LocalStorageModule']);
-angular.module('chipster-authentication').factory('AuthenticationService', ['localStorageService', '$http', 'ConfigService',
-    function (localStorageService, $http, ConfigService) {
-        var service = {};
-        service.login = function (username, password) {
-            service.setAuthToken(null);
-            return this.requestToken('POST', username, password).then(function (response) {
-                service.setAuthToken(response.data.tokenKey);
-            });
-        };
-        service.logout = function () {
-            localStorageService.clearAll();
-        };
-        service.getTokenHeader = function () {
-            service.updateTokenHeader();
-            return this.tokenHeader;
-        };
-        service.requestToken = function (method, username, password) {
-            var string = username + ":" + password;
-            var encodedString = btoa(string);
-            var urlString = URI(ConfigService.getAuthUrl()).path('tokens').toString();
-            return promise = $http({
-                url: urlString,
-                method: method,
-                withCredentials: true,
-                headers: { 'Authorization': 'Basic ' + encodedString }
-            });
-        };
-        service.getToken = function () {
-            return localStorageService.get('auth-token');
-        };
-        service.setAuthToken = function (val) {
-            localStorageService.set('auth-token', val);
-            service.updateTokenHeader();
-        };
-        service.updateTokenHeader = function () {
-            if (!service.tokenHeader) {
-                service.tokenHeader = {};
-            }
-            this.tokenHeader['Authorization'] = 'Basic ' + btoa('token' + ':' + service.getToken());
-        };
-        return service;
-    }]);
-angular.module('chipster-web').controller('MainCtrl', function ($scope, $location, SessionRestangular, ConfigService) {
+    };
+    $scope.logout = function () {
+        AuthenticationService.logout();
+        $location.path("/");
+    };
+    $scope.isLoggedIn = function () {
+        if (AuthenticationService.getToken() !== null) {
+            return true;
+        }
+    };
     $scope.getHost = function () {
         return ConfigService.getApiUrl();
     };
-    $scope.setTitle = function (title, renameEnabled) {
-        $scope.title = title;
-        $scope.isTitleRenameEnabled = renameEnabled;
-    };
 });
-angular.module('chipster-web').directive('chipsterHtml', function ($sce) {
+angular.module('chipster-web').directive('htmlVisualization', function ($sce) {
     return {
         restrict: 'E',
         scope: {
@@ -107,6 +66,18 @@ angular.module('chipster-web').directive('chipsterHtml', function ($sce) {
         }
     };
 });
+angular.module('chipster-web').run(function ($rootScope, $location, AuthenticationService, ConfigService) {
+    ConfigService.init();
+    $rootScope.$on("$routeChangeStart", function (event, next) {
+        if (next.$$route.authenticated) {
+            var userAuth = AuthenticationService.getToken();
+            if (!userAuth) {
+                console.log('token not found, forward to login');
+                $location.path('/login');
+            }
+        }
+    });
+});
 angular.module('chipster-web').directive('chipsterImage', function () {
     return {
         restrict: 'E',
@@ -116,7 +87,637 @@ angular.module('chipster-web').directive('chipsterImage', function () {
         template: '<div class="scrollable"><img ng-src="{{src}}"></div>'
     };
 });
-angular.module('chipster-web').directive('chipsterSpreadsheet', function (FileRestangular) {
+angular.module('chipster-web').controller('DatasetHistoryModalController', function ($log, $uibModalInstance) {
+    this.close = function () {
+        $uibModalInstance.dismiss();
+    };
+});
+angular.module('chipster-web').directive('imageVisualization', function () {
+    return {
+        restrict: 'E',
+        scope: {
+            src: '='
+        },
+        template: '<div class="scrollable"><img ng-src="{{src}}"></div>'
+    };
+});
+angular.module('chipster-authentication', ['LocalStorageModule']);
+angular.module('chipster-resource', ['restangular']);
+angular.module('chipster-web').controller('JobErrorModalController', function ($log, $uibModalInstance, toolErrorTitle, toolError) {
+    this.toolErrorTitle = toolErrorTitle;
+    this.toolError = toolError;
+    this.close = function () {
+        $uibModalInstance.close();
+    };
+});
+angular.module('chipster-web').directive('pdfVisualization', function () {
+    return {
+        restrict: 'E',
+        scope: {
+            datasetId: "=",
+            sessionId: "=",
+            src: "="
+        },
+        template: '<div class="wrapper scrollable"><ng-pdf template-url="app/views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf></div>',
+        link: function ($scope) {
+            $scope.pdfFileName = 'PDF file';
+            $scope.pdfUrl = $scope.src;
+            $scope.scroll = 0;
+            $scope.loading = 'loading';
+            $scope.getNavStyle = function (scroll) {
+                if (scroll > 100)
+                    return 'pdf-controls fixed';
+                else
+                    return 'pdf-controls';
+            };
+            $scope.onError = function (error) {
+                console.log(error);
+            };
+            $scope.onLoad = function () {
+                $scope.loading = '';
+            };
+            $scope.onProgress = function (progress) {
+            };
+        }
+    };
+});
+angular.module('chipster-resource').factory('FileRestangular', function (Restangular, AuthenticationService, ConfigService) {
+    var service = Restangular.withConfig(function (RestangularConfigurer) {
+        RestangularConfigurer.setBaseUrl(ConfigService.getFileBrokerUrl());
+        RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
+        RestangularConfigurer.setFullResponse(true);
+    });
+    service.getData = function (sessionId, datasetId) {
+        return this.one('sessions', sessionId)
+            .one('datasets', datasetId)
+            .get();
+    };
+    return service;
+});
+angular.module('chipster-web').controller('SessionCtrl', function ($scope, $routeParams, $q, SessionRestangular, AuthenticationService, $websocket, $http, $window, WorkflowGraphService, ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
+    $scope.sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
+    $scope.datasetSearch = {};
+    $scope.selectedDatasets = [];
+    $scope.selectedJobs = [];
+    $scope.selectedTool = null;
+    $scope.selectedToolIndex = -1;
+    $scope.istoolselected = false;
+    $scope.selectedTab = 1;
+    $scope.toolDetailList = null;
+    $scope.searched_dataset_name = null;
+    $scope.data = {
+        sessionId: $routeParams.sessionId,
+        jobsMap: new Map(),
+        datasetsMap: new Map(),
+        workflowData: {}
+    };
+    $scope.datasetSearchKeyEvent = function (e) {
+        if (e.keyCode == 13) {
+            var allDatasets = $scope.getDatasetList();
+            $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
+            $scope.datasetSearch.value = null;
+        }
+        if (e.keyCode == 27) {
+            $scope.datasetSearch.value = null;
+        }
+    };
+    $scope.getWorkflowCallback = function () {
+        return $scope;
+    };
+    $scope.getDatasetList = function () {
+        return Utils.mapValues($scope.data.datasetsMap);
+    };
+    $scope.setTab = function (tab) {
+        $scope.selectedTab = tab;
+    };
+    $scope.isTab = function (tab) {
+        return $scope.selectedTab === tab;
+    };
+    $scope.isDatasetSelected = function () {
+        return $scope.selectedDatasets.length > 0;
+    };
+    $scope.isJobSelected = function () {
+        return $scope.selectedJobs.length > 0;
+    };
+    $scope.isSelectedDataset = function (data) {
+        return $scope.selectedDatasets.indexOf(data) !== -1;
+    };
+    $scope.isSelectedJob = function (data) {
+        return $scope.selectedJobs.indexOf(data) !== -1;
+    };
+    $scope.isSingleDatasetSelected = function () {
+        return $scope.selectedDatasets.length == 1;
+    };
+    $scope.isMultipleDatasetsSelected = function () {
+        return $scope.selectedDatasets.length > 1;
+    };
+    $scope.clearSelection = function () {
+        $scope.selectedDatasets.length = 0;
+        $scope.selectedJobs.length = 0;
+    };
+    $scope.toggleDatasetSelection = function ($event, data) {
+        Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
+    };
+    $scope.selectJob = function (event, job) {
+        $scope.clearSelection();
+        $scope.selectedJobs = [job];
+    };
+    $scope.deleteJobs = function (jobs) {
+        angular.forEach(jobs, function (job) {
+            var url = $scope.sessionUrl.one('jobs').one(job.jobId);
+            url.remove().then(function (res) {
+                $log.debug(res);
+            });
+        });
+    };
+    SessionRestangular.loadSession($routeParams.sessionId).then(function (data) {
+        $scope.$apply(function () {
+            $scope.data = data;
+            var subscription = SessionEventService.subscribe($routeParams.sessionId, $scope.data, $scope.onSessionChange);
+            $scope.$on("$destroy", function () {
+                subscription.unsubscribe();
+            });
+        });
+    });
+    $scope.onSessionChange = function (event, oldValue, newValue) {
+        if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
+            $scope.$apply(function () {
+                alert('The session has been deleted.');
+                $location.path('sessions');
+            });
+        }
+        if (event.resourceType === 'DATASET') {
+            $scope.$broadcast('datasetsMapChanged', {});
+        }
+        if (event.resourceType === 'JOB') {
+            $scope.$broadcast('jobsMapChanged', {});
+            if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+                $scope.openErrorModal('Job failed', newValue);
+                $log.info(newValue);
+            }
+            if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+                $scope.openErrorModal('Job error', newValue);
+                $log.info(newValue);
+            }
+        }
+    };
+    $scope.getDataSets = function () {
+        $scope.datalist = $scope.sessionUrl.all('datasets')
+            .getList();
+    };
+    $scope.deleteDatasets = function (datasets) {
+        angular.forEach(datasets, function (dataset) {
+            var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
+            datasetUrl.remove().then(function (res) {
+                $log.debug(res);
+            });
+        });
+    };
+    $scope.getJob = function (jobId) {
+        return $scope.data.jobsMap.get(jobId);
+    };
+    $scope.renameDatasetDialog = function (dataset) {
+        var result = prompt('Change the name of the node', dataset.name);
+        if (result) {
+            dataset.name = result;
+        }
+        $scope.updateDataset(dataset);
+    };
+    $scope.updateDataset = function (dataset) {
+        var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
+        return datasetUrl.customPUT(dataset);
+    };
+    $scope.updateSession = function () {
+        $scope.sessionUrl.customPUT($scope.data.session);
+    };
+    $scope.getDatasetUrl = function () {
+        if ($scope.selectedDatasets && $scope.selectedDatasets.length > 0) {
+            return URI(ConfigService.getFileBrokerUrl())
+                .path('sessions/' + $routeParams.sessionId + '/datasets/' + $scope.selectedDatasets[0].datasetId)
+                .addQuery('token', AuthenticationService.getToken()).toString();
+        }
+    };
+    $scope.showDefaultVisualization = function () {
+        $scope.$broadcast('showDefaultVisualization', {});
+    };
+    $scope.exportDatasets = function (datasets) {
+        angular.forEach(datasets, function (d) {
+            $window.open($scope.getDatasetUrl(d), "_blank");
+        });
+    };
+    $scope.$on("angular-resizable.resizeEnd", function () {
+        $scope.$broadcast('resizeWorkFlowGraph', {});
+    });
+    angular.element($window).bind('resize', function () {
+        $scope.$broadcast('resizeWorkFlowGraph', {});
+    });
+    $scope.getSessionId = function () {
+        return $routeParams.sessionId;
+    };
+    $scope.openAddDatasetModal = function () {
+        $uibModal.open({
+            animation: true,
+            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal.html',
+            controller: 'AddDatasetModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+                data: function () {
+                    return $scope.data;
+                }
+            }
+        });
+    };
+    $scope.openErrorModal = function (title, toolError) {
+        $uibModal.open({
+            animation: true,
+            templateUrl: 'app/views/sessions/session/joberrormodal.html',
+            controller: 'JobErrorModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+                toolErrorTitle: function () {
+                    return angular.copy(title);
+                },
+                toolError: function () {
+                    return angular.copy(toolError);
+                }
+            }
+        });
+    };
+    $scope.openSessionEditModal = function () {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'app/views/sessions/session/sessioneditmodal.html',
+            controller: 'SessionEditModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            resolve: {
+                title: function () {
+                    return angular.copy($scope.data.session.name);
+                }
+            }
+        });
+        modalInstance.result.then(function (result) {
+            if (!result) {
+                result = 'unnamed session';
+            }
+            $scope.data.session.name = result;
+            $scope.updateSession();
+        }, function () {
+        });
+    };
+    $scope.openDatasetHistoryModal = function () {
+        $uibModal.open({
+            templateUrl: 'app/views/sessions/session/datasethistorymodal.html',
+            controller: 'DatasetHistoryModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            resolve: {
+                selectedDatasets: function () {
+                    return angular.copy($scope.selectedDatasets);
+                }
+            }
+        });
+    };
+});
+angular.module('chipster-web').directive('phenodataVisualization', function (FileRestangular, SessionRestangular, Utils, TableService) {
+    return {
+        restrict: 'E',
+        scope: {
+            datasets: '=selectedDatasets',
+            datasetId: '=',
+            sessionId: '=',
+            src: '='
+        },
+        templateUrl: 'app/views/sessions/session/visualization/phenodata/phenodatavisualization.html',
+        link: function ($scope, element) {
+            var unremovableColumns = ['sample', 'original_name', 'dataset', 'column'];
+            $scope.getSettings = function (array, headers) {
+                return {
+                    data: array,
+                    colHeaders: headers,
+                    columnSorting: true,
+                    manualColumnResize: true,
+                    sortIndicator: true,
+                    afterGetColHeader: function (col, TH) {
+                        if (unremovableColumns.indexOf(headers[col]) !== -1) {
+                            return;
+                        }
+                        $scope.createRemoveButton(col, TH);
+                    },
+                    afterChange: function (changes, source) {
+                        if (source === 'edit' || source === 'autofill' || source === 'paste') {
+                            $scope.latestEdit = new Date().getTime();
+                            $scope.updateDatasets();
+                        }
+                    }
+                };
+            };
+            $scope.createRemoveButton = function (col, TH) {
+                var button = document.createElement('A');
+                button.className = 'btn btn-xs pull-right phenodata-header-button';
+                var span = document.createElement('SPAN');
+                span.className = 'glyphicon glyphicon-remove';
+                button.appendChild(span);
+                Handsontable.Dom.addEvent(button, 'click', function () {
+                    $scope.removeColumn(col);
+                });
+                if (TH.firstChild.lastChild.nodeName === 'A') {
+                    TH.firstChild.removeChild(TH.firstChild.lastChild);
+                }
+                TH.firstChild.appendChild(button);
+            };
+            $scope.addColumn = function () {
+                var colHeaders = $scope.hot.getSettings().colHeaders;
+                $scope.hot.alter('insert_col', colHeaders.length);
+                colHeaders.pop();
+                colHeaders.push($scope.colName);
+                $scope.hot.updateSettings({
+                    colHeaders: colHeaders
+                });
+                $scope.colName = '';
+                $scope.updateDatasets();
+            };
+            $scope.removeColumn = function (index) {
+                $scope.hot.alter('remove_col', index);
+                $scope.updateDatasets();
+            };
+            $scope.reset = function () {
+                angular.forEach($scope.datasets, function (dataset) {
+                    if (Utils.getFileExtension(dataset.name) === 'tsv') {
+                        $scope.resetTsv(dataset);
+                    }
+                    else {
+                        $scope.resetGenericFile(dataset);
+                    }
+                });
+            };
+            $scope.resetTsv = function (dataset) {
+                TableService.getColumns($scope.sessionId, dataset.datasetId).then(function (fileHeaders) {
+                    var metadata = [];
+                    var chipHeaders = fileHeaders.filter(function (header) {
+                        return Utils.startsWith(header, 'chip.');
+                    });
+                    angular.forEach(chipHeaders, function (fileHeader) {
+                        var entry = {
+                            column: fileHeader,
+                            key: 'sample',
+                            value: fileHeader.replace('chip.', '')
+                        };
+                        metadata.push(entry);
+                    });
+                    dataset.metadata = metadata;
+                    $scope.updateView();
+                    $scope.updateDatasets(true);
+                });
+            };
+            $scope.resetGenericFile = function (dataset) {
+                dataset.metadata = [{
+                        column: null,
+                        key: 'sample',
+                        value: dataset.name
+                    }];
+                $scope.updateView();
+                $scope.updateDatasets(true);
+            };
+            $scope.remove = function () {
+                angular.forEach($scope.datasets, function (dataset) {
+                    dataset.metadata = null;
+                });
+                $scope.updateView();
+                $scope.updateDatasets(true);
+            };
+            $scope.getHeaders = function (datasets) {
+                var headers = {
+                    dataset: true,
+                    column: true
+                };
+                angular.forEach(datasets, function (dataset) {
+                    angular.forEach(dataset.metadata, function (entry) {
+                        headers[entry.key] = true;
+                    });
+                });
+                return Object.keys(headers);
+            };
+            $scope.getRows = function (datasets, headers) {
+                var array = [];
+                function getRow(dataset, column) {
+                    for (var i = 0; i < array.length; i++) {
+                        if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
+                            return array[i];
+                        }
+                    }
+                    row = Array.apply(null, new Array(headers.length)).map(function () { return undefined; });
+                    row.datasetId = dataset.datasetId;
+                    row.columnName = column;
+                    row[0] = dataset.name;
+                    row[1] = column;
+                    array.push(row);
+                    return row;
+                }
+                angular.forEach(datasets, function (dataset) {
+                    angular.forEach(dataset.metadata, function (entry) {
+                        var row = getRow(dataset, entry.column);
+                        row[headers.indexOf(entry.key)] = entry.value;
+                    });
+                });
+                return array;
+            };
+            $scope.updateDataset = function (dataset) {
+                var datasetUrl = SessionRestangular.one('sessions', $scope.sessionId).one('datasets').one(dataset.datasetId);
+                datasetUrl.customPUT(dataset).catch(function (res) {
+                    console.log('dataset updated failed: ' + res);
+                });
+            };
+            $scope.updateDatasets = function (updateAll) {
+                var metadataMap = {};
+                var array = $scope.array;
+                var headers = $scope.headers;
+                array.forEach(function (row) {
+                    for (var i = 0; i < headers.length; i++) {
+                        var entry = {
+                            column: row.columnName,
+                            key: headers[i],
+                            value: row[i]
+                        };
+                        if (!metadataMap[row.datasetId]) {
+                            metadataMap[row.datasetId] = [];
+                        }
+                        metadataMap[row.datasetId].push(entry);
+                    }
+                });
+                angular.forEach($scope.datasets, function (dataset) {
+                    var newMetadata = metadataMap[dataset.datasetId];
+                    if (updateAll || !angular.equals(newMetadata, dataset.metadata)) {
+                        dataset.metadata = newMetadata;
+                        $scope.updateDataset(dataset);
+                    }
+                });
+            };
+            $scope.updateView = function () {
+                var headers = $scope.getHeaders($scope.datasets);
+                var array = $scope.getRows($scope.datasets, headers);
+                if (!angular.equals(headers, $scope.headers)) {
+                    $scope.headers = headers;
+                    var container = document.getElementById('tableContainer');
+                    while (container.firstChild) {
+                        container.removeChild(container.firstChild);
+                    }
+                    $scope.hot = new Handsontable(container, $scope.getSettings($scope.array, $scope.headers));
+                }
+                $scope.array = array;
+                $scope.hot.loadData($scope.array);
+            };
+            $scope.updateViewLater = function () {
+                function isEditingNow() {
+                    return new Date().getTime() - $scope.latestEdit < 1000;
+                }
+                if (!isEditingNow()) {
+                    $scope.updateView();
+                }
+                else {
+                    if (!$scope.deferredUpdatesTimer) {
+                        $scope.deferredUpdatesTimer = setInterval(function () {
+                            if (!isEditingNow()) {
+                                clearInterval($scope.deferredUpdatesTimer);
+                                $scope.deferredUpdatesTimer = undefined;
+                                $scope.updateView();
+                            }
+                        }, 100);
+                    }
+                }
+            };
+            $scope.$watch('datasets', function () {
+                if ($scope.datasets.length > 0) {
+                    $scope.updateViewLater();
+                }
+            }, true);
+            element.on('$destroy', function () {
+                $scope.$destroy();
+            });
+            $scope.updateView();
+        }
+    };
+});
+var AuthenticationService = (function () {
+    function AuthenticationService(localStorageService, $http, ConfigService) {
+        this.localStorageService = localStorageService;
+        this.$http = $http;
+        this.ConfigService = ConfigService;
+    }
+    AuthenticationService.prototype.login = function (username, password) {
+        var _this = this;
+        this.setAuthToken(null);
+        return this.requestToken('POST', username, password).then(function (response) {
+            var token = response.data.tokenKey;
+            _this.setAuthToken(token);
+        });
+    };
+    ;
+    AuthenticationService.prototype.logout = function () {
+        this.localStorageService.clearAll();
+    };
+    ;
+    AuthenticationService.prototype.getTokenHeader = function () {
+        this.updateTokenHeader();
+        return this.tokenHeader;
+    };
+    ;
+    AuthenticationService.prototype.requestToken = function (method, username, password) {
+        var string = username + ":" + password;
+        var encodedString = btoa(string);
+        var urlString = URI(this.ConfigService.getAuthUrl()).path('tokens').toString();
+        return this.$http({
+            url: urlString,
+            method: method,
+            withCredentials: true,
+            headers: { 'Authorization': 'Basic ' + encodedString }
+        });
+    };
+    ;
+    AuthenticationService.prototype.getToken = function () {
+        return this.localStorageService.get('auth-token');
+    };
+    ;
+    AuthenticationService.prototype.setAuthToken = function (val) {
+        this.localStorageService.set('auth-token', val);
+        this.updateTokenHeader();
+    };
+    ;
+    AuthenticationService.prototype.updateTokenHeader = function () {
+        if (!this.tokenHeader) {
+            this.tokenHeader = {};
+        }
+        this.tokenHeader['Authorization'] = 'Basic ' + btoa('token' + ':' + this.getToken());
+    };
+    ;
+    AuthenticationService.$inject = ['localStorageService', '$http', 'ConfigService'];
+    return AuthenticationService;
+}());
+angular.module('chipster-authentication').service('AuthenticationService', AuthenticationService);
+angular.module('chipster-resource').factory('SessionRestangular', function (Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
+    var service = Restangular.withConfig(function (RestangularConfigurer) {
+        RestangularConfigurer.setBaseUrl(ConfigService.getSessionDbUrl());
+        RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
+        RestangularConfigurer.setFullResponse(true);
+    });
+    service.addRequestInterceptor(function (elem, operation) {
+        if (operation === 'remove') {
+            return undefined;
+        }
+        return elem;
+    });
+    service.loadSession = function (sessionId) {
+        var sessionUrl = service.one('sessions', sessionId);
+        var promises = [
+            sessionUrl.get(),
+            sessionUrl.all('datasets').getList(),
+            sessionUrl.all('jobs').getList(),
+            ToolRestangular.all('modules').getList(),
+            ToolRestangular.all('tools').getList()
+        ];
+        return promise = new Promise(function (resolve) {
+            $q.all(promises).then(function (res) {
+                var session = res[0].data;
+                var datasets = res[1].data;
+                var jobs = res[2].data;
+                var modules = res[3].data;
+                var tools = res[4].data;
+                var data = {};
+                data.session = session;
+                data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+                data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
+                modules = modules.filter(function (module) {
+                    return ConfigService.getModules().indexOf(module.name) >= 0;
+                });
+                data.modules = modules;
+                data.tools = tools;
+                modules.map(function (m) {
+                    m.moduleId = m.name.toLowerCase();
+                    return m;
+                });
+                data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+                data.modulesMap.forEach(function (module) {
+                    module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
+                });
+                resolve(data);
+            });
+        });
+    };
+    return service;
+});
+angular.module('chipster-web').controller('SessionEditModalController', function ($scope, $uibModalInstance, title) {
+    this.title = title;
+    this.cancel = function () {
+        $uibModalInstance.dismiss();
+    };
+    this.save = function () {
+        $uibModalInstance.close(this.title);
+    };
+});
+angular.module('chipster-web').directive('spreadsheetVisualization', function (FileRestangular) {
     return {
         restrict: 'E',
         scope: {
@@ -125,7 +726,7 @@ angular.module('chipster-web').directive('chipsterSpreadsheet', function (FileRe
             src: '='
         },
         template: '<div class="scrollable" id="tableContainer"></div>',
-        link: function ($scope, element, attrs) {
+        link: function ($scope) {
             FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                 parserConfig = {
                     separator: '\t'
@@ -148,7 +749,128 @@ angular.module('chipster-web').directive('chipsterSpreadsheet', function (FileRe
         }
     };
 });
-angular.module('chipster-web').directive('chipsterText', function (FileRestangular) {
+angular.module('chipster-resource').factory('ToolRestangular', function (Restangular, AuthenticationService, ConfigService) {
+    return Restangular.withConfig(function (RestangularConfigurer) {
+        RestangularConfigurer.setBaseUrl(ConfigService.getToolboxUrl());
+        RestangularConfigurer.setFullResponse(true);
+    });
+});
+angular.module('chipster-web').factory('SessionEventService', function (ConfigService, $log, AuthenticationService, $websocket, SessionRestangular) {
+    var service = {};
+    service.ws = null;
+    service.subscribe = function (sessionId, localData, onChange) {
+        var eventUrl = ConfigService.getSessionDbEventsUrl(sessionId);
+        $log.debug('eventUrl', eventUrl);
+        service.ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
+        service.ws.onOpen(function () {
+            $log.info('websocket connected');
+        });
+        service.ws.onMessage(function (event) {
+            service.handleEvent(JSON.parse(event.data), sessionId, localData, onChange);
+        });
+        service.ws.onClose(function () {
+            $log.info('websocket closed');
+        });
+        return {
+            unsubscribe: function () {
+                service.ws.close();
+            }
+        };
+    };
+    service.handleEvent = function (event, sessionId, data, onChange) {
+        var sessionUrl = SessionRestangular.one('sessions', sessionId);
+        $log.debug('websocket event', event);
+        if (event.resourceType === 'AUTHORIZATION') {
+            service.handleAuthorizationEvent(event, data, onChange);
+        }
+        else if (event.resourceType === 'SESSION') {
+            service.handleSessionEvent(event, sessionUrl, data, onChange);
+        }
+        else if (event.resourceType === 'DATASET') {
+            service.handleDatasetEvent(event, sessionUrl, data, onChange);
+        }
+        else if (event.resourceType === 'JOB') {
+            service.handleJobEvent(event, sessionUrl, data, onChange);
+        }
+        else {
+            $log.warn("unknwon resource type", event.resourceType, event);
+        }
+    };
+    service.handleAuthorizationEvent = function (event, data, onChange) {
+        if (event.type === 'DELETE') {
+            onChange(event, data.session, null);
+        }
+        else {
+            $log.warn("unknown event type", event);
+        }
+    };
+    service.handleSessionEvent = function (event, sessionUrl, data, onChange) {
+        if (event.type === 'UPDATE') {
+            sessionUrl.get().then(function (resp) {
+                var local = data.session;
+                var localCopy = angular.copy(local);
+                var remote = resp.data;
+                angular.copy(remote, local);
+                onChange(event, localCopy, remote);
+            });
+        }
+        else {
+            $log.warn("unknown event type", event);
+        }
+    };
+    service.handleDatasetEvent = function (event, sessionUrl, data, onChange) {
+        if (event.type === 'CREATE') {
+            sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+                data.datasetsMap.set(event.resourceId, resp.data);
+                onChange(event, null, resp.data);
+            });
+        }
+        else if (event.type === 'UPDATE') {
+            sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+                var local = data.datasetsMap.get(event.resourceId);
+                var localCopy = angular.copy(local);
+                var remote = resp.data;
+                angular.copy(remote, local);
+                onChange(event, localCopy, remote);
+            });
+        }
+        else if (event.type === 'DELETE') {
+            var localCopy = angular.copy(data.datasetsMap.get(event.resourceId));
+            data.datasetsMap.delete(event.resourceId);
+            onChange(event, localCopy, null);
+        }
+        else {
+            $log.warn("unknown event type", event);
+        }
+    };
+    service.handleJobEvent = function (event, sessionUrl, data, onChange) {
+        if (event.type === 'CREATE') {
+            sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+                data.jobsMap.set(event.resourceId, resp.data);
+                onChange(event, null, resp.data);
+            });
+        }
+        else if (event.type === 'UPDATE') {
+            sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+                var local = data.jobsMap.get(event.resourceId);
+                var localCopy = angular.copy(local);
+                var remote = resp.data;
+                angular.copy(remote, local);
+                onChange(event, localCopy, remote);
+            });
+        }
+        else if (event.type === 'DELETE') {
+            var localCopy = angular.copy(data.jobsMap.get(event.resourceId));
+            data.jobsMap.delete(event.resourceId);
+            onChange(event, localCopy, null);
+        }
+        else {
+            $log.warn("unknown event type", event.type, event);
+        }
+    };
+    return service;
+});
+angular.module('chipster-web').directive('textVisualization', function (FileRestangular) {
     return {
         restrict: 'E',
         scope: {
@@ -157,47 +879,595 @@ angular.module('chipster-web').directive('chipsterText', function (FileRestangul
             src: "="
         },
         template: "<p>{{data}}</p>",
-        link: function ($scope, element, attrs) {
+        link: function ($scope) {
             FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                 $scope.data = resp.data;
             });
         }
     };
 });
-angular.module('chipster-web').directive('toolCircle', function () {
-    var radius = 3;
-    return {
-        restrict: 'EA',
-        scope: {
-            toolcolor: "="
-        },
-        template: "<canvas id='tcanvas' width=" + (radius * 2 + 5) + " height=" + (radius * 2 + 2) + ">",
-        link: function (scope, element) {
-            scope.canvas = element.find('canvas')[0];
-            scope.context = scope.canvas.getContext('2d');
-            var centerX = radius;
-            var centerY = radius;
-            scope.context.beginPath();
-            scope.context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-            scope.context.fillStyle = scope.toolcolor;
-            scope.context.fill();
-        }
+angular.module('chipster-web').filter('bytes', function () {
+    return function (bytes, precision) {
+        if (isNaN(parseFloat(bytes)) || !isFinite(bytes))
+            return '-';
+        if (bytes === 0)
+            return '';
+        if (typeof precision === 'undefined')
+            precision = 1;
+        var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'], number = Math
+            .floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision)
+            + ' ' + units[number];
     };
 });
-angular.module('chipster-web').directive('toolText', function () {
-    return {
-        restrict: 'EA',
-        scope: {
-            toolname: "="
-        },
-        template: "<canvas id='txtcanvas' width='300' height='20'/>",
-        link: function (scope, element, attrs) {
-            scope.canvas = element.find('canvas')[0];
-            scope.context = scope.canvas.getContext('2d');
-            scope.context.font = "9pt sans-serif";
-            scope.context.fillStyle = "black";
-            scope.context.fillText(scope.toolname, 5, 12);
+angular.module('chipster-web').config(function ($routeProvider) {
+    $routeProvider
+        .when('/', { templateUrl: 'app/views/home/home.html' })
+        .when('/home', { templateUrl: 'app/views/home/home.html' })
+        .when('/login', { templateUrl: 'app/views/login/login.html', controller: 'LoginCtrl' })
+        .when('/sessions', { templateUrl: 'app/views/sessions/sessionlist.html', controller: 'SessionListCtrl', authenticated: true })
+        .when('/sessions/:sessionId', { templateUrl: 'app/views/sessions/session/session.html', controller: 'SessionCtrl', authenticated: true })
+        .otherwise({ templateUrl: 'app/views/home/home.html' });
+});
+angular.module('chipster-web').controller('ParameterModalController', function ($log, $uibModalInstance, $scope, selectedTool, inputBindings, selectedDatasets, ToolService, isRunEnabled, parameters) {
+    var self = this;
+    this.selectedTool = selectedTool;
+    this.inputBindings = inputBindings;
+    this.selectedDatasets = selectedDatasets;
+    this.isRunEnabled = isRunEnabled;
+    this.parameters = parameters;
+    this.isSelectionParameter = ToolService.isSelectionParameter;
+    this.isNumberParameter = ToolService.isNumberParameter;
+    this.getDefaultValue = ToolService.getDefaultValue;
+    this.getCompatibleDatasets = function (toolInput) {
+        return this.selectedDatasets.filter(function (dataset) {
+            return ToolService.isCompatible(dataset, toolInput.type.name);
+        });
+    };
+    this.showDescription = function (description) {
+        this.description = description;
+    };
+    this.runJob = function () {
+        this.close(true);
+    };
+    this.close = function (run) {
+        $uibModalInstance.close({
+            parameters: this.parameters,
+            inputBindings: this.inputBindings,
+            run: run
+        });
+    };
+    this.dismiss = function () {
+        $uibModalInstance.dismiss();
+    };
+    $scope.$on('modal.closing', function (event, reason, closed) {
+        if (!closed) {
+            event.preventDefault();
+            self.close(false);
         }
+    });
+});
+angular.module('chipster-web').controller('VisualizationCtrl', function ($scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils) {
+    $scope.setTab = function (value) {
+        $scope.tab = value;
+    };
+    $scope.isTab = function (value) {
+        return $scope.tab === value;
+    };
+    $scope.$watchCollection("selectedDatasets", function () {
+        $scope.setTab(1);
+        $scope.setCurrentVisualization(undefined);
+    });
+    $scope.setCurrentVisualization = function (newVisualization, directive) {
+        if ($scope.currentVisualizationDirective) {
+            $scope.currentVisualizationDirective.remove();
+        }
+        $scope.currentVisualization = newVisualization;
+        $scope.currentVisualizationDirective = directive;
+    };
+    $scope.$on('showDefaultVisualization', function () {
+        var visualizations = $scope.getVisualizations();
+        if (visualizations.length > 0) {
+            $scope.show(visualizations[0]);
+        }
+    });
+    $scope.visualizations = [
+        {
+            directive: 'image-visualization',
+            icon: 'glyphicon-picture',
+            name: 'Image',
+            extensions: ['png', "jpg", "jpeg"],
+            preview: true,
+            multipleDatasets: false
+        },
+        {
+            directive: 'pdf-visualization',
+            icon: 'glyphicon-book',
+            name: 'PDF',
+            extensions: ['pdf'],
+            preview: true,
+            multipleDatasets: false
+        },
+        {
+            directive: 'spreadsheet-visualization',
+            icon: 'glyphicon-th',
+            name: 'Spreadsheet',
+            extensions: ['tsv', 'bed'],
+            preview: false,
+            multipleDatasets: false
+        },
+        {
+            directive: 'phenodata-visualization',
+            icon: 'glyphicon-edit',
+            name: 'Phenodata',
+            extensions: ['tsv', 'bam'],
+            preview: false,
+            multipleDatasets: true
+        },
+        {
+            directive: 'html-visualization',
+            icon: 'glyphicon-globe',
+            name: 'Html',
+            extensions: ['html'],
+            preview: true,
+            multipleDatasets: false
+        },
+        {
+            directive: 'text-visualization',
+            icon: 'glyphicon-font',
+            name: 'Text',
+            extensions: ['txt', 'tsv', 'bed'],
+            preview: false,
+            multipleDatasets: false
+        }
+    ];
+    $scope.setCurrentVisualization(undefined);
+    $scope.isCompatibleWithDataset = function (visualization, dataset) {
+        var extension = Utils.getFileExtension(dataset.name);
+        return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
+    };
+    $scope.isCompatible = function (visualization, datasets) {
+        if (datasets && datasets.length === 1) {
+            return $scope.isCompatibleWithDataset(visualization, datasets[0]);
+        }
+        else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
+            for (var i = 0; i < datasets.length; i++) {
+                if (!$scope.isCompatibleWithDataset(visualization, datasets[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    };
+    $scope.getVisualizations = function () {
+        return $scope.visualizations.filter(function (visualization) {
+            return $scope.isCompatible(visualization, $scope.selectedDatasets);
+        });
+    };
+    $scope.showPreview = function () {
+        var visualizations = $scope.getVisualizations();
+        return visualizations.length === 1 && visualizations[0].preview;
+    };
+    $scope.show = function (vis) {
+        if (!$scope.isSingleDatasetSelected) {
+            console.log("trying to show visualization, but " + $scope.selectedDatasets.length + " datasets selected");
+            return;
+        }
+        var directive = angular.element('<' + vis.directive + '/>');
+        directive.attr('src', 'getDatasetUrl()');
+        directive.attr('dataset-id', 'selectedDatasets[0].datasetId');
+        directive.attr('session-id', "'" + $routeParams.sessionId + "'");
+        directive.attr('selected-datasets', 'selectedDatasets');
+        $compile(directive)($scope);
+        var area = angular.element(document.getElementById("visualizationArea"));
+        area.empty();
+        area.append(directive);
+        $scope.setTab(2);
+        $scope.setCurrentVisualization(vis, directive);
+    };
+});
+angular.module('chipster-web').filter('categoryFilter', function ($filter) {
+    return function (arr, searchTool) {
+        if (!searchTool)
+            return arr;
+        var result = [];
+        angular.forEach(arr, function (category) {
+            var filteredTools = $filter('toolFilter')(category.tools, searchTool);
+            if (filteredTools.length > 0) {
+                result.push(category);
+            }
+        });
+        return result;
+    };
+});
+angular.module('chipster-web').factory('ConfigService', ['$location',
+    function ($location) {
+        var service = {};
+        service.init = function () {
+            var serviceLocatorUrl = null;
+            $.ajax({
+                url: '/app/config.json',
+                async: false,
+                dataType: 'json',
+                success: function (response) {
+                    service.config = response;
+                    serviceLocatorUrl = response.serviceLocator;
+                    console.log('serviceLocator', serviceLocatorUrl);
+                }
+            });
+            var baseURL;
+            $.ajax({
+                url: serviceLocatorUrl + '/services',
+                async: false,
+                dataType: 'json',
+                success: function (response) {
+                    service.services = {};
+                    angular.forEach(response, function (s) {
+                        var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) {
+                            return w.toUpperCase();
+                        });
+                        service.services[camelCaseRole] = s.publicUri;
+                    });
+                    baseURL = service.services.sessionDb;
+                    console.log('sessionDb', service.services.sessionDb);
+                }
+            });
+            service.baseUrl = baseURL;
+        };
+        service.getApiUrl = function () {
+            return service.baseUrl;
+        };
+        service.getSessionDbUrl = function () {
+            if (service.services.sessionDb) {
+                return service.services.sessionDb;
+            }
+            return service.baseUrl + 'sessiondb' + '/';
+        };
+        service.getSessionDbEventsUrl = function (sessionId) {
+            if (service.services.sessionDbEvents) {
+                return URI(service.services.sessionDbEvents).path('events/' + sessionId).toString();
+            }
+            var eventUrl = service.baseUrl
+                .replace('http://', 'ws://')
+                .replace('https://', 'wss://')
+                + 'sessiondbevents/events/' + sessionId;
+            if (service.baseUrl === "") {
+                eventUrl = "ws://" + $location.host() + ":" + $location.port()
+                    + "/sessiondbevents/events/" + sessionId;
+            }
+            return eventUrl;
+        };
+        service.getAuthUrl = function () {
+            if (service.services.authenticationService) {
+                return service.services.authenticationService;
+            }
+            return service.baseUrl + 'auth' + '/';
+        };
+        service.getFileBrokerUrl = function () {
+            if (service.services.fileBroker) {
+                return service.services.fileBroker;
+            }
+            return service.baseUrl + 'filebroker' + '/';
+        };
+        service.getToolboxUrl = function () {
+            if (service.services.toolbox) {
+                return service.services.toolbox;
+            }
+            return service.baseUrl + 'toolbox/';
+        };
+        service.getModules = function () {
+            return service.config.modules;
+        };
+        return service;
+    }]);
+angular.module('chipster-web').controller('SourceModalController', function ($log, $uibModalInstance, selectedTool, ToolRestangular) {
+    var self = this;
+    this.selectedTool = selectedTool;
+    this.$onInit = function () {
+        ToolRestangular.one('tools', this.selectedTool.name.id).customGET('source').then(function (response) {
+            $log.log(response.data);
+            self.source = response.data;
+        });
+    };
+    this.close = function () {
+        $uibModalInstance.close();
+    };
+});
+angular.module('chipster-web').controller('AddDatasetModalController', function ($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
+    this.flowFileAdded = function (file, event, flow) {
+        $log.debug('file added');
+        flow.opts.target = function (file) {
+            return file.chipsterTarget;
+        };
+        this.createDataset(file.name).then(function (dataset) {
+            file.chipsterTarget = URI(ConfigService.getFileBrokerUrl())
+                .path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId)
+                .addQuery('token', AuthenticationService.getToken()).toString();
+            file.resume();
+        });
+        file.pause();
+    };
+    this.createDataset = function (name) {
+        var sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
+        var d = {
+            datasetId: null,
+            name: name,
+            x: null,
+            y: null,
+            sourceJob: null
+        };
+        $log.debug('createDataset', d);
+        return new Promise(function (resolve) {
+            var datasetUrl = sessionUrl.one('datasets');
+            datasetUrl.customPOST(d).then(function (response) {
+                $log.debug(response);
+                var location = response.headers('Location');
+                d.datasetId = location.substr(location.lastIndexOf('/') + 1);
+                var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(data.datasetsMap));
+                d.x = pos.x;
+                d.y = pos.y;
+                data.datasetsMap.set(d.datasetId, d);
+                var datasetUrl = sessionUrl.one('datasets').one(d.datasetId);
+                datasetUrl.customPUT(d).then(function () {
+                    resolve(d);
+                });
+            });
+        });
+    };
+    this.flowFileSuccess = function (file) {
+        file.cancel();
+    };
+    this.close = function () {
+        $uibModalInstance.dismiss();
+    };
+});
+angular.module('chipster-web').filter('moduleFilter', function ($filter) {
+    return function (arr, searchTool) {
+        if (!searchTool)
+            return arr;
+        var result = [];
+        angular.forEach(arr, function (module) {
+            var filteredTools = $filter('categoryFilter')(module.categories, searchTool);
+            if (filteredTools.length > 0) {
+                result.push(module);
+            }
+        });
+        return result;
+    };
+});
+angular.module('chipster-web').factory('TableService', function (FileRestangular) {
+    var service = {};
+    service.getColumns = function (sessionId, datasetId) {
+        return FileRestangular.getData(sessionId, datasetId).then(function (resp) {
+            return new Promise(function (resolve, reject) {
+                parserConfig = {
+                    separator: '\t'
+                };
+                $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
+                    if (fileArray) {
+                        resolve(fileArray[0]);
+                    }
+                    else {
+                        reject(err);
+                    }
+                });
+            });
+        });
+    };
+    return service;
+});
+angular.module('chipster-web').controller('ToolCtrl', function ($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
+    $scope.activeTab = 0;
+    $scope.selectedCategory = null;
+    $scope.$watch('data.modules', function () {
+        if ($scope.data.modules) {
+            $scope.selectModule($scope.data.modules[0]);
+        }
+    });
+    $scope.selectModule = function (module) {
+        $scope.selectedModule = module;
+        $scope.categories = module.categories;
+        $scope.selectFirstVisible();
+    };
+    $scope.selectCategory = function (category) {
+        $scope.selectedCategory = category;
+    };
+    $scope.selectTool = function (toolId) {
+        angular.forEach($scope.data.tools, function (tool) {
+            if (tool.name.id === toolId) {
+                $scope.selectedTool = tool;
+                $scope.job = {
+                    toolId: $scope.selectedTool.name.id,
+                    toolCategory: $scope.selectedCategory.name,
+                    toolName: $scope.selectedTool.name.displayName,
+                    toolDescription: $scope.selectedTool.description,
+                    state: 'NEW',
+                    parameters: $scope.selectedTool.parameters.map($scope.getJobParameter)
+                };
+            }
+        });
+        $scope.inputBindings = $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets);
+    };
+    $scope.isRunEnabled = function () {
+        return $scope.selectedDatasets.length > 0 && $scope.selectedTool;
+    };
+    $scope.isParametersEnabled = function () {
+        return $scope.selectedTool && $scope.selectedTool.parameters.length > 0;
+    };
+    $scope.bindInputs = function (tool, datasets) {
+        var unboundDatasets = datasets.slice();
+        var inputBindings = [];
+        for (var j = 0; j < tool.inputs.length; j++) {
+            var toolInput = tool.inputs[j];
+            if (toolInput.type === 'PHENODATA') {
+                continue;
+            }
+            var found = false;
+            for (var i = 0; i < unboundDatasets.length; i++) {
+                var dataset = unboundDatasets[i];
+                if (ToolService.isCompatible(dataset, toolInput.type.name)) {
+                    inputBindings.push({
+                        toolInput: toolInput,
+                        dataset: dataset
+                    });
+                    unboundDatasets.splice(unboundDatasets.indexOf(dataset), 1);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return null;
+            }
+        }
+        return inputBindings;
+    };
+    $scope.runJob = function () {
+        var jobToRun = angular.copy($scope.job);
+        for (var _i = 0, _a = jobToRun.parameters; _i < _a.length; _i++) {
+            jobParameter = _a[_i];
+            delete jobParameter.toolParameter;
+        }
+        jobToRun.inputs = [];
+        for (var _b = 0, _c = $scope.inputBindings; _b < _c.length; _b++) {
+            inputBinding = _c[_b];
+            var jobInput = {
+                inputId: inputBinding.toolInput.name.id,
+                description: inputBinding.toolInput.description,
+                datasetId: inputBinding.dataset.datasetId,
+                displayName: inputBinding.dataset.name
+            };
+            jobToRun.inputs.push(jobInput);
+        }
+        var postJobUrl = $scope.sessionUrl.one('jobs');
+        postJobUrl.customPOST(jobToRun).then(function (response) {
+            console.log(response);
+        });
+    };
+    $scope.selectFirstVisible = function () {
+        var filteredModules = $filter('moduleFilter')($scope.data.modules, $scope.searchTool);
+        if (filteredModules && filteredModules.indexOf($scope.selectedModule) < 0 && filteredModules[0]) {
+            $scope.selectModule(filteredModules[0]);
+        }
+        var filteredCategories = $filter('categoryFilter')($scope.selectedModule.categories, $scope.searchTool);
+        if (filteredCategories && filteredCategories.indexOf($scope.selectedCategory) < 0 && filteredCategories[0]) {
+            $scope.selectCategory(filteredCategories[0]);
+        }
+    };
+    $scope.toolSearchKeyEvent = function (e) {
+        if (e.keyCode == 13) {
+            var visibleTools = $filter('toolFilter')($scope.selectedCategory.tools, $scope.searchTool);
+            if (visibleTools[0]) {
+                $scope.searchTool = null;
+                $scope.selectTool(visibleTools[0].id);
+            }
+        }
+        if (e.keyCode == 27) {
+            $scope.searchTool = null;
+        }
+    };
+    $scope.getJobParameter = function (toolParameter) {
+        var jobParameter = {
+            parameterId: toolParameter.name.id,
+            displayName: toolParameter.name.displayName,
+            description: toolParameter.description,
+            type: toolParameter.type,
+            value: ToolService.getDefaultValue(toolParameter),
+            toolParameter: toolParameter
+        };
+        if (toolParameter.type === 'COLUMN_SEL') {
+            $scope.getColumns().then(function (columns) {
+                jobParameter.toolParameter.selectionOptions = columns.map(function (column) {
+                    return { id: column };
+                });
+            });
+        }
+        if (toolParameter.type === 'METACOLUMN_SEL') {
+            jobParameter.toolParameter.selectionOptions = $scope.getMetadataColumns().map(function (column) {
+                return { id: column };
+            });
+        }
+        return jobParameter;
+    };
+    $scope.getColumns = function () {
+        var promises = [];
+        angular.forEach($scope.selectedDatasets, function (dataset) {
+            if ($scope.isCompatible(dataset, 'TSV')) {
+                promises.push(TableService.getColumns($scope.getSessionId(), dataset.datasetId));
+            }
+        });
+        return $q.all(promises).then(function (columnsOfSelectedDatasets) {
+            var columnSet = new Set();
+            for (var _i = 0, columnsOfSelectedDatasets_1 = columnsOfSelectedDatasets; _i < columnsOfSelectedDatasets_1.length; _i++) {
+                columns = columnsOfSelectedDatasets_1[_i];
+                for (var _a = 0, columns_1 = columns; _a < columns_1.length; _a++) {
+                    column = columns_1[_a];
+                    columnSet.add(column);
+                }
+            }
+            return Array.from(columnSet);
+        }, function (e) {
+            console.log('failed to get columns', e);
+        });
+    };
+    $scope.getMetadataColumns = function () {
+        var keySet = new Set();
+        angular.forEach($scope.selectedDatasets, function (dataset) {
+            angular.forEach(dataset.metadata, function (entry) {
+                keySet.add(entry.key);
+            });
+        });
+        return Array.from(keySet);
+    };
+    $scope.openParameterModal = function () {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/views/sessions/session/tools/parametermodal.html',
+            controller: 'ParameterModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+                selectedTool: function () {
+                    return angular.copy($scope.selectedTool);
+                },
+                inputBindings: function () {
+                    return angular.copy($scope.inputBindings);
+                },
+                selectedDatasets: function () {
+                    return angular.copy($scope.selectedDatasets);
+                },
+                isRunEnabled: function () {
+                    return $scope.isRunEnabled();
+                },
+                parameters: function () {
+                    return angular.copy($scope.job.parameters);
+                }
+            }
+        });
+        modalInstance.result.then(function (result) {
+            $scope.job.parameters = result.parameters;
+            $scope.inputBindings = result.inputBindings;
+            if (result.run) {
+                $scope.runJob();
+            }
+        }, function () {
+        });
+    };
+    $scope.openSourceModal = function () {
+        $uibModal.open({
+            animation: true,
+            templateUrl: 'app/views/sessions/session/tools/sourcemodal.html',
+            controller: 'SourceModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+                selectedTool: function () {
+                    return angular.copy($scope.selectedTool);
+                }
+            }
+        });
     };
 });
 angular.module('chipster-web').directive('workflowGraph', function ($window, WorkflowGraphService, Utils) {
@@ -493,7 +1763,7 @@ angular.module('chipster-web').directive('workflowGraph', function ($window, Wor
                             scope.callback.exportDatasets(scope.callback.selectedDatasets);
                         } },
                     { title: 'View History as text', action: function () {
-                            scope.callback.showHistory();
+                            scope.callback.openDatasetHistoryModal();
                         } }
                 ];
             }
@@ -682,177 +1952,27 @@ angular.module('chipster-web').directive('workflowGraph', function ($window, Wor
         }
     };
 });
-angular.module('chipster-resource', ['restangular']);
-angular.module('chipster-resource').factory('FileRestangular', function (Restangular, AuthenticationService, ConfigService) {
-    var service = Restangular.withConfig(function (RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl(ConfigService.getFileBrokerUrl());
-        RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
-        RestangularConfigurer.setFullResponse(true);
-    });
-    service.getData = function (sessionId, datasetId) {
-        return this.one('sessions', sessionId)
-            .one('datasets', datasetId)
-            .get();
-    };
-    return service;
-});
-angular.module('chipster-resource').factory('SessionRestangular', function (Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
-    var service = Restangular.withConfig(function (RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl(ConfigService.getSessionDbUrl());
-        RestangularConfigurer.setDefaultHeaders(AuthenticationService.getTokenHeader());
-        RestangularConfigurer.setFullResponse(true);
-    });
-    service.addRequestInterceptor(function (elem, operation) {
-        if (operation === 'remove') {
-            return undefined;
+angular.module('chipster-web').filter('searchDatasetFilter', function ($rootScope) {
+    return function (array, expression) {
+        var result = [];
+        if (!expression) {
+            result = array;
         }
-        return elem;
-    });
-    service.loadSession = function (sessionId) {
-        var sessionUrl = service.one('sessions', sessionId);
-        var promises = [
-            sessionUrl.get(),
-            sessionUrl.all('datasets').getList(),
-            sessionUrl.all('jobs').getList(),
-            ToolRestangular.all('modules').getList(),
-            ToolRestangular.all('tools').getList()
-        ];
-        return promise = new Promise(function (resolve) {
-            $q.all(promises).then(function (res) {
-                var session = res[0].data;
-                var datasets = res[1].data;
-                var jobs = res[2].data;
-                var modules = res[3].data;
-                var tools = res[4].data;
-                var data = {};
-                data.session = session;
-                data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
-                data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
-                modules = modules.filter(function (module) {
-                    return ConfigService.getModules().indexOf(module.name) >= 0;
-                });
-                data.modules = modules;
-                data.tools = tools;
-                modules.map(function (m) {
-                    m.moduleId = m.name.toLowerCase();
-                    return m;
-                });
-                data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
-                data.modulesMap.forEach(function (module) {
-                    module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
-                });
-                resolve(data);
-            });
-        });
-    };
-    return service;
-});
-angular.module('chipster-resource').factory('ToolRestangular', function (Restangular, AuthenticationService, ConfigService) {
-    return Restangular.withConfig(function (RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl(ConfigService.getToolboxUrl());
-        RestangularConfigurer.setFullResponse(true);
-    });
-});
-angular.module('chipster-web').factory('ConfigService', ['$location',
-    function ($location) {
-        var service = {};
-        service.init = function () {
-            var serviceLocatorUrl = null;
-            $.ajax({
-                url: '/app/config.json',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.config = response;
-                    serviceLocatorUrl = response.serviceLocator;
-                    console.log('serviceLocator', serviceLocatorUrl);
+        else {
+            angular.forEach(array, function (item) {
+                if (item.name.toLowerCase().indexOf(expression.toLowerCase()) !== -1) {
+                    result.push(item);
                 }
             });
-            var baseURL;
-            $.ajax({
-                url: serviceLocatorUrl + '/services',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.services = {};
-                    angular.forEach(response, function (s) {
-                        var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) {
-                            return w.toUpperCase();
-                        });
-                        service.services[camelCaseRole] = s.publicUri;
-                    });
-                    baseURL = service.services.sessionDb;
-                    console.log('sessionDb', service.services.sessionDb);
-                }
-            });
-            service.baseUrl = baseURL;
-        };
-        service.getApiUrl = function () {
-            return service.baseUrl;
-        };
-        service.getSessionDbUrl = function () {
-            if (service.services.sessionDb) {
-                return service.services.sessionDb;
-            }
-            return service.baseUrl + 'sessiondb' + '/';
-        };
-        service.getSessionDbEventsUrl = function (sessionId) {
-            if (service.services.sessionDbEvents) {
-                return URI(service.services.sessionDbEvents).path('events/' + sessionId).toString();
-            }
-            var eventUrl = service.baseUrl
-                .replace('http://', 'ws://')
-                .replace('https://', 'wss://')
-                + 'sessiondbevents/events/' + sessionId;
-            if (service.baseUrl === "") {
-                eventUrl = "ws://" + $location.host() + ":" + $location.port()
-                    + "/sessiondbevents/events/" + sessionId;
-            }
-            return eventUrl;
-        };
-        service.getAuthUrl = function () {
-            if (service.services.authenticationService) {
-                return service.services.authenticationService;
-            }
-            return service.baseUrl + 'auth' + '/';
-        };
-        service.getFileBrokerUrl = function () {
-            if (service.services.fileBroker) {
-                return service.services.fileBroker;
-            }
-            return service.baseUrl + 'filebroker' + '/';
-        };
-        service.getToolboxUrl = function () {
-            if (service.services.toolbox) {
-                return service.services.toolbox;
-            }
-            return service.baseUrl + 'toolbox/';
-        };
-        service.getModules = function () {
-            return service.config.modules;
-        };
-        return service;
-    }]);
-angular.module('chipster-web').factory('TableService', function (FileRestangular) {
-    var service = {};
-    service.getColumns = function (sessionId, datasetId) {
-        return FileRestangular.getData(sessionId, datasetId).then(function (resp) {
-            return new Promise(function (resolve, reject) {
-                parserConfig = {
-                    separator: '\t'
-                };
-                $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
-                    if (fileArray) {
-                        resolve(fileArray[0]);
-                    }
-                    else {
-                        reject(err);
-                    }
-                });
-            });
-        });
+        }
+        if (expression) {
+            $rootScope.$broadcast('searchDatasets', { data: result });
+        }
+        else {
+            $rootScope.$broadcast('searchDatasets', { data: null });
+        }
+        return result;
     };
-    return service;
 });
 angular.module('chipster-web').factory('Utils', function () {
     var service = {};
@@ -938,1069 +2058,6 @@ angular.module('chipster-web').factory('Utils', function () {
     };
     return service;
 });
-angular.module('chipster-web').factory('WorkflowGraphService', function () {
-    var service = {
-        nodeHeight: 20,
-        nodeWidth: 32
-    };
-    service.xMargin = service.nodeWidth / 4;
-    service.yMargin = service.nodeHeight;
-    service.newRootPosition = function (nodes) {
-        return service.newPosition(nodes, null, null);
-    };
-    service.newPosition = function (nodes, parentX, parentY) {
-        var x = 10;
-        var y = 10;
-        if (parentX) {
-            x = parentX;
-        }
-        if (parentY) {
-            y = parentY + service.nodeHeight + service.yMargin;
-        }
-        while (service.intersectsAny(nodes, x, y, service.nodeWidth, service.nodeHeight)) {
-            x += service.nodeWidth + service.xMargin;
-        }
-        return {
-            x: x,
-            y: y
-        };
-    };
-    service.intersectsAny = function (nodes, x, y, w, h) {
-        return !nodes.every(function (node) {
-            return !service.intersectsNode(node, x, y, w, h);
-        });
-    };
-    service.intersectsNode = function (node, x, y, w, h) {
-        return (x + w >= node.x &&
-            x < node.x + service.nodeWidth &&
-            y + h >= node.y &&
-            y < node.y + service.nodeHeight);
-    };
-    return service;
-});
-angular.module('chipster-web').filter('bytes', function () {
-    return function (bytes, precision) {
-        if (isNaN(parseFloat(bytes)) || !isFinite(bytes))
-            return '-';
-        if (bytes === 0)
-            return '';
-        if (typeof precision === 'undefined')
-            precision = 1;
-        var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'], number = Math
-            .floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision)
-            + ' ' + units[number];
-    };
-});
-angular.module('chipster-web').filter('categoryFilter', function ($filter) {
-    return function (arr, searchTool) {
-        if (!searchTool)
-            return arr;
-        var result = [];
-        angular.forEach(arr, function (category) {
-            var filteredTools = $filter('toolFilter')(category.tools, searchTool);
-            if (filteredTools.length > 0) {
-                result.push(category);
-            }
-        });
-        return result;
-    };
-});
-angular.module('chipster-web').filter('moduleFilter', function ($filter) {
-    return function (arr, searchTool) {
-        if (!searchTool)
-            return arr;
-        var result = [];
-        angular.forEach(arr, function (module) {
-            var filteredTools = $filter('categoryFilter')(module.categories, searchTool);
-            if (filteredTools.length > 0) {
-                result.push(module);
-            }
-        });
-        return result;
-    };
-});
-angular.module('chipster-web').filter('searchDatasetFilter', function ($rootScope) {
-    return function (array, expression) {
-        var result = [];
-        if (!expression) {
-            result = array;
-        }
-        else {
-            angular.forEach(array, function (item) {
-                if (item.name.toLowerCase().indexOf(expression.toLowerCase()) !== -1) {
-                    result.push(item);
-                }
-            });
-        }
-        if (expression) {
-            $rootScope.$broadcast('searchDatasets', { data: result });
-        }
-        else {
-            $rootScope.$broadcast('searchDatasets', { data: null });
-        }
-        return result;
-    };
-});
-angular.module('chipster-web').filter('seconds', function () {
-    return function (seconds) {
-        if (isNaN(parseFloat(seconds)) || !isFinite(seconds))
-            return '-';
-        if (seconds === 0)
-            return '';
-        var units = ['seconds', 'minutes', 'hours'], number = Math.floor(Math
-            .log(seconds)
-            / Math.log(60));
-        return (seconds / Math.pow(60, Math.floor(number))).toFixed(0) + ' '
-            + units[number];
-    };
-});
-angular.module('chipster-web').filter('toolFilter', function () {
-    return function (arr, searchTool) {
-        if (!searchTool)
-            return arr;
-        var result = [];
-        angular.forEach(arr, function (item) {
-            if (item.name.toLowerCase().indexOf(searchTool.toLowerCase()) !== -1) {
-                result.push(item);
-            }
-        });
-        return result;
-    };
-});
-angular.module('chipster-web').directive('chipsterPdf', function () {
-    return {
-        restrict: 'E',
-        scope: {
-            datasetId: "=",
-            sessionId: "=",
-            src: "="
-        },
-        template: '<div class="wrapper scrollable"><ng-pdf template-url="app/directives/chipsterpdf/viewer.html" scale="page-fit"></ng-pdf></div>',
-        link: function ($scope, element, attrs) {
-            $scope.pdfFileName = 'PDF file';
-            $scope.pdfUrl = $scope.src;
-            $scope.scroll = 0;
-            $scope.loading = 'loading';
-            $scope.getNavStyle = function (scroll) {
-                if (scroll > 100)
-                    return 'pdf-controls fixed';
-                else
-                    return 'pdf-controls';
-            };
-            $scope.onError = function (error) {
-                console.log(error);
-            };
-            $scope.onLoad = function () {
-                $scope.loading = '';
-            };
-            $scope.onProgress = function (progress) {
-            };
-        }
-    };
-});
-angular.module('chipster-web').directive('chipsterPhenodata', function (FileRestangular, SessionRestangular, Utils, TableService) {
-    return {
-        restrict: 'E',
-        scope: {
-            datasets: '=selectedDatasets',
-            datasetId: '=',
-            sessionId: '=',
-            src: '='
-        },
-        templateUrl: 'app/directives/chipsterphenodata/chipsterphenodata.html',
-        link: function ($scope, element) {
-            var unremovableColumns = ['sample', 'original_name', 'dataset', 'column'];
-            $scope.getSettings = function (array, headers) {
-                return {
-                    data: array,
-                    colHeaders: headers,
-                    columnSorting: true,
-                    manualColumnResize: true,
-                    sortIndicator: true,
-                    afterGetColHeader: function (col, TH) {
-                        if (unremovableColumns.indexOf(headers[col]) !== -1) {
-                            return;
-                        }
-                        $scope.createRemoveButton(col, TH);
-                    },
-                    afterChange: function (changes, source) {
-                        if (source === 'edit' || source === 'autofill' || source === 'paste') {
-                            $scope.latestEdit = new Date().getTime();
-                            $scope.updateDatasets();
-                        }
-                    }
-                };
-            };
-            $scope.createRemoveButton = function (col, TH) {
-                var button = document.createElement('A');
-                button.className = 'btn btn-xs pull-right phenodata-header-button';
-                var span = document.createElement('SPAN');
-                span.className = 'glyphicon glyphicon-remove';
-                button.appendChild(span);
-                Handsontable.Dom.addEvent(button, 'click', function () {
-                    $scope.removeColumn(col);
-                });
-                if (TH.firstChild.lastChild.nodeName === 'A') {
-                    TH.firstChild.removeChild(TH.firstChild.lastChild);
-                }
-                TH.firstChild.appendChild(button);
-            };
-            $scope.addColumn = function () {
-                var colHeaders = $scope.hot.getSettings().colHeaders;
-                $scope.hot.alter('insert_col', colHeaders.length);
-                colHeaders.pop();
-                colHeaders.push($scope.colName);
-                $scope.hot.updateSettings({
-                    colHeaders: colHeaders
-                });
-                $scope.colName = '';
-                $scope.updateDatasets();
-            };
-            $scope.removeColumn = function (index) {
-                $scope.hot.alter('remove_col', index);
-                $scope.updateDatasets();
-            };
-            $scope.reset = function () {
-                angular.forEach($scope.datasets, function (dataset) {
-                    if (Utils.getFileExtension(dataset.name) === 'tsv') {
-                        $scope.resetTsv(dataset);
-                    }
-                    else {
-                        $scope.resetGenericFile(dataset);
-                    }
-                });
-            };
-            $scope.resetTsv = function (dataset) {
-                TableService.getColumns($scope.sessionId, dataset.datasetId).then(function (fileHeaders) {
-                    var metadata = [];
-                    var chipHeaders = fileHeaders.filter(function (header) {
-                        return Utils.startsWith(header, 'chip.');
-                    });
-                    angular.forEach(chipHeaders, function (fileHeader) {
-                        var entry = {
-                            column: fileHeader,
-                            key: 'sample',
-                            value: fileHeader.replace('chip.', '')
-                        };
-                        metadata.push(entry);
-                    });
-                    dataset.metadata = metadata;
-                    $scope.updateView();
-                    $scope.updateDatasets(true);
-                });
-            };
-            $scope.resetGenericFile = function (dataset) {
-                dataset.metadata = [{
-                        column: null,
-                        key: 'sample',
-                        value: dataset.name
-                    }];
-                $scope.updateView();
-                $scope.updateDatasets(true);
-            };
-            $scope.remove = function () {
-                angular.forEach($scope.datasets, function (dataset) {
-                    dataset.metadata = null;
-                });
-                $scope.updateView();
-                $scope.updateDatasets(true);
-            };
-            $scope.getHeaders = function (datasets) {
-                var headers = {
-                    dataset: true,
-                    column: true
-                };
-                angular.forEach(datasets, function (dataset) {
-                    angular.forEach(dataset.metadata, function (entry) {
-                        headers[entry.key] = true;
-                    });
-                });
-                return Object.keys(headers);
-            };
-            $scope.getRows = function (datasets, headers) {
-                var array = [];
-                function getRow(dataset, column) {
-                    for (var i = 0; i < array.length; i++) {
-                        if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
-                            return array[i];
-                        }
-                    }
-                    row = Array.apply(null, new Array(headers.length)).map(function () { return undefined; });
-                    row.datasetId = dataset.datasetId;
-                    row.columnName = column;
-                    row[0] = dataset.name;
-                    row[1] = column;
-                    array.push(row);
-                    return row;
-                }
-                angular.forEach(datasets, function (dataset) {
-                    angular.forEach(dataset.metadata, function (entry) {
-                        var row = getRow(dataset, entry.column);
-                        row[headers.indexOf(entry.key)] = entry.value;
-                    });
-                });
-                return array;
-            };
-            $scope.updateDataset = function (dataset) {
-                var datasetUrl = SessionRestangular.one('sessions', $scope.sessionId).one('datasets').one(dataset.datasetId);
-                datasetUrl.customPUT(dataset).catch(function (res) {
-                    console.log('dataset updated failed: ' + res);
-                });
-            };
-            $scope.updateDatasets = function (updateAll) {
-                var metadataMap = {};
-                var array = $scope.array;
-                var headers = $scope.headers;
-                array.forEach(function (row) {
-                    for (var i = 0; i < headers.length; i++) {
-                        var entry = {
-                            column: row.columnName,
-                            key: headers[i],
-                            value: row[i]
-                        };
-                        if (!metadataMap[row.datasetId]) {
-                            metadataMap[row.datasetId] = [];
-                        }
-                        metadataMap[row.datasetId].push(entry);
-                    }
-                });
-                angular.forEach($scope.datasets, function (dataset) {
-                    var newMetadata = metadataMap[dataset.datasetId];
-                    if (updateAll || !angular.equals(newMetadata, dataset.metadata)) {
-                        dataset.metadata = newMetadata;
-                        $scope.updateDataset(dataset);
-                    }
-                });
-            };
-            $scope.updateView = function () {
-                var headers = $scope.getHeaders($scope.datasets);
-                var array = $scope.getRows($scope.datasets, headers);
-                if (!angular.equals(headers, $scope.headers)) {
-                    $scope.headers = headers;
-                    var container = document.getElementById('tableContainer');
-                    while (container.firstChild) {
-                        container.removeChild(container.firstChild);
-                    }
-                    $scope.hot = new Handsontable(container, $scope.getSettings($scope.array, $scope.headers));
-                }
-                $scope.array = array;
-                $scope.hot.loadData($scope.array);
-            };
-            $scope.updateViewLater = function () {
-                function isEditingNow() {
-                    return new Date().getTime() - $scope.latestEdit < 1000;
-                }
-                if (!isEditingNow()) {
-                    $scope.updateView();
-                }
-                else {
-                    if (!$scope.deferredUpdatesTimer) {
-                        $scope.deferredUpdatesTimer = setInterval(function () {
-                            if (!isEditingNow()) {
-                                clearInterval($scope.deferredUpdatesTimer);
-                                $scope.deferredUpdatesTimer = undefined;
-                                $scope.updateView();
-                            }
-                        }, 100);
-                    }
-                }
-            };
-            $scope.$watch('datasets', function () {
-                if ($scope.datasets.length > 0) {
-                    $scope.updateViewLater();
-                }
-            }, true);
-            element.on('$destroy', function () {
-                $scope.$destroy();
-            });
-            $scope.updateView();
-        }
-    };
-});
-angular.module('chipster-web').controller('LoginCtrl', function ($scope, $location, $http, AuthenticationService) {
-    $scope.login = function () {
-        AuthenticationService.login($scope.username, $scope.password).then(function () {
-            $location.path("/sessions");
-        }, function (response) {
-            console.log('login failed', response);
-            if (response) {
-                if (response.status === 403) {
-                    $scope.error = 'Incorrect username or password.';
-                }
-                else {
-                    $scope.error = response.data;
-                }
-            }
-            else {
-                $scope.error = 'Could not connect to the server ' + baseURLString;
-            }
-        });
-    };
-});
-angular.module('chipster-web').controller('NavigationController', function ($scope, AuthenticationService, $uibModal, $location) {
-    $scope.isLoggedOut = function () {
-        if (AuthenticationService.getToken() === null) {
-            return true;
-        }
-    };
-    $scope.logout = function () {
-        AuthenticationService.logout();
-        $location.path("/");
-    };
-    $scope.isLoggedIn = function () {
-        if (AuthenticationService.getToken() !== null) {
-            return true;
-        }
-    };
-    $scope.openSessionEditModal = function () {
-        var modalInstance = $uibModal.open({
-            templateUrl: 'app/views/navigation/sessioneditmodal.html',
-            controller: 'SessionEditModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            resolve: {
-                title: function () {
-                    return angular.copy($scope.title);
-                }
-            }
-        });
-        modalInstance.result.then(function (result) {
-            $scope.title = result;
-        }, function () {
-        });
-    };
-});
-angular.module('chipster-web').controller('SessionEditModalController', function ($scope, $uibModalInstance, title) {
-    this.title = title;
-    this.cancel = function () {
-        $uibModalInstance.dismiss();
-    };
-    this.save = function () {
-        $uibModalInstance.close(this.title);
-    };
-});
-angular.module('chipster-web').controller('SessionListCtrl', function ($scope, $http, $location, SessionRestangular) {
-    $scope.selectedSessions = [];
-    $scope.userSessions = [];
-    $scope.createSession = function () {
-        var session = {
-            sessionId: null,
-            name: 'New session',
-            notes: '',
-            created: '2015-08-27T17:53:10.331Z',
-            accessed: '2015-08-27T17:53:10.331Z'
-        };
-        SessionRestangular.one('sessions').customPOST(session).then(function (res) {
-            if (res.headers) {
-                var sessionLocation = res.headers('Location');
-                session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
-                $scope.openSession(session);
-            }
-        });
-    };
-    $scope.init = function () {
-        $scope.setTitle('Sessions', false);
-        $scope.updateSessions();
-    };
-    $scope.updateSessions = function () {
-        SessionRestangular.all('sessions').getList().then(function (res) {
-            $scope.userSessions = res.data;
-        }, function (response) {
-            console.log('failed to get sessions', response);
-            if (response.status === 403) {
-                $location.path('/login');
-            }
-        });
-    };
-    $scope.openSession = function (session) {
-        $location.path("/sessions" + "/" + session.sessionId);
-    };
-    $scope.deleteSessions = function (sessions) {
-        angular.forEach(sessions, function (session) {
-            var sessionUrl = SessionRestangular.one('sessions').one(session.sessionId);
-            sessionUrl.remove().then(function (res) {
-                console.log("session deleted", res);
-                $scope.updateSessions();
-                $scope.selectedSessions = [];
-            });
-        });
-    };
-    $scope.selectSession = function (event, session) {
-        $scope.selectedSessions = [session];
-        if ($scope.selectedSessions.length === 1) {
-            if (session !== $scope.previousSession) {
-                $scope.previousSession = session;
-                $scope.session = {};
-                SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function (fullSession) {
-                    if ($scope.selectedSessions[0] === session) {
-                        $scope.$apply(function () {
-                            $scope.session = fullSession;
-                        });
-                    }
-                });
-            }
-        }
-    };
-    $scope.isSessionSelected = function (session) {
-        return $scope.selectedSessions.indexOf(session) !== -1;
-    };
-    var callback = {
-        isSelectedDataset: function () { },
-        isSelectedJob: function () { }
-    };
-    $scope.getWorkflowCallback = function () {
-        return callback;
-    };
-});
-angular.module('chipster-web').controller('JobErrorModalController', function ($log, $uibModalInstance, toolErrorTitle, toolError) {
-    this.toolErrorTitle = toolErrorTitle;
-    this.toolError = toolError;
-    this.close = function () {
-        $uibModalInstance.close();
-    };
-});
-angular.module('chipster-web').controller('SessionCtrl', function ($scope, $routeParams, $q, SessionRestangular, AuthenticationService, $websocket, $http, $window, WorkflowGraphService, ConfigService, $location, Utils, $filter, $log, $uibModal) {
-    $scope.sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
-    var eventUrl = ConfigService.getSessionDbEventsUrl($routeParams.sessionId);
-    $log.debug('eventUrl', eventUrl);
-    var ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
-    ws.onOpen(function () {
-        $log.info('websocket connected');
-    });
-    ws.onMessage(function (event) {
-        $scope.handleEvent(JSON.parse(event.data));
-    });
-    ws.onClose(function () {
-        $log.info('websocket closed');
-    });
-    $scope.$on("$destroy", function () {
-        ws.close();
-    });
-    $scope.handleEvent = function (event) {
-        $log.debug('websocket event', event);
-        if (event.resourceType === 'AUTHORIZATION') {
-            if (event.type === 'DELETE') {
-                $scope.$apply(function () {
-                    alert('The session has been deleted.');
-                    $location.path('sessions');
-                });
-            }
-            else {
-                $log.warn("unknown event type", event);
-            }
-        }
-        else if (event.resourceType === 'SESSION') {
-            if (event.type === 'UPDATE') {
-                $scope.sessionUrl.get().then(function (resp) {
-                    var local = $scope.data.session;
-                    var remote = resp.data;
-                    angular.copy(remote, local);
-                    $scope.setTitle(remote.name, true);
-                });
-            }
-            else {
-                $log.warn("unknown event type", event);
-            }
-        }
-        else if (event.resourceType === 'DATASET') {
-            if (event.type === 'CREATE') {
-                $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-                    $scope.data.datasetsMap.set(event.resourceId, resp.data);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-            }
-            else if (event.type === 'UPDATE') {
-                $scope.sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
-                    var local = $scope.data.datasetsMap.get(event.resourceId);
-                    var remote = resp.data;
-                    angular.copy(remote, local);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-            }
-            else if (event.type === 'DELETE') {
-                $scope.$apply(function () {
-                    $scope.data.datasetsMap.delete(event.resourceId);
-                    $scope.$broadcast('datasetsMapChanged', {});
-                });
-            }
-            else {
-                $log.warn("unknown event type", event);
-            }
-        }
-        else if (event.resourceType === 'JOB') {
-            if (event.type === 'CREATE') {
-                $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                    $scope.data.jobsMap.set(event.resourceId, resp.data);
-                    $scope.$broadcast('jobsMapChanged', {});
-                });
-            }
-            else if (event.type === 'UPDATE') {
-                $scope.sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
-                    var local = $scope.data.jobsMap.get(event.resourceId);
-                    var remote = resp.data;
-                    if (remote.state === 'FAILED' && local.state !== 'FAILED') {
-                        $scope.openErrorModal('Job failed', remote);
-                        $log.info(remote);
-                    }
-                    if (remote.state === 'ERROR' && local.state !== 'ERROR') {
-                        $scope.openErrorModal('Job error', remote);
-                        $log.info(remote);
-                    }
-                    angular.copy(remote, local);
-                    $scope.$broadcast('jobsMapChanged', {});
-                });
-            }
-            else if (event.type === 'DELETE') {
-                $scope.data.jobsMap.delete(event.resourceId);
-                $scope.$broadcast('jobsMapChanged', {});
-            }
-            else {
-                $log.warn("unknown event type", event.type, event);
-            }
-        }
-        else {
-            $log.warn("unknwon resource type", event.resourceType, event);
-        }
-    };
-    $scope.datasetSearch = {};
-    $scope.datasetSearchKeyEvent = function (e) {
-        if (e.keyCode == 13) {
-            var allDatasets = $scope.getDatasetList();
-            $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
-            $scope.datasetSearch.value = null;
-        }
-        if (e.keyCode == 27) {
-            $scope.datasetSearch.value = null;
-        }
-    };
-    $scope.data = {
-        sessionId: $routeParams.sessionId,
-        jobsMap: new Map(),
-        datasetsMap: new Map(),
-        workflowData: {}
-    };
-    $scope.getWorkflowCallback = function () {
-        return $scope;
-    };
-    $scope.getDatasetList = function () {
-        return Utils.mapValues($scope.data.datasetsMap);
-    };
-    $scope.item = 1;
-    $scope.setItem = function (value) {
-        $scope.item = value;
-    };
-    $scope.isSet = function (value) {
-        return $scope.item === value;
-    };
-    $scope.selectedDatasets = [];
-    $scope.selectedJobs = [];
-    $scope.isDatasetSelected = function () {
-        return $scope.selectedDatasets.length > 0;
-    };
-    $scope.isJobSelected = function () {
-        return $scope.selectedJobs.length > 0;
-    };
-    $scope.isSelectedDataset = function (data) {
-        return $scope.selectedDatasets.indexOf(data) !== -1;
-    };
-    $scope.isSelectedJob = function (data) {
-        return $scope.selectedJobs.indexOf(data) !== -1;
-    };
-    $scope.isSingleDatasetSelected = function () {
-        return $scope.selectedDatasets.length == 1;
-    };
-    $scope.isMultipleDatasetsSelected = function () {
-        return $scope.selectedDatasets.length > 1;
-    };
-    $scope.clearSelection = function () {
-        $scope.selectedDatasets.length = 0;
-        $scope.selectedJobs.length = 0;
-    };
-    $scope.toggleDatasetSelection = function ($event, data) {
-        Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
-    };
-    $scope.selectJob = function (event, job) {
-        $scope.clearSelection();
-        $scope.selectedJobs = [job];
-    };
-    $scope.deleteJobs = function (jobs) {
-        angular.forEach(jobs, function (job) {
-            var url = $scope.sessionUrl.one('jobs').one(job.jobId);
-            url.remove().then(function (res) {
-                $log.debug(res);
-            });
-        });
-    };
-    $scope.selectedTool = null;
-    $scope.selectedToolIndex = -1;
-    $scope.istoolselected = false;
-    $scope.toolDetailList = null;
-    $scope.searched_dataset_name = null;
-    SessionRestangular.loadSession($routeParams.sessionId).then(function (data) {
-        $scope.$apply(function () {
-            $scope.data = data;
-            $scope.setTitle($scope.data.session.name, true);
-            $scope.$watch('title', function () {
-                $scope.data.session.name = $scope.title;
-                $scope.updateSession();
-            });
-        });
-    });
-    $scope.getDataSets = function () {
-        $scope.datalist = $scope.sessionUrl.all('datasets')
-            .getList();
-    };
-    $scope.deleteDatasets = function (datasets) {
-        angular.forEach(datasets, function (dataset) {
-            var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
-            datasetUrl.remove().then(function (res) {
-                $log.debug(res);
-            });
-        });
-    };
-    $scope.getJob = function (jobId) {
-        return $scope.data.jobsMap.get(jobId);
-    };
-    $scope.renameDatasetDialog = function (dataset) {
-        var result = prompt('Change the name of the node', dataset.name);
-        if (result) {
-            dataset.name = result;
-        }
-        $scope.updateDataset(dataset);
-    };
-    $scope.updateDataset = function (dataset) {
-        var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
-        return datasetUrl.customPUT(dataset);
-    };
-    $scope.updateSession = function () {
-        $scope.sessionUrl.customPUT($scope.data.session);
-    };
-    $scope.getDatasetUrl = function () {
-        if ($scope.selectedDatasets && $scope.selectedDatasets.length > 0) {
-            return URI(ConfigService.getFileBrokerUrl())
-                .path('sessions/' + $routeParams.sessionId + '/datasets/' + $scope.selectedDatasets[0].datasetId)
-                .addQuery('token', AuthenticationService.getToken()).toString();
-        }
-    };
-    $scope.showDefaultVisualization = function () {
-        $scope.$broadcast('showDefaultVisualization', {});
-    };
-    $scope.exportDatasets = function (datasets) {
-        angular.forEach(datasets, function (d) {
-            $window.open($scope.getDatasetUrl(d), "_blank");
-        });
-    };
-    $scope.showHistory = function () {
-        $('#historyModal').modal('show');
-    };
-    $scope.$on("angular-resizable.resizeEnd", function () {
-        $scope.$broadcast('resizeWorkFlowGraph', {});
-    });
-    angular.element($window).bind('resize', function () {
-        $scope.$broadcast('resizeWorkFlowGraph', {});
-    });
-    $scope.getSessionId = function () {
-        return $routeParams.sessionId;
-    };
-    $scope.openAddDatasetModal = function () {
-        $uibModal.open({
-            animation: true,
-            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal.html',
-            controller: 'AddDatasetModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                data: function () {
-                    return $scope.data;
-                }
-            }
-        });
-    };
-    $scope.openErrorModal = function (title, toolError) {
-        $uibModal.open({
-            animation: true,
-            templateUrl: 'app/views/sessions/session/joberrormodal.html',
-            controller: 'JobErrorModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                toolErrorTitle: function () {
-                    return angular.copy(title);
-                },
-                toolError: function () {
-                    return angular.copy(toolError);
-                }
-            }
-        });
-    };
-});
-angular.module('chipster-web').controller('ParameterModalController', function ($log, $uibModalInstance, $scope, selectedTool, inputBindings, selectedDatasets, ToolService, isRunEnabled, parameters) {
-    var self = this;
-    this.selectedTool = selectedTool;
-    this.inputBindings = inputBindings;
-    this.selectedDatasets = selectedDatasets;
-    this.isRunEnabled = isRunEnabled;
-    this.parameters = parameters;
-    this.isSelectionParameter = ToolService.isSelectionParameter;
-    this.isNumberParameter = ToolService.isNumberParameter;
-    this.getDefaultValue = ToolService.getDefaultValue;
-    this.getCompatibleDatasets = function (toolInput) {
-        return this.selectedDatasets.filter(function (dataset) {
-            return ToolService.isCompatible(dataset, toolInput.type.name);
-        });
-    };
-    this.showDescription = function (description) {
-        this.description = description;
-    };
-    this.runJob = function () {
-        this.close(true);
-    };
-    this.close = function (run) {
-        $uibModalInstance.close({
-            parameters: this.parameters,
-            inputBindings: this.inputBindings,
-            run: run
-        });
-    };
-    this.dismiss = function () {
-        $uibModalInstance.dismiss();
-    };
-    $scope.$on('modal.closing', function (event, reason, closed) {
-        if (!closed) {
-            event.preventDefault();
-            self.close(false);
-        }
-    });
-});
-angular.module('chipster-web').controller('SourceModalController', function ($log, $uibModalInstance, selectedTool, ToolRestangular) {
-    var self = this;
-    this.selectedTool = selectedTool;
-    this.$onInit = function () {
-        ToolRestangular.one('tools', this.selectedTool.name.id).customGET('source').then(function (response) {
-            $log.log(response.data);
-            self.source = response.data;
-        });
-    };
-    this.close = function () {
-        $uibModalInstance.close();
-    };
-});
-angular.module('chipster-web').controller('ToolCtrl', function ($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
-    $scope.activeTab = 0;
-    $scope.selectedCategory = null;
-    $scope.$watch('data.modules', function () {
-        if ($scope.data.modules) {
-            $scope.selectModule($scope.data.modules[0]);
-        }
-    });
-    $scope.selectModule = function (module) {
-        $scope.selectedModule = module;
-        $scope.categories = module.categories;
-        $scope.selectFirstVisible();
-    };
-    $scope.selectCategory = function (category) {
-        $scope.selectedCategory = category;
-    };
-    $scope.selectTool = function (toolId) {
-        angular.forEach($scope.data.tools, function (tool) {
-            if (tool.name.id === toolId) {
-                $scope.selectedTool = tool;
-                $scope.job = {
-                    toolId: $scope.selectedTool.name.id,
-                    toolCategory: $scope.selectedCategory.name,
-                    toolName: $scope.selectedTool.name.displayName,
-                    toolDescription: $scope.selectedTool.description,
-                    state: 'NEW',
-                    parameters: $scope.selectedTool.parameters.map($scope.getJobParameter)
-                };
-            }
-        });
-        $scope.inputBindings = $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets);
-    };
-    $scope.isRunEnabled = function () {
-        return $scope.selectedDatasets.length > 0 && $scope.selectedTool;
-    };
-    $scope.isParametersEnabled = function () {
-        return $scope.selectedTool && $scope.selectedTool.parameters.length > 0;
-    };
-    $scope.bindInputs = function (tool, datasets) {
-        var unboundDatasets = datasets.slice();
-        var inputBindings = [];
-        for (var j = 0; j < tool.inputs.length; j++) {
-            var toolInput = tool.inputs[j];
-            if (toolInput.type === 'PHENODATA') {
-                continue;
-            }
-            var found = false;
-            for (var i = 0; i < unboundDatasets.length; i++) {
-                var dataset = unboundDatasets[i];
-                if (ToolService.isCompatible(dataset, toolInput.type.name)) {
-                    inputBindings.push({
-                        toolInput: toolInput,
-                        dataset: dataset
-                    });
-                    unboundDatasets.splice(unboundDatasets.indexOf(dataset), 1);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return null;
-            }
-        }
-        return inputBindings;
-    };
-    $scope.runJob = function () {
-        var jobToRun = angular.copy($scope.job);
-        for (var _i = 0, _a = jobToRun.parameters; _i < _a.length; _i++) {
-            jobParameter = _a[_i];
-            delete jobParameter.toolParameter;
-        }
-        jobToRun.inputs = [];
-        for (var _b = 0, _c = $scope.inputBindings; _b < _c.length; _b++) {
-            inputBinding = _c[_b];
-            var jobInput = {
-                inputId: inputBinding.toolInput.name.id,
-                description: inputBinding.toolInput.description,
-                datasetId: inputBinding.dataset.datasetId,
-                displayName: inputBinding.dataset.name
-            };
-            jobToRun.inputs.push(jobInput);
-        }
-        var postJobUrl = $scope.sessionUrl.one('jobs');
-        postJobUrl.customPOST(jobToRun).then(function (response) {
-            console.log(response);
-        });
-    };
-    $scope.selectFirstVisible = function () {
-        var filteredModules = $filter('moduleFilter')($scope.data.modules, $scope.searchTool);
-        if (filteredModules && filteredModules.indexOf($scope.selectedModule) < 0 && filteredModules[0]) {
-            $scope.selectModule(filteredModules[0]);
-        }
-        var filteredCategories = $filter('categoryFilter')($scope.selectedModule.categories, $scope.searchTool);
-        if (filteredCategories && filteredCategories.indexOf($scope.selectedCategory) < 0 && filteredCategories[0]) {
-            $scope.selectCategory(filteredCategories[0]);
-        }
-    };
-    $scope.toolSearchKeyEvent = function (e) {
-        if (e.keyCode == 13) {
-            var visibleTools = $filter('toolFilter')($scope.selectedCategory.tools, $scope.searchTool);
-            if (visibleTools[0]) {
-                $scope.searchTool = null;
-                $scope.selectTool(visibleTools[0].id);
-            }
-        }
-        if (e.keyCode == 27) {
-            $scope.searchTool = null;
-        }
-    };
-    $scope.getJobParameter = function (toolParameter) {
-        var jobParameter = {
-            parameterId: toolParameter.name.id,
-            displayName: toolParameter.name.displayName,
-            description: toolParameter.description,
-            type: toolParameter.type,
-            value: ToolService.getDefaultValue(toolParameter),
-            toolParameter: toolParameter
-        };
-        if (toolParameter.type === 'COLUMN_SEL') {
-            $scope.getColumns().then(function (columns) {
-                jobParameter.toolParameter.selectionOptions = columns.map(function (column) {
-                    return { id: column };
-                });
-            });
-        }
-        if (toolParameter.type === 'METACOLUMN_SEL') {
-            jobParameter.toolParameter.selectionOptions = $scope.getMetadataColumns().map(function (column) {
-                return { id: column };
-            });
-        }
-        return jobParameter;
-    };
-    $scope.getColumns = function () {
-        var promises = [];
-        angular.forEach($scope.selectedDatasets, function (dataset) {
-            if ($scope.isCompatible(dataset, 'TSV')) {
-                promises.push(TableService.getColumns($scope.getSessionId(), dataset.datasetId));
-            }
-        });
-        return $q.all(promises).then(function (columnsOfSelectedDatasets) {
-            var columnSet = new Set();
-            for (var _i = 0, columnsOfSelectedDatasets_1 = columnsOfSelectedDatasets; _i < columnsOfSelectedDatasets_1.length; _i++) {
-                columns = columnsOfSelectedDatasets_1[_i];
-                for (var _a = 0, columns_1 = columns; _a < columns_1.length; _a++) {
-                    column = columns_1[_a];
-                    columnSet.add(column);
-                }
-            }
-            return Array.from(columnSet);
-        }, function (e) {
-            console.log('failed to get columns', e);
-        });
-    };
-    $scope.getMetadataColumns = function () {
-        var keySet = new Set();
-        angular.forEach($scope.selectedDatasets, function (dataset) {
-            angular.forEach(dataset.metadata, function (entry) {
-                keySet.add(entry.key);
-            });
-        });
-        return Array.from(keySet);
-    };
-    $scope.openParameterModal = function () {
-        var modalInstance = $uibModal.open({
-            animation: true,
-            templateUrl: 'app/views/sessions/session/tools/parametermodal.html',
-            controller: 'ParameterModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                selectedTool: function () {
-                    return angular.copy($scope.selectedTool);
-                },
-                inputBindings: function () {
-                    return angular.copy($scope.inputBindings);
-                },
-                selectedDatasets: function () {
-                    return angular.copy($scope.selectedDatasets);
-                },
-                isRunEnabled: function () {
-                    return $scope.isRunEnabled();
-                },
-                parameters: function () {
-                    return angular.copy($scope.job.parameters);
-                }
-            }
-        });
-        modalInstance.result.then(function (result) {
-            $scope.job.parameters = result.parameters;
-            $scope.inputBindings = result.inputBindings;
-            if (result.run) {
-                $scope.runJob();
-            }
-        }, function () {
-        });
-    };
-    $scope.openSourceModal = function () {
-        $uibModal.open({
-            animation: true,
-            templateUrl: 'app/views/sessions/session/tools/sourcemodal.html',
-            controller: 'SourceModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                selectedTool: function () {
-                    return angular.copy($scope.selectedTool);
-                }
-            }
-        });
-    };
-});
 angular.module('chipster-web').factory('ToolService', function () {
     var service = {};
     service.isSelectionParameter = function (parameter) {
@@ -2055,171 +2112,168 @@ angular.module('chipster-web').factory('ToolService', function () {
     };
     return service;
 });
-angular.module('chipster-web').controller('AddDatasetModalController', function ($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
-    this.flowFileAdded = function (file, event, flow) {
-        $log.debug('file added');
-        flow.opts.target = function (file) {
-            return file.chipsterTarget;
-        };
-        this.createDataset(file.name).then(function (dataset) {
-            file.chipsterTarget = URI(ConfigService.getFileBrokerUrl())
-                .path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId)
-                .addQuery('token', AuthenticationService.getToken()).toString();
-            file.resume();
-        });
-        file.pause();
+angular.module('chipster-web').factory('WorkflowGraphService', function () {
+    var service = {
+        nodeHeight: 20,
+        nodeWidth: 32
     };
-    this.createDataset = function (name) {
-        var sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
-        var d = {
-            datasetId: null,
-            name: name,
-            x: null,
-            y: null,
-            sourceJob: null
+    service.xMargin = service.nodeWidth / 4;
+    service.yMargin = service.nodeHeight;
+    service.newRootPosition = function (nodes) {
+        return service.newPosition(nodes, null, null);
+    };
+    service.newPosition = function (nodes, parentX, parentY) {
+        var x = 10;
+        var y = 10;
+        if (parentX) {
+            x = parentX;
+        }
+        if (parentY) {
+            y = parentY + service.nodeHeight + service.yMargin;
+        }
+        while (service.intersectsAny(nodes, x, y, service.nodeWidth, service.nodeHeight)) {
+            x += service.nodeWidth + service.xMargin;
+        }
+        return {
+            x: x,
+            y: y
         };
-        $log.debug('createDataset', d);
-        return new Promise(function (resolve) {
-            var datasetUrl = sessionUrl.one('datasets');
-            datasetUrl.customPOST(d).then(function (response) {
-                $log.debug(response);
-                var location = response.headers('Location');
-                d.datasetId = location.substr(location.lastIndexOf('/') + 1);
-                var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(data.datasetsMap));
-                d.x = pos.x;
-                d.y = pos.y;
-                data.datasetsMap.set(d.datasetId, d);
-                var datasetUrl = sessionUrl.one('datasets').one(d.datasetId);
-                datasetUrl.customPUT(d).then(function () {
-                    resolve(d);
-                });
+    };
+    service.intersectsAny = function (nodes, x, y, w, h) {
+        return !nodes.every(function (node) {
+            return !service.intersectsNode(node, x, y, w, h);
+        });
+    };
+    service.intersectsNode = function (node, x, y, w, h) {
+        return (x + w >= node.x &&
+            x < node.x + service.nodeWidth &&
+            y + h >= node.y &&
+            y < node.y + service.nodeHeight);
+    };
+    return service;
+});
+angular.module('chipster-web').filter('seconds', function () {
+    return function (seconds) {
+        if (isNaN(parseFloat(seconds)) || !isFinite(seconds))
+            return '-';
+        if (seconds === 0)
+            return '';
+        var units = ['seconds', 'minutes', 'hours'], number = Math.floor(Math
+            .log(seconds)
+            / Math.log(60));
+        return (seconds / Math.pow(60, Math.floor(number))).toFixed(0) + ' '
+            + units[number];
+    };
+});
+angular.module('chipster-web').controller('LoginCtrl', function ($scope, $location, $http, AuthenticationService) {
+    $scope.login = function () {
+        AuthenticationService.login($scope.username, $scope.password).then(function () {
+            $location.path("/sessions");
+        }, function (response) {
+            console.log('login failed', response);
+            if (response) {
+                if (response.status === 403) {
+                    $scope.error = 'Incorrect username or password.';
+                }
+                else {
+                    $scope.error = response.data;
+                }
+            }
+            else {
+                $scope.error = 'Could not connect to the server ' + baseURLString;
+            }
+        });
+    };
+});
+angular.module('chipster-web').directive('toolCircle', function () {
+    var radius = 3;
+    return {
+        restrict: 'EA',
+        scope: {
+            toolcolor: "="
+        },
+        template: "<canvas id='tcanvas' width=" + (radius * 2 + 5) + " height=" + (radius * 2 + 2) + ">",
+        link: function (scope, element) {
+            scope.canvas = element.find('canvas')[0];
+            scope.context = scope.canvas.getContext('2d');
+            var centerX = radius;
+            var centerY = radius;
+            scope.context.beginPath();
+            scope.context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            scope.context.fillStyle = scope.toolcolor;
+            scope.context.fill();
+        }
+    };
+});
+angular.module('chipster-web').controller('SessionListCtrl', function ($scope, $http, $location, SessionRestangular) {
+    $scope.selectedSessions = [];
+    $scope.userSessions = [];
+    $scope.createSession = function () {
+        var session = {
+            sessionId: null,
+            name: 'New session',
+            notes: '',
+            created: '2015-08-27T17:53:10.331Z',
+            accessed: '2015-08-27T17:53:10.331Z'
+        };
+        SessionRestangular.one('sessions').customPOST(session).then(function (res) {
+            if (res.headers) {
+                var sessionLocation = res.headers('Location');
+                session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
+                $scope.openSession(session);
+            }
+        });
+    };
+    $scope.init = function () {
+        $scope.updateSessions();
+    };
+    $scope.updateSessions = function () {
+        SessionRestangular.all('sessions').getList().then(function (res) {
+            $scope.userSessions = res.data;
+        }, function (response) {
+            console.log('failed to get sessions', response);
+            if (response.status === 403) {
+                $location.path('/login');
+            }
+        });
+    };
+    $scope.openSession = function (session) {
+        $location.path("/sessions" + "/" + session.sessionId);
+    };
+    $scope.deleteSessions = function (sessions) {
+        angular.forEach(sessions, function (session) {
+            var sessionUrl = SessionRestangular.one('sessions').one(session.sessionId);
+            sessionUrl.remove().then(function (res) {
+                console.log("session deleted", res);
+                $scope.updateSessions();
+                $scope.selectedSessions = [];
             });
         });
     };
-    this.flowFileSuccess = function (file) {
-        file.cancel();
-    };
-    this.close = function () {
-        $uibModalInstance.dismiss();
-    };
-});
-angular.module('chipster-web').controller('VisualizationCtrl', function ($scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils) {
-    $scope.setTab = function (value) {
-        $scope.tab = value;
-    };
-    $scope.isTab = function (value) {
-        return $scope.tab === value;
-    };
-    $scope.$watchCollection("selectedDatasets", function () {
-        $scope.setTab(1);
-        $scope.setCurrentVisualization(undefined);
-    });
-    $scope.setCurrentVisualization = function (newVisualization, directive) {
-        if ($scope.currentVisualizationDirective) {
-            $scope.currentVisualizationDirective.remove();
-        }
-        $scope.currentVisualization = newVisualization;
-        $scope.currentVisualizationDirective = directive;
-    };
-    $scope.$on('showDefaultVisualization', function () {
-        var visualizations = $scope.getVisualizations();
-        if (visualizations.length > 0) {
-            $scope.show(visualizations[0]);
-        }
-    });
-    $scope.visualizations = [
-        {
-            directive: 'chipster-image',
-            icon: 'glyphicon-picture',
-            name: 'Image',
-            extensions: ['png', "jpg", "jpeg"],
-            preview: true,
-            multipleDatasets: false
-        },
-        {
-            directive: 'chipster-pdf',
-            icon: 'glyphicon-book',
-            name: 'PDF',
-            extensions: ['pdf'],
-            preview: true,
-            multipleDatasets: false
-        },
-        {
-            directive: 'chipster-spreadsheet',
-            icon: 'glyphicon-th',
-            name: 'Spreadsheet',
-            extensions: ['tsv', 'bed'],
-            preview: false,
-            multipleDatasets: false
-        },
-        {
-            directive: 'chipster-phenodata',
-            icon: 'glyphicon-edit',
-            name: 'Phenodata',
-            extensions: ['tsv', 'bam'],
-            preview: false,
-            multipleDatasets: true
-        },
-        {
-            directive: 'chipster-html',
-            icon: 'glyphicon-globe',
-            name: 'Html',
-            extensions: ['html'],
-            preview: true,
-            multipleDatasets: false
-        },
-        {
-            directive: 'chipster-text',
-            icon: 'glyphicon-font',
-            name: 'Text',
-            extensions: ['txt', 'tsv', 'bed'],
-            preview: false,
-            multipleDatasets: false
-        }
-    ];
-    $scope.setCurrentVisualization(undefined);
-    $scope.isCompatibleWithDataset = function (visualization, dataset) {
-        var extension = Utils.getFileExtension(dataset.name);
-        return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
-    };
-    $scope.isCompatible = function (visualization, datasets) {
-        if (datasets && datasets.length === 1) {
-            return $scope.isCompatibleWithDataset(visualization, datasets[0]);
-        }
-        else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
-            for (var i = 0; i < datasets.length; i++) {
-                if (!$scope.isCompatibleWithDataset(visualization, datasets[i])) {
-                    return false;
-                }
+    $scope.selectSession = function (event, session) {
+        $scope.selectedSessions = [session];
+        if ($scope.selectedSessions.length === 1) {
+            if (session !== $scope.previousSession) {
+                $scope.previousSession = session;
+                $scope.session = {};
+                SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function (fullSession) {
+                    if ($scope.selectedSessions[0] === session) {
+                        $scope.$apply(function () {
+                            $scope.session = fullSession;
+                        });
+                    }
+                });
             }
-            return true;
         }
-        return false;
     };
-    $scope.getVisualizations = function () {
-        return $scope.visualizations.filter(function (visualization) {
-            return $scope.isCompatible(visualization, $scope.selectedDatasets);
-        });
+    $scope.isSessionSelected = function (session) {
+        return $scope.selectedSessions.indexOf(session) !== -1;
     };
-    $scope.showPreview = function () {
-        var visualizations = $scope.getVisualizations();
-        return visualizations.length === 1 && visualizations[0].preview;
+    var callback = {
+        isSelectedDataset: function () { },
+        isSelectedJob: function () { }
     };
-    $scope.show = function (vis) {
-        if (!$scope.isSingleDatasetSelected) {
-            console.log("trying to show visualization, but " + $scope.selectedDatasets.length + " datasets selected");
-            return;
-        }
-        var directive = angular.element('<' + vis.directive + '/>');
-        directive.attr('src', 'getDatasetUrl()');
-        directive.attr('dataset-id', 'selectedDatasets[0].datasetId');
-        directive.attr('session-id', "'" + $routeParams.sessionId + "'");
-        directive.attr('selected-datasets', 'selectedDatasets');
-        $compile(directive)($scope);
-        var area = angular.element(document.getElementById("visualizationArea"));
-        area.empty();
-        area.append(directive);
-        $scope.setTab(2);
-        $scope.setCurrentVisualization(vis, directive);
+    $scope.getWorkflowCallback = function () {
+        return callback;
     };
 });
