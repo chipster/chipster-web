@@ -1,1 +1,1 @@
-angular.module('chipster-resource', ['restangular']);
+angular.module('chipster-resource', ['restangular', 'ngResource']);

@@ -12,6 +12,7 @@
     "typings/index.d.ts",
 
     "app/app.module.ts",
+    "app/app.constants.ts",
     "app/common/filter/tool.filter.ts",
     "app/views/navigation/navigation.controller.ts",
     "app/views/sessions/session/visualization/htmlvisualization.directive.ts",
@@ -38,6 +39,7 @@
     "app/resources/tool.resource.ts",
     "app/views/sessions/session/sessionevent.service.ts",
     "app/views/sessions/session/visualization/textvisualization.directive.ts",
+    "app/resources/configurationresource.ts",
 
     "app/common/filter/bytes.filter.ts",
     "app/routes.config.ts",

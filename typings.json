@@ -4,6 +4,9 @@
   "globalDependencies": {
     "angular": "registry:dt/angular#1.5.0+20160619025852",
     "angular-local-storage": "registry:dt/angular-local-storage#0.1.5+20160602154142",
+    "angular-resource": "registry:dt/angular-resource#1.5.0+20160613142217",
+    "angular-route": "registry:dt/angular-route#1.3.0+20160317120654",
+    "bluebird": "registry:dt/bluebird#2.0.0+20160319051630",
     "jquery": "registry:dt/jquery#1.10.0+20160620094458",
     "urijs": "registry:dt/urijs#1.15.1+20160526132152"
   }

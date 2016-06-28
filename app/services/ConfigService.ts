@@ -1,47 +1,23 @@
-angular.module('chipster-web').factory('ConfigService', ['$location',
-    function ($location) {
+angular.module('chipster-web').factory('ConfigService',
+    function ($location, ConfigurationResource, ChipsterModules) {
 
-        var service = {};
+        var service = {
+            config: {modules: ["NGS", "Microarray", "Misc"]}
+        };
 
         service.init = function() {
+            var baseUrl;
+            ConfigurationResource.getConfigurationResource().query().$promise.then( response => {
+                service.services = {};
+                angular.forEach(response, s => {
 
-            var serviceLocatorUrl = null;
-
-            // read the API address from the file
-            // wait until the config is loaded
-            // http://hippieitgeek.blogspot.fi/2013/06/load-json-files-synchronously-with.html
-            $.ajax({
-                url: '/app/config.json',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.config = response;
-                    serviceLocatorUrl = response.serviceLocator;
-                    console.log('serviceLocator', serviceLocatorUrl);
-                }
+                    var camelCaseRole = s.role.replace(/-([a-z])/g, (m, w) => w.toUpperCase() );
+                    service.services[camelCaseRole] = s.publicUri;
+                });
+                service.baseUrl = service.services.sessionDb;
+                console.log('sessionDb', service.services.sessionDb);
             });
 
-            var baseURL;
-
-            $.ajax({
-                url: serviceLocatorUrl + '/services',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.services = {};
-                    angular.forEach(response, function(s) {
-
-                        var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) {
-                            return w.toUpperCase();
-                        });
-                        service.services[camelCaseRole] = s.publicUri;
-                    });
-                    baseURL = service.services.sessionDb;
-                    console.log('sessionDb', service.services.sessionDb);
-                }
-            });
-
-            service.baseUrl = baseURL;
         };
 
         service.getApiUrl = function () {
@@ -102,4 +78,4 @@ angular.module('chipster-web').factory('ConfigService', ['$location',
         };
 
         return service;
-    }]);
+    });

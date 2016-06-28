@@ -20,6 +20,10 @@ angular.module('chipster-web').config([
             file.errorMessageDetails = chunk.xhr.responseURL;
         });
     }]);
+angular.module('chipster-web')
+    .constant('ChipsterModules', ["NGS", "Microarray", "Misc"])
+    .constant('ServiceLocator', 'http://localhost:8003')
+    .constant('_ServiceLocator', 'http://service-locator-chipster.dac-oso.csc.fi');
 angular.module('chipster-web').filter('toolFilter', function () {
     return function (arr, searchTool) {
         if (!searchTool)
@@ -102,7 +106,7 @@ angular.module('chipster-web').directive('imageVisualization', function () {
     };
 });
 angular.module('chipster-authentication', ['LocalStorageModule']);
-angular.module('chipster-resource', ['restangular']);
+angular.module('chipster-resource', ['restangular', 'ngResource']);
 angular.module('chipster-web').controller('JobErrorModalController', function ($log, $uibModalInstance, toolErrorTitle, toolError) {
     this.toolErrorTitle = toolErrorTitle;
     this.toolError = toolError;
@@ -886,6 +890,18 @@ angular.module('chipster-web').directive('textVisualization', function (FileRest
         }
     };
 });
+var ConfigurationResource = (function () {
+    function ConfigurationResource($resource, ServiceLocator) {
+        this.$resource = $resource;
+        this.ServiceLocator = ServiceLocator;
+    }
+    ConfigurationResource.prototype.getConfigurationResource = function () {
+        return this.$resource(this.ServiceLocator + '/services');
+    };
+    ConfigurationResource.$inject = ['$resource', 'ServiceLocator'];
+    return ConfigurationResource;
+}());
+angular.module('chipster-resource').service('ConfigurationResource', ConfigurationResource);
 angular.module('chipster-web').filter('bytes', function () {
     return function (bytes, precision) {
         if (isNaN(parseFloat(bytes)) || !isFinite(bytes))
@@ -1081,86 +1097,68 @@ angular.module('chipster-web').filter('categoryFilter', function ($filter) {
         return result;
     };
 });
-angular.module('chipster-web').factory('ConfigService', ['$location',
-    function ($location) {
-        var service = {};
-        service.init = function () {
-            var serviceLocatorUrl = null;
-            $.ajax({
-                url: '/app/config.json',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.config = response;
-                    serviceLocatorUrl = response.serviceLocator;
-                    console.log('serviceLocator', serviceLocatorUrl);
-                }
+angular.module('chipster-web').factory('ConfigService', function ($location, ConfigurationResource, ChipsterModules) {
+    var service = {
+        config: { modules: ["NGS", "Microarray", "Misc"] }
+    };
+    service.init = function () {
+        var baseUrl;
+        ConfigurationResource.getConfigurationResource().query().$promise.then(function (response) {
+            service.services = {};
+            angular.forEach(response, function (s) {
+                var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) { return w.toUpperCase(); });
+                service.services[camelCaseRole] = s.publicUri;
             });
-            var baseURL;
-            $.ajax({
-                url: serviceLocatorUrl + '/services',
-                async: false,
-                dataType: 'json',
-                success: function (response) {
-                    service.services = {};
-                    angular.forEach(response, function (s) {
-                        var camelCaseRole = s.role.replace(/-([a-z])/g, function (m, w) {
-                            return w.toUpperCase();
-                        });
-                        service.services[camelCaseRole] = s.publicUri;
-                    });
-                    baseURL = service.services.sessionDb;
-                    console.log('sessionDb', service.services.sessionDb);
-                }
-            });
-            service.baseUrl = baseURL;
-        };
-        service.getApiUrl = function () {
-            return service.baseUrl;
-        };
-        service.getSessionDbUrl = function () {
-            if (service.services.sessionDb) {
-                return service.services.sessionDb;
-            }
-            return service.baseUrl + 'sessiondb' + '/';
-        };
-        service.getSessionDbEventsUrl = function (sessionId) {
-            if (service.services.sessionDbEvents) {
-                return URI(service.services.sessionDbEvents).path('events/' + sessionId).toString();
-            }
-            var eventUrl = service.baseUrl
-                .replace('http://', 'ws://')
-                .replace('https://', 'wss://')
-                + 'sessiondbevents/events/' + sessionId;
-            if (service.baseUrl === "") {
-                eventUrl = "ws://" + $location.host() + ":" + $location.port()
-                    + "/sessiondbevents/events/" + sessionId;
-            }
-            return eventUrl;
-        };
-        service.getAuthUrl = function () {
-            if (service.services.authenticationService) {
-                return service.services.authenticationService;
-            }
-            return service.baseUrl + 'auth' + '/';
-        };
-        service.getFileBrokerUrl = function () {
-            if (service.services.fileBroker) {
-                return service.services.fileBroker;
-            }
-            return service.baseUrl + 'filebroker' + '/';
-        };
-        service.getToolboxUrl = function () {
-            if (service.services.toolbox) {
-                return service.services.toolbox;
-            }
-            return service.baseUrl + 'toolbox/';
-        };
-        service.getModules = function () {
-            return service.config.modules;
-        };
-        return service;
-    }]);
+            service.baseUrl = service.services.sessionDb;
+            console.log('sessionDb', service.services.sessionDb);
+        });
+    };
+    service.getApiUrl = function () {
+        return service.baseUrl;
+    };
+    service.getSessionDbUrl = function () {
+        if (service.services.sessionDb) {
+            return service.services.sessionDb;
+        }
+        return service.baseUrl + 'sessiondb' + '/';
+    };
+    service.getSessionDbEventsUrl = function (sessionId) {
+        if (service.services.sessionDbEvents) {
+            return URI(service.services.sessionDbEvents).path('events/' + sessionId).toString();
+        }
+        var eventUrl = service.baseUrl
+            .replace('http://', 'ws://')
+            .replace('https://', 'wss://')
+            + 'sessiondbevents/events/' + sessionId;
+        if (service.baseUrl === "") {
+            eventUrl = "ws://" + $location.host() + ":" + $location.port()
+                + "/sessiondbevents/events/" + sessionId;
+        }
+        return eventUrl;
+    };
+    service.getAuthUrl = function () {
+        if (service.services.authenticationService) {
+            return service.services.authenticationService;
+        }
+        return service.baseUrl + 'auth' + '/';
+    };
+    service.getFileBrokerUrl = function () {
+        if (service.services.fileBroker) {
+            return service.services.fileBroker;
+        }
+        return service.baseUrl + 'filebroker' + '/';
+    };
+    service.getToolboxUrl = function () {
+        if (service.services.toolbox) {
+            return service.services.toolbox;
+        }
+        return service.baseUrl + 'toolbox/';
+    };
+    service.getModules = function () {
+        return service.config.modules;
+    };
+    return service;
+});
 angular.module('chipster-web').controller('SourceModalController', function ($log, $uibModalInstance, selectedTool, ToolRestangular) {
     var self = this;
     this.selectedTool = selectedTool;
