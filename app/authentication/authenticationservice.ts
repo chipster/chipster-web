@@ -3,16 +3,16 @@ class AuthenticationService {
 
     static $inject = ['localStorageService', '$http', 'ConfigService'];
 
-    tokenHeader:{};
-
     constructor(private localStorageService:any, private $http:ng.IHttpService, private ConfigService:any) {}
+
+    tokenHeader:{};
 
     // Do the authentication here based on userid and password
     login(username:string, password:string) {
         // clear any old tokens
         this.setAuthToken(null);
 
-        return this.requestToken('POST', username, password).then( (response) => {
+        return this.requestToken('POST', username, password).then( (response: any) => {
 
             let token = response.data.tokenKey;
             this.setAuthToken(token);

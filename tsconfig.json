@@ -35,7 +35,6 @@
     "app/views/sessions/session/sessioneditmodal.controller.ts",
     "app/views/sessions/session/visualization/spreadsheetvisualization.directive.ts",
 
-    "app/authentication/point.ts",
     "app/resources/tool.resource.ts",
     "app/views/sessions/session/sessionevent.service.ts",
     "app/views/sessions/session/visualization/textvisualization.directive.ts",
