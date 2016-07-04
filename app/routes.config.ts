@@ -3,7 +3,7 @@ export default function ($routeProvider) {
     $routeProvider
         .when('/', {templateUrl: 'app/views/home/home.html'})
         .when('/home', {templateUrl: 'app/views/home/home.html'})
-        .when('/login', {templateUrl: 'app/views/login/login.html', controller: 'LoginController'})
+        .when('/login', {templateUrl: 'app/views/login/login.html', controller: 'LoginController as vm'})
         .when('/sessions', {
             templateUrl: 'app/views/sessions/sessionlist.html',
             controller: 'SessionListCtrl',

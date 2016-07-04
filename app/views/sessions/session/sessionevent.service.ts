@@ -11,7 +11,6 @@ export default class SessionEventService{
                 private authenticationService: AuthenticationService,
                 private $websocket: any,
                 private SessionRestangular: any){
-        console.log(this.$log);
     }
 
     subscribe(sessionId, localData, onChange) {

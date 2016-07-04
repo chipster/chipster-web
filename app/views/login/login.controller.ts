@@ -1,28 +1,29 @@
 
+import {ServiceLocator} from "../../app.constants";
+import AuthenticationService from "../../authentication/authenticationservice";
 
-LoginController.$inject = ['$scope', '$location', '$http', 'AuthenticationService'];
+export default class LoginController {
 
-function LoginController($scope, $location, $http, AuthenticationService) {
+    static $inject = ['$location', '$http', 'AuthenticationService'];
 
-    $scope.login = function () {
+    error: string;
 
-        AuthenticationService.login($scope.username, $scope.password).then(function () {
+    constructor(private $location: ng.ILocationService,
+                private $http: ng.IHttpService,
+                private authenticationService: AuthenticationService) {}
+
+    login(username: string, password: string) {
+        this.authenticationService.login(username, password).then( () => {
             //Route to Session creation page
-            $location.path("/sessions");
-        }, function (response) {
-            console.log('login failed', response);
-            if (response) {
-                if (response.status === 403) {
-                    $scope.error = 'Incorrect username or password.';
-                } else {
-                    $scope.error = response.data;
-                }
+            this.$location.path("/sessions");
+        }, (error: any) => {
+            console.log('login failed', error);
+            if (error) {
+                this.error = error.status === 403 ? 'Incorrect username or password.' : error.data;
             } else {
-                $scope.error = 'Could not connect to the server ' + baseURLString;
+                this.error = 'Could not connect to the server ' + ServiceLocator;
             }
         });
-    };
-};
+    }
 
-export default LoginController;
-
+}
