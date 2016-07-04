@@ -25,17 +25,13 @@ export default class SessionEventService{
         this.$log.debug('eventUrl', eventUrl);
         this.ws = this.$websocket(new URI(eventUrl).addQuery('token', this.authenticationService.getToken()).toString());
 
-        this.ws.onOpen(function () {
-            this.$log.info('websocket connected');
-        });
+        this.ws.onOpen( () => { this.$log.info('websocket connected') });
 
-        this.ws.onMessage(function (event) {
+        this.ws.onMessage( (event) => {
             this.handleEvent(JSON.parse(event.data), sessionId, localData, onChange);
         });
 
-        this.ws.onClose(function () {
-            this.$log.info('websocket closed');
-        });
+        this.ws.onClose( () => { this.$log.info('websocket closed') });
 
         return {
             unsubscribe: function () {
@@ -78,7 +74,7 @@ export default class SessionEventService{
 
     handleSessionEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'UPDATE') {
-            sessionUrl.get().then(function (resp) {
+            sessionUrl.get().then( (resp) => {
                 var local = data.session;
                 var localCopy = angular.copy(local);
                 var remote = resp.data;
@@ -96,13 +92,13 @@ export default class SessionEventService{
 
     handleDatasetEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'CREATE') {
-            sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+            sessionUrl.one('datasets', event.resourceId).get().then( (resp) => {
                 data.datasetsMap.set(event.resourceId, resp.data);
                 onChange(event, null, resp.data);
             });
 
         } else if (event.type === 'UPDATE') {
-            sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
+            sessionUrl.one('datasets', event.resourceId).get().then( (resp) => {
 
                 var local = data.datasetsMap.get(event.resourceId);
                 var localCopy = angular.copy(local);
@@ -125,13 +121,13 @@ export default class SessionEventService{
 
     handleJobEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'CREATE') {
-            sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+            sessionUrl.one('jobs', event.resourceId).get().then( (resp) => {
                 data.jobsMap.set(event.resourceId, resp.data);
                 onChange(event, null, resp.data);
             });
 
         } else if (event.type === 'UPDATE') {
-            sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
+            sessionUrl.one('jobs', event.resourceId).get().then( (resp) => {
                 var local = data.jobsMap.get(event.resourceId);
                 var localCopy = angular.copy(local);
                 var remote = resp.data;
