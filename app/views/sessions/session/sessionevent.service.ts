@@ -1,69 +1,81 @@
-export default function (ConfigService, $log, AuthenticationService, $websocket, SessionRestangular) {
-    var service = {};
-    service.ws = null;
+import AuthenticationService from "../../../authentication/authenticationservice";
+import ConfigService from "../../../services/ConfigService";
 
-    service.subscribe = function (sessionId, localData, onChange) {
+export default class SessionEventService{
+    ws: any;
+
+    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionRestangular'];
+
+    constructor(private configService: ConfigService,
+                private $log: ng.ILogService,
+                private authenticationService: AuthenticationService,
+                private $websocket: any,
+                private SessionRestangular: any){
+        console.log(this.$log);
+    }
+
+    subscribe(sessionId, localData, onChange) {
 
         // creating a websocket object and start listening for the
         // events
 
-        var eventUrl = ConfigService.getSessionDbEventsUrl(sessionId);
+        var eventUrl = this.configService.getSessionDbEventsUrl(sessionId);
 
-        $log.debug('eventUrl', eventUrl);
-        service.ws = $websocket(new URI(eventUrl).addQuery('token', AuthenticationService.getToken()).toString());
+        this.$log.debug('eventUrl', eventUrl);
+        this.ws = this.$websocket(new URI(eventUrl).addQuery('token', this.authenticationService.getToken()).toString());
 
-        service.ws.onOpen(function () {
-            $log.info('websocket connected');
+        this.ws.onOpen(function () {
+            this.$log.info('websocket connected');
         });
 
-        service.ws.onMessage(function (event) {
-            service.handleEvent(JSON.parse(event.data), sessionId, localData, onChange);
+        this.ws.onMessage(function (event) {
+            this.handleEvent(JSON.parse(event.data), sessionId, localData, onChange);
         });
 
-        service.ws.onClose(function () {
-            $log.info('websocket closed');
+        this.ws.onClose(function () {
+            this.$log.info('websocket closed');
         });
 
         return {
             unsubscribe: function () {
-                service.ws.close();
+                this.ws.close();
             }
         }
     };
 
-    service.handleEvent = function(event, sessionId, data, onChange) {
+    handleEvent(event, sessionId, data, onChange) {
 
-        var sessionUrl = SessionRestangular.one('sessions', sessionId);
+        var sessionUrl = this.SessionRestangular.one('sessions', sessionId);
 
-        $log.debug('websocket event', event);
+        this.$log.debug('websocket event', event);
 
         if (event.resourceType === 'AUTHORIZATION') {
-            service.handleAuthorizationEvent(event, data, onChange);
+            this.handleAuthorizationEvent(event, data, onChange);
 
         } else if (event.resourceType === 'SESSION') {
-            service.handleSessionEvent(event, sessionUrl, data, onChange);
+            this.handleSessionEvent(event, sessionUrl, data, onChange);
 
         } else if (event.resourceType === 'DATASET') {
-            service.handleDatasetEvent(event, sessionUrl, data, onChange);
+            this.handleDatasetEvent(event, sessionUrl, data, onChange);
 
         } else if (event.resourceType === 'JOB') {
-            service.handleJobEvent(event, sessionUrl, data, onChange);
+            this.handleJobEvent(event, sessionUrl, data, onChange);
 
         } else {
-            $log.warn("unknwon resource type", event.resourceType, event);
+            this.$log.warn("unknwon resource type", event.resourceType, event);
         }
     };
 
-    service.handleAuthorizationEvent = function (event, data, onChange) {
+    handleAuthorizationEvent(event, data, onChange) {
         if (event.type === 'DELETE') {
             onChange(event, data.session, null);
 
         } else {
-            $log.warn("unknown event type", event);
+            this.$log.warn("unknown event type", event);
         }
     };
 
-    service.handleSessionEvent = function (event, sessionUrl, data, onChange) {
+    handleSessionEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'UPDATE') {
             sessionUrl.get().then(function (resp) {
                 var local = data.session;
@@ -77,11 +89,11 @@ export default function (ConfigService, $log, AuthenticationService, $websocket,
             });
 
         } else {
-            $log.warn("unknown event type", event);
+            this.$log.warn("unknown event type", event);
         }
     };
 
-    service.handleDatasetEvent = function (event, sessionUrl, data, onChange) {
+    handleDatasetEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'CREATE') {
             sessionUrl.one('datasets', event.resourceId).get().then(function (resp) {
                 data.datasetsMap.set(event.resourceId, resp.data);
@@ -106,11 +118,11 @@ export default function (ConfigService, $log, AuthenticationService, $websocket,
             onChange(event, localCopy, null);
 
         } else {
-            $log.warn("unknown event type", event);
+            this.$log.warn("unknown event type", event);
         }
     };
 
-    service.handleJobEvent = function (event, sessionUrl, data, onChange) {
+    handleJobEvent(event, sessionUrl, data, onChange) {
         if (event.type === 'CREATE') {
             sessionUrl.one('jobs', event.resourceId).get().then(function (resp) {
                 data.jobsMap.set(event.resourceId, resp.data);
@@ -134,9 +146,9 @@ export default function (ConfigService, $log, AuthenticationService, $websocket,
             onChange(event, localCopy, null);
 
         } else {
-            $log.warn("unknown event type", event.type, event);
+            this.$log.warn("unknown event type", event.type, event);
         }
     };
 
-    return service;
-};
+
+}

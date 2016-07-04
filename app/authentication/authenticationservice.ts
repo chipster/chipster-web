@@ -5,10 +5,11 @@ export default class AuthenticationService {
 
     static $inject = ['localStorageService', '$http', 'ConfigService'];
 
-
-    constructor(private localStorageService:any, private $http:ng.IHttpService, private ConfigService: ConfigService) {}
-
     tokenHeader:{};
+
+    constructor(private localStorageService: any,
+                private $http: ng.IHttpService,
+                private ConfigService: ConfigService) {}
 
     // Do the authentication here based on userid and password
     login(username:string, password:string) {

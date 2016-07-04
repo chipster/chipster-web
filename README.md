@@ -12,6 +12,12 @@ Chipster Web client for data processing and visualization.
     - npm install
     - typings install
 
+- Installing packages
+    - npm install <package-name> [--save|--save-dev]
+    - typings install -SG <package-name>
+
+
+
 - Start web server
     - npm run start
 

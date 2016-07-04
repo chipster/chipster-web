@@ -61,7 +61,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.factory('SessionRestangular', SessionRestangular)
 	.factory('ToolRestangular', ToolRestangular)
 	.factory('Utils', Utils)
-	.factory('SessionEventService', SessionEventService)
+	.service('SessionEventService', SessionEventService)
 	.factory('WorkflowGraphService', WorkflowGraphService)
 	.factory('FileRestangular', FileRestangular)
 	.factory('TableService', TableService)
