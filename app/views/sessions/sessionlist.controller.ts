@@ -1,5 +1,5 @@
 
-export default function($scope, $http, $location, SessionRestangular) {
+export default function($scope, $http, $location, SessionResource) {
 
 	$scope.selectedSessions = [];
 	$scope.userSessions=[];
@@ -14,7 +14,7 @@ export default function($scope, $http, $location, SessionRestangular) {
 			accessed: '2015-08-27T17:53:10.331Z'
 		};
 
-		SessionRestangular.one('sessions').customPOST(session).then(function(res){
+		SessionResource.service.one('sessions').customPOST(session).then(function(res){
 			if(res.headers){
 				var sessionLocation=res.headers('Location');
 				session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
@@ -29,7 +29,7 @@ export default function($scope, $http, $location, SessionRestangular) {
 
 	$scope.updateSessions = function(){
 
-		SessionRestangular.all('sessions').getList().then(function(res){
+		SessionResource.service.all('sessions').getList().then(function(res){
 			$scope.userSessions=res.data;
 		}, function(response) {
 			console.log('failed to get sessions', response);
@@ -46,7 +46,7 @@ export default function($scope, $http, $location, SessionRestangular) {
 	$scope.deleteSessions = function(sessions){
 
 		angular.forEach(sessions, function(session) {
-			var sessionUrl = SessionRestangular.one('sessions').one(session.sessionId);
+			var sessionUrl = SessionResource.service.one('sessions').one(session.sessionId);
 			sessionUrl.remove().then(function(res) {
 				console.log("session deleted", res);
 				$scope.updateSessions();
@@ -65,7 +65,7 @@ export default function($scope, $http, $location, SessionRestangular) {
 				// hide the old session immediately
 				$scope.previousSession = session;
 				$scope.session = {};
-				SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function(fullSession) {
+				SessionResource.loadSession($scope.selectedSessions[0].sessionId).then(function(fullSession) {
 					// don't show if the selection has already changed
 					if ($scope.selectedSessions[0] === session) {
 						$scope.session = fullSession;

@@ -1,21 +1,21 @@
 import SessionResource from "../../../resources/session.resource";
 
 SessionController.$inject = ['$scope', '$routeParams', '$q',
-    'SessionRestangular', 'AuthenticationService', '$websocket',
+    'SessionResource', 'AuthenticationService', '$websocket',
     '$http', '$window', 'WorkflowGraphService',
-    'ConfigService', '$location', 'Utils', '$filter', '$log', '$uibModal', 'SessionEventService', 'SessionResource'];
+    'ConfigService', '$location', 'Utils', '$filter', '$log', '$uibModal', 'SessionEventService'];
 
 function SessionController(
     $scope, $routeParams, $q,
-    SessionRestangular, AuthenticationService, $websocket,
+    SessionResource, AuthenticationService, $websocket,
     $http, $window, WorkflowGraphService,
-    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService, SessionResource) {
+    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
 
     // SessionRestangular is a restangular object with
     // configured baseUrl and
     // authorization header
 
-    $scope.sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
+    $scope.sessionUrl = SessionResource.service.one('sessions', $routeParams.sessionId);
 
     // create an object for the dataset search value, so that we can modify it from here
     // the search box seems to have a separate child scope, not sure why
@@ -148,7 +148,7 @@ function SessionController(
         });
     };
 
-    SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
+    SessionResource.loadSession($routeParams.sessionId).then(function(data) {
                    console.log(data);
         $scope.data = SessionResource.parseSessionData(data);
          console.log($scope.data);

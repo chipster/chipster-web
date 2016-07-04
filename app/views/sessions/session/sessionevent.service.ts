@@ -1,16 +1,18 @@
 import AuthenticationService from "../../../authentication/authenticationservice";
 import ConfigService from "../../../services/ConfigService";
+import SessionResource from "../../../resources/session.resource";
 
 export default class SessionEventService{
-    ws: any;
 
-    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionRestangular'];
+    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionResource'];
+
+    ws: any;
 
     constructor(private configService: ConfigService,
                 private $log: ng.ILogService,
                 private authenticationService: AuthenticationService,
                 private $websocket: any,
-                private SessionRestangular: any){
+                private sessionResource: SessionResource){
     }
 
     subscribe(sessionId, localData, onChange) {
@@ -44,7 +46,7 @@ export default class SessionEventService{
 
     handleEvent(event, sessionId, data, onChange) {
 
-        var sessionUrl = this.SessionRestangular.one('sessions', sessionId);
+        var sessionUrl = this.sessionResource.service.one('sessions', sessionId);
 
         this.$log.debug('websocket event', event);
 

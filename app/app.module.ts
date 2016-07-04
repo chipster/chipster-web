@@ -6,7 +6,6 @@ import ConfigService from "./services/ConfigService";
 import ConfigurationResource from "./resources/configurationresource";
 import RouteConfiguration from "./routes.config";
 import ChipsterRun from "./app.run";
-import SessionRestangular from "./resources/session.resource";
 import ToolRestangular from "./resources/tool.resource";
 import Utils from "./services/Utils";
 import SessionCtrl from "./views/sessions/session/session.controller";
@@ -58,7 +57,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.service('AuthenticationService', AuthenticationService)
 	.service('ConfigService', ConfigService)
 	.service('ConfigurationResource', ConfigurationResource)
-	.factory('SessionRestangular', SessionRestangular)
 	.factory('ToolRestangular', ToolRestangular)
 	.factory('Utils', Utils)
 	.service('SessionEventService', SessionEventService)
@@ -66,7 +64,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.service('FileResource', FileResource)
 	.factory('TableService', TableService)
 	.factory('ToolService', ToolService)
-	.factory('SessionResource', SessionResource)
+	.service('SessionResource', SessionResource)
 	.filter('searchDatasetFilter', searchDatasetFilter)
 	.filter('bytes', bytes)
 	.filter('categoryFilter', categoryFilter)
