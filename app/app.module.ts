@@ -37,6 +37,7 @@ import SourceModalController from "./views/sessions/session/tools/sourcemodal.co
 import SessionEditModalController from "./views/sessions/session/sessioneditmodal.controller";
 import JobErrorModalController from "./views/sessions/session/joberrormodal.controller";
 import SessionResource from "./resources/session.resource";
+import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal.controller";
 
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
@@ -53,6 +54,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.controller('ParameterModalController', ParameterModalController)
 	.controller('SourceModalController', SourceModalController)
 	.controller('SessionEditModalController', SessionEditModalController)
+	.controller('DatasetHistoryModalController', DatasetHistoryModalController)
 	.controller('JobErrorModalController', JobErrorModalController)
 	.service('AuthenticationService', AuthenticationService)
 	.service('ConfigService', ConfigService)
