@@ -1,4 +1,4 @@
-export default function ($scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils) {
+export default function ($scope, $routeParams, AuthenticationService, $compile, Utils) {
 	$scope.setTab = function (value) {
 		$scope.tab = value;
 	};

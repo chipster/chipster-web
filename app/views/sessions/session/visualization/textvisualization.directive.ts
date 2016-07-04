@@ -1,6 +1,6 @@
-textVisualization.$inject = ['FileRestangular'];
+textVisualization.$inject = ['FileResource'];
 
-function textVisualization(FileRestangular) {
+function textVisualization(FileResource) {
     return{
         restrict:'E',
         scope : {
@@ -10,7 +10,7 @@ function textVisualization(FileRestangular) {
         },
         template: "<p>{{data}}</p>",
         link: function ($scope) {
-            FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
+            FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                $scope.data = resp.data;
             });
         }

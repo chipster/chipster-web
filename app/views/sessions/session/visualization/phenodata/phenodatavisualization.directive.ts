@@ -1,6 +1,6 @@
-phenodataVisualization.$inject = ['FileRestangular', 'SessionRestangular', 'Utils', 'TableService'];
+phenodataVisualization.$inject = ['FileResource', 'SessionRestangular', 'Utils', 'TableService'];
 
-function phenodataVisualization(FileRestangular, SessionRestangular, Utils, TableService){
+function phenodataVisualization(FileResource, SessionRestangular, Utils, TableService){
 
     return {
         restrict:'E',

@@ -14,7 +14,7 @@ import WorkflowGraphService from "./views/sessions/session/workflow/workflowgrap
 import SessionEventService from "./views/sessions/session/sessionevent.service";
 import VisualizationCtrl from "./views/sessions/session/visualization/visualization.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
-import FileRestangular from "./resources/filerestangular.resource";
+import FileResource from "./resources/fileresource";
 import ToolCtrl from "./views/sessions/session/tools/tool.controller";
 import TableService from "./services/tableservice.factory";
 import ToolService from "./views/sessions/session/tools/tool.service";
@@ -63,7 +63,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.factory('Utils', Utils)
 	.service('SessionEventService', SessionEventService)
 	.factory('WorkflowGraphService', WorkflowGraphService)
-	.factory('FileRestangular', FileRestangular)
+	.service('FileResource', FileResource)
 	.factory('TableService', TableService)
 	.factory('ToolService', ToolService)
 	.factory('SessionResource', SessionResource)

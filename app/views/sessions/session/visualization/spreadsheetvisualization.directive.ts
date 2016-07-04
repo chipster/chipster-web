@@ -1,7 +1,7 @@
 
-spreadsheetVisualization.$inject = ['FileRestangular'];
+spreadsheetVisualization.$inject = ['FileResource'];
 
-function spreadsheetVisualization(FileRestangular){
+function spreadsheetVisualization(FileResource){
     return{
         restrict:'E',
         scope : {
@@ -12,7 +12,7 @@ function spreadsheetVisualization(FileRestangular){
         template: '<div class="scrollable" id="tableContainer"></div>',
         link: function ($scope) {
 
-            FileRestangular.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
+            FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                 // parse the file data using the JQuery-cvs library
                 parserConfig = {
                     separator: '\t'

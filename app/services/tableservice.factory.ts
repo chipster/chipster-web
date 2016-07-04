@@ -1,12 +1,12 @@
-TableService.$inject = ['FileRestangular'];
+TableService.$inject = ['FileResource'];
 
-function TableService(FileRestangular) {
+function TableService(FileResource) {
 
     var service = {};
 
     service.getColumns = function (sessionId, datasetId) {
 
-        return FileRestangular.getData(sessionId, datasetId).then(function (resp) {
+        return FileResource.getData(sessionId, datasetId).then(function (resp) {
 
             // we have to create the promise, because JQuery-cvs doesn't use them
             return new Promise(function(resolve, reject) {
