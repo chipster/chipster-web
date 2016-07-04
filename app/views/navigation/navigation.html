@@ -16,12 +16,6 @@
                 <li><a href="../manual">Manual</a></li>
             </ul>
 
-            <!-- show session name at the center (also text-align set above for the parent div)
-            http://stackoverflow.com/questions/18777235/center-content-in-responsive-bootstrap-navbar -->
-            <ul class="nav navbar-nav" style="text-align: center; display: inline-block; float: none; vertical-align: top">
-                <li><button ng-bind="vm.title" class="navbar-brand no-border" href="" ng-click="vm.openSessionEditModal()"></button></li>
-            </ul>
-
             <!--end navbar form-->
             <ul class="nav navbar-nav navbar-right">
                 <li><p class="navbar-text" ng-bind="vm.getHost()"></p></li>
