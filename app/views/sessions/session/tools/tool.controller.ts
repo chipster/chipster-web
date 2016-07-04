@@ -1,8 +1,8 @@
 import * as Promise from "bluebird";
 
-ToolCtrl.$inject = ['$scope', 'ToolRestangular', '$filter', 'Utils', 'TableService', '$q', '$uibModal', 'ToolService'];
+ToolCtrl.$inject = ['$scope', '$filter', 'Utils', 'TableService', '$q', '$uibModal', 'ToolService'];
 
-function ToolCtrl($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
+function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolService) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning

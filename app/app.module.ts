@@ -6,7 +6,7 @@ import ConfigService from "./services/ConfigService";
 import ConfigurationResource from "./resources/configurationresource";
 import RouteConfiguration from "./routes.config";
 import ChipsterRun from "./app.run";
-import ToolRestangular from "./resources/tool.resource";
+import ToolResource from "./resources/toolresource";
 import Utils from "./services/Utils";
 import SessionCtrl from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
@@ -57,7 +57,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.service('AuthenticationService', AuthenticationService)
 	.service('ConfigService', ConfigService)
 	.service('ConfigurationResource', ConfigurationResource)
-	.factory('ToolRestangular', ToolRestangular)
+	.service('ToolResource', ToolResource)
 	.factory('Utils', Utils)
 	.service('SessionEventService', SessionEventService)
 	.factory('WorkflowGraphService', WorkflowGraphService)

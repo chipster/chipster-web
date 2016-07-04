@@ -2,17 +2,18 @@
 import AuthenticationService from "../authentication/authenticationservice";
 import * as restangular from "restangular";
 import ConfigService from "../services/ConfigService";
+import ToolResource from "../resources/toolresource";
 
 export default class SessionResource {
 
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolRestangular', '$q', 'Utils'];
+	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q', 'Utils'];
 
 	public service: any;
 
 	constructor(private restangular: restangular.IService,
 				private authenticationService:AuthenticationService,
 				private configService: ConfigService,
-				private toolRestangular:any,
+				private toolResource: ToolResource,
 				private $q:ng.IQService,
 				private Utils: any) {
 
@@ -79,8 +80,8 @@ export default class SessionResource {
 			sessionUrl.get(),
 			sessionUrl.all('datasets').getList(),
 			sessionUrl.all('jobs').getList(),
-			this.toolRestangular.all('modules').getList(),
-			this.toolRestangular.all('tools').getList()
+			this.toolResource.service.all('modules').getList(),
+			this.toolResource.service.all('tools').getList()
 		];
 
 		return this.$q.all(promises);
