@@ -1,23 +1,31 @@
-angular.module('chipster-web').controller('NavigationController', function ($scope, AuthenticationService, $uibModal, $location, ConfigService) {
+import AuthenticationService from "../../authentication/authenticationservice";
+import ConfigService from "../../services/ConfigService";
 
-    $scope.isLoggedOut=function(){
-        if(AuthenticationService.getToken()===null){
+export default class NavigationController {
+
+    static $inject = ['$location', 'AuthenticationService', 'ConfigService'];
+
+    constructor(private $location: ng.ILocationService, private authenticationService: AuthenticationService, private configService: ConfigService) {}
+
+    isLoggedOut() {
+        if (this.authenticationService.getToken() === null) {
             return true;
         }
     };
 
-    $scope.logout=function(){
-        AuthenticationService.logout();
-        $location.path("/");
+    logout() {
+        this.authenticationService.logout();
+        this.$location.path("/");
     };
 
-    $scope.isLoggedIn=function(){
-        if(AuthenticationService.getToken()!==null){
+    isLoggedIn() {
+         if(this.authenticationService.getToken()!==null){
             return true;
-        }
-    };
+         }
+     };
 
-    $scope.getHost = function () {
-        return ConfigService.getApiUrl();
-    };
-});
+     getHost() {
+        return this.configService.getApiUrl();
+     };
+}
+

@@ -1,5 +1,12 @@
-angular.module('chipster-web').controller('DatasetHistoryModalController', function ($log, $uibModalInstance) {
-    this.close = function () {
-        $uibModalInstance.dismiss();
-    };
-});
+
+export default class DatasetHistoryModalController {
+
+    static $inject = ['$log', '$uibModalInstance'];
+
+    constructor(private $log: ng.ILogService, private $uibModalInstance: angular.ui.bootstrap.IModalServiceInstance){}
+
+    close() {
+        this.$uibModalInstance.dismiss();
+    }
+
+}

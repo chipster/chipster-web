@@ -1,4 +1,4 @@
-angular.module('chipster-web').controller('VisualizationCtrl', function ($scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils) {
+export default function ($scope, $routeParams, FileRestangular, AuthenticationService, $compile, Utils) {
 	$scope.setTab = function (value) {
 		$scope.tab = value;
 	};
@@ -117,4 +117,4 @@ angular.module('chipster-web').controller('VisualizationCtrl', function ($scope,
 		$scope.setTab(2);
 		$scope.setCurrentVisualization(vis, directive);
 	};
-});
+};

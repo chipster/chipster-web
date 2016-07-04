@@ -1,5 +1,5 @@
 
-angular.module('chipster-web').filter('seconds', function() {
+export default function() {
     return function(seconds) {
         if (isNaN(parseFloat(seconds)) || !isFinite(seconds))
             return '-';
@@ -11,4 +11,4 @@ angular.module('chipster-web').filter('seconds', function() {
         return (seconds / Math.pow(60, Math.floor(number))).toFixed(0) + ' '
             + units[number];
     };
-});
+};

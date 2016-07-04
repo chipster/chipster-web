@@ -1,4 +1,8 @@
-angular.module('chipster-resource').factory('FileRestangular',function(Restangular,AuthenticationService, ConfigService){
+
+import ConfigService from "../services/ConfigService";
+FileRestangular.$inject = ['Restangular', 'AuthenticationService', 'ConfigService'];
+
+function FileRestangular(Restangular,AuthenticationService, ConfigService){
 
 		var service = Restangular.withConfig(function(RestangularConfigurer) {
 
@@ -14,6 +18,8 @@ angular.module('chipster-resource').factory('FileRestangular',function(Restangul
 		};
 
 		return service;
-});
+};
+
+export default FileRestangular;
 
 

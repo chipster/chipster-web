@@ -1,4 +1,4 @@
-angular.module('chipster-web').factory('ToolService', function () {
+export default function () {
     var service = {};
     service.isSelectionParameter = function (parameter) {
         return parameter.type === 'ENUM' ||
@@ -51,4 +51,4 @@ angular.module('chipster-web').factory('ToolService', function () {
         return types[type].indexOf(extension) !== -1;
     };
     return service;
-});
+};

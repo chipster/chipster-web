@@ -1,5 +1,7 @@
 
-angular.module('chipster-web').directive('workflowGraph',function($window, WorkflowGraphService, Utils) {
+workflowGraph.$inject = ['$window', 'WorkflowGraphService', 'Utils'];
+
+function workflowGraph($window, WorkflowGraphService, Utils) {
 	return {
 		restrict : 'EA',
 		require:'^ngController',
@@ -22,6 +24,9 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 			var nodeHeight=WorkflowGraphService.nodeHeight;
 			var fontSize = 14;
 			var nodeRadius = 4;
+			var width;
+			var height;
+			var svgDatasetNodes;
 
 			scope.$on('resizeWorkFlowGraph', scope.renderGraph);
 
@@ -669,4 +674,6 @@ angular.module('chipster-web').directive('workflowGraph',function($window, Workf
 
 	};//end of return
 
-});
+};
+
+export default workflowGraph;

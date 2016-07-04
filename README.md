@@ -11,10 +11,9 @@ Chipster Web client for data processing and visualization.
     - npm install typings -g
     - npm install
     - typings install
-    - npm install gulp -g
 
 - Start web server
-    - gulp
+    - npm run start
 
 
 

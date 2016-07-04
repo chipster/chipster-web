@@ -1,13 +1,15 @@
-angular.module('chipster-web').controller('AddDatasetModalController', function ($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
+AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'Utils', 'data', '$routeParams', 'SessionRestangular', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
+
+function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
+    
     this.flowFileAdded = function (file, event, flow) {
         $log.debug('file added');
         flow.opts.target = function (file) {
             return file.chipsterTarget;
         };
-        this.createDataset(file.name).then(function (dataset) {
-            file.chipsterTarget = URI(ConfigService.getFileBrokerUrl())
-                .path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId)
-                .addQuery('token', AuthenticationService.getToken()).toString();
+        let k = this.createDataset(file.name);
+            k.then(function (dataset) {
+            file.chipsterTarget = URI(ConfigService.getFileBrokerUrl()).path('sessions/' + $routeParams.sessionId + '/datasets/' + dataset.datasetId).addQuery('token', AuthenticationService.getToken()).toString();
             file.resume();
         });
         file.pause();
@@ -45,4 +47,6 @@ angular.module('chipster-web').controller('AddDatasetModalController', function 
     this.close = function () {
         $uibModalInstance.dismiss();
     };
-});
+};
+
+export default AddDatasetModalController;

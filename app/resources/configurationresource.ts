@@ -1,15 +1,16 @@
-class ConfigurationResource {
+import * as configurationConstants from '../app.constants';
 
-    static $inject = ['$resource', 'ServiceLocator'];
+export default class ConfigurationResource {
 
-    constructor(private $resource: angular.resource.IResourceService, private ServiceLocator: any) {
+    static $inject = ['$resource'];
+
+    constructor(private $resource: angular.resource.IResourceService, private configurationConstants: configurationConstants) {
     }
 
     getConfigurationResource() {
-        return this.$resource(this.ServiceLocator + '/services');
+        return this.$resource(configurationConstants.ServiceLocator + '/services');
     }
 
 }
 
-angular.module('chipster-resource').service('ConfigurationResource', ConfigurationResource);
 

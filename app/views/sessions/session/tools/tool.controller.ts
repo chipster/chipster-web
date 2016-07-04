@@ -1,4 +1,8 @@
-angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
+import * as Promise from "bluebird";
+
+ToolCtrl.$inject = ['$scope', 'ToolRestangular', '$filter', 'Utils', 'TableService', '$q', '$uibModal', 'ToolService'];
+
+function ToolCtrl($scope, ToolRestangular, $filter, Utils, TableService, $q, $uibModal, ToolService) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
@@ -41,6 +45,7 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		});
 
 		$scope.inputBindings = $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets);
+
 	};
 
 	$scope.isRunEnabled = function() {
@@ -58,7 +63,10 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 
 		// see OperationDefinition.bindInputs()
 		//TODO handle multi-inputs
-
+		console.log('tool', tool);
+		datasets.forEach( item => {console.log('dataset', item)});
+		
+		
 		var inputBindings = [];
 		for (var j = 0; j < tool.inputs.length; j++) {
 			var toolInput = tool.inputs[j];
@@ -100,21 +108,33 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 		var jobToRun = angular.copy($scope.job);
 
 		// toolParameters aren't needed anymore and the server doesn't accept extra fields
-		for (jobParameter of jobToRun.parameters) {
-			delete jobParameter.toolParameter;
-		}
+		jobToRun.parameters.forEach( jobParameter => {delete jobParameter.toolParameter});
+
+		//for (jobParameter of jobToRun.parameters) {
+		//	delete jobParameter.toolParameter;
+		//}
 
 		jobToRun.inputs = [];
 
-		for (inputBinding of $scope.inputBindings) {
-			var jobInput = {
+		$scope.inputBindings.forEach( inputBinding => {
+			jobToRun.inputs.push({
 				inputId: inputBinding.toolInput.name.id,
 				description: inputBinding.toolInput.description,
 				datasetId: inputBinding.dataset.datasetId,
 				displayName: inputBinding.dataset.name
-			};
-			jobToRun.inputs.push(jobInput);
-		}
+			});
+		});
+
+
+		//for (inputBinding of $scope.inputBindings) {
+		//	var jobInput = {
+		//		inputId: inputBinding.toolInput.name.id,
+		//		description: inputBinding.toolInput.description,
+		//		datasetId: inputBinding.dataset.datasetId,
+		//		displayName: inputBinding.dataset.name
+		//	};
+		//	jobToRun.inputs.push(jobInput);
+		//}
 
 		var postJobUrl = $scope.sessionUrl.one('jobs');
 		postJobUrl.customPOST(jobToRun).then(function (response) {
@@ -268,4 +288,7 @@ angular.module('chipster-web').controller('ToolCtrl', function($scope, ToolResta
 			}
 		});
 	};
-});
+};
+
+
+export default ToolCtrl;

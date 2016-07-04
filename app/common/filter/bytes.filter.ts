@@ -1,4 +1,4 @@
-angular.module('chipster-web').filter('bytes', function() {
+export default function() {
     return function(bytes, precision) {
         if (isNaN(parseFloat(bytes)) || !isFinite(bytes))
             return '-';
@@ -11,4 +11,4 @@ angular.module('chipster-web').filter('bytes', function() {
         return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision)
             + ' ' + units[number];
     };
-});
+};

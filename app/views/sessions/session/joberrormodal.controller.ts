@@ -1,5 +1,6 @@
-angular.module('chipster-web').controller('JobErrorModalController',
-    function ($log, $uibModalInstance, toolErrorTitle, toolError) {
+JobErrorModalController.$inject = ['$log', '$uibModalInstance', 'toolErrorTitle', 'toolError'];
+
+function JobErrorModalController($log, $uibModalInstance, toolErrorTitle, toolError) {
 
     this.toolErrorTitle = toolErrorTitle;
     this.toolError = toolError;
@@ -7,4 +8,6 @@ angular.module('chipster-web').controller('JobErrorModalController',
     this.close = function () {
         $uibModalInstance.close();
     };
-});
+};
+
+export default JobErrorModalController;

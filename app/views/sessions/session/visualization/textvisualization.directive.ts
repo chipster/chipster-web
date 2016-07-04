@@ -1,4 +1,6 @@
-angular.module('chipster-web').directive('textVisualization',function(FileRestangular){
+textVisualization.$inject = ['FileRestangular'];
+
+function textVisualization(FileRestangular) {
     return{
         restrict:'E',
         scope : {
@@ -13,4 +15,6 @@ angular.module('chipster-web').directive('textVisualization',function(FileRestan
             });
         }
     };
-});
+};
+
+export default textVisualization;

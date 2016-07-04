@@ -1,81 +1,87 @@
-angular.module('chipster-web').factory('ConfigService',
-    function ($location, ConfigurationResource, ChipsterModules) {
 
-        var service = {
-            config: {modules: ["NGS", "Microarray", "Misc"]}
-        };
+import * as configConstants from '../app.constants';
+import ConfigurationResource from "../resources/configurationresource";
 
-        service.init = function() {
-            var baseUrl;
-            ConfigurationResource.getConfigurationResource().query().$promise.then( response => {
-                service.services = {};
-                angular.forEach(response, s => {
+export default class ConfigService {
 
-                    var camelCaseRole = s.role.replace(/-([a-z])/g, (m, w) => w.toUpperCase() );
-                    service.services[camelCaseRole] = s.publicUri;
-                });
-                service.baseUrl = service.services.sessionDb;
-                console.log('sessionDb', service.services.sessionDb);
+    static $inject = ['$location', 'ConfigurationResource'];
+
+    public services: any;
+    public config: any;
+    public baseUrl: string;
+
+    constructor(private $location: ng.ILocationService, private configurationResource: ConfigurationResource){
+        this.services = {};
+        this.config = {};
+        this.config.modules = configConstants.ChipsterModules;
+    }
+
+    init() {
+        this.configurationResource.getConfigurationResource().query().$promise.then( response => {
+            angular.forEach(response, ( item: any ) => {
+                let camelCaseRole = item.role.replace(/-([a-z])/g, (m, w) => w.toUpperCase() );
+                this.services[camelCaseRole] = item.publicUri;
             });
+            this.baseUrl = this.services.sessionDb;
+            console.log('sessionDb', this.services.sessionDb);
+        });
+    };
 
-        };
+    getApiUrl() {
+        return this.baseUrl;
+    };
 
-        service.getApiUrl = function () {
-            return service.baseUrl;
-        };
+    getSessionDbUrl() {
+        if (this.services.sessionDb) {
+            return this.services.sessionDb;
+        }
+        return this.baseUrl + 'sessiondb' + '/';
+    };
 
-        service.getSessionDbUrl = function () {
-            if (service.services.sessionDb) {
-                return service.services.sessionDb;
-            }
-            return service.baseUrl + 'sessiondb' + '/';
-        };
+    getSessionDbEventsUrl(sessionId:string) {
 
-        service.getSessionDbEventsUrl = function (sessionId) {
+        if (this.services.sessionDbEvents) {
+            return URI(this.services.sessionDbEvents).path('events/' + sessionId).toString();
+        }
 
-            if (service.services.sessionDbEvents) {
-                return URI(service.services.sessionDbEvents).path('events/' + sessionId).toString();
-            }
-
-            // different api server
-            var eventUrl = service.baseUrl
+        // different api server
+        var eventUrl = this.baseUrl
                 .replace('http://', 'ws://')
                 .replace('https://', 'wss://')
-                + 'sessiondbevents/events/' + sessionId;
+            + 'sessiondbevents/events/' + sessionId;
 
-            // api and client served from the same host
-            if (service.baseUrl === "") {
-                eventUrl = "ws://" + $location.host() + ":" + $location.port()
-                    + "/sessiondbevents/events/" + sessionId;
-            }
+        // api and client served from the same host
+        if (this.baseUrl === "") {
+            eventUrl = "ws://" + this.$location.host() + ":" + this.$location.port()
+                + "/sessiondbevents/events/" + sessionId;
+        }
 
-            return eventUrl;
-        };
+        return eventUrl;
+    };
 
-        service.getAuthUrl = function () {
-            if (service.services.authenticationService) {
-                return service.services.authenticationService;
-            }
-            return service.baseUrl + 'auth' + '/';
-        };
+    getAuthUrl() {
+        if (this.services.authenticationService) {
+            return this.services.authenticationService;
+        }
+        return this.baseUrl + 'auth' + '/';
+    };
 
-        service.getFileBrokerUrl = function () {
-            if (service.services.fileBroker) {
-                return service.services.fileBroker;
-            }
-            return service.baseUrl + 'filebroker' + '/';
-        };
+    getFileBrokerUrl() {
+        if (this.services.fileBroker) {
+            return this.services.fileBroker;
+        }
+        return this.baseUrl + 'filebroker' + '/';
+    };
 
-        service.getToolboxUrl = function () {
-            if (service.services.toolbox) {
-                return service.services.toolbox;
-            }
-            return service.baseUrl + 'toolbox/';
-        };
+    getToolboxUrl() {
+        if (this.services.toolbox) {
+            return this.services.toolbox;
+        }
+        return this.baseUrl + 'toolbox/';
+    };
 
-        service.getModules = function () {
-            return service.config.modules;
-        };
+    getModules() {
+        return this.config.modules;
+    };
+}
 
-        return service;
-    });

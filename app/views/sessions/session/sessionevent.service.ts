@@ -1,5 +1,4 @@
-angular.module('chipster-web').factory('SessionEventService', function (
-    ConfigService, $log, AuthenticationService, $websocket, SessionRestangular) {
+export default function (ConfigService, $log, AuthenticationService, $websocket, SessionRestangular) {
     var service = {};
     service.ws = null;
 
@@ -140,4 +139,4 @@ angular.module('chipster-web').factory('SessionEventService', function (
     };
 
     return service;
-});
+};

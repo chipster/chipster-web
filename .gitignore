@@ -5,3 +5,5 @@ npm-debug.log
 /.idea
 dist/dist.js
 typings/
+app/**/*.js
+app/**/*.js.map

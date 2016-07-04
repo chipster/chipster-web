@@ -1,4 +1,4 @@
-angular.module('chipster-web').directive('imageVisualization',function(){
+export default function(){
     return{
         restrict:'E',
         scope : {
@@ -6,4 +6,4 @@ angular.module('chipster-web').directive('imageVisualization',function(){
         },
         template: '<div class="scrollable"><img ng-src="{{src}}"></div>'
     };
-});
+};

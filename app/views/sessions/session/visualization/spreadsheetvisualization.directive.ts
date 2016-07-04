@@ -1,4 +1,7 @@
-angular.module('chipster-web').directive('spreadsheetVisualization',function(FileRestangular){
+
+spreadsheetVisualization.$inject = ['FileRestangular'];
+
+function spreadsheetVisualization(FileRestangular){
     return{
         restrict:'E',
         scope : {
@@ -34,4 +37,6 @@ angular.module('chipster-web').directive('spreadsheetVisualization',function(Fil
             };
         }
     };
-});
+};
+
+export default spreadsheetVisualization;

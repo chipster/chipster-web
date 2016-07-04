@@ -1,5 +1,5 @@
 
-angular.module('chipster-web').controller('SessionListCtrl', function($scope, $http, $location,SessionRestangular){
+export default function($scope, $http, $location, SessionRestangular) {
 
 	$scope.selectedSessions = [];
 	$scope.userSessions=[];
@@ -68,9 +68,7 @@ angular.module('chipster-web').controller('SessionListCtrl', function($scope, $h
 				SessionRestangular.loadSession($scope.selectedSessions[0].sessionId).then(function(fullSession) {
 					// don't show if the selection has already changed
 					if ($scope.selectedSessions[0] === session) {
-						$scope.$apply(function() {
-								$scope.session = fullSession;
-						});
+						$scope.session = fullSession;
 					}
 				});
 			}
@@ -89,6 +87,6 @@ angular.module('chipster-web').controller('SessionListCtrl', function($scope, $h
 	$scope.getWorkflowCallback = function() {
 		return callback;
 	};
-});
+};
 
 

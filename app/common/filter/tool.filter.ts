@@ -1,5 +1,5 @@
 
-angular.module('chipster-web').filter('toolFilter',function(){
+export default function(){
 
     return function(arr,searchTool){
         if(!searchTool)
@@ -15,4 +15,4 @@ angular.module('chipster-web').filter('toolFilter',function(){
         return result;
     }
 
-});
+};

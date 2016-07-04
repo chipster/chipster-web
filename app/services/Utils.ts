@@ -1,4 +1,4 @@
-angular.module('chipster-web').factory('Utils', function () {
+export default function () {
 
     var service = {};
 
@@ -95,4 +95,4 @@ angular.module('chipster-web').factory('Utils', function () {
     };
 
     return service;
-});
+};

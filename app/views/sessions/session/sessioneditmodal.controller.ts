@@ -1,4 +1,6 @@
-angular.module('chipster-web').controller('SessionEditModalController', function ($scope, $uibModalInstance, title) {
+SessionEditModalController.$inject = ['$scope', '$uibModalInstance', 'title'];
+
+function SessionEditModalController($scope, $uibModalInstance, title) {
 
     this.title = title;
 
@@ -10,4 +12,6 @@ angular.module('chipster-web').controller('SessionEditModalController', function
         $uibModalInstance.close(this.title);
     };
 
-});
+};
+
+export default SessionEditModalController;

@@ -1,4 +1,6 @@
-angular.module('chipster-web').factory('TableService', function (FileRestangular) {
+TableService.$inject = ['FileRestangular'];
+
+function TableService(FileRestangular) {
 
     var service = {};
 
@@ -25,4 +27,6 @@ angular.module('chipster-web').factory('TableService', function (FileRestangular
     };
 
     return service;
-});
+};
+
+export default TableService;

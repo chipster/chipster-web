@@ -1,7 +1,7 @@
 /**
  * Filter for searching dataset in dataset list view
  */
-angular.module('chipster-web').filter('searchDatasetFilter', function ($rootScope) {
+export default function ($rootScope) {
     return function (array, expression) {
 
         var result = [];
@@ -29,4 +29,4 @@ angular.module('chipster-web').filter('searchDatasetFilter', function ($rootScop
         return result;
     }
 
-});
+};

@@ -7,7 +7,11 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "lite": "lite-server",
+    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" "
   },
   "repository": {
     "type": "git",
@@ -21,13 +25,13 @@
   "homepage": "https://github.com/chipster/chipster-web#readme",
   "devDependencies": {
     "browser-sync": "^2.13.0",
-    "gulp": "^3.9.1",
-    "gulp-dev": "^0.3.0",
-    "gulp-typescript": "^2.13.6",
+    "concurrently": "^2.1.0",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.9",
     "karma-chrome-launcher": "^0.2.0",
-    "karma-jasmine": "^0.3.6"
+    "karma-jasmine": "^0.3.6",
+    "lite-server": "^2.2.2",
+    "typescript": "^1.8.10"
   },
   "dependencies": {
     "angular": "^1.5.6",
@@ -51,6 +55,7 @@
     "ng-flow": "^2.1.4",
     "pdfjs-dist": "^1.5.279",
     "restangular": "^1.5.2",
+    "systemjs": "^0.19.31",
     "urijs": "^1.18.1"
   }
 }

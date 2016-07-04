@@ -1,4 +1,4 @@
-angular.module('chipster-web').filter('categoryFilter', function($filter){
+function categoryFilter($filter){
 
     return function(arr,searchTool){
         if(!searchTool)
@@ -16,4 +16,6 @@ angular.module('chipster-web').filter('categoryFilter', function($filter){
 
         return result;
     }
-});
+};
+
+export default categoryFilter;

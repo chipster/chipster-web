@@ -1,8 +1,15 @@
-angular.module('chipster-web').controller('SessionCtrl',function (
+import SessionResource from "../../../resources/session.resource";
+
+SessionController.$inject = ['$scope', '$routeParams', '$q',
+    'SessionRestangular', 'AuthenticationService', '$websocket',
+    '$http', '$window', 'WorkflowGraphService',
+    'ConfigService', '$location', 'Utils', '$filter', '$log', '$uibModal', 'SessionEventService', 'SessionResource'];
+
+function SessionController(
     $scope, $routeParams, $q,
     SessionRestangular, AuthenticationService, $websocket,
     $http, $window, WorkflowGraphService,
-    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
+    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService, SessionResource) {
 
     // SessionRestangular is a restangular object with
     // configured baseUrl and
@@ -142,21 +149,20 @@ angular.module('chipster-web').controller('SessionCtrl',function (
     };
 
     SessionRestangular.loadSession($routeParams.sessionId).then(function(data) {
-        $scope.$apply(function() {
-            $scope.data = data;
+                   console.log(data);
+        $scope.data = SessionResource.parseSessionData(data);
+         console.log($scope.data);
+        // start listening for remote changes
+        // in theory we may miss an update between the loadSession() and this subscribe(), but
+        // the safe way would be much more complicated:
+        // - subscribe but put the updates in queue
+        // - loadSession().then()
+        // - apply the queued updates
+        var subscription = SessionEventService.subscribe($routeParams.sessionId, $scope.data, $scope.onSessionChange);
 
-            // start listening for remote changes
-            // in theory we may miss an update between the loadSession() and this subscribe(), but
-            // the safe way would be much more complicated:
-            // - subscribe but put the updates in queue
-            // - loadSession().then()
-            // - apply the queued updates
-            var subscription = SessionEventService.subscribe($routeParams.sessionId, $scope.data, $scope.onSessionChange);
-
-            // stop listening when leaving this view
-            $scope.$on("$destroy", function () {
-                subscription.unsubscribe();
-            });
+        // stop listening when leaving this view
+        $scope.$on("$destroy", function () {
+            subscription.unsubscribe();
         });
     });
 
@@ -325,4 +331,6 @@ angular.module('chipster-web').controller('SessionCtrl',function (
             }
         });
     };
-});
+};
+
+export default SessionController;

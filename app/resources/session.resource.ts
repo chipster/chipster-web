@@ -1,5 +1,7 @@
-angular.module('chipster-resource').factory('SessionRestangular', function (
-	Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
+
+SessionResource.$inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolRestangular', '$q', 'Utils'];
+
+function SessionResource(Restangular, AuthenticationService, ConfigService, ToolRestangular, $q, Utils) {
 
 	var service = Restangular.withConfig(function (RestangularConfigurer) {
 
@@ -22,6 +24,44 @@ angular.module('chipster-resource').factory('SessionRestangular', function (
 		return elem;
 	});
 
+	service.parseSessionData = function (param) {
+		var session = param[0].data;
+		var datasets = param[1].data;
+		var jobs = param[2].data;
+		var modules = param[3].data;
+		var tools = param[4].data;
+
+		var data = {};
+
+		data.session = session;
+		data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+		data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
+
+		// show only configured modules
+		modules = modules.filter(function (module) {
+			return ConfigService.getModules().indexOf(module.name) >= 0;
+		});
+
+		data.modules = modules;
+		data.tools = tools;
+
+		// build maps for modules and categories
+
+		// generate moduleIds
+		modules.map(function (m) {
+			m.moduleId = m.name.toLowerCase();
+			return m;
+		});
+
+		data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+
+		data.modulesMap.forEach(function (module) {
+			module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
+		});
+
+		return data;
+	};
+	
 	service.loadSession = function (sessionId) {
 
 		var sessionUrl = service.one('sessions',  sessionId);
@@ -34,50 +74,11 @@ angular.module('chipster-resource').factory('SessionRestangular', function (
 			ToolRestangular.all('tools').getList()
 		];
 
-		return promise = new Promise(function(resolve) {
-
-			$q.all(promises).then(function (res) {
-
-				var session = res[0].data;
-				var datasets = res[1].data;
-				var jobs = res[2].data;
-				var modules = res[3].data;
-				var tools = res[4].data;
-
-				var data = {};
-
-				data.session = session;
-				data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
-				data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
-
-				// show only configured modules
-				modules = modules.filter(function (module) {
-					return ConfigService.getModules().indexOf(module.name) >= 0;
-				});
-
-				data.modules = modules;
-				data.tools = tools;
-
-				// build maps for modules and categories
-
-				// generate moduleIds
-				modules.map(function (m) {
-					m.moduleId = m.name.toLowerCase();
-					return m;
-				});
-
-				data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
-
-				data.modulesMap.forEach(function (module) {
-					module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
-				});
-
-				resolve(data);
-			});
-		});
+		return $q.all(promises);
 	};
 
 	return service;
-});
+};
 
 
+export default SessionResource;

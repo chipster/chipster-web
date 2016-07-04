@@ -1,4 +1,5 @@
-angular.module('chipster-web').directive('pdfVisualization',function(){
+
+export default function(){
     return{
         restrict:'E',
         scope : {
@@ -34,4 +35,4 @@ angular.module('chipster-web').directive('pdfVisualization',function(){
             };
         }
     };
-});
+};

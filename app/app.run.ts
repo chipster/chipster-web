@@ -1,4 +1,4 @@
-angular.module('chipster-web').run(function($rootScope, $location, AuthenticationService, ConfigService) {
+export default function($rootScope, $location, AuthenticationService, ConfigService) {
 
     ConfigService.init();
 
@@ -11,5 +11,6 @@ angular.module('chipster-web').run(function($rootScope, $location, Authenticatio
             }
         }
     });
-});
+
+};
 

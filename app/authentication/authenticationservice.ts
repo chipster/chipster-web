@@ -1,9 +1,12 @@
 
-class AuthenticationService {
+import ConfigService from "../services/ConfigService";
+
+export default class AuthenticationService {
 
     static $inject = ['localStorageService', '$http', 'ConfigService'];
 
-    constructor(private localStorageService:any, private $http:ng.IHttpService, private ConfigService:any) {}
+
+    constructor(private localStorageService:any, private $http:ng.IHttpService, private ConfigService: ConfigService) {}
 
     tokenHeader:{};
 
@@ -56,6 +59,6 @@ class AuthenticationService {
         }
         this.tokenHeader['Authorization'] = 'Basic ' + btoa('token' + ':' + this.getToken())
     };
+
 }
 
-angular.module('chipster-authentication').service('AuthenticationService', AuthenticationService);

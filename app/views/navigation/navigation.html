@@ -1,4 +1,4 @@
-<nav class="navbar navbar-default" ng-controller="NavigationController"> <!-- navbar-fixed-top -->
+<nav class="navbar navbar-default" ng-controller="NavigationController as vm"> <!-- navbar-fixed-top -->
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
 
@@ -19,14 +19,14 @@
             <!-- show session name at the center (also text-align set above for the parent div)
             http://stackoverflow.com/questions/18777235/center-content-in-responsive-bootstrap-navbar -->
             <ul class="nav navbar-nav" style="text-align: center; display: inline-block; float: none; vertical-align: top">
-                <li><button ng-bind="title" class="navbar-brand no-border" href="" ng-click="openSessionEditModal()" ng-disabled="!isTitleRenameEnabled"></button></li>
+                <li><button ng-bind="vm.title" class="navbar-brand no-border" href="" ng-click="vm.openSessionEditModal()" ng-disabled="!isTitleRenameEnabled"></button></li>
             </ul>
 
             <!--end navbar form-->
             <ul class="nav navbar-nav navbar-right">
-                <li><p class="navbar-text" ng-bind="getHost()"></p></li>
-                <li><a href="#login" ng-show="isLoggedOut()">Login</a></li>
-                <li><a href="#home" ng-show="isLoggedIn()" ng-click="logout()">Logout</a></li>
+                <li><p class="navbar-text" ng-bind="vm.getHost()"></p></li>
+                <li><a href="#login" ng-show="vm.isLoggedOut()">Login</a></li>
+                <li><a href="#home" ng-show="vm.isLoggedIn()" ng-click="vm.logout()">Logout</a></li>
             </ul>
         </div>
         <!-- /.navbar-collapse -->

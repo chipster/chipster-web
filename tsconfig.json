@@ -1,69 +1,16 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
-    "noImplicitAny": false,
-    "removeComments": true,
-    "rootDir": "./app",
-    "outFile": "dist.js"
+    "module": "system",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "removeComments": false,
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "rootDir": "./app"
   },
-  "exclude": ["node_modules", "dependencies", "css", "test", "dist"],
-  "files": [
-    "typings/index.d.ts",
+  "exclude": ["node_modules", "dependencies", "css", "test", "dist"]
 
-    "app/app.module.ts",
-    "app/app.constants.ts",
-    "app/common/filter/tool.filter.ts",
-    "app/views/navigation/navigation.controller.ts",
-    "app/views/sessions/session/visualization/htmlvisualization.directive.ts",
-
-    "app/app.run.ts",
-    "app/directives/chipsterimage.ts",
-    "app/views/sessions/session/datasethistorymodal.controller.ts",
-    "app/views/sessions/session/visualization/imagevisualization.directive.ts",
-
-    "app/authentication/authentication.module.ts",
-    "app/resources/chipsterresource.module.ts",
-    "app/views/sessions/session/joberrormodal.controller.ts",
-    "app/views/sessions/session/visualization/pdf/pdfvisualization.directive.ts",
-
-    "app/resources/file.resource.ts",
-    "app/views/sessions/session/session.controller.ts",
-    "app/views/sessions/session/visualization/phenodata/phenodatavisualization.directive.ts",
-
-    "app/authentication/authenticationservice.ts",
-    "app/resources/session.resource.ts",
-    "app/views/sessions/session/sessioneditmodal.controller.ts",
-    "app/views/sessions/session/visualization/spreadsheetvisualization.directive.ts",
-
-    "app/resources/tool.resource.ts",
-    "app/views/sessions/session/sessionevent.service.ts",
-    "app/views/sessions/session/visualization/textvisualization.directive.ts",
-    "app/resources/configurationresource.ts",
-
-    "app/common/filter/bytes.filter.ts",
-    "app/routes.config.ts",
-    "app/views/sessions/session/tools/parametermodal.controller.ts",
-    "app/views/sessions/session/visualization/visualization.controller.ts",
-
-    "app/common/filter/category.filter.ts",
-    "app/services/ConfigService.ts",
-    "app/views/sessions/session/tools/sourcemodal.controller.ts",
-    "app/views/sessions/session/workflow/adddatasetmodal.controller.ts",
-
-    "app/common/filter/module.filter.ts",
-    "app/services/TableService.ts",
-    "app/views/sessions/session/tools/tool.controller.ts",
-    "app/views/sessions/session/workflow/workflowgraph.controller.ts",
-
-    "app/common/filter/searchdataset.filter.ts",
-    "app/services/Utils.ts",
-    "app/views/sessions/session/tools/tool.service.ts",
-    "app/views/sessions/session/workflow/workflowgraph.service.ts",
-
-    "app/common/filter/seconds.filter.ts",
-    "app/views/login/login.controller.ts",
-    "app/views/sessions/session/tools/toolcircle.directive.ts",
-    "app/views/sessions/sessionlist.controller.ts"
-  ]
 }

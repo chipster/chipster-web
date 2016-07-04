@@ -1,99 +1,64 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="chipster-web">
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Chipster</title>
+    <meta charset="utf-8">
+    <title>Chipster</title>
 
-<!-- Mobile Viewport optimized-->
-<meta name="viewport"
-	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description"
-	content="Chipster Web Tool for Data Processing and Visualization">
-<meta name="author" content="Rumana Quazi">
+    <!-- Mobile Viewport optimized-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Chipster Web Tool for Data Processing and Visualization">
+    <meta name="author" content="Rumana Quazi">
 
-<!--Bootstrap CSS-->
-<link href="/node_modules/bootstrap/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<!--Vendor CSS-->
-<link rel="stylesheet" type="text/css"
-	href="/node_modules/d3-context-menu/css/d3-context-menu.css">
-<!-- Angular resizable css -->
-<link rel="stylesheet" type="text/css"
-	href="/node_modules/angular-resizable/angular-resizable.min.css">
+    <!-- Style dependencies -->
+    <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/node_modules/d3-context-menu/css/d3-context-menu.css">
+    <link rel="stylesheet" type="text/css" href="/node_modules/angular-resizable/angular-resizable.min.css">
+    <link rel="stylesheet" type="text/css" href="/node_modules/handsontable/dist/handsontable.full.css">
 
-<!-- Spreadsheet component -->
-<link rel="stylesheet" type="text/css" href="/node_modules/handsontable/dist/handsontable.full.css">
-
-	<!--Custom CSS-->
-<link rel="stylesheet" type="text/css" href="css/app.css">
-
-
+    <!-- Application Styles -->
+    <link rel="stylesheet" type="text/css" href="css/app.css">
 </head>
-<!--end of head-->
 
 <body>
-	<!--header and Navbar-->
 
-	<div id="wrap">
-		<div ng-include="'app/views/navigation/navigation.html'"></div>
+    <div ng-include="'app/views/navigation/navigation.html'"></div>
 
-		<!--Main content and injected view-->
-		<div id="main">
-			<!--andgular templating-->
-			<!--This is where the contents will be injected-->
-			<div ng-view></div>
-		</div>
-		<!--end of main container-->
-	</div>
-	<!--end of wrap-->
+    <div id="main">
+        <div ng-view></div>
+    </div>
 
+    <!-- Dependencies -->
+    <script src="/node_modules/jquery/dist/jquery.js"></script>
+    <script src="/node_modules/systemjs/dist/system.js"></script>
+    <script src="/node_modules/angular/angular.js"></script>
+    <script src="/node_modules/angular-route/angular-route.js"></script>
+    <script src="/node_modules/angular-resource/angular-resource.js"></script>
+    <script src="/node_modules/angular-animate/angular-animate.js"></script>
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="/node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+    <script src="/node_modules/d3/d3.js"></script>
+    <script src="/node_modules/d3-context-menu/js/d3-context-menu.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="/node_modules/ng-flow/dist/ng-flow-standalone.js"></script>
+    <script src="/node_modules/lodash/lodash.js"></script>
+    <script src="/node_modules/restangular/dist/restangular.js"></script>
+    <script src="/node_modules/angular-local-storage/dist/angular-local-storage.min.js"></script>
+    <script src="/node_modules/angular-websocket/dist/angular-websocket.js"></script>
+    <script src="/node_modules/angular-resizable/angular-resizable.min.js"></script>
+    <script src="/node_modules/angular-pdf/dist/angular-pdf.js"></script>
+    <script src="/node_modules/pdfjs-dist/build/pdf.js"></script>
+    <script src="/node_modules/pdfjs-dist/build/pdf.worker.js"></script>
+    <script src="/node_modules/handsontable/dist/handsontable.full.js"></script>
+    <script src="/dependencies/nghandsontable/ngHandsontable.js"></script>
+    <script src="/node_modules/jquery-csv/src/jquery.csv.js"></script>
+    <script src="/node_modules/urijs/src/URI.js"></script>
+    <script src="/node_modules/bluebird/js/browser/bluebird.js"></script>
 
-	<!--js stuff-->
-	<script src="/node_modules/jquery/dist/jquery.js"></script>
-	<script src="/node_modules/angular/angular.js"></script>
-	<script src="/node_modules/angular-resource/angular-resource.js"></script>
-	<script src="/node_modules/angular-route/angular-route.js"></script>
-	<script src="/node_modules/angular-animate/angular-animate.js"></script>
+    <!-- SystemJS module loading configuration -->
+    <script src="config.js"></script>
 
-	<script src="/node_modules/bootstrap/dist/js/bootstrap.js"></script>
-	<script src="/node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
-
-	<!--defining d3 element-->
-	<script src="/node_modules/d3/d3.js"></script>
-	<script src="/node_modules/d3-context-menu/js/d3-context-menu.js"></script>
-	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-
-	<!--file and folder uploader-->
-	<script src="/node_modules/ng-flow/dist/ng-flow-standalone.js"></script>
-
-	<!--Modules for RestAngular-->
-	<script src="/node_modules/lodash/lodash.js"></script>
-	<script src="/node_modules/restangular/dist/restangular.js"></script>
-	<script src="/node_modules/angular-local-storage/dist/angular-local-storage.min.js"></script>
-
-	<!-- Module for Web Socket -->
-	<script src="/node_modules/angular-websocket/dist/angular-websocket.js"></script>
-
-	<!-- Module for Angular Resizable -->
-	<script src="/node_modules/angular-resizable/angular-resizable.min.js"></script>
-
-	<!-- Module for Angular PDF viewer -->
-	<script src="/node_modules/angular-pdf/dist/angular-pdf.js"></script>
-	<script src="/node_modules/pdfjs-dist/build/pdf.js"></script>
-	<script src="/node_modules/pdfjs-dist/build/pdf.worker.js"></script>
-
-	<!-- Spreadsheet compoenent -->
-	<script src="/node_modules/handsontable/dist/handsontable.full.js"></script>
-	<script src="/dependencies/nghandsontable/ngHandsontable.js"></script>
-
-	<!-- CSV parser -->
-	<script src="/node_modules/jquery-csv/src/jquery.csv.js"></script>
-
-	<!-- URI building -->
-	<script src="/node_modules/urijs/src/URI.js"></script>
-
-	<!-- Chipster -->
-	<script src="dist/dist.js"></script>
+    <!-- Source -->
+    <script>SystemJS.import('app/app.module');</script>
 
 </body>
 </html>

@@ -1,4 +1,7 @@
-angular.module('chipster-web').controller('ParameterModalController', function ($log, $uibModalInstance, $scope, selectedTool, inputBindings, selectedDatasets, ToolService, isRunEnabled, parameters) {
+
+ParameterModalController.$inject = ['$log', '$uibModalInstance', '$scope', 'selectedTool', 'inputBindings', 'selectedDatasets', 'ToolService', 'isRunEnabled', 'parameters'];
+
+function ParameterModalController ($log, $uibModalInstance, $scope, selectedTool, inputBindings, selectedDatasets, ToolService, isRunEnabled, parameters) {
     var self = this;
     this.selectedTool = selectedTool;
     this.inputBindings = inputBindings;
@@ -35,4 +38,6 @@ angular.module('chipster-web').controller('ParameterModalController', function (
             self.close(false);
         }
     });
-});
+};
+
+export default ParameterModalController;

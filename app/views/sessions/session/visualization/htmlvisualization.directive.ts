@@ -1,4 +1,6 @@
-angular.module('chipster-web').directive('htmlVisualization',function($sce){
+htmlVisualization.$inject = ['$sce'];
+
+function htmlVisualization($sce){
     return{
         restrict:'E',
         scope : {
@@ -15,4 +17,6 @@ angular.module('chipster-web').directive('htmlVisualization',function($sce){
             };
         }
     };
-});
+};
+
+export default htmlVisualization;

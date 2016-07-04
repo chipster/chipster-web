@@ -1,5 +1,4 @@
-
-angular.module('chipster-web').directive('toolCircle',function(){
+export default function(){
 
 	 var radius=3;
 
@@ -23,4 +22,4 @@ angular.module('chipster-web').directive('toolCircle',function(){
 			scope.context.fill();
 		}
 	};
-});
+};

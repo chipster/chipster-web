@@ -3,7 +3,7 @@
  *       in the workflow graph
  */
 
-angular.module('chipster-web').factory('WorkflowGraphService', function() {
+export default function() {
 
 	var service = {
 
@@ -54,4 +54,4 @@ angular.module('chipster-web').factory('WorkflowGraphService', function() {
 	};
 
 	return service;
-});
+};

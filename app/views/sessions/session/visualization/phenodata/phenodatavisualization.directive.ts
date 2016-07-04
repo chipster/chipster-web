@@ -1,4 +1,6 @@
-angular.module('chipster-web').directive('phenodataVisualization', function(FileRestangular, SessionRestangular, Utils, TableService){
+phenodataVisualization.$inject = ['FileRestangular', 'SessionRestangular', 'Utils', 'TableService'];
+
+function phenodataVisualization(FileRestangular, SessionRestangular, Utils, TableService){
 
     return {
         restrict:'E',
@@ -315,4 +317,6 @@ angular.module('chipster-web').directive('phenodataVisualization', function(File
             $scope.updateView();
         }
     };
-});
+};
+
+export default phenodataVisualization;
