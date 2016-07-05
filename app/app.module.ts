@@ -21,7 +21,7 @@ import bytes from "./common/filter/bytes.filter";
 import categoryFilter from "./common/filter/category.filter";
 import moduleFilter from "./common/filter/module.filter";
 import toolFilter from "./common/filter/tool.filter";
-import AddDatasetModalController from "./views/sessions/session/workflow/adddatasetmodal.controller";
+import AddDatasetModalController from "./views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.controller.ts";
 import secondsFilter from "./common/filter/seconds.filter";
 import ParameterModalController from "./views/sessions/session/tools/parametermodal.controller";
 import chipsterImage from "./directives/chipsterimage";
