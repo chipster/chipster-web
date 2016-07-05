@@ -25,10 +25,10 @@ import AddDatasetModalController from "./views/sessions/session/workflow/adddata
 import secondsFilter from "./common/filter/seconds.filter";
 import ParameterModalController from "./views/sessions/session/tools/parametermodal/parametermodal.controller";
 import chipsterImage from "./directives/chipsterimage";
-import textVisualization from "./views/sessions/session/visualization/textvisualization.directive";
-import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization.directive";
-import imageVisualization from "./views/sessions/session/visualization/imagevisualization.directive";
-import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization.directive";
+import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.directive";
+import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.directive";
+import imageVisualization from "./views/sessions/session/visualization/imagevisualization/imagevisualization.directive";
+import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization/htmlvisualization.directive";
 import toolCircle from "./views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.directive";
 import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.directive";
