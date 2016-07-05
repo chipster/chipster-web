@@ -15,7 +15,7 @@ function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeP
         file.pause();
     };
     this.createDataset = function (name) {
-        var sessionUrl = SessionResource.one('sessions', $routeParams.sessionId);
+        var sessionUrl = SessionResource.service.one('sessions', $routeParams.sessionId);
         var d = {
             datasetId: null,
             name: name,
