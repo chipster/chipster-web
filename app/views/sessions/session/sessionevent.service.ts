@@ -1,8 +1,9 @@
 import AuthenticationService from "../../../authentication/authenticationservice";
 import ConfigService from "../../../services/ConfigService";
 import SessionResource from "../../../resources/session.resource";
+import IWebSocket = angular.websocket.IWebSocket;
 
-export default class SessionEventService{
+export default class SessionEventService {
 
     static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionResource'];
 
@@ -11,7 +12,7 @@ export default class SessionEventService{
     constructor(private configService: ConfigService,
                 private $log: ng.ILogService,
                 private authenticationService: AuthenticationService,
-                private $websocket: any,
+                private $websocket: IWebSocket,
                 private sessionResource: SessionResource){
     }
 
@@ -34,7 +35,7 @@ export default class SessionEventService{
         this.ws.onClose( () => { this.$log.info('websocket closed') });
 
         return {
-            unsubscribe: function () {
+            unsubscribe: () => {
                 this.ws.close();
             }
         }
