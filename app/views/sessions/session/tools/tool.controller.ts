@@ -237,7 +237,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 	$scope.openParameterModal = function () {
 		var modalInstance = $uibModal.open({
 			animation: true,
-			templateUrl: 'app/views/sessions/session/tools/parametermodal.html',
+			templateUrl: 'app/views/sessions/session/tools/parametermodal/parametermodal.html',
 			controller: 'ParameterModalController',
 			controllerAs: 'vm',
 			bindToController: true,
@@ -276,7 +276,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 	$scope.openSourceModal = function () {
 		$uibModal.open({
 			animation: true,
-			templateUrl: 'app/views/sessions/session/tools/sourcemodal.html',
+			templateUrl: 'app/views/sessions/session/tools/sourcemodal/sourcemodal.html',
 			controller: 'SourceModalController',
 			controllerAs: 'vm',
 			bindToController: true,
