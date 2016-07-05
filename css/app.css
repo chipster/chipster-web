@@ -89,11 +89,11 @@
 }
 
 
-#workflow-dataset-static-panel {
+.workflow-dataset-static-panel {
 	position: relative;
 }
 
-#workflow-dataset-panel {
+.workflow-dataset-panel {
 	overflow-y: auto;
 	position: relative;
 }
