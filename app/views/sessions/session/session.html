@@ -1,16 +1,30 @@
 <div class="row">
 
-	<!-- Start of Workflow View -->
-	<div id="main-panel-left" class="col-md-4">
-		<h4>
-			<button ng-bind="data.session.name" class="no-border" ng-click="openSessionEditModal()" title="Click to rename the session"></button>
-		</h4>
-		<div ng-include="'app/views/sessions/session/workflow/workflow.html'"></div>
-	</div>
+    <!-- Start of Workflow View -->
+    <div class="col-md-4">
+        <h4>
+            <button ng-bind="data.session.name" class="no-border" ng-click="openSessionEditModal()" title="Click to rename the session"></button>
+        </h4>
+        <div ng-include="'app/views/sessions/session/workflow/workflow.html'"></div>
+    </div>
 
-	<!-- end of workflow -->
+    <!-- end of workflow -->
 
-	<!-- Visualization View -->
-	<div class="col-md-8" ng-include="'app/views/sessions/session/visualization/visualization.html'"></div>
-	<!-- End of Visualization View -->
+    <!-- Visualization View -->
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Tools</h4>
+                <div ng-include="'app/views/sessions/session/tools/tools.html'"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Datasets</h4>
+                <div ng-include="'app/views/sessions/session/visualization/visualization.html'"></div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Visualization View -->
 </div>

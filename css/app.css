@@ -39,10 +39,6 @@
 	right: 2px;
 }
 
-#main-panel-left {
-	padding-right: 0;
-}
-
 .visualization-area {
 	height: calc(100vh - 110px);
 }
