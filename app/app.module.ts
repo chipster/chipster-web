@@ -34,10 +34,10 @@ import phenodataVisualization from "./views/sessions/session/visualization/pheno
 import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.directive";
 import workflowGraph from "./views/sessions/session/workflow/workflowgraph.directive";
 import SourceModalController from "./views/sessions/session/tools/sourcemodal.controller";
-import SessionEditModalController from "./views/sessions/session/sessioneditmodal.controller";
-import JobErrorModalController from "./views/sessions/session/joberrormodal.controller";
+import SessionEditModalController from "./views/sessions/session/sessioneditmodal/sessioneditmodal.controller";
+import JobErrorModalController from "./views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "./resources/session.resource";
-import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal.controller";
+import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
