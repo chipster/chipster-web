@@ -261,7 +261,7 @@ function SessionController(
     $scope.openAddDatasetModal = function () {
         $uibModal.open({
             animation: true,
-            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal.html',
+            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
             controller: 'AddDatasetModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -277,7 +277,7 @@ function SessionController(
     $scope.openErrorModal = function (title, toolError) {
         $uibModal.open({
             animation: true,
-            templateUrl: 'app/views/sessions/session/joberrormodal.html',
+            templateUrl: 'app/views/sessions/session/joberrormodal/joberrormodal.html',
             controller: 'JobErrorModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -296,7 +296,7 @@ function SessionController(
     $scope.openSessionEditModal = function () {
 
         var modalInstance = $uibModal.open({
-            templateUrl: 'app/views/sessions/session/sessioneditmodal.html',
+            templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -320,7 +320,7 @@ function SessionController(
 
     $scope.openDatasetHistoryModal = function() {
         $uibModal.open({
-            templateUrl: 'app/views/sessions/session/datasethistorymodal.html',
+            templateUrl: 'app/views/sessions/session/datasetmodalhistory/datasethistorymodal.html',
             controller: 'DatasetHistoryModalController',
             controllerAs: 'vm',
             bindToController: true,

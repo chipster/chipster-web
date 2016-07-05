@@ -1,6 +1,6 @@
-AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'Utils', 'data', '$routeParams', 'SessionRestangular', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
+AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'Utils', 'data', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
 
-function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeParams, SessionRestangular, ConfigService, AuthenticationService, WorkflowGraphService) {
+function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeParams, SessionResource, ConfigService, AuthenticationService, WorkflowGraphService) {
     
     this.flowFileAdded = function (file, event, flow) {
         $log.debug('file added');
@@ -15,7 +15,7 @@ function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeP
         file.pause();
     };
     this.createDataset = function (name) {
-        var sessionUrl = SessionRestangular.one('sessions', $routeParams.sessionId);
+        var sessionUrl = SessionResource.one('sessions', $routeParams.sessionId);
         var d = {
             datasetId: null,
             name: name,
