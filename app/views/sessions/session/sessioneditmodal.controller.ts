@@ -1,17 +1,22 @@
-SessionEditModalController.$inject = ['$scope', '$uibModalInstance', 'title'];
 
-function SessionEditModalController($scope, $uibModalInstance, title) {
+import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 
-    this.title = title;
+export default class SessionEditModalController {
 
-    this.cancel = function () {
-        $uibModalInstance.dismiss();
+    static $inject = ['$uibModalInstance', 'title'];
+
+    title: string;
+
+    constructor(private $uibModalInstance: IModalServiceInstance, title: string) {
+        this.title = title;
+    }
+
+    cancel() {
+        this.$uibModalInstance.dismiss();
     };
 
-    this.save = function () {
-        $uibModalInstance.close(this.title);
+    save() {
+        this.$uibModalInstance.close(this.title);
     };
 
-};
-
-export default SessionEditModalController;
+}
