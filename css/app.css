@@ -1,22 +1,5 @@
 /*Custom CSS for Chipster Web*/
 
-
-@media (min-width: 1000px) {
-	html,
-	body {
-		overflow-y: hidden;
-		overflow-x: hidden;
-		padding-left: 2px;
-		padding-right: 2px;
-	}
-}
-
-/*
-#main-navbar {
-	margin-bottom:5px;
-}
-*/
-
 .fill {
 	width: 100%;
 	height: 100%;
@@ -76,6 +59,19 @@
 	overflow-x: auto;
 }
 
+.chipster-highlight {
+	padding: 9px 14px;
+	margin-bottom: 14px;
+	background-color: #f7f7f9;
+	border: 1px solid #e1e1e8;
+	border-radius: 4px;
+}
+
+.tool-list {
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
 .non-scrollable-modal {
 	height: calc(100vh - 160px);
 }
@@ -105,10 +101,6 @@
 	height: auto;
 }
 
-.tool-height {
-	height: calc((100vh - 220px) * 0.6);
-}
-
 .no-margin {
 	margin: 0;
 }
@@ -128,18 +120,6 @@
 
 .link-cursor {
 	cursor: pointer;
-}
-
-#tool-table{
-	overflow-y: auto;
-}
-
-#category-table{
-	overflow-y: auto;
-	overflow-x: hidden;
-}
-
-#tool-details-panel {
 }
 
 .tool-description {
@@ -182,73 +162,6 @@
 .td-selected>a {
 	color: white;
 }
-
-/*
-
-.form-control{
-	margin:2px;
-	height:28px;
-	padding:0px;
-}
-
-.panel-tabs {
-    position: relative;
-    bottom: 30px;
-    clear:both;
-    border-bottom: 1px solid transparent;
-}
-*/
-
-/*
-table{
-	border-collapse: collapse;
-}
-*/
-
-/*
-ul.unstyled {
-	list-style: none;
-	padding: 0;
-}
-
-
-#chipsterInfoContainer{
-	text-align: center;
-	padding: 10px;
-}
-
-#mypanel{
-	padding:10px;
-}
-
-#toolButtonGroup{
-	margin-top: 20px
-}
-
-#add{
-	margin-top:10px;
-	float:right;
-}
-
-*/
-
-/*
-
-#toolrow {max-height:10px;}
-
-#run_btn{
-	margin:20px;
-	width:80%
-}
-
-#flow-button-group{
-	margin: 20px;
-	position: center;
-
-}
-
-*/
-
 
 /* D3 graph related styles*/
 

@@ -11,7 +11,7 @@ import Utils from "./services/Utils";
 import SessionCtrl from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
 import SessionEventService from "./views/sessions/session/sessionevent.service";
-import VisualizationCtrl from "./views/sessions/session/visualization/visualization.controller";
+import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolCtrl from "./views/sessions/session/tools/tool.controller";
@@ -48,7 +48,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.controller('NavigationController', NavigationController)
 	.controller('SessionListCtrl', SessionListCtrl)
 	.controller('SessionCtrl', SessionCtrl)
-	.controller('VisualizationCtrl', VisualizationCtrl)
+	.controller('DatasetCtrl', DatasetCtrl)
 	.controller('ToolCtrl', ToolCtrl)
 	.controller('AddDatasetModalController', AddDatasetModalController)
 	.controller('ParameterModalController', ParameterModalController)

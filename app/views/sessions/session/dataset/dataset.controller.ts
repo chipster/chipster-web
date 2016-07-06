@@ -1,8 +1,7 @@
 
-import VisualizationList from "./visualizationconstants";
+import VisualizationList from "./../visualization/visualizationconstants";
 
 export default function ($scope, $routeParams, AuthenticationService, $compile, Utils) {
-
 	$scope.visualizations = VisualizationList;
 
 	$scope.setTab = function (value) {

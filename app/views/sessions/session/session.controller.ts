@@ -1,15 +1,10 @@
 import SessionResource from "../../../resources/session.resource";
 
-SessionController.$inject = ['$scope', '$routeParams', '$q',
-    'SessionResource', 'AuthenticationService', '$websocket',
-    '$http', '$window', 'WorkflowGraphService',
-    'ConfigService', '$location', 'Utils', '$filter', '$log', '$uibModal', 'SessionEventService'];
+SessionController.$inject = ['$scope', '$routeParams', 'SessionResource', 'AuthenticationService', '$window',
+                            'ConfigService', '$location', 'Utils', '$filter', '$log', '$uibModal', 'SessionEventService'];
 
-function SessionController(
-    $scope, $routeParams, $q,
-    SessionResource, AuthenticationService, $websocket,
-    $http, $window, WorkflowGraphService,
-    ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
+function SessionController($scope, $routeParams, SessionResource, AuthenticationService, $window,
+                           ConfigService, $location, Utils, $filter, $log, $uibModal, SessionEventService) {
 
     // SessionRestangular is a restangular object with
     // configured baseUrl and
@@ -58,7 +53,7 @@ function SessionController(
         }
     };
 
-    $scope.getWorkflowCallback = function() {
+    $scope.getWorkflowCallback = function () {
         return $scope;
     };
 
@@ -78,7 +73,7 @@ function SessionController(
      * Check if there are one or more dataset selected
      * @returns {boolean}
      */
-    $scope.isDatasetSelected = function() {
+    $scope.isDatasetSelected = function () {
         return $scope.selectedDatasets.length > 0;
     };
 
@@ -86,7 +81,7 @@ function SessionController(
      * Check if there are one or more jobs selected
      * @returns {boolean}
      */
-    $scope.isJobSelected = function() {
+    $scope.isJobSelected = function () {
         return $scope.selectedJobs.length > 0;
     };
 
@@ -95,7 +90,7 @@ function SessionController(
      * @param data
      * @returns {boolean}
      */
-    $scope.isSelectedDataset = function(data) {
+    $scope.isSelectedDataset = function (data) {
         return $scope.selectedDatasets.indexOf(data) !== -1;
     };
 
@@ -104,7 +99,7 @@ function SessionController(
      * @param data
      * @returns {boolean}
      */
-    $scope.isSelectedJob = function(data) {
+    $scope.isSelectedJob = function (data) {
         return $scope.selectedJobs.indexOf(data) !== -1;
     };
 
@@ -112,7 +107,7 @@ function SessionController(
      * Check if single dataset is selected
      * @returns {boolean}
      */
-    $scope.isSingleDatasetSelected = function() {
+    $scope.isSingleDatasetSelected = function () {
         return $scope.selectedDatasets.length == 1;
     };
 
@@ -120,27 +115,27 @@ function SessionController(
      * Check if there are more than one datasets selected
      * @returns {boolean}
      */
-    $scope.isMultipleDatasetsSelected = function() {
+    $scope.isMultipleDatasetsSelected = function () {
         return $scope.selectedDatasets.length > 1;
     };
 
-    $scope.clearSelection = function() {
+    $scope.clearSelection = function () {
         $scope.selectedDatasets.length = 0;
         $scope.selectedJobs.length = 0;
     };
 
-    $scope.toggleDatasetSelection = function($event, data) {
+    $scope.toggleDatasetSelection = function ($event, data) {
         Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
     };
 
-    $scope.selectJob = function(event, job) {
+    $scope.selectJob = function (event, job) {
         $scope.clearSelection();
         $scope.selectedJobs = [job];
     };
 
     $scope.deleteJobs = function (jobs) {
 
-        angular.forEach(jobs, function(job) {
+        angular.forEach(jobs, function (job) {
             var url = $scope.sessionUrl.one('jobs').one(job.jobId);
             url.remove().then(function (res) {
                 $log.debug(res);
@@ -148,10 +143,10 @@ function SessionController(
         });
     };
 
-    SessionResource.loadSession($routeParams.sessionId).then(function(data) {
-                   console.log(data);
+    SessionResource.loadSession($routeParams.sessionId).then(function (data) {
+        console.log(data);
         $scope.data = SessionResource.parseSessionData(data);
-         console.log($scope.data);
+        console.log($scope.data);
         // start listening for remote changes
         // in theory we may miss an update between the loadSession() and this subscribe(), but
         // the safe way would be much more complicated:
@@ -168,7 +163,7 @@ function SessionController(
 
     $scope.onSessionChange = function (event, oldValue, newValue) {
         if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
-            $scope.$apply(function() {
+            $scope.$apply(function () {
                 alert('The session has been deleted.');
                 $location.path('sessions');
             });
@@ -198,7 +193,7 @@ function SessionController(
 
     $scope.deleteDatasets = function (datasets) {
 
-        angular.forEach(datasets, function(dataset) {
+        angular.forEach(datasets, function (dataset) {
             var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
             datasetUrl.remove().then(function (res) {
                 $log.debug(res);
@@ -210,22 +205,24 @@ function SessionController(
         return $scope.data.jobsMap.get(jobId);
     };
 
-    $scope.renameDatasetDialog = function(dataset) {
+    $scope.renameDatasetDialog = function (dataset) {
         var result = prompt('Change the name of the node', dataset.name);
-        if(result) {dataset.name = result;}
+        if (result) {
+            dataset.name = result;
+        }
         $scope.updateDataset(dataset);
     };
 
-    $scope.updateDataset = function(dataset) {
+    $scope.updateDataset = function (dataset) {
         var datasetUrl = $scope.sessionUrl.one('datasets').one(dataset.datasetId);
         return datasetUrl.customPUT(dataset);
     };
 
-    $scope.updateSession = function() {
+    $scope.updateSession = function () {
         $scope.sessionUrl.customPUT($scope.data.session);
     };
 
-    $scope.getDatasetUrl = function() {
+    $scope.getDatasetUrl = function () {
         if ($scope.selectedDatasets && $scope.selectedDatasets.length > 0) {
             //TODO should we have separate read-only tokens for datasets?
             return URI(ConfigService.getFileBrokerUrl())
@@ -234,12 +231,12 @@ function SessionController(
         }
     };
 
-    $scope.showDefaultVisualization = function() {
+    $scope.showDefaultVisualization = function () {
         $scope.$broadcast('showDefaultVisualization', {});
     };
 
-    $scope.exportDatasets = function(datasets) {
-        angular.forEach(datasets, function(d) {
+    $scope.exportDatasets = function (datasets) {
+        angular.forEach(datasets, function (d) {
             $window.open($scope.getDatasetUrl(d), "_blank")
         });
     };
@@ -250,7 +247,7 @@ function SessionController(
         $scope.$broadcast('resizeWorkFlowGraph', {});
     });
 
-    angular.element($window).bind('resize', function() {
+    angular.element($window).bind('resize', function () {
         $scope.$broadcast('resizeWorkFlowGraph', {});
     });
 
@@ -318,7 +315,7 @@ function SessionController(
         });
     };
 
-    $scope.openDatasetHistoryModal = function() {
+    $scope.openDatasetHistoryModal = function () {
         $uibModal.open({
             templateUrl: 'app/views/sessions/session/datasetmodalhistory/datasethistorymodal.html',
             controller: 'DatasetHistoryModalController',

@@ -1,65 +1,58 @@
 <div ng-controller="ToolCtrl">
 
-    <div class="bar pull-right search-div">
-        <input type="text" class="search" ng-model="searchTool" ng-change="selectFirstVisible()"
-               placeholder="search tool" ng-keyup="toolSearchKeyEvent($event)"/>
-        <button class="clear-search-button no-border" ng-show="searchTool"
-                ng-click="searchTool = null">
-            <span class="glyphicon glyphicon-remove"></span>
-        </button>
-    </div>
+    <h4>Tools</h4>
+    <div class="chipster-highlight">
 
-    <!-- Tools div -->
-        <ul class="nav nav-pills btn-xs">
-            <li ng-class="{active:module === selectedModule}" ng-repeat="module in data.modules | moduleFilter:searchTool">
-                <a href ng-click="selectModule(module)">{{module.name}}</a>
-            </li>
-        </ul>
+        <!--<div class="bar pull-right search-div">-->
+        <!--<input type="text" class="search" ng-model="searchTool" ng-change="selectFirstVisible()"-->
+        <!--placeholder="search tool" ng-keyup="toolSearchKeyEvent($event)"/>-->
+        <!--<button class="clear-search-button no-border" ng-show="searchTool"-->
+        <!--ng-click="searchTool = null">-->
+        <!--<span class="glyphicon glyphicon-remove"></span>-->
+        <!--</button>-->
+        <!--</div>-->
 
-    <!-- Tab Content -->
-    <div>
-            <div class="col-xs-4 no-padding">
-                <div id="category-table" class="tool-height">
-                    <div id="category-list" class="list-group" data-toggle="buttons">
-                        <button type="button" class="list-group-item thin-list-group-item"
-                                ng-class="{'active':category===selectedCategory}"
-                                ng-click="selectCategory(category)"
-                                ng-repeat="category in categories | categoryFilter:searchTool">
-                            <span><tool-circle toolcolor="category.color"></span>
-                            {{category.name}}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- end of tool category table with column width 4 -->
-            <div class="col-xs-4">
-                <div id="tool-table" class="tool-height">
-                    <div id="tool-list" class="list-group" data-toggle="buttons">
-                        <button type="button" class="list-group-item thin-list-group-item"
-                                ng-class="{'active':tool.id===selectedTool.name.id}"
-                                ng-click="selectTool(tool.id)"
-                                ng-repeat="tool in selectedCategory.tools|toolFilter:searchTool"
-                                id="tool-button-{{tool.id}}">
-                            {{tool.name}}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-4 tool-height no-padding" id="tool-details-panel">
-
-                <div class="btn-group btn-group-justified"  role="group">
-                    <button class="btn btn-default" style="width: 50%"
-                        ng-disabled="!isParametersEnabled()"
-                        ng-click="openParameterModal()">
-                        Parameters
-                    </button>
-                    <button class="btn btn-success" style="width: 50%"
-                        ng-click="runJob()" ng-disabled="!isRunEnabled()">
-                        <span class="glyphicon glyphicon-play">
-                        </span>
-                        Run
+        <!-- Tab Content -->
+        <div class="row">
+            <ul class="col-md-4">
+                <h5>Module</h5>
+                <div class="list-group tool-list" data-toggle="buttons">
+                    <button class="list-group-item thin-list-group-item"
+                            ng-click="selectModule(module)"
+                            ng-repeat="module in data.modules | moduleFilter:searchTool"
+                            ng-class="{active:module === selectedModule}">{{module.name}}
                     </button>
                 </div>
+            </ul>
+
+            <div class="col-md-4">
+                <h5>Category</h5>
+                <div class="list-group tool-list" data-toggle="buttons">
+                    <button type="button" class="list-group-item thin-list-group-item"
+                            ng-class="{'active':category===selectedCategory}"
+                            ng-click="selectCategory(category)"
+                            ng-repeat="category in categories | categoryFilter:searchTool">
+                        <span><tool-circle toolcolor="category.color"></span>
+                        {{category.name}}
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Tool</h5>
+                <div class="list-group tool-list" data-toggle="buttons">
+                    <button type="button" class="list-group-item thin-list-group-item"
+                            ng-class="{'active':tool.id===selectedTool.name.id}"
+                            ng-click="selectTool(tool.id)"
+                            ng-repeat="tool in selectedCategory.tools|toolFilter:searchTool"
+                            id="tool-button-{{tool.id}}">
+                        {{tool.name}}
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h5>Tool Description</h5>
 
                 <!-- Tool Description div -->
                 <div class="tool-description" ng-show="selectedTool">
@@ -74,7 +67,27 @@
 
                 <!--Parameter-->
             </div>
-    </div>
-    <!--end of tabset div-->
-</div>
 
+            <div class="col-md-6">
+
+                <div class="btn-group btn-group-justified" role="group">
+                    <button class="btn btn-default" style="width: 50%"
+                            ng-disabled="!isParametersEnabled()"
+                            ng-click="openParameterModal()">
+                        Parameters
+                    </button>
+                    <button class="btn btn-success" style="width: 50%"
+                            ng-click="runJob()" ng-disabled="!isRunEnabled()">
+                        <span class="glyphicon glyphicon-play">
+                        </span>
+                        Run
+                    </button>
+                </div>
+
+
+            </div>
+        </div>
+        <!--end of tabset div-->
+    </div>
+
+</div>
