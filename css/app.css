@@ -7,7 +7,7 @@
 	border: 1px solid #e1e1e8;
 	border-radius: 4px;
 	max-height: 300px;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .dataset-details textarea {
@@ -83,7 +83,7 @@
 
 .tool-list {
 	max-height: 200px;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .non-scrollable-modal {

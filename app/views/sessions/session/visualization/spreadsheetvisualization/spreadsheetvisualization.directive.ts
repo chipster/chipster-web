@@ -14,7 +14,7 @@ function spreadsheetVisualization(FileResource){
 
             FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
                 // parse the file data using the JQuery-cvs library
-                parserConfig = {
+                let parserConfig = {
                     separator: '\t'
                 };
                 $.csv.toArrays(resp.data, parserConfig, function (err, array) {
