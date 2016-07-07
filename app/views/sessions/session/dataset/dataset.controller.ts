@@ -4,12 +4,6 @@ import VisualizationList from "./../visualization/visualizationconstants";
 export default function ($scope, $routeParams, AuthenticationService, $compile, Utils) {
 	$scope.visualizations = VisualizationList;
 
-	$scope.setTab = function (value) {
-		$scope.tab = value;
-	};
-	$scope.isTab = function (value) {
-		return $scope.tab === value;
-	};
 	$scope.$watchCollection("selectedDatasets", function () {
 		$scope.setTab(1);
 		$scope.setCurrentVisualization(undefined);

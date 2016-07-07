@@ -2,7 +2,6 @@
   "name": "chipster-web",
   "version": "1.0.0",
   "description": "Chipster Web client for data processing and visualization.",
-  "main": "index.js",
   "directories": {
     "test": "test"
   },

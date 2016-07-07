@@ -1,5 +1,19 @@
 /*Custom CSS for Chipster Web*/
 
+
+/* DATASET COMPONENT */
+.dataset-details {
+	background-color: white;
+	border: 1px solid #e1e1e8;
+	border-radius: 4px;
+	max-height: 300px;
+	overflow-y: scroll;
+}
+
+.dataset-details textarea {
+	border: 1px solid #e1e1e8 !important;
+}
+
 .fill {
 	width: 100%;
 	height: 100%;
@@ -90,11 +104,6 @@
 	position: relative;
 }
 
-#data-detail {
-	height: calc((100vh - 220px) * 0.4);
-	overflow-y: auto;
-}
-
 #session-notes {
 	border: none;
 	width: 100%;
@@ -114,10 +123,6 @@
 	background: transparent;
 }
 
-.indented {
-	margin-left: 1em
-}
-
 .link-cursor {
 	cursor: pointer;
 }
@@ -132,10 +137,6 @@
 	/*height: 2em;*/
 	padding-top: 4px;
 	padding-bottom: 4px;
-}
-
-.parameter-table>tbody>tr>td {
-	border-top: none;
 }
 
 .nav-pills {

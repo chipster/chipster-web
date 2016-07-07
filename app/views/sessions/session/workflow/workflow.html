@@ -60,6 +60,13 @@
 
             </uib-tab>
 
+            <uib-tab index="2" heading="Details">
+                <textarea id="session-notes" rows="15" placeholder="Session notes"
+                          ng-blur="updateSession()"
+                          ng-model="data.session.notes">
+                </textarea>
+            </uib-tab>
+
         </uib-tabset>
     </div>
 

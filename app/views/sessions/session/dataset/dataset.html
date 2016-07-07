@@ -1,165 +1,108 @@
-<!-- <div class="panel panel-default main-panel-right" ng-controller="VisualizationCtrl">
-	<div class="panel-body"> -->
-
 <div class="main-panel-right chipster-highlight" ng-controller="DatasetCtrl">
 
 
-    <li role="presentation" class="dropdown" ng-class="{active:isTab(2)}" ng-show="currentVisualization">
-        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {{currentVisualization.name}} <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li ng-repeat="vis in visualizations" ng-show="isCompatible(vis, selectedDatasets)"><a ng-click="show(vis)">{{vis.name}}</a></li>
-        </ul>
-    </li>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <li ng-repeat="vis in visualizations" ng-show="isCompatible(vis, selectedDatasets)"><a ng-click="show(vis)">{{vis.name}}</a></li>
+    </ul>
 
-    <div class="tab-content">
-
-        <div class="col-sm-7" id="data-detail">
-
-            <!-- single selection -->
-            <div ng-if="isSingleDatasetSelected()">
-                <div>
-                    <div class="col-sm-4">
-                        <h5>{{selectedDatasets[0].name}}</h5>
-                    </div>
-
-                    <div class="col-sm-8">
-                        <div class="btn-group btn-group-sm pull-right">
-                            <button type="button" class="btn btn-default" ng-click="renameDatasetDialog(selectedDatasets[0])">
-                                Rename
-                            </button>
-                            <button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">
-                                Delete
-                            </button>
-                            <button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">
-                                Export
-                            </button>
-                            <button type="button" class="btn btn-default" ng-click="openDatasetHistoryModal()">
-                                History
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-12">
-                        <div class="indented">
-                            <p style="font-size: smaller">{{selectedDatasets[0].size}},
-                                {{selectedDatasets[0].data.created}}</p>
-									<textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
-                                              ng-blur="updateDataset(selectedDatasets[0])"
-                                              ng-model="selectedDatasets[0].notes">
-									</textarea>
-                        </div>
-
-                        <h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
-                        <div>
-                            <table class="table table-condensed parameter-table">
-                                <tr ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">
-                                    <td>{{param.displayName}}</td>
-                                    <td>{{param.value}}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+    <div class="row" ng-if="isDatasetSelected()">
+        <div class="col-md-12">
+            <div class="pull-right btn-group btn-group-sm">
+                <button ng-if="isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="renameDatasetDialog(selectedDatasets[0])">Rename</button>
+                <button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">Delete</button>
+                <button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">Export</button>
+                <button type="button" class="btn btn-default" ng-click="openDatasetHistoryModal()">History</button>
             </div>
-
-            <!-- multiple selection -->
-            <div ng-if="isMultipleDatasetsSelected()">
-
-                <div class="col-sm-4">
-                    <h5 ng-repeat="data in selectedDatasets">{{data.name}}</h5>
-                </div>
-
-                <div class="col-sm-8">
-                    <div class="btn-group btn-group-sm pull-right">
-                        <button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">
-                            Delete
-                        </button>
-                        <button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">
-                            Export
-                        </button>
-                        <button type="button" class="btn btn-default" ng-click="openDatasetHistoryModal()">
-                            History
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div ng-if="selectedJobs.length > 0">
-                <div>
-                    <div class="col-sm-8">
-                        <h5>{{selectedJobs[0].toolCategory}} / {{selectedJobs[0].toolName}}</h5>
-                    </div>
-
-                    <div class="col-sm-4">
-                        <div class="btn-group btn-group-sm pull-right">
-                            <button type="button" class="btn btn-default" ng-click="deleteJobs(selectedJobs)">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-12">
-                        <div class="indented">
-                            <p>Status: {{selectedJobs[0].state.toLowerCase()}}
-										<span ng-show="selectedJobs[0].stateDetail">
-											({{selectedJobs[0].stateDetail}})
-										</span>
-                            </p>
-                            <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
-                        </div>
-
-                        <h5>Parameters</h5>
-                        <div>
-                            <table class="table table-condensed parameter-table">
-                                <tr ng-repeat="param in selectedJobs[0].parameters">
-                                    <td>{{param.displayName}}</td>
-                                    <td>{{param.value}}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- no selection -->
-            <div ng-if="!isDatasetSelected() && !isJobSelected()">
-						<textarea id="session-notes" rows="15" placeholder="Session notes"
-                                  ng-blur="updateSession()"
-                                  ng-model="data.session.notes">
-						</textarea>
-            </div>
-
         </div>
-
-        <div class="coll-sm-5">
-            <div ng-if="showPreview()">
-                <button type="button" class="btn btn-default no-padding thumbnail-button" ng-click="show(vis)"
-                        ng-repeat="vis in getVisualizations()">
-                    <img ng-src="{{getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
-
-                    <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
-                        <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
-                        {{pdfUrl=getDatasetUrl();""}}
-                        <ng-pdf scale="page-fit" template-url="app/views/sessions/session/visualization/pdf/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
-                        </ng-pdf>
-                    </div>
-
-                    <html-visualization ng-if="vis.directive == 'html-visualization'" src="getDatasetUrl()" class="thumbnail thumbnail-html"></html-visualization>
-                </button>
-
-            </div>
-
-            <div ng-if="!showPreview()" class="btn-group-vertical" role="group">
-                <button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in getVisualizations()">
-                    <span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
-                    <br>
-                    {{vis.name}}
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group tool-list" data-toggle="buttons">
+                <button class="list-group-item thin-list-group-item"
+                        ng-repeat="dataset in selectedDatasets"
+                        ng-class="{active: dataset.datasetId === activeDatasetId}">{{dataset.name}}
                 </button>
             </div>
         </div>
+        <div class="col-md-9 dataset-details">
+            <h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
 
+            <p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].data.created}}</p>
+                                <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
+                                          ng-blur="updateDataset(selectedDatasets[0])"
+                                          ng-model="selectedDatasets[0].notes">
+                                </textarea>
+            <table class="table table-condensed parameter-table">
+                <tr ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">
+                    <td>{{param.displayName}}</td>
+                    <td>{{param.value}}</td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+    <div ng-if="selectedJobs.length > 0">
+        <div>
+            <div class="col-sm-8">
+                <h5>{{selectedJobs[0].toolCategory}} / {{selectedJobs[0].toolName}}</h5>
+            </div>
+
+            <div class="col-sm-4">
+                <div class="btn-group btn-group-sm pull-right">
+                    <button type="button" class="btn btn-default" ng-click="deleteJobs(selectedJobs)">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="indented">
+                    <p>Status: {{selectedJobs[0].state.toLowerCase()}}
+                        <span ng-show="selectedJobs[0].stateDetail">({{selectedJobs[0].stateDetail}})</span>
+                    </p>
+                    <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
+                </div>
+
+                <h5>Parameters</h5>
+                <div>
+                    <table class="table table-condensed parameter-table">
+                        <tr ng-repeat="param in selectedJobs[0].parameters">
+                            <td>{{param.displayName}}</td>
+                            <td>{{param.value}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="col-md-12">
+    <div ng-if="showPreview()">
+        <button type="button" class="btn btn-default no-padding thumbnail-button" ng-click="show(vis)"
+                ng-repeat="vis in getVisualizations()">
+            <img ng-src="{{getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
+
+            <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
+                <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
+                {{pdfUrl=getDatasetUrl();""}}
+                <ng-pdf scale="page-fit" template-url="app/views/sessions/session/visualization/pdf/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
+                </ng-pdf>
+            </div>
+
+            <html-visualization ng-if="vis.directive == 'html-visualization'" src="getDatasetUrl()" class="thumbnail thumbnail-html"></html-visualization>
+        </button>
+
+    </div>
+
+    <div ng-if="!showPreview()" class="btn-group-vertical" role="group">
+        <button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in getVisualizations()">
+            <span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
+            <br>
+            {{vis.name}}
+        </button>
     </div>
 
 </div>

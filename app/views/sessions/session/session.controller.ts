@@ -125,6 +125,7 @@ function SessionController($scope, $routeParams, SessionResource, Authentication
     };
 
     $scope.toggleDatasetSelection = function ($event, data) {
+        $scope.activeDatasetId = data.datasetId;
         Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
     };
 
