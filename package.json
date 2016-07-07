@@ -29,6 +29,7 @@
     "karma": "^0.13.9",
     "karma-chrome-launcher": "^0.2.0",
     "karma-jasmine": "^0.3.6",
+    "less": "^2.7.1",
     "lite-server": "^2.2.2",
     "typescript": "^1.8.10"
   },
