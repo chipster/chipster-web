@@ -1,4 +1,4 @@
-<div class="container" ng-init="init()">
+<div class="container">
     <br>
     <div class="col-md-6">
         <!-- User Sessions -->
@@ -9,7 +9,7 @@
             </div>
             <div class="col-md-6">
                 <button class="btn btn-sm btn-success pull-right"
-                        ng-click="createSession()">
+                        ng-click="vm.createSession()">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     New session
                 </button>
@@ -19,13 +19,13 @@
         <div class="scrollable session-list">
             <table class="table table-hover table-condensed ">
                 <tbody>
-                <tr ng-repeat="session in userSessions"
-                    ng-mouseover="selectSession($event, session)"
-                    ng-click="openSession(session)">
+                <tr ng-repeat="session in vm.userSessions"
+                    ng-mouseover="vm.selectSession($event, session)"
+                    ng-click="vm.openSession(session)">
                     <td class="text-left text-nowrap link-cursor" >{{session.name}}</td>
                     <td>
                         <button class="btn btn-default btn-xs pull-right no-border"
-                                ng-click="deleteSessions([session]); $event.stopImmediatePropagation();"
+                                ng-click="vm.deleteSessions([session]); $event.stopImmediatePropagation();"
                                 title="Delete session">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
@@ -39,7 +39,7 @@
             <h4>Example sessions</h4>
             <table class="table table-hover">
                 <tbody>
-                <tr ng-repeat="session in localSessions">
+                <tr ng-repeat="session in vm.localSessions">
                     <td class="text-left text-nowrap">
                         {{session.name}}
                     </td>
@@ -50,16 +50,16 @@
     </div><!--end of column-md-6-->
     <div class="col-md-6" id="session-preview"><!-- Session Detail -->
 
-        <h5 ng-repeat="session in selectedSessions">{{session.name}}</h5>
+        <h5 ng-repeat="session in vm.selectedSessions">{{vm.session.name}}</h5>
 
-        <div id="workflow-dataset-panel" ng-if="selectedSessions.length === 1">
-            <p>{{selectedSessions[0].notes}}</p>
+        <div id="workflow-dataset-panel" ng-if="vm.selectedSessions.length === 1">
+            <p>{{vm.selectedSessions[0].notes}}</p>
 
-            <div ng-if="session.datasetsMap && session.jobsMap">
+            <div ng-if="vm.session.datasetsMap && vm.session.jobsMap">
                 <workflow-graph
-                        datasets-map="session.datasetsMap"
-                        jobs-map="session.jobsMap"
-                        modules-map="session.modulesMap"
+                        datasets-map="vm.session.datasetsMap"
+                        jobs-map="vm.session.jobsMap"
+                        modules-map="vm.session.modulesMap"
                         zoom="0.5"
                         enabled="false">
             </div>

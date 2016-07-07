@@ -1,12 +1,25 @@
 
-export default function($scope, $http, $location, SessionResource) {
+import * as _ from "lodash";
+import SessionResource from "../../resources/session.resource";
 
-	$scope.selectedSessions = [];
-	$scope.userSessions=[];
+export default class SessionListController{
 
-	$scope.createSession=function(){
-			
-		var session = {
+	static $inject = ['$location', 'SessionResource'];
+
+	public selectedSession: Array;
+	public selectedSessions: Array;
+	public previousSession: {};
+	public userSession: Array;
+	public userSessions: Array;
+	public session: {};
+
+	constructor(private $location: ng.ILocationService, private sessionResource: SessionResource){
+		this.updateSessions();
+	}
+
+	createSession() {
+
+		let session = {
 			sessionId: null,
 			name: 'New session',
 			notes: '',
@@ -14,79 +27,75 @@ export default function($scope, $http, $location, SessionResource) {
 			accessed: '2015-08-27T17:53:10.331Z'
 		};
 
-		SessionResource.service.one('sessions').customPOST(session).then(function(res){
+		this.sessionResource.service.one('sessions').customPOST(session).then( (res) => {
 			if(res.headers){
 				var sessionLocation=res.headers('Location');
 				session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
-				$scope.openSession(session);
+				this.openSession(session);
 			}
 		});
 	};
 
-	$scope.init = function () {
-		$scope.updateSessions();
-	};
+	updateSessions() {
 
-	$scope.updateSessions = function(){
-
-		SessionResource.service.all('sessions').getList().then(function(res){
-			$scope.userSessions=res.data;
+		this.sessionResource.service.all('sessions').getList().then( (res) => {
+			this.userSessions=res.data;
+			console.log(this.userSessions);
 		}, function(response) {
 			console.log('failed to get sessions', response);
 			if (response.status === 403) {
-				$location.path('/login');
+				this.$location.path('/login');
 			}
 		});
 	};
 
-	$scope.openSession = function(session){
-		$location.path("/sessions" + "/" + session.sessionId);
+	openSession(session) {
+		this.$location.path("/sessions" + "/" + session.sessionId);
 	};
 
-	$scope.deleteSessions = function(sessions){
-
-		angular.forEach(sessions, function(session) {
-			var sessionUrl = SessionResource.service.one('sessions').one(session.sessionId);
-			sessionUrl.remove().then(function(res) {
-				console.log("session deleted", res);
-				$scope.updateSessions();
-				$scope.selectedSessions = [];
-			});
-		});
-	};
-
-	$scope.selectSession = function(event, session) {
+	selectSession(event, session) {
 		//Utils.toggleSelection(event, session, $scope.userSessions, $scope.selectedSessions);
 
-		$scope.selectedSessions = [session];
+		this.selectedSessions = [session];
 
-		if ($scope.selectedSessions.length === 1) {
-			if (session !== $scope.previousSession) {
+		if (this.selectedSessions.length === 1) {
+			if (session !== this.previousSession) {
 				// hide the old session immediately
-				$scope.previousSession = session;
-				$scope.session = {};
-				SessionResource.loadSession($scope.selectedSessions[0].sessionId).then(function(fullSession) {
+				this.previousSession = session;
+				this.session = {};
+				this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then( (fullSession) => {
 					// don't show if the selection has already changed
-					if ($scope.selectedSessions[0] === session) {
-						$scope.session = fullSession;
+					if (this.selectedSessions[0] === session) {
+						this.session = fullSession;
 					}
 				});
 			}
 		}
 	};
 
-	$scope.isSessionSelected = function(session) {
-		return $scope.selectedSessions.indexOf(session) !== -1;
+	deleteSessions(sessions) {
+		angular.forEach(sessions, (session) => {
+			var sessionUrl = this.sessionResource.service.one('sessions').one(session.sessionId);
+			sessionUrl.remove().then( (res) => {
+				console.log("session deleted", res);
+				this.updateSessions();
+				this.selectedSessions = [];
+			});
+		});
 	};
 
-	var callback = {
-		isSelectedDataset: function () {},
-		isSelectedJob: function () {}
+	isSessionSelected(session) {
+		return this.selectedSessions.indexOf(session) !== -1;
 	};
 
-	$scope.getWorkflowCallback = function() {
-		return callback;
+	getWorkflowCallback() {
+		return {
+			isSelectedDataset: function () {},
+			isSelectedJob: function () {}
+		};
 	};
-};
 
+
+
+}
 
