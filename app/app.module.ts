@@ -1,6 +1,5 @@
 import LoginController from "./views/login/login.controller";
 import NavigationController from "./views/navigation/navigation.controller";
-import SessionListCtrl from "./views/sessions/sessionlist.controller"
 import AuthenticationService from "./authentication/authenticationservice";
 import ConfigService from "./services/ConfigService";
 import ConfigurationResource from "./resources/configurationresource";
@@ -38,7 +37,7 @@ import SessionEditModalController from "./views/sessions/session/sessioneditmoda
 import JobErrorModalController from "./views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "./resources/session.resource";
 import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
-
+import sessionList from "./views/sessions/sessionlist.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
 		 'ngWebSocket', 'angularResizable', 'ui.bootstrap',
@@ -46,7 +45,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
 	.controller('LoginController', LoginController)
 	.controller('NavigationController', NavigationController)
-	.controller('SessionListCtrl', SessionListCtrl)
 	.controller('SessionCtrl', SessionCtrl)
 	.controller('DatasetCtrl', DatasetCtrl)
 	.controller('ToolCtrl', ToolCtrl)
@@ -82,6 +80,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.directive('phenodataVisualization', phenodataVisualization)
 	.directive('pdfVisualization', pdfVisualization)
 	.directive('workflowGraph', workflowGraph)
+	.component('sessionList', sessionList)
     .config(RouteConfiguration)
 	.run(ChipsterRun);
 

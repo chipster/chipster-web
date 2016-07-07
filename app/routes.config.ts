@@ -5,8 +5,7 @@ export default function ($routeProvider) {
         .when('/home', {templateUrl: 'app/views/home/home.html'})
         .when('/login', {templateUrl: 'app/views/login/login.html', controller: 'LoginController as vm'})
         .when('/sessions', {
-            templateUrl: 'app/views/sessions/sessionlist.html',
-            controller: 'SessionListCtrl as vm',
+            template: '<session-list></session-list>',
             authenticated: true
         })
         .when('/sessions/:sessionId', {
