@@ -6,22 +6,26 @@ import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/ConfigService";
 import AuthenticationService from "../../../authentication/authenticationservice";
 import SessionEventService from "./sessionevent.service";
+import Session from "./model/session";
+import Dataset from "./model/dataset";
+import Job from "./model/job";
+import Module from "./model/module";
+import Tool from "./model/tool";
 
 export default class SessionDataService {
 
-    static $inject = ['$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService', 'SessionEventService'];
-
     sessionId: string;
-    jobsMap = new Map();
-    datasetsMap = new Map();
-    modules: [any];
-    tools: [any];
-    modulesMap = new Map();
+    jobsMap = new Map<string, Job>();
+    datasetsMap = new Map<string, Dataset>();
+    modules: Module[];
+    tools: Tool[];
+    modulesMap = new Map<string, Module>();
     sessionUrl: any;
+    subscription: {unsubscribe(): void};
+    session: Session;
+    listeners: {function(event: any, oldValue: any, newValue: any): void}[] = [];
 
-    subscription: any;
-
-    listeners: any[] = [];
+    static $inject = ['$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService', 'SessionEventService'];
 
     constructor(
         private $routeParams: IRouteParamsService,
@@ -32,24 +36,28 @@ export default class SessionDataService {
         private AuthenticationService: AuthenticationService,
         private SessionEventService: SessionEventService) {
 
-        this.sessionId = $routeParams['sessionId'];
+        this.init();
+    }
+
+    init() {
+        this.sessionId = this.$routeParams['sessionId'];
 
         // SessionRestangular is a restangular object with
         // configured baseUrl and
         // authorization header
-        this.sessionUrl = SessionResource.service.one('sessions', this.sessionId);
+        this.sessionUrl = this.SessionResource.service.one('sessions', this.sessionId);
 
-        SessionResource.loadSession(this.sessionId).then(function (data) {
+        this.SessionResource.loadSession(this.sessionId).then(function (data: any) {
 
-            let parsedData: any = SessionResource.parseSessionData(data);
+
+            let parsedData: any = this.SessionResource.parseSessionData(data);
             this.sessionId = parsedData.session.sessionId;
             this.jobsMap = parsedData.jobsMap;
             this.datasetsMap = parsedData.datasetsMap;
             this.modules = parsedData.modules;
             this.tools = parsedData.tools;
             this.modulesMap = parsedData.modulesMap;
-
-            console.log('going to subscribe', parsedData);
+            this.session = parsedData.session;
 
             // start listening for remote changes
             // in theory we may miss an update between the loadSession() and this subscribe(), but
@@ -57,15 +65,15 @@ export default class SessionDataService {
             // - subscribe but put the updates in queue
             // - loadSession().then()
             // - apply the queued updates
-            this.subscription = SessionEventService.subscribe(this.sessionId, this, function (event, oldValue, newValue) {
-                angular.forEach(this.listeners, function(listener) {
+            this.subscription = this.SessionEventService.subscribe(this.sessionId, this, function (event: any, oldValue: any, newValue: any) {
+                for (let listener of this.listeners) {
                     listener(event, oldValue, newValue);
-                });
+                }
             }.bind(this));
         }.bind(this));
     }
 
-    onSessionChange(listener) {
+    onSessionChange(listener: {function(event: any, oldValue: any, newValue: any): void}) {
         this.listeners.push(listener);
     }
 
@@ -73,61 +81,54 @@ export default class SessionDataService {
         this.subscription.unsubscribe();
     }
 
-    getDatasetList() {
+    getDatasetList(): Dataset[] {
         return Utils.mapValues(this.datasetsMap);
-    };
+    }
 
-    getJob = function (jobId) {
+    getJob(jobId: string): Job {
         return this.jobsMap.get(jobId);
-    };
+    }
 
-/*
-    $scope.getDataSets = function () {
-        $scope.datalist = $scope.sessionUrl.all('datasets')
-            .getList();
-    };*/
-
-    deleteJobs = function (jobs) {
-
-        angular.forEach(jobs, function (job) {
+    deleteJobs(jobs: Job[]) {
+        for (let job of jobs) {
             var url = this.sessionUrl.one('jobs').one(job.jobId);
-            url.remove().then(function (res) {
+            url.remove().then(function (res: any) {
                 this.$log.debug(res);
             }.bind(this));
-        }.bind(this));
-    };
+        }
+    }
 
-    deleteDatasets = function (datasets) {
+    deleteDatasets(datasets: Dataset[]) {
 
-        angular.forEach(datasets, function (dataset) {
+        for (let dataset of datasets) {
             var datasetUrl = this.sessionUrl.one('datasets').one(dataset.datasetId);
-            datasetUrl.remove().then(function (res) {
+            datasetUrl.remove().then(function (res: any) {
                 this.$log.debug(res);
             }.bind(this));
-        }.bind(this));
-    };
+        }
+    }
 
-    updateDataset = function (dataset) {
+    updateDataset(dataset: Dataset) {
         var datasetUrl = this.sessionUrl.one('datasets').one(dataset.datasetId);
         return datasetUrl.customPUT(dataset);
-    };
+    }
 
 
-    updateSession = function () {
+    updateSession() {
         this.sessionUrl.customPUT(this.session);
-    };
+    }
 
-    getDatasetUrl = function (dataset) {
+    getDatasetUrl(dataset: Dataset): string {
         //TODO should we have separate read-only tokens for datasets?
         return URI(this.ConfigService.getFileBrokerUrl())
-            .path('sessions/' + this.$routeParams.sessionId + '/datasets/' + dataset.datasetId)
+            .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
             .addQuery('token', this.AuthenticationService.getToken()).toString();
 
-    };
+    }
 
-    exportDatasets = function (datasets) {
-        angular.forEach(datasets, function (d) {
+    exportDatasets(datasets: Dataset[]) {
+        for (let d of datasets) {
             this.$window.open(this.getDatasetUrl(d), "_blank")
-        }.bind(this));
-    };
+        }
+    }
 }
