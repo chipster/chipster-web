@@ -9,10 +9,11 @@ function spreadsheetVisualization(FileResource){
             sessionId: '=',
             src: '='
         },
-        template: '<div class="scrollable" id="tableContainer"></div>',
+        template: '<div id="tableContainer"></div>',
         link: function ($scope) {
 
             FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
+
                 // parse the file data using the JQuery-cvs library
                 let parserConfig = {
                     separator: '\t'
@@ -37,6 +38,6 @@ function spreadsheetVisualization(FileResource){
             };
         }
     };
-};
+}
 
 export default spreadsheetVisualization;

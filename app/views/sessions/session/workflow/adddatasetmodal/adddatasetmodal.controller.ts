@@ -1,6 +1,7 @@
-AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'Utils', 'data', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
+import Utils from "../../../../../services/Utils";
+AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'data', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
 
-function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeParams, SessionResource, ConfigService, AuthenticationService, WorkflowGraphService) {
+function AddDatasetModalController($log, $uibModalInstance, data, $routeParams, SessionResource, ConfigService, AuthenticationService, WorkflowGraphService) {
     
     this.flowFileAdded = function (file, event, flow) {
         $log.debug('file added');
@@ -47,6 +48,6 @@ function AddDatasetModalController($log, $uibModalInstance, Utils, data, $routeP
     this.close = function () {
         $uibModalInstance.dismiss();
     };
-};
+}
 
 export default AddDatasetModalController;

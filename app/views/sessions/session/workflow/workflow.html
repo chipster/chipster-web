@@ -29,9 +29,9 @@
 
                 <div class="fill workflow-dataset-panel">
                     <workflow-graph
-                            datasets-map="data.datasetsMap"
-                            jobs-map="data.jobsMap"
-                            modules-map="data.modulesMap"
+                            datasets-map="getDatasetsMap()"
+                            jobs-map="getJobsMap()"
+                            modules-map="getModulesMap()"
                             callback="getWorkflowCallback()"
                             zoom="1"
                             enabled="true"></workflow-graph>

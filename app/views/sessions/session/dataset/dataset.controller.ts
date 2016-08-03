@@ -1,7 +1,8 @@
 
 import VisualizationList from "./../visualization/visualizationconstants";
+import Utils from "../../../../services/Utils";
 
-export default function ($scope, $routeParams, AuthenticationService, $compile, Utils) {
+export default function ($scope, $routeParams, AuthenticationService, $compile) {
 	$scope.visualizations = VisualizationList;
 
 	$scope.$watchCollection("selectedDatasets", function () {

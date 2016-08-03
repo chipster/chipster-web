@@ -1,7 +1,8 @@
+import Utils from "../../../../services/Utils";
 
-workflowGraph.$inject = ['$window', 'WorkflowGraphService', 'Utils'];
+workflowGraph.$inject = ['$window', 'WorkflowGraphService', 'SessionDataService'];
 
-function workflowGraph($window, WorkflowGraphService, Utils) {
+function workflowGraph($window, WorkflowGraphService, SessionDataService) {
 	return {
 		restrict : 'EA',
 		require:'^ngController',
@@ -64,8 +65,8 @@ function workflowGraph($window, WorkflowGraphService, Utils) {
 
 			scope.update = function() {
 
-				var datasetNodes = scope.getDatasetNodes(scope.datasetsMap, scope.jobsMap, scope.modulesMap);
-				var jobNodes = scope.getJobNodes(scope.jobsMap);
+				var datasetNodes = scope.getDatasetNodes(SessionDataService.datasetsMap, SessionDataService.jobsMap, SessionDataService.modulesMap);
+				var jobNodes = scope.getJobNodes(SessionDataService.jobsMap);
 
 
 				// add datasets before jobs, because the layout will be done in this order

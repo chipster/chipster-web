@@ -1,17 +1,17 @@
 import * as Promise from "bluebird";
 
-ToolCtrl.$inject = ['$scope', '$filter', 'Utils', 'TableService', '$q', '$uibModal', 'ToolService'];
+ToolCtrl.$inject = ['$scope', '$filter', 'TableService', '$q', '$uibModal', 'ToolService', 'SessionDataService'];
 
-function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolService) {
+function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, SessionDataService) {
 
 	//initialization
 	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
 	$scope.selectedCategory = null;
 
-	$scope.$watch('data.modules', function () {
+	$scope.$watch('getModules()', function () {
 		// select the first module when the tools are loaded
-		if ($scope.data.modules) {
-			$scope.selectModule($scope.data.modules[0]);
+		if (SessionDataService.modules) {
+			$scope.selectModule(SessionDataService.modules[0]);
 		}
 	});
 
@@ -29,7 +29,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 	$scope.selectTool = function(toolId) {
 
 		//find the relevant tool
-		angular.forEach($scope.data.tools, function(tool) {
+		angular.forEach(SessionDataService.tools, function(tool) {
 			if(tool.name.id === toolId) {
 				$scope.selectedTool = tool;
 
@@ -136,7 +136,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 		//	jobToRun.inputs.push(jobInput);
 		//}
 
-		var postJobUrl = $scope.sessionUrl.one('jobs');
+		var postJobUrl = SessionDataService.sessionUrl.one('jobs');
 		postJobUrl.customPOST(jobToRun).then(function (response) {
 			console.log(response);
 		});
@@ -144,7 +144,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 
 	$scope.selectFirstVisible = function () {
 
-		var filteredModules = $filter('moduleFilter')($scope.data.modules, $scope.searchTool);
+		var filteredModules = $filter('moduleFilter')(SessionDataService.modules, $scope.searchTool);
 		if (filteredModules && filteredModules.indexOf($scope.selectedModule) < 0 && filteredModules[0]) {
 			$scope.selectModule(filteredModules[0]);
 		}
@@ -199,10 +199,14 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 		return jobParameter;
 	};
 
+	$scope.getModules = function () {
+		return SessionDataService.modules;
+	};
+
 	$scope.getColumns = function () {
 		var promises = [];
 		angular.forEach($scope.selectedDatasets, function (dataset) {
-			if ($scope.isCompatible(dataset, 'TSV')) {
+			if (ToolService.isCompatible(dataset, 'TSV')) {
 				promises.push(TableService.getColumns($scope.getSessionId(), dataset.datasetId));
 			}
 		});
@@ -288,7 +292,7 @@ function ToolCtrl($scope, $filter, Utils, TableService, $q, $uibModal, ToolServi
 			}
 		});
 	};
-};
+}
 
 
 export default ToolCtrl;

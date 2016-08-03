@@ -19,7 +19,7 @@
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button class="list-group-item thin-list-group-item"
                             ng-click="selectModule(module)"
-                            ng-repeat="module in data.modules | moduleFilter:searchTool"
+                            ng-repeat="module in getModules() | moduleFilter:searchTool"
                             ng-class="{active:module === selectedModule}">{{module.name}}
                     </button>
                 </div>
@@ -32,7 +32,7 @@
                             ng-class="{'active':category===selectedCategory}"
                             ng-click="selectCategory(category)"
                             ng-repeat="category in categories | categoryFilter:searchTool">
-                        <span><tool-circle toolcolor="category.color"></span>
+                        <span><tool-circle toolcolor="category.color"></tool-circle></span>
                         {{category.name}}
                     </button>
                 </div>

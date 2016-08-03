@@ -10,6 +10,7 @@ import Utils from "./services/Utils";
 import SessionCtrl from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
 import SessionEventService from "./views/sessions/session/sessionevent.service";
+import SessionDataService from "./views/sessions/session/sessiondata.service";
 import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
@@ -65,6 +66,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.factory('TableService', TableService)
 	.factory('ToolService', ToolService)
 	.service('SessionResource', SessionResource)
+	.service('SessionDataService', SessionDataService)
 	.filter('searchDatasetFilter', searchDatasetFilter)
 	.filter('bytes', bytes)
 	.filter('categoryFilter', categoryFilter)

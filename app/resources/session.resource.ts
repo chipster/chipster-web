@@ -3,6 +3,7 @@ import AuthenticationService from "../authentication/authenticationservice";
 import * as restangular from "restangular";
 import ConfigService from "../services/ConfigService";
 import ToolResource from "../resources/toolresource";
+import Utils from "../services/Utils";
 
 export default class SessionResource {
 
@@ -15,7 +16,7 @@ export default class SessionResource {
 				private configService: ConfigService,
 				private toolResource: ToolResource,
 				private $q:ng.IQService,
-				private Utils: any) {
+				private Utils: Utils) {
 
 		this.service = this.restangular.withConfig( (configurer) => {
 			configurer.setBaseUrl(this.configService.getSessionDbUrl());
@@ -46,8 +47,8 @@ export default class SessionResource {
 		let data = {};
 
 		data.session = session;
-		data.datasetsMap = this.Utils.arrayToMap(datasets, 'datasetId');
-		data.jobsMap = this.Utils.arrayToMap(jobs, 'jobId');
+		data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
+		data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
 
 		// show only configured modules
 		modules = modules.filter( (module) => this.configService.getModules().indexOf(module.name) >= 0 );
@@ -63,10 +64,10 @@ export default class SessionResource {
 			return module;
 		});
 
-		data.modulesMap = this.Utils.arrayToMap(modules, 'moduleId');
+		data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
 
 		data.modulesMap.forEach( (module:any) => {
-			module.categoriesMap = this.Utils.arrayToMap(module.categories, 'name');
+			module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
 		});
 
 		return data;

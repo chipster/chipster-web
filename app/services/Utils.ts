@@ -1,40 +1,38 @@
-export default function () {
+export default class Utils {
 
-    var service = {};
-
-    service.getFileExtension = function(name) {
+    static getFileExtension(name) {
         return name.split('.').pop();
-    };
+    }
 
-    service.startsWith = function(data, start) {
+    static startsWith(data, start) {
         return data.substring(0, start.length) === start;
-    };
+    }
 
-    service.mapValues = function(map) {
+    static mapValues(map) {
         var array = [];
         map.forEach( function(value) {
             array.push(value);
         });
         return array;
-    };
+    }
 
-    service.arrayToMap = function(array, key) {
+    static arrayToMap(array, key) {
         var map = new Map();
         for (var i = 0; i < array.length; i++) {
             map.set(array[i][key], array[i]);
         }
         return map;
-    };
+    }
 
-    service.isCtrlKey = function(event) {
+    static isCtrlKey(event) {
         return event.metaKey || event.ctrlKey;
-    };
+    }
 
-    service.isShiftKey = function(event) {
+    static isShiftKey(event) {
         return event.shiftKey;
-    };
+    }
 
-    service.toggleSelection = function(event, item, allItems, selectedItems) {
+    static toggleSelection(event, item, allItems, selectedItems) {
 
         function isSelectionEmpty() {
             return selectedItems.length === 0;
@@ -60,13 +58,13 @@ export default function () {
             selectedItems.push(item);
         }
 
-        if (service.isCtrlKey(event)) {
+        if (this.isCtrlKey(event)) {
             if (selectionContains(item)) {
                 removeFromSelection(item);
             } else {
                 addToSelection(item);
             }
-        } else if (service.isShiftKey(event)) {
+        } else if (this.isShiftKey(event)) {
             if (!isSelectionEmpty()) {
 
                 var lastSelectedItem = selectedItems[selectedItems.length - 1];
@@ -92,7 +90,5 @@ export default function () {
         } else {
             setSelection(item);
         }
-    };
-
-    return service;
-};
+    }
+}
