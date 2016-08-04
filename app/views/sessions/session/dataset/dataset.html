@@ -1,17 +1,17 @@
-<div class="chipster-highlight" ng-controller="DatasetCtrl">
+<div class="chipster-highlight" ng-controller="DatasetCtrl as vm">
 
 
     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li ng-repeat="vis in visualizations" ng-show="isCompatible(vis, selectedDatasets)"><a ng-click="show(vis)">{{vis.name}}</a></li>
+        <li ng-repeat="vis in vm.visualizations" ng-show="vm.isCompatible(vis)"><a ng-click="vm.show(vis)">{{vis.name}}</a></li>
     </ul>
 
-    <div class="row" ng-if="isDatasetSelected()">
+    <div class="row" ng-if="vm.$scope.isDatasetSelected()">
         <div class="col-md-12">
             <div class="pull-right btn-group btn-group-sm">
-                <button ng-if="isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="renameDatasetDialog(selectedDatasets[0])">Rename</button>
-                <button type="button" class="btn btn-default" ng-click="deleteDatasets(selectedDatasets)">Delete</button>
-                <button type="button" class="btn btn-default" ng-click="exportDatasets(selectedDatasets)">Export</button>
-                <button type="button" class="btn btn-default" ng-click="openDatasetHistoryModal()">History</button>
+                <button ng-if="vm.$scope.isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="vm.renameDataset()">Rename</button>
+                <button type="button" class="btn btn-default" ng-click="vm.deleteDatasets()">Delete</button>
+                <button type="button" class="btn btn-default" ng-click="vm.exportDatasets()">Export</button>
+                <button type="button" class="btn btn-default" ng-click="vm.showHistory()">History</button>
             </div>
         </div>
     </div>
@@ -19,13 +19,13 @@
         <div class="col-md-3">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
-                        ng-repeat="dataset in selectedDatasets"
+                        ng-repeat="dataset in vm.$scope.selectedDatasets"
                         ng-class="{active: dataset.datasetId === activeDatasetId}">{{dataset.name}}
                 </button>
             </div>
         </div>
         <div class="col-md-9 dataset-details">
-            <h5>{{getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
+            <h5>{{vm.getJob(selectedDatasets[0].sourceJob).toolCategory}} / {{getJob(selectedDatasets[0].sourceJob).toolName}}</h5>
 
             <p style="font-size: smaller">{{selectedDatasets[0].size}}, {{selectedDatasets[0].data.created}}</p>
                                 <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
@@ -33,7 +33,7 @@
                                           ng-model="selectedDatasets[0].notes">
                                 </textarea>
             <table class="table table-condensed parameter-table">
-                <tr ng-repeat="param in getJob(selectedDatasets[0].sourceJob).parameters">
+                <tr ng-repeat="param in vm.$scope.getJob(vm.$scope.selectedDatasets[0].sourceJob).parameters">
                     <td>{{param.displayName}}</td>
                     <td>{{param.value}}</td>
                 </tr>
@@ -44,14 +44,14 @@
 
     <div class="row">
         <div class="col-md-3">
-            <button class="btn btn-default" ng-click="show(vis)">Show visualization</button>
+            <button class="btn btn-default" ng-click="vm.show(vis)">Show visualization</button>
         </div>
 
         <div class="col-md-9">
-            <div ng-if="showPreview()">
-                <button class="btn btn-default thumbnail-button" ng-click="show(vis)"
-                        ng-repeat="vis in getVisualizations()">
-                    <img ng-src="{{getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
+            <div ng-if="vm.showPreview()">
+                <button class="btn btn-default thumbnail-button" ng-click="vm.show(vis)"
+                        ng-repeat="vis in vm.getVisualizations()">
+                    <img ng-src="{{vm.$scope.getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
 
                     <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
                         <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
@@ -65,8 +65,8 @@
 
             </div>
 
-            <div ng-if="!showPreview()" class="btn-group-vertical" role="group">
-                <button type="button" class="btn btn-default" ng-click="show(vis)" ng-repeat="vis in getVisualizations()">
+            <div ng-if="!vm.showPreview()" class="btn-group-vertical" role="group">
+                <button type="button" class="btn btn-default" ng-click="vm.show(vis)" ng-repeat="vis in vm.getVisualizations()">
                     <span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
                     <br>
                     {{vis.name}}
