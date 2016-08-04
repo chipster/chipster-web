@@ -6,16 +6,22 @@ import IRouteParamsService = angular.IRouteParamsService;
 import ICompileService = angular.ICompileService;
 import Visualization from "../visualization/visualization";
 import Dataset from "../model/dataset";
+import SelectionService from "../selection.service";
+import SessionDataService from "../sessiondata.service";
 
 export default class DatasetController {
 
-	static $inject = ['$scope', '$routeParams', 'AuthenticationService', '$compile'];
+	static $inject = [
+		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
+		'SessionDataService'];
 
 	constructor(
 		private $scope: IScopeService,
 		private $routeParams: IRouteParamsService,
 		private AuthenticationService: AuthenticationService,
-		private $compile: ICompileService) {
+		private $compile: ICompileService,
+		private SelectionService: SelectionService,
+		private SessionDataService: SessionDataService) {
 
 		this.init();
 	}
@@ -27,7 +33,6 @@ export default class DatasetController {
 	init() {
 
 		this.$scope.$watchCollection("selectedDatasets", function () {
-			this.$scope.setTab(1);
 			this.setCurrentVisualization(undefined);
 		}.bind(this));
 
@@ -58,7 +63,7 @@ export default class DatasetController {
 
 	isCompatible(visualization: Visualization) {
 
-		let datasets = this.$scope.selectedDatasets;
+		let datasets = this.SelectionService.selectedDatasets;
 
 		if (datasets && datasets.length === 1) {
 			return DatasetController.isCompatibleWithDataset(visualization, datasets[0]);
@@ -86,36 +91,54 @@ export default class DatasetController {
 	}
 
 	show(vis: Visualization) {
-		if (!this.$scope.isSingleDatasetSelected) {
-			console.log("trying to show visualization, but " + this.$scope.selectedDatasets.length + " datasets selected");
+		if (!this.SelectionService.isSingleDatasetSelected()) {
+			console.log("trying to show visualization, but " + this.SelectionService.selectedDatasets.length + " datasets selected");
 			return;
 		}
 		var directive = angular.element('<' + vis.directive + '/>');
-		directive.attr('src', 'getDatasetUrl()');
-		directive.attr('dataset-id', 'selectedDatasets[0].datasetId');
-		directive.attr('session-id', "'" + this.$scope.getSessionId() + "'");
-		directive.attr('selected-datasets', 'selectedDatasets');
+		directive.attr('src', 'vm.getDatasetUrl()');
+		directive.attr('dataset-id', 'vm.getDataset().datasetId');
+		directive.attr('session-id', "'" + this.SessionDataService.sessionId + "'");
+		directive.attr('selected-datasets', 'vm.getSelectionService().selectedDatasets');
 		this.$compile(directive)(this.$scope);
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();
 		area.append(directive);
-		this.$scope.setTab(2);
 		this.setCurrentVisualization(vis, directive);
 	}
 
 	renameDataset() {
-		this.$scope.renameDatasetDialog(this.$scope.selectedDatasets[0]);
+		this.SessionDataService.renameDatasetDialog(this.SelectionService.selectedDatasets[0]);
 	}
 
 	deleteDatasets() {
-		this.$scope.deleteDatasets(this.$scope.selectedDatasets);
+		this.SessionDataService.deleteDatasets(this.SelectionService.selectedDatasets);
 	}
 
 	exportDatasets() {
-		this.$scope.exportDatasets(this.$scope.selectedDatasets);
+		this.SessionDataService.exportDatasets(this.SelectionService.selectedDatasets);
 	}
 
 	showHistory() {
-		this.$scope.openDatasetHistoryModal();
+		this.SessionDataService.openDatasetHistoryModal();
+	}
+
+	getSelectionService() {
+		return this.SelectionService;
+	}
+
+	getSourceJob() {
+		if (this.getSelectionService().selectedDatasets[0]) {
+			return this.SessionDataService.getJob(this.getSelectionService().selectedDatasets[0].sourceJob)
+		}
+		return null;
+	}
+
+	getDataset() {
+		return this.SelectionService.selectedDatasets[0];
+	}
+
+	getDatasetUrl() {
+		return this.SessionDataService.getDatasetUrl(this.getDataset());
 	}
 }

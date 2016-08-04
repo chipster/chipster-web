@@ -10,7 +10,7 @@ export default function ($routeProvider) {
         })
         .when('/sessions/:sessionId', {
             templateUrl: 'app/views/sessions/session/session.html',
-            controller: 'SessionCtrl',
+            controller: 'SessionController as vm',
             authenticated: true
         })
         .otherwise({templateUrl: 'app/views/home/home.html'});

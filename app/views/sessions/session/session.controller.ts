@@ -1,219 +1,175 @@
-import Utils from "../../../services/Utils";
+import SessionEventService from "./sessionevent.service";
+import SessionDataService from "./sessiondata.service";
+import IScopeService = angular.IScopeService;
+import IRouteParamsService = angular.IRouteParamsService;
+import IWindowService = angular.IWindowService;
+import ILocationService = angular.ILocationService;
+import IFilterService = angular.IFilterService;
+import ILogService = angular.ILogService;
+import IUibModalService = angular.IUibModalService;
+import SelectionService from "./selection.service";
 
-SessionController.$inject = ['$scope', '$routeParams', '$window',
-                            '$location', '$filter', '$log', '$uibModal',
-                            'SessionEventService', 'SessionDataService'];
+export default class SessionController {
 
-function SessionController($scope, $routeParams, $window,
-                           $location, $filter, $log, $uibModal, SessionEventService,
-                           SessionDataService) {
+    static $inject = [
+        '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
+        'SessionEventService', 'SessionDataService', 'SelectionService'];
+
+    constructor(
+        private $scope: IScopeService,
+        private $routeParams: IRouteParamsService,
+        private $window: IWindowService,
+        private $location: ILocationService,
+        private $filter: IFilterService,
+        private $log: ILogService,
+        private $uibModal: IUibModalService,
+        private SessionEventService: SessionEventService,
+        private SessionDataService: SessionDataService,
+        private SelectionService: SelectionService) {
+
+        this.init();
+    }
 
     // create an object for the dataset search value, so that we can modify it from here
     // the search box seems to have a separate child scope, not sure why
-    $scope.datasetSearch = {};
+    datasetSearch: any = {};
 
-    // selections
-    $scope.selectedDatasets = [];
-    $scope.selectedJobs = [];
+    selectedTab = 1;
 
-    // tool selection
-    $scope.selectedTool = null;
-    $scope.selectedToolIndex = -1;
-    $scope.istoolselected = false;
+    toolDetailList: any = null;
 
-    $scope.selectedTab = 1;
+    workflowCallback = {
+        isSelectedDataset: dataset => this.SelectionService.isSelectedDataset(dataset),
+        isSelectedJob: job => this.SelectionService.isSelectedJob(job),
+        clearSelection: () => this.SelectionService.clearSelection(),
+        toggleDatasetSelection: ($event, data) => this.SelectionService.toggleDatasetSelection($event, data),
+        showDefaultVisualization: () => this.showDefaultVisualization()
+    };
 
-    $scope.toolDetailList = null;
-
-    // For searching dataset in workflowgraph
-    $scope.searched_dataset_name = null;
-
-    SessionDataService.onSessionChange(function (event, oldValue, newValue) {
-        if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
-            $scope.$apply(function () {
-                alert('The session has been deleted.');
-                $location.path('sessions');
-            });
-        }
-        if (event.resourceType === 'DATASET') {
-            $scope.$broadcast('datasetsMapChanged', {});
-        }
-        if (event.resourceType === 'JOB') {
-            $scope.$broadcast('jobsMapChanged', {});
-
-            // if the job has just failed
-            if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
-                $scope.openErrorModal('Job failed', newValue);
-                $log.info(newValue);
+    init() {
+        this.SessionDataService.onSessionChange(function (event, oldValue, newValue): void {
+            if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
+                this.$scope.$apply(function () {
+                    alert('The session has been deleted.');
+                    this.$location.path('sessions');
+                });
             }
-            if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
-                $scope.openErrorModal('Job error', newValue);
-                $log.info(newValue);
+            if (event.resourceType === 'DATASET') {
+                this.$scope.$broadcast('datasetsMapChanged', {});
             }
-        }
-    });
+            if (event.resourceType === 'JOB') {
+                this.$scope.$broadcast('jobsMapChanged', {});
 
-    // stop listening for events when leaving this view
-    $scope.$on("$destroy", function () {
-        SessionDataService.destroy();
-    });
+                // if the job has just failed
+                if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+                    this.$scope.openErrorModal('Job failed', newValue);
+                    this.$log.info(newValue);
+                }
+                if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+                    this.$scope.openErrorModal('Job error', newValue);
+                    this.$log.info(newValue);
+                }
+            }
+        }.bind(this));
 
-    $scope.datasetSearchKeyEvent = function (e) {
+        // stop listening for events when leaving this view
+        this.$scope.$on("$destroy", function () {
+            this.SessionDataService.destroy();
+        });
+
+        // We are only handling the resize end event, currently only
+        // working in workflow graph div
+        this.$scope.$on("angular-resizable.resizeEnd", function () {
+            this.$scope.$broadcast('resizeWorkFlowGraph', {});
+        });
+
+        angular.element(this.$window).bind('resize', function () {
+            this.$scope.$broadcast('resizeWorkFlowGraph', {});
+        });
+    }
+
+    datasetSearchKeyEvent = function (e) {
         if (e.keyCode == 13) { // enter
             // select highlighted datasets
-            var allDatasets = $scope.getDatasetList();
-            $scope.selectedDatasets = $filter('searchDatasetFilter')(allDatasets, $scope.datasetSearch.value);
-            $scope.datasetSearch.value = null;
+            var allDatasets = this.getDatasetList();
+            this.SelectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch.value);
+            this.datasetSearch.value = null;
         }
         if (e.keyCode == 27) { // escape key
             // clear the search
-            $scope.datasetSearch.value = null;
+            this.datasetSearch.value = null;
         }
     };
 
-    $scope.getWorkflowCallback = function () {
-        return $scope;
+    getWorkflowCallback = function () {
+        return this.workflowCallback;
     };
 
-    $scope.setTab = function (tab) {
-        $scope.selectedTab = tab;
+    setTab = function (tab) {
+        this.selectedTab = tab;
     };
 
-    $scope.isTab = function (tab) {
-        return $scope.selectedTab === tab;
+    isTab = function (tab) {
+        return this.selectedTab === tab;
     };
 
-    /**
-     * Check if there are one or more dataset selected
-     * @returns {boolean}
-     */
-    $scope.isDatasetSelected = function () {
-        return $scope.selectedDatasets.length > 0;
+    getJob = function (jobId) {
+        return this.SessionDataService.getJob(jobId);
     };
 
-    /**
-     * Check if there are one or more jobs selected
-     * @returns {boolean}
-     */
-    $scope.isJobSelected = function () {
-        return $scope.selectedJobs.length > 0;
+    deleteJobs = function (jobs) {
+        this.SessionDataService.deleteJobs(jobs);
     };
 
-    /**
-     * Check if given dataset is selected
-     * @param data
-     * @returns {boolean}
-     */
-    $scope.isSelectedDataset = function (data) {
-        return $scope.selectedDatasets.indexOf(data) !== -1;
+    deleteDatasets = function (datasets) {
+        this.SessionDataService.deleteDatasets(datasets);
     };
 
-    /**
-     * Check if given job is selected
-     * @param data
-     * @returns {boolean}
-     */
-    $scope.isSelectedJob = function (data) {
-        return $scope.selectedJobs.indexOf(data) !== -1;
+    renameDatasetDialog = function (dataset) {
+        this.SessionDataService.renameDatasetDialog(dataset);
     };
 
-    /**
-     * Check if single dataset is selected
-     * @returns {boolean}
-     */
-    $scope.isSingleDatasetSelected = function () {
-        return $scope.selectedDatasets.length == 1;
+    exportDatasets = function (datasets) {
+        this.SessionDataService.exportDatasets(datasets);
     };
 
-    /**
-     * Check if there are more than one datasets selected
-     * @returns {boolean}
-     */
-    $scope.isMultipleDatasetsSelected = function () {
-        return $scope.selectedDatasets.length > 1;
+    showDefaultVisualization = function () {
+        this.$scope.$broadcast('showDefaultVisualization', {});
     };
 
-    $scope.clearSelection = function () {
-        $scope.selectedDatasets.length = 0;
-        $scope.selectedJobs.length = 0;
+    getSessionId = function () {
+        return this.SessionDataService.getSessionId();
     };
 
-    $scope.toggleDatasetSelection = function ($event, data) {
-        $scope.activeDatasetId = data.datasetId;
-        Utils.toggleSelection($event, data, $scope.getDatasetList(), $scope.selectedDatasets);
+    getSession() {
+        return this.SessionDataService.session;
+    }
+
+    getDatasetList = function () {
+        return this.SessionDataService.getDatasetList();
     };
 
-    $scope.selectJob = function (event, job) {
-        $scope.clearSelection();
-        $scope.selectedJobs = [job];
+    getDatasetsMap = function () {
+        return this.SessionDataService.datasetsMap;
     };
 
-    $scope.deleteJobs = function (jobs) {
-        SessionDataService.deleteJobs(jobs);
+    getJobsMap = function () {
+        return this.SessionEventService.jobsMap;
     };
 
-    $scope.deleteDatasets = function (datasets) {
-        SessionDataService.deleteDatasets(datasets);
+    getModulesMap = function () {
+        return this.SessionDataService.modulesMap;
     };
 
-    $scope.getJob = function (jobId) {
-        return SessionDataService.getJob(jobId);
-    };
 
-    $scope.renameDatasetDialog = function (dataset) {
-        var result = prompt('Change the name of the node', dataset.name);
-        if (result) {
-            dataset.name = result;
-        }
-        SessionDataService.updateDataset(dataset);
-    };
-
-    $scope.showDefaultVisualization = function () {
-        $scope.$broadcast('showDefaultVisualization', {});
-    };
-
-    // We are only handling the resize end event, currently only
-    // working in workflow graph div
-    $scope.$on("angular-resizable.resizeEnd", function () {
-        $scope.$broadcast('resizeWorkFlowGraph', {});
-    });
-
-    angular.element($window).bind('resize', function () {
-        $scope.$broadcast('resizeWorkFlowGraph', {});
-    });
-
-    $scope.getSessionId = function () {
-        return $routeParams.sessionId;
-    };
-
-    $scope.getDatasetList = function () {
-        return SessionDataService.getDatasetList();
-    };
-
-    $scope.getDatasetsMap = function () {
-        return SessionDataService.datasetsMap;
-    };
-
-    $scope.getJobsMap = function () {
-        return SessionEventService.jobsMap;
-    };
-
-    $scope.getModulesMap = function () {
-        return SessionDataService.modulesMap;
-    };
-
-    $scope.exportDatasets = function (datasets) {
-        SessionDataService.exportDatasets(datasets);
-    };
-
-    $scope.getDatasetUrl = function () {
-        if ($scope.selectedDatasets && $scope.selectedDatasets.length > 0) {
-            return SessionDataService.getDatasetUrl($scope.selectedDatasets[0]);
+    getDatasetUrl = function () {
+        if (this.SelectionService.selectedDatasets && this.SelectionService.selectedDatasets.length > 0) {
+            return this.SessionDataService.getDatasetUrl(this.SelectionService.selectedDatasets[0]);
         }
     };
 
-    $scope.openAddDatasetModal = function () {
-        $uibModal.open({
+    openAddDatasetModal = function () {
+        this.$uibModal.open({
             animation: true,
             templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
             controller: 'AddDatasetModalController',
@@ -228,8 +184,8 @@ function SessionController($scope, $routeParams, $window,
         });
     };
 
-    $scope.openErrorModal = function (title, toolError) {
-        $uibModal.open({
+    openErrorModal = function (title, toolError) {
+        this.$uibModal.open({
             animation: true,
             templateUrl: 'app/views/sessions/session/joberrormodal/joberrormodal.html',
             controller: 'JobErrorModalController',
@@ -247,16 +203,16 @@ function SessionController($scope, $routeParams, $window,
         });
     };
 
-    $scope.openSessionEditModal = function () {
+    openSessionEditModal = function () {
 
-        var modalInstance = $uibModal.open({
+        var modalInstance = this.$uibModal.open({
             templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,
             resolve: {
                 title: function () {
-                    return angular.copy($scope.data.session.name);
+                    return angular.copy(this.SessionDataService.session.name);
                 }
             }
         });
@@ -265,26 +221,10 @@ function SessionController($scope, $routeParams, $window,
             if (!result) {
                 result = 'unnamed session';
             }
-            $scope.data.session.name = result;
-            SessionDataService.updateSession();
+            this.SessionDataService.session.name = result;
+            this.SessionDataService.updateSession();
         }, function () {
             // modal dismissed
         });
     };
-
-    $scope.openDatasetHistoryModal = function () {
-        $uibModal.open({
-            templateUrl: 'app/views/sessions/session/datasethistorymodal/datasethistorymodal.html',
-            controller: 'DatasetHistoryModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            resolve: {
-                selectedDatasets: function () {
-                    return angular.copy($scope.selectedDatasets);
-                }
-            }
-        });
-    };
 }
-
-export default SessionController;

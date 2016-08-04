@@ -13,11 +13,14 @@ import Tool from "../model/tool";
 import InputBinding from "../model/inputbinding";
 import ToolParameter from "../model/toolparameter";
 import JobParameter from "../model/jobparameter";
+import SelectionService from "../selection.service";
 
 export default class ToolCtrl {
 
 
-	static $inject = ['$scope', '$filter', 'TableService', '$q', '$uibModal', 'ToolService', 'SessionDataService'];
+	static $inject = [
+		'$scope', '$filter', 'TableService', '$q', '$uibModal', 'ToolService', 'SessionDataService',
+		'SelectionService'];
 
 	constructor(
 		private $scope: IScopeService,
@@ -26,7 +29,8 @@ export default class ToolCtrl {
 		private $q: IQService,
 		private $uibModal: any,
 		private ToolService: ToolService,
-		private SessionDataService: SessionDataService) {
+		private SessionDataService: SessionDataService,
+		private SelectionService: SelectionService) {
 
 		this.init();
 	}
@@ -84,12 +88,12 @@ export default class ToolCtrl {
 			}
 		}
 
-		this.inputBindings = this.bindInputs(this.selectedTool, this.$scope.selectedDatasets);
+		this.inputBindings = this.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
 
 	}
 
 	isRunEnabled() {
-		return this.$scope.selectedDatasets.length > 0 && this.selectedTool;
+		return this.SelectionService.selectedDatasets.length > 0 && this.selectedTool;
 	}
 
 	isParametersEnabled() {
@@ -244,9 +248,9 @@ export default class ToolCtrl {
 
 	getColumns() {
 		var promises: any[] = [];
-		for (let dataset of this.$scope.selectedDatasets) {
+		for (let dataset of this.SelectionService.selectedDatasets) {
 			if (this.ToolService.isCompatible(dataset, 'TSV')) {
-				promises.push(this.TableService.getColumns(this.$scope.getSessionId(), dataset.datasetId));
+				promises.push(this.TableService.getColumns(this.SessionDataService.sessionId, dataset.datasetId));
 			}
 		}
 
@@ -268,7 +272,7 @@ export default class ToolCtrl {
 	getMetadataColumns() {
 
 		var keySet = new Set();
-		for (let dataset of this.$scope.selectedDatasets) {
+		for (let dataset of this.SelectionService.selectedDatasets) {
 			for (let entry of dataset.metadata) {
 				keySet.add(entry.key);
 			}
@@ -292,7 +296,7 @@ export default class ToolCtrl {
 					return angular.copy(this.inputBindings);
 				},
 				selectedDatasets: function () {
-					return angular.copy(this.$scope.selectedDatasets);
+					return angular.copy(this.SelectionService.selectedDatasets);
 				},
 				isRunEnabled: function () {
 					return this.isRunEnabled();
@@ -331,3 +335,4 @@ export default class ToolCtrl {
 		});
 	}
 }
+

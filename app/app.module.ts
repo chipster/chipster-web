@@ -7,10 +7,11 @@ import RouteConfiguration from "./routes.config";
 import ChipsterRun from "./app.run";
 import ToolResource from "./resources/toolresource";
 import Utils from "./services/Utils";
-import SessionCtrl from "./views/sessions/session/session.controller";
+import SessionController from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
 import SessionEventService from "./views/sessions/session/sessionevent.service";
 import SessionDataService from "./views/sessions/session/sessiondata.service";
+import SelectionService from "./views/sessions/session/selection.service";
 import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
@@ -46,7 +47,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
 	.controller('LoginController', LoginController)
 	.controller('NavigationController', NavigationController)
-	.controller('SessionCtrl', SessionCtrl)
+	.controller('SessionController', SessionController)
 	.controller('DatasetCtrl', DatasetCtrl)
 	.controller('ToolCtrl', ToolCtrl)
 	.controller('AddDatasetModalController', AddDatasetModalController)
@@ -59,14 +60,15 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.service('ConfigService', ConfigService)
 	.service('ConfigurationResource', ConfigurationResource)
 	.service('ToolResource', ToolResource)
-	.factory('Utils', Utils)
 	.service('SessionEventService', SessionEventService)
-	.factory('WorkflowGraphService', WorkflowGraphService)
-	.service('FileResource', FileResource)
-	.factory('TableService', TableService)
-	.factory('ToolService', ToolService)
 	.service('SessionResource', SessionResource)
 	.service('SessionDataService', SessionDataService)
+	.service('SelectionService', SelectionService)
+	.service('FileResource', FileResource)
+	.factory('Utils', Utils)
+	.factory('WorkflowGraphService', WorkflowGraphService)
+	.factory('TableService', TableService)
+	.factory('ToolService', ToolService)
 	.filter('searchDatasetFilter', searchDatasetFilter)
 	.filter('bytes', bytes)
 	.filter('categoryFilter', categoryFilter)

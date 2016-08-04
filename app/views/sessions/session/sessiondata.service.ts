@@ -3,6 +3,7 @@ import Utils from "../../../services/Utils";
 import IRouteParamsService = angular.IRouteParamsService;
 import ILogService = angular.ILogService;
 import IWindowService = angular.IWindowService;
+import IUibModalService = angular.IUibModalService;
 import ConfigService from "../../../services/ConfigService";
 import AuthenticationService from "../../../authentication/authenticationservice";
 import SessionEventService from "./sessionevent.service";
@@ -14,6 +15,23 @@ import Tool from "./model/tool";
 
 export default class SessionDataService {
 
+    static $inject = [
+        '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
+        'SessionEventService', '$uibModal'];
+
+    constructor(
+        private $routeParams: IRouteParamsService,
+        private SessionResource: SessionResource,
+        private $log: ILogService,
+        private $window: IWindowService,
+        private ConfigService: ConfigService,
+        private AuthenticationService: AuthenticationService,
+        private SessionEventService: SessionEventService,
+        private $uibModal: IUibModalService) {
+
+        this.init();
+    }
+
     sessionId: string;
     jobsMap = new Map<string, Job>();
     datasetsMap = new Map<string, Dataset>();
@@ -23,21 +41,7 @@ export default class SessionDataService {
     sessionUrl: any;
     subscription: {unsubscribe(): void};
     session: Session;
-    listeners: {function(event: any, oldValue: any, newValue: any): void}[] = [];
-
-    static $inject = ['$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService', 'SessionEventService'];
-
-    constructor(
-        private $routeParams: IRouteParamsService,
-        private SessionResource: SessionResource,
-        private $log: ILogService,
-        private $window: IWindowService,
-        private ConfigService: ConfigService,
-        private AuthenticationService: AuthenticationService,
-        private SessionEventService: SessionEventService) {
-
-        this.init();
-    }
+    listeners: any = [];
 
     init() {
         this.sessionId = this.$routeParams['sessionId'];
@@ -73,7 +77,7 @@ export default class SessionDataService {
         }.bind(this));
     }
 
-    onSessionChange(listener: {function(event: any, oldValue: any, newValue: any): void}) {
+    onSessionChange(listener: any) {
         this.listeners.push(listener);
     }
 
@@ -131,4 +135,26 @@ export default class SessionDataService {
             this.$window.open(this.getDatasetUrl(d), "_blank")
         }
     }
+
+    renameDatasetDialog(dataset) {
+        var result = prompt('Change the name of the node', dataset.name);
+        if (result) {
+            dataset.name = result;
+        }
+        this.updateDataset(dataset);
+    }
+
+    openDatasetHistoryModal() {
+        this.$uibModal.open({
+            templateUrl: 'app/views/sessions/session/datasethistorymodal/datasethistorymodal.html',
+            controller: 'DatasetHistoryModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            resolve: {
+                selectedDatasets: function () {
+                    return angular.copy(this.SelectionService.selectedDatasets);
+                }.bind(this)
+            }
+        })
+    };
 }
