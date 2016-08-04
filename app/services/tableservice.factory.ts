@@ -1,21 +1,25 @@
-TableService.$inject = ['FileResource'];
+import FileResource from "../resources/fileresource";
 
-function TableService(FileResource) {
+export default class TableService {
 
-    var service = {};
+    static $inject = ['FileResource'];
 
-    service.getColumns = function (sessionId, datasetId) {
+    constructor(
+        private FileResource: FileResource) {
+    }
 
-        return FileResource.getData(sessionId, datasetId).then(function (resp) {
+   getColumns(sessionId, datasetId) {
+
+        return this.FileResource.getData(sessionId, datasetId).then(function (resp) {
 
             // we have to create the promise, because JQuery-cvs doesn't use them
             return new Promise(function(resolve, reject) {
 
                 // parse the file data using the JQuery-cvs library
-                parserConfig = {
+                let parserConfig = {
                     separator: '\t'
                 };
-                $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
+                this.$.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
                     if (fileArray) {
                         resolve(fileArray[0]);
                     } else {
@@ -24,9 +28,5 @@ function TableService(FileResource) {
                 });
             });
         });
-    };
-
-    return service;
-};
-
-export default TableService;
+    }
+}

@@ -1,16 +1,22 @@
-export default function () {
-    var service = {};
-    service.isSelectionParameter = function (parameter) {
+import Utils from "../../../../services/Utils";
+import ToolParameter from "../model/toolparameter";
+import Dataset from "../model/dataset";
+
+export default class {
+
+    isSelectionParameter = function (parameter: ToolParameter) {
         return parameter.type === 'ENUM' ||
             parameter.type === 'COLUMN_SEL' ||
             parameter.type === 'METACOLUMN_SEL';
     };
-    service.isNumberParameter = function (parameter) {
+
+    isNumberParameter = function (parameter: ToolParameter) {
         return parameter.type === 'INTEGER' ||
             parameter.type === 'DECIMAL' ||
             parameter.type === 'PERCENT';
     };
-    service.getDefaultValue = function (toolParameter) {
+
+    getDefaultValue = function (toolParameter: ToolParameter): number | string {
         if (this.isNumberParameter(toolParameter)) {
             return Number(toolParameter.defaultValue);
         }
@@ -18,7 +24,8 @@ export default function () {
             return toolParameter.defaultValue;
         }
     };
-    service.isCompatible = function (dataset, type) {
+
+    isCompatible = function (dataset: Dataset, type: string) {
         var alwaysCompatible = ['GENERIC', 'CDNA', 'GENE_EXPRS', 'GENELIST', 'PHENODATA'];
         if (alwaysCompatible.indexOf(type) !== -1) {
             return true;
@@ -49,6 +56,5 @@ export default function () {
         };
         var extension = Utils.getFileExtension(dataset.name);
         return types[type].indexOf(extension) !== -1;
-    };
-    return service;
-};
+    }
+}

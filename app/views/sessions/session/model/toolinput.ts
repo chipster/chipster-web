@@ -1,5 +1,5 @@
 import Name from "./name";
-export default class Input {
+export default class ToolInput {
     description: string;
     meta: boolean;
     name: Name;

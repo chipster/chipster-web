@@ -1,73 +1,113 @@
 import * as Promise from "bluebird";
+import SessionDataService from "../sessiondata.service";
+import ToolService from "./tool.service";
+import TableService from "../../../../services/tableservice.factory"
+import IScopeService = angular.IScopeService;
+import IFilterService = angular.IFilterService;
+import IQService = angular.IQService;
+import Category from "../model/category";
+import Module from "../model/module";
+import Job from "../model/job";
+import Dataset from "../model/dataset";
+import Tool from "../model/tool";
+import InputBinding from "../model/inputbinding";
+import ToolParameter from "../model/toolparameter";
+import JobParameter from "../model/jobparameter";
 
-ToolCtrl.$inject = ['$scope', '$filter', 'TableService', '$q', '$uibModal', 'ToolService', 'SessionDataService'];
+export default class ToolCtrl {
 
-function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, SessionDataService) {
+
+	static $inject = ['$scope', '$filter', 'TableService', '$q', '$uibModal', 'ToolService', 'SessionDataService'];
+
+	constructor(
+		private $scope: IScopeService,
+		private $filter: IFilterService,
+		private TableService: TableService,
+		private $q: IQService,
+		private $uibModal: any,
+		private ToolService: ToolService,
+		private SessionDataService: SessionDataService) {
+
+		this.init();
+	}
 
 	//initialization
-	$scope.activeTab=0;//defines which tab is displayed as active tab in the beginning
-	$scope.selectedCategory = null;
+	activeTab = 0;//defines which tab is displayed as active tab in the beginning
+	selectedModule: Module = null;
+	selectedCategory: Category = null;
+	selectedTool: Tool = null;
+	categories: Category[] = [];
+	job: Job = null;
+	inputBindings: InputBinding[] = null;
+	searchTool: string;
 
-	$scope.$watch('getModules()', function () {
-		// select the first module when the tools are loaded
-		if (SessionDataService.modules) {
-			$scope.selectModule(SessionDataService.modules[0]);
-		}
-	});
+	init() {
+		this.$scope.$watch(() => this.getModules(), function () {
+			// select the first module when the tools are loaded
+			if (this.getModules()) {
+				this.selectModule(this.getModules()[0]);
+			}
+		}.bind(this));
+	}
 
-	$scope.selectModule = function(module){
-		$scope.selectedModule = module;
-		$scope.categories = module.categories;
-		$scope.selectFirstVisible();
-	};
+	selectModule(module: Module){
+		this.selectedModule = module;
+		this.categories = module.categories;
+		this.selectFirstVisible();
+	}
 
 	//defines which tool category the user have selected
-	$scope.selectCategory = function(category) {
-		$scope.selectedCategory = category;
-	};
+	selectCategory(category: Category) {
+		this.selectedCategory = category;
+	}
 
-	$scope.selectTool = function(toolId) {
+	selectTool(toolId: string) {
 
 		//find the relevant tool
-		angular.forEach(SessionDataService.tools, function(tool) {
+		for (let tool of this.SessionDataService.tools) {
 			if(tool.name.id === toolId) {
-				$scope.selectedTool = tool;
+				this.selectedTool = tool;
 
-				$scope.job = {
-					toolId: $scope.selectedTool.name.id,
-					toolCategory: $scope.selectedCategory.name,
-					toolName: $scope.selectedTool.name.displayName,
-					toolDescription: $scope.selectedTool.description,
+				let jobParameters: JobParameter[] = [];
+				for (let toolParameter of tool.parameters) {
+					jobParameters.push(this.getJobParameter(toolParameter));
+				}
+
+				this.job = <Job>{
+					toolId: tool.name.id,
+					toolCategory: this.selectedCategory.name,
+					toolName: tool.name.displayName,
+					toolDescription: tool.description,
 					state: 'NEW',
-					parameters: $scope.selectedTool.parameters.map($scope.getJobParameter)
+					parameters: jobParameters
 				};
 			}
-		});
+		}
 
-		$scope.inputBindings = $scope.bindInputs($scope.selectedTool, $scope.selectedDatasets);
+		this.inputBindings = this.bindInputs(this.selectedTool, this.$scope.selectedDatasets);
 
-	};
+	}
 
-	$scope.isRunEnabled = function() {
-		return $scope.selectedDatasets.length > 0 && $scope.selectedTool;
-	};
+	isRunEnabled() {
+		return this.$scope.selectedDatasets.length > 0 && this.selectedTool;
+	}
 
-	$scope.isParametersEnabled = function() {
-		return $scope.selectedTool && $scope.selectedTool.parameters.length > 0
-	};
+	isParametersEnabled() {
+		return this.selectedTool && this.selectedTool.parameters.length > 0
+	}
 
-	$scope.bindInputs = function(tool, datasets) {
+	bindInputs(tool: any, datasets: Dataset[]) {
 
 		// copy the array so that we can remove items from it
 		var unboundDatasets = datasets.slice();
 
 		// see OperationDefinition.bindInputs()
 		//TODO handle multi-inputs
-		console.log('tool', tool);
+		console.log('tool', tool.plain());
 		datasets.forEach( item => {console.log('dataset', item)});
 		
 		
-		var inputBindings = [];
+		var inputBindings: InputBinding[] = [];
 		for (var j = 0; j < tool.inputs.length; j++) {
 			var toolInput = tool.inputs[j];
 
@@ -81,7 +121,7 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 			for (var i = 0; i < unboundDatasets.length; i++) {
 
 				var dataset = unboundDatasets[i];
-				if (ToolService.isCompatible(dataset, toolInput.type.name)) {
+				if (this.ToolService.isCompatible(dataset, toolInput.type.name)) {
 
 					inputBindings.push({
 						toolInput: toolInput,
@@ -100,15 +140,15 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 		}
 
 		return inputBindings;
-	};
+	}
 
 	// Method for submitting a job
-	$scope.runJob = function () {
+	runJob() {
 
-		var jobToRun = angular.copy($scope.job);
+		var jobToRun: Job = angular.copy(this.job);
 
 		// toolParameters aren't needed anymore and the server doesn't accept extra fields
-		jobToRun.parameters.forEach( jobParameter => {delete jobParameter.toolParameter});
+		jobToRun.parameters.forEach(jobParameter => {delete jobParameter.toolParameter});
 
 		//for (jobParameter of jobToRun.parameters) {
 		//	delete jobParameter.toolParameter;
@@ -116,15 +156,14 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 
 		jobToRun.inputs = [];
 
-		$scope.inputBindings.forEach( inputBinding => {
+		for (let inputBinding of this.inputBindings) {
 			jobToRun.inputs.push({
 				inputId: inputBinding.toolInput.name.id,
 				description: inputBinding.toolInput.description,
 				datasetId: inputBinding.dataset.datasetId,
 				displayName: inputBinding.dataset.name
 			});
-		});
-
+		}
 
 		//for (inputBinding of $scope.inputBindings) {
 		//	var jobInput = {
@@ -136,54 +175,54 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 		//	jobToRun.inputs.push(jobInput);
 		//}
 
-		var postJobUrl = SessionDataService.sessionUrl.one('jobs');
-		postJobUrl.customPOST(jobToRun).then(function (response) {
+		var postJobUrl = this.SessionDataService.sessionUrl.one('jobs');
+		postJobUrl.customPOST(jobToRun).then(function (response: any) {
 			console.log(response);
 		});
-	};
+	}
 
-	$scope.selectFirstVisible = function () {
+	selectFirstVisible() {
 
-		var filteredModules = $filter('moduleFilter')(SessionDataService.modules, $scope.searchTool);
-		if (filteredModules && filteredModules.indexOf($scope.selectedModule) < 0 && filteredModules[0]) {
-			$scope.selectModule(filteredModules[0]);
+		var filteredModules = this.$filter('moduleFilter')(this.SessionDataService.modules, this.searchTool);
+		if (filteredModules && filteredModules.indexOf(this.selectedModule) < 0 && filteredModules[0]) {
+			this.selectModule(filteredModules[0]);
 		}
 
-		var filteredCategories = $filter('categoryFilter')($scope.selectedModule.categories, $scope.searchTool);
-		if (filteredCategories && filteredCategories.indexOf($scope.selectedCategory) < 0 && filteredCategories[0]) {
-			$scope.selectCategory(filteredCategories[0]);
+		var filteredCategories = this.$filter('categoryFilter')(this.selectedModule.categories, this.searchTool);
+		if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
+			this.selectCategory(filteredCategories[0]);
 		}
-	};
+	}
 
-	$scope.toolSearchKeyEvent = function (e) {
+	toolSearchKeyEvent(e: any) {
 		if (e.keyCode == 13) { // enter
 			// select the first result
-			var visibleTools = $filter('toolFilter')($scope.selectedCategory.tools, $scope.searchTool);
+			var visibleTools = this.$filter('toolFilter')(this.selectedCategory.tools, this.searchTool);
 			if (visibleTools[0]) {
-				$scope.searchTool = null;
-				$scope.selectTool(visibleTools[0].id);
+				this.searchTool = null;
+				this.selectTool(visibleTools[0].id);
 			}
 		}
 		if (e.keyCode == 27) { // escape key
 			// clear the search
-			$scope.searchTool = null;
+			this.searchTool = null;
 		}
-	};
+	}
 
-	$scope.getJobParameter = function (toolParameter) {
+	getJobParameter(toolParameter: ToolParameter): JobParameter {
 
-		var jobParameter = {
+		var jobParameter: JobParameter = {
 			parameterId: toolParameter.name.id,
 			displayName: toolParameter.name.displayName,
 			description: toolParameter.description,
 			type: toolParameter.type,
-			value: ToolService.getDefaultValue(toolParameter),
+			value: this.ToolService.getDefaultValue(toolParameter),
 			// access selectionOptions, defaultValue, optional, from and to values from the toolParameter
 			toolParameter: toolParameter
 		};
 
 		if (toolParameter.type === 'COLUMN_SEL') {
-			$scope.getColumns().then( function (columns) {
+			this.getColumns().then( function (columns: string[]) {
 				jobParameter.toolParameter.selectionOptions = columns.map( function (column) {
 					return {id: column};
 				});
@@ -191,55 +230,54 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 		}
 
 		if (toolParameter.type === 'METACOLUMN_SEL') {
-			jobParameter.toolParameter.selectionOptions = $scope.getMetadataColumns().map( function (column) {
+			jobParameter.toolParameter.selectionOptions = this.getMetadataColumns().map( function (column) {
 				return {id: column};
 			});
 		}
 
 		return jobParameter;
-	};
+	}
 
-	$scope.getModules = function () {
-		return SessionDataService.modules;
-	};
+	getModules() {
+		return this.SessionDataService.modules;
+	}
 
-	$scope.getColumns = function () {
-		var promises = [];
-		angular.forEach($scope.selectedDatasets, function (dataset) {
-			if (ToolService.isCompatible(dataset, 'TSV')) {
-				promises.push(TableService.getColumns($scope.getSessionId(), dataset.datasetId));
+	getColumns() {
+		var promises: any[] = [];
+		for (let dataset of this.$scope.selectedDatasets) {
+			if (this.ToolService.isCompatible(dataset, 'TSV')) {
+				promises.push(this.TableService.getColumns(this.$scope.getSessionId(), dataset.datasetId));
 			}
-		});
+		}
 
-		return $q.all(promises).then(function(columnsOfSelectedDatasets) {
-			var columnSet = new Set();
-			for (columns of columnsOfSelectedDatasets) {
-				for (column of columns) {
+		return this.$q.all(promises).then(function(columnsOfSelectedDatasets: string[][]) {
+			var columnSet = new Set<string>();
+			for (let columns of columnsOfSelectedDatasets) {
+				for (let column of columns) {
 					columnSet.add(column);
 				}
 			}
 
 			return Array.from(columnSet);
 
-		}, function(e) {
+		}, function(e: any) {
 			console.log('failed to get columns', e);
 		});
-	};
+	}
 
-	$scope.getMetadataColumns = function () {
+	getMetadataColumns() {
 
 		var keySet = new Set();
-		angular.forEach($scope.selectedDatasets, function(dataset) {
-			angular.forEach(dataset.metadata, function (entry) {
+		for (let dataset of this.$scope.selectedDatasets) {
+			for (let entry of dataset.metadata) {
 				keySet.add(entry.key);
-			});
-		});
-
+			}
+		}
 		return Array.from(keySet);
-	};
+	}
 
-	$scope.openParameterModal = function () {
-		var modalInstance = $uibModal.open({
+	openParameterModal() {
+		var modalInstance = this.$uibModal.open({
 			animation: true,
 			templateUrl: 'app/views/sessions/session/tools/parametermodal/parametermodal.html',
 			controller: 'ParameterModalController',
@@ -248,37 +286,37 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 			size: 'lg',
 			resolve: {
 				selectedTool: function () {
-					return angular.copy($scope.selectedTool);
+					return angular.copy(this.selectedTool);
 				},
 				inputBindings: function () {
-					return angular.copy($scope.inputBindings);
+					return angular.copy(this.inputBindings);
 				},
 				selectedDatasets: function () {
-					return angular.copy($scope.selectedDatasets);
+					return angular.copy(this.$scope.selectedDatasets);
 				},
 				isRunEnabled: function () {
-					return $scope.isRunEnabled();
+					return this.isRunEnabled();
 				},
 				parameters: function () {
-					return angular.copy($scope.job.parameters)
+					return angular.copy(this.job.parameters)
 				}
 			}
 		});
 
-		modalInstance.result.then(function (result) {
+		modalInstance.result.then(function (result: any) {
 			// save settings
-			$scope.job.parameters = result.parameters;
-			$scope.inputBindings = result.inputBindings;
+			this.job.parameters = result.parameters;
+			this.inputBindings = result.inputBindings;
 			if (result.run) {
-				$scope.runJob();
+				this.runJob();
 			}
 		}, function () {
 			// modal dismissed
 		});
-	};
+	}
 
-	$scope.openSourceModal = function () {
-		$uibModal.open({
+	openSourceModal() {
+		this.$uibModal.open({
 			animation: true,
 			templateUrl: 'app/views/sessions/session/tools/sourcemodal/sourcemodal.html',
 			controller: 'SourceModalController',
@@ -287,12 +325,9 @@ function ToolCtrl($scope, $filter, TableService, $q, $uibModal, ToolService, Ses
 			size: 'lg',
 			resolve: {
 				selectedTool: function () {
-					return angular.copy($scope.selectedTool);
+					return angular.copy(this.selectedTool);
 				}
 			}
 		});
-	};
+	}
 }
-
-
-export default ToolCtrl;

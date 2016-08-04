@@ -1,13 +1,14 @@
 import Name from "./name";
 
-export default class Parameter {
+export default class ToolParameter {
+
     defaultValue: string;
     defaultValues: string[];
     description: string;
     from: number;
     name: Name;
     optional: boolean;
-    selectionOptions: string[];
+    selectionOptions: any[];
     to: number;
     type: string;
 }

@@ -1,4 +1,4 @@
-<div ng-controller="ToolCtrl">
+<div ng-controller="ToolCtrl as vm">
 
     <h4>Tools</h4>
     <div class="chipster-highlight">
@@ -18,9 +18,9 @@
                 <h5>Module</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button class="list-group-item thin-list-group-item"
-                            ng-click="selectModule(module)"
-                            ng-repeat="module in getModules() | moduleFilter:searchTool"
-                            ng-class="{active:module === selectedModule}">{{module.name}}
+                            ng-click="vm.selectModule(module)"
+                            ng-repeat="module in vm.getModules() | moduleFilter:vm.searchTool"
+                            ng-class="{active:module === vm.selectedModule}">{{module.name}}
                     </button>
                 </div>
             </ul>
@@ -29,9 +29,9 @@
                 <h5>Category</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':category===selectedCategory}"
-                            ng-click="selectCategory(category)"
-                            ng-repeat="category in categories | categoryFilter:searchTool">
+                            ng-class="{'active':category===vm.selectedCategory}"
+                            ng-click="vm.selectCategory(category)"
+                            ng-repeat="category in vm.categories | categoryFilter:vm.searchTool">
                         <span><tool-circle toolcolor="category.color"></tool-circle></span>
                         {{category.name}}
                     </button>
@@ -42,9 +42,9 @@
                 <h5>Tool</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':tool.id===selectedTool.name.id}"
-                            ng-click="selectTool(tool.id)"
-                            ng-repeat="tool in selectedCategory.tools|toolFilter:searchTool"
+                            ng-class="{'active':tool.id===vm.selectedTool.name.id}"
+                            ng-click="vm.selectTool(tool.id)"
+                            ng-repeat="tool in vm.selectedCategory.tools|toolFilter:vm.searchTool"
                             id="tool-button-{{tool.id}}">
                         {{tool.name}}
                     </button>
@@ -55,11 +55,11 @@
                 <h5>Tool Description</h5>
 
                 <!-- Tool Description div -->
-                <div class="tool-description" ng-show="selectedTool">
-                    <p>{{selectedTool.description}}</p>
+                <div class="tool-description" ng-show="vm.selectedTool">
+                    <p>{{vm.selectedTool.description}}</p>
                     <!--Tool source-->
                     <p>
-                        <a href ng-click="openSourceModal()" ng-disabled="!selectedTool">
+                        <a href ng-click="vm.openSourceModal()" ng-disabled="!selectedTool">
                             Source code
                         </a>
                     </p>
@@ -72,12 +72,12 @@
 
                 <div class="btn-group btn-group-justified" role="group">
                     <button class="btn btn-default" style="width: 50%"
-                            ng-disabled="!isParametersEnabled()"
-                            ng-click="openParameterModal()">
+                            ng-disabled="!vm.isParametersEnabled()"
+                            ng-click="vm.openParameterModal()">
                         Parameters
                     </button>
                     <button class="btn btn-success" style="width: 50%"
-                            ng-click="runJob()" ng-disabled="!isRunEnabled()">
+                            ng-click="vm.runJob()" ng-disabled="!vm.isRunEnabled()">
                         <span class="glyphicon glyphicon-play">
                         </span>
                         Run
