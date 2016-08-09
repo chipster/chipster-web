@@ -13,6 +13,7 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import Module from "../../../model/session/module";
 import Tool from "../../../model/session/tool";
+import {SessionData} from "../../../resources/session.resource";
 
 export default class SessionDataService {
 
@@ -52,9 +53,8 @@ export default class SessionDataService {
         // authorization header
         this.sessionUrl = this.SessionResource.service.one('sessions', this.sessionId);
 
-        this.SessionResource.loadSession(this.sessionId).then(function (data: any) {
+        this.SessionResource.loadSession(this.sessionId).then(function (parsedData: SessionData) {
 
-            let parsedData: any = this.SessionResource.parseSessionData(data);
             this.sessionId = parsedData.session.sessionId;
             this.jobsMap = parsedData.jobsMap;
             this.datasetsMap = parsedData.datasetsMap;

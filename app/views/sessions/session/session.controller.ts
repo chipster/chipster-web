@@ -220,7 +220,7 @@ export default class SessionController {
             bindToController: true,
             resolve: {
                 title: function () {
-                    return angular.copy(this.SessionDataService.session.name);
+                    return angular.copy(this.SessionDataService.sessionData.name);
                 }
             }
         });

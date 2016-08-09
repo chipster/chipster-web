@@ -1,16 +1,18 @@
 
 import SessionResource from "../../resources/session.resource";
+import Session from "../../model/session/session";
+import {SessionData} from "../../resources/session.resource";
 
 class SessionListController {
 
     static $inject = ['$location', 'SessionResource'];
 
-    public selectedSession:Array;
-    public selectedSessions:Array;
-    public previousSession:{};
-    public userSession:Array;
-    public userSessions:Array;
-    public session:{};
+    public selectedSession: Session;
+    public selectedSessions: Session[];
+    public previousSession: Session;
+    public userSession: Session;
+    public userSessions: Session[];
+    public sessionData: SessionData;
 
     constructor(private $location:ng.ILocationService, private sessionResource:SessionResource) {
         this.updateSessions();
@@ -19,40 +21,40 @@ class SessionListController {
     createSession() {
 
         let session = {
-            sessionId: null,
+            sessionId: <string>null,
             name: 'New session',
             notes: '',
             created: '2015-08-27T17:53:10.331Z',
             accessed: '2015-08-27T17:53:10.331Z'
         };
 
-        this.sessionResource.service.one('sessions').customPOST(session).then((res) => {
+        this.sessionResource.service.one('sessions').customPOST(session).then((res: any) => {
             if (res.headers) {
                 var sessionLocation = res.headers('Location');
                 session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
                 this.openSession(session);
             }
         });
-    };
+    }
 
     updateSessions() {
 
-        this.sessionResource.service.all('sessions').getList().then((res) => {
+        this.sessionResource.service.all('sessions').getList().then((res: any) => {
             this.userSessions = res.data;
             console.log(this.userSessions);
-        }, function (response) {
+        }, function (response: any) {
             console.log('failed to get sessions', response);
             if (response.status === 403) {
                 this.$location.path('/login');
             }
         }.bind(this));
-    };
+    }
 
-    openSession(session) {
+    openSession(session: Session) {
         this.$location.path("/sessions" + "/" + session.sessionId);
-    };
+    }
 
-    selectSession(event, session) {
+    selectSession(event: any, session: Session) {
 
         this.selectedSessions = [session];
 
@@ -60,31 +62,31 @@ class SessionListController {
             if (session !== this.previousSession) {
                 // hide the old session immediately
                 this.previousSession = session;
-                this.session = {};
-                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then((fullSession) => {
+                this.sessionData = null;
+                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then((fullSession: SessionData) => {
                     // don't show if the selection has already changed
                     if (this.selectedSessions[0] === session) {
-                        this.session = this.sessionResource.parseSessionData(fullSession);
+                        this.sessionData = fullSession;
                     }
                 });
             }
         }
-    };
+    }
 
-    deleteSessions(sessions) {
-        angular.forEach(sessions, (session) => {
+    deleteSessions(sessions: Session[]) {
+        sessions.forEach((session: Session) => {
             var sessionUrl = this.sessionResource.service.one('sessions').one(session.sessionId);
-            sessionUrl.remove().then((res) => {
+            sessionUrl.remove().then((res: any) => {
                 console.log("session deleted", res);
                 this.updateSessions();
                 this.selectedSessions = [];
             });
         });
-    };
+    }
 
-    isSessionSelected(session) {
+    isSessionSelected(session: Session) {
         return this.selectedSessions.indexOf(session) !== -1;
-    };
+    }
 
     getWorkflowCallback() {
         return {
@@ -93,8 +95,7 @@ class SessionListController {
             isSelectedJob: function () {
             }
         };
-    };
-
+    }
 }
 
 export default {

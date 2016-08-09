@@ -10,6 +10,15 @@ import Module from "../model/session/module";
 import Tool from "../model/session/tool";
 import Job from "../model/session/job";
 
+export class SessionData {
+	session: Session;
+	datasetsMap: Map<string, Dataset>;
+	jobsMap: Map<string, Job>;
+	modules: Module[];
+	tools: Tool[];
+	modulesMap: Map<string, Module>;
+}
+
 export default class SessionResource {
 
 	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q', 'Utils'];
@@ -50,14 +59,7 @@ export default class SessionResource {
 		let tools = param[4].data;
 
 		// is there any less ugly syntax for defining the types of anonymous object?
-		let data = {
-			session: Session,
-			datasetsMap: <Map<string, Dataset>>null,
-			jobsMap: <Map<string, Job>>null,
-			modules: <Module[]>null,
-			tools: <Tool[]>null,
-			modulesMap: <Map<string, Module>>null,
-		};
+		let data = new SessionData();
 
 		data.session = session;
 		data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
@@ -98,7 +100,9 @@ export default class SessionResource {
 			this.toolResource.service.all('tools').getList()
 		];
 
-		return this.$q.all(promises);
+		return this.$q.all(promises).then((data) => {
+			return this.parseSessionData(data);
+		});
 	};
 
 }

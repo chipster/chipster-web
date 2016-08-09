@@ -54,11 +54,11 @@
         <div id="workflow-dataset-panel" ng-if="$ctrl.selectedSessions.length === 1">
             <p>{{$ctrl.selectedSessions[0].notes}}</p>
 
-            <div ng-if="$ctrl.session.datasetsMap && $ctrl.session.jobsMap">
+            <div ng-if="$ctrl.sessionData.datasetsMap && $ctrl.sessionData.jobsMap">
                 <workflow-graph
-                        datasets-map="$ctrl.session.datasetsMap"
-                        jobs-map="$ctrl.session.jobsMap"
-                        modules-map="$ctrl.session.modulesMap"
+                        datasets-map="$ctrl.sessionData.datasetsMap"
+                        jobs-map="$ctrl.sessionData.jobsMap"
+                        modules-map="$ctrl.sessionData.modulesMap"
                         zoom="0.5"
                         enabled="false">
             </div>
