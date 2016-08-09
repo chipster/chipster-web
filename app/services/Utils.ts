@@ -1,22 +1,22 @@
 export default class Utils {
 
-    static getFileExtension(name) {
+    static getFileExtension(name: string) {
         return name.split('.').pop();
     }
 
-    static startsWith(data, start) {
+    static startsWith(data: string, start: string) {
         return data.substring(0, start.length) === start;
     }
 
-    static mapValues(map) {
-        var array = [];
-        map.forEach( function(value) {
+    static mapValues(map: Map<any, any>) {
+        var array: any[] = [];
+        map.forEach( function(value: any) {
             array.push(value);
         });
         return array;
     }
 
-    static arrayToMap(array, key) {
+    static arrayToMap(array: any[], key: string) {
         var map = new Map();
         for (var i = 0; i < array.length; i++) {
             map.set(array[i][key], array[i]);
@@ -24,36 +24,36 @@ export default class Utils {
         return map;
     }
 
-    static isCtrlKey(event) {
+    static isCtrlKey(event: any) {
         return event.metaKey || event.ctrlKey;
     }
 
-    static isShiftKey(event) {
+    static isShiftKey(event: any) {
         return event.shiftKey;
     }
 
-    static toggleSelection(event, item, allItems, selectedItems) {
+    static toggleSelection(event: any, item: any, allItems: any[], selectedItems: any[]) {
 
         function isSelectionEmpty() {
             return selectedItems.length === 0;
         }
 
-        function selectionContains(item) {
+        function selectionContains(item: any) {
             return selectedItems.indexOf(item) !== -1;
         }
 
-        function removeFromSelection(item) {
+        function removeFromSelection(item: any) {
             var index = selectedItems.indexOf(item);
             selectedItems.splice(index, 1);
         }
 
-        function addToSelection(item) {
+        function addToSelection(item: any) {
             if (!selectionContains(item)) {
                 selectedItems.push(item);
             }
         }
 
-        function setSelection(item) {
+        function setSelection(item: any) {
             selectedItems.length = 0;
             selectedItems.push(item);
         }
@@ -70,7 +70,7 @@ export default class Utils {
                 var lastSelectedItem = selectedItems[selectedItems.length - 1];
                 var indexOfLastSelection = allItems.indexOf(lastSelectedItem);
                 var indexOfNewSelection = allItems.indexOf(item);
-                var from, to;
+                var from: number, to: number;
                 if (indexOfLastSelection < indexOfNewSelection) {
                     from = indexOfLastSelection + 1;
                     to = indexOfNewSelection + 1;

@@ -44,7 +44,7 @@ export default class SelectionService {
      * @param data
      * @returns {boolean}
      */
-    isSelectedDataset(data) {
+    isSelectedDataset(data: Dataset) {
         return this.selectedDatasets.indexOf(data) !== -1;
     }
 
@@ -53,7 +53,7 @@ export default class SelectionService {
      * @param data
      * @returns {boolean}
      */
-    isSelectedJob(data) {
+    isSelectedJob(data: Job) {
         return this.selectedJobs.indexOf(data) !== -1;
     }
 
@@ -78,12 +78,12 @@ export default class SelectionService {
         this.selectedJobs.length = 0;
     }
 
-    toggleDatasetSelection($event, data) {
+    toggleDatasetSelection($event: any, data: Dataset) {
         this.activeDatasetId = data.datasetId;
         Utils.toggleSelection($event, data, this.SessionDataService.getDatasetList(), this.selectedDatasets);
     }
 
-    selectJob(event, job) {
+    selectJob(event: any, job: Job) {
         this.clearSelection();
         this.selectedJobs = [job];
     }

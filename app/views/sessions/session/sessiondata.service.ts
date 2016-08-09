@@ -1,3 +1,4 @@
+import angular from "angular";
 import SessionResource from "../../../resources/session.resource";
 import Utils from "../../../services/Utils";
 import IRouteParamsService = angular.IRouteParamsService;
@@ -52,7 +53,6 @@ export default class SessionDataService {
         this.sessionUrl = this.SessionResource.service.one('sessions', this.sessionId);
 
         this.SessionResource.loadSession(this.sessionId).then(function (data: any) {
-
 
             let parsedData: any = this.SessionResource.parseSessionData(data);
             this.sessionId = parsedData.session.sessionId;
@@ -136,7 +136,7 @@ export default class SessionDataService {
         }
     }
 
-    renameDatasetDialog(dataset) {
+    renameDatasetDialog(dataset: Dataset) {
         var result = prompt('Change the name of the node', dataset.name);
         if (result) {
             dataset.name = result;

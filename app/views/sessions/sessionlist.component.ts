@@ -45,7 +45,7 @@ class SessionListController {
             if (response.status === 403) {
                 this.$location.path('/login');
             }
-        });
+        }.bind(this));
     };
 
     openSession(session) {
@@ -53,7 +53,6 @@ class SessionListController {
     };
 
     selectSession(event, session) {
-        //Utils.toggleSelection(event, session, $scope.userSessions, $scope.selectedSessions);
 
         this.selectedSessions = [session];
 
@@ -65,7 +64,7 @@ class SessionListController {
                 this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then((fullSession) => {
                     // don't show if the selection has already changed
                     if (this.selectedSessions[0] === session) {
-                        this.session = fullSession;
+                        this.session = this.sessionResource.parseSessionData(fullSession);
                     }
                 });
             }

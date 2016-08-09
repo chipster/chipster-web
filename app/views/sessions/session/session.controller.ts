@@ -1,5 +1,6 @@
 import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
+import angular from "angular";
 import IScopeService = angular.IScopeService;
 import IRouteParamsService = angular.IRouteParamsService;
 import IWindowService = angular.IWindowService;
@@ -8,6 +9,8 @@ import IFilterService = angular.IFilterService;
 import ILogService = angular.ILogService;
 import IUibModalService = angular.IUibModalService;
 import SelectionService from "./selection.service";
+import Dataset from "./model/dataset";
+import Job from "./model/job";
 
 export default class SessionController {
 
@@ -39,15 +42,17 @@ export default class SessionController {
     toolDetailList: any = null;
 
     workflowCallback = {
-        isSelectedDataset: dataset => this.SelectionService.isSelectedDataset(dataset),
-        isSelectedJob: job => this.SelectionService.isSelectedJob(job),
+        isSelectedDataset: (dataset: Dataset) => this.SelectionService.isSelectedDataset(dataset),
+        isSelectedJob: (job: Job) => this.SelectionService.isSelectedJob(job),
         clearSelection: () => this.SelectionService.clearSelection(),
-        toggleDatasetSelection: ($event, data) => this.SelectionService.toggleDatasetSelection($event, data),
-        showDefaultVisualization: () => this.showDefaultVisualization()
+        toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
+        selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
+        showDefaultVisualization: () => this.showDefaultVisualization(),
+        updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
     };
 
     init() {
-        this.SessionDataService.onSessionChange(function (event, oldValue, newValue): void {
+        this.SessionDataService.onSessionChange(function (event: any, oldValue: any, newValue: any): void {
             if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
                 this.$scope.$apply(function () {
                     alert('The session has been deleted.');
@@ -82,13 +87,13 @@ export default class SessionController {
         this.$scope.$on("angular-resizable.resizeEnd", function () {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });
-
+        /*
         angular.element(this.$window).bind('resize', function () {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
-        });
+        });*/
     }
 
-    datasetSearchKeyEvent = function (e) {
+    datasetSearchKeyEvent(e: any) {
         if (e.keyCode == 13) { // enter
             // select highlighted datasets
             var allDatasets = this.getDatasetList();
@@ -99,76 +104,79 @@ export default class SessionController {
             // clear the search
             this.datasetSearch.value = null;
         }
-    };
+    }
 
-    getWorkflowCallback = function () {
+    getWorkflowCallback() {
         return this.workflowCallback;
-    };
+    }
 
-    setTab = function (tab) {
+    getSelectedDatasets() {
+        return this.SelectionService.selectedDatasets;
+    }
+
+    setTab(tab: number) {
         this.selectedTab = tab;
-    };
+    }
 
-    isTab = function (tab) {
+    isTab(tab: number) {
         return this.selectedTab === tab;
-    };
+    }
 
-    getJob = function (jobId) {
+    getJob(jobId: string) {
         return this.SessionDataService.getJob(jobId);
-    };
+    }
 
-    deleteJobs = function (jobs) {
+    deleteJobs(jobs: Job[]) {
         this.SessionDataService.deleteJobs(jobs);
-    };
+    }
 
-    deleteDatasets = function (datasets) {
+    deleteDatasets(datasets: Dataset[]) {
         this.SessionDataService.deleteDatasets(datasets);
-    };
+    }
 
-    renameDatasetDialog = function (dataset) {
+    renameDatasetDialog(dataset: Dataset) {
         this.SessionDataService.renameDatasetDialog(dataset);
-    };
+    }
 
-    exportDatasets = function (datasets) {
+    exportDatasets(datasets: Dataset[]) {
         this.SessionDataService.exportDatasets(datasets);
-    };
+    }
 
-    showDefaultVisualization = function () {
+    showDefaultVisualization() {
         this.$scope.$broadcast('showDefaultVisualization', {});
-    };
+    }
 
-    getSessionId = function () {
-        return this.SessionDataService.getSessionId();
-    };
+    getSessionId() {
+        return this.SessionDataService.sessionId;
+    }
 
     getSession() {
         return this.SessionDataService.session;
     }
 
-    getDatasetList = function () {
+    getDatasetList() {
         return this.SessionDataService.getDatasetList();
-    };
+    }
 
-    getDatasetsMap = function () {
+    getDatasetsMap() {
         return this.SessionDataService.datasetsMap;
-    };
+    }
 
-    getJobsMap = function () {
-        return this.SessionEventService.jobsMap;
-    };
+    getJobsMap() {
+        return this.SessionDataService.jobsMap;
+    }
 
-    getModulesMap = function () {
+    getModulesMap() {
         return this.SessionDataService.modulesMap;
-    };
+    }
 
-
-    getDatasetUrl = function () {
+    getDatasetUrl() {
         if (this.SelectionService.selectedDatasets && this.SelectionService.selectedDatasets.length > 0) {
             return this.SessionDataService.getDatasetUrl(this.SelectionService.selectedDatasets[0]);
         }
-    };
+    }
 
-    openAddDatasetModal = function () {
+    openAddDatasetModal() {
         this.$uibModal.open({
             animation: true,
             templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
@@ -182,9 +190,9 @@ export default class SessionController {
                 }
             }
         });
-    };
+    }
 
-    openErrorModal = function (title, toolError) {
+    openErrorModal(title: string, toolError: string) {
         this.$uibModal.open({
             animation: true,
             templateUrl: 'app/views/sessions/session/joberrormodal/joberrormodal.html',
@@ -201,9 +209,9 @@ export default class SessionController {
                 }
             }
         });
-    };
+    }
 
-    openSessionEditModal = function () {
+    openSessionEditModal() {
 
         var modalInstance = this.$uibModal.open({
             templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
@@ -217,7 +225,7 @@ export default class SessionController {
             }
         });
 
-        modalInstance.result.then(function (result) {
+        modalInstance.result.then(function (result: string) {
             if (!result) {
                 result = 'unnamed session';
             }
@@ -226,5 +234,5 @@ export default class SessionController {
         }, function () {
             // modal dismissed
         });
-    };
+    }
 }

@@ -33,7 +33,7 @@ import htmlVisualization from "./views/sessions/session/visualization/htmlvisual
 import toolCircle from "./views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.directive";
 import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.directive";
-import workflowGraph from "./views/sessions/session/workflow/workflowgraph.directive";
+import workflowGraph from "./views/sessions/session/workflow/workflowgraph.component";
 import SourceModalController from "./views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import SessionEditModalController from "./views/sessions/session/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "./views/sessions/session/joberrormodal/joberrormodal.controller";
@@ -83,7 +83,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.directive('toolCircle', toolCircle)
 	.directive('phenodataVisualization', phenodataVisualization)
 	.directive('pdfVisualization', pdfVisualization)
-	.directive('workflowGraph', workflowGraph)
+	.component('workflowGraph', workflowGraph)
 	.component('sessionList', sessionList)
     .config(RouteConfiguration)
 	.run(ChipsterRun);

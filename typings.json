@@ -1,6 +1,8 @@
 {
   "name": "chipster-web",
-  "dependencies": {},
+  "dependencies": {
+    "d3": "registry:npm/d3#3.0.0+20160723033700"
+  },
   "globalDependencies": {
     "angular": "registry:dt/angular#1.5.0+20160619025852",
     "angular-local-storage": "registry:dt/angular-local-storage#0.1.5+20160602154142",
