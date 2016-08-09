@@ -5,15 +5,7 @@ import IScope = angular.IScope;
 import Job from "../model/job";
 import Dataset from "../model/dataset";
 import Module from "../model/module";
-
-interface Node {
-	x: number;
-	y: number;
-	color: string;
-	source: Node;
-	target: Node;
-	sourceJob: Job;
-}
+import Node from "./node.ts"
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -35,12 +27,11 @@ interface Link {
 
 class WorkflowGraphController {
 
-	static $inject = ['$scope', '$window', 'WorkflowGraphService'];
+	static $inject = ['$scope', '$window'];
 
 	constructor(
 		private $scope: IScope,
-		private $window: IWindowService,
-		private WorkflowGraphService: WorkflowGraphService) {
+		private $window: IWindowService) {
 
 		this.init();
 	}
@@ -55,8 +46,8 @@ class WorkflowGraphController {
 	menu:any;
 	d3JobNodes:any;
 	graph:any;
-	nodeWidth:number = this.WorkflowGraphService.nodeWidth;
-	nodeHeight:number = this.WorkflowGraphService.nodeHeight;
+	nodeWidth:number = WorkflowGraphService.nodeWidth;
+	nodeHeight:number = WorkflowGraphService.nodeHeight;
 	fontSize = 14;
 	nodeRadius = 4;
 	width:number;
@@ -675,7 +666,7 @@ class WorkflowGraphController {
 		// layout nodes with parents (assumes that a parent precedes its childrens in the array)
 		links.forEach((link: Link) => {
 			if (!link.target.x || !link.target.y) {
-				var pos = this.WorkflowGraphService.newPosition(nodes, link.source.x, link.source.y);
+				var pos = WorkflowGraphService.newPosition(nodes, link.source.x, link.source.y);
 				link.target.x = pos.x;
 				link.target.y = pos.y;
 			}
@@ -684,7 +675,7 @@ class WorkflowGraphController {
 		// layout orphan nodes
 		nodes.forEach((node: Node) => {
 			if (!node.x || !node.y) {
-				var pos = this.WorkflowGraphService.newRootPosition(nodes);
+				var pos = WorkflowGraphService.newRootPosition(nodes);
 				node.x = pos.x;
 				node.y = pos.y;
 			}

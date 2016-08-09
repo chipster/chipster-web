@@ -1,24 +1,22 @@
+import Node from "./node.ts";
+
 /**
  * @desc Service functions needed to define the positions of the nodes and links
  *       in the workflow graph
  */
+export default class WorkflowgraphService{
 
-export default function() {
+	static nodeHeight = 20;
+	static nodeWidth = 32;
 
-	var service = {
+	static xMargin = WorkflowgraphService.nodeWidth / 4;
+	static yMargin = WorkflowgraphService.nodeHeight;
 
-		nodeHeight: 20,
-		nodeWidth: 32
-	};
+	static newRootPosition(nodes: Node[]) {
+		return WorkflowgraphService.newPosition(nodes, null, null);
+	}
 
-	service.xMargin = service.nodeWidth / 4;
-	service.yMargin = service.nodeHeight;
-
-	service.newRootPosition = function(nodes) {
-		return service.newPosition(nodes, null, null);
-	};
-
-	service.newPosition = function(nodes, parentX, parentY) {
+	static newPosition(nodes: Node[], parentX: number, parentY: number) {
 
 		var x = 10;
 		var y = 10;
@@ -26,32 +24,30 @@ export default function() {
 			x = parentX;
 		}
 		if (parentY) {
-			y = parentY + service.nodeHeight + service.yMargin;
+			y = parentY + WorkflowgraphService.nodeHeight + WorkflowgraphService.yMargin;
 		}
 
-		while (service.intersectsAny(nodes, x, y, service.nodeWidth, service.nodeHeight)) {
-			x += service.nodeWidth + service.xMargin;
+		while (WorkflowgraphService.intersectsAny(nodes, x, y, WorkflowgraphService.nodeWidth, WorkflowgraphService.nodeHeight)) {
+			x += WorkflowgraphService.nodeWidth + WorkflowgraphService.xMargin;
 		}
 
 		return {
 			x: x,
 			y: y
 		}
-	};
+	}
 
-	service.intersectsAny = function(nodes, x, y, w, h) {
+	static intersectsAny(nodes: Node[], x: number, y: number, w: number, h: number) {
 		return !nodes.every(function(node) {
-			return !service.intersectsNode(node, x, y, w, h);
+			return !WorkflowgraphService.intersectsNode(node, x, y, w, h);
 		});
-	};
+	}
 
-	service.intersectsNode = function(node, x, y, w, h) {
+	static intersectsNode(node: Node, x: number, y: number, w: number, h: number) {
 		return (
 			x + w >= node.x &&
-			x < node.x + service.nodeWidth &&
+			x < node.x + WorkflowgraphService.nodeWidth &&
 			y + h >= node.y &&
-			y < node.y + service.nodeHeight);
-	};
-
-	return service;
-};
+			y < node.y + WorkflowgraphService.nodeHeight);
+	}
+}
