@@ -8,11 +8,11 @@ import IUibModalService = angular.IUibModalService;
 import ConfigService from "../../../services/ConfigService";
 import AuthenticationService from "../../../authentication/authenticationservice";
 import SessionEventService from "./sessionevent.service";
-import Session from "./model/session";
-import Dataset from "./model/dataset";
-import Job from "./model/job";
-import Module from "./model/module";
-import Tool from "./model/tool";
+import Session from "../../../model/session/session";
+import Dataset from "../../../model/session/dataset";
+import Job from "../../../model/session/job";
+import Module from "../../../model/session/module";
+import Tool from "../../../model/session/tool";
 
 export default class SessionDataService {
 

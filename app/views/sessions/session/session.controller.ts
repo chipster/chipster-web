@@ -9,8 +9,8 @@ import IFilterService = angular.IFilterService;
 import ILogService = angular.ILogService;
 import IUibModalService = angular.IUibModalService;
 import SelectionService from "./selection.service";
-import Dataset from "./model/dataset";
-import Job from "./model/job";
+import Dataset from "../../../model/session/dataset";
+import Job from "../../../model/session/job";
 
 export default class SessionController {
 

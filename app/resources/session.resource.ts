@@ -4,11 +4,11 @@ import * as restangular from "restangular";
 import ConfigService from "../services/ConfigService";
 import ToolResource from "../resources/toolresource";
 import Utils from "../services/Utils";
-import Session from "../views/sessions/session/model/session";
-import Dataset from "../views/sessions/session/model/dataset";
-import Module from "../views/sessions/session/model/module";
-import Tool from "../views/sessions/session/model/tool";
-import Job from "../views/sessions/session/model/job";
+import Session from "../model/session/session";
+import Dataset from "../model/session/dataset";
+import Module from "../model/session/module";
+import Tool from "../model/session/tool";
+import Job from "../model/session/job";
 
 export default class SessionResource {
 

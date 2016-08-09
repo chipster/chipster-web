@@ -5,14 +5,14 @@ import TableService from "../../../../services/tableservice.factory"
 import IScopeService = angular.IScopeService;
 import IFilterService = angular.IFilterService;
 import IQService = angular.IQService;
-import Category from "../model/category";
-import Module from "../model/module";
-import Job from "../model/job";
-import Dataset from "../model/dataset";
-import Tool from "../model/tool";
-import InputBinding from "../model/inputbinding";
-import ToolParameter from "../model/toolparameter";
-import JobParameter from "../model/jobparameter";
+import Category from "../../../../model/session/category";
+import Module from "../../../../model/session/module";
+import Job from "../../../../model/session/job";
+import Dataset from "../../../../model/session/dataset";
+import Tool from "../../../../model/session/tool";
+import InputBinding from "../../../../model/session/inputbinding";
+import ToolParameter from "../../../../model/session/toolparameter";
+import JobParameter from "../../../../model/session/jobparameter";
 import SelectionService from "../selection.service";
 
 export default class ToolCtrl {

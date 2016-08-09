@@ -5,7 +5,7 @@ import IScopeService = angular.IScopeService;
 import IRouteParamsService = angular.IRouteParamsService;
 import ICompileService = angular.ICompileService;
 import Visualization from "../visualization/visualization";
-import Dataset from "../model/dataset";
+import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
 

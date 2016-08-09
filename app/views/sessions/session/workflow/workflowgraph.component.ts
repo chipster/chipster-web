@@ -2,9 +2,9 @@ import Utils from "../../../../services/Utils";
 import IWindowService = angular.IWindowService;
 import WorkflowGraphService from "./workflowgraph.service";
 import IScope = angular.IScope;
-import Job from "../model/job";
-import Dataset from "../model/dataset";
-import Module from "../model/module";
+import Job from "../../../../model/session/job";
+import Dataset from "../../../../model/session/dataset";
+import Module from "../../../../model/session/module";
 import Node from "./node.ts"
 
 interface DatasetNode extends Node {

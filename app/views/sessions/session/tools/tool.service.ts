@@ -1,6 +1,6 @@
 import Utils from "../../../../services/Utils";
-import ToolParameter from "../model/toolparameter";
-import Dataset from "../model/dataset";
+import ToolParameter from "../../../../model/session/toolparameter";
+import Dataset from "../../../../model/session/dataset";
 
 export default class {
 

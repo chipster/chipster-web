@@ -1,6 +1,6 @@
-import Dataset from "./model/dataset";
-import Job from "./model/job";
-import Tool from "./model/tool";
+import Dataset from "../../../model/session/dataset";
+import Job from "../../../model/session/job";
+import Tool from "../../../model/session/tool";
 import Utils from "../../../services/Utils";
 import SessionDataService from "./sessiondata.service";
 
