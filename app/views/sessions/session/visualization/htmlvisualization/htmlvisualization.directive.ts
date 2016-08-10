@@ -1,6 +1,6 @@
 htmlVisualization.$inject = ['$sce'];
 
-function htmlVisualization($sce){
+function htmlVisualization($sce: any){
     return{
         restrict:'E',
         scope : {
@@ -10,7 +10,7 @@ function htmlVisualization($sce){
         // considering later what capabilities are needed
         template: '<iframe frameBorder="0" sandbox="" width="100%" height="100%" ng-src="{{getUrl()}}"></iframe>',
 
-        link: function ($scope) {
+        link: function ($scope: ng.IScope) {
 
             $scope.getUrl = function () {
                 return $sce.trustAsResourceUrl($scope.src + '&download=false&type=true');

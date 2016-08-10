@@ -8,7 +8,9 @@ export default function(){
 			toolcolor : "="
 		},
 		template: "<canvas id='tcanvas' width=" + (radius * 2 + 5) + " height=" + (radius * 2 + 2) + ">",
-		link:function(scope,element){
+		link:function(
+			scope: ng.IScope,
+			element: any) {
 			scope.canvas=element.find('canvas')[0];
 
 			scope.context=scope.canvas.getContext('2d');

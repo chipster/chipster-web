@@ -1,6 +1,9 @@
-JobErrorModalController.$inject = ['$log', '$uibModalInstance', 'toolErrorTitle', 'toolError'];
+JobErrorModalController.$inject = ['$uibModalInstance', 'toolErrorTitle', 'toolError'];
 
-function JobErrorModalController($log, $uibModalInstance, toolErrorTitle, toolError) {
+function JobErrorModalController(
+    $uibModalInstance: any,
+    toolErrorTitle: string,
+    toolError: string) {
 
     this.toolErrorTitle = toolErrorTitle;
     this.toolError = toolError;

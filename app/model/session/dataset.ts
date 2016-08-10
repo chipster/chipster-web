@@ -1,6 +1,11 @@
 import MetadataEntry from "./metadataentry";
 
 export default class Dataset {
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
     checksum: string;
     datasetId: string;
     fileId: string;

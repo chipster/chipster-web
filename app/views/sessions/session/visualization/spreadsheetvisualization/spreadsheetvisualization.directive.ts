@@ -1,7 +1,8 @@
 
+import FileResource from "../../../../../resources/fileresource";
 spreadsheetVisualization.$inject = ['FileResource'];
 
-function spreadsheetVisualization(FileResource){
+function spreadsheetVisualization(FileResource: FileResource){
     return{
         restrict:'E',
         scope : {
@@ -10,15 +11,15 @@ function spreadsheetVisualization(FileResource){
             src: '='
         },
         template: '<div id="tableContainer"></div>',
-        link: function ($scope) {
+        link: function ($scope: ng.IScope) {
 
-            FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp) {
+            FileResource.getData($scope.sessionId, $scope.datasetId).then(function (resp: any) {
 
                 // parse the file data using the JQuery-cvs library
                 let parserConfig = {
                     separator: '\t'
                 };
-                $.csv.toArrays(resp.data, parserConfig, function (err, array) {
+                $.csv.toArrays(resp.data, parserConfig, function (err: any, array: string[][]) {
 
                     var container = document.getElementById('tableContainer');
 
@@ -26,7 +27,7 @@ function spreadsheetVisualization(FileResource){
                 });
             });
 
-            $scope.getSettings = function (array) {
+            $scope.getSettings = function (array: string[][]) {
                 return {
                     data: array.slice(1),
                     colHeaders: array[0],

@@ -25,7 +25,6 @@ import toolFilter from "./common/filter/tool.filter";
 import AddDatasetModalController from "./views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.controller";
 import secondsFilter from "./common/filter/seconds.filter";
 import ParameterModalController from "./views/sessions/session/tools/parametermodal/parametermodal.controller";
-import chipsterImage from "./directives/chipsterimage";
 import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.directive";
 import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.directive";
 import imageVisualization from "./views/sessions/session/visualization/imagevisualization/imagevisualization.directive";
@@ -75,7 +74,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.filter('moduleFilter', moduleFilter)
 	.filter('toolFilter', toolFilter)
 	.filter('seconds',secondsFilter)
-	.directive('chipsterImage', chipsterImage)
 	.directive('textVisualization', textVisualization)
 	.directive('imageVisualization', imageVisualization)
 	.directive('spreadsheetVisualization', spreadsheetVisualization)
@@ -90,7 +88,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
 
 angular.module('chipster-web').config(
-		function(flowFactoryProvider) {
+		function(flowFactoryProvider: any) {
 
 			flowFactoryProvider.defaults = {
 				// continuation from different browser session not implemented
@@ -114,7 +112,7 @@ angular.module('chipster-web').config(
 			 */
 			// process errors here, because the error callback in html file
 			// doesn't have the chunk parameter
-			flowFactoryProvider.on('error', function(msg, file, chunk) {
+			flowFactoryProvider.on('error', function(msg: string, file: any, chunk: any) {
 				file.errorMessage = chunk.xhr.status + ' '
 						+ chunk.xhr.statusText + ': ' + msg;
 				file.errorMessageDetails = chunk.xhr.responseURL;
