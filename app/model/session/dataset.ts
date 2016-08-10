@@ -1,8 +1,10 @@
+import MetadataEntry from "./metadataentry";
+
 export default class Dataset {
     checksum: string;
     datasetId: string;
     fileId: string;
-    metadata: any[];
+    metadata: MetadataEntry[];
     name: string;
     notes: string;
     size: number;

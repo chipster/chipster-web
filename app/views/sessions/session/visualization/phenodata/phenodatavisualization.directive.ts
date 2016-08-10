@@ -1,17 +1,41 @@
 import Utils from "../../../../../services/Utils";
+import Dataset from "../../../../../model/session/dataset";
+import TableService from "../../../../../services/tableservice.factory";
+import SessionDataService from "../../sessiondata.service";
+import MetadataEntry from "../../../../../model/session/metadataentry";
+
+class Row extends Array<string> {
+    // store datasetId and columnName as properties to hide them from the table
+    constructor(length: number, public datasetId: string, public columnName: string) {
+        super();
+        for (let i = 0; i < length; i++) {
+            this.push(undefined);
+        }
+    }
+}
 
 class PhenodataVisualizationController {
 
-    static $inject = ['FileResource', 'TableService', 'SessionDataService', '$scope'];
+    static $inject = ['TableService', 'SessionDataService', '$scope'];
 
     constructor(
-        private fileResource: FileResource,
         private tableService: TableService,
         private sessionDataService: SessionDataService,
         private $scope: ng.IScopeService) {
 
         this.init();
     }
+
+    datasets: Dataset[];
+    sessionId: string;
+    hot: any;
+    // name of the new column
+    colName: string;
+    array: Row[];
+    headers: string[];
+
+    latestEdit: number;
+    deferredUpdatesTimer: any;
 
     unremovableColumns = [ 'sample', 'original_name', 'dataset', 'column'];
 
@@ -30,7 +54,7 @@ class PhenodataVisualizationController {
         this.updateView();
     }
 
-    getSettings(array, headers) {
+    getSettings(array: string[][], headers: string[]) {
         return {
             data: array,
             colHeaders: headers,
@@ -38,7 +62,7 @@ class PhenodataVisualizationController {
             manualColumnResize: true,
             sortIndicator: true,
 
-            afterGetColHeader: (col, TH) => {
+            afterGetColHeader: (col: number, TH: any) => {
                 if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
                     // removal not allowed
                     return;
@@ -46,7 +70,7 @@ class PhenodataVisualizationController {
                 this.createRemoveButton(col, TH);
             },
 
-            afterChange: (changes, source) => {
+            afterChange: (changes: any, source: string) => {
                 /*
                 Cut two-way binding loops here.
 
@@ -68,7 +92,7 @@ class PhenodataVisualizationController {
         }
     }
 
-    createRemoveButton(col, TH) {
+    createRemoveButton(col: number, TH: any) {
         var button = document.createElement('A');
         button.className = 'btn btn-xs pull-right phenodata-header-button';
         var span = document.createElement('SPAN');
@@ -99,7 +123,7 @@ class PhenodataVisualizationController {
         this.updateDatasets(false);
     }
 
-    removeColumn(index) {
+    removeColumn(index: number) {
         this.hot.alter('remove_col', index);
 
         this.updateDatasets(false);
@@ -107,7 +131,7 @@ class PhenodataVisualizationController {
 
     reset() {
 
-        angular.forEach(this.datasets, (dataset) => {
+        this.datasets.forEach((dataset: Dataset) => {
             if (Utils.getFileExtension(dataset.name) === 'tsv') {
                 this.resetTsv(dataset);
             } else {
@@ -116,17 +140,17 @@ class PhenodataVisualizationController {
         });
     }
 
-    resetTsv(dataset) {
+    resetTsv(dataset: Dataset) {
 
-        this.tableService.getColumns(this.sessionId, dataset.datasetId).then((fileHeaders) => {
-            var metadata = [];
+        this.tableService.getColumns(this.sessionId, dataset.datasetId).then((fileHeaders: string[]) => {
+            var metadata: MetadataEntry[] = [];
 
             var chipHeaders = fileHeaders.filter( function(header) {
                 return Utils.startsWith(header, 'chip.');
             });
 
-            angular.forEach(chipHeaders, function(fileHeader) {
-                var entry = {
+            chipHeaders.forEach((fileHeader) => {
+                var entry = <MetadataEntry>{
                     column: fileHeader,
                     key: 'sample',
                     value: fileHeader.replace('chip.', '')
@@ -141,7 +165,7 @@ class PhenodataVisualizationController {
         });
     }
 
-    resetGenericFile(dataset) {
+    resetGenericFile(dataset: Dataset) {
 
         dataset.metadata = [{
             column: null,
@@ -154,7 +178,7 @@ class PhenodataVisualizationController {
     }
 
     remove () {
-        angular.forEach(this.datasets, function(dataset) {
+        this.datasets.forEach((dataset: Dataset) => {
             dataset.metadata = null;
         });
 
@@ -162,27 +186,27 @@ class PhenodataVisualizationController {
         this.updateDatasets(true);
     }
 
-    getHeaders(datasets) {
+    getHeaders(datasets: Dataset[]) {
         // collect all headers
         var headers = {
             dataset: true,
             column: true
         };
-        angular.forEach(datasets, function(dataset) {
-            angular.forEach(dataset.metadata, function(entry) {
+        datasets.forEach((dataset: Dataset) => {
+            dataset.metadata.forEach((entry: MetadataEntry) => {
                 headers[entry.key] = true;
             });
         });
         return Object.keys(headers);
     }
 
-    getRows(datasets, headers) {
+    getRows(datasets: Dataset[], headers: string[]) {
 
-        var array = [];
+        var array: Row[] = [];
 
         // get the row of a specific dataset and column if it exists already
         // or create a new row
-        function getRow(dataset, column) {
+        function getRow(dataset: Dataset, column: string) {
             // find the existing row
             for (var i = 0; i < array.length; i++) {
                 if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
@@ -192,11 +216,7 @@ class PhenodataVisualizationController {
 
             // create a new row
             // fill the row with undefined values
-            var row = Array.apply(null, new Array(headers.length)).map(function () {return undefined});
-
-            // store datasetId and columnName as properties to hide them from the table
-            row.datasetId = dataset.datasetId;
-            row.columnName = column;
+            var row = new Row(headers.length, dataset.datasetId, column);
             row[0] = dataset.name;
             row[1] = column;
             array.push(row);
@@ -204,9 +224,9 @@ class PhenodataVisualizationController {
             return row;
         }
 
-        angular.forEach(datasets, function(dataset) {
+        datasets.forEach((dataset: Dataset) => {
 
-            angular.forEach(dataset.metadata, function(entry) {
+            dataset.metadata.forEach((entry: MetadataEntry) => {
                 var row = getRow(dataset, entry.column);
                 row[headers.indexOf(entry.key)] = entry.value;
             });
@@ -214,13 +234,13 @@ class PhenodataVisualizationController {
         return array;
     }
 
-    updateDatasets(updateAll) {
+    updateDatasets(updateAll: boolean) {
 
-        var metadataMap = {};
+        var metadataMap = new Map<string, MetadataEntry[]>();
         var array = this.array;
         var headers = this.headers;
 
-        array.forEach( function(row) {
+        array.forEach((row: Row) => {
 
             for (var i = 0; i < headers.length; i++) {
                 var entry = {
@@ -229,16 +249,16 @@ class PhenodataVisualizationController {
                     value: row[i]
                 };
 
-                if (!metadataMap[row.datasetId]) {
-                    metadataMap[row.datasetId] = [];
+                if (!metadataMap.has(row.datasetId)) {
+                    metadataMap.set(row.datasetId, []);
                 }
 
-                metadataMap[row.datasetId].push(entry);
+                metadataMap.get(row.datasetId).push(entry);
             }
         });
 
-        angular.forEach(this.datasets, (dataset) => {
-            var newMetadata = metadataMap[dataset.datasetId];
+        this.datasets.forEach((dataset: Dataset) => {
+            var newMetadata = metadataMap.get(dataset.datasetId);
             if (updateAll || !angular.equals(newMetadata, dataset.metadata)) {
                 dataset.metadata = newMetadata;
                 this.sessionDataService.updateDataset(dataset);
@@ -248,24 +268,26 @@ class PhenodataVisualizationController {
 
     updateView() {
 
-        var headers = this.getHeaders(this.datasets);
-        var array = this.getRows(this.datasets, headers);
+        if (this.datasets) {
+            var headers = this.getHeaders(this.datasets);
+            var array = this.getRows(this.datasets, headers);
 
-        if (!angular.equals(headers, this.headers)) {
-            this.headers = headers;
+            if (!angular.equals(headers, this.headers)) {
+                this.headers = headers;
 
-            // remove old table if this is an update
-            var container = document.getElementById('tableContainer');
-            while (container.firstChild) {
-                container.removeChild(container.firstChild);
+                // remove old table if this is an update
+                var container = document.getElementById('tableContainer');
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+
+                this.hot = new Handsontable(container, this.getSettings(this.array, this.headers));
+
             }
 
-            this.hot = new Handsontable(container, this.getSettings(this.array, this.headers));
-
+            this.array = array;
+            this.hot.loadData(this.array);
         }
-
-        this.array = array;
-        this.hot.loadData(this.array);
     }
 
     isEditingNow() {
@@ -317,8 +339,6 @@ export default {
     templateUrl: 'app/views/sessions/session/visualization/phenodata/phenodatavisualization.html',
     bindings: {
         datasets: '=selectedDatasets',
-        datasetId: '=',
         sessionId: '=',
-        src: '='
     }
 }
