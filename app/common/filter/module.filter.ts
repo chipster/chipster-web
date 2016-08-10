@@ -1,13 +1,14 @@
+import Module from "../../model/session/module";
 
-export default function($filter){
+export default function($filter: any){
 
-    return function(arr,searchTool){
+    return function(arr: Module[], searchTool: string){
         if(!searchTool)
             return arr;
 
-        var result=[];
+        var result: Module[] = [];
 
-        angular.forEach(arr,function(module){
+        arr.forEach((module) => {
             var filteredTools = $filter('categoryFilter')(module.categories, searchTool);
 
             if(filteredTools.length > 0){

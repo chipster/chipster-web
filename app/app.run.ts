@@ -1,8 +1,15 @@
-export default function($rootScope, $location, AuthenticationService, ConfigService) {
+import AuthenticationService from "./authentication/authenticationservice";
+import ConfigService from "./services/config.service";
+
+export default function(
+    $rootScope: any,
+    $location: ng.ILocationService,
+    AuthenticationService: AuthenticationService,
+    ConfigService: ConfigService) {
 
     ConfigService.init();
 
-    $rootScope.$on("$routeChangeStart", function(event, next) {
+    $rootScope.$on("$routeChangeStart", function(event: any, next: any) {
         if (next.$$route.authenticated) {
             var userAuth = AuthenticationService.getToken();
             if (!userAuth) {

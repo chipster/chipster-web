@@ -1,4 +1,4 @@
-import Utils from "../../../../services/Utils";
+import Utils from "../../../../services/utils.service";
 import ToolParameter from "../../../../model/session/toolparameter";
 import Dataset from "../../../../model/session/dataset";
 

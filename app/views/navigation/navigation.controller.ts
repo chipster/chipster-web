@@ -1,5 +1,5 @@
 import AuthenticationService from "../../authentication/authenticationservice";
-import ConfigService from "../../services/ConfigService";
+import ConfigService from "../../services/config.service";
 
 export default class NavigationController {
 

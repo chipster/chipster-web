@@ -1,4 +1,4 @@
-import Utils from "../../../../../services/Utils";
+import Utils from "../../../../../services/utils.service";
 AddDatasetModalController.$inject = ['$log', '$uibModalInstance', 'data', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'WorkflowGraphService'];
 
 function AddDatasetModalController($log, $uibModalInstance, data, $routeParams, SessionResource, ConfigService, AuthenticationService, WorkflowGraphService) {

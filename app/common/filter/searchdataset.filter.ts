@@ -1,16 +1,18 @@
+import Dataset from "../../model/session/dataset";
+
 /**
  * Filter for searching dataset in dataset list view
  */
-export default function ($rootScope) {
-    return function (array, expression) {
+export default function ($rootScope: any) {
+    return function (array: Dataset[], expression: string) {
 
-        var result = [];
+        var result: Dataset[] = [];
 
         if (!expression) {
             result = array;
 
         } else {
-            angular.forEach(array, function (item) {
+            array.forEach((item) => {
 
                 if (item.name.toLowerCase().indexOf(expression.toLowerCase()) !== -1) {
                     result.push(item);
@@ -28,5 +30,4 @@ export default function ($rootScope) {
 
         return result;
     }
-
 };

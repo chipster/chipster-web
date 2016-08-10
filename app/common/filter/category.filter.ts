@@ -1,12 +1,14 @@
-function categoryFilter($filter){
+import Category from "../../model/session/category";
 
-    return function(arr,searchTool){
+function categoryFilter($filter: any){
+
+    return function(arr: Category[], searchTool: string){
         if(!searchTool)
             return arr;
 
-        var result=[];
+        var result: Category[] = [];
 
-        angular.forEach(arr,function(category){
+        arr.forEach((category) => {
             var filteredTools = $filter('toolFilter')(category.tools, searchTool);
 
             if(filteredTools.length > 0){

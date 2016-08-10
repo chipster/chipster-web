@@ -1,4 +1,4 @@
-import Utils from "../../../../../services/Utils";
+import Utils from "../../../../../services/utils.service";
 import Dataset from "../../../../../model/session/dataset";
 import TableService from "../../../../../services/tableservice.factory";
 import SessionDataService from "../../sessiondata.service";

@@ -1,4 +1,4 @@
-import Utils from "../../../../services/Utils";
+import Utils from "../../../../services/utils.service";
 import IWindowService = angular.IWindowService;
 import WorkflowGraphService from "./workflowgraph.service";
 import IScope = angular.IScope;

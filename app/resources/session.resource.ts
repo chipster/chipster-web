@@ -1,9 +1,9 @@
 
 import AuthenticationService from "../authentication/authenticationservice";
 import * as restangular from "restangular";
-import ConfigService from "../services/ConfigService";
+import ConfigService from "../services/config.service";
 import ToolResource from "../resources/toolresource";
-import Utils from "../services/Utils";
+import Utils from "../services/utils.service";
 import Session from "../model/session/session";
 import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";
@@ -100,7 +100,7 @@ export default class SessionResource {
 			this.toolResource.service.all('tools').getList()
 		];
 
-		return this.$q.all(promises).then((data) => {
+		return this.$q.all(promises).then((data: any) => {
 			return this.parseSessionData(data);
 		});
 	};

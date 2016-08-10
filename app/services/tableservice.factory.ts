@@ -8,19 +8,19 @@ export default class TableService {
         private FileResource: FileResource) {
     }
 
-   getColumns(sessionId, datasetId) {
+   getColumns(sessionId: string, datasetId: string) {
 
-        return this.FileResource.getData(sessionId, datasetId).then(function (resp) {
+        return this.FileResource.getData(sessionId, datasetId).then(function (resp: any) {
             
             // we have to create the promise, because JQuery-cvs doesn't use them
-            return new Promise(function(resolve, reject) {
+            return new Promise(function(resolve: any, reject: any) {
 
                 // parse the file data using the JQuery-cvs library
                 let parserConfig = {
                     separator: '\t'
                 };
 
-                $.csv.toArrays(resp.data, parserConfig, function (err, fileArray) {
+                $.csv.toArrays(resp.data, parserConfig, function (err: any, fileArray: string[][]) {
                     if (fileArray) {
                         resolve(fileArray[0]);
                     } else {

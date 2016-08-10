@@ -17,9 +17,9 @@ export default class ConfigService {
     }
 
     init() {
-        this.configurationResource.getConfigurationResource().query().$promise.then( response => {
-            angular.forEach(response, ( item: any ) => {
-                let camelCaseRole = item.role.replace(/-([a-z])/g, (m, w) => w.toUpperCase() );
+        this.configurationResource.getConfigurationResource().query().$promise.then((response: any) => {
+            response.forEach(( item: any ) => {
+                let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase() );
                 this.services[camelCaseRole] = item.publicUri;
             });
             this.baseUrl = this.services.sessionDb;

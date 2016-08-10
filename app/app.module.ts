@@ -1,12 +1,12 @@
 import LoginController from "./views/login/login.controller";
 import NavigationController from "./views/navigation/navigation.controller";
 import AuthenticationService from "./authentication/authenticationservice";
-import ConfigService from "./services/ConfigService";
+import ConfigService from "./services/config.service";
 import ConfigurationResource from "./resources/configurationresource";
 import RouteConfiguration from "./routes.config";
 import ChipsterRun from "./app.run";
 import ToolResource from "./resources/toolresource";
-import Utils from "./services/Utils";
+import UtilsService from "./services/utils.service";
 import SessionController from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
 import SessionEventService from "./views/sessions/session/sessionevent.service";
@@ -65,7 +65,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 	.service('SessionDataService', SessionDataService)
 	.service('SelectionService', SelectionService)
 	.service('FileResource', FileResource)
-	.factory('Utils', Utils)
+	.service('Utils', UtilsService)
 	.factory('WorkflowGraphService', WorkflowGraphService)
 	.factory('TableService', TableService)
 	.factory('ToolService', ToolService)

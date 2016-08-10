@@ -1,5 +1,5 @@
 
-import ConfigService from "../services/ConfigService";
+import ConfigService from "../services/config.service";
 
 export default class AuthenticationService {
 
@@ -32,7 +32,7 @@ export default class AuthenticationService {
         return this.tokenHeader;
     };
 
-    requestToken(method, username, password) {
+    requestToken(method: string, username: string, password: string) {
         var string = username + ":" + password;
         var encodedString = btoa(string); //Convert it to base64 encoded string
         var urlString = URI(this.ConfigService.getAuthUrl()).path('tokens').toString();

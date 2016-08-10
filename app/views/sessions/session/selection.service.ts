@@ -1,7 +1,7 @@
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import Tool from "../../../model/session/tool";
-import Utils from "../../../services/Utils";
+import Utils from "../../../services/utils.service";
 import SessionDataService from "./sessiondata.service";
 
 export default class SelectionService {

@@ -1,5 +1,5 @@
 import VisualizationList from "./../visualization/visualizationconstants";
-import Utils from "../../../../services/Utils";
+import Utils from "../../../../services/utils.service";
 import AuthenticationService from "../../../../authentication/authenticationservice";
 import IScopeService = angular.IScopeService;
 import IRouteParamsService = angular.IRouteParamsService;

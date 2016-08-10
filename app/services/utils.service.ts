@@ -1,4 +1,4 @@
-export default class Utils {
+export default class UtilsService {
 
     static getFileExtension(name: string) {
         return name.split('.').pop();
