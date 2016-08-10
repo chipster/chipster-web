@@ -290,25 +290,25 @@ export default class ToolCtrl {
 			bindToController: true,
 			size: 'lg',
 			resolve: {
-				selectedTool: function () {
-					return angular.copy(this.selectedTool);
+				selectedTool: () => {
+					return angular.copy(this.SelectionService.selectedTool);
 				},
-				inputBindings: function () {
+				inputBindings: () => {
 					return angular.copy(this.inputBindings);
 				},
-				selectedDatasets: function () {
+				selectedDatasets: () => {
 					return angular.copy(this.SelectionService.selectedDatasets);
 				},
-				isRunEnabled: function () {
+				isRunEnabled: () => {
 					return this.isRunEnabled();
 				},
-				parameters: function () {
+				parameters: () => {
 					return angular.copy(this.job.parameters)
 				}
 			}
 		});
 
-		modalInstance.result.then(function (result: any) {
+		modalInstance.result.then((result: any) => {
 			// save settings
 			this.job.parameters = result.parameters;
 			this.inputBindings = result.inputBindings;
