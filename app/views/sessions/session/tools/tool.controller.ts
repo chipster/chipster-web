@@ -247,6 +247,7 @@ export default class ToolCtrl {
 	}
 
 	getColumns() {
+
 		var promises: any[] = [];
 		for (let dataset of this.SelectionService.selectedDatasets) {
 			if (this.ToolService.isCompatible(dataset, 'TSV')) {

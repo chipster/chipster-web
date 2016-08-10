@@ -1,6 +1,7 @@
-phenodataVisualization.$inject = ['FileResource', 'SessionRestangular', 'Utils', 'TableService'];
+import Utils from "../../../../../services/Utils";
+phenodataVisualization.$inject = ['FileResource', 'TableService', 'SessionDataService'];
 
-function phenodataVisualization(FileResource, SessionRestangular, Utils, TableService){
+function phenodataVisualization(FileResource, TableService, SessionDataService){
 
     return {
         restrict:'E',
@@ -92,6 +93,7 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
             };
 
             $scope.reset = function() {
+
                 angular.forEach($scope.datasets, function(dataset) {
                     if (Utils.getFileExtension(dataset.name) === 'tsv') {
                         $scope.resetTsv(dataset);
@@ -104,7 +106,6 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
             $scope.resetTsv = function(dataset) {
 
                 TableService.getColumns($scope.sessionId, dataset.datasetId).then(function (fileHeaders) {
-
                     var metadata = [];
 
                     var chipHeaders = fileHeaders.filter( function(header) {
@@ -178,7 +179,7 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
 
                     // create a new row
                     // fill the row with undefined values
-                    row = Array.apply(null, new Array(headers.length)).map(function () {return undefined});
+                    var row = Array.apply(null, new Array(headers.length)).map(function () {return undefined});
 
                     // store datasetId and columnName as properties to hide them from the table
                     row.datasetId = dataset.datasetId;
@@ -201,11 +202,8 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
             };
 
             $scope.updateDataset = function(dataset) {
-                var datasetUrl = SessionRestangular.one('sessions', $scope.sessionId).one('datasets').one(dataset.datasetId);
 
-                datasetUrl.customPUT(dataset).catch( function(res) {
-                        console.log('dataset updated failed: ' + res);
-                });
+                SessionDataService.updateDataset(dataset);
             };
 
             $scope.updateDatasets = function (updateAll) {
@@ -255,6 +253,7 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
                     }
 
                     $scope.hot = new Handsontable(container, $scope.getSettings($scope.array, $scope.headers));
+
                 }
 
                 $scope.array = array;
@@ -303,7 +302,7 @@ function phenodataVisualization(FileResource, SessionRestangular, Utils, TableSe
                 }
             };
 
-            $scope.$watch('datasets', function () {
+            $scope.$watch(() => $scope.datasets, function () {
                 if ($scope.datasets.length > 0) {
                     $scope.updateViewLater();
                 }
