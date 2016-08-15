@@ -7,7 +7,7 @@ export default function(){
             sessionId: "=",
             src: "="
         },
-        template: '<div class="wrapper scrollable"><ng-pdf template-url="app/views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf></div>',
+        template: '<div class="wrapper scrollable"><ng-pdf template-url="views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf></div>',
         link: function ($scope: ng.IScope) {
 
             //blocks for the visualization controlling

@@ -1,13 +1,5 @@
 import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
-import angular from "angular";
-import IScopeService = angular.IScopeService;
-import IRouteParamsService = angular.IRouteParamsService;
-import IWindowService = angular.IWindowService;
-import ILocationService = angular.ILocationService;
-import IFilterService = angular.IFilterService;
-import ILogService = angular.ILogService;
-import IUibModalService = angular.IUibModalService;
 import SelectionService from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
@@ -19,13 +11,13 @@ export default class SessionController {
         'SessionEventService', 'SessionDataService', 'SelectionService'];
 
     constructor(
-        private $scope: IScopeService,
-        private $routeParams: IRouteParamsService,
-        private $window: IWindowService,
-        private $location: ILocationService,
-        private $filter: IFilterService,
-        private $log: ILogService,
-        private $uibModal: IUibModalService,
+        private $scope: ng.IScope,
+        private $routeParams: ng.route.IRouteParamsService,
+        private $window: ng.IWindowService,
+        private $location: ng.ILocationService,
+        private $filter: ng.IFilterService,
+        private $log: ng.ILogService,
+        private $uibModal: ng.ui.bootstrap.IModalService,
         private SessionEventService: SessionEventService,
         private SessionDataService: SessionDataService,
         private SelectionService: SelectionService) {
@@ -179,7 +171,7 @@ export default class SessionController {
     openAddDatasetModal() {
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
+            templateUrl: 'views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
             controller: 'AddDatasetModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -195,7 +187,7 @@ export default class SessionController {
     openErrorModal(title: string, toolError: string) {
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'app/views/sessions/session/joberrormodal/joberrormodal.html',
+            templateUrl: 'views/sessions/session/joberrormodal/joberrormodal.html',
             controller: 'JobErrorModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -214,7 +206,7 @@ export default class SessionController {
     openSessionEditModal() {
 
         var modalInstance = this.$uibModal.open({
-            templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
+            templateUrl: 'views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,

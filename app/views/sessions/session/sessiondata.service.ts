@@ -1,4 +1,3 @@
-import angular from "angular";
 import SessionResource from "../../../resources/session.resource";
 import Utils from "../../../services/utils.service";
 import IRouteParamsService = angular.IRouteParamsService;
@@ -22,7 +21,7 @@ export default class SessionDataService {
         'SessionEventService', '$uibModal'];
 
     constructor(
-        private $routeParams: IRouteParamsService,
+        private $routeParams: ng.IR,
         private SessionResource: SessionResource,
         private $log: ILogService,
         private $window: IWindowService,
@@ -146,7 +145,7 @@ export default class SessionDataService {
 
     openDatasetHistoryModal() {
         this.$uibModal.open({
-            templateUrl: 'app/views/sessions/session/datasethistorymodal/datasethistorymodal.html',
+            templateUrl: 'views/sessions/session/datasethistorymodal/datasethistorymodal.html',
             controller: 'DatasetHistoryModalController',
             controllerAs: 'vm',
             bindToController: true,

@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "system",
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
     "removeComments": false,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "rootDir": "./app"
+    "suppressImplicitAnyIndexErrors": true
   },
-  "exclude": ["node_modules", "dependencies", "css", "test", "dist"]
+  "exclude": ["node_modules", "dependencies", "test"]
 
 }

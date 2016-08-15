@@ -1,9 +1,6 @@
 import VisualizationList from "./../visualization/visualizationconstants";
 import Utils from "../../../../services/utils.service";
 import AuthenticationService from "../../../../authentication/authenticationservice";
-import IScopeService = angular.IScopeService;
-import IRouteParamsService = angular.IRouteParamsService;
-import ICompileService = angular.ICompileService;
 import Visualization from "../visualization/visualization";
 import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
@@ -16,10 +13,10 @@ export default class DatasetController {
 		'SessionDataService'];
 
 	constructor(
-		private $scope: IScopeService,
-		private $routeParams: IRouteParamsService,
+		private $scope: ng.IScope,
+		private $routeParams: ng.route.IRouteParamsService,
 		private AuthenticationService: AuthenticationService,
-		private $compile: ICompileService,
+		private $compile: ng.ICompileService,
 		private SelectionService: SelectionService,
 		private SessionDataService: SessionDataService) {
 

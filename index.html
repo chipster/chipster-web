@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Chipster</title>
-
+    <base href="/app/">
     <!-- Mobile Viewport optimized-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Chipster Web Tool for Data Processing and Visualization">
@@ -16,20 +16,19 @@
     <link rel="stylesheet" type="text/css" href="/node_modules/handsontable/dist/handsontable.full.css">
 
     <!-- Application Styles -->
-    <link rel="stylesheet/less" type="text/css" href="css/app.less">
+    <link rel="stylesheet/less" type="text/css" href="../css/app.less">
     <script src="/node_modules/less/dist/less.js"></script>
 </head>
 
 <body>
 
-    <div ng-include="'app/views/navigation/navigation.html'"></div>
+    <div ng-include="'views/navigation/navigation.html'"></div>
 
     <div ng-view></div>
 
     <!-- Dependencies -->
 
     <script src="/node_modules/jquery/dist/jquery.js"></script>
-    <script src="/node_modules/systemjs/dist/system.js"></script>
     <script src="/node_modules/angular/angular.js"></script>
     <script src="/node_modules/angular-route/angular-route.js"></script>
     <script src="/node_modules/angular-resource/angular-resource.js"></script>
@@ -50,17 +49,30 @@
     <script src="/node_modules/handsontable/dist/handsontable.full.js"></script>
     <script src="/node_modules/jquery-csv/src/jquery.csv.js"></script>
     <script src="/node_modules/urijs/src/URI.js"></script>
-    <script src="/node_modules/bluebird/js/browser/bluebird.js"></script>
+
+    <script src="/node_modules/reflect-metadata/Reflect.js"></script>
+    <script src="/node_modules/zone.js/dist/zone.js"></script>
+    <script src="/node_modules/core-js/client/shim.min.js"></script>
 
     <script src="/dependencies/nghandsontable/ngHandsontable.js"></script>
     <!-- latest version 2.1.4 from npm is too old-->
     <script src="/dependencies/ngFlow/ng-flow-standalone.js"></script>
 
     <!-- SystemJS module loading configuration -->
-    <script src="config.js"></script>
-
+    <script src="/node_modules/systemjs/dist/system.js"></script>
+    <script src="/systemjs.config.js"></script>
     <!-- Source -->
-    <script>SystemJS.import('app/app.module');</script>
+
+        <script>SystemJS.import('/app').then( function() {
+                    console.info('SYSTEMJS successfully bootstrapped.');
+                },
+                function handleReject( error ) {
+
+                    console.warn( "System.js could not bootstrap the app." );
+                    console.dir( error );
+
+                });</script>
+    <script>
 
 </body>
 </html>

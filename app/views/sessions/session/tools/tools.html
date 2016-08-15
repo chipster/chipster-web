@@ -13,7 +13,9 @@
         <!--</div>-->
 
         <!-- Tab Content -->
+
         <div class="row">
+
             <ul class="col-md-4">
                 <h5>Module</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
@@ -54,18 +56,14 @@
             <div class="col-md-6">
                 <h5>Tool Description</h5>
 
-                <!-- Tool Description div -->
                 <div class="tool-description" ng-show="vm.selectedTool">
                     <p>{{vm.selectedTool.description}}</p>
-                    <!--Tool source-->
                     <p>
                         <a href ng-click="vm.openSourceModal()" ng-disabled="!selectedTool">
                             Source code
                         </a>
                     </p>
                 </div>
-
-                <!--Parameter-->
             </div>
 
             <div class="col-md-6">
@@ -86,6 +84,7 @@
 
 
             </div>
+
         </div>
         <!--end of tabset div-->
     </div>

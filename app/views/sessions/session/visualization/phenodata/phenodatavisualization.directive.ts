@@ -336,7 +336,7 @@ class PhenodataVisualizationController {
 
 export default {
     controller: PhenodataVisualizationController,
-    templateUrl: 'app/views/sessions/session/visualization/phenodata/phenodatavisualization.html',
+    templateUrl: 'views/sessions/session/visualization/phenodata/phenodatavisualization.html',
     bindings: {
         datasets: '=selectedDatasets',
         sessionId: '=',

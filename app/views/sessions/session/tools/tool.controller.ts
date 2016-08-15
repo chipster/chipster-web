@@ -1,10 +1,6 @@
-import * as Promise from "bluebird";
 import SessionDataService from "../sessiondata.service";
 import ToolService from "./tool.service";
 import TableService from "../../../../services/tableservice.factory"
-import IScopeService = angular.IScopeService;
-import IFilterService = angular.IFilterService;
-import IQService = angular.IQService;
 import Category from "../../../../model/session/category";
 import Module from "../../../../model/session/module";
 import Job from "../../../../model/session/job";
@@ -23,10 +19,10 @@ export default class ToolCtrl {
 		'SelectionService'];
 
 	constructor(
-		private $scope: IScopeService,
-		private $filter: IFilterService,
+		private $scope: ng.IScope,
+		private $filter: ng.IFilterService,
 		private TableService: TableService,
-		private $q: IQService,
+		private $q: ng.IQService,
 		private $uibModal: any,
 		private ToolService: ToolService,
 		private SessionDataService: SessionDataService,
@@ -107,7 +103,6 @@ export default class ToolCtrl {
 
 		// see OperationDefinition.bindInputs()
 		//TODO handle multi-inputs
-		console.log('tool', tool.plain());
 		datasets.forEach( item => {console.log('dataset', item)});
 		
 		
@@ -284,7 +279,7 @@ export default class ToolCtrl {
 	openParameterModal() {
 		var modalInstance = this.$uibModal.open({
 			animation: true,
-			templateUrl: 'app/views/sessions/session/tools/parametermodal/parametermodal.html',
+			templateUrl: 'views/sessions/session/tools/parametermodal/parametermodal.html',
 			controller: 'ParameterModalController',
 			controllerAs: 'vm',
 			bindToController: true,
@@ -323,7 +318,7 @@ export default class ToolCtrl {
 	openSourceModal() {
 		this.$uibModal.open({
 			animation: true,
-			templateUrl: 'app/views/sessions/session/tools/sourcemodal/sourcemodal.html',
+			templateUrl: 'views/sessions/session/tools/sourcemodal/sourcemodal.html',
 			controller: 'SourceModalController',
 			controllerAs: 'vm',
 			bindToController: true,
