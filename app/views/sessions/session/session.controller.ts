@@ -57,14 +57,17 @@ export default class SessionController {
             if (event.resourceType === 'JOB') {
                 this.$scope.$broadcast('jobsMapChanged', {});
 
-                // if the job has just failed
-                if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
-                    this.$scope.openErrorModal('Job failed', newValue);
-                    this.$log.info(newValue);
-                }
-                if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
-                    this.$scope.openErrorModal('Job error', newValue);
-                    this.$log.info(newValue);
+                // if not cancelled
+                if (newValue) {
+                    // if the job has just failed
+                    if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+                        this.openErrorModal('Job failed', newValue);
+                        this.$log.info(newValue);
+                    }
+                    if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+                        this.openErrorModal('Job error', newValue);
+                        this.$log.info(newValue);
+                    }
                 }
             }
         }.bind(this));

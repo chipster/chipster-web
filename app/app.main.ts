@@ -15,6 +15,7 @@ import SessionEventService from "./views/sessions/session/sessionevent.service";
 import SessionDataService from "./views/sessions/session/sessiondata.service";
 import SelectionService from "./views/sessions/session/selection.service";
 import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
+import JobController from "./views/sessions/session/job/job.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolCtrl from "./views/sessions/session/tools/tool.controller";
@@ -50,6 +51,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('NavigationController', NavigationController)
     .controller('SessionController', SessionController)
     .controller('DatasetCtrl', DatasetCtrl)
+    .controller('JobController', JobController)
     .controller('ToolCtrl', ToolCtrl)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)

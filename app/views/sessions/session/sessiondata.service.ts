@@ -96,14 +96,14 @@ export default class SessionDataService {
 
     createJob(job: Job) {
         return this.SessionResource.createJob(this.sessionId, job).then((res: any) => {
-            this.$log.debug(res);
+            this.$log.debug('job created', res);
         });
     }
 
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
             this.SessionResource.deleteJob(this.sessionId, job.jobId).then(function (res: any) {
-                this.$log.debug(res);
+                this.$log.debug('job deleted', res);
             }.bind(this));
         }
     }
@@ -112,7 +112,7 @@ export default class SessionDataService {
 
         for (let dataset of datasets) {
             this.SessionResource.deleteDataset(this.sessionId, dataset.datasetId).then(function (res: any) {
-                this.$log.debug(res);
+                this.$log.debug('dataset deleted', res);
             }.bind(this));
         }
     }

@@ -131,7 +131,8 @@ class WorkflowGraphController {
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
 			.attr('transform', (d: Node) => 'translate(' + d.x + ',' + d.y + ')')
-			.style('fill', (d: Node, i:number) => this.getGradient(d, 'job' + i))
+			.style('fill', (d: Node, i:number) => d.color)
+			//.style('fill', (d: Node, i:number) => this.getGradient(d, 'job' + i))
 			.on('click', (d: JobNode) => {
 				if (!this.enabled) {
 					return;
