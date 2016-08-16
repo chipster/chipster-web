@@ -28,26 +28,23 @@ class SessionListController {
             accessed: '2015-08-27T17:53:10.331Z'
         };
 
-        this.sessionResource.service.one('sessions').customPOST(session).then((res: any) => {
-            if (res.headers) {
-                var sessionLocation = res.headers('Location');
-                session.sessionId = sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
+        this.sessionResource.createSession(session).then((sessionId: string) => {
+                session.sessionId = sessionId;
                 this.openSession(session);
-            }
         });
     }
 
     updateSessions() {
 
-        this.sessionResource.service.all('sessions').getList().then((res: any) => {
-            this.userSessions = res.data;
+        this.sessionResource.getSessions().then((sessions: Session[]) => {
+            this.userSessions = sessions;
             console.log(this.userSessions);
-        }, function (response: any) {
+        }, (response: any) => {
             console.log('failed to get sessions', response);
             if (response.status === 403) {
                 this.$location.path('/login');
             }
-        }.bind(this));
+        });
     }
 
     openSession(session: Session) {
@@ -75,8 +72,7 @@ class SessionListController {
 
     deleteSessions(sessions: Session[]) {
         sessions.forEach((session: Session) => {
-            var sessionUrl = this.sessionResource.service.one('sessions').one(session.sessionId);
-            sessionUrl.remove().then((res: any) => {
+            this.sessionResource.deleteSession(session.sessionId).then((res: any) => {
                 console.log("session deleted", res);
                 this.updateSessions();
                 this.selectedSessions = [];

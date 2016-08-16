@@ -83,9 +83,7 @@ export default class ToolCtrl {
 				};
 			}
 		}
-
 		this.inputBindings = this.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
-
 	}
 
 	isRunEnabled() {
@@ -174,10 +172,8 @@ export default class ToolCtrl {
 		//	jobToRun.inputs.push(jobInput);
 		//}
 
-		var postJobUrl = this.SessionDataService.sessionUrl.one('jobs');
-		postJobUrl.customPOST(jobToRun).then(function (response: any) {
-			console.log(response);
-		});
+
+		this.SessionDataService.createJob(jobToRun);
 	}
 
 	selectFirstVisible() {
@@ -326,7 +322,7 @@ export default class ToolCtrl {
 			resolve: {
 				selectedTool: function () {
 					return angular.copy(this.selectedTool);
-				}
+				}.bind(this)
 			}
 		});
 	}

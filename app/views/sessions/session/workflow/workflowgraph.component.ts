@@ -228,7 +228,9 @@ class WorkflowGraphController {
 			.attr('ry', this.nodeRadius)
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
-			.style("fill", this.getGradient.bind(this))
+			//FIXME
+			//.style("fill", this.getGradient.bind(this))
+			.style("fill", (d: Node) => d.color)
 			//.style('filter', 'url(#drop-shadow)')
 			.attr('opacity', (d: DatasetNode) => this.getOpacityForDataset(d.dataset))
 			.on('dblclick', () => {

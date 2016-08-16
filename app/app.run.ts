@@ -4,10 +4,7 @@ import ConfigService from "./services/config.service";
 export default function(
     $rootScope: any,
     $location: ng.ILocationService,
-    AuthenticationService: AuthenticationService,
-    ConfigService: ConfigService) {
-
-    ConfigService.init();
+    AuthenticationService: AuthenticationService) {
 
     $rootScope.$on("$routeChangeStart", function(event: any, next: any) {
         if (next.$$route.authenticated) {

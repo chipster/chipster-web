@@ -2,86 +2,81 @@
 import * as configConstants from '../app.constants';
 import ConfigurationResource from "../resources/configurationresource";
 
+class Services {
+    sessionDb: string;
+    sessionDbEvents: string;
+    authenticationService: string;
+    fileBroker: string;
+    toolbox: string;
+}
+
 export default class ConfigService {
 
     static $inject = ['$location', 'ConfigurationResource'];
 
-    public services: any;
+    public services: Services;
     public config: any;
     public baseUrl: string;
+    private queryPromise: Promise<any>;
 
     constructor(private $location: ng.ILocationService, private configurationResource: ConfigurationResource){
-        this.services = {};
         this.config = {};
         this.config.modules = configConstants.ChipsterModules;
+
+        this.init();
     }
 
     init() {
-        this.configurationResource.getConfigurationResource().query().$promise.then((response: any) => {
-            response.forEach(( item: any ) => {
-                let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase() );
-                this.services[camelCaseRole] = item.publicUri;
-            });
-            this.baseUrl = this.services.sessionDb;
-            console.log('sessionDb', this.services.sessionDb);
+        this.queryPromise = <Promise<any>>this.configurationResource.getConfigurationResource().query().$promise;
+    }
+
+    getServices() {
+        return this.queryPromise.then((response: any) => {
+            let services = new Services();
+
+            if (!this.services) {
+                angular.forEach(response, (item: any) => {
+                    let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase());
+                    services[camelCaseRole] = item.publicUri;
+                });
+                this.services = services;
+                this.baseUrl = this.services.sessionDb;
+                console.log('sessionDb', this.services.sessionDb);
+            }
+            return this.services;
         });
-    };
+    }
 
     getApiUrl() {
         return this.baseUrl;
-    };
+    }
 
     getSessionDbUrl() {
-        if (this.services.sessionDb) {
-            return this.services.sessionDb;
-        }
-        return this.baseUrl + 'sessiondb' + '/';
-    };
+        return this.getServices().then((services: Services) => services.sessionDb);
+    }
 
     getSessionDbEventsUrl(sessionId:string) {
-
-        if (this.services.sessionDbEvents) {
-            return URI(this.services.sessionDbEvents).path('events/' + sessionId).toString();
-        }
-
-        // different api server
-        var eventUrl = this.baseUrl
-                .replace('http://', 'ws://')
-                .replace('https://', 'wss://')
-            + 'sessiondbevents/events/' + sessionId;
-
-        // api and client served from the same host
-        if (this.baseUrl === "") {
-            eventUrl = "ws://" + this.$location.host() + ":" + this.$location.port()
-                + "/sessiondbevents/events/" + sessionId;
-        }
-
-        return eventUrl;
-    };
+        return this.getServices().then((services: Services) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
+    }
 
     getAuthUrl() {
-        if (this.services.authenticationService) {
-            return this.services.authenticationService;
-        }
-        return this.baseUrl + 'auth' + '/';
-    };
+        return this.getServices().then((services: Services) => services.authenticationService);
+    }
 
     getFileBrokerUrl() {
-        if (this.services.fileBroker) {
-            return this.services.fileBroker;
-        }
-        return this.baseUrl + 'filebroker' + '/';
-    };
+        return this.getServices().then((services: Services) => services.fileBroker);
+    }
+
+    getFileBrokerUrlIfInitialized() {
+        return this.services.fileBroker;
+    }
 
     getToolboxUrl() {
-        if (this.services.toolbox) {
-            return this.services.toolbox;
-        }
-        return this.baseUrl + 'toolbox/';
-    };
+        return this.getServices().then((services: Services) => services.toolbox);
+    }
 
     getModules() {
         return this.config.modules;
-    };
+    }
 }
 

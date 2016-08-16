@@ -33,16 +33,20 @@ export default class AuthenticationService {
     };
 
     requestToken(method: string, username: string, password: string) {
-        var string = username + ":" + password;
-        var encodedString = btoa(string); //Convert it to base64 encoded string
-        var urlString = URI(this.ConfigService.getAuthUrl()).path('tokens').toString();
-        return this.$http({
-            url: urlString,
-            method: method,
-            withCredentials: true,
-            headers: {'Authorization': 'Basic ' + encodedString}
+        return this.ConfigService.getAuthUrl().then((authUrl) => {
+
+            var urlString = URI(authUrl).path('tokens').toString();
+            var string = username + ":" + password;
+            var encodedString = btoa(string); //Convert it to base64 encoded string
+
+            return this.$http({
+                url: urlString,
+                method: method,
+                withCredentials: true,
+                headers: {'Authorization': 'Basic ' + encodedString}
+            });
         });
-    };
+    }
 
     getToken() {
         return this.localStorageService.get('auth-token');

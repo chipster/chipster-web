@@ -15,15 +15,15 @@ function SourceModalController(
     this.selectedTool = selectedTool;
 
     this.$onInit = function () {
-        ToolResource.service.one('tools', this.selectedTool.name.id).customGET('source').then(function (response: any) {
-            $log.log(response.data);
-            self.source = response.data;
+        ToolResource.getSourceCode(this.selectedTool.name.id).then((sourceCode) => {
+            $log.log(sourceCode);
+            self.source = sourceCode;
         });
     };
 
     this.close = function () {
         $uibModalInstance.close();
     };
-};
+}
 
 export default SourceModalController;
