@@ -129,5 +129,4 @@ angular.module('chipster-web').config(
 
 
 const upgradeAdapter = new UpgradeAdapter();
-//upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);
-angular.bootstrap(document.documentElement, ['chipster-web']);
+upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);
