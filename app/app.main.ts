@@ -31,7 +31,7 @@ import ParameterModalController from "./views/sessions/session/tools/parametermo
 import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.directive";
 import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.directive";
 import imageVisualization from "./views/sessions/session/visualization/imagevisualization/imagevisualization.directive";
-import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization/htmlvisualization.directive";
+import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
 import toolCircle from "./views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.directive";
 import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.directive";
