@@ -6,12 +6,13 @@ import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import IQService = angular.IQService;
 import IModalService = angular.ui.bootstrap.IModalService;
+import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 
 AddDatasetModalController.$inject = ['$log', '$uibModalInstance', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'SessionDataService', '$q'];
 
 function AddDatasetModalController(
     $log: ng.ILogService,
-    $uibModalInstance: IModalService,
+    $uibModalInstance: IModalServiceInstance,
     $routeParams: ng.route.IRouteParamsService,
     ConfigService: ConfigService,
     AuthenticationService: AuthenticationService,
@@ -33,7 +34,9 @@ function AddDatasetModalController(
             let url: string = results[0];
             let dataset: Dataset = results[1];
 
-            file.chipsterTarget = URI(url).path('sessions/' + $routeParams['sessionId'] + '/datasets/' + dataset.datasetId).addQuery('token', AuthenticationService.getToken()).toString();
+            file.chipsterTarget = URI(url)
+                .path('sessions/' + $routeParams['sessionId'] + '/datasets/' + dataset.datasetId)
+                .addSearch('token', AuthenticationService.getToken()).toString();
             file.resume();
         });
         file.pause();

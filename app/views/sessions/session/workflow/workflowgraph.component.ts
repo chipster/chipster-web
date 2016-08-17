@@ -88,7 +88,7 @@ class WorkflowGraphController {
 
 		this.$scope.$watchGroup([() => this.datasetsMap, () => this.jobsMap, () => this.modulesMap], () => {
 			this.update();
-		}, true);
+		});
 	}
 
 	update() {

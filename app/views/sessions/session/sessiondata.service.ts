@@ -136,7 +136,7 @@ export default class SessionDataService {
 
         return URI(this.ConfigService.getFileBrokerUrlIfInitialized())
             .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
-            .addQuery('token', this.AuthenticationService.getToken()).toString();
+            .addSearch('token', this.AuthenticationService.getToken()).toString();
 
     }
 

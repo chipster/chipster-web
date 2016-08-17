@@ -80,13 +80,14 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('seconds',secondsFilter)
     .directive('imageVisualization', imageVisualization)
     .directive('toolCircle', toolCircle)
-    .component('spreadsheetVisualization', spreadsheetVisualization)
-    .component('textVisualization', textVisualization)
-    .component('pdfVisualization', pdfVisualization)
-    .component('htmlVisualization', htmlVisualization)
-    .component('phenodataVisualization', phenodataVisualization)
-    .component('workflowGraph', workflowGraph)
-    .component('sessionList', sessionList)
+    // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
+    .component('spreadsheetVisualization', <any>spreadsheetVisualization)
+    .component('textVisualization', <any>textVisualization)
+    .component('pdfVisualization', <any>pdfVisualization)
+    .component('htmlVisualization', <any>htmlVisualization)
+    .component('phenodataVisualization', <any>phenodataVisualization)
+    .component('workflowGraph', <any>workflowGraph)
+    .component('sessionList', <any>sessionList)
     .config(RouteConfiguration)
     .run(ChipsterRun);
 
