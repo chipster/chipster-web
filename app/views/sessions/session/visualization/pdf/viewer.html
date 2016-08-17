@@ -1,11 +1,11 @@
 <!-- Viewer.html working as the pdf viewer, taken from angular-pdf example from github (https://github.com/sayanee/angularjs-pdf) -->
 
-<nav ng-class="getNavStyle(scroll)">
-  <button ng-click="goPrevious()">  <   </button>
-  <button ng-click="goNext()">      >   </button>
+<nav ng-class="$ctrl.getNavStyle(scroll)">
+  <button ng-click="$ctrl.goPrevious()">  <   </button>
+  <button ng-click="$ctrl.goNext()">      >   </button>
 
-  <button ng-click="zoomIn()">      +   </button>
-  <button ng-click="zoomOut()">     -   </button>
+  <button ng-click="$ctrl.zoomIn()">      +   </button>
+  <button ng-click="$ctrl.zoomOut()">     -   </button>
 </nav>
 
 <canvas id="pdf-canvas"></canvas>

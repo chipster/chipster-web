@@ -82,7 +82,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('imageVisualization', imageVisualization)
     .directive('spreadsheetVisualization', spreadsheetVisualization)
     .directive('toolCircle', toolCircle)
-    .directive('pdfVisualization', pdfVisualization)
+    .component('pdfVisualization', pdfVisualization)
     .component('htmlVisualization', htmlVisualization)
     .component('phenodataVisualization', phenodataVisualization)
     .component('workflowGraph', workflowGraph)
