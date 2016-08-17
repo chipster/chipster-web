@@ -36,7 +36,7 @@ export default class ToolResource {
 		return this.getService().then((service: IService) => service.all('tools').getList());
 	}
 
-	getSourceCode(toolId: string) {
+	getSourceCode(toolId: string): Promise<string> {
 		return this.getService()
 			.then((service: IService) => service.one('tools', toolId).customGET('source'))
 			.then((response: any) => response.data);

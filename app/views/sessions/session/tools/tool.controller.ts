@@ -10,6 +10,7 @@ import InputBinding from "../../../../model/session/inputbinding";
 import ToolParameter from "../../../../model/session/toolparameter";
 import JobParameter from "../../../../model/session/jobparameter";
 import SelectionService from "../selection.service";
+import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 
 export default class ToolCtrl {
 
@@ -20,7 +21,7 @@ export default class ToolCtrl {
 
 	constructor(
 		private $scope: ng.IScope,
-		private $filter: ng.IFilterService,
+		private $filter: IChipsterFilter,
 		private TableService: TableService,
 		private $q: ng.IQService,
 		private $uibModal: any,
@@ -195,7 +196,7 @@ export default class ToolCtrl {
 			var visibleTools = this.$filter('toolFilter')(this.selectedCategory.tools, this.searchTool);
 			if (visibleTools[0]) {
 				this.searchTool = null;
-				this.selectTool(visibleTools[0].id);
+				this.selectTool(visibleTools[0].name.id);
 			}
 		}
 		if (e.keyCode == 27) { // escape key

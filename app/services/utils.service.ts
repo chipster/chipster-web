@@ -16,8 +16,8 @@ export default class UtilsService {
         return array;
     }
 
-    static arrayToMap(array: any[], key: string) {
-        var map = new Map();
+    static arrayToMap<T>(array: T[], key: string) {
+        var map = new Map<string, T>();
         for (var i = 0; i < array.length; i++) {
             map.set(array[i][key], array[i]);
         }

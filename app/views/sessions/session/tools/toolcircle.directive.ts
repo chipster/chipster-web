@@ -7,21 +7,21 @@ export default function(){
 		scope : {
 			toolcolor : "="
 		},
-		template: "<canvas id='tcanvas' width=" + (radius * 2 + 5) + " height=" + (radius * 2 + 2) + ">",
+		template: "<canvas id='canvas' width=" + (radius * 2 + 5) + " height=" + (radius * 2 + 2) + ">",
 		link:function(
 			scope: ng.IScope,
 			element: any) {
-			scope.canvas=element.find('canvas')[0];
+			let canvas = element.find('canvas')[0];
 
-			scope.context=scope.canvas.getContext('2d');
+			let context = canvas.getContext('2d');
 
-			var centerX=radius;
-			var centerY=radius;
+			let centerX = radius;
+			let centerY = radius;
 
-			scope.context.beginPath();
-			scope.context.arc(centerX,centerY,radius,0,2*Math.PI,false);
-			scope.context.fillStyle=scope.toolcolor;
-			scope.context.fill();
+			context.beginPath();
+			context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+			context.fillStyle = scope['toolcolor'];
+			context.fill();
 		}
 	};
 };

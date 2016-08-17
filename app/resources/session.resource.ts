@@ -65,11 +65,11 @@ export default class SessionResource {
 	}
 
 	parseSessionData(param: any) {
-		let session = param[0].data;
-		let datasets = param[1].data;
-		let jobs = param[2].data;
-		let modules = param[3].data;
-		let tools = param[4].data;
+		let session: Session = param[0].data;
+		let datasets: Dataset[] = param[1].data;
+		let jobs: Job[] = param[2].data;
+		let modules: Module[] = param[3].data;
+		let tools: Tool[] = param[4].data;
 
 		// is there any less ugly syntax for defining the types of anonymous object?
 		let data = new SessionData();

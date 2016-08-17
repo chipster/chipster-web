@@ -3,6 +3,7 @@ import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
+import {IChipsterFilter} from "../../../common/filter/chipsterfilter";
 
 export default class SessionController {
 
@@ -15,7 +16,7 @@ export default class SessionController {
         private $routeParams: ng.route.IRouteParamsService,
         private $window: ng.IWindowService,
         private $location: ng.ILocationService,
-        private $filter: ng.IFilterService,
+        private $filter: IChipsterFilter,
         private $log: ng.ILogService,
         private $uibModal: ng.ui.bootstrap.IModalService,
         private SessionEventService: SessionEventService,

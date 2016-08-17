@@ -4,8 +4,7 @@ export default class ConfigurationResource {
 
     static $inject = ['$resource'];
 
-    constructor(private $resource: angular.resource.IResourceService,
-                private configurationConstants: configurationConstants) {
+    constructor(private $resource: angular.resource.IResourceService) {
     }
 
     getConfigurationResource() {

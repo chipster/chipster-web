@@ -133,6 +133,7 @@ export default class SessionDataService {
         because the URL is used in many different places and the async result could be difficult for some
         of them.
          */
+
         return URI(this.ConfigService.getFileBrokerUrlIfInitialized())
             .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
             .addQuery('token', this.AuthenticationService.getToken()).toString();

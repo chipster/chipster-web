@@ -1,22 +1,22 @@
-htmlVisualization.$inject = ['$sce'];
+class HtmlVisualizationController {
 
-function htmlVisualization($sce: any){
-    return{
-        restrict:'E',
-        scope : {
-            src: "="
-        },
-        // show in iFrame sandbox without any capabilities
-        // considering later what capabilities are needed
-        template: '<iframe frameBorder="0" sandbox="" width="100%" height="100%" ng-src="{{getUrl()}}"></iframe>',
+    static $inject = ['$sce', '$scope'];
 
-        link: function ($scope: ng.IScope) {
+    constructor(private $sce: any, private $scope: ng.IScope){
+    }
 
-            $scope.getUrl = function () {
-                return $sce.trustAsResourceUrl($scope.src + '&download=false&type=true');
-            };
-        }
-    };
-};
+    src: string;
 
-export default htmlVisualization;
+    getUrl() {
+        console.log('getUrl()', this.$sce.trustAsResourceUrl(this.src + '&download=false&type=true'));
+        return this.$sce.trustAsResourceUrl(this.src + '&download=false&type=true');
+    }
+}
+
+export default {
+    controller: HtmlVisualizationController,
+    template: '<iframe frameBorder="0" sandbox="" width="100%" height="100%" ng-src="{{$ctrl.getUrl()}}"></iframe>',
+    bindings: {
+        src: '='
+    }
+}

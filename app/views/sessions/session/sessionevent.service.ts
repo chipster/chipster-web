@@ -17,7 +17,7 @@ export default class SessionEventService {
     constructor(private configService: ConfigService,
                 private $log: ILogService,
                 private authenticationService: AuthenticationService,
-                private $websocket: IWebSocket,
+                private $websocket: ng.websocket.IWebSocketProvider,
                 private sessionResource: SessionResource){
     }
 

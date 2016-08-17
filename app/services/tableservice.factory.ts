@@ -20,7 +20,7 @@ export default class TableService {
                     separator: '\t'
                 };
 
-                $.csv.toArrays(resp.data, parserConfig, function (err: any, fileArray: string[][]) {
+                $['csv'].toArrays(resp.data, parserConfig, function (err: any, fileArray: string[][]) {
                     if (fileArray) {
                         resolve(fileArray[0]);
                     } else {
