@@ -34,7 +34,7 @@ import imageVisualization from "./views/sessions/session/visualization/imagevisu
 import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
 import toolCircle from "./views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.directive";
-import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.directive";
+import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.component";
 import workflowGraph from "./views/sessions/session/workflow/workflowgraph.component";
 import SourceModalController from "./views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import SessionEditModalController from "./views/sessions/session/sessioneditmodal/sessioneditmodal.controller";
