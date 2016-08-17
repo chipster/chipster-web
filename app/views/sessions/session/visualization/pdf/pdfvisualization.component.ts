@@ -4,13 +4,13 @@ interface PdfScope extends IScope {
     pdfUrl: string;
     pdfFileName: string;
     loading: string;
-    onError: () => void;
-    onLoad: () => void;
-    onProgress: () => void;
-    goPrevious: () => void;
-    goNext: () => void;
-    zoomIn: () => void;
-    zoomOut: () => void;
+    onError(): void;
+    onLoad(): void;
+    onProgress(): void;
+    goPrevious(): void;
+    goNext(): void;
+    zoomIn(): void;
+    zoomOut(): void;
 }
 
 class PdfVisualizationController {

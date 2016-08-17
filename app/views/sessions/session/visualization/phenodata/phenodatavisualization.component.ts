@@ -21,14 +21,14 @@ class PhenodataVisualizationController {
     constructor(
         private tableService: TableService,
         private sessionDataService: SessionDataService,
-        private $scope: ng.IScopeService) {
+        private $scope: ng.IScope) {
 
         this.init();
     }
 
     datasets: Dataset[];
     sessionId: string;
-    hot: any;
+    hot: ht.Methods;
     // name of the new column
     colName: string;
     array: Row[];
@@ -99,7 +99,7 @@ class PhenodataVisualizationController {
         span.className = 'glyphicon glyphicon-remove';
         button.appendChild(span);
 
-        Handsontable.Dom.addEvent(button, 'click', () => {
+        (<any>Handsontable).Dom.addEvent(button, 'click', () => {
             this.removeColumn(col);
         });
 
@@ -110,14 +110,14 @@ class PhenodataVisualizationController {
     }
 
     addColumn() {
-        var colHeaders = this.hot.getSettings().colHeaders;
+        var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
         this.hot.alter('insert_col', colHeaders.length);
         // remove undefined column header
         colHeaders.pop();
         colHeaders.push(this.colName);
-        this.hot.updateSettings( {
+        this.hot.updateSettings({
            colHeaders: colHeaders
-        });
+        }, false);
         this.colName = '';
 
         this.updateDatasets(false);

@@ -37,7 +37,7 @@ class WorkflowGraphController {
 	}
 
 
-	wd3:any = this.$window.d3;
+	wd3:any = this.$window['d3'];
 	//var shiftKey, ctrlKey;
 	svg: any;
 	d3Links:any;

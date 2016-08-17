@@ -11,12 +11,13 @@
     "angular-ui-bootstrap": "registry:dt/angular-ui-bootstrap#0.13.3+20160602140119",
     "angular-websocket": "registry:dt/angular-websocket#2.0.0+20160630073950",
     "bluebird": "registry:dt/bluebird#2.0.0+20160319051630",
+    "core-js": "registry:dt/core-js#0.0.0+20160602141332",
+    "handsontable": "registry:dt/handsontable#0.24.3+20160711161324",
     "jquery": "registry:dt/jquery#1.10.0+20160620094458",
     "ng-flow": "registry:dt/ng-flow#0.0.0+20160330001834",
+    "node": "registry:dt/node#6.0.0+20160807145350",
     "restangular": "registry:dt/restangular#1.5.0+20160626231743",
     "systemjs": "registry:dt/systemjs#0.19.29+20160624042934",
-    "urijs": "registry:dt/urijs#1.15.1+20160526132152",
-    "core-js": "registry:dt/core-js#0.0.0+20160602141332",
-    "node": "registry:dt/node#6.0.0+20160807145350"
+    "urijs": "registry:dt/urijs#1.15.1+20160526132152"
   }
 }

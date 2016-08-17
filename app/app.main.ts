@@ -28,12 +28,12 @@ import toolFilter from "./common/filter/tool.filter";
 import AddDatasetModalController from "./views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.controller";
 import secondsFilter from "./common/filter/seconds.filter";
 import ParameterModalController from "./views/sessions/session/tools/parametermodal/parametermodal.controller";
-import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.directive";
-import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.directive";
+import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.component";
+import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.component";
 import imageVisualization from "./views/sessions/session/visualization/imagevisualization/imagevisualization.directive";
 import htmlVisualization from "./views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
 import toolCircle from "./views/sessions/session/tools/toolcircle.directive";
-import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.directive";
+import phenodataVisualization from "./views/sessions/session/visualization/phenodata/phenodatavisualization.component";
 import pdfVisualization from "./views/sessions/session/visualization/pdf/pdfvisualization.component";
 import workflowGraph from "./views/sessions/session/workflow/workflowgraph.component";
 import SourceModalController from "./views/sessions/session/tools/sourcemodal/sourcemodal.controller";
@@ -78,10 +78,10 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('moduleFilter', moduleFilter)
     .filter('toolFilter', toolFilter)
     .filter('seconds',secondsFilter)
-    .directive('textVisualization', textVisualization)
     .directive('imageVisualization', imageVisualization)
-    .directive('spreadsheetVisualization', spreadsheetVisualization)
     .directive('toolCircle', toolCircle)
+    .component('spreadsheetVisualization', spreadsheetVisualization)
+    .component('textVisualization', textVisualization)
     .component('pdfVisualization', pdfVisualization)
     .component('htmlVisualization', htmlVisualization)
     .component('phenodataVisualization', phenodataVisualization)
