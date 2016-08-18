@@ -29,9 +29,9 @@ export default class DatasetController {
 
 	init() {
 
-		this.$scope.$watchCollection("selectedDatasets", function () {
-			this.setCurrentVisualization(undefined);
-		}.bind(this));
+		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
+			this.setCurrentVisualization(null, null);
+		});
 
 		this.$scope.$on('showDefaultVisualization', function () {
 			var visualizations = this.getVisualizations();
@@ -136,6 +136,8 @@ export default class DatasetController {
 	}
 
 	getDatasetUrl() {
-		return this.SessionDataService.getDatasetUrl(this.getDataset());
+		if (this.getDataset()) {
+			return this.SessionDataService.getDatasetUrl(this.getDataset());
+		}
 	}
 }
