@@ -1,6 +1,6 @@
 import { UpgradeAdapter } from "@angular/upgrade";
 
-import LoginController from "./views/login/login.controller";
+import Login from "./views/login/login.component";
 import NavigationController from "./views/navigation/navigation.controller";
 import AuthenticationService from "./authentication/authenticationservice";
 import ConfigService from "./services/config.service";
@@ -47,7 +47,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
         'pdf', 'ngHandsontable'])
 
-    .controller('LoginController', LoginController)
+    .component('login', <any>Login)
     .controller('NavigationController', NavigationController)
     .controller('SessionController', SessionController)
     .controller('DatasetCtrl', DatasetCtrl)
@@ -124,10 +124,6 @@ angular.module('chipster-web').config(
         });
 
     });
-
-
-
-
 
 const upgradeAdapter = new UpgradeAdapter();
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

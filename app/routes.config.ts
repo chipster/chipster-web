@@ -9,7 +9,7 @@ export default function ($routeProvider: ng.route.IRouteProvider) {
     $routeProvider
         .when('/', {templateUrl: 'views/home/home.html'})
         .when('/home', {templateUrl: 'views/home/home.html'})
-        .when('/login', {templateUrl: 'views/login/login.html', controller: 'LoginController as vm'})
+        .when('/login', {template: '<login></login>'})
         .when('/sessions', <IAuthRoute>{
             template: '<session-list></session-list>',
             authenticated: true

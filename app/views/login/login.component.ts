@@ -2,7 +2,7 @@
 import {ServiceLocator} from "../../app.constants";
 import AuthenticationService from "../../authentication/authenticationservice";
 
-export default class LoginController {
+class LoginController {
 
     static $inject = ['$location', '$http', 'AuthenticationService'];
 
@@ -25,5 +25,9 @@ export default class LoginController {
             }
         });
     }
+}
 
+export default {
+    templateUrl: 'views/login/login.html',
+    controller: LoginController
 }
