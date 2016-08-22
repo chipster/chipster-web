@@ -18,7 +18,8 @@ import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
 import JobController from "./views/sessions/session/job/job.controller";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
-import ToolCtrl from "./views/sessions/session/tools/tool.controller";
+//import ToolCtrl from "./views/sessions/session/tools/tool.controller";
+import ToolsBox from "./views/sessions/session/tools/toolsbox.component";
 import TableService from "./services/tableservice.factory";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
@@ -47,12 +48,12 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
         'pdf', 'ngHandsontable'])
 
-    .component('login', <any>Login)
+    .component('login', Login)
     .controller('NavigationController', NavigationController)
     .controller('SessionController', SessionController)
     .controller('DatasetCtrl', DatasetCtrl)
     .controller('JobController', JobController)
-    .controller('ToolCtrl', ToolCtrl)
+    .component('toolsBox', ToolsBox)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('SourceModalController', SourceModalController)

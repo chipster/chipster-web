@@ -1,4 +1,3 @@
-<div ng-controller="ToolCtrl as vm">
 
     <h4>Tools</h4>
     <div class="chipster-highlight">
@@ -20,9 +19,9 @@
                 <h5>Module</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button class="list-group-item thin-list-group-item"
-                            ng-click="vm.selectModule(module)"
-                            ng-repeat="module in vm.getModules() | moduleFilter:vm.searchTool"
-                            ng-class="{active:module === vm.selectedModule}">{{module.name}}
+                            ng-click="$ctrl.selectModule(module)"
+                            ng-repeat="module in $ctrl.getModules() | moduleFilter:$ctrl.searchTool"
+                            ng-class="{active:module === $ctrl.selectedModule}">{{module.name}}
                     </button>
                 </div>
             </ul>
@@ -31,9 +30,9 @@
                 <h5>Category</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':category===vm.selectedCategory}"
-                            ng-click="vm.selectCategory(category)"
-                            ng-repeat="category in vm.categories | categoryFilter:vm.searchTool">
+                            ng-class="{'active':category===$ctrl.selectedCategory}"
+                            ng-click="$ctrl.selectCategory(category)"
+                            ng-repeat="category in $ctrl.categories | categoryFilter:$ctrl.searchTool">
                         <span><tool-circle toolcolor="category.color"></tool-circle></span>
                         {{category.name}}
                     </button>
@@ -44,9 +43,9 @@
                 <h5>Tool</h5>
                 <div class="list-group tool-list" data-toggle="buttons">
                     <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':tool.id===vm.selectedTool.name.id}"
-                            ng-click="vm.selectTool(tool.id)"
-                            ng-repeat="tool in vm.selectedCategory.tools|toolFilter:vm.searchTool"
+                            ng-class="{'active':tool.id===$ctrl.selectedTool.name.id}"
+                            ng-click="$ctrl.selectTool(tool.id)"
+                            ng-repeat="tool in $ctrl.selectedCategory.tools|toolFilter:$ctrl.searchTool"
                             id="tool-button-{{tool.id}}">
                         {{tool.name}}
                     </button>
@@ -56,10 +55,10 @@
             <div class="col-md-6">
                 <h5>Tool Description</h5>
 
-                <div class="tool-description" ng-show="vm.selectedTool">
-                    <p>{{vm.selectedTool.description}}</p>
+                <div class="tool-description" ng-show="$ctrl.selectedTool">
+                    <p>{{$ctrl.selectedTool.description}}</p>
                     <p>
-                        <a href ng-click="vm.openSourceModal()" ng-disabled="!selectedTool">
+                        <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
                             Source code
                         </a>
                     </p>
@@ -70,12 +69,12 @@
 
                 <div class="btn-group btn-group-justified" role="group">
                     <button class="btn btn-default" style="width: 50%"
-                            ng-disabled="!vm.isParametersEnabled()"
-                            ng-click="vm.openParameterModal()">
+                            ng-disabled="!$ctrl.isParametersEnabled()"
+                            ng-click="$ctrl.openParameterModal()">
                         Parameters
                     </button>
                     <button class="btn btn-success" style="width: 50%"
-                            ng-click="vm.runJob()" ng-disabled="!vm.isRunEnabled()">
+                            ng-click="$ctrl.runJob()" ng-disabled="!$ctrl.isRunEnabled()">
                         <span class="glyphicon glyphicon-play">
                         </span>
                         Run
@@ -89,4 +88,3 @@
         <!--end of tabset div-->
     </div>
 
-</div>
