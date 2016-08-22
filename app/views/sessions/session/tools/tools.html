@@ -1,90 +1,72 @@
+<h4>Tools</h4>
+<div class="chipster-highlight">
 
-    <h4>Tools</h4>
-    <div class="chipster-highlight">
+    <!-- Tab Content -->
 
-        <!--<div class="bar pull-right search-div">-->
-        <!--<input type="text" class="search" ng-model="searchTool" ng-change="selectFirstVisible()"-->
-        <!--placeholder="search tool" ng-keyup="toolSearchKeyEvent($event)"/>-->
-        <!--<button class="clear-search-button no-border" ng-show="searchTool"-->
-        <!--ng-click="searchTool = null">-->
-        <!--<span class="glyphicon glyphicon-remove"></span>-->
-        <!--</button>-->
-        <!--</div>-->
+    <div class="row">
 
-        <!-- Tab Content -->
+        <div class="col-md-6">
+            <span uib-dropdown class="btn-group">
+                <button class="btn btn-primary" uib-dropdown-toggle>Module</button>
+                <ul class="dropdown-menu" uib-dropdown-menu>
+                    <li ng-repeat="module in $ctrl.getModules() | moduleFilter:$ctrl.searchTool">
+                        <a ng-click="$ctrl.selectModule(module)">{{module.name}}</a>
+                    </li>
+                </ul>
+            </span>
+            <span uib-dropdown class="btn-group">
+                <button class="btn btn-primary" uib-dropdown-toggle>Category</button>
+                <ul class="dropdown-menu" uib-dropdown-menu>
+                    <li ng-repeat="category in $ctrl.categories | categoryFilter:$ctrl.searchTool">
+                        <a ng-click="$ctrl.selectCategory(category)">{{category.name}}</a>
+                    </li>
+                </ul>
+            </span>
+            <span uib-dropdown class="btn-group">
+                <button class="btn btn-primary" uib-dropdown-toggle>Tool</button>
+                <ul class="dropdown-menu" uib-dropdown-menu>
+                    <li ng-repeat="tool in $ctrl.selectedCategory.tools|toolFilter:$ctrl.searchTool">
+                        <a ng-click="$ctrl.selectTool(tool.id)" id="tool-button-{{tool.id}}">{{tool.name}}</a>
+                    </li>
+                </ul>
+            </span>
+        </div>
 
-        <div class="row">
+        <div class="col-md-6">
 
-            <ul class="col-md-4">
-                <h5>Module</h5>
-                <div class="list-group tool-list" data-toggle="buttons">
-                    <button class="list-group-item thin-list-group-item"
-                            ng-click="$ctrl.selectModule(module)"
-                            ng-repeat="module in $ctrl.getModules() | moduleFilter:$ctrl.searchTool"
-                            ng-class="{active:module === $ctrl.selectedModule}">{{module.name}}
-                    </button>
-                </div>
-            </ul>
-
-            <div class="col-md-4">
-                <h5>Category</h5>
-                <div class="list-group tool-list" data-toggle="buttons">
-                    <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':category===$ctrl.selectedCategory}"
-                            ng-click="$ctrl.selectCategory(category)"
-                            ng-repeat="category in $ctrl.categories | categoryFilter:$ctrl.searchTool">
-                        <span><tool-circle toolcolor="category.color"></tool-circle></span>
-                        {{category.name}}
-                    </button>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <h5>Tool</h5>
-                <div class="list-group tool-list" data-toggle="buttons">
-                    <button type="button" class="list-group-item thin-list-group-item"
-                            ng-class="{'active':tool.id===$ctrl.selectedTool.name.id}"
-                            ng-click="$ctrl.selectTool(tool.id)"
-                            ng-repeat="tool in $ctrl.selectedCategory.tools|toolFilter:$ctrl.searchTool"
-                            id="tool-button-{{tool.id}}">
-                        {{tool.name}}
-                    </button>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <h5>Tool Description</h5>
-
-                <div class="tool-description" ng-show="$ctrl.selectedTool">
-                    <p>{{$ctrl.selectedTool.description}}</p>
-                    <p>
-                        <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
-                            Source code
-                        </a>
-                    </p>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-
-                <div class="btn-group btn-group-justified" role="group">
-                    <button class="btn btn-default" style="width: 50%"
-                            ng-disabled="!$ctrl.isParametersEnabled()"
-                            ng-click="$ctrl.openParameterModal()">
-                        Parameters
-                    </button>
-                    <button class="btn btn-success" style="width: 50%"
-                            ng-click="$ctrl.runJob()" ng-disabled="!$ctrl.isRunEnabled()">
+            <div class="btn-group btn-group-justified" role="group">
+                <button class="btn btn-default" style="width: 50%"
+                        ng-disabled="!$ctrl.isParametersEnabled()"
+                        ng-click="$ctrl.openParameterModal()">
+                    Parameters
+                </button>
+                <button class="btn btn-success" style="width: 50%"
+                        ng-click="$ctrl.runJob()" ng-disabled="!$ctrl.isRunEnabled()">
                         <span class="glyphicon glyphicon-play">
                         </span>
-                        Run
-                    </button>
-                </div>
-
-
+                    Run
+                </button>
             </div>
-
         </div>
-        <!--end of tabset div-->
+
+        <div class="col-md-12">
+            <h5>Selection: {{$ctrl.selectedModule.name}} - {{$ctrl.selectedCategory.name}} - {{$ctrl.selectedTool.name.displayName}}</h5>
+
+            <h5>Tool Description</h5>
+
+            <div class="tool-description" ng-show="$ctrl.selectedTool">
+                <p>{{$ctrl.selectedTool.description}}</p>
+                <p>
+                    <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
+                        Source code
+                    </a>
+                </p>
+            </div>
+        </div>
+
+
+
     </div>
+    <!--end of tabset div-->
+</div>
 
