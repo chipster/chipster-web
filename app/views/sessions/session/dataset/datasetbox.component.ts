@@ -6,7 +6,7 @@ import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
 
-export default class DatasetController {
+class DatasetBoxComponent {
 
 	static $inject = [
 		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
@@ -63,11 +63,11 @@ export default class DatasetController {
 		let datasets = this.SelectionService.selectedDatasets;
 
 		if (datasets && datasets.length === 1) {
-			return DatasetController.isCompatibleWithDataset(visualization, datasets[0]);
+			return DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[0]);
 		}
 		else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
 			for (var i = 0; i < datasets.length; i++) {
-				if (!DatasetController.isCompatibleWithDataset(visualization, datasets[i])) {
+				if (!DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[i])) {
 					return false;
 				}
 			}
@@ -140,4 +140,9 @@ export default class DatasetController {
 			return this.SessionDataService.getDatasetUrl(this.getDataset());
 		}
 	}
+}
+
+export default {
+	templateUrl: 'views/sessions/session/dataset/dataset.html',
+	controller: DatasetBoxComponent
 }

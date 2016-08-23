@@ -1,7 +1,7 @@
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
 
-export default class JobController {
+class JobBoxComponent {
 
 	static $inject = ['SelectionService', 'SessionDataService'];
 
@@ -26,3 +26,9 @@ export default class JobController {
 		return this.SelectionService.selectedJobs.length > 0;
 	}
 }
+
+export default {
+	templateUrl: 'views/sessions/session/job/job.html',
+	controller: JobBoxComponent
+}
+
