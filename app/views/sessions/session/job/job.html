@@ -15,7 +15,7 @@
         <div class="col-sm-12">
             <div class="indented">
                 <p>Status: {{vm.getJob().state.toLowerCase()}}
-                    <span ng-show="vm.getJob().stateDetail">({{vm.getJob().stateDetail}})</span>
+                    <span ng-show="vm.SelectionService.selectedJob.stateDetail">({{vm.getJob().stateDetail}})</span>
                 </p>
                 <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
             </div>
