@@ -86,9 +86,18 @@ class WorkflowGraphController {
 			}
 		}, true);
 
-		this.$scope.$watchGroup([() => this.datasetsMap, () => this.jobsMap, () => this.modulesMap], () => {
+		this.$scope.$watch(() => Utils.mapValues(this.datasetsMap), () => {
 			this.update();
-		});
+		}, true);
+
+		this.$scope.$watch(() => Utils.mapValues(this.jobsMap), () => {
+			this.update();
+
+		}, true);
+
+		this.$scope.$watch(() => Utils.mapValues(this.modulesMap), () => {
+			this.update();
+		}, true);
 	}
 
 	update() {
