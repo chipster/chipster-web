@@ -110,6 +110,14 @@ export default class SessionController {
         return this.SelectionService.selectedDatasets;
     }
 
+    isSelectedDataset(dataset: Dataset) {
+        return this.SelectionService.isSelectedDataset(dataset);
+    }
+
+    toggleDatasetSelection($event: any, dataset: Dataset) {
+        this.SelectionService.toggleDatasetSelection($event, dataset);
+    }
+
     setTab(tab: number) {
         this.selectedTab = tab;
     }
