@@ -4,7 +4,6 @@ import ILogService = angular.ILogService;
 import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/config.service";
 import AuthenticationService from "../../../authentication/authenticationservice";
-import SessionEventService from "./sessionevent.service";
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
@@ -17,7 +16,7 @@ export default class SessionDataService {
 
     static $inject = [
         '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-        'SessionEventService', '$uibModal'];
+         '$uibModal'];
 
     constructor(
         private $routeParams: ng.route.IRouteParamsService,
@@ -26,7 +25,6 @@ export default class SessionDataService {
         private $window: IWindowService,
         private ConfigService: ConfigService,
         private AuthenticationService: AuthenticationService,
-        private SessionEventService: SessionEventService,
         private $uibModal: IModalService) {
 
         this.init();
@@ -44,34 +42,19 @@ export default class SessionDataService {
 
     init() {
         this.sessionId = this.$routeParams['sessionId'];
+        // start listening for remote changes
+        // in theory we may miss an update between the loadSession() and this subscribe(), but
+        // the safe way would be much more complicated:
+        // - subscribe but put the updates in queue
+        // - loadSession().then()
+        // - apply the queued updates
 
         // SessionRestangular is a restangular object with
         // configured baseUrl and
         // authorization header
         //this.sessionUrl = this.SessionResource.service.one('sessions', this.sessionId);
 
-        this.SessionResource.loadSession(this.sessionId).then(function (parsedData: SessionData) {
 
-            this.sessionId = parsedData.session.sessionId;
-            this.jobsMap = parsedData.jobsMap;
-            this.datasetsMap = parsedData.datasetsMap;
-            this.modules = parsedData.modules;
-            this.tools = parsedData.tools;
-            this.modulesMap = parsedData.modulesMap;
-            this.session = parsedData.session;
-
-            // start listening for remote changes
-            // in theory we may miss an update between the loadSession() and this subscribe(), but
-            // the safe way would be much more complicated:
-            // - subscribe but put the updates in queue
-            // - loadSession().then()
-            // - apply the queued updates
-            this.subscription = this.SessionEventService.subscribe(this.sessionId, this, function (event: any, oldValue: any, newValue: any) {
-                for (let listener of this.listeners) {
-                    listener(event, oldValue, newValue);
-                }
-            }.bind(this));
-        }.bind(this));
     }
 
     onSessionChange(listener: any) {

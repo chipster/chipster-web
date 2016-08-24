@@ -4,12 +4,14 @@ import SelectionService from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import {IChipsterFilter} from "../../../common/filter/chipsterfilter";
+import {SessionData} from "../../../resources/session.resource";
+import SessionResource from "../../../resources/session.resource";
 
 export default class SessionController {
 
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService'];
+        'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource'];
 
     constructor(
         private $scope: ng.IScope,
@@ -21,7 +23,8 @@ export default class SessionController {
         private $uibModal: ng.ui.bootstrap.IModalService,
         private SessionEventService: SessionEventService,
         private SessionDataService: SessionDataService,
-        private SelectionService: SelectionService) {
+        private SelectionService: SelectionService,
+        private sessionResource: SessionResource) {
 
         this.init();
     }
@@ -30,7 +33,7 @@ export default class SessionController {
     // the search box seems to have a separate child scope, not sure why
     datasetSearch: any = {};
 
-    selectedTab = 1;
+    private selectedTab = 1;
 
     toolDetailList: any = null;
 
@@ -87,6 +90,24 @@ export default class SessionController {
         angular.element(this.$window).bind('resize', function () {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });*/
+
+
+        this.sessionResource.loadSession(this.$routeParams['sessionId']).then( (parsedData: SessionData) => {
+            this.SessionDataService.sessionId = parsedData.session.sessionId;
+            this.SessionDataService.jobsMap = parsedData.jobsMap;
+            this.SessionDataService.datasetsMap = parsedData.datasetsMap;
+            this.SessionDataService.modules = parsedData.modules;
+            this.SessionDataService.tools = parsedData.tools;
+            this.SessionDataService.modulesMap = parsedData.modulesMap;
+            this.SessionDataService.session = parsedData.session;
+        });
+
+        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.$routeParams['sessionId'], this, (event: any, oldValue: any, newValue: any) => {
+            for (let listener of this.SessionDataService.listeners) {
+                listener(event, oldValue, newValue);
+            }
+        });
+
     }
 
     datasetSearchKeyEvent(e: any) {
