@@ -19,29 +19,26 @@ class DatasetBoxComponent {
 		private $compile: ng.ICompileService,
 		private SelectionService: SelectionService,
 		private SessionDataService: SessionDataService) {
+	}
 
-		this.init();
+	$onInit() {
+		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
+			this.setCurrentVisualization(null, null);
+		});
+
+		this.$scope.$on('showDefaultVisualization', () => {
+			var visualizations = this.getVisualizations();
+			if (visualizations.length > 0) {
+				this.show(visualizations[0]);
+			}
+		});
+
+		this.setCurrentVisualization(null, null);
 	}
 
 	visualizations: Visualization[] = VisualizationList;
 	currentVisualization: Visualization = null;
 	currentVisualizationDirective: any = null;
-
-	init() {
-
-		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
-			this.setCurrentVisualization(null, null);
-		});
-
-		this.$scope.$on('showDefaultVisualization', function () {
-			var visualizations = this.getVisualizations();
-			if (visualizations.length > 0) {
-				this.show(visualizations[0]);
-			}
-		}.bind(this));
-
-		this.setCurrentVisualization(null, null);
-	}
 
 	setCurrentVisualization(newVisualization: Visualization, directive: any) {
 
@@ -77,9 +74,9 @@ class DatasetBoxComponent {
 	}
 
 	getVisualizations() {
-		return this.visualizations.filter(function (visualization: Visualization) {
+		return this.visualizations.filter( (visualization: Visualization) => {
 			return this.isCompatible(visualization);
-		}.bind(this));
+		});
 	}
 
 	showPreview() {
