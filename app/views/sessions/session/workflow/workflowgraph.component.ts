@@ -6,6 +6,7 @@ import Job from "../../../../model/session/job";
 import Dataset from "../../../../model/session/dataset";
 import Module from "../../../../model/session/module";
 import Node from "./node.ts"
+import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -27,13 +28,13 @@ interface Link {
 
 class WorkflowGraphController {
 
-	static $inject = ['$scope', '$window'];
+	static $inject = ['$scope', '$window', '$log', '$filter'];
 
 	constructor(
 		private $scope: IScope,
-		private $window: IWindowService) {
-
-		this.init();
+		private $window: IWindowService,
+		private $log: ng.ILogService,
+		private $filter: IChipsterFilter) {
 	}
 
 
@@ -58,50 +59,74 @@ class WorkflowGraphController {
 	datasetsMap: Map<string, Dataset>;
 	jobsMap: Map<string, Job>;
 	modulesMap: Map<string, Module>;
-	selectedDatasets: {};
+	selectedDatasets: Array<Dataset>;
+	datasetSearch: string;
 	callback: any;
 	zoom: number;
 	enabled: boolean;
 	dragStarted: boolean;
 
-	init() {
+	lastDatasetsMap: Map<string, Dataset>;
+	lastJobsMap: Map<string, Job>;
+	lastModulesMap: Map<string, Module>;
+	lastSelectedDatasets: Array<Dataset>;
 
-		this.$scope.$on('resizeWorkFlowGraph', this.renderGraph);
-
-		//Method for search data file in the workflow graph
-		this.$scope.$on('searchDatasets', (event:any, data:any) => {
+	$onChanges(changes: ng.IChangesObject) {
+		if ("datasetSearch" in changes) {
 			if (this.graph) {
-				if (data.data) {
-					this.graph.filter = Utils.arrayToMap(data.data, 'datasetId');
+				if (this.datasetSearch) {
+					let filteredDatasets = this.$filter('searchDatasetFilter')(Utils.mapValues(this.datasetsMap), this.datasetSearch);
+					this.graph.filter = Utils.arrayToMap(filteredDatasets, 'datasetId');
 				} else {
 					this.graph.filter = null;
 				}
 				this.renderGraph();
 			}
-		});
+		}
+	}
 
-		this.$scope.$watch(() => this.selectedDatasets, () => {
+	$doCheck() {
+		this.lastSelectedDatasets = this.ifArrayChanged(this.selectedDatasets, this.lastSelectedDatasets, () => {
 			if (this.graph) {
 				this.renderGraph();
 			}
-		}, true);
+		});
 
-		this.$scope.$watch(() => Utils.mapValues(this.datasetsMap), () => {
-			this.update();
-		}, true);
+		this.lastDatasetsMap = this.ifMapChanged(this.datasetsMap, this.lastDatasetsMap, this.update.bind(this));
+		this.lastJobsMap = this.ifMapChanged(this.jobsMap, this.lastJobsMap, this.update.bind(this));
+		this.lastModulesMap = this.ifMapChanged(this.modulesMap, this.lastModulesMap, this.update.bind(this));
+	}
 
-		this.$scope.$watch(() => Utils.mapValues(this.jobsMap), () => {
-			this.update();
+	ifArrayChanged(currentArray: Array<any>, lastArray: Array<any>, callback: () => void) {
+		if (!angular.equals(currentArray, lastArray)) {
+			callback();
+			return angular.extend([], currentArray);
+		} else {
+			return lastArray;
+		}
+	}
 
-		}, true);
+	ifMapChanged(currentMap: Map<any, any>, lastMap: Map<any, any>, callback: () => void) {
+		let currentMapValues: Array<any>;
+		let lastMapValues: Array<any>;
 
-		this.$scope.$watch(() => Utils.mapValues(this.modulesMap), () => {
-			this.update();
-		}, true);
+		if (currentMap) {
+			currentMapValues = Utils.mapValues(currentMap);
+		}
+
+		if (lastMap) {
+			lastMapValues = Utils.mapValues(lastMap);
+		}
+
+		if (!angular.equals(currentMapValues, lastMapValues)) {
+			callback();
+			return new Map(currentMap);
+		} else {
+			return lastMap;
+		}
 	}
 
 	update() {
-
 		var datasetNodes = this.getDatasetNodes(this.datasetsMap, this.jobsMap, this.modulesMap);
 		var jobNodes = this.getJobNodes(this.jobsMap);
 
@@ -219,7 +244,6 @@ class WorkflowGraphController {
 	}
 
 	renderNodes(){
-
 		this.svgDatasetNodes = this.vis.append('g').attr('class', 'node').selectAll('rect');
 
 		var tip = this.wd3.tip()
@@ -699,12 +723,13 @@ export default {
 	controller: WorkflowGraphController,
 	template: '<div id="workflow-container" class="fill"></div>',
 	bindings: {
-		datasetsMap: '=',
-		jobsMap: '=',
-		modulesMap: '=',
-		selectedDatasets: '=',
-		callback: '=',
-		zoom: '=',
-		enabled: '='
+		datasetsMap: '<',
+		jobsMap: '<',
+		modulesMap: '<',
+		selectedDatasets: '<',
+		datasetSearch: '<',
+		callback: '<',
+		zoom: '<',
+		enabled: '<'
 	}
 }

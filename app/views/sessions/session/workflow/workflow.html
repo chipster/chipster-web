@@ -3,10 +3,10 @@
 
 <div class="chipster-highlight">
     <div class="bar pull-right search-div">
-        <input id="dataset-search-input" type="text" ng-model="datasetSearch.value"
+        <input id="dataset-search-input" type="text" ng-model="vm.datasetSearch"
                placeholder="search dataset" ng-keyup="vm.datasetSearchKeyEvent($event)">
-        <button class="clear-search-button no-border" ng-show="vm.datasetSearch.value"
-                ng-click="vm.datasetSearch.value = null">
+        <button class="clear-search-button no-border" ng-show="vm.datasetSearch"
+                ng-click="vm.datasetSearch = null">
             <span class="glyphicon glyphicon-remove"></span>
         </button>
     </div>
@@ -33,6 +33,7 @@
                             jobs-map="vm.getJobsMap()"
                             modules-map="vm.getModulesMap()"
                             selected-datasets="vm.getSelectedDatasets()"
+                            dataset-search="vm.datasetSearch"
                             callback="vm.getWorkflowCallback()"
                             zoom="1"
                             enabled="true"></workflow-graph>
@@ -54,7 +55,7 @@
                 <div id="dataset-list" class="list-group workflow-dataset-panel" data-toggle="buttons">
                     <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:vm.isSelectedDataset(data)}"
                             ng-click="vm.toggleDatasetSelection($event, data)"
-                            ng-repeat="data in vm.getDatasetList() | searchDatasetFilter:vm.datasetSearch.value">
+                            ng-repeat="data in vm.getDatasetList() | searchDatasetFilter:vm.datasetSearch">
                         {{data.name}}
                     </button>
                 </div>

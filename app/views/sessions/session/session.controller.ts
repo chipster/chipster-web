@@ -26,9 +26,7 @@ export default class SessionController {
         this.init();
     }
 
-    // create an object for the dataset search value, so that we can modify it from here
-    // the search box seems to have a separate child scope, not sure why
-    datasetSearch: any = {};
+    datasetSearch: string;
 
     selectedTab = 1;
 
@@ -93,12 +91,12 @@ export default class SessionController {
         if (e.keyCode == 13) { // enter
             // select highlighted datasets
             var allDatasets = this.getDatasetList();
-            this.SelectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch.value);
-            this.datasetSearch.value = null;
+            this.SelectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch);
+            this.datasetSearch = null;
         }
         if (e.keyCode == 27) { // escape key
             // clear the search
-            this.datasetSearch.value = null;
+            this.datasetSearch = null;
         }
     }
 

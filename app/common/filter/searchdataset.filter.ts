@@ -3,7 +3,7 @@ import Dataset from "../../model/session/dataset";
 /**
  * Filter for searching dataset in dataset list view
  */
-export default function ($rootScope: any) {
+export default function () {
     return function (array: Dataset[], expression: string) {
 
         var result: Dataset[] = [];
@@ -18,14 +18,6 @@ export default function ($rootScope: any) {
                     result.push(item);
                 }
             });
-        }
-
-        //Here I am braodcasting the filtered result with rootScope to send it to workflowgraph directive, but there might be
-        //a better way to make this communication
-        if (expression) {
-            $rootScope.$broadcast('searchDatasets', {data: result});
-        } else {
-            $rootScope.$broadcast('searchDatasets', {data: null});
         }
 
         return result;
