@@ -71,6 +71,7 @@ class WorkflowGraphController {
 	lastModulesMap: Map<string, Module>;
 	lastSelectedDatasets: Array<Dataset>;
 
+
 	$onChanges(changes: ng.IChangesObject) {
 		if ("datasetSearch" in changes) {
 			if (this.graph) {
@@ -436,7 +437,6 @@ class WorkflowGraphController {
 	}
 
 	renderGraph() {
-
 		var element = document.getElementById('workflow-container');
 
 		this.width = this.graph.width = Math.max(200, element.offsetWidth);
