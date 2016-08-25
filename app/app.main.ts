@@ -14,12 +14,12 @@ import WorkflowGraphService from "./views/sessions/session/workflow/workflowgrap
 import SessionEventService from "./views/sessions/session/sessionevent.service";
 import SessionDataService from "./views/sessions/session/sessiondata.service";
 import SelectionService from "./views/sessions/session/selection.service";
-import DatasetCtrl from "./views/sessions/session/dataset/dataset.controller";
-import JobController from "./views/sessions/session/job/job.controller";
+import DatasetBoxComponent from "./views/sessions/session/dataset/datasetbox.component";
+import JobBoxComponent from "./views/sessions/session/job/jobbox.component";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 //import ToolCtrl from "./views/sessions/session/tools/tool.controller";
-import ToolsBox from "./views/sessions/session/tools/toolsbox.component";
+import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
 import TableService from "./services/tableservice.factory";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
@@ -51,9 +51,9 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('login', Login)
     .controller('NavigationController', NavigationController)
     .controller('SessionController', SessionController)
-    .controller('DatasetCtrl', DatasetCtrl)
-    .controller('JobController', JobController)
-    .component('toolsBox', ToolsBox)
+    .component('datasetBox', DatasetBoxComponent)
+    .component('jobBox', JobBoxComponent)
+    .component('toolsBox', ToolsBoxComponent)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('SourceModalController', SourceModalController)

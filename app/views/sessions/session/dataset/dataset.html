@@ -1,17 +1,18 @@
-<div class="chipster-highlight" ng-controller="DatasetCtrl as vm">
 
+<h4>Dataset</h4>
+<div class="chipster-highlight">
 
     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li ng-repeat="vis in vm.visualizations" ng-show="vm.isCompatible(vis)"><a ng-click="vm.show(vis)">{{vis.name}}</a></li>
+        <li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>
     </ul>
 
-    <div class="row" ng-if="vm.getDataset()">
+    <div class="row" ng-if="$ctrl.getDataset()">
         <div class="col-md-12">
             <div class="pull-right btn-group btn-group-sm">
-                <button ng-if="vm.getSelectionService().isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="vm.renameDataset()">Rename</button>
-                <button type="button" class="btn btn-default" ng-click="vm.deleteDatasets()">Delete</button>
-                <button type="button" class="btn btn-default" ng-click="vm.exportDatasets()">Export</button>
-                <button type="button" class="btn btn-default" ng-click="vm.showHistory()">History</button>
+                <button ng-if="$ctrl.getSelectionService().isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.exportDatasets()">Export</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.showHistory()">History</button>
             </div>
         </div>
     </div>
@@ -19,21 +20,21 @@
         <div class="col-md-3">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
-                        ng-repeat="dataset in vm.getSelectionService().selectedDatasets"
+                        ng-repeat="dataset in $ctrl.getSelectionService().selectedDatasets"
                         ng-class="{active: dataset.datasetId === activeDatasetId}">{{dataset.name}}
                 </button>
             </div>
         </div>
         <div class="col-md-9 dataset-details">
-            <h5 ng-show="vm.getSourceJob()">{{vm.getSourceJob().toolCategory}} / {{vm.getSourceJob().toolName}}</h5>
+            <h5 ng-show="$ctrl.getSourceJob()">{{$ctrl.getSourceJob().toolCategory}} / {{$ctrl.getSourceJob().toolName}}</h5>
 
-            <p style="font-size: smaller">{{vm.getDataset().size}}, {{vm.getDataset().created}}</p>
+            <p style="font-size: smaller">{{$ctrl.getDataset().size}}, {{$ctrl.getDataset().created}}</p>
                                 <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
-                                          ng-blur="vm.updateDataset(vm.getDataset())"
-                                          ng-model="vm.getDataset().notes">
+                                          ng-blur="$ctrl.updateDataset($ctrl.getDataset())"
+                                          ng-model="$ctrl.getDataset().notes">
                                 </textarea>
             <table class="table table-condensed parameter-table">
-                <tr ng-repeat="param in vm.getSourceJob().parameters">
+                <tr ng-repeat="param in $ctrl.getSourceJob().parameters">
                     <td>{{param.displayName}}</td>
                     <td>{{param.value}}</td>
                 </tr>
@@ -44,29 +45,29 @@
 
     <div class="row">
         <div class="col-md-3">
-            <button class="btn btn-default" ng-click="vm.show(vis)">Show visualization</button>
+            <button class="btn btn-default" ng-click="$ctrl.show(vis)">Show visualization</button>
         </div>
 
         <div class="col-md-9">
-            <div ng-if="vm.showPreview()">
-                <button class="btn btn-default thumbnail-button" ng-click="vm.show(vis)"
-                        ng-repeat="vis in vm.getVisualizations()">
-                    <img ng-src="{{vm.$scope.getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
+            <div ng-if="$ctrl.showPreview()">
+                <button class="btn btn-default thumbnail-button" ng-click="$ctrl.show(vis)"
+                        ng-repeat="vis in $ctrl.getVisualizations()">
+                    <img ng-src="{{$ctrl.$scope.getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
 
                     <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
                         <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
-                        {{pdfUrl=vm.getDatasetUrl();""}}
+                        {{pdfUrl=$ctrl.getDatasetUrl();""}}
                         <ng-pdf scale="page-fit" template-url="views/sessions/session/visualization/pdf/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
                         </ng-pdf>
                     </div>
 
-                    <html-visualization ng-if="vis.directive == 'html-visualization'" src="vm.getDatasetUrl()" class="thumbnail thumbnail-html"></html-visualization>
+                    <html-visualization ng-if="vis.directive == 'html-visualization'" src="$ctrl.getDatasetUrl()" class="thumbnail thumbnail-html"></html-visualization>
                 </button>
 
             </div>
 
-            <div ng-if="!vm.showPreview()" class="btn-group-vertical" role="group">
-                <button type="button" class="btn btn-default" ng-click="vm.show(vis)" ng-repeat="vis in vm.getVisualizations()">
+            <div ng-if="!$ctrl.showPreview()" class="btn-group-vertical" role="group">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.show(vis)" ng-repeat="vis in $ctrl.getVisualizations()">
                     <span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
                     <br>
                     {{vis.name}}

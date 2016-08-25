@@ -2,21 +2,21 @@ import Utils from "../../../../services/utils.service";
 import ToolParameter from "../../../../model/session/toolparameter";
 import Dataset from "../../../../model/session/dataset";
 
-export default class {
+export default class ToolService{
 
-    isSelectionParameter = function (parameter: ToolParameter) {
+    isSelectionParameter(parameter: ToolParameter) {
         return parameter.type === 'ENUM' ||
             parameter.type === 'COLUMN_SEL' ||
             parameter.type === 'METACOLUMN_SEL';
     };
 
-    isNumberParameter = function (parameter: ToolParameter) {
+    isNumberParameter(parameter: ToolParameter) {
         return parameter.type === 'INTEGER' ||
             parameter.type === 'DECIMAL' ||
             parameter.type === 'PERCENT';
     };
 
-    getDefaultValue = function (toolParameter: ToolParameter): number | string {
+    getDefaultValue(toolParameter: ToolParameter): number | string {
         if (this.isNumberParameter(toolParameter)) {
             return Number(toolParameter.defaultValue);
         }
@@ -25,7 +25,7 @@ export default class {
         }
     };
 
-    isCompatible = function (dataset: Dataset, type: string) {
+    isCompatible(dataset: Dataset, type: string) {
         var alwaysCompatible = ['GENERIC', 'CDNA', 'GENE_EXPRS', 'GENELIST', 'PHENODATA'];
         if (alwaysCompatible.indexOf(type) !== -1) {
             return true;

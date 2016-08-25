@@ -7,27 +7,16 @@
 
     <div class="col-md-8">
 
-        <!-- Tools -->
         <div class="row">
             <div class="col-md-12">
                 <tools-box></tools-box>
             </div>
         </div>
 
-        <!-- Jobs -->
         <div class="row">
             <div class="col-md-12">
-                <h4>Job</h4>
-                <div ng-include="'views/sessions/session/job/job.html'"></div>
-            </div>
-        </div>
-
-
-        <!-- Datasets -->
-        <div class="row">
-            <div class="col-md-12">
-                <h4>Datasets</h4>
-                <div ng-include="'views/sessions/session/dataset/dataset.html'"></div>
+                <Job-box ng-if="vm.SelectionService.selectedJobs.length > 0"></Job-box>
+                <dataset-box ng-if="vm.SelectionService.selectedDatasets.length > 0"></dataset-box>
             </div>
         </div>
 

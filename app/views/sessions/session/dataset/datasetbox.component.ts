@@ -6,7 +6,7 @@ import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
 
-export default class DatasetController {
+class DatasetBoxComponent {
 
 	static $inject = [
 		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
@@ -19,29 +19,26 @@ export default class DatasetController {
 		private $compile: ng.ICompileService,
 		private SelectionService: SelectionService,
 		private SessionDataService: SessionDataService) {
+	}
 
-		this.init();
+	$onInit() {
+		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
+			this.setCurrentVisualization(null, null);
+		});
+
+		this.$scope.$on('showDefaultVisualization', () => {
+			var visualizations = this.getVisualizations();
+			if (visualizations.length > 0) {
+				this.show(visualizations[0]);
+			}
+		});
+
+		this.setCurrentVisualization(null, null);
 	}
 
 	visualizations: Visualization[] = VisualizationList;
 	currentVisualization: Visualization = null;
 	currentVisualizationDirective: any = null;
-
-	init() {
-
-		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
-			this.setCurrentVisualization(null, null);
-		});
-
-		this.$scope.$on('showDefaultVisualization', function () {
-			var visualizations = this.getVisualizations();
-			if (visualizations.length > 0) {
-				this.show(visualizations[0]);
-			}
-		}.bind(this));
-
-		this.setCurrentVisualization(null, null);
-	}
 
 	setCurrentVisualization(newVisualization: Visualization, directive: any) {
 
@@ -63,11 +60,11 @@ export default class DatasetController {
 		let datasets = this.SelectionService.selectedDatasets;
 
 		if (datasets && datasets.length === 1) {
-			return DatasetController.isCompatibleWithDataset(visualization, datasets[0]);
+			return DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[0]);
 		}
 		else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
 			for (var i = 0; i < datasets.length; i++) {
-				if (!DatasetController.isCompatibleWithDataset(visualization, datasets[i])) {
+				if (!DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[i])) {
 					return false;
 				}
 			}
@@ -77,9 +74,9 @@ export default class DatasetController {
 	}
 
 	getVisualizations() {
-		return this.visualizations.filter(function (visualization: Visualization) {
+		return this.visualizations.filter( (visualization: Visualization) => {
 			return this.isCompatible(visualization);
-		}.bind(this));
+		});
 	}
 
 	showPreview() {
@@ -140,4 +137,9 @@ export default class DatasetController {
 			return this.SessionDataService.getDatasetUrl(this.getDataset());
 		}
 	}
+}
+
+export default {
+	templateUrl: 'views/sessions/session/dataset/dataset.html',
+	controller: DatasetBoxComponent
 }

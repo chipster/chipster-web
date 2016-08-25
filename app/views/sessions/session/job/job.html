@@ -1,12 +1,12 @@
-<div class="chipster-highlight" ng-controller="JobController as vm">
-    <div class="row" ng-if="vm.isJobSelected()">
+<div class="chipster-highlight">
+    <div class="row" ng-if="$ctrl.isJobSelected()">
         <div class="col-sm-8">
-            <h5>{{vm.getJob().toolCategory}} / {{vm.getJob().toolName}}</h5>
+            <h5>{{$ctrl.getJob().toolCategory}} / {{$ctrl.getJob().toolName}}</h5>
         </div>
 
         <div class="col-sm-4">
             <div class="btn-group btn-group-sm pull-right">
-                <button type="button" class="btn btn-default" ng-click="vm.deleteJobs()">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteJobs()">
                     Cancel
                 </button>
             </div>
@@ -14,8 +14,8 @@
 
         <div class="col-sm-12">
             <div class="indented">
-                <p>Status: {{vm.getJob().state.toLowerCase()}}
-                    <span ng-show="vm.SelectionService.selectedJob.stateDetail">({{vm.getJob().stateDetail}})</span>
+                <p>Status: {{$ctrl.getJob().state.toLowerCase()}}
+                    <span ng-show="$ctrl.getJob().stateDetail">({{$ctrl.getJob().stateDetail}})</span>
                 </p>
                 <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
             </div>
@@ -23,7 +23,7 @@
             <h5>Parameters</h5>
             <div>
                 <table class="table table-condensed parameter-table">
-                    <tr ng-repeat="param in vm.getJob().parameters">
+                    <tr ng-repeat="param in $ctrl.getJob().parameters">
                         <td>{{param.displayName}}</td>
                         <td>{{param.value}}</td>
                     </tr>
