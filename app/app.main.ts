@@ -43,6 +43,7 @@ import JobErrorModalController from "./views/sessions/session/joberrormodal/jobe
 import SessionResource from "./resources/session.resource";
 import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "./views/sessions/sessionlist.component";
+import ParameterListComponent from "./views/sessions/session/dataset/parameterlist.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
@@ -89,6 +90,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('phenodataVisualization', <any>phenodataVisualization)
     .component('workflowGraph', <any>workflowGraph)
     .component('sessionList', <any>sessionList)
+    .component('parameterList', ParameterListComponent)
     .config(RouteConfiguration)
     .run(ChipsterRun);
 

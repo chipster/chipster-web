@@ -2,10 +2,6 @@
 <h4>Dataset</h4>
 <div class="chipster-highlight">
 
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>
-    </ul>
-
     <div class="row" ng-if="$ctrl.getDataset()">
         <div class="col-md-12">
             <div class="pull-right btn-group btn-group-sm">
@@ -16,6 +12,11 @@
             </div>
         </div>
     </div>
+
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>
+    </ul>
+
     <div class="row">
         <div class="col-md-3">
             <div class="list-group tool-list" data-toggle="buttons">
@@ -28,21 +29,16 @@
         <div class="col-md-9 dataset-details">
             <h5 ng-show="$ctrl.getSourceJob()">{{$ctrl.getSourceJob().toolCategory}} / {{$ctrl.getSourceJob().toolName}}</h5>
 
-            <p style="font-size: smaller">{{$ctrl.getDataset().size}}, {{$ctrl.getDataset().created}}</p>
-                                <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
-                                          ng-blur="$ctrl.updateDataset($ctrl.getDataset())"
-                                          ng-model="$ctrl.getDataset().notes">
-                                </textarea>
-            <table class="table table-condensed parameter-table">
-                <tr ng-repeat="param in $ctrl.getSourceJob().parameters">
-                    <td>{{param.displayName}}</td>
-                    <td>{{param.value}}</td>
-                </tr>
-            </table>
+            <p >{{$ctrl.getDataset().size}}, {{$ctrl.getDataset().created}}</p>
+            <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
+                      ng-blur="$ctrl.updateDataset($ctrl.getDataset())"
+                      ng-model="$ctrl.getDataset().notes">
+            </textarea>
+            <parameter-list ng-if="$ctrl.getSourceJob().parameters.length > 0" parameters="$ctrl.getSourceJob().parameters"></parameter-list>
 
         </div>
     </div>
-
+              <!--
     <div class="row">
         <div class="col-md-3">
             <button class="btn btn-default" ng-click="$ctrl.show(vis)">Show visualization</button>
@@ -56,6 +52,7 @@
 
                     <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
                         <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
+    <!--
                         {{pdfUrl=$ctrl.getDatasetUrl();""}}
                         <ng-pdf scale="page-fit" template-url="views/sessions/session/visualization/pdf/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
                         </ng-pdf>
@@ -76,6 +73,7 @@
 
         </div>
     </div>
+    -->
 </div>
 
 

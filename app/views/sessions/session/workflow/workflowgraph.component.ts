@@ -304,7 +304,7 @@ class WorkflowGraphController {
 
 		// highlight selected datasets
 		this.svgDatasetNodes.each(function(d: DatasetNode) {
-			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedDataset(d.dataset));
+			self.wd3.select(this).classed('selected', self.enabled && self.callback.isSelectedDataset(d.dataset));
 		});
 	}
 
