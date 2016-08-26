@@ -7,6 +7,9 @@ import Dataset from "../../../../model/session/dataset";
 import Module from "../../../../model/session/module";
 import Node from "./node.ts"
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
+import {ChangeDetector} from "../../../../services/changedetector.service";
+import {MapChangeDetector} from "../../../../services/changedetector.service";
+import {ArrayChangeDetector} from "../../../../services/changedetector.service";
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -60,16 +63,23 @@ class WorkflowGraphController {
 	jobsMap: Map<string, Job>;
 	modulesMap: Map<string, Module>;
 	selectedDatasets: Array<Dataset>;
+	selectedJobs: Array<Job>;
 	datasetSearch: string;
 	callback: any;
 	zoom: number;
 	enabled: boolean;
 	dragStarted: boolean;
 
-	lastDatasetsMap: Map<string, Dataset>;
-	lastJobsMap: Map<string, Job>;
-	lastModulesMap: Map<string, Module>;
-	lastSelectedDatasets: Array<Dataset>;
+	changeDetectors: Array<ChangeDetector> = [];
+
+	$onInit() {
+		// initialize the deep comparison of input collections
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedDatasets, () => this.renderGraph()));
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedJobs, () => this.renderGraph()));
+		this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => this.update()));
+		this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => this.update()));
+		this.changeDetectors.push(new MapChangeDetector(() => this.modulesMap, () => this.update()));
+	}
 
 	$onChanges(changes: ng.IChangesObject) {
 		if ("datasetSearch" in changes) {
@@ -86,44 +96,7 @@ class WorkflowGraphController {
 	}
 
 	$doCheck() {
-		this.lastSelectedDatasets = this.ifArrayChanged(this.selectedDatasets, this.lastSelectedDatasets, () => {
-			if (this.graph) {
-				this.renderGraph();
-			}
-		});
-
-		this.lastDatasetsMap = this.ifMapChanged(this.datasetsMap, this.lastDatasetsMap, this.update.bind(this));
-		this.lastJobsMap = this.ifMapChanged(this.jobsMap, this.lastJobsMap, this.update.bind(this));
-		this.lastModulesMap = this.ifMapChanged(this.modulesMap, this.lastModulesMap, this.update.bind(this));
-	}
-
-	ifArrayChanged(currentArray: Array<any>, lastArray: Array<any>, callback: () => void) {
-		if (!angular.equals(currentArray, lastArray)) {
-			callback();
-			return angular.extend([], currentArray);
-		} else {
-			return lastArray;
-		}
-	}
-
-	ifMapChanged(currentMap: Map<any, any>, lastMap: Map<any, any>, callback: () => void) {
-		let currentMapValues: Array<any>;
-		let lastMapValues: Array<any>;
-
-		if (currentMap) {
-			currentMapValues = Utils.mapValues(currentMap);
-		}
-
-		if (lastMap) {
-			lastMapValues = Utils.mapValues(lastMap);
-		}
-
-		if (!angular.equals(currentMapValues, lastMapValues)) {
-			callback();
-			return new Map(currentMap);
-		} else {
-			return lastMap;
-		}
+		this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
 	}
 
 	update() {
@@ -180,9 +153,9 @@ class WorkflowGraphController {
 				self.wd3.select(this).style('filter', null);
 			});
 
-		// highlight selected datasets
+		// highlight selected nodes
 		rect.each(function (d:any) {
-			self.wd3.select(this).classed('selected', self.enabled && self.callback.isSelectedJob(d.job));
+			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedJob(d.job));
 		});
 
 		// create an arc for each job
@@ -193,6 +166,14 @@ class WorkflowGraphController {
 			.style('pointer-events', 'none')
 			.attr('d', arc)
 			.call(this.spin.bind(this), 3000);
+	}
+
+	isSelectedJob(job: Job) {
+		return this.selectedJobs.indexOf(job) != -1;
+	}
+
+	isSelectedDataset(dataset: Dataset) {
+		return this.selectedDatasets.indexOf(dataset) != -1;
 	}
 
 	spin(selection: any, duration: number){
@@ -323,7 +304,7 @@ class WorkflowGraphController {
 
 		// highlight selected datasets
 		this.svgDatasetNodes.each(function(d: DatasetNode) {
-			self.wd3.select(this).classed('selected', self.enabled && self.callback.isSelectedDataset(d.dataset));
+			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedDataset(d.dataset));
 		});
 	}
 
@@ -436,6 +417,10 @@ class WorkflowGraphController {
 	}
 
 	renderGraph() {
+
+		if (!this.graph) {
+			this.update();
+		}
 
 		var element = document.getElementById('workflow-container');
 
@@ -727,6 +712,7 @@ export default {
 		jobsMap: '<',
 		modulesMap: '<',
 		selectedDatasets: '<',
+		selectedJobs: '<',
 		datasetSearch: '<',
 		callback: '<',
 		zoom: '<',

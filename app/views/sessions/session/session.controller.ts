@@ -36,8 +36,6 @@ export default class SessionController {
     toolDetailList: any = null;
 
     workflowCallback = {
-        isSelectedDataset: (dataset: Dataset) => this.SelectionService.isSelectedDataset(dataset),
-        isSelectedJob: (job: Job) => this.SelectionService.isSelectedJob(job),
         clearSelection: () => this.SelectionService.clearSelection(),
         toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
         selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
@@ -100,7 +98,7 @@ export default class SessionController {
             this.SessionDataService.session = parsedData.session;
         });
 
-        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.$routeParams['sessionId'], this, (event: any, oldValue: any, newValue: any) => {
+        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.$routeParams['sessionId'], this.SessionDataService, (event: any, oldValue: any, newValue: any) => {
             for (let listener of this.SessionDataService.listeners) {
                 listener(event, oldValue, newValue);
             }
@@ -127,6 +125,10 @@ export default class SessionController {
 
     getSelectedDatasets() {
         return this.SelectionService.selectedDatasets;
+    }
+
+    getSelectedJobs() {
+        return this.SelectionService.selectedJobs;
     }
 
     isSelectedDataset(dataset: Dataset) {
