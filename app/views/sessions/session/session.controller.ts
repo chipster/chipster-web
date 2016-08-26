@@ -35,13 +35,7 @@ export default class SessionController {
 
     toolDetailList: any = null;
 
-    workflowCallback = {
-        clearSelection: () => this.SelectionService.clearSelection(),
-        toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
-        selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
-        showDefaultVisualization: () => this.showDefaultVisualization(),
-        updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
-    };
+
 
     init() {
         this.SessionDataService.onSessionChange(function (event: any, oldValue: any, newValue: any): void {
@@ -119,10 +113,6 @@ export default class SessionController {
         }
     }
 
-    getWorkflowCallback() {
-        return this.workflowCallback;
-    }
-
     getSelectedDatasets() {
         return this.SelectionService.selectedDatasets;
     }
@@ -167,9 +157,7 @@ export default class SessionController {
         this.SessionDataService.exportDatasets(datasets);
     }
 
-    showDefaultVisualization() {
-        this.$scope.$broadcast('showDefaultVisualization', {});
-    }
+
 
     getSessionId() {
         return this.SessionDataService.sessionId;
