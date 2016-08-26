@@ -138,8 +138,7 @@ class WorkflowGraphController {
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
 			.attr('transform', (d: Node) => 'translate(' + d.x + ',' + d.y + ')')
-			.style('fill', (d: Node, i:number) => d.color)
-			//.style('fill', (d: Node, i:number) => this.getGradient(d, 'job' + i))
+			.style('fill', (d: Node, i:number) => this.getGradient(d, 'job' + i))
 			.on('click', (d: JobNode) => {
 				if (!this.enabled) {
 					return;
@@ -243,10 +242,7 @@ class WorkflowGraphController {
 			.attr('ry', this.nodeRadius)
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
-			//FIXME
-			//.style("fill", this.getGradient.bind(this))
-			.style("fill", (d: Node) => d.color)
-			//.style('filter', 'url(#drop-shadow)')
+			.style("fill", this.getGradient.bind(this))
 			.attr('opacity', (d: DatasetNode) => this.getOpacityForDataset(d.dataset))
 			.on('dblclick', () => {
 				if (!this.enabled) {
@@ -304,7 +300,7 @@ class WorkflowGraphController {
 
 		// highlight selected datasets
 		this.svgDatasetNodes.each(function(d: DatasetNode) {
-			self.wd3.select(this).classed('selected', self.enabled && self.callback.isSelectedDataset(d.dataset));
+			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedDataset(d.dataset));
 		});
 	}
 
