@@ -35,13 +35,7 @@ export default class SessionController {
 
     toolDetailList: any = null;
 
-    workflowCallback = {
-        clearSelection: () => this.SelectionService.clearSelection(),
-        toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
-        selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
-        showDefaultVisualization: () => this.showDefaultVisualization(),
-        updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
-    };
+
 
     init() {
         this.SessionDataService.onSessionChange(function (event: any, oldValue: any, newValue: any): void {
@@ -73,13 +67,11 @@ export default class SessionController {
         }.bind(this));
 
         // stop listening for events when leaving this view
-        this.$scope.$on("$destroy", function () {
-            this.SessionDataService.destroy();
-        });
+        this.$scope.$on("$destroy", () => this.SessionDataService.destroy() );
 
         // We are only handling the resize end event, currently only
         // working in workflow graph div
-        this.$scope.$on("angular-resizable.resizeEnd", function () {
+        this.$scope.$on("angular-resizable.resizeEnd", () => {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });
         /*
@@ -117,10 +109,6 @@ export default class SessionController {
             // clear the search
             this.datasetSearch = null;
         }
-    }
-
-    getWorkflowCallback() {
-        return this.workflowCallback;
     }
 
     getSelectedDatasets() {
@@ -167,9 +155,7 @@ export default class SessionController {
         this.SessionDataService.exportDatasets(datasets);
     }
 
-    showDefaultVisualization() {
-        this.$scope.$broadcast('showDefaultVisualization', {});
-    }
+
 
     getSessionId() {
         return this.SessionDataService.sessionId;

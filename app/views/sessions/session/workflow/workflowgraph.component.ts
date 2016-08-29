@@ -5,11 +5,13 @@ import IScope = angular.IScope;
 import Job from "../../../../model/session/job";
 import Dataset from "../../../../model/session/dataset";
 import Module from "../../../../model/session/module";
-import Node from "./node.ts"
+import Node from "./node"
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import {ChangeDetector} from "../../../../services/changedetector.service";
 import {MapChangeDetector} from "../../../../services/changedetector.service";
 import {ArrayChangeDetector} from "../../../../services/changedetector.service";
+import SessionDataService from "../sessiondata.service";
+import SelectionService from "../selection.service";
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -31,13 +33,23 @@ interface Link {
 
 class WorkflowGraphController {
 
-	static $inject = ['$scope', '$window', '$log', '$filter'];
+	static $inject = ['$scope', '$window', '$log', '$filter', 'SessionDataService', 'SelectionService'];
 
 	constructor(
 		private $scope: IScope,
 		private $window: IWindowService,
 		private $log: ng.ILogService,
-		private $filter: IChipsterFilter) {
+		private $filter: IChipsterFilter,
+		private SessionDataService: SessionDataService,
+		private SelectionService: SelectionService) {
+
+		this.callback = {
+			clearSelection: () => this.SelectionService.clearSelection(),
+			toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
+			selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
+			showDefaultVisualization: () => this.showDefaultVisualization(),
+			updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
+		};
 	}
 
 
@@ -79,6 +91,7 @@ class WorkflowGraphController {
 		this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => this.update()));
 		this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => this.update()));
 		this.changeDetectors.push(new MapChangeDetector(() => this.modulesMap, () => this.update()));
+
 	}
 
 	$onChanges(changes: ng.IChangesObject) {
@@ -173,6 +186,10 @@ class WorkflowGraphController {
 
 	isSelectedDataset(dataset: Dataset) {
 		return this.selectedDatasets.indexOf(dataset) != -1;
+	}
+
+	showDefaultVisualization() {
+		this.$scope.$broadcast('showDefaultVisualization', {});
 	}
 
 	spin(selection: any, duration: number){
@@ -357,6 +374,8 @@ class WorkflowGraphController {
 	//Function to describe drag behavior
 	dragNodes(dx: number, dy: number) {
 
+		console.log(this.callback);
+		
 		this.svgDatasetNodes
 			.filter((d: DatasetNode) => this.callback.isSelectedDataset(d.dataset))
 			.attr('x', (d: Node) => d.x += dx)

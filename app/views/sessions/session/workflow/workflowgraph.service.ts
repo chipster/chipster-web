@@ -1,4 +1,4 @@
-import Node from "./node.ts";
+import Node from "./node";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
