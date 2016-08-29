@@ -67,13 +67,11 @@ export default class SessionController {
         }.bind(this));
 
         // stop listening for events when leaving this view
-        this.$scope.$on("$destroy", function () {
-            this.SessionDataService.destroy();
-        });
+        this.$scope.$on("$destroy", () => this.SessionDataService.destroy() );
 
         // We are only handling the resize end event, currently only
         // working in workflow graph div
-        this.$scope.$on("angular-resizable.resizeEnd", function () {
+        this.$scope.$on("angular-resizable.resizeEnd", () => {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });
         /*
