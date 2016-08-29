@@ -38,42 +38,7 @@
 
         </div>
     </div>
-              <!--
-    <div class="row">
-        <div class="col-md-3">
-            <button class="btn btn-default" ng-click="$ctrl.show(vis)">Show visualization</button>
-        </div>
 
-        <div class="col-md-9">
-            <div ng-if="$ctrl.showPreview()">
-                <button class="btn btn-default thumbnail-button" ng-click="$ctrl.show(vis)"
-                        ng-repeat="vis in $ctrl.getVisualizations()">
-                    <img ng-src="{{$ctrl.$scope.getDatasetUrl()}}" ng-if="vis.directive == 'image-visualization'" class="thumbnail"/>
-
-                    <div ng-if="vis.directive == 'pdf-visualization'" class="thumbnail">
-                        <!-- set url to variable  http://stackoverflow.com/questions/16796341/set-angular-scope-variable-in-markup -->
-    <!--
-                        {{pdfUrl=$ctrl.getDatasetUrl();""}}
-                        <ng-pdf scale="page-fit" template-url="views/sessions/session/visualization/pdf/pdf-thumbnail.html" canvasid="pdf-canvas-thumb">
-                        </ng-pdf>
-                    </div>
-
-                    <html-visualization ng-if="vis.directive == 'html-visualization'" src="$ctrl.getDatasetUrl()" class="thumbnail thumbnail-html"></html-visualization>
-                </button>
-
-            </div>
-
-            <div ng-if="!$ctrl.showPreview()" class="btn-group-vertical" role="group">
-                <button type="button" class="btn btn-default" ng-click="$ctrl.show(vis)" ng-repeat="vis in $ctrl.getVisualizations()">
-                    <span class="glyphicon {{vis.icon}}" aria-hidden="true"></span>
-                    <br>
-                    {{vis.name}}
-                </button>
-            </div>
-
-        </div>
-    </div>
-    -->
 </div>
 
 

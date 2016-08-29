@@ -44,6 +44,10 @@ import SessionResource from "./resources/session.resource";
 import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "./views/sessions/sessionlist.component";
 import ParameterListComponent from "./views/sessions/session/dataset/parameterlist.component";
+import Visualization from "./views/sessions/session/visualization/visualization";
+import VisualizationBoxComponent from "./views/sessions/session/visualization/visualizationbox.component";
+
+
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
@@ -91,6 +95,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('workflowGraph', <any>workflowGraph)
     .component('sessionList', <any>sessionList)
     .component('parameterList', ParameterListComponent)
+    .component('visualizationBox', VisualizationBoxComponent)
     .config(RouteConfiguration)
     .run(ChipsterRun);
 

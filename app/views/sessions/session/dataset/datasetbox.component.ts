@@ -36,10 +36,6 @@ class DatasetBoxComponent {
 		this.setCurrentVisualization(null, null);
 	}
 
-	visualizations: Visualization[] = VisualizationList;
-	currentVisualization: Visualization = null;
-	currentVisualizationDirective: any = null;
-
 	setCurrentVisualization(newVisualization: Visualization, directive: any) {
 
 		if (this.currentVisualizationDirective) {
@@ -49,40 +45,7 @@ class DatasetBoxComponent {
 		this.currentVisualizationDirective = directive;
 	}
 
-	static isCompatibleWithDataset(visualization: Visualization, dataset: Dataset) {
 
-		var extension = Utils.getFileExtension(dataset.name);
-		return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
-	}
-
-	isCompatible(visualization: Visualization) {
-
-		let datasets = this.SelectionService.selectedDatasets;
-
-		if (datasets && datasets.length === 1) {
-			return DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[0]);
-		}
-		else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
-			for (var i = 0; i < datasets.length; i++) {
-				if (!DatasetBoxComponent.isCompatibleWithDataset(visualization, datasets[i])) {
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
-	}
-
-	getVisualizations() {
-		return this.visualizations.filter( (visualization: Visualization) => {
-			return this.isCompatible(visualization);
-		});
-	}
-
-	showPreview() {
-		var visualizations = this.getVisualizations();
-		return visualizations.length === 1 && visualizations[0].preview;
-	}
 
 	show(vis: Visualization) {
 		if (!this.SelectionService.isSingleDatasetSelected()) {

@@ -24,6 +24,5 @@ export default {
                         <td>{{param.displayName}}</td>
                         <td>{{param.value}}</td>
                     </tr>
-                </table>
-                `
+                </table>`
 }
