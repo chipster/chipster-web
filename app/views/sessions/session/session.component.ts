@@ -1,14 +1,13 @@
+
+import {IChipsterFilter} from "../../../common/filter/chipsterfilter";
 import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
+import SessionResource from "../../../resources/session.resource";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import {IChipsterFilter} from "../../../common/filter/chipsterfilter";
-import {SessionData} from "../../../resources/session.resource";
-import SessionResource from "../../../resources/session.resource";
 
-export default class SessionController {
-
+class SessionComponent {
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
         'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource'];
@@ -75,9 +74,9 @@ export default class SessionController {
             this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });
         /*
-        angular.element(this.$window).bind('resize', function () {
-            this.$scope.$broadcast('resizeWorkFlowGraph', {});
-        });*/
+         angular.element(this.$window).bind('resize', function () {
+         this.$scope.$broadcast('resizeWorkFlowGraph', {});
+         });*/
 
 
         this.sessionResource.loadSession(this.$routeParams['sessionId']).then( (parsedData: SessionData) => {
@@ -196,7 +195,7 @@ export default class SessionController {
             bindToController: true,
             size: 'lg',
             resolve: {
-                data: function () {
+                data: () => {
                     return SessionDataService;
                 }
             }
@@ -212,10 +211,10 @@ export default class SessionController {
             bindToController: true,
             size: 'lg',
             resolve: {
-                toolErrorTitle: function () {
+                toolErrorTitle: () => {
                     return angular.copy(title);
                 },
-                toolError: function () {
+                toolError: () => {
                     return angular.copy(toolError);
                 }
             }
@@ -230,13 +229,13 @@ export default class SessionController {
             controllerAs: 'vm',
             bindToController: true,
             resolve: {
-                title: function () {
+                title:  () => {
                     return angular.copy(this.SessionDataService.sessionData.name);
                 }
             }
         });
 
-        modalInstance.result.then(function (result: string) {
+        modalInstance.result.then( (result: string) => {
             if (!result) {
                 result = 'unnamed session';
             }
@@ -246,4 +245,12 @@ export default class SessionController {
             // modal dismissed
         });
     }
+
+
+}
+
+
+export default {
+    controller: SessionComponent,
+    templateUrl: 'views/sessions/session/session.html'
 }

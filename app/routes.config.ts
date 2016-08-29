@@ -15,8 +15,7 @@ export default function ($routeProvider: ng.route.IRouteProvider) {
             authenticated: true
         })
         .when('/sessions/:sessionId', <IAuthRoute>{
-            templateUrl: 'views/sessions/session/session.html',
-            controller: 'SessionController as vm',
+            template: '<session></session>',
             authenticated: true
         })
         .otherwise({templateUrl: 'views/home/home.html'});

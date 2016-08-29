@@ -1,12 +1,12 @@
 
-<h4><span ng-click="openSessionEditModal()">Session - {{vm.getSession().name}}</span></h4>
+<h4><span ng-click="openSessionEditModal()">Session - {{$ctrl.getSession().name}}</span></h4>
 
 <div class="chipster-highlight">
     <div class="bar pull-right search-div">
-        <input id="dataset-search-input" type="text" ng-model="vm.datasetSearch"
-               placeholder="search dataset" ng-keyup="vm.datasetSearchKeyEvent($event)">
-        <button class="clear-search-button no-border" ng-show="vm.datasetSearch"
-                ng-click="vm.datasetSearch = null">
+        <input id="dataset-search-input" type="text" ng-model="$ctrl.datasetSearch"
+               placeholder="search dataset" ng-keyup="$ctrl.datasetSearchKeyEvent($event)">
+        <button class="clear-search-button no-border" ng-show="$ctrl.datasetSearch"
+                ng-click="$ctrl.datasetSearch = null">
             <span class="glyphicon glyphicon-remove"></span>
         </button>
     </div>
@@ -20,7 +20,7 @@
                 <div class="workflow-dataset-static-panel">
                     <div class="add-dataset-button">
                         <button class="btn btn-sm btn-success link-btn"
-                                ng-click="vm.openAddDatasetModal()">
+                                ng-click="$ctrl.openAddDatasetModal()">
                             <span class="glyphicon glyphicon-plus"></span>
                             Add dataset
                         </button>
@@ -29,12 +29,12 @@
 
                 <div class="fill workflow-dataset-panel">
                     <workflow-graph
-                            datasets-map="vm.getDatasetsMap()"
-                            jobs-map="vm.getJobsMap()"
-                            modules-map="vm.getModulesMap()"
-                            selected-datasets="vm.getSelectedDatasets()"
-                            selected-jobs="vm.getSelectedJobs()"
-                            dataset-search="vm.datasetSearch"
+                            datasets-map="$ctrl.getDatasetsMap()"
+                            jobs-map="$ctrl.getJobsMap()"
+                            modules-map="$ctrl.getModulesMap()"
+                            selected-datasets="$ctrl.getSelectedDatasets()"
+                            selected-jobs="$ctrl.getSelectedJobs()"
+                            dataset-search="$ctrl.datasetSearch"
                             zoom="1"
                             enabled="true"></workflow-graph>
                 </div>
@@ -45,7 +45,7 @@
                 <div class="workflow-dataset-static-panel">
                     <div class="add-dataset-button">
                         <button class="btn btn-sm btn-success link-btn"
-                                ng-click="vm.openAddDatasetModal()">
+                                ng-click="$ctrl.openAddDatasetModal()">
                             <span class="glyphicon glyphicon-plus"></span>
                             Add dataset
                         </button>
@@ -53,9 +53,9 @@
                 </div>
 
                 <div id="dataset-list" class="list-group workflow-dataset-panel" data-toggle="buttons">
-                    <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:vm.isSelectedDataset(data)}"
-                            ng-click="vm.toggleDatasetSelection($event, data)"
-                            ng-repeat="data in vm.getDatasetList() | searchDatasetFilter:vm.datasetSearch">
+                    <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
+                            ng-click="$ctrl.toggleDatasetSelection($event, data)"
+                            ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">
                         {{data.name}}
                     </button>
                 </div>
@@ -64,8 +64,8 @@
 
             <uib-tab index="2" heading="Details">
                 <textarea id="session-notes" rows="15" placeholder="Session notes"
-                          ng-blur="vm.updateSession()"
-                          ng-model="vm.getSession().notes">
+                          ng-blur="$ctrl.updateSession()"
+                          ng-model="$ctrl.getSession().notes">
                 </textarea>
             </uib-tab>
 

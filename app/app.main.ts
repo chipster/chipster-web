@@ -9,7 +9,6 @@ import RouteConfiguration from "./routes.config";
 import ChipsterRun from "./app.run";
 import ToolResource from "./resources/toolresource";
 import UtilsService from "./services/utils.service";
-import SessionController from "./views/sessions/session/session.controller";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
 import SessionEventService from "./views/sessions/session/sessionevent.service";
 import SessionDataService from "./views/sessions/session/sessiondata.service";
@@ -46,6 +45,7 @@ import sessionList from "./views/sessions/sessionlist.component";
 import ParameterListComponent from "./views/sessions/session/dataset/parameterlist.component";
 import Visualization from "./views/sessions/session/visualization/visualization";
 import VisualizationBoxComponent from "./views/sessions/session/visualization/visualizationbox.component";
+import SessionComponent from "./views/sessions/session/session.component";
 
 
 
@@ -55,7 +55,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     .component('login', Login)
     .controller('NavigationController', NavigationController)
-    .controller('SessionController', SessionController)
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
@@ -96,6 +95,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('sessionList', <any>sessionList)
     .component('parameterList', ParameterListComponent)
     .component('visualizationBox', VisualizationBoxComponent)
+    .component('session', SessionComponent)
     .config(RouteConfiguration)
     .run(ChipsterRun);
 
