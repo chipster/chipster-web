@@ -53,10 +53,10 @@ class DatasetBoxComponent {
 			return;
 		}
 		var directive = angular.element('<' + vis.directive + '/>');
-		directive.attr('src', 'vm.getDatasetUrl()');
-		directive.attr('dataset-id', 'vm.getDataset().datasetId');
+		directive.attr('src', '$ctrl.getDatasetUrl()');
+		directive.attr('dataset-id', '$ctrl.getDataset().datasetId');
 		directive.attr('session-id', "'" + this.SessionDataService.sessionId + "'");
-		directive.attr('selected-datasets', 'vm.getSelectionService().selectedDatasets');
+		directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
 		this.$compile(directive)(this.$scope);
 		var area = angular.element(document.getElementById("visualizationArea"));
 		area.empty();

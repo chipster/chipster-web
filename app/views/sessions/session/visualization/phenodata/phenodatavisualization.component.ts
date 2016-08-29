@@ -40,6 +40,8 @@ class PhenodataVisualizationController {
     unremovableColumns = [ 'sample', 'original_name', 'dataset', 'column'];
 
     init() {
+
+
         this.$scope.$watch(() => this.datasets, () => {
             if (this.datasets.length > 0) {
                 this.updateViewLater();
