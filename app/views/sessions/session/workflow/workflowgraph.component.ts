@@ -168,10 +168,13 @@ class WorkflowGraphController {
 	}
 
 	$doCheck() {
-		this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
-		// it seems that there is no easy way to listen for div's size changes
-		// running this on every digest cycle might be close enough
-		this.updateSvgSize();
+
+		if (this.svg) {
+			this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
+			// it seems that there is no easy way to listen for div's size changes
+			// running this on every digest cycle might be close enough
+			this.updateSvgSize();
+		}
 	}
 
 	updateSvgSize() {
