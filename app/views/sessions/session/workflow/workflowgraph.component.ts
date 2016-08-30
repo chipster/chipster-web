@@ -365,7 +365,7 @@ class WorkflowGraphController {
 					if (!Utils.isCtrlKey(this.d3.event)) {
 						this.callback.clearSelection();
 					}
-					this.SelectionService.toggleDatasetSelection(this.wd3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
+					this.SelectionService.toggleDatasetSelection(this.d3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
 				});
 				tip.hide(d);
 			})
