@@ -26,11 +26,8 @@ export default class SessionDataService {
         private ConfigService: ConfigService,
         private AuthenticationService: AuthenticationService,
         private $uibModal: IModalService) {
-
-        this.init();
     }
 
-    sessionId: string;
     jobsMap = new Map<string, Job>();
     datasetsMap = new Map<string, Dataset>();
     modules: Module[];
@@ -40,21 +37,21 @@ export default class SessionDataService {
     session: Session;
     listeners: any = [];
 
-    init() {
-        this.sessionId = this.$routeParams['sessionId'];
-        // start listening for remote changes
-        // in theory we may miss an update between the loadSession() and this subscribe(), but
-        // the safe way would be much more complicated:
-        // - subscribe but put the updates in queue
-        // - loadSession().then()
-        // - apply the queued updates
+    // start listening for remote changes
+    // in theory we may miss an update between the loadSession() and this subscribe(), but
+    // the safe way would be much more complicated:
+    // - subscribe but put the updates in queue
+    // - loadSession().then()
+    // - apply the queued updates
 
-        // SessionRestangular is a restangular object with
-        // configured baseUrl and
-        // authorization header
-        //this.sessionUrl = this.SessionResource.service.one('sessions', this.sessionId);
+    // SessionRestangular is a restangular object with
+    // configured baseUrl and
+    // authorization header
+    //this.sessionUrl = this.SessionResource.service.one('sessions', this.$routeParams['sessionId'];);
 
 
+    getSessionId() : string {
+        return this.$routeParams['sessionId'];
     }
 
     onSessionChange(listener: any) {
@@ -74,18 +71,18 @@ export default class SessionDataService {
     }
 
     createDataset(dataset: Dataset) {
-        return this.SessionResource.createDataset(this.sessionId, dataset);
+        return this.SessionResource.createDataset(this.getSessionId(), dataset);
     }
 
     createJob(job: Job) {
-        return this.SessionResource.createJob(this.sessionId, job).then((res: any) => {
+        return this.SessionResource.createJob(this.getSessionId(), job).then((res: any) => {
             this.$log.debug('job created', res);
         });
     }
 
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
-            this.SessionResource.deleteJob(this.sessionId, job.jobId).then(function (res: any) {
+            this.SessionResource.deleteJob(this.getSessionId(), job.jobId).then(function (res: any) {
                 this.$log.debug('job deleted', res);
             }.bind(this));
         }
@@ -94,14 +91,14 @@ export default class SessionDataService {
     deleteDatasets(datasets: Dataset[]) {
 
         for (let dataset of datasets) {
-            this.SessionResource.deleteDataset(this.sessionId, dataset.datasetId).then(function (res: any) {
+            this.SessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then(function (res: any) {
                 this.$log.debug('dataset deleted', res);
             }.bind(this));
         }
     }
 
     updateDataset(dataset: Dataset) {
-        return this.SessionResource.updateDataset(this.sessionId, dataset);
+        return this.SessionResource.updateDataset(this.getSessionId(), dataset);
     }
 
 
@@ -118,7 +115,7 @@ export default class SessionDataService {
          */
 
         return URI(this.ConfigService.getFileBrokerUrlIfInitialized())
-            .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
+            .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
             .addSearch('token', this.AuthenticationService.getToken()).toString();
 
     }

@@ -1,19 +1,20 @@
 import FileResource from "../../../../../resources/fileresource";
+import SessionDataService from "../../sessiondata.service";
 
 class SpreadsheetVisualizationController {
 
-    static $inject = ['FileResource', '$scope'];
+    static $inject = ['FileResource', '$scope', 'SessionDataService'];
 
-    constructor(private fileResource: FileResource, private $scope: ng.IScope){
-        this.init();
-    }
-
-    sessionId: string;
     datasetId: string;
 
-    init() {
+    constructor(private fileResource: FileResource,
+                private $scope: ng.IScope,
+                private SessionDataService: SessionDataService){
 
-        this.fileResource.getData(this.sessionId, this.datasetId).then((resp: any) => {
+    }
+
+    $onInit() {
+        this.fileResource.getData(this.SessionDataService.getSessionId(), this.datasetId).then((resp: any) => {
 
             // parse the file data using the JQuery-cvs library
             let parserConfig = {
@@ -45,7 +46,6 @@ export default {
     controller: SpreadsheetVisualizationController,
     template: '<div id="tableContainer"></div>',
     bindings: {
-        sessionId: '=',
-        datasetId: '='
+        datasetId: '<'
     }
 }

@@ -242,7 +242,7 @@ class ToolsBox {
         var promises: any[] = [];
         for (let dataset of this.SelectionService.selectedDatasets) {
             if (this.ToolService.isCompatible(dataset, 'TSV')) {
-                promises.push(this.TableService.getColumns(this.SessionDataService.sessionId, dataset.datasetId));
+                promises.push(this.TableService.getColumns(this.SessionDataService.getSessionId(), dataset.datasetId));
             }
         }
 

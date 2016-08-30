@@ -22,12 +22,10 @@ class PhenodataVisualizationController {
         private tableService: TableService,
         private sessionDataService: SessionDataService,
         private $scope: ng.IScope) {
-
         this.init();
     }
 
     datasets: Dataset[];
-    sessionId: string;
     hot: ht.Methods;
     // name of the new column
     colName: string;
@@ -144,7 +142,7 @@ class PhenodataVisualizationController {
 
     resetTsv(dataset: Dataset) {
 
-        this.tableService.getColumns(this.sessionId, dataset.datasetId).then((fileHeaders: string[]) => {
+        this.tableService.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).then((fileHeaders: string[]) => {
             var metadata: MetadataEntry[] = [];
 
             var chipHeaders = fileHeaders.filter( function(header) {
@@ -340,7 +338,6 @@ export default {
     controller: PhenodataVisualizationController,
     templateUrl: 'views/sessions/session/visualization/phenodata/phenodatavisualization.html',
     bindings: {
-        datasets: '=selectedDatasets',
-        sessionId: '=',
+        datasets: '=selectedDatasets'
     }
 }

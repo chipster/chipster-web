@@ -6,11 +6,17 @@ import SelectionService from "./selection.service";
 import SessionResource from "../../../resources/session.resource";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
+import { SessionData } from "../../../resources/session.resource";
 
 class SessionComponent {
+
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
         'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource'];
+
+    datasetSearch: string;
+    private selectedTab = 1;
+    toolDetailList: any = null;
 
     constructor(
         private $scope: ng.IScope,
@@ -23,21 +29,10 @@ class SessionComponent {
         private SessionEventService: SessionEventService,
         private SessionDataService: SessionDataService,
         private SelectionService: SelectionService,
-        private sessionResource: SessionResource) {
+        private sessionResource: SessionResource) {}
 
-        this.init();
-    }
-
-    datasetSearch: string;
-
-    private selectedTab = 1;
-
-    toolDetailList: any = null;
-
-
-
-    init() {
-        this.SessionDataService.onSessionChange(function (event: any, oldValue: any, newValue: any): void {
+    $onInit() {
+        this.SessionDataService.onSessionChange( (event: any, oldValue: any, newValue: any): void => {
             if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
                 this.$scope.$apply(function () {
                     alert('The session has been deleted.');
@@ -63,10 +58,7 @@ class SessionComponent {
                     }
                 }
             }
-        }.bind(this));
-
-        // stop listening for events when leaving this view
-        this.$scope.$on("$destroy", () => this.SessionDataService.destroy() );
+        });
 
         // We are only handling the resize end event, currently only
         // working in workflow graph div
@@ -78,9 +70,7 @@ class SessionComponent {
          this.$scope.$broadcast('resizeWorkFlowGraph', {});
          });*/
 
-
-        this.sessionResource.loadSession(this.$routeParams['sessionId']).then( (parsedData: SessionData) => {
-            this.SessionDataService.sessionId = parsedData.session.sessionId;
+        this.sessionResource.loadSession(this.SessionDataService.getSessionId()).then( (parsedData: SessionData) => {
             this.SessionDataService.jobsMap = parsedData.jobsMap;
             this.SessionDataService.datasetsMap = parsedData.datasetsMap;
             this.SessionDataService.modules = parsedData.modules;
@@ -89,12 +79,16 @@ class SessionComponent {
             this.SessionDataService.session = parsedData.session;
         });
 
-        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.$routeParams['sessionId'], this.SessionDataService, (event: any, oldValue: any, newValue: any) => {
+        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.SessionDataService.getSessionId(), this.SessionDataService, (event: any, oldValue: any, newValue: any) => {
             for (let listener of this.SessionDataService.listeners) {
                 listener(event, oldValue, newValue);
             }
         });
+    }
 
+    $onDestroy() {
+        // stop listening for events when leaving this view
+        this.SessionDataService.destroy();
     }
 
     datasetSearchKeyEvent(e: any) {
@@ -152,12 +146,6 @@ class SessionComponent {
 
     exportDatasets(datasets: Dataset[]) {
         this.SessionDataService.exportDatasets(datasets);
-    }
-
-
-
-    getSessionId() {
-        return this.SessionDataService.sessionId;
     }
 
     getSession() {
@@ -222,7 +210,6 @@ class SessionComponent {
     }
 
     openSessionEditModal() {
-
         var modalInstance = this.$uibModal.open({
             templateUrl: 'views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
@@ -245,8 +232,6 @@ class SessionComponent {
             // modal dismissed
         });
     }
-
-
 }
 
 

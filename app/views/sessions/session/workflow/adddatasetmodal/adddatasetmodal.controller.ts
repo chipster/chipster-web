@@ -8,62 +8,62 @@ import IQService = angular.IQService;
 import IModalService = angular.ui.bootstrap.IModalService;
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 
-AddDatasetModalController.$inject = ['$log', '$uibModalInstance', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'SessionDataService', '$q'];
+export default class AddDatasetModalController {
+    static $inject = ['$log', '$uibModalInstance', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'SessionDataService', '$q'];
 
-function AddDatasetModalController(
-    $log: ng.ILogService,
-    $uibModalInstance: IModalServiceInstance,
-    $routeParams: ng.route.IRouteParamsService,
-    ConfigService: ConfigService,
-    AuthenticationService: AuthenticationService,
-    SessionDataService: SessionDataService,
-    $q: IQService) {
-    
-    this.flowFileAdded = function (file: any, event: any, flow: any) {
-        $log.debug('file added');
+    constructor(private $log: ng.ILogService,
+                private $uibModalInstance: IModalServiceInstance,
+                private $routeParams: ng.route.IRouteParamsService,
+                private ConfigService: ConfigService,
+                private AuthenticationService: AuthenticationService,
+                private SessionDataService: SessionDataService,
+                private $q: IQService) {
+
+    }
+
+    flowFileAdded(file: any, event: any, flow: any) {
+        this.$log.debug('file added');
         flow.opts.target = function (file: any) {
             return file.chipsterTarget;
         };
 
         let promises = [
-            ConfigService.getFileBrokerUrl(),
+            this.ConfigService.getFileBrokerUrl(),
             this.createDataset(file.name)
         ];
 
-        $q.all(promises).then((results: any) => {
+        this.$q.all(promises).then((results: any) => {
             let url: string = results[0];
             let dataset: Dataset = results[1];
 
             file.chipsterTarget = URI(url)
-                .path('sessions/' + $routeParams['sessionId'] + '/datasets/' + dataset.datasetId)
-                .addSearch('token', AuthenticationService.getToken()).toString();
+                .path('sessions/' + this.SessionDataService.getSessionId() + '/datasets/' + dataset.datasetId)
+                .addSearch('token', this.AuthenticationService.getToken()).toString();
             file.resume();
         });
         file.pause();
-    };
+    }
 
-    this.createDataset = function (name: string) {
-
+    createDataset(name: string) {
         var d = new Dataset(name);
-        $log.debug('createDataset', d);
-        return SessionDataService.createDataset(d).then((datasetId: string) => {
-                d.datasetId = datasetId;
-                var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(SessionDataService.datasetsMap));
-                d.x = pos.x;
-                d.y = pos.y;
-                SessionDataService.datasetsMap.set(d.datasetId, d);
-                SessionDataService.updateDataset(d);
-                return d;
-            });
+        this.$log.debug('createDataset', d);
+        return this.SessionDataService.createDataset(d).then((datasetId: string) => {
+            d.datasetId = datasetId;
+            var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(this.SessionDataService.datasetsMap));
+            d.x = pos.x;
+            d.y = pos.y;
+            this.SessionDataService.datasetsMap.set(d.datasetId, d);
+            this.SessionDataService.updateDataset(d);
+            return d;
+        });
     };
 
-    this.flowFileSuccess = function (file: any) {
+    flowFileSuccess(file: any) {
         file.cancel();
     };
 
-    this.close = function () {
-        $uibModalInstance.dismiss();
+    close() {
+        this.$uibModalInstance.dismiss();
     };
-}
 
-export default AddDatasetModalController;
+}

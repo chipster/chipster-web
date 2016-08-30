@@ -98,7 +98,6 @@ class VisualizationBoxComponent {
         var directive = angular.element('<' + vis.directive + '/>');
         directive.attr('src', '$ctrl.getDatasetUrl()');
         directive.attr('dataset-id', '$ctrl.SelectionService.selectedDatasets[0].datasetId');
-        directive.attr('session-id', "'" + this.SessionDataService.sessionId + "'");
         directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
         this.$compile(directive)(this.$scope);
         var area = angular.element(document.getElementById("visualizationArea"));

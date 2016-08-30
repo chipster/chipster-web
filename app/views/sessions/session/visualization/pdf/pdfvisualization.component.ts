@@ -17,9 +17,9 @@ class PdfVisualizationController {
 
     constructor(private $scope: PdfScope) {
         // the pdf library assumes these are in $scope
-        $scope.pdfUrl = this.src;
-        $scope.pdfFileName = 'PDF file';//name of the pdf result file to view
-        $scope.loading = 'loading';
+        this.$scope.pdfUrl = this.src;
+        this.$scope.pdfFileName = 'PDF file';//name of the pdf result file to view
+        this.$scope.loading = 'loading';
 
         this.$scope.onError = this.onError.bind(this);
         this.$scope.onLoad = this.onLoad.bind(this);

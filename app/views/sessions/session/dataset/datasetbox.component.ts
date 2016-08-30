@@ -45,8 +45,6 @@ class DatasetBoxComponent {
 		this.currentVisualizationDirective = directive;
 	}
 
-
-
 	show(vis: Visualization) {
 		if (!this.SelectionService.isSingleDatasetSelected()) {
 			console.log("trying to show visualization, but " + this.SelectionService.selectedDatasets.length + " datasets selected");
@@ -55,7 +53,6 @@ class DatasetBoxComponent {
 		var directive = angular.element('<' + vis.directive + '/>');
 		directive.attr('src', '$ctrl.getDatasetUrl()');
 		directive.attr('dataset-id', '$ctrl.getDataset().datasetId');
-		directive.attr('session-id', "'" + this.SessionDataService.sessionId + "'");
 		directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
 		this.$compile(directive)(this.$scope);
 		var area = angular.element(document.getElementById("visualizationArea"));
