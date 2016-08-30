@@ -2,15 +2,9 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import Tool from "../../../model/session/tool";
 import Utils from "../../../services/utils.service";
-import SessionDataService from "./sessiondata.service";
+import UtilsService from "../../../services/utils.service";
 
 export default class SelectionService {
-
-    static $inject = ['SessionDataService'];
-
-    constructor(
-        private SessionDataService: SessionDataService) {
-    }
 
     // selections
     selectedDatasets: Dataset[] = [];
@@ -73,18 +67,19 @@ export default class SelectionService {
         return this.selectedDatasets.length > 1;
     }
 
+    toggleDatasetSelection($event: any, data: Dataset, allDatasets: any[]) {
+        this.activeDatasetId = data.datasetId;
+        UtilsService.toggleSelection($event, data, allDatasets, this.selectedDatasets);
+    }
+
     clearSelection() {
         this.selectedDatasets.length = 0;
         this.selectedJobs.length = 0;
-    }
-
-    toggleDatasetSelection($event: any, data: Dataset) {
-        this.activeDatasetId = data.datasetId;
-        Utils.toggleSelection($event, data, this.SessionDataService.getDatasetList(), this.selectedDatasets);
     }
 
     selectJob(event: any, job: Job) {
         this.clearSelection();
         this.selectedJobs = [job];
     }
+
 }

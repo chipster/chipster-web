@@ -7,16 +7,19 @@ import SessionResource from "../../../resources/session.resource";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import { SessionData } from "../../../resources/session.resource";
+import UtilsService from "../../../services/utils.service";
+
 
 class SessionComponent {
 
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource'];
+        'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource', '$route'];
 
     datasetSearch: string;
     private selectedTab = 1;
     toolDetailList: any = null;
+    sessionData: SessionData;
 
     constructor(
         private $scope: ng.IScope,
@@ -27,12 +30,16 @@ class SessionComponent {
         private $log: ng.ILogService,
         private $uibModal: ng.ui.bootstrap.IModalService,
         private SessionEventService: SessionEventService,
-        private SessionDataService: SessionDataService,
-        private SelectionService: SelectionService,
-        private sessionResource: SessionResource) {}
+        private sessionDataService: SessionDataService,
+        private selectionService: SelectionService,
+        private sessionResource: SessionResource,
+        private $route: ng.route.IRouteService) {
+    }
 
     $onInit() {
-        this.SessionDataService.onSessionChange( (event: any, oldValue: any, newValue: any): void => {
+        this.sessionData = this.$route.current.locals.sessionData;
+
+        this.sessionDataService.onSessionChange( (event: any, oldValue: any, newValue: any): void => {
             if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
                 this.$scope.$apply(function () {
                     alert('The session has been deleted.');
@@ -70,17 +77,10 @@ class SessionComponent {
          this.$scope.$broadcast('resizeWorkFlowGraph', {});
          });*/
 
-        this.sessionResource.loadSession(this.SessionDataService.getSessionId()).then( (parsedData: SessionData) => {
-            this.SessionDataService.jobsMap = parsedData.jobsMap;
-            this.SessionDataService.datasetsMap = parsedData.datasetsMap;
-            this.SessionDataService.modules = parsedData.modules;
-            this.SessionDataService.tools = parsedData.tools;
-            this.SessionDataService.modulesMap = parsedData.modulesMap;
-            this.SessionDataService.session = parsedData.session;
-        });
 
-        this.SessionDataService.subscription = this.SessionEventService.subscribe(this.SessionDataService.getSessionId(), this.SessionDataService, (event: any, oldValue: any, newValue: any) => {
-            for (let listener of this.SessionDataService.listeners) {
+
+        this.sessionDataService.subscription = this.SessionEventService.subscribe(this.sessionDataService.getSessionId(), this.sessionDataService, (event: any, oldValue: any, newValue: any) => {
+            for (let listener of this.sessionDataService.listeners) {
                 listener(event, oldValue, newValue);
             }
         });
@@ -88,14 +88,14 @@ class SessionComponent {
 
     $onDestroy() {
         // stop listening for events when leaving this view
-        this.SessionDataService.destroy();
+        this.sessionDataService.destroy();
     }
 
     datasetSearchKeyEvent(e: any) {
         if (e.keyCode == 13) { // enter
             // select highlighted datasets
             var allDatasets = this.getDatasetList();
-            this.SelectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch);
+            this.selectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch);
             this.datasetSearch = null;
         }
         if (e.keyCode == 27) { // escape key
@@ -105,72 +105,72 @@ class SessionComponent {
     }
 
     getSelectedDatasets() {
-        return this.SelectionService.selectedDatasets;
+        return this.selectionService.selectedDatasets;
     }
 
     getSelectedJobs() {
-        return this.SelectionService.selectedJobs;
+        return this.selectionService.selectedJobs;
     }
 
     isSelectedDataset(dataset: Dataset) {
-        return this.SelectionService.isSelectedDataset(dataset);
-    }
-
-    toggleDatasetSelection($event: any, dataset: Dataset) {
-        this.SelectionService.toggleDatasetSelection($event, dataset);
+        return this.selectionService.isSelectedDataset(dataset);
     }
 
     setTab(tab: number) {
-        this.selectedTab = tab;
+        this.selectedTab§ = tab;
     }
 
     isTab(tab: number) {
         return this.selectedTab === tab;
     }
 
-    getJob(jobId: string) {
-        return this.SessionDataService.getJob(jobId);
+    getJob(jobId: string): Job {
+        return this.getJob(jobId);
+    }
+
+    getDatasetList(datasetsMap: Map): Dataset[] {
+        return UtilsService.mapValues(this.sessionData.datasetsMap);
     }
 
     deleteJobs(jobs: Job[]) {
-        this.SessionDataService.deleteJobs(jobs);
+        this.sessionDataService.deleteJobs(jobs);
     }
 
     deleteDatasets(datasets: Dataset[]) {
-        this.SessionDataService.deleteDatasets(datasets);
+        this.sessionDataService.deleteDatasets(datasets);
     }
 
     renameDatasetDialog(dataset: Dataset) {
-        this.SessionDataService.renameDatasetDialog(dataset);
+        this.sessionDataService.renameDatasetDialog(dataset);
     }
 
     exportDatasets(datasets: Dataset[]) {
-        this.SessionDataService.exportDatasets(datasets);
+        this.sessionDataService.exportDatasets(datasets);
     }
 
     getSession() {
-        return this.SessionDataService.session;
+        return this.sessionDataService.session;
     }
 
     getDatasetList() {
-        return this.SessionDataService.getDatasetList();
+        return UtilsService.mapValues(this.sessionData.datasetsMap);
     }
 
     getDatasetsMap() {
-        return this.SessionDataService.datasetsMap;
+        return this.sessionDataService.datasetsMap;
     }
 
     getJobsMap() {
-        return this.SessionDataService.jobsMap;
+        return this.sessionDataService.jobsMap;
     }
 
     getModulesMap() {
-        return this.SessionDataService.modulesMap;
+        return this.sessionDataService.modulesMap;
     }
 
     getDatasetUrl() {
-        if (this.SelectionService.selectedDatasets && this.SelectionService.selectedDatasets.length > 0) {
-            return this.SessionDataService.getDatasetUrl(this.SelectionService.selectedDatasets[0]);
+        if (this.selectionService.selectedDatasets && this.selectionService.selectedDatasets.length > 0) {
+            return this.sessionDataService.getDatasetUrl(this.selectionService.selectedDatasets[0]);
         }
     }
 
@@ -184,7 +184,7 @@ class SessionComponent {
             size: 'lg',
             resolve: {
                 data: () => {
-                    return SessionDataService;
+                    return sessionDataService;
                 }
             }
         });
@@ -217,7 +217,7 @@ class SessionComponent {
             bindToController: true,
             resolve: {
                 title:  () => {
-                    return angular.copy(this.SessionDataService.sessionData.name);
+                    return angular.copy(this.sessionDataService.sessionData.name);
                 }
             }
         });
@@ -226,8 +226,8 @@ class SessionComponent {
             if (!result) {
                 result = 'unnamed session';
             }
-            this.SessionDataService.session.name = result;
-            this.SessionDataService.updateSession();
+            this.sessionDataService.session.name = result;
+            this.sessionDataService.updateSession();
         }, function () {
             // modal dismissed
         });

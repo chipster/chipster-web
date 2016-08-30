@@ -49,7 +49,6 @@ class VisualizationBoxComponent {
     }
 
     $onChanges(changes: ng.IChangesObject) {
-        console.log(changes);
     }
 
     setCurrentVisualization(newVisualization: Visualization, directive: any) {

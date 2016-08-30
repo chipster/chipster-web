@@ -11,6 +11,7 @@ import Module from "../../../model/session/module";
 import Tool from "../../../model/session/tool";
 import {SessionData} from "../../../resources/session.resource";
 import IModalService = angular.ui.bootstrap.IModalService;
+import UtilsService from "../../../services/utils.service";
 
 export default class SessionDataService {
 
@@ -28,13 +29,7 @@ export default class SessionDataService {
         private $uibModal: IModalService) {
     }
 
-    jobsMap = new Map<string, Job>();
-    datasetsMap = new Map<string, Dataset>();
-    modules: Module[];
-    tools: Tool[];
-    modulesMap = new Map<string, Module>();
     subscription: {unsubscribe(): void};
-    session: Session;
     listeners: any = [];
 
     // start listening for remote changes
@@ -60,14 +55,6 @@ export default class SessionDataService {
 
     destroy() {
         this.subscription.unsubscribe();
-    }
-
-    getDatasetList(): Dataset[] {
-        return Utils.mapValues(this.datasetsMap);
-    }
-
-    getJob(jobId: string): Job {
-        return this.jobsMap.get(jobId);
     }
 
     createDataset(dataset: Dataset) {
@@ -101,6 +88,9 @@ export default class SessionDataService {
         return this.SessionResource.updateDataset(this.getSessionId(), dataset);
     }
 
+    getDatasetList(datasetsMap: Map): Dataset[] {
+        return UtilsService.mapValues(datasetsMap);
+    }
 
     updateSession() {
         return this.SessionResource.updateSession(this.session);

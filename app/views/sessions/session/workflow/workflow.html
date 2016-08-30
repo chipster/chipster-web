@@ -29,9 +29,9 @@
 
                 <div class="fill workflow-dataset-panel">
                     <workflow-graph
-                            datasets-map="$ctrl.getDatasetsMap()"
-                            jobs-map="$ctrl.getJobsMap()"
-                            modules-map="$ctrl.getModulesMap()"
+                            datasets-map="$ctrl.sessionData.datasetsMap"
+                            jobs-map="$ctrl.sessionData.jobsMap"
+                            modules-map="$ctrl.sessionData.modulesMap"
                             selected-datasets="$ctrl.getSelectedDatasets()"
                             selected-jobs="$ctrl.getSelectedJobs()"
                             dataset-search="$ctrl.datasetSearch"

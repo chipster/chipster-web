@@ -4,7 +4,7 @@ interface IAuthRoute extends IRoute {
     authenticated: boolean;
 }
 
-export default function ($routeProvider: ng.route.IRouteProvider) {
+export default function($routeProvider: ng.route.IRouteProvider) {
 
     $routeProvider
         .when('/', {templateUrl: 'views/home/home.html'})
@@ -16,7 +16,13 @@ export default function ($routeProvider: ng.route.IRouteProvider) {
         })
         .when('/sessions/:sessionId', <IAuthRoute>{
             template: '<session></session>',
-            authenticated: true
+            authenticated: true,
+            resolve: {
+                sessionData: ($route, SessionResource) => {
+                    return SessionResource.loadSession($route.current.params.sessionId);
+                }
+            }
         })
         .otherwise({templateUrl: 'views/home/home.html'});
 };
+

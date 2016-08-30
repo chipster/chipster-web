@@ -13,6 +13,7 @@ import {ArrayChangeDetector} from "../../../../services/changedetector.service";
 import SessionDataService from "../sessiondata.service";
 import SelectionService from "../selection.service";
 import * as d3 from "d3";
+import UtilsService from "../../../../services/utils.service";
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -46,7 +47,6 @@ class WorkflowGraphController {
 
 		this.callback = {
 			clearSelection: () => this.SelectionService.clearSelection(),
-			toggleDatasetSelection: ($event: any, data: Dataset) => this.SelectionService.toggleDatasetSelection($event, data),
 			selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
 			showDefaultVisualization: () => this.showDefaultVisualization(),
 			updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
@@ -365,7 +365,7 @@ class WorkflowGraphController {
 					if (!Utils.isCtrlKey(this.d3.event)) {
 						this.callback.clearSelection();
 					}
-					this.callback.toggleDatasetSelection(this.d3.event, d.dataset);
+					this.SelectionService.toggleDatasetSelection(this.wd3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
 				});
 				tip.hide(d);
 			})
@@ -757,6 +757,8 @@ class WorkflowGraphController {
 			}
 		});
 	}
+
+
 }
 
 export default {
