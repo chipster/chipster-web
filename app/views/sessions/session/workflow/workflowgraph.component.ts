@@ -7,11 +7,12 @@ import Dataset from "../../../../model/session/dataset";
 import Module from "../../../../model/session/module";
 import Node from "./node"
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
-import {ChangeDetector} from "../../../../services/changedetector.service";
+import {ChangeDetector, Comparison} from "../../../../services/changedetector.service";
 import {MapChangeDetector} from "../../../../services/changedetector.service";
 import {ArrayChangeDetector} from "../../../../services/changedetector.service";
 import SessionDataService from "../sessiondata.service";
 import SelectionService from "../selection.service";
+import * as d3 from "d3";
 
 interface DatasetNode extends Node {
 	dataset: Dataset;
@@ -52,24 +53,38 @@ class WorkflowGraphController {
 		};
 	}
 
-
-	wd3:any = this.$window['d3'];
+	d3: any = this.$window['d3'];
 	//var shiftKey, ctrlKey;
-	svg: any;
-	d3Links:any;
-	d3Labels:any;
-	vis:any;
+	svg: d3.Selection<any>;
+	outerSvg: d3.Selection<any>;
+
+	d3DatasetNodesGroup: d3.Selection<DatasetNode>;
+	d3JobNodesGroup: d3.Selection<JobNode>;
+	d3LinksGroup: d3.Selection<Link>;
+	d3LinksDefsGroup: d3.Selection<any>;
+	d3LabelsGroup: d3.Selection<DatasetNode>;
+	background: d3.Selection<any>;
+
+	d3Links: d3.selection.Update<Link>;
+	d3Labels: d3.selection.Update<DatasetNode>;
+	d3DatasetNodes: d3.selection.Update<DatasetNode>;
+	d3JobNodes: d3.selection.Update<JobNode>;
+
 	menu:any;
-	d3JobNodes:any;
-	graph:any;
 	nodeWidth:number = WorkflowGraphService.nodeWidth;
 	nodeHeight:number = WorkflowGraphService.nodeHeight;
 	fontSize = 14;
 	nodeRadius = 4;
 	width:number;
 	height:number;
-	svgDatasetNodes:any;
-	lastScale: number;
+	zoom: number; // default zoom level
+	lastScale: number; // last zoom level
+	zoomer: d3.behavior.Zoom<any>;
+
+	datasetNodes: Array<DatasetNode>;
+	jobNodes: Array<JobNode>;
+	links: Array<Link>;
+	filter: Map<string, Dataset>;
 
 	datasetsMap: Map<string, Dataset>;
 	jobsMap: Map<string, Job>;
@@ -78,103 +93,168 @@ class WorkflowGraphController {
 	selectedJobs: Array<Job>;
 	datasetSearch: string;
 	callback: any;
-	zoom: number;
 	enabled: boolean;
 	dragStarted: boolean;
 
 	changeDetectors: Array<ChangeDetector> = [];
 
 	$onInit() {
-		// initialize the deep comparison of input collections
-		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedDatasets, () => this.renderGraph()));
-		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedJobs, () => this.renderGraph()));
-		this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => this.update()));
-		this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => this.update()));
-		this.changeDetectors.push(new MapChangeDetector(() => this.modulesMap, () => this.update()));
 
+		var element = WorkflowGraphController.getElement();
+
+		this.zoomer = this.d3.behavior.zoom()
+			.scaleExtent([ 0.2, 1 ])
+			.scale(this.zoom)
+			.on('zoom', this.zoomAndPan.bind(this));
+
+		this.outerSvg = this.d3.select(element).append('svg').call(this.zoomer);
+
+		// draw background on outerSvg, so that it won't pan or zoom
+		this.renderBackground(this.outerSvg);
+
+		this.svg = this.outerSvg.append('g');
+
+		this.updateSvgSize();
+
+		// order of these appends will determine the drawing order
+
+		this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
+		this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node');
+		this.d3LinksGroup = this.svg.append('g').attr('class', 'link');
+		this.d3LinksDefsGroup = this.d3LinksGroup.append('defs');
+		this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
+
+		this.createShadowFilter();
+
+		// initialize the comparison of input collections
+
+		// shallow comparison is enough for noticing when the array is changed
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedDatasets, () => {
+			this.renderGraph();
+		}, Comparison.Shallow));
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedJobs, () => {
+			this.renderGraph()
+		}, Comparison.Shallow));
+
+		// deep comparison is needed to notice the changes in the objects (e.g. rename)
+		this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => {
+			this.update()
+		}, Comparison.Deep));
+		this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => {
+			this.update()
+		}, Comparison.Deep));
+		this.changeDetectors.push(new MapChangeDetector(() => this.modulesMap, () => {
+			this.update()
+		}, Comparison.Deep));
 	}
 
 	$onChanges(changes: ng.IChangesObject) {
+
+		if (!this.svg) {
+			// not yet initialized
+			return;
+		}
+
 		if ("datasetSearch" in changes) {
-			if (this.graph) {
-				if (this.datasetSearch) {
-					let filteredDatasets = this.$filter('searchDatasetFilter')(Utils.mapValues(this.datasetsMap), this.datasetSearch);
-					this.graph.filter = Utils.arrayToMap(filteredDatasets, 'datasetId');
-				} else {
-					this.graph.filter = null;
-				}
-				this.renderGraph();
+
+			if (this.datasetSearch) {
+				let filteredDatasets = this.$filter('searchDatasetFilter')(Utils.mapValues(this.datasetsMap), this.datasetSearch);
+				this.filter = Utils.arrayToMap(filteredDatasets, 'datasetId');
+			} else {
+				this.filter = null;
 			}
+			this.renderGraph();
 		}
 	}
 
 	$doCheck() {
 		this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
+		// it seems that there is no easy way to listen for div's size changes
+		// running this on every digest cycle might be close enough
+		this.updateSvgSize();
+	}
+
+	updateSvgSize() {
+
+		let element = WorkflowGraphController.getElement();
+
+		// leave some pixels for margins, otherwise the element will grow
+		this.width = Math.max(200, element.offsetWidth);
+		this.height = Math.max(200, element.offsetHeight - 5);
+
+		this.outerSvg
+			.attr('width', this.width)
+			.attr('height', this.height);
+
+		this.background
+			.attr('width', this.width)
+			.attr('height', this.height);
+	}
+
+	static getElement() {
+		return document.getElementById('workflow-container');
 	}
 
 	update() {
+
 		var datasetNodes = this.getDatasetNodes(this.datasetsMap, this.jobsMap, this.modulesMap);
 		var jobNodes = this.getJobNodes(this.jobsMap);
 
 		// Add datasets before jobs, because the layout will be done in this order.
 		// Jobs should make space for the datasets in the layout, because
 		// the jobs are only temporary.
-		var allNodes: Node[] = [];
-
-		datasetNodes.forEach((n: Node) => allNodes.push(n));
-		jobNodes.forEach((n: Node) => allNodes.push(n));
+		var allNodes = (<Array<Node>>datasetNodes).concat(jobNodes);
 
 		var links = this.getLinks(allNodes);
 
 		this.doLayout(links, allNodes);
 
-		this.graph = {
-			nodes: datasetNodes,
-			jobNodes: jobNodes,
-			links: links
-		};
+		this.datasetNodes = datasetNodes;
+		this.jobNodes = jobNodes;
+		this.links = links;
+
 		this.renderGraph();
 	}
 
 	renderJobs() {
 
-		var arc = this.wd3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
-
-		this.d3JobNodes = this.vis.append('g').attr('class', 'node').selectAll('rect');
+		var arc = <d3.svg.Arc<JobNode>>this.d3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
 		var self = this;
 
-		// create a box for each job
-		var rect = this.d3JobNodes.data(this.graph.jobNodes).enter().append('rect')
+		this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
+
+		// create the new job nodes and throw away the selection of created nodes
+		this.d3JobNodes.enter().append('rect');
+
+		// update all job nodes
+		this.d3JobNodes
 			.attr('rx', this.nodeRadius)
 			.attr('ry', this.nodeRadius)
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
-			.attr('transform', (d: Node) => 'translate(' + d.x + ',' + d.y + ')')
-			.style('fill', (d: Node, i:number) => this.getGradient(d, 'job' + i))
-			.on('click', (d: JobNode) => {
+			.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')')
+			.style('fill', (d) => d.color)
+			.attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
+			.classed('selected', (d) => self.enabled && self.isSelectedJob(d.job))
+			.on('click', (d) => {
 				if (!this.enabled) {
 					return;
 				}
-				this.$scope.$apply(this.callback.selectJob(this.wd3.event, d.job));
+				this.$scope.$apply(this.callback.selectJob(this.d3.event, d.job));
 			})
 			.on('mouseover', function () {
-				self.wd3.select(this).style('filter', 'url(#drop-shadow)');
+				self.d3.select(this).style('filter', 'url(#drop-shadow)');
 			})
 			.on('mouseout', function () {
-				self.wd3.select(this).style('filter', null);
+				self.d3.select(this).style('filter', null);
 			});
 
-		// highlight selected nodes
-		rect.each(function (d:any) {
-			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedJob(d.job));
-		});
-
 		// create an arc for each job
-		this.d3JobNodes.data(this.graph.jobNodes).enter().append('path')
-			.style('fill', (d:JobNode) => d.fgColor)
+		this.d3JobNodesGroup.selectAll('path').data(this.jobNodes).enter().append('path')
+			.style('fill', (d) => d.fgColor)
 			.style('stroke-width', 0)
-			.attr('opacity', 0.5)
+			.attr('opacity', this.filter? 0.1 : 0.5)
 			.style('pointer-events', 'none')
 			.attr('d', arc)
 			.call(this.spin.bind(this), 3000);
@@ -205,12 +285,12 @@ class WorkflowGraphController {
 				var y = d.y + this.nodeHeight / 2;
 
 				if (d.spin) {
-					return this.wd3.interpolateString(
+					return this.d3.interpolateString(
 						'translate(' + x + ',' + y + ')rotate(0)',
 						'translate(' + x + ',' + y + ')rotate(360)'
 					);
 				} else {
-					return this.wd3.interpolateString(
+					return this.d3.interpolateString(
 						'translate(' + x + ',' + y + ')',
 						'translate(' + x + ',' + y + ')'
 					);
@@ -223,71 +303,79 @@ class WorkflowGraphController {
 		}, duration);
 	}
 
-	renderBackground() {
+	renderBackground(parent: d3.Selection<any>) {
 
 		// invisible rect for listening background clicks
-		this.vis.append('rect')
+		this.background = parent.append('g').attr('class', 'background').append('rect')
 			.attr('x', 0)
 			.attr('y', 0)
 			.attr('width', this.width)
 			.attr('height', this.height)
+			//.attr('fill', 'white')
 			.attr('opacity', 0)
 			.on('click', () => {
-				if (!this.enabled) {
-					return;
+				if (this.enabled) {
+					this.$scope.$apply(this.callback.clearSelection());
 				}
-				this.$scope.$apply(this.callback.clearSelection());
 			});
 	}
 
-	renderNodes(){
-		this.svgDatasetNodes = this.vis.append('g').attr('class', 'node').selectAll('rect');
+	renderDatasets(){
 
-		var tip = this.wd3.tip()
+		var tip = this.d3['tip']()
 			.attr('class','d3-tip')
-			.offset([-10,0]).html((d: DatasetNode) => d.name+'');
+			.offset([-10,0])
+			.html((d: DatasetNode) => d.name);
 
 		this.svg.call(tip);
 
 		var self = this;
 
-		//Drawing the nodes in the SVG
-		this.svgDatasetNodes = this.svgDatasetNodes.data(this.graph.nodes).enter().append('rect')
-			.attr('x', (d: Node) => d.x )
-			.attr('y', (d: Node) => d.y )
+		// store the selection of all existing and new elements
+		this.d3DatasetNodes = this.d3DatasetNodesGroup.selectAll('rect').data(this.datasetNodes);
+
+		// don't store this selection, because enter() returns only the new elements
+		this.d3DatasetNodes.enter().append('rect');
+
+		// apply to all elements (old and new)
+		this.d3DatasetNodes
+			.attr('x', (d) => d.x )
+			.attr('y', (d) => d.y )
 			.attr('rx', this.nodeRadius)
 			.attr('ry', this.nodeRadius)
 			.attr('width', this.nodeWidth)
 			.attr('height', this.nodeHeight)
-			.style("fill", this.getGradient.bind(this))
-			.attr('opacity', (d: DatasetNode) => this.getOpacityForDataset(d.dataset))
+			.style("fill", (d) => d.color)
+			.attr('opacity', (d) => this.getOpacityForDataset(d.dataset))
+			.classed('selected', (d) => this.enabled && this.isSelectedDataset(d.dataset))
 			.on('dblclick', () => {
 				if (!this.enabled) {
 					return;
 				}
 				this.callback.showDefaultVisualization();
 			})
-			.on('click', (d: DatasetNode) => {
+			.on('click', (d) => {
 				if (!this.enabled) {
 					return;
 				}
 				this.$scope.$apply(() => {
-					if (!Utils.isCtrlKey(this.wd3.event)) {
+					if (!Utils.isCtrlKey(this.d3.event)) {
 						this.callback.clearSelection();
 					}
-					this.callback.toggleDatasetSelection(this.wd3.event, d.dataset);
+					this.callback.toggleDatasetSelection(this.d3.event, d.dataset);
 				});
 				tip.hide(d);
 			})
-			.call(this.wd3.behavior.drag()
-				.on('drag',() => {
+			.call(this.d3.behavior.drag()
+				.on('drag', () => {
+					let event = <d3.DragEvent>this.d3.event;
 					if (!this.enabled) {
 						return;
 					}
 					this.dragStarted = true;
-					this.dragNodes(this.wd3.event.dx, this.wd3.event.dy);
+					this.dragNodes(event.dx, event.dy);
 					// set defaultPrevented flag to disable scrolling
-					this.wd3.event.sourceEvent.preventDefault();
+					event.sourceEvent.preventDefault();
 				})
 				.on('dragend', () => {
 					// check the flag to differentiate between drag and click events
@@ -297,35 +385,30 @@ class WorkflowGraphController {
 					}
 				})
 			)
-			.on('contextmenu', this.wd3.contextMenu(this.menu).bind(this))
-			.on('mouseover', function(d: Node) {
+			.on('contextmenu', this.d3['contextMenu'](this.menu).bind(this))
+			.on('mouseover', function(d) {
 				if (!self.enabled) {
 					return;
 				}
 				// how to get the current element without select(this) so that we can bind(this)
 				// and get rid of 'self'
-				self.wd3.select(this).style('filter', 'url(#drop-shadow)');
+				self.d3.select(this).style('filter', 'url(#drop-shadow)');
 				tip.show(d);
 			})
-			.on('mouseout', function(d: Node) {
+			.on('mouseout', function(d) {
 				if (!self.enabled) {
 					return;
 				}
-				self.wd3.select(this).style('filter', null);
+				self.d3.select(this).style('filter', null);
 				tip.hide(d);
 			});
-
-		// highlight selected datasets
-		this.svgDatasetNodes.each(function(d: DatasetNode) {
-			self.wd3.select(this).classed('selected', self.enabled && self.isSelectedDataset(d.dataset));
-		});
 	}
 
 	getOpacityForDataset(d: Dataset) {
-		return this.getOpacity(!this.graph.filter || this.graph.filter.has(d.datasetId));
+		return WorkflowGraphController.getOpacity(!this.filter || this.filter.has(d.datasetId));
 	}
 
-	getOpacity(isVisible: boolean) {
+	static getOpacity(isVisible: boolean) {
 		if (isVisible) {
 			return 1.0;
 		} else {
@@ -333,23 +416,20 @@ class WorkflowGraphController {
 		}
 	}
 
-	renderLabels(){
-
-		this.d3Labels = this.vis.append('g').selectAll('text').data(this.graph.nodes).enter()
-			.append('text').text((d: any) => Utils.getFileExtension(d.name).slice(0, 4))
-			.attr('x', (d: Node) => d.x + this.nodeWidth/2)
-			.attr('y', (d: Node) => d.y + this.nodeHeight/2 + this.fontSize / 4)
+	renderLabels() {
+		this.d3Labels = this.d3LabelsGroup.selectAll('text').data(this.datasetNodes);
+		this.d3Labels.enter().append('text');
+		this.d3Labels.text((d: any) => Utils.getFileExtension(d.name).slice(0, 4))
+			.attr('x', (d) => d.x + this.nodeWidth/2)
+			.attr('y', (d) => d.y + this.nodeHeight/2 + this.fontSize / 4)
 			.attr('font-size', this.fontSize + 'px').attr('fill','black').attr('text-anchor', 'middle')
 			.style('pointer-events', 'none')
-			.attr('opacity', (d: DatasetNode) => this.getOpacityForDataset(d.dataset));
+			.attr('opacity', (d) => this.getOpacityForDataset(d.dataset));
 	}
 
 	renderLinks() {
-		//defining links
-		this.d3Links = this.vis.append('g').attr('class', 'link').selectAll('line');
-
 		//building the arrows for the link end
-		this.vis.append('defs').selectAll('marker').data(['end']).enter().append('marker')
+		this.d3LinksDefsGroup.selectAll('marker').data(['end']).enter().append('marker')
 			.attr('id', String)
 			.attr('viewBox','-7 -7 14 14')
 			.attr('refX', 6)
@@ -361,12 +441,16 @@ class WorkflowGraphController {
 			.style('fill','#555');
 
 		//Define the xy positions of the link
-		this.d3Links = this.d3Links.data(this.graph.links).enter().append('line')
-			.attr('x1', (d: Node) => d.source.x + this.nodeWidth/2)
-			.attr('y1', (d: Node) => d.source.y + this.nodeHeight)
-			.attr('x2', (d: Node) => d.target.x + this.nodeWidth/2)
-			.attr('y2', (d: Node) => d.target.y)
-			.attr('opacity', () => this.getOpacity(!this.graph.filter))
+		this.d3Links = this.d3LinksGroup.selectAll('line').data(this.links);
+		// add new lines, but throw away the "enter" selection
+		this.d3Links.enter().append('line');
+		// update also the old lines (for example when dragging dataset)
+		this.d3Links
+			.attr('x1', (d) => d.source.x + this.nodeWidth/2)
+			.attr('y1', (d) => d.source.y + this.nodeHeight)
+			.attr('x2', (d) => d.target.x + this.nodeWidth/2)
+			.attr('y2', (d) => d.target.y)
+			.attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
 			.style('marker-end','url(#end)');
 	}
 
@@ -374,35 +458,33 @@ class WorkflowGraphController {
 	//Function to describe drag behavior
 	dragNodes(dx: number, dy: number) {
 
-		console.log(this.callback);
-		
-		this.svgDatasetNodes
-			.filter((d: DatasetNode) => this.callback.isSelectedDataset(d.dataset))
-			.attr('x', (d: Node) => d.x += dx)
-			.attr('y', (d: Node) => d.y += dy);
+		this.d3DatasetNodes
+			.filter((d: DatasetNode) => this.isSelectedDataset(d.dataset))
+			.attr('x', (d) => d.x += dx)
+			.attr('y', (d) => d.y += dy);
 
 		this.d3Labels
-			.filter((d: DatasetNode) => this.callback.isSelectedDataset(d.dataset))
-			.attr('x', (d: Node) => d.x + dx + this.nodeWidth/2)
-			.attr('y', (d: Node) => d.y + dy + this.nodeHeight/2 + this.fontSize / 4);
+			.filter((d) => this.isSelectedDataset(d.dataset))
+			.attr('x', (d) => d.x + dx + this.nodeWidth/2)
+			.attr('y', (d) => d.y + dy + this.nodeHeight/2 + this.fontSize / 4);
 
 		this.d3Links
-			.filter((d: Link) => this.callback.isSelectedDataset(d.source.dataset))
-			.attr('x1', (d: Node) => d.source.x + this.nodeWidth/2)
-			.attr('y1', (d: Node) => d.source.y + this.nodeHeight);
+			.filter((d) => this.isSelectedDataset(d.source.dataset))
+			.attr('x1', (d) => d.source.x + this.nodeWidth/2)
+			.attr('y1', (d) => d.source.y + this.nodeHeight);
 
 		this.d3Links
-			.filter((d: Link) => this.callback.isSelectedDataset((<DatasetNode>d.target).dataset))
-			.attr('x2', (d: Node) => d.target.x + this.nodeWidth/2)
-			.attr('y2', (d: Node) => d.target.y);
+			.filter((d) => this.isSelectedDataset((<DatasetNode>d.target).dataset))
+			.attr('x2', (d) => d.target.x + this.nodeWidth/2)
+			.attr('y2', (d) => d.target.y);
 	}
 
 	dragEnd() {
 
 		// update positions of all selected datasets to the server
-		this.svgDatasetNodes
-			.filter((d: DatasetNode) => { return this.callback.isSelectedDataset(d.dataset);})
-			.each((d: DatasetNode) => {
+		this.d3DatasetNodes
+			.filter((d) => { return this.isSelectedDataset(d.dataset);})
+			.each((d) => {
 				if (d.dataset) {
 					d.dataset.x = d.x;
 					d.dataset.y = d.y;
@@ -433,43 +515,17 @@ class WorkflowGraphController {
 
 	renderGraph() {
 
-		if (!this.graph) {
+		if (!this.datasetNodes || !this.jobNodes || !this.links) {
 			this.update();
 		}
 
-		var element = document.getElementById('workflow-container');
-
-		this.width = this.graph.width = Math.max(200, element.offsetWidth);
-		this.height = this.graph.height = Math.max(200, element.offsetHeight);
-		this.wd3.select('svg').remove();
-
-		var xScale = this.wd3.scale.linear().domain([ 0, this.width ]).range([0, this.width ]);
-		var yScale = this.wd3.scale.linear().domain([ 0, this.height ]).range([ 0, this.height ]);
-
-		this.svg = this.wd3.select(element).append('svg').attr('width', this.width).attr('height', this.height);
-
-		var zoomer = this.wd3.behavior.zoom().scaleExtent([ 0.2, 1 ]).x(xScale).y(yScale).on('zoom', this.redraw.bind(this));
-
-		var svg_graph = this.svg.append('svg:g').call(zoomer);
-
-		var rect = svg_graph.append('svg:rect').attr('width', this.width).attr('height', this.height)
-			.attr('fill', 'transparent');
-
-		this.vis = svg_graph.append('svg:g');
-
-		zoomer.scale(this.zoom);
-		zoomer.event(this.svg);
-
 		//Rendering the graph elements
-
-		this.createShadowFilter();
-		this.renderBackground();
 		if (this.enabled) {
 			this.defineRightClickMenu();
 		}
 
 		this.renderLinks();
-		this.renderNodes();
+		this.renderDatasets();
 		this.renderLabels();
 		this.renderJobs();
 
@@ -501,29 +557,39 @@ class WorkflowGraphController {
 
 	}
 
-	redraw() {
+	zoomAndPan() {
+
+		let event  = <d3.ZoomEvent>this.d3.event;
 
 		// allow default zoom level to be set even when disabled
-		if (!this.enabled && this.wd3.event.scale !== this.zoom) {
+		if (!this.enabled && event.scale !== this.zoom) {
 			return;
 		}
 
 		// let zoom events go through, because those have always defaultPrevented === true
-		if (this.wd3.event.scale === this.lastScale) {
+		if (event.scale === this.lastScale) {
 			// disable scrolling when dragging nodes
-			if (this.wd3.event.sourceEvent && this.wd3.event.sourceEvent.defaultPrevented) {
+			if (event.sourceEvent && event.sourceEvent.defaultPrevented) {
 				return;
 			}
 		}
-		this.lastScale = this.wd3.event.scale;
+		this.lastScale = event.scale;
 
 		// prevent scrolling over the top and left edges
-		this.wd3.event.translate[0] = Math.min(0, this.wd3.event.translate[0]);
-		this.wd3.event.translate[1] = Math.min(0, this.wd3.event.translate[1]);
+		let tx = Math.min(0, event.translate[0]);
+		let ty = Math.min(0, event.translate[1]);
 
-		this.vis.attr('transform', 'translate('
-			+ this.wd3.event.translate + ')'
-			+ 'scale(' + this.wd3.event.scale + ')');
+		/*
+		Set limited values as a starting point of the new events.
+		Otherwise the coordinates keep growing when you scroll over the
+		limits and you have to scroll back before anything happens.
+		*/
+		this.zoomer.translate([tx, ty]);
+
+		// transform the view
+		this.svg.attr('transform', 'translate('
+			+ [tx, ty] + ')'
+			+ 'scale(' + event.scale + ')');
 	}
 
 	createShadowFilter() {
@@ -561,35 +627,6 @@ class WorkflowGraphController {
 
 		feMerge.append("feMergeNode").attr("in", "offsetBlur");
 		feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-	}
-
-	getGradient(d: Node, i: string) {
-
-		var gradient = this.vis.append("defs")
-			//.selectAll('linearGradient').data(graph.nodes).enter()
-			.append("linearGradient")
-			// separate gradient def for each data item
-			.attr("id", "gradient" + i)
-			// show only half of the gradient
-			// gradient is visible only from 0%, but this way we can fade to white and
-			// don't have to blend colors
-			.attr("x1", "-100%")
-			.attr("y1", "-100%")
-			.attr("x2", "100%")
-			.attr("y2", "100%")
-			.attr("spreadMethod", "pad");
-
-		gradient.append("stop")
-			.attr("offset", "0%")
-			.attr("stop-color", 'white')
-			.attr("stop-opacity", 1);
-
-		gradient.append("stop")
-			.attr("offset", "100%")
-			.attr("stop-color", () => d.color)
-			.attr("stop-opacity", 1);
-
-		return 'url(#gradient' + i + ')';
 	}
 
 	getDatasetNodes(datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>, modulesMap: Map<string, Module>) {
@@ -632,7 +669,7 @@ class WorkflowGraphController {
 	getJobNodes(jobsMap: Map<string, Job>) {
 
 		var jobNodes: JobNode[] = [];
-		jobsMap.forEach( (job: Job) => {
+		jobsMap.forEach( (job) => {
 			// no need to show completed jobs
 			if (job.state !== 'COMPLETED') {
 
@@ -700,7 +737,7 @@ class WorkflowGraphController {
 		// layout nodes that don't yet have a position
 
 		// layout nodes with parents (assumes that a parent precedes its childrens in the array)
-		links.forEach((link: Link) => {
+		links.forEach((link) => {
 			if (!link.target.x || !link.target.y) {
 				var pos = WorkflowGraphService.newPosition(nodes, link.source.x, link.source.y);
 				link.target.x = pos.x;
@@ -709,7 +746,7 @@ class WorkflowGraphController {
 		});
 
 		// layout orphan nodes
-		nodes.forEach((node: Node) => {
+		nodes.forEach((node) => {
 			if (!node.x || !node.y) {
 				var pos = WorkflowGraphService.newRootPosition(nodes);
 				node.x = pos.x;

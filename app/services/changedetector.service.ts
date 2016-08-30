@@ -6,14 +6,15 @@ export interface ChangeDetector {
 
 export class MapChangeDetector {
 
-    lastMap: Map<any, any>;
+    lastMapValues: Array<any>;
 
     /**
      * @param currentMap a funktion which returns the current map instance. Simple object reference would fail
      * if the instance is changed.
      * @param onChange a callback to call when a change is detected
+     * @param comparison comparison type
      */
-    constructor(private currentMap: () => Map<any, any>, private onChange: () => void) {
+    constructor(private currentMap: () => Map<any, any>, private onChange: () => void, private comparison: Comparison) {
     }
 
     /**
@@ -21,19 +22,20 @@ export class MapChangeDetector {
      */
     check() {
         let currentMapValues: Array<any>;
-        let lastMapValues: Array<any>;
 
         if (this.currentMap()) {
             currentMapValues = Utils.mapValues(this.currentMap());
         }
 
-        if (this.lastMap) {
-            lastMapValues = Utils.mapValues(this.lastMap);
-        }
-
-        if (!angular.equals(currentMapValues, lastMapValues)) {
+        if (!angular.equals(currentMapValues, this.lastMapValues)) {
             this.onChange();
-            this.lastMap = new Map(this.currentMap());
+            if (this.comparison === Comparison.Deep) {
+                // we need a deep copy to notice changes in the deep
+                this.lastMapValues = angular.copy(currentMapValues);
+            } else if (this.comparison == Comparison.Shallow) {
+                // the current instance is fine, because a new one is created on each call
+                this.lastMapValues = currentMapValues;
+            }
         }
     }
 }
@@ -46,17 +48,27 @@ export class ArrayChangeDetector {
      * @param currentArray a funktion which returns the current array instance. Simple object reference would fail
      * if the instance is changed.
      * @param onChange a callback to call when a change is detected
+     * @param comparison comparison type
      */
-    constructor(private currentArray: () => Array<any>, private onChange: () => void) {
+    constructor(private currentArray: () => Array<any>, private onChange: () => void, private comparison: Comparison) {
     }
 
     /**
      * Call the onChange funktion if the current array has changed after the last call of this method
      */
     check() {
+
         if (!angular.equals(this.currentArray(), this.lastArray)) {
             this.onChange();
-            this.lastArray = angular.extend([], this.currentArray());
+            if (this.comparison === Comparison.Shallow) {
+                // a copy of the array is needed to store the last state safely
+                this.lastArray = angular.extend([], this.currentArray());
+            } else if (this.comparison === Comparison.Deep) {
+                // we need a deep copy to notice changes in the deep
+                this.lastArray = angular.copy(this.currentArray());
+            }
         }
     }
 }
+
+export enum Comparison { Shallow, Deep }
