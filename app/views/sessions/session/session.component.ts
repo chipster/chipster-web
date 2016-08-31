@@ -117,7 +117,7 @@ class SessionComponent {
     }
 
     setTab(tab: number) {
-        this.selectedTab§ = tab;
+        this.selectedTab = tab;
     }
 
     isTab(tab: number) {
@@ -149,7 +149,7 @@ class SessionComponent {
     }
 
     getSession() {
-        return this.sessionDataService.session;
+        return this.sessionData.session;
     }
 
     getDatasetList() {
@@ -157,15 +157,15 @@ class SessionComponent {
     }
 
     getDatasetsMap() {
-        return this.sessionDataService.datasetsMap;
+        return this.sessionData.datasetsMap;
     }
 
     getJobsMap() {
-        return this.sessionDataService.jobsMap;
+        return this.sessionData.jobsMap;
     }
 
     getModulesMap() {
-        return this.sessionDataService.modulesMap;
+        return this.sessionData.modulesMap;
     }
 
     getDatasetUrl() {
@@ -226,7 +226,7 @@ class SessionComponent {
             if (!result) {
                 result = 'unnamed session';
             }
-            this.sessionDataService.session.name = result;
+            this.sessionData.session.name = result;
             this.sessionDataService.updateSession();
         }, function () {
             // modal dismissed

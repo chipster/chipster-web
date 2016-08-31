@@ -27,8 +27,6 @@ class ToolsBox {
         private ToolService: ToolService,
         private SessionDataService: SessionDataService,
         private SelectionService: SelectionService) {
-
-        this.init();
     }
 
     //initialization
@@ -40,14 +38,10 @@ class ToolsBox {
     job: Job = null;
     inputBindings: InputBinding[] = null;
     searchTool: string;
+    modules: Module[];
 
-    init() {
-        this.$scope.$watch(() => this.getModules(), function () {
-            // select the first module when the tools are loaded
-            if (this.getModules()) {
-                this.selectModule(this.getModules()[0]);
-            }
-        }.bind(this));
+    $onInit() {
+        this.selectModule(this.modules[0]);
     }
 
     selectModule(module: Module){
@@ -62,10 +56,15 @@ class ToolsBox {
     }
 
     selectTool(toolId: string) {
-
+        
+        console.dir(this.selectedCategory);
+        console.log('selecting tool', toolId);
         //find the relevant tool
-        for (let tool of this.SessionDataService.tools) {
+        for (let tool of this.selectedCategory.tools) {
+            console.log('for tools', tool);
             if(tool.name.id === toolId) {
+
+                console.log('selectedTool', tool);
                 this.selectedTool = tool;
 
                 let jobParameters: JobParameter[] = [];
@@ -103,7 +102,7 @@ class ToolsBox {
         //TODO handle multi-inputs
         datasets.forEach( item => {console.log('dataset', item)});
 
-
+             console.log('tool', tool);
         var inputBindings: InputBinding[] = [];
         for (var j = 0; j < tool.inputs.length; j++) {
             var toolInput = tool.inputs[j];
@@ -233,10 +232,6 @@ class ToolsBox {
         return jobParameter;
     }
 
-    getModules() {
-        return this.SessionDataService.modules;
-    }
-
     getColumns() {
 
         var promises: any[] = [];
@@ -329,6 +324,9 @@ class ToolsBox {
 }
 
 export default {
+    bindings: {
+        modules: '<'
+    },
     templateUrl: 'views/sessions/session/tools/tools.html',
     controller: ToolsBox
 }

@@ -9,7 +9,7 @@
             <span uib-dropdown class="btn-group">
                 <button class="btn btn-primary" uib-dropdown-toggle>Module</button>
                 <ul class="dropdown-menu" uib-dropdown-menu>
-                    <li ng-repeat="module in $ctrl.getModules() | moduleFilter:$ctrl.searchTool">
+                    <li ng-repeat="module in $ctrl.modules | moduleFilter:$ctrl.searchTool">
                         <a ng-click="$ctrl.selectModule(module)">{{module.name}}</a>
                     </li>
                 </ul>
