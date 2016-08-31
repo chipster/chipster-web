@@ -39,6 +39,7 @@ class ToolsBox {
     inputBindings: InputBinding[] = null;
     searchTool: string;
     modules: Module[];
+    tools: Tool[];
 
     $onInit() {
         this.selectModule(this.modules[0]);
@@ -57,16 +58,10 @@ class ToolsBox {
 
     selectTool(toolId: string) {
         
-        console.dir(this.selectedCategory);
-        console.log('selecting tool', toolId);
         //find the relevant tool
-        for (let tool of this.selectedCategory.tools) {
-            console.log('for tools', tool);
+        for (let tool of this.tools) {
             if(tool.name.id === toolId) {
-
-                console.log('selectedTool', tool);
                 this.selectedTool = tool;
-
                 let jobParameters: JobParameter[] = [];
                 for (let toolParameter of tool.parameters) {
                     jobParameters.push(this.getJobParameter(toolParameter));
@@ -177,7 +172,7 @@ class ToolsBox {
 
     selectFirstVisible() {
 
-        var filteredModules = this.$filter('moduleFilter')(this.SessionDataService.modules, this.searchTool);
+        var filteredModules = this.$filter('moduleFilter')(this.modules, this.searchTool);
         if (filteredModules && filteredModules.indexOf(this.selectedModule) < 0 && filteredModules[0]) {
             this.selectModule(filteredModules[0]);
         }
@@ -325,7 +320,8 @@ class ToolsBox {
 
 export default {
     bindings: {
-        modules: '<'
+        modules: '<',
+        tools: '<'
     },
     templateUrl: 'views/sessions/session/tools/tools.html',
     controller: ToolsBox
