@@ -2,10 +2,10 @@
 <h4>Dataset</h4>
 <div class="chipster-highlight">
 
-    <div class="row" ng-if="$ctrl.getDataset()">
+    <div class="row" ng-if="$ctrl.SelectionService.selectedDatasets.length > 0">
         <div class="col-md-12">
             <div class="pull-right btn-group btn-group-sm">
-                <button ng-if="$ctrl.getSelectionService().isSingleDatasetSelected()" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
+                <button ng-if="$ctrl.SelectionService.selectedDatasets.length === 0" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
                 <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete</button>
                 <button type="button" class="btn btn-default" ng-click="$ctrl.exportDatasets()">Export</button>
                 <button type="button" class="btn btn-default" ng-click="$ctrl.showHistory()">History</button>
@@ -13,26 +13,27 @@
         </div>
     </div>
 
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>
-    </ul>
+    <!--<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">-->
+        <!--<li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>-->
+    <!--</ul>-->
 
     <div class="row">
         <div class="col-md-3">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
-                        ng-repeat="dataset in $ctrl.getSelectionService().selectedDatasets"
-                        ng-class="{active: dataset.datasetId === activeDatasetId}">{{dataset.name}}
+                        ng-repeat="dataset in $ctrl.SelectionService.selectedDatasets"
+                        ng-class="{active: dataset.datasetId === activeDatasetId}"
+                        ng-click="$ctrl.setDatasetBoxDatasetSelection(dataset)">{{dataset.name}}
                 </button>
             </div>
         </div>
         <div class="col-md-9 dataset-details">
             <h5 ng-show="$ctrl.getSourceJob()">{{$ctrl.getSourceJob().toolCategory}} / {{$ctrl.getSourceJob().toolName}}</h5>
 
-            <p >{{$ctrl.getDataset().size}}, {{$ctrl.getDataset().created}}</p>
+            <p >{{$ctrl.datasetSelection.size}}, {{$ctrl.datasetSelection.created}}</p>
             <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
-                      ng-blur="$ctrl.updateDataset($ctrl.getDataset())"
-                      ng-model="$ctrl.getDataset().notes">
+                      ng-blur="$ctrl.updateDataset($ctrl.datasetSelection)"
+                      ng-model="$ctrl.datasetSelection.notes">
             </textarea>
             <parameter-list ng-if="$ctrl.getSourceJob().parameters.length > 0" parameters="$ctrl.getSourceJob().parameters"></parameter-list>
 

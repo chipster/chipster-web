@@ -5,12 +5,16 @@ import Visualization from "../visualization/visualization";
 import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
+import Job from "../../../../model/session/job";
 
 class DatasetBoxComponent {
 
 	static $inject = [
 		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
 		'SessionDataService'];
+
+	private jobs: Job[];
+	private datasetSelection: Dataset;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -21,44 +25,14 @@ class DatasetBoxComponent {
 		private SessionDataService: SessionDataService) {
 	}
 
-	$onInit() {
-		this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
-			this.setCurrentVisualization(null, null);
-		});
+    $onInit() {
+        // A dataset should be selected from workflow when this component is initialized. Set it as selected by default.
+        this.datasetSelection = this.SelectionService.selectedDatasets[0];
+    }
 
-		this.$scope.$on('showDefaultVisualization', () => {
-			var visualizations = this.getVisualizations();
-			if (visualizations.length > 0) {
-				this.show(visualizations[0]);
-			}
-		});
-
-		this.setCurrentVisualization(null, null);
-	}
-
-	setCurrentVisualization(newVisualization: Visualization, directive: any) {
-
-		if (this.currentVisualizationDirective) {
-			this.currentVisualizationDirective.remove();
-		}
-		this.currentVisualization = newVisualization;
-		this.currentVisualizationDirective = directive;
-	}
-
-	show(vis: Visualization) {
-		if (!this.SelectionService.isSingleDatasetSelected()) {
-			console.log("trying to show visualization, but " + this.SelectionService.selectedDatasets.length + " datasets selected");
-			return;
-		}
-		var directive = angular.element('<' + vis.directive + '/>');
-		directive.attr('src', '$ctrl.getDatasetUrl()');
-		directive.attr('dataset-id', '$ctrl.getDataset().datasetId');
-		directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
-		this.$compile(directive)(this.$scope);
-		var area = angular.element(document.getElementById("visualizationArea"));
-		area.empty();
-		area.append(directive);
-		this.setCurrentVisualization(vis, directive);
+	// Used in datasetBox to select one dataset and view information about it (not to be mixed with dataset selections in workflow)
+	setDatasetBoxDatasetSelection(dataset: Dataset) {
+		this.datasetSelection = dataset;
 	}
 
 	renameDataset() {
@@ -77,29 +51,24 @@ class DatasetBoxComponent {
 		this.SessionDataService.openDatasetHistoryModal();
 	}
 
-	getSelectionService() {
-		return this.SelectionService;
-	}
-
 	getSourceJob() {
-		if (this.getSelectionService().selectedDatasets[0]) {
-			return this.SessionDataService.getJob(this.getSelectionService().selectedDatasets[0].sourceJob)
+		if (this.SelectionService.selectedDatasets[0]) {
+			return this.SessionDataService.getJobById(this.SelectionService.selectedDatasets[0].sourceJob, this.jobs);
 		}
 		return null;
 	}
 
-	getDataset() {
-		return this.SelectionService.selectedDatasets[0];
-	}
-
 	getDatasetUrl() {
-		if (this.getDataset()) {
+		if (this.SelectionService.selectedDatasets.length > 0) {
 			return this.SessionDataService.getDatasetUrl(this.getDataset());
 		}
 	}
 }
 
 export default {
+	bindings: {
+		jobs: '<'
+	},
 	templateUrl: 'views/sessions/session/dataset/dataset.html',
 	controller: DatasetBoxComponent
 }

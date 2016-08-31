@@ -15,10 +15,13 @@
             </div>
         </div>
 
+
+
         <div class="row">
             <div class="col-md-12">
-                <Job-box ng-if="$ctrl.SelectionService.selectedJobs.length > 0"></Job-box>
-                <dataset-box ng-if="$ctrl.SelectionService.selectedDatasets.length > 0"></dataset-box>
+                <Job-box ng-if="$ctrl.selectionService.selectedJobs.length > 0"></Job-box>
+                <dataset-box ng-if="$ctrl.selectionService.selectedDatasets.length > 0"
+                        jobs="$ctrl.sessionData.jobsMap"></dataset-box>
             </div>
         </div>
 

@@ -67,6 +67,10 @@ export default class SessionDataService {
         });
     }
 
+    getJobById(jobId: string, jobs: Map){
+        return jobs.get(jobId);
+    }
+
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
             this.SessionResource.deleteJob(this.getSessionId(), job.jobId).then(function (res: any) {
