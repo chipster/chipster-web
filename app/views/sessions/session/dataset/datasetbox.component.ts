@@ -32,6 +32,14 @@ class DatasetBoxComponent {
         this.datasetSelectionSourceJob = this.getSourceJob(this.datasetSelection);
     }
 
+    $doCheck() {
+        let selectedDatasetsCount = this.SelectionService.selectedDatasets.length;
+        let lastSelectedDataset = this.SelectionService.selectedDatasets[selectedDatasetsCount - 1];
+        if(lastSelectedDataset.datasetId !== this.datasetSelection.datasetId) {
+            this.setDatasetBoxDatasetSelection(lastSelectedDataset);
+        }
+    }
+
 	// Used in datasetBox to select one dataset and view information about it (not to be mixed with dataset selections in workflow)
 	setDatasetBoxDatasetSelection(dataset: Dataset) {
 		this.datasetSelection = dataset;
