@@ -79,7 +79,7 @@ class SessionComponent {
 
 
 
-        this.sessionDataService.subscription = this.SessionEventService.subscribe(this.sessionDataService.getSessionId(), this.sessionDataService, (event: any, oldValue: any, newValue: any) => {
+        this.sessionDataService.subscription = this.SessionEventService.subscribe(this.sessionDataService.getSessionId(), this.sessionData, (event: any, oldValue: any, newValue: any) => {
             for (let listener of this.sessionDataService.listeners) {
                 listener(event, oldValue, newValue);
             }

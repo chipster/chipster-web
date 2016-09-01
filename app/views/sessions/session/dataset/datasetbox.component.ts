@@ -13,8 +13,9 @@ class DatasetBoxComponent {
 		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
 		'SessionDataService'];
 
-	private jobs: Job[];
+	private jobs: Map;
 	private datasetSelection: Dataset;
+    private datasetSelectionSourceJob: Job;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -28,11 +29,13 @@ class DatasetBoxComponent {
     $onInit() {
         // A dataset should be selected from workflow when this component is initialized. Set it as selected by default.
         this.datasetSelection = this.SelectionService.selectedDatasets[0];
+        this.datasetSelectionSourceJob = this.getSourceJob(this.datasetSelection);
     }
 
 	// Used in datasetBox to select one dataset and view information about it (not to be mixed with dataset selections in workflow)
 	setDatasetBoxDatasetSelection(dataset: Dataset) {
 		this.datasetSelection = dataset;
+        this.datasetSelectionSourceJob = this.getSourceJob(this.datasetSelection);
 	}
 
 	renameDataset() {
@@ -51,11 +54,8 @@ class DatasetBoxComponent {
 		this.SessionDataService.openDatasetHistoryModal();
 	}
 
-	getSourceJob() {
-		if (this.SelectionService.selectedDatasets[0]) {
-			return this.SessionDataService.getJobById(this.SelectionService.selectedDatasets[0].sourceJob, this.jobs);
-		}
-		return null;
+	getSourceJob(dataset: Dataset) {
+        return this.SessionDataService.getJobById(dataset.sourceJob, this.jobs);
 	}
 
 	getDatasetUrl() {

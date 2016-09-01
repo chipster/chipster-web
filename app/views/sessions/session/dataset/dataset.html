@@ -22,20 +22,20 @@
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
                         ng-repeat="dataset in $ctrl.SelectionService.selectedDatasets"
-                        ng-class="{active: dataset.datasetId === activeDatasetId}"
-                        ng-click="$ctrl.setDatasetBoxDatasetSelection(dataset)">{{dataset.name}}
+                        ng-class="{active: dataset.datasetId === activeDatasetId}">
+                    <span ng-click="$ctrl.setDatasetBoxDatasetSelection(dataset)">{{dataset.name}} - {{dataset.datasetId}}</span>
                 </button>
             </div>
         </div>
         <div class="col-md-9 dataset-details">
-            <h5 ng-show="$ctrl.getSourceJob()">{{$ctrl.getSourceJob().toolCategory}} / {{$ctrl.getSourceJob().toolName}}</h5>
+            <h5 ng-if="$ctrl.datasetSelectionSourceJob">{{$ctrl.datasetSelectionSourceJob.toolCategory}} / {{$ctrl.datasetSelectionSourceJob.toolName}}</h5>
 
-            <p >{{$ctrl.datasetSelection.size}}, {{$ctrl.datasetSelection.created}}</p>
+            <p>{{$ctrl.datasetSelection.size}}, {{$ctrl.datasetSelection.created}}</p>
             <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
                       ng-blur="$ctrl.updateDataset($ctrl.datasetSelection)"
                       ng-model="$ctrl.datasetSelection.notes">
             </textarea>
-            <parameter-list ng-if="$ctrl.getSourceJob().parameters.length > 0" parameters="$ctrl.getSourceJob().parameters"></parameter-list>
+            <parameter-list ng-if="$ctrl.datasetSelectionSourceJob.parameters.length > 0" parameters="$ctrl.datasetSelectionSourceJob.parameters"></parameter-list>
 
         </div>
     </div>
