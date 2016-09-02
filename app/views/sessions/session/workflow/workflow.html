@@ -1,33 +1,32 @@
+<div class="sidebar">
+    <h4><span ng-click="openSessionEditModal()">Session - {{$ctrl.getSession().name}}</span></h4>
 
-<h4><span ng-click="openSessionEditModal()">Session - {{$ctrl.getSession().name}}</span></h4>
+    <div class="chipster-highlight ">
+        <div class="bar pull-right search-div">
+            <input id="dataset-search-input" type="text" ng-model="$ctrl.datasetSearch"
+                   placeholder="search dataset" ng-keyup="$ctrl.datasetSearchKeyEvent($event)">
+            <button class="clear-search-button no-border" ng-show="$ctrl.datasetSearch"
+                    ng-click="$ctrl.datasetSearch = null">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+        </div>
 
-<div class="chipster-highlight">
-    <div class="bar pull-right search-div">
-        <input id="dataset-search-input" type="text" ng-model="$ctrl.datasetSearch"
-               placeholder="search dataset" ng-keyup="$ctrl.datasetSearchKeyEvent($event)">
-        <button class="clear-search-button no-border" ng-show="$ctrl.datasetSearch"
-                ng-click="$ctrl.datasetSearch = null">
-            <span class="glyphicon glyphicon-remove"></span>
-        </button>
-    </div>
+        <div>
 
-    <div>
+            <uib-tabset>
 
-        <uib-tabset>
+                <uib-tab index="0" heading="Workflow">
 
-            <uib-tab index="0" heading="Workflow">
-
-                <div class="workflow-dataset-static-panel">
-                    <div class="add-dataset-button">
-                        <button class="btn btn-sm btn-success link-btn"
-                                ng-click="$ctrl.openAddDatasetModal()">
-                            <span class="glyphicon glyphicon-plus"></span>
-                            Add dataset
-                        </button>
+                    <div class="workflow-dataset-static-panel">
+                        <div class="add-dataset-button">
+                            <button class="btn btn-sm btn-success link-btn"
+                                    ng-click="$ctrl.openAddDatasetModal()">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Add dataset
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="fill workflow-dataset-panel">
                     <workflow-graph
                             datasets-map="$ctrl.sessionData.datasetsMap"
                             jobs-map="$ctrl.sessionData.jobsMap"
@@ -37,39 +36,39 @@
                             dataset-search="$ctrl.datasetSearch"
                             zoom="1"
                             enabled="true"></workflow-graph>
-                </div>
-            </uib-tab>
+                </uib-tab>
 
-            <uib-tab index="1" heading="Datasets">
+                <uib-tab index="1" heading="Datasets">
 
-                <div class="workflow-dataset-static-panel">
-                    <div class="add-dataset-button">
-                        <button class="btn btn-sm btn-success link-btn"
-                                ng-click="$ctrl.openAddDatasetModal()">
-                            <span class="glyphicon glyphicon-plus"></span>
-                            Add dataset
+                    <div class="workflow-dataset-static-panel">
+                        <div class="add-dataset-button">
+                            <button class="btn btn-sm btn-success link-btn"
+                                    ng-click="$ctrl.openAddDatasetModal()">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Add dataset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="dataset-list" class="list-group workflow-dataset-panel" data-toggle="buttons">
+                        <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
+                                ng-click="$ctrl.toggleDatasetSelection($event, data)"
+                                ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">
+                            {{data.name}}
                         </button>
                     </div>
-                </div>
 
-                <div id="dataset-list" class="list-group workflow-dataset-panel" data-toggle="buttons">
-                    <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
-                            ng-click="$ctrl.toggleDatasetSelection($event, data)"
-                            ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">
-                        {{data.name}}
-                    </button>
-                </div>
+                </uib-tab>
 
-            </uib-tab>
-
-            <uib-tab index="2" heading="Details">
+                <uib-tab index="2" heading="Details">
                 <textarea id="session-notes" rows="15" placeholder="Session notes"
                           ng-blur="$ctrl.updateSession()"
                           ng-model="$ctrl.getSession().notes">
                 </textarea>
-            </uib-tab>
+                </uib-tab>
 
-        </uib-tabset>
+            </uib-tabset>
+        </div>
+
     </div>
-
 </div>

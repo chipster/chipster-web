@@ -33,6 +33,8 @@ class DatasetBoxComponent {
     }
 
     $doCheck() {
+
+        // Show information about selected dataset in workflow view in datasetbox
         let selectedDatasetsCount = this.SelectionService.selectedDatasets.length;
         let lastSelectedDataset = this.SelectionService.selectedDatasets[selectedDatasetsCount - 1];
         if(lastSelectedDataset.datasetId !== this.datasetSelection.datasetId) {
