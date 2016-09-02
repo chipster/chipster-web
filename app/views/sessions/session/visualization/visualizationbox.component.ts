@@ -32,8 +32,9 @@ class VisualizationBoxComponent {
     }
 
     $onInit() {
-        this.datasets = this.SelectionService.selectedDatasets;
+        this.datasets = [];
     }
+
 
     $doCheck() {
         if(this.datasets.length !== this.SelectionService.selectedDatasets.length ||
