@@ -28,7 +28,7 @@
         <!-- Visualization -->
         <div class="row">
             <div class="col-md-12">
-                <visualization-box></visualization-box>
+                <visualization-box ng-if="$ctrl.selectionService.selectedDatasets.length > 0"></visualization-box>
             </div>
         </div>
 

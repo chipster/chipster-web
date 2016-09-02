@@ -13,6 +13,7 @@
     "core-js": "registry:dt/core-js#0.0.0+20160602141332",
     "handsontable": "registry:dt/handsontable#0.24.3+20160711161324",
     "jquery": "registry:dt/jquery#1.10.0+20160620094458",
+    "lodash": "registry:dt/lodash#4.14.0+20160830145422",
     "ng-flow": "registry:dt/ng-flow#0.0.0+20160330001834",
     "node": "registry:dt/node#6.0.0+20160807145350",
     "restangular": "registry:dt/restangular#1.5.0+20160626231743",

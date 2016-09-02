@@ -4,6 +4,10 @@ import SelectionService from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../services/utils.service";
 import SessionDataService from "../sessiondata.service";
+import {ChangeDetector} from "../../../../services/changedetector.service";
+import {Comparison} from "../../../../services/changedetector.service";
+import {ArrayChangeDetector} from "../../../../services/changedetector.service";
+import * as _ from "lodash";
 
 class VisualizationBoxComponent {
 
@@ -12,6 +16,7 @@ class VisualizationBoxComponent {
     visualizations: Visualization[] = VisualizationList;
     currentVisualization: Visualization = null;
     currentVisualizationDirective: any = null;
+    datasets: Array<Dataset>;
 
     constructor(
         private $scope: ng.IScope,
@@ -27,28 +32,28 @@ class VisualizationBoxComponent {
     }
 
     $onInit() {
-        this.$scope.$watchCollection(() => this.SelectionService.selectedDatasets, () => {
-            this.setCurrentVisualization(null, null);
-        });
-
-        this.$scope.$on('showDefaultVisualization', () => {
-            var visualizations = this.getVisualizations();
-            if (visualizations.length > 0) {
-                this.show(visualizations[0]);
-            }
-        });
-
-        this.setCurrentVisualization(null, null);
-
-        this.$scope.$on('showDefaultVisualization', () => {
-            var visualizations = this.getVisualizations();
-            if (visualizations.length > 0) {
-                this.show(visualizations[0]);
-            }
-        });
+        this.datasets = this.SelectionService.selectedDatasets;
     }
 
-    $onChanges(changes: ng.IChangesObject) {
+    $doCheck() {
+        if(this.datasets.length !== this.SelectionService.selectedDatasets.length ||
+            !this.equalStringArrays( this.getDatasetIds(this.datasets), this.getDatasetIds(this.SelectionService.selectedDatasets)) ) {
+            this.datasets = angular.copy(this.SelectionService.selectedDatasets);
+            this.show(this.getVisualizations()[0]);
+        }
+    }
+
+    getDatasetIds(datasets: Array<Dataset>): Array<String> {
+        return datasets.map( (dataset: Dataset) => dataset.datasetId);
+    }
+
+    /**
+     * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
+     */
+    equalStringArrays(first: Array<String>, second: Array<String>) {
+        return _.every( first, (item) => {
+            return _.includes(second, item)
+        } );
     }
 
     setCurrentVisualization(newVisualization: Visualization, directive: any) {
@@ -64,6 +69,7 @@ class VisualizationBoxComponent {
         var visualizations = this.getVisualizations();
         return visualizations.length === 1 && visualizations[0].preview;
     }
+
 
     getVisualizations() {
         return this.visualizations.filter( (visualization: Visualization) => {
@@ -103,6 +109,7 @@ class VisualizationBoxComponent {
         area.empty();
         area.append(directive);
         this.setCurrentVisualization(vis, directive);
+
     }
 
 }

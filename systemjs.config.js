@@ -6,11 +6,13 @@
         'angular2-in-memory-web-api': '/node_modules/angular2-in-memory-web-api',
         'rxjs':                       '/node_modules/rxjs',
         'typescript':                   'node_modules/typescript/lib/typescript.js',
+        'lodash':                       '/node_modules/lodash'
     };
     var packages = {
         '/app':                       { main: 'app.main.js',  defaultExtension: 'js' },
         'rxjs':                       { defaultExtension: 'js' },
         'angular2-in-memory-web-api': { main: 'index.js', defaultExtension: 'js' },
+        'lodash':                       {main: 'lodash.js', defaultExtension: 'js'}
     };
 
     var ngPackageNames = [
