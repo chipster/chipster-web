@@ -1,50 +1,37 @@
 
 (function(global) {
-    var map = {
-        'app':                        '/app', // 'dist',
-        '@angular':                   '/node_modules/@angular',
-        'angular2-in-memory-web-api': '/node_modules/angular2-in-memory-web-api',
-        'rxjs':                       '/node_modules/rxjs',
-        'typescript':                   'node_modules/typescript/lib/typescript.js',
-        'lodash':                       '/node_modules/lodash'
-    };
-    var packages = {
-        '/app':                       { main: 'app.main.js',  defaultExtension: 'js' },
-        'rxjs':                       { defaultExtension: 'js' },
-        'angular2-in-memory-web-api': { main: 'index.js', defaultExtension: 'js' },
-        'lodash':                       {main: 'lodash.js', defaultExtension: 'js'}
-    };
 
-    var ngPackageNames = [
-        'common',
-        'compiler',
-        'core',
-        'forms',
-        'http',
-        'platform-browser',
-        'platform-browser-dynamic',
-        'router',
-        'router-deprecated',
-        'upgrade'
-    ];
-    // Individual files (~300 requests):
-    function packIndex(pkgName) {
-        packages['@angular/'+pkgName] = { main: 'index.js', defaultExtension: 'js' };
-    }
-    // Bundled (~40 requests):
-    function packUmd(pkgName) {
-        packages['@angular/'+pkgName] = { main: '/bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
-    }
-    // Most environments should use UMD; some (Karma) need the individual index files
-    var setPackageConfig = SystemJS.packageWithIndex ? packIndex : packUmd;
-    // Add package entries for angular packages
-    ngPackageNames.forEach(setPackageConfig);
-    var config = {
-        baseUrl: "/",
-        map: map,
-        packages: packages
-    };
-    SystemJS.config(config);
+    SystemJS.config({
+        paths: {
+            'npm:': '/node_modules/'
+        },
+        map: {
+            'app':                        '/app', // 'dist',
+            // angular bundles
+            '@angular/core': 'npm:@angular/core/bundles/core.umd.js',
+            '@angular/common': 'npm:@angular/common/bundles/common.umd.js',
+            '@angular/compiler': 'npm:@angular/compiler/bundles/compiler.umd.js',
+            '@angular/platform-browser': 'npm:@angular/platform-browser/bundles/platform-browser.umd.js',
+            '@angular/platform-browser-dynamic': 'npm:@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js',
+            '@angular/http': 'npm:@angular/http/bundles/http.umd.js',
+            '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
+            '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
+            '@angular/upgrade': 'npm:@angular/upgrade/bundles/upgrade.umd.js',
+
+
+            'angular2-in-memory-web-api': 'npm:angular2-in-memory-web-api',
+            'rxjs':                       'npm:rxjs',
+            'typescript':                   'npm:typescript/lib/typescript.js',
+            'lodash':                       'npm:lodash'
+        },
+        packages: {
+            'app':                       { main: 'app.main.js',  defaultExtension: 'js' },
+            'rxjs':                       { defaultExtension: 'js' },
+            'angular2-in-memory-web-api': { main: 'index.js', defaultExtension: 'js' },
+            'lodash':                     {main: 'lodash.js', defaultExtension: 'js'}
+        }
+    });
+
 })(this);
 
 
