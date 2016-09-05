@@ -17,6 +17,7 @@ class VisualizationBoxComponent {
     currentVisualization: Visualization = null;
     currentVisualizationDirective: any = null;
     datasets: Array<Dataset>;
+    private activeTab: number;
 
     constructor(
         private $scope: ng.IScope,
@@ -33,15 +34,22 @@ class VisualizationBoxComponent {
 
     $onInit() {
         this.datasets = [];
+        this.activeTab = 0;
     }
-
 
     $doCheck() {
         if(this.datasets.length !== this.SelectionService.selectedDatasets.length ||
             !this.equalStringArrays( this.getDatasetIds(this.datasets), this.getDatasetIds(this.SelectionService.selectedDatasets)) ) {
             this.datasets = angular.copy(this.SelectionService.selectedDatasets);
             this.show(this.getVisualizations()[0]);
+            this.activeTab = 0;
         }
+    }
+
+    selectVisualization(visualization: Visualization, index: number, event: ng.IAngularEvent) {
+        event.preventDefault(); // prevent scrolling page up
+        this.activeTab = index;
+        this.show(visualization);
     }
 
     getDatasetIds(datasets: Array<Dataset>): Array<String> {
