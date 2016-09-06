@@ -13,8 +13,7 @@
         </div>
         <div class="col-md-6">
             <div class="pull-right btn-group btn-group-sm">
-                <button ng-if="$ctrl.SelectionService.selectedDatasets.length === 0" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
-                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete all</button>
                 <button type="button" class="btn btn-default" ng-click="$ctrl.exportDatasets()">Export</button>
                 <button type="button" class="btn btn-default" ng-click="$ctrl.showHistory()">History</button>
             </div>

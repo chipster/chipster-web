@@ -17,7 +17,7 @@ export default class SessionDataService {
 
     static $inject = [
         '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-         '$uibModal'];
+         '$uibModal', 'SelectionService'];
 
     constructor(
         private $routeParams: ng.route.IRouteParamsService,

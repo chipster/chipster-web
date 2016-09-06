@@ -22,7 +22,24 @@ class SingleDataset {
         this.dataset = changes.dataset.currentValue;
         this.sourceJob = this.getSourceJob(this.dataset);
     }
-    
+
+    renameDataset() {
+        this.sessionDataService.renameDatasetDialog([this.dataset]);
+    }
+
+    deleteDatasets() {
+        this.sessionDataService.deleteDatasets([this.dataset]);
+    }
+
+    exportDatasets() {
+        this.sessionDataService.exportDatasets([this.dataset]);
+    }
+
+    showHistory() {
+        this.sessionDataService.openDatasetHistoryModal();
+    }
+
+
     getSourceJob(dataset: Dataset) {
         return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);
     }

@@ -184,7 +184,7 @@ class SessionComponent {
             size: 'lg',
             resolve: {
                 data: () => {
-                    return sessionDataService;
+                    return this.sessionDataService;
                 }
             }
         });
