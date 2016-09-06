@@ -110,7 +110,7 @@ class VisualizationBoxComponent {
             return;
         }
         var directive = angular.element('<' + vis.directive + '/>');
-        directive.attr('src', '$ctrl.getDatasetUrl()');
+        directive.attr('src', '$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])');
         directive.attr('dataset-id', '$ctrl.SelectionService.selectedDatasets[0].datasetId');
         directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
         this.$compile(directive)(this.$scope);
