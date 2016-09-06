@@ -21,7 +21,7 @@
             <div class="col-md-12">
                 <Job-box ng-if="$ctrl.selectionService.selectedJobs.length > 0"></Job-box>
                 <single-dataset dataset="$ctrl.selectionService.selectedDatasets[0]" jobs="$ctrl.sessionData.jobsMap" ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></single-dataset>
-                <dataset-box ng-if="$ctrl.selectionService.selectedDatasets.length > 1"
+                <dataset-box datasets="$ctrl.selectionService.selectedDatasets" ng-if="$ctrl.selectionService.selectedDatasets.length > 1"
                         jobs="$ctrl.sessionData.jobsMap"></dataset-box>
             </div>
         </div>

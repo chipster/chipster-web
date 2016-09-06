@@ -18,13 +18,11 @@ class SingleDataset {
         this.sourceJob = this.getSourceJob(this.dataset);
     }
 
-    $doCheck() {
-        if(this.dataset !== this.selectionService.selectedDatasets[0]) {
-            this.dataset = this.selectionService.selectedDatasets[0];
-            this.sourceJob = this.getSourceJob(this.dataset.sourceJob);
-        }
+    $onChanges(changes) {
+        this.dataset = changes.dataset.currentValue;
+        this.sourceJob = this.getSourceJob(this.dataset);
     }
-
+    
     getSourceJob(dataset: Dataset) {
         return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);
     }

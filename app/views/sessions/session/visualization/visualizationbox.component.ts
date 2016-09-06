@@ -106,7 +106,6 @@ class VisualizationBoxComponent {
 
     show(vis: Visualization) {
         if (!this.SelectionService.isSingleDatasetSelected()) {
-            console.log("trying to show visualization, but " + this.SelectionService.selectedDatasets.length + " datasets selected");
             return;
         }
         if (vis) {

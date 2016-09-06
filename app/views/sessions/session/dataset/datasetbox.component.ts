@@ -14,6 +14,7 @@ class DatasetBoxComponent {
 	private jobs: Map;
 	private datasetSelection: Dataset;
     private datasetSelectionSourceJob: Job;
+    private datasets: Array<Dataset>;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -75,7 +76,8 @@ class DatasetBoxComponent {
 
 export default {
 	bindings: {
-		jobs: '<'
+		jobs: '<',
+        datasets: '<'
 	},
 	templateUrl: 'views/sessions/session/dataset/dataset.html',
 	controller: DatasetBoxComponent
