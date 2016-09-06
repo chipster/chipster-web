@@ -43,14 +43,7 @@ class WorkflowGraphController {
 		private $log: ng.ILogService,
 		private $filter: IChipsterFilter,
 		private SessionDataService: SessionDataService,
-		private SelectionService: SelectionService) {
-
-		this.callback = {
-			selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
-			showDefaultVisualization: () => this.showDefaultVisualization(),
-			updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
-		};
-	}
+		private SelectionService: SelectionService) {}
 
 	d3: any = this.$window['d3'];
 	//var shiftKey, ctrlKey;
@@ -241,7 +234,7 @@ class WorkflowGraphController {
 				if (!this.enabled) {
 					return;
 				}
-				this.$scope.$apply(this.callback.selectJob(this.d3.event, d.job));
+				this.$scope.$apply(this.SelectionService.selectJob(this.d3.event, d.job));
 			})
 			.on('mouseover', function () {
 				self.d3.select(this).style('filter', 'url(#drop-shadow)');
@@ -352,7 +345,7 @@ class WorkflowGraphController {
 				if (!this.enabled) {
 					return;
 				}
-				this.callback.showDefaultVisualization();
+				this.showDefaultVisualization();
 			})
 			.on('click', (d) => {
 				if (!this.enabled) {
@@ -488,7 +481,7 @@ class WorkflowGraphController {
 				if (d.dataset) {
 					d.dataset.x = d.x;
 					d.dataset.y = d.y;
-					this.callback.updateDataset(d.dataset);
+					this.SessionDataService.updateDataset(d.dataset);
 				}
 			});
 	}
@@ -496,19 +489,19 @@ class WorkflowGraphController {
 	defineRightClickMenu(){
 
 		this.menu=[{title:'Visualize', action: () => {
-                this.callback.showDefaultVisualization();
+                this.showDefaultVisualization();
             }},
 			{title:'Rename',action:function(elm: any,d: DatasetNode){
-				this.callback.renameDatasetDialog(d.dataset);
+				this.SessionDataService.renameDatasetDialog(d.dataset);
 			}},
 			{title:'Delete', action: () => {
-				this.callback.deleteDatasets(this.callback.selectedDatasets);
+				this.SessionDataService.deleteDatasets(this.SelectionService.selectedDatasets);
 			}},
 			{title:'Export', action: () => {
-				this.callback.exportDatasets(this.callback.selectedDatasets);
+				this.SessionDataService.exportDatasets(this.SelectionService.selectedDatasets);
 			}},
 			{title:'View History as text', action: () => {
-				this.callback.openDatasetHistoryModal();
+				this.SessionDataService.openDatasetHistoryModal();
 			}}
 		];
 	}
