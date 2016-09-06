@@ -4,14 +4,10 @@ import TableService from "../../../../../services/tableservice.factory";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 
-class Row extends Array<string> {
+interface Row extends Array<string> {
     // store datasetId and columnName as properties to hide them from the table
-    constructor(length: number, public datasetId: string, public columnName: string) {
-        super();
-        for (let i = 0; i < length; i++) {
-            this.push(undefined);
-        }
-    }
+    datasetId: string;
+    columnName: string;
 }
 
 class PhenodataVisualizationController {
@@ -193,43 +189,67 @@ class PhenodataVisualizationController {
             column: true
         };
         datasets.forEach((dataset: Dataset) => {
-            dataset.metadata.forEach((entry: MetadataEntry) => {
-                headers[entry.key] = true;
-            });
+            if (dataset.metadata) {
+                dataset.metadata.forEach((entry: MetadataEntry) => {
+                    headers[entry.key] = true;
+                });
+            }
         });
         return Object.keys(headers);
+    }
+
+    createRow(length, datasetId, columnName) {
+        // create a plain JS array, because Handsontable doesn't recognize typescript Array
+        // and doesn't allow columns to be added on object data source
+        let row = <Row>[];
+         for (let i = 0; i < length; i++) {
+            row.push(undefined);
+         }
+         row.datasetId = datasetId;
+         row.columnName = columnName;
+
+        return row;
+    }
+
+    // get the row of a specific dataset and column if it exists already
+    // or create a new row
+    getRow(dataset: Dataset, column: string, array: Row[], headers: string[]) {
+        // find the existing row
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
+                return array[i];
+            }
+        }
+
+        // create a new row
+        // fill the row with undefined values
+        var row = this.createRow(headers.length, dataset.datasetId, column);
+
+        row[0] = dataset.name;
+        row[1] = column;
+
+        return row;
     }
 
     getRows(datasets: Dataset[], headers: string[]) {
 
         var array: Row[] = [];
 
-        // get the row of a specific dataset and column if it exists already
-        // or create a new row
-        function getRow(dataset: Dataset, column: string) {
-            // find the existing row
-            for (var i = 0; i < array.length; i++) {
-                if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
-                    return array[i];
+        datasets.forEach((dataset: Dataset) => {
+            if (dataset.metadata) {
+                if (dataset.metadata.length > 0) {
+                    dataset.metadata.forEach((entry: MetadataEntry) => {
+                        var row = this.getRow(dataset, entry.column, array, headers);
+                        row[headers.indexOf(entry.key)] = entry.value;
+                        if (array.indexOf(row) === -1) {
+                            array.push(row);
+                        }
+                    });
+                } else {
+                    var row = this.getRow(dataset, null, array, headers);
+                    array.push(row);
                 }
             }
-
-            // create a new row
-            // fill the row with undefined values
-            var row = new Row(headers.length, dataset.datasetId, column);
-            row[0] = dataset.name;
-            row[1] = column;
-            array.push(row);
-
-            return row;
-        }
-
-        datasets.forEach((dataset: Dataset) => {
-
-            dataset.metadata.forEach((entry: MetadataEntry) => {
-                var row = getRow(dataset, entry.column);
-                row[headers.indexOf(entry.key)] = entry.value;
-            });
         });
         return array;
     }
@@ -281,7 +301,7 @@ class PhenodataVisualizationController {
                     container.removeChild(container.firstChild);
                 }
 
-                this.hot = new Handsontable(container, this.getSettings(this.array, this.headers));
+                this.hot = new Handsontable(container, this.getSettings(array, this.headers));
 
             }
 

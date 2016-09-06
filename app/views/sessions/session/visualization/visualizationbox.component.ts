@@ -109,14 +109,16 @@ class VisualizationBoxComponent {
             console.log("trying to show visualization, but " + this.SelectionService.selectedDatasets.length + " datasets selected");
             return;
         }
-        var directive = angular.element('<' + vis.directive + '/>');
-        directive.attr('src', '$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])');
-        directive.attr('dataset-id', '$ctrl.SelectionService.selectedDatasets[0].datasetId');
-        directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
-        this.$compile(directive)(this.$scope);
-        var area = angular.element(document.getElementById("visualizationArea"));
-        area.empty();
-        area.append(directive);
+        if (vis) {
+            var directive = angular.element('<' + vis.directive + '/>');
+            directive.attr('src', '$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])');
+            directive.attr('dataset-id', '$ctrl.SelectionService.selectedDatasets[0].datasetId');
+            directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
+            this.$compile(directive)(this.$scope);
+            var area = angular.element(document.getElementById("visualizationArea"));
+            area.empty();
+            area.append(directive);
+        }
         this.setCurrentVisualization(vis, directive);
 
     }
