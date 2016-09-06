@@ -9,9 +9,7 @@ import Job from "../../../../model/session/job";
 
 class DatasetBoxComponent {
 
-	static $inject = [
-		'$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService',
-		'SessionDataService'];
+	static $inject = [ '$scope', '$routeParams', 'AuthenticationService', '$compile', 'SelectionService', 'SessionDataService' ];
 
 	private jobs: Map;
 	private datasetSelection: Dataset;

@@ -46,7 +46,7 @@ import ParameterListComponent from "./views/sessions/session/dataset/parameterli
 import Visualization from "./views/sessions/session/visualization/visualization";
 import VisualizationBoxComponent from "./views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "./views/sessions/session/session.component";
-
+import SingleDatasetComponent from "./views/sessions/session/dataset/singledataset.component";
 
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
@@ -96,6 +96,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('parameterList', ParameterListComponent)
     .component('visualizationBox', VisualizationBoxComponent)
     .component('session', SessionComponent)
+    .component('singleDataset', SingleDatasetComponent)
     .config(RouteConfiguration)
     .run(ChipsterRun);
 

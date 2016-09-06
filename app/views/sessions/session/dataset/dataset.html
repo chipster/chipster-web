@@ -2,22 +2,7 @@
 <div class="chipster-highlight">
 
     <div class="row" ng-if="$ctrl.SelectionService.selectedDatasets.length > 0">
-        <div class="col-md-12">
-            <div class="pull-right btn-group btn-group-sm">
-                <button ng-if="$ctrl.SelectionService.selectedDatasets.length === 0" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
-                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete</button>
-                <button type="button" class="btn btn-default" ng-click="$ctrl.exportDatasets()">Export</button>
-                <button type="button" class="btn btn-default" ng-click="$ctrl.showHistory()">History</button>
-            </div>
-        </div>
-    </div>
-
-    <!--<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">-->
-    <!--<li ng-repeat="vis in $ctrl.visualizations" ng-show="$ctrl.isCompatible(vis)"><a ng-click="$ctrl.show(vis)">{{vis.name}}</a></li>-->
-    <!--</ul>-->
-
-    <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-6">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
                         ng-repeat="dataset in $ctrl.SelectionService.selectedDatasets"
@@ -26,20 +11,15 @@
                 </button>
             </div>
         </div>
-        <div class="col-md-9">
-            <div class="dataset-details">
-                <h5 ng-if="$ctrl.datasetSelectionSourceJob">{{$ctrl.datasetSelectionSourceJob.toolCategory}} / {{$ctrl.datasetSelectionSourceJob.toolName}}</h5>
-
-                <p>{{$ctrl.datasetSelection.size}}, {{$ctrl.datasetSelection.created}}</p>
-                <textarea style="border: none; width: 100%" rows="1" placeholder="Dataset notes"
-                          ng-blur="$ctrl.updateDataset($ctrl.datasetSelection)"
-                          ng-model="$ctrl.datasetSelection.notes">
-                </textarea>
-                <parameter-list ng-if="$ctrl.datasetSelectionSourceJob.parameters.length > 0" parameters="$ctrl.datasetSelectionSourceJob.parameters"></parameter-list>
+        <div class="col-md-6">
+            <div class="pull-right btn-group btn-group-sm">
+                <button ng-if="$ctrl.SelectionService.selectedDatasets.length === 0" type="button" class="btn btn-default" ng-click="$ctrl.renameDataset()">Rename</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteDatasets()">Delete</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.exportDatasets()">Export</button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.showHistory()">History</button>
             </div>
         </div>
     </div>
-
 </div>
 
 

@@ -18,7 +18,7 @@ export default {
         parameters: '<'
     },
     controller: ParameterList,
-    template: `<h4>Parameters <button ng-if="$ctrl.parameters.length > 3" ng-click="$ctrl.toggleParameterList()" class="btn btn-sm btn-info">Show/Hide parameters</button></h4>
+    template: `<h5>Parameters <button ng-if="$ctrl.parameters.length > 3" ng-click="$ctrl.toggleParameterList()" class="pull-right btn btn-xs btn-default">Show/Hide parameters</button></h5>
                 <table class="table table-condensed parameter-table">
                     <tr ng-repeat="param in $ctrl.parameters" ng-if="$index < $ctrl.limit">
                         <td>{{param.displayName}}</td>
