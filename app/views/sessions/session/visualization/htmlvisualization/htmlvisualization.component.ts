@@ -1,14 +1,13 @@
 class HtmlVisualizationController {
 
-    static $inject = ['$sce', '$scope'];
+    static $inject = ['$sce', '$scope', '$log'];
 
-    constructor(private $sce: any, private $scope: ng.IScope){
+    constructor(private $sce: any, private $scope: ng.IScope, private $log: ng.ILogService){
     }
 
     src: string;
 
     getUrl() {
-        console.log('getUrl()', this.$sce.trustAsResourceUrl(this.src + '&download=false&type=true'));
         return this.$sce.trustAsResourceUrl(this.src + '&download=false&type=true');
     }
 }
