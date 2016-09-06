@@ -46,7 +46,6 @@ class WorkflowGraphController {
 		private SelectionService: SelectionService) {
 
 		this.callback = {
-			clearSelection: () => this.SelectionService.clearSelection(),
 			selectJob: ($event: any, job: Job) => this.SelectionService.selectJob($event, job),
 			showDefaultVisualization: () => this.showDefaultVisualization(),
 			updateDataset: (dataset: Dataset) => this.SessionDataService.updateDataset(dataset)
@@ -89,8 +88,6 @@ class WorkflowGraphController {
 	datasetsMap: Map<string, Dataset>;
 	jobsMap: Map<string, Job>;
 	modulesMap: Map<string, Module>;
-	selectedDatasets: Array<Dataset>;
-	selectedJobs: Array<Job>;
 	datasetSearch: string;
 	callback: any;
 	enabled: boolean;
@@ -129,10 +126,10 @@ class WorkflowGraphController {
 		// initialize the comparison of input collections
 
 		// shallow comparison is enough for noticing when the array is changed
-		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedDatasets, () => {
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.SelectionService.selectedDatasets, () => {
 			this.renderGraph();
 		}, Comparison.Shallow));
-		this.changeDetectors.push(new ArrayChangeDetector(() => this.selectedJobs, () => {
+		this.changeDetectors.push(new ArrayChangeDetector(() => this.SelectionService.selectedJobs, () => {
 			this.renderGraph()
 		}, Comparison.Shallow));
 
@@ -264,11 +261,11 @@ class WorkflowGraphController {
 	}
 
 	isSelectedJob(job: Job) {
-		return this.selectedJobs.indexOf(job) != -1;
+		return this.SelectionService.selectedJobs.indexOf(job) != -1;
 	}
 
 	isSelectedDataset(dataset: Dataset) {
-		return this.selectedDatasets.indexOf(dataset) != -1;
+		return this.SelectionService.selectedDatasets.indexOf(dataset) != -1;
 	}
 
 	showDefaultVisualization() {
@@ -318,7 +315,7 @@ class WorkflowGraphController {
 			.attr('opacity', 0)
 			.on('click', () => {
 				if (this.enabled) {
-					this.$scope.$apply(this.callback.clearSelection());
+					this.$scope.$apply(this.SelectionService.clearSelection());
 				}
 			});
 	}
@@ -363,7 +360,7 @@ class WorkflowGraphController {
 				}
 				this.$scope.$apply(() => {
 					if (!Utils.isCtrlKey(this.d3.event)) {
-						this.callback.clearSelection();
+						this.SelectionService.clearSelection();
 					}
 					this.SelectionService.toggleDatasetSelection(this.d3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
 				});
@@ -768,8 +765,6 @@ export default {
 		datasetsMap: '<',
 		jobsMap: '<',
 		modulesMap: '<',
-		selectedDatasets: '<',
-		selectedJobs: '<',
 		datasetSearch: '<',
 		callback: '<',
 		zoom: '<',

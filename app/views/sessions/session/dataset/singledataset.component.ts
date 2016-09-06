@@ -10,7 +10,7 @@ class SingleDataset {
 
     private dataset: Dataset;
     private sourceJob: Job;
-    private jobs: Job[];
+    private jobs: Map;
 
     constructor(private sessionDataService: SessionDataService, private selectionService: SelectionService){}
 
