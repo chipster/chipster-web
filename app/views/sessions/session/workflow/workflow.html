@@ -48,7 +48,7 @@
                         </div>
                     </div>
 
-                    <div id="dataset-list" class="list-group workflow-dataset-panel" data-toggle="buttons">
+                    <div id="dataset-list" class="list-group workflow-dataset-panel dataset-list" data-toggle="buttons">
                         <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
                                 ng-click="$ctrl.toggleDatasetSelection($event, data)"
                                 ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">

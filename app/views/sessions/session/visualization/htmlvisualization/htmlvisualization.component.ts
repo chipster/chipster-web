@@ -14,7 +14,7 @@ class HtmlVisualizationController {
 
 export default {
     controller: HtmlVisualizationController,
-    template: '<iframe frameBorder="0" sandbox="" width="100%" height="100%" ng-src="{{$ctrl.getUrl()}}"></iframe>',
+    template: '<iframe frameBorder="0" sandbox="" width="100%" height="1000px" ng-src="{{$ctrl.getUrl()}}"></iframe>',
     bindings: {
         src: '='
     }
