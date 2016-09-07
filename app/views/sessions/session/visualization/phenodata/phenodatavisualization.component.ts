@@ -198,7 +198,7 @@ class PhenodataVisualizationController {
         return Object.keys(headers);
     }
 
-    createRow(length, datasetId, columnName) {
+    createRow(length: number, datasetId: string, columnName: string) {
         // create a plain JS array, because Handsontable doesn't recognize typescript Array
         // and doesn't allow columns to be added on object data source
         let row = <Row>[];

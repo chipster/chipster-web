@@ -10,20 +10,34 @@ class SingleDataset {
 
     private dataset: Dataset;
     private sourceJob: Job;
-    private jobs: Map;
-
+    private jobs: Map<string, Job>;
     constructor(private sessionDataService: SessionDataService, private selectionService: SelectionService){}
 
     $onInit() {
         this.sourceJob = this.getSourceJob(this.dataset);
     }
 
-    $doCheck() {
-        if(this.dataset !== this.selectionService.selectedDatasets[0]) {
-            this.dataset = this.selectionService.selectedDatasets[0];
-            this.sourceJob = this.getSourceJob(this.dataset.sourceJob);
-        }
+    $onChanges(changes: any) {
+        this.dataset = changes.dataset.currentValue;
+        this.sourceJob = this.getSourceJob(this.dataset);
     }
+
+    renameDataset() {
+        this.sessionDataService.renameDatasetDialog(this.dataset);
+    }
+
+    deleteDatasets() {
+        this.sessionDataService.deleteDatasets([this.dataset]);
+    }
+
+    exportDatasets() {
+        this.sessionDataService.exportDatasets([this.dataset]);
+    }
+
+    showHistory() {
+        this.sessionDataService.openDatasetHistoryModal();
+    }
+
 
     getSourceJob(dataset: Dataset) {
         return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);

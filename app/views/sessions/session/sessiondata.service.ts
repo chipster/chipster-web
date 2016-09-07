@@ -12,12 +12,13 @@ import Tool from "../../../model/session/tool";
 import {SessionData} from "../../../resources/session.resource";
 import IModalService = angular.ui.bootstrap.IModalService;
 import UtilsService from "../../../services/utils.service";
+import SelectionService from "./selection.service";
 
 export default class SessionDataService {
 
     static $inject = [
         '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-         '$uibModal'];
+         '$uibModal', 'SelectionService'];
 
     constructor(
         private $routeParams: ng.route.IRouteParamsService,
@@ -26,7 +27,8 @@ export default class SessionDataService {
         private $window: IWindowService,
         private ConfigService: ConfigService,
         private AuthenticationService: AuthenticationService,
-        private $uibModal: IModalService) {
+        private $uibModal: IModalService,
+        private selectionService: SelectionService) {
     }
 
     subscription: {unsubscribe(): void};
@@ -67,24 +69,24 @@ export default class SessionDataService {
         });
     }
 
-    getJobById(jobId: string, jobs: Map){
+    getJobById(jobId: string, jobs: Map<string, Job>){
         return jobs.get(jobId);
     }
 
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
-            this.SessionResource.deleteJob(this.getSessionId(), job.jobId).then(function (res: any) {
+            this.SessionResource.deleteJob(this.getSessionId(), job.jobId).then( (res: any) => {
                 this.$log.debug('job deleted', res);
-            }.bind(this));
+            });
         }
     }
 
     deleteDatasets(datasets: Dataset[]) {
 
         for (let dataset of datasets) {
-            this.SessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then(function (res: any) {
+            this.SessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then( (res: any) => {
                 this.$log.debug('dataset deleted', res);
-            }.bind(this));
+            });
         }
     }
 
@@ -136,7 +138,7 @@ export default class SessionDataService {
             bindToController: true,
             resolve: {
                 selectedDatasets: function () {
-                    return angular.copy(this.SelectionService.selectedDatasets);
+                    return angular.copy(this.selectionService.selectedDatasets);
                 }.bind(this)
             }
         })
