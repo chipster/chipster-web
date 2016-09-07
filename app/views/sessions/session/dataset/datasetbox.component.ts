@@ -10,8 +10,6 @@ class DatasetBoxComponent {
 
 	static $inject = ['SelectionService', 'SessionDataService' ];
 
-    private datasets: Array<Dataset>;
-
 	constructor(
 		private SelectionService: SelectionService,
 		private SessionDataService: SessionDataService) {
@@ -28,22 +26,9 @@ class DatasetBoxComponent {
 	showHistory() {
 		this.SessionDataService.openDatasetHistoryModal();
 	}
-
-	getSourceJob(dataset: Dataset) {
-        return this.SessionDataService.getJobById(dataset.sourceJob, this.jobs);
-	}
-
-	getDatasetUrl() {
-		if (this.SelectionService.selectedDatasets.length > 0) {
-			return this.SessionDataService.getDatasetUrl(this.getDataset());
-		}
-	}
 }
 
 export default {
-	bindings: {
-        datasets: '<'
-	},
 	templateUrl: 'views/sessions/session/dataset/dataset.html',
 	controller: DatasetBoxComponent
 }
