@@ -10,21 +10,20 @@ class SingleDataset {
 
     private dataset: Dataset;
     private sourceJob: Job;
-    private jobs: Map;
-
+    private jobs: Map<string, Job>;
     constructor(private sessionDataService: SessionDataService, private selectionService: SelectionService){}
 
     $onInit() {
         this.sourceJob = this.getSourceJob(this.dataset);
     }
 
-    $onChanges(changes) {
+    $onChanges(changes: any) {
         this.dataset = changes.dataset.currentValue;
         this.sourceJob = this.getSourceJob(this.dataset);
     }
 
     renameDataset() {
-        this.sessionDataService.renameDatasetDialog([this.dataset]);
+        this.sessionDataService.renameDatasetDialog(this.dataset);
     }
 
     deleteDatasets() {

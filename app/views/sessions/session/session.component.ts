@@ -128,10 +128,6 @@ class SessionComponent {
         return this.getJob(jobId);
     }
 
-    getDatasetList(datasetsMap: Map): Dataset[] {
-        return UtilsService.mapValues(this.sessionData.datasetsMap);
-    }
-
     deleteJobs(jobs: Job[]) {
         this.sessionDataService.deleteJobs(jobs);
     }
@@ -185,7 +181,7 @@ class SessionComponent {
             resolve: {
                 data: () => {
                     return this.sessionDataService;
-                }
+                },
             }
         });
     }
@@ -217,7 +213,7 @@ class SessionComponent {
             bindToController: true,
             resolve: {
                 title:  () => {
-                    return angular.copy(this.sessionDataService.sessionData.name);
+                    return angular.copy(this.sessionData.session.name);
                 }
             }
         });

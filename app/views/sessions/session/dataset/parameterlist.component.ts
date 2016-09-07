@@ -1,8 +1,9 @@
 
+import JobParameter from "../../../../model/session/jobparameter";
 class ParameterList {
 
     private limit: number;
-    private parameters: Array;
+    private parameters: Array<JobParameter>;
 
     constructor() {
         this.limit = 3;
