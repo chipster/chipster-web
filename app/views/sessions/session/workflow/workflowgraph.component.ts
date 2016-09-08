@@ -106,6 +106,8 @@ class WorkflowGraphController {
 
 		this.updateSvgSize();
 
+		this.transformView(0, 0, this.zoomer.scale());
+
 		// order of these appends will determine the drawing order
 
 		this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
@@ -579,10 +581,13 @@ class WorkflowGraphController {
 		*/
 		this.zoomer.translate([tx, ty]);
 
-		// transform the view
+		this.transformView(tx, ty, event.scale);
+	}
+
+	transformView(tx: number, ty: number, scale: number) {
 		this.svg.attr('transform', 'translate('
 			+ [tx, ty] + ')'
-			+ 'scale(' + event.scale + ')');
+			+ 'scale(' + scale + ')');
 	}
 
 	createShadowFilter() {
