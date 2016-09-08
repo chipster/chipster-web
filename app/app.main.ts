@@ -1,4 +1,6 @@
-import { UpgradeAdapter } from "@angular/upgrade";
+import upgradeAdapter from "upgradeadapter";
+import { HTTP_PROVIDERS } from '@angular/http';
+import './rxjs-operators';
 
 import Login from "./views/login/login.component";
 import NavigationController from "./views/navigation/navigation.controller";
@@ -17,7 +19,6 @@ import DatasetBoxComponent from "./views/sessions/session/dataset/datasetbox.com
 import JobBoxComponent from "./views/sessions/session/job/jobbox.component";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
-//import ToolCtrl from "./views/sessions/session/tools/tool.controller";
 import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
 import TableService from "./services/tableservice.factory";
 import ToolService from "./views/sessions/session/tools/tool.service";
@@ -49,6 +50,7 @@ import SessionComponent from "./views/sessions/session/session.component";
 import SingleDatasetComponent from "./views/sessions/session/dataset/singledataset.component";
 
 
+
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
         'pdf', 'ngHandsontable'])
@@ -66,7 +68,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('JobErrorModalController', JobErrorModalController)
     .service('AuthenticationService', AuthenticationService)
     .service('ConfigService', ConfigService)
-    .service('ConfigurationResource', ConfigurationResource)
+    .factory('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('ToolResource', ToolResource)
     .service('SessionEventService', SessionEventService)
     .service('SessionResource', SessionResource)
@@ -134,5 +136,7 @@ angular.module('chipster-web').config(
 
     });
 
-const upgradeAdapter = new UpgradeAdapter();
+
+upgradeAdapter.addProvider(ConfigurationResource);
+upgradeAdapter.addProvider(HTTP_PROVIDERS);
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

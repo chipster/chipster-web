@@ -27,7 +27,7 @@ export default class ConfigService {
     }
 
     init() {
-        this.queryPromise = <Promise<any>>this.configurationResource.getConfigurationResource().query().$promise;
+        this.queryPromise = <Promise<any>>this.configurationResource.getConfigurationResource();
     }
 
     getServices() {
