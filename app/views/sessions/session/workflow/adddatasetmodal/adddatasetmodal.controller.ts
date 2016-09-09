@@ -9,7 +9,9 @@ import IModalService = angular.ui.bootstrap.IModalService;
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 
 export default class AddDatasetModalController {
-    static $inject = ['$log', '$uibModalInstance', '$routeParams', 'SessionResource', 'ConfigService', 'AuthenticationService', 'SessionDataService', '$q'];
+    static $inject = [
+        '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
+        'SessionDataService', '$q', 'datasetsMap'];
 
     constructor(private $log: ng.ILogService,
                 private $uibModalInstance: IModalServiceInstance,
@@ -17,8 +19,8 @@ export default class AddDatasetModalController {
                 private ConfigService: ConfigService,
                 private AuthenticationService: AuthenticationService,
                 private SessionDataService: SessionDataService,
-                private $q: IQService) {
-
+                private $q: IQService,
+                private datasetsMap: Map<string, Dataset>) {
     }
 
     flowFileAdded(file: any, event: any, flow: any) {
@@ -49,21 +51,19 @@ export default class AddDatasetModalController {
         this.$log.debug('createDataset', d);
         return this.SessionDataService.createDataset(d).then((datasetId: string) => {
             d.datasetId = datasetId;
-            var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(this.SessionDataService.datasetsMap));
+            var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));
             d.x = pos.x;
             d.y = pos.y;
-            this.SessionDataService.datasetsMap.set(d.datasetId, d);
             this.SessionDataService.updateDataset(d);
             return d;
         });
-    };
+    }
 
     flowFileSuccess(file: any) {
         file.cancel();
-    };
+    }
 
     close() {
         this.$uibModalInstance.dismiss();
-    };
-
+    }
 }

@@ -14,7 +14,7 @@ class SessionComponent {
 
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService', 'SessionResource', '$route'];
+        'SessionEventService', 'SessionDataService', 'SelectionService', '$route'];
 
     datasetSearch: string;
     private selectedTab = 1;
@@ -32,7 +32,6 @@ class SessionComponent {
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
-        private sessionResource: SessionResource,
         private $route: ng.route.IRouteService) {
     }
 
@@ -125,7 +124,7 @@ class SessionComponent {
     }
 
     getJob(jobId: string): Job {
-        return this.getJob(jobId);
+        return this.sessionData.jobsMap.get(jobId);
     }
 
     deleteJobs(jobs: Job[]) {
@@ -179,9 +178,9 @@ class SessionComponent {
             bindToController: true,
             size: 'lg',
             resolve: {
-                data: () => {
-                    return this.sessionDataService;
-                },
+                datasetsMap: () => {
+                    return new Map(this.sessionData.datasetsMap);
+                }
             }
         });
     }

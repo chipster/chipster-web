@@ -23,6 +23,7 @@ import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component
 import TableService from "./services/tableservice.factory";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
+import isoDateFilter from "./common/filter/isodate.filter"
 import categoryFilter from "./common/filter/category.filter";
 import moduleFilter from "./common/filter/module.filter";
 import toolFilter from "./common/filter/tool.filter";
@@ -44,7 +45,6 @@ import SessionResource from "./resources/session.resource";
 import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "./views/sessions/sessionlist.component";
 import ParameterListComponent from "./views/sessions/session/dataset/parameterlist.component";
-import Visualization from "./views/sessions/session/visualization/visualization";
 import VisualizationBoxComponent from "./views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "./views/sessions/session/session.component";
 import SingleDatasetComponent from "./views/sessions/session/dataset/singledataset.component";
@@ -81,6 +81,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ToolService', ToolService)
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
+    .filter('isoDate', isoDateFilter)
     .filter('categoryFilter', categoryFilter)
     .filter('moduleFilter', moduleFilter)
     .filter('toolFilter', toolFilter)

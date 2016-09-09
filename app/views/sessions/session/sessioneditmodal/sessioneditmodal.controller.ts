@@ -5,10 +5,7 @@ export default class SessionEditModalController {
 
     static $inject = ['$uibModalInstance', 'title'];
 
-    title: string;
-
-    constructor(private $uibModalInstance: IModalServiceInstance, title: string) {
-        this.title = title;
+    constructor(private $uibModalInstance: IModalServiceInstance, private title: string) {
     }
 
     cancel() {
