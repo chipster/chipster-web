@@ -6,12 +6,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
     "lite": "lite-server",
     "start": "concurrently \"npm run tsc:w\" \"npm run lite\" ",
-    "typings": "typings"
+    "typings": "typings",
+    "lite-server-test": "lite-server --config=test/liteserver-test-config.json",
+    "test": "tsc && concurrently \"npm run tsc:w\" \"npm run lite-server-test\" "
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   "bugs": {
     "url": "https://github.com/chipster/chipster-web/issues"
   },
+
   "homepage": "https://github.com/chipster/chipster-web#readme",
   "devDependencies": {
     "browser-sync": "^2.13.0",
