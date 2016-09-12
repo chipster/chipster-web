@@ -8,7 +8,6 @@ import AuthenticationService from "./authentication/authenticationservice";
 import ConfigService from "./services/config.service";
 import ConfigurationResource from "./resources/configurationresource";
 import RouteConfiguration from "./routes.config";
-import ChipsterRun from "./app.run";
 import ToolResource from "./resources/toolresource";
 import UtilsService from "./services/utils.service";
 import WorkflowGraphService from "./views/sessions/session/workflow/workflowgraph.service";
@@ -100,8 +99,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('visualizationBox', VisualizationBoxComponent)
     .component('session', SessionComponent)
     .component('singleDataset', SingleDatasetComponent)
-    .config(RouteConfiguration)
-    .run(ChipsterRun);
+    .config(RouteConfiguration);
 
 
 angular.module('chipster-web').config(

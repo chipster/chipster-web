@@ -3,13 +3,25 @@ import ConfigService from "../services/config.service";
 
 export default class AuthenticationService {
 
-    static $inject = ['localStorageService', '$http', 'ConfigService'];
+    static $inject = ['localStorageService', '$http', 'ConfigService', '$rootScope'];
 
     tokenHeader:{};
 
     constructor(private localStorageService: any,
                 private $http: ng.IHttpService,
-                private ConfigService: ConfigService) {}
+                private ConfigService: ConfigService,
+                private $rootScope: ng.IRootScopeService,
+                private $location: ng.ILocationService) {
+        $rootScope.$on("$routeChangeStart", (event: any, next: any) => {
+            if (next.$$route.authenticated) {
+                var userAuth = this.getToken();
+                if (!userAuth) {
+                    console.log('token not found, forward to login');
+                    $location.path('/login');
+                }
+            }
+        });
+    }
 
     // Do the authentication here based on userid and password
     login(username:string, password:string) {
