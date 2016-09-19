@@ -9,7 +9,6 @@ import Category from "../../../../../model/session/category";
 import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
 import ToolParameter from "../../../../../model/session/toolparameter";
 import TableService from "../../../../../services/tableservice.factory";
-import Session from "../../../../../model/session/session";
 import SessionDataService from "../../sessiondata.service";
 
 
@@ -162,7 +161,7 @@ export default class ToolsModalController {
     populateParameterValues(parameter: ToolParameter) {
 
         if (!parameter.value) {
-            parameter.value = this.getDefaultValue(parameter);
+            parameter.value = this.toolService.getDefaultValue(parameter);
         }
 
         if (parameter.type === 'COLUMN_SEL') {
