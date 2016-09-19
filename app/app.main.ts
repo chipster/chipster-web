@@ -29,6 +29,7 @@ import toolFilter from "./common/filter/tool.filter";
 import AddDatasetModalController from "./views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.controller";
 import secondsFilter from "./common/filter/seconds.filter";
 import ParameterModalController from "./views/sessions/session/tools/parametermodal/parametermodal.controller";
+import ToolsModalController from "./views/sessions/session/tools/toolsmodal/toolsmodal.controller";
 import textVisualization from "./views/sessions/session/visualization/textvisualization/textvisualization.component";
 import spreadsheetVisualization from "./views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.component";
 import imageVisualization from "./views/sessions/session/visualization/imagevisualization/imagevisualization.directive";
@@ -61,6 +62,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('toolsBox', ToolsBoxComponent)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)
+    .controller('ToolsModalController', ToolsModalController)
     .controller('SourceModalController', SourceModalController)
     .controller('SessionEditModalController', SessionEditModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)

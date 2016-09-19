@@ -11,4 +11,5 @@ export default class ToolParameter {
     selectionOptions: any[];
     to: number;
     type: string;
+    value: string | number; // not included in incoming json
 }

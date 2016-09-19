@@ -39,7 +39,7 @@ class VisualizationBoxComponent {
 
     $doCheck() {
         if(this.datasets.length !== this.SelectionService.selectedDatasets.length ||
-            !this.equalStringArrays( this.getDatasetIds(this.datasets), this.getDatasetIds(this.SelectionService.selectedDatasets)) ) {
+            !Utils.equalStringArrays( Utils.getDatasetIds(this.datasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets)) ) {
             this.datasets = angular.copy(this.SelectionService.selectedDatasets);
             this.show(this.getVisualizations()[0]);
             this.activeTab = 0;
@@ -50,19 +50,6 @@ class VisualizationBoxComponent {
         event.preventDefault(); // prevent scrolling page up
         this.activeTab = index;
         this.show(visualization);
-    }
-
-    getDatasetIds(datasets: Array<Dataset>): Array<String> {
-        return datasets.map( (dataset: Dataset) => dataset.datasetId);
-    }
-
-    /**
-     * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
-     */
-    equalStringArrays(first: Array<String>, second: Array<String>) {
-        return _.every( first, (item) => {
-            return _.includes(second, item)
-        } );
     }
 
     setCurrentVisualization(newVisualization: Visualization, directive: any) {

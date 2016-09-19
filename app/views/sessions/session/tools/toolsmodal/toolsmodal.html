@@ -1,0 +1,181 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="vm.dismiss(false)">&times</button>
+    <h4>Tools</h4>
+</div>
+<!--end of modal header-->
+<div class="modal-body">
+    <div class="row">
+
+        <ul class="col-md-2">
+            <h5>Module</h5>
+            <div class="list-group tool-list" data-toggle="buttons">
+                <button class="list-group-item thin-list-group-item"
+                        ng-click="vm.selectModule(module)"
+                        ng-repeat="module in vm.modules | moduleFilter:vm.searchTool"
+                        ng-class="{active:module === vm.selectedModule}">{{module.name}}
+                </button>
+            </div>
+        </ul>
+
+        <div class="col-md-3">
+            <h5>Category</h5>
+            <div class="list-group tool-list" data-toggle="buttons">
+                <button type="button" class="list-group-item thin-list-group-item"
+                        ng-class="{'active':category===vm.selectedCategory}"
+                        ng-click="vm.selectCategory(category)"
+                        ng-repeat="category in vm.selectedModule.categories | categoryFilter:vm.searchTool">
+                    <span><tool-circle toolcolor="category.color"></tool-circle></span>
+                    {{category.name}}
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h5>Tool</h5>
+            <div class="list-group tool-list" data-toggle="buttons">
+                <button type="button" class="list-group-item thin-list-group-item"
+                        ng-class="{'active':tool===vm.selectedTool}"
+                        ng-click="vm.selectTool(tool)"
+                        ng-repeat="tool in vm.selectedCategory.tools|toolFilter:vm.searchTool"
+                        id="tool-button-{{tool.id}}">
+                    {{tool.name.displayName}}
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <h5>Tool Description</h5>
+
+            <div class="tool-list" ng-show="vm.selectedTool">
+                <p>{{vm.selectedTool.description}}</p>
+                <p>
+                    <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
+                        Source code
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" >
+            <button class="btn btn-success pull-right" style="widht: 100%" ng-click="vm.runJob()"
+                    ng-disabled="!vm.isRunEnabled()">
+                <span class="glyphicon glyphicon-play"></span> Run
+            </button>
+            <button class="btn btn-secondary pull-right" style="" ng-click="vm.dismiss(false)">
+                Close
+            </button>
+
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Parameters</h5>
+        </div>
+    </div>
+
+    <!-- parameters -->
+    <div class="row">
+        <div class="col-md-8 scrollable">
+            <form name="paramForm">
+                <table class="table table-borderless table-condensed table-hover">
+                    <tr ng-repeat="parameter in vm.selectedTool.parameters"
+                        ng-mouseover="vm.setDescription(parameter.description)"
+                        ng-mouseleave="vm.setDescription('')">
+                        <td>
+                            <label ng-if="!parameter.optional">{{parameter.name.displayName}}</label>
+                            <span ng-if="parameter.optional">{{parameter.name.displayName}}</span>
+                        </td>
+
+                        <td>
+                            <select ng-if="vm.isSelectionParameter(parameter)"
+                                    name="parameter_{{$index}}"
+                                    ng-model="parameter.value"
+                                    style="max-width: 300px"
+                                    ng-required="!parameter.optional">
+                                <option ng-repeat="option in parameter.selectionOptions"
+                                        value="{{option.id}}">
+                                    {{option.displayName || option.id}}
+                                </option>
+                            </select>
+
+                            <input ng-if="vm.isNumberParameter(parameter)" type="number"
+                                   ng-model="parameter.value"
+                                   name="parameter_{{$index}}"
+                                   min="{{parameter.from}}"
+                                   max="{{parameter.to}}"
+                                   ng-required="!parameter.optional">
+
+                            <input ng-if="parameter.type === 'STRING'" type="text"
+                                   name="parameter_{{$index}}"
+                                   ng-model="parameter.value"
+                                   ng-required="!parameter.optional">
+
+                            <label class="label label-warning"
+                                   ng-class="{'visibility-hidden': !paramForm['parameter_{{$index}}'].$error.required}">Required
+                                value</label>
+                            <label class="label label-warning"
+                                   ng-class="{'visibility-hidden': !paramForm['parameter_{{$index}}'].$error.min}">Min
+                                value: {{parameter.from}}</label>
+                            <label class="label label-warning"
+                                   ng-class="{'visibility-hidden': !paramForm['parameter_{{$index}}'].$error.max}">Max
+                                value: {{parameter.to}}</label>
+                        </td>
+
+                        <!--
+                        <td>
+                            <button type="button" class="close"
+                                    ng-class="{'visibility-hidden': parameter.value == vm.getDefaultValue(parameter.toolParameter)}"
+                                    ng-click="parameter.value = vm.getDefaultValue(parameter.toolParameter)"
+                                    title="Reset to default value">
+                                &times
+                            </button>
+                        </td>
+                        -->
+                        <!--
+                        <td>{{parameter.type}}</td>
+                        <td>{{parameter.defaultValue}}</td>
+                        <td>{{parameter.from}}</td>
+                        <td>{{parameter.to}}</td>
+                        <td>{{parameter.optional}}</td>
+                        -->
+
+                    </tr>
+
+                    <tr ng-if="vm.selectedTool.inputs.length > 1">
+                        <td><h5>Input datasets</h5></td>
+                        <td></td>
+                    </tr>
+
+                    <tr ng-repeat="inputBinding in vm.inputBindings" ng-if="vm.inputBindings.length > 1">
+                        <td><label>{{inputBinding.toolInput.name.displayName ||
+                            inputBinding.toolInput.name.id}}</label></td>
+
+                        <td>
+                            <!-- ng-options allows values to be objects instead of simple strings, which makes
+                            it easier to get the both dataset id and name later -->
+                            <select ng-model="inputBinding.dataset"
+                                    name="input_{{$index}}"
+                                    ng-required="!inputBinding.toolInput.optional"
+                                    ng-options="dataset.name for dataset in vm.getCompatibleDatasets(inputBinding.toolInput) track by dataset.datasetId">
+                            </select>
+
+                            <label class="label label-warning"
+                                   ng-show="paramForm['input_{{$index}}'].$error.required">Required input</label>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <p>{{vm.parameterDescription}}</p>
+
+        </div>
+
+    </div>
+</div>    <!--end of modal body-->

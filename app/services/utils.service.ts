@@ -1,3 +1,4 @@
+import Dataset from "../model/session/dataset";
 export default class UtilsService {
 
     static getFileExtension(name: string) {
@@ -91,4 +92,19 @@ export default class UtilsService {
             setSelection(item);
         }
     }
+
+    static getDatasetIds(datasets: Array<Dataset>): Array<String> {
+        return datasets.map( (dataset: Dataset) => dataset.datasetId);
+    }
+
+    /**
+     * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
+     */
+    static equalStringArrays(first: Array<String>, second: Array<String>) {
+        return _.every( first, (item) => {
+            return _.includes(second, item)
+        } );
+    }
+
+
 }

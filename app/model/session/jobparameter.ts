@@ -7,5 +7,4 @@ export default class JobParameter {
     description: string;
     type: string;
     value: number|string;
-    toolParameter: ToolParameter;
 }

@@ -1,72 +1,29 @@
-<h4>Tools</h4>
+<h4>Tool</h4>
 <div class="chipster-highlight">
 
-    <!-- Tab Content -->
-
     <div class="row">
-
-        <div class="col-md-6">
-            <span uib-dropdown class="btn-group">
-                <button class="btn btn-primary" uib-dropdown-toggle>Module</button>
-                <ul class="dropdown-menu" uib-dropdown-menu>
-                    <li ng-repeat="module in $ctrl.modules | moduleFilter:$ctrl.searchTool">
-                        <a ng-click="$ctrl.selectModule(module)">{{module.name}}</a>
-                    </li>
-                </ul>
-            </span>
-            <span uib-dropdown class="btn-group">
-                <button class="btn btn-primary" uib-dropdown-toggle>Category</button>
-                <ul class="dropdown-menu" uib-dropdown-menu>
-                    <li ng-repeat="category in $ctrl.categories | categoryFilter:$ctrl.searchTool">
-                        <a ng-click="$ctrl.selectCategory(category)">{{category.name}}</a>
-                    </li>
-                </ul>
-            </span>
-            <span uib-dropdown class="btn-group">
-                <button class="btn btn-primary" uib-dropdown-toggle>Tool</button>
-                <ul class="dropdown-menu" uib-dropdown-menu>
-                    <li ng-repeat="tool in $ctrl.selectedCategory.tools|toolFilter:$ctrl.searchTool">
-                        <a ng-click="$ctrl.selectTool(tool.id)" id="tool-button-{{tool.id}}">{{tool.name}}</a>
-                    </li>
-                </ul>
-            </span>
+        <div class="col-md-2">
+            <button class="btn btn-info" style="width: 100%" ng-click="$ctrl.openToolsModal()">
+                Tools...
+            </button>
         </div>
 
-        <div class="col-md-6">
-
-            <div class="btn-group btn-group-justified" role="group">
-                <button class="btn btn-default" style="width: 50%"
-                        ng-disabled="!$ctrl.isParametersEnabled()"
-                        ng-click="$ctrl.openParameterModal()">
-                    Parameters
-                </button>
-                <button class="btn btn-success" style="width: 50%"
-                        ng-click="$ctrl.runJob()" ng-disabled="!$ctrl.isRunEnabled()">
-                        <span class="glyphicon glyphicon-play">
-                        </span>
-                    Run
-                </button>
-            </div>
+        <div class="col-md-8">
+            <h5> {{$ctrl.selectedTool ? $ctrl.selectedModule.name  + '&#8212' +
+                $ctrl.selectedCategory.name + '&#8212' +
+                $ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}
+                <!--<span class="glyphicon glyphicon-triangle-right"></span>-->
+            </h5>
         </div>
 
-        <div class="col-md-12">
-            <h5>Selection: {{$ctrl.selectedModule.name}} - {{$ctrl.selectedCategory.name}} - {{$ctrl.selectedTool.name.displayName}}</h5>
-
-            <h5>Tool Description</h5>
-
-            <div class="tool-description" ng-show="$ctrl.selectedTool">
-                <p>{{$ctrl.selectedTool.description}}</p>
-                <p>
-                    <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
-                        Source code
-                    </a>
-                </p>
-            </div>
+        <div class="col-md-2">
+            <button class="btn btn-success" style="width: 100%" ng-click="$ctrl.runJob()"
+                    ng-disabled="!$ctrl.isRunEnabled()">
+                <span class="glyphicon glyphicon-play"></span> Run
+            </button>
         </div>
-
-
 
     </div>
-    <!--end of tabset div-->
+
 </div>
 
