@@ -148,7 +148,11 @@ export default class SessionResource {
 
 	createJob(sessionId: string, job: Job) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).one('jobs').customPOST(job));
+			.then((service: IService) => service.one('sessions', sessionId).one('jobs').customPOST(job))
+			.then((res: any) => {
+				var location = res.headers('Location');
+				return location.substr(location.lastIndexOf('/') + 1);
+			});
 	}
 
 	getSession(sessionId: string) {
@@ -185,7 +189,7 @@ export default class SessionResource {
 	updateJob(sessionId: string, job: Job) {
 		return this.getService().then((service: IService) => service
 			.one('sessions', sessionId)
-			.one('datasets', job.jobId)
+			.one('jobs', job.jobId)
 			.customPUT(job));
 	}
 
@@ -207,5 +211,72 @@ export default class SessionResource {
 			.one('sessions', sessionId)
 			.one('jobs', jobId)
 			.remove());
+	}
+
+	copySession(sessionData: SessionData, name: string) {
+		let newSession: Session = _.clone(sessionData.session);
+		newSession.sessionId = null;
+		newSession.name = name;
+
+		// create session
+		return this.createSession(newSession).then((sessionId) => {
+
+			let datasetIdMap = new Map<string, string>();
+			let jobIdMap = new Map<string, string>();
+
+			// create datasets
+			let createRequests: Array<Promise<string>> = [];
+			sessionData.datasetsMap.forEach((dataset: Dataset) => {
+				let datasetCopy = _.clone(dataset);
+				datasetCopy.datasetId = null;
+				let request = this.createDataset(sessionId, datasetCopy);
+				createRequests.push(request);
+				request.then((newId) => {
+					datasetIdMap.set(dataset.datasetId, newId);
+				});
+			});
+
+
+			// create jobs
+			sessionData.jobsMap.forEach((oldJob: Job) => {
+				let jobCopy = _.clone(oldJob);
+				jobCopy.jobId = null;
+				let request = this.createJob(sessionId, jobCopy);
+				createRequests.push(request);
+				request.then((newId) => {
+					jobIdMap.set(oldJob.jobId, newId);
+				});
+			});
+
+			return Promise.all(createRequests).then(() => {
+
+				let updateRequests: Array<Promise<string>> = [];
+
+				// update datasets' sourceJob id
+				sessionData.datasetsMap.forEach((oldDataset: Dataset) => {
+					let sourceJobId = oldDataset.sourceJob;
+					if (sourceJobId) {
+						let datasetCopy = _.clone(oldDataset);
+						datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
+						datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
+						updateRequests.push(this.updateDataset(sessionId, datasetCopy));
+					}
+				});
+
+				// update jobs' inputs' datasetIds
+				sessionData.jobsMap.forEach((oldJob: Job) => {
+					let jobCopy = _.clone(oldJob);
+					jobCopy.jobId = jobIdMap.get(oldJob.jobId);
+					jobCopy.inputs.forEach((input) => {
+						input.datasetId = datasetIdMap.get(input.datasetId);
+						updateRequests.push(this.updateJob(sessionId, jobCopy));
+					});
+				});
+
+				return Promise.all(updateRequests).then(() => {
+					console.log('session copied');
+				});
+			});
+		});
 	}
 }

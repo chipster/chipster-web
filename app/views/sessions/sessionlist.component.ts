@@ -20,14 +20,7 @@ class SessionListController {
 
     createSession() {
 
-        let session = {
-            sessionId: <string>null,
-            name: 'New session',
-            notes: '',
-            created: '2015-08-27T17:53:10.331Z',
-            accessed: '2015-08-27T17:53:10.331Z'
-        };
-
+        let session = new Session('New session');
         this.sessionResource.createSession(session).then((sessionId: string) => {
                 session.sessionId = sessionId;
                 this.openSession(session);

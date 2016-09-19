@@ -59,12 +59,34 @@
                 </uib-tab>
 
                 <uib-tab index="2" heading="Details">
-                <textarea id="session-notes" rows="15" placeholder="Session notes"
-                          ng-blur="$ctrl.updateSession()"
-                          ng-model="$ctrl.getSession().notes">
-                </textarea>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button ng-disabled="$ctrl.isCopying" class="btn btn-default"
+                                    ng-click="$ctrl.openCopySessionModal()">
+                                Copy session
+	                            <i ng-show="$ctrl.isCopying" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Created: {{$ctrl.getSession().created | isoDate }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Accessed: {{$ctrl.getSession().accessed | isoDate }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                        <textarea id="session-notes" rows="15" placeholder="Session notes"
+                                  ng-blur="$ctrl.updateSession()"
+                                  ng-model="$ctrl.getSession().notes">
+                        </textarea>
+                        </div>
+                    </div>
                 </uib-tab>
-
             </uib-tabset>
         </div>
 

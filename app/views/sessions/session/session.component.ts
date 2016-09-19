@@ -9,17 +9,17 @@ import Job from "../../../model/session/job";
 import { SessionData } from "../../../resources/session.resource";
 import UtilsService from "../../../services/utils.service";
 
-
 class SessionComponent {
 
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService', '$route'];
+        'SessionEventService', 'SessionDataService', 'SelectionService', '$route', 'SessionResource'];
 
     datasetSearch: string;
     private selectedTab = 1;
     toolDetailList: any = null;
     sessionData: SessionData;
+    private isCopying = false;
 
     constructor(
         private $scope: ng.IScope,
@@ -32,7 +32,8 @@ class SessionComponent {
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
-        private $route: ng.route.IRouteService) {
+        private $route: ng.route.IRouteService,
+        private sessionResource: SessionResource) {
     }
 
     $onInit() {
@@ -204,18 +205,21 @@ class SessionComponent {
         });
     }
 
-    openSessionEditModal() {
-        var modalInstance = this.$uibModal.open({
+    getSessionEditModal(title: string, name: string) {
+        return this.$uibModal.open({
             templateUrl: 'views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,
             resolve: {
-                title:  () => {
-                    return angular.copy(this.sessionData.session.name);
-                }
+                title: () => angular.copy(title),
+                name: () => angular.copy(name)
             }
         });
+    }
+
+    openSessionEditModal() {
+        var modalInstance = this.getSessionEditModal('Rename session', this.sessionData.session.name);
 
         modalInstance.result.then( (result: string) => {
             if (!result) {
@@ -223,6 +227,23 @@ class SessionComponent {
             }
             this.sessionData.session.name = result;
             this.sessionDataService.updateSession();
+        }, function () {
+            // modal dismissed
+        });
+    }
+
+    openCopySessionModal() {
+        var modalInstance = this.getSessionEditModal('Copy session', this.sessionData.session.name + '_copy');
+
+
+        modalInstance.result.then( (result: string) => {
+            if (!result) {
+                result = 'unnamed session';
+            }
+            this.isCopying = true;
+            this.sessionResource.copySession(this.sessionData, result).then(() => {
+                this.isCopying = false;
+            })
         }, function () {
             // modal dismissed
         });

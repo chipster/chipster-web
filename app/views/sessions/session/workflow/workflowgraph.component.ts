@@ -711,6 +711,7 @@ class WorkflowGraphController {
 			}
 		});
 
+
 		nodes.forEach((targetNode: Node) => {
 			if (targetNode.sourceJob) {
 				var sourceJob = targetNode.sourceJob;
