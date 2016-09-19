@@ -23,7 +23,6 @@
   "bugs": {
     "url": "https://github.com/chipster/chipster-web/issues"
   },
-
   "homepage": "https://github.com/chipster/chipster-web#readme",
   "devDependencies": {
     "browser-sync": "^2.13.0",
@@ -64,6 +63,7 @@
     "d3": "^3.5.17",
     "d3-context-menu": "^0.1.2",
     "d3-tip": "^0.6.7",
+    "font-awesome": "^4.6.3",
     "handsontable": "^0.25.0",
     "jquery": "^2.2.4",
     "jquery-csv": "^0.8.1",
