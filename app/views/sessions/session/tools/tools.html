@@ -9,9 +9,17 @@
         </div>
 
         <div class="col-md-8">
-            <h5> {{$ctrl.selectedTool ? $ctrl.selectedModule.name  + '&#8212' +
+            <h5 ng-if="!$ctrl.selectedTool"><span class="glyphicon glyphicon-arrow-left"></span>
+                Use the <button class="btn btn-info btn-xs" ng-click="$ctrl.openToolsModal()">Tools...</button>
+                button or press 'T' to view and select tools</h5>
+
+            <h5 ng-if="$ctrl.selectedTool"> {{
+                $ctrl.selectedModule.name  + '&#8212' +
                 $ctrl.selectedCategory.name + '&#8212' +
-                $ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}
+                $ctrl.selectedTool.name.displayName }}
+
+                <!--$ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
+
                 <!--<span class="glyphicon glyphicon-triangle-right"></span>-->
             </h5>
         </div>
