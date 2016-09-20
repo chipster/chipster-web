@@ -1,14 +1,11 @@
-import VisualizationList from "./../visualization/visualizationconstants";
-import Utils from "../../../../services/utils.service";
-import Visualization from "../visualization/visualization";
-import Dataset from "../../../../model/session/dataset";
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
-import Job from "../../../../model/session/job";
 
 class DatasetBoxComponent {
 
 	static $inject = ['SelectionService', 'SessionDataService' ];
+
+	onDelete: () => void;
 
 	constructor(
 		private SelectionService: SelectionService,
@@ -16,7 +13,7 @@ class DatasetBoxComponent {
 	}
 
 	deleteDatasets() {
-		this.SessionDataService.deleteDatasets(this.SelectionService.selectedDatasets);
+		this.onDelete();
 	}
 
 	exportDatasets() {
@@ -30,5 +27,8 @@ class DatasetBoxComponent {
 
 export default {
 	templateUrl: 'views/sessions/session/dataset/dataset.html',
-	controller: DatasetBoxComponent
+	controller: DatasetBoxComponent,
+	bindings: {
+		onDelete: '&'
+	}
 }

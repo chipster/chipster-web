@@ -85,6 +85,7 @@ class WorkflowGraphController {
 	callback: any;
 	enabled: boolean;
 	dragStarted: boolean;
+	onDelete: () => void;
 
 	changeDetectors: Array<ChangeDetector> = [];
 
@@ -130,7 +131,7 @@ class WorkflowGraphController {
 
 		// deep comparison is needed to notice the changes in the objects (e.g. rename)
 		this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => {
-			this.update()
+			this.update();
 		}, Comparison.Deep));
 		this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => {
 			this.update()
@@ -160,7 +161,6 @@ class WorkflowGraphController {
 	}
 
 	$doCheck() {
-
 		if (this.svg) {
 			this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
 			// it seems that there is no easy way to listen for div's size changes
@@ -221,6 +221,7 @@ class WorkflowGraphController {
 
 		// create the new job nodes and throw away the selection of created nodes
 		this.d3JobNodes.enter().append('rect');
+		this.d3JobNodes.exit().remove();
 
 		// update all job nodes
 		this.d3JobNodes
@@ -331,6 +332,9 @@ class WorkflowGraphController {
 
 		// don't store this selection, because enter() returns only the new elements
 		this.d3DatasetNodes.enter().append('rect');
+		// remove deleted nodes
+		// for some reason the effect is visible only when removing multiple datasets twice
+		this.d3DatasetNodes.exit().remove();
 
 		// apply to all elements (old and new)
 		this.d3DatasetNodes
@@ -414,6 +418,7 @@ class WorkflowGraphController {
 	renderLabels() {
 		this.d3Labels = this.d3LabelsGroup.selectAll('text').data(this.datasetNodes);
 		this.d3Labels.enter().append('text');
+		this.d3Labels.exit().remove();
 		this.d3Labels.text((d: any) => Utils.getFileExtension(d.name).slice(0, 4))
 			.attr('x', (d) => d.x + this.nodeWidth/2)
 			.attr('y', (d) => d.y + this.nodeHeight/2 + this.fontSize / 4)
@@ -439,6 +444,7 @@ class WorkflowGraphController {
 		this.d3Links = this.d3LinksGroup.selectAll('line').data(this.links);
 		// add new lines, but throw away the "enter" selection
 		this.d3Links.enter().append('line');
+		this.d3Links.exit().remove();
 		// update also the old lines (for example when dragging dataset)
 		this.d3Links
 			.attr('x1', (d) => d.source.x + this.nodeWidth/2)
@@ -497,7 +503,7 @@ class WorkflowGraphController {
 				this.SessionDataService.renameDatasetDialog(d.dataset);
 			}},
 			{title:'Delete', action: () => {
-				this.SessionDataService.deleteDatasets(this.SelectionService.selectedDatasets);
+				this.onDelete();
 			}},
 			{title:'Export', action: () => {
 				this.SessionDataService.exportDatasets(this.SelectionService.selectedDatasets);
@@ -765,7 +771,7 @@ export default {
 		jobsMap: '<',
 		modulesMap: '<',
 		datasetSearch: '<',
-		callback: '<',
+		onDelete: '&',
 		zoom: '<',
 		enabled: '<'
 	}

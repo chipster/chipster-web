@@ -32,8 +32,10 @@
                             jobs-map="$ctrl.sessionData.jobsMap"
                             modules-map="$ctrl.sessionData.modulesMap"
                             dataset-search="$ctrl.datasetSearch"
+                            on-delete="$ctrl.deleteDatasetsLater()"
                             zoom="1"
                             enabled="true"></workflow-graph>
+
                 </uib-tab>
 
                 <uib-tab index="1" heading="Datasets">

@@ -11,6 +11,9 @@ class SingleDataset {
     private dataset: Dataset;
     private sourceJob: Job;
     private jobs: Map<string, Job>;
+
+    onDelete: () => void;
+
     constructor(private sessionDataService: SessionDataService, private selectionService: SelectionService){}
 
     $onInit() {
@@ -27,7 +30,7 @@ class SingleDataset {
     }
 
     deleteDatasets() {
-        this.sessionDataService.deleteDatasets([this.dataset]);
+        this.onDelete();
     }
 
     exportDatasets() {
@@ -47,7 +50,8 @@ class SingleDataset {
 export default {
     bindings: {
         dataset: '<',
-        jobs: '<'
+        jobs: '<',
+        onDelete: '&'
     },
     controller: SingleDataset,
     templateUrl: 'views/sessions/session/dataset/singledataset.html'

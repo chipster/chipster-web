@@ -3,6 +3,14 @@
     <!-- Start of Workflow View -->
     <div class="col-md-4">
         <div ng-include="'views/sessions/session/workflow/workflow.html'"></div>
+
+        <div ng-if="$ctrl.deletedDatasets" class="well dataset-delete-undo-well">
+            <button type="button" class="close close-well-button"
+                    ng-click="$ctrl.deleteDatasetsNow()">&times</button>
+            <span ng-if="$ctrl.deletedDatasets.length === 1">Dataset {{$ctrl.deletedDatasets[0].name}} deleted</span>
+            <span ng-if="$ctrl.deletedDatasets.length !== 1">{{$ctrl.deletedDatasets.length}} datasets deleted</span>
+            <a class="pull-right" ng-click="$ctrl.deleteDatasetsUndo()">Undo</a>
+        </div>
     </div>
 
     <div class="col-md-8 scrollable">
@@ -15,13 +23,18 @@
             </div>
         </div>
 
-
-
         <div class="row">
             <div class="col-md-12">
                 <Job-box ng-if="$ctrl.selectionService.selectedJobs.length > 0"></Job-box>
-                <single-dataset dataset="$ctrl.selectionService.selectedDatasets[0]" jobs="$ctrl.sessionData.jobsMap" ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></single-dataset>
-                <dataset-box ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></dataset-box>
+                <single-dataset
+                        dataset="$ctrl.selectionService.selectedDatasets[0]"
+                        jobs="$ctrl.sessionData.jobsMap"
+                        on-delete="$ctrl.deleteDatasetsLater()"
+                        ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></single-dataset>
+
+                <dataset-box
+                        on-delete="$ctrl.deleteDatasetsLater()"
+                        ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></dataset-box>
             </div>
         </div>
 

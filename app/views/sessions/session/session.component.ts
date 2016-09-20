@@ -20,6 +20,8 @@ class SessionComponent {
     toolDetailList: any = null;
     sessionData: SessionData;
     private isCopying = false;
+    deletedDatasets: Array<Dataset>;
+    deletedDatasetsTimeout;
 
     constructor(
         private $scope: ng.IScope,
@@ -132,8 +134,44 @@ class SessionComponent {
         this.sessionDataService.deleteJobs(jobs);
     }
 
-    deleteDatasets(datasets: Dataset[]) {
-        this.sessionDataService.deleteDatasets(datasets);
+    deleteDatasetsNow() {
+        // cancel the timer
+        clearTimeout(this.deletedDatasetsTimeout);
+
+        // delete from the server
+        this.sessionDataService.deleteDatasets(this.deletedDatasets);
+
+        // hide the undo message
+        this.deletedDatasets = null;
+    }
+
+    deleteDatasetsUndo() {
+        // cancel the deletion
+        clearTimeout(this.deletedDatasetsTimeout);
+
+        // show datasets again in the workflow
+        this.deletedDatasets.forEach((dataset: Dataset) => {
+            this.sessionData.datasetsMap.set(dataset.datasetId, dataset);
+        });
+
+        // hide the undo message
+        this.deletedDatasets = null;
+    }
+
+    deleteDatasetsLater() {
+
+        // make a copy so that further selection changes won't change the array
+        this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
+
+        // hide from the workflow
+        this.deletedDatasets.forEach((dataset: Dataset) => {
+            this.sessionData.datasetsMap.delete(dataset.datasetId);
+        });
+
+        // start timer to delete datasets from the server later
+        this.deletedDatasetsTimeout = setTimeout(() => {
+            this.deleteDatasetsNow();
+        }, 10 * 1000);
     }
 
     renameDatasetDialog(dataset: Dataset) {
