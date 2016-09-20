@@ -44,9 +44,10 @@ class ExpressionProfile {
 
         let headers = this.csvModel.getChipHeaders();
         let values = this.csvModel.getChipValues();
+        let orderedValues = this.orderChipValues(values);
 
         // max & min value from two-dimensional array
-        let flatValues = _.map(_.flatten(values), item => parseInt(item));
+        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
         let maxValue = _.max(flatValues);
         let minValue = _.min(flatValues);
 
@@ -69,10 +70,18 @@ class ExpressionProfile {
             .y( d => yScale(d) );
 
         // Paths
-        _.forEach(values, (item, index) => {
+        _.forEach(orderedValues, (item, index, array) => {
+
+            // colorIndex should be same for each 1/20 part of all arrays
+            // resulting each 1/20 of all lines getting same color index.
+            // All arrays are ordered by their first value so the line colors
+            // each group of lines get their own color making it easier to
+            // see where each line moves
+            let colorIndex = _.floor( index / array.length * 20);
+
             g.append('path')
                 .attr('d', lineGenerator(item))
-                .attr('stroke', () => color(index))
+                .attr('stroke', () => color( colorIndex )  )
                 .attr('stroke-width', 1)
                 .attr('fill', 'none')
                 .attr('transform', 'translate(' + margin.left + ',0)');
@@ -95,6 +104,28 @@ class ExpressionProfile {
 
 
 
+    }
+
+    /*
+     * Parse strings in two-dimensional array to numbers
+     */
+    parseValues(values: Array<Array<string>>): Array<Array<number>> {
+        return _.map(values, valueArray => _.map(valueArray, value => parseFloat(value)));
+    }
+
+    /*
+     * Order two-dimensional array by the first number in the arrays
+     */
+    orderByFirstValues(values: Array<Array<number>>) {
+        return _.orderBy(values, [ valueArray => _.head(valueArray) ]);
+    }
+
+    /*
+     * Order two-dimensional array using first item in every subarray from largest to smallest
+     */
+    orderChipValues(values: Array<Array<string>>): Array<Array<number>> {
+        let numberArrays = this.parseValues(values);
+        return this.orderByFirstValues(numberArrays);
     }
 
 }
