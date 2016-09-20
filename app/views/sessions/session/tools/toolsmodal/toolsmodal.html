@@ -2,11 +2,29 @@
     <button type="button" class="close" ng-click="vm.dismiss(false)">&times</button>
     <h4>Tools</h4>
 </div>
-<!--end of modal header-->
-<div class="modal-body">
-    <div class="row">
 
-        <ul class="col-md-2">
+<div class="modal-body">
+
+    <!-- module buttons -->
+    <div class="">
+        <button type="button" class="btn btn-sm module-button"
+                ng-click="vm.selectModule(module)"
+                ng-repeat="module in vm.modules | moduleFilter:vm.searchTool"
+                ng-class="{'btn-primary':module === vm.selectedModule,
+                'btn-default':module !== vm.selectedModule,}">{{module.name}}
+        </button>
+    </div>
+
+    <!-- category and tool lists -->
+    <div class="row">
+        <div class="col-md-3"><h5>Category</h5></div>
+        <div class="col-md-4"><h5>Tool</h5></div>
+        <div class="col-md-5"><h5></h5></div>
+    </div>
+
+    <div class="row">
+        <!--
+        <div id="modules-list-col" class="col-md-2 tool-list-col">
             <h5>Module</h5>
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
@@ -15,10 +33,10 @@
                         ng-class="{active:module === vm.selectedModule}">{{module.name}}
                 </button>
             </div>
-        </ul>
+        </div>
+        -->
 
-        <div class="col-md-3">
-            <h5>Category</h5>
+        <div class="col-md-3 tool-list-col">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button type="button" class="list-group-item thin-list-group-item"
                         ng-class="{'active':category===vm.selectedCategory}"
@@ -30,8 +48,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <h5>Tool</h5>
+        <div class="col-md-4 tool-list-col">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button type="button" class="list-group-item thin-list-group-item"
                         ng-class="{'active':tool===vm.selectedTool}"
@@ -43,13 +60,11 @@
             </div>
         </div>
 
-        <div class="col-md-3">
-            <h5>Tool Description</h5>
-
+        <div class="col-md-5 tool-list-col">
             <div class="tool-list" ng-show="vm.selectedTool">
                 <p>{{vm.selectedTool.description}}</p>
                 <p>
-                    <a href ng-click="$ctrl.openSourceModal()" ng-disabled="!selectedTool">
+                    <a href ng-click="$ctrl.openSourceModal()">
                         Source code
                     </a>
                 </p>
@@ -58,9 +73,11 @@
 
     </div>
 
+
+    <!-- close and run buttons -->
     <div class="row">
         <div class="col-md-12" >
-            <button class="btn btn-success pull-right" style="widht: 100%" ng-click="vm.runJob()"
+            <button class="btn btn-success pull-right" style="" ng-click="vm.runJob()"
                     ng-disabled="!vm.isRunEnabled()">
                 <span class="glyphicon glyphicon-play"></span> Run
             </button>
@@ -72,13 +89,13 @@
     </div>
 
 
+    <!-- parameters -->
     <div class="row">
         <div class="col-md-12">
             <h5>Parameters</h5>
         </div>
     </div>
 
-    <!-- parameters -->
     <div class="row">
         <div class="col-md-8 scrollable">
             <form name="paramForm">
