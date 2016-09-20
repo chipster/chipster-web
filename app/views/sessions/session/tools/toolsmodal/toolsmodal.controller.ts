@@ -8,14 +8,14 @@ import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
 import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
 import ToolParameter from "../../../../../model/session/toolparameter";
-import TableService from "../../../../../services/tableservice.factory";
 import SessionDataService from "../../sessiondata.service";
+import CSVReader from "../../../../../services/csv/CSVReader";
 
 
 export default class ToolsModalController {
 
     static $inject = ['$uibModalInstance', '$scope', '$filter', '$q','selectedTool', 'selectedCategory', 'selectedModule',
-        'inputBindings', 'selectedDatasets', 'ToolService', 'TableService','SessionDataService', 'modules', 'tools'];
+        'inputBindings', 'selectedDatasets', 'ToolService', 'CSVReader','SessionDataService', 'modules', 'tools'];
 
     private searchTool: string;
     private parameterDescription: string;
@@ -35,12 +35,11 @@ export default class ToolsModalController {
         private inputBindings: InputBinding[],
         private selectedDatasets: Dataset[],
         private toolService: ToolService,
-        private tableService: TableService,
+        private csvReader: CSVReader,
         private sessionDataService: SessionDataService,
         //private isRunEnabled: boolean,
         private modules: Module[],
-        private tools: Tool[]
-    ) {
+        private tools: Tool[]) {
 
         // used from template
         this.isSelectionParameter = toolService.isSelectionParameter;
@@ -192,7 +191,7 @@ export default class ToolsModalController {
         var promises: any[] = [];
         for (let dataset of this.selectedDatasets) {
             if (this.toolService.isCompatible(dataset, 'TSV')) {
-                promises.push(this.tableService.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId));
+                promises.push(this.csvReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId));
             }
         }
 

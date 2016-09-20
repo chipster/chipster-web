@@ -27,7 +27,6 @@ class VisualizationBoxComponent {
     ) {}
 
     static isCompatibleWithDataset(visualization: Visualization, dataset: Dataset) {
-
         var extension = Utils.getFileExtension(dataset.name);
         return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
     }

@@ -1,6 +1,6 @@
 import Utils from "../../../../../services/utils.service";
 import Dataset from "../../../../../model/session/dataset";
-import TableService from "../../../../../services/tableservice.factory";
+import CSVReader from "../../../../../services/csv/CSVReader";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 
@@ -12,10 +12,10 @@ interface Row extends Array<string> {
 
 class PhenodataVisualizationController {
 
-    static $inject = ['TableService', 'SessionDataService', '$scope'];
+    static $inject = ['CSVReader', 'SessionDataService', '$scope'];
 
     constructor(
-        private tableService: TableService,
+        private CSVReader: CSVReader,
         private sessionDataService: SessionDataService,
         private $scope: ng.IScope) {
         this.init();
@@ -138,7 +138,7 @@ class PhenodataVisualizationController {
 
     resetTsv(dataset: Dataset) {
 
-        this.tableService.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).then((fileHeaders: string[]) => {
+        this.CSVReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).then((fileHeaders: string[]) => {
             var metadata: MetadataEntry[] = [];
 
             var chipHeaders = fileHeaders.filter( function(header) {

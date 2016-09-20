@@ -19,7 +19,7 @@ import JobBoxComponent from "./views/sessions/session/job/jobbox.component";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
-import TableService from "./services/tableservice.factory";
+import TableService from "./services/csv/CSVReader";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
 import isoDateFilter from "./common/filter/isodate.filter"
@@ -48,7 +48,7 @@ import ParameterListComponent from "./views/sessions/session/dataset/parameterli
 import VisualizationBoxComponent from "./views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "./views/sessions/session/session.component";
 import SingleDatasetComponent from "./views/sessions/session/dataset/singledataset.component";
-
+import ExpressionProfile from "./views/sessions/session/visualization/expressionprofile/expressionprofile";
 
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
@@ -78,7 +78,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('FileResource', FileResource)
     .service('Utils', UtilsService)
     .service('WorkflowGraphService', WorkflowGraphService)
-    .service('TableService', TableService)
+    .service('CSVReader', TableService)
     .service('ToolService', ToolService)
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
@@ -95,6 +95,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('pdfVisualization', <any>pdfVisualization)
     .component('htmlVisualization', <any>htmlVisualization)
     .component('phenodataVisualization', <any>phenodataVisualization)
+    .component('expressionProfile', ExpressionProfile)
     .component('workflowGraph', <any>workflowGraph)
     .component('sessionList', <any>sessionList)
     .component('parameterList', ParameterListComponent)

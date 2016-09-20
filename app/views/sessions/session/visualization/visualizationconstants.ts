@@ -46,5 +46,11 @@ export default [
         extensions: ['txt', 'tsv', 'bed'],
         preview: false,
         multipleDatasets: false
+    },
+    {
+        directive: 'expression-profile',
+        name: 'Expression profile',
+        extensions: ['tsv'],
+        multipleDatasets: false
     }
 ];
