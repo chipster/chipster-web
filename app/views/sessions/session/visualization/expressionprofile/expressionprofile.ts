@@ -24,8 +24,10 @@ class ExpressionProfile {
     }
 
     drawLineChart() {
-        let margin = {top: 10, right: 10, bottom: 200, left: 20};
-        let size = { width: 1000, height: 600};
+        let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
+
+        let margin = {top: 10, right: 10, bottom: 150, left: 20};
+        let size = { width: expressionprofileWidth, height: 600};
 
         let graphArea = {
             width: size.width - margin.left - margin.right,
