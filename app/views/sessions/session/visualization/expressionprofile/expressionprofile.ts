@@ -32,7 +32,12 @@ class ExpressionProfile {
             height: size.height - margin.top - margin.bottom
         };
 
-        let svg = d3.select('#expressionprofile').append('svg').attr('width', size.width).attr('height', size.height);
+        let svg = d3.select('#expressionprofile')
+            .append('svg')
+            .attr('width', size.width)
+            .attr('height', size.height)
+            .style('margin-top', margin.top + 'px');
+
         let g = svg.append("g").attr('transform', 'translate(' + margin.left + ',0)');
 
         let headers = this.csvModel.getChipHeaders();
@@ -40,9 +45,12 @@ class ExpressionProfile {
 
         // max & min value from two-dimensional array
         let flatValues = _.map(_.flatten(values), item => parseInt(item));
-
         let maxValue = _.max(flatValues);
         let minValue = _.min(flatValues);
+
+        //add threshold to max and min so that threshold values can be seen on the graph.
+        maxValue += maxValue * 0.05;
+        minValue -= minValue * 0.05;
 
         // Calculate points (in pixels) for positioning x-axis points
         let chipRange = _.map(headers, (item, index) => (size.width / headers.length) * index);
@@ -58,22 +66,6 @@ class ExpressionProfile {
             .x( (d,i) => xScale( headers[i]) )
             .y( d => yScale(d) );
 
-        // x-axis
-        g.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
-            .call(xAxis)
-            .selectAll("text")
-                .attr('transform', 'rotate(-65 0 0)')
-                .attr('text-anchor', 'end')
-                .attr('style', 'font-size: 12px');
-
-        // y-axis
-        g.append('g')
-            .attr('class', 'y axis')
-            .attr('transform', 'translate(' + margin.left + ',0 )')
-            .call(yAxis);
-
         // Paths
         _.forEach(values, (item, index) => {
             g.append('path')
@@ -83,6 +75,23 @@ class ExpressionProfile {
                 .attr('fill', 'none')
                 .attr('transform', 'translate(' + margin.left + ',0)');
         });
+
+        // x-axis
+        g.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
+            .call(xAxis)
+            .selectAll("text")
+                .attr('transform', 'rotate(-65 0 0)')
+                .style('text-anchor', 'end');
+
+        // y-axis
+        g.append('g')
+            .attr('class', 'y axis')
+            .attr('transform', 'translate(' + margin.left + ',0 )')
+            .call(yAxis);
+
+
 
     }
 
