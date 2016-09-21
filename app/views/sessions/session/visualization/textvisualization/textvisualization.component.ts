@@ -13,7 +13,9 @@ class TextVisualizationController {
 
     $onInit() {
         this.fileResource.getData(this.SessionDataService.getSessionId(), this.datasetId).then( (resp: any) => {
-            this.data = resp.data;
+            this.$scope.$apply(() => {
+                this.data = resp.data;
+            });
         });
     }
 
