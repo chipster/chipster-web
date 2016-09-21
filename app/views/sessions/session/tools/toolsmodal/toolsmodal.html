@@ -6,13 +6,25 @@
 <div class="modal-body">
 
     <!-- module buttons -->
-    <div class="">
-        <button type="button" class="btn btn-sm module-button"
-                ng-click="vm.selectModule(module)"
-                ng-repeat="module in vm.modules | moduleFilter:vm.searchTool"
-                ng-class="{'btn-primary':module === vm.selectedModule,
+    <div class="row">
+        <div class="col-md-8"><button type="button" class="btn btn-sm module-button"
+                                     ng-click="vm.selectModule(module)"
+                                     ng-repeat="module in vm.modules | moduleFilter:vm.searchTool"
+                                     ng-class="{'btn-primary':module === vm.selectedModule,
                 'btn-default':module !== vm.selectedModule,}">{{module.name}}
         </button>
+        </div>
+        <div class="col-md-4">
+            <div class="search-div pull-right">
+                <span class="glyphicon glyphicon-search"></span>
+                <input id="tool-search-input" type="text" ng-model="vm.searchTool"
+                       placeholder="search tool" ng-keyup="vm.toolSearchKeyEvent($event)">
+                <button class="clear-search-button no-border" ng-show="vm.searchTool"
+                        ng-click="vm.searchTool = null">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- category and tool lists -->
