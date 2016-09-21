@@ -83,8 +83,8 @@
                     <div class="row">
                         <div class="col-md-12">
                         <textarea id="session-notes" rows="15" placeholder="Session notes"
-                                  ng-blur="$ctrl.updateSession()"
-                                  ng-model="$ctrl.getSession().notes">
+                                  ng-blur="$ctrl.sessionDataService.updateSession($ctrl.sessionData.session)"
+                                  ng-model="$ctrl.sessionData.session.notes">
                         </textarea>
                         </div>
                     </div>

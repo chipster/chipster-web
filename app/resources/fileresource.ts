@@ -36,4 +36,11 @@ export default class FileResource {
 			.one('datasets', datasetId)
 			.get());
 	}
+
+	uploadData(sessionId: string, datasetId: string, data: string) {
+		return this.getService().then((service: IService) => service
+			.one('sessions', sessionId)
+			.one('datasets', datasetId)
+			.customPUT(data));
+	}
 }

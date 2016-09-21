@@ -264,7 +264,7 @@ class SessionComponent {
                 result = 'unnamed session';
             }
             this.sessionData.session.name = result;
-            this.sessionDataService.updateSession();
+            this.sessionDataService.updateSession(this.sessionData.session);
         }, function () {
             // modal dismissed
         });

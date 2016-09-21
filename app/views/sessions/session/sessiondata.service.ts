@@ -1,34 +1,33 @@
 import SessionResource from "../../../resources/session.resource";
-import Utils from "../../../services/utils.service";
 import ILogService = angular.ILogService;
 import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/config.service";
 import AuthenticationService from "../../../authentication/authenticationservice";
-import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import Module from "../../../model/session/module";
-import Tool from "../../../model/session/tool";
-import {SessionData} from "../../../resources/session.resource";
 import IModalService = angular.ui.bootstrap.IModalService;
 import UtilsService from "../../../services/utils.service";
 import SelectionService from "./selection.service";
+import JobInput from "../../../model/session/jobinput";
+import FileResource from "../../../resources/fileresource";
+import Session from "../../../model/session/session";
 
 export default class SessionDataService {
 
     static $inject = [
         '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-         '$uibModal', 'SelectionService'];
+         '$uibModal', 'SelectionService', 'FileResource'];
 
     constructor(
         private $routeParams: ng.route.IRouteParamsService,
-        private SessionResource: SessionResource,
+        private sessionResource: SessionResource,
         private $log: ILogService,
         private $window: IWindowService,
-        private ConfigService: ConfigService,
-        private AuthenticationService: AuthenticationService,
+        private configService: ConfigService,
+        private authenticationService: AuthenticationService,
         private $uibModal: IModalService,
-        private selectionService: SelectionService) {
+        private selectionService: SelectionService,
+        private fileResource: FileResource) {
     }
 
     subscription: {unsubscribe(): void};
@@ -60,22 +59,59 @@ export default class SessionDataService {
     }
 
     createDataset(dataset: Dataset) {
-        return this.SessionResource.createDataset(this.getSessionId(), dataset);
+        return this.sessionResource.createDataset(this.getSessionId(), dataset);
     }
 
     createJob(job: Job) {
-        return this.SessionResource.createJob(this.getSessionId(), job).then((res: any) => {
-            this.$log.debug('job created', res);
-        });
+        return this.sessionResource.createJob(this.getSessionId(), job);
     }
 
     getJobById(jobId: string, jobs: Map<string, Job>){
         return jobs.get(jobId);
     }
 
+    /**
+     * Create a dataset which is derived from some other datasets.
+     *
+     * The file content is uploaded to the server and a fake job is created, so
+     * that the datasets' relationships are shown correctly in the workflow graph.
+     *
+     * @param name Name of the new dataset
+     * @param sourceDatasetIds Array of datasetIds shown as inputs for the new dataset
+     * @param toolName e.g. name of the visualization that created this dataset
+     * @param content File content, the actual data
+     * @returns Promise which resolves when all this is done
+     */
+    createDerivedDataset(name: string, sourceDatasetIds: string[], toolName: string, content: string) {
+
+        var d = new Dataset(name);
+        return this.createDataset(d).then((datasetId: string) => {
+            d.datasetId = datasetId;
+
+            let job = new Job();
+            job.state = "COMPLETED";
+            job.toolCategory = "Interactive visualizations";
+            job.toolName = toolName;
+
+            job.inputs = sourceDatasetIds.map((id) => {
+                let input = new JobInput();
+                input.datasetId = id;
+                return input;
+            });
+
+            return this.createJob(job);
+        }).then((jobId: string) => {
+            // d.datasetId is already set above
+            d.sourceJob = jobId;
+            return this.updateDataset(d);
+        }).then(() => {
+            return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content);
+        });
+    }
+
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
-            this.SessionResource.deleteJob(this.getSessionId(), job.jobId).then( (res: any) => {
+            this.sessionResource.deleteJob(this.getSessionId(), job.jobId).then( (res: any) => {
                 this.$log.debug('job deleted', res);
             });
         }
@@ -84,22 +120,22 @@ export default class SessionDataService {
     deleteDatasets(datasets: Dataset[]) {
 
         for (let dataset of datasets) {
-            this.SessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then( (res: any) => {
+            this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then( (res: any) => {
                 this.$log.debug('dataset deleted', res);
             });
         }
     }
 
     updateDataset(dataset: Dataset) {
-        return this.SessionResource.updateDataset(this.getSessionId(), dataset);
+        return this.sessionResource.updateDataset(this.getSessionId(), dataset);
     }
 
     getDatasetList(datasetsMap: Map): Dataset[] {
         return UtilsService.mapValues(datasetsMap);
     }
 
-    updateSession() {
-        return this.SessionResource.updateSession(this.session);
+    updateSession(session: Session) {
+        return this.sessionResource.updateSession(session);
     }
 
     getDatasetUrl(dataset: Dataset): string {
@@ -110,9 +146,9 @@ export default class SessionDataService {
         of them.
          */
 
-        return URI(this.ConfigService.getFileBrokerUrlIfInitialized())
+        return URI(this.configService.getFileBrokerUrlIfInitialized())
             .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
-            .addSearch('token', this.AuthenticationService.getToken()).toString();
+            .addSearch('token', this.authenticationService.getToken()).toString();
 
     }
 
