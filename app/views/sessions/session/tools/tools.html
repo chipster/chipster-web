@@ -3,7 +3,7 @@
 
     <div class="row">
         <div class="col-md-2">
-            <button class="btn btn-info" style="width: 100%" ng-click="$ctrl.openToolsModal()">
+            <button class="btn btn-info min-width-button" ng-click="$ctrl.openToolsModal()">
                 Tools...
             </button>
         </div>
@@ -13,19 +13,19 @@
                 Use the <button class="btn btn-info btn-xs" ng-click="$ctrl.openToolsModal()">Tools...</button>
                 button or press 'T' to view and select tools</h5>
 
-            <h5 ng-if="$ctrl.selectedTool"> {{
-                $ctrl.selectedModule.name  + '&#8212' +
-                $ctrl.selectedCategory.name + '&#8212' +
-                $ctrl.selectedTool.name.displayName }}
-
+            <tool-title ng-if="$ctrl.selectedTool"
+                        module="$ctrl.selectedModule.name"
+                        category="$ctrl.selectedCategory.name"
+                        tool="$ctrl.selectedTool.name.displayName">
+            </tool-title>
                 <!--$ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
 
                 <!--<span class="glyphicon glyphicon-triangle-right"></span>-->
-            </h5>
+
         </div>
 
         <div class="col-md-2">
-            <button class="btn btn-success" style="width: 100%" ng-click="$ctrl.runJob()"
+            <button class="btn btn-success min-width-button" ng-click="$ctrl.runJob()"
                     ng-disabled="!$ctrl.isRunEnabled()">
                 <span class="glyphicon glyphicon-play"></span> Run
             </button>

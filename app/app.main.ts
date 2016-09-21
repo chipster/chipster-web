@@ -19,6 +19,7 @@ import JobBoxComponent from "./views/sessions/session/job/jobbox.component";
 import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
+import ToolTitleComponent from "./views/sessions/session/tools/tooltitle.component";
 import TableService from "./services/csv/CSVReader";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
@@ -60,6 +61,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
+    .component('toolTitle', ToolTitleComponent)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('ToolsModalController', ToolsModalController)

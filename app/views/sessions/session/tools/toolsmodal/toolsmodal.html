@@ -1,6 +1,19 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="vm.dismiss(false)">&times</button>
-    <h4>Tools</h4>
+    <div class="col-md-1">
+        <h4>Tools</h4>
+    </div>
+    <div class="col-md-10" style="text-align: center">
+        <h5 ng-if="!vm.selectedTool">No tool selected</h5>
+
+        <tool-title ng-if="vm.selectedTool"
+            module="vm.selectedModule.name"
+            category="vm.selectedCategory.name"
+            tool="vm.selectedTool.name.displayName">
+        </tool-title>
+    </div>
+    <div class="col-md-1" style="padding-right: 0">
+        <button type="button" class="close pull-right" ng-click="vm.dismiss(false)">&times</button>
+    </div>
 </div>
 
 <div class="modal-body">
@@ -89,14 +102,13 @@
     <!-- close and run buttons -->
     <div class="row">
         <div class="col-md-12" >
-            <button class="btn btn-success pull-right" style="" ng-click="vm.runJob()"
+            <button class="btn btn-success min-width-button pull-right" ng-click="vm.runJob()"
                     ng-disabled="!vm.isRunEnabled()">
                 <span class="glyphicon glyphicon-play"></span> Run
             </button>
-            <button class="btn btn-secondary pull-right" style="" ng-click="vm.dismiss(false)">
+            <button id="close-tools-button" class="btn btn-default min-width-button pull-right" ng-click="vm.dismiss(false)">
                 Close
             </button>
-
         </div>
     </div>
 
