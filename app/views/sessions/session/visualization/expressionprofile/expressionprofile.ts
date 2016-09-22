@@ -2,6 +2,18 @@ import Dataset from "../../../../../model/session/dataset";
 import CSVReader from "../../../../../services/csv/CSVReader";
 import CSVModel from "../../../../../services/csv/CSVModel";
 
+class DomainBoundaries {
+
+    min: number;
+    max: number;
+
+    constructor(min: number, max: number) {
+        this.min = min;
+        this.max = max;
+    }
+
+}
+
 class ExpressionProfile {
 
     static $inject = ['CSVReader', '$routeParams', '$window'];
@@ -44,22 +56,19 @@ class ExpressionProfile {
 
         let headers = this.csvModel.getChipHeaders();
         let values = this.csvModel.getChipValues();
+
         let orderedValues = this.orderChipValues(values);
 
-        // max & min value from two-dimensional array
-        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
-        let maxValue = _.max(flatValues);
-        let minValue = _.min(flatValues);
-
+        let domainBoundaries = this.getDomainBoundaries(orderedValues);
+        domainBoundaries = this.addThreshold(domainBoundaries);
         //add threshold to max and min so that threshold values can be seen on the graph.
-        maxValue += maxValue * 0.05;
-        minValue -= minValue * 0.05;
+
 
         // Calculate points (in pixels) for positioning x-axis points
         let chipRange = _.map(headers, (item, index) => (size.width / headers.length) * index);
 
         let xScale = d3.scale.ordinal().range(chipRange).domain(headers);
-        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([minValue, maxValue]);
+        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([domainBoundaries.min, domainBoundaries.max]);
 
         let color = d3.scale.category20();
         let xAxis = d3.svg.axis().scale(xScale).orient('bottom').ticks(headers.length);
@@ -126,6 +135,25 @@ class ExpressionProfile {
     orderChipValues(values: Array<Array<string>>): Array<Array<number>> {
         let numberArrays = this.parseValues(values);
         return this.orderByFirstValues(numberArrays);
+    }
+
+    /*
+     * max & min value from two-dimensional array
+     */
+    getDomainBoundaries(values: Array<Array<number>>): DomainBoundaries {
+        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
+        let min = _.min(flatValues);
+        let max = _.max(flatValues);
+        return new DomainBoundaries(min, max);
+    }
+
+    /*
+     * Add threshold to min and max. Needed for lines to show on without being cut of on max and min
+     */
+    addThreshold(domainBoundaries: DomainBoundaries): DomainBoundaries {
+        let min = domainBoundaries.min - domainBoundaries.min * 0.05;
+        let max = domainBoundaries.max + domainBoundaries.max * 0.05;
+        return new DomainBoundaries(min, max);
     }
 
 }
