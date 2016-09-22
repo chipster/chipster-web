@@ -1,7 +1,7 @@
 <div id="visualization-box" class="chipster-highlight">
         <ul class="nav nav-tabs">
             <li ng-class="$index === $ctrl.activeTab ? 'active' : ''" ng-repeat="visualization in $ctrl.getVisualizations()">
-                <a ng-click="$ctrl.selectVisualization(visualization, $index, $event)">{{visualization.name}} <span class="glyphicon {{visualization.icon}}"></span></a>
+                <a ng-click="$ctrl.selectVisualization(visualization, $index, $event)"><span class="glyphicon {{visualization.icon}}"></span> {{visualization.name}}</a>
             </li>
         </ul>
     <div id="visualizationArea" class="visualization-area"></div>
