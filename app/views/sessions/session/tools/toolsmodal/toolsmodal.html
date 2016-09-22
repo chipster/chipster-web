@@ -89,7 +89,7 @@
             <div class="tool-list" ng-show="vm.selectedTool">
                 <p>{{vm.selectedTool.description}}</p>
                 <p>
-                    <a href ng-click="$ctrl.openSourceModal()">
+                    <a href ng-click="vm.openSourceModal()">
                         Source code
                     </a>
                 </p>
@@ -128,8 +128,7 @@
                         ng-mouseover="vm.setDescription(parameter.description)"
                         ng-mouseleave="vm.setDescription('')">
                         <td>
-                            <label ng-if="!parameter.optional">{{parameter.name.displayName}}</label>
-                            <span ng-if="parameter.optional">{{parameter.name.displayName}}</span>
+                            {{parameter.name.displayName}}
                         </td>
 
                         <td>

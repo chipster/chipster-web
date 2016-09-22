@@ -14,7 +14,7 @@ import CSVReader from "../../../../../services/csv/CSVReader";
 
 export default class ToolsModalController {
 
-    static $inject = ['$uibModalInstance', '$scope', '$filter', '$q','selectedTool', 'selectedCategory', 'selectedModule',
+    static $inject = ['$uibModalInstance', '$uibModal', '$scope', '$filter', '$q','selectedTool', 'selectedCategory', 'selectedModule',
         'inputBindings', 'selectedDatasets', 'ToolService', 'CSVReader','SessionDataService', 'modules', 'tools'];
 
     private searchTool: string;
@@ -26,6 +26,7 @@ export default class ToolsModalController {
 
     constructor(
         private $uibModalInstance: any,
+        private $uibModal: any,
         private $scope: ng.IScope,
         private $filter: IChipsterFilter,
         private $q: ng.IQService,
@@ -182,6 +183,30 @@ export default class ToolsModalController {
                 return {id: column};
             });
         }
+    }
+
+
+    openSourceModal() {
+        this.$uibModal.open({
+            animation: true,
+            templateUrl: 'views/sessions/session/tools/sourcemodal/sourcemodal.html',
+            controller: 'SourceModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+
+                selectedTool: () => {
+                    return angular.copy(this.selectedTool);
+                },
+                category: () => {
+                    return this.selectedCategory.name;
+                },
+                module: () => {
+                    return this.selectedModule.name;
+                }
+            }
+        });
     }
 
 

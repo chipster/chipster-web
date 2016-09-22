@@ -1,29 +1,30 @@
 import Tool from "../../../../../model/session/tool";
 import ToolResource from "../../../../../resources/toolresource";
 
-SourceModalController.$inject = ['$log', '$uibModalInstance', 'selectedTool', 'ToolResource'];
 
+export default class SourceModalController {
 
-function SourceModalController(
-    $log: ng.ILogService,
-    $uibModalInstance: any,
-    selectedTool: Tool,
-    ToolResource: ToolResource) {
+    static $inject = ['$log', '$uibModalInstance', 'module', 'category', 'selectedTool', 'ToolResource'];
 
-    var self = this;
+    private source: string;
 
-    this.selectedTool = selectedTool;
+    constructor(
+        private $log: ng.ILogService,
+        private $uibModalInstance: any,
+        private module: string,
+        private category: string,
+        private selectedTool: Tool,
+        private toolResource: ToolResource) {
+    }
 
-    this.$onInit = function () {
-        ToolResource.getSourceCode(this.selectedTool.name.id).then((sourceCode) => {
-            $log.log(sourceCode);
-            self.source = sourceCode;
+    $onInit() {
+        this.toolResource.getSourceCode(this.selectedTool.name.id).then((sourceCode) => {
+            //this.$log.log(sourceCode);
+            this.source = sourceCode;
         });
     };
 
-    this.close = function () {
-        $uibModalInstance.close();
+    close() {
+        this.$uibModalInstance.close();
     };
 }
-
-export default SourceModalController;

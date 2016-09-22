@@ -168,23 +168,6 @@ class ToolsBox {
         });
     }
 
-
-    // TODO move to tools modal / service
-    openSourceModal() {
-        this.$uibModal.open({
-            animation: true,
-            templateUrl: 'views/sessions/session/tools/sourcemodal/sourcemodal.html',
-            controller: 'SourceModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                selectedTool: function () {
-                    return angular.copy(this.selectedTool);
-                }.bind(this)
-            }
-        });
-    }
 }
 
 export default {
