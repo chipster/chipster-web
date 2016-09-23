@@ -2,18 +2,6 @@ import Dataset from "../../../../../model/session/dataset";
 import CSVReader from "../../../../../services/csv/CSVReader";
 import CSVModel from "../../../../../services/csv/CSVModel";
 
-class DomainBoundaries {
-
-    min: number;
-    max: number;
-
-    constructor(min: number, max: number) {
-        this.min = min;
-        this.max = max;
-    }
-
-}
-
 class ExpressionProfile {
 
     static $inject = ['CSVReader', '$routeParams', '$window'];
@@ -55,20 +43,12 @@ class ExpressionProfile {
         let g = svg.append("g").attr('transform', 'translate(' + margin.left + ',0)');
 
         let headers = this.csvModel.getChipHeaders();
-        let values = this.csvModel.getChipValues();
-
-        let orderedValues = this.orderChipValues(values);
-
-        let domainBoundaries = this.getDomainBoundaries(orderedValues);
-        domainBoundaries = this.addThreshold(domainBoundaries);
-        //add threshold to max and min so that threshold values can be seen on the graph.
-
 
         // Calculate points (in pixels) for positioning x-axis points
         let chipRange = _.map(headers, (item, index) => (size.width / headers.length) * index);
 
         let xScale = d3.scale.ordinal().range(chipRange).domain(headers);
-        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([domainBoundaries.min, domainBoundaries.max]);
+        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([this.csvModel.domainBoundaries.min, this.csvModel.domainBoundaries.max]);
 
         let color = d3.scale.category20();
         let xAxis = d3.svg.axis().scale(xScale).orient('bottom').ticks(headers.length);
@@ -78,23 +58,20 @@ class ExpressionProfile {
             .x( (d,i) => xScale( headers[i]) )
             .y( d => yScale(d) );
 
-        // Paths
-        _.forEach(orderedValues, (item, index, array) => {
+        let path = g.selectAll('.path')
+            .data(this.csvModel.body)
+            .enter().append('path').attr('class', 'path');
 
-            // colorIndex should be same for each 1/20 part of all arrays
-            // resulting each 1/20 of all lines getting same color index.
-            // All arrays are ordered by their first value so the line colors
-            // each group of lines get their own color making it easier to
-            // see where each line moves
-            let colorIndex = _.floor( index / array.length * 20);
-
-            g.append('path')
-                .attr('d', lineGenerator(item))
-                .attr('stroke', () => color( colorIndex )  )
-                .attr('stroke-width', 1)
-                .attr('fill', 'none')
-                .attr('transform', 'translate(' + margin.left + ',0)');
-        });
+        path.attr('d', (d) => {
+            return lineGenerator(this.csvModel.getItemsByIndexes( this.csvModel.chipValueIndexes, d ));
+        })
+            .attr('fill', 'none')
+            .attr('stroke-width', 1)
+            .attr('transform', 'translate(' + margin.left + ',0)')
+            .attr('stroke', (d, i) => {
+                let colorIndex = _.floor( (i / this.csvModel.body.length) * 20);
+                return color(colorIndex)
+            });
 
         // x-axis
         g.append('g')
@@ -110,51 +87,9 @@ class ExpressionProfile {
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + margin.left + ',0 )')
             .call(yAxis);
-
-
-
     }
 
-    /*
-     * Parse strings in two-dimensional array to numbers
-     */
-    parseValues(values: Array<Array<string>>): Array<Array<number>> {
-        return _.map(values, valueArray => _.map(valueArray, value => parseFloat(value)));
-    }
 
-    /*
-     * Order two-dimensional array by the first number in the arrays
-     */
-    orderByFirstValues(values: Array<Array<number>>) {
-        return _.orderBy(values, [ valueArray => _.head(valueArray) ]);
-    }
-
-    /*
-     * Order two-dimensional array using first item in every subarray from largest to smallest
-     */
-    orderChipValues(values: Array<Array<string>>): Array<Array<number>> {
-        let numberArrays = this.parseValues(values);
-        return this.orderByFirstValues(numberArrays);
-    }
-
-    /*
-     * max & min value from two-dimensional array
-     */
-    getDomainBoundaries(values: Array<Array<number>>): DomainBoundaries {
-        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
-        let min = _.min(flatValues);
-        let max = _.max(flatValues);
-        return new DomainBoundaries(min, max);
-    }
-
-    /*
-     * Add threshold to min and max. Needed for lines to show on without being cut of on max and min
-     */
-    addThreshold(domainBoundaries: DomainBoundaries): DomainBoundaries {
-        let min = domainBoundaries.min - domainBoundaries.min * 0.05;
-        let max = domainBoundaries.max + domainBoundaries.max * 0.05;
-        return new DomainBoundaries(min, max);
-    }
 
 }
 

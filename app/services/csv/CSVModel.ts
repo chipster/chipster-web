@@ -1,43 +1,31 @@
 import * as _ from "lodash";
+import DomainBoundaries from "./domainboundaries";
 
 export default class CSVModel {
 
+    private headers: Array<string>;
+    public body: Array<Array <string>>;
+    public chipValueIndexes: Array<number>;
+    public domainBoundaries: DomainBoundaries;
+
     constructor(CSVdata: Array<Array<string>>) {
         this.headers = _.head(CSVdata);
-        this.body = _.tail(CSVdata);
+        this.chipValueIndexes = this.getChipValueIndexes(CSVdata);
+        this.body = this.orderBodyByFirstValue(_.tail(CSVdata));
+        this.domainBoundaries = this.getDomainBoundaries();
     }
 
-    private headers: Array<string>;
-    private body: Array<Array <string>>;
-
-    /*
-     * Get two-dimensional array including chipdata and headers (as first row)
-     */
-    public getChipData() : Array<Array<string>> {
-        let chipValues = this.getChipValues();
-        let chipHeaders = this.getChipHeaders();
-        return [chipHeaders].concat(chipValues);
-    }
-
-    /*
-     * Get actual chip-values for csv data
-     */
-    public getChipValues(): Array<Array<string>> {
-        let indexes = this.getChipValueIndexes();
-        return _.map(this.body, row => this.getCellsWithIndexes(indexes, row));
-    }
     /*
      * Get chip-value headers
      */
     public getChipHeaders(): Array<string> {
-        let indexes = this.getChipValueIndexes();
-        return this.getCellsWithIndexes(indexes, this.headers);
+        return this.getItemsByIndexes(this.chipValueIndexes, this.headers);
     }
 
     /*
      * Return array containing numbers indicating indexes for column headers starting with 'chip.'
      */
-    private getChipColumnIndexes(): Array<number> {
+    public getChipColumnIndexes(): Array<number> {
         return _.chain(this.headers)
             .map( (cell, index) => _.startsWith(cell, 'chip.') ? index : false)
             .filter( cell => _.isNumber(cell))
@@ -45,27 +33,78 @@ export default class CSVModel {
     }
 
     /*
-     * Is headers-row missing a cell
+     * Headers are missing a cell, if first (or any other) datarow is longer than headerrow
      */
-    private isHeadersMissingCell(): boolean {
-        return this.headers.length !== _.head(this.body).length;
+    private isHeadersMissingCell(csvData: Array<Array<string>>): boolean {
+        return csvData[0].length !== csvData[1].length;
     }
 
     /*
      * Get Indexes containing actual _chip-values
      */
-    private getChipValueIndexes(): Array<number> {
+    public getChipValueIndexes(csvData: Array<Array<string>>): Array<number> {
         let chipColumnIndexes = this.getChipColumnIndexes();
-        return this.isHeadersMissingCell() ? _.map(chipColumnIndexes, cell => cell + 1) : chipColumnIndexes;
+        return this.isHeadersMissingCell(csvData) ? _.map(chipColumnIndexes, cellIndex => cellIndex + 1) : chipColumnIndexes;
     }
 
     /*
      * Filter unwanted cells from row
      */
-    private getCellsWithIndexes(indexes: Array<number>, row: Array<string>) {
+    public getItemsByIndexes(indexes: Array<number>, row: Array<string>) {
         return _.map( indexes, index => row[index] );
     }
 
+    /*
+     * Parse array of string to array of numbers
+     */
+    public parseRow(row: Array<string>): Array<number> {
+        return _.map(row, value => parseFloat(value));
+    }
 
+    /*
+     * Get chipvalues from raw data
+     */
+    public getChipValues(csvBody: Array<Array<string>>): Array<number> {
+        let chipValueIndexes = this.chipValueIndexes;
+        return _.map(csvBody, row => this.getItemsByIndexes(chipValueIndexes, row));
+    }
+
+    private orderByValueInIndex(csvBody: Array<Array<string>>, index: number): Array<Array<string>> {
+        return _.orderBy(csvBody, [ valueArray => parseFloat( valueArray[index] ) ]);
+    }
+
+    private orderBodyByFirstValue(csvBody: Array <Array<string>>): Array <Array <string>> {
+        let firstChipValueIndex = _.head(this.chipValueIndexes);
+        return this.orderByValueInIndex(csvBody, firstChipValueIndex);
+    }
+
+    /*
+     * max & min value from two-dimensional array
+     */
+    getDomainBoundaries(): DomainBoundaries {
+        let values = this.getChipValues(this.body);
+        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
+        let min = _.min(flatValues);
+        let max = _.max(flatValues);
+        let boundaries = new DomainBoundaries(min, max);
+        return this.addThreshold(boundaries);
+    }
+
+    /*
+     * Add threshold to min and max. Needed for lines to show on without being cut of on max and min
+     */
+    addThreshold(domainBoundaries: DomainBoundaries): DomainBoundaries {
+        let min = domainBoundaries.min - domainBoundaries.min * 0.05;
+        let max = domainBoundaries.max + domainBoundaries.max * 0.05;
+        return new DomainBoundaries(min, max);
+    }
+
+    /*
+     * Parse strings in two-dimensional array to numbers
+     */
+    parseValues(values: Array<string>): Array<number> {
+        let result = _.map(values, value => parseFloat(value));
+        return result;
+    }
 
 }
