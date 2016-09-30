@@ -40,38 +40,31 @@ export default class ExpressionProfileService {
         return new Line(lineDataIndex, x1, y1, x2, y2);
     }
 
-
-    /*
-     * Determine if line is intersecting with a rectangle
-     * https://gist.github.com/ChickenProp/3194723
-     */
+    // Check if line intersecting with rectangle
     static isIntersecting(line: Line, rectangle: Rectangle) {
-        let u1 = Number.MIN_VALUE;
-        let u2 = Number.MAX_VALUE;
-        let p = [-Math.abs(line.vx), Math.abs(line.vx), -Math.abs(line.vy), Math.abs(line.vy)];
-        let q = [line.start.x - rectangle.topleft.x, rectangle.bottomright.x - line.start.x, line.start.y - rectangle.topleft.y, rectangle.bottomright.y - line.start.y];
-
-        for (let i = 0; i < 4; i++) {
-            if (p[i] == 0) {
-                if (q[i] < 0) {
-                    return false;
-                }
-            } else {
-                var t = q[i] / p[i];
-                if (p[i] < 0 && u1 < t) {
-                    u1 = t;
-                } else if (p[i] > 0 && u2 > t) {
-                    u2 = t;
-                }
-
-            }
-        }
-
-        if (u1 > u2 || u1 > 1 || u1 < 0) {
+        // Completely outside.
+        if ( (line.start.x <= rectangle.topleft.x && line.end.x <= rectangle.topleft.x) ||
+            (line.start.y <= rectangle.topleft.y && line.end.y <= rectangle.topleft.y) ||
+            (line.start.x >= rectangle.bottomright.x && line.end.x >= rectangle.bottomright.x) ||
+            (line.start.y >= rectangle.bottomright.y && line.end.y >= rectangle.bottomright.y)) {
             return false;
         }
 
-        return true;
+        let m = (line.end.y - line.start.y) / (line.end.x - line.start.x);
+
+        let y = m * (rectangle.topleft.x - line.start.x) + line.start.y;
+        if (y > rectangle.topleft.y && y < rectangle.bottomright.y) return true;
+
+        y = m * (rectangle.bottomright.x - line.start.x) + line.start.y;
+        if (y > rectangle.topleft.y && y < rectangle.bottomright.y) return true;
+
+        let x = (rectangle.topleft.y - line.start.y) / m + line.start.x;
+        if (x > rectangle.topleft.x && x < rectangle.bottomright.x) return true;
+
+        x = (rectangle.bottomright.y - line.start.y) / m + line.start.x;
+        if (x > rectangle.topleft.x && x < rectangle.bottomright.x) return true;
+
+        return false;
     }
 
 }

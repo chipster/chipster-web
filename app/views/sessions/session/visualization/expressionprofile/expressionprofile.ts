@@ -85,15 +85,13 @@ class ExpressionProfile {
             .call(xIndexAxis);
         
         
-        console.log('pixels for linear x-axis', linearXScale(0), linearXScale(1));
-
         // Paths
         let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let lineGenerator = d3.svg.line()
             .x( (d,i) => xScale( headers[i]) )
             .y( d => yScale(d) );
         let paths = pathsGroup.selectAll('.path')
-            .data(_.filter(csvModel.body, (row, i) => i % 160 === 0))
+            .data(csvModel.body)
             .enter()
             .append('path')
             .attr('class', 'path')
@@ -129,16 +127,24 @@ class ExpressionProfile {
             .call(drag);
 
         function onDragEnd() {
+            d3.selectAll('.path').attr('stroke-width', 1);
             let pos = d3.mouse(document.getElementById('dragGroup'));
 
             // X-axis indexes for intervals the selection rectangle is crossing
-            let floor = ExpressionProfileService.getFloor( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
-            let ceil = ExpressionProfileService.getCeil( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
-            
+            let intervalStartIndex = ExpressionProfileService.getFloor( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
+            let intervalEndIndex  = ExpressionProfileService.getCeil( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
+            if(intervalStartIndex < 0) {
+                intervalStartIndex = 0;
+            }
+
+            if(intervalEndIndex >= csvModel.getChipHeaders().length - 1) {
+                intervalEndIndex = csvModel.getChipHeaders().length - 1;
+            }
+
             var intervals: Array<Interval> = [];
 
             // create intervals
-            for( let chipValueIndex = floor; chipValueIndex < ceil; chipValueIndex++ ) {
+            for( let chipValueIndex = intervalStartIndex; chipValueIndex < intervalEndIndex; chipValueIndex++ ) {
                 let lines = ExpressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
                 let intervalStartIndex = chipValueIndex;
                 let point1 = new Point(pos[0], pos[1]);
@@ -146,7 +152,6 @@ class ExpressionProfile {
                 let rectangle = new Rectangle(point1.x, point1.y, point2.x, point2.y);
                 intervals.push(new Interval(intervalStartIndex, lines, rectangle));
             }
-
 
             _.forEach(intervals, interval => {
                 let intersectingLines = _.filter(interval.lines, line => {
@@ -156,15 +161,18 @@ class ExpressionProfile {
                 let csvIds = _.map(intersectingLines, line => line._csvIndex);
 
                 _.forEach(csvIds, pathId => {
-                    console.log(pathId);
-                    d3.select('#path' + pathId).attr('stroke-width', 5);
+                    d3.select('#path' + pathId).attr('stroke-width', 3);
                 })
             });
 
-
-
-
             bandPos = [-1, -1];
+
+
+            d3.select('.band')
+                .attr("width", 0)
+                .attr("height", 0)
+                .attr("x", 0)
+                .attr("y", 0)
         }
 
         function onDrag() {
