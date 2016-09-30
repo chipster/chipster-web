@@ -9,7 +9,7 @@ import Interval from "./interval";
 
 class ExpressionProfile {
 
-    static $inject = ['CSVReader', '$routeParams', '$window'];
+    static $inject = ['CSVReader', '$routeParams', '$window', 'ExpressionProfileService'];
 
     private datasetId: string;
     private d3: any;
@@ -18,7 +18,8 @@ class ExpressionProfile {
 
     constructor(private csvReader: CSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
-                private $window: ng.IWindowService) {
+                private $window: ng.IWindowService,
+                private expressionProfileService: ExpressionProfileService) {
         this.expressionProfileService = new ExpressionProfileService();
     }
 
@@ -33,7 +34,7 @@ class ExpressionProfile {
 
     drawLineChart(csvModel: CSVModel) {
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
-
+        let expressionProfileService = this.expressionProfileService;
         let margin = {top: 10, right: 10, bottom: 150, left: 40};
         let size = { width: expressionprofileWidth, height: 600};
 
@@ -131,8 +132,8 @@ class ExpressionProfile {
             let pos = d3.mouse(document.getElementById('dragGroup'));
 
             // X-axis indexes for intervals the selection rectangle is crossing
-            let intervalStartIndex = ExpressionProfileService.getFloor( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
-            let intervalEndIndex  = ExpressionProfileService.getCeil( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
+            let intervalStartIndex = expressionProfileService.getFloor( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
+            let intervalEndIndex  = expressionProfileService.getCeil( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
             if(intervalStartIndex < 0) {
                 intervalStartIndex = 0;
             }
@@ -145,7 +146,7 @@ class ExpressionProfile {
 
             // create intervals
             for( let chipValueIndex = intervalStartIndex; chipValueIndex < intervalEndIndex; chipValueIndex++ ) {
-                let lines = ExpressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
+                let lines = expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
                 let intervalStartIndex = chipValueIndex;
                 let point1 = new Point(pos[0], pos[1]);
                 let point2 = new Point(bandPos[0], bandPos[1]);
@@ -155,7 +156,7 @@ class ExpressionProfile {
 
             _.forEach(intervals, interval => {
                 let intersectingLines = _.filter(interval.lines, line => {
-                    return ExpressionProfileService.isIntersecting(line, interval.rectangle);
+                    return expressionProfileService.isIntersecting(line, interval.rectangle);
                 });
 
                 let csvIds = _.map(intersectingLines, line => line._csvIndex);

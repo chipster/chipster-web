@@ -1,20 +1,19 @@
 import * as _ from 'lodash';
 import CSVModel from "../../../../../services/csv/CSVModel";
 import Line from "./line";
-import Point from "./point";
 import Rectangle from "./rectangle";
 
 export default class ExpressionProfileService {
 
-    static getFloor(first: number, second: number) {
+    getFloor(first: number, second: number) {
         return first <= second ? _.floor(first) : _.floor(second);
     }
 
-    static getCeil(first: number, second: number) {
+    getCeil(first: number, second: number) {
         return first >= second ? _.ceil(first) : _.ceil(second);
     }
 
-    static createLines(csvModel: CSVModel, chipValueIndex: number, linearXScale: any, yScale: any): Array<Line> {
+    createLines(csvModel: CSVModel, chipValueIndex: number, linearXScale: any, yScale: any): Array<Line> {
         return _.map(csvModel.body, row => {
 
             // get indexes for finding raw data value for lines start and end points
@@ -29,7 +28,7 @@ export default class ExpressionProfileService {
         } );
     }
 
-    static createLine(lineDataIndex: number, chipValueIndex: number, lineStartValue: string, lineEndValue: string, linearXScale: any, yScale: any ): Line {
+    createLine(lineDataIndex: number, chipValueIndex: number, lineStartValue: string, lineEndValue: string, linearXScale: any, yScale: any ): Line {
 
         // get pixel values for lines start and end positions
         let x1 = linearXScale(chipValueIndex);
@@ -41,7 +40,7 @@ export default class ExpressionProfileService {
     }
 
     // Check if line intersecting with rectangle
-    static isIntersecting(line: Line, rectangle: Rectangle) {
+    isIntersecting(line: Line, rectangle: Rectangle) {
         // Completely outside.
         if ( (line.start.x <= rectangle.topleft.x && line.end.x <= rectangle.topleft.x) ||
             (line.start.y <= rectangle.topleft.y && line.end.y <= rectangle.topleft.y) ||
