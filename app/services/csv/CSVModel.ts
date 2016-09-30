@@ -9,17 +9,29 @@ export default class CSVModel {
     public domainBoundaries: DomainBoundaries;
 
     constructor(CSVdata: Array<Array<string>>) {
+        this.addIndexToData(CSVdata); // add index information to all rows to indentificate them later
         this.headers = _.head(CSVdata);
+
+        // Find indexes where actual chipdata is located in the arrays.
+        // Note that these indexes may differ from the indexes the matching headers are located
+        // since the header-row may be missing a column
         this.chipValueIndexes = this.getChipValueIndexes(CSVdata);
         this.body = this.orderBodyByFirstValue(_.tail(CSVdata));
         this.domainBoundaries = this.getDomainBoundaries();
+    }
+
+    private addIndexToData( CSVdata: Array<Array<string>> ) {
+        _.head(CSVdata).unshift('index');
+        _.forEach(_.tail(CSVdata), (row, index) => {
+            row.unshift(index);
+        });
     }
 
     /*
      * Get chip-value headers
      */
     public getChipHeaders(): Array<string> {
-        return this.getItemsByIndexes(this.chipValueIndexes, this.headers);
+        return this.getItemsByIndexes(this.getChipColumnIndexes(), this.headers);
     }
 
     /*
@@ -40,11 +52,11 @@ export default class CSVModel {
     }
 
     /*
-     * Get Indexes containing actual _chip-values
+     * Get Indexes containing actual .chip-values
      */
     public getChipValueIndexes(csvData: Array<Array<string>>): Array<number> {
         let chipColumnIndexes = this.getChipColumnIndexes();
-        return this.isHeadersMissingCell(csvData) ? _.map(chipColumnIndexes, cellIndex => cellIndex + 1) : chipColumnIndexes;
+        return this.isHeadersMissingCell(csvData) ? _.map(chipColumnIndexes, cellIndex => cellIndex + 1) : chipColumnIndexes ;
     }
 
     /*
@@ -69,10 +81,16 @@ export default class CSVModel {
         return _.map(csvBody, row => this.getItemsByIndexes(chipValueIndexes, row));
     }
 
+    /*
+     * Order csvBodyRows by values in the given index of each row
+     */
     private orderByValueInIndex(csvBody: Array<Array<string>>, index: number): Array<Array<string>> {
         return _.orderBy(csvBody, [ valueArray => parseFloat( valueArray[index] ) ]);
     }
 
+    /*
+     * Order csvBodyRows by first chip-value in each row
+     */
     private orderBodyByFirstValue(csvBody: Array <Array<string>>): Array <Array <string>> {
         let firstChipValueIndex = _.head(this.chipValueIndexes);
         return this.orderByValueInIndex(csvBody, firstChipValueIndex);
@@ -87,7 +105,8 @@ export default class CSVModel {
         let min = _.min(flatValues);
         let max = _.max(flatValues);
         let boundaries = new DomainBoundaries(min, max);
-        return this.addThreshold(boundaries);
+        return boundaries;
+        // return this.addThreshold(boundaries);
     }
 
     /*
