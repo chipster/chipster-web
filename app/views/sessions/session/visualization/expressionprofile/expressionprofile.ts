@@ -67,6 +67,8 @@ class ExpressionProfile {
             .attr('transform', 'rotate(-65 0 0)')
             .style('text-anchor', 'end');
 
+        // Linear x-axis to determine selection-rectangle position scaled to csv-data
+        let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
 
         // Y-axis and scale
         let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([csvModel.domainBoundaries.min, csvModel.domainBoundaries.max]);
@@ -75,16 +77,6 @@ class ExpressionProfile {
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + margin.left + ',0 )')
             .call(yAxis);
-
-
-        // Linear x-axis to determine selection-rectangle position scaled to csv-data
-        let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
-        let xIndexAxis = d3.svg.axis().scale(linearXScale).orient('top').ticks(headers.length);
-        svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
-            .call(xIndexAxis);
-        
         
         // Paths
         let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
