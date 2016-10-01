@@ -1,5 +1,4 @@
-import upgradeAdapter from "upgradeadapter";
-import { HTTP_PROVIDERS } from '@angular/http';
+import {upgradeAdapter} from "./upgradeadapter";
 import './rxjs-operators';
 
 import Login from "./views/login/login.component";
@@ -141,7 +140,4 @@ angular.module('chipster-web').config(
 
     });
 
-
-upgradeAdapter.addProvider(ConfigurationResource);
-upgradeAdapter.addProvider(HTTP_PROVIDERS);
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);
