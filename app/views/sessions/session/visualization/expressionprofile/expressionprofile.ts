@@ -98,12 +98,14 @@ class ExpressionProfile {
             });
 
         // Dragging
+        let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let drag = d3.behavior.drag();
+
+        // Register drag handlers
         drag.on("drag", onDrag);
         drag.on("dragend", onDragEnd);
 
-        let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
-
+        // Create selection rectangle
         let band = dragGroup.append("rect")
             .attr("width", 0)
             .attr("height", 0)
@@ -113,6 +115,8 @@ class ExpressionProfile {
             .attr('id', 'band');
 
         let bandPos = [-1,-1];
+
+        // Create
         let zoomOverlay = svg.append("rect")
             .attr("width", graphArea.width)
             .attr("height", graphArea.height)
