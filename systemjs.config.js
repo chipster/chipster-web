@@ -22,13 +22,19 @@
             'angular2-in-memory-web-api': 'npm:angular2-in-memory-web-api',
             'rxjs':                       'npm:rxjs',
             'typescript':                   'npm:typescript/lib/typescript.js',
-            'lodash':                       'npm:lodash'
+            'lodash':                       'npm:lodash',
+            'd3':                           'npm:d3',
+            'd3-context-menu':              'npm:d3-context-menu',
+            'd3-tip':                       'npm:d3-tip'
         },
         packages: {
             'app':                       { main: 'app.main.js',  defaultExtension: 'js' },
             'rxjs':                       { defaultExtension: 'js' },
             'angular2-in-memory-web-api': { main: 'index.js', defaultExtension: 'js' },
-            'lodash':                     {main: 'lodash.js', defaultExtension: 'js'}
+            'lodash':                     {main: 'lodash.js', defaultExtension: 'js'},
+            'd3':                           {main: 'd3.js', defaultExtension: 'js'},
+            'd3-context-menu':              {main: 'js/d3-context-menu', defaultExtension: 'js'},
+            'd3-tip':                       {main: 'index.js', defaultExtension: 'js'}
         }
     });
 

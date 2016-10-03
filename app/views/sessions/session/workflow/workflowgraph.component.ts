@@ -12,7 +12,11 @@ import {MapChangeDetector} from "../../../../services/changedetector.service";
 import {ArrayChangeDetector} from "../../../../services/changedetector.service";
 import SessionDataService from "../sessiondata.service";
 import SelectionService from "../selection.service";
-import * as d3 from "d3";
+import * as d3 from 'd3';
+import * as d3Tip from 'd3-tip';
+import * as d3ContextMenu from 'd3-context-menu';
+
+
 import UtilsService from "../../../../services/utils.service";
 
 interface DatasetNode extends Node {
@@ -43,9 +47,11 @@ class WorkflowGraphController {
 		private $log: ng.ILogService,
 		private $filter: IChipsterFilter,
 		private SessionDataService: SessionDataService,
-		private SelectionService: SelectionService) {}
+		private SelectionService: SelectionService) {
+		d3['tip'] = d3Tip;
+		d3['contextMenu'] = d3ContextMenu;
+	}
 
-	d3: any = this.$window['d3'];
 	//var shiftKey, ctrlKey;
 	svg: d3.Selection<any>;
 	outerSvg: d3.Selection<any>;
@@ -93,12 +99,12 @@ class WorkflowGraphController {
 
 		var element = WorkflowGraphController.getElement();
 
-		this.zoomer = this.d3.behavior.zoom()
+		this.zoomer = d3.behavior.zoom()
 			.scaleExtent([ 0.2, 1 ])
 			.scale(this.zoom)
 			.on('zoom', this.zoomAndPan.bind(this));
 
-		this.outerSvg = this.d3.select(element).append('svg').call(this.zoomer);
+		this.outerSvg = d3.select(element).append('svg').call(this.zoomer);
 
 		// draw background on outerSvg, so that it won't pan or zoom
 		this.renderBackground(this.outerSvg);
@@ -213,7 +219,7 @@ class WorkflowGraphController {
 
 	renderJobs() {
 
-		var arc = <d3.svg.Arc<JobNode>>this.d3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
+		var arc = <d3.svg.Arc<JobNode>>d3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
 		var self = this;
 
@@ -237,13 +243,13 @@ class WorkflowGraphController {
 				if (!this.enabled) {
 					return;
 				}
-				this.$scope.$apply(this.SelectionService.selectJob(this.d3.event, d.job));
+				this.$scope.$apply(this.SelectionService.selectJob(d3.event, d.job));
 			})
 			.on('mouseover', function () {
-				self.d3.select(this).style('filter', 'url(#drop-shadow)');
+				d3.select(this).style('filter', 'url(#drop-shadow)');
 			})
 			.on('mouseout', function () {
-				self.d3.select(this).style('filter', null);
+				d3.select(this).style('filter', null);
 			});
 
 		// create an arc for each job
@@ -281,12 +287,12 @@ class WorkflowGraphController {
 				var y = d.y + this.nodeHeight / 2;
 
 				if (d.spin) {
-					return this.d3.interpolateString(
+					return d3.interpolateString(
 						'translate(' + x + ',' + y + ')rotate(0)',
 						'translate(' + x + ',' + y + ')rotate(360)'
 					);
 				} else {
-					return this.d3.interpolateString(
+					return d3.interpolateString(
 						'translate(' + x + ',' + y + ')',
 						'translate(' + x + ',' + y + ')'
 					);
@@ -317,8 +323,7 @@ class WorkflowGraphController {
 	}
 
 	renderDatasets(){
-
-		var tip = this.d3['tip']()
+		var tip = d3['tip']()
 			.attr('class','d3-tip')
 			.offset([-10,0])
 			.html((d: DatasetNode) => d.name);
@@ -358,16 +363,16 @@ class WorkflowGraphController {
 					return;
 				}
 				this.$scope.$apply(() => {
-					if (!Utils.isCtrlKey(this.d3.event)) {
+					if (!Utils.isCtrlKey(d3.event)) {
 						this.SelectionService.clearSelection();
 					}
-					this.SelectionService.toggleDatasetSelection(this.d3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
+					this.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(this.datasetsMap));
 				});
 				tip.hide(d);
 			})
-			.call(this.d3.behavior.drag()
+			.call(d3.behavior.drag()
 				.on('drag', () => {
-					let event = <d3.DragEvent>this.d3.event;
+					let event = <d3.DragEvent>d3.event;
 					if (!this.enabled) {
 						return;
 					}
@@ -384,21 +389,21 @@ class WorkflowGraphController {
 					}
 				})
 			)
-			.on('contextmenu', this.d3['contextMenu'](this.menu).bind(this))
+			.on('contextmenu', d3['contextMenu'](this.menu).bind(this))
 			.on('mouseover', function(d) {
 				if (!self.enabled) {
 					return;
 				}
 				// how to get the current element without select(this) so that we can bind(this)
 				// and get rid of 'self'
-				self.d3.select(this).style('filter', 'url(#drop-shadow)');
+				d3.select(this).style('filter', 'url(#drop-shadow)');
 				tip.show(d);
 			})
 			.on('mouseout', function(d) {
 				if (!self.enabled) {
 					return;
 				}
-				self.d3.select(this).style('filter', null);
+				d3.select(this).style('filter', null);
 				tip.hide(d);
 			});
 	}
@@ -560,7 +565,7 @@ class WorkflowGraphController {
 
 	zoomAndPan() {
 
-		let event  = <d3.ZoomEvent>this.d3.event;
+		let event  = <d3.ZoomEvent>d3.event;
 
 		// allow default zoom level to be set even when disabled
 		if (!this.enabled && event.scale !== this.zoom) {

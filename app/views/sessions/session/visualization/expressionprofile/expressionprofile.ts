@@ -6,6 +6,7 @@ import Line from "./line";
 import Point from "./point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
+import * as d3 from 'd3';
 
 class ExpressionProfile {
 
@@ -24,8 +25,6 @@ class ExpressionProfile {
     }
 
     $onInit() {
-        this.d3 = this.$window['d3'];
-
         this.csvReader.getCSV(this.$routeParams.sessionId, this.datasetId).then( (csvModel: CSVModel) => {
             this.csvModel = csvModel;
             this.drawLineChart(csvModel);
