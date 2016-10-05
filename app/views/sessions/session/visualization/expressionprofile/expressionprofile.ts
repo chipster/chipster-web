@@ -7,6 +7,7 @@ import Point from "./point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
 import * as d3 from 'd3';
+import {csv} from "~d3/index";
 
 class ExpressionProfile {
 
@@ -16,6 +17,8 @@ class ExpressionProfile {
     private d3: any;
     private csvModel: CSVModel;
     private expressionProfileService: ExpressionProfileService;
+    private selectedLines: Array<Array<string>>;
+    private lines: Array<Array<string>>;
 
     constructor(private csvReader: CSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
@@ -34,14 +37,16 @@ class ExpressionProfile {
     drawLineChart(csvModel: CSVModel) {
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
         let expressionProfileService = this.expressionProfileService;
-        let margin = {top: 10, right: 10, bottom: 150, left: 40};
-        let size = { width: expressionprofileWidth, height: 600};
 
+        // Configurate svg and graph-area
+        let margin = {top: 10, right: 0, bottom: 150, left: 40};
+        let size = { width: expressionprofileWidth, height: 600};
         let graphArea = {
-            width: size.width - margin.left - margin.right,
+            width: size.width,
             height: size.height - margin.top - margin.bottom
         };
 
+        // SVG-element
         let svg = d3.select('#expressionprofile')
             .append('svg')
             .attr('width', size.width)
@@ -49,9 +54,8 @@ class ExpressionProfile {
             .attr('id', 'svg')
             .style('margin-top', margin.top + 'px');
 
-
+        // Custom headers for x-axis
         let headers = csvModel.getChipHeaders();
-        let color = d3.scale.category20();
 
         // X-axis and scale
         // Calculate points (in pixels) for positioning x-axis points
@@ -82,6 +86,7 @@ class ExpressionProfile {
         let lineGenerator = d3.svg.line()
             .x( (d,i) => xScale( headers[i]) )
             .y( d => yScale(d) );
+        let color = d3.scale.category20();
         let paths = pathsGroup.selectAll('.path')
             .data(csvModel.body)
             .enter()
@@ -93,16 +98,15 @@ class ExpressionProfile {
             .attr('stroke-width', 1)
             .attr('stroke', (d, i) => {
                 let colorIndex = _.floor( (i / csvModel.body.length) * 20);
-                return color(i)
+                return color(colorIndex)
             });
+
+
+
 
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let drag = d3.behavior.drag();
-
-        // Register drag handlers
-        drag.on("drag", onDrag);
-        drag.on("dragend", onDragEnd);
 
         // Create selection rectangle
         let band = dragGroup.append("rect")
@@ -115,63 +119,10 @@ class ExpressionProfile {
 
         let bandPos = [-1,-1];
 
-        // Create
-        let zoomOverlay = svg.append("rect")
-            .attr("width", graphArea.width)
-            .attr("height", graphArea.height)
-            .attr("class", "zoomOverlay")
-            .call(drag);
-
-        function onDragEnd() {
-            d3.selectAll('.path').attr('stroke-width', 1);
-            let pos = d3.mouse(document.getElementById('dragGroup'));
-
-            // X-axis indexes for intervals the selection rectangle is crossing
-            let intervalStartIndex = expressionProfileService.getFloor( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
-            let intervalEndIndex  = expressionProfileService.getCeil( linearXScale.invert(pos[0]), linearXScale.invert(bandPos[0]) );
-            if(intervalStartIndex < 0) {
-                intervalStartIndex = 0;
-            }
-
-            if(intervalEndIndex >= csvModel.getChipHeaders().length - 1) {
-                intervalEndIndex = csvModel.getChipHeaders().length - 1;
-            }
-
-            var intervals: Array<Interval> = [];
-
-            // create intervals
-            for( let chipValueIndex = intervalStartIndex; chipValueIndex < intervalEndIndex; chipValueIndex++ ) {
-                let lines = expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
-                let intervalStartIndex = chipValueIndex;
-                let point1 = new Point(pos[0], pos[1]);
-                let point2 = new Point(bandPos[0], bandPos[1]);
-                let rectangle = new Rectangle(point1.x, point1.y, point2.x, point2.y);
-                intervals.push(new Interval(intervalStartIndex, lines, rectangle));
-            }
-
-            _.forEach(intervals, interval => {
-                let intersectingLines = _.filter(interval.lines, line => {
-                    return expressionProfileService.isIntersecting(line, interval.rectangle);
-                });
-
-                let csvIds = _.map(intersectingLines, line => line._csvIndex);
-
-                _.forEach(csvIds, pathId => {
-                    d3.select('#path' + pathId).attr('stroke-width', 3);
-                })
-            });
-
-            bandPos = [-1, -1];
 
 
-            d3.select('.band')
-                .attr("width", 0)
-                .attr("height", 0)
-                .attr("x", 0)
-                .attr("y", 0)
-        }
-
-        function onDrag() {
+        // Register drag handlers
+        drag.on("drag", () => {
             let pos = d3.mouse(document.getElementById('dragGroup'));
 
             if (pos[0] < bandPos[0]) {
@@ -190,15 +141,79 @@ class ExpressionProfile {
                 d3.select(".band").attr("transform", "translate(" + bandPos[0] + "," + bandPos[1] + ")");
             }
 
-
             d3.select(".band").transition().duration(1)
                 .attr("width", Math.abs(bandPos[0] - pos[0]))
                 .attr("height", Math.abs(bandPos[1] - pos[1]));
+        });
+
+        drag.on("dragend", () => {
+            if(bandPos[0] !== -1 && bandPos[1] !== -1) {
+
+                d3.selectAll('.path').attr('stroke-width', 1);
+                let pos = d3.mouse(document.getElementById('dragGroup'));
+                let p1 = new Point(pos[0], pos[1]);
+                let p2 = new Point(bandPos[0], bandPos[1]);
+
+                let intervalIndexes = expressionProfileService.getCrossingIntervals(p1, p2, linearXScale, csvModel);
+                var intervals: Array<Interval> = [];
+
+                // create intervals
+                for( let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++ ) {
+                    let lines = expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
+                    let intervalStartIndex = chipValueIndex;
+
+                    let rectangle = new Rectangle(p1.x, p1.y, p2.x, p2.y);
+                    intervals.push(new Interval(intervalStartIndex, lines, rectangle));
+                }
+
+                let lines = [];
+
+                _.forEach(intervals, interval => {
+                    let intersectingLines = _.filter(interval.lines, line => {
+                        return expressionProfileService.isIntersecting(line, interval.rectangle);
+                    });
+
+                    // Line ids intersecting with selection as an array
+                    let csvIds = _.map(intersectingLines, line => line._csvIndex);
+
+                    // set styles for selected lines
+                    _.forEach(csvIds, pathId => {
+                        d3.select('#path' + pathId).attr('stroke-width', 3);
+                    });
+
+                    lines = _.merge(lines, csvModel.getCSVLines(csvIds));
+                });
+
+                this.lines  = _.uniqBy(lines, line => line[0]);
+                resetSelectionRectangle();
+
+            }
+
+        });
+
+
+
+        // Create
+        let zoomOverlay = svg.append("rect")
+            .attr("width", graphArea.width)
+            .attr("height", graphArea.height)
+            .attr("class", "zoomOverlay")
+            .call(drag);
+
+        function resetSelectionRectangle() {
+            bandPos = [-1, -1];
+            d3.select('.band')
+                .attr("width", 0)
+                .attr("height", 0)
+                .attr("x", 0)
+                .attr("y", 0)
         }
 
     }
 
+    createNewDataset() {
 
+    }
 
 }
 
@@ -209,5 +224,5 @@ export default {
         selectedDatasets: '<'
     },
     controller: ExpressionProfile,
-    template: '<div id="expressionprofile"></div>'
+    templateUrl: 'views/sessions/session/visualization/expressionprofile/expressionprofile.html'
 }

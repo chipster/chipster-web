@@ -99,23 +99,19 @@ export default class CSVModel {
     /*
      * max & min value from two-dimensional array
      */
-    getDomainBoundaries(): DomainBoundaries {
+    public getDomainBoundaries(): DomainBoundaries {
         let values = this.getChipValues(this.body);
         let flatValues = _.map(_.flatten(values), item => parseFloat(item));
         let min = _.min(flatValues);
         let max = _.max(flatValues);
         let boundaries = new DomainBoundaries(min, max);
         return boundaries;
-        // return this.addThreshold(boundaries);
     }
 
-    /*
-     * Add threshold to min and max. Needed for lines to show on without being cut of on max and min
-     */
-    addThreshold(domainBoundaries: DomainBoundaries): DomainBoundaries {
-        let min = domainBoundaries.min - domainBoundaries.min * 0.05;
-        let max = domainBoundaries.max + domainBoundaries.max * 0.05;
-        return new DomainBoundaries(min, max);
+    getCSVLines(ids: Array<string>) {
+        return _.filter(this.body, linedata => {
+            return _.includes(ids, linedata[0]);
+        });
     }
 
     /*

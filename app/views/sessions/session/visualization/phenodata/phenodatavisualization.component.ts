@@ -12,12 +12,13 @@ interface Row extends Array<string> {
 
 class PhenodataVisualizationController {
 
-    static $inject = ['CSVReader', 'SessionDataService', '$scope'];
+    static $inject = ['CSVReader', 'SessionDataService', '$scope', '$uibModal'];
 
     constructor(
         private CSVReader: CSVReader,
         private sessionDataService: SessionDataService,
-        private $scope: ng.IScope) {
+        private $scope: ng.IScope,
+        private $uibModal: any) {
         this.init();
     }
 
@@ -105,35 +106,10 @@ class PhenodataVisualizationController {
         TH.firstChild.appendChild(button);
     }
 
-    addColumn() {
-        var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
-        this.hot.alter('insert_col', colHeaders.length);
-        // remove undefined column header
-        colHeaders.pop();
-        colHeaders.push(this.colName);
-        this.hot.updateSettings({
-           colHeaders: colHeaders
-        }, false);
-        this.colName = '';
-
-        this.updateDatasets(false);
-    }
-
     removeColumn(index: number) {
         this.hot.alter('remove_col', index);
 
         this.updateDatasets(false);
-    }
-
-    reset() {
-
-        this.datasets.forEach((dataset: Dataset) => {
-            if (Utils.getFileExtension(dataset.name) === 'tsv') {
-                this.resetTsv(dataset);
-            } else {
-                this.resetGenericFile(dataset);
-            }
-        });
     }
 
     resetTsv(dataset: Dataset) {
@@ -173,14 +149,7 @@ class PhenodataVisualizationController {
         this.updateDatasets(true);
     }
 
-    remove () {
-        this.datasets.forEach((dataset: Dataset) => {
-            dataset.metadata = null;
-        });
 
-        this.updateView();
-        this.updateDatasets(true);
-    }
 
     getHeaders(datasets: Dataset[]) {
         // collect all headers
@@ -352,6 +321,31 @@ class PhenodataVisualizationController {
             }
         }
     }
+
+    addColumnModal() {
+        var modalInstance = this.$uibModal.open({
+            animation: true,
+            templateUrl: 'views/sessions/session/visualization/phenodata/addcolumn.html',
+            controller: 'AddColumnController',
+            controllerAs: '$ctrl',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+                hot: () => this.hot,
+                colName: () => this.colName,
+                datasets: () => this.datasets
+            }
+        });
+
+        modalInstance.result.then((result: any) => {
+            if(result === 'update') {
+                this.updateDatasets(false);
+            }
+        }, function () {
+            // modal dismissed
+        });
+    }
+
 }
 
 export default {

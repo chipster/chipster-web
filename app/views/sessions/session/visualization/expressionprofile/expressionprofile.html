@@ -1,0 +1,15 @@
+<div class="row">
+
+    <div class="col-md-9">
+        <div id="expressionprofile"></div>
+    </div>
+    <div class="col-md-3" ng-if="$ctrl.lines">
+        <button class="btn btn-default btn-sm" ng-click="createNewDataset($ctrl.lines)">Create new dataset</button>
+        <h6>Selection</h6>
+        <ul>
+            <li ng-repeat="line in $ctrl.lines">{{line[1]}}, {{line[2]}}</li>
+        </ul>
+    </div>
+
+</div>
+

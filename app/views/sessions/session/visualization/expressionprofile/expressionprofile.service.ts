@@ -2,8 +2,27 @@ import * as _ from 'lodash';
 import CSVModel from "../../../../../services/csv/CSVModel";
 import Line from "./line";
 import Rectangle from "./rectangle";
+import Point from "./point";
 
 export default class ExpressionProfileService {
+
+    // X-axis indexes for intervals the selection rectangle is crossing
+    getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, csvModel: CSVModel) {
+        let startIndex = this.getFloor( linearXScale.invert(p1.x), linearXScale.invert(p2.x) );
+        let endIndex  = this.getCeil( linearXScale.invert(p1.x), linearXScale.invert(p2.x) );
+        if(startIndex < 0) {
+            startIndex = 0;
+        }
+
+        if(endIndex >= csvModel.getChipHeaders().length - 1) {
+            endIndex = csvModel.getChipHeaders().length - 1;
+        }
+
+        return {
+            start: startIndex,
+            end: endIndex
+        }
+    }
 
     getFloor(first: number, second: number) {
         return first <= second ? _.floor(first) : _.floor(second);

@@ -50,6 +50,7 @@ import SessionComponent from "./views/sessions/session/session.component";
 import SingleDatasetComponent from "./views/sessions/session/dataset/singledataset.component";
 import ExpressionProfile from "./views/sessions/session/visualization/expressionprofile/expressionprofile";
 import ExpressionProfileService from "./views/sessions/session/visualization/expressionprofile/expressionprofile.service";
+import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap',
@@ -68,6 +69,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('SessionEditModalController', SessionEditModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
+    .controller('AddColumnController', AddColumnController)
     .service('AuthenticationService', AuthenticationService)
     .service('ConfigService', ConfigService)
     .factory('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))

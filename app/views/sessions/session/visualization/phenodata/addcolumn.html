@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <button type="button" class="close">&times</button>
+    <h4>Add new column</h4>
+</div>
+<!--end of modal header-->
+<div class="modal-body">
+    <div class="form-group">
+        <label>Column name</label>
+        <input type="text"
+               class="form-control"
+               ng-model="$ctrl.colName"
+               placeholder=""
+               autofocus>
+    </div>
+    <!-- type "submit" reacts to enter key -->
+    <button type="submit" class="btn btn-info" ng-click="$ctrl.addColumn()">Add</button>
+    <button type="button" class="btn btn-default pull-right">Cancel</button>
+</div>
