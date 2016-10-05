@@ -23,13 +23,14 @@ class TextVisualizationController {
     }
 
     createDataset() {
+
     	this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Text", this.data);
     }
 }
 
 export default {
     controller: TextVisualizationController,
-    template: '<p>{{$ctrl.data}}</p><button ng-click="$ctrl.createDataset()">Create dataset</button>',
+    template: '<button class="btn btn-default" ng-click="$ctrl.createDataset()">Create dataset</button><p>{{$ctrl.data}}</p>',
     bindings: {
         datasetId: '<'
     }

@@ -27,6 +27,15 @@ export default class CSVModel {
         });
     }
 
+    public getCSVData(ids: Array<string>) {
+        let body = this.getCSVLines(ids);
+        body = _.map(body, row => _.drop(row, 1));
+        let headers = _.drop(this.headers, 1);
+
+        let data = [headers].concat(body);
+        return data;
+    }
+
     /*
      * Get chip-value headers
      */

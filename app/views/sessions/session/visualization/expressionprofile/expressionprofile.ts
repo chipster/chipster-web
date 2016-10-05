@@ -2,28 +2,31 @@ import Dataset from "../../../../../model/session/dataset";
 import CSVReader from "../../../../../services/csv/CSVReader";
 import CSVModel from "../../../../../services/csv/CSVModel";
 import ExpressionProfileService from "./expressionprofile.service";
-import Line from "./line";
 import Point from "./point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
 import * as d3 from 'd3';
-import {csv} from "~d3/index";
+import SessionDataService from "../../sessiondata.service";
 
 class ExpressionProfile {
 
-    static $inject = ['CSVReader', '$routeParams', '$window', 'ExpressionProfileService'];
+    static $inject = ['CSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService'];
 
     private datasetId: string;
     private d3: any;
     private csvModel: CSVModel;
     private expressionProfileService: ExpressionProfileService;
-    private selectedLines: Array<Array<string>>;
+    private selectedGeneExpressions: Array<Array<string>>;
+    private selectedGeneExpressionIds: Array<string>;
     private lines: Array<Array<string>>;
+    private sessionDataService: SessionDataService;
+    private selectedDatasets: any;
 
     constructor(private csvReader: CSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
                 private $window: ng.IWindowService,
-                private expressionProfileService: ExpressionProfileService) {
+                private expressionProfileService: ExpressionProfileService,
+                private sessionDataService: SessionDataService) {
         this.expressionProfileService = new ExpressionProfileService();
     }
 
@@ -37,7 +40,6 @@ class ExpressionProfile {
     drawLineChart(csvModel: CSVModel) {
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
         let expressionProfileService = this.expressionProfileService;
-
         // Configurate svg and graph-area
         let margin = {top: 10, right: 0, bottom: 150, left: 40};
         let size = { width: expressionprofileWidth, height: 600};
@@ -101,9 +103,6 @@ class ExpressionProfile {
                 return color(colorIndex)
             });
 
-
-
-
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let drag = d3.behavior.drag();
@@ -166,7 +165,7 @@ class ExpressionProfile {
                     intervals.push(new Interval(intervalStartIndex, lines, rectangle));
                 }
 
-                let lines = [];
+                let geneExpressionIds = [];
 
                 _.forEach(intervals, interval => {
                     let intersectingLines = _.filter(interval.lines, line => {
@@ -174,19 +173,23 @@ class ExpressionProfile {
                     });
 
                     // Line ids intersecting with selection as an array
-                    let csvIds = _.map(intersectingLines, line => line._csvIndex);
+                    let ids = _.map(intersectingLines, line => line._csvIndex);
 
                     // set styles for selected lines
-                    _.forEach(csvIds, pathId => {
+                    _.forEach(ids, pathId => {
                         d3.select('#path' + pathId).attr('stroke-width', 3);
                     });
 
-                    lines = _.merge(lines, csvModel.getCSVLines(csvIds));
+                    geneExpressionIds = ids.concat(geneExpressionIds);
                 });
 
-                this.lines  = _.uniqBy(lines, line => line[0]);
+                // remove duplicate ids
+                this.selectedGeneExpressionIds = _.uniq(geneExpressionIds);
+                this.selectedGeneExpressions = csvModel.getCSVLines(geneExpressionIds);
                 resetSelectionRectangle();
 
+                console.log('here', this.selectedGeneExpressionIds, this.selectedGeneExpressions);
+                
             }
 
         });
@@ -212,7 +215,8 @@ class ExpressionProfile {
     }
 
     createNewDataset() {
-
+        let data = this.csvModel.getCSVData(this.selectedGeneExpressionIds);
+        this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
 
 }
