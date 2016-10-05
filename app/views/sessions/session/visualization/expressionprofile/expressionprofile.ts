@@ -187,14 +187,9 @@ class ExpressionProfile {
                 this.selectedGeneExpressionIds = _.uniq(geneExpressionIds);
                 this.selectedGeneExpressions = csvModel.getCSVLines(geneExpressionIds);
                 resetSelectionRectangle();
-
-                console.log('here', this.selectedGeneExpressionIds, this.selectedGeneExpressions);
-                
             }
 
         });
-
-
 
         // Create
         let zoomOverlay = svg.append("rect")
@@ -215,7 +210,8 @@ class ExpressionProfile {
     }
 
     createNewDataset() {
-        let data = this.csvModel.getCSVData(this.selectedGeneExpressionIds);
+        let csvData = this.csvModel.getCSVData(this.selectedGeneExpressionIds);
+        let data = d3.tsv.formatRows(csvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
 
