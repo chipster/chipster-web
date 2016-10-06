@@ -137,14 +137,12 @@ class ExpressionProfile {
             let id = d[0];
             let isCtrl = UtilsService.isCtrlKey(d3.event);
             let isShift = UtilsService.isShiftKey(d3.event);
-            let selectionIds = that.getSelectionIds();
-            let lineAlreadySelected = _.includes(selectionIds, id);
 
-            if(isShift) {
+            if(isShift) { 
                 that.addSelections([id]);
-            } else if(isCtrl && !isShift) {
+            } else if(isCtrl) {
                 that.toggleSelections([id]);
-            } else if(!isCtrl && !isShift) {
+            } else {
                 that.resetSelections();
                 that.addSelections([id]);
             }
@@ -193,12 +191,11 @@ class ExpressionProfile {
         });
 
         drag.on("dragend", () => {
-            this.resetSelections();
+            let pos = d3.mouse(document.getElementById('dragGroup'));
 
-            if(bandPos[0] !== -1 && bandPos[1] !== -1) {
-
+            if( (bandPos[0] !== -1 && bandPos[1] !== -1) && ((bandPos[0] !== pos[0]) && (bandPos[1] !== pos[1]))     ) {
+                this.resetSelections();
                 d3.selectAll('.path').attr('stroke-width', 1);
-                let pos = d3.mouse(document.getElementById('dragGroup'));
                 let p1 = new Point(pos[0], pos[1]);
                 let p2 = new Point(bandPos[0], bandPos[1]);
 
@@ -292,7 +289,6 @@ class ExpressionProfile {
     removeSelectionStyle(id: string) {
         d3.select('#path' + id).classed('selected', false);
     }
-
 
     setSelectionHoverStyle(id: string) {
         d3.select('#path' + id).classed('pathover', true)
