@@ -57,7 +57,20 @@ class ExpressionProfile {
             .style('margin-top', margin.top + 'px');
 
         // Custom headers for x-axis
-        let headers = csvModel.getChipHeaders();
+        let phenodataDescriptions = _.filter(_.first(this.selectedDatasets).metadata, metadata => {
+            return metadata.key === 'description';
+        });
+
+        // Change default headers to values defined in phenodata if description value has been defined
+        let headers = _.map(csvModel.getChipHeaders(), header => {
+
+            // find if there is a phenodata description matching header and containing a value
+            let phenodataHeader = _.find(phenodataDescriptions, item => {
+                return item.column === header && item.value !== null;
+            });
+            return phenodataHeader ? phenodataHeader.value : header;
+        });
+
 
         // X-axis and scale
         // Calculate points (in pixels) for positioning x-axis points
@@ -117,8 +130,6 @@ class ExpressionProfile {
             .attr('id', 'band');
 
         let bandPos = [-1,-1];
-
-
 
         // Register drag handlers
         drag.on("drag", () => {
