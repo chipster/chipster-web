@@ -3,11 +3,11 @@
     <div class="col-md-9">
         <div id="expressionprofile"></div>
     </div>
-    <div class="col-md-3" ng-if="$ctrl.selectedGeneExpressions">
-        <button class="btn btn-default btn-sm" ng-click="$ctrl.createNewDataset($ctrl.selectedGeneExpressionIds)">Create new dataset</button>
+    <div class="col-md-3" ng-if="$ctrl.selections && $ctrl.selections.length > 0">
+        <button class="btn btn-default btn-sm" ng-click="$ctrl.createNewDataset()">Create new dataset</button>
         <h6>Selection</h6>
         <ol>
-            <li ng-repeat="line in $ctrl.selectedGeneExpressions">{{line[2]}} ({{line[1]}})</li>
+            <li ng-repeat="line in $ctrl.selections">{{line[2]}} ({{line[1]}})</li>
         </ol>
     </div>
 
