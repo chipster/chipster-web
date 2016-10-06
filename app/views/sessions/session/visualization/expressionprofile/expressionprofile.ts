@@ -272,8 +272,6 @@ class ExpressionProfile {
         _.forEach(missingSelectionIds, id => {
             this.setSelectionStyle(id);
         });
-
-        console.log(this.selections);
     };
 
     toggleSelections(ids: Array<string>) {
