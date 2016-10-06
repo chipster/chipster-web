@@ -123,6 +123,12 @@ export default class CSVModel {
         });
     }
 
+    getCSVLine(id: string) {
+        return _.find(this.body, expressionGene => {
+            return expressionGene[0] === id;
+        });
+    }
+
     /*
      * Parse strings in two-dimensional array to numbers
      */

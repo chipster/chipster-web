@@ -7,6 +7,7 @@ import Rectangle from "./rectangle";
 import Interval from "./interval";
 import * as d3 from 'd3';
 import SessionDataService from "../../sessiondata.service";
+import UtilsService from "../../../../../services/utils.service";
 
 class ExpressionProfile {
 
@@ -16,9 +17,7 @@ class ExpressionProfile {
     private d3: any;
     private csvModel: CSVModel;
     private expressionProfileService: ExpressionProfileService;
-    private selectedGeneExpressions: Array<Array<string>>;
-    private selectedGeneExpressionIds: Array<string>;
-    private lines: Array<Array<string>>;
+    private selections: Array<Array<string>>; // selected gene expressions
     private sessionDataService: SessionDataService;
     private selectedDatasets: any;
 
@@ -35,9 +34,12 @@ class ExpressionProfile {
             this.csvModel = csvModel;
             this.drawLineChart(csvModel);
         });
+
+        this.selections = [];
     }
 
     drawLineChart(csvModel: CSVModel) {
+        let that = this;
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
         let expressionProfileService = this.expressionProfileService;
         // Configurate svg and graph-area
@@ -49,12 +51,15 @@ class ExpressionProfile {
         };
 
         // SVG-element
+        let drag = d3.behavior.drag();
+
         let svg = d3.select('#expressionprofile')
             .append('svg')
             .attr('width', size.width)
             .attr('height', size.height)
             .attr('id', 'svg')
-            .style('margin-top', margin.top + 'px');
+            .style('margin-top', margin.top + 'px')
+            .call(drag);
 
         // Custom headers for x-axis
         let phenodataDescriptions = _.filter(_.first(this.selectedDatasets).metadata, metadata => {
@@ -102,6 +107,7 @@ class ExpressionProfile {
             .x( (d,i) => xScale( headers[i]) )
             .y( d => yScale(d) );
         let color = d3.scale.category20();
+
         let paths = pathsGroup.selectAll('.path')
             .data(csvModel.body)
             .enter()
@@ -114,11 +120,41 @@ class ExpressionProfile {
             .attr('stroke', (d, i) => {
                 let colorIndex = _.floor( (i / csvModel.body.length) * 20);
                 return color(colorIndex)
-            });
+            })
+            .on('mouseover', mouseOverHandler)
+            .on('mouseout', mouseOutHandler)
+            .on('click', clickHandler);
+
+        function mouseOverHandler(d) {
+            that.setSelectionHoverStyle(d[0]);
+        }
+
+        function mouseOutHandler(d) {
+            that.removeSelectionHoverStyle(d[0]);
+        }
+
+        function clickHandler(d) {
+            let id = d[0];
+            let isCtrl = UtilsService.isCtrlKey(d3.event);
+            let isShift = UtilsService.isShiftKey(d3.event);
+            let selectionIds = that.getSelectionIds();
+            let lineAlreadySelected = _.includes(selectionIds, id);
+
+            if(isShift) {
+                that.addSelections([id]);
+            } else if(isCtrl && !isShift) {
+                that.toggleSelections([id]);
+            } else if(!isCtrl && !isShift) {
+                that.resetSelections();
+                that.addSelections([id]);
+            }
+
+        }
+
+
 
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
-        let drag = d3.behavior.drag();
 
         // Create selection rectangle
         let band = dragGroup.append("rect")
@@ -157,6 +193,8 @@ class ExpressionProfile {
         });
 
         drag.on("dragend", () => {
+            this.resetSelections();
+
             if(bandPos[0] !== -1 && bandPos[1] !== -1) {
 
                 d3.selectAll('.path').attr('stroke-width', 1);
@@ -176,38 +214,23 @@ class ExpressionProfile {
                     intervals.push(new Interval(intervalStartIndex, lines, rectangle));
                 }
 
-                let geneExpressionIds = [];
-
+                let ids = []; // path ids found in each interval (not unique list)
                 _.forEach(intervals, interval => {
                     let intersectingLines = _.filter(interval.lines, line => {
                         return expressionProfileService.isIntersecting(line, interval.rectangle);
                     });
 
                     // Line ids intersecting with selection as an array
-                    let ids = _.map(intersectingLines, line => line._csvIndex);
-
-                    // set styles for selected lines
-                    _.forEach(ids, pathId => {
-                        d3.select('#path' + pathId).attr('stroke-width', 3);
-                    });
-
-                    geneExpressionIds = ids.concat(geneExpressionIds);
+                    ids = ids.concat(_.map(intersectingLines, line => line._csvIndex));
                 });
 
+                this.resetSelections();
+                this.addSelections(_.uniq(ids));
                 // remove duplicate ids
-                this.selectedGeneExpressionIds = _.uniq(geneExpressionIds);
-                this.selectedGeneExpressions = csvModel.getCSVLines(geneExpressionIds);
                 resetSelectionRectangle();
             }
 
         });
-
-        // Create
-        let zoomOverlay = svg.append("rect")
-            .attr("width", graphArea.width)
-            .attr("height", graphArea.height)
-            .attr("class", "zoomOverlay")
-            .call(drag);
 
         function resetSelectionRectangle() {
             bandPos = [-1, -1];
@@ -221,10 +244,64 @@ class ExpressionProfile {
     }
 
     createNewDataset() {
-        let csvData = this.csvModel.getCSVData(this.selectedGeneExpressionIds);
+        let selectedGeneExpressionIds = this.getSelectionIds();
+        let csvData = this.csvModel.getCSVData(selectedGeneExpressionIds);
         let data = d3.tsv.formatRows(csvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
+
+    getSelectionIds() {
+        return _.flatten(_.map(this.selections, geneExpression => _.first(geneExpression) ));
+    }
+
+    resetSelections() {
+        this.removeSelections(this.getSelectionIds());
+        this.selections.length = 0;
+    }
+
+    removeSelections(ids: Array<string>) {
+        _.forEach(ids, id => {
+            d3.select('#path'+id).classed('selected', false);
+        });
+
+        let selectionIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
+        this.selections = _.map(selectionIds, id => this.csvModel.getCSVLine(id));
+    }
+
+    addSelections(ids: Array<string>) {
+        let selectionIds = this.getSelectionIds();
+        let missingSelectionIds = _.difference(ids, selectionIds);
+        this.selections = this.selections.concat(_.map(missingSelectionIds, id => this.csvModel.getCSVLine(id)));
+        _.forEach(missingSelectionIds, id => {
+            this.setSelectionStyle(id);
+        });
+    };
+
+    toggleSelections(ids: Array<string>) {
+        let selectionIds = this.getSelectionIds();
+        let selectionIdsToAdd = _.difference(ids, selectionIds);
+        let selectionIdsToRemove = _.intersection(ids, selectionIds);
+        this.addSelections(selectionIdsToAdd);
+        this.removeSelections(selectionIdsToRemove);
+    }
+
+    setSelectionStyle(id: string) {
+        d3.select('#path' + id).classed('selected', true);
+    }
+
+    removeSelectionStyle(id: string) {
+        d3.select('#path' + id).classed('selected', false);
+    }
+
+
+    setSelectionHoverStyle(id: string) {
+        d3.select('#path' + id).classed('pathover', true)
+    }
+
+    removeSelectionHoverStyle(id: string) {
+        d3.select('#path' + id).classed('pathover', false);
+    }
+
 
 }
 
