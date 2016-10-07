@@ -4,12 +4,11 @@ import AuthenticationService from "../../authentication/authenticationservice";
 
 class LoginController {
 
-    static $inject = ['$location', '$http', 'AuthenticationService'];
+    static $inject = ['$location', 'AuthenticationService'];
 
     error: string;
 
     constructor(private $location: ng.ILocationService,
-                private $http: ng.IHttpService,
                 private authenticationService: AuthenticationService) {}
 
     login(username: string, password: string) {

@@ -33,6 +33,7 @@
     "@types/angular-websocket": "^2.0.4",
     "@types/core-js": "^0.9.34",
     "@types/d3": "^3.5.36",
+    "@types/handsontable": "^0.24.18",
     "@types/jquery": "^2.0.33",
     "@types/lodash": "^4.14.37",
     "@types/ng-flow": "0.0.29",

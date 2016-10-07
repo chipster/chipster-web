@@ -2,8 +2,6 @@ import AuthenticationService from "../../../authentication/authenticationservice
 import ConfigService from "../../../services/config.service";
 import SessionResource from "../../../resources/session.resource";
 import IWebSocket = angular.websocket.IWebSocket;
-import ILogService = angular.ILogService;
-import SessionDataService from "./sessiondata.service";
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
@@ -16,7 +14,7 @@ export default class SessionEventService {
     ws: any;
 
     constructor(private configService: ConfigService,
-                private $log: ILogService,
+                private $log: ng.ILogService,
                 private authenticationService: AuthenticationService,
                 private $websocket: ng.websocket.IWebSocketProvider,
                 private sessionResource: SessionResource){

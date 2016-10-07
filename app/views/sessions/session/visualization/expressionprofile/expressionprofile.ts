@@ -18,19 +18,16 @@ class ExpressionProfile {
     private tsv: TSV;
     private expressionProfileService: ExpressionProfileService;
     private selections: Array<Array<string>>; // selected gene expressions
-    private sessionDataService: SessionDataService;
     private selectedDatasets: any;
 
     constructor(private csvReader: CSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
                 private $window: ng.IWindowService,
-                private expressionProfileService: ExpressionProfileService,
                 private sessionDataService: SessionDataService) {
-        this.expressionProfileService = new ExpressionProfileService();
     }
 
     $onInit() {
-        this.csvReader.getCSV(this.$routeParams.sessionId, this.datasetId).then( (csvModel: TSV) => {
+        this.csvReader.getCSV(this.$routeParams['sessionId'], this.datasetId).then( (csvModel: TSV) => {
             this.tsv = csvModel;
             this.drawLineChart(csvModel);
         });
@@ -39,7 +36,7 @@ class ExpressionProfile {
     }
 
     drawLineChart(csvModel: TSV) {
-        let _this = this;
+        let that = this;
 
         // Configurate svg and graph-area
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
@@ -62,15 +59,17 @@ class ExpressionProfile {
             .call(drag);
 
         // Custom headers for x-axis
-        let phenodataDescriptions = _.filter(_.first(this.selectedDatasets).metadata, metadata => {
+        let firstDataset: any = _.first(this.selectedDatasets);
+        let phenodataDescriptions = _.filter(firstDataset.metadata, (metadata:any) => {
             return metadata.key === 'description';
         });
+
 
         // Change default headers to values defined in phenodata if description value has been defined
         let headers = _.map(csvModel.getChipHeaders(), header => {
 
             // find if there is a phenodata description matching header and containing a value
-            let phenodataHeader = _.find(phenodataDescriptions, item => {
+            let phenodataHeader:any = _.find(phenodataDescriptions, (item:any) => {
                 return item.column === header && item.value !== null;
             });
             return phenodataHeader ? phenodataHeader.value : header;
@@ -104,8 +103,8 @@ class ExpressionProfile {
         // Paths
         let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let lineGenerator = d3.svg.line()
-            .x( (d,i) => xScale( headers[i]) )
-            .y( d => yScale(d) );
+            .x( (d:any,i:number) => xScale( headers[i]) )
+            .y( (d:any) => yScale(d) );
         let color = d3.scale.category20();
 
         let paths = pathsGroup.selectAll('.path')
@@ -113,32 +112,32 @@ class ExpressionProfile {
             .enter()
             .append('path')
             .attr('class', 'path')
-            .attr('id', (d,i) => 'path' + d[0])
-            .attr('d', (d) => lineGenerator( csvModel.getItemsByIndexes(csvModel.chipValueIndexes, d) ) )
+            .attr('id', (d: any,i: number) => 'path' + d[0])
+            .attr('d', (d: any) => lineGenerator( csvModel.getItemsByIndexes(csvModel.chipValueIndexes, d) ) )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
-            .attr('stroke', (d, i) => {
-                let colorIndex = _.floor( (i / csvModel.body.length) * 20);
+            .attr('stroke', (d: any, i: number) => {
+                let colorIndex = (_.floor( (i / csvModel.body.length) * 20)).toString();
                 return color(colorIndex)
             })
-            .on('mouseover', (d) => {
-                _this.setSelectionHoverStyle(d[0]);
+            .on('mouseover', (d: any) => {
+                that.setSelectionHoverStyle(d[0]);
             })
-            .on('mouseout', (d) => {
-                _this.removeSelectionHoverStyle(d[0]);
+            .on('mouseout', (d: any) => {
+                that.removeSelectionHoverStyle(d[0]);
             })
-            .on('click', (d) => {
+            .on('click', (d:any) => {
                 let id = d[0];
                 let isCtrl = UtilsService.isCtrlKey(d3.event);
                 let isShift = UtilsService.isShiftKey(d3.event);
 
                 if(isShift) {
-                    _this.addSelections([id]);
+                    that.addSelections([id]);
                 } else if(isCtrl) {
-                    _this.toggleSelections([id]);
+                    that.toggleSelections([id]);
                 } else {
-                    _this.resetSelections();
-                    _this.addSelections([id]);
+                    that.resetSelections();
+                    that.addSelections([id]);
                 }
             });
 
@@ -193,22 +192,22 @@ class ExpressionProfile {
                 let p1 = new Point(endPoint.x, endPoint.y);
                 let p2 = new Point(startPoint.x, startPoint.y);
 
-                let intervalIndexes = _this.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, csvModel);
+                let intervalIndexes = that.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, csvModel);
                 var intervals: Array<Interval> = [];
 
                 // create intervals
                 for( let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++ ) {
-                    let lines = _this.expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
+                    let lines = that.expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
                     let intervalStartIndex = chipValueIndex;
 
                     let rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
                     intervals.push(new Interval(intervalStartIndex, lines, rectangle));
                 }
 
-                let ids = []; // path ids found in each interval (not unique list)
-                _.forEach(intervals, interval => {
+                let ids: Array<number> = []; // path ids found in each interval (not unique list)
+                _.forEach(intervals, (interval:Interval) => {
                     let intersectingLines = _.filter(interval.lines, line => {
-                        return _this.expressionProfileService.isIntersecting(line, interval.rectangle);
+                        return that.expressionProfileService.isIntersecting(line, interval.rectangle);
                     });
 
                     // Line ids intersecting with selection as an array
@@ -220,6 +219,7 @@ class ExpressionProfile {
                 // remove duplicate ids
                 resetSelectionRectangle();
             }
+
 
         });
 
@@ -259,7 +259,7 @@ class ExpressionProfile {
         this.selections = _.map(selectionIds, id => this.tsv.getCSVLine(id));
     }
 
-    addSelections(ids: Array<string>) {
+    addSelections(ids: Array<number>) {
         let selectionIds = this.getSelectionIds();
         let missingSelectionIds = _.difference(ids, selectionIds);
         this.selections = this.selections.concat(_.map(missingSelectionIds, id => this.tsv.getCSVLine(id)));
