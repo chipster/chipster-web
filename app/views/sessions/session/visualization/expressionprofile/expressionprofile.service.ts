@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import CSVModel from "../../../../../services/csv/CSVModel";
+import CSVModel from "./TSV";
 import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";

@@ -1,6 +1,6 @@
 import Dataset from "../../../../../model/session/dataset";
-import CSVReader from "../../../../../services/csv/CSVReader";
-import CSVModel from "../../../../../services/csv/CSVModel";
+import CSVReader from "../../../../../services/CSVReader";
+import TSV from "./TSV";
 import ExpressionProfileService from "./expressionprofile.service";
 import Point from "./point";
 import Rectangle from "./rectangle";
@@ -15,7 +15,7 @@ class ExpressionProfile {
 
     private datasetId: string;
     private d3: any;
-    private csvModel: CSVModel;
+    private tsv: TSV;
     private expressionProfileService: ExpressionProfileService;
     private selections: Array<Array<string>>; // selected gene expressions
     private sessionDataService: SessionDataService;
@@ -30,19 +30,19 @@ class ExpressionProfile {
     }
 
     $onInit() {
-        this.csvReader.getCSV(this.$routeParams.sessionId, this.datasetId).then( (csvModel: CSVModel) => {
-            this.csvModel = csvModel;
+        this.csvReader.getCSV(this.$routeParams.sessionId, this.datasetId).then( (csvModel: TSV) => {
+            this.tsv = csvModel;
             this.drawLineChart(csvModel);
         });
 
         this.selections = [];
     }
 
-    drawLineChart(csvModel: CSVModel) {
-        let that = this;
-        let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
-        let expressionProfileService = this.expressionProfileService;
+    drawLineChart(csvModel: TSV) {
+        let _this = this;
+
         // Configurate svg and graph-area
+        let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
         let margin = {top: 10, right: 0, bottom: 150, left: 40};
         let size = { width: expressionprofileWidth, height: 600};
         let graphArea = {
@@ -121,35 +121,26 @@ class ExpressionProfile {
                 let colorIndex = _.floor( (i / csvModel.body.length) * 20);
                 return color(colorIndex)
             })
-            .on('mouseover', mouseOverHandler)
-            .on('mouseout', mouseOutHandler)
-            .on('click', clickHandler);
+            .on('mouseover', (d) => {
+                _this.setSelectionHoverStyle(d[0]);
+            })
+            .on('mouseout', (d) => {
+                _this.removeSelectionHoverStyle(d[0]);
+            })
+            .on('click', (d) => {
+                let id = d[0];
+                let isCtrl = UtilsService.isCtrlKey(d3.event);
+                let isShift = UtilsService.isShiftKey(d3.event);
 
-        function mouseOverHandler(d) {
-            that.setSelectionHoverStyle(d[0]);
-        }
-
-        function mouseOutHandler(d) {
-            that.removeSelectionHoverStyle(d[0]);
-        }
-
-        function clickHandler(d) {
-            let id = d[0];
-            let isCtrl = UtilsService.isCtrlKey(d3.event);
-            let isShift = UtilsService.isShiftKey(d3.event);
-
-            if(isShift) { 
-                that.addSelections([id]);
-            } else if(isCtrl) {
-                that.toggleSelections([id]);
-            } else {
-                that.resetSelections();
-                that.addSelections([id]);
-            }
-
-        }
-
-
+                if(isShift) {
+                    _this.addSelections([id]);
+                } else if(isCtrl) {
+                    _this.toggleSelections([id]);
+                } else {
+                    _this.resetSelections();
+                    _this.addSelections([id]);
+                }
+            });
 
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
@@ -164,57 +155,60 @@ class ExpressionProfile {
             .attr('id', 'band');
 
         let bandPos = [-1,-1];
+        let startPoint = new Point(-1, -1); // startpoint for dragging
 
         // Register drag handlers
         drag.on("drag", () => {
             let pos = d3.mouse(document.getElementById('dragGroup'));
+            let endPoint = new Point(pos[0], pos[1]);
 
-            if (pos[0] < bandPos[0]) {
-                d3.select(".band").attr("transform", "translate(" + (pos[0]) + "," + bandPos[1] + ")");
+            if (endPoint.x < startPoint.x) {
+                d3.select(".band").attr("transform", "translate(" + (endPoint.x) + "," + startPoint.y + ")");
             }
-            if (pos[1] < bandPos[1]) {
-                d3.select(".band").attr("transform", "translate(" + (pos[0]) + "," + pos[1] + ")");
+            if (endPoint.y < startPoint.y) {
+                d3.select(".band").attr("transform", "translate(" + (endPoint.x) + "," + endPoint.y + ")");
             }
-            if (pos[1] < bandPos[1] && pos[0] > bandPos[0]) {
-                d3.select(".band").attr("transform", "translate(" + (bandPos[0]) + "," + pos[1] + ")");
+            if (endPoint.y < startPoint.y && endPoint.x > startPoint.x) {
+                d3.select(".band").attr("transform", "translate(" + (startPoint.x) + "," + endPoint.y + ")");
             }
 
             //set new position of band when user initializes drag
-            if (bandPos[0] === -1) {
-                bandPos = pos;
-                d3.select(".band").attr("transform", "translate(" + bandPos[0] + "," + bandPos[1] + ")");
+            if (startPoint.x === -1) {
+                startPoint = new Point(endPoint.x, endPoint.y);
+                d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + startPoint.y + ")");
             }
 
             d3.select(".band").transition().duration(1)
-                .attr("width", Math.abs(bandPos[0] - pos[0]))
-                .attr("height", Math.abs(bandPos[1] - pos[1]));
+                .attr("width", Math.abs(startPoint.x - endPoint.x))
+                .attr("height", Math.abs(startPoint.y - endPoint.y));
         });
 
         drag.on("dragend", () => {
             let pos = d3.mouse(document.getElementById('dragGroup'));
+            let endPoint = new Point(pos[0], pos[1]);
 
-            if( (bandPos[0] !== -1 && bandPos[1] !== -1) && ((bandPos[0] !== pos[0]) && (bandPos[1] !== pos[1]))     ) {
+            if( (startPoint.x !== -1 && startPoint.y !== -1) && ((startPoint.x !== endPoint.x) && (startPoint.y !== endPoint.y))     ) {
                 this.resetSelections();
                 d3.selectAll('.path').attr('stroke-width', 1);
-                let p1 = new Point(pos[0], pos[1]);
-                let p2 = new Point(bandPos[0], bandPos[1]);
+                let p1 = new Point(endPoint.x, endPoint.y);
+                let p2 = new Point(startPoint.x, startPoint.y);
 
-                let intervalIndexes = expressionProfileService.getCrossingIntervals(p1, p2, linearXScale, csvModel);
+                let intervalIndexes = _this.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, csvModel);
                 var intervals: Array<Interval> = [];
 
                 // create intervals
                 for( let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++ ) {
-                    let lines = expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
+                    let lines = _this.expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
                     let intervalStartIndex = chipValueIndex;
 
-                    let rectangle = new Rectangle(p1.x, p1.y, p2.x, p2.y);
+                    let rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
                     intervals.push(new Interval(intervalStartIndex, lines, rectangle));
                 }
 
                 let ids = []; // path ids found in each interval (not unique list)
                 _.forEach(intervals, interval => {
                     let intersectingLines = _.filter(interval.lines, line => {
-                        return expressionProfileService.isIntersecting(line, interval.rectangle);
+                        return _this.expressionProfileService.isIntersecting(line, interval.rectangle);
                     });
 
                     // Line ids intersecting with selection as an array
@@ -230,7 +224,7 @@ class ExpressionProfile {
         });
 
         function resetSelectionRectangle() {
-            bandPos = [-1, -1];
+            startPoint = new Point(-1, -1);
             d3.select('.band')
                 .attr("width", 0)
                 .attr("height", 0)
@@ -242,7 +236,7 @@ class ExpressionProfile {
 
     createNewDataset() {
         let selectedGeneExpressionIds = this.getSelectionIds();
-        let csvData = this.csvModel.getCSVData(selectedGeneExpressionIds);
+        let csvData = this.tsv.getCSVData(selectedGeneExpressionIds);
         let data = d3.tsv.formatRows(csvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
@@ -258,17 +252,17 @@ class ExpressionProfile {
 
     removeSelections(ids: Array<string>) {
         _.forEach(ids, id => {
-            d3.select('#path'+id).classed('selected', false);
+            this.removeSelectionStyle(id);
         });
 
         let selectionIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
-        this.selections = _.map(selectionIds, id => this.csvModel.getCSVLine(id));
+        this.selections = _.map(selectionIds, id => this.tsv.getCSVLine(id));
     }
 
     addSelections(ids: Array<string>) {
         let selectionIds = this.getSelectionIds();
         let missingSelectionIds = _.difference(ids, selectionIds);
-        this.selections = this.selections.concat(_.map(missingSelectionIds, id => this.csvModel.getCSVLine(id)));
+        this.selections = this.selections.concat(_.map(missingSelectionIds, id => this.tsv.getCSVLine(id)));
         _.forEach(missingSelectionIds, id => {
             this.setSelectionStyle(id);
         });

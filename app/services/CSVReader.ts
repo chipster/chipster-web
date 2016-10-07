@@ -1,5 +1,5 @@
-import FileResource from "../../resources/fileresource";
-import CSVModel from "./CSVModel";
+import FileResource from "../resources/fileresource";
+import CSVModel from "../views/sessions/session/visualization/expressionprofile/TSV";
 
 export default class CSVReader {
 

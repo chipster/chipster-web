@@ -45,7 +45,6 @@ class SessionListController {
     }
 
     selectSession(event: any, session: Session) {
-
         this.selectedSessions = [session];
 
         if (this.selectedSessions.length === 1) {

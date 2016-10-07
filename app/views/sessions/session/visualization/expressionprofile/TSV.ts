@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import DomainBoundaries from "./domainboundaries";
 
-export default class CSVModel {
+export default class TSV {
 
     private headers: Array<string>;
     public body: Array<Array <string>>;

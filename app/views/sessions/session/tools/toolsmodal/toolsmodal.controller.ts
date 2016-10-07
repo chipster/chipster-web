@@ -9,7 +9,7 @@ import Category from "../../../../../model/session/category";
 import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
 import ToolParameter from "../../../../../model/session/toolparameter";
 import SessionDataService from "../../sessiondata.service";
-import CSVReader from "../../../../../services/csv/CSVReader";
+import CSVReader from "../../../../../services/CSVReader";
 
 
 export default class ToolsModalController {
