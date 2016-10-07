@@ -11,7 +11,8 @@
     "lite": "lite-server",
     "start": "concurrently \"npm run tsc:w\" \"npm run lite\" ",
     "lite-server-test": "lite-server --config=test/liteserver-test-config.json",
-    "test": "tsc && concurrently \"npm run tsc:w\" \"npm run lite-server-test\" "
+    "test": "tsc && concurrently \"npm run tsc:w\" \"npm run lite-server-test\" ",
+    "lint": "tslint -c ./tslint.json './app/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
     "@types/ng-flow": "0.0.29",
     "@types/urijs": "^1.15.31",
     "browser-sync": "^2.13.0",
+    "codelyzer": "0.0.28",
     "concurrently": "^2.1.0",
     "http-server": "^0.9.0",
     "jasmine-core": "^2.3.4",
@@ -45,6 +47,7 @@
     "karma-jasmine": "^0.3.6",
     "less": "^2.7.1",
     "lite-server": "^2.2.2",
+    "tslint": "^3.15.1",
     "typescript": "^2.0.3"
   },
   "dependencies": {

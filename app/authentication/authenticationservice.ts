@@ -12,12 +12,12 @@ export default class AuthenticationService {
                 private ConfigService: ConfigService,
                 private $rootScope: ng.IRootScopeService,
                 private $location: ng.ILocationService) {
-        $rootScope.$on("$routeChangeStart", (event: any, next: any) => {
+        this.$rootScope.$on("$routeChangeStart", (event: any, next: any) => {
             if (next.$$route.authenticated) {
                 var userAuth = this.getToken();
                 if (!userAuth) {
                     console.log('token not found, forward to login');
-                    $location.path('/login');
+                    this.$location.path('/login');
                 }
             }
         });
