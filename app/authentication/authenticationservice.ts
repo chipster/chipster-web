@@ -3,7 +3,7 @@ import ConfigService from "../services/config.service";
 
 export default class AuthenticationService {
 
-    static $inject = ['localStorageService', '$http', 'ConfigService', '$rootScope'];
+    static $inject = ['localStorageService', '$http', 'ConfigService', '$rootScope', '$location'];
 
     tokenHeader:{};
 
