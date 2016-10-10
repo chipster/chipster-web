@@ -1,8 +1,8 @@
 import {upgradeAdapter} from "./upgradeadapter";
 import './rxjs-operators';
 
+import {NavigationComponent} from "./views/navigation/navigation.component";
 import Login from "./views/login/login.component";
-import NavigationController from "./views/navigation/navigation.controller";
 import AuthenticationService from "./authentication/authenticationservice";
 import ConfigService from "./services/config.service";
 import ConfigurationResource from "./resources/configurationresource";
@@ -57,7 +57,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
         'pdf', 'ngHandsontable'])
 
     .component('login', Login)
-    .controller('NavigationController', NavigationController)
+    .directive('navigation', upgradeAdapter.downgradeNg2Component(NavigationComponent))
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
@@ -142,4 +142,6 @@ angular.module('chipster-web').config(
 
     });
 
+upgradeAdapter.upgradeNg1Provider('AuthenticationService');
+upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

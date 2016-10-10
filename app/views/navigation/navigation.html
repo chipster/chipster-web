@@ -1,8 +1,8 @@
-<nav class="navbar navbar-default" ng-controller="NavigationController as vm"> <!-- navbar-fixed-top -->
+<nav class="navbar navbar-default"> <!-- navbar-fixed-top -->
     <div class="container-fluid">
 
         <div class="navbar-header">
-            <a class="navbar-brand active" href="#home">Chipster</a>
+            <a class="navbar-brand active" href="#/home">Chipster</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -10,16 +10,16 @@
              id="bs-example-navbar-collapse-1"
              style="text-align: center">
             <ul class="nav navbar-nav">
-                <li><a href="#sessions">Sessions</a></li>
-                <li><a href="#jobs">Jobs</a></li>
-                <li><a href="../manual">Manual</a></li>
+                <li><a href="#/sessions">Sessions</a></li>
+                <li><a href="#/jobs">Jobs</a></li>
+                <li><a href="#/manual">Manual</a></li>
             </ul>
 
             <!--end navbar form-->
             <ul class="nav navbar-nav navbar-right">
-                <li><p class="navbar-text" ng-bind="vm.getHost()"></p></li>
-                <li><a href="#login" ng-show="vm.isLoggedOut()">Login</a></li>
-                <li><a href="#home" ng-show="vm.isLoggedIn()" ng-click="vm.logout()">Logout</a></li>
+                <li><p class="navbar-text">{{getHost()}}</p></li>
+                <li><a href="#/login" *ngIf="isLoggedOut()">Login</a></li>
+                <li><a href="#/home" *ngIf="isLoggedIn()" (click)="logout()">Logout</a></li>
             </ul>
         </div>
 

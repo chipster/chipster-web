@@ -1,11 +1,15 @@
+import {Component, Inject} from '@angular/core';
 import AuthenticationService from "../../authentication/authenticationservice";
 import ConfigService from "../../services/config.service";
 
-export default class NavigationController {
+@Component({
+    selector: 'navigation',
+    templateUrl: './views/navigation/navigation.html'
+})
+export class NavigationComponent {
 
-    static $inject = ['$location', 'AuthenticationService', 'ConfigService'];
-
-    constructor(private $location: ng.ILocationService, private authenticationService: AuthenticationService, private configService: ConfigService) {}
+    constructor(@Inject('AuthenticationService') private authenticationService,
+                @Inject('ConfigService') private configService){}
 
     isLoggedOut() {
         if (this.authenticationService.getToken() === null) {
@@ -15,17 +19,15 @@ export default class NavigationController {
 
     logout() {
         this.authenticationService.logout();
-        this.$location.path("/");
     };
 
     isLoggedIn() {
-         if(this.authenticationService.getToken()!==null){
+        if(this.authenticationService.getToken()!==null){
             return true;
-         }
-     };
+        }
+    };
 
-     getHost() {
+    getHost() {
         return this.configService.getApiUrl();
-     };
+    };
 }
-
