@@ -38,6 +38,7 @@ export default class SessionEventService {
                 this.handleEvent(JSON.parse(event.data), sessionId, sessionData, onChange);
             });
 
+
             this.ws.onClose(() => {
                 this.$log.info('websocket closed')
             });
@@ -84,10 +85,10 @@ export default class SessionEventService {
         if (event.type === 'UPDATE') {
             this.sessionResource.getSession(sessionId).then((remote: Session) => {
                 var local = sessionData.session;
-                var localCopy = angular.copy(local);
+                var localCopy = _.cloneDeep(local);
 
                 // update the original instance
-                angular.copy(remote, local);
+                local = _.cloneDeep(remote);
 
                 onChange(event, localCopy, remote);
             });
@@ -107,15 +108,15 @@ export default class SessionEventService {
         } else if (event.type === 'UPDATE') {
             this.sessionResource.getDataset(sessionId, event.resourceId).then((remote: Dataset) => {
                 var local = sessionData.datasetsMap.get(event.resourceId);
-                var localCopy = angular.copy(local);
+                var localCopy = _.cloneDeep(local);
 
                 // update the original instance
-                angular.copy(remote, local);
+                local = _.cloneDeep(remote);
                 onChange(event, localCopy, remote);
             });
 
         } else if (event.type === 'DELETE') {
-            var localCopy = angular.copy(sessionData.datasetsMap.get(event.resourceId));
+            var localCopy = _.cloneDeep(sessionData.datasetsMap.get(event.resourceId));
             sessionData.datasetsMap.delete(event.resourceId);
             onChange(event, localCopy, null);
 
@@ -134,16 +135,16 @@ export default class SessionEventService {
         } else if (event.type === 'UPDATE') {
             this.sessionResource.getJob(sessionId, event.resourceId). then((remote: Job) => {
                 var local = sessionData.jobsMap.get(event.resourceId);
-                var localCopy = angular.copy(local);
+                var localCopy = _.cloneDeep(local);
 
                 // update the original instance
-                angular.copy(remote, local);
+                local = _.cloneDeep(remote);
                 onChange(event, localCopy, remote);
             });
 
         } else if (event.type === 'DELETE') {
-            var localCopy = angular.copy(sessionData.jobsMap.get(event.resourceId));
-            data.jobsMap.delete(event.resourceId);
+            var localCopy = _.cloneDeep(sessionData.jobsMap.get(event.resourceId));
+            sessionData.jobsMap.delete(event.resourceId);
             onChange(event, localCopy, null);
 
         } else {

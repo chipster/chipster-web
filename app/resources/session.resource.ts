@@ -9,7 +9,6 @@ import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";
 import Tool from "../model/session/tool";
 import Job from "../model/session/job";
-import IService = restangular.IService;
 
 export class SessionData {
 	session: Session;
@@ -103,7 +102,7 @@ export default class SessionResource {
 
 	loadSession(sessionId: string) {
 
-		return this.getService().then((service: IService) => {
+		return this.getService().then((service: restangular.IService) => {
 			var sessionUrl = service.one('sessions', sessionId);
 
 			// get session detail
@@ -123,13 +122,13 @@ export default class SessionResource {
 
 	getSessions() {
 		return this.getService()
-			.then((service: IService) => service.all('sessions').getList())
+			.then((service:restangular.IService) => service.all('sessions').getList())
 			.then((response: any) => response.data);
 	}
 
 	createSession(session: Session) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions').customPOST(session))
+			.then((service:restangular.IService) => service.one('sessions').customPOST(session))
 			.then((res: any) => {
 				var sessionLocation = res.headers('Location');
 				// sessionId
@@ -139,7 +138,7 @@ export default class SessionResource {
 
 	createDataset(sessionId: string, dataset: Dataset) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).one('datasets').customPOST(dataset))
+			.then((service:restangular.IService) => service.one('sessions', sessionId).one('datasets').customPOST(dataset))
 			.then((res: any) => {
 				var location = res.headers('Location');
 				return location.substr(location.lastIndexOf('/') + 1);
@@ -148,7 +147,7 @@ export default class SessionResource {
 
 	createJob(sessionId: string, job: Job) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).one('jobs').customPOST(job))
+			.then((service:restangular.IService) => service.one('sessions', sessionId).one('jobs').customPOST(job))
 			.then((res: any) => {
 				var location = res.headers('Location');
 				return location.substr(location.lastIndexOf('/') + 1);
@@ -157,57 +156,57 @@ export default class SessionResource {
 
 	getSession(sessionId: string) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).get())
+			.then((service:restangular.IService) => service.one('sessions', sessionId).get())
 			.then((resp: any) => resp.data);
 	}
 
 	getDataset(sessionId: string, datasetId: string) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).one('datasets', datasetId).get())
+			.then((service:restangular.IService) => service.one('sessions', sessionId).one('datasets', datasetId).get())
 			.then((resp: any) => resp.data);
 	}
 
 	getJob(sessionId: string, jobId: string) {
 		return this.getService()
-			.then((service: IService) => service.one('sessions', sessionId).one('jobs', jobId).get())
+			.then((service:restangular.IService) => service.one('sessions', sessionId).one('jobs', jobId).get())
 			.then((resp: any) => resp.data);
 	}
 
 	updateSession(session: Session) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', session.sessionId)
 			.customPUT(session));
 	}
 
 	updateDataset(sessionId: string, dataset: Dataset) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', sessionId)
 			.one('datasets', dataset.datasetId)
 			.customPUT(dataset));
 	}
 
 	updateJob(sessionId: string, job: Job) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', sessionId)
 			.one('jobs', job.jobId)
 			.customPUT(job));
 	}
 
 	deleteSession(sessionId: string) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', sessionId)
 			.remove());
 	}
 
 	deleteDataset(sessionId: string, datasetId: string) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', sessionId)
 			.one('datasets', datasetId)
 			.remove());
 	}
 
 	deleteJob(sessionId: string, jobId: string) {
-		return this.getService().then((service: IService) => service
+		return this.getService().then((service:restangular.IService) => service
 			.one('sessions', sessionId)
 			.one('jobs', jobId)
 			.remove());
@@ -219,7 +218,7 @@ export default class SessionResource {
 		newSession.name = name;
 
 		// create session
-		return this.createSession(newSession).then((sessionId) => {
+		return this.createSession(newSession).then((sessionId: string) => {
 
 			let datasetIdMap = new Map<string, string>();
 			let jobIdMap = new Map<string, string>();
@@ -231,7 +230,7 @@ export default class SessionResource {
 				datasetCopy.datasetId = null;
 				let request = this.createDataset(sessionId, datasetCopy);
 				createRequests.push(request);
-				request.then((newId) => {
+				request.then((newId: string) => {
 					datasetIdMap.set(dataset.datasetId, newId);
 				});
 			});
@@ -243,7 +242,7 @@ export default class SessionResource {
 				jobCopy.jobId = null;
 				let request = this.createJob(sessionId, jobCopy);
 				createRequests.push(request);
-				request.then((newId) => {
+				request.then((newId: string) => {
 					jobIdMap.set(oldJob.jobId, newId);
 				});
 			});

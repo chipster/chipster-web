@@ -1,6 +1,6 @@
 export default class Session {
 
-    constructor (private name: string) {
+    constructor (name: string) {
     }
     name: string;
     accessed: string;

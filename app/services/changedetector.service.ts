@@ -31,7 +31,7 @@ export class MapChangeDetector {
             this.onChange();
             if (this.comparison === Comparison.Deep) {
                 // we need a deep copy to notice changes in the deep
-                this.lastMapValues = angular.copy(currentMapValues);
+                this.lastMapValues = _.cloneDeep(currentMapValues);
             } else if (this.comparison == Comparison.Shallow) {
                 // the current instance is fine, because a new one is created on each call
                 this.lastMapValues = currentMapValues;
@@ -62,10 +62,10 @@ export class ArrayChangeDetector {
             this.onChange();
             if (this.comparison === Comparison.Shallow) {
                 // a copy of the array is needed to store the last state safely
-                this.lastArray = angular.extend([], this.currentArray());
+                this.lastArray = _.concat([], this.currentArray());
             } else if (this.comparison === Comparison.Deep) {
                 // we need a deep copy to notice changes in the deep
-                this.lastArray = angular.copy(this.currentArray());
+                this.lastArray = _.cloneDeep(this.currentArray());
             }
         }
     }

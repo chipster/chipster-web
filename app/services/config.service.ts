@@ -35,7 +35,7 @@ export default class ConfigService {
             let services = new Services();
 
             if (!this.services) {
-                angular.forEach(response, (item: any) => {
+                _.forEach(response, (item: any) => {
                     let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase());
                     services[camelCaseRole] = item.publicUri;
                 });

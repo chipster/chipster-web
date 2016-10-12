@@ -57,7 +57,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
         'pdf', 'ngHandsontable'])
 
     .component('login', Login)
-    .directive('navigation', upgradeAdapter.downgradeNg2Component(NavigationComponent))
+    .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)

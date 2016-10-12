@@ -37,6 +37,7 @@
     "@types/jquery": "^2.0.33",
     "@types/lodash": "^4.14.37",
     "@types/ng-flow": "0.0.29",
+    "@types/restangular": "^1.5.33",
     "@types/urijs": "^1.15.31",
     "browser-sync": "^2.13.0",
     "codelyzer": "0.0.28",

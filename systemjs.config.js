@@ -34,7 +34,12 @@
             'lodash':                     {main: 'lodash.js', defaultExtension: 'js'},
             'd3':                           {main: 'd3.js', defaultExtension: 'js'},
             'd3-context-menu':              {main: 'js/d3-context-menu', defaultExtension: 'js'},
-            'd3-tip':                       {main: 'index.js', defaultExtension: 'js'}
+            'd3-tip':                       {main: 'index.js', defaultExtension: 'js'},
+
+        },
+        meta: {
+            'd3-context-menu':              { deps: ['d3']},
+            'd3-tip':                       { deps: ['d3']}
         }
     });
 
