@@ -14,16 +14,16 @@ class ExpressionProfile {
     static $inject = ['CSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService'];
 
     private datasetId: string;
-    private d3: any;
     private tsv: TSV;
-    private expressionProfileService: ExpressionProfileService;
     private selections: Array<Array<string>>; // selected gene expressions
     private selectedDatasets: any;
 
     constructor(private csvReader: CSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
                 private $window: ng.IWindowService,
+                private expressionProfileService: ExpressionProfileService,
                 private sessionDataService: SessionDataService) {
+
     }
 
     $onInit() {
@@ -37,7 +37,7 @@ class ExpressionProfile {
 
     drawLineChart(csvModel: TSV) {
         let that = this;
-
+            console.log(that);
         // Configurate svg and graph-area
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
         let margin = {top: 10, right: 0, bottom: 150, left: 40};

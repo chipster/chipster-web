@@ -48,8 +48,9 @@ class WorkflowGraphController {
 		private $filter: IChipsterFilter,
 		private SessionDataService: SessionDataService,
 		private SelectionService: SelectionService) {
-		d3['tip'] = d3Tip;
-		d3['contextMenu'] = d3ContextMenu;
+		var d3js = d3;
+		d3js['tip'] = d3Tip;
+		d3js['contextMenu'] = d3ContextMenu(d3);
 	}
 
 	//var shiftKey, ctrlKey;
