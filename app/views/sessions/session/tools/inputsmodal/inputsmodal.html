@@ -1,0 +1,52 @@
+<div class="modal-header">
+    <div class="col-md-3">
+        <h4>Input datasets</h4>
+    </div>
+    <div class="col-md-8">
+        <tool-title ng-if="vm.selectedTool"
+                    module="vm.moduleName"
+                    category="vm.categoryName"
+                    tool="vm.selectedTool.name.displayName">
+        </tool-title>
+    </div>
+    <div class="col-md-1" style="padding-right: 0">
+        <button type="button" class="close pull-right" ng-click="vm.close()">&times</button>
+    </div>
+</div>
+
+<div class="modal-body">
+
+    <div class="row">
+        <div class="col-md-7 no-padding-right">
+            <table class="table table-borderless table-condensed table-hover">
+
+                <tr ng-repeat="inputBinding in vm.inputBindings" ng-if="vm.inputBindings.length > 0">
+                    <td>{{inputBinding.toolInput.name.displayName ||
+                        inputBinding.toolInput.name.id}}</td>
+
+                    <td>
+                        <select multiple ng-model="inputBinding.datasets"
+                                name="input_{{$index}}"
+                                ng-required="!inputBinding.toolInput.optional"
+                                ng-change="vm.inputSelected(inputBinding)"
+                                ng-options="dataset.name for dataset in vm.toolService.getCompatibleDatasets(inputBinding.toolInput, vm.selectedDatasets) track by dataset.datasetId">
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-md-5">
+            <p>Input description</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 no-padding-right" >
+            <button id="close-tools-button" class="btn btn-default min-width-button pull-right" ng-click="vm.close()">
+                Close
+            </button>
+        </div>
+    </div>
+
+</div>

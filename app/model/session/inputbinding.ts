@@ -3,5 +3,5 @@ import ToolInput from "./toolinput";
 
 export default class InputBinding {
     toolInput: ToolInput;
-    dataset: Dataset;
+    datasets: Dataset[] = [];
 }

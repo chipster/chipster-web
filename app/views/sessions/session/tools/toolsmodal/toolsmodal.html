@@ -85,7 +85,7 @@
             </div>
         </div>
 
-        <div class="col-md-5 tool-list-col">
+        <div class="col-md-5">
             <div class="tool-list" ng-show="vm.selectedTool">
                 <p>{{vm.selectedTool.description}}</p>
                 <p>
@@ -113,6 +113,83 @@
     </div>
 
 
+
+    <!-- inputs -->
+    <!-- ng-if="vm.selectedTool.inputs.length >= 1 -->
+
+    <div class="row">
+        <div class="col-md-7 no-padding-right">
+            <h5>Input datasets <button class="btn btn-info btn-xs pull-right" ng-click="vm.openInputsModal()" ng-disabled="!vm.selectedTool">Edit multiple inputs</button></h5>
+        </div>
+    </div>
+
+    <!--
+    <div class="row">
+        <div class="col-md-7 no-padding-right">
+            <table class="table table-borderless table-condensed table-hover">
+                <tr ng-repeat="input in vm.selectedTool.inputs">
+                    <td>{{input.name.displayName || input.name.id}}</td>
+                    <td>
+                        <select>
+                            <option ng-repeat="dataset in vm.selectedDatasets"
+                                    value="{{dataset.datasetId}}">
+                                {{dataset.name}}
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="col-md-5">
+            TODO Input description goes here
+        </div>
+    </div>
+    -->
+
+
+    <div class="row">
+        <div class="col-md-7 no-padding-right">
+            <table class="table table-borderless table-condensed table-hover">
+
+                <tr ng-repeat="inputBinding in vm.inputBindings" ng-if="vm.inputBindings.length > 0"
+                    ng-mouseover="vm.setInputDescription(inputBinding.toolInput.description )"
+                    ng-mouseleave="vm.setInputDescription('')" >
+
+                    <td>{{inputBinding.toolInput.name.displayName ||
+                        inputBinding.toolInput.name.id}}</td>
+
+                    <td>
+
+                        <!-- ng-options allows values to be objects instead of simple strings, which makes
+                        it easier to get the both dataset id and name later -->
+                        <span ng-if="inputBinding.datasets.length > 1">multiple </span>
+
+                        <select ng-if="inputBinding.datasets.length <= 1"
+                                ng-model="inputBinding.datasets[0]"
+                                name="input_{{$index}}"
+                                ng-required="!inputBinding.toolInput.optional"
+                                ng-options="dataset.name for dataset in vm.toolService.getCompatibleDatasets(inputBinding.toolInput, vm.selectedDatasets) track by dataset.datasetId">
+                        </select>
+
+                        <label class="label label-warning"
+                               ng-show="paramForm['input_{{$index}}'].$error.required">Required input</label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- input description -->
+        <div class="col-md-5">
+            <p>{{vm.inputDescription}}</p>
+        </div>
+
+    </div>
+
+
+
+
     <!-- parameters -->
     <div class="row">
         <div class="col-md-12">
@@ -121,7 +198,7 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8 scrollable">
+        <div class="col-md-7 scrollable no-padding-right">
             <form name="paramForm">
                 <table class="table table-borderless table-condensed table-hover">
                     <tr ng-repeat="parameter in vm.selectedTool.parameters"
@@ -176,45 +253,14 @@
                             </button>
                         </td>
                         -->
-                        <!--
-                        <td>{{parameter.type}}</td>
-                        <td>{{parameter.defaultValue}}</td>
-                        <td>{{parameter.from}}</td>
-                        <td>{{parameter.to}}</td>
-                        <td>{{parameter.optional}}</td>
-                        -->
-
                     </tr>
 
-                    <tr ng-if="vm.selectedTool.inputs.length > 1">
-                        <td><h5>Input datasets</h5></td>
-                        <td></td>
-                    </tr>
-
-                    <tr ng-repeat="inputBinding in vm.inputBindings" ng-if="vm.inputBindings.length > 1">
-                        <td><label>{{inputBinding.toolInput.name.displayName ||
-                            inputBinding.toolInput.name.id}}</label></td>
-
-                        <td>
-                            <!-- ng-options allows values to be objects instead of simple strings, which makes
-                            it easier to get the both dataset id and name later -->
-                            <select ng-model="inputBinding.dataset"
-                                    name="input_{{$index}}"
-                                    ng-required="!inputBinding.toolInput.optional"
-                                    ng-options="dataset.name for dataset in vm.getCompatibleDatasets(inputBinding.toolInput) track by dataset.datasetId">
-                            </select>
-
-                            <label class="label label-warning"
-                                   ng-show="paramForm['input_{{$index}}'].$error.required">Required input</label>
-                        </td>
-                    </tr>
                 </table>
             </form>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
             <p>{{vm.parameterDescription}}</p>
-
         </div>
 
     </div>

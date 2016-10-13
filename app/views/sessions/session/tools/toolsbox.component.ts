@@ -44,6 +44,8 @@ class ToolsBox {
         // TODO do bindings for tools with no inputs?
     }
 
+
+    // watch for data selection changes
     $doCheck() {
         if (this.selectedDatasets && (this.selectedDatasets.length !== this.SelectionService.selectedDatasets.length ||
             !Utils.equalStringArrays( Utils.getDatasetIds(this.selectedDatasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets))) ) {
@@ -61,7 +63,11 @@ class ToolsBox {
 
 
     isRunEnabled() {
-        return this.SelectionService.selectedDatasets.length > 0 && this.selectedTool;
+        // TODO add mandatory parameters check
+
+        // either bindings ok or tool without inputs
+        return this.inputBindings ||
+        (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
     }
 
     // Method for submitting a job
@@ -99,15 +105,32 @@ class ToolsBox {
         }
 
         for (let inputBinding of this.inputBindings) {
-            job.inputs.push({
-                inputId: inputBinding.toolInput.name.id,
-                description: inputBinding.toolInput.description,
-                datasetId: inputBinding.dataset.datasetId,
-                displayName: inputBinding.dataset.name
-            });
-        }
 
-        // run
+            // single input
+            if (!this.ToolService.isMultiInput(inputBinding.toolInput)) {
+                job.inputs.push({
+                    inputId: inputBinding.toolInput.name.id,
+                    description: inputBinding.toolInput.description,
+                    datasetId: inputBinding.datasets[0].datasetId,
+                    displayName: inputBinding.datasets[0].name
+                });
+            }
+
+            // multi input
+            else {
+                let i = 0;
+                for (let dataset of inputBinding.datasets) {
+                    job.inputs.push({
+                        inputId: this.ToolService.getMultiInputId(inputBinding.toolInput, i),
+                        description: inputBinding.toolInput.description,
+                        datasetId: dataset.datasetId,
+                        displayName: dataset.name
+                    });
+                    i++;
+                }
+            }
+        }
+        // runsys
         this.SessionDataService.createJob(job);
     }
 
@@ -130,7 +153,7 @@ class ToolsBox {
                     return this.selectedModule;
                 },
                 inputBindings: () => {
-                    return _.cloneDeep(this.inputBindings);
+                    return this.inputBindings;
                 },
                 selectedDatasets: () => {
                     return _.cloneDeep(this.SelectionService.selectedDatasets);

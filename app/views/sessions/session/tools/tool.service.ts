@@ -2,6 +2,8 @@ import Utils from "../../../../services/utils.service";
 import ToolParameter from "../../../../model/session/toolparameter";
 import Dataset from "../../../../model/session/dataset";
 import InputBinding from "../../../../model/session/inputbinding";
+import Tool from "../../../../model/session/tool";
+import ToolInput from "../../../../model/session/toolinput";
 
 export default class ToolService{
 
@@ -59,48 +61,103 @@ export default class ToolService{
         return types[type].indexOf(extension) !== -1;
     }
 
-    bindInputs(tool: any, datasets: Dataset[]) {
 
+    bindInputs(tool: Tool, datasets: Dataset[]) : InputBinding[] {
+
+        console.log("binding inputs for " + tool.name.displayName);
         // copy the array so that we can remove items from it
         var unboundDatasets = datasets.slice();
 
         // see OperationDefinition.bindInputs()
         //TODO handle multi-inputs
-        datasets.forEach( item => {console.log('dataset', item)});
 
         var inputBindings: InputBinding[] = [];
-        for (var j = 0; j < tool.inputs.length; j++) {
-            var toolInput = tool.inputs[j];
+        for (let toolInput of tool.inputs) {
 
+            // ignore phenodata TODO should we check that it exists?
             if (toolInput.type === 'PHENODATA') {
-                // should we check that it exists?
                 continue;
             }
 
             var found = false;
-
-            for (var i = 0; i < unboundDatasets.length; i++) {
-
-                var dataset = unboundDatasets[i];
+            let compatibleDatasets: Dataset[] = [];
+            for (let dataset of unboundDatasets) {
                 if (this.isCompatible(dataset, toolInput.type.name)) {
+                    compatibleDatasets.push(dataset);
 
-                    inputBindings.push({
-                        toolInput: toolInput,
-                        dataset: dataset
-                    });
-                    // remove from datasets
+                    // remove from unbound datasets
                     unboundDatasets.splice(unboundDatasets.indexOf(dataset), 1);
                     found = true;
-                    break;
+
+                    // only bind one dataset if not multi input
+                    if (!this.isMultiInput(toolInput)) {
+                        break;
+                    }
                 }
             }
-            if (!found) {
+
+            // binding this input ok
+            if (found) {
+                console.log("binding " + toolInput.name.id + ":");
+                for (let dataset of compatibleDatasets) {
+                    console.log("\t" + dataset.name);
+                }
+                inputBindings.push({
+                    toolInput: toolInput,
+                    datasets: compatibleDatasets
+                });
+
+            }
+
+            // binding this input failed
+            else {
                 // suitable datasets not found
+                console.log("binding " + toolInput.name.id + " failed");
                 return null;
             }
         }
 
         return inputBindings;
     }
+
+    isMultiInput(input: ToolInput) {
+        return (input.name.prefix && input.name.prefix.length > 0) ||
+            (input.name.postfix && input.name.postfix.length > 0);
+    }
+
+
+    /** Return the id of the nth input instance of multi input
+     *
+     * E.g. microarray{...}.cel getMultiInputId(2) will return microarray003.cel
+     *
+     * NOTE: name indexing starts from 1, getMultiInputId(0) will return the first
+     * multi input instance, which will be microarray001.cel
+     *
+     * NOTE: number is padded with zeros to always contain at least 3 digits
+     *
+     */
+    getMultiInputId(input: ToolInput, index: number) : string {
+        if (!this.isMultiInput(input)) {
+            return null;
+        }
+
+        // pad with zeros to three digits
+        let digits: string = "" + index;
+        if (digits.length < 3) {
+            while (digits.length < 3) {
+                digits = "0" + digits;
+            }
+        }
+
+        return input.name.prefix + digits + input.name.postfix;
+    }
+
+    getCompatibleDatasets(toolInput: ToolInput, datasets: Dataset[]) {
+        return datasets;
+//        return this.selectedDatasets.filter(function (dataset: Dataset) {
+//            return this.toolService.isCompatible(dataset, toolInput.type.name);
+//        });
+    };
+
 
 }

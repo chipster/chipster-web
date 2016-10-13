@@ -3,7 +3,6 @@ import Tool from "../../../../../model/session/tool";
 import InputBinding from "../../../../../model/session/inputbinding";
 import Dataset from "../../../../../model/session/dataset";
 import ToolService from "../tool.service";
-import ToolInput from "../../../../../model/session/toolinput";
 import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
 import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
@@ -19,6 +18,7 @@ export default class ToolsModalController {
 
     private searchTool: string;
     private parameterDescription: string;
+    private inputDescription: string;
 
     // from ToolsService, used by template
     private isSelectionParameter: (parameter: ToolParameter) => boolean;
@@ -38,11 +38,10 @@ export default class ToolsModalController {
         private toolService: ToolService,
         private csvReader: CSVReader,
         private sessionDataService: SessionDataService,
-        //private isRunEnabled: boolean,
         private modules: Module[],
         private tools: Tool[]) {
 
-        // used from template
+        // used by template
         this.isSelectionParameter = toolService.isSelectionParameter;
         this.isNumberParameter = toolService.isNumberParameter;
     }
@@ -104,7 +103,6 @@ export default class ToolsModalController {
     }
 
 
-    // TODO add input field for this to template
     toolSearchKeyEvent(e: any) {
         if (e.keyCode == 13) { // enter
             // select the first result
@@ -122,21 +120,21 @@ export default class ToolsModalController {
     }
 
 
-
-
     isRunEnabled() {
-        return this.selectedDatasets.length > 0 && this.selectedTool;
-    }
+        // TODO add mandatory parameters check
 
-    getCompatibleDatasets(toolInput: ToolInput) {
-        return this.selectedDatasets.filter(function (dataset: Dataset) {
-            return this.toolService.isCompatible(dataset, toolInput.type.name);
-        });
-    };
+        // either bindings ok or tool without inputs
+        return this.inputBindings ||
+            (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+    }
 
     setDescription(description: string) {
         this.parameterDescription = description;
     };
+
+    setInputDescription(description: string) {
+        this.inputDescription = description;
+    }
 
     runJob() {
         this.close(true);
@@ -183,6 +181,45 @@ export default class ToolsModalController {
                 return {id: column};
             });
         }
+    }
+
+
+    openInputsModal() {
+        let modalInstance = this.$uibModal.open({
+            animation: true,
+            templateUrl: 'views/sessions/session/tools/inputsmodal/inputsmodal.html',
+            controller: 'InputsModalController',
+            controllerAs: 'vm',
+            bindToController: true,
+            size: 'lg',
+            resolve: {
+
+                selectedTool: () => {
+                    return angular.copy(this.selectedTool);
+                },
+                moduleName: () => {
+                    return this.selectedModule.name;
+                },
+                categoryName: () => {
+                    return this.selectedCategory.name;
+                },
+                inputBindings: () => {
+                    return this.inputBindings;
+                    //return angular.copy(this.inputBindings);
+                },
+                selectedDatasets: () => {
+                    return angular.copy(this.selectedDatasets);
+                }
+            }
+        });
+
+        modalInstance.result.then((result: any) => {
+            this.inputBindings = result.inputBindings;
+
+        }, function () {
+            // modal dismissed
+        });
+
     }
 
 
