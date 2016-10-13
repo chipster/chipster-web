@@ -153,10 +153,9 @@ export default class ToolService{
     }
 
     getCompatibleDatasets(toolInput: ToolInput, datasets: Dataset[]) {
-        return datasets;
-//        return this.selectedDatasets.filter(function (dataset: Dataset) {
-//            return this.toolService.isCompatible(dataset, toolInput.type.name);
-//        });
+        return datasets.filter(function (dataset: Dataset) {
+            return this.isCompatible(dataset, toolInput.type.name);
+        }.bind(this));
     };
 
 
