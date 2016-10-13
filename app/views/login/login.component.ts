@@ -1,20 +1,26 @@
-
 import {ServiceLocator} from "../../app.constants";
 import AuthenticationService from "../../authentication/authenticationservice";
+import {Component, Inject, ViewChild} from "@angular/core";
+import { FormGroup } from '@angular/forms';
 
-class LoginController {
-
-    static $inject = ['$location', 'AuthenticationService'];
+@Component({
+    selector: 'login',
+    templateUrl: './views/login/login.html'
+})
+export class LoginComponent {
 
     error: string;
 
-    constructor(private $location: ng.ILocationService,
-                private authenticationService: AuthenticationService) {}
+    @ViewChild('myForm')
+    private myForm: FormGroup;
+
+    constructor(@Inject('$location') private $location: ng.ILocationService, @Inject('AuthenticationService') private authenticationService: AuthenticationService) {}
+
 
     login(username: string, password: string) {
-        this.authenticationService.login(username, password).then( () => {
+        this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).then( () => {
             //Route to Session creation page
-            this.$location.path("/sessions");
+            this.$location.path('/sessions')
         }, (error: any) => {
             console.log('login failed', error);
             if (error) {
@@ -26,7 +32,3 @@ class LoginController {
     }
 }
 
-export default {
-    templateUrl: 'views/login/login.html',
-    controller: LoginController
-}

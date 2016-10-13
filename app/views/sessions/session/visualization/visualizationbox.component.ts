@@ -28,7 +28,7 @@ class VisualizationBoxComponent {
         if(!_.isEqual(this.datasets, this.SelectionService.selectedDatasets)) {
             this.active = undefined;
             this.datasets = _.cloneDeep(this.SelectionService.selectedDatasets);
-            console.log(this.getPossibleVisualizations()    );
+
             // set timeout with 0 forces removing tab content from dom
             // so that tab content will be drawn again. Otherwise tab-content
             // won't change since it's not listening dataset selection changes

@@ -3,11 +3,13 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import ConfigurationResource from './resources/configurationresource';
 import {NavigationComponent} from "./views/navigation/navigation.component";
+import {FormsModule} from "@angular/forms";
+import {LoginComponent} from "./views/login/login.component";
 
 
 @NgModule({
-    imports: [ BrowserModule, HttpModule ],
-    declarations: [ NavigationComponent ],
+    imports: [ BrowserModule, HttpModule, FormsModule ],
+    declarations: [ NavigationComponent, LoginComponent ],
     providers: [ ConfigurationResource ]
 })
 export class AppModule {}
