@@ -49,7 +49,7 @@ class ToolsBox {
             !Utils.equalStringArrays( Utils.getDatasetIds(this.selectedDatasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets))) ) {
 
             // save for comparison
-            this.selectedDatasets = angular.copy(this.SelectionService.selectedDatasets);
+            this.selectedDatasets = _.cloneDeep(this.SelectionService.selectedDatasets);
 
             // bind if tool selected
             if (this.selectedTool) {
@@ -121,34 +121,30 @@ class ToolsBox {
             size: 'lg',
             resolve: {
                 selectedTool: () => {
-                    // return angular.copy(this.selectedTool);
                     return this.selectedTool;
                 },
                 selectedCategory: () => {
-                    //return angular.copy(this.selectedCategory);
                     return this.selectedCategory;
                 },
                 selectedModule: () => {
-                    //return angular.copy(this.selectedModule);
                     return this.selectedModule;
                 },
                 inputBindings: () => {
-                    return angular.copy(this.inputBindings);
+                    return _.cloneDeep(this.inputBindings);
                 },
                 selectedDatasets: () => {
-                    return angular.copy(this.SelectionService.selectedDatasets);
+                    return _.cloneDeep(this.SelectionService.selectedDatasets);
                 },
                 isRunEnabled: () => {
                     return this.isRunEnabled();
                 },
                 modules: () => {
-                    // return angular.copy(this.modules);
                     return this.modules;
                 },
 
                 // TODO remove?
                 tools: () => {
-                    return angular.copy(this.tools);
+                    return _.cloneDeep(this.tools);
                 }
             }
         });

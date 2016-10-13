@@ -27,7 +27,7 @@ export class MapChangeDetector {
             currentMapValues = Utils.mapValues(this.currentMap());
         }
 
-        if (!angular.equals(currentMapValues, this.lastMapValues)) {
+        if (!_.isEqual(currentMapValues, this.lastMapValues)) {
             this.onChange();
             if (this.comparison === Comparison.Deep) {
                 // we need a deep copy to notice changes in the deep
@@ -58,7 +58,7 @@ export class ArrayChangeDetector {
      */
     check() {
 
-        if (!angular.equals(this.currentArray(), this.lastArray)) {
+        if (!_.isEqual(this.currentArray(), this.lastArray)) {
             this.onChange();
             if (this.comparison === Comparison.Shallow) {
                 // a copy of the array is needed to store the last state safely

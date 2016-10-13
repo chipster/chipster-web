@@ -22,8 +22,8 @@ export default class TSV {
 
     private addIndexToData( CSVdata: Array<Array<string>> ) {
         _.head(CSVdata).unshift('index');
-        _.forEach(_.tail(CSVdata), (row, index) => {
-            row.unshift(index);
+        _.forEach(_.tail(CSVdata), (row: Array<string>, index: number) => {
+            row.unshift(index.toString());
         });
     }
 
@@ -48,8 +48,8 @@ export default class TSV {
      */
     public getChipColumnIndexes(): Array<number> {
         return _.chain(this.headers)
-            .map( (cell, index) => _.startsWith(cell, 'chip.') ? index : false)
-            .filter( cell => _.isNumber(cell))
+            .map( (cell: string, index: number) => _.startsWith(cell, 'chip.') ? index : false)
+            .filter( (cell: number) => _.isNumber(cell))
             .value();
     }
 
@@ -71,7 +71,7 @@ export default class TSV {
     /*
      * Filter unwanted cells from row
      */
-    public getItemsByIndexes(indexes: Array<number>, row: Array<string>) {
+    public getItemsByIndexes(indexes: Array<number>, row: Array<string>): Array<any> {
         return _.map( indexes, index => row[index] );
     }
 
@@ -85,9 +85,8 @@ export default class TSV {
     /*
      * Get chipvalues from raw data
      */
-    public getChipValues(csvBody: Array<Array<string>>): Array<number> {
-        let chipValueIndexes = this.chipValueIndexes;
-        return _.map(csvBody, row => this.getItemsByIndexes(chipValueIndexes, row));
+    public getChipValues(csvBody: Array<Array<string>>): Array<Array<number>> {
+        return _.map(csvBody, (row: Array<string>) => this.getItemsByIndexes(this.chipValueIndexes, row));
     }
 
     /*
@@ -110,11 +109,10 @@ export default class TSV {
      */
     public getDomainBoundaries(): DomainBoundaries {
         let values = this.getChipValues(this.body);
-        let flatValues = _.map(_.flatten(values), item => parseFloat(item));
+        let flatValues = _.map(_.flatten(values), (item: string) => parseFloat(item));
         let min = _.min(flatValues);
         let max = _.max(flatValues);
-        let boundaries = new DomainBoundaries(min, max);
-        return boundaries;
+        return new DomainBoundaries(min, max);
     }
 
     getCSVLines(ids: Array<string>) {

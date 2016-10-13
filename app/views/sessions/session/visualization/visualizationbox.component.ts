@@ -1,111 +1,63 @@
-import Visualization from "./visualization";
-import VisualizationList from "./visualizationconstants";
 import SelectionService from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../services/utils.service";
 import SessionDataService from "../sessiondata.service";
-import {ChangeDetector} from "../../../../services/changedetector.service";
-import {Comparison} from "../../../../services/changedetector.service";
-import {ArrayChangeDetector} from "../../../../services/changedetector.service";
 import * as _ from "lodash";
+import visualizations from "./visualizationconstants";
 
 class VisualizationBoxComponent {
 
-    static $inject = ['$scope', '$compile', 'SelectionService', 'SessionDataService'];
+    static $inject = ['SelectionService', 'SessionDataService', '$timeout'];
 
-    visualizations: Visualization[] = VisualizationList;
-    currentVisualization: Visualization = null;
-    currentVisualizationDirective: any = null;
     datasets: Array<Dataset>;
-    private activeTab: number;
+    active: string;
+    visualizations = visualizations;
 
     constructor(
-        private $scope: ng.IScope,
-        private $compile: ng.ICompileService,
         private SelectionService: SelectionService,
-        private SessionDataService: SessionDataService
-    ) {}
-
-    static isCompatibleWithDataset(visualization: Visualization, dataset: Dataset) {
-        var extension = Utils.getFileExtension(dataset.name);
-        return visualization.extensions.indexOf(extension.toLowerCase()) != -1;
+        private SessionDataService: SessionDataService,
+        private $timeout: ng.ITimeoutService) {
     }
 
     $onInit() {
         this.datasets = [];
-        this.activeTab = 0;
+        this.active = _.first(this.getPossibleVisualizations());
     }
 
     $doCheck() {
-        if(this.datasets.length !== this.SelectionService.selectedDatasets.length ||
-            !Utils.equalStringArrays( Utils.getDatasetIds(this.datasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets)) ) {
-            this.datasets = angular.copy(this.SelectionService.selectedDatasets);
-            this.show(this.getVisualizations()[0]);
-            this.activeTab = 0;
+        if(!_.isEqual(this.datasets, this.SelectionService.selectedDatasets)) {
+            this.active = undefined;
+            this.datasets = _.cloneDeep(this.SelectionService.selectedDatasets);
+            console.log(this.getPossibleVisualizations()    );
+            // set timeout with 0 forces removing tab content from dom
+            // so that tab content will be drawn again. Otherwise tab-content
+            // won't change since it's not listening dataset selection changes
+            this.$timeout( () => {
+                this.active = _.first(this.getPossibleVisualizations());
+            }, 0);
         }
     }
 
-    selectVisualization(visualization: Visualization, index: number, event: ng.IAngularEvent) {
-        event.preventDefault(); // prevent scrolling page up
-        this.activeTab = index;
-        this.show(visualization);
+    isCompatibleVisualization(name: string): boolean {
+        let visualization = _.find(this.visualizations, visualization => visualization.id === name);
+        return this.containsExtension(visualization.extensions) && (visualization.multipleDatasets === this.SelectionService.selectedDatasets.length > 1);
     }
 
-    setCurrentVisualization(newVisualization: Visualization, directive: any) {
-
-        if (this.currentVisualizationDirective) {
-            this.currentVisualizationDirective.remove();
-        }
-        this.currentVisualization = newVisualization;
-        this.currentVisualizationDirective = directive;
-    }
-
-    showPreview() {
-        var visualizations = this.getVisualizations();
-        return visualizations.length === 1 && visualizations[0].preview;
-    }
-
-
-    getVisualizations() {
-        return this.visualizations.filter( (visualization: Visualization) => {
-            return this.isCompatible(visualization);
+    containsExtension(extensions: Array<string>) {
+        return _.every(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
+            return _.includes(extensions, Utils.getFileExtension(dataset.name));
         });
     }
 
-    isCompatible(visualization: Visualization) {
+    getPossibleVisualizations() {
+        let datasetFileExtensions = _.map(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
+            return Utils.getFileExtension(dataset.name);
+        });
 
-        let datasets = this.SelectionService.selectedDatasets;
-
-        if (datasets && datasets.length === 1) {
-            return VisualizationBoxComponent.isCompatibleWithDataset(visualization, datasets[0]);
-        }
-        else if (datasets && datasets.length > 1 && visualization.multipleDatasets) {
-            for (var i = 0; i < datasets.length; i++) {
-                if (!VisualizationBoxComponent.isCompatibleWithDataset(visualization, datasets[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    show(vis: Visualization) {
-        if (!this.SelectionService.isSingleDatasetSelected()) {
-            return;
-        }
-        if (vis) {
-            var directive = angular.element('<' + vis.directive + '/>');
-            directive.attr('src', '$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])');
-            directive.attr('dataset-id', '$ctrl.SelectionService.selectedDatasets[0].datasetId');
-            directive.attr('selected-datasets', '$ctrl.SelectionService.selectedDatasets');
-            this.$compile(directive)(this.$scope);
-            var area = angular.element(document.getElementById("visualizationArea"));
-            area.empty();
-            area.append(directive);
-        }
-        this.setCurrentVisualization(vis, directive);
-
+        return _.chain(this.visualizations)
+            .filter( item => _.some( item.extensions, (extension: string) => _.includes(datasetFileExtensions, extension) ) )
+            .map( item => item.id)
+            .value();
     }
 
 }

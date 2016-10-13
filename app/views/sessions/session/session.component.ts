@@ -21,7 +21,7 @@ class SessionComponent {
     sessionData: SessionData;
     private isCopying = false;
     deletedDatasets: Array<Dataset>;
-    deletedDatasetsTimeout;
+    deletedDatasetsTimeout: any;
 
     constructor(
         private $scope: ng.IScope,
@@ -234,10 +234,10 @@ class SessionComponent {
             size: 'lg',
             resolve: {
                 toolErrorTitle: () => {
-                    return angular.copy(title);
+                    return _.cloneDeep(title);
                 },
                 toolError: () => {
-                    return angular.copy(toolError);
+                    return _.cloneDeep(toolError);
                 }
             }
         });
@@ -250,8 +250,8 @@ class SessionComponent {
             controllerAs: 'vm',
             bindToController: true,
             resolve: {
-                title: () => angular.copy(title),
-                name: () => angular.copy(name)
+                title: () => _.cloneDeep(title),
+                name: () => _.cloneDeep(name)
             }
         });
     }

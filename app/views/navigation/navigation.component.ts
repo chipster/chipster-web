@@ -8,8 +8,8 @@ import ConfigService from "../../services/config.service";
 })
 export class NavigationComponent {
 
-    constructor(@Inject('AuthenticationService') private authenticationService,
-                @Inject('ConfigService') private configService){}
+    constructor(@Inject('AuthenticationService') private authenticationService: AuthenticationService,
+                @Inject('ConfigService') private configService: ConfigService){}
 
     isLoggedOut() {
         if (this.authenticationService.getToken() === null) {
