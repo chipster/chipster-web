@@ -195,7 +195,7 @@ export default class ToolsModalController {
             resolve: {
 
                 selectedTool: () => {
-                    return angular.copy(this.selectedTool);
+                    return _.cloneDeep(this.selectedTool);
                 },
                 moduleName: () => {
                     return this.selectedModule.name;
@@ -205,10 +205,9 @@ export default class ToolsModalController {
                 },
                 inputBindings: () => {
                     return this.inputBindings;
-                    //return angular.copy(this.inputBindings);
                 },
                 selectedDatasets: () => {
-                    return angular.copy(this.selectedDatasets);
+                    return _.cloneDeep(this.selectedDatasets);
                 }
             }
         });
@@ -234,7 +233,7 @@ export default class ToolsModalController {
             resolve: {
 
                 selectedTool: () => {
-                    return angular.copy(this.selectedTool);
+                    return _.cloneDeep(this.selectedTool);
                 },
                 category: () => {
                     return this.selectedCategory.name;
