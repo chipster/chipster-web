@@ -243,16 +243,16 @@
                                 value: {{parameter.to}}</label>
                         </td>
 
-                        <!--
+                        <!-- reset parameter to default button -->
                         <td>
                             <button type="button" class="close"
-                                    ng-class="{'visibility-hidden': parameter.value == vm.getDefaultValue(parameter.toolParameter)}"
-                                    ng-click="parameter.value = vm.getDefaultValue(parameter.toolParameter)"
+                                    ng-class="{'visibility-hidden': parameter.value == vm.toolService.getDefaultValue(parameter)}"
+                                    ng-click="parameter.value = vm.toolService.getDefaultValue(parameter)"
                                     title="Reset to default value">
                                 &times
                             </button>
                         </td>
-                        -->
+
                     </tr>
 
                 </table>
