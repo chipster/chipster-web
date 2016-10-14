@@ -72,7 +72,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
-    .service('AuthenticationService', AuthenticationService)
+    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService))
     .service('ConfigService', ConfigService)
     .factory('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('ToolResource', ToolResource)
@@ -144,6 +144,10 @@ angular.module('chipster-web').config(
 
     });
 
+upgradeAdapter.upgradeNg1Provider('localStorageService');
+upgradeAdapter.upgradeNg1Provider('$http');
+upgradeAdapter.upgradeNg1Provider('ConfigService');
+upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');
 upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');

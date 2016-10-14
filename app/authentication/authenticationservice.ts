@@ -1,17 +1,17 @@
 
 import ConfigService from "../services/config.service";
+import {Inject, Injectable} from "@angular/core";
 
+@Injectable()
 export default class AuthenticationService {
-
-    static $inject = ['localStorageService', '$http', 'ConfigService', '$rootScope', '$location'];
 
     tokenHeader:{};
 
-    constructor(private localStorageService: any,
-                private $http: ng.IHttpService,
-                private ConfigService: ConfigService,
-                private $rootScope: ng.IRootScopeService,
-                private $location: ng.ILocationService) {
+    constructor(@Inject('localStorageService') private localStorageService: any,
+                @Inject('$http') private $http: ng.IHttpService,
+                @Inject('ConfigService') private ConfigService: ConfigService,
+                @Inject('$rootScope') private $rootScope: ng.IRootScopeService,
+                @Inject('$location') private $location: ng.ILocationService) {
         this.$rootScope.$on("$routeChangeStart", (event: any, next: any) => {
             if (next.$$route.authenticated) {
                 var userAuth = this.getToken();

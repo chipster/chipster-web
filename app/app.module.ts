@@ -6,12 +6,13 @@ import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
+import AuthenticationService from "./authentication/authenticationservice";
 
 
 @NgModule({
     imports: [ BrowserModule, HttpModule, FormsModule ],
     declarations: [ NavigationComponent, LoginComponent ],
-    providers: [ ConfigurationResource, SelectionService ]
+    providers: [ ConfigurationResource, SelectionService, AuthenticationService ]
 })
 export class AppModule {}
 
