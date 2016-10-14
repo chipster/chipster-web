@@ -4,8 +4,9 @@ import Tool from "../../../model/session/tool";
 import Utils from "../../../services/utils.service";
 import UtilsService from "../../../services/utils.service";
 import * as _ from "lodash";
+import {Injectable} from "@angular/core";
 
-
+@Injectable()
 export default class SelectionService {
 
     // selections

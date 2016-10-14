@@ -79,7 +79,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('SessionEventService', SessionEventService)
     .service('SessionResource', SessionResource)
     .service('SessionDataService', SessionDataService)
-    .service('SelectionService', SelectionService)
+    .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('FileResource', FileResource)
     .service('Utils', UtilsService)
     .service('WorkflowGraphService', WorkflowGraphService)
