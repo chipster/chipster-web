@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import CSVModel from "./TSV";
+import TSVFile from "../../../../../model/file/TSVFile";
 import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";
@@ -7,15 +7,15 @@ import Point from "./point";
 export default class ExpressionProfileService {
 
     // X-axis indexes for intervals the selection rectangle is crossing
-    getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, csvModel: CSVModel) {
+    getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, tsv: TSVFile) {
         let startIndex = this.getFloor( linearXScale.invert(p1.x), linearXScale.invert(p2.x) );
         let endIndex  = this.getCeil( linearXScale.invert(p1.x), linearXScale.invert(p2.x) );
         if(startIndex < 0) {
             startIndex = 0;
         }
 
-        if(endIndex >= csvModel.getChipHeaders().length - 1) {
-            endIndex = csvModel.getChipHeaders().length - 1;
+        if(endIndex >= tsv.getChipHeaders().length - 1) {
+            endIndex = tsv.getChipHeaders().length - 1;
         }
 
         return {
@@ -32,12 +32,12 @@ export default class ExpressionProfileService {
         return first >= second ? _.ceil(first) : _.ceil(second);
     }
 
-    createLines(csvModel: CSVModel, chipValueIndex: number, linearXScale: any, yScale: any): Array<Line> {
-        return _.map(csvModel.body, row => {
+    createLines(tsv: TSVFile, chipValueIndex: number, linearXScale: any, yScale: any): Array<Line> {
+        return _.map(tsv.body, row => {
 
             // get indexes for finding raw data value for lines start and end points
-            let chipLineStartDataIndex = csvModel.chipValueIndexes[chipValueIndex];
-            let chipLineEndDataIndex = csvModel.chipValueIndexes[chipValueIndex + 1];
+            let chipLineStartDataIndex = tsv.chipValueIndexes[chipValueIndex];
+            let chipLineEndDataIndex = tsv.chipValueIndexes[chipValueIndex + 1];
 
             // get raw data for lines start and end points
             let lineStartValue = row[chipLineStartDataIndex];

@@ -19,7 +19,7 @@ import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
 import ToolTitleComponent from "./views/sessions/session/tools/tooltitle.component";
-import TableService from "./services/CSVReader";
+import CSVReader from "./services/CSVReader";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
 import isoDateFilter from "./common/filter/isodate.filter"
@@ -52,6 +52,7 @@ import SingleDatasetComponent from "./views/sessions/session/dataset/singledatas
 import ExpressionProfile from "./views/sessions/session/visualization/expressionprofile/expressionprofile";
 import ExpressionProfileService from "./views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
+import {TSVReader} from "./services/TSVReader";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
@@ -82,7 +83,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('FileResource', FileResource)
     .service('Utils', UtilsService)
     .service('WorkflowGraphService', WorkflowGraphService)
-    .service('CSVReader', TableService)
+    .service('CSVReader', CSVReader)
+    .service('TSVReader', TSVReader)
     .service('ToolService', ToolService)
     .service('ExpressionProfileService', ExpressionProfileService)
     .filter('searchDatasetFilter', searchDatasetFilter)

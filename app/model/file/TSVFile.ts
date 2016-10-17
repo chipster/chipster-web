@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import DomainBoundaries from "./domainboundaries";
+import DomainBoundaries from "../../views/sessions/session/visualization/expressionprofile/domainboundaries";
 
 export default class TSV {
 
@@ -8,21 +8,21 @@ export default class TSV {
     public chipValueIndexes: Array<number>;
     public domainBoundaries: DomainBoundaries;
 
-    constructor(CSVdata: Array<Array<string>>) {
-        this.addIndexToData(CSVdata); // add index information to all rows to indentificate them later
-        this.headers = _.head(CSVdata);
+    constructor(tsv: Array<Array<string>>) {
+        this.addIndexToData(tsv); // add index information to all rows to indentificate them later
+        this.headers = _.head(tsv);
 
         // Find indexes where actual chipdata is located in the arrays.
         // Note that these indexes may differ from the indexes the matching headers are located
         // since the header-row may be missing a column
-        this.chipValueIndexes = this.getChipValueIndexes(CSVdata);
-        this.body = this.orderBodyByFirstValue(_.tail(CSVdata));
+        this.chipValueIndexes = this.getChipValueIndexes(tsv);
+        this.body = this.orderBodyByFirstValue(_.tail(tsv));
         this.domainBoundaries = this.getDomainBoundaries();
     }
 
-    private addIndexToData( CSVdata: Array<Array<string>> ) {
-        _.head(CSVdata).unshift('index');
-        _.forEach(_.tail(CSVdata), (row: Array<string>, index: number) => {
+    private addIndexToData( tsv: Array<Array<string>> ) {
+        _.head(tsv).unshift('index');
+        _.forEach(_.tail(tsv), (row: Array<string>, index: number) => {
             row.unshift(index.toString());
         });
     }
