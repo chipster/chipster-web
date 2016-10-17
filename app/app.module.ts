@@ -8,10 +8,11 @@ import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
 import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
+import {TSVReader} from "./services/TSVReader";
 
 @NgModule({
     imports: [ BrowserModule, HttpModule, FormsModule, AuthenticationModule ],
     declarations: [ NavigationComponent, LoginComponent ],
-    providers: [ ConfigurationResource, SelectionService, ConfigService ]
+    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
 })
 export class AppModule {}

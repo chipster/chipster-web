@@ -84,7 +84,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('Utils', UtilsService)
     .service('WorkflowGraphService', WorkflowGraphService)
     .service('CSVReader', CSVReader)
-    .service('TSVReader', TSVReader)
+    .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
     .service('ToolService', ToolService)
     .service('ExpressionProfileService', ExpressionProfileService)
     .filter('searchDatasetFilter', searchDatasetFilter)
@@ -156,4 +156,6 @@ upgradeAdapter.upgradeNg1Provider('AuthenticationService');
 upgradeAdapter.upgradeNg1Provider('ConfigurationResource');
 upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');
+upgradeAdapter.upgradeNg1Provider('TSVReader');
+upgradeAdapter.upgradeNg1Provider('FileResource');
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

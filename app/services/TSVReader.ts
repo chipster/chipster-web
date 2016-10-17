@@ -1,11 +1,11 @@
 import FileResource from "../resources/fileresource";
 import TSVFile from "../model/file/TSVFile";
+import {Injectable, Inject} from "@angular/core";
 
+@Injectable()
 export class TSVReader {
 
-    static $inject = ['FileResource'];
-
-   constructor(private FileResource: FileResource) {
+   constructor(@Inject('FileResource') private FileResource: FileResource) {
     }
 
     getTSV(sessionId: string, datasetId: string) {
