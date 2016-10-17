@@ -54,7 +54,7 @@ import ExpressionProfileService from "./views/sessions/session/visualization/exp
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
-        'ngWebSocket', 'angularResizable', 'ui.bootstrap',
+        'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
         'pdf', 'ngHandsontable'])
 
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
@@ -72,7 +72,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
-    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
     .service('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('ToolResource', ToolResource)
@@ -109,6 +108,10 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('session', SessionComponent)
     .component('singleDataset', SingleDatasetComponent)
     .config(RouteConfiguration);
+
+angular.module('AuthenticationModule', [])
+    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService));
+
 
 
 angular.module('chipster-web').config(
