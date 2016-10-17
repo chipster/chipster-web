@@ -7,12 +7,11 @@ import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
 import AuthenticationService from "./authentication/authenticationservice";
-
+import ConfigService from "./services/config.service";
 
 @NgModule({
     imports: [ BrowserModule, HttpModule, FormsModule ],
     declarations: [ NavigationComponent, LoginComponent ],
-    providers: [ ConfigurationResource, SelectionService, AuthenticationService ]
+    providers: [ ConfigurationResource, SelectionService, AuthenticationService, ConfigService ]
 })
 export class AppModule {}
-
