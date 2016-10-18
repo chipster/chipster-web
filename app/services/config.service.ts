@@ -1,6 +1,7 @@
 
 import * as configConstants from '../app.constants';
 import ConfigurationResource from "../resources/configurationresource";
+import {Injectable, Inject} from "@angular/core";
 
 class Services {
     sessionDb: string;
@@ -10,16 +11,16 @@ class Services {
     toolbox: string;
 }
 
+@Injectable()
 export default class ConfigService {
-
-    static $inject = ['$location', 'ConfigurationResource'];
 
     public services: Services;
     public config: any;
     public baseUrl: string;
     private queryPromise: Promise<any>;
 
-    constructor(private $location: ng.ILocationService, private configurationResource: ConfigurationResource){
+    constructor(@Inject('$location') private $location: ng.ILocationService,
+                @Inject('ConfigurationResource') private configurationResource: ConfigurationResource){
         this.config = {};
         this.config.modules = configConstants.ChipsterModules;
 

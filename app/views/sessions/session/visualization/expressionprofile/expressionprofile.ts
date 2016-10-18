@@ -1,6 +1,3 @@
-import Dataset from "../../../../../model/session/dataset";
-import CSVReader from "../../../../../services/CSVReader";
-import TSV from "./TSV";
 import ExpressionProfileService from "./expressionprofile.service";
 import Point from "./point";
 import Rectangle from "./rectangle";
@@ -8,34 +5,36 @@ import Interval from "./interval";
 import * as d3 from 'd3';
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
+import TSVFile from "../../../../../model/file/TSVFile";
+import { TSVReader } from "../../../../../services/TSVReader";
 
 class ExpressionProfile {
 
-    static $inject = ['CSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService'];
+    static $inject = ['TSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService'];
 
     private datasetId: string;
-    private tsv: TSV;
+    private tsv: TSVFile;
     private selections: Array<Array<string>>; // selected gene expressions
     private selectedDatasets: any;
 
-    constructor(private csvReader: CSVReader,
+    constructor(
+                private tsvReader: TSVReader,
                 private $routeParams: ng.route.IRouteParamsService,
                 private $window: ng.IWindowService,
                 private expressionProfileService: ExpressionProfileService,
                 private sessionDataService: SessionDataService) {
-
     }
 
     $onInit() {
-        this.csvReader.getCSV(this.$routeParams['sessionId'], this.datasetId).then( (csvModel: TSV) => {
-            this.tsv = csvModel;
-            this.drawLineChart(csvModel);
+        this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).then( (tsv: TSVFile) => {
+            this.tsv = tsv;
+            this.drawLineChart(tsv);
         });
 
         this.selections = [];
     }
 
-    drawLineChart(csvModel: TSV) {
+    drawLineChart(tsv: TSVFile) {
         let that = this;
         // Configurate svg and graph-area
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
@@ -65,7 +64,7 @@ class ExpressionProfile {
 
 
         // Change default headers to values defined in phenodata if description value has been defined
-        let headers = _.map(csvModel.getChipHeaders(), header => {
+        let headers = _.map(tsv.getChipHeaders(), header => {
 
             // find if there is a phenodata description matching header and containing a value
             let phenodataHeader:any = _.find(phenodataDescriptions, (item:any) => {
@@ -88,11 +87,11 @@ class ExpressionProfile {
             .attr('transform', 'rotate(-65 0 0)')
             .style('text-anchor', 'end');
 
-        // Linear x-axis to determine selection-rectangle position scaled to csv-data
+        // Linear x-axis to determine selection-rectangle position scaled to tsv-data
         let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
 
         // Y-axis and scale
-        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([csvModel.domainBoundaries.min, csvModel.domainBoundaries.max]);
+        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([tsv.domainBoundaries.min, tsv.domainBoundaries.max]);
         let yAxis = d3.svg.axis().scale(yScale).orient('left').ticks(5);
         svg.append('g')
             .attr('class', 'y axis')
@@ -107,16 +106,16 @@ class ExpressionProfile {
         let color = d3.scale.category20();
 
         let paths = pathsGroup.selectAll('.path')
-            .data(csvModel.body)
+            .data(tsv.body)
             .enter()
             .append('path')
             .attr('class', 'path')
             .attr('id', (d: any,i: number) => 'path' + d[0])
-            .attr('d', (d: any) => lineGenerator( csvModel.getItemsByIndexes(csvModel.chipValueIndexes, d) ) )
+            .attr('d', (d: any) => lineGenerator( tsv.getItemsByIndexes(tsv.chipValueIndexes, d) ) )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {
-                let colorIndex = (_.floor( (i / csvModel.body.length) * 20)).toString();
+                let colorIndex = (_.floor( (i / tsv.body.length) * 20)).toString();
                 return color(colorIndex)
             })
             .on('mouseover', (d: any) => {
@@ -191,12 +190,12 @@ class ExpressionProfile {
                 let p1 = new Point(endPoint.x, endPoint.y);
                 let p2 = new Point(startPoint.x, startPoint.y);
 
-                let intervalIndexes = that.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, csvModel);
+                let intervalIndexes = that.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, tsv);
                 var intervals: Array<Interval> = [];
 
                 // create intervals
                 for( let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++ ) {
-                    let lines = that.expressionProfileService.createLines(csvModel, chipValueIndex, linearXScale, yScale);
+                    let lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
                     let intervalStartIndex = chipValueIndex;
 
                     let rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);

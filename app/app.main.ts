@@ -19,7 +19,7 @@ import searchDatasetFilter from "./common/filter/searchdataset.filter";
 import FileResource from "./resources/fileresource";
 import ToolsBoxComponent from "./views/sessions/session/tools/toolsbox.component";
 import ToolTitleComponent from "./views/sessions/session/tools/tooltitle.component";
-import TableService from "./services/CSVReader";
+import CSVReader from "./services/CSVReader";
 import ToolService from "./views/sessions/session/tools/tool.service";
 import bytes from "./common/filter/bytes.filter";
 import isoDateFilter from "./common/filter/isodate.filter"
@@ -52,9 +52,10 @@ import SingleDatasetComponent from "./views/sessions/session/dataset/singledatas
 import ExpressionProfile from "./views/sessions/session/visualization/expressionprofile/expressionprofile";
 import ExpressionProfileService from "./views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
+import {TSVReader} from "./services/TSVReader";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
-        'ngWebSocket', 'angularResizable', 'ui.bootstrap',
+        'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
         'pdf', 'ngHandsontable'])
 
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
@@ -72,9 +73,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
-    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService))
-    .service('ConfigService', ConfigService)
-    .factory('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
+    .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
+    .service('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('ToolResource', ToolResource)
     .service('SessionEventService', SessionEventService)
     .service('SessionResource', SessionResource)
@@ -83,7 +83,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('FileResource', FileResource)
     .service('Utils', UtilsService)
     .service('WorkflowGraphService', WorkflowGraphService)
-    .service('CSVReader', TableService)
+    .service('CSVReader', CSVReader)
+    .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
     .service('ToolService', ToolService)
     .service('ExpressionProfileService', ExpressionProfileService)
     .filter('searchDatasetFilter', searchDatasetFilter)
@@ -109,6 +110,10 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('session', SessionComponent)
     .component('singleDataset', SingleDatasetComponent)
     .config(RouteConfiguration);
+
+angular.module('AuthenticationModule', [])
+    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService));
+
 
 
 angular.module('chipster-web').config(
@@ -146,9 +151,11 @@ angular.module('chipster-web').config(
 
 upgradeAdapter.upgradeNg1Provider('localStorageService');
 upgradeAdapter.upgradeNg1Provider('$http');
-upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');
+upgradeAdapter.upgradeNg1Provider('ConfigurationResource');
 upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');
+upgradeAdapter.upgradeNg1Provider('TSVReader');
+upgradeAdapter.upgradeNg1Provider('FileResource');
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

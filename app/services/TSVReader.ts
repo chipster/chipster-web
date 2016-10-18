@@ -1,17 +1,16 @@
 import FileResource from "../resources/fileresource";
+import TSVFile from "../model/file/TSVFile";
+import {Injectable, Inject} from "@angular/core";
 
-export default class CSVReader {
+@Injectable()
+export class TSVReader {
 
-    static $inject = ['FileResource'];
-
-    constructor(
-        private FileResource: FileResource) {
+   constructor(@Inject('FileResource') private FileResource: FileResource) {
     }
 
-   getColumns(sessionId: string, datasetId: string) {
-
+    getTSV(sessionId: string, datasetId: string) {
         return this.FileResource.getData(sessionId, datasetId).then( (resp: any) => {
-            
+
             // we have to create the promise, because JQuery-cvs doesn't use them
             return new Promise( (resolve: any, reject: any) => {
 
@@ -22,7 +21,7 @@ export default class CSVReader {
 
                 $['csv'].toArrays(resp.data, parserConfig, (err: any, fileArray: string[][]) => {
                     if (fileArray) {
-                        resolve(fileArray[0]);
+                        resolve(new TSVFile(fileArray));
                     } else {
                         reject(err);
                     }
@@ -30,5 +29,4 @@ export default class CSVReader {
             });
         });
     }
-
 }
