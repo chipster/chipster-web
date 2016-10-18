@@ -54,5 +54,5 @@ export default {
         onDelete: '&'
     },
     controller: SingleDataset,
-    templateUrl: 'views/sessions/session/dataset/singledataset.html'
+    templateUrl: 'app/views/sessions/session/dataset/singledataset.html'
 }

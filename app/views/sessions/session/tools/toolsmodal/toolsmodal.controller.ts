@@ -187,7 +187,7 @@ export default class ToolsModalController {
     openInputsModal() {
         let modalInstance = this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/tools/inputsmodal/inputsmodal.html',
+            templateUrl: 'app/views/sessions/session/tools/inputsmodal/inputsmodal.html',
             controller: 'InputsModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -225,7 +225,7 @@ export default class ToolsModalController {
     openSourceModal() {
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/tools/sourcemodal/sourcemodal.html',
+            templateUrl: 'app/views/sessions/session/tools/sourcemodal/sourcemodal.html',
             controller: 'SourceModalController',
             controllerAs: 'vm',
             bindToController: true,

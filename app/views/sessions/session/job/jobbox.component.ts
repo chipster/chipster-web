@@ -28,7 +28,7 @@ class JobBoxComponent {
 }
 
 export default {
-	templateUrl: 'views/sessions/session/job/job.html',
+	templateUrl: 'app/views/sessions/session/job/job.html',
 	controller: JobBoxComponent
 }
 

@@ -211,7 +211,7 @@ class SessionComponent {
     openAddDatasetModal() {
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
+            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
             controller: 'AddDatasetModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -227,7 +227,7 @@ class SessionComponent {
     openErrorModal(title: string, toolError: string) {
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/joberrormodal/joberrormodal.html',
+            templateUrl: 'app/views/sessions/session/joberrormodal/joberrormodal.html',
             controller: 'JobErrorModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -245,7 +245,7 @@ class SessionComponent {
 
     getSessionEditModal(title: string, name: string) {
         return this.$uibModal.open({
-            templateUrl: 'views/sessions/session/sessioneditmodal/sessioneditmodal.html',
+            templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -291,5 +291,5 @@ class SessionComponent {
 
 export default {
     controller: SessionComponent,
-    templateUrl: 'views/sessions/session/session.html'
+    templateUrl: 'app/views/sessions/session/session.html'
 }

@@ -168,7 +168,7 @@ export default class SessionDataService {
 
     openDatasetHistoryModal() {
         this.$uibModal.open({
-            templateUrl: 'views/sessions/session/datasethistorymodal/datasethistorymodal.html',
+            templateUrl: 'app/views/sessions/session/datasethistorymodal/datasethistorymodal.html',
             controller: 'DatasetHistoryModalController',
             controllerAs: 'vm',
             bindToController: true,

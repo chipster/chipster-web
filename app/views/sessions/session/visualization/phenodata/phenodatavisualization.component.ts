@@ -325,7 +325,7 @@ class PhenodataVisualizationController {
     addColumnModal() {
         var modalInstance = this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/visualization/phenodata/addcolumn.html',
+            templateUrl: 'app/views/sessions/session/visualization/phenodata/addcolumn.html',
             controller: 'AddColumnController',
             controllerAs: '$ctrl',
             bindToController: true,
@@ -350,7 +350,7 @@ class PhenodataVisualizationController {
 
 export default {
     controller: PhenodataVisualizationController,
-    templateUrl: 'views/sessions/session/visualization/phenodata/phenodatavisualization.html',
+    templateUrl: 'app/views/sessions/session/visualization/phenodata/phenodatavisualization.html',
     bindings: {
         datasets: '=selectedDatasets'
     }

@@ -5,7 +5,7 @@ import { FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'login',
-    templateUrl: './views/login/login.html'
+    templateUrl: 'app/views/login/login.html'
 })
 export class LoginComponent {
 

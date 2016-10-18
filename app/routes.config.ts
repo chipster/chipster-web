@@ -8,8 +8,8 @@ interface IAuthRoute extends IRoute {
 export default function($routeProvider: ng.route.IRouteProvider) {
 
     $routeProvider
-        .when('/', {templateUrl: 'views/home/home.html'})
-        .when('/home', {templateUrl: 'views/home/home.html'})
+        .when('/', {templateUrl: 'app/views/home/home.html'})
+        .when('/home', {templateUrl: 'app/views/home/home.html'})
         .when('/login', {template: '<login></login>'})
         .when('/sessions', <IAuthRoute>{
             template: '<session-list></session-list>',
@@ -24,6 +24,6 @@ export default function($routeProvider: ng.route.IRouteProvider) {
                 }
             }
         })
-        .otherwise({templateUrl: 'views/home/home.html'});
+        .otherwise({templateUrl: 'app/views/home/home.html'});
 };
 

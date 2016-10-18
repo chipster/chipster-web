@@ -88,5 +88,5 @@ class SessionListController {
 
 export default {
     controller: SessionListController,
-    templateUrl: 'views/sessions/sessionlist.html'
+    templateUrl: 'app/views/sessions/sessionlist.html'
 }

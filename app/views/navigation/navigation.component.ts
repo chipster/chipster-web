@@ -4,7 +4,7 @@ import ConfigService from "../../services/config.service";
 
 @Component({
     selector: 'navigation',
-    templateUrl: './views/navigation/navigation.html'
+    templateUrl: 'app/views/navigation/navigation.html'
 })
 export class NavigationComponent {
 

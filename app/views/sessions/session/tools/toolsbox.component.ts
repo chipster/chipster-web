@@ -137,7 +137,7 @@ class ToolsBox {
     openToolsModal() {
         var modalInstance = this.$uibModal.open({
             animation: true,
-            templateUrl: 'views/sessions/session/tools/toolsmodal/toolsmodal.html',
+            templateUrl: 'app/views/sessions/session/tools/toolsmodal/toolsmodal.html',
             controller: 'ToolsModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -194,7 +194,7 @@ export default {
         modules: '<',
         tools: '<' // TODO remove?
     },
-    templateUrl: 'views/sessions/session/tools/tools.html',
+    templateUrl: 'app/views/sessions/session/tools/tools.html',
     controller: ToolsBox
 }
 

@@ -301,5 +301,5 @@ export default {
         selectedDatasets: '<'
     },
     controller: ExpressionProfile,
-    templateUrl: 'views/sessions/session/visualization/expressionprofile/expressionprofile.html'
+    templateUrl: 'app/views/sessions/session/visualization/expressionprofile/expressionprofile.html'
 }

@@ -26,7 +26,7 @@ class DatasetBoxComponent {
 }
 
 export default {
-	templateUrl: 'views/sessions/session/dataset/dataset.html',
+	templateUrl: 'app/views/sessions/session/dataset/dataset.html',
 	controller: DatasetBoxComponent,
 	bindings: {
 		onDelete: '&'

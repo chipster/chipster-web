@@ -66,7 +66,7 @@ class PdfVisualizationController {
 
 export default {
     controller: PdfVisualizationController,
-    template: '<ng-pdf template-url="views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf>',
+    template: '<ng-pdf template-url="app/views/sessions/session/visualization/pdf/viewer.html" scale="page-fit"></ng-pdf>',
     bindings: {
         src: '='
     }

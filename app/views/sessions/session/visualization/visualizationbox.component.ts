@@ -64,5 +64,5 @@ class VisualizationBoxComponent {
 
 export default {
     controller: VisualizationBoxComponent,
-    templateUrl: 'views/sessions/session/visualization/visualization.html'
+    templateUrl: 'app/views/sessions/session/visualization/visualization.html'
 }
