@@ -137,6 +137,14 @@ class ExpressionProfile {
                 }
             });
 
+        paths.each(function(d) { d.totalLength = this.getTotalLength(); })
+            .attr("stroke-dasharray", function(d) { return d.totalLength + " " + d.totalLength; })
+            .attr("stroke-dashoffset", function(d) { return d.totalLength; })
+            .transition()
+            .duration(2000)
+            .ease('linear')
+            .attr('stroke-dashoffset', 0);
+
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
 
