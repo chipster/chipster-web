@@ -3,12 +3,11 @@ import SessionDataService from "../../sessiondata.service";
 
 class SpreadsheetVisualizationController {
 
-    static $inject = ['FileResource', '$scope', 'SessionDataService'];
+    static $inject = ['FileResource', 'SessionDataService'];
 
     datasetId: string;
 
     constructor(private fileResource: FileResource,
-                private $scope: ng.IScope,
                 private SessionDataService: SessionDataService){
 
     }

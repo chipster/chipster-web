@@ -1,8 +1,8 @@
 class HtmlVisualizationController {
 
-    static $inject = ['$sce', '$scope', '$log'];
+    static $inject = ['$sce'];
 
-    constructor(private $sce: any, private $scope: ng.IScope, private $log: ng.ILogService){
+    constructor(private $sce: any){
     }
 
     src: string;

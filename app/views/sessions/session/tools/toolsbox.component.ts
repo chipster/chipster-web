@@ -13,11 +13,10 @@ import Utils from "../../../../services/utils.service";
 class ToolsBox {
 
     static $inject = [
-        '$scope', '$filter', '$log', '$q', '$uibModal', 'ToolService', 'SessionDataService',
+        '$filter', '$log', '$q', '$uibModal', 'ToolService', 'SessionDataService',
         'SelectionService'];
 
     constructor(
-        private $scope: ng.IScope,
         private $filter: IChipsterFilter,
         private $log: ng.ILogService,
         private $q: ng.IQService,
