@@ -1,138 +1,61 @@
 import * as _ from "lodash";
 import DomainBoundaries from "../../views/sessions/session/visualization/expressionprofile/domainboundaries";
+import TSVHeaders from "./TSVHeaders";
+import TSVBody from "./TSVBody";
+import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
 
 export default class TSV {
 
-    private headers: Array<string>;
-    public body: Array<Array <string>>;
-    public chipValueIndexes: Array<number>;
+    public headers: TSVHeaders;
+    public body: TSVBody;
     public domainBoundaries: DomainBoundaries;
 
     constructor(tsv: Array<Array<string>>) {
-        this.addIndexToData(tsv); // add index information to all rows to indentificate them later
-        this.headers = _.head(tsv);
-
+        this.headers = new TSVHeaders(_.head(tsv));
+        this.body = new TSVBody(_.tail(tsv), this.getChipIndexes(this.headers, _.tail(tsv)));
+        
         // Find indexes where actual chipdata is located in the arrays.
         // Note that these indexes may differ from the indexes the matching headers are located
         // since the header-row may be missing a column
-        this.chipValueIndexes = this.getChipValueIndexes(tsv);
-        this.body = this.orderBodyByFirstValue(_.tail(tsv));
         this.domainBoundaries = this.getDomainBoundaries();
     }
 
-    private addIndexToData( tsv: Array<Array<string>> ) {
-        _.head(tsv).unshift('index');
-        _.forEach(_.tail(tsv), (row: Array<string>, index: number) => {
-            row.unshift(index.toString());
-        });
-    }
-
+    /*
+     * return TSV-data in its initial form without indexes
+     */
     public getCSVData(ids: Array<string>) {
-        let body = this.getCSVLines(ids);
+        let body = this.body.getTSVRows(ids);
         body = _.map(body, row => _.drop(row, 1));
-        let headers = _.drop(this.headers, 1);
-
-        let data = [headers].concat(body);
+        let headers = this.headers.getOriginalHeaders();
+        let data = [headers, ...body];
         return data;
-    }
-
-    /*
-     * Get chip-value headers
-     */
-    public getChipHeaders(): Array<string> {
-        return this.getItemsByIndexes(this.getChipColumnIndexes(), this.headers);
-    }
-
-    /*
-     * Return array containing numbers indicating indexes for column headers starting with 'chip.'
-     */
-    public getChipColumnIndexes(): Array<number> {
-        return _.chain(this.headers)
-            .map( (cell: string, index: number) => _.startsWith(cell, 'chip.') ? index : false)
-            .filter( (cell: number) => _.isNumber(cell))
-            .value();
-    }
-
-    /*
-     * Headers are missing a cell, if first (or any other) datarow is longer than headerrow
-     */
-    private isHeadersMissingCell(csvData: Array<Array<string>>): boolean {
-        return csvData[0].length !== csvData[1].length;
-    }
-
-    /*
-     * Get Indexes containing actual .chip-values
-     */
-    public getChipValueIndexes(csvData: Array<Array<string>>): Array<number> {
-        let chipColumnIndexes = this.getChipColumnIndexes();
-        return this.isHeadersMissingCell(csvData) ? _.map(chipColumnIndexes, cellIndex => cellIndex + 1) : chipColumnIndexes ;
-    }
-
-    /*
-     * Filter unwanted cells from row
-     */
-    public getItemsByIndexes(indexes: Array<number>, row: Array<string>): Array<any> {
-        return _.map( indexes, index => row[index] );
-    }
-
-    /*
-     * Parse array of string to array of numbers
-     */
-    public parseRow(row: Array<string>): Array<number> {
-        return _.map(row, value => parseFloat(value));
-    }
-
-    /*
-     * Get chipvalues from raw data
-     */
-    public getChipValues(csvBody: Array<Array<string>>): Array<Array<number>> {
-        return _.map(csvBody, (row: Array<string>) => this.getItemsByIndexes(this.chipValueIndexes, row));
-    }
-
-    /*
-     * Order csvBodyRows by values in the given index of each row
-     */
-    private orderByValueInIndex(csvBody: Array<Array<string>>, index: number): Array<Array<string>> {
-        return _.orderBy(csvBody, [ valueArray => parseFloat( valueArray[index] ) ]);
-    }
-
-    /*
-     * Order csvBodyRows by first chip-value in each row
-     */
-    private orderBodyByFirstValue(csvBody: Array <Array<string>>): Array <Array <string>> {
-        let firstChipValueIndex = _.head(this.chipValueIndexes);
-        return this.orderByValueInIndex(csvBody, firstChipValueIndex);
     }
 
     /*
      * max & min value from two-dimensional array
      */
     public getDomainBoundaries(): DomainBoundaries {
-        let values = this.getChipValues(this.body);
-        let flatValues = _.map(_.flatten(values), (item: string) => parseFloat(item));
+        let values = this.body.getGeneExpressions().map( (expression: GeneExpression) => expression.values );
+        let flatValues = _.flatten(values);
         let min = _.min(flatValues);
         let max = _.max(flatValues);
         return new DomainBoundaries(min, max);
     }
 
-    getCSVLines(ids: Array<string>) {
-        return _.filter(this.body, linedata => {
-            return _.includes(ids, linedata[0]);
-        });
-    }
-
-    getCSVLine(id: string) {
-        return _.find(this.body, expressionGene => {
-            return expressionGene[0] === id;
-        });
+    /*
+     * Get Indexes containing actual .chip-values
+     */
+    public getChipIndexes(headers: TSVHeaders, bodyRows: Array<Array<string>> ): Array<number> {
+        let chipIndexes = headers.getChipIndexes();
+        // if headers is missing a cell then add
+        return this.isHeadersMissingCell(headers, bodyRows) ? _.map(chipIndexes, cellIndex => cellIndex + 1 ) : chipIndexes;
     }
 
     /*
-     * Parse strings in two-dimensional array to numbers
+     * Headers are missing a cell, if first (or any other) datarow is longer than headerrow
      */
-    parseValues(values: Array<string>): Array<number> {
-        let result = _.map(values, value => parseFloat(value));
-        return result;
+    private isHeadersMissingCell(headers, bodyRows): boolean {
+        return headers.size() !== _.first(bodyRows).length;
     }
 
 }

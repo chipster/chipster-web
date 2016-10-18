@@ -7,6 +7,7 @@ import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
 import TSVFile from "../../../../../model/file/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
+import GeneExpression from "./geneexpression";
 
 class ExpressionProfile {
 
@@ -14,7 +15,7 @@ class ExpressionProfile {
 
     private datasetId: string;
     private tsv: TSVFile;
-    private selections: Array<Array<string>>; // selected gene expressions
+    private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
     private selectedDatasets: any;
 
     constructor(
@@ -31,7 +32,7 @@ class ExpressionProfile {
             this.drawLineChart(tsv);
         });
 
-        this.selections = [];
+        this.selectedGeneExpressions = [];
     }
 
     drawLineChart(tsv: TSVFile) {
@@ -62,17 +63,14 @@ class ExpressionProfile {
             return metadata.key === 'description';
         });
 
-
         // Change default headers to values defined in phenodata if description value has been defined
-        let headers = _.map(tsv.getChipHeaders(), header => {
-
+        let headers = _.map(tsv.headers.getChipHeaders(), header => {
             // find if there is a phenodata description matching header and containing a value
             let phenodataHeader:any = _.find(phenodataDescriptions, (item:any) => {
                 return item.column === header && item.value !== null;
             });
             return phenodataHeader ? phenodataHeader.value : header;
         });
-
 
         // X-axis and scale
         // Calculate points (in pixels) for positioning x-axis points
@@ -106,33 +104,33 @@ class ExpressionProfile {
         let color = d3.scale.category20();
 
         let paths = pathsGroup.selectAll('.path')
-            .data(tsv.body)
+            .data(tsv.body.getGeneExpressions())
             .enter()
             .append('path')
             .attr('class', 'path')
-            .attr('id', (d: any,i: number) => 'path' + d[0])
-            .attr('d', (d: any) => lineGenerator( tsv.getItemsByIndexes(tsv.chipValueIndexes, d) ) )
+            .attr('id', (d: GeneExpression) => 'path' + d.id)
+            .attr('d', (d: GeneExpression) => lineGenerator( d.values ) )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {
-                let colorIndex = (_.floor( (i / tsv.body.length) * 20)).toString();
+                let colorIndex = (_.floor( (i / tsv.body.size() ) * 20)).toString();
                 return color(colorIndex)
             })
             .on('mouseover', (d: any) => {
-                that.setSelectionHoverStyle(d[0]);
+                that.setSelectionHoverStyle(d.id);
             })
             .on('mouseout', (d: any) => {
-                that.removeSelectionHoverStyle(d[0]);
+                that.removeSelectionHoverStyle(d.id);
             })
-            .on('click', (d:any) => {
-                let id = d[0];
+            .on('click', (d:GeneExpression) => {
+                let id = d.id;
                 let isCtrl = UtilsService.isCtrlKey(d3.event);
                 let isShift = UtilsService.isShiftKey(d3.event);
 
                 if(isShift) {
                     that.addSelections([id]);
                 } else if(isCtrl) {
-                    that.toggleSelections([id]);
+                    that.toggleSelections([id.toString()]);
                 } else {
                     that.resetSelections();
                     that.addSelections([id]);
@@ -203,14 +201,14 @@ class ExpressionProfile {
                 }
 
                 let ids: Array<number> = []; // path ids found in each interval (not unique list)
-                _.forEach(intervals, (interval:Interval) => {
+                for (let interval: Interval of intervals ) {
                     let intersectingLines = _.filter(interval.lines, line => {
                         return that.expressionProfileService.isIntersecting(line, interval.rectangle);
                     });
 
                     // Line ids intersecting with selection as an array
-                    ids = ids.concat(_.map(intersectingLines, line => line._csvIndex));
-                });
+                    ids = ids.concat(_.map(intersectingLines, line => line._lineId));
+                };
 
                 this.resetSelections();
                 this.addSelections(_.uniq(ids));
@@ -239,28 +237,29 @@ class ExpressionProfile {
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
 
-    getSelectionIds() {
-        return _.flatten(_.map(this.selections, geneExpression => _.first(geneExpression) ));
+    getSelectionIds(): Array<string> {
+        return this.selectedGeneExpressions.map( (expression: GeneExpression) => expression.id );
     }
 
-    resetSelections() {
+    resetSelections(): void {
         this.removeSelections(this.getSelectionIds());
-        this.selections.length = 0;
+        this.selectedGeneExpressions.length = 0;
     }
 
-    removeSelections(ids: Array<string>) {
-        _.forEach(ids, id => {
+    removeSelections(ids: Array<string>): void {
+        for( let id of ids ) {
             this.removeSelectionStyle(id);
-        });
+        }
 
         let selectionIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
-        this.selections = _.map(selectionIds, id => this.tsv.getCSVLine(id));
+        this.selectedGeneExpressions = _.map(selectionIds, id => this.tsv.body.getGeneExpression(id));
     }
 
-    addSelections(ids: Array<number>) {
+    addSelections(ids: Array<string>) {
         let selectionIds = this.getSelectionIds();
         let missingSelectionIds = _.difference(ids, selectionIds);
-        this.selections = this.selections.concat(_.map(missingSelectionIds, id => this.tsv.getCSVLine(id)));
+        
+        this.selectedGeneExpressions = this.selectedGeneExpressions.concat(_.map(missingSelectionIds, id => this.tsv.body.getGeneExpression(id)));
         _.forEach(missingSelectionIds, id => {
             this.setSelectionStyle(id);
         });

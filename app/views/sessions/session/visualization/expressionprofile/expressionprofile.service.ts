@@ -3,6 +3,7 @@ import TSVFile from "../../../../../model/file/TSVFile";
 import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";
+import TSVRow from "../../../../../model/file/TSVRow";
 
 export default class ExpressionProfileService {
 
@@ -14,8 +15,8 @@ export default class ExpressionProfileService {
             startIndex = 0;
         }
 
-        if(endIndex >= tsv.getChipHeaders().length - 1) {
-            endIndex = tsv.getChipHeaders().length - 1;
+        if(endIndex >= tsv.headers.getChipHeaders().length - 1) {
+            endIndex = tsv.headers.getChipHeaders().length - 1;
         }
 
         return {
@@ -32,30 +33,27 @@ export default class ExpressionProfileService {
         return first >= second ? _.ceil(first) : _.ceil(second);
     }
 
-    createLines(tsv: TSVFile, chipValueIndex: number, linearXScale: any, yScale: any): Array<Line> {
-        return _.map(tsv.body, row => {
+    createLines(tsv: TSVFile, chipIndex: number, linearXScale: any, yScale: any): Array<Line> {
+        return _.map(tsv.body.rows, ( (tsvRow: TSVRow) => {
 
             // get indexes for finding raw data value for lines start and end points
-            let chipLineStartDataIndex = tsv.chipValueIndexes[chipValueIndex];
-            let chipLineEndDataIndex = tsv.chipValueIndexes[chipValueIndex + 1];
+            let chipLineStartDataIndex = tsv.body.chipIndexes[chipIndex];
+            let chipLineEndDataIndex = tsv.body.chipIndexes[chipIndex + 1];
 
             // get raw data for lines start and end points
-            let lineStartValue = row[chipLineStartDataIndex];
-            let lineEndValue = row[chipLineEndDataIndex];
+            let lineStartValue = tsvRow.row[chipLineStartDataIndex];
+            let lineEndValue = tsvRow.row[chipLineEndDataIndex];
 
-            return this.createLine(row[0], chipValueIndex, lineStartValue, lineEndValue, linearXScale, yScale);
-        } );
+            return this.createLine(tsvRow.id, chipIndex, lineStartValue, lineEndValue, linearXScale, yScale);
+        } ));
     }
 
-    createLine(lineDataIndex: number, chipValueIndex: number, lineStartValue: string, lineEndValue: string, linearXScale: any, yScale: any ): Line {
+    createLine(lineId: string, chipValueIndex: number, lineStartValue: string, lineEndValue: string, linearXScale: any, yScale: any ): Line {
 
         // get pixel values for lines start and end positions
-        let x1 = linearXScale(chipValueIndex);
-        let y1 = yScale(lineStartValue);
-        let x2 = linearXScale(chipValueIndex + 1);
-        let y2 = yScale(lineEndValue);
-
-        return new Line(lineDataIndex, x1, y1, x2, y2);
+        let [x1, y1] = [linearXScale(chipValueIndex), yScale(lineStartValue)];
+        let [x2, y2] = [linearXScale(chipValueIndex + 1), yScale(lineEndValue)];
+        return new Line(lineId, x1, y1, x2, y2);
     }
 
     // Check if line intersecting with rectangle
