@@ -20,7 +20,3 @@ Chipster Web client for data processing and visualization.
 
 - Start web server
     - npm run start
-
-
-
-
