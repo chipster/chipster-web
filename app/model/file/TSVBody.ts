@@ -9,10 +9,11 @@ export default class TSVBody {
 
     constructor(tsvBody: Array<Array<string>>, chipIndexes: Array<number>) {
         this.chipIndexes = chipIndexes;
-        this.rows = this.createRows(tsvBody);
+        let orderedTSVRows = this.orderBodyByFirstValue(chipIndexes, tsvBody);
+        this.rows = this.createRows(orderedTSVRows);
     }
 
-    private createRows( tsvBody: Array<Array<string>>): Array<TSVRow> {
+    private createRows(tsvBody: Array<Array<string>>): Array<TSVRow> {
         return _.map(tsvBody, (row: Array<string>, index: number) => {
             return new TSVRow(row, index.toString());
         });
@@ -54,22 +55,22 @@ export default class TSVBody {
      * Get rows with ids
      */
     public getTSVRows(ids: Array<string>): Array<TSVRow> {
-        return _.filter(this.rows, (row: TSVRow) => _.includes(ids, row.id.toString()) );
+        return _.filter(this.rows, (row: TSVRow) => _.includes(ids, row.id.toString()));
     }
 
     /*
      * Order csvBodyRows by values in the given index of each row
      */
     private orderByValueInIndex(rows: Array<TSVRow>, index: number): Array<Array<string>> {
-        return _.orderBy(rows, [ valueArray => parseFloat( valueArray[index] ) ]);
+        return _.orderBy(rows, [valueArray => parseFloat(valueArray[index])]);
     }
 
     /*
      * Order body by first chip-value in each row
      */
-    private orderBodyByFirstValue(chipValueIndexes: Array<number>): Array <Array <string>> {
+    private orderBodyByFirstValue(chipValueIndexes: Array<number>, rows: Array<Array<string>>): Array<Array<string>> {
         let firstChipValueIndex = _.head(chipValueIndexes);
-        return this.orderByValueInIndex(this.rows, firstChipValueIndex);
+        return this.orderByValueInIndex(rows, firstChipValueIndex);
     }
 
 }
