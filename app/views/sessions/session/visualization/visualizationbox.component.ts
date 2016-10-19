@@ -40,7 +40,8 @@ class VisualizationBoxComponent {
 
     isCompatibleVisualization(name: string): boolean {
         let visualization = _.find(this.visualizations, visualization => visualization.id === name);
-        return this.containsExtension(visualization.extensions) && (visualization.multipleDatasets === this.SelectionService.selectedDatasets.length > 1);
+        let datasetSelectionCount = this.SelectionService.selectedDatasets.length;
+        return this.containsExtension(visualization.extensions) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount) )
     }
 
     containsExtension(extensions: Array<string>) {

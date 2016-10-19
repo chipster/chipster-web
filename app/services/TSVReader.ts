@@ -1,6 +1,6 @@
 import FileResource from "../resources/fileresource";
-import TSVFile from "../model/file/TSVFile";
 import {Injectable, Inject} from "@angular/core";
+import {Observable} from "rxjs/Rx";
 
 @Injectable()
 export class TSVReader {
@@ -8,25 +8,8 @@ export class TSVReader {
    constructor(@Inject('FileResource') private FileResource: FileResource) {
     }
 
-    getTSV(sessionId: string, datasetId: string) {
-        return this.FileResource.getData(sessionId, datasetId).then( (resp: any) => {
-
-            // we have to create the promise, because JQuery-cvs doesn't use them
-            return new Promise( (resolve: any, reject: any) => {
-
-                // parse the file data using the JQuery-cvs library
-                let parserConfig = {
-                    separator: '\t'
-                };
-
-                $['csv'].toArrays(resp.data, parserConfig, (err: any, fileArray: string[][]) => {
-                    if (fileArray) {
-                        resolve(new TSVFile(fileArray));
-                    } else {
-                        reject(err);
-                    }
-                });
-            });
-        });
+    getTSV(sessionId: string, datasetId: string): Observable<any> {
+        return Observable.fromPromise(this.FileResource.getData(sessionId, datasetId));
     }
+
 }

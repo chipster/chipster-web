@@ -27,9 +27,10 @@ class ExpressionProfile {
     }
 
     $onInit() {
-        this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).then( (tsv: TSVFile) => {
-            this.tsv = tsv;
-            this.drawLineChart(tsv);
+        this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
+            let parsedTSV = d3.tsv.parseRows(result.data);
+            this.tsv = new TSVFile(parsedTSV);
+            this.drawLineChart(this.tsv);
         });
 
         this.selectedGeneExpressions = [];
@@ -137,6 +138,7 @@ class ExpressionProfile {
                 }
             });
 
+        // path animation
         paths.each(function(d) { d.totalLength = this.getTotalLength(); })
             .attr("stroke-dasharray", function(d) { return d.totalLength + " " + d.totalLength; })
             .attr("stroke-dashoffset", function(d) { return d.totalLength; })
@@ -303,7 +305,6 @@ class ExpressionProfile {
 export default {
     bindings: {
         datasetId: '<',
-        src: '<',
         selectedDatasets: '<'
     },
     controller: ExpressionProfile,

@@ -53,6 +53,7 @@ import ExpressionProfile from "./views/sessions/session/visualization/expression
 import ExpressionProfileService from "./views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
 import {TSVReader} from "./services/TSVReader";
+import {VennDiagram} from "./views/sessions/session/visualization/venndiagram/venndiagram";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
@@ -60,6 +61,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
     .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
+    .directive('vennDiagram', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VennDiagram))
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
@@ -152,10 +154,12 @@ angular.module('chipster-web').config(
 upgradeAdapter.upgradeNg1Provider('localStorageService');
 upgradeAdapter.upgradeNg1Provider('$http');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
+upgradeAdapter.upgradeNg1Provider('$routeParams');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');
 upgradeAdapter.upgradeNg1Provider('ConfigurationResource');
 upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');
 upgradeAdapter.upgradeNg1Provider('TSVReader');
 upgradeAdapter.upgradeNg1Provider('FileResource');
+
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

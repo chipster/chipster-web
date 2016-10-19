@@ -9,10 +9,12 @@ import SelectionService from "./views/sessions/session/selection.service";
 import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
+import {VennDiagram} from "./views/sessions/session/visualization/venndiagram/venndiagram";
+
 
 @NgModule({
     imports: [ BrowserModule, HttpModule, FormsModule, AuthenticationModule ],
-    declarations: [ NavigationComponent, LoginComponent ],
+    declarations: [ NavigationComponent, LoginComponent, VennDiagram ],
     providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
 })
 export class AppModule {}

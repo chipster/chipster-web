@@ -29,7 +29,6 @@
             <uib-tab-heading>Expression profile</uib-tab-heading>
             <expression-profile
                     ng-if="$ctrl.active === 'expressionprofile'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
                     dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
                     selected-datasets="$ctrl.SelectionService.selectedDatasets">
             </expression-profile>
@@ -79,6 +78,15 @@
                     dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
                     selected-datasets="$ctrl.SelectionService.selectedDatasets">
             </html-visualization>
+        </uib-tab>
+
+        <uib-tab index="'venn'"
+                ng-if="$ctrl.isCompatibleVisualization('venn')">
+            <uib-tab-heading>Venn Diagram</uib-tab-heading>
+            <venn-diagram
+                    ng-if="$ctrl.active === 'venn'"
+                    [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
+            </venn-diagram>
         </uib-tab>
 
     </uib-tabset>
