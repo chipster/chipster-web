@@ -5,6 +5,7 @@ import Dataset from "../../../../../model/session/dataset";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import {Observable} from "rxjs/Rx";
+import TSVFile from "../../../../../model/file/TSVFile";
 
 @Component({
     selector: 'vennDiagram',
@@ -13,7 +14,8 @@ import {Observable} from "rxjs/Rx";
 export class VennDiagram {
 
     @Input() selectedDatasets: Array<any>;
-    tsvInputs: Array<TSVFile> = [];
+
+    files: Array<TSVFile> = [];
 
     constructor(private tsvReader: TSVReader, @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService) {
     }
@@ -26,14 +28,21 @@ export class VennDiagram {
             .value();
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
-            this.tsvInputs = _.chain(resultTSVs)
+            this.files = _.chain(resultTSVs)
                 .map( (tsv: any) => d3.tsv.parseRows(tsv.data))
                 .map( (tsv: Array<Array<string>>) => new TSVFile(tsv))
                 .value();
 
+                this.drawVennDiagram(this.files);
         });
 
 
     }
+
+    drawVennDiagram(files: Array<TSVFile>) {
+
+    }
+
+    
 
 }

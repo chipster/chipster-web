@@ -4,7 +4,7 @@ import TSVHeaders from "./TSVHeaders";
 import TSVBody from "./TSVBody";
 import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
 
-export default class TSV {
+export default class TSVFile {
 
     public headers: TSVHeaders;
     public body: TSVBody;
@@ -21,7 +21,7 @@ export default class TSV {
     }
 
     /*
-     * return TSV-data in its initial form without indexes
+     * return TSVFile-data in its initial form without indexes
      */
     public getCSVData(ids: Array<string>) {
         let body = this.body.getTSVRows(ids);

@@ -251,7 +251,7 @@ export default class ToolsModalController {
 
         var promises: any[] = [];
         for (let dataset of this.selectedDatasets) {
-            if (this.toolService.isCompatible(dataset, 'TSV')) {
+            if (this.toolService.isCompatible(dataset, 'TSVFile')) {
                 promises.push(this.csvReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId));
             }
         }
