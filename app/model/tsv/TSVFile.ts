@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import TSVHeaders from "./TSVHeaders";
 import TSVBody from "./TSVBody";
-import GeneExpression from "views/sessions/session/visualization/expressionprofile/geneexpression";
+import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
 import DomainBoundaries from "../domainboundaries";
 
 export default class TSVFile {

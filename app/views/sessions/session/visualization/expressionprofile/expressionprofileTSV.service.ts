@@ -1,10 +1,10 @@
 
 import {Injectable} from "@angular/core";
 import GeneExpression from "./geneexpression";
-import TSVRow from "./tsv/TSVRow";
+import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "./domainboundaries";
-import TSVHeaders from "./tsv/TSVHeaders";
-import TSVFile from "./tsv/TSVFile";
+import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
+import TSVFile from "../../../../../model/tsv/TSVFile";
 
 @Injectable()
 export default class ExpressionProfileTSVService {

@@ -5,7 +5,7 @@ import Interval from "./interval";
 import * as d3 from 'd3';
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
-import TSVFile from "./tsv/TSVFile";
+import TSVFile from "../../../../../model/tsv/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
 import ExpressionProfileTSVService from "./expressionprofileTSV.service";

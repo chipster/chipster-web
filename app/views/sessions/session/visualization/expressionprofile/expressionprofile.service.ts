@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
-import TSVFile from "./tsv/TSVFile";
+import TSVFile from "../../../../../model/tsv/TSVFile";
 import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";
-import TSVRow from "./tsv/TSVRow";
+import TSVRow from "../../../../../model/tsv/TSVRow";
 import ExpressionProfileTSVService from "./expressionprofileTSV.service";
 import {Injectable} from "@angular/core";
 
