@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
+import GeneExpression from "../geneexpression";
 
 export default class TSVRow {
 

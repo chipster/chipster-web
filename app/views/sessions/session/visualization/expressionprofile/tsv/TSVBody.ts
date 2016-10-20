@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import TSVRow from "./TSVRow";
-import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
+import GeneExpression from "../geneexpression";
+import DomainBoundaries from "../domainboundaries";
 
 export default class TSVBody {
 
@@ -47,7 +48,10 @@ export default class TSVBody {
         return _.map(row, value => parseFloat(value));
     }
 
-    public getGeneExpression(id: string) {
+    /*
+     * create new GeneExpression from data with given id
+     */
+    public getGeneExpression(id: string): GeneExpression {
         return new GeneExpression(id, _.find(this.rows, (row: TSVRow) => row.id === id));
     }
 
@@ -59,9 +63,20 @@ export default class TSVBody {
     }
 
     /*
+     * max & min value from two-dimensional array
+     */
+    public getDomainBoundaries(): DomainBoundaries {
+        let values = this.getGeneExpressions().map( (expression: GeneExpression) => expression.values );
+        let flatValues = _.flatten(values);
+        let min = _.min(flatValues);
+        let max = _.max(flatValues);
+        return new DomainBoundaries(min, max);
+    }
+
+    /*
      * Order csvBodyRows by values in the given index of each row
      */
-    private orderByValueInIndex(rows: Array<TSVRow>, index: number): Array<Array<string>> {
+    private orderByValueInIndex(rows: Array<Array<string>>, index: number): Array<Array<string>> {
         return _.orderBy(rows, [valueArray => parseFloat(valueArray[index])]);
     }
 

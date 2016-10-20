@@ -1,11 +1,11 @@
 import {Component, Input, Inject} from '@angular/core';
 import {TSVReader} from "../../../../../services/TSVReader";
-import TSVFile from "../../../../../model/file/TSVFile";
+import TSVFile from "../expressionprofile/tsv/TSVFile";
 import Dataset from "../../../../../model/session/dataset";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import {Observable} from "rxjs/Rx";
-import TSVFile from "../../../../../model/file/TSVFile";
+import TSVFile from "../expressionprofile/tsv/TSVFile";
 
 @Component({
     selector: 'vennDiagram',

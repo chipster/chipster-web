@@ -5,7 +5,7 @@ import Interval from "./interval";
 import * as d3 from 'd3';
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
-import TSVFile from "../../../../../model/file/TSVFile";
+import TSVFile from "./tsv/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
 
@@ -90,7 +90,7 @@ class ExpressionProfile {
         let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
 
         // Y-axis and scale
-        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([tsv.domainBoundaries.min, tsv.domainBoundaries.max]);
+        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([tsv.body.getDomainBoundaries().min, tsv.body.getDomainBoundaries().max]);
         let yAxis = d3.svg.axis().scale(yScale).orient('left').ticks(5);
         svg.append('g')
             .attr('class', 'y axis')

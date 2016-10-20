@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
-import TSVFile from "../../../../../model/file/TSVFile";
+import TSVFile from "./tsv/TSVFile";
 import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";
-import TSVRow from "../../../../../model/file/TSVRow";
+import TSVRow from "./tsv/TSVRow";
 
 export default class ExpressionProfileService {
 
