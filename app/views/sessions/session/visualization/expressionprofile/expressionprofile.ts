@@ -8,10 +8,11 @@ import UtilsService from "../../../../../services/utils.service";
 import TSVFile from "./tsv/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
+import ExpressionProfileTSVService from "./expressionprofileTSV.service";
 
 class ExpressionProfile {
 
-    static $inject = ['TSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService'];
+    static $inject = ['TSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService', 'ExpressionProfileTSVService'];
 
     private datasetId: string;
     private tsv: TSVFile;
@@ -23,7 +24,8 @@ class ExpressionProfile {
                 private $routeParams: ng.route.IRouteParamsService,
                 private $window: ng.IWindowService,
                 private expressionProfileService: ExpressionProfileService,
-                private sessionDataService: SessionDataService) {
+                private sessionDataService: SessionDataService,
+                private expressionProfileTSVService: ExpressionProfileTSVService) {
     }
 
     $onInit() {
@@ -65,7 +67,7 @@ class ExpressionProfile {
         });
 
         // Change default headers to values defined in phenodata if description value has been defined
-        let headers = _.map(tsv.headers.getChipHeaders(), header => {
+        let headers = _.map(this.expressionProfileTSVService.getChipHeaders(tsv), header => {
             // find if there is a phenodata description matching header and containing a value
             let phenodataHeader:any = _.find(phenodataDescriptions, (item:any) => {
                 return item.column === header && item.value !== null;
@@ -88,9 +90,11 @@ class ExpressionProfile {
 
         // Linear x-axis to determine selection-rectangle position scaled to tsv-data
         let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
-
+        
         // Y-axis and scale
-        let yScale = d3.scale.linear().range([graphArea.height, 0]).domain([tsv.body.getDomainBoundaries().min, tsv.body.getDomainBoundaries().max]);
+        let yScale = d3.scale.linear()
+                    .range([graphArea.height, 0])
+                    .domain([this.expressionProfileTSVService.getDomainBoundaries(tsv).min, this.expressionProfileTSVService.getDomainBoundaries(tsv).max]);
         let yAxis = d3.svg.axis().scale(yScale).orient('left').ticks(5);
         svg.append('g')
             .attr('class', 'y axis')
@@ -104,8 +108,11 @@ class ExpressionProfile {
             .y( (d:any) => yScale(d) );
         let color = d3.scale.category20();
 
+
+        let geneExpression = this.expressionProfileTSVService.getGeneExpressions(tsv);
+        let orderedExpressionGenes = this.expressionProfileTSVService.orderBodyByFirstValue(geneExpression);
         let paths = pathsGroup.selectAll('.path')
-            .data(tsv.body.getGeneExpressions())
+            .data(orderedExpressionGenes)
             .enter()
             .append('path')
             .attr('class', 'path')
@@ -242,7 +249,7 @@ class ExpressionProfile {
 
     createNewDataset() {
         let selectedGeneExpressionIds = this.getSelectionIds();
-        let csvData = this.tsv.getCSVData(selectedGeneExpressionIds);
+        let csvData = this.tsv.getRawData(selectedGeneExpressionIds);
         let data = d3.tsv.formatRows(csvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
@@ -261,15 +268,15 @@ class ExpressionProfile {
             this.removeSelectionStyle(id);
         }
 
-        let selectionIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
-        this.selectedGeneExpressions = _.map(selectionIds, id => this.tsv.body.getGeneExpression(id));
+        let selectedGeneIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
+        this.selectedGeneExpressions = _.map(selectedGeneIds, id => this.expressionProfileTSVService.getGeneExpression(this.tsv, id));
     }
 
     addSelections(ids: Array<string>) {
         let selectionIds = this.getSelectionIds();
         let missingSelectionIds = _.difference(ids, selectionIds);
-        
-        this.selectedGeneExpressions = this.selectedGeneExpressions.concat(_.map(missingSelectionIds, id => this.tsv.body.getGeneExpression(id)));
+        let missingGeneExpressions = _.map(missingSelectionIds, id => this.expressionProfileTSVService.getGeneExpression(this.tsv, id));
+        this.selectedGeneExpressions = this.selectedGeneExpressions.concat( missingGeneExpressions );
         _.forEach(missingSelectionIds, id => {
             this.setSelectionStyle(id);
         });

@@ -6,25 +6,15 @@ import DomainBoundaries from "../domainboundaries";
 export default class TSVBody {
 
     rows: Array<TSVRow>;
-    chipIndexes: Array<number>;
 
-    constructor(tsvBody: Array<Array<string>>, chipIndexes: Array<number>) {
-        this.chipIndexes = chipIndexes;
-        let orderedTSVRows = this.orderBodyByFirstValue(chipIndexes, tsvBody);
-        this.rows = this.createRows(orderedTSVRows);
+    constructor(tsvBody: Array<Array<string>>) {
+        this.rows = this.createRows(tsvBody);
     }
 
     private createRows(tsvBody: Array<Array<string>>): Array<TSVRow> {
         return _.map(tsvBody, (row: Array<string>, index: number) => {
             return new TSVRow(row, index.toString());
         });
-    }
-
-    /*
-     * Length of each row in body
-     */
-    public rowSize(): number {
-        return _.first(this.rows).size();
     }
 
     /*
@@ -35,27 +25,6 @@ export default class TSVBody {
     }
 
     /*
-     * Get chipvalues from raw data
-     */
-    public getGeneExpressions(): Array<GeneExpression> {
-        return _.map(this.rows, (row: TSVRow) => row.getGeneExpressionsByIndex(this.chipIndexes));
-    }
-
-    /*
-     * Parse array of string to array of numbers
-     */
-    public parseRow(row: Array<string>): Array<number> {
-        return _.map(row, value => parseFloat(value));
-    }
-
-    /*
-     * create new GeneExpression from data with given id
-     */
-    public getGeneExpression(id: string): GeneExpression {
-        return new GeneExpression(id, _.find(this.rows, (row: TSVRow) => row.id === id));
-    }
-
-    /*
      * Get rows with ids
      */
     public getTSVRows(ids: Array<string>): Array<TSVRow> {
@@ -63,29 +32,20 @@ export default class TSVBody {
     }
 
     /*
-     * max & min value from two-dimensional array
+     * Get single tsvRow with ids
      */
-    public getDomainBoundaries(): DomainBoundaries {
-        let values = this.getGeneExpressions().map( (expression: GeneExpression) => expression.values );
-        let flatValues = _.flatten(values);
-        let min = _.min(flatValues);
-        let max = _.max(flatValues);
-        return new DomainBoundaries(min, max);
+    public getTSVRow(id: string): TSVRow {
+        return _.find(this.rows, (row: TSVRow) => row.id === id);
     }
 
     /*
-     * Order csvBodyRows by values in the given index of each row
+     * Get original TSVBodyrows with ids
      */
-    private orderByValueInIndex(rows: Array<Array<string>>, index: number): Array<Array<string>> {
-        return _.orderBy(rows, [valueArray => parseFloat(valueArray[index])]);
+    public getRawDataByRowIds(ids: Array<string>): Array<Array<string>> {
+        let tsvRows = this.getTSVRows(ids);
+        return _.map(tsvRows, (tsvRow: TSVRow) => tsvRow.getRawData());
     }
 
-    /*
-     * Order body by first chip-value in each row
-     */
-    private orderBodyByFirstValue(chipValueIndexes: Array<number>, rows: Array<Array<string>>): Array<Array<string>> {
-        let firstChipValueIndex = _.head(chipValueIndexes);
-        return this.orderByValueInIndex(rows, firstChipValueIndex);
-    }
+
 
 }

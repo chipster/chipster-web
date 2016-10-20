@@ -54,6 +54,7 @@ import ExpressionProfileService from "./views/sessions/session/visualization/exp
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
 import {TSVReader} from "./services/TSVReader";
 import {VennDiagram} from "./views/sessions/session/visualization/venndiagram/venndiagram";
+import ExpressionProfileTSVService from "./views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
@@ -88,7 +89,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('CSVReader', CSVReader)
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
     .service('ToolService', ToolService)
-    .service('ExpressionProfileService', ExpressionProfileService)
+    .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
+    .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
     .filter('isoDate', isoDateFilter)

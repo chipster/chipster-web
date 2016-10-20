@@ -4,8 +4,13 @@ import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "./point";
 import TSVRow from "./tsv/TSVRow";
+import ExpressionProfileTSVService from "./expressionprofileTSV.service";
+import {Injectable} from "@angular/core";
 
+@Injectable()
 export default class ExpressionProfileService {
+
+    constructor(private expressionprofileTSVService: ExpressionProfileTSVService){}
 
     // X-axis indexes for intervals the selection rectangle is crossing
     getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, tsv: TSVFile) {
@@ -15,8 +20,8 @@ export default class ExpressionProfileService {
             startIndex = 0;
         }
 
-        if(endIndex >= tsv.headers.getChipHeaders().length - 1) {
-            endIndex = tsv.headers.getChipHeaders().length - 1;
+        if(endIndex >= this.expressionprofileTSVService.getChipHeaders(tsv).length - 1) {
+            endIndex = this.expressionprofileTSVService.getChipHeaders(tsv).length - 1;
         }
 
         return {
@@ -37,8 +42,9 @@ export default class ExpressionProfileService {
         return _.map(tsv.body.rows, ( (tsvRow: TSVRow) => {
 
             // get indexes for finding raw data value for lines start and end points
-            let chipLineStartDataIndex = tsv.body.chipIndexes[chipIndex];
-            let chipLineEndDataIndex = tsv.body.chipIndexes[chipIndex + 1];
+            let chipIndexes = this.expressionprofileTSVService.getChipValueIndexes(tsv);
+            let chipLineStartDataIndex = chipIndexes[chipIndex];
+            let chipLineEndDataIndex = chipIndexes[chipIndex + 1];
 
             // get raw data for lines start and end points
             let lineStartValue = tsvRow.row[chipLineStartDataIndex];

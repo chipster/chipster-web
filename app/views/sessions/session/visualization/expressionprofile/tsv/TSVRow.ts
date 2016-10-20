@@ -16,16 +16,17 @@ export default class TSVRow {
     }
 
     /*
-     * Return GeneExpression based on id for the TSVRow and the values in indexes of row
+     * Return new array from row containing items in indexes of parameter
      */
-    getGeneExpressionsByIndex(indexes: Array<number>): GeneExpression {
-        let values = _.map( indexes, index => this.parseToNumber(this.row[index]) );
-        return new GeneExpression(this.id, values);
+    getCellsByIndexes(indexes: Array<number>): Array<string> {
+        return _.map(indexes, (index: number) => this.row[index]);
     }
 
-    parseToNumber(value: string): number {
-        return parseFloat(value);
+    /*
+     * Get original TSVRow data
+     */
+    getRawData(): Array<string> {
+        return _.drop(this.row, 1);
     }
-
 
 }
