@@ -23,4 +23,11 @@ export default class TSVHeaders {
         return _.map(indexes, index => this.headers[index]);
     }
 
+    /*
+     * Get index for the key
+     */
+    public getColumnIndexByKey(key: string): number {
+        return _.findIndex(this.headers, (header: string) => header === key);
+    }
+
 }

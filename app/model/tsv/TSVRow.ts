@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import GeneExpression from "../geneexpression";
 
 export default class TSVRow {
 

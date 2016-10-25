@@ -9,14 +9,12 @@ import SelectionService from "./views/sessions/session/selection.service";
 import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
-import {VennDiagram} from "./views/sessions/session/visualization/venndiagram/venndiagram";
-import ExpressionProfileTSVService from "./views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
-import ExpressionProfileService from "./views/sessions/session/visualization/expressionprofile/expressionprofile.service";
+import {VisualizationsModule} from "./views/sessions/session/visualization/visualizations.module";
 
 
 @NgModule({
-    imports: [ BrowserModule, HttpModule, FormsModule, AuthenticationModule ],
-    declarations: [ NavigationComponent, LoginComponent, VennDiagram ],
-    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader, ExpressionProfileTSVService, ExpressionProfileService ]
+    imports: [ BrowserModule, HttpModule, FormsModule, AuthenticationModule, VisualizationsModule ],
+    declarations: [ NavigationComponent, LoginComponent ],
+    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
 })
 export class AppModule {}

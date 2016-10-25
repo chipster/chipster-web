@@ -1,5 +1,5 @@
 import ExpressionProfileService from "./expressionprofile.service";
-import Point from "./point";
+import Point from "../model/point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
 import * as d3 from 'd3';
@@ -121,6 +121,8 @@ class ExpressionProfile {
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {
+                // There are 20 different colors in colorcategory. Setting same color for each consecutive 5% of lines.
+                // So for 100 lines 5 first lines gets first color in category, next 5 lines get second color and so on.
                 let colorIndex = (_.floor( (i / tsv.body.size() ) * 20)).toString();
                 return color(colorIndex)
             })

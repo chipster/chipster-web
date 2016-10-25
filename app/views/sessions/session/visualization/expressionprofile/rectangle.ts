@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import Point from "./point";
+import Point from "../model/point";
 
 export default class Rectangle {
 

@@ -1,7 +1,5 @@
 import * as _ from "lodash";
 import TSVRow from "./TSVRow";
-import GeneExpression from "../geneexpression";
-import DomainBoundaries from "../domainboundaries";
 
 export default class TSVBody {
 
