@@ -5,7 +5,6 @@ import * as d3 from "d3";
 import * as _ from "lodash";
 import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import TSVColumn from "../../../../../model/tsv/TSVColumn";
 import Point from "../model/point";
 import VennDiagramService from "./venndiagram.service";
 import VennDiagramUtils from "./venndiagramutils";
@@ -35,20 +34,20 @@ export class VennDiagram {
 
     ngOnInit() {
 
-        const tsvObservables = _.chain(this.selectedDatasets)
-            .map((dataset: Dataset) => dataset.datasetId )
-            .map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId))
-            .value();
+        const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
+        const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId));
 
-        Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
+        Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>, ...args) => {
+
             this.files = _.chain(resultTSVs)
                 .map( (tsv: any) => d3.tsv.parseRows(tsv.data))
-                .map( (tsv: Array<Array<string>>) => new TSVFile(tsv))
+                .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, datasetIds[index]))
                 .value();
 
-                this.drawVennDiagram(this.files);
-        });
+            this.drawVennDiagram(this.files);
 
+
+        });
 
     }
 
@@ -61,8 +60,8 @@ export class VennDiagram {
             height: size.height,
             center: new Point(size.width / 2, (size.height) / 2)
         };
-        let datas = _.map(files ,(file:TSVFile) => new TSVColumn(file, 'symbol').data );
-        this.vennCircles = this.venndiagramService.createCircles(datas, visualizationArea.center, circleRadius);
+
+        this.vennCircles = this.createVennCircles(files, visualizationArea.center, circleRadius);
 
         // color category
         const colors = d3.scale.category10();
@@ -128,8 +127,12 @@ export class VennDiagram {
 
     createNewDataset(): void {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
-        let data =
         this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", data);
+    }
+
+    createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
+        const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
+        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.getColumnDataByHeaderKey('symbol'), circleCenters[index], radius));
     }
 
 }

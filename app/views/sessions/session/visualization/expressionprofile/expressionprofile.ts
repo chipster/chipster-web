@@ -32,7 +32,7 @@ class ExpressionProfile {
     $onInit() {
         this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsv.parseRows(result.data);
-            this.tsv = new TSVFile(parsedTSV);
+            this.tsv = new TSVFile(parsedTSV, this.datasetId);
             this.drawLineChart(this.tsv);
         });
 
