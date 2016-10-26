@@ -9,6 +9,7 @@ import TSVFile from "../../../../../model/tsv/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
 import ExpressionProfileTSVService from "./expressionprofileTSV.service";
+import TSVRow from "../../../../../model/tsv/TSVRow";
 
 class ExpressionProfile {
 
@@ -136,7 +137,6 @@ class ExpressionProfile {
                 let id = d.id;
                 let isCtrl = UtilsService.isCtrlKey(d3.event);
                 let isShift = UtilsService.isShiftKey(d3.event);
-
                 if(isShift) {
                     that.addSelections([id]);
                 } else if(isCtrl) {
@@ -279,9 +279,7 @@ class ExpressionProfile {
         let missingSelectionIds = _.difference(ids, selectionIds);
         let missingGeneExpressions = _.map(missingSelectionIds, id => this.expressionProfileTSVService.getGeneExpression(this.tsv, id));
         this.selectedGeneExpressions = this.selectedGeneExpressions.concat( missingGeneExpressions );
-        _.forEach(missingSelectionIds, id => {
-            this.setSelectionStyle(id);
-        });
+        missingSelectionIds.forEach( id => { this.setSelectionStyle(id) });
     };
 
     toggleSelections(ids: Array<string>) {
@@ -308,6 +306,11 @@ class ExpressionProfile {
         d3.select('#path' + id).classed('pathover', false);
     }
 
+    getSelectionListData(): Array<Array<string>> {
+        let rowIds = this.selectedGeneExpressions.map( (geneExpression: GeneExpression) => geneExpression.id );
+        let rawTSVRows = this.tsv.body.getTSVRows(rowIds);
+        return rawTSVRows.map( (row: TSVRow) => row.row );
+    }
 
 }
 
