@@ -3,7 +3,6 @@ import {Injectable} from "@angular/core";
 import Point from "../model/point";
 import Circle from "./circle";
 import VennDiagramUtils from "./venndiagramutils";
-import reference = ts.HighlightSpanKind.reference;
 
 @Injectable()
 export default class ThreeCircleVennDiagramService {
@@ -19,6 +18,9 @@ export default class ThreeCircleVennDiagramService {
         return [point1, point2, point3];
     }
 
+    /*
+     *
+     */
     getSelectionDescriptor(circles: Array<Circle>, selectionCrossingCircles: Array<Circle>, radius: number, visualizationCenter: Point): string {
         if(selectionCrossingCircles.length === 1 ) {
             return this.oneCircleSelectionDescriptor(circles, selectionCrossingCircles[0], radius);
@@ -30,6 +32,9 @@ export default class ThreeCircleVennDiagramService {
 
     }
 
+    /*
+     * @description: return svg path descriptor for area that includes one circle minus the areas of two other circles
+     */
     oneCircleSelectionDescriptor(circles: Array<Circle>, selectionCircle: Circle, radius: number): string {
         let otherCircles = circles.filter( (circle: Circle) => !circle.equals(selectionCircle));
         let firstCandidate = otherCircles[0];
@@ -56,7 +61,7 @@ export default class ThreeCircleVennDiagramService {
     }
 
     /*
-     * @description: return svg path descriptor for area that includes two selected circles but not the third
+     * @description: return svg path descriptor for area that is the intersection of two circles minus the third circlearea
      */
     twoCircleSelectionDescriptor(circles: Array<Circle>, selectionCircles: Array<Circle>, radius: number, visualizationCenter: Point): string {
 
@@ -78,6 +83,9 @@ export default class ThreeCircleVennDiagramService {
                 A ${radius} ${radius} 0 0 1 ${firstDrawPoint.x} ${firstDrawPoint.y}`;
     }
 
+    /*
+     *
+     */
     threeCircleSelectionDescriptor(circles: Array<Circle>, radius: number, visualizationCenter: Point): string {
         let firstCircle = circles[0];
         let secondCircle = circles[1];
@@ -96,7 +104,7 @@ export default class ThreeCircleVennDiagramService {
 
     }
 
-    isRightSideCircle(referencePoint: Point, visualizationCenter: Point, circle1: Circle): Circle {
+    isRightSideCircle(referencePoint: Point, visualizationCenter: Point, circle1: Circle): boolean {
         let referenceVector = VennDiagramUtils.createVector2d(referencePoint, visualizationCenter);
         let circleCenterVector = VennDiagramUtils.createVector2d(referencePoint, circle1.center);
         return referenceVector.crossProduct(circleCenterVector) >= 0;

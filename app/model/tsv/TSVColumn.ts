@@ -12,12 +12,4 @@ export default class TSVColumn {
         this.data = _.map(tsv.body.rows, (tsvRow: TSVRow) => tsvRow.row[dataIndex]);
     }
 
-    getDataAsSet(): Set {
-        let result = new Set();
-        for(let item of this.data) {
-            result.add(item);
-        }
-        return result;
-    }
-
 }

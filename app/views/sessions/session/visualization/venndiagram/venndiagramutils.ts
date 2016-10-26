@@ -79,15 +79,6 @@ export default class VennDiagramUtils {
     }
 
     /*
-     * @description: Distance between two points
-     */
-    static distance(point1: Point, point2: Point): number {
-        const dx = point1.x - point2.x;
-        const dy = point1.y - point2.y;
-        return Math.sqrt( (dx * dx) + (dy*dy) );
-    }
-
-    /*
      * @description: Get rightmost point when comparing with vectors drawn from reference point
      */
     static getRightMostPoint(point1: Point, point2: Point, reference: Point): Point {

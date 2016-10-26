@@ -3,12 +3,12 @@ import Point from "../model/point";
 import VennDiagramUtils from "./venndiagramutils";
 export default class Circle {
 
-    data: Set<string>;
+    data: Array<string>;
     center: Point;
     radius: number;
 
-    constructor(data: Set<string>, center: Point, radius: number) {
-        this.data = data;
+    constructor(data: Array<string>, center: Point, radius: number) {
+        this.data = _.uniq(data);
         this.center = center;
         this.radius = radius;
     }

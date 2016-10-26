@@ -22,30 +22,21 @@ export default class TwoCircleVennDiagramService {
     /*
      * @description: select description generator
      */
-    getSelectionDescriptor(circles: Array<Circle>, selectionCircles: Array<Circle>, radius: number, visualizationCenter: Point) {
-        return selectionCircles.length === 1 ? this.oneSelectedCircleDescriptor(circles, selectionCircles[0], radius, visualizationCenter) : this.twoSelectedCirclesDescriptor(circles, radius);
+    getSelectionDescriptor(circles: Array<Circle>, selectionCircles: Array<Circle>, radius: number) {
+        return selectionCircles.length === 1 ? this.oneSelectedCircleDescriptor(circles, selectionCircles[0], radius) : this.twoSelectedCirclesDescriptor(circles, radius);
     }
 
     /*
      * @description: get path descriptor for when one circle is selected
      */
-    oneSelectedCircleDescriptor(circles: Array<Circle>, selectionCircle: Circle, radius: number, visualizationCenter: Point) {
+    oneSelectedCircleDescriptor(circles: Array<Circle>, selectionCircle: Circle, radius: number) {
         let intersections = VennDiagramUtils.getIntersections(circles[0], circles[1]);
+        let firstDrawPoint = VennDiagramUtils.getRightMostPoint(intersections.point1, intersections.point2, selectionCircle.center);
+        let secondDrawPoint = VennDiagramUtils.getLeftMostPoint(intersections.point1, intersections.point2, selectionCircle.center);
 
-        let upperPoint = intersections.getUpperPoint();
-        let lowerPoint = intersections.getLowerPoint();
-
-        let isLeftSideCircleSelected = selectionCircle.center.x < visualizationCenter.x;
-
-        let leftSideSelectionDescription = `M ${upperPoint.x},${upperPoint.y} 
-        A ${radius}, ${radius}, 0, 1, 0, ${lowerPoint.x},${lowerPoint.y} 
-        A ${radius}, ${radius}, 0, 0, 1, ${upperPoint.x},${upperPoint.y}`;
-
-        let rightSideSelectionDescription = `M ${upperPoint.x},${upperPoint.y} 
-        A ${radius}, ${radius}, 0, 1, 1, ${lowerPoint.x},${lowerPoint.y} 
-        A ${radius}, ${radius}, 0, 0, 0, ${upperPoint.x},${upperPoint.y}`;
-
-        return isLeftSideCircleSelected ? leftSideSelectionDescription : rightSideSelectionDescription;
+        return `M ${firstDrawPoint.x} ${firstDrawPoint.y} 
+        A ${radius} ${radius} 0 1 1 ${secondDrawPoint.x} ${secondDrawPoint.y} 
+        A ${radius} ${radius} 0 0 0 ${firstDrawPoint.x} ${firstDrawPoint.y}`;
     }
 
     /*

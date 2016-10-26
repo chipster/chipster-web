@@ -56,8 +56,8 @@ export class VennDiagram {
             height: size.height,
             center: new Point(size.width / 2, (size.height) / 2)
         };
-        let ellipseDatas = _.map(files ,(file:TSVFile) => new TSVColumn(file, 'symbol').getDataAsSet() );
-        this.circles = this.venndiagramService.createCircles(ellipseDatas, visualizationArea.center, circleRadius);
+        let datas = _.map(files ,(file:TSVFile) => new TSVColumn(file, 'symbol').data );
+        this.circles = this.venndiagramService.createCircles(datas, visualizationArea.center, circleRadius);
 
         // color category
         const colors = d3.scale.category10();
@@ -100,7 +100,12 @@ export class VennDiagram {
                 selectionGroup.append("path")
                     .attr('class', 'vennselection')
                     .attr("d", selectionDescriptor)
-                    .attr('fill', 'black');
+                    .attr('fill', 'grey')
+                    .attr('opacity', 0.7)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 1);
+
+                let dataIntersection = this.venndiagramService.getDataIntersection(selectionCircles);
             }
         });
 
