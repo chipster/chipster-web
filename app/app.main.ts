@@ -166,5 +166,6 @@ upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');
 upgradeAdapter.upgradeNg1Provider('TSVReader');
 upgradeAdapter.upgradeNg1Provider('FileResource');
+upgradeAdapter.upgradeNg1Provider('SessionDataService');
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

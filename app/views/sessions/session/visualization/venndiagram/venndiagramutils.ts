@@ -1,8 +1,9 @@
 
-import Circle from "./circle";
+import Circle from "../model/circle";
 import PointPair from "./pointpair";
 import Point from "../model/point";
 import Vector2d from "../model/vector2d";
+import VennCircle from "./venncircle";
 export default class VennDiagramUtils {
 
     /*
@@ -74,8 +75,8 @@ export default class VennDiagramUtils {
     /*
      * @description: Get Circles containing point
      */
-    static getCirclesByPosition(circles: Array<Circle>, point: Point): Array<Circle> {
-        return circles.filter( (circle: Circle) => this.distance(circle.center, point) <= circle.radius);
+    static getCirclesByPosition(circles: Array<VennCircle>, point: Point): Array<VennCircle> {
+        return circles.filter( (vennCircle: VennCircle) => this.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius);
     }
 
     /*

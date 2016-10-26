@@ -2,9 +2,10 @@
 import {Injectable} from "@angular/core";
 import TSVColumn from "../../../../../model/tsv/TSVColumn";
 import Point from "../model/point";
-import Circle from "./circle";
+import Circle from "../model/circle";
 import TwoCircleVennDiagramService from "./twocirclevenndiagram.service";
 import ThreeCircleVennDiagramService from "./threecirclevenndiagram.service";
+import VennCircle from "./venncircle";
 
 @Injectable()
 export default class VennDiagramService {
@@ -24,9 +25,9 @@ export default class VennDiagramService {
     /*
      * @description: Create venn-diagram circles with given data, visualization area centerpoint and circle radius
      */
-    createCircles(circleDatas: Array<Set<string>>, visualizationAreaCenter: Point, radius: number): Array<Circle> {
+    createCircles(circleDatas: Array<Set<string>>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
         let ellipseCenterPoints = circleDatas.length === 2 ? this.twoCircleVenndiagramService.getCenterPoints(visualizationAreaCenter, radius) : this.threeCircleVenndiagramService.getCenterPoints(visualizationAreaCenter, radius);
-        return _.map(circleDatas, (circleData: Array<string>, index: number) => new Circle(circleData, ellipseCenterPoints[index], radius));
+        return _.map(circleDatas, (circleData: Array<string>, index: number) => new VennCircle(circleData, ellipseCenterPoints[index], radius));
     }
 
     getSelectionDescriptor(circles: Array<Circle>, selectionCircles: Array<Circle>, radius: number, visualizationCenter: Point): string {
@@ -36,8 +37,8 @@ export default class VennDiagramService {
     /*
      * @description: get intersection data of given circles
      */
-    getDataIntersection(circles: Array<Circle>): Array<string> {
-        let values = _.map(circles, circle => circle.data);
+    getDataIntersection(circles: Array<VennCircle>): Array<string> {
+        let values = _.map(circles, (vennCircle: VennCircle) => vennCircle.data);
         return _.intersection(...values);
     }
 

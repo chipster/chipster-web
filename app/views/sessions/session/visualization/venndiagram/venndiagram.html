@@ -1,5 +1,4 @@
 <section id="venndiagram">
-    <h3>Venni</h3>
 
     <div class="row">
 
@@ -7,10 +6,12 @@
             <div id="visualization"></div>
         </div>
 
-        <div class="col-md-4">
-
-
-
+        <div class="col-md-4" *ngIf="selection.length > 0">
+            <button class="btn btn-default" (click)="createNewdataset()">Create new dataset</button>
+            <h5>Selections: {{selection.length}}</h5>
+            <ol>
+                <li *ngFor="let item of selection">{{item}}</li>
+            </ol>
         </div>
 
     </div>
