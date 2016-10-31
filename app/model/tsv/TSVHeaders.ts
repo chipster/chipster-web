@@ -5,7 +5,7 @@ export default class TSVHeaders {
     public headers: Array<string>;
 
     constructor(headers: Array<string>) {
-        this.headers = ['index', ...headers];  // headers containing 'index' by default. Index is used to indentificate TSVBody's data later
+        this.headers = headers;
     }
 
     public size(): number {

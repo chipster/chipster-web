@@ -113,6 +113,9 @@ export class VennDiagram {
 
                 let values = this.venndiagramService.getDataIntersection(selectionVennCircles);
                 let datasetIds = selectionVennCircles.map( (vennCircle: VennCircle) => vennCircle.datasetId);
+                if(!isShift) {
+                    this.diagramSelection.clearSelection();
+                }
                 this.diagramSelection.addSelection(datasetIds, values);
             }
         });

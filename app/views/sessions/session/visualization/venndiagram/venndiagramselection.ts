@@ -6,9 +6,8 @@ export default class VennDiagramSelection {
     values: Array<string> = [];
 
     addSelection(datasetIds: Array<string>, values: Array<string>) {
-
         this.datasetIds = _.uniq(this.datasetIds.concat(datasetIds));
-        this.values = this.values.concat(values);
+        this.values = _.uniq(this.values.concat(values));
     }
 
     clearSelection() {
