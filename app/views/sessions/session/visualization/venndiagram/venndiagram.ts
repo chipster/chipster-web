@@ -11,6 +11,7 @@ import VennDiagramUtils from "./venndiagramutils";
 import UtilsService from "../../../../../services/utils.service";
 import VennCircle from "./venncircle";
 import SessionDataService from "../../sessiondata.service";
+import VennDiagramSelection from "./venndiagramselection";
 
 @Component({
     selector: 'vennDiagram',
@@ -23,8 +24,7 @@ export class VennDiagram {
 
     files: Array<TSVFile> = [];
     vennCircles: Array<VennCircle>;
-    selection: Array<string> = [];
-
+    diagramSelection: VennDiagramSelection = new VennDiagramSelection();
 
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
@@ -37,16 +37,13 @@ export class VennDiagram {
         const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
         const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId));
 
-        Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>, ...args) => {
-
+        Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)
                 .map( (tsv: any) => d3.tsv.parseRows(tsv.data))
                 .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, datasetIds[index]))
                 .value();
-
-            this.drawVennDiagram(this.files);
-
-
+            console.log(this.files);
+             this.drawVennDiagram(this.files);
         });
 
     }
@@ -114,19 +111,21 @@ export class VennDiagram {
                     .attr('stroke', 'black')
                     .attr('stroke-width', 1);
 
-                let latestSelection = this.venndiagramService.getDataIntersection(selectionVennCircles);
-                this.selection = isShift ? this.selection.concat(latestSelection) : latestSelection ;
+                let values = this.venndiagramService.getDataIntersection(selectionVennCircles);
+                let datasetIds = selectionVennCircles.map( (vennCircle: VennCircle) => vennCircle.datasetId);
+                this.diagramSelection.addSelection(datasetIds, values);
             }
         });
 
     }
 
     resetSelection(): void {
-        this.selection.length = 0;
+        this.diagramSelection.clearSelection();
     }
 
     createNewDataset(): void {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
+        let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, 'symbol');
         this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", data);
     }
 

@@ -5,6 +5,8 @@ import Circle from "../model/circle";
 import TwoCircleVennDiagramService from "./twocirclevenndiagram.service";
 import ThreeCircleVennDiagramService from "./threecirclevenndiagram.service";
 import VennCircle from "./venncircle";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import VennDiagramSelection from "./venndiagramselection";
 
 @Injectable()
 export default class VennDiagramService {
@@ -25,6 +27,20 @@ export default class VennDiagramService {
     getDataIntersection(circles: Array<VennCircle>): Array<string> {
         let values = _.map(circles, (vennCircle: VennCircle) => vennCircle.data);
         return _.intersection(...values);
+    }
+
+    /*
+     * @description: Create
+     */
+    generateNewDatasetTSV(files: Array<TSVFile>, selection: VennDiagramSelection, columnKey: string): Array<Array<string>> {
+        let headers = files.map( (file: TSVFile) => file.headers);
+
+
+        let tsv = _.map(selection.datasetIds, (datasetId: string) => {
+            let file = _.find(files, (file: TSVFile) => file.datasetId === datasetId);
+            let keys = selection.values;
+
+        });
     }
 
 }

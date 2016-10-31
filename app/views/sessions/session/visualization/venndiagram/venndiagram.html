@@ -6,11 +6,11 @@
             <div id="visualization"></div>
         </div>
 
-        <div class="col-md-4" *ngIf="selection.length > 0">
+        <div class="col-md-4" *ngIf="diagramSelection.values.length > 0">
             <button class="btn btn-default" (click)="createNewdataset()">Create new dataset</button>
-            <h5>Selections: {{selection.length}}</h5>
+            <h5>Selections: {{diagramSelection.values.length}}</h5>
             <ol>
-                <li *ngFor="let item of selection">{{item}}</li>
+                <li *ngFor="let item of diagramSelection.values">{{item}}</li>
             </ol>
         </div>
 
