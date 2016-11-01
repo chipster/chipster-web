@@ -19,6 +19,7 @@ class ExpressionProfile {
     private tsv: TSVFile;
     private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
     private selectedDatasets: any;
+    private viewSelectionList: Array<any>;
 
     constructor(
                 private tsvReader: TSVReader,
@@ -231,6 +232,7 @@ class ExpressionProfile {
 
                 this.resetSelections();
                 this.addSelections(_.uniq(ids));
+
                 // remove duplicate ids
                 resetSelectionRectangle();
             }
@@ -280,6 +282,7 @@ class ExpressionProfile {
         let missingGeneExpressions = _.map(missingSelectionIds, id => this.expressionProfileTSVService.getGeneExpression(this.tsv, id));
         this.selectedGeneExpressions = this.selectedGeneExpressions.concat( missingGeneExpressions );
         missingSelectionIds.forEach( id => { this.setSelectionStyle(id) });
+        this.setViewSelectionList();
     };
 
     toggleSelections(ids: Array<string>) {
@@ -306,10 +309,15 @@ class ExpressionProfile {
         d3.select('#path' + id).classed('pathover', false);
     }
 
-    getSelectionListData(): Array<Array<string>> {
+    setViewSelectionList(): void {
         let rowIds = this.selectedGeneExpressions.map( (geneExpression: GeneExpression) => geneExpression.id );
         let rawTSVRows = this.tsv.body.getTSVRows(rowIds);
-        return rawTSVRows.map( (row: TSVRow) => row.row );
+        let tsvSymbolIndex = this.tsv.getKeyColumnIndex('symbol');
+        let tsvIdentifierIndex = this.tsv.getKeyColumnIndex('identifier');
+
+        this.viewSelectionList = rawTSVRows.map( (row: TSVRow) => {
+            return {symbol: row.row[tsvSymbolIndex], identifier: row.row[tsvIdentifierIndex]};
+        });
     }
 
 }

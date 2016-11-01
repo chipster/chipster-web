@@ -7,7 +7,7 @@
         <button class="btn btn-default btn-sm" ng-click="$ctrl.createNewDataset()">Create new dataset</button>
         <h6>Selection</h6>
         <ol>
-            <li ng-repeat="line in $ctrl.getSelectionListData()">{{line[1]}} ({{line[0]}})</li>
+            <li ng-repeat="selection in $ctrl.viewSelectionList">{{selection.symbol}} <span ng-if="selection.identifier">({{selection.identifier}})</span></li>
         </ol>
     </div>
 

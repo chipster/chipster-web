@@ -33,8 +33,11 @@ export default class VennDiagramService {
      * @description: Create
      */
     generateNewDatasetTSV(files: Array<TSVFile>, selection: VennDiagramSelection, columnKey: string): Array<Array<string>> {
-        let headers = files.map( (file: TSVFile) => file.headers);
-
+        let headers = _.chain(files)
+            .map( (file: TSVFile) => file.headers.headers)
+            .flatten()
+            .uniq()
+            .value();
 
         let tsv = _.map(selection.datasetIds, (datasetId: string) => {
             let file = _.find(files, (file: TSVFile) => file.datasetId === datasetId);

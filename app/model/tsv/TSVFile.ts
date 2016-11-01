@@ -17,17 +17,17 @@ export default class TSVFile {
     }
 
     /*
-     * return raw TSVFile-data in its initial form without indexes
+     * @description: get raw TSVFile-data in its initial
      */
     public getRawData(ids: Array<string>): Array<Array<string>> {
         let body = this.body.getRawDataByRowIds(ids);
-        let headers = this.headers.getRawHeaders();
+        let headers = this.headers.headers;
         let data = [headers, ...body];
         return data;
     }
 
     /*
-     * Headers are missing a cell, if first (or any other) datarow is longer than headerrow
+     * @description: Headers are missing a cell, if first (or any other) datarow is longer than headerrow
      */
     private isHeadersMissingCell( ): boolean {
         return this.headers.size() !== this.body.rows[0].size();
@@ -35,9 +35,29 @@ export default class TSVFile {
 
     /*
      * @description: Get values from TSVbody column by given header-key
+     *
      */
-    public getColumnDataByHeaderKey( key: string ) {
-        let columnIndex = this.isHeadersMissingCell ? this.headers.getColumnIndexByKey(key) + 1 : this.headers.getColumnIndexByKey(key);
+    public getColumnDataByHeaderKey( key: string ): Array<string> {
+        let columnIndex = this.getKeyColumnIndex(key);
         return _.map(this.body.rows, (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
     }
+
+    /*
+     * @description: get column index matching
+     */
+    public getKeyColumnIndex(key: string): number {
+        let columnIndex;
+        if(key === 'identifier') {
+            columnIndex = this.headers.getIdentifierColumnIndex(this.isHeadersMissingCell);
+            if(this.isHeadersMissingCell) {
+                return columnIndex;
+            }
+        } else {
+            columnIndex = this.headers.getColumnIndexByKey(key);
+        }
+
+        return this.isHeadersMissingCell ? columnIndex + 1 : columnIndex;
+    }
+
+
 }
