@@ -83,12 +83,13 @@ class SessionComponent {
          });*/
 
 
-
         this.sessionDataService.subscription = this.SessionEventService.subscribe(this.sessionDataService.getSessionId(), this.sessionData, (event: any, oldValue: any, newValue: any) => {
             for (let listener of this.sessionDataService.listeners) {
                 listener(event, oldValue, newValue);
             }
         });
+
+        console.log('subscription', this.sessionDataService.subscription);
     }
 
     $onDestroy() {

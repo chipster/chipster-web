@@ -25,7 +25,7 @@ export default class SessionEventService {
         // creating a websocket object and start listening for the
         // events
 
-        this.configService.getSessionDbEventsUrl(sessionId).then((eventUrl) => {
+        return this.configService.getSessionDbEventsUrl(sessionId).then((eventUrl) => {
 
             this.$log.debug('eventUrl', eventUrl);
             this.ws = this.$websocket(URI(eventUrl).addSearch('token', this.authenticationService.getToken()).toString());

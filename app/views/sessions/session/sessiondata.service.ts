@@ -30,7 +30,7 @@ export default class SessionDataService {
         private fileResource: FileResource) {
     }
 
-    subscription: {unsubscribe(): void};
+    subscription: Promise<{unsubscribe(): void}>;
     listeners: any = [];
 
     // start listening for remote changes
@@ -55,7 +55,9 @@ export default class SessionDataService {
     }
 
     destroy() {
-        this.subscription.unsubscribe();
+        this.subscription.then((subscription) => {
+            subscription.unsubscribe();
+        });
     }
 
     createDataset(dataset: Dataset) {
