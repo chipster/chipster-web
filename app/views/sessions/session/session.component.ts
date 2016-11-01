@@ -216,6 +216,10 @@ class SessionComponent {
         })
     }
 
+    toggleDatasetSelection($event, data) {
+         this.selectionService.toggleDatasetSelection($event, data, UtilsService.mapValues(this.sessionData.datasetsMap));
+    }
+
     openAddDatasetModal() {
         this.$uibModal.open({
             animation: true,

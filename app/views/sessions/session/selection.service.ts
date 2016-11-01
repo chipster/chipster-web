@@ -1,7 +1,6 @@
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import Tool from "../../../model/session/tool";
-import Utils from "../../../services/utils.service";
 import UtilsService from "../../../services/utils.service";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
@@ -72,6 +71,7 @@ export default class SelectionService {
 
     toggleDatasetSelection($event: any, data: Dataset, allDatasets: any[]) {
         this.activeDatasetId = data.datasetId;
+
         UtilsService.toggleSelection($event, data, allDatasets, this.selectedDatasets);
         this.selectedDatasets = _.clone(this.selectedDatasets); // clone array so that changes on it can be tracen in $onChanges-block
     }
