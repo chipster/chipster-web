@@ -88,8 +88,6 @@ class SessionComponent {
                 listener(event, oldValue, newValue);
             }
         });
-
-        console.log('subscription', this.sessionDataService.subscription);
     }
 
     $onDestroy() {

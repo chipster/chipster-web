@@ -35,7 +35,6 @@ class SessionListController {
 
         this.sessionResource.getSessions().then((sessions: Session[]) => {
             this.userSessions = sessions;
-            console.log(this.userSessions);
         }, (response: any) => {
             console.log('failed to get sessions', response);
             if (response.status === 403) {
