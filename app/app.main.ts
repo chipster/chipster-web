@@ -43,6 +43,7 @@ import InputsModalController from "./views/sessions/session/tools/inputsmodal/in
 import SessionEditModalController from "./views/sessions/session/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "./views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "./resources/session.resource";
+import SessionWorkerResource from "./resources/sessionworker.resource";
 import DatasetHistoryModalController from "./views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "./views/sessions/sessionlist.component";
 import ParameterListComponent from "./views/sessions/session/dataset/parameterlist.component";
@@ -83,6 +84,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ToolResource', ToolResource)
     .service('SessionEventService', SessionEventService)
     .service('SessionResource', SessionResource)
+    .service('SessionWorkerResource', SessionWorkerResource)
     .service('SessionDataService', SessionDataService)
     .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('FileResource', FileResource)

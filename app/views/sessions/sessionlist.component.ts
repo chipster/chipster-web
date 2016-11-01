@@ -1,20 +1,24 @@
 
 import SessionResource from "../../resources/session.resource";
+import SessionWorkerResource from "../../resources/sessionworker.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../resources/session.resource";
 
 class SessionListController {
 
-    static $inject = ['$location', 'SessionResource'];
+    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource'];
 
-    public selectedSession: Session;
     public selectedSessions: Session[];
     public previousSession: Session;
-    public userSession: Session;
     public userSessions: Session[];
     public sessionData: SessionData;
 
-    constructor(private $location:ng.ILocationService, private sessionResource:SessionResource) {
+    constructor(
+        private $location:ng.ILocationService,
+        private sessionResource:SessionResource,
+        private $uibModal: ng.ui.bootstrap.IModalService,
+        private sessionWorkerResource:SessionWorkerResource) {
+
         this.updateSessions();
     }
 
@@ -42,6 +46,35 @@ class SessionListController {
 
     openSession(session: Session) {
         this.$location.path("/sessions" + "/" + session.sessionId);
+    }
+
+    openSessionFile() {
+        let session = new Session('New session');
+        this.sessionResource.createSession(session).then((sessionId: string) => {
+            session.sessionId = sessionId;
+            this.$uibModal.open({
+                animation: true,
+                templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
+                controller: 'AddDatasetModalController',
+                controllerAs: 'vm',
+                bindToController: true,
+                size: 'lg',
+                resolve: {
+                    datasetsMap: () => {
+                        return new Map();
+                    },
+                    sessionId: () => {
+                        return sessionId;
+                    }
+                }
+            }).result.then((datasets: string[]) => {
+                this.openSession(session);
+                console.log('extracting session');
+                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]);
+            }).then((warnings) => {
+                console.log('extracted, warnings: ', warnings);
+            });
+        });
     }
 
     selectSession(event: any, session: Session) {

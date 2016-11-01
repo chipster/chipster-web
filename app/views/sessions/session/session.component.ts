@@ -4,6 +4,7 @@ import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
 import SessionResource from "../../../resources/session.resource";
+import SessionWorkerResource from "../../../resources/sessionworker.resource";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import { SessionData } from "../../../resources/session.resource";
@@ -13,7 +14,8 @@ class SessionComponent {
 
     static $inject = [
         '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService', '$route', 'SessionResource'];
+        'SessionEventService', 'SessionDataService', 'SelectionService', '$route', 'SessionResource',
+        'SessionWorkerResource'];
 
     datasetSearch: string;
     private selectedTab = 1;
@@ -35,7 +37,8 @@ class SessionComponent {
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
         private $route: ng.route.IRouteService,
-        private sessionResource: SessionResource) {
+        private sessionResource: SessionResource,
+        private sessionWorkerResource: SessionWorkerResource) {
     }
 
     $onInit() {
@@ -208,6 +211,12 @@ class SessionComponent {
         }
     }
 
+    downloadSession() {
+        this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).then((url) => {
+            this.sessionDataService.download(url);
+        })
+    }
+
     openAddDatasetModal() {
         this.$uibModal.open({
             animation: true,
@@ -219,6 +228,9 @@ class SessionComponent {
             resolve: {
                 datasetsMap: () => {
                     return new Map(this.sessionData.datasetsMap);
+                },
+                sessionId: () => {
+                    return this.sessionDataService.getSessionId();
                 }
             }
         });

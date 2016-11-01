@@ -9,6 +9,7 @@ class Services {
     authenticationService: string;
     fileBroker: string;
     toolbox: string;
+    sessionWorker: string;
 }
 
 @Injectable()
@@ -58,6 +59,10 @@ export default class ConfigService {
 
     getSessionDbEventsUrl(sessionId:string) {
         return this.getServices().then((services: Services) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
+    }
+
+    getSessionWorkerUrl() {
+        return this.getServices().then((services: Services) => services.sessionWorker);
     }
 
     getAuthUrl() {

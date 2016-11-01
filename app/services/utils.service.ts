@@ -105,6 +105,4 @@ export default class UtilsService {
             return _.includes(second, item)
         } );
     }
-
-
 }

@@ -2,25 +2,28 @@ import Utils from "../../../../../services/utils.service";
 import WorkflowGraphService from "../workflowgraph.service";
 import ConfigService from "../../../../../services/config.service";
 import AuthenticationService from "../../../../../authentication/authenticationservice";
-import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import IQService = angular.IQService;
 import IModalService = angular.ui.bootstrap.IModalService;
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
+import SessionResource from "../../../../../resources/session.resource";
 
 export default class AddDatasetModalController {
     static $inject = [
         '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-        'SessionDataService', '$q', 'datasetsMap'];
+        'SessionResource', '$q', 'datasetsMap', 'sessionId'];
+
+    private datasetIds: string[] = [];
 
     constructor(private $log: ng.ILogService,
                 private $uibModalInstance: IModalServiceInstance,
                 private $routeParams: ng.route.IRouteParamsService,
                 private ConfigService: ConfigService,
                 private AuthenticationService: AuthenticationService,
-                private SessionDataService: SessionDataService,
+                private sessionResource: SessionResource,
                 private $q: IQService,
-                private datasetsMap: Map<string, Dataset>) {
+                private datasetsMap: Map<string, Dataset>,
+                private sessionId: string) {
     }
 
     flowFileAdded(file: any, event: any, flow: any) {
@@ -31,7 +34,7 @@ export default class AddDatasetModalController {
 
         let promises = [
             this.ConfigService.getFileBrokerUrl(),
-            this.createDataset(file.name)
+            this.createDataset(this.sessionId, file.name)
         ];
 
         this.$q.all(promises).then((results: any) => {
@@ -39,22 +42,23 @@ export default class AddDatasetModalController {
             let dataset: Dataset = results[1];
 
             file.chipsterTarget = URI(url)
-                .path('sessions/' + this.SessionDataService.getSessionId() + '/datasets/' + dataset.datasetId)
+                .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
                 .addSearch('token', this.AuthenticationService.getToken()).toString();
             file.resume();
+            this.datasetIds.push(dataset.datasetId);
         });
         file.pause();
     }
 
-    createDataset(name: string) {
+    createDataset(sessionId: string, name: string) {
         var d = new Dataset(name);
         this.$log.debug('createDataset', d);
-        return this.SessionDataService.createDataset(d).then((datasetId: string) => {
+        return this.sessionResource.createDataset(sessionId, d).then((datasetId: string) => {
             d.datasetId = datasetId;
             var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));
             d.x = pos.x;
             d.y = pos.y;
-            this.SessionDataService.updateDataset(d);
+            this.sessionResource.updateDataset(sessionId, d);
             return d;
         });
     }
@@ -64,6 +68,6 @@ export default class AddDatasetModalController {
     }
 
     close() {
-        this.$uibModalInstance.dismiss();
+        this.$uibModalInstance.close(this.datasetIds);
     }
 }

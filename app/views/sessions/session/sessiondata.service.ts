@@ -154,8 +154,12 @@ export default class SessionDataService {
 
     exportDatasets(datasets: Dataset[]) {
         for (let d of datasets) {
-            this.$window.open(this.getDatasetUrl(d), "_blank")
+            this.download(this.getDatasetUrl(d));
         }
+    }
+
+    download(url: string) {
+        this.$window.open(url, "_blank");
     }
 
     renameDatasetDialog(dataset: Dataset) {
