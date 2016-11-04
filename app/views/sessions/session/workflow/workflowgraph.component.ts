@@ -39,7 +39,7 @@ interface Link {
 
 class WorkflowGraphController {
 
-	static $inject = ['$scope', '$window', '$log', '$filter', 'SessionDataService', 'SelectionService'];
+	static $inject = ['$scope', '$window', '$log', '$filter', 'SessionDataService', 'SelectionService', '$element'];
 
 	constructor(
 		private $scope: IScope,
@@ -47,13 +47,15 @@ class WorkflowGraphController {
 		private $log: ng.ILogService,
 		private $filter: IChipsterFilter,
 		private SessionDataService: SessionDataService,
-		private SelectionService: SelectionService) {
+		private SelectionService: SelectionService,
+		private $element: ng.IRootElementService) {
 		var d3js = d3;
 		d3js['tip'] = d3Tip;
 		d3js['contextMenu'] = d3ContextMenu(d3);
 	}
 
 	//var shiftKey, ctrlKey;
+	svgContainer: d3.Selection<any>;
 	svg: d3.Selection<any>;
 	outerSvg: d3.Selection<any>;
 
@@ -89,7 +91,6 @@ class WorkflowGraphController {
 	jobsMap: Map<string, Job>;
 	modulesMap: Map<string, Module>;
 	datasetSearch: string;
-	callback: any;
 	enabled: boolean;
 	dragStarted: boolean;
 	onDelete: () => void;
@@ -98,14 +99,14 @@ class WorkflowGraphController {
 
 	$onInit() {
 
-		var element = WorkflowGraphController.getElement();
-
 		this.zoomer = d3.behavior.zoom()
 			.scaleExtent([ 0.2, 1 ])
 			.scale(this.zoom)
 			.on('zoom', this.zoomAndPan.bind(this));
 
-		this.outerSvg = d3.select(element).append('svg').call(this.zoomer);
+		// used for adjusting the svg size
+		this.svgContainer = this.getGraph().append('div').classed('fill', true).classed('workflow-container', true);
+		this.outerSvg = this.svgContainer.append('svg').call(this.zoomer);
 
 		// draw background on outerSvg, so that it won't pan or zoom
 		this.renderBackground(this.outerSvg);
@@ -149,7 +150,6 @@ class WorkflowGraphController {
 	}
 
 	$onChanges(changes: ng.IChangesObject) {
-
 		if (!this.svg) {
 			// not yet initialized
 			return;
@@ -178,7 +178,8 @@ class WorkflowGraphController {
 
 	updateSvgSize() {
 
-		let element = WorkflowGraphController.getElement();
+		// get the DOM element with [0][0] ( when there is only one element in the selection)
+		let element: HTMLElement = <HTMLElement>this.svgContainer[0][0];
 
 		// leave some pixels for margins, otherwise the element will grow
 		this.width = Math.max(200, element.offsetWidth);
@@ -191,10 +192,12 @@ class WorkflowGraphController {
 		this.background
 			.attr('width', this.width)
 			.attr('height', this.height);
+
 	}
 
-	static getElement() {
-		return document.getElementById('workflow-container');
+	getGraph() {
+		// why $element is an array?
+		return d3.select(this.$element[0]);
 	}
 
 	update() {
@@ -561,7 +564,6 @@ class WorkflowGraphController {
 			svg_graph.call(zoomer);
 		}
 		*/
-
 	}
 
 	zoomAndPan() {
@@ -771,7 +773,6 @@ class WorkflowGraphController {
 
 export default {
 	controller: WorkflowGraphController,
-	template: '<div id="workflow-container" class="fill"></div>',
 	bindings: {
 		datasetsMap: '<',
 		jobsMap: '<',

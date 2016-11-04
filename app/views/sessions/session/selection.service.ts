@@ -85,5 +85,4 @@ export default class SelectionService {
         this.clearSelection();
         this.selectedJobs = [job];
     }
-
 }
