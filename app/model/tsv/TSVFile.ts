@@ -14,6 +14,7 @@ export default class TSVFile {
         this.headers = new TSVHeaders(_.head(tsv));
         this.body = new TSVBody(_.tail(tsv));
         this.isHeadersMissingCell = this.isHeadersMissingCell();
+        this.datasetId = datasetId;
     }
 
     /*
@@ -38,14 +39,14 @@ export default class TSVFile {
      *
      */
     public getColumnDataByHeaderKey( key: string ): Array<string> {
-        let columnIndex = this.getKeyColumnIndex(key);
+        let columnIndex = this.getColumnIndex(key);
         return _.map(this.body.rows, (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
     }
 
     /*
      * @description: get column index matching
      */
-    public getKeyColumnIndex(key: string): number {
+    public getColumnIndex(key: string): number {
         let columnIndex;
         if(key === 'identifier') {
             columnIndex = this.headers.getIdentifierColumnIndex(this.isHeadersMissingCell);

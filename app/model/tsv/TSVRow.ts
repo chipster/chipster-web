@@ -15,10 +15,17 @@ export default class TSVRow {
     }
 
     /*
-     * Return new array from row containing items in indexes of parameter
+     * Return new array from row containing items in indexes array
      */
     getCellsByIndexes(indexes: Array<number>): Array<string> {
-        return _.map(indexes, (index: number) => this.row[index]);
+        return _.map(indexes, (index: number) => this.getCellByIndex(index));
+    }
+
+    /*
+     * @description: return cell with given index
+     */
+    getCellByIndex(index: number): string {
+        return this.row[index];
     }
 
     /*

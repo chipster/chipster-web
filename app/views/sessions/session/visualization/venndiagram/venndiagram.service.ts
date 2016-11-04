@@ -7,6 +7,7 @@ import ThreeCircleVennDiagramService from "./threecirclevenndiagram.service";
 import VennCircle from "./venncircle";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import VennDiagramSelection from "./venndiagramselection";
+import TSVRow from "../../../../../model/tsv/TSVRow";
 
 @Injectable()
 export default class VennDiagramService {
@@ -24,26 +25,68 @@ export default class VennDiagramService {
     /*
      * @description: get intersection data of given circles
      */
-    getDataIntersection(circles: Array<VennCircle>): Array<string> {
-        let values = _.map(circles, (vennCircle: VennCircle) => vennCircle.data);
-        return _.intersection(...values);
+    getDataIntersection(selectionCircles: Array<VennCircle>, allCircles: Array<VennCircle>): Array<string> {
+        const differenceCircles = allCircles.filter( (circle: VennCircle) => !_.includes(selectionCircles, circle));
+        return this.getSelectionData(selectionCircles, differenceCircles);
     }
 
     /*
-     * @description: Create
+     * @description: return the intersection of selectionCircles data minus the datas of dirrerence circles
+     */
+    getSelectionData(selectionCircles: Array<VennCircle>, difference: Array<VennCircle>): Array<string> {
+        const values = _.map(selectionCircles, (vennCircle: VennCircle) => vennCircle.data);
+        const intersection = _.intersection(...values);
+        const differenceValues = difference.map( (circle: VennCircle) => circle.data);
+        return _.difference(intersection, ...differenceValues);
+    }
+
+    /*
+     * @description: Create new TSVFile based on selected values
      */
     generateNewDatasetTSV(files: Array<TSVFile>, selection: VennDiagramSelection, columnKey: string): Array<Array<string>> {
-        let headers = _.chain(files)
+
+        // all headers from given files
+        const headers = _.chain(files)
             .map( (file: TSVFile) => file.headers.headers)
             .flatten()
             .uniq()
             .value();
 
-        let tsv = _.map(selection.datasetIds, (datasetId: string) => {
-            let file = _.find(files, (file: TSVFile) => file.datasetId === datasetId);
-            let keys = selection.values;
+        let body = [];
+        _.forEach(selection.datasetIds, (datasetId: string) => {
+            const file = _.find(files, (file: TSVFile) => file.datasetId === datasetId);
+            const values = selection.values;
+            const keyColumnIndex = file.getColumnIndex(columnKey); // index where the values are collected
+
+            _.forEach(files, (file: TSVFile) => {
+                let rows = this.getTSVRowsContainingValues(file, values, keyColumnIndex);
+                let sortedIndexes = this.getIndexesForHeaders(file, headers);
+                let sortedRows = rows.map( (tsvRow: TSVRow) => {
+                    let sortedRow = [];
+                    tsvRow.row.forEach( (value: string, index: number) => { sortedRow[sortedIndexes[index]] = value; });
+                    return sortedRow;
+                });
+                body = body.concat(sortedRows);
+            });
 
         });
+        return [headers, ...body];
+    }
+
+    /*
+     * @description: Find out rows which contain a value from values-array in the given column
+     */
+    getTSVRowsContainingValues(file: TSVFile, values: Array<string>, columnIndex: number): Array<TSVRow> {
+        return _.chain(file.body.rows)
+            .filter( (row: TSVRow) => _.includes(values, row.getCellByIndex(columnIndex)) )
+            .value();
+    }
+
+    /*
+     * @description: Get column indexes for given header-keys in file
+     */
+    getIndexesForHeaders(file: TSVFile, headers: Array<string>): Array<number> {
+        return headers.map( (header: string) => file.getColumnIndex(header));
     }
 
 }

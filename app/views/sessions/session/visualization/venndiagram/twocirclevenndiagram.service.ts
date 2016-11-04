@@ -2,9 +2,10 @@
 
 import {Injectable} from "@angular/core";
 import Point from "../model/point";
-import Circle from "./circle";
+import Circle from "../model/circle";
 import VennDiagramUtils from "./venndiagramutils";
 import * as _ from 'lodash';
+import VennCircle from "./venncircle";
 
 @Injectable()
 export default class TwoCircleVennDiagramService {

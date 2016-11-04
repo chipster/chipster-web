@@ -3,6 +3,7 @@ import {Injectable} from "@angular/core";
 import Point from "../model/point";
 import Circle from "./circle";
 import VennDiagramUtils from "./venndiagramutils";
+import VennCircle from "./venncircle";
 
 @Injectable()
 export default class ThreeCircleVennDiagramService {
@@ -84,7 +85,7 @@ export default class ThreeCircleVennDiagramService {
     }
 
     /*
-     *
+     * 
      */
     threeCircleSelectionDescriptor(circles: Array<Circle>, radius: number, visualizationCenter: Point): string {
         let firstCircle = circles[0];

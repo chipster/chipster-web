@@ -312,8 +312,8 @@ class ExpressionProfile {
     setViewSelectionList(): void {
         let rowIds = this.selectedGeneExpressions.map( (geneExpression: GeneExpression) => geneExpression.id );
         let rawTSVRows = this.tsv.body.getTSVRows(rowIds);
-        let tsvSymbolIndex = this.tsv.getKeyColumnIndex('symbol');
-        let tsvIdentifierIndex = this.tsv.getKeyColumnIndex('identifier');
+        let tsvSymbolIndex = this.tsv.getColumnIndex('symbol');
+        let tsvIdentifierIndex = this.tsv.getColumnIndex('identifier');
 
         this.viewSelectionList = rawTSVRows.map( (row: TSVRow) => {
             return {symbol: row.row[tsvSymbolIndex], identifier: row.row[tsvIdentifierIndex]};
