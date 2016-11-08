@@ -253,8 +253,8 @@ class ExpressionProfile {
 
     createNewDataset() {
         let selectedGeneExpressionIds = this.getSelectionIds();
-        let csvData = this.tsv.getRawData(selectedGeneExpressionIds);
-        let data = d3.tsv.formatRows(csvData);
+        let tsvData = this.tsv.getRawData(selectedGeneExpressionIds);
+        let data = d3.tsv.formatRows(tsvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }
 
@@ -314,7 +314,6 @@ class ExpressionProfile {
         let rawTSVRows = this.tsv.body.getTSVRows(rowIds);
         let tsvSymbolIndex = this.tsv.getColumnIndex('symbol');
         let tsvIdentifierIndex = this.tsv.getColumnIndex('identifier');
-
         this.viewSelectionList = rawTSVRows.map( (row: TSVRow) => {
             return {symbol: row.row[tsvSymbolIndex], identifier: row.row[tsvIdentifierIndex]};
         });

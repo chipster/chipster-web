@@ -41,7 +41,7 @@ export default class TSVBody {
      */
     public getRawDataByRowIds(ids: Array<string>): Array<Array<string>> {
         let tsvRows = this.getTSVRows(ids);
-        return _.map(tsvRows, (tsvRow: TSVRow) => tsvRow.getRawData());
+        return _.map(tsvRows, (tsvRow: TSVRow) => tsvRow.row);
     }
 
 

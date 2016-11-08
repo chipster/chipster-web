@@ -28,11 +28,4 @@ export default class TSVRow {
         return this.row[index];
     }
 
-    /*
-     * Get original TSVRow data
-     */
-    getRawData(): Array<string> {
-        return _.drop(this.row, 1);
-    }
-
 }
