@@ -33,7 +33,6 @@ export default class TSVHeaders {
      *      3. column with string 'identifier' as header
      */
     public getIdentifierColumnIndex(isHeadersMissingCell: boolean): number {
-
         // identifier is first column if one header is missing
         if(isHeadersMissingCell) {
             return 0;
@@ -44,7 +43,15 @@ export default class TSVHeaders {
             return _.findIndex(this.headers, ' ');
         }
 
-        return _.findIndex(this.headers, 'identifier');
+        if(_.findIndex(this.headers, 'identifier') !== -1) {
+            return _.findIndex(this.headers, 'identifier');
+        }
+
+        return -1;
+    }
+
+    public hasIdentifierColumn(isMissingHeader: boolean): boolean {
+        return isMissingHeader || _.includes(this.headers, ' ') || _.includes(this.headers, 'identifier');
     }
 
 }

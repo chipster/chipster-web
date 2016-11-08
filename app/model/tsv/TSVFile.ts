@@ -39,6 +39,7 @@ export default class TSVFile {
      *
      */
     public getColumnDataByHeaderKey( key: string ): Array<string> {
+
         let columnIndex = this.getColumnIndex(key);
         return _.map(this.body.rows, (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
     }
@@ -47,18 +48,11 @@ export default class TSVFile {
      * @description: get column index matching
      */
     public getColumnIndex(key: string): number {
-        let columnIndex;
-        if(key === 'identifier') {
-            columnIndex = this.headers.getIdentifierColumnIndex(this.isHeadersMissingCell);
-            if(this.isHeadersMissingCell) {
-                return columnIndex;
-            }
-        } else {
-            columnIndex = this.headers.getColumnIndexByKey(key);
-        }
-
-        return this.isHeadersMissingCell ? columnIndex + 1 : columnIndex;
+        return key === 'identifier' ? this.headers.getIdentifierColumnIndex(this.isHeadersMissingCell) : this.getBasicColumnIndex(key);
     }
 
+    private getBasicColumnIndex(key: string): number {
+        return this.isHeadersMissingCell ? this.headers.getColumnIndexByKey(key) + 1 : this.headers.getColumnIndexByKey(key);
+    }
 
 }
