@@ -57,20 +57,30 @@ export default class VennDiagramService {
             const file = _.find(files, (file: TSVFile) => file.datasetId === datasetId);
             const values = selection.values;
             const keyColumnIndex = file.getColumnIndex(columnKey); // index where the values are collected
-
             _.forEach(files, (file: TSVFile) => {
                 let rows = this.getTSVRowsContainingValues(file, values, keyColumnIndex);
-                let sortedIndexes = this.getIndexesForHeaders(file, headers);
-                let sortedRows = rows.map( (tsvRow: TSVRow) => {
-                    let sortedRow = [];
-                    tsvRow.row.forEach( (value: string, index: number) => { sortedRow[sortedIndexes[index]] = value; });
-                    return sortedRow;
-                });
+                let sortedIndexMapping = this.getSortedIndexMapping(file, headers);
+                let sortedRows = this.rearrangeCells(rows, sortedIndexMapping);
                 body = body.concat(sortedRows);
             });
 
         });
         return [headers, ...body];
+    }
+
+    /*
+     * @description: map given tsv bodyrows items to new indexes in
+     */
+    rearrangeCells(tsvRows: Array<TSVRow>, sortingMap: Map): Array<Array<string>> {
+        return tsvRows.map( (tsvRow: TSVRow) => {
+            let sortedRow = [];
+
+            sortingMap.forEach( (key: number, index: number) => {
+                sortedRow[index] = tsvRow.getCellByIndex(key);
+            });
+
+            return sortedRow;
+        });
     }
 
     /*
@@ -85,8 +95,11 @@ export default class VennDiagramService {
     /*
      * @description: Get column indexes for given header-keys in file
      */
-    getIndexesForHeaders(file: TSVFile, headers: Array<string>): Array<number> {
-        return headers.map( (header: string) => file.getColumnIndex(header));
+    getSortedIndexMapping(file: TSVFile, headers: Array<string>): Map<number, number> {
+        let mapping = new Map();
+        headers.forEach( (header:string, index:number) => { mapping.set(index, file.getBasicColumnIndex(header)) });
+        console.log(mapping);
+        return mapping;
     }
 
 }

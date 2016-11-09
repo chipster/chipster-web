@@ -41,10 +41,10 @@ class ExpressionProfile {
     }
 
     drawLineChart(tsv: TSVFile) {
-        let that = this;
+        const that = this;
         // Configurate svg and graph-area
         let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
-        let margin = {top: 10, right: 0, bottom: 150, left: 40};
+        const margin = {top: 10, right: 0, bottom: 150, left: 40};
         let size = { width: expressionprofileWidth, height: 600};
         let graphArea = {
             width: size.width,
@@ -53,7 +53,6 @@ class ExpressionProfile {
 
         // SVG-element
         let drag = d3.behavior.drag();
-
         let svg = d3.select('#expressionprofile')
             .append('svg')
             .attr('width', size.width)
@@ -111,15 +110,16 @@ class ExpressionProfile {
         let color = d3.scale.category20();
 
 
-        let geneExpression = this.expressionProfileTSVService.getGeneExpressions(tsv);
-        let orderedExpressionGenes = this.expressionProfileTSVService.orderBodyByFirstValue(geneExpression);
+        let geneExpressions = this.expressionProfileTSVService.getGeneExpressions(tsv);
+        let orderedExpressionGenes = this.expressionProfileTSVService.orderBodyByFirstValue(geneExpressions);
+
         let paths = pathsGroup.selectAll('.path')
             .data(orderedExpressionGenes)
             .enter()
             .append('path')
             .attr('class', 'path')
             .attr('id', (d: GeneExpression) => 'path' + d.id)
-            .attr('d', (d: GeneExpression) => lineGenerator( d.values ) )
+            .attr('d', (d: GeneExpression) => { console.log(d);return lineGenerator( d.values )} )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {

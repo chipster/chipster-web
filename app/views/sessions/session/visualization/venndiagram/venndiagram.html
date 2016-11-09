@@ -6,12 +6,22 @@
             <div id="visualization"></div>
         </div>
 
-        <div class="col-md-4" *ngIf="diagramSelection.values.length > 0">
-            <button class="btn btn-default" (click)="createNewDataset()">Create new dataset</button>
-            <h5>Selections: {{diagramSelection.values.length}}</h5>
-            <ol>
-                <li *ngFor="let item of diagramSelection.values">{{item}}</li>
-            </ol>
+        <div class="col-md-4" >
+            <h6>Common denominator</h6>
+            <button (click)="compareIntersectionBy('identifier')"
+                    [disabled]="compareBy === 'identifier'"
+                    class="btn btn-default">Identifier</button>
+            <button (click)="compareIntersectionBy('symbol')"
+                    [disabled]="compareBy === 'symbol'"
+                    class="btn btn-default">Symbol</button>
+
+            <div *ngIf="diagramSelection.values.length > 0">
+                <button class="btn btn-default" (click)="createNewDataset()">Create new dataset</button>
+                <h6>Selections: {{diagramSelection.values.length}}</h6>
+                <ol>
+                    <li *ngFor="let item of diagramSelection.values">{{item}}</li>
+                </ol>
+            </div>
         </div>
 
     </div>

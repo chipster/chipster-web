@@ -13,7 +13,7 @@ export default class ExpressionProfileTSVService {
      * Get chipvalues from raw data
      */
     public getGeneExpressions(tsv: TSVFile): Array<GeneExpression> {
-        let chipIndexes = this.getChipValueIndexes(tsv);
+        let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
         return _.map(tsv.body.rows, (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
     }
 
@@ -21,7 +21,7 @@ export default class ExpressionProfileTSVService {
      * max & min value from two-dimensional array
      */
     public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
-        let chipIndexes = this.getChipValueIndexes(tsv);
+        let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
         let values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
         let flatValues = _.map(_.flatten(values), (value: string) => this.stringToNumber(value));
         let min = _.min(flatValues);
@@ -40,19 +40,10 @@ export default class ExpressionProfileTSVService {
     }
 
     /*
-     * Get Indexes containing actual .chip-values
-     */
-    public getChipValueIndexes(tsv: TSVFile ): Array<number> {
-        let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-        // if headers is missing a cell then add
-        return tsv.isHeadersMissingCell ? _.map(chipIndexes, cellIndex => cellIndex + 1 ) : chipIndexes;
-    }
-
-    /*
      * create new GeneExpression from data with given id
      */
     public getGeneExpression(tsv: TSVFile, id: string): GeneExpression {
-        let chipIndexes = this.getChipValueIndexes(tsv);
+        let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
         let tsvRow = tsv.body.getTSVRow(id);
 
         return this.getGeneExpressionsByIndex(tsvRow, chipIndexes);
@@ -85,7 +76,7 @@ export default class ExpressionProfileTSVService {
      * Get chip-value headers
      */
     public getChipHeaders(tsv: TSVFile): Array<string> {
-        let chipHeaderIndexes = this.getChipValueIndexes(tsv);
+        let chipHeaderIndexes = this.getChipHeaderIndexes(tsv.headers);
         return tsv.headers.getItemsByIndexes(chipHeaderIndexes);
     }
 

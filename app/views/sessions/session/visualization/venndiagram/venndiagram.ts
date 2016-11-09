@@ -25,6 +25,7 @@ export class VennDiagram {
     files: Array<TSVFile> = [];
     vennCircles: Array<VennCircle>;
     diagramSelection: VennDiagramSelection = new VennDiagramSelection();
+    compareBy: string;
 
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
@@ -33,6 +34,7 @@ export class VennDiagram {
     }
 
     ngOnInit() {
+        this.compareBy = 'identifier';
 
         const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
         const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId));
@@ -129,15 +131,20 @@ export class VennDiagram {
 
     createNewDataset(): void {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
-        let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, 'symbol');
-        console.log(data);
+        let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.compareBy);
+        console.table(data);
         let tsvData = d3.tsv.formatRows(data);
         // this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData);
     }
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
         const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
-        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.getColumnDataByHeaderKey('symbol'), circleCenters[index], radius));
+        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.getColumnDataByHeaderKey(this.compareBy), circleCenters[index], radius));
+    }
+
+    compareIntersectionBy(str: string): void {
+        this.compareBy = str;
+        this.resetSelection();
     }
 
 }

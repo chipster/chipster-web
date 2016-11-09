@@ -7,13 +7,15 @@ export default class TSVFile {
 
     public headers: TSVHeaders;
     public body: TSVBody;
-    public isHeadersMissingCell: boolean;
     public datasetId: string;
 
     constructor(tsv: Array<Array<string>>, datasetId: string) {
-        this.headers = new TSVHeaders(_.head(tsv));
+        // normalize header-row in tsv-file so that if headers are missing a column
+        // or identifier is indicated by an empty string
+        const normalizedHeaders = this.getNormalizeHeaders(tsv);
+        console.log(normalizedHeaders);
+        this.headers = new TSVHeaders(normalizedHeaders);
         this.body = new TSVBody(_.tail(tsv));
-        this.isHeadersMissingCell = this.isHeadersMissingCell();
         this.datasetId = datasetId;
     }
 
@@ -28,18 +30,9 @@ export default class TSVFile {
     }
 
     /*
-     * @description: Headers are missing a cell, if first (or any other) datarow is longer than headerrow
-     */
-    private isHeadersMissingCell( ): boolean {
-        return this.headers.size() !== this.body.rows[0].size();
-    }
-
-    /*
      * @description: Get values from TSVbody column by given header-key
-     *
      */
     public getColumnDataByHeaderKey( key: string ): Array<string> {
-
         let columnIndex = this.getColumnIndex(key);
         return _.map(this.body.rows, (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
     }
@@ -48,11 +41,28 @@ export default class TSVFile {
      * @description: get column index matching
      */
     public getColumnIndex(key: string): number {
-        return key === 'identifier' ? this.headers.getIdentifierColumnIndex(this.isHeadersMissingCell) : this.getBasicColumnIndex(key);
+        return this.headers.getColumnIndexByKey(key);
     }
 
-    private getBasicColumnIndex(key: string): number {
-        return this.isHeadersMissingCell ? this.headers.getColumnIndexByKey(key) + 1 : this.headers.getColumnIndexByKey(key);
+    private getNormalizeHeaders(tsv: Array<Array<string>>) {
+        const isMissingHeader = this.isMissingHeader(tsv);
+        let headers = tsv[0];
+
+        if(isMissingHeader) {
+            headers.unshift('identifier');
+            return headers;
+        }
+
+        if(headers.indexOf(' ') !== -1) {
+            headers[headers.indexOf(' ')] = 'identifier';
+            return headers;
+        }
+
+        return headers;
+    }
+
+    private isMissingHeader(tsv: Array<Array<string>>) {
+        return tsv[0].length < tsv[1].length;
     }
 
 }
