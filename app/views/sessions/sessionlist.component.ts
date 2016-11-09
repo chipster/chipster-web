@@ -50,7 +50,9 @@ class SessionListController {
         this.$location.path("/sessions" + "/" + session.sessionId);
     }
 
-    openSessionFile() {
+    openSessionFile(event: any) {
+    	// why is the file dialog triggered twice every now and then without this?
+    	event.stopImmediatePropagation();
 		/*
 		File dialog is opened by triggering a fake click event on the hidden file input.
 		Browsers allow the file input to open only if this is called directly from some
