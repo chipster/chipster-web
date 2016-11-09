@@ -119,7 +119,7 @@ class ExpressionProfile {
             .append('path')
             .attr('class', 'path')
             .attr('id', (d: GeneExpression) => 'path' + d.id)
-            .attr('d', (d: GeneExpression) => { console.log(d);return lineGenerator( d.values )} )
+            .attr('d', (d: GeneExpression) => lineGenerator( d.values ) )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {

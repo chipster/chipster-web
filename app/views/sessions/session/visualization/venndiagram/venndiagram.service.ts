@@ -97,8 +97,7 @@ export default class VennDiagramService {
      */
     getSortedIndexMapping(file: TSVFile, headers: Array<string>): Map<number, number> {
         let mapping = new Map();
-        headers.forEach( (header:string, index:number) => { mapping.set(index, file.getBasicColumnIndex(header)) });
-        console.log(mapping);
+        headers.forEach( (header:string, index:number) => { mapping.set(index, file.getColumnIndex(header)) });
         return mapping;
     }
 

@@ -13,7 +13,6 @@ export default class TSVFile {
         // normalize header-row in tsv-file so that if headers are missing a column
         // or identifier is indicated by an empty string
         const normalizedHeaders = this.getNormalizeHeaders(tsv);
-        console.log(normalizedHeaders);
         this.headers = new TSVHeaders(normalizedHeaders);
         this.body = new TSVBody(_.tail(tsv));
         this.datasetId = datasetId;

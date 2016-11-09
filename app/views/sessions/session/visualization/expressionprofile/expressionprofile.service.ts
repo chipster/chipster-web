@@ -42,7 +42,7 @@ export default class ExpressionProfileService {
         return _.map(tsv.body.rows, ( (tsvRow: TSVRow) => {
 
             // get indexes for finding raw data value for lines start and end points
-            let chipIndexes = this.expressionprofileTSVService.getChipValueIndexes(tsv);
+            let chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(tsv.headers);
             let chipLineStartDataIndex = chipIndexes[chipIndex];
             let chipLineEndDataIndex = chipIndexes[chipIndex + 1];
 

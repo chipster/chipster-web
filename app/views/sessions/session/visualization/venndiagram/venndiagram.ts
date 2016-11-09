@@ -84,6 +84,9 @@ export class VennDiagram {
             .attr('opacity', 0.4)
             .attr('fill', (d: VennCircle, i: number) => colors(i.toString()));
 
+        //draw text on venn diagram circles
+
+
         // selection group
         let selectionGroup = svg.append('g').attr('id', 'vennselections');
         circleGroup.on('click', () => {
@@ -132,9 +135,8 @@ export class VennDiagram {
     createNewDataset(): void {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
         let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.compareBy);
-        console.table(data);
         let tsvData = d3.tsv.formatRows(data);
-        // this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData);
+        this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData);
     }
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {

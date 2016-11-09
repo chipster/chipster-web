@@ -23,7 +23,7 @@ export default class ExpressionProfileTSVService {
     public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
         let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
         let values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
-        let flatValues = _.map(_.flatten(values), (value: string) => this.stringToNumber(value));
+        let flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
         let min = _.min(flatValues);
         let max = _.max(flatValues);
         return new DomainBoundaries(min, max);
@@ -45,7 +45,6 @@ export default class ExpressionProfileTSVService {
     public getGeneExpression(tsv: TSVFile, id: string): GeneExpression {
         let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
         let tsvRow = tsv.body.getTSVRow(id);
-
         return this.getGeneExpressionsByIndex(tsvRow, chipIndexes);
     }
 
@@ -54,7 +53,7 @@ export default class ExpressionProfileTSVService {
      */
     getGeneExpressionsByIndex(row: TSVRow, indexes: Array<number>): GeneExpression {
         let values = row.getCellsByIndexes(indexes);
-        let numberValues = _.map(values, (value: string) => this.stringToNumber(value));
+        let numberValues = _.map(values, (value: string) => parseFloat(value));
         return new GeneExpression(row.id, numberValues);
     }
 
@@ -63,13 +62,6 @@ export default class ExpressionProfileTSVService {
      */
     public orderBodyByFirstValue(geneExpressions: Array<GeneExpression>): Array<GeneExpression> {
         return _.orderBy(geneExpressions, [ (geneExpression:GeneExpression) => _.first(geneExpression.values) ]);
-    }
-
-    /*
-     * Parse number from a string
-     */
-    public stringToNumber(str: string): number {
-        return parseFloat(str);
     }
 
     /*
