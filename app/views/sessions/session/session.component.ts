@@ -234,7 +234,9 @@ class SessionComponent {
                 },
                 sessionId: () => {
                     return this.sessionDataService.getSessionId();
-                }
+                },
+                oneFile: () => false,
+	            files: () => []
             }
         });
     }

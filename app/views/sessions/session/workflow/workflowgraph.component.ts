@@ -664,11 +664,14 @@ class WorkflowGraphController {
 				}
 			}
 
+			// when opening a session file, datasets may be without names for some time
+			let name = dataset.name ? dataset.name : '';
+
 			datasetNodes.push(<DatasetNode>{
 				x: dataset.x,
 				y: dataset.y,
-				name: dataset.name,
-				extension: Utils.getFileExtension(dataset.name),
+				name: name,
+				extension: Utils.getFileExtension(name),
 				sourceJob: sourceJob,
 				color: color,
 				dataset: dataset

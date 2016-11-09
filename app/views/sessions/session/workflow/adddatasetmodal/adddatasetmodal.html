@@ -5,50 +5,52 @@
 
         <div class="modal-body" flow-init
              flow-file-added="vm.flowFileAdded( $file, $event, $flow )"
-             flow-file-success="vm.flowFileSuccess( $file, $message, $flow )">
+             flow-file-success="vm.flowFileSuccess( $file, $message, $flow )"
+             ng-init="vm.init($flow)">
 
             <div flow-prevent-drop
                  flow-drag-enter="style={border:'5px solid green'}"
                  flow-drag-leave="style={}"
                  ng-style="style">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-xs-8">
-                            <span class="btn btn-small btn-success" flow-btn><i class="icon icon-file"></i>Upload File</span>
-                            <span class="btn btn-small btn-success" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
-                            <!-- <span class="label label-info" flow-drop flow-drag-enter="class='alert-success'" flow-drag-leave="class=''" ng-class="class">
-                                Drag and drop files here
-                            </span>-->
+                    <div ng-show="!vm.oneFile">
+                        <div class="row">
+                            <div class="col-xs-8">
+                                <span id="upload-file-span" class="btn btn-small btn-success" flow-btn><i class="icon icon-file"></i>Upload File</span>
+                                <span class="btn btn-small btn-success" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="icon icon-folder-open"></i>Upload Folder</span>
+                                <!-- <span class="label label-info" flow-drop flow-drag-enter="class='alert-success'" flow-drag-leave="class=''" ng-class="class">
+                                    Drag and drop files here
+                                </span>-->
+                            </div>
+                        </div><!--end of row-->
+
+                        <div class="row">
+                            <hr class="soften col-xs-8">
                         </div>
-                    </div><!--end of row-->
 
-                    <div class="row">
-                        <hr class="soften col-xs-8">
-                    </div>
+                        <div class="row">
+                            <div class="col-xs-8">
+                                <button class="btn btn-default" ng-click="$flow.pause()">
+                                    <span class="glyphicon glyphicon-pause"></span>
+                                    Pause all
+                                </button>
+                                <button class="btn btn-default" ng-click="$flow.resume()">
+                                    <span class="glyphicon glyphicon-play"></span>
+                                    Resume all
+                                </button>
+                                <button class="btn btn-default" ng-click="$flow.cancel()">
+                                    <span class="glyphicon glyphicon-remove-sign"></span>
+                                    Cancel all
+                                </button>
+                                <span class="label label-info">Total Size: {{$flow.getSize() | bytes}}</span>
+                                <span class="label label-info">Time remaining: {{$flow.timeRemaining() | seconds}}</span>
+                            </div>
+                        </div>
 
-                    <div class="row">
-                        <div class="col-xs-8">
-                            <button class="btn btn-default" ng-click="$flow.pause()">
-                                <span class="glyphicon glyphicon-pause"></span>
-                                Pause all
-                            </button>
-                            <button class="btn btn-default" ng-click="$flow.resume()">
-                                <span class="glyphicon glyphicon-play"></span>
-                                Resume all
-                            </button>
-                            <button class="btn btn-default" ng-click="$flow.cancel()">
-                                <span class="glyphicon glyphicon-remove-sign"></span>
-                                Cancel all
-                            </button>
-                            <span class="label label-info">Total Size: {{$flow.getSize() | bytes}}</span>
-                            <span class="label label-info">Time remaining: {{$flow.timeRemaining() | seconds}}</span>
+                        <div class="row">
+                            <hr class="soften col-xs-8">
                         </div>
                     </div>
-
-                    <div class="row">
-                        <hr class="soften col-xs-8">
-                    </div>
-
                     <div class="row" ng-repeat="file in $flow.files">
                         <div class="col-xs-3">
                             {{file.relativePath}}
@@ -93,5 +95,5 @@
             </div>
         </div><!--end of flow-init directive-->
         <div class="modal-footer">
-            <button class="btn btn-primary" ng-click="vm.close()">OK</button>
+            <button class="btn btn-primary" ng-click="vm.close()" ng-show="!vm.oneFile">OK</button>
         </div>

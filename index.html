@@ -57,18 +57,17 @@
     <!-- SystemJS module loading configuration -->
     <script src="/node_modules/systemjs/dist/system.js"></script>
     <script src="/systemjs.config.js"></script>
+
     <!-- Source -->
 
-        <script>SystemJS.import('/app').then( function() {
-                    console.info('SYSTEMJS successfully bootstrapped.');
-                },
-                function handleReject( error ) {
+    <script>SystemJS.import('/app').then( function() {
+        console.info('SYSTEMJS successfully bootstrapped.');
+        function handleReject( error ) {
 
-                    console.warn( "System.js could not bootstrap the app." );
-                    console.dir( error );
-
-                });</script>
-    <script>
-
+            console.warn("System.js could not bootstrap the app.");
+            console.dir(error);
+        }
+    });
+    </script>
 </body>
 </html>

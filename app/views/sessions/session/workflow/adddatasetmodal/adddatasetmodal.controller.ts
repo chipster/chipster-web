@@ -11,7 +11,7 @@ import SessionResource from "../../../../../resources/session.resource";
 export default class AddDatasetModalController {
     static $inject = [
         '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-        'SessionResource', '$q', 'datasetsMap', 'sessionId'];
+        'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files'];
 
     private datasetIds: string[] = [];
 
@@ -23,7 +23,16 @@ export default class AddDatasetModalController {
                 private sessionResource: SessionResource,
                 private $q: IQService,
                 private datasetsMap: Map<string, Dataset>,
-                private sessionId: string) {
+                private sessionId: string,
+                private oneFile: boolean,
+                private files: any[]) {
+    }
+
+    init(flow) {
+        // run outside of the digest cycle
+        setTimeout(() => {
+            flow.addFile(this.files[0]);
+        }, 0);
     }
 
     flowFileAdded(file: any, event: any, flow: any) {
@@ -64,7 +73,12 @@ export default class AddDatasetModalController {
     }
 
     flowFileSuccess(file: any) {
+        // remove from the list
         file.cancel();
+
+        if (this.oneFile) {
+            this.close();
+        }
     }
 
     close() {

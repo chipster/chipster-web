@@ -6,18 +6,21 @@ import {SessionData} from "../../resources/session.resource";
 
 class SessionListController {
 
-    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource'];
+    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource', '$scope'];
 
     public selectedSessions: Session[];
     public previousSession: Session;
     public userSessions: Session[];
     public sessionData: SessionData;
 
+    private isOpening = false;
+
     constructor(
         private $location:ng.ILocationService,
         private sessionResource:SessionResource,
         private $uibModal: ng.ui.bootstrap.IModalService,
-        private sessionWorkerResource:SessionWorkerResource) {
+        private sessionWorkerResource:SessionWorkerResource,
+        private $scope: ng.IScope) {
 
         this.updateSessions();
     }
@@ -48,8 +51,20 @@ class SessionListController {
     }
 
     openSessionFile() {
+		/*
+		File dialog is opened by triggering a fake click event on the hidden file input.
+		Browsers allow the file input to open only if this is called directly from some
+		user generated event (like clicking a button).
+		 */
+
+        let input = document.getElementById('open-session-file-input');
+        angular.element(input).trigger('click'); // open dialog
+    }
+
+    uploadSessionFile(event: any, files: any) {
+        this.isOpening = true;
         let session = new Session('New session');
-        this.sessionResource.createSession(session).then((sessionId: string) => {
+        return this.sessionResource.createSession(session).then((sessionId: string) => {
             session.sessionId = sessionId;
             this.$uibModal.open({
                 animation: true,
@@ -64,14 +79,24 @@ class SessionListController {
                     },
                     sessionId: () => {
                         return sessionId;
-                    }
+                    },
+                    oneFile: () => true,
+                    files: () => files
                 }
             }).result.then((datasets: string[]) => {
-                this.openSession(session);
-                console.log('extracting session');
-                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]);
-            }).then((warnings) => {
-                console.log('extracted, warnings: ', warnings);
+                console.log('session file uploaded');
+                console.log('extract session');
+                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).then((warnings) => {
+                    console.log('extracted, warnings: ', warnings);
+                    return this.sessionResource.deleteDataset(sessionId, datasets[0]);
+                }).then((res) => {
+                    console.log('uploaded session file deleted', res);
+                    console.log('change view');
+                    this.isOpening = false;
+                    this.$scope.$apply(() => {
+                        this.openSession(session);
+                    });
+                });
             });
         });
     }
@@ -95,6 +120,9 @@ class SessionListController {
     }
 
     deleteSessions(sessions: Session[]) {
+        // preview could cause errors
+        this.selectedSessions.length = 0;
+
         sessions.forEach((session: Session) => {
             this.sessionResource.deleteSession(session.sessionId).then((res: any) => {
                 console.log("session deleted", res);

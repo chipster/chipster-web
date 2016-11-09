@@ -55,6 +55,7 @@ import ExpressionProfileService from "./views/sessions/session/visualization/exp
 import AddColumnController from "./views/sessions/session/visualization/phenodata/addcolumn.controller";
 import {TSVReader} from "./services/TSVReader";
 import {VennDiagram} from "./views/sessions/session/visualization/venndiagram/venndiagram";
+import CustomOnChange from "./views/sessions/fileinput/fileinput.directive";
 
 import ExpressionProfileTSVService from "./views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
 import VennDiagramTSVService from "./views/sessions/session/visualization/venndiagram/venndiagramtsv.service";
@@ -66,6 +67,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
     .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
     .directive('vennDiagram', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VennDiagram))
+    .directive('customOnChange', CustomOnChange)
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
