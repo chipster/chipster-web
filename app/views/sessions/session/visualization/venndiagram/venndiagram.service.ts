@@ -8,6 +8,8 @@ import VennCircle from "./venncircle";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import VennDiagramSelection from "./venndiagramselection";
 import TSVRow from "../../../../../model/tsv/TSVRow";
+import Vector2d from "../model/vector2d";
+import VennDiagramText from "./venndiagramtext";
 
 @Injectable()
 export default class VennDiagramService {
@@ -101,4 +103,47 @@ export default class VennDiagramService {
         return mapping;
     }
 
+    /*
+     * @description: find out position for text containing circles filename and its item count
+     */
+    getVennCircleFilenamePoint(vennCircle: VennCircle, visualizationAreaCenter: Point): Point {
+        if(vennCircle.circle.center.x === visualizationAreaCenter.x) {
+            return new Point(visualizationAreaCenter.x - vennCircle.circle.radius * 0.5, vennCircle.circle.center.y - vennCircle.circle.radius - 3);
+        } else if(vennCircle.circle.center.x < visualizationAreaCenter.x) {
+            return new Point(vennCircle.circle.center.x - vennCircle.circle.radius * 1.2, vennCircle.circle.center.y + vennCircle.circle.radius + 5);
+        } else {
+            return new Point(vennCircle.circle.center.x + vennCircle.circle.radius * 0.8, vennCircle.circle.center.y + vennCircle.circle.radius + 5);
+        }
+    }
+
+    getVennDiagramSegmentTexts(vennCircles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
+        return vennCircles.length === 2 ? this.getTwoVennDiagramSegmentTexts(vennCircles, visualizationAreaCenter) : this.getThreeVennDiagramSegmentTexts(vennCircles, visualizationAreaCenter);
+    }
+
+    /*
+     * @description: get position for venn diagrams segment where the count of it's items is displayed
+     */
+    getTwoVennDiagramSegmentTexts(circles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
+        let result = [];
+        const circle1 = circles[0];
+        const circle2 = circles[1];
+
+        //intersection
+        let intersectionData = this.getDataIntersection([circle1, circle2], circles);
+        result.push(new VennDiagramText(intersectionData.length.toString(), visualizationAreaCenter));
+
+        // left circle
+        let circle1Data = this.getDataIntersection([circle1], [circle2]);
+        result.push(new VennDiagramText(circle1Data.length.toString(), new Point(circle1.circle.center.x - circle1.circle.radius * 0.5, circle1.circle.center.y)));
+
+        // right circle
+        let circle2Data = this.getDataIntersection([circle2], [circle1]);
+        result.push(new VennDiagramText(circle2Data.length.toString(), new Point(circle2.circle.center.x + circle2.circle.radius * 0.5, circle2.circle.center.y)));
+
+        return result;
+    }
+
+    getThreeVennDiagramSegmentTexts(circles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
+        return [];
+    }
 }

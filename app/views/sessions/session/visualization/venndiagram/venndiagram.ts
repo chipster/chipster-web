@@ -12,6 +12,7 @@ import UtilsService from "../../../../../services/utils.service";
 import VennCircle from "./venncircle";
 import SessionDataService from "../../sessiondata.service";
 import VennDiagramSelection from "./venndiagramselection";
+import VennDiagramText from "./venndiagramtext";
 
 @Component({
     selector: 'vennDiagram',
@@ -26,6 +27,8 @@ export class VennDiagram {
     vennCircles: Array<VennCircle>;
     diagramSelection: VennDiagramSelection = new VennDiagramSelection();
     compareBy: string;
+    symbolComparingEnabled: boolean;
+    identifierComparingEnabled: boolean;
 
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
@@ -34,19 +37,24 @@ export class VennDiagram {
     }
 
     ngOnInit() {
-        this.compareBy = 'identifier';
-
         const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
         const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId));
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)
                 .map( (tsv: any) => d3.tsv.parseRows(tsv.data))
-                .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, datasetIds[index]))
+                .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name))
                 .value();
-             this.drawVennDiagram(this.files);
-        });
 
+            this.symbolComparingEnabled = this.enableComparing('symbol');
+            this.identifierComparingEnabled = this.enableComparing('identifier');
+            this.compareBy = this.identifierComparingEnabled ? 'identifier' : 'symbol';
+            this.drawVennDiagram(this.files);
+        });
+    }
+
+    enableComparing(key: string): boolean {
+        return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key) );
     }
 
     drawVennDiagram(files: Array<TSVFile>) {
@@ -84,8 +92,17 @@ export class VennDiagram {
             .attr('opacity', 0.4)
             .attr('fill', (d: VennCircle, i: number) => colors(i.toString()));
 
-        //draw text on venn diagram circles
-
+        // Add filenames for each venn diagram circles and item counts in each segment
+        let circleTextsGroup = svg.append('g').attr('id', 'circleTextsGroup');
+        let circleTexts = this.getVennCircleFileNameDescriptor(this.vennCircles, visualizationArea);
+        circleTexts = circleTexts.concat(this.venndiagramService.getVennDiagramSegmentTexts(this.vennCircles, visualizationArea.center));
+        circleTextsGroup.selectAll('.text')
+            .data(circleTexts)
+            .enter()
+            .append('text')
+            .attr('x', (d) => d.position.x)
+            .attr('y', (d) => d.position.y)
+            .text( (d) => d.text);
 
         // selection group
         let selectionGroup = svg.append('g').attr('id', 'vennselections');
@@ -119,7 +136,10 @@ export class VennDiagram {
                 this.diagramSelection.addSelection(datasetIds, values);
             }
         });
+    }
 
+    getVennCircleFileNameDescriptor(vennCircles: Array<VennCircle>, visualizationArea: any): Array<any> {
+        return vennCircles.map( (vennCircle: VennCircle) => new VennDiagramText(vennCircle.filename, this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center)) );
     }
 
     getSelectionDescriptor(allVennCircles: Array<VennCircle>, selectionVennCircles: Array<VennCircle>, circleRadius, visualizationArea) {
@@ -141,7 +161,7 @@ export class VennDiagram {
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
         const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
-        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.getColumnDataByHeaderKey(this.compareBy), circleCenters[index], radius));
+        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.filename, file.getColumnDataByHeaderKey(this.compareBy), circleCenters[index], radius));
     }
 
     compareIntersectionBy(str: string): void {

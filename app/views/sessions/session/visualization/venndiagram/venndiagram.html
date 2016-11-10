@@ -10,10 +10,12 @@
             <h6>Common denominator</h6>
             <button (click)="compareIntersectionBy('identifier')"
                     [disabled]="compareBy === 'identifier'"
-                    class="btn btn-default">Identifier</button>
+                    class="btn btn-default"
+                    *ngIf="identifierComparingEnabled">Identifier</button>
             <button (click)="compareIntersectionBy('symbol')"
                     [disabled]="compareBy === 'symbol'"
-                    class="btn btn-default">Symbol</button>
+                    class="btn btn-default"
+                    *ngIf="symbolComparingEnabled">Symbol</button>
 
             <div *ngIf="diagramSelection.values.length > 0">
                 <button class="btn btn-default" (click)="createNewDataset()">Create new dataset</button>

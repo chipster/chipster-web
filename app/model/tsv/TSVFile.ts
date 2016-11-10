@@ -7,15 +7,15 @@ export default class TSVFile {
 
     public headers: TSVHeaders;
     public body: TSVBody;
-    public datasetId: string;
 
-    constructor(tsv: Array<Array<string>>, datasetId: string) {
+    constructor(tsv: Array<Array<string>>, public datasetId: string, public filename: string) {
         // normalize header-row in tsv-file so that if headers are missing a column
         // or identifier is indicated by an empty string
         const normalizedHeaders = this.getNormalizeHeaders(tsv);
         this.headers = new TSVHeaders(normalizedHeaders);
         this.body = new TSVBody(_.tail(tsv));
-        this.datasetId = datasetId;
+        datasetId;
+        filename;
     }
 
     /*

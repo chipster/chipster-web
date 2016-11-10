@@ -6,10 +6,10 @@ export default class VennCircle {
 
     data: Array<string>;
     circle: Circle;
-    datasetId: string;
 
-    constructor(datasetId: string, data: Array<string>, center: Point, radius: number) {
-        this.datasetId = datasetId;
+    constructor(public datasetId: string, public filename: string, data: Array<string>, center: Point, radius: number) {
+        datasetId;
+        filename;
         this.data = _.uniq(data);
         this.circle = new Circle(center, radius);
     }

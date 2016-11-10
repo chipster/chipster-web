@@ -1,11 +1,9 @@
-
-
 import {Injectable} from "@angular/core";
 import Point from "../model/point";
 import Circle from "../model/circle";
 import VennDiagramUtils from "./venndiagramutils";
-import * as _ from 'lodash';
 import VennCircle from "./venncircle";
+import VennDiagramText from "./venndiagramtext";
 
 @Injectable()
 export default class TwoCircleVennDiagramService {
@@ -50,5 +48,6 @@ export default class TwoCircleVennDiagramService {
         A ${radius},${radius} 0 0,1 ${intersections.point2.x},${intersections.point2.y} 
         A ${radius},${radius} 0 0,1 ${intersections.point1.x},${intersections.point1.y}`;
     }
+
 
 }
