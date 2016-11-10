@@ -125,25 +125,65 @@ export default class VennDiagramService {
      */
     getTwoVennDiagramSegmentTexts(circles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
         let result = [];
-        const circle1 = circles[0];
-        const circle2 = circles[1];
+
+        const leftCircle = (circles[0].circle.center.x < visualizationAreaCenter.x) ? circles[0] : circles[1];
+        const rightCircle = (circles[0].circle.center.x > visualizationAreaCenter.x) ? circles[0] : circles[1];
 
         //intersection
-        let intersectionData = this.getDataIntersection([circle1, circle2], circles);
-        result.push(new VennDiagramText(intersectionData.length.toString(), visualizationAreaCenter));
+        const intersectionCount = this.getSelectionData(circles, []).length.toString();
+        result.push(new VennDiagramText(intersectionCount, visualizationAreaCenter));
 
         // left circle
-        let circle1Data = this.getDataIntersection([circle1], [circle2]);
-        result.push(new VennDiagramText(circle1Data.length.toString(), new Point(circle1.circle.center.x - circle1.circle.radius * 0.5, circle1.circle.center.y)));
+        const leftCircleCount = this.getSelectionData([leftCircle], [rightCircle]).length.toString();
+        const leftCirclePosition = new Point(leftCircle.circle.center.x - leftCircle.circle.radius * 0.5, leftCircle.circle.center.y);
+        result.push(new VennDiagramText(leftCircleCount, leftCirclePosition));
 
         // right circle
-        let circle2Data = this.getDataIntersection([circle2], [circle1]);
-        result.push(new VennDiagramText(circle2Data.length.toString(), new Point(circle2.circle.center.x + circle2.circle.radius * 0.5, circle2.circle.center.y)));
+        const rightCircleCount = this.getSelectionData([rightCircle], [leftCircle]).length.toString();
+        const rightCirclePosition = new Point(rightCircle.circle.center.x + rightCircle.circle.radius * 0.5, rightCircle.circle.center.y);
+        result.push(new VennDiagramText(rightCircleCount, rightCirclePosition));
 
         return result;
     }
 
     getThreeVennDiagramSegmentTexts(circles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
-        return [];
+        let result = [];
+        const radius = circles[0].circle.radius;
+
+        let circlesSortedByXAxis = _.sortBy(circles, (circle: VennCircle) => circle.circle.center.x);
+
+        // circles sorted by x-axis value
+        const bottomLeftCircle = circlesSortedByXAxis[0];
+        const topCircle = circlesSortedByXAxis[1];
+        const bottomRightCircle = circlesSortedByXAxis[2];
+
+        const intersectionAllCirclesCount = this.getSelectionData(circles, []).length.toString();
+        result.push(new VennDiagramText(intersectionAllCirclesCount, visualizationAreaCenter));
+
+        const intersectionBottomLeftTopCirclesCount = this.getSelectionData([bottomLeftCircle, topCircle], [bottomRightCircle]).length.toString();
+        const intersectionBottomLeftTopCirclesPosition = new Point(visualizationAreaCenter.x - radius * 0.6, visualizationAreaCenter.y - radius * 0.2);
+        result.push(new VennDiagramText(intersectionBottomLeftTopCirclesCount, intersectionBottomLeftTopCirclesPosition));
+
+        const intersectionBottomRightTopCirclesCount = this.getSelectionData([topCircle, bottomRightCircle], [bottomLeftCircle]).length.toString();
+        const intersectionBottomRightTopCirclesPosition = new Point(visualizationAreaCenter.x + radius * 0.6, visualizationAreaCenter.y - radius * 0.2);
+        result.push(new VennDiagramText(intersectionBottomRightTopCirclesCount, intersectionBottomRightTopCirclesPosition));
+
+        const intersectionBottomRightBottomLeftCirclesCount = this.getSelectionData([bottomLeftCircle, bottomRightCircle], [topCircle]).length.toString();
+        const intersectionBottomRightBottomLeftCirclesPosition = new Point(visualizationAreaCenter.x , visualizationAreaCenter.y + radius);
+        result.push(new VennDiagramText(intersectionBottomRightBottomLeftCirclesCount, intersectionBottomRightBottomLeftCirclesPosition));
+
+        const bottomLeftCircleCount = this.getSelectionData([bottomLeftCircle], [topCircle, bottomRightCircle]).length.toString();
+        const bottomLeftCirclePosition = new Point(bottomLeftCircle.circle.center.x - radius * 0.5, bottomLeftCircle.circle.center.y);
+        result.push(new VennDiagramText(bottomLeftCircleCount, bottomLeftCirclePosition));
+
+        const topCircleCount = this.getSelectionData([topCircle], [bottomLeftCircle, bottomRightCircle]).length.toString();
+        const topCirclePosition = new Point(topCircle.circle.center.x, topCircle.circle.center.y - radius * 0.3);
+        result.push(new VennDiagramText(topCircleCount, topCirclePosition));
+
+        const bottomRightCircleCount = this.getSelectionData([bottomRightCircle], [topCircle, bottomLeftCircle]).length.toString();
+        const bottomRightCirclePosition = new Point(bottomRightCircle.circle.center.x + radius * 0.3, bottomRightCircle.circle.center.y);
+        result.push(new VennDiagramText(bottomRightCircleCount, bottomRightCirclePosition));
+
+        return result;
     }
 }

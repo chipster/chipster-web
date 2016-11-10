@@ -94,8 +94,10 @@ export class VennDiagram {
 
         // Add filenames for each venn diagram circles and item counts in each segment
         let circleTextsGroup = svg.append('g').attr('id', 'circleTextsGroup');
-        let circleTexts = this.getVennCircleFileNameDescriptor(this.vennCircles, visualizationArea);
-        circleTexts = circleTexts.concat(this.venndiagramService.getVennDiagramSegmentTexts(this.vennCircles, visualizationArea.center));
+        let filenameTexts = this.getVennCircleFileNameDescriptor(this.vennCircles, visualizationArea);
+        let segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(this.vennCircles, visualizationArea.center);
+
+        let circleTexts = [...filenameTexts, ...segmentItemCountTexts];
         circleTextsGroup.selectAll('.text')
             .data(circleTexts)
             .enter()
