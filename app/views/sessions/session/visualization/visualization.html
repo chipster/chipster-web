@@ -1,6 +1,10 @@
+<h4>Visualizations</h4>
+
 <div id="visualization-box" class="chipster-highlight">
 
-    <uib-tabset active="$ctrl.active">
+    <h6 ng-if="!$ctrl.active">No suitable visualization for current dataset selections</h6>
+
+    <uib-tabset ng-if="$ctrl.active" active="$ctrl.active">
 
         <uib-tab index="'text'"
                  ng-if="$ctrl.isCompatibleVisualization('text')">
