@@ -55,10 +55,19 @@ class VisualizationBoxComponent {
             return Utils.getFileExtension(dataset.name);
         });
 
-        return _.chain(this.visualizations)
-            .filter( item => _.some( item.extensions, (extension: string) => _.includes(datasetFileExtensions, extension) ) )
+        const selectionCount = datasetFileExtensions.length;
+        const sameFileTypes = _.uniq(datasetFileExtensions).length === 1;
+
+        return sameFileTypes ? _.chain(this.visualizations)
+            .filter( visualization => _.some( visualization.extensions, (extension: string) => {
+
+                let appropriateInputFileCount = (visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, selectionCount));
+                let visualizationSupportsFileType = _.includes(datasetFileExtensions, extension);
+
+                return appropriateInputFileCount && visualizationSupportsFileType;
+            }) )
             .map( item => item.id)
-            .value();
+            .value() : [];
     }
 
 }

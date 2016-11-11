@@ -116,6 +116,9 @@ export default class VennDiagramService {
         }
     }
 
+    /*
+     * @description: get count of items and positions for texts in each segment
+     */
     getVennDiagramSegmentTexts(vennCircles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
         return vennCircles.length === 2 ? this.getTwoVennDiagramSegmentTexts(vennCircles, visualizationAreaCenter) : this.getThreeVennDiagramSegmentTexts(vennCircles, visualizationAreaCenter);
     }
@@ -146,6 +149,9 @@ export default class VennDiagramService {
         return result;
     }
 
+    /*
+     * @description: get position for venn diagrams segment where the count of it's items is displayed
+     */
     getThreeVennDiagramSegmentTexts(circles: Array<VennCircle>, visualizationAreaCenter: Point): Array<VennDiagramText> {
         let result = [];
         const radius = circles[0].circle.radius;

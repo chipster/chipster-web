@@ -2,17 +2,6 @@
 
     <uib-tabset active="$ctrl.active">
 
-        <uib-tab index="'spreadsheet'"
-                 ng-if="$ctrl.isCompatibleVisualization('spreadsheet')">
-            <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
-            <spreadsheet-visualization
-                    ng-if="$ctrl.active === 'spreadsheet'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </spreadsheet-visualization>
-        </uib-tab>
-
         <uib-tab index="'text'"
                  ng-if="$ctrl.isCompatibleVisualization('text')">
             <uib-tab-heading><span class="glyphicon glyphicon-font"></span> Text</uib-tab-heading>
@@ -22,6 +11,17 @@
                     dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
                     selected-datasets="$ctrl.SelectionService.selectedDatasets">
             </text-visualization>
+        </uib-tab>
+
+        <uib-tab index="'spreadsheet'"
+                 ng-if="$ctrl.isCompatibleVisualization('spreadsheet')">
+            <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
+            <spreadsheet-visualization
+                    ng-if="$ctrl.active === 'spreadsheet'"
+                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
+                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
+            </spreadsheet-visualization>
         </uib-tab>
 
         <uib-tab index="'expressionprofile'"
