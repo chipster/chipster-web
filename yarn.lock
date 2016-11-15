@@ -12,6 +12,10 @@
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@angular/core/-/core-2.2.0.tgz#7a3a8592b6731a65e5a9746ce45419d86d15fe56"
 
+"@angular/forms":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@angular/forms/-/forms-2.2.0.tgz#1e11781c740445ab5d08fd54f3b0d6f25d4ba34d"
+
 "@angular/http@2.2":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@angular/http/-/http-2.2.0.tgz#7e44c820692be03b8c882531dbd697ee04a4e993"
