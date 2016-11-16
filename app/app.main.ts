@@ -1,5 +1,4 @@
 import {upgradeAdapter} from "./upgradeadapter";
-import './rxjs-operators';
 
 import {NavigationComponent} from "./views/navigation/navigation.component";
 import {LoginComponent} from "./views/login/login.component";

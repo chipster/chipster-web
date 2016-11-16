@@ -6,6 +6,7 @@ import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import {SessionData} from "../../../resources/session.resource";
+import * as _ from "lodash";
 
 export default class SessionEventService {
 

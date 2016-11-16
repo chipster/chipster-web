@@ -5,6 +5,7 @@ import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "./domainboundaries";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVFile from "../../../../../model/tsv/TSVFile";
+import * as _ from "lodash";
 
 @Injectable()
 export default class ExpressionProfileTSVService {

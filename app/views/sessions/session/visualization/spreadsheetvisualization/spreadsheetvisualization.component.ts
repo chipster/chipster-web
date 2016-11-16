@@ -1,8 +1,6 @@
 import FileResource from "../../../../../resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import {TSVReader} from "../../../../../services/TSVReader";
-import {Observable} from "rxjs";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 
 class SpreadsheetVisualizationController {
 
@@ -10,11 +8,8 @@ class SpreadsheetVisualizationController {
 
     datasetId: string;
 
-    constructor(private fileResource: FileResource,
-                private sessionDataService: SessionDataService,
-                private tsvReader: TSVReader){
-
-    }
+    constructor(private sessionDataService: SessionDataService,
+                private tsvReader: TSVReader){}
 
     $onInit() {
 

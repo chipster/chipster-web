@@ -14,6 +14,7 @@ import SessionDataService from "../../sessiondata.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
 
+
 @Component({
     selector: 'vennDiagram',
     templateUrl: 'app/views/sessions/session/visualization/venndiagram/venndiagram.html'

@@ -8,8 +8,8 @@ import VennCircle from "./venncircle";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import VennDiagramSelection from "./venndiagramselection";
 import TSVRow from "../../../../../model/tsv/TSVRow";
-import Vector2d from "../model/vector2d";
 import VennDiagramText from "./venndiagramtext";
+import * as _ from "lodash";
 
 @Injectable()
 export default class VennDiagramService {

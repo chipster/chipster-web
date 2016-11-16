@@ -10,6 +10,7 @@ import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
 import ExpressionProfileTSVService from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
+import * as _ from "lodash";
 
 class ExpressionProfile {
 
