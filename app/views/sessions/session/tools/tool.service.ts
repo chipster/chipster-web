@@ -64,7 +64,6 @@ export default class ToolService{
 
     bindInputs(tool: Tool, datasets: Dataset[]) : InputBinding[] {
 
-        console.log("binding inputs for " + tool.name.displayName);
         // copy the array so that we can remove items from it
         var unboundDatasets = datasets.slice();
 
@@ -98,10 +97,6 @@ export default class ToolService{
 
             // binding this input ok
             if (found) {
-                console.log("binding " + toolInput.name.id + ":");
-                for (let dataset of compatibleDatasets) {
-                    console.log("\t" + dataset.name);
-                }
                 inputBindings.push({
                     toolInput: toolInput,
                     datasets: compatibleDatasets
@@ -112,7 +107,7 @@ export default class ToolService{
             // binding this input failed
             else {
                 // suitable datasets not found
-                console.log("binding " + toolInput.name.id + " failed");
+                console.warn("binding " + toolInput.name.id + " failed");
                 return null;
             }
         }

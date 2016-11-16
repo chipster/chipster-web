@@ -50,7 +50,9 @@ export class VennDiagram {
             this.identifierComparingEnabled = this.enableComparing('identifier');
             this.compareBy = this.identifierComparingEnabled ? 'identifier' : 'symbol';
             this.drawVennDiagram(this.files);
-        });
+        }, (error: any) => {
+            console.error('Fetching TSV-files failed', error);
+        })
     }
 
     enableComparing(key: string): boolean {

@@ -79,7 +79,6 @@
     "font-awesome": "^4.6.3",
     "handsontable": "^0.25.0",
     "jquery": "^2.2.4",
-    "jquery-csv": "^0.8.1",
     "lodash": "^4.15.0",
     "pdfjs-dist": "^1.5.279",
     "reflect-metadata": "^0.1.3",

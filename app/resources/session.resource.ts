@@ -9,6 +9,7 @@ import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";
 import Tool from "../model/session/tool";
 import Job from "../model/session/job";
+import * as _ from "lodash";
 
 export class SessionData {
 	session: Session;

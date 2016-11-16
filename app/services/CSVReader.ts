@@ -1,4 +1,5 @@
 import FileResource from "../resources/fileresource";
+import {Observable} from "rxjs/Rx";
 
 export default class CSVReader {
 
@@ -8,27 +9,8 @@ export default class CSVReader {
         private FileResource: FileResource) {
     }
 
-   getColumns(sessionId: string, datasetId: string) {
-
-        return this.FileResource.getData(sessionId, datasetId).then( (resp: any) => {
-            
-            // we have to create the promise, because JQuery-cvs doesn't use them
-            return new Promise( (resolve: any, reject: any) => {
-
-                // parse the file data using the JQuery-cvs library
-                let parserConfig = {
-                    separator: '\t'
-                };
-
-                $['csv'].toArrays(resp.data, parserConfig, (err: any, fileArray: string[][]) => {
-                    if (fileArray) {
-                        resolve(fileArray[0]);
-                    } else {
-                        reject(err);
-                    }
-                });
-            });
-        });
-    }
+   getColumns(sessionId: string, datasetId: string): Observable<any> {
+        return Observable.fromPromise(this.FileResource.getData(sessionId, datasetId));
+   }
 
 }

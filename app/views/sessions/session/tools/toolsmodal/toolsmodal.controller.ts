@@ -8,13 +8,14 @@ import Category from "../../../../../model/session/category";
 import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
 import ToolParameter from "../../../../../model/session/toolparameter";
 import SessionDataService from "../../sessiondata.service";
-import CSVReader from "../../../../../services/CSVReader";
-
+import {Observable} from "rxjs/Rx";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import {TSVReader} from "../../../../../services/TSVReader";
 
 export default class ToolsModalController {
 
     static $inject = ['$uibModalInstance', '$uibModal', '$scope', '$filter', '$q','selectedTool', 'selectedCategory', 'selectedModule',
-        'inputBindings', 'selectedDatasets', 'ToolService', 'CSVReader','SessionDataService', 'modules', 'tools'];
+        'inputBindings', 'selectedDatasets', 'ToolService', 'TSVReader','SessionDataService', 'modules', 'tools'];
 
     private searchTool: string;
     private parameterDescription: string;
@@ -36,7 +37,7 @@ export default class ToolsModalController {
         private inputBindings: InputBinding[],
         private selectedDatasets: Dataset[],
         private toolService: ToolService,
-        private csvReader: CSVReader,
+        private tsvReader: TSVReader,
         private sessionDataService: SessionDataService,
         private modules: Module[],
         private tools: Tool[]) {
@@ -155,33 +156,7 @@ export default class ToolsModalController {
     };
 
 
-    // TODO move to service?
-    populateParameterValues(parameter: ToolParameter) {
 
-        if (!parameter.value) {
-            parameter.value = this.toolService.getDefaultValue(parameter);
-        }
-
-        if (parameter.type === 'COLUMN_SEL') {
-            this.getColumns().then( function (columns: string[]) {
-                parameter.selectionOptions = columns.map(function (column) {
-                    return {id: column};
-                });
-            });
-
-            // reset value to empty if previous or default value is now invalid
-            if (parameter.value && !this.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
-                parameter.value = '';
-            }
-        }
-
-        // TODO reset value to empty if previous or default value is now invalid
-        if (parameter.type === 'METACOLUMN_SEL') {
-            parameter.selectionOptions = this.getMetadataColumns().map( function (column) {
-                return {id: column};
-            });
-        }
-    }
 
 
     openInputsModal() {
@@ -245,30 +220,40 @@ export default class ToolsModalController {
         });
     }
 
+    // TODO move to service?
+    getDatasetHeaders() : Observable<TSVFile>[] {
+        return this.selectedDatasets.map( (dataset: Dataset) => this.tsvReader.getTSVFile(this.sessionDataService.getSessionId(), dataset.datasetId));
+    }
 
     // TODO move to service?
-    getColumns() {
-
-        var promises: any[] = [];
-        for (let dataset of this.selectedDatasets) {
-            if (this.toolService.isCompatible(dataset, 'TSVFile')) {
-                promises.push(this.csvReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId));
-            }
+    populateParameterValues(parameter: ToolParameter) {
+        if (!parameter.value) {
+            parameter.value = this.toolService.getDefaultValue(parameter);
         }
 
-        return this.$q.all(promises).then(function(columnsOfSelectedDatasets: string[][]) {
-            var columnSet = new Set<string>();
-            for (let columns of columnsOfSelectedDatasets) {
-                for (let column of columns) {
-                    columnSet.add(column);
+        if (parameter.type === 'COLUMN_SEL') {
+            Observable.forkJoin(this.getDatasetHeaders()).subscribe( (tsvFiles: Array<TSVFile>) => {
+                let columns = _.uniq( _.flatten(tsvFiles.map( (tsvFile: TSVFile) => tsvFile.headers.headers)) );
+                parameter.selectionOptions = columns.map(function (column) {
+                    return {id: column};
+                });
+
+                // reset value to empty if previous or default value is now invalid
+                if (parameter.value && !this.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+                    parameter.value = '';
                 }
-            }
 
-            return Array.from(columnSet);
+            });
 
-        }, function(e: any) {
-            console.log('failed to get columns', e);
-        });
+
+        }
+
+        // TODO reset value to empty if previous or default value is now invalid
+        if (parameter.type === 'METACOLUMN_SEL') {
+            parameter.selectionOptions = this.getMetadataColumns().map( function (column) {
+                return {id: column};
+            });
+        }
     }
 
     // TODO move to service
