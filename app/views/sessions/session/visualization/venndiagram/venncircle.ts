@@ -1,17 +1,15 @@
 
 import Circle from "../model/circle";
-import * as _ from 'lodash';
-import Point from "../model/point";
 export default class VennCircle {
 
-    data: Array<string>;
-    circle: Circle;
-
-    constructor(public datasetId: string, public filename: string, data: Array<string>, center: Point, radius: number) {
+    constructor(public datasetId: string,
+                public filename: string,
+                public data: Array<[string | undefined, string | undefined]>,
+                public circle: Circle) {
         datasetId;
         filename;
-        this.data = _.uniq(data);
-        this.circle = new Circle(center, radius);
+        data; // array of tuples containing symbol and identifier (both of which are nullable)
+        circle;
     }
 
 }

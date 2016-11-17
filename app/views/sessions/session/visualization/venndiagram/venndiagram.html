@@ -7,23 +7,35 @@
         </div>
 
         <div class="col-md-4" >
+
             <h6>Common denominator</h6>
+
             <button (click)="compareIntersectionBy('identifier')"
-                    [disabled]="compareBy === 'identifier'"
+                    [disabled]="columnKey === 'identifier'"
                     class="btn btn-default"
                     *ngIf="identifierComparingEnabled">Identifier</button>
+
             <button (click)="compareIntersectionBy('symbol')"
-                    [disabled]="compareBy === 'symbol'"
+                    [disabled]="columnKey === 'symbol'"
                     class="btn btn-default"
                     *ngIf="symbolComparingEnabled">Symbol</button>
 
             <div *ngIf="diagramSelection.values.length > 0">
                 <button class="btn btn-default" (click)="createNewDataset()">Create new dataset</button>
                 <h6>Selections: {{diagramSelection.values.length}}</h6>
-                <ol>
-                    <li *ngFor="let item of diagramSelection.values">{{item}}</li>
-                </ol>
+                <table class="table-condensed">
+                    <thead>
+                        <tr><td>Symbol</td><td>Identifier</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of diagramSelection.values">
+                            <td>{{item[0]}}</td>
+                            <td>{{item[1]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+
         </div>
 
     </div>

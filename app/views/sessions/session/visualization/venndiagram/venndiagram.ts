@@ -13,7 +13,7 @@ import VennCircle from "./venncircle";
 import SessionDataService from "../../sessiondata.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
-
+import Circle from "../model/circle";
 
 @Component({
     selector: 'vennDiagram',
@@ -27,7 +27,7 @@ export class VennDiagram {
     files: Array<TSVFile> = [];
     vennCircles: Array<VennCircle>;
     diagramSelection: VennDiagramSelection = new VennDiagramSelection();
-    compareBy: string;
+    columnKey: string;
     symbolComparingEnabled: boolean;
     identifierComparingEnabled: boolean;
 
@@ -49,16 +49,14 @@ export class VennDiagram {
 
             this.symbolComparingEnabled = this.enableComparing('symbol');
             this.identifierComparingEnabled = this.enableComparing('identifier');
-            this.compareBy = this.identifierComparingEnabled ? 'identifier' : 'symbol';
+            this.columnKey = this.identifierComparingEnabled ? 'identifier' : 'symbol';
             this.drawVennDiagram(this.files);
         }, (error: any) => {
             console.error('Fetching TSV-files failed', error);
         })
     }
 
-    enableComparing(key: string): boolean {
-        return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key) );
-    }
+
 
     drawVennDiagram(files: Array<TSVFile>) {
         let visualizationWidth = document.getElementById('visualization').offsetWidth;
@@ -71,7 +69,6 @@ export class VennDiagram {
         };
 
         this.vennCircles = this.createVennCircles(files, visualizationArea.center, circleRadius);
-
         // color category
         const colors = d3.scale.category10();
 
@@ -98,7 +95,7 @@ export class VennDiagram {
         // Add filenames for each venn diagram circles and item counts in each segment
         let circleTextsGroup = svg.append('g').attr('id', 'circleTextsGroup');
         let filenameTexts = this.getVennCircleFileNameDescriptor(this.vennCircles, visualizationArea);
-        let segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(this.vennCircles, visualizationArea.center);
+        let segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(this.vennCircles, visualizationArea.center, this.columnKey);
 
         let circleTexts = [...filenameTexts, ...segmentItemCountTexts];
         circleTextsGroup.selectAll('.text')
@@ -133,7 +130,7 @@ export class VennDiagram {
                     .attr('stroke', 'black')
                     .attr('stroke-width', 1);
 
-                let values = this.venndiagramService.getDataIntersection(selectionVennCircles, this.vennCircles);
+                let values = this.venndiagramService.getDataIntersection(selectionVennCircles, this.vennCircles, this.columnKey);
                 let datasetIds = selectionVennCircles.map( (vennCircle: VennCircle) => vennCircle.datasetId);
                 if(!isShift) {
                     this.diagramSelection.clearSelection();
@@ -159,19 +156,28 @@ export class VennDiagram {
 
     createNewDataset(): void {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
-        let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.compareBy);
+        let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
         let tsvData = d3.tsv.formatRows(data);
         this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData);
     }
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
         const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
-        return _.map(files ,(file:TSVFile, index: number) => new VennCircle(file.datasetId, file.filename, file.getColumnDataByHeaderKey(this.compareBy), circleCenters[index], radius));
+        return files.map( (file:TSVFile, index: number) => new VennCircle(file.datasetId,
+                                                                            file.filename,
+                                                                            file.getColumnDataByHeaderKeys(['symbol', 'identifier']),
+                                                                            new Circle( circleCenters[index], radius)));
+    }
+
+    enableComparing(key: string): boolean {
+        return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key) );
     }
 
     compareIntersectionBy(str: string): void {
-        this.compareBy = str;
+        this.columnKey = str;
         this.resetSelection();
     }
+
+
 
 }

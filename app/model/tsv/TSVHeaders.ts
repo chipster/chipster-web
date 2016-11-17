@@ -22,6 +22,7 @@ export default class TSVHeaders {
 
     /*
      * @description: Get index for the key
+     * @return: index of header and -1 if not found
      */
     public getColumnIndexByKey(key: string): number {
         return _.findIndex(this.headers, (header: string) => header === key);

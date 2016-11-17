@@ -33,7 +33,15 @@ export default class TSVFile {
      */
     public getColumnDataByHeaderKey( key: string ): Array<string> {
         let columnIndex = this.getColumnIndex(key);
-        return _.map(this.body.rows, (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
+        return this.body.rows.map( (tsvRow: TSVRow) => tsvRow.row[columnIndex]);
+    }
+
+    /*
+     * @description: get columndata of multiple headers.
+     */
+    public getColumnDataByHeaderKeys( keys: Array<string> ): Array<Array<string>> {
+        const columnIndexes = keys.map( (key: string) => this.getColumnIndex(key));
+        return this.body.rows.map( (tsvRow: TSVRow) => columnIndexes.map( (index: number) => tsvRow.row[index]));
     }
 
     /*
