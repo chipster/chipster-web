@@ -1,4 +1,6 @@
 import Dataset from "../model/session/dataset";
+import * as _ from "lodash";
+
 export default class UtilsService {
 
     static getFileExtension(name: string) {

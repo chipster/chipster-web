@@ -3,8 +3,7 @@ import {Injectable} from "@angular/core";
 import Point from "../model/point";
 import Circle from "../model/circle";
 import VennDiagramUtils from "./venndiagramutils";
-import VennCircle from "./venncircle";
-import VennDiagramText from "./venndiagramtext";
+import * as _ from "lodash";
 
 @Injectable()
 export default class ThreeCircleVennDiagramService {

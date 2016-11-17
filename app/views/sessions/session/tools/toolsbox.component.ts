@@ -9,6 +9,7 @@ import InputBinding from "../../../../model/session/inputbinding";
 import SelectionService from "../selection.service";
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import Utils from "../../../../services/utils.service";
+import * as _ from "lodash";
 
 class ToolsBox {
 

@@ -2,7 +2,7 @@ import Tool from "../../../../../model/session/tool";
 import Dataset from "../../../../../model/session/dataset";
 import InputBinding from "../../../../../model/session/inputbinding";
 import ToolService from "../tool.service";
-
+import * as _ from "lodash";
 
 export default class InputsModalController {
 

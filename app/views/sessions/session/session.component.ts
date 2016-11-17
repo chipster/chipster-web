@@ -9,6 +9,7 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import { SessionData } from "../../../resources/session.resource";
 import UtilsService from "../../../services/utils.service";
+import * as _ from "lodash";
 
 class SessionComponent {
 

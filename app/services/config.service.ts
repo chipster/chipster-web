@@ -2,6 +2,7 @@
 import * as configConstants from '../app.constants';
 import ConfigurationResource from "../resources/configurationresource";
 import {Injectable, Inject} from "@angular/core";
+import * as _ from "lodash";
 
 class Services {
     sessionDb: string;
