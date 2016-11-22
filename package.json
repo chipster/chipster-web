@@ -1,57 +1,16 @@
 {
-  "name": "chipster-web",
-  "version": "1.0.0",
-  "description": "Chipster Web client for data processing and visualization.",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "tsc": "tsc",
-    "tsc:w": "tsc -w",
-    "lite": "lite-server",
-    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" ",
-    "lite-server-test": "lite-server --config=test/liteserver-test-config.json",
-    "test": "tsc && concurrently \"npm run tsc:w\" \"npm run lite-server-test\" ",
-    "lint": "tslint -c ./tslint.json './app/**/*.ts'"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chipster/chipster-web.git"
-  },
-  "author": "Rumana Quazi",
+  "name": "testing",
+  "version": "0.0.0",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chipster/chipster-web/issues"
+  "angular-cli": {},
+  "scripts": {
+    "start": "ng serve",
+    "lint": "tslint \"src/**/*.ts\"",
+    "test": "ng test",
+    "pree2e": "webdriver-manager update",
+    "e2e": "protractor"
   },
-  "homepage": "https://github.com/chipster/chipster-web#readme",
-  "devDependencies": {
-    "@types/angular": "^1.5.16",
-    "@types/angular-local-storage": "^0.1.33",
-    "@types/angular-resource": "^1.5.6",
-    "@types/angular-route": "^1.3.2",
-    "@types/angular-ui-bootstrap": "^0.13.35",
-    "@types/angular-websocket": "^2.0.4",
-    "@types/core-js": "^0.9.34",
-    "@types/d3": "^3.5.36",
-    "@types/handsontable": "^0.24.18",
-    "@types/jquery": "^2.0.33",
-    "@types/lodash": "^4.14.37",
-    "@types/ng-flow": "0.0.29",
-    "@types/restangular": "^1.5.33",
-    "@types/urijs": "^1.15.31",
-    "browser-sync": "^2.13.0",
-    "codelyzer": "0.0.28",
-    "concurrently": "^2.1.0",
-    "http-server": "^0.9.0",
-    "jasmine-core": "^2.3.4",
-    "karma": "^0.13.9",
-    "karma-chrome-launcher": "^0.2.0",
-    "karma-jasmine": "^0.3.6",
-    "less": "^2.7.1",
-    "lite-server": "^2.2.2",
-    "tslint": "^3.15.1",
-    "typescript": "^2.0.3"
-  },
+  "private": true,
   "dependencies": {
     "@angular/common": "2.2",
     "@angular/compiler": "2.2",
@@ -73,7 +32,7 @@
     "angular-websocket": "^2.0.0",
     "bootstrap": "^3.3.6",
     "core-js": "^2.4.0",
-    "d3": "^3.5.17",
+    "d3": "3.5.17",
     "d3-context-menu": "^0.1.2",
     "d3-tip": "^0.6.7",
     "font-awesome": "^4.6.3",
@@ -86,6 +45,39 @@
     "rxjs": "5.0.0-beta.12",
     "systemjs": "^0.19.31",
     "urijs": "^1.18.1",
-    "zone.js": "^0.6.25"
+    "zone.js": "^0.6.25",
+    "ts-helpers": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/angular": "^1.5.16",
+    "@types/angular-local-storage": "^0.1.33",
+    "@types/angular-resource": "^1.5.6",
+    "@types/angular-route": "^1.3.2",
+    "@types/angular-ui-bootstrap": "^0.13.35",
+    "@types/angular-websocket": "^2.0.4",
+    "@types/d3": "^3.5.36",
+    "@types/handsontable": "^0.24.18",
+    "@types/jquery": "^2.0.33",
+    "@types/lodash": "^4.14.37",
+    "@types/ng-flow": "0.0.29",
+    "@types/restangular": "^1.5.33",
+    "@types/urijs": "^1.15.31",
+    "@angular/compiler-cli": "^2.1.0",
+    "@types/jasmine": "^2.2.30",
+    "@types/node": "^6.0.42",
+    "angular-cli": "1.0.0-beta.20-4",
+    "codelyzer": "~1.0.0-beta.3",
+    "jasmine-core": "2.4.1",
+    "jasmine-spec-reporter": "2.5.0",
+    "karma": "1.2.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-cli": "^1.0.1",
+    "karma-jasmine": "^1.0.2",
+    "karma-remap-istanbul": "^0.2.1",
+    "protractor": "4.0.9",
+    "ts-node": "1.2.1",
+    "tslint": "3.13.0",
+    "typescript": "~2.0.3",
+    "webdriver-manager": "10.2.5"
   }
 }
