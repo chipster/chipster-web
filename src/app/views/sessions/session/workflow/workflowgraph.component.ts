@@ -15,27 +15,10 @@ import SelectionService from "../selection.service";
 import * as d3 from 'd3';
 import * as d3Tip from 'd3-tip';
 import * as d3ContextMenu from 'd3-context-menu';
-
-
 import UtilsService from "../../../../services/utils.service";
-
-interface DatasetNode extends Node {
-	dataset: Dataset;
-	datasetId?: string;
-	name: string;
-	extension: string;
-}
-
-interface JobNode extends Node {
-	job: Job;
-	fgColor: string;
-	spin: boolean;
-}
-
-interface Link {
-	source: DatasetNode;
-	target: Node;
-}
+import {DatasetNode} from "./dataset-node";
+import {JobNode} from "./job-node";
+import {Link} from "./link";
 
 class WorkflowGraphController {
 

@@ -11,7 +11,7 @@ class VisualizationBoxComponent {
 
     datasets: Array<Dataset>;
     active: string;
-    visualizations = visualizations;
+    visualizations: Array<any> = visualizations;
 
     constructor(
         private SelectionService: SelectionService,

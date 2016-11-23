@@ -1,5 +1,5 @@
 import {upgradeAdapter} from "app/upgradeadapter";
-import angular from "angular";
+import * as angular from 'angular';
 
 import {NavigationComponent} from "app/views/navigation/navigation.component";
 import {LoginComponent} from "app/views/login/login.component";
@@ -58,7 +58,6 @@ import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 
 import ExpressionProfileTSVService from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
-import VennDiagramTSVService from "app/views/sessions/session/visualization/venndiagram/venndiagramtsv.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
@@ -97,7 +96,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ToolService', ToolService)
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
-    // .service('VennDiagramTSVService', upgradeAdapter.downgradeNg2Provider(VennDiagramTSVService))
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
     .filter('isoDate', isoDateFilter)
