@@ -44,7 +44,6 @@ class SessionComponent {
 
     $onInit() {
         this.sessionData = this.$route.current.locals.sessionData;
-
         this.sessionDataService.onSessionChange( (event: any, oldValue: any, newValue: any): void => {
             if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
                 this.$scope.$apply(function () {

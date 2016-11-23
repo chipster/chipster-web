@@ -3,6 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import CSVReader from "../../../../../services/CSVReader";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
+import * as _ from "lodash";
 
 interface Row extends Array<string> {
     // store datasetId and columnName as properties to hide them from the table
@@ -114,7 +115,7 @@ class PhenodataVisualizationController {
 
     resetTsv(dataset: Dataset) {
 
-        this.CSVReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).then((fileHeaders: string[]) => {
+        this.CSVReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((fileHeaders: string[]) => {
             var metadata: MetadataEntry[] = [];
 
             var chipHeaders = fileHeaders.filter( function(header) {
@@ -248,7 +249,8 @@ class PhenodataVisualizationController {
 
         this.datasets.forEach((dataset: Dataset) => {
             var newMetadata = metadataMap.get(dataset.datasetId);
-            if (updateAll || !angular.equals(newMetadata, dataset.metadata)) {
+
+            if (updateAll || !_.isEqual(newMetadata, dataset.metadata)) {
                 dataset.metadata = newMetadata;
                 this.sessionDataService.updateDataset(dataset);
             }
@@ -261,7 +263,7 @@ class PhenodataVisualizationController {
             var headers = this.getHeaders(this.datasets);
             var array = this.getRows(this.datasets, headers);
 
-            if (!angular.equals(headers, this.headers)) {
+            if (!_.isEqual(headers, this.headers)) {
                 this.headers = headers;
 
                 // remove old table if this is an update

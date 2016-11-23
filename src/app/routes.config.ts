@@ -1,5 +1,6 @@
 import IRoute = angular.route.IRoute;
 import SessionResource from "./resources/session.resource";
+import {SessionData} from "./resources/session.resource";
 
 interface IAuthRoute extends IRoute {
     authenticated: boolean;

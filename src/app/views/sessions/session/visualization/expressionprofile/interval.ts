@@ -1,4 +1,4 @@
-import {Line} from "./line";
+import Line from "./line";
 import Rectangle from "./rectangle";
 export default class Interval {
 

@@ -66,7 +66,7 @@ export default class VennDiagramService {
             .map( (file: TSVFile) => file.headers.headers)
             .flatten()
             .uniq()
-            .value();
+            .value() as Array<string>;
 
         let body = [];
         _.forEach(selection.datasetIds, (datasetId: string) => {
@@ -87,7 +87,7 @@ export default class VennDiagramService {
     /*
      * @description: map given tsv bodyrows items to new indexes in
      */
-    rearrangeCells(tsvRows: Array<TSVRow>, sortingMap: Map): Array<Array<string>> {
+    rearrangeCells(tsvRows: Array<TSVRow>, sortingMap: Map<number, number>): Array<Array<string>> {
         return tsvRows.map( (tsvRow: TSVRow) => {
             let sortedRow = [];
 

@@ -1,5 +1,6 @@
 import SessionDataService from "../../sessiondata.service";
 import {TSVReader} from "../../../../../services/TSVReader";
+import * as d3 from "d3";
 
 class SpreadsheetVisualizationController {
 

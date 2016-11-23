@@ -32,9 +32,10 @@ class ExpressionProfile {
     }
 
     $onInit() {
+        const datasetName = this.selectedDatasets[0].name;
         this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsv.parseRows(result.data);
-            this.tsv = new TSVFile(parsedTSV, this.datasetId);
+            this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
             this.drawLineChart(this.tsv);
         });
 
@@ -106,8 +107,9 @@ class ExpressionProfile {
         // Paths
         let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
         let lineGenerator = d3.svg.line()
-            .x( (d:any,i:number) => xScale( headers[i]) )
+            .x( (d: [number,number], i:number) => parseFloat(xScale( headers[i]).toString() ))
             .y( (d:any) => yScale(d) );
+
         let color = d3.scale.category20();
 
 
@@ -150,9 +152,9 @@ class ExpressionProfile {
             });
 
         // path animation
-        paths.each(function(d) { d.totalLength = this.getTotalLength(); })
-            .attr("stroke-dasharray", function(d) { return d.totalLength + " " + d.totalLength; })
-            .attr("stroke-dashoffset", function(d) { return d.totalLength; })
+        paths.each(function(d: any) { d.totalLength = this.getTotalLength(); })
+            .attr("stroke-dasharray", function(d:any) { return d.totalLength + " " + d.totalLength; })
+            .attr("stroke-dashoffset", function(d:any) { return d.totalLength; })
             .transition()
             .duration(2000)
             .ease('linear')
@@ -221,8 +223,8 @@ class ExpressionProfile {
                     intervals.push(new Interval(intervalStartIndex, lines, rectangle));
                 }
 
-                let ids: Array<number> = []; // path ids found in each interval (not unique list)
-                for (let interval: Interval of intervals ) {
+                let ids: Array<string> = []; // path ids found in each interval (not unique list)
+                for (let interval of intervals ) {
                     let intersectingLines = _.filter(interval.lines, line => {
                         return that.expressionProfileService.isIntersecting(line, interval.rectangle);
                     });

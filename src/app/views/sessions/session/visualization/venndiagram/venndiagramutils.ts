@@ -9,7 +9,7 @@ export default class VennDiagramUtils {
     /*
      * @description: Intersection points of two circles
      */
-    static getIntersections(circle1: Circle, circle2: Circle): PointPair {
+    static getIntersections(circle1: Circle, circle2: Circle): PointPair | undefined {
 
         /* dx and dy are the vertical and horizontal distances between
          * the circle centers.
@@ -22,7 +22,7 @@ export default class VennDiagramUtils {
 
         /* Check if circles do not intersect or circle2 circle is inside ancircle2 */
         if ( (distance > (circle1.radius + circle2.radius)) || (distance < Math.abs(circle1.radius - circle2.radius)) ) {
-            return [];
+            return undefined;
         }
 
         /* 'point 2' is the point where the line through the circle
