@@ -12,6 +12,7 @@ import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../resources/fileresource";
 import Session from "../../../model/session/session";
 import * as _ from "lodash";
+import * as angular from 'angular';
 
 export default class SessionDataService {
 

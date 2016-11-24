@@ -3,7 +3,7 @@ import SessionResource from "../../resources/session.resource";
 import SessionWorkerResource from "../../resources/sessionworker.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../resources/session.resource";
-import * as angular from "angular";
+import * as angular from 'angular';
 
 class SessionListController {
 
