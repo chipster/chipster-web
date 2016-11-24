@@ -129,7 +129,7 @@ class WorkflowGraphController {
 		}, Comparison.Deep));
 	}
 
-	$onChanges(changes: ng.IChangesObject) {
+	$onChanges(changes: ng.IChangesObject<string>) {
 		if (!this.svg) {
 			// not yet initialized
 			return;
@@ -202,7 +202,7 @@ class WorkflowGraphController {
 
 	renderJobs() {
 
-		var arc = <d3.svg.Arc<JobNode>>d3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
+		var arc = d3.svg.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
 		var self = this;
 
@@ -226,7 +226,9 @@ class WorkflowGraphController {
 				if (!this.enabled) {
 					return;
 				}
-				this.$scope.$apply(this.SelectionService.selectJob(d3.event, d.job));
+				this.$scope.$apply(() => {
+				    this.SelectionService.selectJob(d3.event, d.job)
+        });
 			})
 			.on('mouseover', function () {
 				d3.select(this).style('filter', 'url(#drop-shadow)');
@@ -241,7 +243,7 @@ class WorkflowGraphController {
 			.style('stroke-width', 0)
 			.attr('opacity', this.filter? 0.1 : 0.5)
 			.style('pointer-events', 'none')
-			.attr('d', arc)
+			.attr('d', <any>arc)
 			.call(this.spin.bind(this), 3000);
 	}
 
@@ -300,7 +302,9 @@ class WorkflowGraphController {
 			.attr('opacity', 0)
 			.on('click', () => {
 				if (this.enabled) {
-					this.$scope.$apply(this.SelectionService.clearSelection());
+					this.$scope.$apply(() => {
+					  this.SelectionService.clearSelection();
+          });
 				}
 			});
 	}

@@ -11,6 +11,7 @@ import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../resources/fileresource";
 import Session from "../../../model/session/session";
+import * as _ from "lodash";
 
 export default class SessionDataService {
 
@@ -176,9 +177,10 @@ export default class SessionDataService {
             bindToController: true,
             resolve: {
                 selectedDatasets: function () {
-                    return angular.copy(this.selectionService.selectedDatasets);
+                    return _.clone(this.selectionService.selectedDatasets);
                 }.bind(this)
             }
         })
     };
 }
+

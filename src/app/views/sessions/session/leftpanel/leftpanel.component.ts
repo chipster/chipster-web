@@ -6,7 +6,8 @@ import SessionResource from "../../../../resources/session.resource";
 import {SessionData} from "../../../../resources/session.resource";
 import SelectionService from "../selection.service";
 import SessionWorkerResource from "../../../../resources/sessionworker.resource";
-
+import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
+import * as _ from "lodash";
 
 class LeftPanelComponent {
 
@@ -15,7 +16,9 @@ class LeftPanelComponent {
   datasetSearch: string;
   private selectedTab = 1;
 
-  static $inject = ['SessionResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService', 'SessionWorkerResource'];
+  static $inject = [
+    'SessionResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
+    'SessionWorkerResource', '$filter'];
 
   constructor(
     private sessionResource: SessionResource,
@@ -23,7 +26,8 @@ class LeftPanelComponent {
     private $uibModal: ng.ui.bootstrap.IModalService,
     private $scope: ng.IScope,
     private selectionService: SelectionService,
-    private sessionWorkerResource: SessionWorkerResource) {
+    private sessionWorkerResource: SessionWorkerResource,
+    private $filter: IChipsterFilter,) {
 
     // We are only handling the resize end event, currently only
     // working in workflowgraph graph div
