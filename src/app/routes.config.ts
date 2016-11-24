@@ -9,9 +9,9 @@ interface IAuthRoute extends IRoute {
 export default function($routeProvider: ng.route.IRouteProvider) {
 
     $routeProvider
-        .when('/', {templateUrl: './views/home/home.html'})
-        .when('/home', {templateUrl: './views/home/home.html'})
-        .when('/login', {template: '<login></login>'})
+        .when('/', { template: '<home></home>' })
+        .when('/home', { template: '<home></home>' })
+        .when('/login', { template: '<login></login>' })
         .when('/sessions', <IAuthRoute>{
             template: '<session-list></session-list>',
             authenticated: true
@@ -25,6 +25,6 @@ export default function($routeProvider: ng.route.IRouteProvider) {
                 }
             }
         })
-        .otherwise({templateUrl: './views/home/home.html'});
+        .otherwise({ template: '<home></home>' });
 };
 

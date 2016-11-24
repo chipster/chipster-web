@@ -10,7 +10,8 @@ import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
 import {VisualizationsModule} from "./views/sessions/session/visualization/visualizations.module";
-import {RouterModule} from "@angular/router";
+import { RouterModule, Routes } from '@angular/router';
+import {HomeComponent} from "./views/home/home.component";
 
 
 @NgModule({
@@ -22,7 +23,7 @@ import {RouterModule} from "@angular/router";
       AuthenticationModule,
       VisualizationsModule
     ],
-    declarations: [ NavigationComponent, LoginComponent ],
+    declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
     providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
 })
 export class AppModule {}
