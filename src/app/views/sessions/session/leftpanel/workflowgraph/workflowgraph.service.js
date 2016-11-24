@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @desc Service functions needed to define the positions of the nodes and links
- *       in the workflow graph
+ *       in the workflowgraph graph
  */
 var WorkflowgraphService = (function () {
     function WorkflowgraphService() {
@@ -42,7 +42,7 @@ var WorkflowgraphService = (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @desc Service functions needed to define the positions of the nodes and links
- *       in the workflow graph
+ *       in the workflowgraph graph
  */
 exports.default = WorkflowgraphService;
 WorkflowgraphService.nodeHeight = 20;

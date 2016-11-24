@@ -7,4 +7,4 @@ export default class Node {
     source: Node;
     target: Node;
     sourceJob: Job;
-} 
+}

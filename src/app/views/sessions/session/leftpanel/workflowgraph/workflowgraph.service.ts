@@ -2,7 +2,7 @@ import Node from "./node";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
- *       in the workflow graph
+ *       in the workflowgraph graph
  */
 export default class WorkflowgraphService{
 

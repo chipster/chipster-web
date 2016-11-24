@@ -1,6 +1,6 @@
 "use strict";
 var utils_service_1 = require("../../../../services/utils.service");
-var workflowgraph_service_1 = require("./workflowgraph.service");
+var workflowgraph_service_1 = require("./workflowgraph.service.ts");
 var changedetector_service_1 = require("../../../../services/changedetector.service");
 var changedetector_service_2 = require("../../../../services/changedetector.service");
 var changedetector_service_3 = require("../../../../services/changedetector.service");
@@ -33,7 +33,7 @@ var WorkflowGraphController = (function () {
             .scale(this.zoom)
             .on('zoom', this.zoomAndPan.bind(this));
         // used for adjusting the svg size
-        this.svgContainer = this.getGraph().append('div').classed('fill', true).classed('workflow-container', true);
+        this.svgContainer = this.getGraph().append('div').classed('fill', true).classed('workflowgraph-container', true);
         this.outerSvg = this.svgContainer.append('svg').call(this.zoomer);
         // draw background on outerSvg, so that it won't pan or zoom
         this.renderBackground(this.outerSvg);

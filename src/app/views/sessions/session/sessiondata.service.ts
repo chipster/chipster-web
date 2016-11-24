@@ -76,7 +76,7 @@ export default class SessionDataService {
      * Create a dataset which is derived from some other datasets.
      *
      * The file content is uploaded to the server and a fake job is created, so
-     * that the datasets' relationships are shown correctly in the workflow graph.
+     * that the datasets' relationships are shown correctly in the workflowgraph graph.
      *
      * @param name Name of the new dataset
      * @param sourceDatasetIds Array of datasetIds shown as inputs for the new dataset
@@ -130,10 +130,6 @@ export default class SessionDataService {
 
     updateDataset(dataset: Dataset) {
         return this.sessionResource.updateDataset(this.getSessionId(), dataset);
-    }
-
-    getDatasetList(datasetsMap: Map): Dataset[] {
-        return UtilsService.mapValues(datasetsMap);
     }
 
     updateSession(session: Session) {

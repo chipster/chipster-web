@@ -1,5 +1,5 @@
 import Utils from "../../../../../services/utils.service";
-import WorkflowGraphService from "../workflowgraph.service";
+import WorkflowGraphService from "../workflowgraph/workflowgraph.service";
 import ConfigService from "../../../../../services/config.service";
 import AuthenticationService from "../../../../../authentication/authenticationservice";
 import Dataset from "../../../../../model/session/dataset";

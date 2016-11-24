@@ -9,7 +9,7 @@ import ConfigurationResource from "app/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
 import ToolResource from "app/resources/toolresource";
 import UtilsService from "app/services/utils.service";
-import WorkflowGraphService from "app/views/sessions/session/workflow/workflowgraph.service";
+import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import SessionEventService from "app/views/sessions/session/sessionevent.service";
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
 import SelectionService from "app/views/sessions/session/selection.service";
@@ -26,7 +26,7 @@ import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
 import moduleFilter from "app/common/filter/module.filter";
 import toolFilter from "app/common/filter/tool.filter";
-import AddDatasetModalController from "app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.controller";
+import AddDatasetModalController from "app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.controller";
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
 import ToolsModalController from "app/views/sessions/session/tools/toolsmodal/toolsmodal.controller";
@@ -37,10 +37,10 @@ import htmlVisualization from "app/views/sessions/session/visualization/htmlvisu
 import toolCircle from "app/views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
 import pdfVisualization from "app/views/sessions/session/visualization/pdf/pdfvisualization.component";
-import workflowGraph from "app/views/sessions/session/workflow/workflowgraph.component";
+import workflowGraph from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
-import SessionEditModalController from "app/views/sessions/session/sessioneditmodal/sessioneditmodal.controller";
+import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/resources/session.resource";
 import SessionWorkerResource from "app/resources/sessionworker.resource";
@@ -56,6 +56,7 @@ import AddColumnController from "app/views/sessions/session/visualization/phenod
 import {TSVReader} from "app/services/TSVReader";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
+import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
 import ExpressionProfileTSVService from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
 
@@ -71,6 +72,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
     .component('toolTitle', ToolTitleComponent)
+    .component('leftPanel', LeftPanelComponent)
     .controller('AddDatasetModalController', AddDatasetModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('ToolsModalController', ToolsModalController)

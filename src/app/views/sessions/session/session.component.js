@@ -50,7 +50,7 @@ var SessionComponent = (function () {
             }
         });
         // We are only handling the resize end event, currently only
-        // working in workflow graph div
+        // working in workflowgraph graph div
         this.$scope.$on("angular-resizable.resizeEnd", function () {
             _this.$scope.$broadcast('resizeWorkFlowGraph', {});
         });
@@ -114,7 +114,7 @@ var SessionComponent = (function () {
         var _this = this;
         // cancel the deletion
         clearTimeout(this.deletedDatasetsTimeout);
-        // show datasets again in the workflow
+        // show datasets again in the workflowgraph
         this.deletedDatasets.forEach(function (dataset) {
             _this.sessionData.datasetsMap.set(dataset.datasetId, dataset);
         });
@@ -125,7 +125,7 @@ var SessionComponent = (function () {
         var _this = this;
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
-        // hide from the workflow
+        // hide from the workflowgraph
         this.deletedDatasets.forEach(function (dataset) {
             _this.sessionData.datasetsMap.delete(dataset.datasetId);
         });
@@ -173,7 +173,7 @@ var SessionComponent = (function () {
         var _this = this;
         this.$uibModal.open({
             animation: true,
-            templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
+            templateUrl: 'leftpanel/adddatasetmodal/adddatasetmodal.html',
             controller: 'AddDatasetModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -210,7 +210,7 @@ var SessionComponent = (function () {
     };
     SessionComponent.prototype.getSessionEditModal = function (title, name) {
         return this.$uibModal.open({
-            templateUrl: 'app/views/sessions/session/sessioneditmodal/sessioneditmodal.html',
+            templateUrl: 'leftpanel/sessioneditmodal/sessioneditmodal.html',
             controller: 'SessionEditModalController',
             controllerAs: 'vm',
             bindToController: true,
@@ -258,6 +258,6 @@ SessionComponent.$inject = [
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     controller: SessionComponent,
-    templateUrl: 'app/views/sessions/session/session.html'
+    templateUrl: 'session.component.html'
 };
 //# sourceMappingURL=session.component.js.map

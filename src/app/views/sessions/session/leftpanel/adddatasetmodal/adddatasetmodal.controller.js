@@ -1,5 +1,5 @@
 "use strict";
-var utils_service_1 = require("../../../../../services/utils.service");
+var utils_service_1 = require("../../../../../services/utils.service.ts");
 var workflowgraph_service_1 = require("../workflowgraph.service");
 var dataset_1 = require("../../../../../model/session/dataset");
 var AddDatasetModalController = (function () {

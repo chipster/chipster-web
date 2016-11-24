@@ -1,0 +1,99 @@
+<div class="sidebar">
+  <h4><span ng-click="$ctrl.openSessionEditModal()">Session - {{$ctrl.getSession().name}}</span></h4>
+
+  <div class="chipster-highlight ">
+    <div class="bar pull-right search-div">
+      <input id="dataset-search-input" type="text" ng-model="$ctrl.datasetSearch"
+             placeholder="search dataset" ng-keyup="$ctrl.datasetSearchKeyEvent($event)">
+      <button class="clear-search-button no-border" ng-show="$ctrl.datasetSearch"
+              ng-click="$ctrl.datasetSearch = null">
+        <span class="glyphicon glyphicon-remove"></span>
+      </button>
+    </div>
+
+    <div>
+
+      <uib-tabset>
+
+        <uib-tab index="0" heading="Workflow">
+
+          <div class="workflow-dataset-static-panel">
+            <div class="add-dataset-button">
+              <button class="btn btn-sm btn-success link-btn"
+                      ng-click="$ctrl.openAddDatasetModal()">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add dataset
+              </button>
+            </div>
+          </div>
+
+          <workflow-graph
+            datasets-map="$ctrl.sessionData.datasetsMap"
+            jobs-map="$ctrl.sessionData.jobsMap"
+            modules-map="$ctrl.sessionData.modulesMap"
+            dataset-search="$ctrl.datasetSearch"
+            on-delete="$ctrl.onDelete"
+            zoom="1"
+            enabled="true"></workflow-graph>
+
+        </uib-tab>
+
+        <uib-tab index="1" heading="Datasets">
+
+          <div class="workflow-dataset-static-panel">
+            <div class="add-dataset-button">
+              <button class="btn btn-sm btn-success link-btn"
+                      ng-click="$ctrl.openAddDatasetModal()">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add dataset
+              </button>
+            </div>
+          </div>
+
+          <div id="dataset-list" class="list-group workflow-dataset-panel dataset-list" data-toggle="buttons">
+            <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
+                    ng-click="$ctrl.toggleDatasetSelection($event, data)"
+                    ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">
+              {{data.name}}
+            </button>
+          </div>
+
+        </uib-tab>
+
+        <uib-tab index="2" heading="Details">
+          <div class="row">
+            <div class="col-md-12">
+              <button ng-disabled="$ctrl.isCopying" class="btn btn-default"
+                      ng-click="$ctrl.openCopySessionModal()">
+                Copy session
+                <i ng-show="$ctrl.isCopying" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+              </button>
+              <button class="btn btn-default" ng-click="$ctrl.downloadSession()">
+                Save session file
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <p>Created: {{$ctrl.getSession().created | isoDate }}</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <p>Accessed: {{$ctrl.getSession().accessed | isoDate }}</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+                        <textarea id="session-notes" rows="15" placeholder="Session notes"
+                                  ng-blur="$ctrl.sessionDataService.updateSession($ctrl.sessionData.session)"
+                                  ng-model="$ctrl.sessionData.session.notes">
+                        </textarea>
+            </div>
+          </div>
+        </uib-tab>
+      </uib-tabset>
+    </div>
+
+  </div>
+</div>

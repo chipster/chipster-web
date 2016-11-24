@@ -51,7 +51,7 @@ var SessionListController = (function () {
             session.sessionId = sessionId;
             _this.$uibModal.open({
                 animation: true,
-                templateUrl: 'app/views/sessions/session/workflow/adddatasetmodal/adddatasetmodal.html',
+                templateUrl: 'session/leftpanel/adddatasetmodal/adddatasetmodal.html',
                 controller: 'AddDatasetModalController',
                 controllerAs: 'vm',
                 bindToController: true,

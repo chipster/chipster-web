@@ -1,4 +1,3 @@
-
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 
 export default class SessionEditModalController {

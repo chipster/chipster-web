@@ -2,7 +2,9 @@
 
     <!-- Start of Workflow View -->
     <div class="col-md-4">
-        <div ng-include="'app/views/sessions/session/workflow/workflow.html'"></div>
+        <left-panel
+          on-delete="$ctrl.deleteDatasetsLater()"
+          session-data="$ctrl.sessionData"></left-panel>
 
         <div ng-if="$ctrl.deletedDatasets" class="well dataset-delete-undo-well">
             <button type="button" class="close close-well-button"
