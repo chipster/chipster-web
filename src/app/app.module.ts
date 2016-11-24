@@ -10,6 +10,7 @@ import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
 import {VisualizationsModule} from "./views/sessions/session/visualization/visualizations.module";
+import {RouterModule} from "@angular/router";
 
 
 @NgModule({
