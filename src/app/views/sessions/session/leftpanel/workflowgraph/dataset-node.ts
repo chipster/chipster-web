@@ -1,4 +1,4 @@
-import Dataset from "../../../../model/session/dataset";
+import Dataset from "../../../../../model/session/dataset";
 import Node from './node';
 
 export interface DatasetNode extends Node {

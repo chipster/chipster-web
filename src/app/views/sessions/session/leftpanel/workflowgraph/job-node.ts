@@ -1,4 +1,4 @@
-import Job from "../../../../model/session/job";
+import Job from "../../../../../model/session/job";
 import Node from './node';
 
 export interface JobNode extends Node {
