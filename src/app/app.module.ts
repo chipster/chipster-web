@@ -13,7 +13,14 @@ import {VisualizationsModule} from "./views/sessions/session/visualization/visua
 
 
 @NgModule({
-    imports: [ BrowserModule, HttpModule, FormsModule, AuthenticationModule, VisualizationsModule ],
+    imports: [
+      BrowserModule,
+      HttpModule,
+      FormsModule,
+      RouterModule,
+      AuthenticationModule,
+      VisualizationsModule
+    ],
     declarations: [ NavigationComponent, LoginComponent ],
     providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
 })

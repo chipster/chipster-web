@@ -1,7 +1,7 @@
 {
   "project": {
     "version": "1.0.0-beta.20-4",
-    "name": "testing"
+    "name": "Chipster-web"
   },
   "apps": [
     {
@@ -15,12 +15,11 @@
       "main": "main.ts",
       "test": "test.ts",
       "tsconfig": "tsconfig.json",
-      "prefix": "app",
+      "prefix": "ch",
       "mobile": false,
       "styles": [
         "styles.less",
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
-        "../node_modules/d3-context-menu/css/d3-context-menu.css",
         "../node_modules/angular-resizable/angular-resizable.min.css",
         "../node_modules/handsontable/dist/handsontable.full.css"
       ],
