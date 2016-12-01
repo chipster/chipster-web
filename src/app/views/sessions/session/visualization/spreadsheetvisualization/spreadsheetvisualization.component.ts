@@ -13,7 +13,7 @@ class SpreadsheetVisualizationController {
 
     $onInit() {
         this.tsvReader.getTSV(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
-            let parsedTSV = d3.tsv.parseRows(result.data);
+            let parsedTSV = d3.tsvParseRows(result.data);
             const container = document.getElementById('tableContainer');
             new Handsontable(container, this.getSettings(parsedTSV));
         }, e => console.error('Fetching TSVData failed', e));

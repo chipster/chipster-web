@@ -90,7 +90,9 @@ class WorkflowGraphController {
 
     // draw background on outerSvg, so that it won't pan or zoom
     // invisible rect for listening background clicks
-    this.background = this.outerSvg.append('g').attr('class', 'background').append('rect')
+    this.background = this.outerSvg.append('g')
+      .attr('class', 'background')
+      .append('rect')
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', this.width)
@@ -99,6 +101,7 @@ class WorkflowGraphController {
       .on('click', function () {
         self.SelectionService.clearSelection();
         d3.selectAll('.selected-dataset').classed('selected-dataset', false);
+        d3.selectAll('.selected-job').classed('selected-job', false);
       });
 
     this.svg = this.outerSvg.append('g');

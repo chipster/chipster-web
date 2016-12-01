@@ -43,7 +43,7 @@ export class VennDiagram {
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)
-                .map( (tsv: any) => d3.tsv.parseRows(tsv.data))
+                .map( (tsv: any) => d3.tsvParseRows(tsv.data))
                 .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name))
                 .value();
 
@@ -70,7 +70,7 @@ export class VennDiagram {
 
         this.vennCircles = this.createVennCircles(files, visualizationArea.center, circleRadius);
         // color category
-        const colors = d3.scale.category10();
+        const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
         // svg-element
         let svg = d3.select('#visualization')
