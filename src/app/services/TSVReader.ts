@@ -17,7 +17,7 @@ export class TSVReader {
 
     getTSVFile(sessionId: string, datasetId: string): Observable<TSVFile> {
         return this.getTSV(sessionId, datasetId).map( (tsvData: any) => {
-            let parsedTSVData = d3.tsv.parseRows(tsvData.data);
+            let parsedTSVData = d3.tsvParseRows(tsvData.data);
             return new TSVFile(parsedTSVData, datasetId, 'dataset');
         });
     }

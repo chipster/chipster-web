@@ -2,7 +2,6 @@ import ExpressionProfileService from "./expressionprofile.service";
 import Point from "../model/point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
-import * as d3 from 'd3';
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
@@ -10,6 +9,7 @@ import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
 import ExpressionProfileTSVService from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
+import * as d3 from "d3";
 import * as _ from "lodash";
 
 class ExpressionProfile {
@@ -34,7 +34,7 @@ class ExpressionProfile {
     $onInit() {
         const datasetName = this.selectedDatasets[0].name;
         this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
-            let parsedTSV = d3.tsv.parseRows(result.data);
+            let parsedTSV = d3.tsvParseRows(result.data);
             this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
             this.drawLineChart(this.tsv);
         });
@@ -54,7 +54,7 @@ class ExpressionProfile {
         };
 
         // SVG-element
-        let drag = d3.behavior.drag();
+        let drag = d3.drag();
         let svg = d3.select('#expressionprofile')
             .append('svg')
             .attr('width', size.width)
@@ -81,8 +81,8 @@ class ExpressionProfile {
         // X-axis and scale
         // Calculate points (in pixels) for positioning x-axis points
         let chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index );
-        let xScale = d3.scale.ordinal().range(chipRange).domain(headers);
-        let xAxis = d3.svg.axis().scale(xScale).orient('bottom').ticks(headers.length);
+        let xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
+        let xAxis = d3.axisBottom(xScale).ticks(headers.length);
         svg.append('g')
             .attr('class', 'x axis')
             .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
@@ -92,13 +92,13 @@ class ExpressionProfile {
             .style('text-anchor', 'end');
 
         // Linear x-axis to determine selection-rectangle position scaled to tsv-data
-        let linearXScale = d3.scale.linear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
+        let linearXScale = d3.scaleLinear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
 
         // Y-axis and scale
-        let yScale = d3.scale.linear()
+        let yScale = d3.scaleLinear()
                     .range([graphArea.height, 0])
                     .domain([this.expressionProfileTSVService.getDomainBoundaries(tsv).min, this.expressionProfileTSVService.getDomainBoundaries(tsv).max]);
-        let yAxis = d3.svg.axis().scale(yScale).orient('left').ticks(5);
+        let yAxis = d3.axisLeft().scale(yScale).ticks(5);
         svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + margin.left + ',0 )')
@@ -106,12 +106,11 @@ class ExpressionProfile {
 
         // Paths
         let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
-        let lineGenerator = d3.svg.line()
+        let lineGenerator = d3.line()
             .x( (d: [number,number], i:number) => parseFloat(xScale( headers[i]).toString() ))
             .y( (d:any) => yScale(d) );
 
-        let color = d3.scale.category20();
-
+        let color = d3.scaleOrdinal(d3.schemeCategory20);
 
         let geneExpressions = this.expressionProfileTSVService.getGeneExpressions(tsv);
         let orderedExpressionGenes = this.expressionProfileTSVService.orderBodyByFirstValue(geneExpressions);
@@ -126,8 +125,8 @@ class ExpressionProfile {
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {
-                // There are 20 different colors in colorcategory. Setting same color for each consecutive 5% of lines.
-                // So for 100 lines 5 first lines gets first color in category, next 5 lines get second color and so on.
+            //     There are 20 different colors in colorcategory. Setting same color for each consecutive 5% of lines.
+            //     So for 100 lines 5 first lines gets first color in category, next 5 lines get second color and so on.
                 let colorIndex = (_.floor( (i / tsv.body.size() ) * 20)).toString();
                 return color(colorIndex)
             })
@@ -152,13 +151,13 @@ class ExpressionProfile {
             });
 
         // path animation
-        paths.each(function(d: any) { d.totalLength = this.getTotalLength(); })
-            .attr("stroke-dasharray", function(d:any) { return d.totalLength + " " + d.totalLength; })
-            .attr("stroke-dashoffset", function(d:any) { return d.totalLength; })
-            .transition()
-            .duration(2000)
-            .ease('linear')
-            .attr('stroke-dashoffset', 0);
+        // paths.each(function(d: any) { d.totalLength = this.getTotalLength(); })
+        //     .attr("stroke-dasharray", function(d:any) { return d.totalLength + " " + d.totalLength; })
+        //     .attr("stroke-dashoffset", function(d:any) { return d.totalLength; })
+        //     .transition()
+        //     .duration(2000)
+        //     .ease('linear')
+        //     .attr('stroke-dashoffset', 0);
 
         // Dragging
         let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
@@ -201,7 +200,7 @@ class ExpressionProfile {
                 .attr("height", Math.abs(startPoint.y - endPoint.y));
         });
 
-        drag.on("dragend", () => {
+        drag.on("end", () => {
             let pos = d3.mouse(document.getElementById('dragGroup'));
             let endPoint = new Point(pos[0], pos[1]);
 
