@@ -108,10 +108,10 @@ class WorkflowGraphController {
     // this.transformView(0, 0, this.zoomer.scale());
 
     // order of these appends will determine the drawing order
-    this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
     this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node');
     this.d3LinksGroup = this.svg.append('g').attr('class', 'link');
     this.d3LinksDefsGroup = this.d3LinksGroup.append('defs');
+    this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
 
     // initialize the comparison of input collections
@@ -206,10 +206,11 @@ class WorkflowGraphController {
   }
 
   renderJobs() {
-
+    /*
     var arc = d3.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
     this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
+
     this.d3JobNodes
       .enter()
       .append('rect')
@@ -234,11 +235,16 @@ class WorkflowGraphController {
     this.d3JobNodes.exit().remove();
 
     // create an arc for each job
-    this.d3JobNodesGroup.selectAll('path').data(this.jobNodes).enter().append('path')
+
+    this.d3JobNodesGroup.selectAll('path')
+      .data(this.jobNodes)
+      .enter()
+      .append('path')
       .style('fill', (d) => d.fgColor)
       .style('stroke-width', 0)
       .attr('opacity', this.filter ? 0.1 : 0.5)
       .style('pointer-events', 'none');
+*/
   }
 
   isSelectedJob(job: Job) {
@@ -321,7 +327,8 @@ class WorkflowGraphController {
   renderLabels() {
     this.d3Labels = this.d3LabelsGroup.selectAll('text').data(this.datasetNodes);
     this.d3Labels
-      .enter().append('text')
+      .enter()
+      .append('text')
       .text((d: any) => Utils.getFileExtension(d.name).slice(0, 4))
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
@@ -358,6 +365,8 @@ class WorkflowGraphController {
 
 
   renderLinks() {
+    let self = this;
+
     //building the arrows for the link end
     this.d3LinksDefsGroup.selectAll('marker').data(['end']).enter().append('marker')
       .attr('id', String)
@@ -372,6 +381,7 @@ class WorkflowGraphController {
 
     //Define the xy positions of the link
     this.d3Links = this.d3LinksGroup.selectAll('line').data(this.links);
+
     this.d3Links
       .enter().append('line')
       .attr('x1', (d) => d.source.x + this.nodeWidth / 2)
@@ -379,6 +389,17 @@ class WorkflowGraphController {
       .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
       .attr('y2', (d) => d.target.y)
       .attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
+      .on('click', function(d) {
+        self.SelectionService.selectJob(d3.event, d.target.sourceJob);
+        d3.selectAll('.selected-job').classed('selected-job', false);
+        d3.select(this).classed('selected-job', true);
+      })
+      .on('mouseover', function() {
+        d3.select(this).classed('hovering-job', true);
+      })
+      .on('mouseout', function() {
+        d3.select(this).classed('hovering-job', false);
+      })
       .style('marker-end', 'url(#end)');
 
     this.d3Links.exit().remove();
@@ -443,9 +464,9 @@ class WorkflowGraphController {
     }
 
     this.renderLinks();
+    this.renderJobs();
     this.renderDatasets();
     this.renderLabels();
-    this.renderJobs();
 
   }
 
@@ -487,44 +508,6 @@ class WorkflowGraphController {
       + 'scale(' + scale + ')');
   }
 
-  /*
-   createShadowFilter() {
-   // hover shadows inspired bys
-   // http://bl.ocks.org/cpbotha/5200394
-
-   // create filter with id #drop-shadow
-   // height=130% so that the shadow is not clipped
-   var filter = this.svg.append("defs").append("filter")
-   .attr("id", "drop-shadow")
-   .attr("x", "-50%")
-   .attr("y", "-50%")
-   .attr("height", "200%")
-   .attr("width", "200%");
-
-   // SourceAlpha refers to opacity of graphic that this filter will be applied to
-   // convolve that with a Gaussian with standard deviation 3 and store result
-   // in blur
-   filter.append("feGaussianBlur")
-   // black and white
-   //.attr("in", "SourceAlpha")
-   .attr("in", "SourceGraphic")
-   .attr("stdDeviation", 3)
-   .attr("result", "blur");
-
-   // translate output of Gaussian blur to the right and downwards with 2px
-   // store result in offsetBlur
-   filter.append("feOffset")
-   .attr("in", "blur")
-   .attr("result", "offsetBlur");
-
-   // overlay original SourceGraphic over translated blurred opacity by using
-   // feMerge filter. Order of specifying inputs is important!
-   var feMerge = filter.append("feMerge");
-
-   feMerge.append("feMergeNode").attr("in", "offsetBlur");
-   feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-   }
-   */
   getDatasetNodes(datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>, modulesMap: Map<string, Module>) {
 
     var datasetNodes: DatasetNode[] = [];
