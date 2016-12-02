@@ -1,12 +1,16 @@
 import FileResource from "../../../../../resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
+import Dataset from "../../../../../model/session/dataset";
 
 class TextVisualizationController {
 
     static $inject = ['FileResource', '$scope', 'SessionDataService'];
 
+    fileSizeLimit = 10 * 1024;
+
     datasetId: string;
     data: string;
+    selectedDatasets: Dataset[];
 
     constructor(
     	private fileResource: FileResource,
@@ -15,23 +19,47 @@ class TextVisualizationController {
     }
 
     $onInit() {
-        this.fileResource.getData(this.sessionDataService.getSessionId(), this.datasetId).then( (resp: any) => {
+        this.load();
+    }
+
+    load() {
+        this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).then( (resp: any) => {
             this.$scope.$apply(() => {
-                this.data = resp.data;
+              this.data = resp.data;
             });
         });
+    }
+
+    loadMore() {
+        this.fileSizeLimit *= 2;
+        this.load();
     }
 
     createDataset() {
 
     	this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Text", this.data);
     }
+
+    getSizeShown() {
+        if (this.data) {
+            return this.data.length;
+        }
+    }
+
+    getSizeFull() {
+        return this.selectedDatasets[0].size;
+    }
+
+    isCompleteFile() {
+        return this.getSizeShown() === this.getSizeFull();
+    }
 }
 
 export default {
     controller: TextVisualizationController,
-    template: '<button class="btn btn-default" ng-click="$ctrl.createDataset()">Create dataset</button><p>{{$ctrl.data}}</p>',
+    templateUrl: './textvisualization.component.html',
     bindings: {
-        datasetId: '<'
+        datasetId: '<',
+        selectedDatasets: '<'
     }
 }

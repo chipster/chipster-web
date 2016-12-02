@@ -1,0 +1,3 @@
+<label ng-show="!$ctrl.isCompleteFile()">Showing {{$ctrl.getSizeShown() | bytes}} of {{$ctrl.getSizeFull() | bytes}}</label>
+<p>{{$ctrl.data}}</p>
+<a href ng-click="$ctrl.loadMore()" ng-show="!$ctrl.isCompleteFile()">Show more</a>

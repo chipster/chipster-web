@@ -37,6 +37,13 @@ export default class FileResource {
 			.get());
 	}
 
+  getLimitedData(sessionId: string, datasetId: string, maxBytes: number) {
+    return this.getService().then((service: IService) => service
+      .one('sessions', sessionId)
+      .one('datasets', datasetId)
+      .get({}, {'range': 'bytes=0-' + maxBytes}));
+  }
+
 	uploadData(sessionId: string, datasetId: string, data: string) {
 		return this.getService().then((service: IService) => service
 			.one('sessions', sessionId)
