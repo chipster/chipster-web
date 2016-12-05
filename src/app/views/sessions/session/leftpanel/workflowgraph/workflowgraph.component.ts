@@ -100,8 +100,7 @@ class WorkflowGraphController {
       .attr('opacity', 0)
       .on('click', function () {
         self.SelectionService.clearSelection();
-        d3.selectAll('.selected-dataset').classed('selected-dataset', false);
-        d3.selectAll('.selected-job').classed('selected-job', false);
+        self.clearWorkflowSelections();
       });
 
     this.svg = this.outerSvg.append('g');
@@ -209,7 +208,7 @@ class WorkflowGraphController {
   }
 
   renderJobs() {
-    /*
+
     var arc = d3.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
     this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
@@ -238,7 +237,6 @@ class WorkflowGraphController {
     this.d3JobNodes.exit().remove();
 
     // create an arc for each job
-
     this.d3JobNodesGroup.selectAll('path')
       .data(this.jobNodes)
       .enter()
@@ -246,8 +244,24 @@ class WorkflowGraphController {
       .style('fill', (d) => d.fgColor)
       .style('stroke-width', 0)
       .attr('opacity', this.filter ? 0.1 : 0.5)
-      .style('pointer-events', 'none');
-*/
+      .style('pointer-events', 'none')
+      // .transition()
+      //   .duration(3000)
+      //   .ease(d3.easeLinear)
+      // .attrTween('transform', (d: JobNode) => {
+      //   console.log(d);
+      //
+      //   let x = d.x + this.nodeWidth / 2;
+      //   let y = d.y + this.nodeHeight / 2;
+      //
+      //   if (d.spin) {
+      //     return d3.interpolateString( `translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)` );
+      //   } else {
+      //     return d3.interpolateString( `translate(${x},${y})`, `translate(${x},${y})` );
+      //   }
+      // })
+      // .delay( () => 3000 )
+
   }
 
   isSelectedJob(job: Job) {
@@ -256,10 +270,6 @@ class WorkflowGraphController {
 
   isSelectedDataset(dataset: Dataset) {
     return this.SelectionService.selectedDatasets.indexOf(dataset) != -1;
-  }
-
-  showDefaultVisualization() {
-    this.$scope.$broadcast('showDefaultVisualization', {});
   }
 
   renderDatasets() {
@@ -279,13 +289,10 @@ class WorkflowGraphController {
       .style("fill", (d) => d.color)
       .attr('opacity', (d) => this.getOpacityForDataset(d.dataset))
       .classed('selected', (d) => this.enabled && this.isSelectedDataset(d.dataset))
-      .on('dblclick', () => {
-        this.showDefaultVisualization();
-      })
       .on('click', function (d) {
         if (!Utils.isCtrlKey(d3.event)) {
           self.SelectionService.clearSelection();
-          d3.selectAll('.selected-dataset').classed('selected-dataset', false);
+          self.clearWorkflowSelections();
         }
         self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
         d3.select(this).classed('selected-dataset', true);
@@ -394,7 +401,7 @@ class WorkflowGraphController {
       .attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
       .on('click', function(d) {
         self.SelectionService.selectJob(d3.event, d.target.sourceJob);
-        d3.selectAll('.selected-job').classed('selected-job', false);
+        self.clearWorkflowSelections();
         d3.select(this).classed('selected-job', true);
       })
       .on('mouseover', function() {
@@ -425,45 +432,10 @@ class WorkflowGraphController {
       });
   }
 
-  defineRightClickMenu() {
-
-    this.menu = [{
-      title: 'Visualize', action: () => {
-        this.showDefaultVisualization();
-      }
-    },
-      {
-        title: 'Rename', action: function (elm: any, d: DatasetNode) {
-        this.SessionDataService.renameDatasetDialog(d.dataset);
-      }
-      },
-      {
-        title: 'Delete', action: () => {
-        this.onDelete();
-      }
-      },
-      {
-        title: 'Export', action: () => {
-        this.SessionDataService.exportDatasets(this.SelectionService.selectedDatasets);
-      }
-      },
-      {
-        title: 'View History as text', action: () => {
-        this.SessionDataService.openDatasetHistoryModal();
-      }
-      }
-    ];
-  }
-
   renderGraph() {
 
     if (!this.datasetNodes || !this.jobNodes || !this.links) {
       this.update();
-    }
-
-    //Rendering the graph elements
-    if (this.enabled) {
-      this.defineRightClickMenu();
     }
 
     this.renderLinks();
@@ -586,6 +558,38 @@ class WorkflowGraphController {
     return jobNodes;
   }
 
+  spin(selection: any, duration: number){
+
+    // first round
+    selection
+      .transition()
+      .ease('linear')
+      .duration(duration)
+      .attrTween('transform', (d: JobNode) => {
+
+        var x = d.x + this.nodeWidth / 2;
+        var y = d.y + this.nodeHeight / 2;
+
+        if (d.spin) {
+          return d3.interpolateString(
+            'translate(' + x + ',' + y + ')rotate(0)',
+            'translate(' + x + ',' + y + ')rotate(360)'
+          );
+        } else {
+          return d3.interpolateString(
+            'translate(' + x + ',' + y + ')',
+            'translate(' + x + ',' + y + ')'
+          );
+        }
+      });
+
+    // schedule the next round
+    setTimeout(() => {
+      this.spin(selection, duration);
+    }, duration);
+  }
+
+
   getLinks(nodes: Node[]) {
 
     var links: Link[] = [];
@@ -639,6 +643,11 @@ class WorkflowGraphController {
         node.y = pos.y;
       }
     });
+  }
+
+  clearWorkflowSelections() {
+    d3.select('.selected-dataset').classed('selected-dataset', false);
+    d3.select('.selected-job').classed('selected-job', false);
   }
 
 
