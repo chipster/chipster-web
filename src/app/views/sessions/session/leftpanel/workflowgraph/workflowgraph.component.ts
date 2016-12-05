@@ -248,12 +248,14 @@ class WorkflowGraphController {
       .attr('d', arc)
       .transition()
         .duration(3000)
-        .ease(d3.easeLinear)
+      .ease(d3.easeLinear)
         .attrTween('transform', (d: JobNode) => {
           let x = d.x + this.nodeWidth / 2;
           let y = d.y + this.nodeHeight / 2;
           return d.spin ? d3.interpolateString( `translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)` ) : d3.interpolateString( `translate(${x},${y})`, `translate(${x},${y})` );
         });
+
+  }
 
   isSelectedJob(job: Job) {
     return this.SelectionService.selectedJobs.indexOf(job) != -1;
