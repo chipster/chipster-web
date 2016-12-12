@@ -57,7 +57,6 @@ class WorkflowGraphController {
   height: number;
   zoom: number; // default zoom level
   lastScale: number; // last zoom level
-  zoomer: any;
 
   datasetNodes: Array<DatasetNode>;
   jobNodes: Array<JobNode>;
@@ -78,15 +77,9 @@ class WorkflowGraphController {
   $onInit() {
     let self = this;
 
-    this.zoomer = d3.zoom()
-      .scaleExtent([0.2, 1])
-      // .scaleBy(this.zoom)
-      .on('zoom', this.zoomAndPan.bind(this));
-
-
     // used for adjusting the svg size
     this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
-    this.outerSvg = this.svgContainer.append('svg').call(this.zoomer);
+    this.outerSvg = this.svgContainer.append('svg');
 
     // draw background on outerSvg, so that it won't pan or zoom
     // invisible rect for listening background clicks
@@ -107,8 +100,6 @@ class WorkflowGraphController {
 
     this.updateSvgSize();
 
-    // this.transformView(0, 0, this.zoomer.scale());
-
     // order of these appends will determine the drawing order
     this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node');
     this.d3LinksGroup = this.svg.append('g').attr('class', 'link');
@@ -116,8 +107,18 @@ class WorkflowGraphController {
     this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
 
-    // initialize the comparison of input collections
+    // apply zoom
+    d3.select('g.background').call(d3.zoom()
+      .scaleExtent([0.2, 1])
+      .on('zoom', () => {
+        d3.select('svg').attr("transform", d3.event.transform);
+        // this.d3JobNodesGroup.attr("transform", d3.event.transform);
+        // this.d3LinksGroup.attr("transform", d3.event.transform);
+        // this.d3DatasetNodesGroup.attr("transform", d3.event.transform);
+        // this.d3LabelsGroup.attr("transform", d3.event.transform);
+      }));
 
+    // initialize the comparison of input collections
     // shallow comparison is enough for noticing when the array is changed
     this.changeDetectors.push(new ArrayChangeDetector(() => this.SelectionService.selectedDatasets, () => {
       this.renderGraph()
@@ -436,44 +437,6 @@ class WorkflowGraphController {
     this.renderDatasets();
     this.renderLabels();
 
-  }
-
-  zoomAndPan() {
-
-    let event = d3.event;
-
-    // allow default zoom level to be set even when disabled
-    if (!this.enabled && event.scale !== this.zoom) {
-      return;
-    }
-
-    // let zoom events go through, because those have always defaultPrevented === true
-    if (event.scale === this.lastScale) {
-      // disable scrolling when dragging nodes
-      if (event.sourceEvent && event.sourceEvent.defaultPrevented) {
-        return;
-      }
-    }
-    this.lastScale = event.scale;
-
-    // prevent scrolling over the top and left edges
-    let tx = Math.min(0, event.translate[0]);
-    let ty = Math.min(0, event.translate[1]);
-
-    /*
-     Set limited values as a starting point of the new events.
-     Otherwise the coordinates keep growing when you scroll over the
-     limits and you have to scroll back before anything happens.
-     */
-    this.zoomer.translate([tx, ty]);
-
-    this.transformView(tx, ty, event.scale);
-  }
-
-  transformView(tx: number, ty: number, scale: number) {
-    this.svg.attr('transform', 'translate('
-      + [tx, ty] + ')'
-      + 'scale(' + scale + ')');
   }
 
   getDatasetNodes(datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>, modulesMap: Map<string, Module>) {
