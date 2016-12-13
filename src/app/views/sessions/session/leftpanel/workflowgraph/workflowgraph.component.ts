@@ -109,11 +109,10 @@ class WorkflowGraphController {
     d3.select('g.background').call(d3.zoom()
       .scaleExtent([0.2, 1])
       .on('zoom', () => {
-        d3.select('svg').attr("transform", d3.event.transform);
-        // this.d3JobNodesGroup.attr("transform", d3.event.transform);
-        // this.d3LinksGroup.attr("transform", d3.event.transform);
-        // this.d3DatasetNodesGroup.attr("transform", d3.event.transform);
-        // this.d3LabelsGroup.attr("transform", d3.event.transform);
+        this.d3JobNodesGroup.attr("transform", d3.event.transform);
+        this.d3LinksGroup.attr("transform", d3.event.transform);
+        this.d3DatasetNodesGroup.attr("transform", d3.event.transform);
+        this.d3LabelsGroup.attr("transform", d3.event.transform);
       }));
 
     // initialize the comparison of input collections
