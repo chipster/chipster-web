@@ -55,8 +55,6 @@ class WorkflowGraphController {
   nodeRadius = 4;
   width: number;
   height: number;
-  zoom: number; // default zoom level
-  lastScale: number; // last zoom level
 
   datasetNodes: Array<DatasetNode>;
   jobNodes: Array<JobNode>;
