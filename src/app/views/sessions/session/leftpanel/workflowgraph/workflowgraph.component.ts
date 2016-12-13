@@ -167,13 +167,10 @@ class WorkflowGraphController {
 
   updateSvgSize() {
 
-    // get the DOM element with [0][0] ( when there is only one element in the selection)
-    // let element: HTMLElement = <HTMLElement>this.svgContainer[0][0];
-    let element = d3.selection('#workflowvisualization');
+    const element = document.getElementById('workflowvisualization');
 
-    // leave some pixels for margins, otherwise the element will grow
-    this.width = 400;
-    this.height = 400;
+    this.width = element.offsetWidth;
+    this.height = element.offsetHeight;
 
     this.outerSvg
       .attr('width', this.width)
