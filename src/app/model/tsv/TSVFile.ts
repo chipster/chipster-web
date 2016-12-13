@@ -19,7 +19,7 @@ export default class TSVFile {
     }
 
     /*
-     * @description: get raw TSVFile-data in its initial
+     * @description: get raw TSVFile-data in its initial form
      */
     public getRawData(ids: Array<string>): Array<Array<string>> {
         let body = this.body.getRawDataByRowIds(ids);
