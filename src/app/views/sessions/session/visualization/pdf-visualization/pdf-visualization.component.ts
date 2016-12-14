@@ -18,7 +18,6 @@ export class PdfVisualizationComponent implements OnInit {
   ngOnInit() {
     this.page = 1;
     this.zoom = 1;
-
   }
 
   previousPage() {
