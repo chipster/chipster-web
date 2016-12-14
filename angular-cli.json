@@ -36,7 +36,6 @@
         "../node_modules/angular-local-storage/dist/angular-local-storage.min.js",
         "../node_modules/angular-websocket/dist/angular-websocket.js",
         "../node_modules/angular-resizable/angular-resizable.min.js",
-        "../node_modules/angular-pdf/dist/angular-pdf.js",
         "../node_modules/pdfjs-dist/build/pdf.js",
         "../node_modules/pdfjs-dist/build/pdf.worker.js",
         "../node_modules/handsontable/dist/handsontable.full.js",
@@ -78,6 +77,8 @@
       "module": false,
       "pipe": true,
       "service": true
-    }
+    },
+    "viewEncapsulation": "Emulated",
+    "changeDetection": "Default"
   }
 }

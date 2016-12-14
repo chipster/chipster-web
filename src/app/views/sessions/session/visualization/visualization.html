@@ -64,12 +64,12 @@
         <uib-tab index="'pdf'"
                  ng-if="$ctrl.isCompatibleVisualization('pdf')">
             <uib-tab-heading><span class="glyphicon glyphicon-book"></span> PDF</uib-tab-heading>
-            <pdf-visualization
+            <ch-pdf-visualization
                     ng-if="$ctrl.active === 'pdf'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
+                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
                     dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
                     selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </pdf-visualization>
+            </ch-pdf-visualization>
         </uib-tab>
 
 

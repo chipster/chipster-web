@@ -36,7 +36,6 @@ import imageVisualization from "app/views/sessions/session/visualization/imagevi
 import htmlVisualization from "app/views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
 import toolCircle from "app/views/sessions/session/tools/toolcircle.directive";
 import phenodataVisualization from "app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
-import pdfVisualization from "app/views/sessions/session/visualization/pdf/pdfvisualization.component";
 import workflowGraph from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
@@ -60,14 +59,15 @@ import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.c
 
 import ExpressionProfileTSVService from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
 import { HomeComponent } from "./app/views/home/home.component";
+import {PdfVisualizationComponent} from "./app/views/sessions/session/visualization/pdf-visualization/pdf-visualization.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
-        'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule',
-        'pdf', 'ngHandsontable'])
+        'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
     .directive('home', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
     .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
     .directive('vennDiagram', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VennDiagram))
+    .directive('chPdfVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(PdfVisualizationComponent))
     .directive('customOnChange', CustomOnChange)
     .component('datasetBox', DatasetBoxComponent)
     .component('jobBox', JobBoxComponent)
@@ -111,7 +111,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .component('spreadsheetVisualization', <any>spreadsheetVisualization)
     .component('textVisualization', <any>textVisualization)
-    .component('pdfVisualization', <any>pdfVisualization)
     .component('htmlVisualization', <any>htmlVisualization)
     .component('phenodataVisualization', <any>phenodataVisualization)
     .component('expressionProfile', ExpressionProfile)

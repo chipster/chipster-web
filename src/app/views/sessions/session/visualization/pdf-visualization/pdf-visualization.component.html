@@ -1,0 +1,14 @@
+
+<nav class="pdf-view-navigation">
+  <button class="btn btn-default" (click)="previousPage()"><</button>
+  <button class="btn btn-default" (click)="nextPage()">></button>
+  <button class="btn btn-default" (click)="zoomIn()">+</button>
+  <button class="btn btn-default" (click)="zoomOut()">-</button>
+</nav>
+
+<pdf-viewer [src]="src"
+            ([page])="page"
+            ([zoom])="zoom"
+            [show-all]="false"
+            style="display: block;">
+</pdf-viewer>
