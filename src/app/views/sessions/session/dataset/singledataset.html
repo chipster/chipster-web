@@ -3,6 +3,8 @@
     <div class="dataset-details">
         <div class="row">
             <div class="col-md-6">
+
+                <h4>{{$ctrl.dataset.name}}</h4>
                 <h5 ng-if="$ctrl.sourceJob">{{$ctrl.sourceJob.toolCategory}} / {{$ctrl.sourceJob.toolName}}</h5>
                 <h5 ng-if="!$ctrl.sourceJob">Imported file</h5>
 
