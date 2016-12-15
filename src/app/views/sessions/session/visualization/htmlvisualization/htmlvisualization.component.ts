@@ -4,8 +4,7 @@ import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  templateUrl: './htmlvisualization.component.html',
-  styleUrls: ['./htmlvisualization.component.less'],
+  template: `<div [innerHTML]="visualizationHTML"></div>`
 })
 export class HtmlvisualizationComponent implements OnInit {
 
