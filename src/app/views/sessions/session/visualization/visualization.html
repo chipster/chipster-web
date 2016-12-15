@@ -66,9 +66,7 @@
             <uib-tab-heading><span class="glyphicon glyphicon-book"></span> PDF</uib-tab-heading>
             <ch-pdf-visualization
                     ng-if="$ctrl.active === 'pdf'"
-                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
+                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
             </ch-pdf-visualization>
         </uib-tab>
 
@@ -76,12 +74,10 @@
         <uib-tab index="'html'"
                  ng-if="$ctrl.isCompatibleVisualization('html')">>
             <uib-tab-heading><span class="glyphicon glyphicon-globe"></span> HTML</uib-tab-heading>
-            <html-visualization
+            <ch-htmlvisualization
                     ng-if="$ctrl.active === 'html'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </html-visualization>
+                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0]) + '&download=false&type=true'">
+            </ch-htmlvisualization>
         </uib-tab>
 
         <uib-tab index="'venn'"

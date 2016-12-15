@@ -1,21 +1,21 @@
-class HtmlVisualizationController {
+import {Component, OnInit, Input} from '@angular/core';
 
-    static $inject = ['$sce'];
+@Component({
+  selector: 'ch-htmlvisualization',
+  templateUrl: './htmlvisualization.component.html',
+  styleUrls: ['./htmlvisualization.component.less'],
+})
+export class HtmlvisualizationComponent implements OnInit {
 
-    constructor(private $sce: any){
-    }
+  @Input() src: string;
 
-    src: string;
+  constructor() { }
 
-    getUrl() {
-        return this.$sce.trustAsResourceUrl(this.src + '&download=false&type=true');
-    }
-}
+  ngOnInit() {}
 
-export default {
-    controller: HtmlVisualizationController,
-    template: '<iframe frameBorder="0" sandbox="" width="100%" height="1000px" ng-src="{{$ctrl.getUrl()}}"></iframe>',
-    bindings: {
-        src: '='
-    }
+  resize(htmlIframe: HTMLIFrameElement) {
+    htmlIframe.style.height = '1000px';
+    // htmlIframe.style.height = htmlIframe.contentWindow.document.body.scrollHeight + 'px';
+  }
+
 }

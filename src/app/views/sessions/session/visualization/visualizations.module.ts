@@ -9,10 +9,12 @@ import ThreeCircleVennDiagramService from "./venndiagram/threecirclevenndiagram.
 import {BrowserModule} from "@angular/platform-browser";
 import { PdfVisualizationComponent } from './pdf-visualization/pdf-visualization.component';
 import {PdfViewerComponent} from "ng2-pdf-viewer";
+import { HtmlvisualizationComponent } from './htmlvisualization/htmlvisualization.component';
+import {TrustedResourcePipe} from "../../../../pipes/trustedresource.pipe";
 
 @NgModule({
     imports: [ BrowserModule ],
-    declarations: [ VennDiagram, PdfVisualizationComponent, PdfViewerComponent ],
+    declarations: [ VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TrustedResourcePipe ],
     providers: [ ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService ]
 })
 export class VisualizationsModule {}
