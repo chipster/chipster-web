@@ -4,36 +4,17 @@ import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  template: `<div [innerHTML]="visualizationHTML"></div>`
+  template: `<iframe width="100%" [src]="wrapperUrl | trustedresource" scrolling="no" location="asdf" frameborder="0"></iframe>`
 })
 export class HtmlvisualizationComponent implements OnInit {
 
   @Input() src: string;
-
-  private visualizationHTML: string;
+  private wrapperUrl: string = './htmlvisualizationwrapper.html';
 
   constructor(private http: Http) { }
 
-  ngOnInit() {
-    this.http.get(this.src).map((res:Response) => {
-      const html = res.text();
-      return html || '';
-    })
-      .catch( (error: Response | any) => {
-        let errMsg: string;
-        if (error instanceof Response) {
-          const body = error.json() || '';
-          const err = body.error || JSON.stringify(body);
-          errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-        } else {
-          errMsg = error.message ? error.message : error.toString();
-        }
-        console.error(errMsg);
-        return Observable.throw(errMsg);
-      })
-      .subscribe( (html: any) => {
-        this.visualizationHTML = html;
-      });
-  }
+  ngOnInit() {}
 
 }
+// <iframe id="iframeId" src="iframe.html" (load)="onLoad()"></iframe>
+// <iframe #htmlIframe id="htmliframe" frameBorder="0" width="100%" scrolling="no" [src]="src | trustedresource" (load)="resize(htmlIframe)"></iframe>
