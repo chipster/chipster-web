@@ -4,7 +4,7 @@ export default class VennCircle {
 
     constructor(public datasetId: string,
                 public filename: string,
-                public data: Array<[string | undefined, string | undefined]>,
+                public data: Array<Array<string>>,
                 public circle: Circle) {
         datasetId;
         filename;
