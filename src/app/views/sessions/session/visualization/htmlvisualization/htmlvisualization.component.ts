@@ -1,39 +1,32 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, Inject} from '@angular/core';
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs";
+import AuthenticationService from "../../../../../authentication/authenticationservice";
+import {timeout} from "d3-timer";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  template: `<div [innerHTML]="visualizationHTML"></div>`
+  template: `<iframe #htmlframe width="100%" [src]="wrapperUrl + '?location=' + src + '&token=' + this.token | trustedresource" scrolling="no" frameborder="0" (load)="run(htmlframe)"></iframe>`
 })
 export class HtmlvisualizationComponent implements OnInit {
 
   @Input() src: string;
+  private wrapperUrl: string = 'app/views/sessions/session/visualization/htmlvisualization/htmlvisualizationwrapper.html';
+  private token: string;
 
-  private visualizationHTML: string;
-
-  constructor(private http: Http) { }
+  constructor(private http: Http,
+              private authenticationService: AuthenticationService) { }
 
   ngOnInit() {
-    this.http.get(this.src).map((res:Response) => {
-      const html = res.text();
-      return html || '';
-    })
-      .catch( (error: Response | any) => {
-        let errMsg: string;
-        if (error instanceof Response) {
-          const body = error.json() || '';
-          const err = body.error || JSON.stringify(body);
-          errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-        } else {
-          errMsg = error.message ? error.message : error.toString();
-        }
-        console.error(errMsg);
-        return Observable.throw(errMsg);
-      })
-      .subscribe( (html: any) => {
-        this.visualizationHTML = html;
-      });
+    this.token =this.authenticationService.getToken();
+  }
+
+  run(htmlframe) {
+    timeout( () => {
+      htmlframe.height = htmlframe.contentWindow.document.body.style.height + 'px';
+    }, 1000);
   }
 
 }
+// <iframe id="iframeId" src="iframe.html" (load)="onLoad()"></iframe>
+// <iframe #htmlIframe id="htmliframe" frameBorder="0" width="100%" scrolling="no" [src]="src | trustedresource" (load)="resize(htmlIframe)"></iframe>
