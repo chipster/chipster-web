@@ -1,19 +1,31 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, Inject} from '@angular/core';
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs";
+import AuthenticationService from "../../../../../authentication/authenticationservice";
+import {timeout} from "d3-timer";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  template: `<iframe width="100%" [src]="wrapperUrl | trustedresource" scrolling="no" location="asdf" frameborder="0"></iframe>`
+  template: `<iframe #htmlframe width="100%" [src]="wrapperUrl + '?location=' + src + '&token=' + this.token | trustedresource" scrolling="no" frameborder="0" (load)="run(htmlframe)"></iframe>`
 })
 export class HtmlvisualizationComponent implements OnInit {
 
   @Input() src: string;
-  private wrapperUrl: string = './htmlvisualizationwrapper.html';
+  private wrapperUrl: string = 'app/views/sessions/session/visualization/htmlvisualization/htmlvisualizationwrapper.html';
+  private token: string;
 
-  constructor(private http: Http) { }
+  constructor(private http: Http,
+              private authenticationService: AuthenticationService) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.token =this.authenticationService.getToken();
+  }
+
+  run(htmlframe) {
+    timeout( () => {
+      htmlframe.height = htmlframe.contentWindow.document.body.style.height + 'px';
+    }, 1000);
+  }
 
 }
 // <iframe id="iframeId" src="iframe.html" (load)="onLoad()"></iframe>

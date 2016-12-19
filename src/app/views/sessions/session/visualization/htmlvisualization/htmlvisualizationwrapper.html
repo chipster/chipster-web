@@ -4,22 +4,50 @@
     <meta charset="UTF-8">
     <script type="text/javascript">
 
-      const url = window.frameElement.getAttribute('location');
+//      console.log('location', window.location);
 
-      console.log(url);
-//      function getParamValue(paramName) {
-//        var url = window.location.search.substring(1); //get rid of "?" in querystring
-//        var qArray = url.split('&'); //get key-value pairs
-//        for (var i = 0; i < qArray.length; i++)
-//        {
-//          var pArr = qArray[i].split('='); //split key and value
-//          if (pArr[0] == paramName)
-//            return pArr[1]; //return value
-//        }
-//      }
+
+      function getParamValue(paramName) {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++)
+        {
+          var pArr = qArray[i].split('='); //split key and value
+          if (pArr[0] == paramName) {
+            return pArr[1].split('?')[0]; //return value
+          }
+        }
+      }
+
+      const url = getParamValue('location');
+      const token = getParamValue('token');
+
+//      console.log('url', url);
+//      console.log('token', token);
+
+      var request = new XMLHttpRequest();
+      request.open("GET", url + '?download=false&type=true&token=' + token);
+      request.send();
+
+      request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+          document.write(request.responseText);
+          var body = document.body,
+            html = document.documentElement;
+
+          var height = Math.max( body.scrollHeight, body.offsetHeight,
+            html.clientHeight, html.scrollHeight, html.offsetHeight );
+          document.getElementsByTagName('body')[0].style.height = height + "px";
+        }
+      }
+
+
     </script>
 </head>
 <body>
-  <h3>here</h3>
+
+<div id="visualization"></div>
+
 </body>
 </html>
+

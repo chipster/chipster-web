@@ -76,7 +76,7 @@
             <uib-tab-heading><span class="glyphicon glyphicon-globe"></span> HTML</uib-tab-heading>
             <ch-htmlvisualization
                     ng-if="$ctrl.active === 'html'"
-                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0]) + '&download=false&type=true'">
+                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
             </ch-htmlvisualization>
         </uib-tab>
 
