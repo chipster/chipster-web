@@ -28,5 +28,3 @@ export class HtmlvisualizationComponent implements OnInit {
   }
 
 }
-// <iframe id="iframeId" src="iframe.html" (load)="onLoad()"></iframe>
-// <iframe #htmlIframe id="htmliframe" frameBorder="0" width="100%" scrolling="no" [src]="src | trustedresource" (load)="resize(htmlIframe)"></iframe>
