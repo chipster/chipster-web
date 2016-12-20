@@ -21,12 +21,11 @@
 
       const url = getParamValue('location');
       const token = getParamValue('token');
-
-//      console.log('url', url);
-//      console.log('token', token);
+      const tokenHeader = 'Basic ' + btoa('token:' + token);
 
       var request = new XMLHttpRequest();
-      request.open("GET", url + '?download=false&type=true&token=' + token);
+      request.open("GET", url + '?download=false&type=true');
+      request.setRequestHeader('Authorization', tokenHeader);
       request.send();
 
       request.onreadystatechange = function() {
