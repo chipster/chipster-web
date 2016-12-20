@@ -23,8 +23,12 @@ export class HtmlvisualizationComponent implements OnInit {
 
   run(htmlframe) {
     timeout( () => {
-      htmlframe.height = htmlframe.contentWindow.document.body.style.height + 'px';
-    }, 1000);
+      let height = htmlframe.contentWindow.document.body.style.height;
+      if (height) {
+        htmlframe.height = height + 'px';
+      } else {
+        this.run(htmlframe);
+      }
+    }, 100);
   }
-
 }
