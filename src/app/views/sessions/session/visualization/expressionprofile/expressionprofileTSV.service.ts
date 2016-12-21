@@ -35,8 +35,8 @@ export default class ExpressionProfileTSVService {
      */
     public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
         return _.chain(tsvHeaders.headers)
-            .map( (cell: string, index: number) => _.startsWith(cell, 'chip.') ? index : false)
-            .filter( (cell: number) => _.isNumber(cell))
+            .map( (cell: string, index: number) => _.startsWith(cell, 'chip.') ? index : -1)
+            .filter( (cell: number) => cell !== -1)
             .value();
     }
 
