@@ -33,7 +33,6 @@ export default class VennDiagramService {
     }
 
 
-
     /*
      * @description: return the intersection of selectionCircles data minus the datas of difference circles
      */
@@ -44,13 +43,32 @@ export default class VennDiagramService {
         const values = selectionCircles.map( (vennCircle: VennCircle) => vennCircle.data );
 
         // intersecting values from selected circles
-        const intersection = _.intersectionBy(...values, compareByIndex);
+        const intersection = this.intersectionBySubarrayIndex(values, compareByIndex);
 
         // all values from difference circles (circles that aren't selected)
         const differenceValues = difference.map( (vennCircle: VennCircle) => vennCircle.data );
 
         // intersecting values from selected circles minus values in difference circles
         return _.differenceBy(intersection, ...differenceValues, compareByIndex);
+    }
+
+
+    /*
+     * @description: return the subarrays (arrays with two values) that are found in each array
+     * since wanted values should reside in each array we can compare only values in the first array to all the rest arrays and see if a value is found in each of them.
+     */
+    intersectionBySubarrayIndex( values: Array<Array<Array<string>>>, compareByIndex: number ): Array<Array<string>> {
+      let result = [];
+
+      let arraysToCompare = _.tail(values).map( (array: Array<Array<string>>) => array.map( (row: Array<string>) => row[compareByIndex]));
+
+      _.forEach(_.head(values), (pair: Array<string>) => {
+        let comparator = pair[compareByIndex];
+        if(_.every(arraysToCompare, (array: Array<string>) => _.includes(array, comparator))) {
+          result.push(pair);
+        };
+      });
+      return result;
     }
 
 
