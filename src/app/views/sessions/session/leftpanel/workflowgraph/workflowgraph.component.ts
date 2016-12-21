@@ -32,9 +32,9 @@ class WorkflowGraphController {
   }
 
   //var shiftKey, ctrlKey;
-  svgContainer: d3.Selection<any>;
-  svg: d3.Selection<any>;
-  outerSvg: d3.Selection<any>;
+  svgContainer: any;
+  svg: any;
+  outerSvg: any;
 
   d3DatasetNodesGroup: any;
   d3JobNodesGroup: any;
@@ -293,7 +293,7 @@ class WorkflowGraphController {
       })
       .call(d3.drag()
         .on('drag', function (d) {
-          this.dragStarted = true;
+          self.dragStarted = true;
           self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
           // set defaultPrevented flag to disable scrolling
         })
