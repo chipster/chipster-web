@@ -98,7 +98,7 @@ class ExpressionProfile {
         let yScale = d3.scaleLinear()
                     .range([graphArea.height, 0])
                     .domain([this.expressionProfileTSVService.getDomainBoundaries(tsv).min, this.expressionProfileTSVService.getDomainBoundaries(tsv).max]);
-        let yAxis = d3.axisLeft().scale(yScale).ticks(5);
+        let yAxis = d3.axisLeft(yScale).ticks(5);
         svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + margin.left + ',0 )')
