@@ -12,6 +12,7 @@ import {TSVReader} from "./services/TSVReader";
 import {VisualizationsModule} from "./views/sessions/session/visualization/visualizations.module";
 import { RouterModule, Routes } from '@angular/router';
 import {HomeComponent} from "./views/home/home.component";
+import {BytesPipe} from "./pipes/bytes.pipe";
 
 
 @NgModule({

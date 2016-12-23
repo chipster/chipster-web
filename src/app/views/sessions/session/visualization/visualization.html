@@ -9,12 +9,12 @@
         <uib-tab index="'text'"
                  ng-if="$ctrl.isCompatibleVisualization('text')">
             <uib-tab-heading><span class="glyphicon glyphicon-font"></span> Text</uib-tab-heading>
-            <text-visualization
+            <ch-text-visualization
                     ng-if="$ctrl.active === 'text'"
                     src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </text-visualization>
+                    [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+                    [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
+            </ch-text-visualization>
         </uib-tab>
 
         <uib-tab index="'spreadsheet'"

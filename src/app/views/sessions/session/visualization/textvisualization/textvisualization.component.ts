@@ -1,33 +1,47 @@
 import FileResource from "../../../../../resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
+import {Component, Input, Inject, ChangeDetectorRef} from "@angular/core";
+import {Observable} from "rxjs";
+import {Response} from "@angular/http";
 
-class TextVisualizationController {
+@Component({
+  selector: 'ch-text-visualization',
+  template: `
+    <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytepipe}} of {{getSizeFull() | bytepipe}}</label>
+    <p>{{data}}</p>
+    <a href (click)="loadMore()" *ngIf="!isCompleteFile()">Show more</a>
+  `
+})
+export class TextVisualizationComponent {
 
-    static $inject = ['FileResource', '$scope', 'SessionDataService'];
+    @Input() datasetId: string;
+    @Input() selectedDatasets: Array<Dataset>;
+    private data: string;
 
     fileSizeLimit = 10 * 1024;
 
-    datasetId: string;
-    data: string;
-    selectedDatasets: Dataset[];
-
     constructor(
-    	private fileResource: FileResource,
-	    private $scope: ng.IScope,
-	    private sessionDataService: SessionDataService) {
+      private changeDetectorRef: ChangeDetectorRef,
+    	@Inject('FileResource') private fileResource: FileResource,
+      @Inject('SessionDataService') private sessionDataService: SessionDataService) {
     }
 
-    $onInit() {
-        this.load();
+    ngOnInit() {
+      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
+        this.data = response.data;
+        this.changeDetectorRef.detectChanges();
+      }, (error: Response) => {
+        console.error(error);
+      });
     }
 
     load() {
-        this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).then( (resp: any) => {
-            this.$scope.$apply(() => {
-              this.data = resp.data;
-            });
-        });
+      this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).then( (resp: any) => {
+        this.data = resp.data;
+      }, (error) => {
+        console.error('error', error);
+      });
     }
 
     loadMore() {
@@ -36,7 +50,6 @@ class TextVisualizationController {
     }
 
     createDataset() {
-
     	this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Text", this.data);
     }
 
@@ -52,14 +65,5 @@ class TextVisualizationController {
 
     isCompleteFile() {
         return this.getSizeShown() === this.getSizeFull();
-    }
-}
-
-export default {
-    controller: TextVisualizationController,
-    templateUrl: './textvisualization.component.html',
-    bindings: {
-        datasetId: '<',
-        selectedDatasets: '<'
     }
 }
