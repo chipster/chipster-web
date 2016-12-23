@@ -213,7 +213,7 @@ var ExpressionProfile = (function () {
     };
     ExpressionProfile.prototype.createNewDataset = function () {
         var selectedGeneExpressionIds = this.getSelectionIds();
-        var tsvData = this.tsv.getRawData(selectedGeneExpressionIds);
+        var tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
         var data = d3.tsv.formatRows(tsvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     };

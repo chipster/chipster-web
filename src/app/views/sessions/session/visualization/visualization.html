@@ -22,9 +22,7 @@
             <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
             <spreadsheet-visualization
                     ng-if="$ctrl.active === 'spreadsheet'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
+                    [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
             </spreadsheet-visualization>
         </uib-tab>
 

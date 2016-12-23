@@ -63,13 +63,13 @@ describe('TSVFile', () => {
 
   });
 
-  describe('getRawData', () => {
+  describe('getRawDataByRowIds', () => {
 
     // copied 3 first items in input data + added identifier column
     const result = [["identifier", "symbol","description","chip.microarray001.cel","chip.microarray002.cel","chip.microarray003.cel","chip.microarray004.cel","chip.microarray005.cel","chip.microarray006.cel","chip.microarray007.cel","chip.microarray008.cel","chip.microarray009.cel","chip.microarray010.cel","chip.microarray011.cel","chip.microarray012.cel","flag.microarray001.cel","flag.microarray002.cel","flag.microarray003.cel","flag.microarray004.cel","flag.microarray005.cel","flag.microarray006.cel","flag.microarray007.cel","flag.microarray008.cel","flag.microarray009.cel","flag.microarray010.cel","flag.microarray011.cel","flag.microarray012.cel","p.adjusted","FC"],["7369_at","UMOD","uromodulin","5.38","5.84","5.32","5.3","7.12","4.97","11.66","13","12.94","11.42","12.7","11.74","A","A","A","A","P","A","P","P","P","P","P","P","0.000479","-6.58833333333333"],["10610_at","ST6GALNAC2","ST6 (alpha-N-acetyl-neuraminyl-2,3-beta-galactosyl-1,3)-N-acetylgalactosaminide alpha-2,6-sialyltransferase 2","6.7","6.82","6.66","6.94","6.75","6.69","7.53","7.6","7.58","7.78","7.57","7.6","A","A","A","A","A","A","M","A","A","A","A","M","0.000799","-0.849999999999999"]];
 
     it('should return only first item', () => {
-      expect(tsv.getRawData(["0","1"])).toEqual(result);
+      expect(tsv.getRawDataByRowIds(["0","1"])).toEqual(result);
     });
 
 

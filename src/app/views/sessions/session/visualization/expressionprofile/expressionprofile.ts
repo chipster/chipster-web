@@ -255,7 +255,7 @@ class ExpressionProfile {
 
     createNewDataset() {
         let selectedGeneExpressionIds = this.getSelectionIds();
-        let tsvData = this.tsv.getRawData(selectedGeneExpressionIds);
+        let tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
         let data = d3.tsvFormatRows(tsvData);
         this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data);
     }

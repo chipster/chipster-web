@@ -1,21 +1,26 @@
 import SessionDataService from "../../sessiondata.service";
 import {TSVReader} from "../../../../../services/TSVReader";
 import * as d3 from "d3";
+import {Input, Component, Inject} from "@angular/core";
+import TSVFile from "../../../../../model/tsv/TSVFile";
 
-class SpreadsheetVisualizationController {
+@Component({
+  selector: 'spreadsheet-visualization',
+  template: '<div id="tableContainer"></div>'
+})
+export class SpreadsheetVisualizationComponent {
 
-    static $inject = ['SessionDataService', 'TSVReader'];
+    @Input() datasetId: string;
 
-    datasetId: string;
-
-    constructor(private sessionDataService: SessionDataService,
+    constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
                 private tsvReader: TSVReader){}
 
-    $onInit() {
+    ngOnInit() {
         this.tsvReader.getTSV(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsvParseRows(result.data);
+            let normalizedTSV = new TSVFile(parsedTSV, this.datasetId, 'öalskfj');
             const container = document.getElementById('tableContainer');
-            new Handsontable(container, this.getSettings(parsedTSV));
+            new Handsontable(container, this.getSettings(normalizedTSV.getRawData()));
         }, e => console.error('Fetching TSVData failed', e));
 
     }
@@ -29,13 +34,5 @@ class SpreadsheetVisualizationController {
             sortIndicator: true,
             readOnly: true
         }
-    }
-}
-
-export default {
-    controller: SpreadsheetVisualizationController,
-    template: '<div id="tableContainer"></div>',
-    bindings: {
-        datasetId: '<'
     }
 }

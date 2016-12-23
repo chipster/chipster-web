@@ -12,10 +12,11 @@ import {HtmlvisualizationComponent} from './htmlvisualization/htmlvisualization.
 import {TrustedResourcePipe} from "../../../../pipes/trustedresource.pipe";
 import {TextVisualizationComponent} from "./textvisualization/textvisualization.component";
 import {BytesPipe} from "../../../../pipes/bytes.pipe";
+import {SpreadsheetVisualizationComponent} from "./spreadsheetvisualization/spreadsheetvisualization.component";
 
 @NgModule({
   imports: [BrowserModule],
-  declarations: [VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TrustedResourcePipe, BytesPipe, TextVisualizationComponent],
+  declarations: [VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TrustedResourcePipe, BytesPipe, TextVisualizationComponent, SpreadsheetVisualizationComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService]
 })
 export class VisualizationsModule {

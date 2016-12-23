@@ -37,10 +37,11 @@ export class TextVisualizationComponent {
     }
 
     load() {
-      this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).then( (resp: any) => {
-        this.data = resp.data;
-      }, (error) => {
-        console.error('error', error);
+      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
+        this.data = response.data;
+        this.changeDetectorRef.detectChanges();
+      }, (error: Response) => {
+        console.error(error);
       });
     }
 

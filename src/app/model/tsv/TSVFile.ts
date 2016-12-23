@@ -11,6 +11,7 @@ export default class TSVFile {
     constructor(tsv: Array<Array<string>>, public datasetId: string, public filename: string) {
         // normalize header-row in tsv-file so that if headers are missing a column
         // or identifier is indicated by an empty string
+
         const normalizedHeaders = this.getNormalizeHeaders(tsv);
         this.headers = new TSVHeaders(normalizedHeaders);
         this.body = new TSVBody(_.tail(tsv));
@@ -19,13 +20,21 @@ export default class TSVFile {
     }
 
     /*
+     * @description: return unfiltered tsv-data. Note that data is normalized.
+     */
+    public getRawData(): Array<Array<string>> {
+      const headers = this.headers.headers;
+      const body = this.body.getRawDataRows();
+      return [headers, ...body];
+    }
+
+    /*
      * @description: get raw TSVFile-data in its initial form
      */
-    public getRawData(ids: Array<string>): Array<Array<string>> {
-        let body = this.body.getRawDataByRowIds(ids);
-        let headers = this.headers.headers;
-        let data = [headers, ...body];
-        return data;
+    public getRawDataByRowIds(ids: Array<string>): Array<Array<string>> {
+        const headers = this.headers.headers;
+        const body = this.body.getRawDataByRowIds(ids);
+        return [headers, ...body];
     }
 
     /*

@@ -17,7 +17,7 @@ var TSVFile = (function () {
     /*
      * @description: get raw TSVFile-data in its initial
      */
-    TSVFile.prototype.getRawData = function (ids) {
+    TSVFile.prototype.getRawDataByRowIds = function (ids) {
         var body = this.body.getRawDataByRowIds(ids);
         var headers = this.headers.headers;
         var data = [headers].concat(body);
