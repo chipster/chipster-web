@@ -46,7 +46,6 @@ import ParameterListComponent from "app/views/sessions/session/dataset/parameter
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "app/views/sessions/session/session.component";
 import SingleDatasetComponent from "app/views/sessions/session/dataset/singledataset.component";
-import ExpressionProfile from "app/views/sessions/session/visualization/expressionprofile/expressionprofile";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
 import {TSVReader} from "app/services/TSVReader";
@@ -60,6 +59,7 @@ import {PdfVisualizationComponent} from "./app/views/sessions/session/visualizat
 import {HtmlvisualizationComponent} from "./app/views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
 import {TextVisualizationComponent} from "./app/views/sessions/session/visualization/textvisualization/textvisualization.component";
 import {SpreadsheetVisualizationComponent} from "./app/views/sessions/session/visualization/spreadsheetvisualization/spreadsheetvisualization.component";
+import {ExpressionProfileComponent} from "./app/views/sessions/session/visualization/expressionprofile/expressionprofile";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -71,6 +71,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chHtmlvisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HtmlvisualizationComponent))
     .directive('spreadsheetVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SpreadsheetVisualizationComponent))
     .directive('chTextVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(TextVisualizationComponent))
+    .directive('chExpressionProfile', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ExpressionProfileComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -114,7 +115,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('toolCircle', toolCircle)
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .component('phenodataVisualization', <any>phenodataVisualization)
-    .component('expressionProfile', ExpressionProfile)
     .component('workflowGraph', <any>workflowGraph)
     .component('sessionList', <any>sessionList)
     .component('parameterList', ParameterListComponent)
@@ -163,6 +163,7 @@ angular.module('chipster-web').config(
 
 upgradeAdapter.upgradeNg1Provider('localStorageService');
 upgradeAdapter.upgradeNg1Provider('$http');
+upgradeAdapter.upgradeNg1Provider('$window');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('$routeParams');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');

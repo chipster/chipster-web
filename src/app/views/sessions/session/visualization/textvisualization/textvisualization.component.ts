@@ -3,7 +3,7 @@ import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, Inject, ChangeDetectorRef} from "@angular/core";
 import {Observable} from "rxjs";
-import {Response} from "@angular/http";
+import {Response, Http} from "@angular/http";
 
 @Component({
   selector: 'ch-text-visualization',
@@ -23,14 +23,16 @@ export class TextVisualizationComponent {
 
     constructor(
       private changeDetectorRef: ChangeDetectorRef,
+      private http: Http,
     	@Inject('FileResource') private fileResource: FileResource,
       @Inject('SessionDataService') private sessionDataService: SessionDataService) {
     }
 
     ngOnInit() {
+
       Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
         this.data = response.data;
-        this.changeDetectorRef.detectChanges();
+        // this.changeDetectorRef.detectChanges();
       }, (error: Response) => {
         console.error(error);
       });

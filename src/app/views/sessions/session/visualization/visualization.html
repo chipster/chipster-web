@@ -2,91 +2,92 @@
 
 <div id="visualization-box" class="chipster-highlight">
 
-    <h6 ng-if="!$ctrl.active">No suitable visualization for current dataset selections</h6>
+  <h6 ng-if="!$ctrl.active">No suitable visualization for current dataset selections</h6>
 
-    <uib-tabset ng-if="$ctrl.active" active="$ctrl.active">
+  <uib-tabset ng-if="$ctrl.active" active="$ctrl.active">
 
-        <uib-tab index="'text'"
-                 ng-if="$ctrl.isCompatibleVisualization('text')">
-            <uib-tab-heading><span class="glyphicon glyphicon-font"></span> Text</uib-tab-heading>
-            <ch-text-visualization
-                    ng-if="$ctrl.active === 'text'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
-            </ch-text-visualization>
-        </uib-tab>
+    <uib-tab index="'spreadsheet'"
+             ng-if="$ctrl.isCompatibleVisualization('spreadsheet')">
+      <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
+      <spreadsheet-visualization
+        ng-if="$ctrl.active === 'spreadsheet'"
+        [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+      </spreadsheet-visualization>
+    </uib-tab>
 
-        <uib-tab index="'spreadsheet'"
-                 ng-if="$ctrl.isCompatibleVisualization('spreadsheet')">
-            <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
-            <spreadsheet-visualization
-                    ng-if="$ctrl.active === 'spreadsheet'"
-                    [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-            </spreadsheet-visualization>
-        </uib-tab>
-
-        <uib-tab index="'expressionprofile'"
-                 ng-if="$ctrl.isCompatibleVisualization('expressionprofile')">
-            <uib-tab-heading>Expression profile</uib-tab-heading>
-            <expression-profile
-                    ng-if="$ctrl.active === 'expressionprofile'"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </expression-profile>
-        </uib-tab>
-
-        <uib-tab index="'image'"
-                 ng-if="$ctrl.isCompatibleVisualization('image')">
-            <uib-tab-heading><span class="glyphicon glyphicon-picture"></span> Image</uib-tab-heading>
-            <image-visualization
-                    ng-if="$ctrl.active === 'image'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </image-visualization>
-        </uib-tab>
-
-        <uib-tab index="'phenodata'"
-                 ng-if="$ctrl.isCompatibleVisualization('phenodata')">
-            <uib-tab-heading><span class="glyphicon glyphicon-edit"></span> Phenodata</uib-tab-heading>
-            <phenodata-visualization
-                    ng-if="$ctrl.active === 'phenodata'"
-                    src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-                    dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-                    selected-datasets="$ctrl.SelectionService.selectedDatasets">
-            </phenodata-visualization>
-        </uib-tab>
+    <uib-tab index="'text'"
+             ng-if="$ctrl.isCompatibleVisualization('text')">
+      <uib-tab-heading><span class="glyphicon glyphicon-font"></span> Text</uib-tab-heading>
+      <ch-text-visualization
+        ng-if="$ctrl.active === 'text'"
+        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
+        [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+        [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
+      </ch-text-visualization>
+    </uib-tab>
 
 
-        <uib-tab index="'pdf'"
-                 ng-if="$ctrl.isCompatibleVisualization('pdf')">
-            <uib-tab-heading><span class="glyphicon glyphicon-book"></span> PDF</uib-tab-heading>
-            <ch-pdf-visualization
-                    ng-if="$ctrl.active === 'pdf'"
-                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
-            </ch-pdf-visualization>
-        </uib-tab>
+    <uib-tab index="'expressionprofile'"
+             ng-if="$ctrl.isCompatibleVisualization('expressionprofile')">
+      <uib-tab-heading>Expression profile</uib-tab-heading>
+      <ch-expression-profile
+        ng-if="$ctrl.active === 'expressionprofile'"
+        [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+        [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
+      </ch-expression-profile>
+    </uib-tab>
+
+    <uib-tab index="'image'"
+             ng-if="$ctrl.isCompatibleVisualization('image')">
+      <uib-tab-heading><span class="glyphicon glyphicon-picture"></span> Image</uib-tab-heading>
+      <image-visualization
+        ng-if="$ctrl.active === 'image'"
+        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
+        dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+        selected-datasets="$ctrl.SelectionService.selectedDatasets">
+      </image-visualization>
+    </uib-tab>
+
+    <uib-tab index="'phenodata'"
+             ng-if="$ctrl.isCompatibleVisualization('phenodata')">
+      <uib-tab-heading><span class="glyphicon glyphicon-edit"></span> Phenodata</uib-tab-heading>
+      <phenodata-visualization
+        ng-if="$ctrl.active === 'phenodata'"
+        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
+        dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+        selected-datasets="$ctrl.SelectionService.selectedDatasets">
+      </phenodata-visualization>
+    </uib-tab>
 
 
-        <uib-tab index="'html'"
-                 ng-if="$ctrl.isCompatibleVisualization('html')">
-            <uib-tab-heading><span class="glyphicon glyphicon-globe"></span> HTML</uib-tab-heading>
-            <ch-htmlvisualization
-                    ng-if="$ctrl.active === 'html'"
-                    [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
-            </ch-htmlvisualization>
-        </uib-tab>
+    <uib-tab index="'pdf'"
+             ng-if="$ctrl.isCompatibleVisualization('pdf')">
+      <uib-tab-heading><span class="glyphicon glyphicon-book"></span> PDF</uib-tab-heading>
+      <ch-pdf-visualization
+        ng-if="$ctrl.active === 'pdf'"
+        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+      </ch-pdf-visualization>
+    </uib-tab>
 
-        <uib-tab index="'venn'"
-                ng-if="$ctrl.isCompatibleVisualization('venn')">
-            <uib-tab-heading>Venn Diagram</uib-tab-heading>
-            <venn-diagram
-                    ng-if="$ctrl.active === 'venn'"
-                    [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
-            </venn-diagram>
-        </uib-tab>
 
-    </uib-tabset>
+    <uib-tab index="'html'"
+             ng-if="$ctrl.isCompatibleVisualization('html')">
+      <uib-tab-heading><span class="glyphicon glyphicon-globe"></span> HTML</uib-tab-heading>
+      <ch-htmlvisualization
+        ng-if="$ctrl.active === 'html'"
+        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+      </ch-htmlvisualization>
+    </uib-tab>
+
+    <uib-tab index="'venn'"
+             ng-if="$ctrl.isCompatibleVisualization('venn')">
+      <uib-tab-heading>Venn Diagram</uib-tab-heading>
+      <venn-diagram
+        ng-if="$ctrl.active === 'venn'"
+        [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
+      </venn-diagram>
+    </uib-tab>
+
+  </uib-tabset>
 </div>
 

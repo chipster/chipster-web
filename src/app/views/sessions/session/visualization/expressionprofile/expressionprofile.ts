@@ -11,27 +11,33 @@ import ExpressionProfileTSVService from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
+import {Component, Input, Inject} from "@angular/core";
 
-class ExpressionProfile {
+@Component({
+  selector: 'ch-expression-profile',
+  templateUrl: './expressionprofile.html'
+})
+export class ExpressionProfileComponent {
 
-    static $inject = ['TSVReader', '$routeParams', '$window', 'ExpressionProfileService', 'SessionDataService', 'ExpressionProfileTSVService'];
-
+    @Input()
     private datasetId: string;
+
+    @Input()
+    private selectedDatasets: any;
+
     private tsv: TSVFile;
     private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
-    private selectedDatasets: any;
     private viewSelectionList: Array<any>;
 
     constructor(
                 private tsvReader: TSVReader,
-                private $routeParams: ng.route.IRouteParamsService,
-                private $window: ng.IWindowService,
+                @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
+                @Inject('$window') private $window: ng.IWindowService,
                 private expressionProfileService: ExpressionProfileService,
-                private sessionDataService: SessionDataService,
-                private expressionProfileTSVService: ExpressionProfileTSVService) {
-    }
+                @Inject('SessionDataService') private sessionDataService: SessionDataService,
+                private expressionProfileTSVService: ExpressionProfileTSVService) {}
 
-    $onInit() {
+    ngOnInit() {
         const datasetName = this.selectedDatasets[0].name;
         this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsvParseRows(result.data);
@@ -320,15 +326,5 @@ class ExpressionProfile {
             return {symbol: row.row[tsvSymbolIndex], identifier: row.row[tsvIdentifierIndex]};
         });
     }
-
-}
-
-export default {
-  bindings: {
-    datasetId: '<',
-    selectedDatasets: '<'
-  },
-  controller: ExpressionProfile,
-  templateUrl: './expressionprofile.html'
 
 }
