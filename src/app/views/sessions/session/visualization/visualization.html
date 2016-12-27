@@ -40,12 +40,10 @@
     <uib-tab index="'image'"
              ng-if="$ctrl.isCompatibleVisualization('image')">
       <uib-tab-heading><span class="glyphicon glyphicon-picture"></span> Image</uib-tab-heading>
-      <image-visualization
+      <ch-image-visualization
         ng-if="$ctrl.active === 'image'"
-        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-        dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-        selected-datasets="$ctrl.SelectionService.selectedDatasets">
-      </image-visualization>
+        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+      </ch-image-visualization>
     </uib-tab>
 
     <uib-tab index="'phenodata'"

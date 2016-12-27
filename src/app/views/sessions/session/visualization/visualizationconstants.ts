@@ -55,6 +55,4 @@ export default [
     anyInputCountSupported: false,
     supportedInputFileCounts: [2, 3]
   }
-
-
 ];

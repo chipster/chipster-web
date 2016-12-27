@@ -32,7 +32,7 @@ export class TextVisualizationComponent {
 
       Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
         this.data = response.data;
-        // this.changeDetectorRef.detectChanges();
+        this.changeDetectorRef.detectChanges();
       }, (error: Response) => {
         console.error(error);
       });
