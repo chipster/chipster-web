@@ -15,10 +15,11 @@ import {BytesPipe} from "../../../../pipes/bytes.pipe";
 import {SpreadsheetVisualizationComponent} from "./spreadsheetvisualization/spreadsheetvisualization.component";
 import {ExpressionProfileComponent} from "./expressionprofile/expressionprofile.component";
 import {ImageVisualizationComponent} from "./imagevisualization/imagevisualization.component";
+import {PhenodataVisualizationComponent} from "./phenodata/phenodatavisualization.component";
 
 @NgModule({
   imports: [BrowserModule],
-  declarations: [VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TrustedResourcePipe, BytesPipe, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent],
+  declarations: [VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TrustedResourcePipe, BytesPipe, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService]
 })
 export class VisualizationsModule {}

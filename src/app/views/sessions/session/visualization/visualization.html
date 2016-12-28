@@ -49,12 +49,10 @@
     <uib-tab index="'phenodata'"
              ng-if="$ctrl.isCompatibleVisualization('phenodata')">
       <uib-tab-heading><span class="glyphicon glyphicon-edit"></span> Phenodata</uib-tab-heading>
-      <phenodata-visualization
+      <ch-phenodata-visualization
         ng-if="$ctrl.active === 'phenodata'"
-        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
-        dataset-id="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-        selected-datasets="$ctrl.SelectionService.selectedDatasets">
-      </phenodata-visualization>
+        [datasets]="$ctrl.SelectionService.selectedDatasets">
+      </ch-phenodata-visualization>
     </uib-tab>
 
 

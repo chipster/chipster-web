@@ -12,6 +12,7 @@ import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import {Component, Input, Inject} from "@angular/core";
+import Line from "./line";
 
 @Component({
   selector: 'ch-expression-profile',
@@ -230,12 +231,12 @@ export class ExpressionProfileComponent {
 
                 let ids: Array<string> = []; // path ids found in each interval (not unique list)
                 for (let interval of intervals ) {
-                    let intersectingLines = _.filter(interval.lines, line => {
+                    let intersectingLines = _.filter(interval.lines, (line: Line) => {
                         return that.expressionProfileService.isIntersecting(line, interval.rectangle);
                     });
 
                     // Line ids intersecting with selection as an array
-                    ids = ids.concat(_.map(intersectingLines, line => line._lineId));
+                    ids = ids.concat(_.map(intersectingLines, (line:Line) => line.lineId));
                 };
 
                 this.resetSelections();

@@ -4,24 +4,17 @@ import CSVReader from "../../../../../services/CSVReader";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
+import {Component, Inject, Input, SimpleChanges} from "@angular/core";
+import {Row} from "./phenodatarow.interface";
 
-interface Row extends Array<string> {
-    // store datasetId and columnName as properties to hide them from the table
-    datasetId: string;
-    columnName: string;
-}
+@Component({
+  selector: 'ch-phenodata-visualization',
+  templateUrl: './phenodatavisualization.html'
+})
+export class PhenodataVisualizationComponent {
 
-class PhenodataVisualizationController {
-
-    static $inject = ['CSVReader', 'SessionDataService', '$scope', '$uibModal'];
-
-    constructor(
-        private CSVReader: CSVReader,
-        private sessionDataService: SessionDataService,
-        private $scope: ng.IScope,
-        private $uibModal: any) {
-        this.init();
-    }
+    @Input()
+    private datasets: Array<Dataset>;
 
     datasets: Dataset[];
     hot: ht.Methods;
@@ -29,27 +22,30 @@ class PhenodataVisualizationController {
     colName: string;
     array: Row[];
     headers: string[];
-
     latestEdit: number;
     deferredUpdatesTimer: any;
-
     unremovableColumns = [ 'sample', 'original_name', 'dataset', 'column'];
 
-    init() {
 
+    constructor(
+        @Inject('CSVReader') private CSVReader: CSVReader,
+        @Inject('SessionDataService') private sessionDataService: SessionDataService,
+        @Inject('$scope') private $scope: ng.IScope,
+        @Inject('$uibModal') private $uibModal: any) {
+    }
 
-        this.$scope.$watch(() => this.datasets, () => {
-            if (this.datasets.length > 0) {
-                this.updateViewLater();
-            }
-        }, true);
-        /*
-        // destroy the isolated scope when the element is removed to get rid of $watch listeners
-        element.on('$destroy', function () {
-            $scope.$destroy();
-        });*/
+    ngOnInit() {
+      this.updateView();
+    }
 
-        this.updateView();
+    ngOnChanges(changes: SimpleChanges) {
+      for( let propName in changes) {
+        if(propName === 'datasets') {
+          if(this.datasets.length > 0) {
+            this.updateViewLater();
+          }
+        }
+      }
     }
 
     getSettings(array: string[][], headers: string[]) {
@@ -59,7 +55,6 @@ class PhenodataVisualizationController {
             columnSorting: true,
             manualColumnResize: true,
             sortIndicator: true,
-
             afterGetColHeader: (col: number, TH: any) => {
                 if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
                     // removal not allowed
@@ -258,7 +253,6 @@ class PhenodataVisualizationController {
     }
 
     updateView() {
-
         if (this.datasets) {
             var headers = this.getHeaders(this.datasets);
             var array = this.getRows(this.datasets, headers);
@@ -275,7 +269,6 @@ class PhenodataVisualizationController {
                 this.hot = new Handsontable(container, this.getSettings(array, this.headers));
 
             }
-
             this.array = array;
             this.hot.loadData(this.array);
         }
@@ -348,12 +341,4 @@ class PhenodataVisualizationController {
         });
     }
 
-}
-
-export default {
-    controller: PhenodataVisualizationController,
-    templateUrl: './phenodatavisualization.html',
-    bindings: {
-        datasets: '=selectedDatasets'
-    }
 }

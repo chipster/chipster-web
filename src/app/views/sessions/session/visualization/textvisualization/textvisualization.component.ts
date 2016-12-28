@@ -30,7 +30,7 @@ export class TextVisualizationComponent {
 
     ngOnInit() {
 
-      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
+      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: any) => {
         this.data = response.data;
         this.changeDetectorRef.detectChanges();
       }, (error: Response) => {
@@ -39,7 +39,7 @@ export class TextVisualizationComponent {
     }
 
     load() {
-      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: Response) => {
+      Observable.fromPromise(this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit)).subscribe( (response: any) => {
         this.data = response.data;
         this.changeDetectorRef.detectChanges();
       }, (error: Response) => {
