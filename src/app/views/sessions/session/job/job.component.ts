@@ -1,13 +1,16 @@
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
+import {Component, Inject} from "@angular/core";
 
-class JobBoxComponent {
-
-	static $inject = ['SelectionService', 'SessionDataService'];
+@Component({
+  selector: 'ch-job',
+  templateUrl: './job.html'
+})
+export class JobComponent {
 
 	constructor(
 		private SelectionService: SelectionService,
-		private SessionDataService: SessionDataService) {
+		@Inject('SessionDataService') private SessionDataService: SessionDataService) {
 	}
 
 	deleteJobs() {
@@ -25,10 +28,5 @@ class JobBoxComponent {
 	isJobSelected() {
 		return this.SelectionService.selectedJobs.length > 0;
 	}
-}
-
-export default {
-	templateUrl: './job.html',
-	controller: JobBoxComponent
 }
 

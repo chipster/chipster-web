@@ -16,7 +16,6 @@ export class PhenodataVisualizationComponent {
     @Input()
     private datasets: Array<Dataset>;
 
-    datasets: Dataset[];
     hot: ht.Methods;
     // name of the new column
     colName: string;

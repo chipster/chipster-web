@@ -1,13 +1,13 @@
 <h4>Job</h4>
 <div class="chipster-highlight">
-    <div class="row" ng-if="$ctrl.isJobSelected()">
+    <div class="row" *ngIf="isJobSelected()">
         <div class="col-sm-8">
-            <h5>{{$ctrl.getJob().toolCategory}} / {{$ctrl.getJob().toolName}}</h5>
+            <h5>{{getJob().toolCategory}} / {{getJob().toolName}}</h5>
         </div>
 
         <div class="col-sm-4">
             <div class="btn-group btn-group-sm pull-right">
-                <button type="button" class="btn btn-default" ng-click="$ctrl.deleteJobs()">
+                <button type="button" class="btn btn-default" (click)="deleteJobs()">
                     Cancel
                 </button>
             </div>
@@ -15,8 +15,8 @@
 
         <div class="col-sm-12">
             <div class="indented">
-                <p>Status: {{$ctrl.getJob().state.toLowerCase()}}
-                    <span ng-show="$ctrl.getJob().stateDetail">({{$ctrl.getJob().stateDetail}})</span>
+                <p>Status: {{getJob().state.toLowerCase()}}
+                    <span *ngIf="getJob().stateDetail">({{getJob().stateDetail}})</span>
                 </p>
                 <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
             </div>
@@ -24,7 +24,7 @@
             <h5>Parameters</h5>
             <div>
                 <table class="table table-condensed parameter-table">
-                    <tr ng-repeat="param in $ctrl.getJob().parameters">
+                    <tr *ngFor="let param of getJob().parameters">
                         <td>{{param.displayName}}</td>
                         <td>{{param.value}}</td>
                     </tr>

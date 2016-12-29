@@ -13,6 +13,7 @@ import {VisualizationsModule} from "./views/sessions/session/visualization/visua
 import { RouterModule, Routes } from '@angular/router';
 import {HomeComponent} from "./views/home/home.component";
 import {BytesPipe} from "./pipes/bytes.pipe";
+import {SessionModule} from "./views/sessions/session/session.module";
 
 
 @NgModule({
@@ -22,7 +23,7 @@ import {BytesPipe} from "./pipes/bytes.pipe";
       FormsModule,
       RouterModule,
       AuthenticationModule,
-      VisualizationsModule
+      SessionModule
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
     providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]

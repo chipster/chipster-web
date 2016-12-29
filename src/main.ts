@@ -14,7 +14,6 @@ import SessionEventService from "app/views/sessions/session/sessionevent.service
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
 import SelectionService from "app/views/sessions/session/selection.service";
 import DatasetBoxComponent from "app/views/sessions/session/dataset/datasetbox.component";
-import JobBoxComponent from "app/views/sessions/session/job/jobbox.component";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
@@ -60,6 +59,7 @@ import {SpreadsheetVisualizationComponent} from "./app/views/sessions/session/vi
 import {ExpressionProfileComponent} from "./app/views/sessions/session/visualization/expressionprofile/expressionprofile.component";
 import {ImageVisualizationComponent} from "./app/views/sessions/session/visualization/imagevisualization/imagevisualization.component";
 import {PhenodataVisualizationComponent} from "./app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
+import {JobComponent} from "./app/views/sessions/session/job/job.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -74,6 +74,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chExpressionProfile', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ExpressionProfileComponent))
     .directive('chImageVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ImageVisualizationComponent))
     .directive('chPhenodataVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(PhenodataVisualizationComponent))
+    .directive('chJob', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(JobComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -83,7 +84,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     .component('datasetBox', DatasetBoxComponent)
     .directive('customOnChange', CustomOnChange)
-    .component('jobBox', JobBoxComponent)
     .component('toolsBox', ToolsBoxComponent)
     .component('toolTitle', ToolTitleComponent)
     .component('leftPanel', LeftPanelComponent)
