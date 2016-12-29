@@ -1,5 +1,4 @@
 
-import Dataset from "../../../../../model/session/dataset";
 export default class AddColumnController {
 
     static $inject = ['$uibModalInstance', '$uibModal', 'hot', 'colName'];

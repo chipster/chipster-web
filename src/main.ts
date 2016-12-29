@@ -63,6 +63,9 @@ import {JobComponent} from "./app/views/sessions/session/job/job.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
+
+
+    // Angular 2
     .directive('home', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
     .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
     .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
@@ -81,31 +84,13 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
+  .component('parameterList', ParameterListComponent)
 
+
+    // Should be trivial to upgrade to Angular 2
     .component('datasetBox', DatasetBoxComponent)
-    .directive('customOnChange', CustomOnChange)
     .component('toolsBox', ToolsBoxComponent)
     .component('toolTitle', ToolTitleComponent)
-    .component('leftPanel', LeftPanelComponent)
-    .controller('AddDatasetModalController', AddDatasetModalController)
-    .controller('ParameterModalController', ParameterModalController)
-    .controller('ToolsModalController', ToolsModalController)
-    .controller('InputsModalController', InputsModalController)
-    .controller('SourceModalController', SourceModalController)
-    .controller('SessionEditModalController', SessionEditModalController)
-    .controller('DatasetHistoryModalController', DatasetHistoryModalController)
-    .controller('JobErrorModalController', JobErrorModalController)
-    .controller('AddColumnController', AddColumnController)
-    .service('ToolResource', ToolResource)
-    .service('SessionEventService', SessionEventService)
-    .service('SessionResource', SessionResource)
-    .service('SessionWorkerResource', SessionWorkerResource)
-    .service('SessionDataService', SessionDataService)
-    .service('FileResource', FileResource)
-    .service('Utils', UtilsService)
-    .service('WorkflowGraphService', WorkflowGraphService)
-    .service('CSVReader', CSVReader)
-    .service('ToolService', ToolService)
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
     .filter('isoDate', isoDateFilter)
@@ -113,14 +98,40 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('moduleFilter', moduleFilter)
     .filter('toolFilter', toolFilter)
     .filter('seconds',secondsFilter)
-    .directive('toolCircle', toolCircle)
-    // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
-    .component('workflowGraph', <any>workflowGraph)
-    .component('sessionList', <any>sessionList)
-    .component('parameterList', ParameterListComponent)
+    .service('WorkflowGraphService', WorkflowGraphService)
+    .service('Utils', UtilsService)
+  .service('ToolService', ToolService)
+  .component('workflowGraph', <any>workflowGraph)
+  .service('CSVReader', CSVReader)
+  .component('singleDataset', SingleDatasetComponent)
+  .directive('toolCircle', toolCircle)
+
+    // Uprade simultaneously when refactoring restangular to Angular2 implementation
+    .service('ToolResource', ToolResource)
+  .service('SessionEventService', SessionEventService)
+  .service('SessionResource', SessionResource)
+  .service('SessionWorkerResource', SessionWorkerResource)
+  .service('SessionDataService', SessionDataService)
+  .service('FileResource', FileResource)
+  .component('sessionList', <any>sessionList)
+  .component('session', SessionComponent)
+
+
+    // Last to be upgraded
+    .component('leftPanel', LeftPanelComponent)
+    .controller('ToolsModalController', ToolsModalController)
+    .controller('InputsModalController', InputsModalController)
+    .controller('SourceModalController', SourceModalController)
+    .directive('customOnChange', CustomOnChange)
+    .controller('AddDatasetModalController', AddDatasetModalController)
+    .controller('SessionEditModalController', SessionEditModalController)
+    .controller('ParameterModalController', ParameterModalController)
+    .controller('DatasetHistoryModalController', DatasetHistoryModalController)
+    .controller('JobErrorModalController', JobErrorModalController)
+    .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
-    .component('session', SessionComponent)
-    .component('singleDataset', SingleDatasetComponent)
+
+    // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);
 
 angular.module('AuthenticationModule', [])
