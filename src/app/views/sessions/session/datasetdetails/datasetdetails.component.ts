@@ -1,7 +1,6 @@
 import SelectionService from "../selection.service";
 import SessionDataService from "../sessiondata.service";
-import {Component, Inject, Output, Directive, EventEmitter, ElementRef, Injector} from "@angular/core";
-import {UpgradeComponent} from "@angular/upgrade/src/aot/upgrade_component";
+import {Component, Inject, Output, EventEmitter} from "@angular/core";
 
 @Component({
   selector: 'ch-dataset-details',

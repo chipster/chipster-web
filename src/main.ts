@@ -38,7 +38,6 @@ import SessionResource from "app/resources/session.resource";
 import SessionWorkerResource from "app/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "app/views/sessions/sessionlist.component";
-import ParameterListComponent from "app/views/sessions/session/datasetdetails/parameterlist.component";
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "app/views/sessions/session/session.component";
 import SingleDatasetComponent from "app/views/sessions/session/datasetdetails/singledataset.component";
@@ -60,6 +59,7 @@ import {ImageVisualizationComponent} from "./app/views/sessions/session/visualiz
 import {PhenodataVisualizationComponent} from "./app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
 import {JobComponent} from "./app/views/sessions/session/job/job.component";
 import {DatasetDetailsComponent} from "./app/views/sessions/session/datasetdetails/datasetdetails.component";
+import {DatasetParameterListComponent} from "./app/views/sessions/session/datasetdetails/dataset-parameter-list/dataset-parameter-list.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -79,6 +79,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chPhenodataVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(PhenodataVisualizationComponent))
     .directive('chJob', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(JobComponent))
     .directive('chDatasetDetails', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetDetailsComponent))
+    .directive('chParameterList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetParameterListComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -88,7 +89,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
 
     // Should be trivial to upgrade to Angular 2
-  .component('parameterList', ParameterListComponent)
     .component('toolsBox', ToolsBoxComponent)
     .component('toolTitle', ToolTitleComponent)
     .filter('searchDatasetFilter', searchDatasetFilter)

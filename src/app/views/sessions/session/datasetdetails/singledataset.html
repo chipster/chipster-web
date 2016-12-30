@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <parameter-list ng-if="$ctrl.sourceJob.parameters.length > 0" parameters="$ctrl.sourceJob.parameters"></parameter-list>
+                <ch-parameter-list ng-if="$ctrl.sourceJob.parameters.length > 0" [parameters]="$ctrl.sourceJob.parameters"></ch-parameter-list>
             </div>
         </div>
 
