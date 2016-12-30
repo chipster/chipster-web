@@ -116,7 +116,6 @@ class SessionComponent {
     }
 
     deleteDatasetsLater() {
-
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 

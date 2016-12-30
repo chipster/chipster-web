@@ -13,7 +13,6 @@ import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowg
 import SessionEventService from "app/views/sessions/session/sessionevent.service";
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
 import SelectionService from "app/views/sessions/session/selection.service";
-import DatasetBoxComponent from "app/views/sessions/session/dataset/datasetbox.component";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
@@ -39,10 +38,10 @@ import SessionResource from "app/resources/session.resource";
 import SessionWorkerResource from "app/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "app/views/sessions/sessionlist.component";
-import ParameterListComponent from "app/views/sessions/session/dataset/parameterlist.component";
+import ParameterListComponent from "app/views/sessions/session/datasetdetails/parameterlist.component";
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "app/views/sessions/session/session.component";
-import SingleDatasetComponent from "app/views/sessions/session/dataset/singledataset.component";
+import SingleDatasetComponent from "app/views/sessions/session/datasetdetails/singledataset.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
 import {TSVReader} from "app/services/TSVReader";
@@ -60,6 +59,7 @@ import {ExpressionProfileComponent} from "./app/views/sessions/session/visualiza
 import {ImageVisualizationComponent} from "./app/views/sessions/session/visualization/imagevisualization/imagevisualization.component";
 import {PhenodataVisualizationComponent} from "./app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
 import {JobComponent} from "./app/views/sessions/session/job/job.component";
+import {DatasetDetailsComponent} from "./app/views/sessions/session/datasetdetails/datasetdetails.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -78,17 +78,17 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chImageVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ImageVisualizationComponent))
     .directive('chPhenodataVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(PhenodataVisualizationComponent))
     .directive('chJob', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(JobComponent))
+    .directive('chDatasetDetails', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetDetailsComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
     .service('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
-  .component('parameterList', ParameterListComponent)
 
 
     // Should be trivial to upgrade to Angular 2
-    .component('datasetBox', DatasetBoxComponent)
+  .component('parameterList', ParameterListComponent)
     .component('toolsBox', ToolsBoxComponent)
     .component('toolTitle', ToolTitleComponent)
     .filter('searchDatasetFilter', searchDatasetFilter)
@@ -130,6 +130,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
+
+
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);

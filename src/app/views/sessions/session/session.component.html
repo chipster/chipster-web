@@ -34,9 +34,9 @@
                         on-delete="$ctrl.deleteDatasetsLater()"
                         ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></single-dataset>
 
-                <dataset-box
-                        on-delete="$ctrl.deleteDatasetsLater()"
-                        ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></dataset-box>
+                <ch-dataset-details
+                        (on-delete)="$ctrl.deleteDatasetsLater()"
+                        ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></ch-dataset-details>
             </div>
         </div>
 
