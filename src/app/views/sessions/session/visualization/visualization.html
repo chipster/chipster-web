@@ -9,10 +9,10 @@
     <uib-tab index="'spreadsheet'"
              ng-if="$ctrl.isCompatibleVisualization('spreadsheet')">
       <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
-      <spreadsheet-visualization
+      <ch-spreadsheet-visualization
         ng-if="$ctrl.active === 'spreadsheet'"
         [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
-      </spreadsheet-visualization>
+      </ch-spreadsheet-visualization>
     </uib-tab>
 
     <uib-tab index="'text'"
@@ -78,10 +78,10 @@
     <uib-tab index="'venn'"
              ng-if="$ctrl.isCompatibleVisualization('venn')">
       <uib-tab-heading>Venn Diagram</uib-tab-heading>
-      <venn-diagram
+      <ch-venn-diagram
         ng-if="$ctrl.active === 'venn'"
         [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
-      </venn-diagram>
+      </ch-venn-diagram>
     </uib-tab>
 
   </uib-tabset>

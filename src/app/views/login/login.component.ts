@@ -4,7 +4,7 @@ import {Component, Inject, ViewChild} from "@angular/core";
 import { FormGroup } from '@angular/forms';
 
 @Component({
-    selector: 'login',
+    selector: 'ch-login',
     templateUrl: './login.html'
 })
 export class LoginComponent {

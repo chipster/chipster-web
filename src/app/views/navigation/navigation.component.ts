@@ -3,7 +3,7 @@ import AuthenticationService from "../../authentication/authenticationservice";
 import ConfigService from "../../services/config.service";
 
 @Component({
-    selector: 'navigation',
+    selector: 'ch-navigation',
     templateUrl: './navigation.html'
 })
 export class NavigationComponent {

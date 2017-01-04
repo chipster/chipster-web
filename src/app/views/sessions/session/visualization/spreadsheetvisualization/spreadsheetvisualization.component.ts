@@ -5,7 +5,7 @@ import {Input, Component, Inject} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 
 @Component({
-  selector: 'spreadsheet-visualization',
+  selector: 'ch-spreadsheet-visualization',
   template: '<div id="tableContainer"></div>'
 })
 export class SpreadsheetVisualizationComponent {

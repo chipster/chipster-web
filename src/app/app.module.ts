@@ -9,10 +9,7 @@ import SelectionService from "./views/sessions/session/selection.service";
 import ConfigService from "./services/config.service";
 import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
-import {VisualizationsModule} from "./views/sessions/session/visualization/visualizations.module";
-import { RouterModule, Routes } from '@angular/router';
 import {HomeComponent} from "./views/home/home.component";
-import {BytesPipe} from "./pipes/bytes.pipe";
 import {SessionModule} from "./views/sessions/session/session.module";
 
 
@@ -21,7 +18,6 @@ import {SessionModule} from "./views/sessions/session/session.module";
       BrowserModule,
       HttpModule,
       FormsModule,
-      RouterModule,
       AuthenticationModule,
       SessionModule
     ],

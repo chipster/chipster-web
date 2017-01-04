@@ -66,13 +66,13 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
 
     // Angular 2
-    .directive('home', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
-    .directive('login', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
-    .directive('navigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
-    .directive('vennDiagram', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VennDiagram))
+    .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
+    .directive('chLogin', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LoginComponent))
+    .directive('chNavigation', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(NavigationComponent))
+    .directive('chVennDiagram', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VennDiagram))
     .directive('chPdfVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(PdfVisualizationComponent))
     .directive('chHtmlvisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HtmlvisualizationComponent))
-    .directive('spreadsheetVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SpreadsheetVisualizationComponent))
+    .directive('chSpreadsheetVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SpreadsheetVisualizationComponent))
     .directive('chTextVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(TextVisualizationComponent))
     .directive('chExpressionProfile', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ExpressionProfileComponent))
     .directive('chImageVisualization', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ImageVisualizationComponent))

@@ -16,7 +16,7 @@ import VennDiagramText from "./venndiagramtext";
 import Circle from "../model/circle";
 
 @Component({
-    selector: 'vennDiagram',
+    selector: 'ch-venn-diagram',
     templateUrl: './venndiagram.html'
 })
 export class VennDiagram {
