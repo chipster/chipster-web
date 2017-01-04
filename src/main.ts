@@ -17,7 +17,6 @@ import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
 import CSVReader from "app/services/CSVReader";
-import ToolService from "app/views/sessions/session/tools/tool.service";
 import bytes from "app/common/filter/bytes.filter";
 import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
@@ -41,12 +40,13 @@ import SessionComponent from "app/views/sessions/session/session.component";
 import SingleDatasetComponent from "app/views/sessions/session/datasetdetails/singledataset.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
-import {TSVReader} from "app/services/TSVReader";
-import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
-import ExpressionProfileTSVService from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
+import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
+import {TSVReader} from "app/services/TSVReader";
+import {ExpressionProfileTSVService} from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
+import {ToolService} from "app/views/sessions/session/tools/tool.service";
 import {ToolTitleComponent} from "app/views/sessions/session/tools/tooltitle.component";
 import { HomeComponent } from "./app/views/home/home.component";
 import {PdfVisualizationComponent} from "./app/views/sessions/session/visualization/pdf-visualization/pdf-visualization.component";
@@ -88,7 +88,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ConfigurationResource', upgradeAdapter.downgradeNg2Provider(ConfigurationResource))
     .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
-
+    .service('ToolService', upgradeAdapter.downgradeNg2Provider(ToolService))
 
     // Should be trivial to upgrade to Angular 2
     .component('toolsBox', ToolsBoxComponent)
@@ -101,7 +101,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('seconds',secondsFilter)
     .service('WorkflowGraphService', WorkflowGraphService)
     .service('Utils', UtilsService)
-  .service('ToolService', ToolService)
   .component('workflowGraph', <any>workflowGraph)
   .service('CSVReader', CSVReader)
   .component('singleDataset', SingleDatasetComponent)

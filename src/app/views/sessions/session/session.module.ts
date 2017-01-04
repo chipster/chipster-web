@@ -7,10 +7,11 @@ import {DatasetDetailsComponent} from "./datasetdetails/datasetdetails.component
 import { DatasetParameterListComponent } from './datasetdetails/dataset-parameter-list/dataset-parameter-list.component';
 import { ToolListItemComponent } from './tools/toolsmodal/tool-list-item/tool-list-item.component';
 import {ToolTitleComponent} from "./tools/tooltitle.component";
+import {ToolsModule} from "./tools/tools.module";
 
 @NgModule({
-  imports: [BrowserModule, VisualizationsModule],
-  declarations: [JobComponent, DatasetDetailsComponent, DatasetParameterListComponent, ToolListItemComponent, ToolTitleComponent],
+  imports: [BrowserModule, VisualizationsModule, ToolsModule],
+  declarations: [JobComponent, DatasetDetailsComponent, DatasetParameterListComponent],
   providers: []
 })
 export class SessionModule{}

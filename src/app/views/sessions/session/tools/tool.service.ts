@@ -4,8 +4,12 @@ import Dataset from "../../../../model/session/dataset";
 import InputBinding from "../../../../model/session/inputbinding";
 import Tool from "../../../../model/session/tool";
 import ToolInput from "../../../../model/session/toolinput";
+import {Injectable} from "@angular/core";
 
-export default class ToolService{
+@Injectable()
+export class ToolService {
+
+    constructor(){}
 
     isSelectionParameter(parameter: ToolParameter) {
         return parameter.type === 'ENUM' ||
@@ -152,6 +156,5 @@ export default class ToolService{
             return this.isCompatible(dataset, toolInput.type.name);
         }.bind(this));
     };
-
 
 }

@@ -8,7 +8,7 @@ import TSVFile from "../../../../../model/tsv/TSVFile";
 import * as _ from "lodash";
 
 @Injectable()
-export default class ExpressionProfileTSVService {
+export class ExpressionProfileTSVService {
 
     /*
      * Get chipvalues from raw data

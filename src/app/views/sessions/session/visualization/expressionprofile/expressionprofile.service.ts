@@ -4,7 +4,7 @@ import Line from "./line";
 import Rectangle from "./rectangle";
 import Point from "../model/point";
 import TSVRow from "../../../../../model/tsv/TSVRow";
-import ExpressionProfileTSVService from "./expressionprofileTSV.service";
+import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import {Injectable} from "@angular/core";
 
 @Injectable()

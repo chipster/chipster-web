@@ -7,7 +7,7 @@ import UtilsService from "../../../../../services/utils.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import { TSVReader } from "../../../../../services/TSVReader";
 import GeneExpression from "./geneexpression";
-import ExpressionProfileTSVService from "./expressionprofileTSV.service";
+import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
