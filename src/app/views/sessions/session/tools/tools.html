@@ -13,11 +13,11 @@
                 Use the <button class="btn btn-info btn-xs" ng-click="$ctrl.openToolsModal()">Tools...</button>
                 button or press 'T' to view and select tools</h5>
 
-            <tool-title ng-if="$ctrl.selectedTool"
-                        module="$ctrl.selectedModule.name"
-                        category="$ctrl.selectedCategory.name"
-                        tool="$ctrl.selectedTool.name.displayName">
-            </tool-title>
+            <ch-tool-title ng-if="$ctrl.selectedTool"
+                        [module]="$ctrl.selectedModule.name"
+                        [category]="$ctrl.selectedCategory.name"
+                        [tool]="$ctrl.selectedTool.name.displayName">
+            </ch-tool-title>
                 <!--$ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
 
                 <!--<span class="glyphicon glyphicon-triangle-right"></span>-->

@@ -3,11 +3,11 @@
         <h4>Input datasets</h4>
     </div>
     <div class="col-md-8">
-        <tool-title ng-if="vm.selectedTool"
-                    module="vm.moduleName"
-                    category="vm.categoryName"
-                    tool="vm.selectedTool.name.displayName">
-        </tool-title>
+        <ch-tool-title ng-if="vm.selectedTool"
+                    [module]="vm.moduleName"
+                    [category]="vm.categoryName"
+                    [tool]="vm.selectedTool.name.displayName">
+        </ch-tool-title>
     </div>
     <div class="col-md-1" style="padding-right: 0">
         <button type="button" class="close pull-right" ng-click="vm.close()">&times</button>

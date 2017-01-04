@@ -5,11 +5,11 @@
     <div class="col-md-10" style="text-align: center">
         <h5 ng-if="!vm.selectedTool">No tool selected</h5>
 
-        <tool-title ng-if="vm.selectedTool"
-            module="vm.selectedModule.name"
-            category="vm.selectedCategory.name"
-            tool="vm.selectedTool.name.displayName">
-        </tool-title>
+        <ch-tool-title ng-if="vm.selectedTool"
+            [module]="vm.selectedModule.name"
+            [category]="vm.selectedCategory.name"
+            [tool]="vm.selectedTool.name.displayName">
+        </ch-tool-title>
     </div>
     <div class="col-md-1" style="padding-right: 0">
         <button type="button" class="close pull-right" ng-click="vm.dismiss(false)">&times</button>

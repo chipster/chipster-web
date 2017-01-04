@@ -1,9 +1,19 @@
-export default {
-    bindings: {
-        module: '<',
-        category: '<',
-        tool: '<',
-    },
+import {Input, Component} from "@angular/core";
 
-    template: '<h5>{{$ctrl.module}} &#8594; {{$ctrl.category}} &#8594; {{$ctrl.tool}}</h5>'
+@Component({
+  selector: 'ch-tool-title',
+  template: `<h5>{{module}} &#8594; {{category}} &#8594; {{tool}}</h5>`
+})
+export class ToolTitleComponent {
+
+  @Input() module: string;
+  @Input() category: string;
+  @Input() tool: string;
+
+  constructor(){}
+
+  ngOnInit() {
+
+  }
+
 }

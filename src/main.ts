@@ -16,7 +16,6 @@ import SelectionService from "app/views/sessions/session/selection.service";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
-import ToolTitleComponent from "app/views/sessions/session/tools/tooltitle.component";
 import CSVReader from "app/services/CSVReader";
 import ToolService from "app/views/sessions/session/tools/tool.service";
 import bytes from "app/common/filter/bytes.filter";
@@ -48,6 +47,7 @@ import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
 import ExpressionProfileTSVService from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
+import {ToolTitleComponent} from "app/views/sessions/session/tools/tooltitle.component";
 import { HomeComponent } from "./app/views/home/home.component";
 import {PdfVisualizationComponent} from "./app/views/sessions/session/visualization/pdf-visualization/pdf-visualization.component";
 import {HtmlvisualizationComponent} from "./app/views/sessions/session/visualization/htmlvisualization/htmlvisualization.component";
@@ -81,6 +81,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chDatasetDetails', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetDetailsComponent))
     .directive('chParameterList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetParameterListComponent))
     .directive('chToolListItem', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolListItemComponent))
+    .directive('chToolTitle', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolTitleComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -91,7 +92,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     // Should be trivial to upgrade to Angular 2
     .component('toolsBox', ToolsBoxComponent)
-    .component('toolTitle', ToolTitleComponent)
     .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('bytes', bytes)
     .filter('isoDate', isoDateFilter)

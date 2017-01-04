@@ -3,11 +3,11 @@
         <h4>Source</h4>
     </div>
     <div class="col-md-10" style="text-align: center">
-        <tool-title ng-if="vm.selectedTool"
-                    module="vm.module"
-                    category="vm.category"
-                    tool="vm.selectedTool.name.displayName">
-        </tool-title>
+        <ch-tool-title ng-if="vm.selectedTool"
+                    [module]="vm.module"
+                    [category]="vm.category"
+                    [tool]="vm.selectedTool.name.displayName">
+        </ch-tool-title>
     </div>
     <div class="col-md-1" style="padding-right: 0">
         <button type="button" class="close pull-right" ng-click="vm.close()">&times</button>
