@@ -26,13 +26,17 @@ export class SpreadsheetVisualizationComponent {
     }
 
     getSettings(array: string[][]) {
+      const arrayHeight = array.length * 23 + 23; // extra for header-row
         return {
             data: array.slice(1),
             colHeaders: array[0],
             columnSorting: true,
             manualColumnResize: true,
             sortIndicator: true,
-            readOnly: true
+            readOnly: true,
+            rowHeights: 23,
+            height: arrayHeight,
+            renderAllRows: false
         }
     }
 }

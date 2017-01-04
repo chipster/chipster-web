@@ -23,7 +23,6 @@ export class DatasetParameterListComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.parameters);
     this.limit = 3;
   }
 
