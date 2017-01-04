@@ -1,6 +1,6 @@
 import Utils from "../../../../../services/utils.service";
 import Dataset from "../../../../../model/session/dataset";
-import CSVReader from "../../../../../services/CSVReader";
+import {CSVReader} from "../../../../../services/CSVReader";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";

@@ -1,12 +1,12 @@
 import FileResource from "../resources/fileresource";
 import {Observable} from "rxjs/Rx";
+import {Injectable, Inject} from "@angular/core";
 
-export default class CSVReader {
-
-    static $inject = ['FileResource'];
+@Injectable()
+export class CSVReader {
 
     constructor(
-        private FileResource: FileResource) {
+        @Inject('FileResource') private FileResource: FileResource) {
     }
 
    getColumns(sessionId: string, datasetId: string): Observable<any> {

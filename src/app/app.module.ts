@@ -11,6 +11,7 @@ import {AuthenticationModule} from "./authentication/authentication.module";
 import {TSVReader} from "./services/TSVReader";
 import {HomeComponent} from "./views/home/home.component";
 import {SessionModule} from "./views/sessions/session/session.module";
+import {CSVReader} from "./services/CSVReader";
 
 
 @NgModule({
@@ -22,6 +23,6 @@ import {SessionModule} from "./views/sessions/session/session.module";
       SessionModule
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
-    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader ]
+    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader, CSVReader ]
 })
 export class AppModule {}
