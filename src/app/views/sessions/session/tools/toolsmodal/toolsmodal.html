@@ -67,8 +67,7 @@
                         ng-class="{'active':category===vm.selectedCategory}"
                         ng-click="vm.selectCategory(category)"
                         ng-repeat="category in vm.selectedModule.categories | categoryFilter:vm.searchTool">
-                    <span><tool-circle toolcolor="category.color"></tool-circle></span>
-                    {{category.name}}
+                    <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
                 </button>
             </div>
         </div>

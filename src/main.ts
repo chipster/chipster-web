@@ -28,7 +28,6 @@ import AddDatasetModalController from "app/views/sessions/session/leftpanel/addd
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
 import ToolsModalController from "app/views/sessions/session/tools/toolsmodal/toolsmodal.controller";
-import toolCircle from "app/views/sessions/session/tools/toolcircle.directive";
 import workflowGraph from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
@@ -60,6 +59,7 @@ import {PhenodataVisualizationComponent} from "./app/views/sessions/session/visu
 import {JobComponent} from "./app/views/sessions/session/job/job.component";
 import {DatasetDetailsComponent} from "./app/views/sessions/session/datasetdetails/datasetdetails.component";
 import {DatasetParameterListComponent} from "./app/views/sessions/session/datasetdetails/dataset-parameter-list/dataset-parameter-list.component";
+import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -80,6 +80,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chJob', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(JobComponent))
     .directive('chDatasetDetails', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetDetailsComponent))
     .directive('chParameterList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetParameterListComponent))
+    .directive('chToolListItem', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolListItemComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -104,7 +105,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
   .component('workflowGraph', <any>workflowGraph)
   .service('CSVReader', CSVReader)
   .component('singleDataset', SingleDatasetComponent)
-  .directive('toolCircle', toolCircle)
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
     .service('ToolResource', ToolResource)

@@ -9,7 +9,7 @@ import {Component, Inject, Output, EventEmitter} from "@angular/core";
 })
 export class DatasetDetailsComponent {
 
-  @Output() onDelete: EventEmitter<> = new EventEmitter();
+  @Output() onDelete: EventEmitter<any> = new EventEmitter();
 
 	constructor(
 		private SelectionService: SelectionService,
