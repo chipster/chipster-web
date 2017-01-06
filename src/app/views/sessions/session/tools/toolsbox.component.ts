@@ -1,5 +1,5 @@
 import SessionDataService from "../sessiondata.service";
-import ToolService from "./tool.service";
+import {ToolService} from "./tool.service";
 import Category from "../../../../model/session/category";
 import Module from "../../../../model/session/module";
 import Job from "../../../../model/session/job";

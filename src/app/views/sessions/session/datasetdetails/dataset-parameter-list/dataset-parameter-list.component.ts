@@ -1,4 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import JobParameter from "../../../../../model/session/jobparameter";
 
 @Component({
@@ -13,7 +13,7 @@ import JobParameter from "../../../../../model/session/jobparameter";
                       </tr>
                 </table>`
 })
-export class DatasetParameterListComponent implements OnInit {
+export class DatasetParameterListComponent {
 
   @Input() parameters: Array<JobParameter>;
 

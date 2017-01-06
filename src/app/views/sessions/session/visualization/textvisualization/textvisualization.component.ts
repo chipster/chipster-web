@@ -8,7 +8,7 @@ import {Response, Http} from "@angular/http";
 @Component({
   selector: 'ch-text-visualization',
   template: `
-    <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytepipe}} of {{getSizeFull() | bytepipe}}</label>
+    <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
     <p>{{data}}</p>
     <a href (click)="loadMore()" *ngIf="!isCompleteFile()">Show more</a>
   `
@@ -23,7 +23,6 @@ export class TextVisualizationComponent {
 
     constructor(
       private changeDetectorRef: ChangeDetectorRef,
-      private http: Http,
     	@Inject('FileResource') private fileResource: FileResource,
       @Inject('SessionDataService') private sessionDataService: SessionDataService) {
     }

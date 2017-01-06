@@ -1,0 +1,30 @@
+<h4>Dataset</h4>
+<div class="chipster-highlight">
+    <div class="dataset-details">
+        <div class="row">
+            <div class="col-md-6">
+
+                <h4>{{dataset.name}}</h4>
+                <h5 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h5>
+                <h5 *ngIf="!sourceJob">Imported file</h5>
+
+                <p>{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
+                <textarea [(ngModel)]="dataset.notes"
+                          class="dataset-notes"
+                          rows="1" placeholder="Dataset notes"
+                          (blur)="updateDataset(dataset)">
+                </textarea>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-default" (click)="renameDataset()">Rename</button>
+                    <button type="button" class="btn btn-default" (click)="deleteDatasets()">Delete</button>
+                    <button type="button" class="btn btn-default" (click)="exportDatasets()">Export</button>
+                    <button type="button" class="btn btn-default" (click)="showHistory()">History</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <ch-dataset-parameter-list *ngIf="sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters"></ch-dataset-parameter-list>
+            </div>
+        </div>
+
+    </div>
+</div>

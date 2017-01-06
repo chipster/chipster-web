@@ -36,12 +36,12 @@ import DatasetHistoryModalController from "app/views/sessions/session/datasethis
 import sessionList from "app/views/sessions/sessionlist.component";
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
 import SessionComponent from "app/views/sessions/session/session.component";
-import SingleDatasetComponent from "app/views/sessions/session/datasetdetails/singledataset.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
+import {SingleDatasetComponent} from "app/views/sessions/session/datasetdetails/singledataset/singledataset.component";
 import {CSVReader} from "app/services/CSVReader";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import {TSVReader} from "app/services/TSVReader";
@@ -60,10 +60,10 @@ import {JobComponent} from "./app/views/sessions/session/job/job.component";
 import {DatasetDetailsComponent} from "./app/views/sessions/session/datasetdetails/datasetdetails.component";
 import {DatasetParameterListComponent} from "./app/views/sessions/session/datasetdetails/dataset-parameter-list/dataset-parameter-list.component";
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
+import {BytesPipe} from "./app/shared/pipes/bytes.pipe";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
-
 
     // Angular 2
     .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
@@ -82,6 +82,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chParameterList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(DatasetParameterListComponent))
     .directive('chToolListItem', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolListItemComponent))
     .directive('chToolTitle', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolTitleComponent))
+    .directive('chSingleDataset', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SingleDatasetComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -91,11 +92,15 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('ToolService', upgradeAdapter.downgradeNg2Provider(ToolService))
     .service('CSVReader', upgradeAdapter.downgradeNg2Provider(CSVReader))
 
+    // Angular 2 version exists, can't upgrade. These needed in angularjs templates
+    .filter('isoDate', isoDateFilter)
+
+
+
+
     // Should be trivial to upgrade to Angular 2
     .component('toolsBox', ToolsBoxComponent)
     .filter('searchDatasetFilter', searchDatasetFilter)
-    .filter('bytes', bytes)
-    .filter('isoDate', isoDateFilter)
     .filter('categoryFilter', categoryFilter)
     .filter('moduleFilter', moduleFilter)
     .filter('toolFilter', toolFilter)
@@ -103,7 +108,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('WorkflowGraphService', WorkflowGraphService)
     .service('Utils', UtilsService)
   .component('workflowGraph', <any>workflowGraph)
-  .component('singleDataset', SingleDatasetComponent)
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
     .service('ToolResource', ToolResource)

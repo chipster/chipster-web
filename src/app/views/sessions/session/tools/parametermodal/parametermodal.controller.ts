@@ -3,7 +3,7 @@ import Tool from "../../../../../model/session/tool";
 import InputBinding from "../../../../../model/session/inputbinding";
 import Dataset from "../../../../../model/session/dataset";
 import JobParameter from "../../../../../model/session/jobparameter";
-import ToolService from "../tool.service";
+import {ToolService} from "../tool.service";
 import ToolInput from "../../../../../model/session/toolinput";
 
 ParameterModalController.$inject = ['$uibModalInstance', '$scope', 'selectedTool', 'inputBindings', 'selectedDatasets', 'ToolService', 'isRunEnabled', 'parameters'];

@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import AuthenticationService from "./authenticationservice";
-import {BrowserModule} from "@angular/platform-browser";
+import {CommonModule} from "@angular/common";
 
 @NgModule({
-    imports: [BrowserModule],
+    imports: [CommonModule],
     providers: [AuthenticationService]
 })
 export class AuthenticationModule {

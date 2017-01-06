@@ -1,7 +1,7 @@
 import Tool from "../../../../../model/session/tool";
 import Dataset from "../../../../../model/session/dataset";
 import InputBinding from "../../../../../model/session/inputbinding";
-import ToolService from "../tool.service";
+import {ToolService} from "../tool.service";
 import * as _ from "lodash";
 
 export default class InputsModalController {
@@ -18,9 +18,6 @@ export default class InputsModalController {
         private inputBindings: InputBinding[],
         private selectedDatasets: Dataset[]) {
     }
-
-    $onInit() {
-    };
 
     close() {
         this.$uibModalInstance.close({inputBindings: this.inputBindings});

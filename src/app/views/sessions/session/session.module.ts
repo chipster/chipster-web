@@ -1,17 +1,16 @@
 
 import {NgModule} from "@angular/core";
-import {BrowserModule} from "@angular/platform-browser";
 import {VisualizationsModule} from "./visualization/visualizations.module";
 import {JobComponent} from "./job/job.component";
-import {DatasetDetailsComponent} from "./datasetdetails/datasetdetails.component";
-import { DatasetParameterListComponent } from './datasetdetails/dataset-parameter-list/dataset-parameter-list.component';
-import { ToolListItemComponent } from './tools/toolsmodal/tool-list-item/tool-list-item.component';
-import {ToolTitleComponent} from "./tools/tooltitle.component";
 import {ToolsModule} from "./tools/tools.module";
+import {DatasetModule} from "./datasetdetails/dataset.module";
+import {CommonModule} from "@angular/common";
+import {SharedModule} from "../../../shared/shared.module";
 
 @NgModule({
-  imports: [BrowserModule, VisualizationsModule, ToolsModule],
-  declarations: [JobComponent, DatasetDetailsComponent, DatasetParameterListComponent],
+  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule],
+  declarations: [JobComponent],
   providers: []
 })
 export class SessionModule{}
+
