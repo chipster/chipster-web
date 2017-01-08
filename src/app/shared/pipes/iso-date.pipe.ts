@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class IsoDatePipe implements PipeTransform {
 
   transform(isoDate: string): any {
-    let d = new Date(isoDate);
+    const d = new Date(isoDate);
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
   }
 
