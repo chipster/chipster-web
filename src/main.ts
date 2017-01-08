@@ -94,17 +94,14 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
-
-
-
-
-    // Should be trivial to upgrade to Angular 2
-    .component('toolsBox', ToolsBoxComponent)
-    .filter('searchDatasetFilter', searchDatasetFilter)
     .filter('categoryFilter', categoryFilter)
     .filter('moduleFilter', moduleFilter)
     .filter('toolFilter', toolFilter)
     .filter('seconds',secondsFilter)
+    .filter('searchDatasetFilter', searchDatasetFilter)
+
+    // Should be trivial to upgrade to Angular 2
+    .component('toolsBox', ToolsBoxComponent)
     .service('WorkflowGraphService', WorkflowGraphService)
     .service('Utils', UtilsService)
   .component('workflowGraph', <any>workflowGraph)
