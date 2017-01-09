@@ -5,25 +5,12 @@ import {PipeService} from "./pipeservice.service";
 @Pipe({
   name: 'modulepipe'
 })
-export class ModulepipePipe implements PipeTransform {
+export class ModulePipe implements PipeTransform {
 
   constructor(private pipeService: PipeService) {}
 
   transform(modules: Array<Module>, searchWord: string){
-    if(!searchWord)
-      return modules;
-
-    var result: Module[] = [];
-
-    modules.forEach((module) => {
-      var filteredTools = $filter('categoryFilter')(module.categories, searchWord);
-
-      if(filteredTools.length > 0){
-        result.push(module);
-      }
-    });
-
-    return result;
+    return searchWord ? this.pipeService.findModulesContainingTool(modules, searchWord) : modules;
   }
 
 }

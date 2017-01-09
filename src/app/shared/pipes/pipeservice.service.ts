@@ -31,6 +31,9 @@ export class PipeService {
     return searchWord ? categories.filter( (category: Category) => this.containingToolBySearchWord(category.tools, searchWord)) : categories;
   }
 
+  /*
+   * @description: find modules containing at least one tool matching searchword
+   */
   findModulesContainingTool(modules: Array<Module>, searchWord: string): Array<Module> {
     return searchWord ? modules.filter( (module: Module) => this.findCategoriesContainingTool(module.categories, searchWord).length > 0) : modules;
   }

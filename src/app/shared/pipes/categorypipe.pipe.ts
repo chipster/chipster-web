@@ -5,7 +5,7 @@ import {PipeService} from "./pipeservice.service";
 @Pipe({
   name: 'categorypipe'
 })
-export class CategorypipePipe implements PipeTransform {
+export class CategoryPipe implements PipeTransform {
 
   constructor(private pipeService: PipeService) {}
 

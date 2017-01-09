@@ -3,7 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
   name: 'secondspipe'
 })
-export class SecondspipePipe implements PipeTransform {
+export class SecondsPipe implements PipeTransform {
 
   transform(seconds: number|string): any {
     if (isNaN(parseFloat(<string>seconds)) || !isFinite(<number>seconds))
