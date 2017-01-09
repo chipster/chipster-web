@@ -1,5 +1,5 @@
 
-import ConfigService from "../services/config.service";
+import ConfigService from "../../services/config.service";
 import {Inject, Injectable} from "@angular/core";
 
 @Injectable()
