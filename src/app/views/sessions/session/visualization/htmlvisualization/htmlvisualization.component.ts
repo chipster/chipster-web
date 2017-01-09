@@ -1,7 +1,7 @@
 import {Component, OnInit, Input, Inject} from '@angular/core';
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs";
-import AuthenticationService from "../../../../../authentication/authenticationservice";
+import AuthenticationService from "../../../../../core/authentication/authenticationservice";
 import {timeout} from "d3-timer";
 
 @Component({

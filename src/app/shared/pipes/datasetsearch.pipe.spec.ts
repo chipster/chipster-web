@@ -5,9 +5,9 @@ import { DatasetsearchPipe } from './datasetsearch.pipe';
 import {PipeService} from "../services/pipeservice.service";
 
 describe('DatasetsearchPipe', () => {
+  const pipe = new DatasetsearchPipe(new PipeService());
 
   it('create an instance', () => {
-    let pipe = new DatasetsearchPipe(PipeService);
     expect(pipe).toBeTruthy();
   });
 });

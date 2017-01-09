@@ -9,6 +9,8 @@ import * as _ from 'lodash';
 @Injectable()
 export class PipeService {
 
+  constructor(){}
+
   findTools(tools: Array<Tool>, searchWord: string) {
     return searchWord ? tools.filter( (tool: Tool) => tool.name.displayName.toLowerCase().indexOf(searchWord.toLowerCase()) !== -1 ) : tools;
   }

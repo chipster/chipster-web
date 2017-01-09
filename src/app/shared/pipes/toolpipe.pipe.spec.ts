@@ -2,10 +2,12 @@
 
 import { TestBed, async } from '@angular/core/testing';
 import {ToolPipe} from "./toolpipe.pipe";
+import {PipeService} from "../services/pipeservice.service";
 
 describe('ToolpipePipe', () => {
+  const toolpipe = new ToolPipe(new PipeService());
+
   it('create an instance', () => {
-    let pipe = new ToolPipe();
-    expect(pipe).toBeTruthy();
+    expect(toolpipe).toBeTruthy();
   });
 });
