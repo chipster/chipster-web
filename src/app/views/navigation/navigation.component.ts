@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import AuthenticationService from "../../authentication/authenticationservice";
+import AuthenticationService from "../../core/authentication/authenticationservice";
 import ConfigService from "../../services/config.service";
 
 @Component({

@@ -1,4 +1,4 @@
-import AuthenticationService from "../../../authentication/authenticationservice";
+import AuthenticationService from "../../../core/authentication/authenticationservice";
 import ConfigService from "../../../services/config.service";
 import SessionResource from "../../../resources/session.resource";
 import IWebSocket = angular.websocket.IWebSocket;

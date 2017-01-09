@@ -2,7 +2,7 @@ import SessionResource from "../../../resources/session.resource";
 import ILogService = angular.ILogService;
 import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/config.service";
-import AuthenticationService from "../../../authentication/authenticationservice";
+import AuthenticationService from "../../../core/authentication/authenticationservice";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import IModalService = angular.ui.bootstrap.IModalService;

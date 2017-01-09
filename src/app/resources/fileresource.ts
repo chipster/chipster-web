@@ -1,7 +1,7 @@
 
 import ConfigService from "../services/config.service";
 import * as restangular from "restangular";
-import AuthenticationService from "../authentication/authenticationservice";
+import AuthenticationService from "../core/authentication/authenticationservice";
 import IService = restangular.IService;
 
 export default class FileResource {
