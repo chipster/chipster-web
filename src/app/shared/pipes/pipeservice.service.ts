@@ -4,6 +4,7 @@ import Tool from "../../model/session/tool";
 import Dataset from "../../model/session/dataset";
 import Category from "../../model/session/category";
 import Module from "../../model/session/module";
+import * as _ from 'lodash';
 
 @Injectable()
 export class PipeService {
