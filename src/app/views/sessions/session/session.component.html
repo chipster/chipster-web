@@ -27,15 +27,14 @@
 
         <div class="row">
             <div class="col-md-12">
-                <ch-job ng-if="$ctrl.selectionService.selectedJobs.length > 0"></ch-job>
+              <ch-job ng-if="$ctrl.selectionService.selectedJobs.length > 0"></ch-job>
                 <ch-single-dataset
                         [dataset]="$ctrl.selectionService.selectedDatasets[0]"
                         [jobs]="$ctrl.sessionData.jobsMap"
                         [on-delete]="$ctrl.deleteDatasetsLater()"
-                        ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></single-dataset>
-
+                        ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></ch-single-dataset>
                 <ch-dataset-details
-                        (on-delete)="$ctrl.deleteDatasetsLater()"
+                        [on-delete]="$ctrl.deleteDatasetsLater()"
                         ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></ch-dataset-details>
             </div>
         </div>

@@ -41,7 +41,7 @@ import AddColumnController from "app/views/sessions/session/visualization/phenod
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
-import {SingleDatasetComponent} from "app/views/sessions/session/datasetdetails/singledataset/singledataset.component";
+import {SingleDatasetComponent} from "app/views/sessions/session/selectiondetails/singledataset/singledataset.component";
 import {CSVReader} from "app/shared/services/CSVReader";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import {TSVReader} from "app/shared/services/TSVReader";
@@ -56,9 +56,9 @@ import {SpreadsheetVisualizationComponent} from "./app/views/sessions/session/vi
 import {ExpressionProfileComponent} from "./app/views/sessions/session/visualization/expressionprofile/expressionprofile.component";
 import {ImageVisualizationComponent} from "./app/views/sessions/session/visualization/imagevisualization/imagevisualization.component";
 import {PhenodataVisualizationComponent} from "./app/views/sessions/session/visualization/phenodata/phenodatavisualization.component";
-import {JobComponent} from "./app/views/sessions/session/job/job.component";
-import {DatasetDetailsComponent} from "./app/views/sessions/session/datasetdetails/datasetdetails.component";
-import {DatasetParameterListComponent} from "./app/views/sessions/session/datasetdetails/dataset-parameter-list/dataset-parameter-list.component";
+import {JobComponent} from "./app/views/sessions/session/selectiondetails/job/job.component";
+import {DatasetDetailsComponent} from "./app/views/sessions/session/selectiondetails/datasetdetails/datasetdetails.component";
+import {DatasetParameterListComponent} from "./app/views/sessions/session/selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 import {BytesPipe} from "./app/shared/pipes/bytes.pipe";
 

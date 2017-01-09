@@ -1,5 +1,5 @@
-import SelectionService from "../selection.service";
-import SessionDataService from "../sessiondata.service";
+import SelectionService from "../../selection.service";
+import SessionDataService from "../../sessiondata.service";
 import {Component, Inject} from "@angular/core";
 
 @Component({
