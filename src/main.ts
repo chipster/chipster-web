@@ -29,7 +29,6 @@ import workflowGraph from "app/views/sessions/session/leftpanel/workflowgraph/wo
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
 import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
-import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/resources/session.resource";
 import SessionWorkerResource from "app/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
@@ -127,7 +126,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .controller('SessionEditModalController', SessionEditModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
-    .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
 
