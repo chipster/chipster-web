@@ -10,7 +10,7 @@ import ToolParameter from "../../../../../model/session/toolparameter";
 import SessionDataService from "../../sessiondata.service";
 import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import {TSVReader} from "../../../../../services/TSVReader";
+import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
 
 export default class ToolsModalController {

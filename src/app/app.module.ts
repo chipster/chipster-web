@@ -7,11 +7,11 @@ import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
 import ConfigService from "./services/config.service";
-import {AuthenticationModule} from "./authentication/authentication.module";
-import {TSVReader} from "./services/TSVReader";
+import {TSVReader} from "./shared/services/TSVReader";
 import {HomeComponent} from "./views/home/home.component";
 import {SessionModule} from "./views/sessions/session/session.module";
-import {CSVReader} from "./services/CSVReader";
+import {CSVReader} from "./shared/services/CSVReader";
+import {CoreModule} from "./core/core.module";
 
 
 @NgModule({
@@ -19,10 +19,10 @@ import {CSVReader} from "./services/CSVReader";
       BrowserModule,
       HttpModule,
       FormsModule,
-      AuthenticationModule,
+      CoreModule,
       SessionModule
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
-    providers: [ ConfigurationResource, SelectionService, ConfigService, TSVReader, CSVReader ]
+    providers: [ ConfigurationResource, SelectionService, ConfigService ]
 })
 export class AppModule {}

@@ -3,7 +3,7 @@ import * as angular from 'angular';
 
 import {NavigationComponent} from "app/views/navigation/navigation.component";
 import {LoginComponent} from "app/views/login/login.component";
-import AuthenticationService from "app/authentication/authenticationservice";
+import AuthenticationService from "app/core/authentication/authenticationservice";
 import ConfigService from "app/services/config.service";
 import ConfigurationResource from "app/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
@@ -42,9 +42,9 @@ import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
 import {SingleDatasetComponent} from "app/views/sessions/session/datasetdetails/singledataset/singledataset.component";
-import {CSVReader} from "app/services/CSVReader";
+import {CSVReader} from "app/shared/services/CSVReader";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
-import {TSVReader} from "app/services/TSVReader";
+import {TSVReader} from "app/shared/services/TSVReader";
 import {ExpressionProfileTSVService} from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
 import {ToolService} from "app/views/sessions/session/tools/tool.service";
 import {ToolTitleComponent} from "app/views/sessions/session/tools/tooltitle.component";

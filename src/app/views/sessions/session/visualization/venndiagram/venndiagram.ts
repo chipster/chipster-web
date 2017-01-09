@@ -1,5 +1,5 @@
 import {Component, Input, Inject} from '@angular/core';
-import {TSVReader} from "../../../../../services/TSVReader";
+import {TSVReader} from "../../../../../shared/services/TSVReader";
 import Dataset from "../../../../../model/session/dataset";
 import * as d3 from "d3";
 import * as _ from "lodash";

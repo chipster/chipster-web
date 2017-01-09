@@ -1,5 +1,5 @@
 import SessionDataService from "../../sessiondata.service";
-import {TSVReader} from "../../../../../services/TSVReader";
+import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as d3 from "d3";
 import {Input, Component, Inject} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";

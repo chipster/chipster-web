@@ -1,8 +1,8 @@
-import FileResource from "../resources/fileresource";
+import FileResource from "../../resources/fileresource";
 import {Injectable, Inject} from "@angular/core";
 import {Observable} from "rxjs/Rx";
-import '../rxjs-operators';
-import TSVFile from "../model/tsv/TSVFile";
+import '../../rxjs-operators';
+import TSVFile from "../../model/tsv/TSVFile";
 import * as d3 from "d3";
 
 @Injectable()

@@ -1,6 +1,6 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import Tool from "../../model/session/tool";
-import {PipeService} from "./pipeservice.service";
+import {PipeService} from "../services/pipeservice.service";
 
 @Pipe({
   name: 'toolpipe'

@@ -5,7 +5,7 @@ import Interval from "./interval";
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../services/utils.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import { TSVReader } from "../../../../../services/TSVReader";
+import { TSVReader } from "../../../../../shared/services/TSVReader";
 import GeneExpression from "./geneexpression";
 import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";

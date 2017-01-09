@@ -2,7 +2,7 @@
 
 import { TestBed, async } from '@angular/core/testing';
 import { DatasetsearchPipe } from './datasetsearch.pipe';
-import {PipeService} from "./pipeservice.service";
+import {PipeService} from "../services/pipeservice.service";
 
 describe('DatasetsearchPipe', () => {
 

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import Dataset from "../../model/session/dataset";
-import {PipeService} from "./pipeservice.service";
+import {PipeService} from "../services/pipeservice.service";
 
 @Pipe({
   name: 'datasetsearch'

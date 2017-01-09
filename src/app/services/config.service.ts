@@ -3,20 +3,12 @@ import * as configConstants from '../app.constants';
 import ConfigurationResource from "../resources/configurationresource";
 import {Injectable, Inject} from "@angular/core";
 import * as _ from "lodash";
-
-class Services {
-    sessionDb: string;
-    sessionDbEvents: string;
-    authenticationService: string;
-    fileBroker: string;
-    toolbox: string;
-    sessionWorker: string;
-}
+import {CoreServices} from "../core/core-services";
 
 @Injectable()
 export default class ConfigService {
 
-    public services: Services;
+    public services: CoreServices;
     public config: any;
     public baseUrl: string;
     private queryPromise: Promise<any>;
@@ -35,7 +27,7 @@ export default class ConfigService {
 
     getServices() {
         return this.queryPromise.then((response: any) => {
-            let services = new Services();
+            let services = new CoreServices();
 
             if (!this.services) {
                 _.forEach(response, (item: any) => {
@@ -55,23 +47,23 @@ export default class ConfigService {
     }
 
     getSessionDbUrl() {
-        return this.getServices().then((services: Services) => services.sessionDb);
+        return this.getServices().then((services: CoreServices) => services.sessionDb);
     }
 
     getSessionDbEventsUrl(sessionId:string) {
-        return this.getServices().then((services: Services) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
+        return this.getServices().then((services: CoreServices) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
     }
 
     getSessionWorkerUrl() {
-        return this.getServices().then((services: Services) => services.sessionWorker);
+        return this.getServices().then((services: CoreServices) => services.sessionWorker);
     }
 
     getAuthUrl() {
-        return this.getServices().then((services: Services) => services.authenticationService);
+        return this.getServices().then((services: CoreServices) => services.authenticationService);
     }
 
     getFileBrokerUrl() {
-        return this.getServices().then((services: Services) => services.fileBroker);
+        return this.getServices().then((services: CoreServices) => services.fileBroker);
     }
 
     getFileBrokerUrlIfInitialized() {
@@ -79,7 +71,7 @@ export default class ConfigService {
     }
 
     getToolboxUrl() {
-        return this.getServices().then((services: Services) => services.toolbox);
+        return this.getServices().then((services: CoreServices) => services.toolbox);
     }
 
     getModules() {
