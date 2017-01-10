@@ -6,9 +6,10 @@ import {ToolsModule} from "./tools/tools.module";
 import {DatasetModule} from "./selectiondetails/dataset.module";
 import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../shared/shared.module";
+import {LeftPanelModule} from "./leftpanel/leftpanel.module";
 
 @NgModule({
-  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule],
+  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule],
   declarations: [],
   providers: []
 })

@@ -28,20 +28,19 @@
           </div>
 
           <workflow-graph
-            datasets-map="$ctrl.sessionData.datasetsMap"
-            jobs-map="$ctrl.sessionData.jobsMap"
-            modules-map="$ctrl.sessionData.modulesMap"
-            dataset-search="$ctrl.datasetSearch"
-            on-delete="$ctrl.onDelete"
-            zoom="1"
-            enabled="true"></workflow-graph>
+            [datasets-map]="$ctrl.sessionData.datasetsMap"
+            [jobs-map]="$ctrl.sessionData.jobsMap"
+            [modules-map]="$ctrl.sessionData.modulesMap"
+            [dataset-search]="$ctrl.datasetSearch"
+            [on-delete]="$ctrl.onDelete"
+            [zoom]="1"
+            [enabled]="true"></workflow-graph>
 
         </uib-tab>
 
         <uib-tab index="1" heading="Datasets">
 
-          <div class="workflow-dataset-static
--panel">
+          <div class="workflow-dataset-static-panel">
             <div class="add-dataset-button">
               <button class="btn btn-sm btn-success link-btn"
                       ng-click="$ctrl.openAddDatasetModal()">

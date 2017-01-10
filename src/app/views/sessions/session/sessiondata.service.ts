@@ -6,7 +6,6 @@ import AuthenticationService from "../../../core/authentication/authenticationse
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import IModalService = angular.ui.bootstrap.IModalService;
-import UtilsService from "../../../services/utils.service";
 import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../resources/fileresource";

@@ -61,6 +61,7 @@ import {DatasetDetailsComponent} from "./app/views/sessions/session/selectiondet
 import {DatasetParameterListComponent} from "./app/views/sessions/session/selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 import {BytesPipe} from "./app/shared/pipes/bytes.pipe";
+import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -83,6 +84,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .directive('chToolListItem', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolListItemComponent))
     .directive('chToolTitle', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolTitleComponent))
     .directive('chSingleDataset', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SingleDatasetComponent))
+    .directive('workflowGraph', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(WorkflowGraphComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -101,10 +103,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('searchDatasetFilter', searchDatasetFilter)
 
     // Should be trivial to upgrade to Angular 2
-    .component('toolsBox', ToolsBoxComponent)
     .service('WorkflowGraphService', WorkflowGraphService)
     .service('Utils', UtilsService)
-  .component('workflowGraph', <any>workflowGraph)
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
     .service('ToolResource', ToolResource)
@@ -119,6 +119,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     // Last to be upgraded
     .component('leftPanel', LeftPanelComponent)
+    .component('toolsBox', ToolsBoxComponent)
     .controller('ToolsModalController', ToolsModalController)
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
@@ -176,6 +177,7 @@ angular.module('chipster-web').config(
 
 upgradeAdapter.upgradeNg1Provider('localStorageService');
 upgradeAdapter.upgradeNg1Provider('$http');
+upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('$routeParams');

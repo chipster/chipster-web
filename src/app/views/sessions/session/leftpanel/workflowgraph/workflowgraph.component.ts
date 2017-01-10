@@ -1,34 +1,41 @@
-import Utils from "../../../../../services/utils.service";
 import IWindowService = angular.IWindowService;
-import WorkflowGraphService from "./workflowgraph.service";
 import IScope = angular.IScope;
-import Job from "../../../../../model/session/job";
-import Dataset from "../../../../../model/session/dataset";
-import Module from "../../../../../model/session/module";
-import Node from "./node"
-import * as d3 from "d3";
-import {IChipsterFilter} from "../../../../../common/filter/chipsterfilter";
-import {ChangeDetector, Comparison} from "../../../../../services/changedetector.service";
-import {MapChangeDetector} from "../../../../../services/changedetector.service";
-import {ArrayChangeDetector} from "../../../../../services/changedetector.service";
-import SessionDataService from "../../sessiondata.service";
 import SelectionService from "../../selection.service";
-import UtilsService from "../../../../../services/utils.service";
 import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
+import Node from "./node";
 import {Link} from "./link";
+import {Component, Input, Output, EventEmitter, Inject} from "@angular/core";
+import Dataset from "../../../../../model/session/dataset";
+import Job from "../../../../../model/session/job";
+import Module from "../../../../../model/session/module";
+import {PipeService} from "../../../../../shared/services/pipeservice.service";
+import {
+  ChangeDetector, Comparison, ArrayChangeDetector,
+  MapChangeDetector
+} from "../../../../../services/changedetector.service";
+import UtilsService from "../../../../../services/utils.service";
+import WorkflowgraphService from "./workflowgraph.service";
+import SessionDataService from "../../sessiondata.service";
+import * as d3 from "d3";
 
-class WorkflowGraphController {
+@Component({
+  selector: 'ch-workflow-graph',
+  template: '<section id="workflowvisualization"></section>'
+})
+export class WorkflowGraphComponent {
 
-  static $inject = ['$scope', '$window', '$log', '$filter', 'SessionDataService', 'SelectionService', '$element'];
+  @Input() datasetsMap: Map<string, Dataset>;
+  @Input() jobsMap: Map<string, Job>;
+  @Input() modulesMap: Map<string, Module>;
+  @Input() datasetSearch: string;
+  @Output() onDelete: EventEmitter<any> = new EventEmitter();
+  @Input() zoom: number;
+  @Input() enabled: boolean;
 
-  constructor(private $scope: IScope,
-              private $window: IWindowService,
-              private $log: ng.ILogService,
-              private $filter: IChipsterFilter,
-              private SessionDataService: SessionDataService,
+  constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
               private SelectionService: SelectionService,
-              private $element: ng.IRootElementService) {
+              private pipeService: PipeService) {
   }
 
   //var shiftKey, ctrlKey;
@@ -49,8 +56,8 @@ class WorkflowGraphController {
   d3JobNodes: any;
 
   menu: any;
-  nodeWidth: number = WorkflowGraphService.nodeWidth;
-  nodeHeight: number = WorkflowGraphService.nodeHeight;
+  nodeWidth: number = WorkflowgraphService.nodeWidth;
+  nodeHeight: number = WorkflowgraphService.nodeHeight;
   fontSize = 14;
   nodeRadius = 4;
   width: number;
@@ -61,9 +68,6 @@ class WorkflowGraphController {
   links: Array<Link>;
   filter: Map<string, Dataset>;
 
-  datasetsMap: Map<string, Dataset>;
-  jobsMap: Map<string, Job>;
-  modulesMap: Map<string, Module>;
   datasetSearch: string;
   enabled: boolean;
   dragStarted: boolean;
@@ -72,8 +76,10 @@ class WorkflowGraphController {
   changeDetectors: Array<ChangeDetector> = [];
 
 
-  $onInit() {
+  ngOnInit() {
     let self = this;
+
+      console.log(this);
 
     // used for adjusting the svg size
     this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
@@ -137,7 +143,7 @@ class WorkflowGraphController {
 
   }
 
-  $onChanges(changes: ng.IChangesObject<string>) {
+  ngOnChanges(changes: ng.IChangesObject<string>) {
     if (!this.svg) {
       // not yet initialized
       return;
@@ -146,8 +152,8 @@ class WorkflowGraphController {
     if ("datasetSearch" in changes) {
 
       if (this.datasetSearch) {
-        let filteredDatasets = this.$filter('searchDatasetFilter')(Utils.mapValues(this.datasetsMap), this.datasetSearch);
-        this.filter = Utils.arrayToMap(filteredDatasets, 'datasetId');
+        let filteredDatasets = this.pipeService.findDataset(UtilsService.mapValues(this.datasetsMap), this.datasetSearch);
+        this.filter = UtilsService.arrayToMap(filteredDatasets, 'datasetId');
       } else {
         this.filter = null;
       }
@@ -156,7 +162,7 @@ class WorkflowGraphController {
 
   }
 
-  $doCheck() {
+  ngDoCheck() {
     if (this.svg) {
       this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
       // it seems that there is no easy way to listen for div's size changes
@@ -217,7 +223,6 @@ class WorkflowGraphController {
       .attr('height', this.nodeHeight)
       .attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')')
       .style('fill', (d) => d.color)
-      .attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
       .classed('selected', (d) => this.isSelectedJob(d.job))
       .on('click', (d) => {
         this.SelectionService.selectJob(d3.event, d.job)
@@ -275,10 +280,9 @@ class WorkflowGraphController {
       .attr('width', this.nodeWidth)
       .attr('height', this.nodeHeight)
       .style("fill", (d) => d.color)
-      .attr('opacity', (d) => this.getOpacityForDataset(d.dataset))
       .classed('selected', (d) => this.enabled && this.isSelectedDataset(d.dataset))
       .on('click', function (d) {
-        if (!Utils.isCtrlKey(d3.event)) {
+        if (!UtilsService.isCtrlKey(d3.event)) {
           self.SelectionService.clearSelection();
           self.clearWorkflowSelections();
         }
@@ -310,10 +314,6 @@ class WorkflowGraphController {
 
   }
 
-  getOpacityForDataset(d: Dataset) {
-    return WorkflowGraphController.getOpacity(!this.filter || this.filter.has(d.datasetId));
-  }
-
   static getOpacity(isVisible: boolean) {
     if (isVisible) {
       return 1.0;
@@ -327,12 +327,11 @@ class WorkflowGraphController {
     this.d3Labels
       .enter()
       .append('text')
-      .text((d: any) => Utils.getFileExtension(d.name).slice(0, 4))
+      .text((d: any) => UtilsService.getFileExtension(d.name).slice(0, 4))
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
       .attr('font-size', this.fontSize + 'px').attr('fill', 'black').attr('text-anchor', 'middle')
-      .style('pointer-events', 'none')
-      .attr('opacity', (d) => this.getOpacityForDataset(d.dataset));
+      .style('pointer-events', 'none');
 
     this.d3Labels.exit().remove();
   }
@@ -386,7 +385,6 @@ class WorkflowGraphController {
       .attr('y1', (d) => d.source.y + this.nodeHeight)
       .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
       .attr('y2', (d) => d.target.y)
-      .attr('opacity', () => WorkflowGraphController.getOpacity(!this.filter))
       .on('click', function(d) {
         self.SelectionService.selectJob(d3.event, d.target.sourceJob);
         self.clearWorkflowSelections();
@@ -415,7 +413,7 @@ class WorkflowGraphController {
         if (d.dataset) {
           d.dataset.x = d.x;
           d.dataset.y = d.y;
-          this.SessionDataService.updateDataset(d.dataset);
+          this.sessionDataService.updateDataset(d.dataset);
         }
       });
   }
@@ -463,7 +461,7 @@ class WorkflowGraphController {
         x: dataset.x,
         y: dataset.y,
         name: name,
-        extension: Utils.getFileExtension(name),
+        extension: UtilsService.getFileExtension(name),
         sourceJob: sourceJob,
         color: color,
         dataset: dataset
@@ -579,7 +577,7 @@ class WorkflowGraphController {
     // layout nodes with parents (assumes that a parent precedes its childrens in the array)
     links.forEach((link) => {
       if (!link.target.x || !link.target.y) {
-        var pos = WorkflowGraphService.newPosition(nodes, link.source.x, link.source.y);
+        var pos = WorkflowgraphService.newPosition(nodes, link.source.x, link.source.y);
         link.target.x = pos.x;
         link.target.y = pos.y;
       }
@@ -588,7 +586,7 @@ class WorkflowGraphController {
     // layout orphan nodes
     nodes.forEach((node) => {
       if (!node.x || !node.y) {
-        var pos = WorkflowGraphService.newRootPosition(nodes);
+        var pos = WorkflowgraphService.newRootPosition(nodes);
         node.x = pos.x;
         node.y = pos.y;
       }
@@ -601,18 +599,4 @@ class WorkflowGraphController {
   }
 
 
-}
-
-export default {
-  controller: WorkflowGraphController,
-  templateUrl: './workflowgraph.html',
-  bindings: {
-    datasetsMap: '<',
-    jobsMap: '<',
-    modulesMap: '<',
-    datasetSearch: '<',
-    onDelete: '&',
-    zoom: '<',
-    enabled: '<'
-  }
 }
