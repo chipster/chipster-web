@@ -9,9 +9,10 @@ export default class AuthenticationService {
 
     constructor(@Inject('localStorageService') private localStorageService: any,
                 @Inject('$http') private $http: ng.IHttpService,
-                @Inject('ConfigService') private ConfigService: ConfigService,
+                private ConfigService: ConfigService,
                 @Inject('$rootScope') private $rootScope: ng.IRootScopeService,
                 @Inject('$location') private $location: ng.ILocationService) {
+
         this.$rootScope.$on("$routeChangeStart", (event: any, next: any) => {
             if (next.$$route.authenticated) {
                 var userAuth = this.getToken();
