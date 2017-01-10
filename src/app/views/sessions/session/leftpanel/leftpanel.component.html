@@ -27,14 +27,14 @@
             </div>
           </div>
 
-          <workflow-graph
+          <ch-workflow-graph
             [datasets-map]="$ctrl.sessionData.datasetsMap"
             [jobs-map]="$ctrl.sessionData.jobsMap"
             [modules-map]="$ctrl.sessionData.modulesMap"
             [dataset-search]="$ctrl.datasetSearch"
             [on-delete]="$ctrl.onDelete"
             [zoom]="1"
-            [enabled]="true"></workflow-graph>
+            [enabled]="true"></ch-workflow-graph>
 
         </uib-tab>
 
