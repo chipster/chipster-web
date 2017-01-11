@@ -66,10 +66,7 @@ export class WorkflowGraphComponent {
   links: Array<Link>;
   filter: Map<string, Dataset>;
 
-  datasetSearch: string;
-  enabled: boolean;
   dragStarted: boolean;
-  onDelete: () => void;
 
   changeDetectors: Array<ChangeDetector> = [];
 

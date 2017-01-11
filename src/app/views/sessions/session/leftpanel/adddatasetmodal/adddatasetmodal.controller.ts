@@ -11,7 +11,7 @@ import SessionResource from "../../../../../resources/session.resource";
 export default class AddDatasetModalController {
     static $inject = [
         '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-        'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files'];
+        'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
 
     private datasetIds: string[] = [];
 
@@ -25,7 +25,8 @@ export default class AddDatasetModalController {
                 private datasetsMap: Map<string, Dataset>,
                 private sessionId: string,
                 private oneFile: boolean,
-                private files: any[]) {
+                private files: any[],
+                private workflowGraphService: WorkflowGraphService) {
     }
 
     init(flow) {
@@ -64,7 +65,7 @@ export default class AddDatasetModalController {
         this.$log.debug('createDataset', d);
         return this.sessionResource.createDataset(sessionId, d).then((datasetId: string) => {
             d.datasetId = datasetId;
-            var pos = WorkflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));
+            var pos = this.workflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));
             d.x = pos.x;
             d.y = pos.y;
             this.sessionResource.updateDataset(sessionId, d);
