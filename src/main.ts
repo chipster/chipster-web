@@ -89,6 +89,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
     .service('ToolService', upgradeAdapter.downgradeNg2Provider(ToolService))
     .service('CSVReader', upgradeAdapter.downgradeNg2Provider(CSVReader))
+    .service('WorkflowGraphService', upgradeAdapter.downgradeNg2Provider(WorkflowGraphService))
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
@@ -99,7 +100,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
     .filter('searchDatasetFilter', searchDatasetFilter)
 
     // Should be trivial to upgrade to Angular 2
-    .service('WorkflowGraphService', WorkflowGraphService)
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
     .service('ToolResource', ToolResource)
