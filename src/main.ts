@@ -8,7 +8,6 @@ import ConfigService from "app/services/config.service";
 import ConfigurationResource from "app/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
 import ToolResource from "app/resources/toolresource";
-import UtilsService from "app/services/utils.service";
 import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import SessionEventService from "app/views/sessions/session/sessionevent.service";
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
@@ -16,7 +15,6 @@ import SelectionService from "app/views/sessions/session/selection.service";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
-import bytes from "app/common/filter/bytes.filter";
 import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
 import moduleFilter from "app/common/filter/module.filter";
@@ -25,7 +23,6 @@ import AddDatasetModalController from "app/views/sessions/session/leftpanel/addd
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
 import ToolsModalController from "app/views/sessions/session/tools/toolsmodal/toolsmodal.controller";
-import workflowGraph from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
 import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
@@ -103,7 +100,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', '
 
     // Should be trivial to upgrade to Angular 2
     .service('WorkflowGraphService', WorkflowGraphService)
-    .service('Utils', UtilsService)
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
     .service('ToolResource', ToolResource)

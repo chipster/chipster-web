@@ -1,22 +1,24 @@
 import Node from "./node";
+import {Injectable} from "@angular/core";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
  *       in the workflowgraph graph
  */
-export default class WorkflowgraphService {
+@Injectable()
+export default class WorkflowGraphService {
 
-	static nodeHeight = 20;
-	static nodeWidth = 32;
+	nodeHeight = 20;
+	nodeWidth = 32;
 
-	static xMargin = WorkflowgraphService.nodeWidth / 4;
-	static yMargin = WorkflowgraphService.nodeHeight;
+	xMargin = this.nodeWidth / 4;
+	yMargin = this.nodeHeight;
 
-	static newRootPosition(nodes: Node[]) {
-		return WorkflowgraphService.newPosition(nodes, null, null);
+	newRootPosition(nodes: Node[]) {
+		return this.newPosition(nodes, null, null);
 	}
 
-	static newPosition(nodes: Node[], parentX: number, parentY: number) {
+	newPosition(nodes: Node[], parentX: number, parentY: number) {
 
 		var x = 10;
 		var y = 10;
@@ -24,11 +26,11 @@ export default class WorkflowgraphService {
 			x = parentX;
 		}
 		if (parentY) {
-			y = parentY + WorkflowgraphService.nodeHeight + WorkflowgraphService.yMargin;
+			y = parentY + this.nodeHeight + this.yMargin;
 		}
 
-		while (WorkflowgraphService.intersectsAny(nodes, x, y, WorkflowgraphService.nodeWidth, WorkflowgraphService.nodeHeight)) {
-			x += WorkflowgraphService.nodeWidth + WorkflowgraphService.xMargin;
+		while (this.intersectsAny(nodes, x, y, this.nodeWidth, this.nodeHeight)) {
+			x += this.nodeWidth + this.xMargin;
 		}
 
 		return {
@@ -37,17 +39,17 @@ export default class WorkflowgraphService {
 		}
 	}
 
-	static intersectsAny(nodes: Node[], x: number, y: number, w: number, h: number) {
-		return !nodes.every(function(node) {
-			return !WorkflowgraphService.intersectsNode(node, x, y, w, h);
+	intersectsAny(nodes: Node[], x: number, y: number, w: number, h: number) {
+		return !nodes.every((node: Node) => {
+			return !this.intersectsNode(node, x, y, w, h);
 		});
 	}
 
-	static intersectsNode(node: Node, x: number, y: number, w: number, h: number) {
+	intersectsNode(node: Node, x: number, y: number, w: number, h: number) {
 		return (
 			x + w >= node.x &&
-			x < node.x + WorkflowgraphService.nodeWidth &&
+			x < node.x + this.nodeWidth &&
 			y + h >= node.y &&
-			y < node.y + WorkflowgraphService.nodeHeight);
+			y < node.y + this.nodeHeight);
 	}
 }

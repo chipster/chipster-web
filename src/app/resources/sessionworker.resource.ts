@@ -5,7 +5,7 @@ import ConfigService from "../services/config.service";
 
 export default class SessionResource {
 
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q', 'Utils'];
+	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q'];
 
 	public service: any;
 

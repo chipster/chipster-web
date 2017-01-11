@@ -10,14 +10,11 @@ import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
-import {
-  ChangeDetector, Comparison, ArrayChangeDetector,
-  MapChangeDetector
-} from "../../../../../services/changedetector.service";
+import {ChangeDetector, Comparison, ArrayChangeDetector, MapChangeDetector} from "../../../../../services/changedetector.service";
 import UtilsService from "../../../../../services/utils.service";
-import WorkflowgraphService from "./workflowgraph.service";
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
+import WorkflowGraphService from "./workflowgraph.service";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -35,7 +32,8 @@ export class WorkflowGraphComponent {
 
   constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
               private SelectionService: SelectionService,
-              private pipeService: PipeService) {
+              private pipeService: PipeService,
+              private workflowGraphService: WorkflowGraphService) {
   }
 
   //var shiftKey, ctrlKey;
@@ -56,8 +54,8 @@ export class WorkflowGraphComponent {
   d3JobNodes: any;
 
   menu: any;
-  nodeWidth: number = WorkflowgraphService.nodeWidth;
-  nodeHeight: number = WorkflowgraphService.nodeHeight;
+  nodeWidth: number = this.workflowGraphService.nodeWidth;
+  nodeHeight: number = this.workflowGraphService.nodeHeight;
   fontSize = 14;
   nodeRadius = 4;
   width: number;
@@ -78,8 +76,6 @@ export class WorkflowGraphComponent {
 
   ngOnInit() {
     let self = this;
-
-      console.log(this);
 
     // used for adjusting the svg size
     this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
@@ -577,7 +573,7 @@ export class WorkflowGraphComponent {
     // layout nodes with parents (assumes that a parent precedes its childrens in the array)
     links.forEach((link) => {
       if (!link.target.x || !link.target.y) {
-        var pos = WorkflowgraphService.newPosition(nodes, link.source.x, link.source.y);
+        var pos = this.workflowGraphService.newPosition(nodes, link.source.x, link.source.y);
         link.target.x = pos.x;
         link.target.y = pos.y;
       }
@@ -586,7 +582,7 @@ export class WorkflowGraphComponent {
     // layout orphan nodes
     nodes.forEach((node) => {
       if (!node.x || !node.y) {
-        var pos = WorkflowgraphService.newRootPosition(nodes);
+        var pos = this.workflowGraphService.newRootPosition(nodes);
         node.x = pos.x;
         node.y = pos.y;
       }

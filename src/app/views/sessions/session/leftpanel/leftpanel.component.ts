@@ -34,6 +34,7 @@ class LeftPanelComponent {
     this.$scope.$on("angular-resizable.resizeEnd", () => {
       this.$scope.$broadcast('resizeWorkFlowGraph', {});
     });
+
   }
 
   datasetSearchKeyEvent(e: any) {

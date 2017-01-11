@@ -3,13 +3,13 @@ import AuthenticationService from "../core/authentication/authenticationservice"
 import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
 import ToolResource from "../resources/toolresource";
-import Utils from "../services/utils.service";
 import Session from "../model/session/session";
 import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";
 import Tool from "../model/session/tool";
 import Job from "../model/session/job";
 import * as _ from "lodash";
+import UtilsService from "../services/utils.service";
 
 export class SessionData {
 	session: Session;
@@ -22,7 +22,7 @@ export class SessionData {
 
 export default class SessionResource {
 
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q', 'Utils'];
+	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q'];
 
 	public service: any;
 
@@ -30,8 +30,7 @@ export default class SessionResource {
 				private authenticationService:AuthenticationService,
 				private configService: ConfigService,
 				private toolResource: ToolResource,
-				private $q:ng.IQService,
-				private Utils: Utils) {
+				private $q:ng.IQService) {
 	}
 
 	getService() {
@@ -75,8 +74,8 @@ export default class SessionResource {
 		let data = new SessionData();
 
 		data.session = session;
-		data.datasetsMap = Utils.arrayToMap(datasets, 'datasetId');
-		data.jobsMap = Utils.arrayToMap(jobs, 'jobId');
+		data.datasetsMap = UtilsService.arrayToMap(datasets, 'datasetId');
+		data.jobsMap = UtilsService.arrayToMap(jobs, 'jobId');
 
 		// show only configured modules
 		modules = modules.filter( (module: Module) => this.configService.getModules().indexOf(module.name) >= 0 );
@@ -92,10 +91,10 @@ export default class SessionResource {
 			return module;
 		});
 
-		data.modulesMap = Utils.arrayToMap(modules, 'moduleId');
+		data.modulesMap = UtilsService.arrayToMap(modules, 'moduleId');
 
 		data.modulesMap.forEach( (module:any) => {
-			module.categoriesMap = Utils.arrayToMap(module.categories, 'name');
+			module.categoriesMap = UtilsService.arrayToMap(module.categories, 'name');
 		});
 
 		return data;
