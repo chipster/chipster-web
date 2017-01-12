@@ -1,6 +1,6 @@
 
-import * as configConstants from '../app.constants';
-import ConfigurationResource from "../resources/configurationresource";
+import * as configConstants from '../core/app.constants';
+import ConfigurationResource from "../core/rest-services/resources/configurationresource";
 import {Injectable, Inject} from "@angular/core";
 import * as _ from "lodash";
 import {CoreServices} from "../core/core-services";
@@ -9,20 +9,14 @@ import {CoreServices} from "../core/core-services";
 export default class ConfigService {
 
     public services: CoreServices;
-    public config: any;
+    public config: any = {};
     public baseUrl: string;
     private queryPromise: Promise<any>;
 
     constructor(@Inject('$location') private $location: ng.ILocationService,
                 @Inject('ConfigurationResource') private configurationResource: ConfigurationResource){
-        this.config = {};
         this.config.modules = configConstants.ChipsterModules;
-
-        this.init();
-    }
-
-    init() {
-        this.queryPromise = <Promise<any>>this.configurationResource.getConfigurationResource();
+        this.queryPromise = <Promise<any>>this.configurationResource.getConfiguration();
     }
 
     getServices() {

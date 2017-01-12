@@ -1,4 +1,4 @@
-import {ServiceLocator} from "../../app.constants";
+import {ServiceLocator} from "../../core/app.constants";
 import AuthenticationService from "../../core/authentication/authenticationservice";
 import {Component, Inject, ViewChild} from "@angular/core";
 import { FormGroup } from '@angular/forms';

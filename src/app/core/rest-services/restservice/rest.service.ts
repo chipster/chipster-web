@@ -14,6 +14,7 @@ export class RestService {
     args.headers = new Headers(args.headers);
     args.headers.append('Content-Type', 'application/json; charset=UTF-8');
     args.headers.append('Accept', 'application/json; charset=UTF-8');
+    // args.headers.append('')
     args.method = method;
     args.url = url;
     args.body = JSON.stringify(data);
@@ -21,15 +22,37 @@ export class RestService {
   }
 
   constructor(private httpQueueu: HttpQueueService,
-              private errorHander: ErrorHandlerService,
+              private errorHandler: ErrorHandlerService,
               private http: Http) {
   }
 
+  /*
+   * Create GET http-request
+   */
   get(url: string, args?: RequestOptionsArgs): Observable<any> {
-    const ops = RestService.buildRequestOptionArgs(url, RequestMethod.Get, args);
-    return this.doRequest(new Request(new RequestOptions(ops)));
+    const opts = RestService.buildRequestOptionArgs(url, RequestMethod.Get, args);
+    return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
+  /*
+   * Create POST http-request
+   */
+  post(url: string, args?: RequestOptionsArgs): Observable<any> {
+    const opts = RestService.buildRequestOptionArgs(url, RequestMethod.Post, args);
+    return this.doRequest(new Request(new RequestOptions(opts)))
+  }
+
+  /*
+   * Create PUT http-request
+   */
+  put(url: string, args?: RequestOptionsArgs): Observable<any> {
+    const opts = RestService.buildRequestOptionArgs(url, RequestMethod.Put, args);
+    return this.doRequest(new Request(new RequestOptions(opts)))
+  }
+
+  /*
+   * Fire the actual http request by given request object and keep track how many request are in queue currently
+   */
   private doRequest(request: Request): Observable<any> {
     this.httpQueueu.increment();
     return this.http.request(request).map(
@@ -41,7 +64,7 @@ export class RestService {
         return resp;
       }
     )
-      .catch(this.errorHander.handleError)
+      .catch(this.errorHandler.handleError)
       .finally( () => this.httpQueueu.decrement());
   }
 

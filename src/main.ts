@@ -5,7 +5,7 @@ import {NavigationComponent} from "app/views/navigation/navigation.component";
 import {LoginComponent} from "app/views/login/login.component";
 import AuthenticationService from "app/core/authentication/authenticationservice";
 import ConfigService from "app/services/config.service";
-import ConfigurationResource from "app/resources/configurationresource";
+import ConfigurationResource from "app/core/rest-services/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
 import ToolResource from "app/resources/toolresource";
 import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
@@ -59,7 +59,7 @@ import {DatasetParameterListComponent} from "./app/views/sessions/session/select
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 
-angular.module('chipster-web', ['ngRoute', 'ngResource', 'LocalStorageModule', 'ngAnimate', 'flow', 'restangular',
+angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
 
     // Angular 2
@@ -170,7 +170,6 @@ angular.module('chipster-web').config(
 
     });
 
-upgradeAdapter.upgradeNg1Provider('localStorageService');
 upgradeAdapter.upgradeNg1Provider('$http');
 upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');

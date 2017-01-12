@@ -1,5 +1,0 @@
-{
-  "_serviceLocator": "http://service-locator-chipster.dac-oso.csc.fi",
-  "serviceLocator": "http://localhost:8003",
-  "modules": ["NGS", "Microarray", "Misc"]
-}

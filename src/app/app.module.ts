@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
-import ConfigurationResource from './resources/configurationresource';
+import ConfigurationResource from './core/rest-services/resources/configurationresource';
 import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
@@ -23,6 +23,6 @@ import {CoreModule} from "./core/core.module";
       SessionModule
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
-    providers: [ ConfigurationResource, SelectionService, ConfigService ]
+    providers: [ SelectionService, ConfigService ]
 })
 export class AppModule {}

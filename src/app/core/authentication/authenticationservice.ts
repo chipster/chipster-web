@@ -7,8 +7,7 @@ export default class AuthenticationService {
 
     tokenHeader:{};
 
-    constructor(@Inject('localStorageService') private localStorageService: any,
-                @Inject('$http') private $http: ng.IHttpService,
+    constructor(@Inject('$http') private $http: ng.IHttpService,
                 private ConfigService: ConfigService,
                 @Inject('$rootScope') private $rootScope: ng.IRootScopeService,
                 @Inject('$location') private $location: ng.ILocationService) {
@@ -37,7 +36,7 @@ export default class AuthenticationService {
     };
 
     logout() {
-        this.localStorageService.clearAll();
+        localStorage.clear();
     };
 
     getTokenHeader() {
@@ -62,11 +61,11 @@ export default class AuthenticationService {
     }
 
     getToken() {
-        return this.localStorageService.get('auth-token');
+        return localStorage['ch-auth-token'];
     };
 
     setAuthToken(val: string) {
-        this.localStorageService.set('auth-token', val);
+        localStorage['ch-auth-token'] = val;
         this.updateTokenHeader();
     };
 
