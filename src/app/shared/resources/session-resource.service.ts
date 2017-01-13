@@ -15,7 +15,7 @@ export class SessionResourceService {
    */
 
   getSession(sessionId: string) {
-    this.restService.get()
+    // this.restService.get()
   }
 
 }
