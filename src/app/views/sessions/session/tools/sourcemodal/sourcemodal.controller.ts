@@ -1,5 +1,5 @@
 import Tool from "../../../../../model/session/tool";
-import ToolResource from "../../../../../resources/toolresource";
+import {ToolResource} from "../../../../../shared/resources/toolresource";
 
 
 export default class SourceModalController {
@@ -18,7 +18,7 @@ export default class SourceModalController {
     }
 
     $onInit() {
-        this.toolResource.getSourceCode(this.selectedTool.name.id).then((sourceCode) => {
+        this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe((sourceCode) => {
             //this.$log.log(sourceCode);
             this.source = sourceCode;
         });

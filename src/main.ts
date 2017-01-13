@@ -7,7 +7,7 @@ import AuthenticationService from "app/core/authentication/authenticationservice
 import ConfigService from "app/services/config.service";
 import ConfigurationResource from "app/shared/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
-import ToolResource from "app/resources/toolresource";
+import {ToolResource} from "app/shared/resources/toolresource";
 import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import SessionEventService from "app/views/sessions/session/sessionevent.service";
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
@@ -58,6 +58,7 @@ import {DatasetDetailsComponent} from "./app/views/sessions/session/selectiondet
 import {DatasetParameterListComponent} from "./app/views/sessions/session/selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
+import {RestService} from "./app/core/rest-services/restservice/rest.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -90,6 +91,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('ToolService', upgradeAdapter.downgradeNg2Provider(ToolService))
     .service('CSVReader', upgradeAdapter.downgradeNg2Provider(CSVReader))
     .service('WorkflowGraphService', upgradeAdapter.downgradeNg2Provider(WorkflowGraphService))
+    .service('RestService', upgradeAdapter.downgradeNg2Provider(RestService))
+    .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
@@ -102,7 +105,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     // Should be trivial to upgrade to Angular 2
 
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
-    .service('ToolResource', ToolResource)
   .service('SessionEventService', SessionEventService)
   .service('SessionResource', SessionResource)
   .service('SessionWorkerResource', SessionWorkerResource)
@@ -184,5 +186,7 @@ upgradeAdapter.upgradeNg1Provider('FileResource');
 upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$uibModal');
+upgradeAdapter.upgradeNg1Provider('Restangular');
+
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

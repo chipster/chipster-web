@@ -9,8 +9,6 @@ import {Observable} from "rxjs";
 export default class ConfigService {
 
   public services: CoreServices;
-  public config: any = { modules: configConstants.ChipsterModules };
-  public baseUrl: string;
   private configuration$: Observable<any>;
 
   constructor(@Inject('$location') private $location: ng.ILocationService,
@@ -18,8 +16,8 @@ export default class ConfigService {
     this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
   }
 
-  getApiUrl(): string {
-    return this.baseUrl;
+  getApiUrl(): Observable<string> {
+    return this.configuration$.map( (services: CoreServices) => services.sessionDb);
   }
 
   getSessionDbUrl(): Observable<string> {
@@ -46,8 +44,8 @@ export default class ConfigService {
     return this.configuration$.map((services: CoreServices) => services.toolbox);
   }
 
-  getModules() {
-    return this.config.modules;
+  getModules(): Array<string> {
+    return configConstants.ChipsterModules;
   }
 
   getConfiguration(): Observable<CoreServices> {

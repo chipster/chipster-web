@@ -4,6 +4,7 @@ import {Headers} from "@angular/http";
 import {RestService} from "../rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
 import {CoreServices} from "../core-services";
+import {ToolResource} from "../../shared/resources/toolresource";
 
 @Injectable()
 export default class AuthenticationService {
@@ -25,6 +26,7 @@ export default class AuthenticationService {
         }
       }
     });
+
   }
 
   // Do the authentication here based on userid and password

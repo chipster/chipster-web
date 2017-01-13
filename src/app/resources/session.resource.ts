@@ -2,8 +2,7 @@
 import AuthenticationService from "../core/authentication/authenticationservice";
 import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
-import ToolResource from "../resources/toolresource";
-import Utils from "../services/utils.service";
+import {ToolResource} from "../shared/resources/toolresource";
 import Session from "../model/session/session";
 import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";
@@ -35,7 +34,6 @@ export default class SessionResource {
 	}
 
 	getService() {
-
 		if (!this.service) {
 			this.service = this.configService.getSessionDbUrl().toPromise().then((url: string) => {
 
@@ -68,8 +66,8 @@ export default class SessionResource {
 		let session: Session = param[0].data;
 		let datasets: Dataset[] = param[1].data;
 		let jobs: Job[] = param[2].data;
-		let modules: Module[] = param[3].data;
-		let tools: Tool[] = param[4].data;
+		let modules: Module[] = param[3];
+		let tools: Tool[] = param[4];
 
 		// is there any less ugly syntax for defining the types of anonymous object?
 		let data = new SessionData();
@@ -111,8 +109,8 @@ export default class SessionResource {
 				sessionUrl.get(),
 				sessionUrl.all('datasets').getList(),
 				sessionUrl.all('jobs').getList(),
-				this.toolResource.getModules(),
-				this.toolResource.getTools()
+				this.toolResource.getModules().toPromise(),
+				this.toolResource.getTools().toPromise()
 			];
 
 			return this.$q.all(promises);

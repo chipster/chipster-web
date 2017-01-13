@@ -1,6 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import AuthenticationService from "../../core/authentication/authenticationservice";
 import ConfigService from "../../services/config.service";
+import {Observable} from "rxjs";
 
 @Component({
     selector: 'ch-navigation',
@@ -8,8 +9,14 @@ import ConfigService from "../../services/config.service";
 })
 export class NavigationComponent {
 
+    host: Observable<string>;
+
     constructor(@Inject('AuthenticationService') private authenticationService: AuthenticationService,
                 @Inject('ConfigService') private configService: ConfigService){}
+
+    ngOnInit() {
+      this.host = this.getHost();
+    }
 
     isLoggedOut() {
         if (this.authenticationService.getToken() === null) {
@@ -27,7 +34,7 @@ export class NavigationComponent {
         }
     };
 
-    getHost() {
+    getHost(): Observable<string> {
         return this.configService.getApiUrl();
     };
 }
