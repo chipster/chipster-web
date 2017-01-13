@@ -5,7 +5,7 @@ import {NavigationComponent} from "app/views/navigation/navigation.component";
 import {LoginComponent} from "app/views/login/login.component";
 import AuthenticationService from "app/core/authentication/authenticationservice";
 import ConfigService from "app/services/config.service";
-import ConfigurationResource from "app/core/rest-services/resources/configurationresource";
+import ConfigurationResource from "app/shared/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
 import ToolResource from "app/resources/toolresource";
 import WorkflowGraphService from "app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";

@@ -5,14 +5,13 @@ import ConfigService from "../services/config.service";
 
 export default class SessionResource {
 
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q'];
+	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource'];
 
 	public service: any;
 
 	constructor(private restangular: restangular.IService,
 				private authenticationService:AuthenticationService,
-				private configService: ConfigService,
-				private $q:ng.IQService) {
+				private configService: ConfigService) {
 	}
 
 	getService() {

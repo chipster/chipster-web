@@ -18,7 +18,7 @@ export class LoginComponent {
 
 
     login(username: string, password: string) {
-        this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).then( () => {
+        this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe( () => {
             //Route to Session creation page
             this.$location.path('/sessions')
         }, (error: any) => {

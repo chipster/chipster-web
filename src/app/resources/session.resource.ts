@@ -3,6 +3,7 @@ import AuthenticationService from "../core/authentication/authenticationservice"
 import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
 import ToolResource from "../resources/toolresource";
+import Utils from "../services/utils.service";
 import Session from "../model/session/session";
 import Dataset from "../model/session/dataset";
 import Module from "../model/session/module";

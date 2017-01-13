@@ -14,7 +14,6 @@ export class RestService {
     args.headers = new Headers(args.headers);
     args.headers.append('Content-Type', 'application/json; charset=UTF-8');
     args.headers.append('Accept', 'application/json; charset=UTF-8');
-    // args.headers.append('')
     args.method = method;
     args.url = url;
     args.body = JSON.stringify(data);

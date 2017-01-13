@@ -12,13 +12,16 @@ import {SecondsPipe} from './pipes/secondspipe.pipe';
 import {CategoryPipe} from "./pipes/categorypipe.pipe";
 import {CSVReader} from "./services/CSVReader";
 import {TSVReader} from "./services/TSVReader";
+import ConfigurationResource from "./resources/configurationresource";
+import {CoreModule} from "../core/core.module";
+import {SessionResourceService} from "./resources/session-resource.service";
 
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule, CoreModule
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
-  providers: [PipeService, TSVReader, CSVReader],
+  providers: [PipeService, TSVReader, CSVReader, ConfigurationResource, SessionResourceService],
   exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe]
 })
-export class SharedModule { }
+export class SharedModule {  }
