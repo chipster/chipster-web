@@ -19,7 +19,7 @@ export default class FileResource {
 		// init service only once
 		if (!this.service) {
 			// this.service will be a promise that resolves to a Restangular service
-			this.service = this.configService.getFileBrokerUrl().then((url: string) => {
+			this.service = this.configService.getFileBrokerUrl().toPromise().then((url: string) => {
 				// return the Restangular service
 				return this.restangular.withConfig((configurer: any) => {
 					configurer.setBaseUrl(url);

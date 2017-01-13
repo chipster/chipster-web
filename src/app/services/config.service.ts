@@ -9,74 +9,41 @@ import {Observable} from "rxjs";
 export default class ConfigService {
 
   public services: CoreServices;
-  public config: any = {};
+  public config: any = { modules: configConstants.ChipsterModules };
   public baseUrl: string;
   private configuration$: Observable<any>;
-  private queryPromise: Promise<any>;
 
   constructor(@Inject('$location') private $location: ng.ILocationService,
-              @Inject('ConfigurationResource') private configurationResource: ConfigurationResource) {
-    this.config.modules = configConstants.ChipsterModules;
-    this.queryPromise = <Promise<any>>this.configurationResource.getConfigurationResource();
-
-    this.configuration$ = this.configurationResource.getConfiguration().map((configuration: any) => {
-      let services = new CoreServices();
-      _.forEach(configuration, (item: any) => {
-        let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase());
-        services[camelCaseRole] = item.publicUri;
-      });
-      return services;
-    }).publishReplay(1).refCount();
-
+              private configurationResource: ConfigurationResource) {
+    this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
   }
 
-  getServices() {
-    return this.queryPromise.then((response: any) => {
-      let services = new CoreServices();
-
-      if (!this.services) {
-        _.forEach(response, (item: any) => {
-          let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase());
-          services[camelCaseRole] = item.publicUri;
-        });
-        this.services = services;
-        this.baseUrl = this.services.sessionDb;
-        console.log('sessionDb', this.services.sessionDb);
-      }
-      return this.services;
-    });
-  }
-
-  getApiUrl() {
+  getApiUrl(): string {
     return this.baseUrl;
   }
 
-  getSessionDbUrl() {
-    return this.getServices().then((services: CoreServices) => services.sessionDb);
+  getSessionDbUrl(): Observable<string> {
+    return this.configuration$.map((services: CoreServices) => services.sessionDb);
   }
 
-  getSessionDbEventsUrl(sessionId: string) {
-    return this.getServices().then((services: CoreServices) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
+  getSessionDbEventsUrl(sessionId: string): Observable<string> {
+    return this.configuration$.map((services: CoreServices) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
   }
 
-  getSessionWorkerUrl() {
-    return this.getServices().then((services: CoreServices) => services.sessionWorker);
+  getSessionWorkerUrl(): Observable<string> {
+    return this.configuration$.map((services: CoreServices) => services.sessionWorker);
   }
 
-  getAuthUrl() {
-    return this.configuration$.then((services: CoreServices) => services.authenticationService);
-  }
-
-  getFileBrokerUrl() {
-    return this.getServices().then((services: CoreServices) => services.fileBroker);
+  getFileBrokerUrl(): Observable<string> {
+    return this.configuration$.map((services: CoreServices) => services.fileBroker);
   }
 
   getFileBrokerUrlIfInitialized() {
     return this.services.fileBroker;
   }
 
-  getToolboxUrl() {
-    return this.getServices().then((services: CoreServices) => services.toolbox);
+  getToolboxUrl(): Observable<string> {
+    return this.configuration$.map((services: CoreServices) => services.toolbox);
   }
 
   getModules() {
@@ -85,6 +52,15 @@ export default class ConfigService {
 
   getConfiguration(): Observable<CoreServices> {
     return this.configuration$;
+  }
+
+  private parseServices(configuration: any): CoreServices {
+    let services = new CoreServices();
+    _.forEach(configuration, (item: any) => {
+      let camelCaseRole = item.role.replace(/-([a-z])/g, (m: string, w: string) => w.toUpperCase());
+      services[camelCaseRole] = item.publicUri;
+    });
+    return services;
   }
 }
 

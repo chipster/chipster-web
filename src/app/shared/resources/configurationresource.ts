@@ -9,15 +9,9 @@ export default class ConfigurationResource {
 
     constructor(private restService: RestService){}
 
-    getConfigurationResource(): Promise<any> {
-        return this.restService.get(configurationConstants.ServiceLocator + '/services').toPromise();
-    }
-
     getConfiguration(): Observable<any> {
       return this.restService.get(configurationConstants.ServiceLocator + '/services');
     }
-
-
 
 }
 

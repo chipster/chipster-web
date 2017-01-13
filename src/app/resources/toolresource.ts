@@ -17,8 +17,8 @@ export default class ToolResource {
 		if (!this.service) {
 			// getToolBoxUrl() returns a Promise
 			// this.service will be a promise that resolves to a Restangular service
-			this.service = this.configService.getToolboxUrl().then((url: string) => {
-				// return the Restangular service
+			this.service = this.configService.getToolboxUrl().toPromise().then((url: string) => {
+        // return the Restangular service
 				return this.restangular.withConfig((RestangularConfigurer: any) => {
 					RestangularConfigurer.setBaseUrl(url);
 					RestangularConfigurer.setFullResponse(true);

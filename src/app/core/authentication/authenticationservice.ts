@@ -31,24 +31,22 @@ export default class AuthenticationService {
   login(username: string, password: string): Observable<string> {
     // clear any old tokens
     this.setAuthToken(null);
-    return this.requestToken('POST', username, password).map((response: any) => {
+    return this.requestToken(username, password).map((response: any) => {
       let token = response.tokenKey;
       this.setAuthToken(token);
     });
   };
 
-  logout() {
+  logout(): void {
     localStorage.clear();
   };
 
-  getTokenHeader() {
+  getTokenHeader(): string {
     this.updateTokenHeader();
     return this.tokenHeader;
   };
 
-  // clientPassword
-
-  requestToken(method: string, username: string, password: string): Observable<string> {
+  requestToken(username: string, password: string): Observable<string> {
     return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
 
       var urlString = URI(coreServices.authenticationService).path('tokens').toString();
@@ -65,16 +63,16 @@ export default class AuthenticationService {
     });
   }
 
-  getToken() {
+  getToken(): string {
     return localStorage['ch-auth-token'];
   };
 
-  setAuthToken(val: string) {
+  setAuthToken(val: string): void {
     localStorage['ch-auth-token'] = val;
     this.updateTokenHeader();
   };
 
-  updateTokenHeader() {
+  updateTokenHeader(): void {
     // return always the same instance so that we can update it later
     if (!this.tokenHeader) {
       this.tokenHeader = {};

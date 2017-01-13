@@ -37,7 +37,7 @@ export default class SessionResource {
 	getService() {
 
 		if (!this.service) {
-			this.service = this.configService.getSessionDbUrl().then((url: string) => {
+			this.service = this.configService.getSessionDbUrl().toPromise().then((url: string) => {
 
 				let service: any = this.restangular.withConfig((configurer: any) => {
 					configurer.setBaseUrl(url);
