@@ -252,7 +252,7 @@ var SessionComponent = (function () {
 }());
 SessionComponent.$inject = [
     '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-    'SessionEventService', 'SessionDataService', 'SelectionService', '$route', 'SessionResource',
+    'SessionEventService', 'SessionDataService', 'SelectionService', '$route', 'SessionWorkerResource',
     'SessionWorkerResource'
 ];
 Object.defineProperty(exports, "__esModule", { value: true });

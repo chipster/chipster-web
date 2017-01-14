@@ -125,5 +125,5 @@ var SessionEventService = (function () {
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = SessionEventService;
-SessionEventService.$inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionResource'];
+SessionEventService.$inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionWorkerResource'];
 //# sourceMappingURL=sessionevent.service.js.map

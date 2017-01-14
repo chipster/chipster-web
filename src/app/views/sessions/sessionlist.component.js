@@ -125,7 +125,7 @@ var SessionListController = (function () {
     };
     return SessionListController;
 }());
-SessionListController.$inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource', '$scope'];
+SessionListController.$inject = ['$location', 'SessionWorkerResource', '$uibModal', 'SessionWorkerResource', '$scope'];
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     controller: SessionListController,

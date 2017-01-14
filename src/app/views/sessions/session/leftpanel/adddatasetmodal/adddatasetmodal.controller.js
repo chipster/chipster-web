@@ -74,6 +74,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = AddDatasetModalController;
 AddDatasetModalController.$inject = [
     '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-    'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files'
+    'SessionWorkerResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files'
 ];
 //# sourceMappingURL=adddatasetmodal.controller.js.map

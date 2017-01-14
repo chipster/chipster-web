@@ -11,7 +11,7 @@ import SessionResource from "../../../../../resources/session.resource";
 export default class AddDatasetModalController {
     static $inject = [
         '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-        'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
+        'SessionWorkerResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
 
     private datasetIds: string[] = [];
 

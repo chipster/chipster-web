@@ -16,7 +16,7 @@ import * as angular from 'angular';
 export default class SessionDataService {
 
     static $inject = [
-        '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
+        '$routeParams', 'SessionWorkerResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
          '$uibModal', 'SelectionService', 'FileResource'];
 
     constructor(
@@ -44,7 +44,7 @@ export default class SessionDataService {
     // SessionRestangular is a restangular object with
     // configured baseUrl and
     // authorization header
-    //this.sessionUrl = this.SessionResource.service.one('sessions', this.$routeParams['sessionId'];);
+    //this.sessionUrl = this.SessionWorkerResource.service.one('sessions', this.$routeParams['sessionId'];);
 
 
     getSessionId() : string {

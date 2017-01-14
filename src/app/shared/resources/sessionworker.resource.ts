@@ -1,15 +1,15 @@
 
-import AuthenticationService from "../core/authentication/authenticationservice";
+import AuthenticationService from "../../core/authentication/authenticationservice";
 import * as restangular from "restangular";
-import ConfigService from "../services/config.service";
+import ConfigService from "../../services/config.service";
+import {Inject, Injectable} from "@angular/core";
 
-export default class SessionResource {
-
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource'];
+@Injectable()
+export class SessionWorkerResource {
 
 	public service: any;
 
-	constructor(private restangular: restangular.IService,
+	constructor(@Inject('Restangular') private restangular: restangular.IService,
 				private authenticationService:AuthenticationService,
 				private configService: ConfigService) {
 	}

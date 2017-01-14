@@ -5,7 +5,7 @@ import UtilsService from "../../../../services/utils.service";
 import SessionResource from "../../../../resources/session.resource";
 import {SessionData} from "../../../../resources/session.resource";
 import SelectionService from "../selection.service";
-import SessionWorkerResource from "../../../../resources/sessionworker.resource";
+import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import * as _ from "lodash";
 
@@ -17,7 +17,7 @@ class LeftPanelComponent {
   private selectedTab = 1;
 
   static $inject = [
-    'SessionResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
+    'SessionWorkerResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
     'SessionWorkerResource', '$filter'];
 
   constructor(

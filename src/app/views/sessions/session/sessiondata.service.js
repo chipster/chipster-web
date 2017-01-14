@@ -154,7 +154,7 @@ var SessionDataService = (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = SessionDataService;
 SessionDataService.$inject = [
-    '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
+    '$routeParams', 'SessionWorkerResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
     '$uibModal', 'SelectionService', 'FileResource'
 ];
 //# sourceMappingURL=sessiondata.service.js.map

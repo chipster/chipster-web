@@ -28,7 +28,7 @@ import InputsModalController from "app/views/sessions/session/tools/inputsmodal/
 import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/resources/session.resource";
-import SessionWorkerResource from "app/resources/sessionworker.resource";
+import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "app/views/sessions/sessionlist.component";
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
@@ -93,6 +93,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('WorkflowGraphService', upgradeAdapter.downgradeNg2Provider(WorkflowGraphService))
     .service('RestService', upgradeAdapter.downgradeNg2Provider(RestService))
     .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
+    .service('SessionWorkerResource', upgradeAdapter.downgradeNg2Provider(SessionWorkerResource))
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
@@ -107,7 +108,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     // Uprade simultaneously when refactoring restangular to Angular2 implementation
   .service('SessionEventService', SessionEventService)
   .service('SessionResource', SessionResource)
-  .service('SessionWorkerResource', SessionWorkerResource)
   .service('SessionDataService', SessionDataService)
   .service('FileResource', FileResource)
   .component('sessionList', <any>sessionList)

@@ -1,13 +1,13 @@
 
 import SessionResource from "../../resources/session.resource";
-import SessionWorkerResource from "../../resources/sessionworker.resource";
+import {SessionWorkerResource} from "../../shared/resources/sessionworker.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../resources/session.resource";
 import * as angular from 'angular';
 
 class SessionListController {
 
-    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource', '$scope'];
+    static $inject = ['$location', 'SessionWorkerResource', '$uibModal', 'SessionWorkerResource', '$scope'];
 
     public selectedSessions: Session[];
     public previousSession: Session;
