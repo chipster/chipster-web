@@ -1,4 +1,4 @@
-import FileResource from "../../../../../resources/fileresource";
+import FileResource from "../../../../../shared/resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, Inject, ChangeDetectorRef} from "@angular/core";

@@ -6,7 +6,7 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
-import FileResource from "../../../resources/fileresource";
+import FileResource from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
 import * as _ from "lodash";
 import * as angular from 'angular';

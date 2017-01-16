@@ -1,4 +1,4 @@
-import FileResource from "../../resources/fileresource";
+import FileResource from "../resources/fileresource";
 import {Injectable, Inject} from "@angular/core";
 import {Observable} from "rxjs/Rx";
 import '../../rxjs-operators';

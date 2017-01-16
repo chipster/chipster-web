@@ -13,7 +13,7 @@ import SessionEventService from "app/views/sessions/session/sessionevent.service
 import SessionDataService from "app/views/sessions/session/sessiondata.service";
 import SelectionService from "app/views/sessions/session/selection.service";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
-import FileResource from "app/resources/fileresource";
+import FileResource from "app/shared/resources/fileresource";
 import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
 import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
@@ -97,6 +97,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('SessionWorkerResource', upgradeAdapter.downgradeNg2Provider(SessionWorkerResource))
   .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
   .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
+  .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
 
   // Angular 2 version exists, can't upgrade. These needed in angularjs templates
   .filter('isoDate', isoDateFilter)
@@ -111,7 +112,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
 
   // Uprade simultaneously when refactoring restangular to Angular2 implementation
   .service('SessionResource', SessionResource)
-  .service('FileResource', FileResource)
   .component('sessionList', <any>sessionList)
   .component('session', SessionComponent)
 

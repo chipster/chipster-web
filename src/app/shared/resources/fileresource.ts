@@ -1,16 +1,16 @@
 
-import ConfigService from "../services/config.service";
+import ConfigService from "../../services/config.service";
 import * as restangular from "restangular";
-import AuthenticationService from "../core/authentication/authenticationservice";
+import AuthenticationService from "../../core/authentication/authenticationservice";
 import IService = restangular.IService;
+import {Injectable, Inject} from "@angular/core";
 
+@Injectable()
 export default class FileResource {
-
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService'];
 
 	service: any;
 
-	constructor(private restangular: restangular.IService,
+	constructor(@Inject('Restangular') private restangular: restangular.IService,
 				private authenticationService: AuthenticationService,
 				private configService: ConfigService) {
 	}
