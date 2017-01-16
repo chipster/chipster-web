@@ -16,7 +16,7 @@ import * as angular from 'angular';
 export default class SessionDataService {
 
     static $inject = [
-        '$routeParams', 'SessionWorkerResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
+        '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
          '$uibModal', 'SelectionService', 'FileResource'];
 
     constructor(

@@ -7,7 +7,7 @@ import * as angular from 'angular';
 
 class SessionListController {
 
-    static $inject = ['$location', 'SessionWorkerResource', '$uibModal', 'SessionWorkerResource', '$scope'];
+    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource', '$scope'];
 
     public selectedSessions: Session[];
     public previousSession: Session;
@@ -89,7 +89,7 @@ class SessionListController {
             }).result.then((datasets: string[]) => {
                 console.log('session file uploaded');
                 console.log('extract session');
-                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).then((warnings) => {
+                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).toPromise().then((warnings) => {
                     console.log('extracted, warnings: ', warnings);
                     return this.sessionResource.deleteDataset(sessionId, datasets[0]);
                 }).then((res) => {

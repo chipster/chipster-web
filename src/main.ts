@@ -19,6 +19,7 @@ import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
 import moduleFilter from "app/common/filter/module.filter";
 import toolFilter from "app/common/filter/tool.filter";
+import bytesFilter from "app/common/filter/bytes.filter";
 import AddDatasetModalController from "app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.controller";
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
@@ -102,6 +103,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .filter('toolFilter', toolFilter)
     .filter('seconds',secondsFilter)
     .filter('searchDatasetFilter', searchDatasetFilter)
+  .filter('bytesFilter', bytesFilter )
 
     // Should be trivial to upgrade to Angular 2
 

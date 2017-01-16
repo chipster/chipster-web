@@ -4,7 +4,6 @@ import {Headers} from "@angular/http";
 import {RestService} from "../rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
 import {CoreServices} from "../core-services";
-import {ToolResource} from "../../shared/resources/toolresource";
 
 @Injectable()
 export default class AuthenticationService {
@@ -43,19 +42,16 @@ export default class AuthenticationService {
     localStorage.clear();
   };
 
-  getTokenHeader(): string {
+  getTokenHeader(): any {
     this.updateTokenHeader();
     return this.tokenHeader;
   };
 
   requestToken(username: string, password: string): Observable<string> {
     return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-
-      var urlString = URI(coreServices.authenticationService).path('tokens').toString();
-      var string = username + ":" + password;
-      var encodedString = btoa(string); //Convert it to base64 encoded string
-
-      return this.restService.post(urlString, {
+      const url= `${coreServices.authenticationService}/tokens`;
+      const encodedString = btoa(`${username}:${password}`); // base64 encoding
+      return this.restService.post(url, {
         withCredentials: true,
         headers: new Headers({
           Authorization: `Basic ${encodedString}`

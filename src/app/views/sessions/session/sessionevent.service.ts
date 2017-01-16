@@ -10,7 +10,7 @@ import * as _ from "lodash";
 
 export default class SessionEventService {
 
-    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionWorkerResource'];
+    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionResource'];
 
     ws: any;
 

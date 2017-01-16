@@ -42,7 +42,7 @@
                                     <span class="glyphicon glyphicon-remove-sign"></span>
                                     Cancel all
                                 </button>
-                                <span class="label label-info">Total Size: {{$flow.getSize() | bytes}}</span>
+                                <span class="label label-info">Total Size: {{$flow.getSize() | bytesFilter}}</span>
                                 <span class="label label-info">Time remaining: {{$flow.timeRemaining() | seconds}}</span>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                             {{file.relativePath}}
                         </div>
                         <div class="col-xs-1">
-                            {{file.size | bytes}}
+                            {{file.size | bytesFilter}}
                         </div>
                         <div class="col-xs-2">
                             <div class="progress progress-striped" ng-show="!file.error">
@@ -77,7 +77,7 @@
                             </div>
                         </div>
                         <div class="col-xs-1">
-                            <span ng-show="file.currentSpeed">{{file.currentSpeed | bytes}}/s</span>
+                            <span ng-show="file.currentSpeed">{{file.currentSpeed | bytesFilter}}/s</span>
                         </div>
                         <div class="col-xs-2">
                             <button class="btn btn-default btn-sm" ng-click="file.pause()" ng-show="file.progress() != 0 && !file.paused && !file.isComplete()">

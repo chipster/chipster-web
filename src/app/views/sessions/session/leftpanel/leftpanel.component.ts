@@ -17,7 +17,7 @@ class LeftPanelComponent {
   private selectedTab = 1;
 
   static $inject = [
-    'SessionWorkerResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
+    'SessionResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
     'SessionWorkerResource', '$filter'];
 
   constructor(
@@ -80,10 +80,10 @@ class LeftPanelComponent {
     });
   }
 
-  downloadSession() {
+  downloadSession(): void {
     this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).then((url) => {
       this.sessionDataService.download(url);
-    })
+    });
   }
 
   toggleDatasetSelection($event, data) {

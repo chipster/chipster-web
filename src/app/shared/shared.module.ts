@@ -14,7 +14,6 @@ import {CSVReader} from "./services/CSVReader";
 import {TSVReader} from "./services/TSVReader";
 import ConfigurationResource from "./resources/configurationresource";
 import {CoreModule} from "../core/core.module";
-import {SessionResourceService} from "./resources/session-resource.service";
 import {ToolResource} from "./resources/toolresource";
 import {SessionWorkerResource} from "./resources/sessionworker.resource";
 
@@ -23,7 +22,7 @@ import {SessionWorkerResource} from "./resources/sessionworker.resource";
     CommonModule, CoreModule
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
-  providers: [PipeService, TSVReader, CSVReader, ConfigurationResource, SessionResourceService, ToolResource, SessionWorkerResource],
+  providers: [PipeService, TSVReader, CSVReader, ConfigurationResource, ToolResource, SessionWorkerResource],
   exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe]
 })
 export class SharedModule {  }

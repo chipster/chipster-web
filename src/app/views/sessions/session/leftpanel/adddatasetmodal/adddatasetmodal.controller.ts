@@ -11,7 +11,7 @@ import SessionResource from "../../../../../resources/session.resource";
 export default class AddDatasetModalController {
     static $inject = [
         '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
-        'SessionWorkerResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
+        'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
 
     private datasetIds: string[] = [];
 
@@ -43,14 +43,13 @@ export default class AddDatasetModalController {
         };
 
         let promises = [
-            this.ConfigService.getFileBrokerUrl(),
+            this.ConfigService.getFileBrokerUrl().toPromise(),
             this.createDataset(this.sessionId, file.name)
         ];
 
         this.$q.all(promises).then((results: any) => {
             let url: string = results[0];
             let dataset: Dataset = results[1];
-
             file.chipsterTarget = URI(url)
                 .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
                 .addSearch('token', this.AuthenticationService.getToken()).toString();
