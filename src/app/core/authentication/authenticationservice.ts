@@ -29,7 +29,7 @@ export default class AuthenticationService {
   }
 
   // Do the authentication here based on userid and password
-  login(username: string, password: string): Observable<string> {
+  login(username: string, password: string): Observable<void> {
     // clear any old tokens
     this.setAuthToken(null);
     return this.requestToken(username, password).map((response: any) => {

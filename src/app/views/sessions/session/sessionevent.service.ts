@@ -7,18 +7,17 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import {SessionData} from "../../../resources/session.resource";
 import * as _ from "lodash";
+import {Injectable, Inject} from "@angular/core";
 
+@Injectable()
 export default class SessionEventService {
-
-    static $inject = ['ConfigService', '$log', 'AuthenticationService', '$websocket', 'SessionResource'];
 
     ws: any;
 
     constructor(private configService: ConfigService,
-                private $log: ng.ILogService,
                 private authenticationService: AuthenticationService,
-                private $websocket: ng.websocket.IWebSocketProvider,
-                private sessionResource: SessionResource){
+                @Inject('$websocket') private $websocket: ng.websocket.IWebSocketProvider,
+                @Inject('SessionResource') private sessionResource: SessionResource){
     }
 
     subscribe(sessionId: string, sessionData: SessionData, onChange: any) {
@@ -28,11 +27,11 @@ export default class SessionEventService {
 
         return this.configService.getSessionDbEventsUrl(sessionId).toPromise().then((eventUrl) => {
 
-            this.$log.debug('eventUrl', eventUrl);
+            console.debug('eventUrl', eventUrl);
             this.ws = this.$websocket(URI(eventUrl).addSearch('token', this.authenticationService.getToken()).toString());
 
             this.ws.onOpen(() => {
-                this.$log.info('websocket connected')
+                console.info('websocket connected')
             });
 
             this.ws.onMessage((event: any) => {
@@ -41,7 +40,7 @@ export default class SessionEventService {
 
 
             this.ws.onClose(() => {
-                this.$log.info('websocket closed')
+                console.info('websocket closed')
             });
 
             return {
@@ -54,7 +53,7 @@ export default class SessionEventService {
 
     handleEvent(event: any, sessionId: string, sessionData: SessionData, onChange: any) {
 
-        this.$log.debug('websocket event', event);
+        console.debug('websocket event', event);
 
         if (event.resourceType === 'AUTHORIZATION') {
             this.handleAuthorizationEvent(event, sessionData, onChange);
@@ -69,7 +68,7 @@ export default class SessionEventService {
             this.handleJobEvent(event, sessionId, sessionData, onChange);
 
         } else {
-            this.$log.warn("unknwon resource type", event.resourceType, event);
+            console.warn("unknwon resource type", event.resourceType, event);
         }
     }
 
@@ -78,7 +77,7 @@ export default class SessionEventService {
             onChange(event, sessionData.session, null);
 
         } else {
-            this.$log.warn("unknown event type", event);
+            console.warn("unknown event type", event);
         }
     }
 
@@ -95,7 +94,7 @@ export default class SessionEventService {
             });
 
         } else {
-            this.$log.warn("unknown event type", event);
+            console.warn("unknown event type", event);
         }
     }
 
@@ -122,7 +121,7 @@ export default class SessionEventService {
             onChange(event, localCopy, null);
 
         } else {
-            this.$log.warn("unknown event type", event);
+            console.warn("unknown event type", event);
         }
     }
 
@@ -149,7 +148,7 @@ export default class SessionEventService {
             onChange(event, localCopy, null);
 
         } else {
-            this.$log.warn("unknown event type", event.type, event);
+            console.warn("unknown event type", event.type, event);
         }
     }
 }

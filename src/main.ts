@@ -95,20 +95,20 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('RestService', upgradeAdapter.downgradeNg2Provider(RestService))
     .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
     .service('SessionWorkerResource', upgradeAdapter.downgradeNg2Provider(SessionWorkerResource))
+  .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
 
-    // Angular 2 version exists, can't upgrade. These needed in angularjs templates
-    .filter('isoDate', isoDateFilter)
-    .filter('categoryFilter', categoryFilter)
-    .filter('moduleFilter', moduleFilter)
-    .filter('toolFilter', toolFilter)
-    .filter('seconds',secondsFilter)
-    .filter('searchDatasetFilter', searchDatasetFilter)
+  // Angular 2 version exists, can't upgrade. These needed in angularjs templates
+  .filter('isoDate', isoDateFilter)
+  .filter('categoryFilter', categoryFilter)
+  .filter('moduleFilter', moduleFilter)
+  .filter('toolFilter', toolFilter)
+  .filter('seconds',secondsFilter)
+  .filter('searchDatasetFilter', searchDatasetFilter)
   .filter('bytesFilter', bytesFilter )
 
-    // Should be trivial to upgrade to Angular 2
+  // Should be trivial to upgrade to Angular 2
 
-    // Uprade simultaneously when refactoring restangular to Angular2 implementation
-  .service('SessionEventService', SessionEventService)
+  // Uprade simultaneously when refactoring restangular to Angular2 implementation
   .service('SessionResource', SessionResource)
   .service('SessionDataService', SessionDataService)
   .service('FileResource', FileResource)
@@ -189,6 +189,8 @@ upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$uibModal');
 upgradeAdapter.upgradeNg1Provider('Restangular');
+upgradeAdapter.upgradeNg1Provider('$websocket');
+upgradeAdapter.upgradeNg1Provider('SessionResource');
 
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);
