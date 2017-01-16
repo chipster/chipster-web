@@ -96,6 +96,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
     .service('SessionWorkerResource', upgradeAdapter.downgradeNg2Provider(SessionWorkerResource))
   .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
+  .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
 
   // Angular 2 version exists, can't upgrade. These needed in angularjs templates
   .filter('isoDate', isoDateFilter)
@@ -110,7 +111,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
 
   // Uprade simultaneously when refactoring restangular to Angular2 implementation
   .service('SessionResource', SessionResource)
-  .service('SessionDataService', SessionDataService)
   .service('FileResource', FileResource)
   .component('sessionList', <any>sessionList)
   .component('session', SessionComponent)

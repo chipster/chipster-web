@@ -1,34 +1,33 @@
 import SessionResource from "../../../resources/session.resource";
-import ILogService = angular.ILogService;
 import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/config.service";
 import AuthenticationService from "../../../core/authentication/authenticationservice";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import IModalService = angular.ui.bootstrap.IModalService;
 import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../resources/fileresource";
 import Session from "../../../model/session/session";
 import * as _ from "lodash";
 import * as angular from 'angular';
+import {Injectable, Inject} from "@angular/core";
 
+@Injectable()
 export default class SessionDataService {
 
-    static $inject = [
-        '$routeParams', 'SessionResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-         '$uibModal', 'SelectionService', 'FileResource'];
+    //static $inject = [
+  // '$routeParams', 'SessionWorkerResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
+  // '$uibModal', 'SelectionService', 'FileResource'];
 
     constructor(
-        private $routeParams: ng.route.IRouteParamsService,
-        private sessionResource: SessionResource,
-        private $log: ILogService,
-        private $window: IWindowService,
+        @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
+        @Inject('SessionResource') private sessionResource: SessionResource,
+        @Inject('$window') private $window: IWindowService,
         private configService: ConfigService,
         private authenticationService: AuthenticationService,
-        private $uibModal: IModalService,
+        @Inject('$uibModal') private $uibModal: any,
         private selectionService: SelectionService,
-        private fileResource: FileResource) {
+        @Inject('FileResource') private fileResource: FileResource) {
     }
 
     subscription: Promise<{unsubscribe(): void}>;
@@ -115,7 +114,7 @@ export default class SessionDataService {
     deleteJobs(jobs: Job[]) {
         for (let job of jobs) {
             this.sessionResource.deleteJob(this.getSessionId(), job.jobId).then( (res: any) => {
-                this.$log.debug('job deleted', res);
+                console.debug('job deleted', res);
             });
         }
     }
@@ -124,7 +123,7 @@ export default class SessionDataService {
 
         for (let dataset of datasets) {
             this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId).then( (res: any) => {
-                this.$log.debug('dataset deleted', res);
+                console.debug('dataset deleted', res);
             });
         }
     }

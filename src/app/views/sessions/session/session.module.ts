@@ -7,11 +7,12 @@ import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../shared/shared.module";
 import {LeftPanelModule} from "./leftpanel/leftpanel.module";
 import SessionEventService from "./sessionevent.service";
+import SessionDataService from "./sessiondata.service";
 
 @NgModule({
   imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule],
   declarations: [],
-  providers: [SessionEventService]
+  providers: [SessionEventService, SessionDataService]
 })
 export class SessionModule{}
 
