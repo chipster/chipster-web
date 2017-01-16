@@ -81,7 +81,7 @@ class LeftPanelComponent {
   }
 
   downloadSession(): void {
-    this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).then((url) => {
+    this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).subscribe((url) => {
       this.sessionDataService.download(url);
     });
   }
