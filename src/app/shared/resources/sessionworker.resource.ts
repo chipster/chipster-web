@@ -1,5 +1,4 @@
 import AuthenticationService from "../../core/authentication/authenticationservice";
-import * as restangular from "restangular";
 import ConfigService from "../../services/config.service";
 import {Inject, Injectable} from "@angular/core";
 import {RestService} from "../../core/rest-services/restservice/rest.service";

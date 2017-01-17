@@ -8,6 +8,7 @@ import Job from "../../../model/session/job";
 import {SessionData} from "../../../resources/session.resource";
 import * as _ from "lodash";
 import {Injectable, Inject} from "@angular/core";
+import {TokenService} from "../../../core/authentication/token.service";
 
 @Injectable()
 export default class SessionEventService {
@@ -15,7 +16,7 @@ export default class SessionEventService {
     ws: any;
 
     constructor(private configService: ConfigService,
-                private authenticationService: AuthenticationService,
+                private tokenService: TokenService,
                 @Inject('$websocket') private $websocket: ng.websocket.IWebSocketProvider,
                 @Inject('SessionResource') private sessionResource: SessionResource){
     }
@@ -28,7 +29,7 @@ export default class SessionEventService {
         return this.configService.getSessionDbEventsUrl(sessionId).toPromise().then((eventUrl) => {
 
             console.debug('eventUrl', eventUrl);
-            this.ws = this.$websocket(URI(eventUrl).addSearch('token', this.authenticationService.getToken()).toString());
+            this.ws = this.$websocket(URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString());
 
             this.ws.onOpen(() => {
                 console.info('websocket connected')

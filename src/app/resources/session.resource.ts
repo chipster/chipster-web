@@ -10,6 +10,7 @@ import Tool from "../model/session/tool";
 import Job from "../model/session/job";
 import * as _ from "lodash";
 import UtilsService from "../services/utils.service";
+import {TokenService} from "../core/authentication/token.service";
 
 export class SessionData {
 	session: Session;
@@ -22,12 +23,12 @@ export class SessionData {
 
 export default class SessionResource {
 
-	static $inject = ['Restangular', 'AuthenticationService', 'ConfigService', 'ToolResource', '$q'];
+	static $inject = ['Restangular', 'TokenService','ConfigService', 'ToolResource', '$q' ];
 
 	public service: any;
 
 	constructor(private restangular: restangular.IService,
-				private authenticationService:AuthenticationService,
+				private tokenService: TokenService,
 				private configService: ConfigService,
 				private toolResource: ToolResource,
 				private $q:ng.IQService) {
@@ -42,7 +43,7 @@ export default class SessionResource {
 					// this service is initialized only once, but the Authentication service will update the returned
 					// instance when necessary (login & logout) so that the request is always made with the most up-to-date
 					// credentials
-					configurer.setDefaultHeaders(this.authenticationService.getTokenHeader());
+					configurer.setDefaultHeaders(this.tokenService.getTokenHeader());
 					configurer.setFullResponse(true);
 				});
 

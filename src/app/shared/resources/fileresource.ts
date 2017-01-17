@@ -1,9 +1,12 @@
 
 import ConfigService from "../../services/config.service";
 import * as restangular from "restangular";
-import AuthenticationService from "../../core/authentication/authenticationservice";
 import IService = restangular.IService;
 import {Injectable, Inject} from "@angular/core";
+import {Observable} from "rxjs";
+import {RestService} from "../../core/rest-services/restservice/rest.service";
+import {Headers, ResponseType, ResponseContentType} from "@angular/http";
+import {TokenService} from "../../core/authentication/token.service";
 
 @Injectable()
 export default class FileResource {
@@ -11,8 +14,9 @@ export default class FileResource {
 	service: any;
 
 	constructor(@Inject('Restangular') private restangular: restangular.IService,
-				private authenticationService: AuthenticationService,
-				private configService: ConfigService) {
+				private tokenService: TokenService,
+				private configService: ConfigService,
+        private restService: RestService) {
 	}
 
 	getService() {
@@ -23,19 +27,29 @@ export default class FileResource {
 				// return the Restangular service
 				return this.restangular.withConfig((configurer: any) => {
 					configurer.setBaseUrl(url);
-					configurer.setDefaultHeaders(this.authenticationService.getTokenHeader());
+					configurer.setDefaultHeaders(this.tokenService.getTokenHeader());
 					configurer.setFullResponse(true);				});
 			});
 		}
 		return this.service;
 	}
 
-	getData(sessionId: string, datasetId: string) {
-		return this.getService().then((service: IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', datasetId)
-			.get());
-	}
+	getData(sessionId: string, datasetId: string): Observable<any> {
+    const apiUrl$ = this.configService.getFileBrokerUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, {
+      responseType: ResponseContentType.Text,
+      headers: new Headers({
+        Authorization: this.tokenService.tokenHeader['Authorization']
+      })
+    }));
+  }
+
+	// getData(sessionId: string, datasetId: string) {
+	// 	return this.getService().then((service: IService) => service
+	// 		.one('sessions', sessionId)
+	// 		.one('datasets', datasetId)
+	// 		.get());
+	// }
 
   getLimitedData(sessionId: string, datasetId: string, maxBytes: number) {
     return this.getService().then((service: IService) => service

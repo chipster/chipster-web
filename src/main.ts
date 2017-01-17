@@ -40,7 +40,6 @@ import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
 import {SingleDatasetComponent} from "app/views/sessions/session/selectiondetails/singledataset/singledataset.component";
-import {CSVReader} from "app/shared/services/CSVReader";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import {TSVReader} from "app/shared/services/TSVReader";
 import {ExpressionProfileTSVService} from "app/views/sessions/session/visualization/expressionprofile/expressionprofileTSV.service";
@@ -60,6 +59,7 @@ import {DatasetParameterListComponent} from "./app/views/sessions/session/select
 import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmodal/tool-list-item/tool-list-item.component";
 import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import {RestService} from "./app/core/rest-services/restservice/rest.service";
+import {TokenService} from "./app/core/authentication/token.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'restangular',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
@@ -90,7 +90,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .service('SelectionService', upgradeAdapter.downgradeNg2Provider(SelectionService))
     .service('TSVReader', upgradeAdapter.downgradeNg2Provider(TSVReader))
     .service('ToolService', upgradeAdapter.downgradeNg2Provider(ToolService))
-    .service('CSVReader', upgradeAdapter.downgradeNg2Provider(CSVReader))
     .service('WorkflowGraphService', upgradeAdapter.downgradeNg2Provider(WorkflowGraphService))
     .service('RestService', upgradeAdapter.downgradeNg2Provider(RestService))
     .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
@@ -137,7 +136,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
     .config(RouteConfiguration);
 
 angular.module('AuthenticationModule', [])
-    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService));
+    .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService))
+    .service('TokenService', upgradeAdapter.downgradeNg2Provider(TokenService));
 
 
 
@@ -180,6 +180,7 @@ upgradeAdapter.upgradeNg1Provider('$window');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('$routeParams');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');
+upgradeAdapter.upgradeNg1Provider('TokenService');
 upgradeAdapter.upgradeNg1Provider('ConfigurationResource');
 upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');

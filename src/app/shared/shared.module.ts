@@ -10,7 +10,6 @@ import {PipeService} from "./services/pipeservice.service";
 import { ModulePipe } from './pipes/modulepipe.pipe';
 import {SecondsPipe} from './pipes/secondspipe.pipe';
 import {CategoryPipe} from "./pipes/categorypipe.pipe";
-import {CSVReader} from "./services/CSVReader";
 import {TSVReader} from "./services/TSVReader";
 import ConfigurationResource from "./resources/configurationresource";
 import {CoreModule} from "../core/core.module";
@@ -23,7 +22,7 @@ import FileResource from "./resources/fileresource";
     CommonModule, CoreModule
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
-  providers: [PipeService, TSVReader, CSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource],
+  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource],
   exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe]
 })
 export class SharedModule {  }

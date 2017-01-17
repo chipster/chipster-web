@@ -1,11 +1,11 @@
 import Utils from "../../../../../services/utils.service";
 import Dataset from "../../../../../model/session/dataset";
-import {CSVReader} from "../../../../../shared/services/CSVReader";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
 import {Component, Inject, Input, SimpleChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
+import FileResource from "../../../../../shared/resources/fileresource";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -27,10 +27,10 @@ export class PhenodataVisualizationComponent {
 
 
     constructor(
-        @Inject('CSVReader') private CSVReader: CSVReader,
         @Inject('SessionDataService') private sessionDataService: SessionDataService,
         @Inject('$scope') private $scope: ng.IScope,
-        @Inject('$uibModal') private $uibModal: any) {
+        @Inject('$uibModal') private $uibModal: any,
+        private fileResource: FileResource) {
     }
 
     ngOnInit() {
@@ -109,7 +109,7 @@ export class PhenodataVisualizationComponent {
 
     resetTsv(dataset: Dataset) {
 
-        this.CSVReader.getColumns(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((fileHeaders: string[]) => {
+        this.fileResource.getData(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((fileHeaders: string[]) => {
             var metadata: MetadataEntry[] = [];
 
             var chipHeaders = fileHeaders.filter( function(header) {
