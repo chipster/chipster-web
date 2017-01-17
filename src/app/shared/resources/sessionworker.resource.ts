@@ -23,11 +23,7 @@ export class SessionWorkerResource {
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.flatMap((url: string) => this.restService.post(`${url}/sessions/${sessionId}/datasets/${zipDatasetId}`, {
-      headers: new Headers({
-        Authorization: this.tokenService.tokenHeader['Authorization']
-      })
-    }))
+    return apiUrl$.flatMap((url: string) => this.restService.post(`${url}/sessions/${sessionId}/datasets/${zipDatasetId}`, true))
   }
 
 }

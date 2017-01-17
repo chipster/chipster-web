@@ -20,51 +20,51 @@ export class RestService {
    * @description: build request options
    */
   private buildRequestOptionArgs(url: string,
-                                        method: RequestMethod = RequestMethod.Get,
-                                        args: RequestOptionsArgs = {},
-                                        authentication: boolean = false,
-                                        data?: any): RequestOptionsArgs {
-    args.headers = new Headers(args.headers);
-    args.headers.append('Content-Type', 'application/json; charset=UTF-8');
-    args.headers.append('Accept', 'application/json; charset=UTF-8');
+                                  method: RequestMethod = RequestMethod.Get,
+                                  requestOptions: RequestOptionsArgs = {},
+                                  authentication: boolean = false,
+                                  payload?: any): RequestOptionsArgs {
+    requestOptions.headers = new Headers(requestOptions.headers);
+    requestOptions.headers.append('Content-Type', 'application/json; charset=UTF-8');
+    requestOptions.headers.append('Accept', 'application/json; charset=UTF-8');
     if(authentication) {
-      args.headers.append( 'Authorization', 'Basic ' + this.tokenService.getTokenHeader() );
+      requestOptions.headers.append( 'Authorization', this.tokenService.getTokenHeader().Authorization );
     }
-    args.method = method;
-    args.url = url;
-    args.body = JSON.stringify(data);
-    return args;
+    requestOptions.method = method;
+    requestOptions.url = url;
+    requestOptions.body = JSON.stringify(payload);
+    return requestOptions;
   }
 
   /*
    * @description: Create GET http-request
    */
-  get(url: string, args?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Get, args);
-    return this.doRequest(new Request(new RequestOptions(opts)));
-  }
-
-  /*
-   * @description: Create POST http-request
-   */
-  post(url: string, args?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Post, args);
+  get(url: string, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Get, requestOptions, authenticationRequired);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
   /*
    * @description:Create PUT http-request
    */
-  put(url: string, args?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, args);
+  put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, requestOptions, authenticationRequired, payload );
+    return this.doRequest(new Request(new RequestOptions(opts)));
+  }
+
+  /*
+   * @description: Create POST http-request
+   */
+  post(url: string, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Post, requestOptions, authenticationRequired);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
   /*
    * @description:Create DELETE http-request
    */
-  delete(url: string, args?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, args);
+  delete(url: string, authenticationRequired?: boolean): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, authenticationRequired);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 

@@ -36,20 +36,8 @@ export default class FileResource {
 
 	getData(sessionId: string, datasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, {
-      responseType: ResponseContentType.Text,
-      headers: new Headers({
-        Authorization: this.tokenService.tokenHeader['Authorization']
-      })
-    }));
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {responseType: ResponseContentType.Text} ));
   }
-
-	// getData(sessionId: string, datasetId: string) {
-	// 	return this.getService().then((service: IService) => service
-	// 		.one('sessions', sessionId)
-	// 		.one('datasets', datasetId)
-	// 		.get());
-	// }
 
   getLimitedData(sessionId: string, datasetId: string, maxBytes: number) {
     return this.getService().then((service: IService) => service
