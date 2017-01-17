@@ -1,6 +1,6 @@
 import ConfigService from "../../services/config.service";
 import {Inject, Injectable} from "@angular/core";
-import {Headers, Http, ResponseContentType} from "@angular/http";
+import {Headers, Http, ResponseContentType, Response} from "@angular/http";
 import {Observable} from "rxjs";
 import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
@@ -41,7 +41,7 @@ export default class AuthenticationService {
     this.tokenService.clear();
   };
 
-  requestToken(username: string, password: string): Observable<string> {
+  requestToken(username: string, password: string): Observable<Response> {
     return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
       const url= `${coreServices.authenticationService}/tokens`;
       const encodedString = btoa(`${username}:${password}`); // base64 encoding

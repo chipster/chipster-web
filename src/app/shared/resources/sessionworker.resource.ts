@@ -4,27 +4,28 @@ import {Inject, Injectable} from "@angular/core";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Headers, Http} from "@angular/http";
 import {Observable} from "rxjs";
+import {TokenService} from "../../core/authentication/token.service";
 
 @Injectable()
 export class SessionWorkerResource {
 
   public service: any;
 
-  constructor(private authenticationService: AuthenticationService,
+  constructor(private tokenService: TokenService,
               private configService: ConfigService,
               private restService: RestService) {
   }
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.map((url: string) => `${url}/sessions/${sessionId}?token=${this.authenticationService.getToken()}` );
+    return apiUrl$.map((url: string) => `${url}/sessions/${sessionId}?token=${this.tokenService.getToken()}` );
   };
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
     return apiUrl$.flatMap((url: string) => this.restService.post(`${url}/sessions/${sessionId}/datasets/${zipDatasetId}`, {
       headers: new Headers({
-        Authorization: this.authenticationService.tokenHeader['Authorization']
+        Authorization: this.tokenService.tokenHeader['Authorization']
       })
     }))
   }

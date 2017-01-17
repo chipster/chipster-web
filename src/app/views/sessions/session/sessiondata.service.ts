@@ -1,7 +1,6 @@
 import SessionResource from "../../../resources/session.resource";
 import IWindowService = angular.IWindowService;
 import ConfigService from "../../../services/config.service";
-import AuthenticationService from "../../../core/authentication/authenticationservice";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import SelectionService from "./selection.service";
@@ -11,20 +10,17 @@ import Session from "../../../model/session/session";
 import * as _ from "lodash";
 import * as angular from 'angular';
 import {Injectable, Inject} from "@angular/core";
+import {TokenService} from "../../../core/authentication/token.service";
 
 @Injectable()
 export default class SessionDataService {
-
-    //static $inject = [
-  // '$routeParams', 'SessionWorkerResource', '$log', '$window', 'ConfigService', 'AuthenticationService',
-  // '$uibModal', 'SelectionService', 'FileResource'];
 
     constructor(
         @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
         @Inject('SessionResource') private sessionResource: SessionResource,
         @Inject('$window') private $window: IWindowService,
         private configService: ConfigService,
-        private authenticationService: AuthenticationService,
+        private tokenService: TokenService,
         @Inject('$uibModal') private $uibModal: any,
         private selectionService: SelectionService,
         @Inject('FileResource') private fileResource: FileResource) {
@@ -146,7 +142,7 @@ export default class SessionDataService {
 
         return URI(this.configService.getFileBrokerUrlIfInitialized())
             .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
-            .addSearch('token', this.authenticationService.getToken()).toString();
+            .addSearch('token', this.tokenService.getToken()).toString();
 
     }
 
