@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <ch-dataset-parameter-list *ngIf="sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters"></ch-dataset-parameter-list>
+                <ch-dataset-parameter-list *ngIf="sourceJob && sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters"></ch-dataset-parameter-list>
             </div>
         </div>
 

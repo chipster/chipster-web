@@ -103,7 +103,7 @@ export default class SessionDataService {
             d.sourceJob = jobId;
             return this.updateDataset(d);
         }).then(() => {
-            return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content);
+            return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content).toPromise();
         });
     }
 

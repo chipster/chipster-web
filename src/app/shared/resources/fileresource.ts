@@ -28,7 +28,8 @@ export default class FileResource {
 				return this.restangular.withConfig((configurer: any) => {
 					configurer.setBaseUrl(url);
 					configurer.setDefaultHeaders(this.tokenService.getTokenHeader());
-					configurer.setFullResponse(true);				});
+					configurer.setFullResponse(true);
+				});
 			});
 		}
 		return this.service;
@@ -46,10 +47,8 @@ export default class FileResource {
       .get({}, {'range': 'bytes=0-' + maxBytes}));
   }
 
-	uploadData(sessionId: string, datasetId: string, data: string) {
-		return this.getService().then((service: IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', datasetId)
-			.customPUT(data));
-	}
+  uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
+    const apiUrl$ = this.configService.getFileBrokerUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.put(`{url}/sessions/${sessionId}/datasets/${datasetId}`, {data: data},  true ));
+  }
 }
