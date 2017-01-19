@@ -5,10 +5,10 @@ import IWebSocket = angular.websocket.IWebSocket;
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import {SessionData} from "../../../resources/session.resource";
 import * as _ from "lodash";
 import {Injectable, Inject} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
+import {SessionData} from "../../../model/session/session-data";
 
 @Injectable()
 export default class SessionEventService {

@@ -97,6 +97,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
   .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
   .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
   .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
+  .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
 
   // Angular 2 version exists, can't upgrade. These needed in angularjs templates
   .filter('isoDate', isoDateFilter)
@@ -110,7 +111,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'r
   // Should be trivial to upgrade to Angular 2
 
   // Uprade simultaneously when refactoring restangular to Angular2 implementation
-  .service('SessionResource', SessionResource)
   .component('sessionList', <any>sessionList)
   .component('session', SessionComponent)
 
@@ -175,6 +175,7 @@ angular.module('chipster-web').config(
     });
 
 upgradeAdapter.upgradeNg1Provider('$http');
+upgradeAdapter.upgradeNg1Provider('$q');
 upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
@@ -186,12 +187,12 @@ upgradeAdapter.upgradeNg1Provider('ConfigService');
 upgradeAdapter.upgradeNg1Provider('$location');
 upgradeAdapter.upgradeNg1Provider('TSVReader');
 upgradeAdapter.upgradeNg1Provider('FileResource');
+upgradeAdapter.upgradeNg1Provider('SessionResource');
 upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$uibModal');
 upgradeAdapter.upgradeNg1Provider('Restangular');
 upgradeAdapter.upgradeNg1Provider('$websocket');
-upgradeAdapter.upgradeNg1Provider('SessionResource');
 
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

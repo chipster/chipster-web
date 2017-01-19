@@ -2,8 +2,8 @@
 import SessionResource from "../../resources/session.resource";
 import {SessionWorkerResource} from "../../shared/resources/sessionworker.resource";
 import Session from "../../model/session/session";
-import {SessionData} from "../../resources/session.resource";
 import * as angular from 'angular';
+import {SessionData} from "../../model/session/session-data";
 
 class SessionListController {
 
@@ -91,7 +91,7 @@ class SessionListController {
                 console.log('extract session');
                 return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).toPromise().then((warnings) => {
                     console.log('extracted, warnings: ', warnings);
-                    return this.sessionResource.deleteDataset(sessionId, datasets[0]);
+                    return this.sessionResource.deleteDataset(sessionId, datasets[0]).toPromise();
                 }).then((res) => {
                     console.log('uploaded session file deleted', res);
                     console.log('change view');

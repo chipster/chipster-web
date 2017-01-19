@@ -3,11 +3,11 @@ import SessionDataService from "../sessiondata.service";
 import Dataset from "../../../../model/session/dataset";
 import UtilsService from "../../../../services/utils.service";
 import SessionResource from "../../../../resources/session.resource";
-import {SessionData} from "../../../../resources/session.resource";
 import SelectionService from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import * as _ from "lodash";
+import {SessionData} from "../../../../model/session/session-data";
 
 class LeftPanelComponent {
 

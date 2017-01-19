@@ -1,5 +1,4 @@
 
-import AuthenticationService from "../core/authentication/authenticationservice";
 import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
 import {ToolResource} from "../shared/resources/toolresource";
@@ -11,27 +10,23 @@ import Job from "../model/session/job";
 import * as _ from "lodash";
 import UtilsService from "../services/utils.service";
 import {TokenService} from "../core/authentication/token.service";
+import {Injectable, Inject} from "@angular/core";
+import {SessionData} from "../model/session/session-data";
+import {RestService} from "../core/rest-services/restservice/rest.service";
+import {Response} from "@angular/http";
+import {Observable} from "rxjs";
 
-export class SessionData {
-	session: Session;
-	datasetsMap: Map<string, Dataset>;
-	jobsMap: Map<string, Job>;
-	modules: Module[];
-	tools: Tool[];
-	modulesMap: Map<string, Module>;
-}
-
+@Injectable()
 export default class SessionResource {
-
-	static $inject = ['Restangular', 'TokenService','ConfigService', 'ToolResource', '$q' ];
 
 	public service: any;
 
-	constructor(private restangular: restangular.IService,
+	constructor(@Inject('Restangular') private restangular: restangular.IService,
 				private tokenService: TokenService,
 				private configService: ConfigService,
 				private toolResource: ToolResource,
-				private $q:ng.IQService) {
+        private restService: RestService,
+				@Inject('$q') private $q:ng.IQService) {
 	}
 
 	getService() {
@@ -199,17 +194,13 @@ export default class SessionResource {
 	}
 
 	deleteDataset(sessionId: string, datasetId: string) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', datasetId)
-			.remove());
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true));
 	}
 
-	deleteJob(sessionId: string, jobId: string) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', sessionId)
-			.one('jobs', jobId)
-			.remove());
+	deleteJob(sessionId: string, jobId: string): Observable<any> {
+	  const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/jobs/${jobId}`, true));
 	}
 
 	copySession(sessionData: SessionData, name: string) {

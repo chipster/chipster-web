@@ -64,7 +64,7 @@ export class RestService {
    * @description:Create DELETE http-request
    */
   delete(url: string, authenticationRequired?: boolean): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, authenticationRequired);
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, {}, authenticationRequired);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
