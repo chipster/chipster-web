@@ -4,7 +4,7 @@ import * as angular from 'angular';
 import {NavigationComponent} from "app/views/navigation/navigation.component";
 import {LoginComponent} from "app/views/login/login.component";
 import AuthenticationService from "app/core/authentication/authenticationservice";
-import ConfigService from "app/services/config.service";
+import ConfigService from "app/shared/services/config.service";
 import ConfigurationResource from "app/shared/resources/configurationresource";
 import RouteConfiguration from "app/routes.config";
 import {ToolResource} from "app/shared/resources/toolresource";
@@ -28,7 +28,7 @@ import SourceModalController from "app/views/sessions/session/tools/sourcemodal/
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
 import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
-import SessionResource from "app/resources/session.resource";
+import SessionResource from "app/shared/resources/session.resource";
 import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import sessionList from "app/views/sessions/sessionlist.component";

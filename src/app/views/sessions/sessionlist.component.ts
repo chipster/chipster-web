@@ -1,5 +1,5 @@
 
-import SessionResource from "../../resources/session.resource";
+import SessionResource from "../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../shared/resources/sessionworker.resource";
 import Session from "../../model/session/session";
 import * as angular from 'angular';
@@ -113,7 +113,7 @@ class SessionListController {
                 // hide the old session immediately
                 this.previousSession = session;
                 this.sessionData = null;
-                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then((fullSession: SessionData) => {
+                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).subscribe((fullSession: SessionData) => {
                     // don't show if the selection has already changed
                     if (this.selectedSessions[0] === session) {
                         this.sessionData = fullSession;

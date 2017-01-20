@@ -5,7 +5,7 @@ import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
-import ConfigService from "./services/config.service";
+import ConfigService from "./shared/services/config.service";
 import {HomeComponent} from "./views/home/home.component";
 import {SessionModule} from "./views/sessions/session/session.module";
 import {CoreModule} from "./core/core.module";
@@ -19,6 +19,6 @@ import {CoreModule} from "./core/core.module";
       SessionModule
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
-    providers: [ SelectionService, ConfigService ]
+    providers: [ SelectionService ]
 })
 export class AppModule {}

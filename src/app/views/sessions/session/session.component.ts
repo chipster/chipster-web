@@ -5,7 +5,7 @@ import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import { SessionData } from "../../../resources/session.resource";
+import { SessionData } from "../../../shared/resources/session.resource";
 import * as _ from "lodash";
 
 class SessionComponent {

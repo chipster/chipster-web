@@ -1,5 +1,5 @@
 import IRoute = angular.route.IRoute;
-import SessionResource from "./resources/session.resource";
+import SessionResource from "./shared/resources/session.resource";
 
 interface IAuthRoute extends IRoute {
     authenticated: boolean;
@@ -20,7 +20,7 @@ export default function($routeProvider: ng.route.IRouteProvider) {
             authenticated: true,
             resolve: {
                 sessionData: ($route: ng.route.IRouteService, SessionResource: SessionResource) => {
-                    return SessionResource.loadSession($route.current.params.sessionId);
+                    return SessionResource.loadSession($route.current.params.sessionId).toPromise();
                 }
             }
         })

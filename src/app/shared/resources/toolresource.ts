@@ -1,4 +1,4 @@
-import ConfigService from "../../services/config.service";
+import ConfigService from "../services/config.service";
 import {Observable} from "rxjs";
 import {Injectable} from "@angular/core";
 import {RestService} from "../../core/rest-services/restservice/rest.service";

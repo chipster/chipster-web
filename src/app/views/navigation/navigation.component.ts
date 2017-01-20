@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import AuthenticationService from "../../core/authentication/authenticationservice";
-import ConfigService from "../../services/config.service";
+import ConfigService from "../../shared/services/config.service";
 import {Observable} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 

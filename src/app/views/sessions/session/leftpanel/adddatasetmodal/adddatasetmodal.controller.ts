@@ -1,11 +1,11 @@
 import Utils from "../../../../../services/utils.service";
 import WorkflowGraphService from "../workflowgraph/workflowgraph.service";
-import ConfigService from "../../../../../services/config.service";
+import ConfigService from "../../../../../shared/services/config.service";
 import Dataset from "../../../../../model/session/dataset";
 import IQService = angular.IQService;
 import IModalService = angular.ui.bootstrap.IModalService;
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
-import SessionResource from "../../../../../resources/session.resource";
+import SessionResource from "../../../../../shared/resources/session.resource";
 import {TokenService} from "../../../../../core/authentication/token.service";
 
 export default class AddDatasetModalController {

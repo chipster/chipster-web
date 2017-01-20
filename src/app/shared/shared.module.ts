@@ -16,14 +16,15 @@ import {CoreModule} from "../core/core.module";
 import {ToolResource} from "./resources/toolresource";
 import {SessionWorkerResource} from "./resources/sessionworker.resource";
 import FileResource from "./resources/fileresource";
-import SessionResource from "../resources/session.resource";
+import SessionResource from "./resources/session.resource";
+import ConfigService from "./services/config.service";
 
 @NgModule({
   imports: [
     CommonModule, CoreModule
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
-  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource],
+  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService],
   exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe]
 })
 export class SharedModule {  }

@@ -1,5 +1,5 @@
 import AuthenticationService from "../../core/authentication/authenticationservice";
-import ConfigService from "../../services/config.service";
+import ConfigService from "../services/config.service";
 import {Inject, Injectable} from "@angular/core";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Headers, Http} from "@angular/http";

@@ -1,19 +1,18 @@
 
 import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
-import {ToolResource} from "../shared/resources/toolresource";
-import Session from "../model/session/session";
-import Dataset from "../model/session/dataset";
-import Module from "../model/session/module";
-import Tool from "../model/session/tool";
-import Job from "../model/session/job";
+import {ToolResource} from "./toolresource";
+import Session from "../../model/session/session";
+import Dataset from "../../model/session/dataset";
+import Module from "../../model/session/module";
+import Tool from "../../model/session/tool";
+import Job from "../../model/session/job";
 import * as _ from "lodash";
-import UtilsService from "../services/utils.service";
-import {TokenService} from "../core/authentication/token.service";
+import UtilsService from "../../services/utils.service";
+import {TokenService} from "../../core/authentication/token.service";
 import {Injectable, Inject} from "@angular/core";
-import {SessionData} from "../model/session/session-data";
-import {RestService} from "../core/rest-services/restservice/rest.service";
-import {Response} from "@angular/http";
+import {SessionData} from "../../model/session/session-data";
+import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
 
 @Injectable()
@@ -23,10 +22,11 @@ export default class SessionResource {
 
 	constructor(@Inject('Restangular') private restangular: restangular.IService,
 				private tokenService: TokenService,
-				private configService: ConfigService,
+        private configService: ConfigService,
 				private toolResource: ToolResource,
         private restService: RestService,
 				@Inject('$q') private $q:ng.IQService) {
+    console.log('const', this.configService);
 	}
 
 	getService() {
@@ -58,61 +58,55 @@ export default class SessionResource {
 		return this.service;
 	}
 
-	parseSessionData(param: any) {
-		let session: Session = param[0].data;
-		let datasets: Dataset[] = param[1].data;
-		let jobs: Job[] = param[2].data;
-		let modules: Module[] = param[3];
-		let tools: Tool[] = param[4];
-
-		// is there any less ugly syntax for defining the types of anonymous object?
-		let data = new SessionData();
-
-		data.session = session;
-		data.datasetsMap = UtilsService.arrayToMap(datasets, 'datasetId');
-		data.jobsMap = UtilsService.arrayToMap(jobs, 'jobId');
-
-		// show only configured modules
-		modules = modules.filter( (module: Module) => this.configService.getModules().indexOf(module.name) >= 0 );
-
-		data.modules = modules;
-		data.tools = tools;
-
-		// build maps for modules and categories
-
-		// generate moduleIds
-		modules.map( (module:any) => {
-			module.moduleId = module.name.toLowerCase();
-			return module;
-		});
-
-		data.modulesMap = UtilsService.arrayToMap(modules, 'moduleId');
-
-		data.modulesMap.forEach( (module:any) => {
-			module.categoriesMap = UtilsService.arrayToMap(module.categories, 'name');
-		});
-
-		return data;
-	};
-
 	loadSession(sessionId: string) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => {
 
-		return this.getService().then((service: restangular.IService) => {
-			var sessionUrl = service.one('sessions', sessionId);
+      const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true);
+      const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true);
+      const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true);
+      const modules$ = this.toolResource.getModules();
+      const tools$ = this.toolResource.getTools();
 
-			// get session detail
-			var promises = [
-				sessionUrl.get(),
-				sessionUrl.all('datasets').getList(),
-				sessionUrl.all('jobs').getList(),
-				this.toolResource.getModules().toPromise(),
-				this.toolResource.getTools().toPromise()
-			];
+      return Observable.forkJoin([session$, sessionDatasets$, sessionJobs$, modules$, tools$])
 
-			return this.$q.all(promises);
-		}).then((data: any) => {
-			return this.parseSessionData(data);
-		});
+    }).map( (param: any) => {
+      let session: Session = param[0];
+      let datasets: Dataset[] = param[1];
+      let jobs: Job[] = param[2];
+      let modules: Module[] = param[3];
+      let tools: Tool[] = param[4];
+
+      // is there any less ugly syntax for defining the types of anonymous object?
+      let data = new SessionData();
+
+      data.session = session;
+      data.datasetsMap = UtilsService.arrayToMap(datasets, 'datasetId');
+      data.jobsMap = UtilsService.arrayToMap(jobs, 'jobId');
+
+      // show only configured modules
+      modules = modules.filter( (module: Module) => this.configService.getModules().indexOf(module.name) >= 0 );
+
+      data.modules = modules;
+      data.tools = tools;
+
+      // build maps for modules and categories
+
+      // generate moduleIds
+      modules.map( (module:any) => {
+        module.moduleId = module.name.toLowerCase();
+        return module;
+      });
+
+      data.modulesMap = UtilsService.arrayToMap(modules, 'moduleId');
+
+      data.modulesMap.forEach( (module:any) => {
+        module.categoriesMap = UtilsService.arrayToMap(module.categories, 'name');
+      });
+
+      return data;
+    });
+
 	}
 
 	getSessions() {

@@ -1,4 +1,4 @@
-import ConfigService from "../../services/config.service";
+import ConfigService from "../../shared/services/config.service";
 import {Inject, Injectable} from "@angular/core";
 import {Headers, Http, ResponseContentType, Response} from "@angular/http";
 import {Observable} from "rxjs";

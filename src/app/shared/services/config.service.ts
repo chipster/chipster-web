@@ -1,8 +1,8 @@
-import * as configConstants from '../core/app.constants';
-import ConfigurationResource from "../shared/resources/configurationresource";
+import * as configConstants from '../../core/app.constants';
+import ConfigurationResource from "../resources/configurationresource";
 import {Injectable} from "@angular/core";
 import * as _ from "lodash";
-import {CoreServices} from "../core/core-services";
+import {CoreServices} from "../../core/core-services";
 import {Observable} from "rxjs";
 
 @Injectable()
@@ -28,10 +28,6 @@ export default class ConfigService {
   }
 
   getFileBrokerUrl(): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.fileBroker);
-  }
-
-  getFileBrokerUrl() {
     return this.configuration$.map((services: CoreServices) => services.fileBroker);
   }
 
