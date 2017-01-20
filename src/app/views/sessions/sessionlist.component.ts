@@ -4,6 +4,7 @@ import {SessionWorkerResource} from "../../shared/resources/sessionworker.resour
 import Session from "../../model/session/session";
 import * as angular from 'angular';
 import {SessionData} from "../../model/session/session-data";
+import {Observable} from "rxjs";
 
 class SessionListController {
 
@@ -123,15 +124,11 @@ class SessionListController {
     }
 
     deleteSessions(sessions: Session[]) {
-        // preview could cause errors
-        this.selectedSessions.length = 0;
-
-        sessions.forEach((session: Session) => {
-            this.sessionResource.deleteSession(session.sessionId).then((res: any) => {
-                console.log("session deleted", res);
-                this.updateSessions();
-                this.selectedSessions = [];
-            });
+        const deleteSessions$ = sessions.map( (session: Session) => this.sessionResource.deleteSession(session.sessionId) );
+        Observable.merge(...deleteSessions$).subscribe( (response: any) => {
+          console.log("session deleted", response);
+          this.updateSessions();
+          this.selectedSessions.length = 0;
         });
     }
 

@@ -60,7 +60,7 @@ export default class AddDatasetModalController {
 
     createDataset(sessionId: string, name: string) {
         var d = new Dataset(name);
-        console.debug('createDataset', d);
+        console.info('createDataset', d);
         return this.sessionResource.createDataset(sessionId, d).then((datasetId: string) => {
             d.datasetId = datasetId;
             var pos = this.workflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));

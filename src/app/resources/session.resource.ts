@@ -168,32 +168,26 @@ export default class SessionResource {
 	}
 
 	updateSession(session: Session) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', session.sessionId)
-			.customPUT(session));
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.put(`${url}/sessions/${session.sessionId}`, session, true));
 	}
 
 	updateDataset(sessionId: string, dataset: Dataset) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', dataset.datasetId)
-			.customPUT(dataset));
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.put(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, dataset, true));
 	}
 
 	updateJob(sessionId: string, job: Job) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', sessionId)
-			.one('jobs', job.jobId)
-			.customPUT(job));
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.put(`${url}/sessions/${sessionId}/jobs/${job.jobId}`, job, true));
 	}
 
 	deleteSession(sessionId: string) {
-		return this.getService().then((service:restangular.IService) => service
-			.one('sessions', sessionId)
-			.remove());
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}`, true));
 	}
 
-	deleteDataset(sessionId: string, datasetId: string) {
+	deleteDataset(sessionId: string, datasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true));
 	}
@@ -249,7 +243,7 @@ export default class SessionResource {
 						let datasetCopy = _.clone(oldDataset);
 						datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
 						datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-						updateRequests.push(this.updateDataset(sessionId, datasetCopy));
+						updateRequests.push(this.updateDataset(sessionId, datasetCopy).toPromise());
 					}
 				});
 
@@ -259,7 +253,7 @@ export default class SessionResource {
 					jobCopy.jobId = jobIdMap.get(oldJob.jobId);
 					jobCopy.inputs.forEach((input) => {
 						input.datasetId = datasetIdMap.get(input.datasetId);
-						updateRequests.push(this.updateJob(sessionId, jobCopy));
+						updateRequests.push(this.updateJob(sessionId, jobCopy).toPromise());
 					});
 				});
 

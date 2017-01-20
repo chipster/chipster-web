@@ -115,7 +115,7 @@ var SessionDataService = (function () {
         because the URL is used in many different places and the async result could be difficult for some
         of them.
          */
-        return URI(this.configService.getFileBrokerUrlIfInitialized())
+        return URI(this.configService.getFileBrokerUrl())
             .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
             .addSearch('token', this.authenticationService.getToken()).toString();
     };

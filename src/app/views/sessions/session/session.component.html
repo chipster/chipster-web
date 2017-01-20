@@ -31,10 +31,10 @@
                 <ch-single-dataset
                         [dataset]="$ctrl.selectionService.selectedDatasets[0]"
                         [jobs]="$ctrl.sessionData.jobsMap"
-                        [on-delete]="$ctrl.deleteDatasetsLater()"
+                        (on-delete)="$ctrl.deleteDatasetsLater()"
                         ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></ch-single-dataset>
                 <ch-dataset-details
-                        [on-delete]="$ctrl.deleteDatasetsLater()"
+                        (on-delete)="$ctrl.deleteDatasetsLater()"
                         ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></ch-dataset-details>
             </div>
         </div>

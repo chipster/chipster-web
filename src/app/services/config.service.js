@@ -65,7 +65,7 @@ var ConfigService = (function () {
     ConfigService.prototype.getFileBrokerUrl = function () {
         return this.getServices().then(function (services) { return services.fileBroker; });
     };
-    ConfigService.prototype.getFileBrokerUrlIfInitialized = function () {
+    ConfigService.prototype.getFileBrokerUrl = function () {
         return this.services.fileBroker;
     };
     ConfigService.prototype.getToolboxUrl = function () {

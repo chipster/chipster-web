@@ -37,6 +37,6 @@ export class NavigationComponent {
     };
 
     getHost(): Observable<string> {
-        return this.configService.getApiUrl();
+        return this.configService.getSessionDbUrl();
     };
 }

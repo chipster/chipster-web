@@ -123,7 +123,7 @@ export default class SessionDataService {
   }
 
   updateDataset(dataset: Dataset) {
-    return this.sessionResource.updateDataset(this.getSessionId(), dataset);
+    return this.sessionResource.updateDataset(this.getSessionId(), dataset).toPromise();
   }
 
   updateSession(session: Session) {
@@ -138,7 +138,7 @@ export default class SessionDataService {
      of them.
      */
 
-    return URI(this.configService.getFileBrokerUrlIfInitialized())
+    return URI(this.configService.getFileBrokerUrl())
       .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
       .addSearch('token', this.tokenService.getToken()).toString();
 
