@@ -45,7 +45,7 @@ export class RestService {
   }
 
   /*
-   * @description:Create PUT http-request
+   * @description: Create PUT http-request
    */
   put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
     const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, requestOptions, authenticationRequired, payload );
@@ -55,8 +55,8 @@ export class RestService {
   /*
    * @description: Create POST http-request
    */
-  post(url: string, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Post, requestOptions, authenticationRequired);
+  post(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Post, requestOptions, authenticationRequired, payload);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
