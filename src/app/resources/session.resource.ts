@@ -156,9 +156,8 @@ export default class SessionResource {
 	}
 
 	getDataset(sessionId: string, datasetId: string) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).one('datasets', datasetId).get())
-			.then((resp: any) => resp.data);
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true));
 	}
 
 	getJob(sessionId: string, jobId: string) {

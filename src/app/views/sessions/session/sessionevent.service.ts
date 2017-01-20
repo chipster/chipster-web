@@ -101,19 +101,19 @@ export default class SessionEventService {
 
     handleDatasetEvent(event: any, sessionId: string, sessionData: SessionData, onChange: any) {
         if (event.type === 'CREATE') {
-            this.sessionResource.getDataset(sessionId, event.resourceId).then((remote: Dataset) => {
-                sessionData.datasetsMap.set(event.resourceId, remote);
-                onChange(event, null, remote);
+            this.sessionResource.getDataset(sessionId, event.resourceId).subscribe((dataset: Dataset) => {
+                sessionData.datasetsMap.set(event.resourceId, dataset);
+                onChange(event, null, dataset);
             });
 
         } else if (event.type === 'UPDATE') {
-            this.sessionResource.getDataset(sessionId, event.resourceId).then((remote: Dataset) => {
+            this.sessionResource.getDataset(sessionId, event.resourceId).subscribe((dataset: Dataset) => {
                 var local = sessionData.datasetsMap.get(event.resourceId);
                 var localCopy = _.cloneDeep(local);
 
                 // update the original instance
-                local = _.cloneDeep(remote);
-                onChange(event, localCopy, remote);
+                local = _.cloneDeep(dataset);
+                onChange(event, localCopy, dataset);
             });
 
         } else if (event.type === 'DELETE') {
