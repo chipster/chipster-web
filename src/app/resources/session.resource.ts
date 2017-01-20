@@ -162,9 +162,8 @@ export default class SessionResource {
 	}
 
 	getJob(sessionId: string, jobId: string) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).one('jobs', jobId).get())
-			.then((resp: any) => resp.data);
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}/jobs/${jobId}`, true));
 	}
 
 	updateSession(session: Session) {

@@ -127,20 +127,21 @@ export default class SessionEventService {
     }
 
     handleJobEvent(event: any, sessionId: any, sessionData: SessionData, onChange: any) {
+
         if (event.type === 'CREATE') {
-            this.sessionResource.getJob(sessionId, event.resourceId). then((remote: Job) => {
-                sessionData.jobsMap.set(event.resourceId, remote);
-                onChange(event, null, remote);
+            this.sessionResource.getJob(sessionId, event.resourceId).subscribe((job: Job) => {
+                sessionData.jobsMap.set(event.resourceId, job);
+                onChange(event, null, job);
             });
 
         } else if (event.type === 'UPDATE') {
-            this.sessionResource.getJob(sessionId, event.resourceId). then((remote: Job) => {
+            this.sessionResource.getJob(sessionId, event.resourceId).subscribe((job: Job) => {
                 var local = sessionData.jobsMap.get(event.resourceId);
                 var localCopy = _.cloneDeep(local);
 
                 // update the original instance
-                local = _.cloneDeep(remote);
-                onChange(event, localCopy, remote);
+                local = _.cloneDeep(job);
+                onChange(event, localCopy, job);
             });
 
         } else if (event.type === 'DELETE') {
