@@ -1,8 +1,8 @@
-import * as configConstants from '../core/app.constants';
-import ConfigurationResource from "../shared/resources/configurationresource";
-import {Injectable, Inject} from "@angular/core";
+import * as configConstants from '../../core/app.constants';
+import ConfigurationResource from "../resources/configurationresource";
+import {Injectable} from "@angular/core";
 import * as _ from "lodash";
-import {CoreServices} from "../core/core-services";
+import {CoreServices} from "../../core/core-services";
 import {Observable} from "rxjs";
 
 @Injectable()
@@ -11,13 +11,8 @@ export default class ConfigService {
   public services: CoreServices;
   private configuration$: Observable<any>;
 
-  constructor(@Inject('$location') private $location: ng.ILocationService,
-              private configurationResource: ConfigurationResource) {
+  constructor(private configurationResource: ConfigurationResource) {
     this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
-  }
-
-  getApiUrl(): Observable<string> {
-    return this.configuration$.map( (services: CoreServices) => services.sessionDb);
   }
 
   getSessionDbUrl(): Observable<string> {
@@ -34,10 +29,6 @@ export default class ConfigService {
 
   getFileBrokerUrl(): Observable<string> {
     return this.configuration$.map((services: CoreServices) => services.fileBroker);
-  }
-
-  getFileBrokerUrlIfInitialized() {
-    return this.services.fileBroker;
   }
 
   getToolboxUrl(): Observable<string> {

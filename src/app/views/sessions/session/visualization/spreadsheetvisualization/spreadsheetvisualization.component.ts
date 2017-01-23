@@ -3,6 +3,7 @@ import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as d3 from "d3";
 import {Input, Component, Inject} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
+import FileResource from "../../../../../shared/resources/fileresource";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -13,12 +14,12 @@ export class SpreadsheetVisualizationComponent {
     @Input() datasetId: string;
 
     constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
-                private tsvReader: TSVReader){}
+                private fileResource: FileResource){}
 
     ngOnInit() {
-        this.tsvReader.getTSV(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
-            let parsedTSV = d3.tsvParseRows(result.data);
-            let normalizedTSV = new TSVFile(parsedTSV, this.datasetId, 'öalskfj');
+        this.fileResource.getData(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
+          let parsedTSV = d3.tsvParseRows(result);
+            let normalizedTSV = new TSVFile(parsedTSV, this.datasetId, 'file');
             const container = document.getElementById('tableContainer');
             new Handsontable(container, this.getSettings(normalizedTSV.getRawData()));
         }, e => console.error('Fetching TSVData failed', e));

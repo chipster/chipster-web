@@ -13,6 +13,7 @@ import * as d3 from "d3";
 import * as _ from "lodash";
 import {Component, Input, Inject} from "@angular/core";
 import Line from "./line";
+import FileResource from "../../../../../shared/resources/fileresource";
 
 @Component({
   selector: 'ch-expression-profile',
@@ -36,12 +37,13 @@ export class ExpressionProfileComponent {
                 @Inject('$window') private $window: ng.IWindowService,
                 private expressionProfileService: ExpressionProfileService,
                 @Inject('SessionDataService') private sessionDataService: SessionDataService,
-                private expressionProfileTSVService: ExpressionProfileTSVService) {}
+                private expressionProfileTSVService: ExpressionProfileTSVService,
+                private fileResource: FileResource) {}
 
     ngOnInit() {
         const datasetName = this.selectedDatasets[0].name;
-        this.tsvReader.getTSV(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
-            let parsedTSV = d3.tsvParseRows(result.data);
+        this.fileResource.getData(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
+            let parsedTSV = d3.tsvParseRows(result);
             this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
             this.drawLineChart(this.tsv);
         });

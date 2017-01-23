@@ -43,7 +43,7 @@ export class VennDiagram {
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)
-                .map( (tsv: any) => d3.tsvParseRows(tsv.data))
+                .map( (tsv: any) => d3.tsvParseRows(tsv))
                 .map( (tsv: Array<Array<string>>, index: number) => new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name))
                 .value();
 

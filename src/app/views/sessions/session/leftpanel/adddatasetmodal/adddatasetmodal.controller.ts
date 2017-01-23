@@ -1,25 +1,24 @@
 import Utils from "../../../../../services/utils.service";
 import WorkflowGraphService from "../workflowgraph/workflowgraph.service";
-import ConfigService from "../../../../../services/config.service";
-import AuthenticationService from "../../../../../core/authentication/authenticationservice";
+import ConfigService from "../../../../../shared/services/config.service";
 import Dataset from "../../../../../model/session/dataset";
 import IQService = angular.IQService;
 import IModalService = angular.ui.bootstrap.IModalService;
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
-import SessionResource from "../../../../../resources/session.resource";
+import SessionResource from "../../../../../shared/resources/session.resource";
+import {TokenService} from "../../../../../core/authentication/token.service";
 
 export default class AddDatasetModalController {
     static $inject = [
-        '$log', '$uibModalInstance', '$routeParams', 'ConfigService', 'AuthenticationService',
+        '$uibModalInstance', '$routeParams', 'ConfigService', 'TokenService',
         'SessionResource', '$q', 'datasetsMap', 'sessionId', 'oneFile', 'files', 'WorkflowGraphService'];
 
     private datasetIds: string[] = [];
 
-    constructor(private $log: ng.ILogService,
-                private $uibModalInstance: IModalServiceInstance,
+    constructor(private $uibModalInstance: IModalServiceInstance,
                 private $routeParams: ng.route.IRouteParamsService,
                 private ConfigService: ConfigService,
-                private AuthenticationService: AuthenticationService,
+                private tokenService: TokenService,
                 private sessionResource: SessionResource,
                 private $q: IQService,
                 private datasetsMap: Map<string, Dataset>,
@@ -37,7 +36,7 @@ export default class AddDatasetModalController {
     }
 
     flowFileAdded(file: any, event: any, flow: any) {
-        this.$log.debug('file added');
+        console.debug('file added');
         flow.opts.target = function (file: any) {
             return file.chipsterTarget;
         };
@@ -52,7 +51,7 @@ export default class AddDatasetModalController {
             let dataset: Dataset = results[1];
             file.chipsterTarget = URI(url)
                 .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
-                .addSearch('token', this.AuthenticationService.getToken()).toString();
+                .addSearch('token', this.tokenService.getToken()).toString();
             file.resume();
             this.datasetIds.push(dataset.datasetId);
         });
@@ -61,7 +60,7 @@ export default class AddDatasetModalController {
 
     createDataset(sessionId: string, name: string) {
         var d = new Dataset(name);
-        this.$log.debug('createDataset', d);
+        console.info('createDataset', d);
         return this.sessionResource.createDataset(sessionId, d).then((datasetId: string) => {
             d.datasetId = datasetId;
             var pos = this.workflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));

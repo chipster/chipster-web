@@ -3,6 +3,7 @@ import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs";
 import AuthenticationService from "../../../../../core/authentication/authenticationservice";
 import {timeout} from "d3-timer";
+import {TokenService} from "../../../../../core/authentication/token.service";
 
 @Component({
   selector: 'ch-htmlvisualization',
@@ -14,11 +15,10 @@ export class HtmlvisualizationComponent implements OnInit {
   private wrapperUrl: string = 'app/views/sessions/session/visualization/htmlvisualization/htmlvisualizationwrapper.html';
   private token: string;
 
-  constructor(private http: Http,
-              private authenticationService: AuthenticationService) { }
+  constructor(private tokenService: TokenService) { }
 
   ngOnInit() {
-    this.token =this.authenticationService.getToken();
+    this.token =this.tokenService.getToken();
   }
 
   run(htmlframe) {

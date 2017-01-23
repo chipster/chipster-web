@@ -21,7 +21,6 @@ export class ErrorHandlerService implements ErrorHandler {
       errorMessage = error.message ? error.message : error.toString();
     }
 
-    console.error(errorMessage);
     return Observable.throw(errorMessage);
   }
 

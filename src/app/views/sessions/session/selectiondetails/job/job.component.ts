@@ -17,10 +17,6 @@ export class JobComponent {
 		this.SessionDataService.deleteJobs(this.SelectionService.selectedJobs);
 	}
 
-	getSelectionService() {
-		return this.SelectionService;
-	}
-
 	getJob() {
 		return this.SelectionService.selectedJobs[0];
 	}

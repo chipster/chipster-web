@@ -1,9 +1,10 @@
 
-import SessionResource from "../../resources/session.resource";
+import SessionResource from "../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../shared/resources/sessionworker.resource";
 import Session from "../../model/session/session";
-import {SessionData} from "../../resources/session.resource";
 import * as angular from 'angular';
+import {SessionData} from "../../model/session/session-data";
+import {Observable} from "rxjs";
 
 class SessionListController {
 
@@ -37,7 +38,7 @@ class SessionListController {
 
     updateSessions() {
 
-        this.sessionResource.getSessions().then((sessions: Session[]) => {
+        this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
             this.userSessions = sessions;
         }, (response: any) => {
             console.log('failed to get sessions', response);
@@ -91,7 +92,7 @@ class SessionListController {
                 console.log('extract session');
                 return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).toPromise().then((warnings) => {
                     console.log('extracted, warnings: ', warnings);
-                    return this.sessionResource.deleteDataset(sessionId, datasets[0]);
+                    return this.sessionResource.deleteDataset(sessionId, datasets[0]).toPromise();
                 }).then((res) => {
                     console.log('uploaded session file deleted', res);
                     console.log('change view');
@@ -112,7 +113,7 @@ class SessionListController {
                 // hide the old session immediately
                 this.previousSession = session;
                 this.sessionData = null;
-                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).then((fullSession: SessionData) => {
+                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).subscribe((fullSession: SessionData) => {
                     // don't show if the selection has already changed
                     if (this.selectedSessions[0] === session) {
                         this.sessionData = fullSession;
@@ -123,15 +124,11 @@ class SessionListController {
     }
 
     deleteSessions(sessions: Session[]) {
-        // preview could cause errors
-        this.selectedSessions.length = 0;
-
-        sessions.forEach((session: Session) => {
-            this.sessionResource.deleteSession(session.sessionId).then((res: any) => {
-                console.log("session deleted", res);
-                this.updateSessions();
-                this.selectedSessions = [];
-            });
+        const deleteSessions$ = sessions.map( (session: Session) => this.sessionResource.deleteSession(session.sessionId) );
+        Observable.merge(...deleteSessions$).subscribe( (response: any) => {
+          console.log("session deleted", response);
+          this.updateSessions();
+          this.selectedSessions.length = 0;
         });
     }
 

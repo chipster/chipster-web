@@ -1,13 +1,14 @@
 import AuthenticationService from "../../../core/authentication/authenticationservice";
-import ConfigService from "../../../services/config.service";
-import SessionResource from "../../../resources/session.resource";
+import ConfigService from "../../../shared/services/config.service";
+import SessionResource from "../../../shared/resources/session.resource";
 import IWebSocket = angular.websocket.IWebSocket;
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import {SessionData} from "../../../resources/session.resource";
 import * as _ from "lodash";
 import {Injectable, Inject} from "@angular/core";
+import {TokenService} from "../../../core/authentication/token.service";
+import {SessionData} from "../../../model/session/session-data";
 import {Observable, Subject, Observer} from "rxjs";
 import SessionEvent from "../../../model/events/sessionevent";
 
@@ -26,7 +27,7 @@ export default class SessionEventService {
     authorizationStream: Observable<SessionEvent>;
 
     constructor(private configService: ConfigService,
-                private authenticationService: AuthenticationService,
+                private tokenService: TokenService,
                 @Inject('$websocket') private $websocket: ng.websocket.IWebSocketProvider,
                 @Inject('SessionResource') private sessionResource: SessionResource){
     }
@@ -74,7 +75,8 @@ export default class SessionEventService {
 
           console.debug('event URL', eventUrl);
           // set token
-          let wsUrl = URI(eventUrl).addSearch('token', this.authenticationService.getToken()).toString();
+          let wsUrl = this.$websocket(URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString());
+          
           // convert websocket to observable
           return this.createWsObservable(wsUrl);
 
@@ -170,13 +172,13 @@ export default class SessionEventService {
 
     handleDatasetEvent(event: any, sessionId: string, sessionData: SessionData) {
         if (event.type === 'CREATE') {
-            return this.sessionResource.getDataset(sessionId, event.resourceId).then((remote: Dataset) => {
+            return this.sessionResource.getDataset(sessionId, event.resourceId).subscribe((remote: Dataset) => {
                 sessionData.datasetsMap.set(event.resourceId, remote);
                 return this.createEvent(event, null, remote);
             });
 
         } else if (event.type === 'UPDATE') {
-            return this.sessionResource.getDataset(sessionId, event.resourceId).then((remote: Dataset) => {
+            this.sessionResource.getDataset(sessionId, event.resourceId).subscribe((remote: Dataset) => {
                 var local = sessionData.datasetsMap.get(event.resourceId);
                 sessionData.datasetsMap.set(event.resourceId, remote);
                 return this.createEvent(event, local, remote);
@@ -194,13 +196,13 @@ export default class SessionEventService {
 
     handleJobEvent(event: any, sessionId: any, sessionData: SessionData) {
         if (event.type === 'CREATE') {
-            return this.sessionResource.getJob(sessionId, event.resourceId). then((remote: Job) => {
+            return this.sessionResource.getJob(sessionId, event.resourceId).subscribe((remote: Job) => {
                 sessionData.jobsMap.set(event.resourceId, remote);
                 return this.createEvent(event, null, remote);
             });
 
         } else if (event.type === 'UPDATE') {
-            return this.sessionResource.getJob(sessionId, event.resourceId). then((remote: Job) => {
+            this.sessionResource.getJob(sessionId, event.resourceId).subscribe((remote: Job) => {
                 var local = sessionData.jobsMap.get(event.resourceId);
                 sessionData.jobsMap.set(event.resourceId, remote);
                 return this.createEvent(event, local, remote);

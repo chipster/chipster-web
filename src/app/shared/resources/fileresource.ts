@@ -1,53 +1,30 @@
 
-import ConfigService from "../../services/config.service";
-import * as restangular from "restangular";
-import AuthenticationService from "../../core/authentication/authenticationservice";
-import IService = restangular.IService;
-import {Injectable, Inject} from "@angular/core";
+import ConfigService from "../services/config.service";
+import {Injectable} from "@angular/core";
+import {Observable} from "rxjs";
+import {RestService} from "../../core/rest-services/restservice/rest.service";
+import {ResponseContentType} from "@angular/http";
 
 @Injectable()
 export default class FileResource {
 
-	service: any;
-
-	constructor(@Inject('Restangular') private restangular: restangular.IService,
-				private authenticationService: AuthenticationService,
-				private configService: ConfigService) {
+	constructor(
+				private configService: ConfigService,
+        private restService: RestService) {
 	}
 
-	getService() {
-		// init service only once
-		if (!this.service) {
-			// this.service will be a promise that resolves to a Restangular service
-			this.service = this.configService.getFileBrokerUrl().toPromise().then((url: string) => {
-				// return the Restangular service
-				return this.restangular.withConfig((configurer: any) => {
-					configurer.setBaseUrl(url);
-					configurer.setDefaultHeaders(this.authenticationService.getTokenHeader());
-					configurer.setFullResponse(true);				});
-			});
-		}
-		return this.service;
-	}
-
-	getData(sessionId: string, datasetId: string) {
-		return this.getService().then((service: IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', datasetId)
-			.get());
-	}
-
-  getLimitedData(sessionId: string, datasetId: string, maxBytes: number) {
-    return this.getService().then((service: IService) => service
-      .one('sessions', sessionId)
-      .one('datasets', datasetId)
-      .get({}, {'range': 'bytes=0-' + maxBytes}));
+	getData(sessionId: string, datasetId: string): Observable<any> {
+    const apiUrl$ = this.configService.getFileBrokerUrl();
+    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {responseType: ResponseContentType.Text}));
   }
 
-	uploadData(sessionId: string, datasetId: string, data: string) {
-		return this.getService().then((service: IService) => service
-			.one('sessions', sessionId)
-			.one('datasets', datasetId)
-			.customPUT(data));
-	}
+  getLimitedData(sessionId: string, datasetId: string, maxBytes: number): Observable<any> {
+    const apiUrl$ = this.configService.getFileBrokerUrl();
+    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {range: `bytes=0-${maxBytes}`, responseType: ResponseContentType.Text} ));
+  }
+
+  uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
+    const apiUrl$ = this.configService.getFileBrokerUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.put(`{url}/sessions/${sessionId}/datasets/${datasetId}`, {data: data},  true ));
+  }
 }
