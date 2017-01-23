@@ -34,45 +34,44 @@ class SessionComponent {
     }
 
     $onInit() {
-        this.sessionData = this.$route.current.locals['sessionData'];
-        this.sessionDataService.onSessionChange( (event: any, oldValue: any, newValue: any): void => {
-            if (event.resourceType === 'SESSION' && event.type === 'DELETE') {
-                this.$scope.$apply(function () {
-                    alert('The session has been deleted.');
-                    this.$location.path('sessions');
-                });
-            }
-            if (event.resourceType === 'DATASET') {
-                this.$scope.$broadcast('datasetsMapChanged', {});
-            }
-            if (event.resourceType === 'JOB') {
-                this.$scope.$broadcast('jobsMapChanged', {});
+      this.sessionData = this.$route.current.locals['sessionData'];
 
-                // if not cancelled
-                if (newValue) {
-                    // if the job has just failed
-                    if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
-                        this.openErrorModal('Job failed', newValue);
-                        this.$log.info(newValue);
-                    }
-                    if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
-                        this.openErrorModal('Job error', newValue);
-                        this.$log.info(newValue);
-                    }
-                }
-            }
-        });
+      // start listening for remote changes
+      // in theory we may miss an update between the loadSession() and this subscribe(), but
+      // the safe way would be much more complicated:
+      // - subscribe but put the updates in queue
+      // - loadSession().then()
+      // - apply the queued updates
 
-        this.sessionDataService.subscription = this.SessionEventService.subscribe(this.sessionDataService.getSessionId(), this.sessionData, (event: any, oldValue: any, newValue: any) => {
-            for (let listener of this.sessionDataService.listeners) {
-                listener(event, oldValue, newValue);
-            }
-        });
-    }
+      this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-    $onDestroy() {
-        // stop listening for events when leaving this view
-        this.sessionDataService.destroy();
+      this.SessionEventService.getSessionStream().subscribe(change => {
+        if (change.event.type === 'DELETE') {
+          this.$scope.$apply(function () {
+            alert('The session has been deleted.');
+            this.$location.path('sessions');
+          });
+        }
+      });
+
+      this.SessionEventService.getJobStream().subscribe(change => {
+
+        let oldValue = <Job>change.oldValue;
+        let newValue = <Job>change.newValue;
+
+        // if not cancelled
+        if (newValue) {
+          // if the job has just failed
+          if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+            this.openErrorModal('Job failed', newValue);
+            this.$log.info(newValue);
+          }
+          if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+            this.openErrorModal('Job error', newValue);
+            this.$log.info(newValue);
+          }
+        }
+      });
     }
 
     getSelectedDatasets() {
@@ -160,7 +159,7 @@ class SessionComponent {
         }
     }
 
-    openErrorModal(title: string, toolError: string) {
+    openErrorModal(title: string, job: Job) {
         this.$uibModal.open({
             animation: true,
             templateUrl: './joberrormodal/joberrormodal.html',
@@ -173,7 +172,8 @@ class SessionComponent {
                     return _.cloneDeep(title);
                 },
                 toolError: () => {
-                    return _.cloneDeep(toolError);
+                    //TODO pass on the job and show only relevant fields
+                    return _.cloneDeep(JSON.stringify(job, null, 2)); // 2 for pretty print
                 }
             }
         });

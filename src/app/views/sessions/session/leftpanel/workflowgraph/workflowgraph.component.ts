@@ -10,11 +10,11 @@ import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
-import {ChangeDetector, Comparison, ArrayChangeDetector, MapChangeDetector} from "../../../../../services/changedetector.service";
 import UtilsService from "../../../../../services/utils.service";
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
 import WorkflowGraphService from "./workflowgraph.service";
+import SessionEventService from "../../sessionevent.service";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -31,6 +31,7 @@ export class WorkflowGraphComponent {
   @Input() enabled: boolean;
 
   constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
+              @Inject('SessionEventService') private sessionEventService: SessionEventService,
               private SelectionService: SelectionService,
               private pipeService: PipeService,
               private workflowGraphService: WorkflowGraphService) {
@@ -53,7 +54,6 @@ export class WorkflowGraphComponent {
   d3DatasetNodes: any;
   d3JobNodes: any;
 
-  menu: any;
   nodeWidth: number = this.workflowGraphService.nodeWidth;
   nodeHeight: number = this.workflowGraphService.nodeHeight;
   fontSize = 14;
@@ -68,10 +68,8 @@ export class WorkflowGraphComponent {
 
   dragStarted: boolean;
 
-  changeDetectors: Array<ChangeDetector> = [];
-
-
   ngOnInit() {
+
     let self = this;
 
     // used for adjusting the svg size
@@ -114,29 +112,33 @@ export class WorkflowGraphComponent {
         this.d3LabelsGroup.attr("transform", d3.event.transform);
       }));
 
-    // initialize the comparison of input collections
-    // shallow comparison is enough for noticing when the array is changed
-    this.changeDetectors.push(new ArrayChangeDetector(() => this.SelectionService.selectedDatasets, () => {
-      this.renderGraph()
-    }, Comparison.Shallow));
-    this.changeDetectors.push(new ArrayChangeDetector(() => this.SelectionService.selectedJobs, () => {
-      this.renderGraph()
-    }, Comparison.Shallow));
+    this.sessionEventService.getDatasetStream().subscribe(() => {
+        this.update();
+        this.renderGraph();
+    });
 
-    // deep comparison is needed to notice the changes in the objects (e.g. rename)
-    this.changeDetectors.push(new MapChangeDetector(() => this.datasetsMap, () => {
-      this.update()
-    }, Comparison.Deep));
-    this.changeDetectors.push(new MapChangeDetector(() => this.jobsMap, () => {
-      this.update()
-    }, Comparison.Deep));
-    this.changeDetectors.push(new MapChangeDetector(() => this.modulesMap, () => {
-      this.update()
-    }, Comparison.Deep));
+    this.sessionEventService.getJobStream().subscribe(() => {
+        this.update();
+        this.renderGraph();
+    });
 
+    this.SelectionService.getDatasetSelectionStream().subscribe(() => {
+        this.update();
+        this.renderGraph();
+    });
+
+    this.SelectionService.getJobSelectionStream().subscribe(() => {
+        this.update();
+        this.renderGraph();
+    });
+
+    // show
+    this.update();
+    this.renderGraph();
   }
 
   ngOnChanges(changes: ng.IChangesObject<string>) {
+
     if (!this.svg) {
       // not yet initialized
       return;
@@ -152,12 +154,10 @@ export class WorkflowGraphComponent {
       }
       this.renderGraph();
     }
-
   }
 
   ngDoCheck() {
     if (this.svg) {
-      this.changeDetectors.forEach((cd: ChangeDetector) => cd.check());
       // it seems that there is no easy way to listen for div's size changes
       // running this on every digest cycle might be close enough
       this.updateSvgSize();
@@ -178,7 +178,6 @@ export class WorkflowGraphComponent {
     this.background
       .attr('width', this.width)
       .attr('height', this.height);
-
   }
 
   update() {
@@ -207,9 +206,7 @@ export class WorkflowGraphComponent {
 
     this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
 
-    this.d3JobNodes
-      .enter()
-      .append('rect')
+    this.d3JobNodes.enter().append('rect').merge(this.d3JobNodes)
       .attr('rx', this.nodeRadius)
       .attr('ry', this.nodeRadius)
       .attr('width', this.nodeWidth)
@@ -263,9 +260,11 @@ export class WorkflowGraphComponent {
     var self = this;
 
     // store the selection of all existing and new elements
-    this.d3DatasetNodes = this.d3DatasetNodesGroup.selectAll('rect').data(this.datasetNodes);
-    this.d3DatasetNodes
-      .enter().append('rect')
+    this.d3DatasetNodes = this.d3DatasetNodesGroup.selectAll('rect')
+      .data(this.datasetNodes, d => d.datasetId);
+
+    // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
+    this.d3DatasetNodes.enter().append('rect').merge(this.d3DatasetNodes)
       .attr('x', (d) => d.x)
       .attr('y', (d) => d.y)
       .attr('rx', this.nodeRadius)
@@ -282,14 +281,14 @@ export class WorkflowGraphComponent {
         self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
         d3.select(this).classed('selected-dataset', true);
       })
-      .on('mouseover', function (d) {
+      .on('mouseover', function () {
         d3.select(this).classed('hovering-dataset', true);
       })
-      .on('mouseout', function (d) {
+      .on('mouseout', function () {
         d3.select(this).classed('hovering-dataset', false);
       })
       .call(d3.drag()
-        .on('drag', function (d) {
+        .on('drag', function () {
           self.dragStarted = true;
           self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
           // set defaultPrevented flag to disable scrolling
@@ -316,10 +315,11 @@ export class WorkflowGraphComponent {
   }
 
   renderLabels() {
-    this.d3Labels = this.d3LabelsGroup.selectAll('text').data(this.datasetNodes);
-    this.d3Labels
-      .enter()
-      .append('text')
+
+    this.d3Labels = this.d3LabelsGroup.selectAll('text')
+      .data(this.datasetNodes, d => d.datasetId);
+
+    this.d3Labels.enter().append('text').merge(this.d3Labels)
       .text((d: any) => UtilsService.getFileExtension(d.name).slice(0, 4))
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
@@ -372,8 +372,7 @@ export class WorkflowGraphComponent {
     //Define the xy positions of the link
     this.d3Links = this.d3LinksGroup.selectAll('line').data(this.links);
 
-    this.d3Links
-      .enter().append('line')
+    this.d3Links.enter().append('line').merge(this.d3Links)
       .attr('x1', (d) => d.source.x + this.nodeWidth / 2)
       .attr('y1', (d) => d.source.y + this.nodeHeight)
       .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
@@ -413,10 +412,6 @@ export class WorkflowGraphComponent {
 
   renderGraph() {
 
-    if (!this.datasetNodes || !this.jobNodes || !this.links) {
-      this.update();
-    }
-
     this.renderLinks();
     this.renderJobs();
     this.renderDatasets();
@@ -455,9 +450,12 @@ export class WorkflowGraphComponent {
         y: dataset.y,
         name: name,
         extension: UtilsService.getFileExtension(name),
+        source: null,
+        target: null,
         sourceJob: sourceJob,
         color: color,
-        dataset: dataset
+        dataset: dataset,
+        datasetId: dataset.datasetId
       });
     });
 
@@ -492,7 +490,7 @@ export class WorkflowGraphComponent {
           color: color,
           spin: spin,
           job: job,
-          sourceJob: job // to create links
+          sourceJob: job, // to create links
         });
       }
     });
@@ -590,6 +588,4 @@ export class WorkflowGraphComponent {
     d3.select('.selected-dataset').classed('selected-dataset', false);
     d3.select('.selected-job').classed('selected-job', false);
   }
-
-
 }

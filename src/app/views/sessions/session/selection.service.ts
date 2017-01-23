@@ -4,6 +4,9 @@ import Tool from "../../../model/session/tool";
 import UtilsService from "../../../services/utils.service";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
+import {Subject} from "rxjs";
+import SelectionEvent from "../../../model/events/selectionevent";
+import {Action} from "../../../model/events/selectionevent";
 
 @Injectable()
 export default class SelectionService {
@@ -18,6 +21,10 @@ export default class SelectionService {
     selectedTool: Tool = null;
     selectedToolIndex = -1;
     istoolselected = false;
+
+    datasetSelectionSubject = new Subject<SelectionEvent>();
+    jobSelectionSubject = new Subject<SelectionEvent>();
+    toolSelectionSubject = new Subject<SelectionEvent>();
 
     /**
      * Check if there are one or more dataset selected
@@ -72,17 +79,49 @@ export default class SelectionService {
     toggleDatasetSelection($event: any, data: Dataset, allDatasets: any[]) {
         this.activeDatasetId = data.datasetId;
 
+        let oldDatasets = _.clone(this.selectedDatasets);
+        let oldIdsSet = new Set(this.selectedDatasets.map(dataset => dataset.datasetId));
+
         UtilsService.toggleSelection($event, data, allDatasets, this.selectedDatasets);
         this.selectedDatasets = _.clone(this.selectedDatasets); // clone array so that changes on it can be tracen in $onChanges-block
+
+        let newIdsSet = new Set(this.selectedDatasets.map(dataset => dataset.datasetId));
+
+        oldDatasets.filter(dataset => !newIdsSet.has(dataset.datasetId)).forEach(dataset => {
+            this.datasetSelectionSubject.next(new SelectionEvent(Action.Remove, dataset));
+        });
+
+        this.selectedDatasets.filter(dataset => !oldIdsSet.has(dataset.datasetId)).forEach(dataset => {
+            this.datasetSelectionSubject.next(new SelectionEvent(Action.Add, dataset))
+        });
     }
 
     clearSelection() {
+        this.selectedDatasets.forEach((dataset) => {
+          this.datasetSelectionSubject.next(new SelectionEvent(Action.Remove, dataset))
+        });
         this.selectedDatasets.length = 0;
+
+        this.selectedJobs.forEach((job) => {
+          this.jobSelectionSubject.next(new SelectionEvent(Action.Remove, job))
+        });
         this.selectedJobs.length = 0;
     }
 
     selectJob(event: any, job: Job) {
         this.clearSelection();
         this.selectedJobs = [job];
+
+        this.jobSelectionSubject.next(new SelectionEvent(Action.Add, job))
+    }
+
+    getDatasetSelectionStream() {
+        // don't expose the subject directly
+        return this.datasetSelectionSubject.asObservable();
+    }
+
+    getJobSelectionStream() {
+        // don't expose the subject directly
+        return this.jobSelectionSubject.asObservable();
     }
 }

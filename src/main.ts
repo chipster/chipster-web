@@ -186,6 +186,7 @@ upgradeAdapter.upgradeNg1Provider('$location');
 upgradeAdapter.upgradeNg1Provider('TSVReader');
 upgradeAdapter.upgradeNg1Provider('FileResource');
 upgradeAdapter.upgradeNg1Provider('SessionDataService');
+upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$uibModal');
 upgradeAdapter.upgradeNg1Provider('Restangular');

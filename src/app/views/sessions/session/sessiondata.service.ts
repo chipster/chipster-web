@@ -30,34 +30,8 @@ export default class SessionDataService {
         @Inject('FileResource') private fileResource: FileResource) {
     }
 
-    subscription: Promise<{unsubscribe(): void}>;
-    listeners: any = [];
-
-    // start listening for remote changes
-    // in theory we may miss an update between the loadSession() and this subscribe(), but
-    // the safe way would be much more complicated:
-    // - subscribe but put the updates in queue
-    // - loadSession().then()
-    // - apply the queued updates
-
-    // SessionRestangular is a restangular object with
-    // configured baseUrl and
-    // authorization header
-    //this.sessionUrl = this.SessionWorkerResource.service.one('sessions', this.$routeParams['sessionId'];);
-
-
     getSessionId() : string {
         return this.$routeParams['sessionId'];
-    }
-
-    onSessionChange(listener: any) {
-        this.listeners.push(listener);
-    }
-
-    destroy() {
-        this.subscription.then((subscription) => {
-            subscription.unsubscribe();
-        });
     }
 
     createDataset(dataset: Dataset) {
