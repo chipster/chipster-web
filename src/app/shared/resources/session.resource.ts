@@ -25,9 +25,7 @@ export default class SessionResource {
         private configService: ConfigService,
 				private toolResource: ToolResource,
         private restService: RestService,
-				@Inject('$q') private $q:ng.IQService) {
-    console.log('const', this.configService);
-	}
+				@Inject('$q') private $q:ng.IQService) {}
 
 	getService() {
 		if (!this.service) {
@@ -110,9 +108,8 @@ export default class SessionResource {
 	}
 
 	getSessions() {
-		return this.getService()
-			.then((service:restangular.IService) => service.all('sessions').getList())
-			.then((response: any) => response.data);
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions`, true));
 	}
 
 	createSession(session: Session) {

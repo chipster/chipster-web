@@ -38,7 +38,7 @@ class SessionListController {
 
     updateSessions() {
 
-        this.sessionResource.getSessions().then((sessions: Session[]) => {
+        this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
             this.userSessions = sessions;
         }, (response: any) => {
             console.log('failed to get sessions', response);
