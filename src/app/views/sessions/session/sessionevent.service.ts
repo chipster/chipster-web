@@ -37,12 +37,25 @@ export default class SessionEventService {
       this.sessionData = sessionData;
       this.sessionId = sessionId;
 
-      // subscribe to all streams to make sure that sessionData is updated even
-      // if there aren't other subscribers
-      this.getDatasetStream().subscribe();
-      this.getJobStream().subscribe();
-      this.getSessionStream().subscribe();
-      this.getAuthorizationStream().subscribe();
+      this.datasetStream = this.getStream()
+        .filter(wsData => wsData.resourceType === 'DATASET')
+        .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.jobStream = this.getStream()
+        .filter(wsData => wsData.resourceType === 'JOB')
+        .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.sessionStream = this.getStream()
+        .filter(wsData => wsData.resourceType === 'SESSION')
+        .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.authorizationStream = this.getStream()
+        .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
+        .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
+        .publish().refCount();
     }
 
     // https://medium.com/@lwojciechowski/websockets-with-angular2-and-rxjs-8b6c5be02fac#.vo2lmk83l
@@ -106,42 +119,18 @@ export default class SessionEventService {
    * @returns {Observable<SessionEvent>}
    */
   getDatasetStream() {
-        if (!this.datasetStream) {
-          this.datasetStream = this.getStream()
-            .filter(wsData => wsData.resourceType === 'DATASET')
-            .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
-            .publish().refCount();
-        }
         return this.datasetStream;
     }
 
     getJobStream() {
-        if (!this.jobStream) {
-          this.jobStream = this.getStream()
-            .filter(wsData => wsData.resourceType === 'JOB')
-            .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
-            .publish().refCount();
-        }
         return this.jobStream;
     }
 
     getSessionStream() {
-      if (!this.sessionStream) {
-        this.sessionStream = this.getStream()
-          .filter(wsData => wsData.resourceType === 'SESSION')
-          .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
-          .publish().refCount();
-      }
       return this.sessionStream;
     }
 
     getAuthorizationStream() {
-      if (!this.authorizationStream) {
-        this.authorizationStream = this.getStream()
-          .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
-          .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
-          .publish().refCount();
-      }
       return this.authorizationStream;
     }
 
