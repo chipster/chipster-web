@@ -142,10 +142,13 @@ export default class SessionResource {
 			});
 	}
 
-	getSession(sessionId: string) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).get())
-			.then((resp: any) => resp.data);
+	getSession(sessionId: string): Observable<Session> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}`));
+
+		// return this.getService()
+		// 	.then((service:restangular.IService) => service.one('sessions', sessionId).get())
+		// 	.then((resp: any) => resp.data);
 	}
 
 	getDataset(sessionId: string, datasetId: string) {
@@ -249,6 +252,8 @@ export default class SessionResource {
           updateRequests.push(this.updateJob(this.helper, jobCopy));
         });
       });
+
+      this.helper = undefined;
 
       return Observable.forkJoin(...updateRequests);
     });

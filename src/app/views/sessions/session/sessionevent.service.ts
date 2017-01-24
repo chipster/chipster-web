@@ -84,7 +84,7 @@ export default class SessionEventService {
 
     handleSessionEvent(event: any, sessionId:any, sessionData: SessionData, onChange: any) {
         if (event.type === 'UPDATE') {
-            this.sessionResource.getSession(sessionId).then((remote: Session) => {
+            this.sessionResource.getSession(sessionId).subscribe((remote: Session) => {
                 var local = sessionData.session;
                 var localCopy = _.cloneDeep(local);
 
