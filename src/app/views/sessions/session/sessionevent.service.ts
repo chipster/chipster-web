@@ -149,7 +149,7 @@ export default class SessionEventService {
 
     handleSessionEvent(event: any, sessionId:any, sessionData: SessionData): Observable<SessionEvent> {
         if (event.type === 'UPDATE') {
-            return this.sessionResource.getSession(sessionId).then((remote: Session) => {
+           return this.sessionResource.getSession(sessionId).subscribe((remote: Session) => {
                 var local = sessionData.session;
                 sessionData.session = remote;
                 return this.createEvent(event, local, remote);

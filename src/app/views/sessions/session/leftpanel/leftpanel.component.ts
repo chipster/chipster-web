@@ -120,7 +120,8 @@ class LeftPanelComponent {
         result = 'unnamed session';
       }
       this.isCopying = true;
-      this.sessionResource.copySession(this.sessionData, result).then(() => {
+      const sessionCopy$ = this.sessionResource.copySession(this.sessionData, result);
+      sessionCopy$.subscribe(() => {
         this.isCopying = false;
       })
     }, function () {

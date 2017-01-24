@@ -63,8 +63,8 @@ export class RestService {
   /*
    * @description:Create DELETE http-request
    */
-  delete(url: string, authenticationRequired?: boolean): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, {}, authenticationRequired);
+  delete(url: string, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Delete, {}, authenticationRequired, requestOptions);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
@@ -95,7 +95,7 @@ export class RestService {
             resp = response.json();
         }
 
-        if (resp.error) {
+      if (resp && resp.error) {
           throw resp;
         }
         return resp;

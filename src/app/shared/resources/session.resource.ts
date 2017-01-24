@@ -14,11 +14,13 @@ import {Injectable, Inject} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
+import {ResponseContentType} from "@angular/http";
 
 @Injectable()
 export default class SessionResource {
 
 	public service: any;
+  private helper: string;
 
 	constructor(@Inject('Restangular') private restangular: restangular.IService,
 				private tokenService: TokenService,
@@ -140,10 +142,13 @@ export default class SessionResource {
 			});
 	}
 
-	getSession(sessionId: string) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).get())
-			.then((resp: any) => resp.data);
+	getSession(sessionId: string): Observable<Session> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}`));
+
+		// return this.getService()
+		// 	.then((service:restangular.IService) => service.one('sessions', sessionId).get())
+		// 	.then((resp: any) => resp.data);
 	}
 
 	getDataset(sessionId: string, datasetId: string) {
@@ -186,70 +191,71 @@ export default class SessionResource {
     return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/jobs/${jobId}`, true));
 	}
 
-	copySession(sessionData: SessionData, name: string) {
+	copySession(sessionData: SessionData, name: string): Observable<any> {
 		let newSession: Session = _.clone(sessionData.session);
 		newSession.sessionId = null;
 		newSession.name = name;
 
-		// create session
-		return this.createSession(newSession).then((sessionId: string) => {
+    let datasetIdMap = new Map<string, string>();
+    let jobIdMap = new Map<string, string>();
 
-			let datasetIdMap = new Map<string, string>();
-			let jobIdMap = new Map<string, string>();
+    // create session
+    return Observable.fromPromise(this.createSession(newSession)).flatMap( (sessionId: string) => {
 
-			// create datasets
-			let createRequests: Array<Promise<string>> = [];
-			sessionData.datasetsMap.forEach((dataset: Dataset) => {
-				let datasetCopy = _.clone(dataset);
-				datasetCopy.datasetId = null;
-				let request = this.createDataset(sessionId, datasetCopy);
-				createRequests.push(request);
-				request.then((newId: string) => {
-					datasetIdMap.set(dataset.datasetId, newId);
-				});
-			});
+      this.helper = sessionId;
 
+      let createRequests: Array<Observable<string>> = [];
 
-			// create jobs
-			sessionData.jobsMap.forEach((oldJob: Job) => {
-				let jobCopy = _.clone(oldJob);
-				jobCopy.jobId = null;
-				let request = this.createJob(sessionId, jobCopy);
-				createRequests.push(request);
-				request.then((newId: string) => {
-					jobIdMap.set(oldJob.jobId, newId);
-				});
-			});
+      // create datasets
+      sessionData.datasetsMap.forEach((dataset: Dataset) => {
+        let datasetCopy = _.clone(dataset);
+        datasetCopy.datasetId = null;
+        let request = Observable.fromPromise(this.createDataset(sessionId, datasetCopy));
+        createRequests.push(request);
+        request.subscribe((newId: string) => {
+          datasetIdMap.set(dataset.datasetId, newId);
+        });
+      });
 
-			return Promise.all(createRequests).then(() => {
+      // create jobs
+      sessionData.jobsMap.forEach((oldJob: Job) => {
+        let jobCopy = _.clone(oldJob);
+        jobCopy.jobId = null;
+        let request = Observable.fromPromise(this.createJob(sessionId, jobCopy));
+        createRequests.push(request);
+        request.subscribe((newId: string) => {
+          jobIdMap.set(oldJob.jobId, newId);
+        });
+      });
 
-				let updateRequests: Array<Promise<string>> = [];
+      return Observable.forkJoin(...createRequests);
+    }).flatMap( () => {
+      let updateRequests: Array<Observable<string>> = [];
 
-				// update datasets' sourceJob id
-				sessionData.datasetsMap.forEach((oldDataset: Dataset) => {
-					let sourceJobId = oldDataset.sourceJob;
-					if (sourceJobId) {
-						let datasetCopy = _.clone(oldDataset);
-						datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
-						datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-						updateRequests.push(this.updateDataset(sessionId, datasetCopy).toPromise());
-					}
-				});
+      // // update datasets' sourceJob id
+      sessionData.datasetsMap.forEach((oldDataset: Dataset) => {
+        let sourceJobId = oldDataset.sourceJob;
+        if (sourceJobId) {
+          let datasetCopy = _.clone(oldDataset);
+          datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
+          datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
+          updateRequests.push(this.updateDataset(this.helper, datasetCopy));
+        }
+      });
 
-				// update jobs' inputs' datasetIds
-				sessionData.jobsMap.forEach((oldJob: Job) => {
-					let jobCopy = _.clone(oldJob);
-					jobCopy.jobId = jobIdMap.get(oldJob.jobId);
-					jobCopy.inputs.forEach((input) => {
-						input.datasetId = datasetIdMap.get(input.datasetId);
-						updateRequests.push(this.updateJob(sessionId, jobCopy).toPromise());
-					});
-				});
+      // update jobs' inputs' datasetIds
+      sessionData.jobsMap.forEach((oldJob: Job) => {
+        let jobCopy = _.clone(oldJob);
+        jobCopy.jobId = jobIdMap.get(oldJob.jobId);
+        jobCopy.inputs.forEach((input) => {
+          input.datasetId = datasetIdMap.get(input.datasetId);
+          updateRequests.push(this.updateJob(this.helper, jobCopy));
+        });
+      });
 
-				return Promise.all(updateRequests).then(() => {
-					console.log('session copied');
-				});
-			});
-		});
+      this.helper = undefined;
+
+      return Observable.forkJoin(...updateRequests);
+    });
 	}
 }

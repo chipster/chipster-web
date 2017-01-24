@@ -123,13 +123,13 @@ class SessionListController {
         }
     }
 
-    deleteSessions(sessions: Session[]) {
-        const deleteSessions$ = sessions.map( (session: Session) => this.sessionResource.deleteSession(session.sessionId) );
-        Observable.merge(...deleteSessions$).subscribe( (response: any) => {
-          console.log("session deleted", response);
-          this.updateSessions();
-          this.selectedSessions.length = 0;
-        });
+    deleteSession(session: Session) {
+      this.sessionResource.deleteSession(session.sessionId).subscribe( (response: any) => {
+        this.updateSessions();
+        this.selectedSessions.length = 0;
+      }, () => {
+        console.error('Error in deleting session');
+      });
     }
 
     isSessionSelected(session: Session) {
