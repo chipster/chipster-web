@@ -22,9 +22,9 @@ export default class SelectionService {
     selectedToolIndex = -1;
     istoolselected = false;
 
-    datasetSelectionSubject = new Subject<SelectionEvent>();
-    jobSelectionSubject = new Subject<SelectionEvent>();
-    toolSelectionSubject = new Subject<SelectionEvent>();
+    datasetSelectionSubject$ = new Subject<SelectionEvent>();
+    jobSelectionSubject$ = new Subject<SelectionEvent>();
+    toolSelectionSubject$ = new Subject<SelectionEvent>();
 
     /**
      * Check if there are one or more dataset selected
@@ -88,40 +88,45 @@ export default class SelectionService {
         let newIdsSet = new Set(this.selectedDatasets.map(dataset => dataset.datasetId));
 
         oldDatasets.filter(dataset => !newIdsSet.has(dataset.datasetId)).forEach(dataset => {
-            this.datasetSelectionSubject.next(new SelectionEvent(Action.Remove, dataset));
+            this.datasetSelectionSubject$.next(new SelectionEvent(Action.Remove, dataset));
         });
 
         this.selectedDatasets.filter(dataset => !oldIdsSet.has(dataset.datasetId)).forEach(dataset => {
-            this.datasetSelectionSubject.next(new SelectionEvent(Action.Add, dataset))
+            this.datasetSelectionSubject$.next(new SelectionEvent(Action.Add, dataset))
         });
     }
 
     clearSelection() {
-        this.selectedDatasets.forEach((dataset) => {
-          this.datasetSelectionSubject.next(new SelectionEvent(Action.Remove, dataset))
-        });
-        this.selectedDatasets.length = 0;
 
-        this.selectedJobs.forEach((job) => {
-          this.jobSelectionSubject.next(new SelectionEvent(Action.Remove, job))
+        let unselectedDatasets = _.clone(this.selectedDatasets);
+        this.selectedDatasets.length = 0;
+        // send events only after the array is cleared in case some component get's the latest
+        // state from the service instead of the event
+        unselectedDatasets.forEach((dataset) => {
+          this.datasetSelectionSubject$.next(new SelectionEvent(Action.Remove, dataset))
         });
+
+        let unselectedJobs = _.clone(this.selectedJobs);
         this.selectedJobs.length = 0;
+        unselectedJobs.forEach((job) => {
+          this.jobSelectionSubject$.next(new SelectionEvent(Action.Remove, job))
+        });
     }
 
     selectJob(event: any, job: Job) {
         this.clearSelection();
         this.selectedJobs = [job];
 
-        this.jobSelectionSubject.next(new SelectionEvent(Action.Add, job))
+        this.jobSelectionSubject$.next(new SelectionEvent(Action.Add, job))
     }
 
     getDatasetSelectionStream() {
         // don't expose the subject directly
-        return this.datasetSelectionSubject.asObservable();
+        return this.datasetSelectionSubject$.asObservable();
     }
 
     getJobSelectionStream() {
         // don't expose the subject directly
-        return this.jobSelectionSubject.asObservable();
+        return this.jobSelectionSubject$.asObservable();
     }
 }

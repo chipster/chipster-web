@@ -88,7 +88,6 @@ export class WorkflowGraphComponent {
       .attr('opacity', 0)
       .on('click', function () {
         self.SelectionService.clearSelection();
-        self.clearWorkflowSelections();
       });
 
     this.svg = this.outerSvg.append('g');
@@ -213,7 +212,7 @@ export class WorkflowGraphComponent {
       .attr('height', this.nodeHeight)
       .attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')')
       .style('fill', (d) => d.color)
-      .classed('selected', (d) => this.isSelectedJob(d.job))
+      .classed('selected-job', (d) => this.isSelectedJob(d.job))
       .on('click', (d) => {
         this.SelectionService.selectJob(d3.event, d.job)
       })
@@ -272,14 +271,12 @@ export class WorkflowGraphComponent {
       .attr('width', this.nodeWidth)
       .attr('height', this.nodeHeight)
       .style("fill", (d) => d.color)
-      .classed('selected', (d) => this.enabled && this.isSelectedDataset(d.dataset))
+      .classed('selected-dataset', (d) => this.enabled && this.isSelectedDataset(d.dataset))
       .on('click', function (d) {
         if (!UtilsService.isCtrlKey(d3.event)) {
           self.SelectionService.clearSelection();
-          self.clearWorkflowSelections();
         }
         self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
-        d3.select(this).classed('selected-dataset', true);
       })
       .on('mouseover', function () {
         d3.select(this).classed('hovering-dataset', true);
@@ -379,8 +376,6 @@ export class WorkflowGraphComponent {
       .attr('y2', (d) => d.target.y)
       .on('click', function(d) {
         self.SelectionService.selectJob(d3.event, d.target.sourceJob);
-        self.clearWorkflowSelections();
-        d3.select(this).classed('selected-job', true);
       })
       .on('mouseover', function() {
         d3.select(this).classed('hovering-job', true);
@@ -438,7 +433,7 @@ export class WorkflowGraphComponent {
             }
           }
         } else {
-          console.log('source job of dataset ' + dataset.name + ' not found');
+          //console.log('source job of dataset ' + dataset.name + ' not found');
         }
       }
 
@@ -582,10 +577,5 @@ export class WorkflowGraphComponent {
         node.y = pos.y;
       }
     });
-  }
-
-  clearWorkflowSelections() {
-    d3.select('.selected-dataset').classed('selected-dataset', false);
-    d3.select('.selected-job').classed('selected-job', false);
   }
 }
