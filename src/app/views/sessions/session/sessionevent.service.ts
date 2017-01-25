@@ -1,16 +1,16 @@
-import AuthenticationService from "../../../core/authentication/authenticationservice";
 import ConfigService from "../../../shared/services/config.service";
 import SessionResource from "../../../shared/resources/session.resource";
 import IWebSocket = angular.websocket.IWebSocket;
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import * as _ from "lodash";
 import {Injectable, Inject} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {SessionData} from "../../../model/session/session-data";
-import {Observable, Subject, Observer} from "rxjs";
+import {Observable} from "rxjs";
 import SessionEvent from "../../../model/events/sessionevent";
+import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
+import WsEvent from "../../../model/events/wsevent";
 
 @Injectable()
 export default class SessionEventService {
@@ -20,11 +20,12 @@ export default class SessionEventService {
     sessionData: SessionData;
     sessionId: string;
 
-    events: Observable<SessionEvent>;
-    datasetStream: Observable<SessionEvent>;
-    jobStream: Observable<SessionEvent>;
-    sessionStream: Observable<SessionEvent>;
-    authorizationStream: Observable<SessionEvent>;
+    events$: Observable<WsEvent>;
+    datasetStream$: Observable<SessionEvent>;
+    jobStream$: Observable<SessionEvent>;
+    sessionStream$: Observable<SessionEvent>;
+    authorizationStream$: Observable<SessionEvent>;
+    wsSubject$: WebSocketSubject<string>;
 
     constructor(private configService: ConfigService,
                 private tokenService: TokenService,
@@ -32,84 +33,70 @@ export default class SessionEventService {
                 @Inject('SessionResource') private sessionResource: SessionResource){
     }
 
+    unsubscribe() {
+        this.wsSubject$.unsubscribe();
+    }
+
     setSessionData(sessionId: string, sessionData: SessionData) {
 
       this.sessionData = sessionData;
       this.sessionId = sessionId;
 
-      this.datasetStream = this.getStream()
+      this.datasetStream$ = this.getStream()
         .filter(wsData => wsData.resourceType === 'DATASET')
         .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
         .publish().refCount();
 
-      this.jobStream = this.getStream()
+      this.jobStream$ = this.getStream()
         .filter(wsData => wsData.resourceType === 'JOB')
         .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
         .publish().refCount();
 
-      this.sessionStream = this.getStream()
+      this.sessionStream$ = this.getStream()
         .filter(wsData => wsData.resourceType === 'SESSION')
         .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
         .publish().refCount();
 
-      this.authorizationStream = this.getStream()
+      this.authorizationStream$ = this.getStream()
         .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
         .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
         .publish().refCount();
     }
 
-    // https://medium.com/@lwojciechowski/websockets-with-angular2-and-rxjs-8b6c5be02fac#.vo2lmk83l
-    private createWsObservable(url): Subject<MessageEvent> {
-      let ws = new WebSocket(url);
-      let observable = Observable.create(
-        (obs: Observer<MessageEvent>) => {
-          ws.onmessage = obs.next.bind(obs);
-          ws.onerror = obs.error.bind(obs);
-          ws.onclose = obs.complete.bind(obs);
-          return ws.close.bind(ws);
-        }
-      );
-      let observer = {
-        next: (data: Object) => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(data));
-          }
-        },
-      };
-      return Subject.create(observer, observable);
-    }
-
     getStream() {
 
       // keep the stream object so that refCount can do it's job
-      if (!this.events) {
+      if (!this.events$) {
 
         // get the url of the websocket server
-        this.events = this.configService.getSessionDbEventsUrl(this.sessionId).flatMap(eventUrl => {
+        this.events$ = this.configService.getSessionDbEventsUrl(this.sessionId).flatMap(eventUrl => {
 
           console.debug('event URL', eventUrl);
           // set token
           let wsUrl = URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString();
 
           // convert websocket to observable
-          return this.createWsObservable(wsUrl);
+          this.wsSubject$ = Observable.webSocket(wsUrl);
 
-        }).map(wsEvent => {
-          // parse JSON
-          console.log('websocket event', JSON.parse(wsEvent.data));
-          return JSON.parse(wsEvent.data);
+          return this.wsSubject$;
+
+        // some debug prints
+        }).map(wsData => {
+          console.log('websocket event', wsData);
+          return wsData;
+
+        }).catch((err, source) => {
+          console.log('websocket error', err, source);
+          return Observable.throw(err);
+
+        }).finally(() => {
+          console.info('websocket closed');
         })
         // use the same websocket connection for all subscribers
         .publish().refCount();
       }
 
-      // some debug prints
-      return this.events.catch((err, source) => {
-        console.log('websocket error', err, source);
-        return Observable.throw(err);
-      }).finally(() => {
-        console.info('websocket closed');
-      });
+      return this.events$;
     }
 
   /**
@@ -119,19 +106,19 @@ export default class SessionEventService {
    * @returns {Observable<SessionEvent>}
    */
   getDatasetStream() {
-        return this.datasetStream;
+        return this.datasetStream$;
     }
 
     getJobStream() {
-        return this.jobStream;
+        return this.jobStream$;
     }
 
     getSessionStream() {
-      return this.sessionStream;
+      return this.sessionStream$;
     }
 
     getAuthorizationStream() {
-      return this.authorizationStream;
+      return this.authorizationStream$;
     }
 
     createEvent(event, oldValue, newValue) {
@@ -149,7 +136,7 @@ export default class SessionEventService {
 
     handleSessionEvent(event: any, sessionId:any, sessionData: SessionData): Observable<SessionEvent> {
         if (event.type === 'UPDATE') {
-           return this.sessionResource.getSession(sessionId).subscribe((remote: Session) => {
+           return this.sessionResource.getSession(sessionId).flatMap((remote: Session) => {
                 var local = sessionData.session;
                 sessionData.session = remote;
                 return this.createEvent(event, local, remote);

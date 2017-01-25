@@ -5,7 +5,7 @@ import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import { SessionData } from "../../../shared/resources/session.resource";
+import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 
 class SessionComponent {
@@ -45,11 +45,11 @@ class SessionComponent {
 
       this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-      this.SessionEventService.getSessionStream().subscribe(change => {
+      this.SessionEventService.getAuthorizationStream().subscribe(change => {
         if (change.event.type === 'DELETE') {
-          this.$scope.$apply(function () {
+          this.$scope.$apply(() => {
             alert('The session has been deleted.');
-            this.$location.path('sessions');
+            this.$location.path('/sessions');
           });
         }
       });
@@ -72,6 +72,10 @@ class SessionComponent {
           }
         }
       });
+    }
+
+    $onDestroy() {
+      this.SessionEventService.unsubscribe();
     }
 
     getSelectedDatasets() {
