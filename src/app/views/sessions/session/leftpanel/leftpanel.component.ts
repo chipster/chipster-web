@@ -41,7 +41,7 @@ class LeftPanelComponent {
     if (e.keyCode == 13) { // enter
       // select highlighted datasets
       var allDatasets = this.getDatasetList();
-      this.selectionService.selectedDatasets = this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch);
+      this.selectionService.setSelectedDatasets(this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch));
       this.datasetSearch = null;
     }
     if (e.keyCode == 27) { // escape key

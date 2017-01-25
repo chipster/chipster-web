@@ -129,4 +129,12 @@ export default class SelectionService {
         // don't expose the subject directly
         return this.jobSelectionSubject$.asObservable();
     }
+
+  setSelectedDatasets(datasets: Dataset[]) {
+    this.clearSelection();
+    datasets.forEach(dataset => {
+      this.selectedDatasets.push(dataset);
+      this.datasetSelectionSubject$.next(new SelectionEvent(Action.Add, dataset))
+    });
+  }
 }

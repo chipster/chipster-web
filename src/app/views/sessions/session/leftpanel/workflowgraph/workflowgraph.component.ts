@@ -212,6 +212,7 @@ export class WorkflowGraphComponent {
       .attr('height', this.nodeHeight)
       .attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')')
       .style('fill', (d) => d.color)
+      .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter))
       .classed('selected-job', (d) => this.isSelectedJob(d.job))
       .on('click', (d) => {
         this.SelectionService.selectJob(d3.event, d.job)
@@ -271,6 +272,7 @@ export class WorkflowGraphComponent {
       .attr('width', this.nodeWidth)
       .attr('height', this.nodeHeight)
       .style("fill", (d) => d.color)
+      .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
       .classed('selected-dataset', (d) => this.enabled && this.isSelectedDataset(d.dataset))
       .on('click', function (d) {
         if (!UtilsService.isCtrlKey(d3.event)) {
@@ -321,7 +323,8 @@ export class WorkflowGraphComponent {
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
       .attr('font-size', this.fontSize + 'px').attr('fill', 'black').attr('text-anchor', 'middle')
-      .style('pointer-events', 'none');
+      .style('pointer-events', 'none')
+      .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
     this.d3Labels.exit().remove();
   }
