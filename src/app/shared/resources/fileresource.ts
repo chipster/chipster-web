@@ -3,7 +3,7 @@ import ConfigService from "../services/config.service";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
-import {ResponseContentType} from "@angular/http";
+import {ResponseContentType, Headers} from "@angular/http";
 
 @Injectable()
 export default class FileResource {
@@ -20,7 +20,7 @@ export default class FileResource {
 
   getLimitedData(sessionId: string, datasetId: string, maxBytes: number): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {range: `bytes=0-${maxBytes}`, responseType: ResponseContentType.Json} ));
+    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {headers: new Headers({range: `bytes=0-${maxBytes}`}), responseType: ResponseContentType.Json} ));
   }
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
