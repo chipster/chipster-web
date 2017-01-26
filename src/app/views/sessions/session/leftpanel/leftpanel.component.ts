@@ -8,6 +8,7 @@ import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.
 import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import * as _ from "lodash";
 import {SessionData} from "../../../../model/session/session-data";
+import SessionEventService from "../sessionevent.service";
 
 class LeftPanelComponent {
 
@@ -17,24 +18,23 @@ class LeftPanelComponent {
   private selectedTab = 1;
 
   static $inject = [
-    'SessionResource', 'SessionDataService', '$uibModal', '$scope', 'SelectionService',
+    'SessionResource', 'SessionDataService', 'SessionEventService', '$uibModal', '$scope', 'SelectionService',
     'SessionWorkerResource', '$filter'];
 
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
+    private sessionEventService: SessionEventService,
     private $uibModal: ng.ui.bootstrap.IModalService,
     private $scope: ng.IScope,
     private selectionService: SelectionService,
     private sessionWorkerResource: SessionWorkerResource,
     private $filter: IChipsterFilter,) {
 
-    // We are only handling the resize end event, currently only
-    // working in workflowgraph graph div
-    this.$scope.$on("angular-resizable.resizeEnd", () => {
-      this.$scope.$broadcast('resizeWorkFlowGraph', {});
+    this.sessionEventService.getSessionStream().subscribe(() => {
+      // someone else has updated the session notes or the session name, show it
+      this.$scope.$apply();
     });
-
   }
 
   datasetSearchKeyEvent(e: any) {
@@ -74,7 +74,7 @@ class LeftPanelComponent {
         result = 'unnamed session';
       }
       this.sessionData.session.name = result;
-      this.sessionDataService.updateSession(this.sessionData.session);
+      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
     }, function () {
       // modal dismissed
     });

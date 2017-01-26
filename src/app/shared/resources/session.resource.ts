@@ -14,7 +14,6 @@ import {Injectable, Inject} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
-import {ResponseContentType} from "@angular/http";
 
 @Injectable()
 export default class SessionResource {
@@ -144,7 +143,7 @@ export default class SessionResource {
 
 	getSession(sessionId: string): Observable<Session> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}`));
+    return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}`, true));
 
 		// return this.getService()
 		// 	.then((service:restangular.IService) => service.one('sessions', sessionId).get())

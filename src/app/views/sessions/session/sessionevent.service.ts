@@ -78,6 +78,12 @@ export default class SessionEventService {
         .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
         .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
         .publish().refCount();
+
+      // update sessionData even if no one else subscribes
+      this.datasetStream$.subscribe();
+      this.jobStream$.subscribe();
+      this.sessionStream$.subscribe();
+      this.authorizationStream$.subscribe();
     }
 
     getWsStream() {
