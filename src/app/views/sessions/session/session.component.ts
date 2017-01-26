@@ -7,6 +7,7 @@ import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
+import WsEvent from "../../../model/events/wsevent";
 
 class SessionComponent {
 
@@ -111,20 +112,32 @@ class SessionComponent {
 
         // show datasets again in the workflowgraph
         this.deletedDatasets.forEach((dataset: Dataset) => {
-            this.sessionData.datasetsMap.set(dataset.datasetId, dataset);
+            let wsEvent = new WsEvent(
+              this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'CREATE');
+            this.SessionEventService.generateLocalEvent(wsEvent);
         });
 
         // hide the undo message
         this.deletedDatasets = null;
     }
 
-    deleteDatasetsLater() {
+  /**
+   * Poor man's undo for the dataset deletion.
+   *
+   * Hide the dataset from the client for ten
+   * seconds and delete from the server only after that. deleteDatasetsUndo() will
+   * cancel the timer and make the datasets visible again. Session copying and sharing
+   * should filter out these hidden datasets or we need a proper server side support for this.
+   */
+  deleteDatasetsLater() {
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 
         // hide from the workflowgraph
         this.deletedDatasets.forEach((dataset: Dataset) => {
-            this.sessionData.datasetsMap.delete(dataset.datasetId);
+          let wsEvent = new WsEvent(
+            this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'DELETE');
+          this.SessionEventService.generateLocalEvent(wsEvent);
         });
 
         // start timer to delete datasets from the server later

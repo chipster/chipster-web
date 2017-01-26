@@ -7,7 +7,7 @@ import Job from "../../../model/session/job";
 import {Injectable, Inject} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {SessionData} from "../../../model/session/session-data";
-import {Observable} from "rxjs";
+import {Observable, Subject} from "rxjs";
 import SessionEvent from "../../../model/events/sessionevent";
 import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
 import WsEvent from "../../../model/events/wsevent";
@@ -20,12 +20,12 @@ export default class SessionEventService {
     sessionData: SessionData;
     sessionId: string;
 
-    events$: Observable<WsEvent>;
     datasetStream$: Observable<SessionEvent>;
     jobStream$: Observable<SessionEvent>;
     sessionStream$: Observable<SessionEvent>;
     authorizationStream$: Observable<SessionEvent>;
     wsSubject$: WebSocketSubject<string>;
+    localSubject$: Subject<string>;
 
     constructor(private configService: ConfigService,
                 private tokenService: TokenService,
@@ -42,46 +42,12 @@ export default class SessionEventService {
       this.sessionData = sessionData;
       this.sessionId = sessionId;
 
-      this.datasetStream$ = this.getStream()
-        .filter(wsData => wsData.resourceType === 'DATASET')
-        .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
-        .publish().refCount();
+      let wsStream = this.getWsStream();
+      this.localSubject$ = new Subject();
 
-      this.jobStream$ = this.getStream()
-        .filter(wsData => wsData.resourceType === 'JOB')
-        .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
-        .publish().refCount();
-
-      this.sessionStream$ = this.getStream()
-        .filter(wsData => wsData.resourceType === 'SESSION')
-        .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
-        .publish().refCount();
-
-      this.authorizationStream$ = this.getStream()
-        .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
-        .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
-        .publish().refCount();
-    }
-
-    getStream() {
-
-      // keep the stream object so that refCount can do it's job
-      if (!this.events$) {
-
-        // get the url of the websocket server
-        this.events$ = this.configService.getSessionDbEventsUrl(this.sessionId).flatMap(eventUrl => {
-
-          console.debug('event URL', eventUrl);
-          // set token
-          let wsUrl = URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString();
-
-          // convert websocket to observable
-          this.wsSubject$ = Observable.webSocket(wsUrl);
-
-          return this.wsSubject$;
-
+      let stream = wsStream.merge(this.localSubject$)
         // some debug prints
-        }).map(wsData => {
+        .map(wsData => {
           console.log('websocket event', wsData);
           return wsData;
 
@@ -91,12 +57,44 @@ export default class SessionEventService {
 
         }).finally(() => {
           console.info('websocket closed');
-        })
-        // use the same websocket connection for all subscribers
-        .publish().refCount();
-      }
+        }).publish().refCount();
 
-      return this.events$;
+      this.datasetStream$ = stream
+        .filter(wsData => wsData.resourceType === 'DATASET')
+        .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.jobStream$ = stream
+        .filter(wsData => wsData.resourceType === 'JOB')
+        .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.sessionStream$ = stream
+        .filter(wsData => wsData.resourceType === 'SESSION')
+        .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
+        .publish().refCount();
+
+      this.authorizationStream$ = stream
+        .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
+        .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
+        .publish().refCount();
+    }
+
+    getWsStream() {
+
+      // get the url of the websocket server
+      return this.configService.getSessionDbEventsUrl(this.sessionId).flatMap(eventUrl => {
+
+        console.debug('event URL', eventUrl);
+        // set token
+        let wsUrl = URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString();
+
+        // convert websocket to observable
+        this.wsSubject$ = Observable.webSocket(wsUrl);
+
+        return this.wsSubject$;
+
+      });
     }
 
   /**
@@ -196,4 +194,17 @@ export default class SessionEventService {
             console.warn("unknown event type", event.type, event);
         }
     }
+
+  /**
+   * Handle a locally generated event just like the real events coming from the websocket.
+   *
+   * Through this the client can be tricked to show different state from the server. Obviously
+   * should be used only for quick hacks.
+   *
+   * @param event
+   */
+  generateLocalEvent(event: WsEvent) {
+    // incorrect typing? it really is an object, but the compiler wants a string
+    this.localSubject$.next(<any>event);
+  }
 }
