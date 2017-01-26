@@ -227,10 +227,9 @@ export class WorkflowGraphComponent {
     this.d3JobNodes.exit().remove();
 
     // create an arc for each job
-    this.d3JobNodesGroup.selectAll('path')
-      .data(this.jobNodes)
-      .enter()
-      .append('path')
+    let d3JobArcs = this.d3JobNodesGroup.selectAll('path').data(this.jobNodes);
+
+    d3JobArcs.enter().append('path').merge(d3JobArcs)
       .style('fill', (d) => d.fgColor)
       .style('stroke-width', 0)
       .attr('opacity', this.filter ? 0.1 : 0.5)
@@ -244,6 +243,8 @@ export class WorkflowGraphComponent {
           let y = d.y + this.nodeHeight / 2;
           return d.spin ? d3.interpolateString( `translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)` ) : d3.interpolateString( `translate(${x},${y})`, `translate(${x},${y})` );
         });
+
+    d3JobArcs.exit().remove();
 
   }
 
