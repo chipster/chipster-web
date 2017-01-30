@@ -104,23 +104,22 @@ export default class SessionDataService {
     return this.sessionResource.updateSession(session);
   }
 
-  getDatasetUrl(dataset: Dataset): string {
+  getDatasetUrl(dataset: Dataset): Observable<string> {
     //TODO should we have separate read-only tokens for datasets?
-    /*
-     getFileBrokerUrl() is really an async call, but let's hope some one else has initialized it already
-     because the URL is used in many different places and the async result could be difficult for some
-     of them.
-     */
 
-    return URI(this.configService.getFileBrokerUrl())
-      .path('sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId)
-      .addSearch('token', this.tokenService.getToken()).toString();
+    let url$ = this.configService.getFileBrokerUrl().map(url => {
+      return url + '/sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId +
+        '?token=' + this.tokenService.getToken();
+    });
 
+    return url$;
   }
 
   exportDatasets(datasets: Dataset[]) {
     for (let d of datasets) {
-      this.download(this.getDatasetUrl(d));
+      this.getDatasetUrl(d).subscribe(url => {
+        this.download(url + '&download');
+      });
     }
   }
 

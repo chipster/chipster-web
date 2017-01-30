@@ -11,7 +11,7 @@
       <uib-tab-heading><span class="glyphicon glyphicon-th"></span> Spreadsheet</uib-tab-heading>
       <ch-spreadsheet-visualization
         ng-if="$ctrl.active === 'spreadsheet'"
-        [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
+        [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId">
       </ch-spreadsheet-visualization>
     </uib-tab>
 
@@ -20,7 +20,6 @@
       <uib-tab-heading><span class="glyphicon glyphicon-font"></span> Text</uib-tab-heading>
       <ch-text-visualization
         ng-if="$ctrl.active === 'text'"
-        src="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])"
         [dataset-id]="$ctrl.SelectionService.selectedDatasets[0].datasetId"
         [selected-datasets]="$ctrl.SelectionService.selectedDatasets">
       </ch-text-visualization>
@@ -42,7 +41,7 @@
       <uib-tab-heading><span class="glyphicon glyphicon-picture"></span> Image</uib-tab-heading>
       <ch-image-visualization
         ng-if="$ctrl.active === 'image'"
-        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+        [dataset]="$ctrl.SelectionService.selectedDatasets[0]">
       </ch-image-visualization>
     </uib-tab>
 
@@ -61,7 +60,7 @@
       <uib-tab-heading><span class="glyphicon glyphicon-book"></span> PDF</uib-tab-heading>
       <ch-pdf-visualization
         ng-if="$ctrl.active === 'pdf'"
-        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+        [dataset]="$ctrl.SelectionService.selectedDatasets[0]">
       </ch-pdf-visualization>
     </uib-tab>
 
@@ -71,7 +70,7 @@
       <uib-tab-heading><span class="glyphicon glyphicon-globe"></span> HTML</uib-tab-heading>
       <ch-htmlvisualization
         ng-if="$ctrl.active === 'html'"
-        [src]="$ctrl.SessionDataService.getDatasetUrl($ctrl.SelectionService.selectedDatasets[0])">
+        [dataset]="$ctrl.SelectionService.selectedDatasets[0]">
       </ch-htmlvisualization>
     </uib-tab>
 

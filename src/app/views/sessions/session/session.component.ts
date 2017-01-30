@@ -170,12 +170,6 @@ class SessionComponent {
         return this.sessionData.modulesMap;
     }
 
-    getDatasetUrl() {
-        if (this.selectionService.selectedDatasets && this.selectionService.selectedDatasets.length > 0) {
-            return this.sessionDataService.getDatasetUrl(this.selectionService.selectedDatasets[0]);
-        }
-    }
-
     openErrorModal(title: string, job: Job) {
         this.$uibModal.open({
             animation: true,

@@ -1,4 +1,6 @@
-import {Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, Input} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, Input, Inject} from '@angular/core';
+import Dataset from "../../../../../model/session/dataset";
+import SessionDataService from "../../sessiondata.service";
 
 @Component({
   selector: 'ch-pdf-visualization',
@@ -8,16 +10,22 @@ import {Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, Input} fr
 export class PdfVisualizationComponent implements OnInit {
 
   @Input()
+  dataset: Dataset;
+
   src: string;
 
   page: number;
   zoom: number;
 
-  constructor() { }
+  constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService) { }
 
   ngOnInit() {
     this.page = 1;
     this.zoom = 1;
+
+    this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
+      this.src = url;
+    });
   }
 
   previousPage() {

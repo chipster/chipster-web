@@ -4,6 +4,8 @@ import {Observable} from "rxjs";
 import AuthenticationService from "../../../../../core/authentication/authenticationservice";
 import {timeout} from "d3-timer";
 import {TokenService} from "../../../../../core/authentication/token.service";
+import SessionDataService from "../../sessiondata.service";
+import Dataset from "../../../../../model/session/dataset";
 
 @Component({
   selector: 'ch-htmlvisualization',
@@ -11,14 +13,23 @@ import {TokenService} from "../../../../../core/authentication/token.service";
 })
 export class HtmlvisualizationComponent implements OnInit {
 
-  @Input() src: string;
+  @Input()
+  private dataset: Dataset;
+
+  private src: string;
   private wrapperUrl: string = 'app/views/sessions/session/visualization/htmlvisualization/htmlvisualizationwrapper.html';
   private token: string;
 
-  constructor(private tokenService: TokenService) { }
+  constructor(
+    private tokenService: TokenService,
+    @Inject('SessionDataService') private sessionDataService: SessionDataService) { }
 
   ngOnInit() {
     this.token =this.tokenService.getToken();
+
+    this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
+      this.src = url;
+    });
   }
 
   run(htmlframe) {
