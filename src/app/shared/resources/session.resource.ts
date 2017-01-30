@@ -7,7 +7,7 @@ import Module from "../../model/session/module";
 import Tool from "../../model/session/tool";
 import Job from "../../model/session/job";
 import * as _ from "lodash";
-import UtilsService from "../../services/utils.service";
+import UtilsService from "../utilities/utils";
 import {Injectable} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";

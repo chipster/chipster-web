@@ -1,7 +1,7 @@
 
 import SessionDataService from "../sessiondata.service";
 import Dataset from "../../../../model/session/dataset";
-import UtilsService from "../../../../services/utils.service";
+import UtilsService from "../../../../shared/utilities/utils";
 import SessionResource from "../../../../shared/resources/session.resource";
 import SelectionService from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";

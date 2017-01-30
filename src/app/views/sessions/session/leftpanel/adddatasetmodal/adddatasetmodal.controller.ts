@@ -1,4 +1,4 @@
-import Utils from "../../../../../services/utils.service";
+import Utils from "../../../../../shared/utilities/utils";
 import WorkflowGraphService from "../workflowgraph/workflowgraph.service";
 import ConfigService from "../../../../../shared/services/config.service";
 import Dataset from "../../../../../model/session/dataset";

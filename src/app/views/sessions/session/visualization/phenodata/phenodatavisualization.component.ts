@@ -1,4 +1,4 @@
-import Utils from "../../../../../services/utils.service";
+import Utils from "../../../../../shared/utilities/utils";
 import Dataset from "../../../../../model/session/dataset";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";

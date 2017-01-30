@@ -62,7 +62,7 @@ import {RestService} from "./app/core/rest-services/restservice/rest.service";
 import {TokenService} from "./app/core/authentication/token.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
-        'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
+        'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
 
     // Angular 2
     .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
@@ -108,13 +108,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
   .filter('searchDatasetFilter', searchDatasetFilter)
   .filter('bytesFilter', bytesFilter )
 
-  // Should be trivial to upgrade to Angular 2
-
-  // Uprade simultaneously when refactoring restangular to Angular2 implementation
-  .component('sessionList', <any>sessionList)
-  .component('session', SessionComponent)
-
-
     // Last to be upgraded
     .component('leftPanel', LeftPanelComponent)
     .component('toolsBox', ToolsBoxComponent)
@@ -129,7 +122,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
-
+  .component('sessionList', <any>sessionList)
+  .component('session', SessionComponent)
 
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
@@ -191,7 +185,6 @@ upgradeAdapter.upgradeNg1Provider('SessionResource');
 upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
-upgradeAdapter.upgradeNg1Provider('$uibModal');
 upgradeAdapter.upgradeNg1Provider('$websocket');
 
 

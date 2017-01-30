@@ -3,7 +3,7 @@ import Point from "../model/point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
 import SessionDataService from "../../sessiondata.service";
-import UtilsService from "../../../../../services/utils.service";
+import UtilsService from "../../../../../shared/utilities/utils";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import { TSVReader } from "../../../../../shared/services/TSVReader";
 import GeneExpression from "./geneexpression";

@@ -10,7 +10,7 @@ import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
-import UtilsService from "../../../../../services/utils.service";
+import UtilsService from "../../../../../shared/utilities/utils";
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
 import WorkflowGraphService from "./workflowgraph.service";

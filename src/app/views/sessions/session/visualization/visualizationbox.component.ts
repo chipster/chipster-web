@@ -1,6 +1,6 @@
 import SelectionService from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
-import Utils from "../../../../services/utils.service";
+import Utils from "../../../../shared/utilities/utils";
 import SessionDataService from "../sessiondata.service";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";

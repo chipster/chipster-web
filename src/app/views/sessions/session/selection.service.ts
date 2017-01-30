@@ -1,7 +1,7 @@
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import Tool from "../../../model/session/tool";
-import UtilsService from "../../../services/utils.service";
+import UtilsService from "../../../shared/utilities/utils";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
 import {Subject} from "rxjs";

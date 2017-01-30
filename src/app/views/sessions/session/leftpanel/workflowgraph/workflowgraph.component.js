@@ -1,5 +1,5 @@
 "use strict";
-var utils_service_1 = require("../../../../services/utils.service");
+var utils_service_1 = require("../../../../services/utils");
 var workflowgraph_service_1 = require("./workflowgraph.service.ts");
 var changedetector_service_1 = require("../../../../services/changedetector.service");
 var changedetector_service_2 = require("../../../../services/changedetector.service");
