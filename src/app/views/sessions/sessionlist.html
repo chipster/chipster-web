@@ -57,20 +57,20 @@
   </div><!--end of column-md-6-->
   <div class="col-md-6" id="session-preview"><!-- Session Detail -->
 
-    <h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>
+    <!--<h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>-->
 
-    <div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">
-      <p>{{selectedSessions[0].notes}}</p>
-
-      <div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">
-        <!--<workflow-graph-->
+    <!--<div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">-->
+      <!--<p>{{selectedSessions[0].notes}}</p>-->
+<!---->
+      <!--<div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">-->
+        <!--<ch-workflow-graph-->
           <!--datasets-map="sessionData.datasetsMap"-->
           <!--jobs-map="sessionData.jobsMap"-->
           <!--modules-map="sessionData.modulesMap"-->
           <!--zoom="0.5"-->
           <!--enabled="false">-->
-        <!--</workflow-graph>-->
-      </div>
-    </div>
+        <!--</ch-workflow-graph>-->
+      <!--</div>-->
+    <!--</div>-->
   </div>
 </div><!--end of row-->
