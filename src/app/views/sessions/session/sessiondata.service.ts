@@ -58,7 +58,7 @@ export default class SessionDataService {
   createDerivedDataset(name: string, sourceDatasetIds: string[], toolName: string, content: string) {
 
     var d = new Dataset(name);
-    return this.createDataset(d).then((datasetId: string) => {
+    return this.createDataset(d).toPromise().then((datasetId: string) => {
       d.datasetId = datasetId;
 
       let job = new Job();

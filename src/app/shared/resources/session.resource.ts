@@ -1,5 +1,4 @@
 
-import * as restangular from "restangular";
 import ConfigService from "../services/config.service";
 import {ToolResource} from "./toolresource";
 import Session from "../../model/session/session";
@@ -9,8 +8,7 @@ import Tool from "../../model/session/tool";
 import Job from "../../model/session/job";
 import * as _ from "lodash";
 import UtilsService from "../../services/utils.service";
-import {TokenService} from "../../core/authentication/token.service";
-import {Injectable, Inject} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
@@ -18,44 +16,9 @@ import {Observable} from "rxjs";
 @Injectable()
 export default class SessionResource {
 
-	public service: any;
-  private helper: string;
-
-	constructor(@Inject('Restangular') private restangular: restangular.IService,
-				private tokenService: TokenService,
-        private configService: ConfigService,
+	constructor(private configService: ConfigService,
 				private toolResource: ToolResource,
-        private restService: RestService,
-				@Inject('$q') private $q:ng.IQService) {}
-
-	getService() {
-		if (!this.service) {
-			this.service = this.configService.getSessionDbUrl().toPromise().then((url: string) => {
-
-				let service: any = this.restangular.withConfig((configurer: any) => {
-					configurer.setBaseUrl(url);
-					// this service is initialized only once, but the Authentication service will update the returned
-					// instance when necessary (login & logout) so that the request is always made with the most up-to-date
-					// credentials
-					configurer.setDefaultHeaders(this.tokenService.getTokenHeader());
-					configurer.setFullResponse(true);
-				});
-
-				// Restangular adds an empty object to the body of the DELETE request, which fails somewhere
-				// on the way, not sure where.
-				// https://github.com/mgonto/restangular/issues/78
-				service.addRequestInterceptor((elem: any, operation: any) => {
-					if (operation === 'remove') {
-						return undefined;
-					}
-					return elem;
-				});
-
-				return service;
-			});
-		}
-		return this.service;
-	}
+        private restService: RestService) {}
 
 	loadSession(sessionId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
@@ -108,46 +71,32 @@ export default class SessionResource {
 
 	}
 
-	getSessions() {
+	getSessions(): Observable<Array<Session>> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions`, true));
 	}
 
-	createSession(session: Session) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions').customPOST(session))
-			.then((res: any) => {
-				var sessionLocation = res.headers('Location');
-				// sessionId
-				return sessionLocation.substr(sessionLocation.lastIndexOf('/') + 1);
-			});
+	createSession(session: Session): Observable<string> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.post(`${url}/sessions/`, session, true))
+      .map( (response: any) => response.sessionId);
 	}
 
-	createDataset(sessionId: string, dataset: Dataset) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).one('datasets').customPOST(dataset))
-			.then((res: any) => {
-				var location = res.headers('Location');
-				return location.substr(location.lastIndexOf('/') + 1);
-			});
+	createDataset(sessionId: string, dataset: Dataset): Observable<string> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.post(`${url}/sessions/${sessionId}/datasets`, dataset, true))
+      .map( (response: any) => response.datasetId);
 	}
 
-	createJob(sessionId: string, job: Job) {
-		return this.getService()
-			.then((service:restangular.IService) => service.one('sessions', sessionId).one('jobs').customPOST(job))
-			.then((res: any) => {
-				var location = res.headers('Location');
-				return location.substr(location.lastIndexOf('/') + 1);
-			});
+	createJob(sessionId: string, job: Job): Observable<string> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.post(`${url}/sessions/${sessionId}/jobs`, job, true))
+      .map( (response: any) => response.jobId);
 	}
 
 	getSession(sessionId: string): Observable<Session> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => this.restService.get(`${url}/sessions/${sessionId}`, true));
-
-		// return this.getService()
-		// 	.then((service:restangular.IService) => service.one('sessions', sessionId).get())
-		// 	.then((resp: any) => resp.data);
 	}
 
 	getDataset(sessionId: string, datasetId: string) {
@@ -194,14 +143,15 @@ export default class SessionResource {
 		let newSession: Session = _.clone(sessionData.session);
 		newSession.sessionId = null;
 		newSession.name = name;
-
+    let createdSessionId: string;
     let datasetIdMap = new Map<string, string>();
     let jobIdMap = new Map<string, string>();
 
     // create session
-    return Observable.fromPromise(this.createSession(newSession)).flatMap( (sessionId: string) => {
+    const createSession$ = this.createSession(newSession);
 
-      this.helper = sessionId;
+    const createDatasetsAndDatasets$ = createSession$.flatMap( (sessionId: string) => {
+      createdSessionId = sessionId;
 
       let createRequests: Array<Observable<string>> = [];
 
@@ -209,7 +159,7 @@ export default class SessionResource {
       sessionData.datasetsMap.forEach((dataset: Dataset) => {
         let datasetCopy = _.clone(dataset);
         datasetCopy.datasetId = null;
-        let request = Observable.fromPromise(this.createDataset(sessionId, datasetCopy));
+        let request = this.createDataset(createdSessionId, datasetCopy);
         createRequests.push(request);
         request.subscribe((newId: string) => {
           datasetIdMap.set(dataset.datasetId, newId);
@@ -220,7 +170,7 @@ export default class SessionResource {
       sessionData.jobsMap.forEach((oldJob: Job) => {
         let jobCopy = _.clone(oldJob);
         jobCopy.jobId = null;
-        let request = Observable.fromPromise(this.createJob(sessionId, jobCopy));
+        let request = this.createJob(createdSessionId, jobCopy);
         createRequests.push(request);
         request.subscribe((newId: string) => {
           jobIdMap.set(oldJob.jobId, newId);
@@ -228,7 +178,9 @@ export default class SessionResource {
       });
 
       return Observable.forkJoin(...createRequests);
-    }).flatMap( () => {
+    });
+
+    return createDatasetsAndDatasets$.flatMap( () => {
       let updateRequests: Array<Observable<string>> = [];
 
       // // update datasets' sourceJob id
@@ -238,7 +190,7 @@ export default class SessionResource {
           let datasetCopy = _.clone(oldDataset);
           datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
           datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-          updateRequests.push(this.updateDataset(this.helper, datasetCopy));
+          updateRequests.push(this.updateDataset(createdSessionId, datasetCopy));
         }
       });
 
@@ -248,11 +200,9 @@ export default class SessionResource {
         jobCopy.jobId = jobIdMap.get(oldJob.jobId);
         jobCopy.inputs.forEach((input) => {
           input.datasetId = datasetIdMap.get(input.datasetId);
-          updateRequests.push(this.updateJob(this.helper, jobCopy));
+          updateRequests.push(this.updateJob(createdSessionId, jobCopy));
         });
       });
-
-      this.helper = undefined;
 
       return Observable.forkJoin(...updateRequests);
     });

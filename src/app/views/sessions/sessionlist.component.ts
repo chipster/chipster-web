@@ -30,7 +30,7 @@ class SessionListController {
     createSession() {
 
         let session = new Session('New session');
-        this.sessionResource.createSession(session).then((sessionId: string) => {
+        this.sessionResource.createSession(session).subscribe((sessionId: string) => {
                 session.sessionId = sessionId;
                 this.openSession(session);
         });
@@ -68,7 +68,7 @@ class SessionListController {
     uploadSessionFile(event: any, files: any) {
         this.isOpening = true;
         let session = new Session('New session');
-        return this.sessionResource.createSession(session).then((sessionId: string) => {
+        return this.sessionResource.createSession(session).subscribe((sessionId: string) => {
             session.sessionId = sessionId;
             this.$uibModal.open({
                 animation: true,

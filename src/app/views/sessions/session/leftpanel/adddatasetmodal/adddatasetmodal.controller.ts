@@ -43,7 +43,7 @@ export default class AddDatasetModalController {
 
         let promises = [
             this.ConfigService.getFileBrokerUrl().toPromise(),
-            this.createDataset(this.sessionId, file.name)
+            this.createDataset(this.sessionId, file.name).toPromise()
         ];
 
         this.$q.all(promises).then((results: any) => {
@@ -61,7 +61,7 @@ export default class AddDatasetModalController {
     createDataset(sessionId: string, name: string) {
         var d = new Dataset(name);
         console.info('createDataset', d);
-        return this.sessionResource.createDataset(sessionId, d).then((datasetId: string) => {
+        return this.sessionResource.createDataset(sessionId, d).map((datasetId: string) => {
             d.datasetId = datasetId;
             var pos = this.workflowGraphService.newRootPosition(Utils.mapValues(this.datasetsMap));
             d.x = pos.x;
