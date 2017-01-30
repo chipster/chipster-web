@@ -8,10 +8,11 @@ import {SharedModule} from "../../../shared/shared.module";
 import {LeftPanelModule} from "./leftpanel/leftpanel.module";
 import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
+import {SessionListComponent} from "../sessionlist.component";
 
 @NgModule({
   imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule],
-  declarations: [],
+  declarations: [SessionListComponent],
   providers: [SessionEventService, SessionDataService]
 })
 export class SessionModule{}

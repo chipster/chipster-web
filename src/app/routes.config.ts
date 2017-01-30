@@ -12,7 +12,7 @@ export default function($routeProvider: ng.route.IRouteProvider) {
         .when('/home', { template: '<ch-home></ch-home>' })
         .when('/login', { template: '<ch-login></ch-login>' })
         .when('/sessions', <IAuthRoute>{
-            template: '<session-list></session-list>',
+            template: '<ch-session-list></ch-session-list>',
             authenticated: true
         })
         .when('/sessions/:sessionId', <IAuthRoute>{

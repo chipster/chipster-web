@@ -60,6 +60,7 @@ import {ToolListItemComponent} from "./app/views/sessions/session/tools/toolsmod
 import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component";
 import {RestService} from "./app/core/rest-services/restservice/rest.service";
 import {TokenService} from "./app/core/authentication/token.service";
+import {SessionListComponent} from "./app/views/sessions/sessionlist.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -83,6 +84,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chToolTitle', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolTitleComponent))
     .directive('chSingleDataset', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SingleDatasetComponent))
     .directive('chWorkflowGraph', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(WorkflowGraphComponent))
+    .directive('chSessionList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionListComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -94,19 +96,19 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .service('RestService', upgradeAdapter.downgradeNg2Provider(RestService))
     .service('ToolResource',  upgradeAdapter.downgradeNg2Provider(ToolResource))
     .service('SessionWorkerResource', upgradeAdapter.downgradeNg2Provider(SessionWorkerResource))
-  .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
-  .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
-  .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
-  .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
+    .service('SessionEventService', upgradeAdapter.downgradeNg2Provider(SessionEventService))
+    .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
+    .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
+    .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
 
-  // Angular 2 version exists, can't upgrade. These needed in angularjs templates
-  .filter('isoDate', isoDateFilter)
-  .filter('categoryFilter', categoryFilter)
-  .filter('moduleFilter', moduleFilter)
-  .filter('toolFilter', toolFilter)
-  .filter('seconds',secondsFilter)
-  .filter('searchDatasetFilter', searchDatasetFilter)
-  .filter('bytesFilter', bytesFilter )
+    // Angular 2 version exists, can't upgrade. These needed in angularjs templates
+    .filter('isoDate', isoDateFilter)
+    .filter('categoryFilter', categoryFilter)
+    .filter('moduleFilter', moduleFilter)
+    .filter('toolFilter', toolFilter)
+    .filter('seconds',secondsFilter)
+    .filter('searchDatasetFilter', searchDatasetFilter)
+    .filter('bytesFilter', bytesFilter )
 
     // Last to be upgraded
     .component('leftPanel', LeftPanelComponent)
@@ -122,9 +124,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
-  .component('sessionList', <any>sessionList)
-  .component('session', SessionComponent)
-
+    .component('session', SessionComponent)
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);

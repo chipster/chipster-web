@@ -1,76 +1,76 @@
 <div class="container">
-    <div class="col-md-6">
-        <!-- User Sessions -->
+  <div class="col-md-6">
+    <!-- User Sessions -->
 
-        <div class="row">
-            <div class="col-md-6">
-                <h4>Open session</h4>
-            </div>
-            <div class="col-md-6">
-                <button class="btn btn-sm btn-success pull-right"
-                        ng-click="$ctrl.createSession()">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    New session
-                </button>
-            </div>
-        </div>
-
-        <div class="scrollable session-list">
-            <table class="table table-hover table-condensed ">
-                <tbody>
-                <tr ng-repeat="session in $ctrl.userSessions"
-                    ng-mouseover="$ctrl.selectSession($event, session)"
-                    ng-click="$ctrl.openSession(session)">
-                    <td class="text-left text-nowrap link-cursor" >{{session.name}}</td>
-                    <td>
-                        <button class="btn btn-default btn-xs pull-right no-border"
-                                ng-click="$ctrl.deleteSession(session); $event.stopImmediatePropagation();"
-                                title="Delete session">
-                            <span class="glyphicon glyphicon-remove"></span>
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
-
-            <button class="btn btn-sm btn-info"
-                    ng-click="$ctrl.openSessionFile($event)">
-                Open session file
-                <i ng-if="$ctrl.isOpening" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
-            </button>
-	        <!-- hidden file input to open file dialog -->
-            <input id="open-session-file-input" type="file" ng-show="false"
-                   custom-on-change="$ctrl.uploadSessionFile($event, files)"/>
-
-            <!-- Example Sessions -->
-            <h4>Example sessions</h4>
-            <table class="table table-hover">
-                <tbody>
-                <tr ng-repeat="session in $ctrl.localSessions">
-                    <td class="text-left text-nowrap">
-                        {{session.name}}
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div><!--end of column-md-6-->
-    <div class="col-md-6" id="session-preview"><!-- Session Detail -->
-
-        <h5 ng-repeat="session in $ctrl.selectedSessions">{{$ctrl.session.name}}</h5>
-
-        <div id="workflow-dataset-panel" ng-if="$ctrl.selectedSessions.length === 1">
-            <p>{{$ctrl.selectedSessions[0].notes}}</p>
-
-            <div ng-if="$ctrl.sessionData.datasetsMap && $ctrl.sessionData.jobsMap">
-                <workflow-graph
-                        datasets-map="$ctrl.sessionData.datasetsMap"
-                        jobs-map="$ctrl.sessionData.jobsMap"
-                        modules-map="$ctrl.sessionData.modulesMap"
-                        zoom="0.5"
-                        enabled="false">
-            </div>
-        </div>
+    <div class="row">
+      <div class="col-md-6">
+        <h4>Open session</h4>
+      </div>
+      <div class="col-md-6">
+        <button class="btn btn-sm btn-success pull-right"
+                (click)="createSession()">
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          New session
+        </button>
+      </div>
     </div>
+
+    <div class="scrollable session-list">
+      <table class="table table-hover table-condensed ">
+        <tbody>
+        <tr *ngFor="let session of userSessions"
+            (mouseover)="selectSession($event, session)"
+            (click)="openSession(session)">
+          <td class="text-left text-nowrap link-cursor">{{session.name}}</td>
+          <td>
+            <button class="btn btn-default btn-xs pull-right no-border"
+                    (click)="deleteSession(session); $event.stopImmediatePropagation();"
+                    title="Delete session">
+              <span class="glyphicon glyphicon-remove"></span>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!--<button class="btn btn-sm btn-info"-->
+              <!--ng-click="$ctrl.openSessionFile($event)">-->
+        <!--Open session file-->
+        <!--<i ng-if="$ctrl.isOpening" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>-->
+      <!--</button>-->
+       <!--hidden file input to open file dialog -->
+      <!--<input id="open-session-file-input" type="file" ng-show="false"-->
+             <!--custom-on-change="$ctrl.uploadSessionFile($event, files)"/>-->
+
+      <!-- Example Sessions -->
+      <h4>Example sessions</h4>
+      <table class="table table-hover">
+        <tbody>
+        <tr *ngFor="let session of localSessions">
+          <td class="text-left text-nowrap">
+            {{session.name}}
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div><!--end of column-md-6-->
+  <div class="col-md-6" id="session-preview"><!-- Session Detail -->
+
+    <h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>
+
+    <div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">
+      <p>{{selectedSessions[0].notes}}</p>
+
+      <div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">
+        <!--<workflow-graph-->
+          <!--datasets-map="sessionData.datasetsMap"-->
+          <!--jobs-map="sessionData.jobsMap"-->
+          <!--modules-map="sessionData.modulesMap"-->
+          <!--zoom="0.5"-->
+          <!--enabled="false">-->
+        <!--</workflow-graph>-->
+      </div>
+    </div>
+  </div>
 </div><!--end of row-->

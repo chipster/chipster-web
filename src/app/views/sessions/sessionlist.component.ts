@@ -5,10 +5,13 @@ import Session from "../../model/session/session";
 import * as angular from 'angular';
 import {SessionData} from "../../model/session/session-data";
 import {Observable} from "rxjs";
+import {Component, Inject} from "@angular/core";
 
-class SessionListController {
-
-    static $inject = ['$location', 'SessionResource', '$uibModal', 'SessionWorkerResource', '$scope'];
+@Component({
+  selector: 'ch-session-list',
+  templateUrl: './sessionlist.html'
+})
+export class SessionListComponent {
 
     public selectedSessions: Session[];
     public previousSession: Session;
@@ -18,13 +21,14 @@ class SessionListController {
     private isOpening = false;
 
     constructor(
-        private $location:ng.ILocationService,
+        @Inject('$location') private $location:ng.ILocationService,
         private sessionResource:SessionResource,
-        private $uibModal: ng.ui.bootstrap.IModalService,
         private sessionWorkerResource:SessionWorkerResource,
-        private $scope: ng.IScope) {
+        @Inject('$scope') private $scope: ng.IScope) {}
 
-        this.updateSessions();
+    ngOnInit() {
+      this.selectedSessions = [];
+      this.updateSessions();
     }
 
     createSession() {
@@ -144,9 +148,4 @@ class SessionListController {
             }
         };
     }
-}
-
-export default {
-    controller: SessionListController,
-    templateUrl: './sessionlist.html'
 }
