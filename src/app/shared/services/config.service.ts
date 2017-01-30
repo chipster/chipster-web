@@ -20,7 +20,7 @@ export default class ConfigService {
   }
 
   getSessionDbEventsUrl(sessionId: string): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => URI(services.sessionDbEvents).path('events/' + sessionId).toString());
+    return this.configuration$.map((services: CoreServices) => services.sessionDbEvents);
   }
 
   getSessionWorkerUrl(): Observable<string> {

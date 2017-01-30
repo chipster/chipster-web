@@ -105,14 +105,9 @@ export default class SessionDataService {
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
-    //TODO should we have separate read-only tokens for datasets?
-
-    let url$ = this.configService.getFileBrokerUrl().map(url => {
-      return url + '/sessions/' + this.getSessionId() + '/datasets/' + dataset.datasetId +
-        '?token=' + this.tokenService.getToken();
-    });
-
-    return url$;
+    return this.configService.getFileBrokerUrl().map( (url: string) =>
+      `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`
+    );
   }
 
   exportDatasets(datasets: Dataset[]) {

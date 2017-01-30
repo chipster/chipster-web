@@ -49,9 +49,7 @@ export default class AddDatasetModalController {
         this.$q.all(promises).then((results: any) => {
             let url: string = results[0];
             let dataset: Dataset = results[1];
-            file.chipsterTarget = URI(url)
-                .path('sessions/' + this.sessionId + '/datasets/' + dataset.datasetId)
-                .addSearch('token', this.tokenService.getToken()).toString();
+            file.chipsterTarget = `${url}/sessions/${this.sessionId}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`;
             file.resume();
             this.datasetIds.push(dataset.datasetId);
         });

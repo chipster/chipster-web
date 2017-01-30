@@ -42,7 +42,6 @@
     "rxjs": "5.0.2",
     "systemjs": "0.19.31",
     "ts-helpers": "1.1.1",
-    "urijs": "1.18.1",
     "zone.js": "0.6.25"
   },
   "devDependencies": {
@@ -59,7 +58,6 @@
     "@types/lodash": "4.14.37",
     "@types/ng-flow": "0.0.29",
     "@types/node": "6.0.42",
-    "@types/urijs": "1.15.31",
     "angular-cli": "1.0.0-beta.21",
     "codelyzer": "~1.0.0-beta.3",
     "jasmine-core": "2.4.1",

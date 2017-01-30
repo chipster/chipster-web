@@ -87,13 +87,11 @@ export default class SessionEventService {
     }
 
     getWsStream() {
-
       // get the url of the websocket server
-      return this.configService.getSessionDbEventsUrl(this.sessionId).flatMap(eventUrl => {
+      return this.configService.getSessionDbEventsUrl(this.sessionId).flatMap( (eventsUrl:string) => {
 
-        console.debug('event URL', eventUrl);
-        // set token
-        let wsUrl = URI(eventUrl).addSearch('token', this.tokenService.getToken()).toString();
+        let wsUrl = `${eventsUrl}/events/${this.sessionId}?token=${this.tokenService.getToken()}`;
+        console.debug('event URL', wsUrl);
 
         // convert websocket to observable
         this.wsSubject$ = Observable.webSocket(wsUrl);
