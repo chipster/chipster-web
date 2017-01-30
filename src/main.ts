@@ -61,7 +61,7 @@ import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/wor
 import {RestService} from "./app/core/rest-services/restservice/rest.service";
 import {TokenService} from "./app/core/authentication/token.service";
 
-angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow', 'restangular',
+angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'ui.bootstrap', 'AuthenticationModule', 'ngHandsontable'])
 
     // Angular 2
@@ -192,7 +192,6 @@ upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$uibModal');
-upgradeAdapter.upgradeNg1Provider('Restangular');
 upgradeAdapter.upgradeNg1Provider('$websocket');
 
 
