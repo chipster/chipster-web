@@ -60,6 +60,7 @@ import {RestService} from "./app/core/rest-services/restservice/rest.service";
 import {TokenService} from "./app/core/authentication/token.service";
 import {SessionListComponent} from "./app/views/sessions/sessionlist.component";
 import {ToolBoxComponent} from "./app/views/sessions/session/tools/toolbox.component";
+import {VisualizationsComponent} from "./app/views/sessions/session/visualization/visualizationbox.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -86,6 +87,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chSessionList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionListComponent))
     .directive('chSession', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionComponent))
     .directive('chToolbox', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolBoxComponent))
+    .directive('chVisualizations', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VisualizationsComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -123,7 +125,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
-    .component('visualizationBox', VisualizationBoxComponent)
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);

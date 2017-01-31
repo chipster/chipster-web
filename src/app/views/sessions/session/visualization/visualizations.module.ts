@@ -15,10 +15,13 @@ import {ImageVisualizationComponent} from "./imagevisualization/imagevisualizati
 import {PhenodataVisualizationComponent} from "./phenodata/phenodatavisualization.component";
 import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../../shared/shared.module";
+import {VisualizationsComponent} from "./visualizationbox.component";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
-  imports: [CommonModule, SharedModule],
-  declarations: [VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent],
-  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService]
+  imports: [CommonModule, NgbModule, SharedModule],
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent],
+  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService],
+  exports: [VisualizationsComponent]
 })
 export class VisualizationsModule {}

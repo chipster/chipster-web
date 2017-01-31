@@ -25,22 +25,22 @@
 
         <div class="row">
             <div class="col-md-12">
-              <!--<ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>-->
-                <!--<ch-single-dataset-->
-                        <!--[dataset]="selectionService.selectedDatasets[0]"-->
-                        <!--[jobs]="sessionData.jobsMap"-->
-                        <!--(on-delete)="deleteDatasetsLater()"-->
-                        <!--*ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>-->
-                <!--<ch-dataset-details-->
-                        <!--(on-delete)="deleteDatasetsLater()"-->
-                        <!--*ngIf="selectionService.selectedDatasets.length > 1"></ch-dataset-details>-->
+              <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
+                <ch-single-dataset
+                        [dataset]="selectionService.selectedDatasets[0]"
+                        [jobs]="sessionData.jobsMap"
+                        (on-delete)="deleteDatasetsLater()"
+                        *ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>
+                <ch-dataset-details
+                        (on-delete)="deleteDatasetsLater()"
+                        *ngIf="selectionService.selectedDatasets.length > 1"></ch-dataset-details>
             </div>
         </div>
 
         <!-- Visualization -->
         <div class="row">
             <div class="col-md-12">
-                <!--<visualization-box *ngIf="selectionService.selectedDatasets.length > 0"></visualization-box>-->
+                <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0"></ch-visualizations>
             </div>
         </div>
 

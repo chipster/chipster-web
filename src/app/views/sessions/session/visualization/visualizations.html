@@ -1,0 +1,113 @@
+<h4>Visualizations</h4>
+
+<div id="visualization-box" class="chipster-highlight">
+
+  <h6 *ngIf="!active">No suitable visualization for current dataset selections</h6>
+
+  <ngb-tabset *ngIf="active" active="active">
+
+    <ngb-tab index="'spreadsheet'"
+             *ngIf="isCompatibleVisualization('spreadsheet')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Spreadsheet</template>
+      <template ngbTabContent>
+        <ch-spreadsheet-visualization
+          *ngIf="active === 'spreadsheet'"
+          [datasetId]="SelectionService.selectedDatasets[0].datasetId">
+        </ch-spreadsheet-visualization>
+      </template>
+
+    </ngb-tab>
+
+    <ngb-tab index="'text'"
+             *ngIf="isCompatibleVisualization('text')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Text</template>
+      <template ngbTabContent>
+        <ch-text-visualization
+          *ngIf="active === 'text'"
+          [datasetId]="SelectionService.selectedDatasets[0].datasetId"
+          [selectedDatasets]="SelectionService.selectedDatasets">
+        </ch-text-visualization>
+      </template>
+
+    </ngb-tab>
+
+
+    <ngb-tab index="'expressionprofile'"
+             *ngIf="isCompatibleVisualization('expressionprofile')">
+      <template ngbTabTitle>Expression profile</template>
+      <template ngbTabContent>
+
+      </template>
+      <ch-expression-profile
+        *ngIf="active === 'expressionprofile'"
+        [datasetId]="SelectionService.selectedDatasets[0].datasetId"
+        [selectedDatasets]="SelectionService.selectedDatasets">
+      </ch-expression-profile>
+    </ngb-tab>
+
+    <ngb-tab index="'image'"
+             *ngIf="isCompatibleVisualization('image')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-picture"></span> Image</template>
+      <template ngbTabContent>
+        <ch-image-visualization
+          *ngIf="active === 'image'"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-image-visualization>
+      </template>
+
+    </ngb-tab>
+
+    <ngb-tab index="'phenodata'"
+             *ngIf="isCompatibleVisualization('phenodata')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-edit"></span> Phenodata</template>
+      <template ngbTabContent>
+        <ch-phenodata-visualization
+          *ngIf="active === 'phenodata'"
+          [datasets]="SelectionService.selectedDatasets">
+        </ch-phenodata-visualization>
+      </template>
+
+    </ngb-tab>
+
+
+    <ngb-tab index="'pdf'"
+             *ngIf="isCompatibleVisualization('pdf')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</template>
+      <template ngbTabContent>
+        <ch-pdf-visualization
+          *ngIf="active === 'pdf'"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-pdf-visualization>
+      </template>
+
+    </ngb-tab>
+
+
+    <ngb-tab index="'html'"
+             *ngIf="isCompatibleVisualization('html')">
+      <template ngbTabTitle><span class="glyphicon glyphicon-globe"></span> HTML</template>
+      <template ngbTabContent>
+        <ch-htmlvisualization
+          *ngIf="active === 'html'"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-htmlvisualization>
+      </template>
+
+    </ngb-tab>
+
+    <ngb-tab index="'venn'"
+             *ngIf="isCompatibleVisualization('venn')">
+      <template ngbTabTitle>Venn Diagram</template>
+      <template ngbTabContent>
+        <ch-venn-diagram
+          *ngIf="active === 'venn'"
+          [selectedDatasets]="SelectionService.selectedDatasets">
+        </ch-venn-diagram>
+      </template>
+
+    </ngb-tab>
+
+
+  </ngb-tabset>
+</div>
+

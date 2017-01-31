@@ -4,10 +4,13 @@ import Utils from "../../../../shared/utilities/utils";
 import SessionDataService from "../sessiondata.service";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
+import {Component, Inject} from "@angular/core";
 
-class VisualizationBoxComponent {
-
-    static $inject = ['SelectionService', 'SessionDataService', '$timeout'];
+@Component({
+  selector: 'ch-visualizations',
+  templateUrl: './visualizations.html'
+})
+export class VisualizationsComponent {
 
     datasets: Array<Dataset>;
     active: string;
@@ -16,15 +19,15 @@ class VisualizationBoxComponent {
     constructor(
         private SelectionService: SelectionService,
         private SessionDataService: SessionDataService,
-        private $timeout: ng.ITimeoutService) {
+        @Inject('$timeout') private $timeout: ng.ITimeoutService) {
     }
 
-    $onInit() {
+    ngOnInit() {
         this.datasets = [];
         this.active = _.first(this.getPossibleVisualizations());
     }
 
-    $doCheck() {
+    ngDoCheck() {
         if(!_.isEqual(this.datasets, this.SelectionService.selectedDatasets)) {
             this.active = undefined;
             this.datasets = _.cloneDeep(this.SelectionService.selectedDatasets);
@@ -70,9 +73,4 @@ class VisualizationBoxComponent {
             .value() : [];
     }
 
-}
-
-export default {
-    controller: VisualizationBoxComponent,
-    templateUrl: './visualization.html'
 }

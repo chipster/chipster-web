@@ -9,6 +9,7 @@ import {JobComponent} from "./job/job.component";
 
 @NgModule({
   imports: [  CommonModule, FormsModule, SharedModule ],
-  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, JobComponent]
+  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, JobComponent],
+  exports: [JobComponent, DatasetDetailsComponent, SingleDatasetComponent]
 })
 export class DatasetModule { }
