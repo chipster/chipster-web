@@ -1,98 +1,100 @@
 <div class="sidebar">
-  <h4><span ng-click="$ctrl.openSessionEditModal()">Session - {{$ctrl.sessionData.session.name}}</span></h4>
+  <h4><span (click)="openSessionEditModal()">Session - {{sessionData.session.name}}</span></h4>
 
   <div class="chipster-highlight ">
     <div class="bar pull-right search-div">
-      <input id="dataset-search-input" type="text" ng-model="$ctrl.datasetSearch"
-             placeholder="search dataset" ng-keyup="$ctrl.datasetSearchKeyEvent($event)">
-      <button class="clear-search-button no-border" ng-show="$ctrl.datasetSearch"
-              ng-click="$ctrl.datasetSearch = null">
+      <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
+             placeholder="search dataset" (keyup)="datasetSearchKeyEvent($event)">
+      <button class="clear-search-button no-border" *ngIf="datasetSearch"
+              (click)="datasetSearch = null">
         <span class="glyphicon glyphicon-remove"></span>
       </button>
     </div>
 
     <div>
 
-      <uib-tabset>
+      <ngb-tabset>
 
-        <uib-tab index="0" heading="Workflow">
+        <ngb-tab index="0" title="Workflow">
+          <template ngbTabContent>
+            <div class="workflow-dataset-static-panel">
+              <div class="add-dataset-button">
+                <button class="btn btn-sm btn-success link-btn"
+                        (click)="openAddDatasetModal()">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add dataset
+                </button>
+              </div>
+            </div>
 
-          <div class="workflow-dataset-static-panel">
-            <div class="add-dataset-button">
-              <button class="btn btn-sm btn-success link-btn"
-                      ng-click="$ctrl.openAddDatasetModal()">
-                <span class="glyphicon glyphicon-plus"></span>
-                Add dataset
+            <ch-workflow-graph
+              [datasetsMap]="sessionData.datasetsMap"
+              [jobsMap]="sessionData.jobsMap"
+              [modulesMap]="sessionData.modulesMap"
+              [datasetSearch]="datasetSearch"
+              [zoom]="1"
+              [enabled]="true"></ch-workflow-graph>
+          </template>
+        </ngb-tab>
+
+        <ngb-tab index="1" title="Datasets">
+          <template ngbTabContent>
+            <div class="workflow-dataset-static-panel">
+              <div class="add-dataset-button">
+                <button class="btn btn-sm btn-success link-btn"
+                        (click)="openAddDatasetModal()">
+                  <span class="glyphicon glyphicon-plus"></span>
+                  Add dataset
+                </button>
+              </div>
+            </div>
+
+            <div id="dataset-list" class="list-group workflow-dataset-panel dataset-list" data-toggle="buttons">
+              <button type="button" class="list-group-item thin-list-group-item"
+                      ngClass="{active:isSelectedDataset(data)}"
+                      (click)="toggleDatasetSelection($event, data)"
+                      *ngFor="let data of getDatasetList() | datasetsearch:datasetSearch">
+                {{data.name}}
               </button>
             </div>
-          </div>
+          </template>
+        </ngb-tab>
 
-          <ch-workflow-graph
-            [datasets-map]="$ctrl.sessionData.datasetsMap"
-            [jobs-map]="$ctrl.sessionData.jobsMap"
-            [modules-map]="$ctrl.sessionData.modulesMap"
-            [dataset-search]="$ctrl.datasetSearch"
-            [on-delete]="$ctrl.onDelete"
-            [zoom]="1"
-            [enabled]="true"></ch-workflow-graph>
-
-        </uib-tab>
-
-        <uib-tab index="1" heading="Datasets">
-
-          <div class="workflow-dataset-static-panel">
-            <div class="add-dataset-button">
-              <button class="btn btn-sm btn-success link-btn"
-                      ng-click="$ctrl.openAddDatasetModal()">
-                <span class="glyphicon glyphicon-plus"></span>
-                Add dataset
-              </button>
+        <ngb-tab index="2" title="Details">
+          <template ngbTabContent>
+            <div class="row">
+              <div class="col-md-12">
+                <button class="btn btn-default"
+                        (click)="openCopySessionModal()">
+                  Copy session
+                  <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+                </button>
+                <button class="btn btn-default" (click)="downloadSession()">
+                  Save session file
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div id="dataset-list" class="list-group workflow-dataset-panel dataset-list" data-toggle="buttons">
-            <button type="button" class="list-group-item thin-list-group-item" ng-class="{active:$ctrl.isSelectedDataset(data)}"
-                    ng-click="$ctrl.toggleDatasetSelection($event, data)"
-                    ng-repeat="data in $ctrl.getDatasetList() | searchDatasetFilter:$ctrl.datasetSearch">
-              {{data.name}}
-            </button>
-          </div>
-
-        </uib-tab>
-
-        <uib-tab index="2" heading="Details">
-          <div class="row">
-            <div class="col-md-12">
-              <button class="btn btn-default"
-                      ng-click="$ctrl.openCopySessionModal()">
-                Copy session
-                <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
-              </button>
-              <button class="btn btn-default" ng-click="$ctrl.downloadSession()">
-                Save session file
-              </button>
+            <div class="row">
+              <div class="col-md-12">
+                <p>Created: {{sessionData.session.created | isodate }}</p>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <p>Created: {{$ctrl.sessionData.session.created | isoDate }}</p>
+            <div class="row">
+              <div class="col-md-12">
+                <p>Accessed: {{sessionData.session.accessed | isodate }}</p>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <p>Accessed: {{$ctrl.sessionData.session.accessed | isoDate }}</p>
+            <div class="row">
+              <div class="col-md-12">
+              <textarea id="session-notes" rows="15" placeholder="Session notes"
+                        (blur)="sessionDataService.updateSession(sessionData.session).subscribe()"
+                        [(ngModel)]="sessionData.session.notes">
+              </textarea>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-                        <textarea id="session-notes" rows="15" placeholder="Session notes"
-                                  ng-blur="$ctrl.sessionDataService.updateSession($ctrl.sessionData.session).subscribe()"
-                                  ng-model="$ctrl.sessionData.session.notes">
-                        </textarea>
-            </div>
-          </div>
-        </uib-tab>
-      </uib-tabset>
+          </template>
+        </ngb-tab>
+      </ngb-tabset>
     </div>
 
   </div>

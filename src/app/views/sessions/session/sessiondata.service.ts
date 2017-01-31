@@ -16,12 +16,12 @@ import {Observable} from "rxjs";
 export default class SessionDataService {
 
   constructor(@Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
-              @Inject('SessionResource') private sessionResource: SessionResource,
+              private sessionResource: SessionResource,
               @Inject('$window') private $window: IWindowService,
               private configService: ConfigService,
               private tokenService: TokenService,
               private selectionService: SelectionService,
-              @Inject('FileResource') private fileResource: FileResource) {
+              private fileResource: FileResource) {
   }
 
   getSessionId() : string {

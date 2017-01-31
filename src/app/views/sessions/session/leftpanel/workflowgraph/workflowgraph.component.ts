@@ -26,12 +26,11 @@ export class WorkflowGraphComponent {
   @Input() jobsMap: Map<string, Job>;
   @Input() modulesMap: Map<string, Module>;
   @Input() datasetSearch: string;
-  @Output() onDelete: EventEmitter<any> = new EventEmitter();
   @Input() zoom: number;
   @Input() enabled: boolean;
 
-  constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,
-              @Inject('SessionEventService') private sessionEventService: SessionEventService,
+  constructor(private sessionDataService: SessionDataService,
+              private sessionEventService: SessionEventService,
               private SelectionService: SelectionService,
               private pipeService: PipeService,
               private workflowGraphService: WorkflowGraphService) {
@@ -91,8 +90,6 @@ export class WorkflowGraphComponent {
       });
 
     this.svg = this.outerSvg.append('g');
-
-    this.updateSvgSize();
 
     // order of these appends will determine the drawing order
     this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node');
@@ -155,11 +152,15 @@ export class WorkflowGraphComponent {
     }
   }
 
+
+
   ngDoCheck() {
     if (this.svg) {
       // it seems that there is no easy way to listen for div's size changes
       // running this on every digest cycle might be close enough
-      this.updateSvgSize();
+
+
+      // TODO this.updateSvgSize();
     }
   }
 

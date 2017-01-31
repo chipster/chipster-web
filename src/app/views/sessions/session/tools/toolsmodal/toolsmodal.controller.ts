@@ -15,7 +15,7 @@ import * as _ from "lodash";
 
 export default class ToolsModalController {
 
-    static $inject = ['$uibModalInstance', '$uibModal', '$scope', '$filter', '$q','selectedTool', 'selectedCategory', 'selectedModule',
+    static $inject = ['$uibModalInstance', '$uibModal', '$scope', '$filter', 'selectedTool', 'selectedCategory', 'selectedModule',
         'inputBindings', 'selectedDatasets', 'ToolService', 'TSVReader','SessionDataService', 'modules', 'tools'];
 
     private searchTool: string;
@@ -31,7 +31,6 @@ export default class ToolsModalController {
         private $uibModal: any,
         private $scope: ng.IScope,
         private $filter: IChipsterFilter,
-        private $q: ng.IQService,
         private selectedTool: Tool,
         private selectedCategory: Category,
         private selectedModule: Module,

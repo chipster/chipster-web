@@ -22,7 +22,6 @@ export class ToolBoxComponent {
     @Input() tools: Array<Tool>;
 
     constructor(
-        @Inject('$q') private $q: ng.IQService,
         private ToolService: ToolService,
         private SessionDataService: SessionDataService,
         private SelectionService: SelectionService) {

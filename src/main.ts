@@ -30,13 +30,12 @@ import JobErrorModalController from "app/views/sessions/session/joberrormodal/jo
 import SessionResource from "app/shared/resources/session.resource";
 import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
-import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
 import {SessionComponent} from "app/views/sessions/session/session.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
-import LeftPanelComponent from "app/views/sessions/session/leftpanel/leftpanel.component";
 
+import {LeftPanelComponent} from "app/views/sessions/session/leftpanel/leftpanel.component";
 import {SingleDatasetComponent} from "app/views/sessions/session/selectiondetails/singledataset/singledataset.component";
 import {VennDiagram} from "app/views/sessions/session/visualization/venndiagram/venndiagram";
 import {TSVReader} from "app/shared/services/TSVReader";
@@ -88,6 +87,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chSession', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionComponent))
     .directive('chToolbox', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolBoxComponent))
     .directive('chVisualizations', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VisualizationsComponent))
+    .directive('chLeftpanel', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LeftPanelComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -114,7 +114,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .filter('bytesFilter', bytesFilter )
 
     // Last to be upgraded
-    .component('leftPanel', LeftPanelComponent)
     .controller('ToolsModalController', ToolsModalController)
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
@@ -186,6 +185,5 @@ upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('$websocket');
-
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

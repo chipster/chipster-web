@@ -5,35 +5,35 @@ import UtilsService from "../../../../shared/utilities/utils";
 import SessionResource from "../../../../shared/resources/session.resource";
 import SelectionService from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
-import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import * as _ from "lodash";
 import {SessionData} from "../../../../model/session/session-data";
 import SessionEventService from "../sessionevent.service";
+import {Component, Inject, Input, Output} from "@angular/core";
+import {EventEmitter} from "@angular/common/src/facade/async";
 
-class LeftPanelComponent {
 
-  sessionData: SessionData;
+@Component({
+  selector: 'ch-leftpanel',
+  templateUrl: './leftpanel.component.html'
+})
+export class LeftPanelComponent {
+
+  @Input() sessionData: SessionData;
   private isCopying = false;
   datasetSearch: string;
   private selectedTab = 1;
-
-  static $inject = [
-    'SessionResource', 'SessionDataService', 'SessionEventService', '$uibModal', '$scope', 'SelectionService',
-    'SessionWorkerResource', '$filter'];
 
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
-    private $uibModal: ng.ui.bootstrap.IModalService,
-    private $scope: ng.IScope,
     private selectionService: SelectionService,
-    private sessionWorkerResource: SessionWorkerResource,
-    private $filter: IChipsterFilter,) {
+    private sessionWorkerResource: SessionWorkerResource) {}
 
+  ngOnInit() {
     this.sessionEventService.getSessionStream().subscribe(() => {
       // someone else has updated the session notes or the session name, show it
-      this.$scope.$apply();
+      // this.$scope.$apply();
     });
   }
 
@@ -41,7 +41,11 @@ class LeftPanelComponent {
     if (e.keyCode == 13) { // enter
       // select highlighted datasets
       var allDatasets = this.getDatasetList();
-      this.selectionService.setSelectedDatasets(this.$filter('searchDatasetFilter')(allDatasets, this.datasetSearch));
+
+
+      // TODO - fix: commented out on angular2 upgrade
+      // this.selectionService.setSelectedDatasets(IChipsterFilter['searchDatasetFilter'](allDatasets, this.datasetSearch));
+
       this.datasetSearch = null;
     }
     if (e.keyCode == 27) { // escape key
@@ -142,13 +146,3 @@ class LeftPanelComponent {
     });
   }
 }
-
-export default {
-  controller: LeftPanelComponent,
-  templateUrl: './leftpanel.component.html',
-  bindings: {
-    onDelete: '&',
-    sessionData: '<'
-  }
-}
-

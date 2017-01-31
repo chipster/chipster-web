@@ -2,9 +2,7 @@
 
     <!-- Start of Workflow View -->
     <div class="col-md-4">
-        <!--<left-panel-->
-          <!--on-delete="deleteDatasetsLater()"-->
-          <!--session-data="sessionData"></left-panel>-->
+        <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
 
         <div *ngIf="deletedDatasets" class="well dataset-delete-undo-well">
             <button type="button" class="close close-well-button"
