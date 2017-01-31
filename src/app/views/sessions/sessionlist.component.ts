@@ -4,12 +4,12 @@ import {SessionWorkerResource} from "../../shared/resources/sessionworker.resour
 import Session from "../../model/session/session";
 import * as angular from 'angular';
 import {SessionData} from "../../model/session/session-data";
-import {Observable} from "rxjs";
 import {Component, Inject} from "@angular/core";
 
 @Component({
   selector: 'ch-session-list',
-  templateUrl: './sessionlist.html'
+  templateUrl: './sessionlist.html',
+  styleUrls: ['./sessionlist.less']
 })
 export class SessionListComponent {
 

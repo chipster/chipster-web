@@ -7,9 +7,8 @@
         <h4>Open session</h4>
       </div>
       <div class="col-md-6">
-        <button class="btn btn-sm btn-success pull-right"
-                (click)="createSession()">
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        <button class="btn btn-sm btn-default pull-right" (click)="createSession()">
+          <span class="fa fa-plus" aria-hidden="true"></span>
           New session
         </button>
       </div>
@@ -21,26 +20,27 @@
         <tr *ngFor="let session of userSessions"
             (mouseover)="selectSession($event, session)"
             (click)="openSession(session)">
-          <td class="text-left text-nowrap link-cursor">{{session.name}}</td>
           <td>
-            <button class="btn btn-default btn-xs pull-right no-border"
-                    (click)="deleteSession(session); $event.stopImmediatePropagation();"
-                    title="Delete session">
-              <span class="glyphicon glyphicon-remove"></span>
-            </button>
+            <span>{{session.name}}
+              <button class="btn btn-default btn-xs pull-right no-border"
+                      (click)="deleteSession(session); $event.stopImmediatePropagation();"
+                      title="Delete session"><span class="fa fa-times"></span>
+              </button>
+            </span>
           </td>
+
         </tr>
         </tbody>
       </table>
 
       <!--<button class="btn btn-sm btn-info"-->
-              <!--ng-click="$ctrl.openSessionFile($event)">-->
-        <!--Open session file-->
-        <!--<i ng-if="$ctrl.isOpening" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>-->
+      <!--ng-click="$ctrl.openSessionFile($event)">-->
+      <!--Open session file-->
+      <!--<i ng-if="$ctrl.isOpening" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>-->
       <!--</button>-->
-       <!--hidden file input to open file dialog -->
+      <!--hidden file input to open file dialog -->
       <!--<input id="open-session-file-input" type="file" ng-show="false"-->
-             <!--custom-on-change="$ctrl.uploadSessionFile($event, files)"/>-->
+      <!--custom-on-change="$ctrl.uploadSessionFile($event, files)"/>-->
 
       <!-- Example Sessions -->
       <h4>Example sessions</h4>
@@ -60,17 +60,17 @@
     <!--<h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>-->
 
     <!--<div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">-->
-      <!--<p>{{selectedSessions[0].notes}}</p>-->
-<!---->
-      <!--<div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">-->
-        <!--<ch-workflow-graph-->
-          <!--datasets-map="sessionData.datasetsMap"-->
-          <!--jobs-map="sessionData.jobsMap"-->
-          <!--modules-map="sessionData.modulesMap"-->
-          <!--zoom="0.5"-->
-          <!--enabled="false">-->
-        <!--</ch-workflow-graph>-->
-      <!--</div>-->
+    <!--<p>{{selectedSessions[0].notes}}</p>-->
+    <!---->
+    <!--<div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">-->
+    <!--<ch-workflow-graph-->
+    <!--datasets-map="sessionData.datasetsMap"-->
+    <!--jobs-map="sessionData.jobsMap"-->
+    <!--modules-map="sessionData.modulesMap"-->
+    <!--zoom="0.5"-->
+    <!--enabled="false">-->
+    <!--</ch-workflow-graph>-->
+    <!--</div>-->
     <!--</div>-->
   </div>
 </div><!--end of row-->
