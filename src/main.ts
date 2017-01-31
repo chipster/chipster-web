@@ -31,9 +31,8 @@ import JobErrorModalController from "app/views/sessions/session/joberrormodal/jo
 import SessionResource from "app/shared/resources/session.resource";
 import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
-import sessionList from "app/views/sessions/sessionlist.component";
 import VisualizationBoxComponent from "app/views/sessions/session/visualization/visualizationbox.component";
-import SessionComponent from "app/views/sessions/session/session.component";
+import {SessionComponent} from "app/views/sessions/session/session.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
@@ -85,6 +84,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chSingleDataset', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SingleDatasetComponent))
     .directive('chWorkflowGraph', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(WorkflowGraphComponent))
     .directive('chSessionList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionListComponent))
+    .directive('chSession', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -124,7 +124,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('JobErrorModalController', JobErrorModalController)
     .controller('AddColumnController', AddColumnController)
     .component('visualizationBox', VisualizationBoxComponent)
-    .component('session', SessionComponent)
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);
@@ -174,6 +173,7 @@ upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');
 upgradeAdapter.upgradeNg1Provider('$rootScope');
 upgradeAdapter.upgradeNg1Provider('$routeParams');
+upgradeAdapter.upgradeNg1Provider('$route');
 upgradeAdapter.upgradeNg1Provider('AuthenticationService');
 upgradeAdapter.upgradeNg1Provider('TokenService');
 upgradeAdapter.upgradeNg1Provider('ConfigurationResource');

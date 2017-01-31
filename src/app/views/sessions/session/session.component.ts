@@ -1,5 +1,4 @@
 
-import {IChipsterFilter} from "../../../common/filter/chipsterfilter";
 import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
 import SelectionService from "./selection.service";
@@ -8,12 +7,13 @@ import Job from "../../../model/session/job";
 import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
+import {Component, Inject} from "@angular/core";
 
-class SessionComponent {
-
-    static $inject = [
-        '$scope', '$routeParams', '$window', '$location', '$filter', '$log', '$uibModal',
-        'SessionEventService', 'SessionDataService', 'SelectionService', '$route'];
+@Component({
+  selector: 'ch-session',
+  templateUrl: './session.component.html'
+})
+export class SessionComponent {
 
     toolDetailList: any = null;
     sessionData: SessionData;
@@ -21,20 +21,15 @@ class SessionComponent {
     deletedDatasetsTimeout: any;
 
     constructor(
-        private $scope: ng.IScope,
-        private $routeParams: ng.route.IRouteParamsService,
-        private $window: ng.IWindowService,
-        private $location: ng.ILocationService,
-        private $filter: IChipsterFilter,
-        private $log: ng.ILogService,
-        private $uibModal: ng.ui.bootstrap.IModalService,
+        @Inject('$scope') private $scope: ng.IScope,
+        @Inject('$location') private $location: ng.ILocationService,
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
-        private $route: ng.route.IRouteService) {
+        @Inject('$route') private $route: ng.route.IRouteService) {
     }
 
-    $onInit() {
+    ngOnInit() {
       this.sessionData = this.$route.current.locals['sessionData'];
 
       // start listening for remote changes
@@ -65,17 +60,17 @@ class SessionComponent {
           // if the job has just failed
           if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
             this.openErrorModal('Job failed', newValue);
-            this.$log.info(newValue);
+            console.info(newValue);
           }
           if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
             this.openErrorModal('Job error', newValue);
-            this.$log.info(newValue);
+            console.info(newValue);
           }
         }
       });
     }
 
-    $onDestroy() {
+    ngOnDestroy() {
       this.SessionEventService.unsubscribe();
     }
 
@@ -171,7 +166,7 @@ class SessionComponent {
     }
 
     openErrorModal(title: string, job: Job) {
-        this.$uibModal.open({
+      this.$uibModal.open({
             animation: true,
             templateUrl: './joberrormodal/joberrormodal.html',
             controller: 'JobErrorModalController',
@@ -189,10 +184,4 @@ class SessionComponent {
             }
         });
     }
-}
-
-
-export default {
-    controller: SessionComponent,
-    templateUrl: './session.component.html'
 }

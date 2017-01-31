@@ -16,7 +16,7 @@ export default function($routeProvider: ng.route.IRouteProvider) {
             authenticated: true
         })
         .when('/sessions/:sessionId', <IAuthRoute>{
-            template: '<session></session>',
+            template: '<ch-session></ch-session>',
             authenticated: true,
             resolve: {
                 sessionData: ($route: ng.route.IRouteService, SessionResource: SessionResource) => {

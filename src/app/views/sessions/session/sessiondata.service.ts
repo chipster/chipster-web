@@ -7,12 +7,10 @@ import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
-import * as _ from "lodash";
 import * as angular from 'angular';
 import {Injectable, Inject} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
-import {Response} from "@angular/http";
 
 @Injectable()
 export default class SessionDataService {
@@ -22,7 +20,6 @@ export default class SessionDataService {
               @Inject('$window') private $window: IWindowService,
               private configService: ConfigService,
               private tokenService: TokenService,
-              @Inject('$uibModal') private $uibModal: any,
               private selectionService: SelectionService,
               @Inject('FileResource') private fileResource: FileResource) {
   }
@@ -131,6 +128,7 @@ export default class SessionDataService {
   }
 
   openDatasetHistoryModal() {
+    /*
     this.$uibModal.open({
       templateUrl: './datasethistorymodal/datasethistorymodal.html',
       controller: 'DatasetHistoryModalController',
@@ -142,6 +140,7 @@ export default class SessionDataService {
         }.bind(this)
       }
     })
-  };
+    */
+  }
 }
 

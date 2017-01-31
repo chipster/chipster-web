@@ -2,16 +2,16 @@
 
     <!-- Start of Workflow View -->
     <div class="col-md-4">
-        <left-panel
-          on-delete="$ctrl.deleteDatasetsLater()"
-          session-data="$ctrl.sessionData"></left-panel>
+        <!--<left-panel-->
+          <!--on-delete="deleteDatasetsLater()"-->
+          <!--session-data="sessionData"></left-panel>-->
 
-        <div ng-if="$ctrl.deletedDatasets" class="well dataset-delete-undo-well">
+        <div *ngIf="deletedDatasets" class="well dataset-delete-undo-well">
             <button type="button" class="close close-well-button"
-                    ng-click="$ctrl.deleteDatasetsNow()">&times</button>
-            <span ng-if="$ctrl.deletedDatasets.length === 1">Dataset {{$ctrl.deletedDatasets[0].name}} deleted</span>
-            <span ng-if="$ctrl.deletedDatasets.length !== 1">{{$ctrl.deletedDatasets.length}} datasets deleted</span>
-            <a class="pull-right" ng-click="$ctrl.deleteDatasetsUndo()">Undo</a>
+                    (click)="deleteDatasetsNow()">&times</button>
+            <span *ngIf="deletedDatasets.length === 1">Dataset {{deletedDatasets[0].name}} deleted</span>
+            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} datasets deleted</span>
+            <a class="pull-right" (click)="deleteDatasetsUndo()">Undo</a>
         </div>
     </div>
 
@@ -19,30 +19,30 @@
 
         <div class="row">
             <div class="col-md-12">
-                <tools-box
-                        modules="$ctrl.sessionData.modules"
-                        tools="$ctrl.sessionData.tools"></tools-box>
+                <!--<tools-box-->
+                        <!--modules="sessionData.modules"-->
+                        <!--tools="sessionData.tools"></tools-box>-->
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-12">
-              <ch-job ng-if="$ctrl.selectionService.selectedJobs.length > 0"></ch-job>
-                <ch-single-dataset
-                        [dataset]="$ctrl.selectionService.selectedDatasets[0]"
-                        [jobs]="$ctrl.sessionData.jobsMap"
-                        (on-delete)="$ctrl.deleteDatasetsLater()"
-                        ng-if="$ctrl.selectionService.selectedDatasets.length === 1"></ch-single-dataset>
-                <ch-dataset-details
-                        (on-delete)="$ctrl.deleteDatasetsLater()"
-                        ng-if="$ctrl.selectionService.selectedDatasets.length > 1"></ch-dataset-details>
+              <!--<ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>-->
+                <!--<ch-single-dataset-->
+                        <!--[dataset]="selectionService.selectedDatasets[0]"-->
+                        <!--[jobs]="sessionData.jobsMap"-->
+                        <!--(on-delete)="deleteDatasetsLater()"-->
+                        <!--*ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>-->
+                <!--<ch-dataset-details-->
+                        <!--(on-delete)="deleteDatasetsLater()"-->
+                        <!--*ngIf="selectionService.selectedDatasets.length > 1"></ch-dataset-details>-->
             </div>
         </div>
 
         <!-- Visualization -->
         <div class="row">
             <div class="col-md-12">
-                <visualization-box ng-if="$ctrl.selectionService.selectedDatasets.length > 0"></visualization-box>
+                <!--<visualization-box *ngIf="selectionService.selectedDatasets.length > 0"></visualization-box>-->
             </div>
         </div>
 
