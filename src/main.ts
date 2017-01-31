@@ -168,7 +168,6 @@ angular.module('chipster-web').config(
 
     });
 
-upgradeAdapter.upgradeNg1Provider('$http');
 upgradeAdapter.upgradeNg1Provider('$q');
 upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');
