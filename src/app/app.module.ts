@@ -9,6 +9,7 @@ import ConfigService from "./shared/services/config.service";
 import {HomeComponent} from "./views/home/home.component";
 import {SessionModule} from "./views/sessions/session/session.module";
 import {CoreModule} from "./core/core.module";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
     imports: [
@@ -16,7 +17,8 @@ import {CoreModule} from "./core/core.module";
       HttpModule,
       FormsModule,
       CoreModule,
-      SessionModule
+      SessionModule,
+      NgbModule.forRoot()
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
     providers: [ SelectionService ]
