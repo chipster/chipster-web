@@ -3,30 +3,30 @@
 
     <div class="row">
         <div class="col-md-2">
-            <button class="btn btn-info min-width-button" ng-click="$ctrl.openToolsModal()">
+            <button class="btn btn-info min-width-button" (click)="openToolsModal()">
                 Tools...
             </button>
         </div>
 
         <div class="col-md-8">
-            <h5 ng-if="!$ctrl.selectedTool"><span class="glyphicon glyphicon-arrow-left"></span>
-                Use the <button class="btn btn-info btn-xs" ng-click="$ctrl.openToolsModal()">Tools...</button>
+            <h5 *ngIf="!selectedTool"><span class="glyphicon glyphicon-arrow-left"></span>
+                Use the <button class="btn btn-info btn-xs" (click)="openToolsModal()">Tools...</button>
                 button or press 'T' to view and select tools</h5>
 
-            <ch-tool-title ng-if="$ctrl.selectedTool"
-                        [module]="$ctrl.selectedModule.name"
-                        [category]="$ctrl.selectedCategory.name"
-                        [tool]="$ctrl.selectedTool.name.displayName">
+            <ch-tool-title *ngIf="selectedTool"
+                        [module]="selectedModule.name"
+                        [category]="selectedCategory.name"
+                        [tool]="selectedTool.name.displayName">
             </ch-tool-title>
-                <!--$ctrl.selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
+                <!--selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
 
                 <!--<span class="glyphicon glyphicon-triangle-right"></span>-->
 
         </div>
 
         <div class="col-md-2">
-            <button class="btn btn-success min-width-button pull-right" ng-click="$ctrl.runJob()"
-                    ng-disabled="!$ctrl.isRunEnabled()">
+            <button class="btn btn-success min-width-button pull-right" (click)="runJob()"
+                    [disabled]="!isRunEnabled()">
                 <span class="glyphicon glyphicon-play"></span> Run
             </button>
         </div>

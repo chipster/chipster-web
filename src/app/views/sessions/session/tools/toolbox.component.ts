@@ -7,21 +7,22 @@ import Dataset from "../../../../model/session/dataset";
 import Tool from "../../../../model/session/tool";
 import InputBinding from "../../../../model/session/inputbinding";
 import SelectionService from "../selection.service";
-import {IChipsterFilter} from "../../../../common/filter/chipsterfilter";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
+import {Component, Input, Inject} from "@angular/core";
 
-class ToolsBox {
 
-    static $inject = [
-        '$filter', '$log', '$q', '$uibModal', 'ToolService', 'SessionDataService',
-        'SelectionService'];
+@Component({
+  selector: 'ch-toolbox',
+  templateUrl: './tools.html'
+})
+export class ToolBoxComponent {
+
+    @Input() modules: Array<Module>;
+    @Input() tools: Array<Tool>;
 
     constructor(
-        private $filter: IChipsterFilter,
-        private $log: ng.ILogService,
-        private $q: ng.IQService,
-        private $uibModal: any,
+        @Inject('$q') private $q: ng.IQService,
         private ToolService: ToolService,
         private SessionDataService: SessionDataService,
         private SelectionService: SelectionService) {
@@ -37,7 +38,7 @@ class ToolsBox {
     modules: Module[];
     tools: Tool[]; // TODO remove?
 
-    $onInit() {
+    ngOnInit() {
         this.modules = _.cloneDeep(this.modules);
         this.selectedDatasets = this.SelectionService.selectedDatasets;
 
@@ -46,7 +47,7 @@ class ToolsBox {
 
 
     // watch for data selection changes
-    $doCheck() {
+    ngDoCheck() {
         if (this.selectedDatasets && (this.selectedDatasets.length !== this.SelectionService.selectedDatasets.length ||
             !Utils.equalStringArrays( Utils.getDatasetIds(this.selectedDatasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets))) ) {
 
@@ -55,7 +56,7 @@ class ToolsBox {
 
             // bind if tool selected
             if (this.selectedTool) {
-                this.$log.info("dataset selection changed -> binding inputs");
+                console.info("dataset selection changed -> binding inputs");
                 this.inputBindings = this.ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
             }
         }
@@ -100,7 +101,7 @@ class ToolsBox {
 
         // TODO bindings done already?
         if (!this.inputBindings) {
-            this.$log.warn("no input bindings before running a job, binding now");
+            console.warn("no input bindings before running a job, binding now");
             this.inputBindings = this.ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
         }
 
@@ -188,13 +189,3 @@ class ToolsBox {
     }
 
 }
-
-export default {
-    bindings: {
-        modules: '<',
-        tools: '<' // TODO remove?
-    },
-    templateUrl: './tools.html',
-    controller: ToolsBox
-}
-

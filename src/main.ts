@@ -14,7 +14,6 @@ import SessionDataService from "app/views/sessions/session/sessiondata.service";
 import SelectionService from "app/views/sessions/session/selection.service";
 import searchDatasetFilter from "app/common/filter/searchdataset.filter";
 import FileResource from "app/shared/resources/fileresource";
-import ToolsBoxComponent from "app/views/sessions/session/tools/toolsbox.component";
 import isoDateFilter from "app/common/filter/isodate.filter"
 import categoryFilter from "app/common/filter/category.filter";
 import moduleFilter from "app/common/filter/module.filter";
@@ -60,6 +59,7 @@ import {WorkflowGraphComponent} from "./app/views/sessions/session/leftpanel/wor
 import {RestService} from "./app/core/rest-services/restservice/rest.service";
 import {TokenService} from "./app/core/authentication/token.service";
 import {SessionListComponent} from "./app/views/sessions/sessionlist.component";
+import {ToolBoxComponent} from "./app/views/sessions/session/tools/toolbox.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -85,6 +85,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chWorkflowGraph', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(WorkflowGraphComponent))
     .directive('chSessionList', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionListComponent))
     .directive('chSession', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionComponent))
+    .directive('chToolbox', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolBoxComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -112,7 +113,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
 
     // Last to be upgraded
     .component('leftPanel', LeftPanelComponent)
-    .component('toolsBox', ToolsBoxComponent)
     .controller('ToolsModalController', ToolsModalController)
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
