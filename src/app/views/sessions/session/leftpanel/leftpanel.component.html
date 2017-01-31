@@ -49,8 +49,9 @@
               </div>
             </div>
 
-            <div id="dataset-list" class="list-group workflow-dataset-panel dataset-list" data-toggle="buttons">
-              <button type="button" class="list-group-item thin-list-group-item"
+            <div class="btn-group-vertical dataset-list">
+              <button type="button"
+                      class="btn btn-secondary"
                       ngClass="{active:isSelectedDataset(data)}"
                       (click)="toggleDatasetSelection($event, data)"
                       *ngFor="let data of getDatasetList() | datasetsearch:datasetSearch">
