@@ -18,9 +18,7 @@ export class VisualizationsComponent {
 
     constructor(
         private SelectionService: SelectionService,
-        private SessionDataService: SessionDataService,
-        @Inject('$timeout') private $timeout: ng.ITimeoutService) {
-    }
+        private SessionDataService: SessionDataService) {}
 
     ngOnInit() {
         this.datasets = [];
@@ -35,7 +33,7 @@ export class VisualizationsComponent {
             // set timeout with 0 forces removing tab content from dom
             // so that tab content will be drawn again. Otherwise tab-content
             // won't change since it's not listening dataset selection changes
-            this.$timeout( () => {
+            setTimeout( () => {
                 this.active = _.first(this.getPossibleVisualizations());
             }, 0);
         }
