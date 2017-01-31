@@ -1,27 +1,29 @@
-<nav class="navbar navbar-default"> <!-- navbar-fixed-top -->
-    <div class="container-fluid">
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
 
-        <div class="navbar-header">
-            <a class="navbar-brand active" href="#/home">Chipster</a>
-        </div>
+  <a class="navbar-brand" href="#">Chipster</a>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#/home">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#/sessions">Sessions</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#/jobs">Jobs</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#/manual">Manual</a>
+      </li>
+    </ul>
+  </div>
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse"
-             id="bs-example-navbar-collapse-1"
-             style="text-align: center">
-            <ul class="nav navbar-nav">
-                <li><a href="#/sessions">Sessions</a></li>
-                <li><a href="#/jobs">Jobs</a></li>
-                <li><a href="#/manual">Manual</a></li>
-            </ul>
 
-            <!--end navbar form-->
-            <ul class="nav navbar-nav navbar-right">
-                <li><p class="navbar-text">{{host | async}}</p></li>
-                <li><a href="#/login" *ngIf="isLoggedOut()">Login</a></li>
-                <li><a href="#/home" *ngIf="isLoggedIn()" (click)="logout()">Logout</a></li>
-            </ul>
-        </div>
+  <!--end navbar form-->
+  <ul class="nav justify-content-end">
+    <li style="padding-right: 20px"><span>{{host | async}}</span></li>
+    <li><a href="#/login" *ngIf="isLoggedOut()">Login</a></li>
+    <li><a href="#/home" *ngIf="isLoggedIn()" (click)="logout()">Logout</a></li>
+  </ul>
 
-    </div>
 </nav>
