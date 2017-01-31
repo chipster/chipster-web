@@ -15,6 +15,7 @@ import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
 import WorkflowGraphService from "./workflowgraph.service";
 import SessionEventService from "../../sessionevent.service";
+import * as _ from "lodash";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -92,10 +93,10 @@ export class WorkflowGraphComponent {
     this.svg = this.outerSvg.append('g');
 
     // order of these appends will determine the drawing order
-    this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node');
-    this.d3LinksGroup = this.svg.append('g').attr('class', 'link');
+    this.d3JobNodesGroup = this.svg.append('g').attr('class', 'job node').attr('id', 'd3JobNodesGroup');
+    this.d3LinksGroup = this.svg.append('g').attr('class', 'link').attr('id', 'd3LinksGroup');
     this.d3LinksDefsGroup = this.d3LinksGroup.append('defs');
-    this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node');
+    this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node').attr('id', 'd3DatasetNodesGroup');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
 
     // apply zoom
@@ -131,6 +132,7 @@ export class WorkflowGraphComponent {
     // show
     this.update();
     this.renderGraph();
+    this.setSVGSize();
   }
 
   ngOnChanges(changes: ng.IChangesObject<string>) {
@@ -152,33 +154,19 @@ export class WorkflowGraphComponent {
     }
   }
 
+  setSVGSize() {
+    const jobNodesRect = document.getElementById('d3JobNodesGroup').getBoundingClientRect();
+    const linksRect = document.getElementById('d3LinksGroup').getBoundingClientRect();
+    const datasetNodesRect = document.getElementById('d3DatasetNodesGroup').getBoundingClientRect();
 
+    const width = _.max([jobNodesRect.width, linksRect.width, datasetNodesRect.width]);
+    const height = _.max([jobNodesRect.height, linksRect.height, datasetNodesRect.height]);
 
-  ngDoCheck() {
-    if (this.svg) {
-      // it seems that there is no easy way to listen for div's size changes
-      // running this on every digest cycle might be close enough
-
-
-      // TODO this.updateSvgSize();
-    }
+    this.outerSvg.attr('width', width).attr('height', height);
+    this.background.attr('width', width).attr('height', height);
   }
 
-  updateSvgSize() {
 
-    const element = document.getElementById('workflowvisualization');
-
-    this.width = element.offsetWidth;
-    this.height = element.offsetHeight;
-
-    this.outerSvg
-      .attr('width', this.width)
-      .attr('height', this.height);
-
-    this.background
-      .attr('width', this.width)
-      .attr('height', this.height);
-  }
 
   update() {
 
