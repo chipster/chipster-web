@@ -20,7 +20,6 @@ export default class SessionDataService {
               @Inject('$window') private $window: IWindowService,
               private configService: ConfigService,
               private tokenService: TokenService,
-              private selectionService: SelectionService,
               private fileResource: FileResource) {
   }
 

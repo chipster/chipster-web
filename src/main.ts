@@ -60,6 +60,7 @@ import {TokenService} from "./app/core/authentication/token.service";
 import {SessionListComponent} from "./app/views/sessions/sessionlist.component";
 import {ToolBoxComponent} from "./app/views/sessions/session/tools/toolbox.component";
 import {VisualizationsComponent} from "./app/views/sessions/session/visualization/visualizationbox.component";
+import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -88,6 +89,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chToolbox', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolBoxComponent))
     .directive('chVisualizations', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VisualizationsComponent))
     .directive('chLeftpanel', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LeftPanelComponent))
+    .directive('chSessionEditModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionEditModalComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -119,7 +121,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('SourceModalController', SourceModalController)
     .directive('customOnChange', CustomOnChange)
     .controller('AddDatasetModalController', AddDatasetModalController)
-    .controller('SessionEditModalController', SessionEditModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
