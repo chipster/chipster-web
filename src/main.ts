@@ -63,7 +63,7 @@ import {AddDatasetModalComponent} from "./app/views/sessions/session/leftpanel/a
 import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
-        'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
+  'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
 
     // Angular 2
     .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))

@@ -1,6 +1,5 @@
 import ConfigService from "../../../shared/services/config.service";
 import SessionResource from "../../../shared/resources/session.resource";
-import IWebSocket = angular.websocket.IWebSocket;
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
@@ -29,7 +28,6 @@ export default class SessionEventService {
 
     constructor(private configService: ConfigService,
                 private tokenService: TokenService,
-                @Inject('$websocket') private $websocket: ng.websocket.IWebSocketProvider,
                 @Inject('SessionResource') private sessionResource: SessionResource){
     }
 
