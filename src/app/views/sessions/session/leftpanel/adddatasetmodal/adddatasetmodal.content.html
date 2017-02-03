@@ -1,0 +1,107 @@
+<div class="modal-header">
+  <h4 class="modal-title">Upload files</h4>
+  <button type="button" class="close" (click)="activeModal.close()">
+    <span>&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="container">
+    <div class="row">
+      <div class="col-3">
+        <span #browseFilesButton class="btn btn-small btn-success btn-block"><i
+          class="icon icon-file"></i>Upload File</span>
+      </div>
+      <div class="col-3">
+          <span #browserDirButton class="btn btn-small btn-success btn-block"><i
+            class="icon icon-folder-open"></i>Upload Folder</span>
+      </div>
+    </div>
+
+    <p></p>
+
+    <div class="row">
+      <div class="col-3">
+        <button class="btn btn-secondary btn-block" (click)="flow.pause()">
+          <i class="fa fa-pause" aria-hidden="true"></i>
+          Pause all
+        </button>
+      </div>
+      <div class="col-3">
+        <button class="btn btn-secondary btn-block" (click)="flow.resume()">
+          <i class="fa fa-play" aria-hidden="true"></i>
+          Resume all
+        </button>
+      </div>
+      <div class="col-3">
+        <button class="btn btn-secondary btn-block" (click)="flow.cancel()">
+          <i class="fa fa-times" aria-hidden="true"></i>
+          Cancel all
+        </button>
+      </div>
+
+      <div class="col-3">
+        <span *ngIf="flow.getSize()" class="badge badge-info">Total Size: {{flow.getSize() | bytes}}</span>
+        <br>
+        <span *ngIf="flow.timeRemaining()" class="badge badge-info">{{flow.timeRemaining() | secondspipe}} remaining</span>
+      </div>
+    </div>
+
+    <br>
+
+    <table class="table">
+      <thead>
+        <th>Filename</th>
+        <th>Size</th>
+        <th>Status</th>
+        <th style="width: 8rem;">Speed</th> <!-- keep the width fixed -->
+        <th>Actions</th>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of flow.files">
+
+          <td>
+            {{file.relativePath}}
+          </td>
+          <td>
+            {{file.size | bytes}}
+          </td>
+          <td>
+            <ngb-progressbar *ngIf="!file.error"
+                             [value]="file.progress() * 100"
+                             [max]="100"></ngb-progressbar>
+
+            <div class="alert alert-danger" role="alert" *ngIf="file.error">
+              <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+              Upload error: {{file.errorMessage}}
+            </div>
+          </td>
+          <td>
+            <span *ngIf="file.currentSpeed">{{file.currentSpeed | bytes}}/s</span>
+          </td>
+          <td>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="file.pause()"
+                    *ngIf="file.progress() != 0 && !file.paused && !file.isComplete()">
+              <i class="fa fa-pause" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="file.resume()"
+                    *ngIf="file.paused && !file.isComplete()">
+              <i class="fa fa-play" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="file.cancel()" *ngIf="!file.isComplete()">
+              <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<br>
+<br>
+<br>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="activeModal.close()">OK</button>
+</div>

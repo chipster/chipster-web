@@ -76,8 +76,8 @@ export class SessionListComponent {
             session.sessionId = sessionId;
             this.$uibModal.open({
                 animation: true,
-                templateUrl: './session/leftpanel/adddatasetmodal/adddatasetmodal.html',
-                controller: 'AddDatasetModalController',
+                templateUrl: './session/leftpanel/adddatasetmodal/adddatasetmodal.component.html',
+                controller: 'AddDatasetModalComponent',
                 controllerAs: 'vm',
                 bindToController: true,
                 size: 'lg',

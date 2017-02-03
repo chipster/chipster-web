@@ -6,11 +6,14 @@ import WorkflowGraphService from "./workflowgraph/workflowgraph.service";
 import {LeftPanelComponent} from "./leftpanel.component";
 import {FormsModule} from "@angular/forms";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import {AddDatasetModalComponent} from "./adddatasetmodal/adddatasetmodal.component";
+import {AddDatasetModalContent} from "./adddatasetmodal/adddatasetmodal.content";
 
 @NgModule({
   imports: [ CommonModule, SharedModule, FormsModule, NgbModule ],
-  declarations: [WorkflowGraphComponent, LeftPanelComponent],
+  declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent],
   providers: [WorkflowGraphService],
-  exports: [LeftPanelComponent]
+  exports: [LeftPanelComponent],
+  entryComponents: [AddDatasetModalContent]
 })
 export class LeftPanelModule { }

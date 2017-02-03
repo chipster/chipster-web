@@ -8,9 +8,7 @@ import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.
 import * as _ from "lodash";
 import {SessionData} from "../../../../model/session/session-data";
 import SessionEventService from "../sessionevent.service";
-import {Component, Inject, Input, Output} from "@angular/core";
-import {EventEmitter} from "@angular/common/src/facade/async";
-
+import {Component, Input} from "@angular/core";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -92,27 +90,6 @@ export class LeftPanelComponent {
 
   toggleDatasetSelection($event, data) {
     this.selectionService.toggleDatasetSelection($event, data, UtilsService.mapValues(this.sessionData.datasetsMap));
-  }
-
-  openAddDatasetModal() {
-    this.$uibModal.open({
-      animation: true,
-      templateUrl: './adddatasetmodal/adddatasetmodal.html',
-      controller: 'AddDatasetModalController',
-      controllerAs: 'vm',
-      bindToController: true,
-      size: 'lg',
-      resolve: {
-        datasetsMap: () => {
-          return new Map(this.sessionData.datasetsMap);
-        },
-        sessionId: () => {
-          return this.sessionDataService.getSessionId();
-        },
-        oneFile: () => false,
-        files: () => []
-      }
-    });
   }
 
   openCopySessionModal() {

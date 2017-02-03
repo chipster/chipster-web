@@ -25,6 +25,6 @@ import ConfigService from "./services/config.service";
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
   providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService],
-  exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe]
+  exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe]
 })
 export class SharedModule {  }
