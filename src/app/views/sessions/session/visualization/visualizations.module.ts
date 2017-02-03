@@ -17,10 +17,12 @@ import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../../shared/shared.module";
 import {VisualizationsComponent} from "./visualizationbox.component";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import { AddColumnModalComponent } from './phenodata/add-column-modal/add-column-modal.component';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
-  imports: [CommonModule, NgbModule, SharedModule],
-  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule],
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent, AddColumnModalComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService],
   exports: [VisualizationsComponent]
 })

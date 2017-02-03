@@ -1,0 +1,22 @@
+<button class="btn btn-default" ng-click="addColumnModal()">
+  <span class="glyphicon glyphicon-plus"></span>Add column
+</button>
+
+<template #addColumnModalRef let-close="close">
+<div class="modal-header">
+  <h4>Add new column</h4>
+</div>
+<!--end of modal header-->
+<div class="modal-body">
+  <div class="form-group">
+    <label>Column name</label>
+    <input type="text"
+           class="form-control"
+           [(ngModel)]="colName"
+           autofocus>
+  </div>
+  <!-- type "submit" reacts to enter key -->
+  <button type="submit" class="btn btn-info" (click)="addColumn()">Add</button>
+  <button type="button" class="btn btn-default pull-right" (click)="close">Cancel</button>
+</div>
+</template>

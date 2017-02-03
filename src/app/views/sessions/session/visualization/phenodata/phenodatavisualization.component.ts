@@ -13,8 +13,7 @@ import FileResource from "../../../../../shared/resources/fileresource";
 })
 export class PhenodataVisualizationComponent {
 
-    @Input()
-    private datasets: Array<Dataset>;
+    @Input() private datasets: Array<Dataset>;
 
     hot: ht.Methods;
     // name of the new column
@@ -27,14 +26,13 @@ export class PhenodataVisualizationComponent {
 
 
     constructor(
-        @Inject('SessionDataService') private sessionDataService: SessionDataService,
-        @Inject('$scope') private $scope: ng.IScope,
-        @Inject('$uibModal') private $uibModal: any,
+        private sessionDataService: SessionDataService,
         private fileResource: FileResource) {
     }
 
     ngOnInit() {
       this.updateView();
+      console.log('here');
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -317,27 +315,27 @@ export class PhenodataVisualizationComponent {
     }
 
     addColumnModal() {
-        var modalInstance = this.$uibModal.open({
-            animation: true,
-            templateUrl: './addcolumn.html',
-            controller: 'AddColumnController',
-            controllerAs: '$ctrl',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                hot: () => this.hot,
-                colName: () => this.colName,
-                datasets: () => this.datasets
-            }
-        });
-
-        modalInstance.result.then((result: any) => {
-            if(result === 'update') {
-                this.updateDatasets(false);
-            }
-        }, function () {
-            // modal dismissed
-        });
+        // var modalInstance = this.$uibModal.open({
+        //     animation: true,
+        //     templateUrl: './addcolumn.html',
+        //     controller: 'AddColumnController',
+        //     controllerAs: '$ctrl',
+        //     bindToController: true,
+        //     size: 'lg',
+        //     resolve: {
+        //         hot: () => this.hot,
+        //         colName: () => this.colName,
+        //         datasets: () => this.datasets
+        //     }
+        // });
+        //
+        // modalInstance.result.then((result: any) => {
+        //     if(result === 'update') {
+        //         this.updateDatasets(false);
+        //     }
+        // }, function () {
+        //     // modal dismissed
+        // });
     }
 
 }
