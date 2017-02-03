@@ -135,7 +135,7 @@ export class AddDatasetModalContent {
    */
 
   /**
-   * We have to poll the upload progress, because flow.js doens't send events of it.
+   * We have to poll the upload progress, because flow.js doesn't send events about it.
    *
    * Schedule a next view update after a second as long as flow.js has files.
    */
