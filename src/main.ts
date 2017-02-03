@@ -24,14 +24,13 @@ import ParameterModalController from "app/views/sessions/session/tools/parameter
 import ToolsModalController from "app/views/sessions/session/tools/toolsmodal/toolsmodal.controller";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
-import SessionEditModalController from "app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/shared/resources/session.resource";
 import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
 import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import {SessionComponent} from "app/views/sessions/session/session.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
-import AddColumnController from "app/views/sessions/session/visualization/phenodata/addcolumn.controller";
+import {AddColumnModalComponent} from "app/views/sessions/session/visualization/phenodata/add-column-modal/add-column-modal.component";
 import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 
 import {LeftPanelComponent} from "app/views/sessions/session/leftpanel/leftpanel.component";
@@ -61,6 +60,7 @@ import {ToolBoxComponent} from "./app/views/sessions/session/tools/toolbox.compo
 import {VisualizationsComponent} from "./app/views/sessions/session/visualization/visualizationbox.component";
 import {AddDatasetModalContent} from "./app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.content";
 import {AddDatasetModalComponent} from "./app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.component";
+import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
         'ngWebSocket', 'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -91,6 +91,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .directive('chLeftpanel', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LeftPanelComponent))
     .directive('chAddDatasetModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalComponent))
     .directive('chAddDatasetModalContant', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalContent))
+    .directive('chSessionEditModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionEditModalComponent))
+    .directive('chAddColumnModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddColumnModalComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -121,11 +123,9 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
     .directive('customOnChange', CustomOnChange)
-    .controller('SessionEditModalController', SessionEditModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
-    .controller('AddColumnController', AddColumnController)
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
     .config(RouteConfiguration);

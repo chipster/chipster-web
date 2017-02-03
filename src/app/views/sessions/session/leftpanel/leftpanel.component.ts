@@ -5,7 +5,6 @@ import UtilsService from "../../../../shared/utilities/utils";
 import SessionResource from "../../../../shared/resources/session.resource";
 import SelectionService from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
-import * as _ from "lodash";
 import {SessionData} from "../../../../model/session/session-data";
 import SessionEventService from "../sessionevent.service";
 import {Component, Input} from "@angular/core";
@@ -68,20 +67,6 @@ export class LeftPanelComponent {
     return UtilsService.mapValues(this.sessionData.datasetsMap);
   }
 
-  openSessionEditModal() {
-    var modalInstance = this.getSessionEditModal('Rename session', this.sessionData.session.name);
-
-    modalInstance.result.then( (result: string) => {
-      if (!result) {
-        result = 'unnamed session';
-      }
-      this.sessionData.session.name = result;
-      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
-    }, function () {
-      // modal dismissed
-    });
-  }
-
   downloadSession(): void {
     this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).subscribe((url) => {
       this.sessionDataService.download(url);
@@ -110,16 +95,4 @@ export class LeftPanelComponent {
     });
   }
 
-  getSessionEditModal(title: string, name: string) {
-    return this.$uibModal.open({
-      templateUrl: './sessioneditmodal/sessioneditmodal.html',
-      controller: 'SessionEditModalController',
-      controllerAs: 'vm',
-      bindToController: true,
-      resolve: {
-        title: () => _.cloneDeep(title),
-        name: () => _.cloneDeep(name)
-      }
-    });
-  }
 }

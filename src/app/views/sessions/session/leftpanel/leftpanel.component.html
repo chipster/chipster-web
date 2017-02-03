@@ -1,5 +1,8 @@
 <div class="sidebar">
-  <h4><span (click)="openSessionEditModal()">Session - {{sessionData.session.name}}</span></h4>
+
+
+  <ch-session-edit-modal [sessionData]="sessionData"></ch-session-edit-modal>
+
 
   <div class="chipster-highlight ">
     <div class="bar pull-right search-div">

@@ -7,9 +7,8 @@
         <span class="glyphicon glyphicon-asterisk"></span>
         Reset all
     </button>
-    <button class="btn btn-default" ng-click="addColumnModal()">
-        <span class="glyphicon glyphicon-plus"></span>Add column
-    </button>
+    <ch-add-column-modal [handsOnTable]="hot" [colName]="colName" [datasets]="datasets"></ch-add-column-modal>
+
 </div>
 
 <div id="tableContainer"></div>

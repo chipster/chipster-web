@@ -16,9 +16,7 @@ export class VisualizationsComponent {
     active: string;
     visualizations: Array<any> = visualizations;
 
-    constructor(
-        private SelectionService: SelectionService,
-        private SessionDataService: SessionDataService) {}
+    constructor( private SelectionService: SelectionService ) {}
 
     ngOnInit() {
         this.datasets = [];

@@ -8,10 +8,11 @@ import {FormsModule} from "@angular/forms";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {AddDatasetModalComponent} from "./adddatasetmodal/adddatasetmodal.component";
 import {AddDatasetModalContent} from "./adddatasetmodal/adddatasetmodal.content";
+import {SessionEditModalComponent} from "./sessioneditmodal/sessioneditmodal.component";
 
 @NgModule({
   imports: [ CommonModule, SharedModule, FormsModule, NgbModule ],
-  declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent],
+  declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent, SessionEditModalComponent],
   providers: [WorkflowGraphService],
   exports: [LeftPanelComponent],
   entryComponents: [AddDatasetModalContent]
