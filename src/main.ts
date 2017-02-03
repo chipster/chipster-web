@@ -62,7 +62,7 @@ import {AddDatasetModalContent} from "./app/views/sessions/session/leftpanel/add
 import {AddDatasetModalComponent} from "./app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.component";
 import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 
-angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate', 'flow',
+angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
   'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
 
     // Angular 2
@@ -134,41 +134,6 @@ angular.module('AuthenticationModule', [])
     .service('AuthenticationService', upgradeAdapter.downgradeNg2Provider(AuthenticationService))
     .service('TokenService', upgradeAdapter.downgradeNg2Provider(TokenService));
 
-
-
-angular.module('chipster-web').config(
-    function(flowFactoryProvider: any) {
-
-        flowFactoryProvider.defaults = {
-            // continuation from different browser session not implemented
-            testChunks : false,
-            method : 'octet',
-            uploadMethod : 'PUT',
-            // upload the chunks in order
-            simultaneousUploads : 1,
-            // don't spend time between requests too often
-            chunkSize : 50000000,
-            // fail on 409 Conflict
-            permanentErrors : [ 404, 409, 415, 500, 501 ],
-            // make numbers easier to read (default 500)
-            progressCallbacksInterval : 1000,
-            // manual's recommendation for big files
-            speedSmoothingFactor : 0.02
-        };
-        /*
-         * flowFactoryProvider.on('catchAll', function(event) {
-         * console.log('catchAll', arguments); });
-         */
-        // process errors here, because the error callback in html file
-        // doesn't have the chunk parameter
-        flowFactoryProvider.on('error', function(msg: string, file: any, chunk: any) {
-            file.errorMessage = chunk.xhr.status + ' '
-                + chunk.xhr.statusText + ': ' + msg;
-            file.errorMessageDetails = chunk.xhr.responseURL;
-        });
-
-    });
-
 upgradeAdapter.upgradeNg1Provider('$q');
 upgradeAdapter.upgradeNg1Provider('$element');
 upgradeAdapter.upgradeNg1Provider('$window');
@@ -187,6 +152,5 @@ upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('WorkflowGraphService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
-upgradeAdapter.upgradeNg1Provider('$websocket');
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);
