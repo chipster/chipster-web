@@ -9,6 +9,8 @@ import {Component, Input, Inject, ChangeDetectorRef, ViewChild} from '@angular/c
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Observable} from 'rxjs/Rx';
 
+declare var Flow: any;
+
 @Component({
   selector: 'ch-add-dataset-modal-content',
   templateUrl: './adddatasetmodal.content.html'
@@ -38,7 +40,7 @@ export class AddDatasetModalContent {
   }
 
   ngOnInit() {
-    this.flow = new window['Flow']({
+    this.flow = new Flow({
       // continuation from different browser session not implemented
       testChunks: false,
       method: 'octet',
