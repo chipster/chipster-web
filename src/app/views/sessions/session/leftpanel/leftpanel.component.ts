@@ -18,7 +18,6 @@ export class LeftPanelComponent {
   @Input() sessionData: SessionData;
   private isCopying = false;
   datasetSearch: string;
-  private selectedTab = 1;
 
   constructor(
     private sessionResource: SessionResource,
@@ -53,14 +52,6 @@ export class LeftPanelComponent {
 
   isSelectedDataset(dataset: Dataset) {
     return this.selectionService.isSelectedDataset(dataset);
-  }
-
-  setTab(tab: number) {
-    this.selectedTab = tab;
-  }
-
-  isTab(tab: number) {
-    return this.selectedTab === tab;
   }
 
   getDatasetList(): Dataset[] {
