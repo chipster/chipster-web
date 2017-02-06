@@ -38,7 +38,7 @@ export class AddDatasetModalContent {
   }
 
   ngOnInit() {
-    this.flow = new Flow({
+    this.flow = new window['Flow']({
       // continuation from different browser session not implemented
       testChunks: false,
       method: 'octet',
@@ -95,22 +95,21 @@ export class AddDatasetModalContent {
       return file.chipsterTarget;
     };
 
-    let promises = [
-      this.ConfigService.getFileBrokerUrl().toPromise(),
-      this.createDataset(this.sessionId, file.name).toPromise()
-    ];
+    Observable.forkJoin(
+      this.ConfigService.getFileBrokerUrl(),
+      this.createDataset(this.sessionId, file.name)
 
-    this.$q.all(promises).then((results: any) => {
-      let url: string = results[0];
-      let dataset: Dataset = results[1];
-      file.chipsterTarget = `${url}/sessions/${this.sessionId}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`;
-      file.resume();
-      this.datasetIds.push(dataset.datasetId);
+    ).subscribe((value: [string, Dataset]) => {
+        let url = value[0];
+        let dataset = value[1];
+        file.chipsterTarget = `${url}/sessions/${this.sessionId}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`;
+        file.resume();
+        this.datasetIds.push(dataset.datasetId);
     });
     file.pause();
   }
 
-  createDataset(sessionId: string, name: string) {
+  createDataset(sessionId: string, name: string): Observable<Dataset> {
     var d = new Dataset(name);
     console.info('createDataset', d);
     return this.sessionResource.createDataset(sessionId, d).map((datasetId: string) => {
