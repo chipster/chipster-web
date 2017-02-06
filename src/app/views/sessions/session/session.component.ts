@@ -31,7 +31,6 @@ export class SessionComponent {
 
     ngOnInit() {
       this.sessionData = this.$route.current.locals['sessionData'];
-
       // start listening for remote changes
       // in theory we may miss an update between the loadSession() and this subscribe(), but
       // the safe way would be much more complicated:

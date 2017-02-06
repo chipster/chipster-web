@@ -9,7 +9,7 @@ import InputBinding from "../../../../model/session/inputbinding";
 import SelectionService from "../selection.service";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
-import {Component, Input, Inject} from "@angular/core";
+import {Component, Input} from "@angular/core";
 
 
 @Component({
@@ -28,13 +28,11 @@ export class ToolBoxComponent {
     }
 
     //initialization
-    activeTab = 0;//defines which tab is displayed as active tab in the beginning
     selectedModule: Module = null;
     selectedCategory: Category = null;
     selectedTool: Tool = null;
     selectedDatasets: Dataset[] = [];
     inputBindings: InputBinding[] = null;
-    modules: Module[];
     tools: Tool[]; // TODO remove?
 
     ngOnInit() {
@@ -134,57 +132,6 @@ export class ToolBoxComponent {
         this.SessionDataService.createJob(job);
     }
 
-    openToolsModal() {
-        var modalInstance = this.$uibModal.open({
-            animation: true,
-            templateUrl: './toolsmodal/toolsmodal.html',
-            controller: 'ToolsModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                selectedTool: () => {
-                    return this.selectedTool;
-                },
-                selectedCategory: () => {
-                    return this.selectedCategory;
-                },
-                selectedModule: () => {
-                    return this.selectedModule;
-                },
-                inputBindings: () => {
-                    return this.inputBindings;
-                },
-                selectedDatasets: () => {
-                    return _.cloneDeep(this.SelectionService.selectedDatasets);
-                },
-                isRunEnabled: () => {
-                    return this.isRunEnabled();
-                },
-                modules: () => {
-                    return this.modules;
-                },
 
-                // TODO remove?
-                tools: () => {
-                    return _.cloneDeep(this.tools);
-                }
-            }
-        });
-
-        modalInstance.result.then((result: any) => {
-            // save settings
-            this.selectedTool = result.selectedTool;
-            this.selectedCategory = result.selectedCategory;
-            this.selectedModule = result.selectedModule;
-            this.inputBindings = result.inputBindings;
-
-            if (result.run) {
-                this.runJob();
-            }
-        }, function () {
-            // modal dismissed
-        });
-    }
 
 }

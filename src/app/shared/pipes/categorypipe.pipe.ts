@@ -10,7 +10,7 @@ export class CategoryPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}
 
   transform(categories: Array<Category>, searchWord: string): any {
-    this.pipeService.findCategoriesContainingTool(categories, searchWord);
+    return this.pipeService.findCategoriesContainingTool(categories, searchWord);
   }
 
 }

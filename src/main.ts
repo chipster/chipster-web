@@ -21,7 +21,7 @@ import toolFilter from "app/common/filter/tool.filter";
 import bytesFilter from "app/common/filter/bytes.filter";
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
-import ToolsModalController from "app/views/sessions/session/tools/toolsmodal/toolsmodal.controller";
+import {ToolsModalComponent} from "app/views/sessions/session/tools/toolsmodal/toolsmodal.component";
 import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
@@ -93,6 +93,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .directive('chAddDatasetModalContant', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalContent))
     .directive('chSessionEditModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionEditModalComponent))
     .directive('chAddColumnModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddColumnModalComponent))
+    .directive('chToolsModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(ToolsModalComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
     .service('ExpressionProfileTSVService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileTSVService))
     .service('ConfigService', upgradeAdapter.downgradeNg2Provider(ConfigService))
@@ -119,7 +120,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .filter('bytesFilter', bytesFilter )
 
     // Last to be upgraded
-    .controller('ToolsModalController', ToolsModalController)
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
     .directive('customOnChange', CustomOnChange)
