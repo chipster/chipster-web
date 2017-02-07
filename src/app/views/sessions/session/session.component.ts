@@ -31,7 +31,6 @@ export class SessionComponent {
 
     ngOnInit() {
       this.sessionData = this.$route.current.locals['sessionData'];
-
       // start listening for remote changes
       // in theory we may miss an update between the loadSession() and this subscribe(), but
       // the safe way would be much more complicated:
@@ -125,6 +124,7 @@ export class SessionComponent {
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
   deleteDatasetsLater() {
+
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 

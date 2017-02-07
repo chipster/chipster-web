@@ -1,6 +1,6 @@
 import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
-import {Component, OnInit, Input, ElementRef, ViewChild} from "@angular/core";
+import {Component, Input, ElementRef, ViewChild} from "@angular/core";
 import {SessionData} from "../../../../../model/session/session-data";
 import SessionDataService from "../../sessiondata.service";
 
@@ -18,7 +18,7 @@ export class SessionEditModalComponent {
               private sessionDataService: SessionDataService) {}
 
   openSessionEditModal() {
-    this.modalRef = this.modalService.open(this.sessionEditModalTemplate, name);
+    this.modalRef = this.modalService.open(this.sessionEditModalTemplate);
   }
 
   save() {

@@ -22,7 +22,6 @@ export class ToolListItemComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
 }

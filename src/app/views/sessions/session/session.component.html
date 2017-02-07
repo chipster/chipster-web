@@ -17,7 +17,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <ch-toolbox modules="sessionData.modules" tools="sessionData.tools"></ch-toolbox>
+                <ch-toolbox [modules]="sessionData.modules" [tools]="sessionData.tools"></ch-toolbox>
             </div>
         </div>
 
@@ -30,7 +30,7 @@
                   (on-delete)="deleteDatasetsLater()"
                   *ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>
                 <ch-dataset-details
-                  (on-delete)="deleteDatasetsLater()"
+                  (onDelete)="deleteDatasetsLater()"
                   *ngIf="selectionService.selectedDatasets.length > 1"></ch-dataset-details>
             </div>
         </div>

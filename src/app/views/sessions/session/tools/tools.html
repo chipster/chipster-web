@@ -3,9 +3,17 @@
 
     <div class="row">
         <div class="col-md-2">
-            <button class="btn btn-info min-width-button" (click)="openToolsModal()">
-                Tools...
-            </button>
+            <ch-tools-modal
+              [selectedTool] = "this.selectedTool"
+              [selectedCategory] = "this.selectedCategory"
+              [selectedModule] = "this.selectedModule"
+              [inputBindings] = "this.inputBindings"
+              [selectedDatasets] = "this.selectedDatasets"
+              [isRunEnabled] = "this.isRunEnabled"
+              [modules] = "this.modules"
+              [tools] = "this.tools">
+            </ch-tools-modal>
+
         </div>
 
         <div class="col-md-8">
@@ -18,9 +26,6 @@
                         [category]="selectedCategory.name"
                         [tool]="selectedTool.name.displayName">
             </ch-tool-title>
-                <!--selectedTool.name.displayName : 'No tool selected. Please use the Tools... button to view and select tools.'}}-->
-
-                <!--<span class="glyphicon glyphicon-triangle-right"></span>-->
 
         </div>
 
