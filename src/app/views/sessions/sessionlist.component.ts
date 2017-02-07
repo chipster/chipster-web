@@ -1,8 +1,6 @@
 
 import SessionResource from "../../shared/resources/session.resource";
-import {SessionWorkerResource} from "../../shared/resources/sessionworker.resource";
 import Session from "../../model/session/session";
-import * as angular from 'angular';
 import {SessionData} from "../../model/session/session-data";
 import {Component, Inject} from "@angular/core";
 
@@ -18,12 +16,9 @@ export class SessionListComponent {
     public userSessions: Session[];
     public sessionData: SessionData;
 
-    private isOpening = false;
-
     constructor(
         @Inject('$location') private $location:ng.ILocationService,
         private sessionResource:SessionResource,
-        private sessionWorkerResource:SessionWorkerResource,
         @Inject('$scope') private $scope: ng.IScope) {}
 
     ngOnInit() {
@@ -54,59 +49,6 @@ export class SessionListComponent {
 
     openSession(session: Session) {
         this.$location.path("/sessions" + "/" + session.sessionId);
-    }
-
-    openSessionFile(event: any) {
-    	// why is the file dialog triggered twice every now and then without this?
-    	event.stopImmediatePropagation();
-		/*
-		File dialog is opened by triggering a fake click event on the hidden file input.
-		Browsers allow the file input to open only if this is called directly from some
-		user generated event (like clicking a button).
-		 */
-
-        let input = document.getElementById('open-session-file-input');
-        angular.element(input).trigger('click'); // open dialog
-    }
-
-    uploadSessionFile(event: any, files: any) {
-        this.isOpening = true;
-        let session = new Session('New session');
-        return this.sessionResource.createSession(session).subscribe((sessionId: string) => {
-            session.sessionId = sessionId;
-            this.$uibModal.open({
-                animation: true,
-                templateUrl: './session/leftpanel/adddatasetmodal/adddatasetmodal.component.html',
-                controller: 'AddDatasetModalComponent',
-                controllerAs: 'vm',
-                bindToController: true,
-                size: 'lg',
-                resolve: {
-                    datasetsMap: () => {
-                        return new Map();
-                    },
-                    sessionId: () => {
-                        return sessionId;
-                    },
-                    oneFile: () => true,
-                    files: () => files
-                }
-            }).result.then((datasets: string[]) => {
-                console.log('session file uploaded');
-                console.log('extract session');
-                return this.sessionWorkerResource.extractSession(sessionId, datasets[0]).toPromise().then((warnings) => {
-                    console.log('extracted, warnings: ', warnings);
-                    return this.sessionResource.deleteDataset(sessionId, datasets[0]).toPromise();
-                }).then((res) => {
-                    console.log('uploaded session file deleted', res);
-                    console.log('change view');
-                    this.isOpening = false;
-                    this.$scope.$apply(() => {
-                        this.openSession(session);
-                    });
-                });
-            });
-        });
     }
 
     selectSession(event: any, session: Session) {

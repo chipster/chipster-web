@@ -60,7 +60,9 @@ import {ToolBoxComponent} from "./app/views/sessions/session/tools/toolbox.compo
 import {VisualizationsComponent} from "./app/views/sessions/session/visualization/visualizationbox.component";
 import {AddDatasetModalContent} from "./app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.content";
 import {AddDatasetModalComponent} from "./app/views/sessions/session/leftpanel/adddatasetmodal/adddatasetmodal.component";
+import {OpenSessionFile} from "./app/views/sessions/opensessionfile/opensessionfile.component";
 import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
+import UploadService from "./app/shared/services/upload.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
   'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -90,7 +92,8 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .directive('chVisualizations', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(VisualizationsComponent))
     .directive('chLeftpanel', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(LeftPanelComponent))
     .directive('chAddDatasetModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalComponent))
-    .directive('chAddDatasetModalContant', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalContent))
+    .directive('chAddDatasetModalContent', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddDatasetModalContent))
+    .directive('chOpenSessionFile', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(OpenSessionFile))
     .directive('chSessionEditModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SessionEditModalComponent))
     .directive('chAddColumnModal', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(AddColumnModalComponent))
     .service('ExpressionProfileService', upgradeAdapter.downgradeNg2Provider(ExpressionProfileService))
@@ -108,6 +111,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .service('SessionDataService', upgradeAdapter.downgradeNg2Provider(SessionDataService))
     .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
     .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
+    .service('UploadService', upgradeAdapter.downgradeNg2Provider(UploadService))
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
@@ -152,5 +156,7 @@ upgradeAdapter.upgradeNg1Provider('SessionDataService');
 upgradeAdapter.upgradeNg1Provider('SessionEventService');
 upgradeAdapter.upgradeNg1Provider('WorkflowGraphService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
+upgradeAdapter.upgradeNg1Provider('UploadService');
+upgradeAdapter.upgradeNg1Provider('SessionWorkerResource');
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

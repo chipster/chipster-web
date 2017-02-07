@@ -12,8 +12,6 @@ export class AddDatasetModalComponent {
 
   @Input() datasetsMap: Map<string, Dataset>;
   @Input() sessionId: string;
-  @Input() oneFile: boolean;
-  @Input() files: any[];
 
   constructor(private modalService: NgbModal) {
   }
@@ -22,7 +20,5 @@ export class AddDatasetModalComponent {
     const modalRef = this.modalService.open(AddDatasetModalContent, {size: "lg"});
     modalRef.componentInstance.datasetsMap = this.datasetsMap;
     modalRef.componentInstance.sessionId = this.sessionId;
-    modalRef.componentInstance.oneFile = this.oneFile;
-    modalRef.componentInstance.files = this.files;
   }
 }

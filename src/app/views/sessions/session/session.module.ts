@@ -10,11 +10,14 @@ import SessionEventService from "./sessionevent.service";
 import SessionDataService from "./sessiondata.service";
 import {SessionListComponent} from "../sessionlist.component";
 import {SessionComponent} from "./session.component";
+import {OpenSessionFile} from "../opensessionfile/opensessionfile.component";
+import UploadService from "../../../shared/services/upload.service";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
-  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule],
-  declarations: [SessionComponent, SessionListComponent],
-  providers: [SessionEventService, SessionDataService]
+  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule, NgbModule],
+  declarations: [SessionComponent, SessionListComponent, OpenSessionFile],
+  providers: [SessionEventService, SessionDataService, UploadService]
 })
 export class SessionModule{}
 
