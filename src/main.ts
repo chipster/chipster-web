@@ -31,7 +31,6 @@ import DatasetHistoryModalController from "app/views/sessions/session/datasethis
 import {SessionComponent} from "app/views/sessions/session/session.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import {AddColumnModalComponent} from "app/views/sessions/session/visualization/phenodata/add-column-modal/add-column-modal.component";
-import CustomOnChange from "app/views/sessions/fileinput/fileinput.directive";
 
 import {LeftPanelComponent} from "app/views/sessions/session/leftpanel/leftpanel.component";
 import {SingleDatasetComponent} from "app/views/sessions/session/selectiondetails/singledataset/singledataset.component";
@@ -126,7 +125,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     // Last to be upgraded
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
-    .directive('customOnChange', CustomOnChange)
     .controller('ParameterModalController', ParameterModalController)
     .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
