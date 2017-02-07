@@ -7,6 +7,7 @@ import {ToolBoxComponent} from "./toolbox.component";
 import {ToolsModalComponent} from "./toolsmodal/toolsmodal.component";
 import {SharedModule} from "../../../../shared/shared.module";
 import {FormsModule} from "@angular/forms";
+import { ToolsParameterFormComponent } from './toolsmodal/tools-parameter-form/tools-parameter-form.component';
 
 @NgModule({
   imports: [
@@ -14,7 +15,7 @@ import {FormsModule} from "@angular/forms";
     SharedModule,
     FormsModule
   ],
-  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent],
+  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent],
   providers: [ToolService],
   exports: [ToolBoxComponent]
 })

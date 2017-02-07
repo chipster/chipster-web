@@ -124,6 +124,7 @@ export class SessionComponent {
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
   deleteDatasetsLater() {
+
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 

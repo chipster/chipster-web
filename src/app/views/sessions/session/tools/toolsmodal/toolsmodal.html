@@ -48,7 +48,7 @@
 
     <div class="row">
 
-      <div class="col">
+      <div class="col-6">
         <div class="btn-group-vertical tool-list">
           <button type="button" class="btn btn-secondary"
                   [ngClass]="{'active':category===selectedCategory}"
@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      <div class="col">
+      <div class="col-6">
         <div class="btn-group-vertical tool-list" *ngIf="selectedCategory">
           <button type="button"
                   class="btn btn-secondary"
@@ -83,20 +83,6 @@
         </div>
       </div>
 
-    </div>
-
-
-    <!-- close and run buttons -->
-    <div class="row">
-      <div class="col-md-12">
-        <button class="btn btn-success min-width-button pull-right" (click)="runJob()"
-                [disabled]="!isRunEnabled()">
-          <span class="glyphicon glyphicon-play"></span> Run
-        </button>
-        <button id="close-tools-button" class="btn btn-secondary pull-right" (click)="close()">
-          Close
-        </button>
-      </div>
     </div>
 
 
@@ -162,64 +148,8 @@
 
     <div class="row">
       <div class="col-md-7 scrollable no-padding-right">
-        <form name="paramForm" *ngIf="selectedTool">
-          <table class="table table-borderless table-condensed table-hover">
-            <tr *ngFor="let parameter of selectedTool.parameters"
-                (mouseover)="setDescription(parameter.description)"
-                (mouseleave)="setDescription('')">
-              <td>
-                {{parameter.name.displayName}}
-              </td>
-
-              <td>
-                <select *ngIf="isSelectionParameter(parameter)"
-                        name="parameter_{{index}}"
-                        [(ngModel)]="parameter.value"
-                        style="max-width: 300px">
-                  <!--ng-required="!parameter.optional">-->
-                  <option *ngFor="let option of parameter.selectionOptions"
-                          value="{{option.id}}">
-                    {{option.displayName || option.id}}
-                  </option>
-                </select>
-
-                <input *ngIf="isNumberParameter(parameter)" type="number"
-                       [(ngModel)]="parameter.value"
-                       name="parameter_{{index}}"
-                       min="{{parameter.from}}"
-                       max="{{parameter.to}}">
-                <!--ng-required="!parameter.optional">-->
-
-                <input *ngIf="parameter.type === 'STRING'" type="text"
-                       name="parameter_{{index}}"
-                       [(ngModel)]="parameter.value">
-                <!--ng-required="!parameter.optional">-->
-
-                <!--<label class="label label-warning"-->
-                <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
-                <!--value</label>-->
-                <!--<label class="label label-warning"-->
-                <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
-                <!--value: {{parameter.from}}</label>-->
-                <!--<label class="label label-warning"-->
-                <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
-                <!--value: {{parameter.to}}</label>-->
-              </td>
-
-              <!-- reset parameter to default button -->
-              <td>
-                <button type="button" class="btn btn-secondary"
-                        [ngClass]="{'visibility-hidden': parameter.value == toolService.getDefaultValue(parameter)}"
-                        (click)="parameter.value = toolService.getDefaultValue(parameter)"
-                        title="Reset to default value">
-                  <i class="fa fa-times"></i>
-                </button>
-              </td>
-
-            </tr>
-
-          </table>
-        </form>
+        <ch-tools-parameter-form [tool]="selectedTool"
+                                 (description)="setDescription($event)"></ch-tools-parameter-form>
       </div>
 
       <div class="col-md-5">
@@ -228,4 +158,13 @@
 
     </div>
   </div>    <!--end of modal body-->
+  <div class="modal-footer">
+    <button class="btn btn-success min-width-button pull-right" (click)="runJob()"
+            [disabled]="!isRunEnabled()">
+      <span class="glyphicon glyphicon-play"></span> Run
+    </button>
+    <button id="close-tools-button" class="btn btn-secondary pull-right" (click)="close()">
+      Close
+    </button>
+  </div>
 </template>

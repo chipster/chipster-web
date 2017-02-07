@@ -10,7 +10,7 @@ import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
-import {Component, ViewChild, ElementRef, Input} from "@angular/core";
+import {Component, ViewChild, ElementRef, Input, ChangeDetectorRef} from "@angular/core";
 import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
 import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
@@ -36,10 +36,6 @@ export class ToolsModalComponent {
   @Input() selectedTool: Tool;
   @Input() isRunEnabled: boolean;
 
-  // from ToolsService, used by template
-  private isSelectionParameter: (parameter: ToolParameter) => boolean;
-  private isNumberParameter: (parameter: ToolParameter) => boolean;
-
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
 
@@ -51,10 +47,6 @@ export class ToolsModalComponent {
               private ngbModal: NgbModal) {}
 
   ngOnInit() {
-
-    // used by template;
-    this.isNumberParameter = this.toolService.isNumberParameter;
-    this.isSelectionParameter = this.toolService.isSelectionParameter;
 
     // trigger parameter validation
     if (this.selectedTool) {
@@ -129,8 +121,9 @@ export class ToolsModalComponent {
       (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
   }
 
-  setDescription(description: string) {
+  setDescription(description: string): void {
     this.parameterDescription = description;
+    this.searchTool = 'asdlköfdalöflakd';
   };
 
   setInputDescription(description: string) {
