@@ -1,10 +1,10 @@
 import SelectionService from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../shared/utilities/utils";
-import SessionDataService from "../sessiondata.service";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
-import {Component, Inject} from "@angular/core";
+import {Component, ChangeDetectorRef} from "@angular/core";
+import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'ch-visualizations',
@@ -12,61 +12,66 @@ import {Component, Inject} from "@angular/core";
 })
 export class VisualizationsComponent {
 
-    datasets: Array<Dataset>;
-    active: string;
-    visualizations: Array<any> = visualizations;
+  static readonly TAB_ID_PREFIX: string = 'ch-vis-tab-';
 
-    constructor( private SelectionService: SelectionService ) {}
+  active: string; // id of the active vis tab
+  visualizations: Array<any> = visualizations;
 
-    ngOnInit() {
-        this.datasets = [];
-        this.active = _.first(this.getPossibleVisualizations());
-    }
+  constructor(private SelectionService: SelectionService,
+              private changeDetectorRef: ChangeDetectorRef,) {}
 
-    ngDoCheck() {
-        if(!_.isEqual(this.datasets, this.SelectionService.selectedDatasets)) {
-            this.active = undefined;
-            this.datasets = _.cloneDeep(this.SelectionService.selectedDatasets);
+  ngOnInit() {
+    this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
 
-            // set timeout with 0 forces removing tab content from dom
-            // so that tab content will be drawn again. Otherwise tab-content
-            // won't change since it's not listening dataset selection changes
-            setTimeout( () => {
-                this.active = _.first(this.getPossibleVisualizations());
-            }, 0);
-        }
-    }
+    this.SelectionService.getDatasetSelectionStream().subscribe(() => {
+      this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
+      this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
+    });
+  }
 
-    isCompatibleVisualization(name: string): boolean {
-        let visualization = _.find(this.visualizations, visualization => visualization.id === name);
-        let datasetSelectionCount = this.SelectionService.selectedDatasets.length;
-        return this.containsExtension(visualization.extensions) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount) )
-    }
+  isCompatibleVisualization(name: string): boolean {
+    let visualization = _.find(this.visualizations, visualization => visualization.id === name);
+    let datasetSelectionCount = this.SelectionService.selectedDatasets.length;
+    return this.containsExtension(visualization.extensions) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount) )
+  }
 
-    containsExtension(extensions: Array<string>) {
-        return _.every(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
-            return _.includes(extensions, Utils.getFileExtension(dataset.name));
-        });
-    }
+  containsExtension(extensions: Array<string>) {
+    return _.every(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
+      return _.includes(extensions, Utils.getFileExtension(dataset.name));
+    });
+  }
 
-    getPossibleVisualizations() {
-        let datasetFileExtensions = _.map(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
-            return Utils.getFileExtension(dataset.name);
-        });
+  getPossibleVisualizations() {
+    let datasetFileExtensions = _.map(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
+      return Utils.getFileExtension(dataset.name);
+    });
 
-        const selectionCount = datasetFileExtensions.length;
-        const sameFileTypes = _.uniq(datasetFileExtensions).length === 1;
+    const selectionCount = datasetFileExtensions.length;
+    const sameFileTypes = _.uniq(datasetFileExtensions).length === 1;
 
-        return sameFileTypes ? _.chain(this.visualizations)
-            .filter( visualization => _.some( visualization.extensions, (extension: string) => {
+    return sameFileTypes ? _.chain(this.visualizations)
+      .filter( visualization => _.some( visualization.extensions, (extension: string) => {
 
-                let appropriateInputFileCount = (visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, selectionCount));
-                let visualizationSupportsFileType = _.includes(datasetFileExtensions, extension);
+        let appropriateInputFileCount = (visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, selectionCount));
+        let visualizationSupportsFileType = _.includes(datasetFileExtensions, extension);
 
-                return appropriateInputFileCount && visualizationSupportsFileType;
-            }) )
-            .map( item => item.id)
-            .value() : [];
-    }
+        return appropriateInputFileCount && visualizationSupportsFileType;
+      }) )
+      .map( item => item.id)
+      .value() : [];
+  }
 
+  tabChange(event: NgbTabChangeEvent) {
+    this.active = event.nextId;
+  }
+
+  //noinspection JSMethodCanBeStatic
+  /**
+   * Not static since used also from template
+   * @param visId
+   * @returns {string}
+   */
+  getTabId(visId: string) {
+    return visId ? VisualizationsComponent.TAB_ID_PREFIX + visId : undefined;
+  }
 }

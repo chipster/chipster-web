@@ -4,110 +4,99 @@
 
   <h6 *ngIf="!active">No suitable visualization for current dataset selections</h6>
 
-  <ngb-tabset *ngIf="active" active="active">
+  <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" active="active">
 
-    <ngb-tab index="'spreadsheet'"
+    <ngb-tab id="{{getTabId('spreadsheet')}}"
              *ngIf="isCompatibleVisualization('spreadsheet')">
       <template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Spreadsheet</template>
       <template ngbTabContent>
         <ch-spreadsheet-visualization
-          *ngIf="active === 'spreadsheet'"
+          *ngIf="active === getTabId('spreadsheet')"
           [datasetId]="SelectionService.selectedDatasets[0].datasetId"
           [selectedDatasets]="SelectionService.selectedDatasets">
         </ch-spreadsheet-visualization>
       </template>
+  </ngb-tab>
 
-    </ngb-tab>
-
-    <ngb-tab index="'text'"
+    <ngb-tab id="{{getTabId('text')}}"
              *ngIf="isCompatibleVisualization('text')">
       <template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Text</template>
       <template ngbTabContent>
         <ch-text-visualization
-          *ngIf="active === 'text'"
+          *ngIf="active === getTabId('text')"
           [datasetId]="SelectionService.selectedDatasets[0].datasetId"
           [selectedDatasets]="SelectionService.selectedDatasets">
         </ch-text-visualization>
       </template>
+  </ngb-tab>
 
-    </ngb-tab>
-
-
-    <ngb-tab index="'expressionprofile'"
+    <ngb-tab id="{{getTabId('expressionprofile')}}"
              *ngIf="isCompatibleVisualization('expressionprofile')">
       <template ngbTabTitle>Expression profile</template>
       <template ngbTabContent>
-
+        <ch-expression-profile
+          *ngIf="active === getTabId('expressionprofile')"
+          [datasetId]="SelectionService.selectedDatasets[0].datasetId"
+          [selectedDatasets]="SelectionService.selectedDatasets">
+        </ch-expression-profile>
       </template>
-      <ch-expression-profile
-        *ngIf="active === 'expressionprofile'"
-        [datasetId]="SelectionService.selectedDatasets[0].datasetId"
-        [selectedDatasets]="SelectionService.selectedDatasets">
-      </ch-expression-profile>
     </ngb-tab>
 
-    <ngb-tab index="'image'"
+    <ngb-tab id="{{getTabId('image')}}"
              *ngIf="isCompatibleVisualization('image')">
       <template ngbTabTitle><span class="glyphicon glyphicon-picture"></span> Image</template>
       <template ngbTabContent>
         <ch-image-visualization
-          *ngIf="active === 'image'"
+          *ngIf="active === getTabId('image')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-image-visualization>
       </template>
-
     </ngb-tab>
 
-    <ngb-tab index="'phenodata'"
+    <ngb-tab id="{{getTabId('phenodata')}}"
              *ngIf="isCompatibleVisualization('phenodata')">
       <template ngbTabTitle><span class="glyphicon glyphicon-edit"></span> Phenodata</template>
       <template ngbTabContent>
         <ch-phenodata-visualization
-          *ngIf="active === 'phenodata'"
+          *ngIf="active === getTabId('phenodata')"
           [datasets]="SelectionService.selectedDatasets">
         </ch-phenodata-visualization>
       </template>
-
     </ngb-tab>
 
-
-    <ngb-tab index="'pdf'"
+  <ngb-tab id="{{getTabId('pdf')}}"
              *ngIf="isCompatibleVisualization('pdf')">
       <template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</template>
       <template ngbTabContent>
         <ch-pdf-visualization
-          *ngIf="active === 'pdf'"
+          *ngIf="active === getTabId('pdf')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-pdf-visualization>
       </template>
 
     </ngb-tab>
 
-
-    <ngb-tab index="'html'"
+    <ngb-tab id="{{getTabId('html')}}"
              *ngIf="isCompatibleVisualization('html')">
       <template ngbTabTitle><span class="glyphicon glyphicon-globe"></span> HTML</template>
       <template ngbTabContent>
         <ch-htmlvisualization
-          *ngIf="active === 'html'"
+          *ngIf="active === getTabId('html')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-htmlvisualization>
       </template>
-
     </ngb-tab>
 
-    <ngb-tab index="'venn'"
+    <ngb-tab id="{{getTabId('venn')}}"
              *ngIf="isCompatibleVisualization('venn')">
       <template ngbTabTitle>Venn Diagram</template>
       <template ngbTabContent>
         <ch-venn-diagram
-          *ngIf="active === 'venn'"
+          *ngIf="active === getTabId('venn')"
           [selectedDatasets]="SelectionService.selectedDatasets">
         </ch-venn-diagram>
       </template>
-
     </ngb-tab>
-
 
   </ngb-tabset>
 </div>
