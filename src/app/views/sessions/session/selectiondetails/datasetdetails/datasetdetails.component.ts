@@ -12,7 +12,7 @@ export class DatasetDetailsComponent {
   @Output() onDelete: EventEmitter<any> = new EventEmitter();
 
 	constructor(
-		private SelectionService: SelectionService,
+		private selectionService: SelectionService,
 		@Inject('SessionDataService') private SessionDataService: SessionDataService) {
 	}
 
@@ -21,10 +21,6 @@ export class DatasetDetailsComponent {
   }
 
 	exportDatasets() {
-		this.SessionDataService.exportDatasets(this.SelectionService.selectedDatasets);
-	}
-
-	showHistory() {
-		this.SessionDataService.openDatasetHistoryModal();
+		this.SessionDataService.exportDatasets(this.selectionService.selectedDatasets);
 	}
 }

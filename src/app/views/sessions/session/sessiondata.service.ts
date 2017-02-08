@@ -3,11 +3,9 @@ import IWindowService = angular.IWindowService;
 import ConfigService from "../../../shared/services/config.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import SelectionService from "./selection.service";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
-import * as angular from 'angular';
 import {Injectable, Inject} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
@@ -116,30 +114,6 @@ export default class SessionDataService {
 
   download(url: string) {
     this.$window.open(url, "_blank");
-  }
-
-  renameDatasetDialog(dataset: Dataset) {
-    var result = prompt('Change the name of the node', dataset.name);
-    if (result) {
-      dataset.name = result;
-    }
-    this.updateDataset(dataset);
-  }
-
-  openDatasetHistoryModal() {
-    /*
-    this.$uibModal.open({
-      templateUrl: './datasethistorymodal/datasethistorymodal.html',
-      controller: 'DatasetHistoryModalController',
-      controllerAs: 'vm',
-      bindToController: true,
-      resolve: {
-        selectedDatasets: function () {
-          return _.clone(this.selectionService.selectedDatasets);
-        }.bind(this)
-      }
-    })
-    */
   }
 }
 

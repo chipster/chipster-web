@@ -27,7 +27,6 @@ import InputsModalController from "app/views/sessions/session/tools/inputsmodal/
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/shared/resources/session.resource";
 import {SessionWorkerResource} from "app/shared/resources/sessionworker.resource";
-import DatasetHistoryModalController from "app/views/sessions/session/datasethistorymodal/datasethistorymodal.controller";
 import {SessionComponent} from "app/views/sessions/session/session.component";
 import ExpressionProfileService from "app/views/sessions/session/visualization/expressionprofile/expressionprofile.service";
 import {AddColumnModalComponent} from "app/views/sessions/session/visualization/phenodata/add-column-modal/add-column-modal.component";
@@ -62,6 +61,7 @@ import {AddDatasetModalComponent} from "./app/views/sessions/session/leftpanel/a
 import {OpenSessionFile} from "./app/views/sessions/opensessionfile/opensessionfile.component";
 import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 import UploadService from "./app/shared/services/upload.service";
+import DatasetModalService from "./app/views/sessions/session/selectiondetails/datasetmodal.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
   'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -112,6 +112,7 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .service('FileResource', upgradeAdapter.downgradeNg2Provider(FileResource))
     .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
     .service('UploadService', upgradeAdapter.downgradeNg2Provider(UploadService))
+    .service('DatasetModalService', upgradeAdapter.downgradeNg2Provider(DatasetModalService))
 
     // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
@@ -126,7 +127,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .controller('InputsModalController', InputsModalController)
     .controller('SourceModalController', SourceModalController)
     .controller('ParameterModalController', ParameterModalController)
-    .controller('DatasetHistoryModalController', DatasetHistoryModalController)
     .controller('JobErrorModalController', JobErrorModalController)
 
     // cast to 'any' to hide type errors about bindings https://github.com/DefinitelyTyped/DefinitelyTyped/issues/9122
@@ -156,5 +156,6 @@ upgradeAdapter.upgradeNg1Provider('WorkflowGraphService');
 upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('UploadService');
 upgradeAdapter.upgradeNg1Provider('SessionWorkerResource');
+upgradeAdapter.upgradeNg1Provider('DatasetModalService');
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

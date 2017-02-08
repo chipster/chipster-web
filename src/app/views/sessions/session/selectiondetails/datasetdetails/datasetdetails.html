@@ -5,7 +5,7 @@
         <div class="col-md-6">
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
-                        *ngFor="let dataset of SelectionService.selectedDatasets"
+                        *ngFor="let dataset of selectionService.selectedDatasets"
                         [ngClass]="{'active': dataset.datasetId === activeDatasetId}">
                     <span (click)="setDatasetBoxDatasetSelection(dataset)">{{dataset.name}}</span>
                 </button>
@@ -13,9 +13,8 @@
         </div>
         <div class="col-md-6">
             <div class="pull-right btn-group btn-group-sm">
-                <button type="button" class="btn btn-default" (click)="deleteDatasets()">Delete all</button>
-                <button type="button" class="btn btn-default" (click)="exportDatasets()">Export</button>
-                <button type="button" class="btn btn-default" (click)="showHistory()">History</button>
+                <button type="button" class="btn btn-secondary" (click)="deleteDatasets()">Delete all</button>
+                <button type="button" class="btn btn-secondary" (click)="exportDatasets()">Export</button>
             </div>
         </div>
     </div>

@@ -6,10 +6,14 @@ import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../../shared/shared.module";
 import {DatasetDetailsComponent} from "./datasetdetails/datasetdetails.component";
 import {JobComponent} from "./job/job.component";
+import { DatasetHistorymodalComponent } from './datasethistorymodal/datasethistorymodal.component';
+import DatasetModalService from "./datasetmodal.service";
 
 @NgModule({
   imports: [  CommonModule, FormsModule, SharedModule ],
-  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, JobComponent],
-  exports: [JobComponent, DatasetDetailsComponent, SingleDatasetComponent]
+  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, JobComponent, DatasetHistorymodalComponent],
+  exports: [JobComponent, DatasetDetailsComponent, SingleDatasetComponent],
+  providers: [DatasetModalService],
+  entryComponents: [DatasetHistorymodalComponent]
 })
 export class DatasetModule { }
