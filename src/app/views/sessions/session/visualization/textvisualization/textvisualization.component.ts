@@ -9,10 +9,16 @@ import {Response, Http} from "@angular/http";
   selector: 'ch-text-visualization',
   template: `
     <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
-    <p>{{data}}</p>
+    <pre>{{data}}</pre>
     <a href (click)="loadMore()" *ngIf="!isCompleteFile()">Show more</a>
-  `
+  `,
+  styles: [`
+    pre {
+      background-color: white;
+    }
+  `],
 })
+
 export class TextVisualizationComponent {
 
     @Input() datasetId: string;
