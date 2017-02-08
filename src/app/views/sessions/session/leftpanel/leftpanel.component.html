@@ -23,7 +23,8 @@
             <div class="workflow-dataset-static-panel">
               <div class="add-dataset-button">
                 <ch-add-dataset-modal
-                  [datasetsMap]="sessionData.datasetsMap" [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
+                  [datasetsMap]="sessionData.datasetsMap"
+                  [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
               </div>
             </div>
 
@@ -41,11 +42,9 @@
           <template ngbTabContent>
             <div class="workflow-dataset-static-panel">
               <div class="add-dataset-button">
-                <button class="btn btn-sm btn-success link-btn"
-                        (click)="openAddDatasetModal()">
-                  <span class="glyphicon glyphicon-plus"></span>
-                  Add dataset
-                </button>
+                <ch-add-dataset-modal
+                  [datasetsMap]="sessionData.datasetsMap"
+                  [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
               </div>
             </div>
 
