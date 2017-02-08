@@ -31,7 +31,7 @@ export class SessionListComponent {
         let session = new Session('New session');
         this.sessionResource.createSession(session).subscribe((sessionId: string) => {
                 session.sessionId = sessionId;
-                this.openSession(session);
+                this.openSession(sessionId);
         });
     }
 
@@ -47,8 +47,8 @@ export class SessionListComponent {
         });
     }
 
-    openSession(session: Session) {
-        this.$location.path("/sessions" + "/" + session.sessionId);
+    openSession(sessionId: string) {
+      this.$location.path("/sessions" + "/" + sessionId);
     }
 
     selectSession(event: any, session: Session) {

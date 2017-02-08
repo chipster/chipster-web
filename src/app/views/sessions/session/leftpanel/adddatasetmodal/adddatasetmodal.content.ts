@@ -2,7 +2,6 @@ import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, Inject, ChangeDetectorRef, ViewChild} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import UploadService from "../../../../../shared/services/upload.service";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-add-dataset-modal-content',
@@ -26,14 +25,17 @@ export class AddDatasetModalContent {
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(
-      Observable.of(this.sessionId), this.datasetsMap, this.onChange.bind(this), this.datasetAdded.bind(this));
+      this.fileAdded.bind(this), this.fileSuccess.bind(this));
   }
 
-  onChange() {
-    this.changeDetectorRef.detectChanges();
+  fileAdded(file: any) {
+    this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
+    this.uploadService.startUpload(this.sessionId, file, this.datasetsMap);
   }
 
-  datasetAdded(datasetId: string) {
+  fileSuccess(file: any) {
+    // remove from the list
+    file.cancel();
   }
 
   ngAfterViewInit() {

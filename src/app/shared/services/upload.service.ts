@@ -1,4 +1,4 @@
-import {Injectable, Inject} from "@angular/core";
+import {Injectable, Inject, ChangeDetectorRef} from "@angular/core";
 import WorkflowGraphService from "../../views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import SessionResource from "../resources/session.resource";
 import {TokenService} from "../../core/authentication/token.service";
@@ -19,7 +19,7 @@ export default class UploadService {
     @Inject('WorkflowGraphService') private workflowGraphService: WorkflowGraphService) {
   }
 
-  getFlow(sessionId$: Observable<string>, datasetsMap: Map<string, Dataset>, onChange: ()=>any, onUploadEnd: (datasetId: string, sessionId: string)=>any) {
+  getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {
     let flow = new Flow({
       // continuation from different browser session not implemented
       testChunks: false,
@@ -42,12 +42,13 @@ export default class UploadService {
     }
 
     flow.on('fileAdded', (file, event) => {
-      console.log(file, event);
-      this.flowFileAdded(file, event, flow, sessionId$, datasetsMap, onChange);
+      //console.log(file, event);
+      this.flowFileAdded(file, event, flow);
+      fileAdded(file, event, flow);
     });
     flow.on('fileSuccess', (file, message) => {
-      console.log(file, message);
-      this.flowFileSuccess(file, onUploadEnd);
+      //console.log(file, message);
+      fileSuccess(file);
     });
     flow.on('fileError', (file, message) => {
       console.log(file, message);
@@ -56,37 +57,33 @@ export default class UploadService {
     return flow;
   }
 
-  flowFileAdded(file: any, event: any, flow: any, sessionId$: Observable<string>, datasetsMap: Map<string, Dataset>, onChange: ()=>any) {
+  private flowFileAdded(file: any, event: any, flow: any) {
 
-    this.scheduleViewUpdate(onChange, flow);
-
-    console.debug('file added');
+    // each file has a unique target url
     flow.opts.target = function (file: any) {
       return file.chipsterTarget;
     };
 
-    console.log('sessionid observable', sessionId$);
-
-    sessionId$.subscribe(sessionId => {
-      Observable.forkJoin(
-        this.ConfigService.getFileBrokerUrl(),
-        this.createDataset(sessionId, file.name, datasetsMap)
-
-      ).subscribe((value: [string, Dataset]) => {
-        let url = value[0];
-        let dataset = value[1];
-        file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`;
-        file.chipsterSessionId = sessionId;
-        file.chipsterDatasetId = dataset.datasetId;
-        file.resume();
-      });
-    });
     file.pause();
   }
 
-  createDataset(sessionId: string, name: string, datasetsMap: Map<string, Dataset>): Observable<Dataset> {
+  startUpload(sessionId: string, file: any, datasetsMap: Map<string, Dataset>) {
+    Observable.forkJoin(
+      this.ConfigService.getFileBrokerUrl(),
+      this.createDataset(sessionId, file.name, datasetsMap)
+
+    ).subscribe((value: [string, Dataset]) => {
+      let url = value[0];
+      let dataset = value[1];
+      file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`;
+      file.chipsterSessionId = sessionId;
+      file.chipsterDatasetId = dataset.datasetId;
+      file.resume();
+    });
+  }
+
+  private createDataset(sessionId: string, name: string, datasetsMap: Map<string, Dataset>): Observable<Dataset> {
     var d = new Dataset(name);
-    console.info('createDataset', d);
     return this.sessionResource.createDataset(sessionId, d).map((datasetId: string) => {
       d.datasetId = datasetId;
       if (datasetsMap) {
@@ -99,24 +96,17 @@ export default class UploadService {
     });
   }
 
-  flowFileSuccess(file: any, onUploadEnd: (datasetId: string, sessionId: string)=>any) {
-    console.log('flowFileSuccess', file);
-    // remove from the list
-    file.cancel();
-    onUploadEnd(file.chipsterDatasetId, file.chipsterSessionId);
-  }
-
   /**
    * We have to poll the upload progress, because flow.js doesn't send events about it.
    *
    * Schedule a next view update after a second as long as flow.js has files.
    */
-  private scheduleViewUpdate(onChange: ()=>void, flow: any) {
+  scheduleViewUpdate(changeDetectorRef: ChangeDetectorRef, flow: any) {
     Observable.timer(1000).subscribe(() => {
-      onChange();
+      changeDetectorRef.detectChanges();
 
       if (flow.files.length > 0) {
-        this.scheduleViewUpdate(onChange, flow);
+        this.scheduleViewUpdate(changeDetectorRef, flow);
       }
     });
   }

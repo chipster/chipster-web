@@ -19,7 +19,7 @@
         <tbody>
         <tr *ngFor="let session of userSessions"
             (mouseover)="selectSession($event, session)"
-            (click)="openSession(session)">
+            (click)="openSession(session.sessionId)">
           <td>
             <span>{{session.name}}
               <button class="btn btn-default btn-xs pull-right no-border"
@@ -33,7 +33,7 @@
         </tbody>
       </table>
 
-      <ch-open-session-file></ch-open-session-file>
+      <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
 
       <!-- Example Sessions -->
       <h4>Example sessions</h4>

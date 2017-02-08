@@ -1,9 +1,8 @@
-import {Component, Inject, ChangeDetectorRef, ViewChild} from '@angular/core';
+import {Component, Inject, ChangeDetectorRef, ViewChild, Output, EventEmitter} from '@angular/core';
 import UploadService from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import SessionResource from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-open-session-file',
@@ -15,6 +14,8 @@ export class OpenSessionFile {
 
   @ViewChild('browseFilesButton') browseFilesButton;
 
+  @Output('openSession') openSession = new EventEmitter();
+
   private flow;
 
   constructor(
@@ -25,32 +26,36 @@ export class OpenSessionFile {
   }
 
   ngOnInit() {
-    this.flow = this.uploadService.getFlow(this.getSessionId(), null, this.onChange.bind(this), this.onUploadEnd.bind(this));
+    this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
   }
 
-  getSessionId() {
-    return Observable.defer(() => {
-      this.status = 'create session';
-      let session = new Session('Opening session file...');
-      return this.sessionResource.createSession(session).do(() => {
-        // progress bar is enough for the upload status
-        this.status = undefined;
-      })
+  fileAdded(file: any) {
+    this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
+
+    this.status = 'Creating session';
+    let session = new Session('Opening session file...');
+
+    this.sessionResource.createSession(session).subscribe((sessionId) => {
+      // progress bar is enough for the upload status
+      this.status = undefined;
+      this.uploadService.startUpload(sessionId, file, null);
     });
   }
 
-  onChange() {
-    this.changeDetectorRef.detectChanges();
-  }
+  fileSuccess(file: any) {
+    // remove from the list
+    file.cancel();
+    let sessionId = file.chipsterSessionId;
+    let datasetId = file.chipsterDatasetId;
 
-  onUploadEnd(datasetId: string, sessionId: string) {
-    this.status = 'extract session';
-    return this.sessionWorkerResource.extractSession(sessionId, datasetId).toPromise().then((warnings) => {
-      console.log('extracted, warnings: ', warnings);
-      this.status = 'delete temporary copy';
-      return this.sessionResource.deleteDataset(sessionId, datasetId).toPromise();
-    }).then(() => {
+    this.status = 'Extracting session';
+    return this.sessionWorkerResource.extractSession(sessionId, datasetId).flatMap(response => {
+      console.log('extracted, warnings: ', response.warnings);
+      this.status = 'Deleting temporary copy';
+      return this.sessionResource.deleteDataset(sessionId, datasetId);
+    }).subscribe(() => {
       this.status = undefined;
+      this.openSession.emit(sessionId);
     });
   }
 
