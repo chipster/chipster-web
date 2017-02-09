@@ -77,9 +77,10 @@
       <div class="col">
         <p>{{selectedTool.description}}</p>
         <div class="btn-group-vertical">
-          <button class="btn btn-secondary" (click)="openSourceModal()">
-            Source code
-          </button>
+          <ch-sourcemodal
+            [selectedTool]="selectedTool"
+            [category]="selectedCategory.name"
+            [module]="selectedModule.name"></ch-sourcemodal>
         </div>
       </div>
 

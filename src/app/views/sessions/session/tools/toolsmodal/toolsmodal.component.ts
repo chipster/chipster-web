@@ -185,30 +185,6 @@ export class ToolsModalComponent {
 
   }
 
-
-  openSourceModal() {
-    // this.$uibModal.open({
-    //   animation: true,
-    //   templateUrl: '../sourcemodal/sourcemodal.html',
-    //   controller: 'SourceModalController',
-    //   controllerAs: 'vm',
-    //   bindToController: true,
-    //   size: 'lg',
-    //   resolve: {
-    //
-    //     selectedTool: () => {
-    //       return _.cloneDeep(this.selectedTool);
-    //     },
-    //     category: () => {
-    //       return this.selectedCategory.name;
-    //     },
-    //     module: () => {
-    //       return this.selectedModule.name;
-    //     }
-    //   }
-    // });
-  }
-
   // TODO move to service?
   getDatasetHeaders(): Observable<TSVFile>[] {
     return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFile(this.sessionDataService.getSessionId(), dataset.datasetId));

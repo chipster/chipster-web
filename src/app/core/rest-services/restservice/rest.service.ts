@@ -1,4 +1,4 @@
-import {Injectable, Inject} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   Headers, RequestOptionsArgs, RequestMethod, Request, RequestOptions, Http, Response,
   ResponseContentType
@@ -26,7 +26,9 @@ export class RestService {
                                   payload?: any): RequestOptionsArgs {
     requestOptions.headers = new Headers(requestOptions.headers);
     requestOptions.headers.append('Content-Type', 'application/json; charset=UTF-8');
-    requestOptions.headers.append('Accept', 'application/json; charset=UTF-8');
+    if (requestOptions.responseType === ResponseContentType.Json) {
+      requestOptions.headers.append('Accept', 'application/json; charset=UTF-8');
+    }
     if(authentication) {
       requestOptions.headers.append( 'Authorization', this.tokenService.getTokenHeader().Authorization );
     }

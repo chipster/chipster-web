@@ -22,7 +22,6 @@ import bytesFilter from "app/common/filter/bytes.filter";
 import secondsFilter from "app/common/filter/seconds.filter";
 import ParameterModalController from "app/views/sessions/session/tools/parametermodal/parametermodal.controller";
 import {ToolsModalComponent} from "app/views/sessions/session/tools/toolsmodal/toolsmodal.component";
-import SourceModalController from "app/views/sessions/session/tools/sourcemodal/sourcemodal.controller";
 import InputsModalController from "app/views/sessions/session/tools/inputsmodal/inputsmodal.controller";
 import JobErrorModalController from "app/views/sessions/session/joberrormodal/joberrormodal.controller";
 import SessionResource from "app/shared/resources/session.resource";
@@ -125,7 +124,6 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
 
     // Last to be upgraded
     .controller('InputsModalController', InputsModalController)
-    .controller('SourceModalController', SourceModalController)
     .controller('ParameterModalController', ParameterModalController)
     .controller('JobErrorModalController', JobErrorModalController)
 
