@@ -61,6 +61,7 @@ import {OpenSessionFile} from "./app/views/sessions/opensessionfile/opensessionf
 import {SessionEditModalComponent} from "./app/views/sessions/session/leftpanel/sessioneditmodal/sessioneditmodal.component";
 import UploadService from "./app/shared/services/upload.service";
 import DatasetModalService from "./app/views/sessions/session/selectiondetails/datasetmodal.service";
+import VisualizationModalService from "./app/views/sessions/session/visualization/visualizationmodal.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
   'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
@@ -112,8 +113,10 @@ angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
     .service('SessionResource', upgradeAdapter.downgradeNg2Provider(SessionResource))
     .service('UploadService', upgradeAdapter.downgradeNg2Provider(UploadService))
     .service('DatasetModalService', upgradeAdapter.downgradeNg2Provider(DatasetModalService))
+    .service('VisualizationModalService', upgradeAdapter.downgradeNg2Provider(VisualizationModalService))
 
-    // Angular 2 version exists, can't upgrade. These needed in angularjs templates
+
+  // Angular 2 version exists, can't upgrade. These needed in angularjs templates
     .filter('isoDate', isoDateFilter)
     .filter('categoryFilter', categoryFilter)
     .filter('moduleFilter', moduleFilter)
@@ -155,5 +158,6 @@ upgradeAdapter.upgradeNg1Provider('CSVReader');
 upgradeAdapter.upgradeNg1Provider('UploadService');
 upgradeAdapter.upgradeNg1Provider('SessionWorkerResource');
 upgradeAdapter.upgradeNg1Provider('DatasetModalService');
+upgradeAdapter.upgradeNg1Provider('VisualizationModalService');
 
 upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

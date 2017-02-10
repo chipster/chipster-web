@@ -19,11 +19,14 @@ import {VisualizationsComponent} from "./visualizationbox.component";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { AddColumnModalComponent } from './phenodata/add-column-modal/add-column-modal.component';
 import {FormsModule} from "@angular/forms";
+import {VisualizationModalComponent} from "./visualizationmodal.component";
+import VisualizationModalService from "./visualizationmodal.service";
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule],
-  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent, AddColumnModalComponent],
-  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService],
-  exports: [VisualizationsComponent]
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent, AddColumnModalComponent],
+  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService],
+  exports: [VisualizationsComponent],
+  entryComponents: [VisualizationModalComponent]
 })
 export class VisualizationsModule {}
