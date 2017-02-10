@@ -1,6 +1,6 @@
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, Inject, ChangeDetectorRef} from "@angular/core";
+import {Input, Component, Inject} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import FileResource from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -25,7 +25,6 @@ export class SpreadsheetVisualizationComponent {
   private lineCount: number;
 
   constructor(
-    private changeDetectorRef: ChangeDetectorRef,
     private fileResource: FileResource,
     @Inject('SessionDataService') private sessionDataService: SessionDataService) {
   }
@@ -40,8 +39,6 @@ export class SpreadsheetVisualizationComponent {
         parsedTSV.pop();
       }
       this.lineCount = parsedTSV.length;
-      this.changeDetectorRef.detectChanges();
-
       let normalizedTSV = new TSVFile(parsedTSV, this.datasetId, 'file');
       const container = document.getElementById('tableContainer');
       new Handsontable(container, SpreadsheetVisualizationComponent.getSettings(normalizedTSV.getRawData()));
