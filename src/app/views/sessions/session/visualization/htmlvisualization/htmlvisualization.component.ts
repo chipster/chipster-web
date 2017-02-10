@@ -1,7 +1,4 @@
-import {Component, OnInit, Input, Inject} from '@angular/core';
-import {Http, Response} from "@angular/http";
-import {Observable} from "rxjs";
-import AuthenticationService from "../../../../../core/authentication/authenticationservice";
+import {Component, OnInit, Input} from '@angular/core';
 import {timeout} from "d3-timer";
 import {TokenService} from "../../../../../core/authentication/token.service";
 import SessionDataService from "../../sessiondata.service";
@@ -22,7 +19,7 @@ export class HtmlvisualizationComponent implements OnInit {
 
   constructor(
     private tokenService: TokenService,
-    @Inject('SessionDataService') private sessionDataService: SessionDataService) { }
+    private sessionDataService: SessionDataService) { }
 
   ngOnInit() {
     this.token =this.tokenService.getToken();

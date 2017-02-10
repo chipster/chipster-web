@@ -1,11 +1,12 @@
 import {ServiceLocator} from "../../core/app.constants";
 import AuthenticationService from "../../core/authentication/authenticationservice";
-import {Component, Inject, ViewChild} from "@angular/core";
+import {Component, ViewChild} from "@angular/core";
 import { FormGroup } from '@angular/forms';
+import {Router} from "@angular/router";
 
 @Component({
-    selector: 'ch-login',
-    templateUrl: './login.html'
+  selector: 'ch-login',
+  templateUrl: './login.html'
 })
 export class LoginComponent {
 
@@ -14,13 +15,13 @@ export class LoginComponent {
     @ViewChild('myForm')
     private myForm: FormGroup;
 
-    constructor(@Inject('$location') private $location: ng.ILocationService, @Inject('AuthenticationService') private authenticationService: AuthenticationService) {}
+    constructor(private router: Router, private authenticationService: AuthenticationService) {}
 
 
     login(username: string, password: string) {
         this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe( () => {
             //Route to Session creation page
-            this.$location.path('/sessions')
+          this.router.navigate(['/sessions']);
         }, (error: any) => {
             console.log('login failed', error);
             if (error) {

@@ -3,7 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import SessionDataService from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
-import {Component, Inject, Input, SimpleChanges} from "@angular/core";
+import {Component, Input, SimpleChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
 import FileResource from "../../../../../shared/resources/fileresource";
 

@@ -1,6 +1,6 @@
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, Inject, ChangeDetectorRef} from "@angular/core";
+import {Input, Component, ChangeDetectorRef} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import FileResource from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -27,7 +27,7 @@ export class SpreadsheetVisualizationComponent {
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private fileResource: FileResource,
-    @Inject('SessionDataService') private sessionDataService: SessionDataService) {
+    private sessionDataService: SessionDataService) {
   }
 
   ngOnInit() {

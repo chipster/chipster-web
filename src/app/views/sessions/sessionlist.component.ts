@@ -2,7 +2,8 @@
 import SessionResource from "../../shared/resources/session.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../model/session/session-data";
-import {Component, Inject} from "@angular/core";
+import {Component} from "@angular/core";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'ch-session-list',
@@ -17,9 +18,8 @@ export class SessionListComponent {
     public sessionData: SessionData;
 
     constructor(
-        @Inject('$location') private $location:ng.ILocationService,
-        private sessionResource:SessionResource,
-        @Inject('$scope') private $scope: ng.IScope) {}
+        private router: Router,
+        private sessionResource: SessionResource) {}
 
     ngOnInit() {
       this.selectedSessions = [];
@@ -41,14 +41,14 @@ export class SessionListComponent {
             this.userSessions = sessions;
         }, (response: any) => {
             console.log('failed to get sessions', response);
-            if (response.status === 403) {
-                this.$location.path('/login');
+            if (response.status === 401 || response.status === 403) {
+                this.router.navigate(['/login']);
             }
         });
     }
 
     openSession(sessionId: string) {
-      this.$location.path("/sessions" + "/" + sessionId);
+      this.router.navigate(['/sessions', sessionId]);
     }
 
     selectSession(event: any, session: Session) {

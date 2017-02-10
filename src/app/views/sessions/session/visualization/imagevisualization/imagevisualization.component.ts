@@ -1,4 +1,4 @@
-import {Component, Input, Inject} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 
@@ -15,7 +15,7 @@ export class ImageVisualizationComponent {
 
   private src: string;
 
-  constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService,) {
+  constructor(private sessionDataService: SessionDataService,) {
   }
 
   ngOnInit() {

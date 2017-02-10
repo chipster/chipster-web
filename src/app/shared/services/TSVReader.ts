@@ -1,5 +1,5 @@
 import FileResource from "../resources/fileresource";
-import {Injectable, Inject} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Rx";
 import '../../rxjs-operators';
 import TSVFile from "../../model/tsv/TSVFile";
@@ -8,7 +8,7 @@ import * as d3 from "d3";
 @Injectable()
 export class TSVReader {
 
-   constructor(@Inject('FileResource') private fileResource: FileResource) {
+   constructor(private fileResource: FileResource) {
     }
 
     getTSV(sessionId: string, datasetId: string): Observable<any> {

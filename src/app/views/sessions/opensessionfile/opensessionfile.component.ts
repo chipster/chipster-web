@@ -1,4 +1,4 @@
-import {Component, Inject, ChangeDetectorRef, ViewChild, Output, EventEmitter} from '@angular/core';
+import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter} from '@angular/core';
 import UploadService from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import SessionResource from "../../../shared/resources/session.resource";
@@ -19,9 +19,9 @@ export class OpenSessionFile {
   private flow;
 
   constructor(
-    @Inject('UploadService') private uploadService: UploadService,
-    @Inject('SessionResource') private sessionResource: SessionResource,
-    @Inject('SessionWorkerResource') private sessionWorkerResource: SessionWorkerResource,
+    private uploadService: UploadService,
+    private sessionResource: SessionResource,
+    private sessionWorkerResource: SessionWorkerResource,
     private changeDetectorRef: ChangeDetectorRef) {
   }
 

@@ -1,4 +1,4 @@
-import {Injectable, Inject} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import Dataset from "../../../../model/session/dataset";
 import SessionDataService from "../sessiondata.service";
@@ -8,7 +8,7 @@ import {DatasetHistorymodalComponent} from "./datasethistorymodal/datasethistory
 export default class DatasetModalService {
 
   constructor(private ngbModal: NgbModal,
-              @Inject('SessionDataService') private sessionDataService: SessionDataService) {
+              private sessionDataService: SessionDataService) {
   }
 
   renameDatasetDialog(dataset: Dataset) {

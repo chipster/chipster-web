@@ -1,8 +1,6 @@
-import AuthenticationService from "../../core/authentication/authenticationservice";
 import ConfigService from "../services/config.service";
-import {Inject, Injectable} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
-import {Headers, Http} from "@angular/http";
 import {Observable} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 

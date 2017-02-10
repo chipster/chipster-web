@@ -1,4 +1,4 @@
-import {Component, Input, Inject} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import Dataset from "../../../../../model/session/dataset";
 import * as d3 from "d3";
@@ -33,13 +33,12 @@ export class VennDiagram {
 
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
-                @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
-                @Inject('SessionDataService') private sessionDataService: SessionDataService) {
+                private sessionDataService: SessionDataService) {
     }
 
     ngOnInit() {
         const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
-        const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.$routeParams['sessionId'], datasetId));
+        const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), datasetId));
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)

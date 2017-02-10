@@ -1,4 +1,4 @@
-import {Injectable, Inject, ChangeDetectorRef} from "@angular/core";
+import {Injectable, ChangeDetectorRef} from "@angular/core";
 import WorkflowGraphService from "../../views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import SessionResource from "../resources/session.resource";
 import {TokenService} from "../../core/authentication/token.service";
@@ -13,10 +13,10 @@ declare var Flow: any;
 export default class UploadService {
 
   constructor(
-    @Inject('ConfigService') private ConfigService: ConfigService,
-    @Inject('TokenService') private tokenService: TokenService,
-    @Inject('SessionResource') private sessionResource: SessionResource,
-    @Inject('WorkflowGraphService') private workflowGraphService: WorkflowGraphService) {
+    private ConfigService: ConfigService,
+    private tokenService: TokenService,
+    private sessionResource: SessionResource,
+    private workflowGraphService: WorkflowGraphService) {
   }
 
   getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {

@@ -5,11 +5,14 @@ import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
 import {LoginComponent} from "./views/login/login.component";
 import SelectionService from "./views/sessions/session/selection.service";
-import ConfigService from "./shared/services/config.service";
 import {HomeComponent} from "./views/home/home.component";
 import {SessionModule} from "./views/sessions/session/session.module";
 import {CoreModule} from "./core/core.module";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import {AppComponent} from "./app.component";
+import {TokenService} from "./core/authentication/token.service";
+import {AppRoutingModule} from "./app-routing.module";
+import {SessionResolve} from "./views/sessions/session/session.resolve";
 
 @NgModule({
     imports: [
@@ -18,9 +21,11 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
       FormsModule,
       CoreModule,
       SessionModule,
-      NgbModule.forRoot()
+      NgbModule.forRoot(),
+      AppRoutingModule
     ],
-    declarations: [ NavigationComponent, LoginComponent, HomeComponent ],
-    providers: [ SelectionService ]
+    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent ],
+    providers: [ SelectionService, TokenService, SessionResolve ],
+    bootstrap: [ AppComponent ]
 })
 export class AppModule {}

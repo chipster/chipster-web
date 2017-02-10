@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component} from '@angular/core';
 import AuthenticationService from "../../core/authentication/authenticationservice";
 import ConfigService from "../../shared/services/config.service";
 import {Observable} from "rxjs";
@@ -12,28 +12,22 @@ export class NavigationComponent {
 
     host: Observable<string>;
 
-    constructor(@Inject('TokenService') private tokenService: TokenService,
-                @Inject('AuthenticationService') private authenticationService: AuthenticationService,
-                @Inject('ConfigService') private configService: ConfigService){}
+    constructor(private tokenService: TokenService,
+                private authenticationService: AuthenticationService,
+                private configService: ConfigService){}
 
     ngOnInit() {
       this.host = this.getHost();
     }
-
-    isLoggedOut() {
-        if (this.tokenService.getToken() === null) {
-            return true;
-        }
-    };
 
     logout() {
         this.authenticationService.logout();
     };
 
     isLoggedIn() {
-        if(this.tokenService.getToken()!==null){
-            return true;
-        }
+      if(this.tokenService.getToken()) {
+        return true;
+      }
     };
 
     getHost(): Observable<string> {

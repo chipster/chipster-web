@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, Input, Inject} from '@angular/core';
+import {Component, OnInit, Input} from '@angular/core';
 import Dataset from "../../../../../model/session/dataset";
 import SessionDataService from "../../sessiondata.service";
 
@@ -17,7 +17,7 @@ export class PdfVisualizationComponent implements OnInit {
   page: number;
   zoom: number;
 
-  constructor(@Inject('SessionDataService') private sessionDataService: SessionDataService) { }
+  constructor(private sessionDataService: SessionDataService) { }
 
   ngOnInit() {
     this.page = 1;

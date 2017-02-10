@@ -2,7 +2,7 @@
 import Dataset from "../../../../../model/session/dataset";
 import SessionDataService from "../../sessiondata.service";
 import Job from "../../../../../model/session/job";
-import {Component, Inject, Input, Output, EventEmitter} from "@angular/core";
+import {Component, Input, Output, EventEmitter} from "@angular/core";
 import DatasetModalService from "../datasetmodal.service";
 
 @Component({
@@ -23,8 +23,8 @@ export class SingleDatasetComponent {
     private sourceJob: Job;
 
     constructor(
-      @Inject('SessionDataService') private sessionDataService: SessionDataService,
-      @Inject('DatasetModalService') private datasetModalService: DatasetModalService){}
+      private sessionDataService: SessionDataService,
+      private datasetModalService: DatasetModalService){}
 
     ngOnInit() {
         this.sourceJob = this.getSourceJob(this.dataset);

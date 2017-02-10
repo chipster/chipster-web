@@ -1,5 +1,5 @@
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input, Inject, ChangeDetectorRef, ViewChild} from '@angular/core';
+import {Component, Input, ChangeDetectorRef, ViewChild} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import UploadService from "../../../../../shared/services/upload.service";
 
@@ -19,7 +19,7 @@ export class AddDatasetModalContent {
 
   constructor(
     public activeModal: NgbActiveModal,
-    @Inject('UploadService') private uploadService: UploadService,
+    private uploadService: UploadService,
     private changeDetectorRef: ChangeDetectorRef) {
   }
 

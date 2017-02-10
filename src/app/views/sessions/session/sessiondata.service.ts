@@ -6,23 +6,29 @@ import Job from "../../../model/session/job";
 import JobInput from "../../../model/session/jobinput";
 import FileResource from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
-import {Injectable, Inject} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
+import {ActivatedRoute} from "@angular/router";
 
 @Injectable()
 export default class SessionDataService {
 
-  constructor(@Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
+  private sessionId: string;
+
+  constructor(
               private sessionResource: SessionResource,
-              @Inject('$window') private $window: IWindowService,
               private configService: ConfigService,
               private tokenService: TokenService,
               private fileResource: FileResource) {
   }
 
   getSessionId() : string {
-    return this.$routeParams['sessionId'];
+    return this.sessionId;
+  }
+
+  setSessionId(id: string) {
+    this.sessionId = id;
   }
 
   createDataset(dataset: Dataset) {
@@ -113,7 +119,7 @@ export default class SessionDataService {
   }
 
   download(url: string) {
-    this.$window.open(url, "_blank");
+    window.open(url, "_blank");
   }
 }
 

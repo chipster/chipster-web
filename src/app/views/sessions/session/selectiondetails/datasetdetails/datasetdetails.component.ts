@@ -1,6 +1,6 @@
 import SelectionService from "../../selection.service";
 import SessionDataService from "../../sessiondata.service";
-import {Component, Inject, Output, EventEmitter} from "@angular/core";
+import {Component, Output, EventEmitter} from "@angular/core";
 
 @Component({
   selector: 'ch-dataset-details',
@@ -13,7 +13,7 @@ export class DatasetDetailsComponent {
 
 	constructor(
 		private selectionService: SelectionService,
-		@Inject('SessionDataService') private SessionDataService: SessionDataService) {
+		private SessionDataService: SessionDataService) {
 	}
 
   deleteDatasets() {

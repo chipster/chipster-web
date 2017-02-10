@@ -7,7 +7,9 @@ import Job from "../../../model/session/job";
 import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
-import {Component, Inject} from "@angular/core";
+import {Component} from "@angular/core";
+import {ActivatedRoute, Router} from "@angular/router";
+
 
 @Component({
   selector: 'ch-session',
@@ -21,16 +23,19 @@ export class SessionComponent {
     deletedDatasetsTimeout: any;
 
     constructor(
-        @Inject('$scope') private $scope: ng.IScope,
-        @Inject('$location') private $location: ng.ILocationService,
+        private router: Router,
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
-        @Inject('$route') private $route: ng.route.IRouteService) {
+        private route: ActivatedRoute) {
     }
 
     ngOnInit() {
-      this.sessionData = this.$route.current.locals['sessionData'];
+
+      this.sessionData = this.route.snapshot.data['sessionData'];
+      // Services don't have access to ActivatedRoute, so we have to set it
+      this.sessionDataService.setSessionId(this.route.snapshot.params['sessionId']);
+
       // start listening for remote changes
       // in theory we may miss an update between the loadSession() and this subscribe(), but
       // the safe way would be much more complicated:
@@ -42,10 +47,8 @@ export class SessionComponent {
 
       this.SessionEventService.getAuthorizationStream().subscribe(change => {
         if (change.event.type === 'DELETE') {
-          this.$scope.$apply(() => {
-            alert('The session has been deleted.');
-            this.$location.path('/sessions');
-          });
+          alert('The session has been deleted.');
+          this.router.navigate(['/sessions']);
         }
       });
 

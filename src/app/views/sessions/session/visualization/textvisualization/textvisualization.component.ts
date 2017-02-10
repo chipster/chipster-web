@@ -1,9 +1,8 @@
 import FileResource from "../../../../../shared/resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input, Inject, ChangeDetectorRef} from "@angular/core";
-import {Observable} from "rxjs";
-import {Response, Http} from "@angular/http";
+import {Component, Input, ChangeDetectorRef} from "@angular/core";
+import {Response} from "@angular/http";
 
 @Component({
   selector: 'ch-text-visualization',
@@ -29,8 +28,8 @@ export class TextVisualizationComponent {
 
     constructor(
       private changeDetectorRef: ChangeDetectorRef,
-    	@Inject('FileResource') private fileResource: FileResource,
-      @Inject('SessionDataService') private sessionDataService: SessionDataService) {
+    	private fileResource: FileResource,
+      private sessionDataService: SessionDataService) {
     }
 
     ngOnInit() {

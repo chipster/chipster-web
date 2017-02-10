@@ -5,7 +5,7 @@ import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
 import Node from "./node";
 import {Link} from "./link";
-import {Component, Input, Output, EventEmitter, Inject} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";

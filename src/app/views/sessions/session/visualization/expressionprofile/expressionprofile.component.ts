@@ -11,7 +11,7 @@ import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
-import {Component, Input, Inject} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import Line from "./line";
 import FileResource from "../../../../../shared/resources/fileresource";
 
@@ -33,16 +33,14 @@ export class ExpressionProfileComponent {
 
     constructor(
                 private tsvReader: TSVReader,
-                @Inject('$routeParams') private $routeParams: ng.route.IRouteParamsService,
-                @Inject('$window') private $window: ng.IWindowService,
                 private expressionProfileService: ExpressionProfileService,
-                @Inject('SessionDataService') private sessionDataService: SessionDataService,
+                private sessionDataService: SessionDataService,
                 private expressionProfileTSVService: ExpressionProfileTSVService,
                 private fileResource: FileResource) {}
 
     ngOnInit() {
         const datasetName = this.selectedDatasets[0].name;
-        this.fileResource.getData(this.$routeParams['sessionId'], this.datasetId).subscribe( (result: any) => {
+        this.fileResource.getData(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsvParseRows(result);
             this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
             this.drawLineChart(this.tsv);

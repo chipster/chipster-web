@@ -1,6 +1,6 @@
 import SelectionService from "../../selection.service";
 import SessionDataService from "../../sessiondata.service";
-import {Component, Inject} from "@angular/core";
+import {Component} from "@angular/core";
 
 @Component({
   selector: 'ch-job',
@@ -10,7 +10,7 @@ export class JobComponent {
 
 	constructor(
 		private SelectionService: SelectionService,
-		@Inject('SessionDataService') private SessionDataService: SessionDataService) {
+		private SessionDataService: SessionDataService) {
 	}
 
 	deleteJobs() {

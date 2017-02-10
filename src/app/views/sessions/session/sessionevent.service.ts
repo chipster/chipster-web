@@ -3,7 +3,7 @@ import SessionResource from "../../../shared/resources/session.resource";
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import {Injectable, Inject} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {SessionData} from "../../../model/session/session-data";
 import {Observable, Subject} from "rxjs";
@@ -13,8 +13,6 @@ import WsEvent from "../../../model/events/wsevent";
 
 @Injectable()
 export default class SessionEventService {
-
-    ws: any;
 
     sessionData: SessionData;
     sessionId: string;
@@ -28,7 +26,7 @@ export default class SessionEventService {
 
     constructor(private configService: ConfigService,
                 private tokenService: TokenService,
-                @Inject('SessionResource') private sessionResource: SessionResource){
+                private sessionResource: SessionResource){
     }
 
     unsubscribe() {
