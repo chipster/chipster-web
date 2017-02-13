@@ -77,7 +77,7 @@ platformBrowserDynamic().bootstrapModule(AppModule);
 // import DatasetModalService from "./app/views/sessions/session/selectiondetails/datasetmodal.service";
 //
 // angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
-//   'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
+//   'angularResizable', 'AuthenticationModule'])
 //
 //     // Angular 2
 //     .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
