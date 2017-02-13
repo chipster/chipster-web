@@ -32,7 +32,6 @@ export class PhenodataVisualizationComponent {
 
     ngOnInit() {
       this.updateView();
-      console.log('here');
     }
 
     ngOnChanges(changes: SimpleChanges) {

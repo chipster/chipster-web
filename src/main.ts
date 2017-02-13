@@ -64,7 +64,7 @@ import DatasetModalService from "./app/views/sessions/session/selectiondetails/d
 import VisualizationModalService from "./app/views/sessions/session/visualization/visualizationmodal.service";
 
 angular.module('chipster-web', ['ngRoute', 'ngResource', 'ngAnimate',
-  'angularResizable', 'AuthenticationModule', 'ngHandsontable'])
+  'angularResizable', 'AuthenticationModule'])
 
     // Angular 2
     .directive('chHome', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(HomeComponent))
