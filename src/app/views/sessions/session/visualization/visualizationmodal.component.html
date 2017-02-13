@@ -1,0 +1,24 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{dataset.name}}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <ch-text-visualization
+    *ngIf="visualizationId === 'text'"
+    [dataset]="dataset"
+    [showFullData]=true>
+  </ch-text-visualization>
+
+  <ch-spreadsheet-visualization
+    *ngIf="visualizationId === 'spreadsheet'"
+    [dataset]="dataset"
+    [showFullData]=true>
+  </ch-spreadsheet-visualization>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
+</div>

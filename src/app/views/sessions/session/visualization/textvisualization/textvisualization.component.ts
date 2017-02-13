@@ -1,76 +1,68 @@
 import FileResource from "../../../../../shared/resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input, ChangeDetectorRef} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import {Response} from "@angular/http";
+import VisualizationModalService from "../visualizationmodal.service";
 
 @Component({
   selector: 'ch-text-visualization',
   template: `
-    <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
-    <pre>{{data}}</pre>
-    <a href (click)="loadMore()" *ngIf="!isCompleteFile()">Show more</a>
+    <p *ngIf="!data">Loading data...</p>
+    
+    <div *ngIf="data">
+      <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
+      <a class="pull-right" (click)="showAll()" *ngIf="!isCompleteFile()">Show all</a>
+      <pre>{{data}}</pre>
+    </div>
   `,
+
   styles: [`
     pre {
       background-color: white;
     }
   `],
 })
-
 export class TextVisualizationComponent {
 
-    @Input() datasetId: string;
-    @Input() selectedDatasets: Array<Dataset>;
-    private data: string;
+  @Input() dataset: Dataset;
+  @Input() showFullData: boolean;
 
-    fileSizeLimit = 10 * 1024;
+  private data: string;
+    
+  fileSizeLimit = 10 * 1024;
 
-    constructor(
-      private changeDetectorRef: ChangeDetectorRef,
-    	private fileResource: FileResource,
-      private sessionDataService: SessionDataService) {
+  constructor(private fileResource: FileResource,
+              private sessionDataService: SessionDataService,
+              private visualizationModalService: VisualizationModalService) {
+  }
+
+  ngOnInit() {
+    let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
+
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((response: any) => {
+      this.data = response;
+    }, (error: Response) => {
+      console.error(error);
+    });
+  }
+
+  getSizeShown() {
+    if (this.data) {
+      return this.data.length;
     }
+  }
 
-    ngOnInit() {
+  getSizeFull() {
+    return this.dataset.size;
+  }
 
-      this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).subscribe( (response: any) => {
-        this.data = response;
-        this.changeDetectorRef.detectChanges();
-      }, (error: Response) => {
-        console.error(error);
-      });
-    }
+  isCompleteFile() {
+    return this.getSizeShown() === this.getSizeFull();
+  }
 
-    load() {
-      this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).subscribe( (response: any) => {
-        this.data = response;
-        this.changeDetectorRef.detectChanges();
-      }, (error: Response) => {
-        console.error(error);
-      });
-    }
+  showAll() {
+    this.visualizationModalService.openVisualizationModal(this.dataset, 'text');
+  }
 
-    loadMore() {
-        this.fileSizeLimit *= 2;
-        this.load();
-    }
-
-    createDataset() {
-    	this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Text", this.data);
-    }
-
-    getSizeShown() {
-        if (this.data) {
-            return this.data.length;
-        }
-    }
-
-    getSizeFull() {
-        return this.selectedDatasets[0].size;
-    }
-
-    isCompleteFile() {
-        return this.getSizeShown() === this.getSizeFull();
-    }
 }

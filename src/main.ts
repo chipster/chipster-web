@@ -169,5 +169,6 @@ platformBrowserDynamic().bootstrapModule(AppModule);
 // upgradeAdapter.upgradeNg1Provider('UploadService');
 // upgradeAdapter.upgradeNg1Provider('SessionWorkerResource');
 // upgradeAdapter.upgradeNg1Provider('DatasetModalService');
+// upgradeAdapter.upgradeNg1Provider('VisualizationModalService');
 //
 // upgradeAdapter.bootstrap(document.documentElement, ['chipster-web']);

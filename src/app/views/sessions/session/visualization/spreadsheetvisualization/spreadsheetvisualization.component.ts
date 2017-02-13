@@ -5,33 +5,42 @@ import TSVFile from "../../../../../model/tsv/TSVFile";
 import FileResource from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
 import Dataset from "../../../../../model/session/dataset";
+import VisualizationModalService from "../visualizationmodal.service";
 
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
   template: `
-    <label *ngIf="!isCompleteFile()">Showing the first {{lineCount}} lines</label> 
-    <label *ngIf="isCompleteFile()">Showing all {{lineCount}} lines</label>
-    <!--<a (click)="showMore()">Show more</a>-->
-    <div id="tableContainer"></div>`
+    <p *ngIf="!dataReady">Loading data...</p>
 
+    <div *ngIf="dataReady">
+      <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label> 
+      <label *ngIf="isCompleteFile()">Showing all {{lineCount}} rows</label>
+      <a *ngIf="!isCompleteFile()" (click)="showAll()" class="pull-right">Show all</a>
+    </div>
+
+    <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->
+    <div id="tableContainer"></div>
+    `
 })
 export class SpreadsheetVisualizationComponent {
 
-  @Input() datasetId: string;
-  @Input() selectedDatasets: Array<Dataset>;
+  @Input() dataset: Dataset;
+  @Input() showFullData: boolean = false;
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
+  private dataReady: boolean = false;
 
-  constructor(
-    private changeDetectorRef: ChangeDetectorRef,
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService) {
+  constructor(private fileResource: FileResource,
+              private sessionDataService: SessionDataService,
+              private visualizationModalService: VisualizationModalService) {
   }
 
   ngOnInit() {
-    this.fileResource.getLimitedData(this.sessionDataService.getSessionId(), this.datasetId, this.fileSizeLimit).subscribe( (result: any) => {
+    let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
+
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((result: any) => {
       let parsedTSV = d3.tsvParseRows(result);
 
       // if not full file, remove the last, possibly incomplete line
@@ -40,11 +49,11 @@ export class SpreadsheetVisualizationComponent {
         parsedTSV.pop();
       }
       this.lineCount = parsedTSV.length;
-      this.changeDetectorRef.detectChanges();
 
-      let normalizedTSV = new TSVFile(parsedTSV, this.datasetId, 'file');
+      let normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
       const container = document.getElementById('tableContainer');
       new Handsontable(container, SpreadsheetVisualizationComponent.getSettings(normalizedTSV.getRawData()));
+      this.dataReady = true;
     }, (e: Response) => {
       console.error('Fetching TSVData failed', e);
     })
@@ -52,7 +61,11 @@ export class SpreadsheetVisualizationComponent {
   }
 
   isCompleteFile() {
-    return this.fileSizeLimit >= this.selectedDatasets[0].size;
+    return this.showFullData;
+  }
+
+  showAll() {
+    this.visualizationModalService.openVisualizationModal(this.dataset, 'spreadsheet');
   }
 
   static getSettings(array: string[][]) {

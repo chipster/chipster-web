@@ -12,8 +12,7 @@
       <template ngbTabContent>
         <ch-spreadsheet-visualization
           *ngIf="active === getTabId('spreadsheet')"
-          [datasetId]="SelectionService.selectedDatasets[0].datasetId"
-          [selectedDatasets]="SelectionService.selectedDatasets">
+          [dataset]="SelectionService.selectedDatasets[0]">
         </ch-spreadsheet-visualization>
       </template>
   </ngb-tab>
@@ -24,8 +23,7 @@
       <template ngbTabContent>
         <ch-text-visualization
           *ngIf="active === getTabId('text')"
-          [datasetId]="SelectionService.selectedDatasets[0].datasetId"
-          [selectedDatasets]="SelectionService.selectedDatasets">
+          [dataset]="SelectionService.selectedDatasets[0]">
         </ch-text-visualization>
       </template>
   </ngb-tab>
