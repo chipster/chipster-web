@@ -24,8 +24,6 @@
     "@angular/upgrade": "2.4.6",
     "@flowjs/flow.js": "^2.11.2",
     "@ng-bootstrap/ng-bootstrap": "^1.0.0-alpha.19",
-    "angular": "1.5.8",
-    "angular-route": "1.5.8",
     "bootstrap": "4.0.0-alpha.6",
     "core-js": "2.4.0",
     "d3": "4.4.0",
