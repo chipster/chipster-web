@@ -7,7 +7,7 @@ import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
   templateUrl: './add-column-modal.component.html',
   styleUrls: ['./add-column-modal.component.less']
 })
-export class AddColumnModalComponent implements OnInit {
+export class AddColumnModalComponent {
 
   @Input() handsOnTable: ht.Methods;
   @Input() colName: string;

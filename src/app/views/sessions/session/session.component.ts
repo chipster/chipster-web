@@ -169,22 +169,22 @@ export class SessionComponent {
     }
 
     openErrorModal(title: string, job: Job) {
-      this.$uibModal.open({
-            animation: true,
-            templateUrl: './joberrormodal/joberrormodal.html',
-            controller: 'JobErrorModalController',
-            controllerAs: 'vm',
-            bindToController: true,
-            size: 'lg',
-            resolve: {
-                toolErrorTitle: () => {
-                    return _.cloneDeep(title);
-                },
-                toolError: () => {
-                    //TODO pass on the job and show only relevant fields
-                    return _.cloneDeep(JSON.stringify(job, null, 2)); // 2 for pretty print
-                }
-            }
-        });
+      // this.$uibModal.open({
+      //       animation: true,
+      //       templateUrl: './joberrormodal/joberrormodal.html',
+      //       controller: 'JobErrorModalController',
+      //       controllerAs: 'vm',
+      //       bindToController: true,
+      //       size: 'lg',
+      //       resolve: {
+      //           toolErrorTitle: () => {
+      //               return _.cloneDeep(title);
+      //           },
+      //           toolError: () => {
+      //               TODO pass on the job and show only relevant fields
+                    // return _.cloneDeep(JSON.stringify(job, null, 2)); // 2 for pretty print
+                // }
+            // }
+        // });
     }
 }

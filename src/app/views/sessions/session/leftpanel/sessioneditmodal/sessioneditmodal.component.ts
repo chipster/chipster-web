@@ -1,4 +1,3 @@
-import IModalServiceInstance = angular.ui.bootstrap.IModalServiceInstance;
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, ElementRef, ViewChild} from "@angular/core";
 import {SessionData} from "../../../../../model/session/session-data";

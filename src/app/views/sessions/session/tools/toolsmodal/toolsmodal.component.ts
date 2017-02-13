@@ -34,7 +34,6 @@ export class ToolsModalComponent {
   @Input() selectedModule: Module;
   @Input() selectedCategory: Category;
   @Input() selectedTool: Tool;
-  @Input() isRunEnabled: boolean;
 
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
@@ -123,7 +122,6 @@ export class ToolsModalComponent {
 
   setDescription(description: string): void {
     this.parameterDescription = description;
-    this.searchTool = 'asdlköfdalöflakd';
   };
 
   setInputDescription(description: string) {

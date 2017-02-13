@@ -69,21 +69,21 @@ export class LeftPanelComponent {
   }
 
   openCopySessionModal() {
-    var modalInstance = this.getSessionEditModal('Copy session', this.sessionData.session.name + '_copy');
-
-
-    modalInstance.result.then( (result: string) => {
-      if (!result) {
-        result = 'unnamed session';
-      }
-      this.isCopying = true;
-      const sessionCopy$ = this.sessionResource.copySession(this.sessionData, result);
-      sessionCopy$.subscribe(() => {
-        this.isCopying = false;
-      })
-    }, function () {
-      // modal dismissed
-    });
+    // var modalInstance = this.getSessionEditModal('Copy session', this.sessionData.session.name + '_copy');
+    //
+    //
+    // modalInstance.result.then( (result: string) => {
+    //   if (!result) {
+    //     result = 'unnamed session';
+    //   }
+    //   this.isCopying = true;
+    //   const sessionCopy$ = this.sessionResource.copySession(this.sessionData, result);
+    //   sessionCopy$.subscribe(() => {
+    //     this.isCopying = false;
+    //   })
+    // }, function () {
+    //   modal dismissed
+    // });
   }
 
 }

@@ -33,7 +33,6 @@ export class ToolBoxComponent {
     selectedTool: Tool = null;
     selectedDatasets: Dataset[] = [];
     inputBindings: InputBinding[] = null;
-    tools: Tool[]; // TODO remove?
 
     ngOnInit() {
         this.modules = _.cloneDeep(this.modules);
