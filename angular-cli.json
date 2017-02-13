@@ -36,8 +36,7 @@
         "../node_modules/pdfjs-dist/build/pdf.js",
         "../node_modules/pdfjs-dist/build/pdf.worker.js",
         "../node_modules/handsontable/dist/handsontable.full.js",
-        "../node_modules/@flowjs/flow.js/dist/flow.js",
-        "./dependencies/nghandsontable/ngHandsontable.js"
+        "../node_modules/@flowjs/flow.js/dist/flow.js"
       ],
       "environments": {
         "source": "environments/environment.ts",

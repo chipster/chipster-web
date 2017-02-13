@@ -9,6 +9,6 @@ export class SessionResolve implements Resolve<SessionData> {
   constructor(private sessionResource: SessionResource) {}
 
   resolve(route: ActivatedRouteSnapshot) {
-    return this.sessionResource.loadSession(route.params['sessionId']).do(x => console.log('SessionResolve observalbe', x));
+    return this.sessionResource.loadSession(route.params['sessionId']);
   }
 }
