@@ -78,7 +78,11 @@ export default class TSVFile {
     }
 
     private isMissingHeader(tsv: Array<Array<string>>) {
-        return tsv[0].length < tsv[1].length;
+      if (tsv.length <= 1) {
+        // have to guess
+        return false;
+      }
+      return tsv[0].length < tsv[1].length;
     }
 
 }

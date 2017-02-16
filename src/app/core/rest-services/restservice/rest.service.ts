@@ -23,9 +23,14 @@ export class RestService {
                                   method: RequestMethod = RequestMethod.Get,
                                   requestOptions: RequestOptionsArgs = {},
                                   authentication: boolean = false,
-                                  payload?: any): RequestOptionsArgs {
+                                  payload?: any,
+                                  jsonRequest: boolean = true): RequestOptionsArgs {
     requestOptions.headers = new Headers(requestOptions.headers);
-    requestOptions.headers.append('Content-Type', 'application/json; charset=UTF-8');
+
+
+    if (jsonRequest) {
+      requestOptions.headers.append('Content-Type', 'application/json; charset=UTF-8');
+    }
     if (requestOptions.responseType === ResponseContentType.Json) {
       requestOptions.headers.append('Accept', 'application/json; charset=UTF-8');
     }
@@ -34,7 +39,12 @@ export class RestService {
     }
     requestOptions.method = method;
     requestOptions.url = url;
-    requestOptions.body = JSON.stringify(payload);
+
+    if (jsonRequest) {
+      requestOptions.body = JSON.stringify(payload);
+    } else {
+      requestOptions.body = payload;
+    }
     return requestOptions;
   }
 
@@ -49,8 +59,8 @@ export class RestService {
   /*
    * @description: Create PUT http-request
    */
-  put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs): Observable<any> {
-    const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, requestOptions, authenticationRequired, payload );
+  put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs, jsonRequest?: boolean): Observable<any> {
+    const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, requestOptions, authenticationRequired, payload, jsonRequest);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
 
@@ -76,6 +86,7 @@ export class RestService {
    */
   private doRequest(request: Request): Observable<any> {
     this.httpQueueu.increment();
+
     return this.http.request(request).map( (response:Response) => {
         let resp: any;
 

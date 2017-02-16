@@ -36,6 +36,7 @@ export default class FileResource {
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    return apiUrl$.flatMap( (url: string) => this.restService.put(`{url}/sessions/${sessionId}/datasets/${datasetId}`, {data: data},  true ));
+    return apiUrl$
+      .flatMap((url: string) => this.restService.put(`${url}/sessions/${sessionId}/datasets/${datasetId}`, data,  true, {}, false));
   }
 }

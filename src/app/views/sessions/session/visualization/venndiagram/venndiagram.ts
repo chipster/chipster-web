@@ -157,7 +157,7 @@ export class VennDiagram {
         let parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
         let data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
         let tsvData = d3.tsvFormatRows(data);
-        this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData);
+        this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData).subscribe();
     }
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {

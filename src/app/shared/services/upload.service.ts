@@ -29,6 +29,8 @@ export default class UploadService {
       simultaneousUploads: 1,
       // don't spend time between requests too often
       chunkSize: 50000000,
+      // accept 204 No content
+      successStatuses: [200, 201, 202, 204],
       // fail on 409 Conflict
       permanentErrors: [404, 409, 415, 500, 501],
       // make numbers easier to read (default 500)

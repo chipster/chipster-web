@@ -31,7 +31,7 @@ export default class SessionDataService {
     this.sessionId = id;
   }
 
-  createDataset(dataset: Dataset) {
+  createDataset(dataset: Dataset): Observable<string> {
     return this.sessionResource.createDataset(this.getSessionId(), dataset);
   }
 
@@ -57,8 +57,8 @@ export default class SessionDataService {
    */
   createDerivedDataset(name: string, sourceDatasetIds: string[], toolName: string, content: string) {
 
-    var d = new Dataset(name);
-    return this.createDataset(d).toPromise().then((datasetId: string) => {
+    let d = new Dataset(name);
+    return this.createDataset(d).flatMap((datasetId: string) => {
       d.datasetId = datasetId;
 
       let job = new Job();
@@ -73,12 +73,12 @@ export default class SessionDataService {
       });
 
       return this.createJob(job);
-    }).then((jobId: string) => {
+    }).flatMap((jobId: string) => {
       // d.datasetId is already set above
       d.sourceJob = jobId;
       return this.updateDataset(d);
-    }).then(() => {
-      return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content).toPromise();
+    }).flatMap(() => {
+      return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content);
     });
   }
 

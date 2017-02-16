@@ -144,10 +144,6 @@ export class SessionComponent {
         }, 10 * 1000);
     }
 
-    renameDatasetDialog(dataset: Dataset) {
-        this.sessionDataService.renameDatasetDialog(dataset);
-    }
-
     exportDatasets(datasets: Dataset[]) {
         this.sessionDataService.exportDatasets(datasets);
     }
