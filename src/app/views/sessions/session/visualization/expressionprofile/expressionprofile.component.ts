@@ -89,7 +89,8 @@ export class ExpressionProfileComponent {
         // Calculate points (in pixels) for positioning x-axis points
         let chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index );
         let xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
-        let xAxis = d3.axisBottom(xScale).ticks(headers.length);
+        //compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not assignable to parameter of type 'AxisScale<string>'.
+        let xAxis = d3.axisBottom(<any>xScale).ticks(headers.length);
         svg.append('g')
             .attr('class', 'x axis')
             .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
@@ -128,7 +129,8 @@ export class ExpressionProfileComponent {
             .append('path')
             .attr('class', 'path')
             .attr('id', (d: GeneExpression) => 'path' + d.id)
-            .attr('d', (d: GeneExpression) => lineGenerator( d.values ) )
+            // compile error hidden with <any>: Argument of type 'number[]' is not assignable to parameter of type '[number, number][]'.
+            .attr('d', (d: GeneExpression) => lineGenerator( <any>d.values ) )
             .attr('fill', 'none')
             .attr('stroke-width', 1)
             .attr('stroke', (d: any, i: number) => {
