@@ -166,14 +166,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     const datasetNodesRect = document.getElementById('d3DatasetNodesGroup').getBoundingClientRect();
     const parent = document.getElementById('workflowvisualization').getBoundingClientRect();
 
-    // have calculate from the absolute coordinates (right, bottom etc.),
+    // have to calculate from the absolute coordinates (right, bottom etc.),
     // because bounding rect's width and height don't start the from the origo
     const contentWidth = _.max([jobNodesRect.right, linksRect.right, datasetNodesRect.right]) - parent.left;
     const contentHeight = _.max([jobNodesRect.bottom, linksRect.bottom, datasetNodesRect.bottom]) - parent.top;
 
+    // svg should fill the parent. It's only a viewport, so the content or zoomming doesn't change it's size
     this.outerSvg.attr('width', parent.width).attr('height', parent.height);
     this.background.attr('width', parent.width).attr('height', parent.height);
 
+    // This sets limits for the scrolling.
+    // It must be large enough to accommodate all the content, but let it still
+    // fill the whole viewport if the content is smaller than the viewport.
+    // Otherwise d3 centers the content.
     const translateWidth = _.max([contentWidth, parent.width]);
     const translateHeight = _.max([contentHeight, parent.height]);
 
