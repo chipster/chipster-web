@@ -79,6 +79,9 @@ export default class SessionDataService {
       return this.updateDataset(d);
     }).flatMap(() => {
       return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content);
+    }).catch(err => {
+      console.log('create derived dataset failed', err);
+      throw err;
     });
   }
 

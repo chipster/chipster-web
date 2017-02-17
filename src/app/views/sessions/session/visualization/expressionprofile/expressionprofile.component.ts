@@ -266,8 +266,7 @@ export class ExpressionProfileComponent {
         let selectedGeneExpressionIds = this.getSelectionIds();
         let tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
         let data = d3.tsvFormatRows(tsvData);
-        this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data)
-          .subscribe(null, err => console.log('failed to create a dataset', err));
+        this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data).subscribe();
     }
 
     getSelectionIds(): Array<string> {
