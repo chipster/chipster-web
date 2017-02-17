@@ -3,19 +3,20 @@ import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
-import {Component, ChangeDetectorRef} from "@angular/core";
+import {Component, ChangeDetectorRef, OnInit, OnDestroy} from "@angular/core";
 import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'ch-visualizations',
   templateUrl: './visualizations.html'
 })
-export class VisualizationsComponent {
+export class VisualizationsComponent implements OnInit, OnDestroy {
 
   static readonly TAB_ID_PREFIX: string = 'ch-vis-tab-';
 
   active: string; // id of the active vis tab
   visualizations: Array<any> = visualizations;
+  private datasetSelectionSubscription;
 
   constructor(private SelectionService: SelectionService,
               private changeDetectorRef: ChangeDetectorRef,) {}
@@ -23,10 +24,14 @@ export class VisualizationsComponent {
   ngOnInit() {
     this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
 
-    this.SelectionService.getDatasetSelectionStream().subscribe(() => {
+    this.datasetSelectionSubscription = this.SelectionService.getDatasetSelectionStream().subscribe(() => {
       this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
-      this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
+      //this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
     });
+  }
+
+  ngOnDestroy() {
+    this.datasetSelectionSubscription.unsubscribe();
   }
 
   isCompatibleVisualization(name: string): boolean {
