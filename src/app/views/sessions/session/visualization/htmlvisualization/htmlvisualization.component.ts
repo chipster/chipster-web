@@ -14,7 +14,7 @@ export class HtmlvisualizationComponent implements OnInit {
   private dataset: Dataset;
 
   private src: string;
-  private wrapperUrl: string = 'app/views/sessions/session/visualization/htmlvisualization/htmlvisualizationwrapper.html';
+  private wrapperUrl: string = 'assets/htmlvisualizationwrapper.html';
   private token: string;
 
   constructor(
