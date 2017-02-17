@@ -174,8 +174,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     this.outerSvg.attr('width', parent.width).attr('height', parent.height);
     this.background.attr('width', parent.width).attr('height', parent.height);
 
-    console.log('prarent', parent);
-    console.log('datasets', datasetNodesRect);
     const translateWidth = _.max([contentWidth, parent.width]);
     const translateHeight = _.max([contentHeight, parent.height]);
 
