@@ -1,69 +1,70 @@
 <div class="container">
-  <div class="col-md-6">
-    <!-- User Sessions -->
+  <div class="row">
+    <div class="col-md">
+      <!-- User Sessions -->
 
-    <div class="row">
-      <div class="col-md-6">
-        <h4>Open session</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Open session</h4>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-sm btn-info pull-right" (click)="createSession()">
+            <span class="fa fa-plus" aria-hidden="true"></span>
+            New session
+          </button>
+        </div>
       </div>
-      <div class="col-md-6">
-        <button class="btn btn-sm btn-info pull-right" (click)="createSession()">
-          <span class="fa fa-plus" aria-hidden="true"></span>
-          New session
-        </button>
-      </div>
-    </div>
 
-    <div class="scrollable session-list">
-      <table class="table table-hover table-condensed ">
-        <tbody>
-        <tr *ngFor="let session of userSessions"
-            (mouseover)="selectSession($event, session)"
-            (click)="openSession(session.sessionId)">
-          <td>
+      <div class="scrollable session-list">
+        <table class="table table-hover table-condensed ">
+          <tbody>
+          <tr *ngFor="let session of userSessions"
+              (mouseover)="selectSession($event, session)"
+              (click)="openSession(session.sessionId)">
+            <td>
             <span>{{session.name}}
               <button class="btn btn-default btn-xs pull-right no-border"
                       (click)="deleteSession(session); $event.stopImmediatePropagation();"
                       title="Delete session"><span class="fa fa-times"></span>
               </button>
             </span>
-          </td>
+            </td>
 
-        </tr>
-        </tbody>
-      </table>
+          </tr>
+          </tbody>
+        </table>
 
-      <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
+        <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
 
-      <!-- Example Sessions -->
-      <h4>Example sessions</h4>
-      <table class="table table-hover">
-        <tbody>
-        <tr *ngFor="let session of localSessions">
-          <td class="text-left text-nowrap">
-            {{session.name}}
-          </td>
-        </tr>
-        </tbody>
-      </table>
+        <!-- Example Sessions -->
+        <h4>Example sessions</h4>
+        <table class="table table-hover">
+          <tbody>
+          <tr *ngFor="let session of localSessions">
+            <td class="text-left text-nowrap">
+              {{session.name}}
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div><!--end of column-md-6-->
-  <div class="col-md-6" id="session-preview"><!-- Session Detail -->
+    <div class="col-md" id="session-preview"><!-- Session Detail -->
 
-    <!--<h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>-->
+      <h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>
 
-    <!--<div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">-->
-    <!--<p>{{selectedSessions[0].notes}}</p>-->
-    <!---->
-    <!--<div *ngIf="sessionData.datasetsMap && sessionData.jobsMap">-->
-    <!--<ch-workflow-graph-->
-    <!--datasets-map="sessionData.datasetsMap"-->
-    <!--jobs-map="sessionData.jobsMap"-->
-    <!--modules-map="sessionData.modulesMap"-->
-    <!--zoom="0.5"-->
-    <!--enabled="false">-->
-    <!--</ch-workflow-graph>-->
-    <!--</div>-->
-    <!--</div>-->
+      <div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">
+        <p>{{selectedSessions[0].notes}}</p>
+
+        <div *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
+          <ch-workflow-graph
+            [datasetsMap]="sessionData.datasetsMap"
+            [jobsMap]="sessionData.jobsMap"
+            [modulesMap]="sessionData.modulesMap"
+            [defaultScale]="0.5"
+            [enabled]="false"></ch-workflow-graph>
+        </div>
+      </div>
+    </div>
   </div>
-</div><!--end of row-->
+</div>

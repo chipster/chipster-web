@@ -15,7 +15,7 @@ import UploadService from "../../../../shared/services/upload.service";
   imports: [ CommonModule, SharedModule, FormsModule, NgbModule ],
   declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent, SessionEditModalComponent],
   providers: [WorkflowGraphService, UploadService],
-  exports: [LeftPanelComponent],
+  exports: [LeftPanelComponent, WorkflowGraphComponent],
   entryComponents: [AddDatasetModalContent]
 })
 export class LeftPanelModule { }

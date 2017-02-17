@@ -1,11 +1,9 @@
-import IWindowService = angular.IWindowService;
-import IScope = angular.IScope;
 import SelectionService from "../../selection.service";
 import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
 import Node from "./node";
 import {Link} from "./link";
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from "@angular/core";
 import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
@@ -21,14 +19,15 @@ import * as _ from "lodash";
   selector: 'ch-workflow-graph',
   template: '<section id="workflowvisualization"></section>'
 })
-export class WorkflowGraphComponent {
+export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   @Input() datasetsMap: Map<string, Dataset>;
   @Input() jobsMap: Map<string, Job>;
   @Input() modulesMap: Map<string, Module>;
   @Input() datasetSearch: string;
-  @Input() zoom: number;
+  @Input() defaultScale: number;
   @Input() enabled: boolean;
+  private zoom;
 
   constructor(private sessionDataService: SessionDataService,
               private sessionEventService: SessionEventService,
@@ -99,35 +98,41 @@ export class WorkflowGraphComponent {
     this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node').attr('id', 'd3DatasetNodesGroup');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
 
+    if (this.enabled) {
+      this.zoom = d3.zoom()
+        .scaleExtent([0.2, 1])
+        .on('zoom', () => {
+          this.svg.attr("transform", d3.event.transform);
+        });
+
+      d3.select('g.background').call(this.zoom);
+    } else {
+      this.svg.attr('transform', 'translate(0,0) scale(' + this.defaultScale + ')');
+    }
+
     // apply zoom
-    d3.select('g.background').call(d3.zoom()
-      .scaleExtent([0.2, 1])
-      .on('zoom', () => {
-        this.d3JobNodesGroup.attr("transform", d3.event.transform);
-        this.d3LinksGroup.attr("transform", d3.event.transform);
-        this.d3DatasetNodesGroup.attr("transform", d3.event.transform);
-        this.d3LabelsGroup.attr("transform", d3.event.transform);
-      }));
 
-    this.sessionEventService.getDatasetStream().subscribe(() => {
-        this.update();
-        this.renderGraph();
-    });
+    if (this.enabled) {
+      this.sessionEventService.getDatasetStream().subscribe(() => {
+          this.update();
+          this.renderGraph();
+      });
 
-    this.sessionEventService.getJobStream().subscribe(() => {
-        this.update();
-        this.renderGraph();
-    });
+      this.sessionEventService.getJobStream().subscribe(() => {
+          this.update();
+          this.renderGraph();
+      });
 
-    this.SelectionService.getDatasetSelectionStream().subscribe(() => {
-        this.update();
-        this.renderGraph();
-    });
+      this.SelectionService.getDatasetSelectionStream().subscribe(() => {
+          this.update();
+          this.renderGraph();
+      });
 
-    this.SelectionService.getJobSelectionStream().subscribe(() => {
-        this.update();
-        this.renderGraph();
-    });
+      this.SelectionService.getJobSelectionStream().subscribe(() => {
+          this.update();
+          this.renderGraph();
+      });
+    }
 
     // show
     this.update();
@@ -135,7 +140,7 @@ export class WorkflowGraphComponent {
     this.setSVGSize();
   }
 
-  ngOnChanges(changes: ng.IChangesObject<string>) {
+  ngOnChanges(changes: SimpleChanges) {
 
     if (!this.svg) {
       // not yet initialized
@@ -155,15 +160,28 @@ export class WorkflowGraphComponent {
   }
 
   setSVGSize() {
+
     const jobNodesRect = document.getElementById('d3JobNodesGroup').getBoundingClientRect();
     const linksRect = document.getElementById('d3LinksGroup').getBoundingClientRect();
     const datasetNodesRect = document.getElementById('d3DatasetNodesGroup').getBoundingClientRect();
+    const parent = document.getElementById('workflowvisualization').getBoundingClientRect();
 
-    const width = _.max([jobNodesRect.width, linksRect.width, datasetNodesRect.width]);
-    const height = _.max([jobNodesRect.height, linksRect.height, datasetNodesRect.height]);
+    // have calculate from the absolute coordinates (right, bottom etc.),
+    // because bounding rect's width and height don't start the from the origo
+    const contentWidth = _.max([jobNodesRect.right, linksRect.right, datasetNodesRect.right]) - parent.left;
+    const contentHeight = _.max([jobNodesRect.bottom, linksRect.bottom, datasetNodesRect.bottom]) - parent.top;
 
-    this.outerSvg.attr('width', width).attr('height', height);
-    this.background.attr('width', width).attr('height', height);
+    this.outerSvg.attr('width', parent.width).attr('height', parent.height);
+    this.background.attr('width', parent.width).attr('height', parent.height);
+
+    console.log('prarent', parent);
+    console.log('datasets', datasetNodesRect);
+    const translateWidth = _.max([contentWidth, parent.width]);
+    const translateHeight = _.max([contentHeight, parent.height]);
+
+    if (this.zoom) {
+      this.zoom.translateExtent([[0, 0], [translateWidth, translateHeight]]);
+    }
   }
 
 
@@ -194,6 +212,8 @@ export class WorkflowGraphComponent {
 
     this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
 
+    let self = this;
+
     this.d3JobNodes.enter().append('rect').merge(this.d3JobNodes)
       .attr('rx', this.nodeRadius)
       .attr('ry', this.nodeRadius)
@@ -204,13 +224,19 @@ export class WorkflowGraphComponent {
       .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter))
       .classed('selected-job', (d) => this.isSelectedJob(d.job))
       .on('click', (d) => {
-        this.SelectionService.selectJob(d3.event, d.job)
+        if (this.enabled) {
+          this.SelectionService.selectJob(d3.event, d.job)
+        }
       })
       .on('mouseover', function () {
-        d3.select(this).classed('hovering-job', true);
+        if (self.enabled) {
+          d3.select(this).classed('hovering-job', true);
+        }
       })
       .on('mouseout', function () {
-        d3.select(this).classed('hovering-job', false);
+        if (self.enabled) {
+          d3.select(this).classed('hovering-job', false);
+        }
       });
 
     this.d3JobNodes.exit().remove();
@@ -265,16 +291,22 @@ export class WorkflowGraphComponent {
       .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
       .classed('selected-dataset', (d) => this.enabled && this.isSelectedDataset(d.dataset))
       .on('click', function (d) {
-        if (!UtilsService.isCtrlKey(d3.event)) {
-          self.SelectionService.clearSelection();
+        if (self.enabled) {
+          if (!UtilsService.isCtrlKey(d3.event)) {
+            self.SelectionService.clearSelection();
+          }
+          self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
         }
-        self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
       })
       .on('mouseover', function () {
-        d3.select(this).classed('hovering-dataset', true);
+        if (self.enabled) {
+          d3.select(this).classed('hovering-dataset', true);
+        }
       })
       .on('mouseout', function () {
-        d3.select(this).classed('hovering-dataset', false);
+        if (self.enabled) {
+          d3.select(this).classed('hovering-dataset', false);
+        }
       })
       .call(d3.drag()
         .on('drag', function () {
@@ -371,10 +403,14 @@ export class WorkflowGraphComponent {
         self.SelectionService.selectJob(d3.event, d.target.sourceJob);
       })
       .on('mouseover', function() {
-        d3.select(this).classed('hovering-job', true);
+        if (this.enabled) {
+          d3.select(this).classed('hovering-job', true);
+        }
       })
       .on('mouseout', function() {
-        d3.select(this).classed('hovering-job', false);
+        if (this.enabled) {
+          d3.select(this).classed('hovering-job', false);
+        }
       })
       .style('marker-end', 'url(#end)');
 
