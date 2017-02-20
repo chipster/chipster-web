@@ -1,6 +1,6 @@
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, ChangeDetectorRef} from "@angular/core";
+import {Input, Component} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import FileResource from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -20,7 +20,7 @@ import VisualizationModalService from "../visualizationmodal.service";
     </div>
 
     <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->
-    <div id="tableContainer"></div>
+    <div id="{{tableContainerId}}"></div>
     `
 })
 export class SpreadsheetVisualizationComponent {
@@ -30,7 +30,9 @@ export class SpreadsheetVisualizationComponent {
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
-  private dataReady: boolean = false;
+  private dataReady: boolean;
+  private readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
+
 
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
@@ -51,7 +53,7 @@ export class SpreadsheetVisualizationComponent {
       this.lineCount = parsedTSV.length;
 
       let normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
-      const container = document.getElementById('tableContainer');
+      const container = document.getElementById(this.tableContainerId);
       new Handsontable(container, SpreadsheetVisualizationComponent.getSettings(normalizedTSV.getRawData()));
       this.dataReady = true;
     }, (e: Response) => {
