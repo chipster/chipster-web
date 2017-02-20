@@ -26,7 +26,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
     this.datasetSelectionSubscription = this.SelectionService.getDatasetSelectionStream().subscribe(() => {
       this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
-      //this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
+      this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
     });
   }
 
