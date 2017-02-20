@@ -26,7 +26,7 @@ import VisualizationModalService from "../visualizationmodal.service";
 export class SpreadsheetVisualizationComponent {
 
   @Input() dataset: Dataset;
-  @Input() showFullData: boolean = false;
+  @Input() showFullData: boolean;
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
@@ -54,7 +54,7 @@ export class SpreadsheetVisualizationComponent {
 
       let normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
       const container = document.getElementById(this.tableContainerId);
-      new Handsontable(container, SpreadsheetVisualizationComponent.getSettings(normalizedTSV.getRawData()));
+      new Handsontable(container, this.getSettings(normalizedTSV.getRawData()));
       this.dataReady = true;
     }, (e: Response) => {
       console.error('Fetching TSVData failed', e);
@@ -70,8 +70,8 @@ export class SpreadsheetVisualizationComponent {
     this.visualizationModalService.openVisualizationModal(this.dataset, 'spreadsheet');
   }
 
-  static getSettings(array: string[][]) {
-    const arrayHeight = array.length * 23 + 23; // extra for header-row
+  getSettings(array: string[][]) {
+    const tableHeight = this.showFullData ? 600 : array.length * 23 + 23; // extra for header-row
     return {
       data: array.slice(1),
       colHeaders: array[0],
@@ -80,7 +80,7 @@ export class SpreadsheetVisualizationComponent {
       sortIndicator: true,
       readOnly: true,
       rowHeights: 23,
-      height: arrayHeight,
+      height: tableHeight,
       renderAllRows: false
     }
   }
