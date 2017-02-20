@@ -29,7 +29,7 @@
                 (click)="selectModule(module)"
                 *ngFor="let module of modules | modulepipe:searchTool"
                 [ngClass]="{'btn-primary':module === selectedModule,
-                'btn-default':module !== selectedModule}">{{module.name}}
+                'btn-secondary':module !== selectedModule}">{{module.name}}
         </button>
       </div>
       <div class="col">

@@ -17,8 +17,7 @@
 
         <div class="col-md-8">
             <h5 *ngIf="!selectedTool"><span class="glyphicon glyphicon-arrow-left"></span>
-                Use the <button class="btn btn-info btn-xs" (click)="openToolsModal()">Tools...</button>
-                button or press 'T' to view and select tools</h5>
+                Use the Tools-button or press 'T' to view and select tools</h5>
 
             <ch-tool-title *ngIf="selectedTool"
                         [module]="selectedModule.name"

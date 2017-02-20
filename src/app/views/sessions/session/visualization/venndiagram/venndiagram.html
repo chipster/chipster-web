@@ -12,16 +12,16 @@
 
             <button (click)="compareIntersectionBy('identifier')"
                     [disabled]="columnKey === 'identifier'"
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     *ngIf="identifierComparingEnabled">Identifier</button>
 
             <button (click)="compareIntersectionBy('symbol')"
                     [disabled]="columnKey === 'symbol'"
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     *ngIf="symbolComparingEnabled">Symbol</button>
 
             <div *ngIf="diagramSelection.values.length > 0">
-                <button class="btn btn-default" (click)="createNewDataset()">Create new dataset</button>
+                <button class="btn btn-secondary" (click)="createNewDataset()">Create new dataset</button>
                 <h6>Selections: {{diagramSelection.values.length}}</h6>
                 <table class="table-condensed">
                     <thead>
