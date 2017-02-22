@@ -10,6 +10,14 @@ import * as _ from "lodash";
 @Injectable()
 export class ExpressionProfileTSVService {
 
+
+    /*
+     * @description: does tsv-file contain .chip-headers
+     */
+    public containsChipHeaders(tsv: TSVFile): boolean {
+      return this.getChipHeaderIndexes(tsv.headers).length > 0;
+    }
+
     /*
      * Get chipvalues from raw data
      */

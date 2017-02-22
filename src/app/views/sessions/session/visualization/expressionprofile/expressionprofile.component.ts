@@ -5,7 +5,6 @@ import Interval from "./interval";
 import SessionDataService from "../../sessiondata.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import { TSVReader } from "../../../../../shared/services/TSVReader";
 import GeneExpression from "./geneexpression";
 import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -30,9 +29,9 @@ export class ExpressionProfileComponent {
     private tsv: TSVFile;
     private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
     private viewSelectionList: Array<any>;
+    private errorMessage: string;
 
     constructor(
-                private tsvReader: TSVReader,
                 private expressionProfileService: ExpressionProfileService,
                 private sessionDataService: SessionDataService,
                 private expressionProfileTSVService: ExpressionProfileTSVService,
@@ -43,7 +42,12 @@ export class ExpressionProfileComponent {
         this.fileResource.getData(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsvParseRows(result);
             this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
-            this.drawLineChart(this.tsv);
+            if(this.expressionProfileTSVService.containsChipHeaders(this.tsv)) {
+              this.drawLineChart(this.tsv);
+            } else {
+              this.errorMessage = `Only microarray data supported, didn’t find any  columns starting with chip.`;
+            }
+
         });
 
         this.selectedGeneExpressions = [];
