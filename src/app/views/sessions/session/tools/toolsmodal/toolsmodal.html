@@ -21,143 +21,168 @@
   </div>
 
   <div class="modal-body">
-
-    <!--&lt;!&ndash; module buttons &ndash;&gt;-->
-    <div class="row">
-      <div class="col">
-        <button type="button" class="btn btn-sm module-button"
-                (click)="selectModule(module)"
-                *ngFor="let module of modules | modulepipe:searchTool"
-                [ngClass]="{'btn-primary':module === selectedModule,
+    <ngb-tabset>
+      <ngb-tab>
+        <template ngbTabTitle>Tool selection</template>
+        <template ngbTabContent>
+          <!--&lt;!&ndash; module buttons &ndash;&gt;-->
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn btn-sm module-button"
+                      (click)="selectModule(module)"
+                      *ngFor="let module of modules | modulepipe:searchTool"
+                      [ngClass]="{'btn-primary':module === selectedModule,
                 'btn-secondary':module !== selectedModule}">{{module.name}}
-        </button>
-      </div>
-      <div class="col">
-        <div class="search-div pull-right">
-          <input class="form-control" type="text" [(ngModel)]="searchTool"
-                 [placeholder]="'Search tool'" (keyup)="toolSearchKeyEvent($event)">
-        </div>
-      </div>
-    </div>
+              </button>
+            </div>
+            <div class="col">
+              <div class="search-div pull-right">
+                <input class="form-control" type="text" [(ngModel)]="searchTool"
+                       [placeholder]="'Search tool'" (keyup)="toolSearchKeyEvent($event)">
+              </div>
+            </div>
+          </div>
 
-    <!--&lt;!&ndash; category and tool lists &ndash;&gt;-->
-    <div class="row">
-      <div class="col"><h5>Category</h5></div>
-      <div class="col"><h5>Tool</h5></div>
-    </div>
+          <!--&lt;!&ndash; category and tool lists &ndash;&gt;-->
+          <div class="row">
+            <div class="col"><h5>Category</h5></div>
+            <div class="col"><h5>Tool</h5></div>
+          </div>
 
-    <div class="row">
+          <div class="row">
 
-      <div class="col-6">
-        <div class="btn-group-vertical tool-list">
-          <button type="button" class="btn btn-secondary"
-                  [ngClass]="{'active':category===selectedCategory}"
-                  (click)="selectCategory(category)"
-                  *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
-            <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
-          </button>
-        </div>
-      </div>
+            <div class="col-6">
+              <div class="btn-group-vertical tool-list">
+                <button type="button" class="btn btn-secondary"
+                        [ngClass]="{'active':category===selectedCategory}"
+                        (click)="selectCategory(category)"
+                        *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
+                  <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
+                </button>
+              </div>
+            </div>
 
-      <div class="col-6">
-        <div class="btn-group-vertical tool-list" *ngIf="selectedCategory">
-          <button type="button"
-                  class="btn btn-secondary"
-                  [ngClass]="{'active':tool===selectedTool}"
-                  (click)="selectTool(tool)"
-                  *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
-                  id="tool-button-{{tool.id}}">
-            {{tool.name.displayName}}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="row" *ngIf="selectedTool">
-      <div class="col">
-        <p>{{selectedTool.description}}</p>
-        <div class="btn-group-vertical">
-          <ch-sourcemodal
-            [selectedTool]="selectedTool"
-            [category]="selectedCategory.name"
-            [module]="selectedModule.name"></ch-sourcemodal>
-        </div>
-      </div>
-
-    </div>
+            <div class="col-6">
+              <div class="btn-group-vertical tool-list" *ngIf="selectedCategory">
+                <button type="button"
+                        class="btn btn-secondary"
+                        [ngClass]="{'active':tool===selectedTool}"
+                        (click)="selectTool(tool)"
+                        *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
+                        id="tool-button-{{tool.id}}">
+                  {{tool.name.displayName}}
+                </button>
+              </div>
+            </div>
+          </div>
 
 
-    <!-- inputs -->
-    <div class="row">
-      <div class="col-md-7 no-padding-right">
-        <h5>Input datasets
-          <button class="btn btn-info btn-xs pull-right" (click)="openInputsModal()" [disabled]="!selectedTool">Edit
-            multiple inputs
-          </button>
-        </h5>
-      </div>
-    </div>
+        </template>
+      </ngb-tab>
+      <ngb-tab>
+        <template ngbTabTitle>Source Code</template>
+        <template ngbTabContent>
+          <div class="row" *ngIf="selectedTool">
+            <div class="col">
+              <p>{{selectedTool.description}}</p>
+              <div class="btn-group-vertical">
+                <ch-sourcemodal
+                  [selectedTool]="selectedTool"
+                  [category]="selectedCategory.name"
+                  [module]="selectedModule.name"></ch-sourcemodal>
+              </div>
+            </div>
+          </div>
+        </template>
+      </ngb-tab>
 
-    <div class="row">
-      <div class="col-md-7 no-padding-right">
-        <table class="table table-borderless table-condensed table-hover">
-          <template *ngFor="let inputBinding of inputBindings">
-            <tr *ngIf="inputBindings.length > 0"
-                (mouseover)="setInputDescription(inputBinding.toolInput.description )"
-                (mouseleave)="setInputDescription('')">
+      <ngb-tab>
+        <template ngbTabTitle>Inputs</template>
+        <template ngbTabContent>
+          <!-- inputs -->
+          <div class="row">
+            <div class="col-md-7 no-padding-right">
+              <h5>Input datasets
+                <button class="btn btn-info btn-xs pull-right" (click)="openInputsModal()" [disabled]="!selectedTool">
+                  Edit
+                  multiple inputs
+                </button>
+              </h5>
+            </div>
+          </div>
 
-              <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
+          <div class="row">
+            <div class="col-md-7 no-padding-right">
+              <table class="table table-borderless table-condensed table-hover">
+                <template *ngFor="let inputBinding of inputBindings">
+                  <tr *ngIf="inputBindings.length > 0"
+                      (mouseover)="setInputDescription(inputBinding.toolInput.description )"
+                      (mouseleave)="setInputDescription('')">
 
-              <td>
+                    <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
 
-                <!-- ng-options allows values to be objects instead of simple strings, which makes
-                it easier to get the both dataset id and name later -->
-                <span *ngIf="inputBinding.datasets.length > 1">multiple </span>
+                    <td>
 
-                <select *ngIf="inputBinding.datasets.length <= 1"
-                        [(ngModel)]="inputBinding.datasets[0]"
-                        name="input_{{index}}">
-                  <!--ng-required="!inputBinding.toolInput.optional"-->
-                  <option
-                    *ngFor="let dataset of toolService.getCompatibleDatasets(inputBinding.toolInput, selectedDatasets); trackBy: dataset.datasetId"
-                    [value]="dataset.name"></option>
-                </select>
+                      <!-- ng-options allows values to be objects instead of simple strings, which makes
+                      it easier to get the both dataset id and name later -->
+                      <span *ngIf="inputBinding.datasets.length > 1">multiple </span>
 
-                <label class="label label-warning"
-                >Required input</label>
-                <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
-              </td>
-            </tr>
-          </template>
-        </table>
-      </div>
+                      <select *ngIf="inputBinding.datasets.length <= 1"
+                              [(ngModel)]="inputBinding.datasets[0]"
+                              name="input_{{index}}">
+                        <!--ng-required="!inputBinding.toolInput.optional"-->
+                        <option
+                          *ngFor="let dataset of toolService.getCompatibleDatasets(inputBinding.toolInput, selectedDatasets); trackBy: dataset.datasetId"
+                          [value]="dataset.name"></option>
+                      </select>
 
-      <!-- input description -->
-      <div class="col-md-5">
-        <p>{{inputDescription}}</p>
-      </div>
+                      <label class="label label-warning"
+                      >Required input</label>
+                      <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
+                    </td>
+                  </tr>
+                </template>
+              </table>
+            </div>
 
-    </div>
+            <!-- input description -->
+            <div class="col-md-5">
+              <p>{{inputDescription}}</p>
+            </div>
 
+          </div>
 
-    <!-- parameters -->
-    <div class="row">
-      <div class="col-md-12">
-        <h5>Parameters</h5>
-      </div>
-    </div>
+        </template>
+      </ngb-tab>
 
-    <div class="row">
-      <div class="col-md-7 scrollable no-padding-right">
-        <ch-tools-parameter-form [tool]="selectedTool"
-                                 (description)="setDescription($event)"></ch-tools-parameter-form>
-      </div>
+      <ngb-tab>
+        <template ngbTabTitle>Parameters</template>
+        <template ngbTabContent>
 
-      <div class="col-md-5">
-        <p>{{parameterDescription}}</p>
-      </div>
+          <!-- parameters -->
+          <div class="row">
+            <div class="col-md-12">
+              <h5>Parameters</h5>
+            </div>
+          </div>
 
-    </div>
+          <div class="row">
+            <div class="col-md-7 scrollable no-padding-right">
+              <ch-tools-parameter-form [tool]="selectedTool"
+                                       (description)="setDescription($event)"></ch-tools-parameter-form>
+            </div>
+
+            <div class="col-md-5">
+              <p>{{parameterDescription}}</p>
+            </div>
+
+          </div>
+
+        </template>
+      </ngb-tab>
+
+    </ngb-tabset>
+
   </div>    <!--end of modal body-->
   <div class="modal-footer">
     <button class="btn btn-success min-width-button pull-right" (click)="runJob()"
