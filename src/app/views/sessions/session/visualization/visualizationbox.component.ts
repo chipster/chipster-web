@@ -3,7 +3,7 @@ import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
-import {Component, ChangeDetectorRef, OnInit, OnDestroy} from "@angular/core";
+import {Component, OnInit, OnDestroy} from "@angular/core";
 import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -18,15 +18,13 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   visualizations: Array<any> = visualizations;
   private datasetSelectionSubscription;
 
-  constructor(private SelectionService: SelectionService,
-              private changeDetectorRef: ChangeDetectorRef,) {}
+  constructor(private SelectionService: SelectionService) {}
 
   ngOnInit() {
     this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
 
     this.datasetSelectionSubscription = this.SelectionService.getDatasetSelectionStream().subscribe(() => {
       this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
-      this.changeDetectorRef.detectChanges(); // needed to trigger tab content update
     });
   }
 

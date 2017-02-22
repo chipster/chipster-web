@@ -4,7 +4,7 @@
 
   <h6 *ngIf="!active">No suitable visualization for current dataset selections</h6>
 
-  <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" active="active">
+  <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" activeId="{{active}}">
 
     <ngb-tab id="{{getTabId('spreadsheet')}}"
              *ngIf="isCompatibleVisualization('spreadsheet')">
