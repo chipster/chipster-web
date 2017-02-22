@@ -1,9 +1,7 @@
 <div class="row">
 
   <div class="col-md-9">
-    <div class="alert alert-warning" role="alert">
-      {{errorMessage}}
-    </div>
+    <div *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
     <div id="expressionprofile"></div>
   </div>
   <div class="col-md-3" *ngIf="selectedGeneExpressions && selectedGeneExpressions.length > 0">
