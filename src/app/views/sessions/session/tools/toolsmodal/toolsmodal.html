@@ -1,4 +1,4 @@
-<button class="btn btn-info min-width-button" (click)="openToolsModal()">Tools</button>
+<button class="btn btn-primary" (click)="openToolsModal()">Tools</button>
 
 <template #toolsModalTemplate let-close="close">
 
@@ -28,12 +28,15 @@
           <!--&lt;!&ndash; module buttons &ndash;&gt;-->
           <div class="row">
             <div class="col">
-              <button type="button" class="btn btn-sm module-button"
-                      (click)="selectModule(module)"
-                      *ngFor="let module of modules | modulepipe:searchTool"
-                      [ngClass]="{'btn-primary':module === selectedModule,
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary"
+                        (click)="selectModule(module)"
+                        *ngFor="let module of modules | modulepipe:searchTool"
+                        [ngClass]="{'btn-primary':module === selectedModule,
                 'btn-secondary':module !== selectedModule}">{{module.name}}
-              </button>
+                </button>
+              </div>
+
             </div>
             <div class="col">
               <div class="search-div pull-right">
@@ -79,7 +82,7 @@
 
         </template>
       </ngb-tab>
-      <ngb-tab>
+      <ngb-tab [disabled]="!selectedTool">
         <template ngbTabTitle>Source Code</template>
         <template ngbTabContent>
           <div class="row" *ngIf="selectedTool">
@@ -96,16 +99,15 @@
         </template>
       </ngb-tab>
 
-      <ngb-tab>
+      <ngb-tab [disabled]="!selectedTool">
         <template ngbTabTitle>Inputs</template>
         <template ngbTabContent>
           <!-- inputs -->
           <div class="row">
             <div class="col-md-7 no-padding-right">
               <h5>Input datasets
-                <button class="btn btn-info btn-xs pull-right" (click)="openInputsModal()" [disabled]="!selectedTool">
-                  Edit
-                  multiple inputs
+                <button class="btn btn-primary btn-xs pull-right" (click)="openInputsModal()" [disabled]="!selectedTool">
+                  Edit multiple inputs
                 </button>
               </h5>
             </div>
@@ -155,29 +157,11 @@
         </template>
       </ngb-tab>
 
-      <ngb-tab>
+      <!-- parameters -->
+      <ngb-tab [disabled]="!selectedTool">
         <template ngbTabTitle>Parameters</template>
         <template ngbTabContent>
-
-          <!-- parameters -->
-          <div class="row">
-            <div class="col-md-12">
-              <h5>Parameters</h5>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-7 scrollable no-padding-right">
-              <ch-tools-parameter-form [tool]="selectedTool"
-                                       (description)="setDescription($event)"></ch-tools-parameter-form>
-            </div>
-
-            <div class="col-md-5">
-              <p>{{parameterDescription}}</p>
-            </div>
-
-          </div>
-
+            <ch-tools-parameter-form [tool]="selectedTool"></ch-tools-parameter-form>
         </template>
       </ngb-tab>
 
@@ -185,7 +169,7 @@
 
   </div>    <!--end of modal body-->
   <div class="modal-footer">
-    <button class="btn btn-success min-width-button pull-right" (click)="runJob()"
+    <button class="btn btn-primary pull-right" (click)="runJob()"
             [disabled]="!isRunEnabled()">
       <span class="glyphicon glyphicon-play"></span> Run
     </button>

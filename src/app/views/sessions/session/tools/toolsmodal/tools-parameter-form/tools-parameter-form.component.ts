@@ -13,14 +13,9 @@ import {ToolService} from "../../tool.service";
 export class ToolsParameterFormComponent implements OnInit {
 
   @Input() tool: Tool;
-  @Output() description: EventEmitter<string> = new EventEmitter();
 
   constructor(private toolService: ToolService) { }
 
   ngOnInit() {}
-
-  setDescription(description: string): void {
-    this.description.emit(description);
-  }
 
 }

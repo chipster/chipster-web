@@ -2,7 +2,7 @@ import {Input, Component} from "@angular/core";
 
 @Component({
   selector: 'ch-tool-title',
-  template: `<h5>{{module}} &#8594; {{category}} &#8594; {{tool}}</h5>`
+  template: `<span>{{module}} &#8594; {{category}} &#8594; {{tool}}</span>`
 })
 export class ToolTitleComponent {
 

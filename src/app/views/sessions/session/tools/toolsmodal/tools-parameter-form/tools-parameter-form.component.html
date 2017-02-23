@@ -1,18 +1,26 @@
 <form name="paramForm" *ngIf="tool">
-  <table class="table table-borderless table-condensed table-hover">
+  <table class="table table-sm table-hover">
+    <thead class="thead-default">
+    <tr>
+      <th>Name</th>
+      <th>Value</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
     <tr *ngFor="let parameter of tool.parameters"
-        (mouseover)="setDescription(parameter.description)"
-        (mouseleave)="setDescription('')">
+        ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave" popoverTitle="Description">
+
       <td>
-        {{parameter.name.displayName}}
+        <strong>{{parameter.name.displayName}}</strong>
       </td>
 
       <td>
+        <span>
         <select *ngIf="toolService.isSelectionParameter(parameter)"
                 name="parameter_{{index}}"
-                [(ngModel)]="parameter.value"
-                style="max-width: 300px">
-                required="{{!parameter.optional}}">
+                [(ngModel)]="parameter.value">
+          <!--required="!parameter.optional"-->
           <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
             {{option.displayName || option.id}}
           </option>
@@ -23,35 +31,36 @@
                name="parameter_{{index}}"
                min="{{parameter.from}}"
                max="{{parameter.to}}"
-               required="{{!parameter.optional}}" />
+               required="{{!parameter.optional}}"/>
 
         <input *ngIf="parameter.type === 'STRING'" type="text"
                name="parameter_{{index}}"
                [(ngModel)]="parameter.value"
                required="{{!parameter.optional}}">
 
-        <!--<label class="label label-warning"-->
-        <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
-        <!--value</label>-->
-        <!--<label class="label label-warning"-->
-        <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
-        <!--value: {{parameter.from}}</label>-->
-        <!--<label class="label label-warning"-->
-        <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
-        <!--value: {{parameter.to}}</label>-->
+          <!--<label class="label label-warning"-->
+          <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
+          <!--value</label>-->
+          <!--<label class="label label-warning"-->
+          <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
+          <!--value: {{parameter.from}}</label>-->
+          <!--<label class="label label-warning"-->
+          <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
+          <!--value: {{parameter.to}}</label>-->
+          </span>
       </td>
 
       <!-- reset parameter to default button -->
       <td>
         <button type="button" class="btn btn-secondary"
-                [ngClass]="{'visibility-hidden': parameter.value == toolService.getDefaultValue(parameter)}"
+                *ngIf="parameter.value !== toolService.getDefaultValue(parameter)"
                 (click)="parameter.value = toolService.getDefaultValue(parameter)"
                 title="Reset to default value">
-          <i class="fa fa-times"></i>
+          Reset to default
         </button>
       </td>
 
     </tr>
-
+    </tbody>
   </table>
 </form>

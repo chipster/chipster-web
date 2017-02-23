@@ -10,7 +10,7 @@ import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
-import {Component, ViewChild, ElementRef, Input, ChangeDetectorRef} from "@angular/core";
+import {Component, ViewChild, ElementRef, Input} from "@angular/core";
 import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
 import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
@@ -25,7 +25,6 @@ import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 export class ToolsModalComponent {
 
   private searchTool: string;
-  private parameterDescription: string;
   private inputDescription: string;
   @Input() modules: Array<Module> = [];
   @Input() tools: Array<Tool> = [];
@@ -120,9 +119,6 @@ export class ToolsModalComponent {
       (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
   }
 
-  setDescription(description: string): void {
-    this.parameterDescription = description;
-  };
 
   setInputDescription(description: string) {
     this.inputDescription = description;

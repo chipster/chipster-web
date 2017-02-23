@@ -3,7 +3,7 @@ node_modules
 npm-debug.log
 /.project
 /.idea
-dist/dist.js
+dist
 typings/
 src/app/**/*.js
 src/app/**/*.js.map
