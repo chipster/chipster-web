@@ -1,1 +1,0 @@
-{"version":3,"file":"secondspipe.pipe.spec.js","sourceRoot":"","sources":["secondspipe.pipe.spec.ts"],"names":[],"mappings":"AAAA,uCAAuC;OAGhC,EAAE,WAAW,EAAE,MAAM,oBAAoB;AAEhD,QAAQ,CAAC,aAAa,EAAE;IACtB,EAAE,CAAC,oBAAoB,EAAE;QACvB,IAAI,IAAI,GAAG,IAAI,WAAW,EAAE,CAAC;QAC7B,MAAM,CAAC,IAAI,CAAC,CAAC,UAAU,EAAE,CAAC;IAC5B,CAAC,CAAC,CAAC;AACL,CAAC,CAAC,CAAC"}
