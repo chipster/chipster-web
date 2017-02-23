@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnChanges} from "@angular/core";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 
@@ -8,7 +8,7 @@ import Dataset from "../../../../../model/session/dataset";
       <div class="scrollable"><img [src]="src"></div>
   `
 })
-export class ImageVisualizationComponent {
+export class ImageVisualizationComponent implements OnChanges {
 
   @Input()
   private dataset: Dataset;
@@ -18,7 +18,7 @@ export class ImageVisualizationComponent {
   constructor(private sessionDataService: SessionDataService,) {
   }
 
-  ngOnInit() {
+  ngOnChanges() {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
       this.src = url;
     });

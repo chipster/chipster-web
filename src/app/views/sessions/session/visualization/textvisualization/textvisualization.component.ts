@@ -1,7 +1,7 @@
 import FileResource from "../../../../../shared/resources/fileresource";
 import SessionDataService from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnChanges} from "@angular/core";
 import {Response} from "@angular/http";
 import VisualizationModalService from "../visualizationmodal.service";
 
@@ -23,13 +23,13 @@ import VisualizationModalService from "../visualizationmodal.service";
     }
   `],
 })
-export class TextVisualizationComponent {
+export class TextVisualizationComponent implements OnChanges {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
 
   private data: string;
-    
+
   fileSizeLimit = 10 * 1024;
 
   constructor(private fileResource: FileResource,
@@ -37,7 +37,7 @@ export class TextVisualizationComponent {
               private visualizationModalService: VisualizationModalService) {
   }
 
-  ngOnInit() {
+  ngOnChanges() {
     let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((response: any) => {

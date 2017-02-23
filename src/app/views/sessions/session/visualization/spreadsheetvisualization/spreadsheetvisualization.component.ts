@@ -1,6 +1,6 @@
 import SessionDataService from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component} from "@angular/core";
+import {Input, Component, OnChanges} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import FileResource from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -23,7 +23,7 @@ import VisualizationModalService from "../visualizationmodal.service";
     <div id="{{tableContainerId}}"></div>
     `
 })
-export class SpreadsheetVisualizationComponent {
+export class SpreadsheetVisualizationComponent implements OnChanges {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
@@ -39,7 +39,7 @@ export class SpreadsheetVisualizationComponent {
               private visualizationModalService: VisualizationModalService) {
   }
 
-  ngOnInit() {
+  ngOnChanges() {
     let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((result: any) => {

@@ -34,8 +34,7 @@
       <template ngbTabContent>
         <ch-expression-profile
           *ngIf="active === getTabId('expressionprofile')"
-          [datasetId]="SelectionService.selectedDatasets[0].datasetId"
-          [selectedDatasets]="SelectionService.selectedDatasets">
+          [dataset]="SelectionService.selectedDatasets[0]">
         </ch-expression-profile>
       </template>
     </ngb-tab>

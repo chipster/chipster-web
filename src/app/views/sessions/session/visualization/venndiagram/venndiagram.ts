@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import Dataset from "../../../../../model/session/dataset";
 import * as d3 from "d3";
@@ -19,7 +19,7 @@ import Circle from "../model/circle";
     selector: 'ch-venn-diagram',
     templateUrl: './venndiagram.html'
 })
-export class VennDiagram {
+export class VennDiagram implements OnChanges {
 
     @Input()
     selectedDatasets: Array<any>;
@@ -36,7 +36,7 @@ export class VennDiagram {
                 private sessionDataService: SessionDataService) {
     }
 
-    ngOnInit() {
+    ngOnChanges() {
         const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
         const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), datasetId));
 

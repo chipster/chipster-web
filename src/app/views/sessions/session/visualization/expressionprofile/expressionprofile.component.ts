@@ -10,21 +10,19 @@ import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnChanges} from "@angular/core";
 import Line from "./line";
 import FileResource from "../../../../../shared/resources/fileresource";
+import Dataset from "../../../../../model/session/dataset";
 
 @Component({
   selector: 'ch-expression-profile',
   templateUrl: './expressionprofile.html'
 })
-export class ExpressionProfileComponent {
+export class ExpressionProfileComponent implements OnChanges {
 
     @Input()
-    private datasetId: string;
-
-    @Input()
-    private selectedDatasets: any;
+    private dataset: Dataset;
 
     private tsv: TSVFile;
     private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
@@ -37,11 +35,11 @@ export class ExpressionProfileComponent {
                 private expressionProfileTSVService: ExpressionProfileTSVService,
                 private fileResource: FileResource) {}
 
-    ngOnInit() {
-        const datasetName = this.selectedDatasets[0].name;
-        this.fileResource.getData(this.sessionDataService.getSessionId(), this.datasetId).subscribe( (result: any) => {
+    ngOnChanges() {
+        const datasetName = this.dataset.name;
+        this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId).subscribe( (result: any) => {
             let parsedTSV = d3.tsvParseRows(result);
-            this.tsv = new TSVFile(parsedTSV, this.datasetId, datasetName);
+            this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
             if(this.expressionProfileTSVService.containsChipHeaders(this.tsv)) {
               this.drawLineChart(this.tsv);
             } else {
@@ -75,7 +73,7 @@ export class ExpressionProfileComponent {
             .call(drag);
 
         // Custom headers for x-axis
-        let firstDataset: any = _.first(this.selectedDatasets);
+        let firstDataset: any = this.dataset;
         let phenodataDescriptions = _.filter(firstDataset.metadata, (metadata:any) => {
             return metadata.key === 'description';
         });
@@ -270,7 +268,7 @@ export class ExpressionProfileComponent {
         let selectedGeneExpressionIds = this.getSelectionIds();
         let tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
         let data = d3.tsvFormatRows(tsvData);
-        this.sessionDataService.createDerivedDataset("dataset.tsv", [this.datasetId], "Expression profile", data).subscribe();
+        this.sessionDataService.createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data).subscribe();
     }
 
     getSelectionIds(): Array<string> {

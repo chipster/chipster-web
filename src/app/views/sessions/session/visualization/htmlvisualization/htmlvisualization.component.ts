@@ -1,4 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {timeout} from "d3-timer";
 import {TokenService} from "../../../../../core/authentication/token.service";
 import SessionDataService from "../../sessiondata.service";
@@ -8,7 +8,7 @@ import Dataset from "../../../../../model/session/dataset";
   selector: 'ch-htmlvisualization',
   template: `<iframe #htmlframe width="100%" [src]="wrapperUrl + '?location=' + src + '&token=' + this.token | trustedresource" scrolling="no" frameborder="0" (load)="run(htmlframe)"></iframe>`
 })
-export class HtmlvisualizationComponent implements OnInit {
+export class HtmlvisualizationComponent implements OnChanges {
 
   @Input()
   private dataset: Dataset;
@@ -21,8 +21,8 @@ export class HtmlvisualizationComponent implements OnInit {
     private tokenService: TokenService,
     private sessionDataService: SessionDataService) { }
 
-  ngOnInit() {
-    this.token =this.tokenService.getToken();
+  ngOnChanges() {
+    this.token = this.tokenService.getToken();
 
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
       this.src = url;

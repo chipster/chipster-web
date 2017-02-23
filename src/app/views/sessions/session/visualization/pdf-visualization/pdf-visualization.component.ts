@@ -1,4 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnChanges, Input} from '@angular/core';
 import Dataset from "../../../../../model/session/dataset";
 import SessionDataService from "../../sessiondata.service";
 
@@ -7,7 +7,7 @@ import SessionDataService from "../../sessiondata.service";
   templateUrl: './pdf-visualization.component.html',
   styleUrls: ['./pdf-visualization.component.less'],
 })
-export class PdfVisualizationComponent implements OnInit {
+export class PdfVisualizationComponent implements OnChanges {
 
   @Input()
   dataset: Dataset;
@@ -19,7 +19,7 @@ export class PdfVisualizationComponent implements OnInit {
 
   constructor(private sessionDataService: SessionDataService) { }
 
-  ngOnInit() {
+  ngOnChanges() {
     this.page = 1;
     this.zoom = 1;
 
