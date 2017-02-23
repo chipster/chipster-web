@@ -8,7 +8,6 @@ import {ToolsModalComponent} from "./toolsmodal/toolsmodal.component";
 import {SharedModule} from "../../../../shared/shared.module";
 import {FormsModule} from "@angular/forms";
 import { ToolsParameterFormComponent } from './toolsmodal/tools-parameter-form/tools-parameter-form.component';
-import SourceModalComponent from "./sourcemodal/sourcemodal.component";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { ToolSourceComponent } from './toolsmodal/tool-source/tool-source.component';
 
@@ -19,7 +18,7 @@ import { ToolSourceComponent } from './toolsmodal/tool-source/tool-source.compon
     FormsModule,
     NgbModule
   ],
-  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent, SourceModalComponent, ToolSourceComponent],
+  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent, ToolSourceComponent],
   providers: [ToolService],
   exports: [ToolBoxComponent]
 })
