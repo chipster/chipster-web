@@ -7,8 +7,8 @@
         <div *ngIf="deletedDatasets" class="well dataset-delete-undo-well">
             <button type="button" class="close close-well-button"
               (click)="deleteDatasetsNow()">&times;</button>
-            <span *ngIf="deletedDatasets.length === 1">Dataset {{deletedDatasets[0].name}} deleted</span>
-            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} datasets deleted</span>
+            <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} deleted</span>
+            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files deleted</span>
             <a class="pull-right" (click)="deleteDatasetsUndo()">Undo</a>
         </div>
     </div>
