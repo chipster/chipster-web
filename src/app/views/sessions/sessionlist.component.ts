@@ -39,11 +39,8 @@ export class SessionListComponent {
 
         this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
             this.userSessions = sessions;
-        }, (response: any) => {
-            console.log('failed to get sessions', response);
-            if (response.status === 401 || response.status === 403) {
-                this.router.navigate(['/login']);
-            }
+        }, (err: any) => {
+            console.log('failed to get sessions', err);
         });
     }
 
