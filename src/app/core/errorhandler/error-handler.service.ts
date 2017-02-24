@@ -14,9 +14,10 @@ export class ErrorHandlerService implements ErrorHandler {
     let errorMessage: string;
 
     if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errorMessage = `${error.status} - ${error.statusText || ''} ${err}`;
+      //const body = error.json() || '';
+      //const err = body.error || JSON.stringify(body);
+      const err = error.text() || '';
+      errorMessage = `${error.status} - ${error.statusText || ''} (${err})`;
     } else {
       errorMessage = error.message ? error.message : error.toString();
     }
