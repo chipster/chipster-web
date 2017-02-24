@@ -64,6 +64,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
   jobNodes: Array<JobNode>;
   links: Array<Link>;
   filter: Map<string, Dataset>;
+  datasetTooltip: any;
 
   dragStarted: boolean;
 
@@ -97,6 +98,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     this.d3LinksDefsGroup = this.d3LinksGroup.append('defs');
     this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node').attr('id', 'd3DatasetNodesGroup');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
+    this.datasetTooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
     if (this.enabled) {
       this.zoom = d3.zoom()
@@ -301,14 +303,23 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
           self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
         }
       })
-      .on('mouseover', function () {
+      .on('mouseover', function (d) {
         if (self.enabled) {
           d3.select(this).classed('hovering-dataset', true);
+          self.datasetTooltip.transition()
+            .duration(200)
+            .style("opacity", .8);
+          self.datasetTooltip.html(d.name)
+            .style("left", (d.x + 50) + "px")
+            .style("top", (d.y + 128) + "px");
         }
       })
-      .on('mouseout', function () {
+      .on('mouseout', function (d) {
         if (self.enabled) {
           d3.select(this).classed('hovering-dataset', false);
+          self.datasetTooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
         }
       })
       .call(d3.drag()
