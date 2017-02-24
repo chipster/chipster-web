@@ -5,13 +5,23 @@ import {LoginComponent} from "./views/login/login.component";
 import {SessionListComponent} from "./views/sessions/sessionlist.component";
 import {SessionResolve} from "./views/sessions/session/session.resolve";
 import {SessionComponent} from "./views/sessions/session/session.component";
+import {AuthGuard} from "./core/authentication/auth-guard.service";
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home',  component: HomeComponent },
   { path: 'login',  component: LoginComponent },
-  { path: 'sessions',  component: SessionListComponent },
-  { path: 'sessions/:sessionId',  component: SessionComponent, resolve: { sessionData: SessionResolve } },
+  {
+    path: 'sessions',
+    component: SessionListComponent,
+    canActivate: [AuthGuard]
+  }, {
+    path: 'sessions/:sessionId',
+    component: SessionComponent,
+    resolve: { sessionData: SessionResolve },
+    canActivate: [AuthGuard]
+  },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '**', redirectTo: '/home' }
 ];
 
 @NgModule({
