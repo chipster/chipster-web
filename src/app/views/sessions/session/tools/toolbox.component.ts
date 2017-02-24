@@ -71,7 +71,6 @@ export class ToolBoxComponent {
       this.inputBindings = input.inputBindings;
       this.selectedCategory = input.category;
       this.selectedModule = input.module;
-      this.runJob();
     }
 
     // Method for submitting a job

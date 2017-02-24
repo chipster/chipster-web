@@ -11,7 +11,8 @@
               [selectedDatasets] = "this.selectedDatasets"
               [modules] = "this.modules"
               [tools] = "this.tools"
-              (onRunJob)="setToolSelection($event)">
+              (onRunJob)="runJob()"
+              (onSelectTool)="setToolSelection($event)">
             </ch-tools-modal>
 
         </div>

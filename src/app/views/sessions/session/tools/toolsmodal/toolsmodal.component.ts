@@ -35,7 +35,8 @@ export class ToolsModalComponent {
   @Input() selectedCategory: Category;
   @Input() selectedTool: Tool;
 
-  @Output() onRunJob: EventEmitter<ToolSelection> = new EventEmitter();
+  @Output() onRunJob: EventEmitter<any> = new EventEmitter();
+  @Output() onSelectTool: EventEmitter<ToolSelection> = new EventEmitter();
 
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
@@ -94,6 +95,8 @@ export class ToolsModalComponent {
     }
 
     this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.selectedDatasets);
+
+    this.onSelectTool.emit(this.getToolSelection());
   }
 
 
@@ -128,15 +131,18 @@ export class ToolsModalComponent {
   }
 
   runJob() {
-    this.onRunJob.emit({
+    this.onRunJob.emit();
+    this.toolsModalRef.close();
+  };
+
+  getToolSelection(): ToolSelection {
+    return {
       tool: this.selectedTool,
       inputBindings: this.inputBindings,
       category: this.selectedCategory,
       module: this.selectedModule
-    });
-
-    this.toolsModalRef.close();
-  };
+    }
+  }
 
   close() {
     this.toolsModalRef.close();
