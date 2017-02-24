@@ -89,6 +89,7 @@ export default class SessionResource {
 	}
 
 	createJob(sessionId: string, job: Job): Observable<string> {
+	  console.log('create job');
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => this.restService.post(`${url}/sessions/${sessionId}/jobs`, job, true))
       .map( (response: any) => response.jobId);

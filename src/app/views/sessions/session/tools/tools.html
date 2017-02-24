@@ -10,15 +10,13 @@
               [inputBindings] = "this.inputBindings"
               [selectedDatasets] = "this.selectedDatasets"
               [modules] = "this.modules"
-              [tools] = "this.tools">
+              [tools] = "this.tools"
+              (onRunJob)="setToolSelection($event)">
             </ch-tools-modal>
 
         </div>
 
         <div class="col-md-8">
-            <h5 *ngIf="!selectedTool"><span class="glyphicon glyphicon-arrow-left"></span>
-                Use the Tools-button or press 'T' to view and select tools</h5>
-
             <ch-tool-title *ngIf="selectedTool"
                         [module]="selectedModule.name"
                         [category]="selectedCategory.name"

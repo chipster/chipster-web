@@ -10,12 +10,13 @@ import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
-import {Component, ViewChild, ElementRef, Input} from "@angular/core";
+import {Component, ViewChild, ElementRef, Input, Output, EventEmitter} from "@angular/core";
 import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
 import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
 import {ToolPipe} from "../../../../../shared/pipes/toolpipe.pipe";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {ToolSelection} from "../ToolSelection";
 
 @Component({
   selector: 'ch-tools-modal',
@@ -30,9 +31,11 @@ export class ToolsModalComponent {
   @Input() tools: Array<Tool> = [];
   @Input() inputBindings: Array<InputBinding> = [];
   @Input() selectedDatasets: Array<Dataset> = [];
-  @Input() selectedModule: Module;
+  @Input() selectedModule:   Module;
   @Input() selectedCategory: Category;
   @Input() selectedTool: Tool;
+
+  @Output() onRunJob: EventEmitter<ToolSelection> = new EventEmitter();
 
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
@@ -125,22 +128,20 @@ export class ToolsModalComponent {
   }
 
   runJob() {
-    this.close(true);
+    this.onRunJob.emit({
+      tool: this.selectedTool,
+      inputBindings: this.inputBindings,
+      category: this.selectedCategory,
+      module: this.selectedModule
+    });
+
+    this.toolsModalRef.close();
   };
 
-  close(run: boolean) {
-    // this.$uibModalInstance.close({
-    //   selectedTool: this.selectedTool,
-    //   selectedCategory: this.selectedCategory,
-    //   selectedModule: this.selectedModule,
-    //   inputBindings: this.inputBindings,
-    //   run: run
-    // });
+  close() {
+    this.toolsModalRef.close();
   };
 
-  dismiss() {
-    // this.$uibModalInstance.dismiss();
-  };
 
   openInputsModal() {
     // let modalInstance = this.$uibModal.open({
@@ -238,56 +239,6 @@ export class ToolsModalComponent {
 
   openToolsModal() {
     this.toolsModalRef = this.ngbModal.open(this.toolsModalTemplate, {size: 'lg'});
-    // var modalInstance = this.$uibModal.open({
-    //     animation: true,
-    //     templateUrl: './toolsmodal/toolsmodal.html',
-    //     controller: 'ToolsModalController',
-    //     controllerAs: 'vm',
-    //     bindToController: true,
-    //     size: 'lg',
-    //     resolve: {
-    //         selectedTool: () => {
-    //             return this.selectedTool;
-    //         },
-    //         selectedCategory: () => {
-    //             return this.selectedCategory;
-    //         },
-    //         selectedModule: () => {
-    //             return this.selectedModule;
-    //         },
-    //         inputBindings: () => {
-    //             return this.inputBindings;
-    //         },
-    //         selectedDatasets: () => {
-    //             return _.cloneDeep(this.SelectionService.selectedDatasets);
-    //         },
-    //         isRunEnabled: () => {
-    //             return this.isRunEnabled();
-    //         },
-    //         modules: () => {
-    //             return this.modules;
-    //         },
-    //
-    //         // TODO remove?
-    //         tools: () => {
-    //             return _.cloneDeep(this.tools);
-    //         }
-    //     }
-    // });
-    //
-    // modalInstance.result.then((result: any) => {
-    //     // save settings
-    //     this.selectedTool = result.selectedTool;
-    //     this.selectedCategory = result.selectedCategory;
-    //     this.selectedModule = result.selectedModule;
-    //     this.inputBindings = result.inputBindings;
-    //
-    //     if (result.run) {
-    //         this.runJob();
-    //     }
-    // }, function () {
-    //     // modal dismissed
-    // });
   }
 
 }
