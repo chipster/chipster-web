@@ -1,5 +1,4 @@
 import Dataset from "../../../../../model/session/dataset";
-import IQService = angular.IQService;
 import {Component, Input} from '@angular/core';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AddDatasetModalContent} from "./adddatasetmodal.content";

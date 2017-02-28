@@ -1,8 +1,7 @@
 <div class="sidebar">
 
 
-  <ch-session-edit-modal [sessionData]="sessionData"></ch-session-edit-modal>
-
+  <h4><span (click)="renameSessionModal()">Session - {{sessionData.session.name}}</span></h4>
 
   <div class="chipster-highlight ">
     <div class="bar pull-right search-div">
@@ -64,10 +63,11 @@
           <template ngbTabContent>
             <div class="row">
               <div class="col-md-12">
+
                 <button class="btn btn-secondary"
                         (click)="openCopySessionModal()">
                   Copy session
-                  <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+                  <i *ngIf="isCopying" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
                 </button>
                 <button class="btn btn-secondary" (click)="downloadSession()">
                   Save session file

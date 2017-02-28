@@ -6,8 +6,8 @@ import SessionResource from "../../../../shared/resources/session.resource";
 import SelectionService from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {SessionData} from "../../../../model/session/session-data";
-import SessionEventService from "../sessionevent.service";
 import {Component, Input} from "@angular/core";
+import SessionNameModalService from "./sessionnamemodal/sessionnamemodal.service";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -22,16 +22,9 @@ export class LeftPanelComponent {
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
     private selectionService: SelectionService,
-    private sessionWorkerResource: SessionWorkerResource) {}
-
-  ngOnInit() {
-    this.sessionEventService.getSessionStream().subscribe(() => {
-      // someone else has updated the session notes or the session name, show it
-      // this.$scope.$apply();
-    });
-  }
+    private sessionWorkerResource: SessionWorkerResource,
+    private sessionNameModalService: SessionNameModalService) {}
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
@@ -68,22 +61,29 @@ export class LeftPanelComponent {
     this.selectionService.toggleDatasetSelection($event, data, UtilsService.mapValues(this.sessionData.datasetsMap));
   }
 
-  openCopySessionModal() {
-    // var modalInstance = this.getSessionEditModal('Copy session', this.sessionData.session.name + '_copy');
-    //
-    //
-    // modalInstance.result.then( (result: string) => {
-    //   if (!result) {
-    //     result = 'unnamed session';
-    //   }
-    //   this.isCopying = true;
-    //   const sessionCopy$ = this.sessionResource.copySession(this.sessionData, result);
-    //   sessionCopy$.subscribe(() => {
-    //     this.isCopying = false;
-    //   })
-    // }, function () {
-    //   modal dismissed
-    // });
+  renameSessionModal() {
+    this.sessionNameModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
+      console.log('renameSessionModal', name);
+      this.sessionData.session.name = name;
+      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
+    }, () => {
+      // modal dismissed
+    });
   }
 
+  openCopySessionModal() {
+    this.sessionNameModalService.openSessionNameModal('Copy session', this.sessionData.session.name + '_copy').then(name => {
+      console.log('openCopySessionModal()', name);
+      if (!name) {
+        name = 'unnamed session';
+      }
+      this.isCopying = true;
+      this.sessionResource.copySession(this.sessionData, name).subscribe(() => {
+        console.log('copy done');
+        this.isCopying = false;
+      });
+    }, () => {
+      // modal dismissed
+    });
+  }
 }

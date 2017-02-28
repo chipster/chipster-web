@@ -1,0 +1,17 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{title}}</h4>
+</div>
+<div class="modal-body">
+    <div class="form-group">
+      <label>Session name</label>
+      <input #nameInput type="text" class="form-control"
+             [(ngModel)]="name"
+             [placeholder]="'Edit name'"
+             (keydown.enter)="save($event)">
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="submit" class="btn btn-info" (click)="save($event)">Save</button>
+    <button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
+</div>
+
