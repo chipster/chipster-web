@@ -6,7 +6,7 @@
   <div class="chipster-highlight ">
     <div class="bar pull-right search-div">
       <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
-             placeholder="search dataset" (keyup)="datasetSearchKeyEvent($event)">
+             placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
       <button class="clear-search-button no-border" *ngIf="datasetSearch"
               (click)="datasetSearch = null">
         <span class="glyphicon glyphicon-remove"></span>
@@ -37,7 +37,7 @@
           </template>
         </ngb-tab>
 
-        <ngb-tab id="datasets" title="Datasets">
+        <ngb-tab id="datasets" title="Files">
           <template ngbTabContent>
             <div class="workflow-dataset-static-panel">
               <div class="add-dataset-button">

@@ -1,4 +1,4 @@
-<h4>Dataset</h4>
+<h4>File</h4>
 <div class="chipster-highlight">
     <div class="dataset-details">
         <div class="row">
@@ -11,7 +11,7 @@
                 <p>{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
                 <textarea [(ngModel)]="dataset.notes"
                           class="dataset-notes"
-                          rows="1" placeholder="Dataset notes"
+                          rows="1" placeholder="File notes"
                           (blur)="updateDataset(dataset)">
                 </textarea>
                 <div class="btn-group btn-group-sm">

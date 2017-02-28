@@ -1,6 +1,6 @@
-<button class="btn btn-primary" (click)="openToolsModal()">Tools</button>
+<button class="btn btn-primary" (click)="openToolsModal()">Select tool</button>
 
-<template #toolsModalTemplate let-close="close">
+<template #toolsModalTemplate>
 
   <div class="modal-header">
     <div class="col-md-1">
@@ -159,8 +159,7 @@
 
   </div>    <!--end of modal body-->
   <div class="modal-footer">
-    <button class="btn btn-primary pull-right" (click)="runJob()"
-            [disabled]="!isRunEnabled()">
+    <button class="btn btn-primary pull-right" (click)="runJob()" [disabled]="!isRunEnabled()">
       <span class="glyphicon glyphicon-play"></span> Run
     </button>
     <button id="close-tools-button" class="btn btn-secondary pull-right" (click)="close()">

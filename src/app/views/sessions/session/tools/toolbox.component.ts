@@ -10,6 +10,7 @@ import SelectionService from "../selection.service";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
 import {Component, Input} from "@angular/core";
+import {ToolSelection} from "./ToolSelection";
 
 
 @Component({
@@ -58,13 +59,18 @@ export class ToolBoxComponent {
         }
     }
 
-
     isRunEnabled() {
         // TODO add mandatory parameters check
-
         // either bindings ok or tool without inputs
         return this.inputBindings ||
         (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+    }
+
+    setToolSelection(input: ToolSelection):void {
+      this.selectedTool = input.tool;
+      this.inputBindings = input.inputBindings;
+      this.selectedCategory = input.category;
+      this.selectedModule = input.module;
     }
 
     // Method for submitting a job
@@ -94,7 +100,6 @@ export class ToolBoxComponent {
 
         // set inputs
         job.inputs = [];
-
         // TODO bindings done already?
         if (!this.inputBindings) {
             console.warn("no input bindings before running a job, binding now");
@@ -127,8 +132,11 @@ export class ToolBoxComponent {
                 }
             }
         }
+
         // runsys
-        this.SessionDataService.createJob(job);
+        this.SessionDataService.createJob(job).subscribe( (result: any) => {}, (error: any) => {
+          console.error('Failed running job', error);
+        });
     }
 
 

@@ -87,15 +87,15 @@ export default class SessionDataService {
 
   deleteJobs(jobs: Job[]) {
     let deleteJobs$ = jobs.map((job: Job) => this.sessionResource.deleteJob(this.getSessionId(), job.jobId));
-    Observable.merge(...deleteJobs$).subscribe((res: any) => {
-      console.info('Job deleted', res);
+    Observable.merge(...deleteJobs$).subscribe(() => {
+      console.info('Job deleted');
     });
   }
 
   deleteDatasets(datasets: Dataset[]) {
     let deleteDatasets$ = datasets.map((dataset: Dataset) => this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId));
     Observable.merge(...deleteDatasets$).subscribe((res: any) => {
-      console.info('Job deleted', res);
+      console.info('Job deleted');
     });
   }
 

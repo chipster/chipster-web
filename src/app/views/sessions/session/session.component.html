@@ -4,25 +4,25 @@
     <div class="col-md-4">
         <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
 
-        <div *ngIf="deletedDatasets" class="well dataset-delete-undo-well">
-            <button type="button" class="close close-well-button"
-              (click)="deleteDatasetsNow()">&times;</button>
-            <span *ngIf="deletedDatasets.length === 1">Dataset {{deletedDatasets[0].name}} deleted</span>
-            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} datasets deleted</span>
-            <a class="pull-right" (click)="deleteDatasetsUndo()">Undo</a>
+        <div *ngIf="deletedDatasets" class="alert alert-danger">
+            <button type="button" class="btn btn-danger btn-sm"
+              (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
+            <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
+            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
+            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
         </div>
     </div>
 
     <div class="col-md-8 scrollable">
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col">
                 <ch-toolbox [modules]="sessionData.modules" [tools]="sessionData.tools"></ch-toolbox>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col">
               <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
                 <ch-single-dataset
                   [dataset]="selectionService.selectedDatasets[0]"
@@ -37,7 +37,7 @@
 
         <!-- Visualization -->
         <div class="row">
-            <div class="col-md-12">
+            <div class="col">
                 <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0"></ch-visualizations>
             </div>
         </div>
