@@ -10,11 +10,12 @@ import {AddDatasetModalComponent} from "./adddatasetmodal/adddatasetmodal.compon
 import {AddDatasetModalContent} from "./adddatasetmodal/adddatasetmodal.content";
 import UploadService from "../../../../shared/services/upload.service";
 import {SessionNameModalModule} from "./sessionnamemodal/sessionname.module";
+import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @NgModule({
   imports: [ CommonModule, SharedModule, FormsModule, NgbModule, SessionNameModalModule ],
   declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent],
-  providers: [WorkflowGraphService, UploadService],
+  providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
   exports: [LeftPanelComponent, WorkflowGraphComponent],
   entryComponents: [AddDatasetModalContent]
 })

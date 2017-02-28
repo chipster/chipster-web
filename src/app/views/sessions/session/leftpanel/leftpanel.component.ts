@@ -8,6 +8,7 @@ import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.
 import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
 import SessionNameModalService from "./sessionnamemodal/sessionnamemodal.service";
+import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -24,16 +25,15 @@ export class LeftPanelComponent {
     private sessionDataService: SessionDataService,
     private selectionService: SelectionService,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionNameModalService: SessionNameModalService) {}
+    private sessionNameModalService: SessionNameModalService,
+    private datasetsearchPipe: DatasetsearchPipe) {}
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
       // select highlighted datasets
       var allDatasets = this.getDatasetList();
 
-
-      // TODO - fix: commented out on angular2 upgrade
-      // this.selectionService.setSelectedDatasets(IChipsterFilter['searchDatasetFilter'](allDatasets, this.datasetSearch));
+      this.selectionService.setSelectedDatasets(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
 
       this.datasetSearch = null;
     }
