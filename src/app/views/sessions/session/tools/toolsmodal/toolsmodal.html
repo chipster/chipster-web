@@ -72,7 +72,12 @@
                         [ngClass]="{'active':tool===selectedTool}"
                         (click)="selectTool(tool)"
                         *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
-                        id="tool-button-{{tool.id}}">
+                        id="tool-button-{{tool.id}}"
+                        ngbPopover="{{tool.description}}"
+                        triggers="mouseenter:mouseleave"
+                        popoverTitle="Description"
+                        container="body"
+                        placement="right">
                   {{tool.name.displayName}}
                 </button>
               </div>
