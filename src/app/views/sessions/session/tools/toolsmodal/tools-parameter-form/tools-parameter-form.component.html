@@ -1,5 +1,6 @@
 <form name="paramForm" *ngIf="tool">
-  <table class="table table-sm table-hover">
+  <div *ngIf="tool.parameters.length === 0" class="alert alert-info">No parameters to modify for this tool</div>
+  <table class="table table-sm table-hover" *ngIf="tool.parameters.length > 0">
     <thead class="thead-default">
     <tr>
       <th>Name</th>
