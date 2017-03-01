@@ -1,29 +1,31 @@
 
-div.tooltip {
+div.dataset-tooltip {
   position: absolute;
   text-align: center;
-  padding: 5px;
+  padding: 2px 5px 2px 5px;
   font-size: 14px;
+  font-weight: bold;
   color: white;
-  background: black;
+  background: #333333;
   border: 0;
   border-radius: 8px;
   pointer-events: none;
 }
 
-//div.tooltip::after {
-//  box-sizing: border-box;
-//  display: inline;
-//  font-size: 10px;
-//  width: 100%;
-//  line-height: 1;
-//  color: rgba(0, 0, 0, 0.8);
-//  content: "\25BC";
-//  position: absolute;
-//  left: 0px;
-//  top: 28px;
-//  text-align: center;
-//}
+div.dataset-tooltip-triangle {
+  position: absolute;
+  text-align: left;
+  padding: 0;
+  box-sizing: border-box;
+  display: inline;
+  font-size: 14px;
+  border: 0;
+  line-height: 1;
+  color: #333333;
+  transform: scale(1.7, 1);
+  pointer-events: none;
+}
+
 
 #workflowvisualization {
 

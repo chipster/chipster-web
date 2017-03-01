@@ -65,6 +65,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
   links: Array<Link>;
   filter: Map<string, Dataset>;
   datasetTooltip: any;
+  datasetTooltipTriangle: any;
 
   dragStarted: boolean;
 
@@ -98,7 +99,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     this.d3LinksDefsGroup = this.d3LinksGroup.append('defs');
     this.d3DatasetNodesGroup = this.svg.append('g').attr('class', 'dataset node').attr('id', 'd3DatasetNodesGroup');
     this.d3LabelsGroup = this.svg.append('g').attr('class', 'label');
-    this.datasetTooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
+    this.datasetTooltip = d3.select("body").append("div").attr("class", "dataset-tooltip").style("opacity", 0).html("tooltip");
+    this.datasetTooltipTriangle = d3.select("body").append("div").attr("class", "dataset-tooltip-triangle").style("opacity", 0).html('\u25BC');
 
     if (this.enabled) {
       this.zoom = d3.zoom()
@@ -116,23 +118,23 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
     if (this.enabled) {
       this.sessionEventService.getDatasetStream().subscribe(() => {
-          this.update();
-          this.renderGraph();
+        this.update();
+        this.renderGraph();
       });
 
       this.sessionEventService.getJobStream().subscribe(() => {
-          this.update();
-          this.renderGraph();
+        this.update();
+        this.renderGraph();
       });
 
       this.SelectionService.getDatasetSelectionStream().subscribe(() => {
-          this.update();
-          this.renderGraph();
+        this.update();
+        this.renderGraph();
       });
 
       this.SelectionService.getJobSelectionStream().subscribe(() => {
-          this.update();
-          this.renderGraph();
+        this.update();
+        this.renderGraph();
       });
     }
 
@@ -188,7 +190,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       this.zoom.translateExtent([[0, 0], [translateWidth, translateHeight]]);
     }
   }
-
 
 
   update() {
@@ -256,13 +257,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       .style('pointer-events', 'none')
       .attr('d', arc)
       .transition()
-        .duration(3000)
+      .duration(3000)
       .ease(d3.easeLinear)
-        .attrTween('transform', (d: JobNode) => {
-          let x = d.x + this.nodeWidth / 2;
-          let y = d.y + this.nodeHeight / 2;
-          return d.spin ? d3.interpolateString( `translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)` ) : d3.interpolateString( `translate(${x},${y})`, `translate(${x},${y})` );
-        });
+      .attrTween('transform', (d: JobNode) => {
+        let x = d.x + this.nodeWidth / 2;
+        let y = d.y + this.nodeHeight / 2;
+        return d.spin ? d3.interpolateString(`translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)`) : d3.interpolateString(`translate(${x},${y})`, `translate(${x},${y})`);
+      });
 
     d3JobArcs.exit().remove();
 
@@ -306,33 +307,28 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       .on('mouseover', function (d) {
         if (self.enabled) {
           d3.select(this).classed('hovering-dataset', true);
-          self.datasetTooltip.transition()
-            .duration(200)
-            .style("opacity", .8);
-          self.datasetTooltip.html(d.name)
-            .style("left", (d.x + 50) + "px")
-            .style("top", (d.y + 128) + "px");
+          self.showTooltip(this, d);
         }
       })
       .on('mouseout', function (d) {
         if (self.enabled) {
           d3.select(this).classed('hovering-dataset', false);
-          self.datasetTooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
+          self.hideTooltip();
         }
       })
       .call(d3.drag()
         .on('drag', function () {
           self.dragStarted = true;
+          self.hideTooltip(0);
           self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
           // set defaultPrevented flag to disable scrolling
         })
-        .on('end', () => {
+        .on('end', function (d) {
           // check the flag to differentiate between drag and click events
-          if (this.dragStarted) {
-            this.dragStarted = false;
-            this.dragEnd();
+          if (self.dragStarted) {
+            self.dragStarted = false;
+            self.dragEnd();
+            self.showTooltip(this, d, 0);
           }
         })
       );
@@ -413,15 +409,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       .attr('y1', (d) => d.source.y + this.nodeHeight)
       .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
       .attr('y2', (d) => d.target.y)
-      .on('click', function(d) {
+      .on('click', function (d) {
         self.SelectionService.selectJob(d3.event, d.target.sourceJob);
       })
-      .on('mouseover', function() {
+      .on('mouseover', function () {
         if (this.enabled) {
           d3.select(this).classed('hovering-job', true);
         }
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         if (this.enabled) {
           d3.select(this).classed('hovering-job', false);
         }
@@ -535,7 +531,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     return jobNodes;
   }
 
-  spin(selection: any, duration: number){
+  spin(selection: any, duration: number) {
 
     // first round
     selection
@@ -621,4 +617,40 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       }
     });
   }
+
+  showTooltip(element: Element, dataset: any, delay = 200) {
+    let datasetLeft = element.getBoundingClientRect().left;
+    let datasetTop = element.getBoundingClientRect().top;
+    let datasetWidth = element.getBoundingClientRect().width;
+    let tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
+    let triangleHeight = this.datasetTooltipTriangle.node().getBoundingClientRect().height;
+    let triangleWidth = this.datasetTooltipTriangle.node().getBoundingClientRect().width;
+
+    this.datasetTooltip.transition()
+      .duration(delay)
+      .style("opacity", 1);
+
+    if (dataset) {
+      this.datasetTooltip.html(dataset.name);
+    }
+    this.datasetTooltip.style("left", (datasetLeft - 5) + "px")
+      .style("top", (datasetTop - tooltipHeight - triangleHeight + 3) + "px");
+
+    this.datasetTooltipTriangle.transition()
+      .duration(delay)
+      .style("opacity", 1);
+    this.datasetTooltipTriangle.html('\u25BC')
+      .style("left", (datasetLeft + datasetWidth / 2 - triangleWidth / 4) + "px")
+      .style("top", (datasetTop - triangleHeight) + "px");
+  }
+
+  hideTooltip(delay = 500) {
+    this.datasetTooltip.transition()
+      .duration(delay)
+      .style("opacity", 0);
+    this.datasetTooltipTriangle.transition()
+      .duration(delay)
+      .style("opacity", 0);
+  }
+
 }
