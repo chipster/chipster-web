@@ -19,6 +19,11 @@ import FileResource from "./resources/fileresource";
 import SessionResource from "./resources/session.resource";
 import ConfigService from "./services/config.service";
 
+
+/*
+ * @description: Shared module should contain application global resources
+ */
+
 @NgModule({
   imports: [
     CommonModule, CoreModule
