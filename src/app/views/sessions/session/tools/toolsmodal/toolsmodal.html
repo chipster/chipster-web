@@ -86,10 +86,12 @@
 
         </template>
       </ngb-tab>
+
+      <!-- parameters -->
       <ngb-tab [disabled]="!selectedTool">
-        <template ngbTabTitle>Source Code</template>
+        <template ngbTabTitle>Parameters</template>
         <template ngbTabContent>
-          <ch-tool-source [selectedTool]="selectedTool"></ch-tool-source>
+          <ch-tools-parameter-form [tool]="selectedTool"></ch-tools-parameter-form>
         </template>
       </ngb-tab>
 
@@ -151,13 +153,13 @@
         </template>
       </ngb-tab>
 
-      <!-- parameters -->
       <ngb-tab [disabled]="!selectedTool">
-        <template ngbTabTitle>Parameters</template>
+        <template ngbTabTitle>Source Code</template>
         <template ngbTabContent>
-            <ch-tools-parameter-form [tool]="selectedTool"></ch-tools-parameter-form>
+          <ch-tool-source [selectedTool]="selectedTool"></ch-tool-source>
         </template>
       </ngb-tab>
+
 
     </ngb-tabset>
 
