@@ -6,7 +6,7 @@ import {Injectable} from "@angular/core";
  *       in the workflowgraph graph
  */
 @Injectable()
-export default class WorkflowGraphService {
+export class WorkflowGraphService {
 
 	nodeHeight = 20;
 	nodeWidth = 32;

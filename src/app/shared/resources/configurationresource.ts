@@ -5,14 +5,13 @@ import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
 
 @Injectable()
-export default class ConfigurationResource {
+export class ConfigurationResource {
 
     constructor(private restService: RestService){}
 
     getConfiguration(): Observable<any> {
       return this.restService.get(configurationConstants.ServiceLocator + '/services');
     }
-
 }
 
 

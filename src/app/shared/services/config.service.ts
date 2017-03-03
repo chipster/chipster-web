@@ -1,14 +1,13 @@
 import * as configConstants from '../../core/app.constants';
-import ConfigurationResource from "../resources/configurationresource";
+import {ConfigurationResource} from "../resources/configurationresource";
 import {Injectable} from "@angular/core";
 import * as _ from "lodash";
 import {CoreServices} from "../../core/core-services";
 import {Observable} from "rxjs";
 
 @Injectable()
-export default class ConfigService {
+export class ConfigService {
 
-  public services: CoreServices;
   private configuration$: Observable<any>;
 
   constructor(private configurationResource: ConfigurationResource) {

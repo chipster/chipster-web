@@ -1,8 +1,8 @@
-import ExpressionProfileService from "./expressionprofile.service";
+import {ExpressionProfileService} from "./expressionprofile.service";
 import Point from "../model/point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import GeneExpression from "./geneexpression";
@@ -12,7 +12,7 @@ import * as d3 from "d3";
 import * as _ from "lodash";
 import {Component, Input, OnChanges} from "@angular/core";
 import Line from "./line";
-import FileResource from "../../../../../shared/resources/fileresource";
+import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
 
 @Component({

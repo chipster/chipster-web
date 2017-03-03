@@ -1,5 +1,5 @@
 
-import ConfigService from "../services/config.service";
+import {ConfigService} from "../services/config.service";
 import {ToolResource} from "./toolresource";
 import Session from "../../model/session/session";
 import Dataset from "../../model/session/dataset";
@@ -14,7 +14,7 @@ import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
 
 @Injectable()
-export default class SessionResource {
+export class SessionResource {
 
 	constructor(private configService: ConfigService,
 				private toolResource: ToolResource,

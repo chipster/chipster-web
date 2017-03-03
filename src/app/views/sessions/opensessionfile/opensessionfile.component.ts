@@ -1,7 +1,7 @@
 import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter} from '@angular/core';
-import UploadService from "../../../shared/services/upload.service";
+import {UploadService} from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
-import SessionResource from "../../../shared/resources/session.resource";
+import {SessionResource} from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
 
 @Component({

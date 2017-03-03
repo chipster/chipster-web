@@ -1,11 +1,11 @@
 import Utils from "../../../../../shared/utilities/utils";
 import Dataset from "../../../../../model/session/dataset";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
 import {Component, Input, SimpleChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
-import FileResource from "../../../../../shared/resources/fileresource";
+import {FileResource} from "../../../../../shared/resources/fileresource";
 
 @Component({
   selector: 'ch-phenodata-visualization',

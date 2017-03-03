@@ -1,12 +1,11 @@
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
 import {Input, Component, OnChanges} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import FileResource from "../../../../../shared/resources/fileresource";
+import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
 import Dataset from "../../../../../model/session/dataset";
-import VisualizationModalService from "../visualizationmodal.service";
-
+import {VisualizationModalService} from "../visualizationmodal.service";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',

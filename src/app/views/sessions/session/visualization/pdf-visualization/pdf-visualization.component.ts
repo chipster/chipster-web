@@ -1,6 +1,6 @@
 import {Component, OnChanges, Input} from '@angular/core';
 import Dataset from "../../../../../model/session/dataset";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 
 @Component({
   selector: 'ch-pdf-visualization',

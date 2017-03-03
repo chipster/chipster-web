@@ -1,4 +1,4 @@
-import SessionDataService from "../sessiondata.service";
+import {SessionDataService} from "../sessiondata.service";
 import {ToolService} from "./tool.service";
 import Category from "../../../../model/session/category";
 import Module from "../../../../model/session/module";
@@ -6,7 +6,7 @@ import Job from "../../../../model/session/job";
 import Dataset from "../../../../model/session/dataset";
 import Tool from "../../../../model/session/tool";
 import InputBinding from "../../../../model/session/inputbinding";
-import SelectionService from "../selection.service";
+import {SelectionService} from "../selection.service";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
 import {Component, Input} from "@angular/core";

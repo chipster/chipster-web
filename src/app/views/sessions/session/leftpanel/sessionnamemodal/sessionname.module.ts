@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NgbModule, NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {SessionNameModalComponent} from "./sessionnamemodal.component";
-import SessionNameModalService from "./sessionnamemodal.service";
+import {SessionNameModalService} from "./sessionnamemodal.service";
 import {CommonModule} from "@angular/common";
 import {SharedModule} from "../../../../../shared/shared.module";
 import {FormsModule} from "@angular/forms";

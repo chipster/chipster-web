@@ -1,12 +1,12 @@
 
-import ConfigService from "../services/config.service";
+import {ConfigService} from "../services/config.service";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {ResponseContentType, Headers} from "@angular/http";
 
 @Injectable()
-export default class FileResource {
+export class FileResource {
 
 	constructor(
 				private configService: ConfigService,

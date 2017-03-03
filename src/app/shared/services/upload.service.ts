@@ -1,8 +1,8 @@
 import {Injectable, ChangeDetectorRef} from "@angular/core";
-import WorkflowGraphService from "../../views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
-import SessionResource from "../resources/session.resource";
+import {WorkflowGraphService} from "../../views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
+import {SessionResource} from "../resources/session.resource";
 import {TokenService} from "../../core/authentication/token.service";
-import ConfigService from "./config.service";
+import {ConfigService} from "./config.service";
 import {Observable} from 'rxjs/Rx';
 import Dataset from "../../model/session/dataset";
 import Utils from "../utilities/utils";
@@ -10,7 +10,7 @@ import Utils from "../utilities/utils";
 declare var Flow: any;
 
 @Injectable()
-export default class UploadService {
+export class UploadService {
 
   constructor(
     private ConfigService: ConfigService,

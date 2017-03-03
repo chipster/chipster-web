@@ -1,10 +1,10 @@
 import {NgModule} from "@angular/core";
-import ExpressionProfileService from "./expressionprofile/expressionprofile.service";
+import {ExpressionProfileService} from "./expressionprofile/expressionprofile.service";
 import {ExpressionProfileTSVService} from "./expressionprofile/expressionprofileTSV.service";
 import {VennDiagram} from "./venndiagram/venndiagram";
-import VennDiagramService from "./venndiagram/venndiagram.service";
-import TwoCircleVennDiagramService from "./venndiagram/twocirclevenndiagram.service";
-import ThreeCircleVennDiagramService from "./venndiagram/threecirclevenndiagram.service";
+import {VennDiagramService} from "./venndiagram/venndiagram.service";
+import {TwoCircleVennDiagramService} from "./venndiagram/twocirclevenndiagram.service";
+import {ThreeCircleVennDiagramService} from "./venndiagram/threecirclevenndiagram.service";
 import {PdfVisualizationComponent} from './pdf-visualization/pdf-visualization.component';
 import {PdfViewerComponent} from "ng2-pdf-viewer";
 import {HtmlvisualizationComponent} from './htmlvisualization/htmlvisualization.component';
@@ -20,7 +20,7 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { AddColumnModalComponent } from './phenodata/add-column-modal/add-column-modal.component';
 import {FormsModule} from "@angular/forms";
 import {VisualizationModalComponent} from "./visualizationmodal.component";
-import VisualizationModalService from "./visualizationmodal.service";
+import {VisualizationModalService} from "./visualizationmodal.service";
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule],

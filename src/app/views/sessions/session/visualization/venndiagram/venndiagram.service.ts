@@ -2,8 +2,8 @@
 import {Injectable} from "@angular/core";
 import Point from "../model/point";
 import Circle from "../model/circle";
-import TwoCircleVennDiagramService from "./twocirclevenndiagram.service";
-import ThreeCircleVennDiagramService from "./threecirclevenndiagram.service";
+import {TwoCircleVennDiagramService} from "./twocirclevenndiagram.service";
+import {ThreeCircleVennDiagramService} from "./threecirclevenndiagram.service";
 import VennCircle from "./venncircle";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import VennDiagramSelection from "./venndiagramselection";
@@ -12,7 +12,7 @@ import VennDiagramText from "./venndiagramtext";
 import * as _ from "lodash";
 
 @Injectable()
-export default class VennDiagramService {
+export class VennDiagramService {
 
     constructor(private twoCircleVenndiagramService: TwoCircleVennDiagramService, private threeCircleVenndiagramService: ThreeCircleVennDiagramService){}
 

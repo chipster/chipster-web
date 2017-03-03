@@ -1,7 +1,7 @@
 import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, ChangeDetectorRef, ViewChild} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import UploadService from "../../../../../shared/services/upload.service";
+import {UploadService} from "../../../../../shared/services/upload.service";
 
 @Component({
   selector: 'ch-add-dataset-modal-content',

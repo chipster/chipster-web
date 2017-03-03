@@ -1,13 +1,13 @@
 
-import SessionDataService from "../sessiondata.service";
+import {SessionDataService} from "../sessiondata.service";
 import Dataset from "../../../../model/session/dataset";
 import UtilsService from "../../../../shared/utilities/utils";
-import SessionResource from "../../../../shared/resources/session.resource";
-import SelectionService from "../selection.service";
+import {SessionResource} from "../../../../shared/resources/session.resource";
+import {SelectionService} from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
-import SessionNameModalService from "./sessionnamemodal/sessionnamemodal.service";
+import {SessionNameModalService} from "./sessionnamemodal/sessionnamemodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @Component({

@@ -8,7 +8,7 @@ import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import {Injectable} from "@angular/core";
 
 @Injectable()
-export default class ExpressionProfileService {
+export class ExpressionProfileService {
 
     constructor(private expressionprofileTSVService: ExpressionProfileTSVService){}
 

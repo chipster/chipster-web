@@ -6,7 +6,7 @@ import VennCircle from "./venncircle";
 import VennDiagramText from "./venndiagramtext";
 
 @Injectable()
-export default class TwoCircleVennDiagramService {
+export class TwoCircleVennDiagramService {
 
     /*
      * @description: Get centerpoints for two ellipses

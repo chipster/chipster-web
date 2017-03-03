@@ -1,5 +1,5 @@
 import {Component, Input, OnChanges} from "@angular/core";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 
 @Component({

@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import {timeout} from "d3-timer";
 import {TokenService} from "../../../../../core/authentication/token.service";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 
 @Component({

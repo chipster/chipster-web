@@ -3,7 +3,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {SessionNameModalComponent} from "./sessionnamemodal.component";
 
 @Injectable()
-export default class SessionNameModalService {
+export class SessionNameModalService {
 
   constructor(private modalService: NgbModal) {
   }

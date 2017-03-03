@@ -1,4 +1,4 @@
-import SelectionService from "../../selection.service";
+import {SelectionService} from "../../selection.service";
 import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
 import Node from "./node";
@@ -9,10 +9,10 @@ import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
 import UtilsService from "../../../../../shared/utilities/utils";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
-import WorkflowGraphService from "./workflowgraph.service";
-import SessionEventService from "../../sessionevent.service";
+import {WorkflowGraphService} from "./workflowgraph.service";
+import {SessionEventService} from "../../sessionevent.service";
 import * as _ from "lodash";
 
 @Component({

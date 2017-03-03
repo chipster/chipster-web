@@ -1,5 +1,5 @@
-import ConfigService from "../../../shared/services/config.service";
-import SessionResource from "../../../shared/resources/session.resource";
+import {ConfigService} from "../../../shared/services/config.service";
+import {SessionResource} from "../../../shared/resources/session.resource";
 import Session from "../../../model/session/session";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
@@ -12,7 +12,7 @@ import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
 import WsEvent from "../../../model/events/wsevent";
 
 @Injectable()
-export default class SessionEventService {
+export class SessionEventService {
 
     sessionData: SessionData;
     sessionId: string;

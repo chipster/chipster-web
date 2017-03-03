@@ -1,9 +1,9 @@
-import FileResource from "../../../../../shared/resources/fileresource";
-import SessionDataService from "../../sessiondata.service";
+import {FileResource} from "../../../../../shared/resources/fileresource";
+import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, OnChanges} from "@angular/core";
 import {Response} from "@angular/http";
-import VisualizationModalService from "../visualizationmodal.service";
+import {VisualizationModalService} from "../visualizationmodal.service";
 
 @Component({
   selector: 'ch-text-visualization',

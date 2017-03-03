@@ -1,18 +1,16 @@
-import SessionResource from "../../../shared/resources/session.resource";
-import IWindowService = angular.IWindowService;
-import ConfigService from "../../../shared/services/config.service";
+import {SessionResource} from "../../../shared/resources/session.resource";
+import {ConfigService} from "../../../shared/services/config.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import JobInput from "../../../model/session/jobinput";
-import FileResource from "../../../shared/resources/fileresource";
+import {FileResource} from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
 import {Injectable} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
-import {ActivatedRoute} from "@angular/router";
 
 @Injectable()
-export default class SessionDataService {
+export class SessionDataService {
 
   private sessionId: string;
 

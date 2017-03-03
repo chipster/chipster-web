@@ -1,7 +1,7 @@
 {
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "project": {
-    "version": "1.0.0-beta.20-4",
-    "name": "Chipster-web"
+    "name": "chipster-web"
   },
   "apps": [
     {
@@ -13,10 +13,11 @@
       ],
       "index": "index.html",
       "main": "main.ts",
+      "polyfills": "polyfills.ts",
       "test": "test.ts",
-      "tsconfig": "tsconfig.json",
+      "tsconfig": "tsconfig.app.json",
+      "testTsconfig": "tsconfig.spec.json",
       "prefix": "ch",
-      "mobile": false,
       "styles": [
         "styles.less",
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
@@ -24,28 +25,35 @@
         "../node_modules/handsontable/dist/handsontable.full.css"
       ],
       "scripts": [
-        "../node_modules/zone.js/dist/zone.js",
-        "../node_modules/reflect-metadata/Reflect.js",
         "../node_modules/jquery/dist/jquery.min.js",
         "../node_modules/pdfjs-dist/build/pdf.js",
         "../node_modules/pdfjs-dist/build/pdf.worker.js",
         "../node_modules/handsontable/dist/handsontable.full.js",
         "../node_modules/@flowjs/flow.js/dist/flow.js"
       ],
+      "environmentSource": "environments/environment.ts",
       "environments": {
-        "source": "environments/environment.ts",
         "dev": "environments/environment.ts",
         "prod": "environments/environment.prod.ts"
       }
     }
   ],
-  "addons": [],
-  "packages": [],
   "e2e": {
     "protractor": {
       "config": "./protractor.conf.js"
     }
   },
+  "lint": [
+    {
+      "project": "src/tsconfig.app.json"
+    },
+    {
+      "project": "src/tsconfig.spec.json"
+    },
+    {
+      "project": "e2e/tsconfig.e2e.json"
+    }
+  ],
   "test": {
     "karma": {
       "config": "./karma.conf.js"
@@ -53,20 +61,7 @@
   },
   "defaults": {
     "styleExt": "less",
-    "prefixInterfaces": false,
-    "inline": {
-      "style": false,
-      "template": false
-    },
-    "spec": {
-      "class": false,
-      "component": true,
-      "directive": true,
-      "module": false,
-      "pipe": true,
-      "service": true
-    },
-    "viewEncapsulation": "Emulated",
-    "changeDetection": "Default"
+    "component": {}
   }
 }
+

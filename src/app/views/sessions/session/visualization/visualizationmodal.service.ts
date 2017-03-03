@@ -4,7 +4,7 @@ import {VisualizationModalComponent} from "./visualizationmodal.component";
 import Dataset from "../../../../model/session/dataset";
 
 @Injectable()
-export default class VisualizationModalService {
+export class VisualizationModalService {
 
   constructor(private ngbModal: NgbModal) {
   }

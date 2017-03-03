@@ -11,13 +11,13 @@ import { ModulePipe } from './pipes/modulepipe.pipe';
 import {SecondsPipe} from './pipes/secondspipe.pipe';
 import {CategoryPipe} from "./pipes/categorypipe.pipe";
 import {TSVReader} from "./services/TSVReader";
-import ConfigurationResource from "./resources/configurationresource";
+import {ConfigurationResource} from "./resources/configurationresource";
 import {CoreModule} from "../core/core.module";
 import {ToolResource} from "./resources/toolresource";
 import {SessionWorkerResource} from "./resources/sessionworker.resource";
-import FileResource from "./resources/fileresource";
-import SessionResource from "./resources/session.resource";
-import ConfigService from "./services/config.service";
+import {FileResource} from "./resources/fileresource";
+import {SessionResource} from "./resources/session.resource";
+import {ConfigService} from "./services/config.service";
 
 
 /*

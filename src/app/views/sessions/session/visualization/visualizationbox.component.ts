@@ -1,4 +1,4 @@
-import SelectionService from "../selection.service";
+import {SelectionService} from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";

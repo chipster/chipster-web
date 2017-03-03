@@ -9,7 +9,7 @@ import SelectionEvent from "../../../model/events/selectionevent";
 import {Action} from "../../../model/events/selectionevent";
 
 @Injectable()
-export default class SelectionService {
+export class SelectionService {
 
     // selections
     selectedDatasets: Dataset[] = [];

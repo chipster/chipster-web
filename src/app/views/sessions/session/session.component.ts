@@ -1,7 +1,7 @@
 
-import SessionEventService from "./sessionevent.service";
-import SessionDataService from "./sessiondata.service";
-import SelectionService from "./selection.service";
+import {SessionEventService} from "./sessionevent.service";
+import {SessionDataService} from "./sessiondata.service";
+import {SelectionService} from "./selection.service";
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
 import {SessionData} from "../../../model/session/session-data";

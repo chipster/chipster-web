@@ -7,7 +7,7 @@ import {SharedModule} from "../../../../shared/shared.module";
 import {DatasetDetailsComponent} from "./datasetdetails/datasetdetails.component";
 import {JobComponent} from "./job/job.component";
 import { DatasetHistorymodalComponent } from './datasethistorymodal/datasethistorymodal.component';
-import DatasetModalService from "./datasetmodal.service";
+import {DatasetModalService} from "./datasetmodal.service";
 
 @NgModule({
   imports: [  CommonModule, FormsModule, SharedModule ],

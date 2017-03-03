@@ -6,7 +6,7 @@ import VennDiagramUtils from "./venndiagramutils";
 import * as _ from "lodash";
 
 @Injectable()
-export default class ThreeCircleVennDiagramService {
+export class ThreeCircleVennDiagramService {
 
     /*
      * @description: Get centerpoints for three ellipses

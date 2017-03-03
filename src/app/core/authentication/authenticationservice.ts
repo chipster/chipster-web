@@ -1,4 +1,4 @@
-import ConfigService from "../../shared/services/config.service";
+import {ConfigService} from "../../shared/services/config.service";
 import {Injectable} from "@angular/core";
 import {Headers, Http, ResponseContentType, Response} from "@angular/http";
 import {Observable} from "rxjs";
@@ -6,25 +6,11 @@ import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
 
 @Injectable()
-export default class AuthenticationService {
+export class AuthenticationService {
 
   constructor(private http: Http,
               private ConfigService: ConfigService,
-              private tokenService: TokenService,
-              // @Inject('$rootScope') private $rootScope: ng.IRootScopeService,
-              // private location: Location
-              ) {
-
-    // this.$rootScope.$on("$routeChangeStart", (event: any, next: any) => {
-    //   if (next.$$route.authenticated) {
-    //     var userAuth = this.tokenService.getToken();
-    //     if (!userAuth) {
-    //       console.log('token not found, forward to login');
-    //       this.$location.path('/login');
-    //     }
-    //   }
-    // });
-
+              private tokenService: TokenService) {
   }
 
   // Do the authentication here based on userid and password

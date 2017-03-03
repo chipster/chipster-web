@@ -1,5 +1,5 @@
 
-import SessionResource from "../../shared/resources/session.resource";
+import {SessionResource} from "../../shared/resources/session.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../model/session/session-data";
 import {Component} from "@angular/core";

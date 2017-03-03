@@ -1,9 +1,9 @@
 
 import Dataset from "../../../../../model/session/dataset";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import Job from "../../../../../model/session/job";
 import {Component, Input, Output, EventEmitter} from "@angular/core";
-import DatasetModalService from "../datasetmodal.service";
+import {DatasetModalService} from "../datasetmodal.service";
 
 @Component({
   selector: 'ch-single-dataset',

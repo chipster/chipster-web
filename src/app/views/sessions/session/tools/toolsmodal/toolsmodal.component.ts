@@ -5,7 +5,7 @@ import {ToolService} from "../tool.service";
 import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
 import ToolParameter from "../../../../../model/session/toolparameter";
-import SessionDataService from "../../sessiondata.service";
+import {SessionDataService} from "../../sessiondata.service";
 import {Observable} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
