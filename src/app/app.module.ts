@@ -13,6 +13,8 @@ import {AppComponent} from "./app.component";
 import {TokenService} from "./core/authentication/token.service";
 import {AppRoutingModule} from "./app-routing.module";
 import {SessionResolve} from "./views/sessions/session/session.resolve";
+import {StoreModule} from "@ngrx/store";
+import {datasetSelection, jobSelection} from "./state/reducers";
 
 @NgModule({
     imports: [
@@ -22,7 +24,8 @@ import {SessionResolve} from "./views/sessions/session/session.resolve";
       CoreModule,
       SessionModule,
       NgbModule.forRoot(),
-      AppRoutingModule
+      AppRoutingModule,
+      StoreModule.provideStore({datasetSelection, jobSelection})
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent ],
     providers: [ SelectionService, TokenService, SessionResolve ],

@@ -9,6 +9,8 @@ import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
 import {SessionNameModalService} from "./sessionnamemodal/sessionnamemodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
+import {Store} from "@ngrx/store";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -19,6 +21,7 @@ export class LeftPanelComponent {
   @Input() sessionData: SessionData;
   private isCopying = false;
   datasetSearch: string;
+
 
   constructor(
     private sessionResource: SessionResource,

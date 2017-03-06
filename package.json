@@ -25,6 +25,8 @@
     "zone.js": "0.7.6",
     "@flowjs/flow.js": "^2.11.2",
     "@ng-bootstrap/ng-bootstrap": "^1.0.0-alpha.19",
+    "@ngrx/core": "^1.2.0",
+    "@ngrx/store": "^2.2.1",
     "bootstrap": "4.0.0-alpha.6",
     "d3": "4.4.0",
     "font-awesome": "4.6.3",

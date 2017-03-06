@@ -8,7 +8,7 @@ export default class Dataset {
 
     checksum: string;
     datasetId: string;
-    fileId: string;
+    fileId: string;s
     metadata: MetadataEntry[];
     name: string;
     notes: string;
