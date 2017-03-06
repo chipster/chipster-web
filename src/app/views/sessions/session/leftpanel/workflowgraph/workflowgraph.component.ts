@@ -34,11 +34,11 @@ import {
     @Input() defaultScale: number;
     @Input() enabled: boolean;
 
-    toggleDatasetSelection$ = new Subject().map( (dataset: Dataset) => ({type: TOGGLE_SELECTED_DATASET, payload: dataset}) );
-    clearDatasetSelections$ = new Subject().map( () => ({type: CLEAR_DATASET_SELECTIONS}));
+    toggleDatasetSelection$ = new Subject();
+    clearDatasetSelections$ = new Subject();
 
-    toggleJobSelection$ = new Subject().map( (job: Job) => ({type: TOGGLE_SELECTED_JOB, payload: job}));
-    clearJobSelections$ = new Subject().map( () => ({type: CLEAR_JOB_SELECTIONS}));
+    toggleJobSelection$ = new Subject();
+    clearJobSelections$ = new Subject();
 
     private zoom;
 
@@ -90,10 +90,10 @@ import {
 
       // Setup state actionlisteners
       Observable.merge(
-        this.toggleDatasetSelection$,
-        this.clearDatasetSelections$,
-        this.toggleJobSelection$,
-        this.clearJobSelections$
+        this.toggleDatasetSelection$.map( (dataset: Dataset) => ({type: TOGGLE_SELECTED_DATASET, payload: dataset}) ),
+        this.clearDatasetSelections$.map( () => ({type: CLEAR_DATASET_SELECTIONS})),
+        this.toggleJobSelection$.map( (job: Job) => ({type: TOGGLE_SELECTED_JOB, payload: job})),
+        this.clearJobSelections$.map( () => ({type: CLEAR_JOB_SELECTIONS}))
       ).subscribe(this.store.dispatch.bind(this.store));
 
       // used for adjusting the svg size
