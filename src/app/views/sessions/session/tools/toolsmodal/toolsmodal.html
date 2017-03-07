@@ -1,18 +1,11 @@
 <button class="btn btn-primary" (click)="openToolsModal()">Select tool</button>
 
 <template #toolsModalTemplate>
-
   <div class="modal-header">
-    <div class="col-md-1">
-      <h4>Tools</h4>
-    </div>
-    <div class="col-md-10" style="text-align: center">
-      <h5 *ngIf="!selectedTool">No tool selected</h5>
-
-      <ch-tool-title *ngIf="selectedTool"
-                     [module]="selectedModule.name"
-                     [category]="selectedCategory.name"
-                     [tool]="selectedTool.name.displayName">
+    <div class="col-md-11">
+      <ch-tool-title [module]="selectedModule?.name"
+                     [category]="selectedCategory?.name"
+                     [tool]="selectedTool?.name.displayName">
       </ch-tool-title>
     </div>
     <div class="col-md-1" style="padding-right: 0">
@@ -23,9 +16,9 @@
   <div class="modal-body">
     <ngb-tabset>
       <ngb-tab>
-        <template ngbTabTitle>Tool selection</template>
+        <template ngbTabTitle>Tools</template>
         <template ngbTabContent>
-          <!--&lt;!&ndash; module buttons &ndash;&gt;-->
+          <!-- module buttons -->
           <div class="row">
             <div class="col">
               <div class="btn-group">
