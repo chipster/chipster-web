@@ -2,14 +2,14 @@ export default [
   {
     id: 'spreadsheet',
     name: 'Spreadsheet',
-    extensions: ['tsv', 'bed'],
+    extensions: ['tsv', 'bed', 'gtf'],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
   {
     id: 'text',
     name: 'Text',
-    extensions: ['txt', 'tsv', 'bed'],
+    extensions: ['txt', 'tsv', 'bed', 'gtf'],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
