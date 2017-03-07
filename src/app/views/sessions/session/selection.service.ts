@@ -26,13 +26,7 @@ export class SelectionService {
     jobSelectionSubject$ = new Subject<SelectionEvent>();
     toolSelectionSubject$ = new Subject<SelectionEvent>();
 
-    /**
-     * Check if there are one or more dataset selected
-     * @returns {boolean}
-     */
-    isDatasetSelected() {
-        return this.selectedDatasets.length > 0;
-    }
+
 
     /**
      * Check if there are one or more jobs selected
@@ -49,31 +43,6 @@ export class SelectionService {
      */
     isSelectedDataset(data: Dataset) {
         return this.selectedDatasets.indexOf(data) !== -1;
-    }
-
-    /**
-     * Check if given job is selected
-     * @param data
-     * @returns {boolean}
-     */
-    isSelectedJob(data: Job) {
-        return this.selectedJobs.indexOf(data) !== -1;
-    }
-
-    /**
-     * Check if single dataset is selected
-     * @returns {boolean}
-     */
-    isSingleDatasetSelected() {
-        return this.selectedDatasets.length == 1;
-    }
-
-    /**
-     * Check if there are more than one datasets selected
-     * @returns {boolean}
-     */
-    isMultipleDatasetsSelected() {
-        return this.selectedDatasets.length > 1;
     }
 
     toggleDatasetSelection($event: any, data: Dataset, allDatasets: any[]) {

@@ -14,7 +14,8 @@ import {TokenService} from "./core/authentication/token.service";
 import {AppRoutingModule} from "./app-routing.module";
 import {SessionResolve} from "./views/sessions/session/session.resolve";
 import {StoreModule} from "@ngrx/store";
-import {datasetSelection, jobSelection} from "./state/reducers";
+import {selectedJobs} from "./state/selectedJobs.reducer";
+import {selectedDatasets} from "./state/selectedDatasets.reducer";
 
 @NgModule({
     imports: [
@@ -25,7 +26,7 @@ import {datasetSelection, jobSelection} from "./state/reducers";
       SessionModule,
       NgbModule.forRoot(),
       AppRoutingModule,
-      StoreModule.provideStore({datasetSelection, jobSelection})
+      StoreModule.provideStore({selectedDatasets, selectedJobs})
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent ],
     providers: [ SelectionService, TokenService, SessionResolve ],

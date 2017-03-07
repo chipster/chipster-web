@@ -15,11 +15,7 @@ import {WorkflowGraphService} from "./workflowgraph.service";
 import {SessionEventService} from "../../sessionevent.service";
 import * as _ from "lodash";
 import {Store} from "@ngrx/store";
-import {Subject, Observable} from "rxjs";
-import {
-  TOGGLE_SELECTED_DATASET, CLEAR_DATASET_SELECTIONS, TOGGLE_SELECTED_JOB,
-  CLEAR_JOB_SELECTIONS
-} from "../../../../../state/reducers";
+import {SelectionHandlerService} from "../../selection-handler.service";
 
   @Component({
     selector: 'ch-workflow-graph',
@@ -34,12 +30,6 @@ import {
     @Input() defaultScale: number;
     @Input() enabled: boolean;
 
-    toggleDatasetSelection$ = new Subject();
-    clearDatasetSelections$ = new Subject();
-
-    toggleJobSelection$ = new Subject();
-    clearJobSelections$ = new Subject();
-
     private zoom;
 
     constructor(private sessionDataService: SessionDataService,
@@ -47,9 +37,7 @@ import {
                 private SelectionService: SelectionService,
                 private pipeService: PipeService,
                 private workflowGraphService: WorkflowGraphService,
-                private store: Store<any>) {
-
-    }
+                private selectionHandlerService: SelectionHandlerService) {}
 
     //var shiftKey, ctrlKey;
     svgContainer: any;
@@ -87,15 +75,6 @@ import {
 
     ngOnInit() {
 
-
-      // Setup state actionlisteners
-      Observable.merge(
-        this.toggleDatasetSelection$.map( (dataset: Dataset) => ({type: TOGGLE_SELECTED_DATASET, payload: dataset}) ),
-        this.clearDatasetSelections$.map( () => ({type: CLEAR_DATASET_SELECTIONS})),
-        this.toggleJobSelection$.map( (job: Job) => ({type: TOGGLE_SELECTED_JOB, payload: job})),
-        this.clearJobSelections$.map( () => ({type: CLEAR_JOB_SELECTIONS}))
-      ).subscribe(this.store.dispatch.bind(this.store));
-
       // used for adjusting the svg size
       this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
       this.outerSvg = this.svgContainer.append('svg');
@@ -111,8 +90,7 @@ import {
         .attr('height', this.height)
         .attr('opacity', 0)
         .on('click', () => {
-          this.clearDatasetSelections$.next();
-          this.clearJobSelections$.next();
+          this.selectionHandlerService.clearSelections();
           this.SelectionService.clearSelection();
         });
 
@@ -254,8 +232,7 @@ import {
         .classed('selected-job', (d) => this.isSelectedJob(d.job))
         .on('click', (d) => {
           if (this.enabled) {
-            this.clearDatasetSelections$.next();
-            this.toggleJobSelection$.next(d.job);
+            this.selectionHandlerService.setJobSelection(d.job);
             this.SelectionService.selectJob(d3.event, d.job);
           }
         })
@@ -323,12 +300,13 @@ import {
         .classed('selected-dataset', (d) => this.enabled && this.isSelectedDataset(d.dataset))
         .on('click', function (d) {
           if (self.enabled) {
+            self.selectionHandlerService.clearJobSelection();
+
             if (!UtilsService.isCtrlKey(d3.event)) {
-              self.clearDatasetSelections$.next();
+              self.selectionHandlerService.clearDatasetSelection();
               self.SelectionService.clearSelection();
             }
-            self.clearJobSelections$.next();
-            self.toggleDatasetSelection$.next(d.dataset);
+            self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
             self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
           }
         })
@@ -438,8 +416,7 @@ import {
         .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
         .attr('y2', (d) => d.target.y)
         .on('click', function (d) {
-          self.clearDatasetSelections$.next();
-          self.toggleJobSelection$.next(d.target.sourceJob);
+          self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
           self.SelectionService.selectJob(d3.event, d.target.sourceJob);
         })
         .on('mouseover', function () {
