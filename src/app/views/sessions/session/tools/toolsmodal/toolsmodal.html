@@ -151,6 +151,13 @@
       </ngb-tab>
 
       <ngb-tab [disabled]="!selectedTool">
+        <template ngbTabTitle>Manual</template>
+        <template ngbTabContent>
+          <p>TBD</p>
+        </template>
+      </ngb-tab>
+
+      <ngb-tab [disabled]="!selectedTool">
         <template ngbTabTitle>Source Code</template>
         <template ngbTabContent>
           <ch-tool-source [selectedTool]="selectedTool"></ch-tool-source>
