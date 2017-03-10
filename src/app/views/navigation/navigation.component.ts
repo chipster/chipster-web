@@ -12,8 +12,9 @@ export class NavigationComponent {
 
     host: Observable<string>;
 
-    constructor(private tokenService: TokenService,
-                private authenticationService: AuthenticationService,
+    constructor(
+      private tokenService: TokenService,
+      private authenticationService: AuthenticationService,
                 private configService: ConfigService){}
 
     ngOnInit() {
@@ -31,6 +32,6 @@ export class NavigationComponent {
     };
 
     getHost(): Observable<string> {
-        return this.configService.getSessionDbUrl();
+      return this.configService.getSessionDbUrl();
     };
 }

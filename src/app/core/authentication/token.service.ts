@@ -17,11 +17,16 @@ export class TokenService {
   };
 
   getToken(): string {
-    return localStorage['ch-auth-token'];
+    return localStorage.getItem('ch-auth-token');
   };
 
-  setAuthToken(val: string): void {
-    localStorage['ch-auth-token'] = val;
+  setAuthToken(token: string): void {
+    if (token) {
+      localStorage.setItem('ch-auth-token', token);
+    } else {
+      // item has to be removed explicitly, because setItem(..., null) would be converted to a 'null' string
+      localStorage.removeItem('ch-auth-token');
+    }
     this.updateTokenHeader();
   };
 

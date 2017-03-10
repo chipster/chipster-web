@@ -11,35 +11,37 @@ export class ConfigService {
   private configuration$: Observable<any>;
 
   constructor(private configurationResource: ConfigurationResource) {
-    this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
+  }
+
+  getConfiguration() {
+    if (!this.configuration$) {
+      this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
+    }
+    return this.configuration$;
   }
 
   getSessionDbUrl(): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.sessionDb);
+    return this.getConfiguration().map((services: CoreServices) => services.sessionDb);
   }
 
   getSessionDbEventsUrl(sessionId: string): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.sessionDbEvents);
+    return this.getConfiguration().map((services: CoreServices) => services.sessionDbEvents);
   }
 
   getSessionWorkerUrl(): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.sessionWorker);
+    return this.getConfiguration().map((services: CoreServices) => services.sessionWorker);
   }
 
   getFileBrokerUrl(): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.fileBroker);
+    return this.getConfiguration().map((services: CoreServices) => services.fileBroker);
   }
 
   getToolboxUrl(): Observable<string> {
-    return this.configuration$.map((services: CoreServices) => services.toolbox);
+    return this.getConfiguration().map((services: CoreServices) => services.toolbox);
   }
 
   getModules(): Array<string> {
     return configConstants.ChipsterModules;
-  }
-
-  getConfiguration(): Observable<CoreServices> {
-    return this.configuration$;
   }
 
   private parseServices(configuration: any): CoreServices {

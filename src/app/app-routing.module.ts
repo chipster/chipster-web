@@ -6,6 +6,7 @@ import {SessionListComponent} from "./views/sessions/sessionlist.component";
 import {SessionResolve} from "./views/sessions/session/session.resolve";
 import {SessionComponent} from "./views/sessions/session/session.component";
 import {AuthGuard} from "./core/authentication/auth-guard.service";
+import {ErrorComponent} from "./views/error/error.component";
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
     resolve: { sessionData: SessionResolve },
     canActivate: [AuthGuard]
   },
+  { path: 'error', component: ErrorComponent},
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home' }
 ];

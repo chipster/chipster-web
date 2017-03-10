@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {NgModule, ErrorHandler} from '@angular/core';
 import { HttpModule } from '@angular/http';
 import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
@@ -16,6 +16,8 @@ import {SessionResolve} from "./views/sessions/session/session.resolve";
 import {StoreModule} from "@ngrx/store";
 import {selectedJobs} from "./state/selectedJobs.reducer";
 import {selectedDatasets} from "./state/selectedDatasets.reducer";
+import {ErrorComponent} from "./views/error/error.component";
+import {AppErrorHandler} from "./views/error/apperrorhandler";
 
 @NgModule({
     imports: [
@@ -28,8 +30,8 @@ import {selectedDatasets} from "./state/selectedDatasets.reducer";
       AppRoutingModule,
       StoreModule.provideStore({selectedDatasets, selectedJobs})
     ],
-    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent ],
-    providers: [ SelectionService, TokenService, SessionResolve ],
+    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent ],
+    providers: [SelectionService, TokenService, SessionResolve, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })
 export class AppModule {}

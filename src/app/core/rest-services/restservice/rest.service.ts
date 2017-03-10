@@ -114,7 +114,7 @@ export class RestService {
         return resp;
       }
     )
-      .catch(this.errorHandler.handleError)
+      .catch(err => this.errorHandler.handleError(err, request))
       .finally( () => this.httpQueueu.decrement());
   }
 

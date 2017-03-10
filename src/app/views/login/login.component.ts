@@ -1,4 +1,3 @@
-import {ServiceLocator} from "../../core/app.constants";
 import {AuthenticationService} from "../../core/authentication/authenticationservice";
 import {Component, ViewChild} from "@angular/core";
 import {FormGroup } from '@angular/forms';
@@ -23,11 +22,10 @@ export class LoginComponent {
             //Route to Session creation page
           this.router.navigate(['/sessions']);
         }, (error: any) => {
-            console.log('login failed', error);
-            if (error) {
-                this.error = error.status === 403 ? 'Incorrect username or password.' : error.data;
+            if (error && error.status === 403) {
+                this.error = 'Incorrect username or password'
             } else {
-                this.error = 'Could not connect to the server ' + ServiceLocator;
+              throw error;
             }
         });
     }

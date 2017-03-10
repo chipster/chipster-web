@@ -39,8 +39,6 @@ export class SessionListComponent {
 
         this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
             this.userSessions = sessions;
-        }, (err: any) => {
-            console.log('failed to get sessions', err);
         });
     }
 
