@@ -14,10 +14,7 @@ export class JobComponent {
 	}
 
 	cancelJobs() {
-    this.SelectionService.selectedJobs.forEach(job => {
-      job.state = "CANCELLED";
-		  this.SessionDataService.updateJob(job);
-    });
+	  this.SessionDataService.deleteJobs(this.SelectionService.selectedJobs);
 	}
 
 	getJob() {
