@@ -13,8 +13,11 @@ export class JobComponent {
 		private SessionDataService: SessionDataService) {
 	}
 
-	deleteJobs() {
-		this.SessionDataService.deleteJobs(this.SelectionService.selectedJobs);
+	cancelJobs() {
+    this.SelectionService.selectedJobs.forEach(job => {
+      job.state = "CANCELLED";
+		  this.SessionDataService.updateJob(job);
+    });
 	}
 
 	getJob() {

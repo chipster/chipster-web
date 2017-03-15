@@ -30,6 +30,6 @@ export class AppErrorHandler implements ErrorHandler {
     // to the error page
     console.log('uncaught error', msg, error);
 
-    this.router.navigate(['/error', {error: msg}]);
+    //this.router.navigate(['/error', {error: msg}]);
   }
 }

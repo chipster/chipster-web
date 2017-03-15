@@ -101,6 +101,10 @@ export class SessionDataService {
     return this.sessionResource.updateDataset(this.getSessionId(), dataset).toPromise();
   }
 
+  updateJob(job: Job) {
+    return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
+  }
+
   updateSession(session: Session) {
     return this.sessionResource.updateSession(session);
   }
