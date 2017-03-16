@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {ActivatedRoute, Params} from "@angular/router";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 import {Observable} from "rxjs";
 
 @Component({
@@ -7,12 +7,17 @@ import {Observable} from "rxjs";
   templateUrl: './error.html'
 })
 export class ErrorComponent {
-  error: Observable<string>;
+  msg: Observable<string>;
 
   constructor(
-    private route: ActivatedRoute) {}
+    private route: ActivatedRoute,
+    private router: Router) {}
 
   ngOnInit() {
-    this.error = this.route.params.map((params: Params) => params['error']);
+    this.msg = this.route.params.map((params: Params) => params['msg']);
+  }
+
+  closeAlert() {
+    this.router.navigate([{ outlets: { header: null}}]);
   }
 }

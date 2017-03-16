@@ -16,11 +16,12 @@ export class AppErrorHandler implements ErrorHandler {
 
     let msg;
 
-    if (error.originalError) {
+    if (error instanceof Error) {
+      msg = error.toString();
+    } else if (error.originalError) {
       // e.g. NavigationComponent.getHost() when backend isn't running
       msg = error.originalError;
     } else if (error.rejection && error.rejection.originalError) {
-      //
       msg = error.rejection.originalError;
     } else {
       msg = JSON.stringify(error);
@@ -28,8 +29,8 @@ export class AppErrorHandler implements ErrorHandler {
 
     // printing the whole error object may provide useful information, because we can pass only a string
     // to the error page
-    console.log('uncaught error', msg, error);
+    console.log('uncaught error', msg, typeof error, error);
 
-    //this.router.navigate(['/error', {error: msg}]);
+    this.router.navigate([{ outlets: { header: ['error', {msg: msg}]}}]);
   }
 }

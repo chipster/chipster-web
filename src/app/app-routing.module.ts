@@ -21,9 +21,10 @@ const routes: Routes = [
     resolve: { sessionData: SessionResolve },
     canActivate: [AuthGuard]
   },
-  { path: 'error', component: ErrorComponent},
   { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: '**', redirectTo: '/home' }
+  { path: '**', redirectTo: '/home' },
+
+  { path: 'error', component: ErrorComponent, outlet: 'header'}
 ];
 
 @NgModule({

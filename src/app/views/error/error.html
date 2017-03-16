@@ -1,10 +1,9 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <h4>Something went wrong</h4>
       <p>
-        <ngb-alert [dismissible]="false">
-          <strong></strong> {{this.error | async}}
+        <ngb-alert (close)="closeAlert(alert)">
+          <strong></strong> {{this.msg | async}}
         </ngb-alert>
       </p>
     </div>
