@@ -10,6 +10,7 @@ import {Observable, Subject} from "rxjs";
 import SessionEvent from "../../../model/events/sessionevent";
 import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
 import WsEvent from "../../../model/events/wsevent";
+import {ErrorService} from "../../error/error.service";
 
 @Injectable()
 export class SessionEventService {
@@ -21,12 +22,14 @@ export class SessionEventService {
     jobStream$: Observable<SessionEvent>;
     sessionStream$: Observable<SessionEvent>;
     authorizationStream$: Observable<SessionEvent>;
-    wsSubject$: WebSocketSubject<string>;
-    localSubject$: Subject<string>;
+    wsSubject$: WebSocketSubject<WsEvent>;
+    localSubject$: Subject<WsEvent>;
 
-    constructor(private configService: ConfigService,
-                private tokenService: TokenService,
-                private sessionResource: SessionResource){
+    constructor(
+      private configService: ConfigService,
+      private tokenService: TokenService,
+      private sessionResource: SessionResource,
+      private errorService: ErrorService){
     }
 
     unsubscribe() {
@@ -38,22 +41,10 @@ export class SessionEventService {
       this.sessionData = sessionData;
       this.sessionId = sessionId;
 
-      let wsStream = this.getWsStream();
       this.localSubject$ = new Subject();
+      let stream = this.localSubject$.publish().refCount();
 
-      let stream = wsStream.merge(this.localSubject$)
-        // some debug prints
-        .map(wsData => {
-          console.log('websocket event', wsData);
-          return wsData;
-
-        }).catch((err, source) => {
-          console.log('websocket error', err, source);
-          return Observable.throw(err);
-
-        }).finally(() => {
-          console.info('websocket closed');
-        }).publish().refCount();
+      this.connect(this.localSubject$);
 
       this.datasetStream$ = stream
         .filter(wsData => wsData.resourceType === 'DATASET')
@@ -82,18 +73,50 @@ export class SessionEventService {
       this.authorizationStream$.subscribe();
     }
 
-    getWsStream() {
+  /**
+   * Connect to websocket and copy events to the listener Subject
+   *
+   * There are two Subjects, the listener Subject and
+   * the real websocket Subject. The listener Subject collects the subscriptions, while the websocket
+   * Subject is kept hidden behing the scenes. All received websocket messages are pushed to the listener
+   * Subject. When the websocket Subject completes beause of the server's
+   * idle timeout, we can simply create a new websocket Subject, without loosing the current subscriptions.
+   */
+  connect(listener) {
       // get the url of the websocket server
-      return this.configService.getSessionDbEventsUrl(this.sessionId).flatMap( (eventsUrl:string) => {
+      this.configService.getSessionDbEventsUrl(this.sessionId).flatMap( (eventsUrl:string) => {
 
         let wsUrl = `${eventsUrl}/events/${this.sessionId}?token=${this.tokenService.getToken()}`;
         console.debug('event URL', wsUrl);
 
         // convert websocket to observable
-        this.wsSubject$ = Observable.webSocket(wsUrl);
+        this.wsSubject$ = Observable.webSocket({
+          url: wsUrl,
+          openObserver: {next: (x) => {
+            console.log('websocket open', x);
+          }}
+        });
 
         return this.wsSubject$;
 
+      })
+        // convert unclean idle timeouts to clean (about 20% of them for unknown reason)
+        .catch(err => {
+        if (err.code === 1001 && err.reason === 'Idle Timeout') {
+          return Observable.empty();
+        } else {
+          return Observable.throw(err);
+        }
+      }).subscribe(data => {
+        console.log('websocket event', data);
+        listener.next(data);
+      }, (err) => {
+        console.log('websocket error', err);
+        this.errorService.headerError('Connection lost, please reload the page', false);
+      }, () => {
+        console.log('websocket closed');
+        // reconnect after clean close (server idle timeout)
+        this.connect(listener);
       });
     }
 
@@ -205,6 +228,6 @@ export class SessionEventService {
    */
   generateLocalEvent(event: WsEvent) {
     // incorrect typing? it really is an object, but the compiler wants a string
-    this.localSubject$.next(<any>event);
+    this.localSubject$.next(event);
   }
 }

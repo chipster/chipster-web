@@ -1,23 +1,30 @@
 import {Component} from "@angular/core";
-import {ActivatedRoute, Params, Router} from "@angular/router";
-import {Observable} from "rxjs";
+import {ErrorService} from "./error.service";
+import {ErrorMessage} from "./errormessage";
 
 @Component({
   selector: 'ch-error',
   templateUrl: './error.html'
 })
 export class ErrorComponent {
-  msg: Observable<string>;
+  msg: string;
+  dismissible: boolean;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router) {}
+    private errorService: ErrorService) {}
 
   ngOnInit() {
-    this.msg = this.route.params.map((params: Params) => params['msg']);
+    this.errorService.getErrors().subscribe((error: ErrorMessage) => {
+      if (error) {
+        this.msg = error.msg;
+        this.dismissible = error.dismissible;
+      } else {
+        this.closeAlert();
+      }
+    });
   }
 
   closeAlert() {
-    this.router.navigate([{ outlets: { header: null}}]);
+    this.msg = null;
   }
 }

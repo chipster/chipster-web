@@ -1,15 +1,18 @@
 import {ErrorHandler, Injectable, Injector} from "@angular/core";
 import {Router} from "@angular/router";
+import {ErrorService} from "./error.service";
 
 @Injectable()
 export class AppErrorHandler implements ErrorHandler {
 
   private router: Router;
+  private errorService: ErrorService;
 
   constructor(
     private injector: Injector) {
     // workaround circular dependency error
     this.router = injector.get(Router);
+    this.errorService = injector.get(ErrorService);
   }
 
   handleError(error) {
@@ -31,6 +34,6 @@ export class AppErrorHandler implements ErrorHandler {
     // to the error page
     console.log('uncaught error', msg, typeof error, error);
 
-    this.router.navigate([{ outlets: { header: ['error', {msg: msg}]}}]);
+    this.errorService.headerError(msg, true);
   }
 }

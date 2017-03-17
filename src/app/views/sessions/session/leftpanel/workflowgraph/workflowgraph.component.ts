@@ -514,7 +514,7 @@ import {SelectionHandlerService} from "../../selection-handler.service";
           var color = 'lightGray';
           var spin = true;
 
-          if (job.state === 'FAILED') {
+          if (job.state === 'FAILED' || job.state === 'EXPIRED_WAITING') {
             color = 'yellow';
             spin = false;
           }

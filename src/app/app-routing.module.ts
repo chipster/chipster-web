@@ -22,9 +22,7 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: '**', redirectTo: '/home' },
-
-  { path: 'error', component: ErrorComponent, outlet: 'header'}
+  { path: '**', redirectTo: '/home' }
 ];
 
 @NgModule({

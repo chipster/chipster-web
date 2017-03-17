@@ -1,9 +1,9 @@
-<div class="container">
+<div class="container" *ngIf="msg">
   <div class="row">
     <div class="col">
       <p>
-        <ngb-alert (close)="closeAlert(alert)">
-          <strong></strong> {{this.msg | async}}
+        <ngb-alert [dismissible]="dismissible" (close)="closeAlert(alert)">
+          <strong></strong> {{this.msg}}
         </ngb-alert>
       </p>
     </div>
