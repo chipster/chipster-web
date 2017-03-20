@@ -12,10 +12,14 @@ import {TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS} from "../.
 @Injectable()
 export class SelectionHandlerService {
 
+  // Streams for handling state in global store. These streams are meant to carry the
+  // information on what datasets are being selected and deselected
   toggleDatasetSelection$ = new Subject();
   setDatasetSelection$ = new Subject();
   clearDatasetSelections$ = new Subject();
 
+  // Streams for handling state in global store. These streams are meant to carry the
+  // information on what jobs are being selected and deselected
   setJobSelection$ = new Subject();
   toggleJobSelection$ = new Subject();
   clearJobSelections$ = new Subject();

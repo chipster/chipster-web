@@ -14,8 +14,9 @@ import * as d3 from "d3";
 import {WorkflowGraphService} from "./workflowgraph.service";
 import {SessionEventService} from "../../sessionevent.service";
 import * as _ from "lodash";
-import {Store} from "@ngrx/store";
 import {SelectionHandlerService} from "../../selection-handler.service";
+import {Store} from "@ngrx/store";
+import {Observable} from "rxjs";
 
   @Component({
     selector: 'ch-workflow-graph',
@@ -37,7 +38,16 @@ import {SelectionHandlerService} from "../../selection-handler.service";
                 private SelectionService: SelectionService,
                 private pipeService: PipeService,
                 private workflowGraphService: WorkflowGraphService,
-                private selectionHandlerService: SelectionHandlerService) {}
+                private selectionHandlerService: SelectionHandlerService,
+                private store: Store<any>) {}
+
+    // actually selected datasets and jobs
+    selectedDatasets: Array<Dataset>;
+    selectedJobs: Array<Job>;
+
+    // Streams for selected datasets and selectedJobs
+    selectedDatasets$: Observable<Array<Dataset>>;
+    selectedJobs$: Observable<Array<Job>>;
 
     //var shiftKey, ctrlKey;
     svgContainer: any;
@@ -74,6 +84,9 @@ import {SelectionHandlerService} from "../../selection-handler.service";
 
 
     ngOnInit() {
+
+      this.selectedDatasets$ = this.store.select('selectedDatasets');
+      this.selectedJobs$ = this.store.select('selectedJobs');
 
       // used for adjusting the svg size
       this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
@@ -118,7 +131,6 @@ import {SelectionHandlerService} from "../../selection-handler.service";
       }
 
       // apply zoom
-
       if (this.enabled) {
         this.sessionEventService.getDatasetStream().subscribe(() => {
           this.update();
@@ -130,12 +142,14 @@ import {SelectionHandlerService} from "../../selection-handler.service";
           this.renderGraph();
         });
 
-        this.SelectionService.getDatasetSelectionStream().subscribe(() => {
+        this.selectedDatasets$.subscribe( (datasets: Array<Dataset>) => {
+          this.selectedDatasets = datasets;
           this.update();
           this.renderGraph();
         });
 
-        this.SelectionService.getJobSelectionStream().subscribe(() => {
+        this.selectedJobs$.subscribe((jobs: Array<Job>) => {
+          this.selectedJobs = jobs;
           this.update();
           this.renderGraph();
         });
@@ -272,11 +286,11 @@ import {SelectionHandlerService} from "../../selection-handler.service";
     }
 
     isSelectedJob(job: Job) {
-      return this.SelectionService.selectedJobs.indexOf(job) != -1;
+      return this.selectedJobs.indexOf(job) != -1;
     }
 
     isSelectedDataset(dataset: Dataset) {
-      return this.SelectionService.selectedDatasets.indexOf(dataset) != -1;
+      return this.selectedDatasets.indexOf(dataset) != -1;
     }
 
     renderDatasets() {

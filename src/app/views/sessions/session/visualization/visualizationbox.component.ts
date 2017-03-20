@@ -5,6 +5,9 @@ import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
 import {Component, OnInit, OnDestroy} from "@angular/core";
 import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
+import {SelectionHandlerService} from "../selection-handler.service";
+import {Store} from "@ngrx/store";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-visualizations',
@@ -16,16 +19,23 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   active: string; // id of the active vis tab
   visualizations: Array<any> = visualizations;
-  private datasetSelectionSubscription;
 
-  constructor(private SelectionService: SelectionService) {}
+  datasetSelectionSubscription;
+  selectedDatasets$: Observable<Array<Dataset>>;
+  selectedDatasets: Array<Dataset>;
+
+  constructor(private selectionHandlerService: SelectionHandlerService,
+              private SelectionService: SelectionService,
+              private store: Store<any>) {}
 
   ngOnInit() {
-    this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
+    this.selectedDatasets$ = this.store.select('selectedDatasets');
 
-    this.datasetSelectionSubscription = this.SelectionService.getDatasetSelectionStream().subscribe(() => {
-      this.active = this.getTabId(_.first(this.getPossibleVisualizations()));
+    this.datasetSelectionSubscription = this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
+      this.selectedDatasets = datasets;
+      this.active = this.getTabId(_.first(this.getPossibleVisualizations(datasets)))
     });
+
   }
 
   ngOnDestroy() {
@@ -34,7 +44,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   isCompatibleVisualization(name: string): boolean {
     let visualization = _.find(this.visualizations, visualization => visualization.id === name);
-    let datasetSelectionCount = this.SelectionService.selectedDatasets.length;
+    let datasetSelectionCount = this.selectedDatasets.length;
     return this.containsExtension(visualization.extensions) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount) )
   }
 
@@ -44,8 +54,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getPossibleVisualizations() {
-    let datasetFileExtensions = _.map(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
+  getPossibleVisualizations(datasets: Array<Dataset>) {
+    let datasetFileExtensions = _.map(datasets, (dataset: Dataset) => {
       return Utils.getFileExtension(dataset.name);
     });
 
