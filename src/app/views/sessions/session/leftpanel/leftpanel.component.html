@@ -50,10 +50,10 @@
             <div class="btn-group-vertical dataset-list">
               <button type="button"
                       class="btn btn-secondary"
-                      ngClass="{active:isSelectedDataset(data)}"
-                      (click)="toggleDatasetSelection($event, data)"
-                      *ngFor="let data of getDatasetList() | datasetsearch:datasetSearch">
-                {{data.name}}
+                      ngClass="{active:isSelectedDataset(dataset)}"
+                      (click)="toggleDatasetSelection($event, dataset)"
+                      *ngFor="let dataset of getDatasetList() | datasetsearch:datasetSearch">
+                {{dataset.name}}
               </button>
             </div>
           </template>

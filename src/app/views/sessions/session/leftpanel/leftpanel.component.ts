@@ -11,6 +11,7 @@ import {SessionNameModalService} from "./sessionnamemodal/sessionnamemodal.servi
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
+import {SelectionHandlerService} from "../selection-handler.service";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -22,22 +23,20 @@ export class LeftPanelComponent {
   private isCopying = false;
   datasetSearch: string;
 
-
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
     private selectionService: SelectionService,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionNameModalService: SessionNameModalService,
-    private datasetsearchPipe: DatasetsearchPipe) {}
+    private datasetsearchPipe: DatasetsearchPipe,
+    private selectionHandlerService: SelectionHandlerService) {}
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
       // select highlighted datasets
       var allDatasets = this.getDatasetList();
-
-      this.selectionService.setSelectedDatasets(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
-
+      this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
       this.datasetSearch = null;
     }
     if (e.keyCode == 27) { // escape key
@@ -60,8 +59,12 @@ export class LeftPanelComponent {
     });
   }
 
-  toggleDatasetSelection($event, data) {
-    this.selectionService.toggleDatasetSelection($event, data, UtilsService.mapValues(this.sessionData.datasetsMap));
+  toggleDatasetSelection($event: any, dataset: Dataset): void {
+    if(UtilsService.isCtrlKey($event) || UtilsService.isShiftKey($event)) {
+      this.selectionHandlerService.toggleDatasetSelection([dataset]);
+    } else {
+      this.selectionHandlerService.setDatasetSelection([dataset]);
+    }
   }
 
   renameSessionModal() {

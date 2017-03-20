@@ -28,7 +28,7 @@ export class DatasetDetailsComponent {
   }
 
   isSelectedDataset(datasetId: string) {
-	  return _.some( this.datasets, (dataset: Dataset) => dataset.datasetId === datasetId );
+	  return _.some( this.datasets, (dataset: Dataset) => dataset.datasetId === datasetId);
   }
 
   deleteDatasets() {

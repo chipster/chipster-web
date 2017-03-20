@@ -104,7 +104,6 @@ import {Observable} from "rxjs";
         .attr('opacity', 0)
         .on('click', () => {
           this.selectionHandlerService.clearSelections();
-          this.SelectionService.clearSelection();
         });
 
       this.svg = this.outerSvg.append('g');
@@ -247,7 +246,6 @@ import {Observable} from "rxjs";
         .on('click', (d) => {
           if (this.enabled) {
             this.selectionHandlerService.setJobSelection(d.job);
-            this.SelectionService.selectJob(d3.event, d.job);
           }
         })
         .on('mouseover', function () {
@@ -315,13 +313,10 @@ import {Observable} from "rxjs";
         .on('click', function (d) {
           if (self.enabled) {
             self.selectionHandlerService.clearJobSelection();
-
             if (!UtilsService.isCtrlKey(d3.event)) {
               self.selectionHandlerService.clearDatasetSelection();
-              self.SelectionService.clearSelection();
             }
             self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
-            self.SelectionService.toggleDatasetSelection(d3.event, d.dataset, UtilsService.mapValues(self.datasetsMap));
           }
         })
         .on('mouseover', function (d) {
@@ -431,7 +426,6 @@ import {Observable} from "rxjs";
         .attr('y2', (d) => d.target.y)
         .on('click', function (d) {
           self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
-          self.SelectionService.selectJob(d3.event, d.target.sourceJob);
         })
         .on('mouseover', function () {
           if (this.enabled) {

@@ -12,6 +12,9 @@ import {TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS} from "../.
 @Injectable()
 export class SelectionHandlerService {
 
+  selectedDatasets: Array<Dataset>;
+  selectedJobs: Array<Job>;
+
   // Streams for handling state in global store. These streams are meant to carry the
   // information on what datasets are being selected and deselected
   toggleDatasetSelection$ = new Subject();
@@ -25,6 +28,8 @@ export class SelectionHandlerService {
   clearJobSelections$ = new Subject();
 
   constructor(private store: Store<any>) {
+
+
 
     // Setup state actionlisteners
     Observable.merge(
