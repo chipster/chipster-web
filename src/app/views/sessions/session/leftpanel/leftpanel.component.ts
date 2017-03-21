@@ -45,10 +45,6 @@ export class LeftPanelComponent {
     }
   }
 
-  isSelectedDataset(dataset: Dataset) {
-    return this.selectionService.isSelectedDataset(dataset);
-  }
-
   getDatasetList(): Dataset[] {
     return UtilsService.mapValues(this.sessionData.datasetsMap);
   }

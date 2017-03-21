@@ -29,8 +29,6 @@ export class SelectionHandlerService {
 
   constructor(private store: Store<any>) {
 
-
-
     // Setup state actionlisteners
     Observable.merge(
 

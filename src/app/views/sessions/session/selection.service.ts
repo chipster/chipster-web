@@ -3,15 +3,13 @@ import Job from "../../../model/session/job";
 import Tool from "../../../model/session/tool";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
-import {Subject} from "rxjs";
-import SelectionEvent from "../../../model/events/selectionevent";
-import {Action} from "../../../model/events/selectionevent";
 import {Store} from "@ngrx/store";
 
 @Injectable()
 export class SelectionService {
 
-    // selections
+    // Selected datasets and jobs
+    // You should not change these directly
     selectedDatasets: Array<Dataset>;
     selectedJobs: Array<Job>;
 
@@ -33,14 +31,25 @@ export class SelectionService {
         (jobs: Array<Job>) => { this.selectedJobs = jobs },
         (error: any) => { console.error('Error fetching jobs from store', error) }
       );
+
     }
 
     isJobSelected(): boolean {
         return this.selectedJobs.length > 0;
     }
 
-    isSelectedDataset(data: Dataset): boolean {
-        return this.selectedDatasets.indexOf(data) !== -1;
+    /*
+     * @description: search by dataset object if given dataset is currently selected
+     */
+    isSelectedDataset(dataset: Dataset):boolean {
+      return this.isSelectedDatasetById(dataset.datasetId);
+    }
+
+    /*
+     * @description: search by id if given dataset is currently selected
+     */
+    isSelectedDatasetById(datasetId: string):boolean {
+      return _.some( this.selectedDatasets, (dataset: Dataset) => dataset.datasetId === datasetId);
     }
 
 }

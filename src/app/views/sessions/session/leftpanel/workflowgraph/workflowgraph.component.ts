@@ -35,7 +35,7 @@ import {Observable} from "rxjs";
 
     constructor(private sessionDataService: SessionDataService,
                 private sessionEventService: SessionEventService,
-                private SelectionService: SelectionService,
+                private selectionService: SelectionService,
                 private pipeService: PipeService,
                 private workflowGraphService: WorkflowGraphService,
                 private selectionHandlerService: SelectionHandlerService,
@@ -287,10 +287,6 @@ import {Observable} from "rxjs";
       return this.selectedJobs.indexOf(job) != -1;
     }
 
-    isSelectedDataset(dataset: Dataset) {
-      return this.selectedDatasets.indexOf(dataset) != -1;
-    }
-
     renderDatasets() {
 
       var self = this;
@@ -309,7 +305,7 @@ import {Observable} from "rxjs";
         .attr('height', this.nodeHeight)
         .style("fill", (d) => d.color)
         .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
-        .classed('selected-dataset', (d) => this.enabled && this.isSelectedDataset(d.dataset))
+        .classed('selected-dataset', (d) => this.enabled && this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
         .on('click', function (d) {
           if (self.enabled) {
             self.selectionHandlerService.clearJobSelection();
@@ -380,22 +376,22 @@ import {Observable} from "rxjs";
     dragNodes(x: number, dx: number, y: number, dy: number) {
 
       this.d3DatasetNodes
-        .filter((d: DatasetNode) => this.isSelectedDataset(d.dataset))
+        .filter((d: DatasetNode) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
         .attr('x', (d) => d.x += dx)
         .attr('y', (d) => d.y += dy);
 
       this.d3Labels
-        .filter((d) => this.isSelectedDataset(d.dataset))
+        .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
         .attr('x', (d) => d.x + this.nodeWidth / 2)
         .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4);
 
       this.d3Links
-        .filter((d) => this.isSelectedDataset(d.source.dataset))
+        .filter((d) => this.selectionService.isSelectedDatasetById(d.source.dataset.datasetId))
         .attr('x1', (d) => d.source.x + this.nodeWidth / 2)
         .attr('y1', (d) => d.source.y + this.nodeHeight);
 
       this.d3Links
-        .filter((d) => this.isSelectedDataset((<DatasetNode>d.target).dataset))
+        .filter((d) => this.selectionService.isSelectedDatasetById((<DatasetNode>d.target).dataset.datasetId))
         .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
         .attr('y2', (d) => d.target.y);
     }
@@ -448,7 +444,7 @@ import {Observable} from "rxjs";
       // update positions of all selected datasets to the server
       this.d3DatasetNodes
         .filter((d) => {
-          return this.isSelectedDataset(d.dataset);
+          return this.selectionService.isSelectedDatasetById(d.dataset.datasetId);
         })
         .each((d) => {
           if (d.dataset) {
@@ -460,12 +456,10 @@ import {Observable} from "rxjs";
     }
 
     renderGraph() {
-
       this.renderLinks();
       this.renderJobs();
       this.renderDatasets();
       this.renderLabels();
-
     }
 
     getDatasetNodes(datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>, modulesMap: Map<string, Module>) {
@@ -633,7 +627,7 @@ import {Observable} from "rxjs";
       });
     }
 
-    showTooltip(element: Element, dataset: any, delay = 200) {
+    showTooltip(element: any, dataset: any, delay = 200) {
       let datasetLeft = element.getBoundingClientRect().left;
       let datasetTop = element.getBoundingClientRect().top;
       let datasetWidth = element.getBoundingClientRect().width;

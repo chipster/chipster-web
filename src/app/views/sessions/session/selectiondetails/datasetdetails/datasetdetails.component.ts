@@ -27,10 +27,6 @@ export class DatasetDetailsComponent {
     });
   }
 
-  isSelectedDataset(datasetId: string) {
-	  return _.some( this.datasets, (dataset: Dataset) => dataset.datasetId === datasetId);
-  }
-
   deleteDatasets() {
     this.onDelete.emit();
   }

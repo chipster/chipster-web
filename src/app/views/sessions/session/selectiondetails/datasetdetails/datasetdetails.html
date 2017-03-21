@@ -6,7 +6,7 @@
             <div class="list-group tool-list" data-toggle="buttons">
                 <button class="list-group-item thin-list-group-item"
                         *ngFor="let dataset of selectionService.selectedDatasets"
-                        [ngClass]="{'active': isSelectedDataset(dataset.datasetId) }">
+                        [ngClass]="{'active': selectionService.isSelectedDatasetById(dataset.datasetId) }">
                     <span (click)="setDatasetBoxDatasetSelection(dataset)">{{dataset.name}}</span>
                 </button>
             </div>
