@@ -31,7 +31,7 @@ export class ToolsModalComponent {
   @Input() tools: Array<Tool> = [];
   @Input() inputBindings: Array<InputBinding> = [];
   @Input() selectedDatasets: Array<Dataset> = [];
-  @Input() selectedModule:   Module;
+  @Input() selectedModule: Module;
   @Input() selectedCategory: Category;
   @Input() selectedTool: Tool;
 
@@ -42,11 +42,11 @@ export class ToolsModalComponent {
   toolsModalRef: NgbModalRef;
 
 
-  constructor(private toolService: ToolService,
-              private tsvReader: TSVReader,
+  constructor(private tsvReader: TSVReader,
               private sessionDataService: SessionDataService,
               private pipeService: PipeService,
-              private ngbModal: NgbModal) {}
+              private ngbModal: NgbModal) {
+  }
 
   ngOnInit() {
 
@@ -94,7 +94,7 @@ export class ToolsModalComponent {
       this.populateParameterValues(param);
     }
 
-    this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.selectedDatasets);
+    this.inputBindings = ToolService.bindInputs(this.selectedTool, this.selectedDatasets);
 
     this.onSelectTool.emit(this.getToolSelection());
   }
@@ -194,7 +194,7 @@ export class ToolsModalComponent {
   // TODO move to service?
   populateParameterValues(parameter: ToolParameter) {
     if (!parameter.value) {
-      parameter.value = this.toolService.getDefaultValue(parameter);
+      parameter.value = ToolService.getDefaultValue(parameter);
     }
 
     if (parameter.type === 'COLUMN_SEL') {
@@ -205,7 +205,7 @@ export class ToolsModalComponent {
         });
 
         // reset value to empty if previous or default value is now invalid
-        if (parameter.value && !this.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+        if (parameter.value && !ToolsModalComponent.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
           parameter.value = '';
         }
 
@@ -225,7 +225,7 @@ export class ToolsModalComponent {
   // TODO move to service
   getMetadataColumns() {
 
-    var keySet = new Set();
+    let keySet = new Set();
     for (let dataset of this.selectedDatasets) {
       for (let entry of dataset.metadata) {
         keySet.add(entry.key);
@@ -234,7 +234,7 @@ export class ToolsModalComponent {
     return Array.from(keySet);
   }
 
-  selectionOptionsContains(options: any[], value: string | number) {
+  static selectionOptionsContains(options: any[], value: string | number) {
     for (let option of options) {
       if (value === option.id) {
         return true;

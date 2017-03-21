@@ -19,126 +19,122 @@ import {ToolSelection} from "./ToolSelection";
 })
 export class ToolBoxComponent {
 
-    @Input() modules: Array<Module>;
-    @Input() tools: Array<Tool>;
+  @Input() modules: Array<Module>;
+  @Input() tools: Array<Tool>;
 
-    constructor(
-        private ToolService: ToolService,
-        private SessionDataService: SessionDataService,
-        private SelectionService: SelectionService) {
+  constructor(private SessionDataService: SessionDataService,
+              private SelectionService: SelectionService) {
+  }
+
+  //initialization
+  selectedModule: Module = null;
+  selectedCategory: Category = null;
+  selectedTool: Tool = null;
+  selectedDatasets: Dataset[] = [];
+  inputBindings: InputBinding[] = null;
+
+  ngOnInit() {
+    this.modules = _.cloneDeep(this.modules);
+    this.selectedDatasets = this.SelectionService.selectedDatasets;
+
+    // TODO do bindings for tools with no inputs?
+  }
+
+
+  // watch for data selection changes
+  ngDoCheck() {
+    if (this.selectedDatasets && (this.selectedDatasets.length !== this.SelectionService.selectedDatasets.length || !Utils.equalStringArrays(Utils.getDatasetIds(this.selectedDatasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets)))) {
+
+      // save for comparison
+      this.selectedDatasets = _.cloneDeep(this.SelectionService.selectedDatasets);
+
+      // bind if tool selected
+      if (this.selectedTool) {
+        console.info("dataset selection changed -> binding inputs");
+        this.inputBindings = ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
+      }
+    }
+  }
+
+  isRunEnabled() {
+    // TODO add mandatory parameters check
+    // either bindings ok or tool without inputs
+    return this.inputBindings ||
+      (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+  }
+
+  setToolSelection(input: ToolSelection): void {
+    this.selectedTool = input.tool;
+    this.inputBindings = input.inputBindings;
+    this.selectedCategory = input.category;
+    this.selectedModule = input.module;
+  }
+
+  // Method for submitting a job
+  runJob() {
+
+    // create job
+    let job: Job = <Job>{
+      toolId: this.selectedTool.name.id,
+      toolCategory: this.selectedCategory.name,
+      toolName: this.selectedTool.name.displayName,
+      toolDescription: this.selectedTool.description,
+      state: 'NEW',
+    };
+
+    // set parameters
+    job.parameters = [];
+    for (let toolParam of this.selectedTool.parameters) {
+      job.parameters.push({
+        parameterId: toolParam.name.id,
+        displayName: toolParam.name.displayName,
+        description: toolParam.description,
+        type: toolParam.type,
+        value: toolParam.value
+        // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
+      });
     }
 
-    //initialization
-    selectedModule: Module = null;
-    selectedCategory: Category = null;
-    selectedTool: Tool = null;
-    selectedDatasets: Dataset[] = [];
-    inputBindings: InputBinding[] = null;
-
-    ngOnInit() {
-        this.modules = _.cloneDeep(this.modules);
-        this.selectedDatasets = this.SelectionService.selectedDatasets;
-
-        // TODO do bindings for tools with no inputs?
+    // set inputs
+    job.inputs = [];
+    // TODO bindings done already?
+    if (!this.inputBindings) {
+      console.warn("no input bindings before running a job, binding now");
+      this.inputBindings = ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
     }
 
+    for (let inputBinding of this.inputBindings) {
 
-    // watch for data selection changes
-    ngDoCheck() {
-        if (this.selectedDatasets && (this.selectedDatasets.length !== this.SelectionService.selectedDatasets.length ||
-            !Utils.equalStringArrays( Utils.getDatasetIds(this.selectedDatasets), Utils.getDatasetIds(this.SelectionService.selectedDatasets))) ) {
-
-            // save for comparison
-            this.selectedDatasets = _.cloneDeep(this.SelectionService.selectedDatasets);
-
-            // bind if tool selected
-            if (this.selectedTool) {
-                console.info("dataset selection changed -> binding inputs");
-                this.inputBindings = this.ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
-            }
-        }
-    }
-
-    isRunEnabled() {
-        // TODO add mandatory parameters check
-        // either bindings ok or tool without inputs
-        return this.inputBindings ||
-        (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
-    }
-
-    setToolSelection(input: ToolSelection):void {
-      this.selectedTool = input.tool;
-      this.inputBindings = input.inputBindings;
-      this.selectedCategory = input.category;
-      this.selectedModule = input.module;
-    }
-
-    // Method for submitting a job
-    runJob() {
-
-        // create job
-        let job: Job = <Job>{
-            toolId: this.selectedTool.name.id,
-            toolCategory: this.selectedCategory.name,
-            toolName: this.selectedTool.name.displayName,
-            toolDescription: this.selectedTool.description,
-            state: 'NEW',
-        };
-
-        // set parameters
-        job.parameters = [];
-        for (let toolParam of this.selectedTool.parameters) {
-            job.parameters.push({
-                parameterId: toolParam.name.id,
-                displayName: toolParam.name.displayName,
-                description: toolParam.description,
-                type: toolParam.type,
-                value: toolParam.value
-                // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
-            });
-        }
-
-        // set inputs
-        job.inputs = [];
-        // TODO bindings done already?
-        if (!this.inputBindings) {
-            console.warn("no input bindings before running a job, binding now");
-            this.inputBindings = this.ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
-        }
-
-        for (let inputBinding of this.inputBindings) {
-
-            // single input
-            if (!this.ToolService.isMultiInput(inputBinding.toolInput)) {
-                job.inputs.push({
-                    inputId: inputBinding.toolInput.name.id,
-                    description: inputBinding.toolInput.description,
-                    datasetId: inputBinding.datasets[0].datasetId,
-                    displayName: inputBinding.datasets[0].name
-                });
-            }
-
-            // multi input
-            else {
-                let i = 0;
-                for (let dataset of inputBinding.datasets) {
-                    job.inputs.push({
-                        inputId: this.ToolService.getMultiInputId(inputBinding.toolInput, i),
-                        description: inputBinding.toolInput.description,
-                        datasetId: dataset.datasetId,
-                        displayName: dataset.name
-                    });
-                    i++;
-                }
-            }
-        }
-
-        // runsys
-        this.SessionDataService.createJob(job).subscribe( (result: any) => {}, (error: any) => {
-          console.error('Failed running job', error);
+      // single input
+      if (!ToolService.isMultiInput(inputBinding.toolInput)) {
+        job.inputs.push({
+          inputId: inputBinding.toolInput.name.id,
+          description: inputBinding.toolInput.description,
+          datasetId: inputBinding.datasets[0].datasetId,
+          displayName: inputBinding.datasets[0].name
         });
+      }
+
+      // multi input
+      else {
+        let i = 0;
+        for (let dataset of inputBinding.datasets) {
+          job.inputs.push({
+            inputId: ToolService.getMultiInputId(inputBinding.toolInput, i),
+            description: inputBinding.toolInput.description,
+            datasetId: dataset.datasetId,
+            displayName: dataset.name
+          });
+          i++;
+        }
+      }
     }
 
-
+    // runsys
+    this.SessionDataService.createJob(job).subscribe((result: any) => {
+    }, (error: any) => {
+      console.error('Failed running job', error);
+    });
+  }
 
 }
