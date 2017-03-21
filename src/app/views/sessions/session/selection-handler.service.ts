@@ -12,19 +12,30 @@ import {TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS} from "../.
 @Injectable()
 export class SelectionHandlerService {
 
-  selectedDatasets: Array<Dataset>;
-  selectedJobs: Array<Job>;
-
   // Streams for handling state in global store. These streams are meant to carry the
   // information on what datasets are being selected and deselected
+  // ******************************************************************************
+
+  // Events in this stream clear selected jobs and datasets and then set given datasets as selected
   toggleDatasetSelection$ = new Subject();
+  // Events in this stream toggle each dataset given as parameter.
+  // If store contains datasets [A,B,C] and event contains datasets [B,C,D] then store should contain [A,D] after
+  // reducer execution
   setDatasetSelection$ = new Subject();
+  // Clear datasets
   clearDatasetSelections$ = new Subject();
 
   // Streams for handling state in global store. These streams are meant to carry the
   // information on what jobs are being selected and deselected
+  // ******************************************************************************
+
+  // Events in this stream clear selected datasets and jobs and then set given jobs as selected
   setJobSelection$ = new Subject();
+  // Events in this stream toggle each job given as parameter.
+  // If store contains jobs [A,B,C] and event contains jobs [B,C,D] then store should contain [A,D] after
+  // reducer execution
   toggleJobSelection$ = new Subject();
+  // Clear jobs
   clearJobSelections$ = new Subject();
 
   constructor(private store: Store<any>) {
