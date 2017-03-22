@@ -78,7 +78,9 @@ export class ToolService {
     // see OperationDefinition.bindInputs()
 
     let inputBindings: InputBinding[] = [];
-    for (let toolInput of tool.inputs) {
+
+    // go through inputs, optional inputs last
+    for (let toolInput of tool.inputs.filter(input => !input.optional).concat(tool.inputs.filter(input => input.optional))) {
 
       // ignore phenodata input, it gets generated on server side TODO should we check that it exists?
       if (toolInput.meta) {
@@ -88,10 +90,14 @@ export class ToolService {
       // get compatible datasets
       let compatibleDatasets = unboundDatasets.filter(dataset => ToolService.isCompatible(dataset, toolInput.type.name));
 
-      // no compatible datasets found, binding fails
+      // if no compatible datasets found, skip to next input if optional input, otherwise fail
       if (compatibleDatasets.length < 1) {
-        console.log("binding failed for", toolInput.name.id, toolInput.type.name);
-        return null;
+        if (toolInput.optional) {
+          continue;
+        } else {
+          console.log("binding failed for", toolInput.name.id, toolInput.type.name);
+          return null;
+        }
       }
 
       // pick the first or all if multi input
