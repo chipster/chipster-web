@@ -45,6 +45,7 @@ export class ToolsModalComponent {
   constructor(private tsvReader: TSVReader,
               private sessionDataService: SessionDataService,
               private pipeService: PipeService,
+              private toolService: ToolService,
               private ngbModal: NgbModal) {
   }
 
@@ -94,7 +95,7 @@ export class ToolsModalComponent {
       this.populateParameterValues(param);
     }
 
-    this.inputBindings = ToolService.bindInputs(this.selectedTool, this.selectedDatasets);
+    this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.selectedDatasets);
 
     this.onSelectTool.emit(this.getToolSelection());
   }
@@ -194,7 +195,7 @@ export class ToolsModalComponent {
   // TODO move to service?
   populateParameterValues(parameter: ToolParameter) {
     if (!parameter.value) {
-      parameter.value = ToolService.getDefaultValue(parameter);
+      parameter.value = this.toolService.getDefaultValue(parameter);
     }
 
     if (parameter.type === 'COLUMN_SEL') {

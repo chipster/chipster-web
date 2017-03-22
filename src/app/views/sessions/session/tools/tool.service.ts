@@ -12,20 +12,22 @@ export class ToolService {
   constructor() {
   }
 
-  static isSelectionParameter(parameter: ToolParameter) {
+  //noinspection JSMethodCanBeStatic
+  isSelectionParameter(parameter: ToolParameter) {
     return parameter.type === 'ENUM' ||
       parameter.type === 'COLUMN_SEL' ||
       parameter.type === 'METACOLUMN_SEL';
   };
 
-  static isNumberParameter(parameter: ToolParameter) {
+  //noinspection JSMethodCanBeStatic
+  isNumberParameter(parameter: ToolParameter) {
     return parameter.type === 'INTEGER' ||
       parameter.type === 'DECIMAL' ||
       parameter.type === 'PERCENT';
   };
 
-  static getDefaultValue(toolParameter: ToolParameter): number | string {
-    if (ToolService.isNumberParameter(toolParameter)) {
+  getDefaultValue(toolParameter: ToolParameter): number | string {
+    if (this.isNumberParameter(toolParameter)) {
       return Number(toolParameter.defaultValue);
     }
     else {
@@ -33,7 +35,8 @@ export class ToolService {
     }
   };
 
-  static isCompatible(dataset: Dataset, type: string) {
+  //noinspection JSMethodCanBeStatic
+  isCompatible(dataset: Dataset, type: string) {
     const alwaysCompatible = ['GENERIC', 'CDNA', 'GENE_EXPRS', 'GENELIST', 'PHENODATA'];
     if (alwaysCompatible.indexOf(type) !== -1) {
       return true;
@@ -70,7 +73,7 @@ export class ToolService {
   }
 
 
-  static bindInputs(tool: Tool, datasets: Dataset[]): InputBinding[] {
+  bindInputs(tool: Tool, datasets: Dataset[]): InputBinding[] {
 
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
@@ -88,7 +91,7 @@ export class ToolService {
       }
 
       // get compatible datasets
-      let compatibleDatasets = unboundDatasets.filter(dataset => ToolService.isCompatible(dataset, toolInput.type.name));
+      let compatibleDatasets = unboundDatasets.filter(dataset => this.isCompatible(dataset, toolInput.type.name));
 
       // if no compatible datasets found, skip to next input if optional input, otherwise fail
       if (compatibleDatasets.length < 1) {
@@ -101,7 +104,7 @@ export class ToolService {
       }
 
       // pick the first or all if multi input
-      let datasetsToBind = ToolService.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0,1);
+      let datasetsToBind = this.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0,1);
 
       inputBindings.push({
         toolInput: toolInput,
@@ -119,7 +122,8 @@ export class ToolService {
     return inputBindings;
   }
 
-  static isMultiInput(input: ToolInput) {
+  //noinspection JSMethodCanBeStatic
+  isMultiInput(input: ToolInput) {
     return (input.name.prefix && input.name.prefix.length > 0) ||
       (input.name.postfix && input.name.postfix.length > 0);
   }
@@ -135,8 +139,8 @@ export class ToolService {
    * NOTE: number is padded with zeros to always contain at least 3 digits
    *
    */
-  static getMultiInputId(input: ToolInput, index: number): string {
-    if (!ToolService.isMultiInput(input)) {
+  getMultiInputId(input: ToolInput, index: number): string {
+    if (!this.isMultiInput(input)) {
       return null;
     }
 

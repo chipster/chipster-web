@@ -23,7 +23,8 @@ export class ToolBoxComponent {
   @Input() tools: Array<Tool>;
 
   constructor(private SessionDataService: SessionDataService,
-              private SelectionService: SelectionService) {
+              private SelectionService: SelectionService,
+              private toolService: ToolService) {
   }
 
   //initialization
@@ -51,7 +52,7 @@ export class ToolBoxComponent {
       // bind if tool selected
       if (this.selectedTool) {
         console.info("dataset selection changed -> binding inputs");
-        this.inputBindings = ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
+        this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
       }
     }
   }
@@ -100,13 +101,13 @@ export class ToolBoxComponent {
     // TODO bindings done already?
     if (!this.inputBindings) {
       console.warn("no input bindings before running a job, binding now");
-      this.inputBindings = ToolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
+      this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
     }
 
     for (let inputBinding of this.inputBindings) {
 
       // single input
-      if (!ToolService.isMultiInput(inputBinding.toolInput)) {
+      if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
         job.inputs.push({
           inputId: inputBinding.toolInput.name.id,
           description: inputBinding.toolInput.description,
@@ -120,7 +121,7 @@ export class ToolBoxComponent {
         let i = 0;
         for (let dataset of inputBinding.datasets) {
           job.inputs.push({
-            inputId: ToolService.getMultiInputId(inputBinding.toolInput, i),
+            inputId: this.toolService.getMultiInputId(inputBinding.toolInput, i),
             description: inputBinding.toolInput.description,
             datasetId: dataset.datasetId,
             displayName: dataset.name
