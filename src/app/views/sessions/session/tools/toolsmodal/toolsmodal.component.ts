@@ -120,10 +120,9 @@ export class ToolsModalComponent {
 
   isRunEnabled() {
     // TODO add mandatory parameters check
-
-    // either bindings ok or tool without inputs
-    return this.inputBindings ||
-      (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+    // tool selected and either bindings ok or tool without inputs
+    return this.selectedTool && (this.toolService.checkBindings(this.inputBindings) ||
+      (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
   }
 
 

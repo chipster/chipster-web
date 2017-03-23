@@ -59,9 +59,9 @@ export class ToolBoxComponent {
 
   isRunEnabled() {
     // TODO add mandatory parameters check
-    // either bindings ok or tool without inputs
-    return this.inputBindings ||
-      (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+    // tool selected and either bindings ok or tool without inputs
+    return this.selectedTool && (this.toolService.checkBindings(this.inputBindings) ||
+      (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
   }
 
   setToolSelection(input: ToolSelection): void {
@@ -104,7 +104,14 @@ export class ToolBoxComponent {
       this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.SelectionService.selectedDatasets);
     }
 
-    for (let inputBinding of this.inputBindings) {
+    // TODO report to user
+    if (!this.toolService.checkBindings(this.inputBindings)) {
+      console.error("refusing to run a job due to invalid bindings");
+      return;
+    }
+
+    // add bound inputs
+    for (let inputBinding of this.inputBindings.filter(binding => binding.datasets.length > 0)) {
 
       // single input
       if (!this.toolService.isMultiInput(inputBinding.toolInput)) {

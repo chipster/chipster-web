@@ -93,18 +93,12 @@ export class ToolService {
       // get compatible datasets
       let compatibleDatasets = unboundDatasets.filter(dataset => this.isCompatible(dataset, toolInput.type.name));
 
-      // if no compatible datasets found, skip to next input if optional input, otherwise fail
-      if (compatibleDatasets.length < 1) {
-        if (toolInput.optional) {
-          continue;
-        } else {
-          console.log("binding failed for", toolInput.name.id, toolInput.type.name);
-          return null;
-        }
+      // if no compatible datasets found, binding gets empty datasets array
+      let datasetsToBind: Dataset[] = [];
+      if (compatibleDatasets.length > 0) {
+        // pick the first or all if multi input
+        datasetsToBind = this.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0,1);
       }
-
-      // pick the first or all if multi input
-      let datasetsToBind = this.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0,1);
 
       inputBindings.push({
         toolInput: toolInput,
@@ -121,6 +115,18 @@ export class ToolService {
 
     return inputBindings;
   }
+
+  //noinspection JSMethodCanBeStatic
+  /**
+   *
+   * @param bindings
+   * @returns {boolean} false if bindings is falsy, true if given array is empty or if every non optional input has
+   * at least one dataset bound
+   */
+  checkBindings(bindings: InputBinding[]): boolean {
+    return bindings && bindings.every(binding => binding.toolInput.optional || binding.datasets && binding.datasets.length > 0);
+  }
+
 
   //noinspection JSMethodCanBeStatic
   isMultiInput(input: ToolInput) {
