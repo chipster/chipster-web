@@ -284,7 +284,6 @@ import {Observable} from "rxjs";
     }
 
     isSelectedJob(job: Job) {
-      console.log(this.selectedJobs, typeof this.selectedJobs);
       return this.selectedJobs && this.selectedJobs.indexOf(job) != -1;
     }
 
