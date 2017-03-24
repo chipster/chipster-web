@@ -9,7 +9,7 @@ import Dataset from "../../../../../../model/session/dataset";
   selector: 'ch-tool-inputs',
   templateUrl: './tool-inputs.component.html',
 })
-export class ToolInputsComponent {
+export class ToolInputsComponent implements OnInit {
 
   @Input() tool: Tool;
   @Input() inputBindings: InputBinding[];
@@ -19,6 +19,8 @@ export class ToolInputsComponent {
   constructor(private toolService: ToolService,
               private toolResource: ToolResource) { }
 
+  ngOnInit() {
+  }
 
   inputSelected(changedBinding: InputBinding) {
 
