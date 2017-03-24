@@ -245,7 +245,7 @@ import {Observable} from "rxjs";
         .classed('selected-job', (d) => this.isSelectedJob(d.job))
         .on('click', (d) => {
           if (this.enabled) {
-            this.selectionHandlerService.setJobSelection(d.job);
+            this.selectionHandlerService.setJobSelection([d.job]);
           }
         })
         .on('mouseover', function () {
@@ -284,7 +284,8 @@ import {Observable} from "rxjs";
     }
 
     isSelectedJob(job: Job) {
-      return this.selectedJobs.indexOf(job) != -1;
+      console.log(this.selectedJobs, typeof this.selectedJobs);
+      return this.selectedJobs && this.selectedJobs.indexOf(job) != -1;
     }
 
     renderDatasets() {
