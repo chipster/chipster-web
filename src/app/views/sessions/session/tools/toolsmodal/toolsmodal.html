@@ -3,9 +3,7 @@
 <template #toolsModalTemplate>
   <div class="modal-header">
     <div class="col-md-11">
-      <ch-tool-title [module]="selectedModule?.name"
-                     [category]="selectedCategory?.name"
-                     [tool]="selectedTool?.name.displayName">
+      <ch-tool-title [toolSelection]="toolSelection">
       </ch-tool-title>
     </div>
     <div class="col-md-1" style="padding-right: 0">
@@ -66,7 +64,7 @@
               <div class="btn-group-vertical tool-list" *ngIf="selectedCategory">
                 <button type="button"
                         class="btn btn-secondary tool-list-item"
-                        [ngClass]="{'active':tool===selectedTool}"
+                        [ngClass]="{'active':tool===toolSelection}"
                         (click)="selectTool(tool)"
                         *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
                         id="tool-button-{{tool.id}}"
@@ -85,21 +83,21 @@
       </ngb-tab>
 
       <!-- parameters -->
-      <ngb-tab [disabled]="!selectedTool">
+      <ngb-tab [disabled]="!toolSelection">
         <template ngbTabTitle>Parameters</template>
         <template ngbTabContent>
-          <ch-tools-parameter-form [tool]="selectedTool"></ch-tools-parameter-form>
+          <ch-tools-parameter-form [tool]="toolSelection.tool"></ch-tools-parameter-form>
         </template>
       </ngb-tab>
 
-      <ngb-tab [disabled]="!selectedTool">
+      <ngb-tab [disabled]="!toolSelection">
         <template ngbTabTitle>Inputs</template>
         <template ngbTabContent>
           <!-- inputs -->
           <div class="row">
             <div class="col-md-7 no-padding-right">
               <h5>Input datasets
-                <button class="btn btn-primary btn-xs pull-right" (click)="openInputsModal()" [disabled]="!selectedTool">
+                <button class="btn btn-primary btn-xs pull-right" (click)="openInputsModal()" [disabled]="!toolSelection">
                   Edit multiple inputs
                 </button>
               </h5>
@@ -150,17 +148,17 @@
         </template>
       </ngb-tab>
 
-      <ngb-tab [disabled]="!selectedTool">
+      <ngb-tab [disabled]="!toolSelection">
         <template ngbTabTitle>Manual</template>
         <template ngbTabContent>
           <p>TBD</p>
         </template>
       </ngb-tab>
 
-      <ngb-tab [disabled]="!selectedTool">
+      <ngb-tab [disabled]="!toolSelection">
         <template ngbTabTitle>Source Code</template>
         <template ngbTabContent>
-          <ch-tool-source [selectedTool]="selectedTool"></ch-tool-source>
+          <ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>
         </template>
       </ngb-tab>
 

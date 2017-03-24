@@ -19,6 +19,7 @@ import {selectedDatasets} from "./state/selectedDatasets.reducer";
 import {ErrorComponent} from "./views/error/error.component";
 import {AppErrorHandler} from "./views/error/apperrorhandler";
 import {ErrorService} from "./views/error/error.service";
+import {toolSelection} from "./state/selected-tool.reducer";
 
 @NgModule({
     imports: [
@@ -29,7 +30,7 @@ import {ErrorService} from "./views/error/error.service";
       SessionModule,
       NgbModule.forRoot(),
       AppRoutingModule,
-      StoreModule.provideStore({selectedDatasets, selectedJobs})
+      StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection})
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent ],
     providers: [SelectionService, TokenService, SessionResolve, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],

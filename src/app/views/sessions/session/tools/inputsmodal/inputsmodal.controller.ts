@@ -6,13 +6,13 @@
 //
 // export default class InputsModalController {
 //
-//     static $inject = ['$log', '$uibModalInstance', 'ToolService', 'selectedTool', 'moduleName','categoryName', 'inputBindings', 'selectedDatasets'];
+//     static $inject = ['$log', '$uibModalInstance', 'ToolService', 'toolSelection', 'moduleName','categoryName', 'inputBindings', 'selectedDatasets'];
 //
 //     constructor(
 //         private $log: ng.ILogService,
 //         private $uibModalInstance: any,
 //         private toolService: ToolService, // used by the template
-//         private selectedTool: Tool,
+//         private toolSelection: Tool,
 //         private moduleName: string,
 //         private categoryName: string,
 //         private inputBindings: InputBinding[],
