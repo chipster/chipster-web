@@ -1,0 +1,82 @@
+<div class="row">
+  <div class="col-md-7 no-padding-right">
+    <table *ngIf="inputBindings.length > 0" class="table table-borderless table-condensed table-hover">
+      <tr *ngFor="let inputBinding of inputBindings"
+          ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"
+          placement="right">
+
+        <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
+
+        <td>
+
+            <!--<span *ngIf="inputBinding.datasets.length > 1">multiple </span>-->
+
+            <select multiple [(ngModel)]="inputBinding.datasets"
+                    name="input_{{index}}"
+                    (ngModelChange)="inputSelected(inputBinding)">
+              <!--ng-required="!inputBinding.toolInput.optional"-->
+              <option
+                *ngFor="let dataset of toolService.getCompatibleDatasets(inputBinding.toolInput, selectedDatasets)"
+                [ngValue]="dataset">{{dataset.name}}</option>
+            </select>
+
+            <!--<label class="label label-warning">Required input</label>-->
+            <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
+          </td>
+        </tr>
+    </table>
+  </div>
+
+  <!-- input description -->
+  <div class="col-md-5">
+    <p>{{inputDescription}}</p>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<div class="row">-->
+  <!--<div class="col-md-7 no-padding-right">-->
+    <!--<table class="table table-borderless table-condensed table-hover">-->
+
+      <!--<tr *ngFor="let inputBinding of inputBindings">-->
+        <!--<td>{{inputBinding.toolInput.name.displayName ||-->
+          <!--inputBinding.toolInput.name.id}}-->
+        <!--</td>-->
+
+        <!--<td>{{inputBinding.datasets}}</td>-->
+        <!--<td>-->
+      <!--<tr *ngFor="let dataset of inputBinding.datasets">-->
+        <!--<td>{{dataset.name.id}}</td>-->
+      <!--</tr>-->
+      <!--</td>-->
+      <!--<td>-->
+      <!--<select multiple ng-model="inputBinding.datasets"-->
+      <!--name="input_{{$index}}"-->
+      <!--ng-required="!inputBinding.toolInput.optional"-->
+      <!--ng-change="inputSelected(inputBinding)"-->
+      <!--ng-options="dataset.name for dataset in toolService.getCompatibleDatasets(inputBinding.toolInput, selectedDatasets) track by dataset.datasetId">-->
+      <!--</select>-->
+      <!--</td>-->
+
+      <!--</tr>-->
+    <!--</table>-->
+  <!--</div>-->
+
+  <!--<div class="col-md-5">-->
+    <!--<p>Input description</p>-->
+  <!--</div>-->
+<!--</div>-->
