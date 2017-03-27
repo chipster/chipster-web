@@ -56,7 +56,7 @@
       <template ngbTabContent>
         <ch-phenodata-visualization
           *ngIf="active === getTabId('phenodata')"
-          [datasets]="SelectionService.selectedDatasets">
+          [datasetsMap]="sessionData.datasetsMap">
         </ch-phenodata-visualization>
       </template>
     </ngb-tab>

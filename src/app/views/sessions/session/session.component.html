@@ -38,7 +38,8 @@
         <!-- Visualization -->
         <div class="row">
             <div class="col">
-                <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0"></ch-visualizations>
+                <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0"
+                  [sessionData]="sessionData"></ch-visualizations>
             </div>
         </div>
 

@@ -9,7 +9,7 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {AddDatasetModalComponent} from "./adddatasetmodal/adddatasetmodal.component";
 import {AddDatasetModalContent} from "./adddatasetmodal/adddatasetmodal.content";
 import {UploadService} from "../../../../shared/services/upload.service";
-import {SessionNameModalModule} from "./sessionnamemodal/sessionname.module";
+import {SessionNameModalModule} from "../stringmodal/stringmodal.module";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @NgModule({

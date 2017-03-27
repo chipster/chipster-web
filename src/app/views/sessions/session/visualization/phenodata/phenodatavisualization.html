@@ -1,14 +1,16 @@
 <div class="btn-group phenodata-button-group">
-    <button class="btn btn-secondary" ng-click="remove()">
-        <span class="glyphicon glyphicon-remove"></span>
-        Remove all
-    </button>
-    <button class="btn btn-secondary" ng-click="reset()">
-        <span class="glyphicon glyphicon-asterisk"></span>
-        Reset all
-    </button>
-    <ch-add-column-modal [handsOnTable]="hot" [colName]="colName" [datasets]="datasets"></ch-add-column-modal>
-
+  <button class="btn btn-secondary" (click)="remove()">
+    <span class="glyphicon glyphicon-remove"></span>
+    Remove all
+  </button>
+  <button class="btn btn-secondary" (click)="reset()">
+    <span class="glyphicon glyphicon-asterisk"></span>
+    Reset all
+  </button>
+  <button class="btn btn-secondary" (click)="addColumnModal()">
+    <span class="glyphicon glyphicon-asterisk"></span>
+    Add column
+  </button>
 </div>
 
 <div id="tableContainer"></div>

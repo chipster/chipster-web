@@ -3,20 +3,22 @@ import {Component, Input, AfterViewInit} from "@angular/core";
 import {ViewChild} from "@angular/core/src/metadata/di";
 
 @Component({
-  templateUrl: './sessionnamemodal.html'
+  templateUrl: './stringmodal.html'
 })
-export class SessionNameModalComponent implements AfterViewInit {
+export class StringModalComponent implements AfterViewInit {
 
-  @Input() name: string;
+  @Input() buttonText: string;
+  @Input() description: string;
+  @Input() value: string;
   @Input() title: string;
 
-  @ViewChild('nameInput') nameInput;
+  @ViewChild('valueInput') valueInput;
 
   constructor(
     private activeModal: NgbActiveModal) {}
 
   ngAfterViewInit() {
-    this.nameInput.nativeElement.focus();
+    this.valueInput.nativeElement.focus();
   }
 
   save() {
@@ -24,7 +26,7 @@ export class SessionNameModalComponent implements AfterViewInit {
        closed with enter. Everything else works, like opening from <span> or closing by a mouse click.
        I have no idea what's happening here or why setTimeout fixes it. */
     setTimeout(() => {
-      this.activeModal.close(this.name);
+      this.activeModal.close(this.value);
     }, 0);
   }
 

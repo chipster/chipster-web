@@ -6,8 +6,8 @@ import JobInput from "../../../model/session/jobinput";
 import {FileResource} from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
 import {Injectable} from "@angular/core";
-import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
+import {TokenService} from "../../../core/authentication/token.service";
 
 @Injectable()
 export class SessionDataService {

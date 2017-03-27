@@ -8,12 +8,17 @@ import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 import {SelectionHandlerService} from "../selection-handler.service";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
+import {Input} from "@angular/core/src/metadata/directives";
+import {SessionData} from "../../../../model/session/session-data";
 
 @Component({
   selector: 'ch-visualizations',
   templateUrl: './visualizations.html'
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
+
+  @Input()
+  private sessionData: SessionData;
 
   static readonly TAB_ID_PREFIX: string = 'ch-vis-tab-';
 
