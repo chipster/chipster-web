@@ -11,14 +11,6 @@ export class DatasetModalService {
               private sessionDataService: SessionDataService) {
   }
 
-  renameDatasetDialog(dataset: Dataset) {
-    var result = prompt('Change the name of the node', dataset.name);
-    if (result) {
-      dataset.name = result;
-    }
-    this.sessionDataService.updateDataset(dataset);
-  }
-
   openDatasetHistoryModal(dataset: Dataset) {
     const modalRef = this.ngbModal.open(DatasetHistorymodalComponent, {size: "lg"});
     modalRef.componentInstance.dataset = dataset;
