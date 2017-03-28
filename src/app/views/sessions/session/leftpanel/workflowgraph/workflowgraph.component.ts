@@ -287,6 +287,10 @@ import {Observable} from "rxjs";
       return this.selectedJobs && this.selectedJobs.indexOf(job) != -1;
     }
 
+    isSelectedDataset(dataset: Dataset) {
+      return this.enabled && this.selectionService.isSelectedDatasetById(dataset.datasetId);
+    }
+
     renderDatasets() {
 
       var self = this;
@@ -305,7 +309,7 @@ import {Observable} from "rxjs";
         .attr('height', this.nodeHeight)
         .style("fill", (d) => d.color)
         .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
-        .classed('selected-dataset', (d) => this.enabled && this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
+        .classed('selected-dataset', (d) => this.isSelectedDataset(d.dataset))
         .on('click', function (d) {
           if (self.enabled) {
             self.selectionHandlerService.clearJobSelection();
@@ -328,11 +332,13 @@ import {Observable} from "rxjs";
           }
         })
         .call(d3.drag()
-          .on('drag', function () {
-            self.dragStarted = true;
-            self.hideTooltip(0);
-            self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
-            // set defaultPrevented flag to disable scrolling
+          .on('drag', function (d: DatasetNode) {
+            // don't allow datasets to be moved from the unselected dataset
+            if (self.isSelectedDataset(d.dataset)) {
+              self.dragStarted = true;
+              self.hideTooltip(0);
+              self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
+            }
           })
           .on('end', function (d) {
             // check the flag to differentiate between drag and click events
@@ -345,7 +351,6 @@ import {Observable} from "rxjs";
         );
 
       this.d3DatasetNodes.exit().remove();
-
     }
 
     static getOpacity(isVisible: boolean) {
