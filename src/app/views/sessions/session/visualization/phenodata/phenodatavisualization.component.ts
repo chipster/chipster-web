@@ -260,6 +260,13 @@ export class PhenodataVisualizationComponent {
     array.forEach((row: Row) => {
 
       for (var i = 0; i < headers.length; i++) {
+        // dataset and column are only presented for the user
+        // the column information will be stored to entries
+        // and the dataset information is unnecessary, because each dataset has it's own metadata
+        if (headers[i] === 'dataset' || headers[i] === 'column') {
+          continue;
+        }
+
         var entry = {
           column: row.columnName,
           key: headers[i],
