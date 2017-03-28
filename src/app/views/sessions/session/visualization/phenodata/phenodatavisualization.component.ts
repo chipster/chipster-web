@@ -305,6 +305,13 @@ export class PhenodataVisualizationComponent {
 
       // remove old table if this is an update
       var container = document.getElementById('tableContainer');
+
+      if (!container) {
+        // timer or event triggered the update, but the visualization is already gone
+        console.log('cancelling the phenodata update, because the container has been removed already');
+        return;
+      }
+
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }

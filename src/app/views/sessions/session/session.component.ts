@@ -11,6 +11,7 @@ import {Component} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
+import {SelectionHandlerService} from "./selection-handler.service";
 
 
 @Component({
@@ -29,6 +30,7 @@ export class SessionComponent {
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
+        private selectionHandlerService: SelectionHandlerService,
         private route: ActivatedRoute,
         private modalService: NgbModal) {
     }
@@ -143,6 +145,10 @@ export class SessionComponent {
 
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
+
+        // all selected datasets are going to be deleted
+        // clear selection to avoid problems in other parts of the UI
+        this.selectionHandlerService.clearDatasetSelection();
 
         // hide from the workflowgraph
         this.deletedDatasets.forEach((dataset: Dataset) => {
