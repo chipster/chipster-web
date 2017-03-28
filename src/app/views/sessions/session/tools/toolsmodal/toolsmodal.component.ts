@@ -18,6 +18,7 @@ import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {ToolSelection} from "../ToolSelection";
 import {Store} from "@ngrx/store";
 import {SET_TOOL_SELECTION} from "../../../../../state/selected-tool.reducer";
+import InputBinding from "../../../../../model/session/inputbinding";
 
 @Component({
   selector: 'ch-tools-modal',
@@ -145,42 +146,6 @@ export class ToolsModalComponent {
   };
 
 
-  openInputsModal() {
-    // let modalInstance = this.$uibModal.open({
-    //   animation: true,
-    //   templateUrl: '../inputsmodal/inputsmodal.html',
-    //   controller: 'InputsModalController',
-    //   controllerAs: 'vm',
-    //   bindToController: true,
-    //   size: 'lg',
-    //   resolve: {
-    //
-    //     toolSelection: () => {
-    //       return _.cloneDeep(this.toolSelection);
-    //     },
-    //     moduleName: () => {
-    //       return this.selectedModule.name;
-    //     },
-    //     categoryName: () => {
-    //       return this.selectedCategory.name;
-    //     },
-    //     inputBindings: () => {
-    //       return this.inputBindings;
-    //     },
-    //     selectedDatasets: () => {
-    //       return _.cloneDeep(this.selectedDatasets);
-    //     }
-    //   }
-    // });
-
-    // modalInstance.result.then((result: any) => {
-    //   this.inputBindings = result.inputBindings;
-    //
-    // }, function () {
-    //   modal dismissed
-    // });
-
-  }
 
   // TODO move to service?
   getDatasetHeaders(): Observable<TSVFile>[] {
@@ -241,6 +206,19 @@ export class ToolsModalComponent {
 
   openToolsModal() {
     this.toolsModalRef = this.ngbModal.open(this.toolsModalTemplate, {size: 'lg'});
+  }
+
+  updateBindings(updatedBindings: InputBinding[]) {
+    const toolSelection: ToolSelection = {
+      tool: this.toolSelection.tool,
+      inputBindings: updatedBindings,
+      category: this.selectedCategory,
+      module: this.selectedModule
+    };
+
+    this.selectTool$.next(toolSelection);
+
+
   }
 
 }

@@ -1,5 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
-import {ToolResource} from "../../../../../../shared/resources/toolresource";
+import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
 import InputBinding from "../../../../../../model/session/inputbinding";
 import Tool from "../../../../../../model/session/tool";
 import {ToolService} from "../../tool.service";
@@ -14,25 +13,35 @@ export class ToolInputsComponent implements OnInit {
   @Input() tool: Tool;
   @Input() inputBindings: InputBinding[];
   @Input() selectedDatasets: Dataset[];
+  @Output() updateBindings = new EventEmitter();
 
-
-  constructor(private toolService: ToolService,
-              private toolResource: ToolResource) { }
+  //noinspection JSUnusedLocalSymbols
+  constructor(private toolService: ToolService) { }
 
   ngOnInit() {
   }
 
   inputSelected(changedBinding: InputBinding) {
-
-    // unselect selection(s) of changed binding from other bindings
-    for (let otherBinding of this.inputBindings.filter(inputBinding => inputBinding !== changedBinding)) {
-      for (let changed of changedBinding.datasets) {
-        for (let dataset of otherBinding.datasets) {
-          if (changed.datasetId === dataset.datasetId) {
-            _.pull(otherBinding.datasets, dataset);
+    // generate new input bindings: for each input binding
+    // copy the previous datasets, except the ones that are present in the
+    // binding changed by the user
+    let updatedBindings: InputBinding[] = [];
+    for (let binding of this.inputBindings) {
+      let updatedDatasets = binding.datasets.slice();
+      if (changedBinding !== binding) {
+        for (let changed of changedBinding.datasets) {
+          for (let dataset of binding.datasets) {
+            if (changed.datasetId === dataset.datasetId) {
+              updatedDatasets = _.pull(updatedDatasets, dataset);
+            }
           }
         }
       }
+      updatedBindings.push({
+        toolInput: binding.toolInput,
+        datasets: updatedDatasets});
     }
+
+    this.updateBindings.emit(updatedBindings);
   }
 }
