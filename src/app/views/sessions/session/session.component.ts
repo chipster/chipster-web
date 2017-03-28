@@ -128,6 +128,12 @@ export class SessionComponent {
    */
   deleteDatasetsLater() {
 
+        // let's assume that user doesn't want to undo, if she is already
+        // deleting more
+        if (this.deletedDatasets) {
+          this.deleteDatasetsNow();
+        }
+
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 
