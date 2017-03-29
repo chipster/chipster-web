@@ -162,9 +162,7 @@ export class ToolService {
   }
 
   getCompatibleDatasets(toolInput: ToolInput, datasets: Dataset[]) {
-    return datasets.filter(function (dataset: Dataset) {
-      return this.isCompatible(dataset, toolInput.type.name);
-    }.bind(this));
-  };
+    return datasets.filter(dataset => this.isCompatible(dataset, toolInput.type.name));
+  }
 
 }

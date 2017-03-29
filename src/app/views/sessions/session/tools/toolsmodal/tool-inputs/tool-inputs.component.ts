@@ -15,6 +15,8 @@ export class ToolInputsComponent implements OnInit {
   @Input() selectedDatasets: Dataset[];
   @Output() updateBindings = new EventEmitter();
 
+  private inputDescription: string;
+
   //noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService) { }
 
@@ -44,4 +46,10 @@ export class ToolInputsComponent implements OnInit {
 
     this.updateBindings.emit(updatedBindings);
   }
+
+  setInputDescription(description: string) {
+    this.inputDescription = description;
+  }
+
+
 }
