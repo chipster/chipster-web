@@ -21,7 +21,7 @@
                     (ngModelChange)="inputSelected(inputBinding)">
               <!--ng-required="!inputBinding.toolInput.optional"-->
               <option
-                *ngFor="let dataset of toolService.getCompatibleDatasets(inputBinding.toolInput, selectedDatasets)"
+                *ngFor="let dataset of selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput"
                 [ngValue]="dataset">{{dataset.name}}</option>
             </select>
 

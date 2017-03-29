@@ -161,8 +161,4 @@ export class ToolService {
     return input.name.prefix + digits + input.name.postfix;
   }
 
-  getCompatibleDatasets(toolInput: ToolInput, datasets: Dataset[]) {
-    return datasets.filter(dataset => this.isCompatible(dataset, toolInput.type.name));
-  }
-
 }
