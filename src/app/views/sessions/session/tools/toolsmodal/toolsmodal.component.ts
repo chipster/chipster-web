@@ -54,7 +54,7 @@ export class ToolsModalComponent {
 
   ngOnInit() {
 
-    this.selectTool$.map((tool: Tool) => ({type: SET_TOOL_SELECTION, payload: tool}))
+    this.selectTool$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection}))
       .subscribe(this.store.dispatch.bind(this.store));
 
     // trigger parameter validation
