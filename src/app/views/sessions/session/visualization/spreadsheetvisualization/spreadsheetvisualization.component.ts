@@ -1,6 +1,6 @@
 import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, OnChanges} from "@angular/core";
+import {Input, Component, OnChanges, NgZone, OnDestroy} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -22,7 +22,7 @@ import {VisualizationModalService} from "../visualizationmodal.service";
     <div id="{{tableContainerId}}"></div>
     `
 })
-export class SpreadsheetVisualizationComponent implements OnChanges {
+export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
@@ -32,10 +32,14 @@ export class SpreadsheetVisualizationComponent implements OnChanges {
   private dataReady: boolean;
   private readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
+  // MUST be handled outside Angular zone to prevent a change detection loop
+  hot: ht.Methods;
 
-  constructor(private fileResource: FileResource,
-              private sessionDataService: SessionDataService,
-              private visualizationModalService: VisualizationModalService) {
+  constructor(
+    private fileResource: FileResource,
+    private sessionDataService: SessionDataService,
+    private visualizationModalService: VisualizationModalService,
+    private zone: NgZone) {
   }
 
   ngOnChanges() {
@@ -65,12 +69,22 @@ export class SpreadsheetVisualizationComponent implements OnChanges {
       }
 
       const container = document.getElementById(this.tableContainerId);
-      new Handsontable(container, this.getSettings(headers, content));
+
+      this.zone.runOutsideAngular(() => {
+        this.hot = new Handsontable(container, this.getSettings(headers, content));
+      });
       this.dataReady = true;
     }, (e: Response) => {
       console.error('Fetching TSVData failed', e);
     })
+  }
 
+  ngOnDestroy() {
+    if (this.hot){
+      this.zone.runOutsideAngular(() => {
+        this.hot.destroy();
+      });
+    }
   }
 
   isCompleteFile() {

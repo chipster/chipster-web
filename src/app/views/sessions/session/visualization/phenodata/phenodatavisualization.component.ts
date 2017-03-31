@@ -3,7 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {SessionDataService} from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
-import {Component, Input, SimpleChanges, ViewEncapsulation} from "@angular/core";
+import {Component, Input, SimpleChanges, ViewEncapsulation, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
 import {StringModalService} from "../../stringmodal/stringmodal.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
@@ -19,11 +19,12 @@ import {SelectionService} from "../../selection.service";
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None
 })
-export class PhenodataVisualizationComponent {
+export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input() private datasets: Array<Dataset>;
   @Input() private datasetsMap: Map<string, Dataset>;
 
+  // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
   array: Row[];
   headers: string[];
@@ -37,7 +38,8 @@ export class PhenodataVisualizationComponent {
     private tsvReader: TSVReader,
     private stringModalService: StringModalService,
     private sessionEventService: SessionEventService,
-    private selectionService: SelectionService) {}
+    private selectionService: SelectionService,
+    private zone: NgZone) {}
 
   ngOnInit() {
     this.updateView();
@@ -55,6 +57,14 @@ export class PhenodataVisualizationComponent {
           this.updateViewLater();
         }
       }
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.hot){
+      this.zone.runOutsideAngular(() => {
+        this.hot.destroy();
+      });
     }
   }
 
@@ -113,7 +123,9 @@ export class PhenodataVisualizationComponent {
   }
 
   removeColumn(index: number) {
-    this.hot.alter('remove_col', index);
+    this.zone.runOutsideAngular(() => {
+      this.hot.alter('remove_col', index);
+    });
 
     this.updateDatasets(false);
   }
@@ -307,7 +319,7 @@ export class PhenodataVisualizationComponent {
       var container = document.getElementById('tableContainer');
 
       if (!container) {
-        // timer or event triggered the update, but the visualization is already gone
+        // timer or event triggered the update, t
         console.log('cancelling the phenodata update, because the container has been removed already');
         return;
       }
@@ -316,11 +328,14 @@ export class PhenodataVisualizationComponent {
         container.removeChild(container.firstChild);
       }
 
-      this.hot = new Handsontable(container, this.getSettings(array, this.headers));
-
+      this.zone.runOutsideAngular(() => {
+        this.hot = new Handsontable(container, this.getSettings(array, this.headers));
+      });
     }
     this.array = array;
-    this.hot.loadData(this.array);
+    this.zone.runOutsideAngular(() => {
+      this.hot.loadData(this.array);
+    });
   }
 
   isEditingNow() {
@@ -368,6 +383,7 @@ export class PhenodataVisualizationComponent {
   addColumnModal() {
 
     this.stringModalService.openStringModal("Add new column", "Column name", "", "Add").then((name) => {
+      this.zone.runOutsideAngular(() => {
         var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
         this.hot.alter('insert_col', colHeaders.length);
         // remove undefined column header
@@ -377,8 +393,9 @@ export class PhenodataVisualizationComponent {
           colHeaders: colHeaders
         }, false);
 
-         this.updateDatasets(false);
-      }, () => {
+        this.updateDatasets(false);
+      });
+    }, () => {
         // modal dismissed
     });
   }
