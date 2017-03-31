@@ -1,15 +1,14 @@
 import {SelectionService} from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
-import Utils from "../../../../shared/utilities/utils";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
 import {Component, OnInit, OnDestroy} from "@angular/core";
 import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
-import {SelectionHandlerService} from "../selection-handler.service";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import {Input} from "@angular/core/src/metadata/directives";
 import {SessionData} from "../../../../model/session/session-data";
+import {TypeTagService, Tag} from "../../../../shared/services/typetag.service";
 
 @Component({
   selector: 'ch-visualizations',
@@ -28,17 +27,20 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   datasetSelectionSubscription;
   selectedDatasets$: Observable<Array<Dataset>>;
   selectedDatasets: Array<Dataset>;
+  private compatibleVisualizations = new Set<string>();
 
-  constructor(private selectionHandlerService: SelectionHandlerService,
-              private SelectionService: SelectionService,
-              private store: Store<any>) {}
+  constructor(
+    private SelectionService: SelectionService,
+    private store: Store<any>,
+    private typeTagService: TypeTagService) {}
 
   ngOnInit() {
     this.selectedDatasets$ = this.store.select('selectedDatasets');
 
     this.datasetSelectionSubscription = this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
       this.selectedDatasets = datasets;
-      this.active = this.getTabId(_.first(this.getPossibleVisualizations(datasets)))
+      this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
+      this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
     });
 
   }
@@ -47,36 +49,28 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     this.datasetSelectionSubscription.unsubscribe();
   }
 
-  isCompatibleVisualization(name: string): boolean {
-    let visualization = _.find(this.visualizations, visualization => visualization.id === name);
+  isTabVisible(id: string) {
+    return this.compatibleVisualizations.has(id);
+  }
+
+  isCompatibleVisualization(id: string): boolean {
+    let visualization = _.find(this.visualizations, visualization => visualization.id === id);
     let datasetSelectionCount = this.selectedDatasets.length;
-    return this.containsExtension(visualization.extensions) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount) )
+    return this.containsTypeTags(visualization.typeTags) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount));
   }
 
-  containsExtension(extensions: Array<string>) {
+  containsTypeTags(tags: Array<Tag>) {
     return _.every(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
-      return _.includes(extensions, Utils.getFileExtension(dataset.name));
+      return _.some(tags, (tag: Tag) => {
+        return this.typeTagService.isCompatible(dataset, tag.id);
+      });
     });
   }
 
-  getPossibleVisualizations(datasets: Array<Dataset>) {
-    let datasetFileExtensions = _.map(datasets, (dataset: Dataset) => {
-      return Utils.getFileExtension(dataset.name);
-    });
-
-    const selectionCount = datasetFileExtensions.length;
-    const sameFileTypes = _.uniq(datasetFileExtensions).length === 1;
-
-    return sameFileTypes ? _.chain(this.visualizations)
-      .filter( visualization => _.some( visualization.extensions, (extension: string) => {
-
-        let appropriateInputFileCount = (visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, selectionCount));
-        let visualizationSupportsFileType = _.includes(datasetFileExtensions, extension);
-
-        return appropriateInputFileCount && visualizationSupportsFileType;
-      }) )
-      .map( item => item.id)
-      .value() : [];
+  getCompatibleVisualizations() {
+    return this.visualizations
+      .filter(vis => this.isCompatibleVisualization(vis.id))
+      .map(vis => vis.id);
   }
 
   tabChange(event: NgbTabChangeEvent) {

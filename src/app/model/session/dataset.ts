@@ -10,6 +10,7 @@ export default class Dataset {
     datasetId: string;
     fileId: string;
     metadata: MetadataEntry[];
+    typeTags: {[key:string]:string;};
     name: string;
     notes: string;
     size: number;
