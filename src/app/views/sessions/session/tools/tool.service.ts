@@ -1,16 +1,16 @@
-import Utils from "../../../../shared/utilities/utils";
 import ToolParameter from "../../../../model/session/toolparameter";
 import Dataset from "../../../../model/session/dataset";
 import InputBinding from "../../../../model/session/inputbinding";
 import Tool from "../../../../model/session/tool";
 import ToolInput from "../../../../model/session/toolinput";
 import {Injectable} from "@angular/core";
+import {TypeTagService} from "../../../../shared/services/typetag.service";
 
 @Injectable()
 export class ToolService {
 
-  constructor() {
-  }
+  constructor(
+    private typeTagService: TypeTagService) {}
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
@@ -37,39 +37,7 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   isCompatible(dataset: Dataset, type: string) {
-    const alwaysCompatible = ['GENERIC', 'CDNA', 'GENE_EXPRS', 'GENELIST', 'PHENODATA'];
-    if (alwaysCompatible.indexOf(type) !== -1) {
-      return true;
-    }
-    const types = {
-      TEXT: ['txt', 'dat', 'wee', 'seq', 'log', 'sam', 'fastq'],
-      TSV: ['tsv'],
-      CSV: ['csv'],
-      PNG: ['png'],
-      GIF: ['gif'],
-      JPEG: ['jpg', 'jpeg'],
-      PDF: ['pdf'],
-      HTML: ['html', 'html'],
-      TRE: ['tre'],
-      AFFY: ['cel'],
-      BED: ['bed'],
-      GTF: ['gtf', 'gff', 'gff2', 'gff3'],
-      FASTA: ['fasta', 'fa', 'fna', 'fsa', 'mpfa'],
-      FASTQ: ['fastq', 'fq'],
-      GZIP: ['gz'],
-      VCF: ['vcf'],
-      BAM: ['bam'],
-      QUAL: ['qual'],
-      MOTHUR_OLIGOS: ['oligos'],
-      MOTHUR_NAMES: ['names'],
-      MOTHUR_GROUPS: ['groups'],
-      MOTHUR_STABILITY: ['files'],
-      MOTHUR_COUNT: ['count_table'],
-
-      SFF: ['sff']
-    };
-    let extension = Utils.getFileExtension(dataset.name);
-    return types[type].indexOf(extension) !== -1;
+    return this.typeTagService.isCompatible(dataset, type);
   }
 
 

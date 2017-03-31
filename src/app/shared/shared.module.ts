@@ -18,6 +18,7 @@ import {SessionWorkerResource} from "./resources/sessionworker.resource";
 import {FileResource} from "./resources/fileresource";
 import {SessionResource} from "./resources/session.resource";
 import {ConfigService} from "./services/config.service";
+import {TypeTagService} from "./services/typetag.service";
 
 
 /*
@@ -29,7 +30,7 @@ import {ConfigService} from "./services/config.service";
     CommonModule, CoreModule
   ],
   declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
-  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService],
+  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService],
   exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe]
 })
 export class SharedModule {  }
