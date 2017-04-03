@@ -46,7 +46,7 @@ export default [
   {
     id: 'html',
     name: 'Html',
-    extensions: [Tags.HTML],
+    typeTags: [Tags.HTML],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },

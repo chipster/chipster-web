@@ -23,7 +23,7 @@ export const Tags = {
   GIF: new Tag('GIF', ['.gif']),
   JPEG: new Tag('JPEG', ['.jpg', '.jpeg']),
   PDF: new Tag('PDF', ['.pdf']),
-  HTML: new Tag('HTML', ['.html', '.html']),
+  HTML: new Tag('HTML', ['.html', '.htm']),
   TRE: new Tag('TRE', ['.tre']),
   AFFY: new Tag('AFFY', ['.cel']),
   BED: new Tag('BED', ['.bed']),
