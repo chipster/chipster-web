@@ -1,5 +1,12 @@
+<ngb-alert *ngIf="inputBindings.length > 0 && selectedDatasets.length == 0" [dismissible]="false">
+  No selected files
+</ngb-alert>
+
 <div class="row">
+
   <div class="col-md-7 no-padding-right">
+
+
     <table *ngIf="inputBindings.length > 0" class="table table-borderless table-condensed table-hover">
 
       <tr *ngFor="let inputBinding of inputBindings"
@@ -12,7 +19,11 @@
 
         <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
 
-        <td>
+
+        <!--<label class="label label-warning">Required input</label>-->
+        <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
+
+        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput).length > 0">
 
             <!--<span *ngIf="inputBinding.datasets.length > 1">multiple </span>-->
 
@@ -24,10 +35,11 @@
                 *ngFor="let dataset of selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput"
                 [ngValue]="dataset">{{dataset.name}}</option>
             </select>
-
-            <!--<label class="label label-warning">Required input</label>-->
-            <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
           </td>
+
+        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput).length == 0">No compatible files</td>
+
+
         </tr>
     </table>
   </div>
