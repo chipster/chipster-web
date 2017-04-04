@@ -4,6 +4,9 @@ import {SessionDataService} from "../../sessiondata.service";
 import Job from "../../../../../model/session/job";
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {DatasetModalService} from "../datasetmodal.service";
+import {SessionComponent} from "../../session.component";
+import {SessionData} from "../../../../../model/session/session-data";
+
 
 @Component({
   selector: 'ch-single-dataset',
@@ -19,6 +22,7 @@ export class SingleDatasetComponent {
 
     @Input() private dataset: Dataset;
     @Input() private jobs: Map<string, Job>;
+    @Input() private sessionData:SessionData;
     @Output() onDelete: EventEmitter<any> = new EventEmitter();
     private sourceJob: Job;
 
@@ -33,6 +37,7 @@ export class SingleDatasetComponent {
     ngOnChanges(changes: any) {
         this.dataset = changes.dataset.currentValue;
         this.sourceJob = this.getSourceJob(this.dataset);
+
     }
 
     renameDataset() {
@@ -48,7 +53,7 @@ export class SingleDatasetComponent {
     }
 
     showHistory() {
-      this.datasetModalService.openDatasetHistoryModal(this.dataset);
+      this.datasetModalService.openDatasetHistoryModal(this.dataset,this.sessionData);
     }
 
 

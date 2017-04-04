@@ -27,6 +27,7 @@
                 <ch-single-dataset
                   [dataset]="selectionService.selectedDatasets[0]"
                   [jobs]="sessionData.jobsMap"
+                  [sessionData]="sessionData"
                   (onDelete)="deleteDatasetsLater()"
                   *ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>
                 <ch-dataset-details

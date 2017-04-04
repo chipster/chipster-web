@@ -5,8 +5,37 @@
   </button>
 </div>
 <div class="modal-body">
-  <p>TODO</p>
-  <p>{{dataset.name}}</p>
+  <div class="form-group">
+    <div *ngFor="let option of historyFilterOptions;let i=index" class="row">
+      <label>
+        <input type="checkbox"
+               name="historyFilterOptions"
+               value="{{option}}"
+               [checked]="historyFilterOptions.indexOf(option)>=0"
+               (change)="updateCheckedOptions(option,$event)"/> {{option}}
+      </label>
+    </div>
+  </div>
+
+
+  <div class="row" *ngFor="let item of datasetHistorySteps;let i=index">
+    <h5 *ngIf="getCheckedOptionStatus(0)">Step {{i+1}}</h5>
+    <table class="table">
+      <tr *ngIf="getCheckedOptionStatus(1)">Dataset Name: {{item.datasetName}}</tr>
+      <tr *ngIf="getCheckedOptionStatus(2)">Created: {{item.creationDate}}</tr>
+      <tr *ngIf="getCheckedOptionStatus(3)">Created with operation: {{item.sourceJobName}}</tr>
+      <tr>Input file Name: {{item.inputFileName}}</tr>
+      <div *ngIf="getCheckedOptionStatus(4)">
+        <h6>Parameters</h6>
+        <table class="table table-condensed" *ngFor="let parameter of item.parameterList">
+          <tr>{{parameter.displayName}}:{{parameter.value}}</tr>
+        </table>
+      </div>
+      <tr *ngIf="getCheckedOptionStatus(5)"> Operation Source Code:{{item.sourceCode}}</tr>
+    </table>
+  </div>
+
+
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
