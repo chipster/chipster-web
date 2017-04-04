@@ -14,11 +14,13 @@ import {OpenSessionFile} from "../opensessionfile/opensessionfile.component";
 import {UploadService} from "../../../shared/services/upload.service";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {SelectionHandlerService} from "./selection-handler.service";
+import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 
 @NgModule({
   imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule, NgbModule],
-  declarations: [SessionComponent, SessionListComponent, OpenSessionFile],
-  providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService]
+  declarations: [SessionComponent, SessionListComponent, OpenSessionFile, JobErrorModalComponent],
+  providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService],
+  entryComponents: [JobErrorModalComponent]
 })
 export class SessionModule{}
 

@@ -1,12 +1,11 @@
 import Tool from "../../../../../model/session/tool";
-import InputBinding from "../../../../../model/session/inputbinding";
 import Dataset from "../../../../../model/session/dataset";
 import {ToolService} from "../tool.service";
 import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
 import ToolParameter from "../../../../../model/session/toolparameter";
 import {SessionDataService} from "../../sessiondata.service";
-import {Observable} from "rxjs/Rx";
+import {Observable, Subject} from "rxjs/Rx";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
@@ -17,6 +16,9 @@ import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
 import {ToolPipe} from "../../../../../shared/pipes/toolpipe.pipe";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {ToolSelection} from "../ToolSelection";
+import {Store} from "@ngrx/store";
+import {SET_TOOL_SELECTION} from "../../../../../state/selected-tool.reducer";
+import InputBinding from "../../../../../model/session/inputbinding";
 
 @Component({
   selector: 'ch-tools-modal',
@@ -27,35 +29,38 @@ export class ToolsModalComponent {
 
   private searchTool: string;
   private inputDescription: string;
+
+  selectedModule: Module = null; // used in modal to keep track of which module has been selected
+  selectedCategory: Category = null; // used in modal to keep track of which category has been selected
+
+  selectTool$ = new Subject();
+
   @Input() modules: Array<Module> = [];
   @Input() tools: Array<Tool> = [];
-  @Input() inputBindings: Array<InputBinding> = [];
   @Input() selectedDatasets: Array<Dataset> = [];
-  @Input() selectedModule:   Module;
-  @Input() selectedCategory: Category;
-  @Input() selectedTool: Tool;
-
+  @Input() toolSelection: ToolSelection;
   @Output() onRunJob: EventEmitter<any> = new EventEmitter();
-  @Output() onSelectTool: EventEmitter<ToolSelection> = new EventEmitter();
 
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
 
-
-  constructor(private toolService: ToolService,
-              private tsvReader: TSVReader,
+  constructor(private tsvReader: TSVReader,
               private sessionDataService: SessionDataService,
               private pipeService: PipeService,
-              private ngbModal: NgbModal) {}
+              private toolService: ToolService,
+              private ngbModal: NgbModal,
+              private store: Store<any>) {
+  }
 
   ngOnInit() {
 
-    // trigger parameter validation
-    if (this.selectedTool) {
-      this.selectTool(this.selectedTool);
-    }
+    this.selectTool$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection}))
+      .subscribe(this.store.dispatch.bind(this.store));
 
-    if (!this.selectedModule) {
+    // trigger parameter validation
+    if (this.toolSelection) {
+      this.selectTool(this.toolSelection.tool);
+    } else {
       this.selectModule(this.modules[0]);
       this.selectCategory(this.selectedModule.categories[0]);
     }
@@ -86,17 +91,19 @@ export class ToolsModalComponent {
 
 
   selectTool(tool: Tool) {
-
-    this.selectedTool = tool;
-
     // TODO reset col_sel and metacol_sel if selected dataset has changed
     for (let param of tool.parameters) {
       this.populateParameterValues(param);
     }
 
-    this.inputBindings = this.toolService.bindInputs(this.selectedTool, this.selectedDatasets);
+    const toolSelection: ToolSelection = {
+      tool: tool,
+      inputBindings: this.toolService.bindInputs(tool, this.selectedDatasets),
+      category: this.selectedCategory,
+      module: this.selectedModule
+    };
 
-    this.onSelectTool.emit(this.getToolSelection());
+    this.selectTool$.next(toolSelection);
   }
 
 
@@ -119,10 +126,9 @@ export class ToolsModalComponent {
 
   isRunEnabled() {
     // TODO add mandatory parameters check
-
-    // either bindings ok or tool without inputs
-    return this.inputBindings ||
-      (this.selectedTool && (!this.selectedTool.inputs || this.selectedTool.inputs.length === 0));
+    // tool selected and either bindings ok or tool without inputs
+    return this.toolSelection && (this.toolService.checkBindings(this.toolSelection.inputBindings) ||
+      (!this.toolSelection.tool.inputs || this.toolSelection.tool.inputs.length === 0));
   }
 
 
@@ -135,56 +141,11 @@ export class ToolsModalComponent {
     this.toolsModalRef.close();
   };
 
-  getToolSelection(): ToolSelection {
-    return {
-      tool: this.selectedTool,
-      inputBindings: this.inputBindings,
-      category: this.selectedCategory,
-      module: this.selectedModule
-    }
-  }
-
   close() {
     this.toolsModalRef.close();
   };
 
 
-  openInputsModal() {
-    // let modalInstance = this.$uibModal.open({
-    //   animation: true,
-    //   templateUrl: '../inputsmodal/inputsmodal.html',
-    //   controller: 'InputsModalController',
-    //   controllerAs: 'vm',
-    //   bindToController: true,
-    //   size: 'lg',
-    //   resolve: {
-    //
-    //     selectedTool: () => {
-    //       return _.cloneDeep(this.selectedTool);
-    //     },
-    //     moduleName: () => {
-    //       return this.selectedModule.name;
-    //     },
-    //     categoryName: () => {
-    //       return this.selectedCategory.name;
-    //     },
-    //     inputBindings: () => {
-    //       return this.inputBindings;
-    //     },
-    //     selectedDatasets: () => {
-    //       return _.cloneDeep(this.selectedDatasets);
-    //     }
-    //   }
-    // });
-
-    // modalInstance.result.then((result: any) => {
-    //   this.inputBindings = result.inputBindings;
-    //
-    // }, function () {
-    //   modal dismissed
-    // });
-
-  }
 
   // TODO move to service?
   getDatasetHeaders(): Observable<TSVFile>[] {
@@ -205,7 +166,7 @@ export class ToolsModalComponent {
         });
 
         // reset value to empty if previous or default value is now invalid
-        if (parameter.value && !this.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+        if (parameter.value && !ToolsModalComponent.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
           parameter.value = '';
         }
 
@@ -225,7 +186,7 @@ export class ToolsModalComponent {
   // TODO move to service
   getMetadataColumns() {
 
-    var keySet = new Set();
+    let keySet = new Set();
     for (let dataset of this.selectedDatasets) {
       for (let entry of dataset.metadata) {
         keySet.add(entry.key);
@@ -234,7 +195,7 @@ export class ToolsModalComponent {
     return Array.from(keySet);
   }
 
-  selectionOptionsContains(options: any[], value: string | number) {
+  static selectionOptionsContains(options: any[], value: string | number) {
     for (let option of options) {
       if (value === option.id) {
         return true;
@@ -245,6 +206,19 @@ export class ToolsModalComponent {
 
   openToolsModal() {
     this.toolsModalRef = this.ngbModal.open(this.toolsModalTemplate, {size: 'lg'});
+  }
+
+  updateBindings(updatedBindings: InputBinding[]) {
+    const toolSelection: ToolSelection = {
+      tool: this.toolSelection.tool,
+      inputBindings: updatedBindings,
+      category: this.selectedCategory,
+      module: this.selectedModule
+    };
+
+    this.selectTool$.next(toolSelection);
+
+
   }
 
 }

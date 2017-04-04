@@ -3,26 +3,19 @@
 
     <div class="row">
         <div class="col-md-2">
+
             <ch-tools-modal
-              [selectedTool] = "this.selectedTool"
-              [selectedCategory] = "this.selectedCategory"
-              [selectedModule] = "this.selectedModule"
-              [inputBindings] = "this.inputBindings"
+              [toolSelection]= "this.toolSelection"
               [selectedDatasets] = "this.selectedDatasets"
               [modules] = "this.modules"
               [tools] = "this.tools"
-              (onRunJob)="runJob()"
-              (onSelectTool)="setToolSelection($event)">
+              (onRunJob)="runJob()">
             </ch-tools-modal>
 
         </div>
 
         <div class="col-md-8">
-            <ch-tool-title *ngIf="selectedTool"
-                        [module]="selectedModule.name"
-                        [category]="selectedCategory.name"
-                        [tool]="selectedTool.name.displayName">
-            </ch-tool-title>
+            <ch-tool-title *ngIf="toolSelection" [toolSelection]="toolSelection"></ch-tool-title>
 
         </div>
 

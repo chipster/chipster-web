@@ -43,7 +43,7 @@ export class ExpressionProfileComponent implements OnChanges {
             if(this.expressionProfileTSVService.containsChipHeaders(this.tsv)) {
               this.drawLineChart(this.tsv);
             } else {
-              this.errorMessage = `Only microarray data supported, didn’t find any  columns starting with chip.`;
+              this.errorMessage = `Only microarray data supported, didn’t find any columns starting with chip.`;
             }
 
         });

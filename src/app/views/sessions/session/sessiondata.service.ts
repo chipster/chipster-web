@@ -6,8 +6,9 @@ import JobInput from "../../../model/session/jobinput";
 import {FileResource} from "../../../shared/resources/fileresource";
 import Session from "../../../model/session/session";
 import {Injectable} from "@angular/core";
-import {TokenService} from "../../../core/authentication/token.service";
 import {Observable} from "rxjs";
+import {TokenService} from "../../../core/authentication/token.service";
+import {ErrorService} from "../../error/error.service";
 
 @Injectable()
 export class SessionDataService {
@@ -18,7 +19,8 @@ export class SessionDataService {
               private sessionResource: SessionResource,
               private configService: ConfigService,
               private tokenService: TokenService,
-              private fileResource: FileResource) {
+              private fileResource: FileResource,
+              private errorService: ErrorService) {
   }
 
   getSessionId() : string {
@@ -124,7 +126,13 @@ export class SessionDataService {
   }
 
   download(url: string) {
-    window.open(url, "_blank");
+    let win = window.open(url, "_blank");
+    if (!win) {
+      console.log(this.errorService.headerError(
+        "Browser's pop-up blocker prevented some exports. " +
+        "Please disable the pop-up blocker for this site or " +
+        "export the files one by one.", true));
+    }
   }
 }
 

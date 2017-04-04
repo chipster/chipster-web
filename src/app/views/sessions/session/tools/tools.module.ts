@@ -10,6 +10,8 @@ import {FormsModule} from "@angular/forms";
 import { ToolsParameterFormComponent } from './toolsmodal/tools-parameter-form/tools-parameter-form.component';
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { ToolSourceComponent } from './toolsmodal/tool-source/tool-source.component';
+import { ToolInputsComponent } from './toolsmodal/tool-inputs/tool-inputs.component';
+import { FilterCompatibleDatasetsPipe } from './filter-compatible-datasets.pipe';
 
 @NgModule({
   imports: [
@@ -18,7 +20,7 @@ import { ToolSourceComponent } from './toolsmodal/tool-source/tool-source.compon
     FormsModule,
     NgbModule
   ],
-  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent, ToolSourceComponent],
+  declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent, ToolSourceComponent, ToolInputsComponent, FilterCompatibleDatasetsPipe],
   providers: [ToolService],
   exports: [ToolBoxComponent]
 })

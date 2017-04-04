@@ -13,11 +13,6 @@ export class SelectionService {
     selectedDatasets: Array<Dataset>;
     selectedJobs: Array<Job>;
 
-    // tool selection
-    selectedTool: Tool = null;
-    selectedToolIndex = -1;
-    istoolselected = false;
-
     constructor(private store: Store<any>) {
 
       // Sync selected datasets from store

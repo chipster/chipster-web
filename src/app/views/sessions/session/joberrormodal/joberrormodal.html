@@ -1,11 +1,12 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="vm.close()">&times</button>
-    <h4 class="modal-title">{{vm.toolErrorTitle}}</h4>
+    <h4 class="modal-title">{{title}}</h4>
+    <button class="close" (click)="close()">&times;</button>
 </div>
-<!--end of modal header-->
+
 <div class="modal-body">
-    <h5>Error details</h5>
-    <pre>{{vm.toolError.stateDetail}}</pre>
-    <h5>Screen output</h5>
-    <pre>{{vm.toolError.screenOutput}}</pre>
+    <pre style="white-space: pre-wrap;">{{job.state}} ({{job.stateDetail}})</pre>
+    <div *ngIf="job.screenOutput">
+      <h5>Screen output</h5>
+      <pre style="white-space: pre-wrap;">{{job.screenOutput}}</pre>
+    </div>
 </div>

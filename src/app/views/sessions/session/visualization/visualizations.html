@@ -7,7 +7,7 @@
   <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" activeId="{{active}}">
 
     <ngb-tab id="{{getTabId('spreadsheet')}}"
-             *ngIf="isCompatibleVisualization('spreadsheet')">
+             *ngIf="isTabVisible('spreadsheet')">
       <template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Spreadsheet</template>
       <template ngbTabContent>
         <ch-spreadsheet-visualization
@@ -18,7 +18,7 @@
   </ngb-tab>
 
     <ngb-tab id="{{getTabId('text')}}"
-             *ngIf="isCompatibleVisualization('text')">
+             *ngIf="isTabVisible('text')">
       <template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Text</template>
       <template ngbTabContent>
         <ch-text-visualization
@@ -29,7 +29,7 @@
   </ngb-tab>
 
     <ngb-tab id="{{getTabId('expressionprofile')}}"
-             *ngIf="isCompatibleVisualization('expressionprofile')">
+             *ngIf="isTabVisible('expressionprofile')">
       <template ngbTabTitle>Expression profile</template>
       <template ngbTabContent>
         <ch-expression-profile
@@ -40,7 +40,7 @@
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('image')}}"
-             *ngIf="isCompatibleVisualization('image')">
+             *ngIf="isTabVisible('image')">
       <template ngbTabTitle><span class="glyphicon glyphicon-picture"></span> Image</template>
       <template ngbTabContent>
         <ch-image-visualization
@@ -51,18 +51,18 @@
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('phenodata')}}"
-             *ngIf="isCompatibleVisualization('phenodata')">
+             *ngIf="isTabVisible('phenodata')">
       <template ngbTabTitle><span class="glyphicon glyphicon-edit"></span> Phenodata</template>
       <template ngbTabContent>
         <ch-phenodata-visualization
           *ngIf="active === getTabId('phenodata')"
-          [datasets]="SelectionService.selectedDatasets">
+          [datasetsMap]="sessionData.datasetsMap">
         </ch-phenodata-visualization>
       </template>
     </ngb-tab>
 
   <ngb-tab id="{{getTabId('pdf')}}"
-             *ngIf="isCompatibleVisualization('pdf')">
+             *ngIf="isTabVisible('pdf')">
       <template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</template>
       <template ngbTabContent>
         <ch-pdf-visualization
@@ -74,7 +74,7 @@
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('html')}}"
-             *ngIf="isCompatibleVisualization('html')">
+             *ngIf="isTabVisible('html')">
       <template ngbTabTitle><span class="glyphicon glyphicon-globe"></span> HTML</template>
       <template ngbTabContent>
         <ch-htmlvisualization
@@ -85,7 +85,7 @@
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('venn')}}"
-             *ngIf="isCompatibleVisualization('venn')">
+             *ngIf="isTabVisible('venn')">
       <template ngbTabTitle>Venn Diagram</template>
       <template ngbTabContent>
         <ch-venn-diagram

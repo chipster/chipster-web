@@ -7,7 +7,7 @@ import {SelectionService} from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
-import {SessionNameModalService} from "./sessionnamemodal/sessionnamemodal.service";
+import {StringModalService} from "../stringmodal/stringmodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
@@ -28,7 +28,7 @@ export class LeftPanelComponent {
     private sessionDataService: SessionDataService,
     private selectionService: SelectionService,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionNameModalService: SessionNameModalService,
+    private sessionNameModalService: StringModalService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService) {}
 

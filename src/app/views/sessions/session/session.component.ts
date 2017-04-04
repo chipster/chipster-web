@@ -9,6 +9,10 @@ import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
 import {Component} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
+import {SelectionHandlerService} from "./selection-handler.service";
+import {TypeTagService} from "../../../shared/services/typetag.service";
 
 
 @Component({
@@ -27,7 +31,10 @@ export class SessionComponent {
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
         private selectionService: SelectionService,
-        private route: ActivatedRoute) {
+        private selectionHandlerService: SelectionHandlerService,
+        private route: ActivatedRoute,
+        private modalService: NgbModal,
+        private typeTagService: TypeTagService) {
     }
 
     ngOnInit() {
@@ -60,6 +67,10 @@ export class SessionComponent {
         // if not cancelled
         if (newValue) {
           // if the job has just failed
+          if (newValue.state === 'EXPIRED_WAITING' && oldValue.state !== 'EXPIRED_WAITING') {
+            this.openErrorModal('Job expired', newValue);
+            console.info(newValue);
+          }
           if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
             this.openErrorModal('Job failed', newValue);
             console.info(newValue);
@@ -70,6 +81,33 @@ export class SessionComponent {
           }
         }
       });
+
+      this.SessionEventService.getDatasetStream().subscribe(change => {
+
+        let oldValue = <Dataset>change.oldValue;
+        let newValue = <Dataset>change.newValue;
+
+        // if not deleted
+        if (newValue) {
+          // if the dataset was just added
+          if (newValue.fileId !== null && (oldValue == null || oldValue.fileId == null)) {
+            // if the session is open in multiple clients, they all will do this
+            // shouldn't matter as long as all the clients are up-to-date
+            this.typeTagService.updateTypeTagsIfNecessary([newValue]);
+          }
+
+          if (oldValue != null && oldValue.name !== newValue.name) {
+            // update the type tags, because file extension may have changed
+            this.typeTagService.updateTypeTags(newValue).subscribe(null, (err) => {
+              console.error('failed to update type tags', err)
+            });
+          }
+        }
+      });
+
+      // check that all datasets in the opened session have up-to-date type tags
+      console.log('checking type tags');
+      this.typeTagService.updateTypeTagsIfNecessary(Array.from(this.sessionData.datasetsMap.values()));
     }
 
     ngOnDestroy() {
@@ -128,8 +166,18 @@ export class SessionComponent {
    */
   deleteDatasetsLater() {
 
+        // let's assume that user doesn't want to undo, if she is already
+        // deleting more
+        if (this.deletedDatasets) {
+          this.deleteDatasetsNow();
+        }
+
         // make a copy so that further selection changes won't change the array
         this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
+
+        // all selected datasets are going to be deleted
+        // clear selection to avoid problems in other parts of the UI
+        this.selectionHandlerService.clearDatasetSelection();
 
         // hide from the workflowgraph
         this.deletedDatasets.forEach((dataset: Dataset) => {
@@ -165,22 +213,15 @@ export class SessionComponent {
     }
 
     openErrorModal(title: string, job: Job) {
-      // this.$uibModal.open({
-      //       animation: true,
-      //       templateUrl: './joberrormodal/joberrormodal.html',
-      //       controller: 'JobErrorModalController',
-      //       controllerAs: 'vm',
-      //       bindToController: true,
-      //       size: 'lg',
-      //       resolve: {
-      //           toolErrorTitle: () => {
-      //               return _.cloneDeep(title);
-      //           },
-      //           toolError: () => {
-      //               TODO pass on the job and show only relevant fields
-                    // return _.cloneDeep(JSON.stringify(job, null, 2)); // 2 for pretty print
-                // }
-            // }
-        // });
+      let modalRef = this.modalService.open(JobErrorModalComponent, {size: 'lg'});
+      modalRef.componentInstance.title = title;
+      modalRef.componentInstance.job = job;
+
+      modalRef.result.then(() => {
+        this.sessionDataService.deleteJobs([job]);
+      }, () => {
+        // modal dismissed
+        this.sessionDataService.deleteJobs([job]);
+      });
     }
 }

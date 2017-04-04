@@ -7,6 +7,7 @@ import {DatasetModalService} from "../datasetmodal.service";
 import {SessionComponent} from "../../session.component";
 import {SessionData} from "../../../../../model/session/session-data";
 
+import {StringModalService} from "../../stringmodal/stringmodal.service";
 
 @Component({
   selector: 'ch-single-dataset',
@@ -28,7 +29,8 @@ export class SingleDatasetComponent {
 
     constructor(
       private sessionDataService: SessionDataService,
-      private datasetModalService: DatasetModalService){}
+      private datasetModalService: DatasetModalService,
+      private stringModalService: StringModalService){}
 
     ngOnInit() {
         this.sourceJob = this.getSourceJob(this.dataset);
@@ -37,11 +39,19 @@ export class SingleDatasetComponent {
     ngOnChanges(changes: any) {
         this.dataset = changes.dataset.currentValue;
         this.sourceJob = this.getSourceJob(this.dataset);
-
     }
 
     renameDataset() {
-        this.datasetModalService.renameDatasetDialog(this.dataset);
+
+      let dataset = _.clone(this.dataset);
+      this.stringModalService.openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename").then((name) => {
+        if (name) {
+          dataset.name = name;
+          this.sessionDataService.updateDataset(dataset);
+        }
+      }, () => {
+        // modal dismissed
+      });
     }
 
     deleteDatasets() {
