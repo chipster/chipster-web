@@ -1,4 +1,4 @@
-import * as configConstants from '../../core/app.constants';
+import * as configConstants from '../../../assets/app.constants';
 import {ConfigurationResource} from "../resources/configurationresource";
 import {Injectable} from "@angular/core";
 import * as _ from "lodash";
