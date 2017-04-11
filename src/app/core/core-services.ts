@@ -1,7 +1,7 @@
 export class CoreServices {
   sessionDb: string;
   sessionDbEvents: string;
-  authenticationService: string;
+  auth: string;
   fileBroker: string;
   toolbox: string;
   sessionWorker: string;
