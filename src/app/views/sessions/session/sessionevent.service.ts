@@ -15,7 +15,6 @@ import {ErrorService} from "../../error/error.service";
 @Injectable()
 export class SessionEventService {
 
-    sessionData: SessionData;
     sessionId: string;
 
     datasetStream$: Observable<SessionEvent>;
@@ -38,7 +37,6 @@ export class SessionEventService {
 
     setSessionData(sessionId: string, sessionData: SessionData) {
 
-      this.sessionData = sessionData;
       this.sessionId = sessionId;
 
       this.localSubject$ = new Subject();
@@ -48,22 +46,22 @@ export class SessionEventService {
 
       this.datasetStream$ = stream
         .filter(wsData => wsData.resourceType === 'DATASET')
-        .flatMap(data => this.handleDatasetEvent(data, this.sessionId, this.sessionData))
+        .flatMap(data => this.handleDatasetEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
       this.jobStream$ = stream
         .filter(wsData => wsData.resourceType === 'JOB')
-        .flatMap(data => this.handleJobEvent(data, this.sessionId, this.sessionData))
+        .flatMap(data => this.handleJobEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
       this.sessionStream$ = stream
         .filter(wsData => wsData.resourceType === 'SESSION')
-        .flatMap(data => this.handleSessionEvent(data, this.sessionId, this.sessionData))
+        .flatMap(data => this.handleSessionEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
       this.authorizationStream$ = stream
         .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
-        .flatMap(data => this.handleAuthorizationEvent(data, this.sessionData))
+        .flatMap(data => this.handleAuthorizationEvent(data, sessionData))
         .publish().refCount();
 
       // update sessionData even if no one else subscribes
