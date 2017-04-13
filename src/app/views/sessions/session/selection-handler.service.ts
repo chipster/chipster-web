@@ -17,11 +17,11 @@ export class SelectionHandlerService {
   // ******************************************************************************
 
   // Events in this stream clear selected jobs and datasets and then set given datasets as selected
-  toggleDatasetSelection$ = new Subject();
+  setDatasetSelection$ = new Subject();
   // Events in this stream toggle each dataset given as parameter.
   // If store contains datasets [A,B,C] and event contains datasets [B,C,D] then store should contain [A,D] after
   // reducer execution
-  setDatasetSelection$ = new Subject();
+  toggleDatasetSelection$ = new Subject();
   // Clear datasets
   clearDatasetSelections$ = new Subject();
 
