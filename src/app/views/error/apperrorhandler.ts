@@ -32,7 +32,7 @@ export class AppErrorHandler implements ErrorHandler {
 
     // printing the whole error object may provide useful information, because we can pass only a string
     // to the error page
-    console.log('uncaught error', msg, typeof error, error);
+    console.error('uncaught error', msg, typeof error, error);
 
     this.errorService.headerError(msg, true);
   }
