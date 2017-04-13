@@ -402,7 +402,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       .attr('y1', (d) => d.source.y + this.nodeHeight);
 
     this.d3Links
-      .filter((d) => this.selectionService.isSelectedDatasetById((<DatasetNode>d.target).dataset.datasetId))
+      .filter((d) => d.target.dataset ? this.selectionService.isSelectedDatasetById((<DatasetNode>d.target).dataset.datasetId) : false )
       .attr('x2', (d) => d.target.x + this.nodeWidth / 2)
       .attr('y2', (d) => d.target.y);
   }
