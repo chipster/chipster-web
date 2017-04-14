@@ -9,9 +9,8 @@ import {Store} from "@ngrx/store";
 export class SelectionService {
 
     // Selected datasets and jobs
-    // You should not change these directly
-    selectedDatasets: Array<Dataset>;
-    selectedJobs: Array<Job>;
+    selectedDatasets: Array<Dataset>; // USE SELECTION-HANDLER SERVICE TO MODIFY
+    selectedJobs: Array<Job>; // USE SELECTION-HANDLER SERVICE TO MODIFY
 
     constructor(private store: Store<any>) {
 

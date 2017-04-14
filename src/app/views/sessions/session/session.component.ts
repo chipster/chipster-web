@@ -8,12 +8,12 @@ import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
 import {Component} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {TypeTagService} from "../../../shared/services/typetag.service";
-
+import {Store} from "@ngrx/store";
 
 @Component({
   selector: 'ch-session',
@@ -34,12 +34,40 @@ export class SessionComponent {
         private selectionHandlerService: SelectionHandlerService,
         private route: ActivatedRoute,
         private modalService: NgbModal,
-        private typeTagService: TypeTagService) {
+        private typeTagService: TypeTagService,
+        private store: Store<any>) {
     }
 
     ngOnInit() {
 
       this.sessionData = this.route.snapshot.data['sessionData'];
+
+      /* ********
+
+      THIS SHOULD WORK IN ANGULAR-ROUTER V4. https://github.com/angular/angular/pull/11373
+      ROUTER V3 DOESN'T SUPPORT SETTING MULTIPLE QUERY PARAMETERS WITH SAME KEY
+
+      // Select datasets provided via queryparameter
+      this.route.queryParams.subscribe( (queryParams: Params) => {
+        const datasets = this.parseQueryparametersArray(queryParams, 'datasetId')
+          .map( (datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
+        if(datasets.length > 0) {
+          this.selectionHandlerService.setDatasetSelection(datasets);
+        }
+      });
+
+      // update route when dataset selections are made by setting current queryparameters
+      this.store.select('selectedDatasets').subscribe( (datasets: Array<Dataset>) => {
+        const datasetIds = datasets.map( (dataset: Dataset) => dataset.datasetId);
+        const navigationExtras = {
+          queryParams: { datasetId: datasetIds }
+        };
+        const urlTree: UrlTree = this.router.createUrlTree([]);
+        this.router.navigateByUrl(urlTree, navigationExtras);
+      });
+
+      ************ */
+
       // Services don't have access to ActivatedRoute, so we have to set it
       this.sessionDataService.setSessionId(this.route.snapshot.params['sessionId']);
 
@@ -105,8 +133,10 @@ export class SessionComponent {
         }
       });
 
+
+
+
       // check that all datasets in the opened session have up-to-date type tags
-      console.log('checking type tags');
       this.typeTagService.updateTypeTagsIfNecessary(Array.from(this.sessionData.datasetsMap.values()));
     }
 
@@ -196,20 +226,15 @@ export class SessionComponent {
         this.sessionDataService.exportDatasets(datasets);
     }
 
-    getSession() {
-        return this.sessionData.session;
-    }
-
-    getDatasetsMap() {
-        return this.sessionData.datasetsMap;
-    }
-
-    getJobsMap() {
-        return this.sessionData.jobsMap;
-    }
-
-    getModulesMap() {
-        return this.sessionData.modulesMap;
+    parseQueryparametersArray(queryParams: Params, key: string ): Array<string> {
+      switch(typeof queryParams[key]) {
+        case 'string':
+          return [queryParams[key]];
+        case 'object':
+          return queryParams[key];
+        default:
+          return [];
+      }
     }
 
     openErrorModal(title: string, job: Job) {
