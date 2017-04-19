@@ -24,6 +24,13 @@ export default [
     supportedInputFileCounts: [1]
   },
   {
+    id:'scatterplot',
+    name:'Scatter Plot',
+    typeTags: [Tags.TSV],
+    anyInputCountSupported:false,
+    supportedInputFileCounts: [1]
+  },
+  {
     id: 'image',
     name: 'Image',
     typeTags: [Tags.PNG, Tags.JPEG, Tags.GIF],

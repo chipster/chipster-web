@@ -95,6 +95,17 @@
       </template>
     </ngb-tab>
 
+    <ngb-tab id="{{getTabId('scatterplot')}}"
+             *ngIf="isTabVisible('scatterplot')">
+      <template ngbTabTitle>Scatter Plot</template>
+      <template ngbTabContent>
+        <ch-scatter-plot
+          *ngIf="active === getTabId('scatterplot')"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-scatter-plot>
+      </template>
+    </ngb-tab>
+
   </ngb-tabset>
 </div>
 

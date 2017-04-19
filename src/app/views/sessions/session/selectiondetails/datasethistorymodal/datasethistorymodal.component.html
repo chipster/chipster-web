@@ -22,7 +22,7 @@
     <h5 *ngIf="getCheckedOptionStatus(0)">Step {{i+1}}</h5>
     <table class="table">
       <tr *ngIf="getCheckedOptionStatus(1)">Dataset Name: {{item.datasetName}}</tr>
-      <tr *ngIf="getCheckedOptionStatus(2)">Created: {{item.creationDate}}</tr>
+      <tr *ngIf="getCheckedOptionStatus(2)">Created: {{item.creationDate| isodate}}</tr>
       <tr *ngIf="getCheckedOptionStatus(3)">Created with operation: {{item.sourceJobName}}</tr>
       <tr>Input file Name: {{item.inputFileName}}</tr>
       <div *ngIf="getCheckedOptionStatus(4)">

@@ -20,10 +20,11 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule} from "@angular/forms";
 import {VisualizationModalComponent} from "./visualizationmodal.component";
 import {VisualizationModalService} from "./visualizationmodal.service";
+import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component"
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule],
-  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent],
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,ScatterPlotComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService],
   exports: [VisualizationsComponent],
   entryComponents: [VisualizationModalComponent]
