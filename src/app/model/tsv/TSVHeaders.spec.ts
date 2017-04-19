@@ -44,8 +44,6 @@ describe('TSVHeaders', () => {
       expect(headers2.getColumnIndexByKey('identifier')).toBe(0);
     });
 
-
-
   });
 
 });

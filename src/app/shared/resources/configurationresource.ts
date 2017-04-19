@@ -1,4 +1,4 @@
-import * as configurationConstants from '../../core/app.constants';
+import * as configurationConstants from '../../../assets/app.constants';
 import { Injectable } from '@angular/core';
 import '../../rxjs-operators';
 import {RestService} from "../../core/rest-services/restservice/rest.service";

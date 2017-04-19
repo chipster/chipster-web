@@ -13,4 +13,5 @@ export class ToolPipe implements PipeTransform {
     return this.pipeService.findTools(arr, searchTool);
   }
 
+
 }

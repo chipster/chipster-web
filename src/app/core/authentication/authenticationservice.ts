@@ -29,7 +29,7 @@ export class AuthenticationService {
 
   requestToken(username: string, password: string): Observable<Response> {
     return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-      const url= `${coreServices.authenticationService}/tokens`;
+      const url= `${coreServices.auth}/tokens`;
       const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
       return this.http.post(url, {}, {
