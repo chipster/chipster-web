@@ -93,8 +93,12 @@
       <ngb-tab [disabled]="!toolSelection">
         <template ngbTabTitle>Inputs</template>
         <template ngbTabContent>
-  			<ch-tool-inputs [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool"
-                        [selectedDatasets]="selectedDatasets" (updateBindings)="updateBindings($event)"></ch-tool-inputs>
+  			<ch-tool-inputs
+          [sessionData]="sessionData"
+          [inputBindings]="toolSelection.inputBindings"
+          [tool]="toolSelection.tool"
+          [selectedDatasets]="selectedDatasets"
+          (updateBindings)="updateBindings($event)"></ch-tool-inputs>
         </template>
       </ngb-tab>
 

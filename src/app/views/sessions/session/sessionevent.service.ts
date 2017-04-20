@@ -47,6 +47,8 @@ export class SessionEventService {
       this.datasetStream$ = stream
         .filter(wsData => wsData.resourceType === 'DATASET')
         .flatMap(data => this.handleDatasetEvent(data, this.sessionId, sessionData))
+        // update type tags before letting other parts of the client know about this change
+        .flatMap(sessionEvent => this.updateTypeTags(this.sessionId, sessionEvent, sessionData))
         .publish().refCount();
 
       this.jobStream$ = stream
@@ -169,13 +171,13 @@ export class SessionEventService {
     handleDatasetEvent(event: any, sessionId: string, sessionData: SessionData): Observable<SessionEvent> {
 
         if (event.type === 'CREATE') {
-            return this.sessionResource.getDataset(sessionId, event.resourceId).flatMap((remote: Dataset) => {
+          return this.sessionResource.getDataset(sessionId, event.resourceId).flatMap((remote: Dataset) => {
                 sessionData.datasetsMap.set(event.resourceId, remote);
                 return this.createEvent(event, null, remote);
             });
 
         } else if (event.type === 'UPDATE') {
-            return this.sessionResource.getDataset(sessionId, event.resourceId)
+          return this.sessionResource.getDataset(sessionId, event.resourceId)
               .flatMap((remote: Dataset) => {
                 var local = sessionData.datasetsMap.get(event.resourceId);
                 sessionData.datasetsMap.set(event.resourceId, remote);
@@ -190,6 +192,24 @@ export class SessionEventService {
         } else {
             console.warn("unknown event type", event);
         }
+    }
+
+    updateTypeTags(sessionId, sessionEvent, sessionData) {
+      // update type tags before
+      let oldValue = <Dataset>sessionEvent.oldValue;
+      let newValue = <Dataset>sessionEvent.newValue;
+
+      if (newValue) {
+        // dataset created or updated, update type tags too
+        return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).map(typeTags => {
+          sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
+          return sessionEvent;
+        });
+      } else {
+        // dataset deleted, type tags can be removed
+        sessionData.datasetTypeTags.delete(oldValue.datasetId);
+        return Observable.of(sessionEvent);
+      }
     }
 
     handleJobEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {

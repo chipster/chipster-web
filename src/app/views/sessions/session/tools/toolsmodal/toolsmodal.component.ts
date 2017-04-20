@@ -19,6 +19,7 @@ import {ToolSelection} from "../ToolSelection";
 import {Store} from "@ngrx/store";
 import {SET_TOOL_SELECTION} from "../../../../../state/selected-tool.reducer";
 import InputBinding from "../../../../../model/session/inputbinding";
+import {SessionData} from "../../../../../model/session/session-data";
 
 @Component({
   selector: 'ch-tools-modal',
@@ -35,11 +36,13 @@ export class ToolsModalComponent {
 
   selectTool$ = new Subject();
 
-  @Input() modules: Array<Module> = [];
-  @Input() tools: Array<Tool> = [];
+  @Input() sessionData: SessionData;
   @Input() selectedDatasets: Array<Dataset> = [];
   @Input() toolSelection: ToolSelection;
   @Output() onRunJob: EventEmitter<any> = new EventEmitter();
+
+  modules: Array<Module> = [];
+  tools: Array<Tool> = [];
 
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
@@ -53,6 +56,9 @@ export class ToolsModalComponent {
   }
 
   ngOnInit() {
+
+    this.modules = this.sessionData.modules;
+    this.tools = this.sessionData.tools;
 
     this.selectTool$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection}))
       .subscribe(this.store.dispatch.bind(this.store));
@@ -98,7 +104,7 @@ export class ToolsModalComponent {
 
     const toolSelection: ToolSelection = {
       tool: tool,
-      inputBindings: this.toolService.bindInputs(tool, this.selectedDatasets),
+      inputBindings: this.toolService.bindInputs(this.sessionData, tool, this.selectedDatasets),
       category: this.selectedCategory,
       module: this.selectedModule
     };

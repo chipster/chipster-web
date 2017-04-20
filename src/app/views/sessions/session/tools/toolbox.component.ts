@@ -11,6 +11,7 @@ import {ToolSelection} from "./ToolSelection";
 import {Store} from "@ngrx/store";
 import {Subject} from "rxjs";
 import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
+import {SessionData} from "../../../../model/session/session-data";
 
 
 @Component({
@@ -19,13 +20,16 @@ import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 })
 export class ToolBoxComponent {
 
-  @Input() modules: Array<Module>;
-  @Input() tools: Array<Tool>;
+  @Input() sessionData: SessionData;
 
-  constructor(private SessionDataService: SessionDataService,
-              private SelectionService: SelectionService,
-              private toolService: ToolService,
-              private store: Store<any>) {
+  private modules: Array<Module>;
+  private tools: Array<Tool>;
+
+  constructor(
+    private SessionDataService: SessionDataService,
+    private SelectionService: SelectionService,
+    private toolService: ToolService,
+    private store: Store<any>) {
   }
 
   toolSelection$ = new Subject();
@@ -35,7 +39,8 @@ export class ToolBoxComponent {
   selectedDatasets: Dataset[] = [];
 
   ngOnInit() {
-    this.modules = _.cloneDeep(this.modules);
+    this.tools = _.cloneDeep(this.sessionData.tools);
+    this.modules = _.cloneDeep(this.sessionData.modules);
     this.selectedDatasets = this.SelectionService.selectedDatasets;
 
     this.toolSelection$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection})).subscribe(this.store.dispatch.bind(this.store));
@@ -50,7 +55,7 @@ export class ToolBoxComponent {
       (selectedDatasets: Array<Dataset>) => {
         this.selectedDatasets = selectedDatasets;
         if(this.toolSelection) {
-          const updatedInputBindings = this.toolService.bindInputs(this.toolSelection.tool, this.SelectionService.selectedDatasets);
+          const updatedInputBindings = this.toolService.bindInputs(this.sessionData, this.toolSelection.tool, this.SelectionService.selectedDatasets);
           const newToolSelection = Object.assign({}, this.toolSelection, {inputBindings: updatedInputBindings});
           this.toolSelection$.next(newToolSelection);
         }

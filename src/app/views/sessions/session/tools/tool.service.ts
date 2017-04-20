@@ -5,6 +5,7 @@ import Tool from "../../../../model/session/tool";
 import ToolInput from "../../../../model/session/toolinput";
 import {Injectable} from "@angular/core";
 import {TypeTagService} from "../../../../shared/services/typetag.service";
+import {SessionData} from "../../../../model/session/session-data";
 
 @Injectable()
 export class ToolService {
@@ -36,12 +37,12 @@ export class ToolService {
   };
 
   //noinspection JSMethodCanBeStatic
-  isCompatible(dataset: Dataset, type: string) {
-    return this.typeTagService.isCompatible(dataset, type);
+  isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
+    return this.typeTagService.isCompatible(sessionData, dataset, type);
   }
 
 
-  bindInputs(tool: Tool, datasets: Dataset[]): InputBinding[] {
+  bindInputs(sessionData: SessionData, tool: Tool, datasets: Dataset[]): InputBinding[] {
 
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
@@ -59,7 +60,7 @@ export class ToolService {
       }
 
       // get compatible datasets
-      let compatibleDatasets = unboundDatasets.filter(dataset => this.isCompatible(dataset, toolInput.type.name));
+      let compatibleDatasets = unboundDatasets.filter(dataset => this.isCompatible(sessionData, dataset, toolInput.type.name));
 
       // if no compatible datasets found, binding gets empty datasets array
       let datasetsToBind: Dataset[] = [];

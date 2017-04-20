@@ -23,7 +23,7 @@
         <!--<label class="label label-warning">Required input</label>-->
         <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
 
-        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput).length > 0">
+        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
 
             <!--<span *ngIf="inputBinding.datasets.length > 1">multiple </span>-->
 
@@ -32,12 +32,12 @@
                     (ngModelChange)="inputSelected(inputBinding)">
               <!--ng-required="!inputBinding.toolInput.optional"-->
               <option
-                *ngFor="let dataset of selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput"
+                *ngFor="let dataset of selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData"
                 [ngValue]="dataset">{{dataset.name}}</option>
             </select>
           </td>
 
-        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput).length == 0">No compatible files</td>
+        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length == 0">No compatible files</td>
 
 
         </tr>

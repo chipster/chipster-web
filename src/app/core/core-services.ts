@@ -5,4 +5,5 @@ export class CoreServices {
   fileBroker: string;
   toolbox: string;
   sessionWorker: string;
+  typeService: string;
 }
