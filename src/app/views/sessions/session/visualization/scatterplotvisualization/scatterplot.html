@@ -1,5 +1,36 @@
 <div class="row">
-  <div class="col-8" id="scatterplot"></div>
-  <div class="col-4" id="setting"></div>
+  <div class="col-10" id="scatterplot"></div>
+  <div class="col-2" id="setting">
+    <ngb-tabset>
+      <ngb-tab title="Settings">
+        <template ngbTabContent>
+          <h6>X-axis</h6>
+          <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
+            <option *ngFor="let header of chipHeaders">{{header}}</option>
+          </select>
+          <h6>Y-Axis</h6>
+          <select [(ngModel)]="selectedChipHeadY" (ngModelChange)="setChipSelectionY($event)">
+            <option *ngFor="let header of chipHeaders">{{header}}</option>
+          </select>
+          <div class="row" style="text-align:center;width:100%;margin: 20px;">
+            <button class="btn-primary" (click)="redrawScatterPlot()">Draw</button>
+          </div>
+        </template>
+      </ngb-tab>
+      <ngb-tab title="Selected">
+        <template ngbTabContent>
+          <textarea>0 Genes Selected</textarea>
+          <textarea id="selectedGeneList"></textarea>
+          <div class="btn-group-vertical">
+            <button>Create dataset from selected</button>
+            <button>Create dataset from unselected</button>
+          </div>
+
+        </template>
+
+      </ngb-tab>
+    </ngb-tabset>
+
+  </div>
 
 </div>
