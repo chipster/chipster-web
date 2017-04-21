@@ -3,6 +3,7 @@ import InputBinding from "../../../../../../model/session/inputbinding";
 import Tool from "../../../../../../model/session/tool";
 import {ToolService} from "../../tool.service";
 import Dataset from "../../../../../../model/session/dataset";
+import {SessionData} from "../../../../../../model/session/session-data";
 
 @Component({
   selector: 'ch-tool-inputs',
@@ -10,6 +11,7 @@ import Dataset from "../../../../../../model/session/dataset";
 })
 export class ToolInputsComponent implements OnInit {
 
+  @Input() sessionData: SessionData;
   @Input() tool: Tool;
   @Input() inputBindings: InputBinding[];
   @Input() selectedDatasets: Dataset[];

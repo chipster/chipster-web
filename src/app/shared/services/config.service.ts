@@ -40,6 +40,10 @@ export class ConfigService {
     return this.getConfiguration().map((services: CoreServices) => services.toolbox);
   }
 
+  getTypeService(): Observable<string> {
+    return this.getConfiguration().map((services: CoreServices) => services.typeService);
+  }
+
   getModules(): Array<string> {
     return configConstants.ChipsterModules;
   }

@@ -8,12 +8,10 @@ import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
 import {Component} from "@angular/core";
-import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
+import {ActivatedRoute, Router, Params} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
-import {TypeTagService} from "../../../shared/services/typetag.service";
-import {Store} from "@ngrx/store";
 
 @Component({
   selector: 'ch-session',
@@ -33,9 +31,7 @@ export class SessionComponent {
         private selectionService: SelectionService,
         private selectionHandlerService: SelectionHandlerService,
         private route: ActivatedRoute,
-        private modalService: NgbModal,
-        private typeTagService: TypeTagService,
-        private store: Store<any>) {
+        private modalService: NgbModal) {
     }
 
     ngOnInit() {
@@ -109,35 +105,6 @@ export class SessionComponent {
           }
         }
       });
-
-      this.SessionEventService.getDatasetStream().subscribe(change => {
-
-        let oldValue = <Dataset>change.oldValue;
-        let newValue = <Dataset>change.newValue;
-
-        // if not deleted
-        if (newValue) {
-          // if the dataset was just added
-          if (newValue.fileId !== null && (oldValue == null || oldValue.fileId == null)) {
-            // if the session is open in multiple clients, they all will do this
-            // shouldn't matter as long as all the clients are up-to-date
-            this.typeTagService.updateTypeTagsIfNecessary([newValue]);
-          }
-
-          if (oldValue != null && oldValue.name !== newValue.name) {
-            // update the type tags, because file extension may have changed
-            this.typeTagService.updateTypeTags(newValue).subscribe(null, (err) => {
-              console.error('failed to update type tags', err)
-            });
-          }
-        }
-      });
-
-
-
-
-      // check that all datasets in the opened session have up-to-date type tags
-      this.typeTagService.updateTypeTagsIfNecessary(Array.from(this.sessionData.datasetsMap.values()));
     }
 
     ngOnDestroy() {

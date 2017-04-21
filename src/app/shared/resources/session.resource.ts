@@ -29,8 +29,9 @@ export class SessionResource {
       const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true);
       const modules$ = this.toolResource.getModules();
       const tools$ = this.toolResource.getTools();
+      const types$ = this.getTypeTagsForSession(sessionId);
 
-      return Observable.forkJoin([session$, sessionDatasets$, sessionJobs$, modules$, tools$])
+      return Observable.forkJoin([session$, sessionDatasets$, sessionJobs$, modules$, tools$, types$])
 
     }).map( (param: any) => {
       let session: Session = param[0];
@@ -38,6 +39,7 @@ export class SessionResource {
       let jobs: Job[] = param[2];
       let modules: Module[] = param[3];
       let tools: Tool[] = param[4];
+      let types = param[5];
 
       // is there any less ugly syntax for defining the types of anonymous object?
       let data = new SessionData();
@@ -66,10 +68,43 @@ export class SessionResource {
         module.categoriesMap = UtilsService.arrayToMap(module.categories, 'name');
       });
 
+      data.datasetTypeTags = types;
+
       return data;
     });
-
 	}
+
+	getTypeTagsForDataset(sessionId: string, dataset: Dataset) {
+
+    return this.configService.getTypeService()
+      .flatMap(typeServiceUrl => {
+        return this.restService.get(typeServiceUrl + '/sessions/' + sessionId + '/datasets/' + dataset.datasetId, true);
+      }).map(typesObj => {
+        return this.objectToMap(typesObj[dataset.datasetId]);
+      });
+  }
+
+	getTypeTagsForSession(sessionId: string) {
+
+    return this.configService.getTypeService().flatMap(typeServiceUrl => {
+      return this.restService.get(typeServiceUrl + '/sessions/' + sessionId, true);
+    }).map(typesObj => {
+      // convert js objects to es6 Maps
+      let typesMap = new Map();
+      for (let datasetId of Object.keys(typesObj)) {
+        typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
+      }
+      return typesMap;
+    });
+  }
+
+  objectToMap(obj) {
+    let map = new Map();
+    for (let key of Object.keys(obj)) {
+      map.set(key, obj[key]);
+    }
+    return map;
+  }
 
 	getSessions(): Observable<Array<Session>> {
     const apiUrl$ = this.configService.getSessionDbUrl();

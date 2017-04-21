@@ -5,10 +5,9 @@
         <div class="col-md-2">
 
             <ch-tools-modal
+              [sessionData] = "this.sessionData"
               [toolSelection]= "this.toolSelection"
               [selectedDatasets] = "this.selectedDatasets"
-              [modules] = "this.modules"
-              [tools] = "this.tools"
               (onRunJob)="runJob()">
             </ch-tools-modal>
 

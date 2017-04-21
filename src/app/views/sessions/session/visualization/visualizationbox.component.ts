@@ -8,7 +8,7 @@ import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import {Input} from "@angular/core/src/metadata/directives";
 import {SessionData} from "../../../../model/session/session-data";
-import {TypeTagService, Tag} from "../../../../shared/services/typetag.service";
+import {TypeTagService} from "../../../../shared/services/typetag.service";
 
 @Component({
   selector: 'ch-visualizations',
@@ -59,10 +59,10 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     return this.containsTypeTags(visualization.typeTags) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount));
   }
 
-  containsTypeTags(tags: Array<Tag>) {
+  containsTypeTags(tags: Array<string>) {
     return _.every(this.SelectionService.selectedDatasets, (dataset: Dataset) => {
-      return _.some(tags, (tag: Tag) => {
-        return this.typeTagService.isCompatible(dataset, tag.id);
+      return _.some(tags, (tag: string) => {
+        return this.typeTagService.isCompatible(this.sessionData, dataset, tag);
       });
     });
   }
