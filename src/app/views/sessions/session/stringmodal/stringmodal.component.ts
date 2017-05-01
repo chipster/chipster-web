@@ -1,6 +1,5 @@
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {Component, Input, AfterViewInit} from "@angular/core";
-import {ViewChild} from "@angular/core/src/metadata/di";
+import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 
 @Component({
   templateUrl: './stringmodal.html'

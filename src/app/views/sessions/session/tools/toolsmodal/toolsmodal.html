@@ -1,6 +1,6 @@
 <button class="btn btn-primary" (click)="openToolsModal()">Select tool</button>
 
-<template #toolsModalTemplate>
+<ng-template #toolsModalTemplate>
   <div class="modal-header">
     <div class="col-md-11">
       <ch-tool-title [toolSelection]="toolSelection">
@@ -18,8 +18,8 @@
 
     <ngb-tabset>
       <ngb-tab>
-        <template ngbTabTitle>Tools</template>
-        <template ngbTabContent>
+        <ng-template ngbTabTitle>Tools</ng-template>
+        <ng-template ngbTabContent>
           <!-- module buttons -->
           <div class="row">
             <div class="col">
@@ -79,45 +79,45 @@
           </div>
 
 
-        </template>
+        </ng-template>
       </ngb-tab>
 
       <!-- parameters -->
       <ngb-tab [disabled]="!toolSelection">
-        <template ngbTabTitle>Parameters</template>
-        <template ngbTabContent>
+        <ng-template ngbTabTitle>Parameters</ng-template>
+        <ng-template ngbTabContent>
           <ch-tools-parameter-form [tool]="toolSelection.tool"></ch-tools-parameter-form>
-        </template>
+        </ng-template>
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <template ngbTabTitle>Inputs</template>
-        <template ngbTabContent>
+        <ng-template ngbTabTitle>Inputs</ng-template>
+        <ng-template ngbTabContent>
   			<ch-tool-inputs
           [sessionData]="sessionData"
           [inputBindings]="toolSelection.inputBindings"
           [tool]="toolSelection.tool"
           [selectedDatasets]="selectedDatasets"
           (updateBindings)="updateBindings($event)"></ch-tool-inputs>
-        </template>
+        </ng-template>
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <template ngbTabTitle>Manual</template>
-        <template ngbTabContent>
+        <ng-template ngbTabTitle>Manual</ng-template>
+        <ng-template ngbTabContent>
           <p>TBD</p>
-        </template>
+        </ng-template>
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <template ngbTabTitle>Source Code</template>
-        <template ngbTabContent>
+        <ng-template ngbTabTitle>Source Code</ng-template>
+        <ng-template ngbTabContent>
           <ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>
-        </template>
+        </ng-template>
       </ngb-tab>
 
 
     </ngb-tabset>
 
   </div>    <!--end of modal body-->
-</template>
+</ng-template>

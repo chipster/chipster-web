@@ -8,102 +8,102 @@
 
     <ngb-tab id="{{getTabId('spreadsheet')}}"
              *ngIf="isTabVisible('spreadsheet')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Spreadsheet</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Spreadsheet</ng-template>
+      <ng-template ngbTabContent>
         <ch-spreadsheet-visualization
           *ngIf="active === getTabId('spreadsheet')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-spreadsheet-visualization>
-      </template>
+      </ng-template>
   </ngb-tab>
 
     <ngb-tab id="{{getTabId('text')}}"
              *ngIf="isTabVisible('text')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Text</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Text</ng-template>
+      <ng-template ngbTabContent>
         <ch-text-visualization
           *ngIf="active === getTabId('text')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-text-visualization>
-      </template>
+      </ng-template>
   </ngb-tab>
 
     <ngb-tab id="{{getTabId('expressionprofile')}}"
              *ngIf="isTabVisible('expressionprofile')">
-      <template ngbTabTitle>Expression profile</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle>Expression profile</ng-template>
+      <ng-template ngbTabContent>
         <ch-expression-profile
           *ngIf="active === getTabId('expressionprofile')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-expression-profile>
-      </template>
+      </ng-template>
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('image')}}"
              *ngIf="isTabVisible('image')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-picture"></span> Image</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-picture"></span> Image</ng-template>
+      <ng-template ngbTabContent>
         <ch-image-visualization
           *ngIf="active === getTabId('image')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-image-visualization>
-      </template>
+      </ng-template>
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('phenodata')}}"
              *ngIf="isTabVisible('phenodata')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-edit"></span> Phenodata</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-edit"></span> Phenodata</ng-template>
+      <ng-template ngbTabContent>
         <ch-phenodata-visualization
           *ngIf="active === getTabId('phenodata')"
           [datasetsMap]="sessionData.datasetsMap">
         </ch-phenodata-visualization>
-      </template>
+      </ng-template>
     </ngb-tab>
 
   <ngb-tab id="{{getTabId('pdf')}}"
              *ngIf="isTabVisible('pdf')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</ng-template>
+      <ng-template ngbTabContent>
         <ch-pdf-visualization
           *ngIf="active === getTabId('pdf')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-pdf-visualization>
-      </template>
+      </ng-template>
 
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('html')}}"
              *ngIf="isTabVisible('html')">
-      <template ngbTabTitle><span class="glyphicon glyphicon-globe"></span> HTML</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-globe"></span> HTML</ng-template>
+      <ng-template ngbTabContent>
         <ch-htmlvisualization
           *ngIf="active === getTabId('html')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-htmlvisualization>
-      </template>
+      </ng-template>
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('venn')}}"
              *ngIf="isTabVisible('venn')">
-      <template ngbTabTitle>Venn Diagram</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle>Venn Diagram</ng-template>
+      <ng-template ngbTabContent>
         <ch-venn-diagram
           *ngIf="active === getTabId('venn')"
           [selectedDatasets]="SelectionService.selectedDatasets">
         </ch-venn-diagram>
-      </template>
+      </ng-template>
     </ngb-tab>
 
     <ngb-tab id="{{getTabId('scatterplot')}}"
              *ngIf="isTabVisible('scatterplot')">
-      <template ngbTabTitle>Scatter Plot</template>
-      <template ngbTabContent>
+      <ng-template ngbTabTitle>Scatter Plot</ng-template>
+      <ng-template ngbTabContent>
         <ch-scatter-plot
           *ngIf="active === getTabId('scatterplot')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-scatter-plot>
-      </template>
+      </ng-template>
     </ngb-tab>
 
   </ngb-tabset>
