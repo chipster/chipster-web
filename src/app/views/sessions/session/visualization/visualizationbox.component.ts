@@ -2,11 +2,10 @@ import {SelectionService} from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import * as _ from "lodash";
 import visualizations from "./visualizationconstants";
-import {Component, OnInit, OnDestroy} from "@angular/core";
+import {Component, OnInit, OnDestroy, Input} from "@angular/core";
 import {NgbTabChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
-import {Input} from "@angular/core/src/metadata/directives";
 import {SessionData} from "../../../../model/session/session-data";
 import {TypeTagService} from "../../../../shared/services/typetag.service";
 

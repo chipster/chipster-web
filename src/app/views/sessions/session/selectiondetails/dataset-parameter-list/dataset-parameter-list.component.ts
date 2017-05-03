@@ -11,10 +11,10 @@ import JobParameter from "../../../../../model/session/jobparameter";
                 
              <table class="table table-condensed parameter-table">
                 <tr *ngFor="let param of parameters; let i = index">
-                   <template [ngIf]="i < limit">
+                   <ng-template [ngIf]="i < limit">
                       <td>{{param.displayName}}</td>
                          <td>{{param.value}}</td>
-                   </template>
+                   </ng-template>
                 </tr>
              </table>`
 })

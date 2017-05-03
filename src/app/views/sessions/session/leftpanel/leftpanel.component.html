@@ -18,7 +18,7 @@
       <ngb-tabset>
 
         <ngb-tab id="workflow" title="Workflow">
-          <template ngbTabContent>
+          <ng-template ngbTabContent>
             <div class="workflow-dataset-static-panel">
               <div class="add-dataset-button">
                 <ch-add-dataset-modal
@@ -34,11 +34,11 @@
               [datasetSearch]="datasetSearch"
               [defaultScale]="1"
               [enabled]="true"></ch-workflow-graph>
-          </template>
+          </ng-template>
         </ngb-tab>
 
         <ngb-tab id="datasets" title="Files">
-          <template ngbTabContent>
+          <ng-template ngbTabContent>
             <div class="workflow-dataset-static-panel">
               <div class="add-dataset-button">
                 <ch-add-dataset-modal
@@ -56,11 +56,11 @@
                 {{dataset.name}}
               </button>
             </div>
-          </template>
+          </ng-template>
         </ngb-tab>
 
         <ngb-tab id="details" title="Details">
-          <template ngbTabContent>
+          <ng-template ngbTabContent>
             <div class="row">
               <div class="col-md-12">
 
@@ -92,7 +92,7 @@
               </textarea>
               </div>
             </div>
-          </template>
+          </ng-template>
         </ngb-tab>
       </ngb-tabset>
     </div>

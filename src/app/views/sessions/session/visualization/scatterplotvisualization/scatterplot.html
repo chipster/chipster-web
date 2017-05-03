@@ -2,8 +2,8 @@
   <div class="col-10" id="scatterplot"></div>
   <div class="col-2" id="setting">
     <ngb-tabset>
-      <ngb-tab *ngIf="!isSelectionVisible()" title="Settings">
-        <template ngbTabContent>
+      <ngb-tab title="Settings">
+        <ng-template ngbTabContent>
           <h6>X-axis</h6>
           <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
             <option *ngFor="let header of chipHeaders">{{header}}</option>
@@ -15,7 +15,7 @@
           <div class="row" style="text-align:center;width:100%;margin: 20px;">
             <button class="btn-primary" (click)="redrawScatterPlot()">Draw</button>
           </div>
-        </template>
+        </ng-template>
       </ngb-tab>
       <ngb-tab *ngIf="isSelectionVisible()" title="Selected">
         <template ngbTabContent>
@@ -26,7 +26,7 @@
             <button>Create dataset from unselected</button>
           </div>
 
-        </template>
+        </ng-template>
 
       </ngb-tab>
     </ngb-tabset>
