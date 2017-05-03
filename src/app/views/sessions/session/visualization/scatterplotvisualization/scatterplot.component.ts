@@ -217,10 +217,6 @@ export class ScatterPlotComponent implements OnChanges {
       }
 
     })
-    //Remove the drag selection rect
-    this.svg.on('click', function () {
-      console.log("svg clicked");
-    });
 
   }
 
