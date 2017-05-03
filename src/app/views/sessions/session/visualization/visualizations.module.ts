@@ -21,11 +21,13 @@ import {FormsModule} from "@angular/forms";
 import {VisualizationModalComponent} from "./visualizationmodal.component";
 import {VisualizationModalService} from "./visualizationmodal.service";
 import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component"
+import {VisualizationTSVService} from "./visualizationTSV.service"
+import {ScatterPlotService} from "./scatterplotvisualization/scatterplot.service"
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule],
   declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,ScatterPlotComponent],
-  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService],
+  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, ScatterPlotService],
   exports: [VisualizationsComponent],
   entryComponents: [VisualizationModalComponent]
 })

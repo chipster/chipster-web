@@ -2,7 +2,7 @@
   <div class="col-10" id="scatterplot"></div>
   <div class="col-2" id="setting">
     <ngb-tabset>
-      <ngb-tab title="Settings">
+      <ngb-tab *ngIf="!isSelectionVisible()" title="Settings">
         <template ngbTabContent>
           <h6>X-axis</h6>
           <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
@@ -17,10 +17,10 @@
           </div>
         </template>
       </ngb-tab>
-      <ngb-tab title="Selected">
+      <ngb-tab *ngIf="isSelectionVisible()" title="Selected">
         <template ngbTabContent>
-          <textarea>0 Genes Selected</textarea>
-          <textarea id="selectedGeneList"></textarea>
+          <textarea>{{selectedGeneRows.length}} Genes Selected</textarea>
+          <textarea id="selectedGeneList" *ngFor="let gene of selectedGeneRows">{{gene.row[0]}}</textarea>
           <div class="btn-group-vertical">
             <button>Create dataset from selected</button>
             <button>Create dataset from unselected</button>
