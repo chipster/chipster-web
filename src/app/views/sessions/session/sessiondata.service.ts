@@ -9,6 +9,7 @@ import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {TokenService} from "../../../core/authentication/token.service";
 import {ErrorService} from "../../error/error.service";
+import {RestService} from "../../../core/rest-services/restservice/rest.service";
 
 @Injectable()
 export class SessionDataService {
@@ -18,9 +19,9 @@ export class SessionDataService {
   constructor(
               private sessionResource: SessionResource,
               private configService: ConfigService,
-              private tokenService: TokenService,
               private fileResource: FileResource,
-              private errorService: ErrorService) {
+              private errorService: ErrorService,
+              private restService: RestService) {
   }
 
   getSessionId() : string {
@@ -57,28 +58,26 @@ export class SessionDataService {
    */
   createDerivedDataset(name: string, sourceDatasetIds: string[], toolName: string, content: string) {
 
-    let d = new Dataset(name);
-    return this.createDataset(d).flatMap((datasetId: string) => {
-      d.datasetId = datasetId;
 
-      let job = new Job();
-      job.state = "COMPLETED";
-      job.toolCategory = "Interactive visualizations";
-      job.toolName = toolName;
+    let job = new Job();
+    job.state = "COMPLETED";
+    job.toolCategory = "Interactive visualizations";
+    job.toolName = toolName;
 
-      job.inputs = sourceDatasetIds.map((id) => {
-        let input = new JobInput();
-        input.datasetId = id;
-        return input;
-      });
+    job.inputs = sourceDatasetIds.map((id) => {
+      let input = new JobInput();
+      input.datasetId = id;
+      return input;
+    });
 
-      return this.createJob(job);
-    }).flatMap((jobId: string) => {
-      // d.datasetId is already set above
+    return this.createJob(job).flatMap((jobId: string) => {
+      let d = new Dataset(name);
       d.sourceJob = jobId;
-      return this.updateDataset(d);
-    }).flatMap(() => {
-      return this.fileResource.uploadData(this.getSessionId(), d.datasetId, content);
+      return this.createDataset(d);
+
+    }).flatMap((datasetId: string) => {
+      return this.fileResource.uploadData(this.getSessionId(), datasetId, content);
+
     }).catch(err => {
       console.log('create derived dataset failed', err);
       throw err;
@@ -112,26 +111,45 @@ export class SessionDataService {
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
-    return this.configService.getFileBrokerUrl().map( (url: string) =>
-      `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`
-    );
+    let datasetToken$ = this.configService.getSessionDbUrl()
+      .flatMap((sessionDbUrl: string) => this.restService.post(
+        sessionDbUrl +
+        '/datasettokens/sessions/' + this.getSessionId() +
+        '/datasets/' + dataset.datasetId, null, true))
+      .map((datasetToken: any) => datasetToken.tokenKey);
+
+    return Observable.forkJoin(datasetToken$, this.configService.getFileBrokerUrl()).map(results => {
+      let [datasetToken, url] = results;
+      return `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${datasetToken}`
+    });
   }
 
   exportDatasets(datasets: Dataset[]) {
     for (let d of datasets) {
-      this.getDatasetUrl(d).subscribe(url => {
-        this.download(url + '&download');
-      });
+      this.download(this.getDatasetUrl(d).map(url => url + '&download'));
     }
   }
 
-  download(url: string) {
-    let win = window.open(url, "_blank");
-    if (!win) {
-      console.log(this.errorService.headerError(
+  download(url$: Observable<string>) {
+    // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
+    // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
+    let win: any  = window.open('', "_blank");
+    if (win) {
+      url$.subscribe(url => {
+        // but we can set it's location later asynchronously
+        win.location.href = url;
+        // we can close the useless empty tab, but unfortunately only after a while, otherwise the
+        // download won't start
+        setTimeout(() => {
+           win.close();
+        }, 1000);
+      });
+    } else {
+      // Chrome allows only one download
+      this.errorService.headerError(
         "Browser's pop-up blocker prevented some exports. " +
         "Please disable the pop-up blocker for this site or " +
-        "export the files one by one.", true));
+        "export the files one by one.", true);
     }
   }
 }
