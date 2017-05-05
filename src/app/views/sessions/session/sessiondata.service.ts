@@ -111,6 +111,31 @@ export class SessionDataService {
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
+    return this.configService.getFileBrokerUrl().map( (url: string) =>
+      `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${this.tokenService.getToken()}`
+    );
+  }
+
+  exportDatasets(datasets: Dataset[]) {
+    for (let d of datasets) {
+      this.getDatasetUrl(d).subscribe(url => {
+        this.download(url + '&download');
+      });
+    }
+  }
+
+  download(url: string) {
+    let win = window.open(url, "_blank");
+    if (!win) {
+      console.log(this.errorService.headerError(
+        "Browser's pop-up blocker prevented some exports. " +
+        "Please disable the pop-up blocker for this site or " +
+        "export the files one by one.", true));
+    }
+  }
+
+  /*
+  getDatasetUrl(dataset: Dataset): Observable<string> {
     let datasetToken$ = this.configService.getSessionDbUrl()
       .flatMap((sessionDbUrl: string) => this.restService.post(
         sessionDbUrl +
@@ -152,5 +177,6 @@ export class SessionDataService {
         "export the files one by one.", true);
     }
   }
+  */
 }
 
