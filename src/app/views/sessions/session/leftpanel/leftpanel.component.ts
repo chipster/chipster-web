@@ -50,9 +50,8 @@ export class LeftPanelComponent {
   }
 
   downloadSession(): void {
-    this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).subscribe((url) => {
-      this.sessionDataService.download(url);
-    });
+    this.sessionDataService.download(
+      this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()));
   }
 
   toggleDatasetSelection($event: any, dataset: Dataset): void {

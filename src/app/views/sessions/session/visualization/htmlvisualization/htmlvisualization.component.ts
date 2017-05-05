@@ -6,7 +6,7 @@ import Dataset from "../../../../../model/session/dataset";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  template: `<iframe #htmlframe width="100%" [src]="wrapperUrl + '?location=' + src + '&token=' + this.token | trustedresource" scrolling="no" frameborder="0" (load)="run(htmlframe)"></iframe>`
+  template: `<iframe #htmlframe *ngIf="src" width="100%" [src]="wrapperUrl + '?location=' + src  | trustedresource" scrolling="no" frameborder="0" (load)="run(htmlframe)"></iframe>`
 })
 export class HtmlvisualizationComponent implements OnChanges {
 
@@ -15,17 +15,13 @@ export class HtmlvisualizationComponent implements OnChanges {
 
   private src: string;
   private wrapperUrl: string = 'assets/htmlvisualizationwrapper.html';
-  private token: string;
 
   constructor(
-    private tokenService: TokenService,
     private sessionDataService: SessionDataService) { }
 
   ngOnChanges() {
-    this.token = this.tokenService.getToken();
-
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
-      this.src = url;
+      this.src = encodeURIComponent(url);
     });
   }
 
