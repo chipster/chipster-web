@@ -207,11 +207,13 @@ export class ScatterPlotComponent implements OnChanges {
         //define the points that are within the drag boundary
         let dragEndPoint = new Point(endPoint.x, endPoint.y);
         let dragStartPoint = new Point(startPoint.x, startPoint.y);
-        let selectedGeneIDs = this.scatterPlotService.getSelectedGeneIds(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
-        console.log(selectedGeneIDs);
 
-        //Populate the selected gene list to show in the selected box view{
-        this.selectedGeneRows = tsv.body.getTSVRows(selectedGeneIDs);
+        //FIXME
+        // let selectedGeneIDs = this.scatterPlotService.getSelectedGeneIds(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
+        // console.log(selectedGeneIDs);
+        //
+        // //Populate the selected gene list to show in the selected box view{
+        // this.selectedGeneRows = tsv.body.getTSVRows(selectedGeneIDs);
 
 
       }

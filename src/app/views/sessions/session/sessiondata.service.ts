@@ -21,7 +21,8 @@ export class SessionDataService {
               private configService: ConfigService,
               private fileResource: FileResource,
               private errorService: ErrorService,
-              private restService: RestService) {
+              private restService: RestService,
+              private tokenService: TokenService) {
   }
 
   getSessionId() : string {
