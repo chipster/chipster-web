@@ -8,10 +8,11 @@ import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
 import {Component} from "@angular/core";
-import {ActivatedRoute, Router, Params} from "@angular/router";
+import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
+import {Store} from "@ngrx/store";
 
 @Component({
   selector: 'ch-session',
@@ -34,35 +35,23 @@ export class SessionComponent {
         private modalService: NgbModal) {
     }
 
+
+
     ngOnInit() {
 
       this.sessionData = this.route.snapshot.data['sessionData'];
 
-      /* ********
-
-      THIS SHOULD WORK IN ANGULAR-ROUTER V4. https://github.com/angular/angular/pull/11373
-      ROUTER V3 DOESN'T SUPPORT SETTING MULTIPLE QUERY PARAMETERS WITH SAME KEY
-
-      // Select datasets provided via queryparameter
+      // Select datasets provided via queryparameter and clear queryparameters
       this.route.queryParams.subscribe( (queryParams: Params) => {
-        const datasets = this.parseQueryparametersArray(queryParams, 'datasetId')
+        const datasets = this.parseQueryparametersArray(queryParams, 'id')
           .map( (datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
         if(datasets.length > 0) {
           this.selectionHandlerService.setDatasetSelection(datasets);
+          const sessionId = this.route.snapshot.params['sessionId'];
+          const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId] );
+          this.router.navigateByUrl(urlTree);
         }
-      });
-
-      // update route when dataset selections are made by setting current queryparameters
-      this.store.select('selectedDatasets').subscribe( (datasets: Array<Dataset>) => {
-        const datasetIds = datasets.map( (dataset: Dataset) => dataset.datasetId);
-        const navigationExtras = {
-          queryParams: { datasetId: datasetIds }
-        };
-        const urlTree: UrlTree = this.router.createUrlTree([]);
-        this.router.navigateByUrl(urlTree, navigationExtras);
-      });
-
-      ************ */
+      }).unsubscribe();
 
       // Services don't have access to ActivatedRoute, so we have to set it
       this.sessionDataService.setSessionId(this.route.snapshot.params['sessionId']);
@@ -106,6 +95,8 @@ export class SessionComponent {
         }
       });
     }
+
+
 
     ngOnDestroy() {
       this.SessionEventService.unsubscribe();
