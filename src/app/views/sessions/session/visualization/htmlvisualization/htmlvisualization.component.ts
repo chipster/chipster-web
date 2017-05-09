@@ -1,6 +1,5 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import {timeout} from "d3-timer";
-import {TokenService} from "../../../../../core/authentication/token.service";
 import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 
@@ -21,6 +20,8 @@ export class HtmlvisualizationComponent implements OnChanges {
 
   ngOnChanges() {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
+      // we have to encode the url to get in one piece to the other side, because it contains
+      // a query parameter itself
       this.src = encodeURIComponent(url);
     });
   }
