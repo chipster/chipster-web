@@ -1,36 +1,48 @@
 <div class="row">
-  <div class="col-10" id="scatterplot"></div>
-  <div class="col-2" id="setting">
-    <ngb-tabset>
-      <ngb-tab *ngIf="!isSelectionVisible()" title="Settings">
-        <ng-template ngbTabContent>
-          <h6>X-axis</h6>
-          <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
-            <option *ngFor="let header of chipHeaders">{{header}}</option>
-          </select>
-          <h6>Y-Axis</h6>
-          <select [(ngModel)]="selectedChipHeadY" (ngModelChange)="setChipSelectionY($event)">
-            <option *ngFor="let header of chipHeaders">{{header}}</option>
-          </select>
-          <div class="row" style="text-align:center;width:100%;margin: 20px;">
-            <button class="btn-primary" (click)="redrawScatterPlot()">Draw</button>
-          </div>
-        </ng-template>
-      </ngb-tab>
-      <ngb-tab *ngIf="isSelectionVisible()" title="Selected">
-        <ng-template ngbTabContent>
-          <textarea>{{selectedGeneRows.length}} Genes Selected</textarea>
-          <textarea id="selectedGeneList" *ngFor="let gene of selectedGeneRows">{{gene.row[0]}}</textarea>
-          <div class="btn-group-vertical">
-            <button>Create dataset from selected</button>
-            <button>Create dataset from unselected</button>
-          </div>
-
-        </ng-template>
-
-      </ngb-tab>
-    </ngb-tabset>
-
+  <div class="col-8">
+    <div class *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
+    <div id="scatterplot"></div>
   </div>
+  <div class="col-4" *ngIf="scatterPlotVisible" id="setting">
+    <div class="row">
+      <div class="my-card">
+        <div class="card">
+          <div class="card-header">Settings</div>
+          <div class="card-block">
+            <div class="table table-info">
+              <tr>
+                <td>
+                  <h6 class="card-subtitle">X-axis</h6>
+                  <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
+                    <option *ngFor="let header of chipHeaders">{{header}}</option>
+                  </select>
+                </td>
+                <td>
+                  <h6 class="card-subtitle">Y-axis</h6>
+                  <select [(ngModel)]="selectedChipHeadY" (ngModelChange)="setChipSelectionY($event)">
+                    <option *ngFor="let header of chipHeaders">{{header}}</option>
+                  </select>
+                </td>
+              </tr>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Selected</div>
+            <div class="card-block">
+              <h6>{{selectedGeneRows.length}} Genes Selected</h6>
+              <ul id="selectedGeneList" *ngFor="let gene of selectedGeneRows">
+                <li>{{gene.row[0]}}</li>
+              </ul>
+              <div class="btn-group-vertical" role="group" aria-label="Card Buttons">
+                <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
+                </button>
+                <button class="btn btn-info" (click)="createDatasetFromNotSelected()">Create dataset from unselected
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-</div>
+    </div>
+  </div>

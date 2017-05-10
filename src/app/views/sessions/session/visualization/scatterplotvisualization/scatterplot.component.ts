@@ -31,9 +31,10 @@ export class ScatterPlotComponent implements OnChanges {
   private selectedChipHeadY: string;
   private svg;
   private selectedGeneData: Array<GeneExpression>;
-  private viewSelectionList: Array<any>;
+  private selectedGeneIds: Array<string>;
   private selectedGeneRows: Array<TSVRow> = [];// contain the tsv rows for the selected Genes
   private dataSelectionModeEnable: boolean = false;
+  private scatterPlotVisible: boolean = false;
 
 
   constructor(private visualizationTSVService: VisualizationTSVService,
@@ -54,6 +55,7 @@ export class ScatterPlotComponent implements OnChanges {
         if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
           //Extracting header name without chip prefix
           this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
+            self.scatterPlotVisible=true;
             chipHeader = chipHeader.split(".").pop();
             self.chipHeaders.push(chipHeader);
           });
@@ -66,6 +68,7 @@ export class ScatterPlotComponent implements OnChanges {
 
         } else {
           this.errorMessage = `Only microarray data supported, didn’t find any columns starting with chip.`;
+          self.scatterPlotVisible=false;
         }
       })
 
@@ -77,10 +80,7 @@ export class ScatterPlotComponent implements OnChanges {
     this.plotData = [];
     let self = this;
     let geneValue = this.visualizationTSVService.getGeneExpressions(tsv);
-    console.log(geneValue);
     let orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(geneValue);
-
-    console.log(orderedGenesValues);
 
     // Creating points for scatter plot combining two chip columns
     orderedGenesValues.forEach(function (geneRow) {
@@ -99,7 +99,7 @@ export class ScatterPlotComponent implements OnChanges {
     let scatterPlotWidth = document.getElementById('scatterplot').offsetWidth;
 
     const margin = {top: 20, right: 40, bottom: 50, left: 40};
-    let size = {width: scatterPlotWidth - 100, height: 600};
+    let size = {width: scatterPlotWidth - 50, height: 500};
     let scatterPlotArea = {
       width: size.width,
       height: size.height - margin.top - margin.bottom
@@ -112,7 +112,8 @@ export class ScatterPlotComponent implements OnChanges {
     //Adding the X-axis
     let xScale = d3.scaleLinear().range([0, scatterPlotArea.width])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let xAxis = d3.axisBottom(xScale).ticks(5).tickSize(-scatterPlotArea.height);
+    let xAxis = d3.axisBottom(xScale).ticks(5).tickSize(-scatterPlotArea.height).tickSizeOuter(0);
+    ;
     this.svg.append('g')
       .attr('class', 'x axis').attr('transform', 'translate(' + margin.left + ',' + scatterPlotArea.height + ')')
       .call(xAxis);
@@ -120,7 +121,8 @@ export class ScatterPlotComponent implements OnChanges {
     //Adding the Y-axis
     let yScale = d3.scaleLinear().range([scatterPlotArea.height, 0])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-scatterPlotArea.width);
+    let yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-scatterPlotArea.width).tickSizeOuter(0);
+    ;
     this.svg.append('g')
       .attr('class', 'y axis')
       .attr('transform', 'translate(' + margin.left + ',0 )')
@@ -133,11 +135,13 @@ export class ScatterPlotComponent implements OnChanges {
     this.svg.selectAll(".dot").data(self.plotData)
       .enter().append("circle")
       .attr("class", "dot")
+      .attr('id', (d: PlotData) => 'dot' + d.geneID)
       .attr("r", 2)
       .attr("cx", function (d) {
         return xScale(d.plotPoint.x);
       })
       .attr("cy", function (d) {
+        console.log(d);
         return yScale(d.plotPoint.y);
       })
       .attr("fill", "red")
@@ -207,19 +211,44 @@ export class ScatterPlotComponent implements OnChanges {
         //define the points that are within the drag boundary
         let dragEndPoint = new Point(endPoint.x, endPoint.y);
         let dragStartPoint = new Point(startPoint.x, startPoint.y);
-        let selectedGeneIDs = this.scatterPlotService.getSelectedGeneIds(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
-        console.log(selectedGeneIDs);
+        this.selectedGeneIds = this.scatterPlotService.getSelectedGeneIds(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
 
         //Populate the selected gene list to show in the selected box view{
-        this.selectedGeneRows = tsv.body.getTSVRows(selectedGeneIDs);
+        this.selectedGeneRows = tsv.body.getTSVRows(this.selectedGeneIds);
+        this.addSelectedDataIds(this.selectedGeneIds);
+        resetSelectionRectangle();
+
+        this.selectedGeneIds.forEach(function (selectedId) {
+          self.setSelectionStyle(selectedId);
+        });
 
 
       }
 
-    })
+    });
+
+    // Hide the Rectangle after drag ends
+    function resetSelectionRectangle() {
+      startPoint = new Point(-1, -1);
+      d3.select('.band').attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
+    }
 
   }
 
+  // Do the stylings for the selected nodes
+  addSelectedDataIds(id: Array<string>) {
+
+
+  }
+
+  setSelectionStyle(id: string) {
+    d3.select('#dot' + id).classed('selected', true).style('fill', 'blue').attr('r', 3);
+  }
+
+  removeSelectionStyle(id: string) {
+    d3.select('#dot' + id).classed('selected', false).style('fill', 'red').attr('r', 2);
+
+  }
 
   getSelectionDataIds(): Array<string> {
     return this.selectedGeneData.map((geneData: GeneExpression) => geneData.id);
@@ -234,15 +263,20 @@ export class ScatterPlotComponent implements OnChanges {
   removeSelectedPoints(ids: Array<string>): void {
     // Need to remove the set of points that are previously selected
     //Should get the points
+    for (let id of ids) {
+      this.removeSelectionStyle(id);
+    }
   }
 
 
   setChipSelectionY(event) {
     this.selectedChipHeadY = event;
+    this.redrawScatterPlot();
   }
 
   setChipSelectionX(event) {
     this.selectedChipHeadX = event;
+    this.redrawScatterPlot();
 
   }
 
@@ -256,6 +290,15 @@ export class ScatterPlotComponent implements OnChanges {
 
   isSelectionVisible(): boolean {
     return this.dataSelectionModeEnable;
+  }
+
+  //New Dataset Creation  from selected datapoints
+  createDatasetFromSelected() {
+    let tsvData = this.tsv.getRawDataByRowIds(this.selectedGeneIds);
+    let data = d3.tsvFormatRows(tsvData);
+    console.log(data);
+    this.sessionDataService.createDerivedDataset('newDataset.tsv', [this.dataset.datasetId], "Scatter Plot", data).subscribe();
+
   }
 
 
