@@ -5,7 +5,7 @@ import Dataset from "../../../../../model/session/dataset";
 @Component({
   selector: 'ch-image-visualization',
   template: `
-      <div class="scrollable"><img [src]="src"></div>
+      <div class="scrollable"><img *ngIf="src" [src]="src"></div>
   `
 })
 export class ImageVisualizationComponent implements OnChanges {

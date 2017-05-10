@@ -24,16 +24,23 @@ export class SessionResource {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => {
 
-      const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true);
-      const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true);
-      const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true);
-      const modules$ = this.toolResource.getModules();
-      const tools$ = this.toolResource.getTools();
-      const types$ = this.getTypeTagsForSession(sessionId);
+      const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true)
+        .do((x: any) => console.debug('session', x));
+      const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true)
+        .do((x: any) => console.debug('sessionDatasets', x));
+      const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true)
+        .do((x: any) => console.debug('sessionJobs', x));
+      const modules$ = this.toolResource.getModules()
+        .do((x: any) => console.debug('modules', x));
+      const tools$ = this.toolResource.getTools()
+        .do((x: any) => console.debug('tools', x));
+      const types$ = this.getTypeTagsForSession(sessionId)
+        .do((x: any) => console.debug('types', x));
 
       return Observable.forkJoin([session$, sessionDatasets$, sessionJobs$, modules$, tools$, types$])
 
     }).map( (param: any) => {
+
       let session: Session = param[0];
       let datasets: Dataset[] = param[1];
       let jobs: Job[] = param[2];

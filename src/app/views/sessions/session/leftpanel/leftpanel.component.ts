@@ -12,6 +12,9 @@ import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import {SelectionHandlerService} from "../selection-handler.service";
+import {UrlTree, ActivatedRoute, Router} from "@angular/router";
+import copy from 'copy-to-clipboard';
+
 
 @Component({
   selector: 'ch-leftpanel',
@@ -26,11 +29,13 @@ export class LeftPanelComponent {
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
-    private selectionService: SelectionService,
+    private router: Router,
+    private route: ActivatedRoute,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionNameModalService: StringModalService,
     private datasetsearchPipe: DatasetsearchPipe,
-    private selectionHandlerService: SelectionHandlerService) {}
+    private selectionHandlerService: SelectionHandlerService,
+    private store: Store<any>) {}
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
@@ -50,9 +55,8 @@ export class LeftPanelComponent {
   }
 
   downloadSession(): void {
-    this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()).subscribe((url) => {
-      this.sessionDataService.download(url);
-    });
+    this.sessionDataService.download(
+      this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()));
   }
 
   toggleDatasetSelection($event: any, dataset: Dataset): void {
@@ -71,6 +75,19 @@ export class LeftPanelComponent {
     }, () => {
       // modal dismissed
     });
+  }
+
+  saveCurrentUrlState() {
+    // copy current route and selected datasetids as queryparameters to clippath
+    this.store.select('selectedDatasets').subscribe( (datasets: Array<Dataset>) => {
+      const datasetIds = datasets.map( (dataset: Dataset) => dataset.datasetId);
+      const navigationExtras = { queryParams: { id: datasetIds } };
+      const sessionId = this.route.snapshot.params['sessionId'];
+      const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId], navigationExtras );
+      if(datasetIds.length > 0) {
+        copy(`${window.location.host}${urlTree.toString()}`);
+      }
+    }).unsubscribe();
   }
 
   openCopySessionModal() {
