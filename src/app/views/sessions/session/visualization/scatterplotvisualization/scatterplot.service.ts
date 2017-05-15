@@ -14,6 +14,7 @@ export class ScatterPlotService {
   //Get the points inside the selection Rectangle
   getSelectedGeneIds(dragStartPoint: Point, dragEndPoint: Point, linearXScale: any, linearYScale: any, plotData: Array<PlotData>): Array<string> {
 
+
     let startXValue = linearXScale.invert(dragStartPoint.x);
     let endXValue = linearXScale.invert(dragEndPoint.x);
 
@@ -24,10 +25,32 @@ export class ScatterPlotService {
 
     // get the chip values which are in this range
 
+    console.log(startXValue);
+    console.log(startYValue);
+    console.log(endXValue);
+    console.log(endYValue);
+
     plotData.forEach(function (val) {
-      if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
-        selectedGenes.push(val.geneID);
-        console.log("selected");
+      if (startXValue < endXValue) {
+        if (startYValue < endYValue) {
+          if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
+            selectedGenes.push(val.geneID);
+          }
+        } else if (startYValue > endYValue) {
+          if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
+            selectedGenes.push(val.geneID);
+          }
+        }
+      } else if (startXValue > endXValue) {
+        if (startYValue < endYValue) {
+          if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
+            selectedGenes.push(val.geneID);
+          }
+        } else if (startYValue > endYValue) {
+          if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
+            selectedGenes.push(val.geneID);
+          }
+        }
       }
 
     });

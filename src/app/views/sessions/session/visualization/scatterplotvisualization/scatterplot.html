@@ -26,19 +26,18 @@
               </tr>
             </div>
           </div>
-          <div class="card">
+          <div class="card" *ngIf="selectedGeneRows &&selectedGeneRows.length>0">
             <div class="card-header">Selected</div>
             <div class="card-block">
+              <div class="btn-group-vertical" role="group">
+                <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
+                </button>
+              </div>
               <h6>{{selectedGeneRows.length}} Genes Selected</h6>
               <ul id="selectedGeneList" *ngFor="let gene of selectedGeneRows">
                 <li>{{gene.row[0]}}</li>
               </ul>
-              <div class="btn-group-vertical" role="group" aria-label="Card Buttons">
-                <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
-                </button>
-                <button class="btn btn-info" (click)="createDatasetFromNotSelected()">Create dataset from unselected
-                </button>
-              </div>
+              <button class="btn btn-info" (click)="resetSelections()">Clear Selection</button>
             </div>
           </div>
         </div>
@@ -46,3 +45,4 @@
 
     </div>
   </div>
+</div>
