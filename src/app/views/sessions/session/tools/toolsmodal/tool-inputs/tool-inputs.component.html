@@ -6,10 +6,9 @@
 
   <div class="col-md-7 no-padding-right">
 
+    <table *ngIf="localInputBindings.length > 0" class="table table-borderless table-condensed table-hover">
 
-    <table *ngIf="inputBindings.length > 0" class="table table-borderless table-condensed table-hover">
-
-      <tr *ngFor="let inputBinding of inputBindings"
+      <tr *ngFor="let inputBinding of localInputBindings"
           (mouseover)="setInputDescription(inputBinding.toolInput.description )"
           (mouseleave)="setInputDescription('')">
 
@@ -20,25 +19,15 @@
         <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
 
 
-        <!--<label class="label label-warning">Required input</label>-->
-        <!--*ngIf="paramForm['input_{{index}}'].$error.required"-->
-
         <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
 
-            <!--<span *ngIf="inputBinding.datasets.length > 1">multiple </span>-->
-
-            <select multiple [(ngModel)]="inputBinding.datasets"
-                    name="input_{{index}}"
-                    (ngModelChange)="inputSelected(inputBinding)">
-              <!--ng-required="!inputBinding.toolInput.optional"-->
-              <option
-                *ngFor="let dataset of selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData"
-                [ngValue]="dataset">{{dataset.name}}</option>
-            </select>
-          </td>
+          <select multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)"
+                  name="input_{{index}}">
+            <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
+          </select>
+        </td>
 
         <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length == 0">No compatible files</td>
-
 
         </tr>
     </table>

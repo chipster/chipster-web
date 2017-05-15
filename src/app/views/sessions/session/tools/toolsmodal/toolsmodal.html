@@ -91,7 +91,7 @@
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <ng-template ngbTabTitle>Inputs</ng-template>
+        <ng-template ngbTabTitle><!--<span *ngIf="true" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>-->Inputs</ng-template>
         <ng-template ngbTabContent>
   			<ch-tool-inputs
           [sessionData]="sessionData"

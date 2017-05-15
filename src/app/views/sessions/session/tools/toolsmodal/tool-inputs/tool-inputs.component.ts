@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnChanges, SimpleChanges} from '@angular/core';
 import InputBinding from "../../../../../../model/session/inputbinding";
 import Tool from "../../../../../../model/session/tool";
 import {ToolService} from "../../tool.service";
@@ -9,7 +9,7 @@ import {SessionData} from "../../../../../../model/session/session-data";
   selector: 'ch-tool-inputs',
   templateUrl: './tool-inputs.component.html',
 })
-export class ToolInputsComponent implements OnInit {
+export class ToolInputsComponent implements OnChanges {
 
   @Input() sessionData: SessionData;
   @Input() tool: Tool;
@@ -18,39 +18,64 @@ export class ToolInputsComponent implements OnInit {
   @Output() updateBindings = new EventEmitter();
 
   private inputDescription: string;
+  private localInputBindings: InputBinding[];
 
   //noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService) { }
 
-  ngOnInit() {
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes["inputBindings"]) {
+      // create copy of the datasets property of each InputBinding as it's used as the model of the select
+      // element in the template (and thus get's modified)
+
+      this.localInputBindings = this.inputBindings.map((b) => { return { toolInput: b.toolInput, datasets: b.datasets.slice() }});
+      console.log("updated bindings:", this.getBindingsString(this.localInputBindings));
+    }
   }
 
-  inputSelected(changedBinding: InputBinding) {
-    // generate new input bindings: for each input binding
-    // copy the previous datasets, except the ones that are present in the
-    // binding changed by the user
-    let updatedBindings: InputBinding[] = [];
-    for (let binding of this.inputBindings) {
-      let updatedDatasets = binding.datasets.slice();
-      if (changedBinding !== binding) {
-        for (let changed of changedBinding.datasets) {
-          for (let dataset of binding.datasets) {
-            if (changed.datasetId === dataset.datasetId) {
-              updatedDatasets = _.pull(updatedDatasets, dataset);
-            }
-          }
-        }
+
+  inputSelected(userEditedBinding: InputBinding) {
+
+    // // if not multi input, the model changes binding.datasets to object instead of array
+    // if (!_.isArray(userEditedBinding.datasets)) {
+    //   userEditedBinding.datasets = [userEditedBinding.datasets];
+    // }
+
+    // generate new input bindings: remove from other bindings the datasets which are present in the binding
+    // edited by the user
+    let updatedBindings = this.localInputBindings.map(binding => {
+      if (binding.toolInput === userEditedBinding.toolInput) {
+        return {toolInput: binding.toolInput, datasets: binding.datasets.slice()}
+      } else {
+        return {toolInput: binding.toolInput, datasets: _.difference(binding.datasets, userEditedBinding.datasets)}
       }
-      updatedBindings.push({
-        toolInput: binding.toolInput,
-        datasets: updatedDatasets});
-    }
+    });
 
     this.updateBindings.emit(updatedBindings);
   }
 
   setInputDescription(description: string) {
     this.inputDescription = description;
+  }
+
+  getBindingsString(bindings: InputBinding[]) {
+
+    let s: string = "";
+    if (!bindings || bindings.length < 1) {
+      return s;
+    }
+
+    s += "-----\n";
+
+    for (let binding of bindings) {
+      let datasetsString: string = binding.datasets.reduce((a: string, b) => a + b.name + " ", "");
+
+      s += binding.toolInput.name.id ? binding.toolInput.name.id : binding.toolInput.name.prefix;
+      s += " -> " + datasetsString;
+      s += "\n";
+    }
+
+    return s;
   }
 
 }
