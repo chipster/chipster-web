@@ -196,7 +196,6 @@ export class SessionEventService {
 
     updateTypeTags(sessionId, sessionEvent, sessionData) {
 
-
       // update type tags before
       let oldValue = <Dataset>sessionEvent.oldValue;
       let newValue = <Dataset>sessionEvent.newValue;
@@ -216,7 +215,7 @@ export class SessionEventService {
 
       } else {
         // dataset deleted, type tags can be removed
-        sessionData.datasetTypeTags.delete(oldValue.datasetId);
+        sessionData.datasetTypeTags.delete(sessionEvent.resourceId);
         return Observable.of(sessionEvent);
       }
     }
