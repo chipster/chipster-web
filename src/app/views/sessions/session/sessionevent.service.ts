@@ -195,16 +195,25 @@ export class SessionEventService {
     }
 
     updateTypeTags(sessionId, sessionEvent, sessionData) {
+
+
       // update type tags before
       let oldValue = <Dataset>sessionEvent.oldValue;
       let newValue = <Dataset>sessionEvent.newValue;
 
       if (newValue) {
+        if (!newValue.fileId) {
+          //dataset created, but fileId is missing
+          // get type tags later when the fileId is added
+          return Observable.of(sessionEvent);
+        }
+
         // dataset created or updated, update type tags too
         return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).map(typeTags => {
           sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
           return sessionEvent;
         });
+
       } else {
         // dataset deleted, type tags can be removed
         sessionData.datasetTypeTags.delete(oldValue.datasetId);
