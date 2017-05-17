@@ -7,7 +7,7 @@ import {SelectionService} from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
-import {StringModalService} from "../stringmodal/stringmodal.service";
+import {DialogModalService} from "../dialogmodal/dialogmodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
@@ -32,7 +32,7 @@ export class LeftPanelComponent {
     private router: Router,
     private route: ActivatedRoute,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionNameModalService: StringModalService,
+    private sessionNameModalService: DialogModalService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
     private store: Store<any>) {}

@@ -5,7 +5,7 @@ import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
 import {Component, Input, SimpleChanges, ViewEncapsulation, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
-import {StringModalService} from "../../stringmodal/stringmodal.service";
+import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
@@ -36,7 +36,7 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
   constructor(
     private sessionDataService: SessionDataService,
     private tsvReader: TSVReader,
-    private stringModalService: StringModalService,
+    private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
     private selectionService: SelectionService,
     private zone: NgZone) {}

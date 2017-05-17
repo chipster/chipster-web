@@ -21,12 +21,7 @@ export class StringModalComponent implements AfterViewInit {
   }
 
   save() {
-    /* a weird workaround for a weird bug: the modal doesn't close if it's opened from the <button> AND
-       closed with enter. Everything else works, like opening from <span> or closing by a mouse click.
-       I have no idea what's happening here or why setTimeout fixes it. */
-    setTimeout(() => {
-      this.activeModal.close(this.value);
-    }, 0);
+    this.activeModal.close(this.value);
   }
 
   cancel() {

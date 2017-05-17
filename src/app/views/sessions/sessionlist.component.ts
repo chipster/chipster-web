@@ -4,6 +4,7 @@ import Session from "../../model/session/session";
 import {SessionData} from "../../model/session/session-data";
 import {Component} from "@angular/core";
 import {Router} from "@angular/router";
+import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 
 @Component({
   selector: 'ch-session-list',
@@ -19,7 +20,8 @@ export class SessionListComponent {
 
     constructor(
         private router: Router,
-        private sessionResource: SessionResource) {}
+        private sessionResource: SessionResource,
+        private dialogModalService: DialogModalService) {}
 
     ngOnInit() {
       this.selectedSessions = [];
@@ -65,24 +67,20 @@ export class SessionListComponent {
     }
 
     deleteSession(session: Session) {
-      this.sessionResource.deleteSession(session.sessionId).subscribe( (response: any) => {
-        this.updateSessions();
-        this.selectedSessions.length = 0;
+
+      this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
+        this.sessionResource.deleteSession(session.sessionId).subscribe( (response: any) => {
+          this.updateSessions();
+          this.selectedSessions.length = 0;
+        }, () => {
+          console.error('Error in deleting session');
+        });
       }, () => {
-        console.error('Error in deleting session');
+        // modal dismissed
       });
     }
 
     isSessionSelected(session: Session) {
         return this.selectedSessions.indexOf(session) !== -1;
-    }
-
-    getWorkflowCallback() {
-        return {
-            isSelectedDataset: function () {
-            },
-            isSelectedJob: function () {
-            }
-        };
     }
 }

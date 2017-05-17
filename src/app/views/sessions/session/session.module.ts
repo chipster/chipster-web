@@ -15,9 +15,10 @@ import {UploadService} from "../../../shared/services/upload.service";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
+import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
 
 @NgModule({
-  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule, NgbModule],
+  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule, NgbModule, DialogModalModule],
   declarations: [SessionComponent, SessionListComponent, OpenSessionFile, JobErrorModalComponent],
   providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService],
   entryComponents: [JobErrorModalComponent]

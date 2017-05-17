@@ -1,9 +1,10 @@
 import {Injectable} from "@angular/core";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {StringModalComponent} from "./stringmodal.component";
+import {BooleanModalComponent} from "./booleanmodal.component";
 
 @Injectable()
-export class StringModalService {
+export class DialogModalService {
 
   constructor(private modalService: NgbModal) {
   }
@@ -18,6 +19,16 @@ export class StringModalService {
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
+
+    return modalRef.result;
+  }
+
+  openBooleanModal(title, message, okButtonText, cancelButtonText) {
+    let modalRef = this.modalService.open(BooleanModalComponent);
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.okButtonText = okButtonText;
+    modalRef.componentInstance.cancelButtonText = cancelButtonText;
 
     return modalRef.result;
   }
