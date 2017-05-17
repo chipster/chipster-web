@@ -15,7 +15,7 @@ import {VisualizationModalService} from "../visualizationmodal.service";
     <div *ngIf="dataReady">
       <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label> 
       <label *ngIf="isCompleteFile()">Showing all {{lineCount}} rows</label>
-      <a *ngIf="!isCompleteFile()" (click)="showAll()" class="pull-right">Show all</a>
+      <ch-link-button *ngIf="!isCompleteFile()" (click)="showAll()" class="pull-right">Show all</ch-link-button>
     </div>
 
     <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->

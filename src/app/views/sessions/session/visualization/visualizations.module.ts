@@ -23,9 +23,10 @@ import {VisualizationModalService} from "./visualizationmodal.service";
 import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component"
 import {VisualizationTSVService} from "./visualizationTSV.service"
 import {ScatterPlotService} from "./scatterplotvisualization/scatterplot.service"
+import {LinkButtonModule} from "../link-button/link-button.module";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule],
   declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,ScatterPlotComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, ScatterPlotService],
   exports: [VisualizationsComponent],

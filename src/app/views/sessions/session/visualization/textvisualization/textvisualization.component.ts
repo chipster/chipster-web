@@ -12,7 +12,7 @@ import {VisualizationModalService} from "../visualizationmodal.service";
     
     <div *ngIf="data">
       <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
-      <a class="pull-right" (click)="showAll()" *ngIf="!isCompleteFile()">Show all</a>
+      <ch-link-button class="pull-right" (click)="showAll()" *ngIf="!isCompleteFile()">Show all</ch-link-button>
       <pre>{{data}}</pre>
     </div>
   `,

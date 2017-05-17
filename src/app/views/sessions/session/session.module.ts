@@ -18,7 +18,9 @@ import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
 
 @NgModule({
-  imports: [CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule, NgbModule, DialogModalModule],
+  imports: [
+    CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule,
+    NgbModule, DialogModalModule],
   declarations: [SessionComponent, SessionListComponent, OpenSessionFile, JobErrorModalComponent],
   providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService],
   entryComponents: [JobErrorModalComponent]
