@@ -16,14 +16,15 @@
       </div>
 
       <div class="scrollable session-list">
-        <table class="table table-hover table-condensed ">
+        <table class="table table-hover table-sm">
           <tbody>
           <tr *ngFor="let session of userSessions"
-              (mouseover)="selectSession($event, session)"
-              (click)="openSession(session.sessionId)">
+              (mouseover)="previewSession($event, session)"
+              (click)="openSession(session.sessionId)"
+              [ngClass]="{'table-active': isSessionSelected(session)}">
             <td>
             <span>{{session.name}}
-              <button class="btn btn-secondary btn-xs pull-right no-border"
+              <button class="btn btn-secondary btn-xs pull-right delete-session-button"
                       (click)="deleteSession(session); $event.stopImmediatePropagation();"
                       title="Delete session"><span class="fa fa-times"></span>
               </button>
@@ -50,11 +51,10 @@
       </div>
     </div>
     <div class="col-md" id="session-preview"><!-- Session Detail -->
+      <div id="workflow-dataset-panel" *ngIf="previewedSession">
 
-      <h5 *ngFor="let session of selectedSessions">{{session.name}}</h5>
-
-      <div id="workflow-dataset-panel" *ngIf="selectedSessions.length === 1">
-        <p>{{selectedSessions[0].notes}}</p>
+        <h5>{{previewedSession.name}}</h5>
+        <p>{{previewedSession.notes}}</p>
 
         <div *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
           <ch-workflow-graph
