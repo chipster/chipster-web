@@ -83,6 +83,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   dragStarted: boolean;
 
+  subscriptions: Array<any> = [];
+
 
   ngOnInit() {
 
@@ -132,27 +134,27 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
     // apply zoom
     if (this.enabled) {
-      this.sessionEventService.getDatasetStream().subscribe(() => {
+      this.subscriptions.push(this.sessionEventService.getDatasetStream().subscribe(() => {
         this.update();
         this.renderGraph();
-      });
+      }));
 
-      this.sessionEventService.getJobStream().subscribe(() => {
+      this.subscriptions.push(this.sessionEventService.getJobStream().subscribe(() => {
         this.update();
         this.renderGraph();
-      });
+      }));
 
-      this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
+      this.subscriptions.push(this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
         this.selectedDatasets = datasets;
         this.update();
         this.renderGraph();
-      });
+      }));
 
-      this.selectedJobs$.subscribe((jobs: Array<Job>) => {
+      this.subscriptions.push(this.selectedJobs$.subscribe((jobs: Array<Job>) => {
         this.selectedJobs = jobs;
         this.update();
         this.renderGraph();
-      });
+      }));
     }
 
     // show
@@ -178,6 +180,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       }
       this.renderGraph();
     }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(subs => subs.unsubscribe());
+    this.subscriptions = [];
   }
 
   setSVGSize() {

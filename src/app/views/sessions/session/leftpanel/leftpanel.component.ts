@@ -10,7 +10,6 @@ import {Component, Input} from "@angular/core";
 import {DialogModalService} from "../dialogmodal/dialogmodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
-import {Observable} from "rxjs";
 import {SelectionHandlerService} from "../selection-handler.service";
 import {UrlTree, ActivatedRoute, Router} from "@angular/router";
 import copy from 'copy-to-clipboard';
@@ -18,7 +17,8 @@ import copy from 'copy-to-clipboard';
 
 @Component({
   selector: 'ch-leftpanel',
-  templateUrl: './leftpanel.component.html'
+  templateUrl: './leftpanel.component.html',
+  styleUrls: ['./leftpanel.component.less'],
 })
 export class LeftPanelComponent {
 
@@ -35,6 +35,7 @@ export class LeftPanelComponent {
     private sessionNameModalService: DialogModalService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
+    private selectionService: SelectionService,
     private store: Store<any>) {}
 
   datasetSearchKeyEvent(e: any) {
@@ -52,6 +53,11 @@ export class LeftPanelComponent {
 
   getDatasetList(): Dataset[] {
     return UtilsService.mapValues(this.sessionData.datasetsMap);
+  }
+
+  getDatasetListSorted(): Dataset[] {
+    // sort by created date, oldest first (string comparison should do with the current date format)
+    return this.getDatasetList().sort((a, b) => a.created.localeCompare(b.created));
   }
 
   downloadSession(): void {
