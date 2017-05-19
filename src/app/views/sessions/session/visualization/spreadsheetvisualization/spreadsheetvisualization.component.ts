@@ -98,8 +98,6 @@ export class SpreadsheetVisualizationComponent implements AfterViewInit, OnDestr
 
   getSettings(headers: string[], content: string[][], container) {
 
-    console.log('spreadsheet container height', container.offsetHeight, container.style.height);
-
     const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
     return {
       data: content,
