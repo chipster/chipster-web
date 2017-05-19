@@ -6,19 +6,18 @@
 </div>
 
 <div class="modal-body">
-  <ch-text-visualization
-    *ngIf="visualizationId === 'text'"
-    [dataset]="dataset"
-    [showFullData]=true>
-  </ch-text-visualization>
+  <div class="visualization-modal-content">
+    <ch-text-visualization
+      *ngIf="visualizationId === 'text'"
+      [dataset]="dataset"
+      [showFullData]=true>
+    </ch-text-visualization>
 
-  <ch-spreadsheet-visualization
-    *ngIf="visualizationId === 'spreadsheet'"
-    [dataset]="dataset"
-    [showFullData]=true>
-  </ch-spreadsheet-visualization>
-</div>
-
-<div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
+    <ch-spreadsheet-visualization
+      class="modal-spreadsheet"
+      *ngIf="visualizationId === 'spreadsheet'"
+      [dataset]="dataset"
+      [showFullData]=true>
+    </ch-spreadsheet-visualization>
+  </div>
 </div>

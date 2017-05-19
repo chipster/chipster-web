@@ -1,6 +1,6 @@
 import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, OnChanges, NgZone, OnDestroy} from "@angular/core";
+import {Input, Component, NgZone, OnDestroy, AfterViewInit} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -19,10 +19,11 @@ import {VisualizationModalService} from "../visualizationmodal.service";
     </div>
 
     <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->
-    <div id="{{tableContainerId}}"></div>
-    `
+    <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+    `,
+  styleUrls: ['./spreadsheetvisualization.component.less']
 })
-export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
+export class SpreadsheetVisualizationComponent implements AfterViewInit, OnDestroy {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
@@ -42,7 +43,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private zone: NgZone) {
   }
 
-  ngOnChanges() {
+  ngAfterViewInit() {
     let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((result: any) => {
@@ -71,7 +72,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       const container = document.getElementById(this.tableContainerId);
 
       this.zone.runOutsideAngular(() => {
-        this.hot = new Handsontable(container, this.getSettings(headers, content));
+        this.hot = new Handsontable(container, this.getSettings(headers, content, container));
       });
       this.dataReady = true;
     }, (e: Response) => {
@@ -95,8 +96,11 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     this.visualizationModalService.openVisualizationModal(this.dataset, 'spreadsheet');
   }
 
-  getSettings(headers: string[], content: string[][]) {
-    const tableHeight = this.showFullData ? 600 : content.length * 23 + 40; // extra for header-row and borders
+  getSettings(headers: string[], content: string[][], container) {
+
+    console.log('spreadsheet container height', container.offsetHeight, container.style.height);
+
+    const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
     return {
       data: content,
       colHeaders: headers,

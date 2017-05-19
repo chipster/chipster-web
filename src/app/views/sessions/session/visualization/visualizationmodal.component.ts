@@ -4,7 +4,8 @@ import Dataset from "../../../../model/session/dataset";
 
 @Component({
   selector: 'ch-visualizationmodal',
-  templateUrl: './visualizationmodal.component.html'
+  templateUrl: './visualizationmodal.component.html',
+  styleUrls: ['./visualizationmodal.component.less']
 })
 export class VisualizationModalComponent {
 
