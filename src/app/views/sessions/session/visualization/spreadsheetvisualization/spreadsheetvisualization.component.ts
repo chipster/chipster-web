@@ -1,6 +1,6 @@
 import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
-import {Input, Component, NgZone, OnDestroy, AfterViewInit} from "@angular/core";
+import {Input, Component, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
@@ -23,7 +23,7 @@ import {VisualizationModalService} from "../visualizationmodal.service";
     `,
   styleUrls: ['./spreadsheetvisualization.component.less']
 })
-export class SpreadsheetVisualizationComponent implements AfterViewInit, OnDestroy {
+export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
@@ -43,7 +43,11 @@ export class SpreadsheetVisualizationComponent implements AfterViewInit, OnDestr
     private zone: NgZone) {
   }
 
-  ngAfterViewInit() {
+  ngOnChanges() {
+
+    // remove old table
+    this.ngOnDestroy();
+
     let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((result: any) => {
@@ -81,6 +85,7 @@ export class SpreadsheetVisualizationComponent implements AfterViewInit, OnDestr
   }
 
   ngOnDestroy() {
+
     if (this.hot){
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
