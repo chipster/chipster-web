@@ -6,19 +6,20 @@ import Dataset from "../../../../model/session/dataset";
 import Tool from "../../../../model/session/tool";
 import {SelectionService} from "../selection.service";
 import * as _ from "lodash";
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnInit, OnDestroy} from "@angular/core";
 import {ToolSelection} from "./ToolSelection";
 import {Store} from "@ngrx/store";
 import {Subject} from "rxjs";
 import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 import {SessionData} from "../../../../model/session/session-data";
+import {subscribeOn} from "rxjs/operator/subscribeOn";
 
 
 @Component({
   selector: 'ch-toolbox',
   templateUrl: './tools.html'
 })
-export class ToolBoxComponent {
+export class ToolBoxComponent implements OnInit, OnDestroy {
 
   @Input() sessionData: SessionData;
 
@@ -38,6 +39,8 @@ export class ToolBoxComponent {
   toolSelection: ToolSelection = null;
   selectedDatasets: Dataset[] = [];
 
+  subscriptions: Array<any> = [];
+
   ngOnInit() {
     this.tools = _.cloneDeep(this.sessionData.tools);
     this.modules = _.cloneDeep(this.sessionData.modules);
@@ -45,13 +48,13 @@ export class ToolBoxComponent {
 
     this.toolSelection$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection})).subscribe(this.store.dispatch.bind(this.store));
 
-    this.store.select('toolSelection').subscribe(
+    this.subscriptions.push(this.store.select('toolSelection').subscribe(
       (toolSelection: ToolSelection) => {this.toolSelection = toolSelection},
       (error: any) => {console.error('Fetching tool from store failed', error)}
-    );
+    ));
 
     // fetch selectedDatasets from store and if tool is selected update it's inputbindings and update store
-    this.store.select('selectedDatasets').subscribe(
+    this.subscriptions.push(this.store.select('selectedDatasets').subscribe(
       (selectedDatasets: Array<Dataset>) => {
         this.selectedDatasets = selectedDatasets;
         if(this.toolSelection) {
@@ -61,7 +64,12 @@ export class ToolBoxComponent {
         }
       },
       (error: any) => {console.error('Fetching selected datasets from store failed', error)}
-    );
+    ));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((subs) => subs.unsubscribe());
+    this.subscriptions = [];
   }
 
   isRunEnabled() {
