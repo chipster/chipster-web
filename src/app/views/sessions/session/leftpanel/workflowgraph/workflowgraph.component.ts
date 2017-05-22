@@ -499,11 +499,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
             var category = module.categoriesMap.get(sourceJob.toolCategory);
             if (category) {
               color = category.color;
+            } else {
+              //console.log('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
             }
+          } else {
+            //console.log('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
           }
         } else {
-          //console.log('source job of dataset ' + dataset.name + ' not found');
+          console.log('source job of dataset ' + dataset.name + ' not found');
         }
+      } else {
+        //console.log('dataset source job ' +  dataset.name + ' is null');
       }
 
       // when opening a session file, datasets may be without names for some time

@@ -78,6 +78,7 @@ export class ToolBoxComponent {
     let job: Job = <Job>{
       toolId: this.toolSelection.tool.name.id,
       toolCategory: this.toolSelection.category.name,
+      module: this.toolSelection.module.moduleId,
       toolName: this.toolSelection.tool.name.displayName,
       toolDescription: this.toolSelection.tool.description,
       state: 'NEW',
