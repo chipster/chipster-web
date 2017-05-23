@@ -4,6 +4,7 @@ import Session from "../../model/session/session";
 import {SessionData} from "../../model/session/session-data";
 import {Component} from "@angular/core";
 import {Router} from "@angular/router";
+import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 
 @Component({
   selector: 'ch-session-list',
@@ -12,17 +13,18 @@ import {Router} from "@angular/router";
 })
 export class SessionListComponent {
 
-    public selectedSessions: Session[];
+    public previewedSession: Session;
     public previousSession: Session;
     public userSessions: Session[];
     public sessionData: SessionData;
+    private selectedSessionId: string;
 
     constructor(
         private router: Router,
-        private sessionResource: SessionResource) {}
+        private sessionResource: SessionResource,
+        private dialogModalService: DialogModalService) {}
 
     ngOnInit() {
-      this.selectedSessions = [];
       this.updateSessions();
     }
 
@@ -43,20 +45,21 @@ export class SessionListComponent {
     }
 
     openSession(sessionId: string) {
+      this.selectedSessionId = sessionId;
       this.router.navigate(['/sessions', sessionId]);
     }
 
-    selectSession(event: any, session: Session) {
-        this.selectedSessions = [session];
+    previewSession(event: any, session: Session) {
+        this.previewedSession = session;
 
-        if (this.selectedSessions.length === 1) {
+        if (this.previewedSession) {
             if (session !== this.previousSession) {
                 // hide the old session immediately
                 this.previousSession = session;
                 this.sessionData = null;
-                this.sessionResource.loadSession(this.selectedSessions[0].sessionId).subscribe((fullSession: SessionData) => {
+                this.sessionResource.loadSession(this.previewedSession.sessionId).subscribe((fullSession: SessionData) => {
                     // don't show if the selection has already changed
-                    if (this.selectedSessions[0] === session) {
+                    if (this.previewedSession === session) {
                         this.sessionData = fullSession;
                     }
                 });
@@ -65,24 +68,20 @@ export class SessionListComponent {
     }
 
     deleteSession(session: Session) {
-      this.sessionResource.deleteSession(session.sessionId).subscribe( (response: any) => {
-        this.updateSessions();
-        this.selectedSessions.length = 0;
+
+      this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
+        this.sessionResource.deleteSession(session.sessionId).subscribe( (response: any) => {
+          this.updateSessions();
+          this.previewedSession = null;
+        }, () => {
+          console.error('Error in deleting session');
+        });
       }, () => {
-        console.error('Error in deleting session');
+        // modal dismissed
       });
     }
 
     isSessionSelected(session: Session) {
-        return this.selectedSessions.indexOf(session) !== -1;
-    }
-
-    getWorkflowCallback() {
-        return {
-            isSelectedDataset: function () {
-            },
-            isSelectedJob: function () {
-            }
-        };
+        return this.selectedSessionId === session.sessionId;
     }
 }

@@ -19,14 +19,14 @@ export default [
   {
     id: 'expressionprofile',
     name: 'Expression profile',
-    typeTags: [Tags.TSV],
+    typeTags: [Tags.GENE_EXPRS],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
   {
     id:'scatterplot',
     name:'Scatter Plot',
-    typeTags: [Tags.TSV],
+    typeTags: [Tags.GENE_EXPRS],
     anyInputCountSupported:false,
     supportedInputFileCounts: [1]
   },

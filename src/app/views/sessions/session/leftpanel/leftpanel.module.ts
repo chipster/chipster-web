@@ -9,11 +9,10 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {AddDatasetModalComponent} from "./adddatasetmodal/adddatasetmodal.component";
 import {AddDatasetModalContent} from "./adddatasetmodal/adddatasetmodal.content";
 import {UploadService} from "../../../../shared/services/upload.service";
-import {SessionNameModalModule} from "../stringmodal/stringmodal.module";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @NgModule({
-  imports: [ CommonModule, SharedModule, FormsModule, NgbModule, SessionNameModalModule ],
+  imports: [ CommonModule, SharedModule, FormsModule, NgbModule ],
   declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent],
   providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
   exports: [LeftPanelComponent, WorkflowGraphComponent],

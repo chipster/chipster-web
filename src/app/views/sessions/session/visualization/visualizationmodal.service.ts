@@ -10,7 +10,7 @@ export class VisualizationModalService {
   }
 
   openVisualizationModal(dataset: Dataset, visualizationId: string) {
-    const modalRef = this.ngbModal.open(VisualizationModalComponent, {size: "lg"});
+    const modalRef = this.ngbModal.open(VisualizationModalComponent, {size: "lg", windowClass: "modal-xl"});
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.visualizationId = visualizationId;
   }

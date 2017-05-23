@@ -89,11 +89,6 @@
   padding-right: 0;
 }
 
-.no-border {
-  border: 0 solid transparent;
-  background: transparent;
-}
-
 .link-cursor {
   cursor: pointer;
 }
@@ -189,8 +184,14 @@ pdf-viewer canvas {
   border: 1px solid #ccc;
 }
 
+// extra large modal for visualizations
+.modal-xl > .modal-dialog {
+  max-width: none;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
 @import "./app/views/sessions/session/session.component.less";
-@import "./app/views/sessions/session/leftpanel/leftpanel.component.less";
 @import "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component.less";
 @import "./app/views/sessions/session/tools/tools";
 @import "./app/views/sessions/session/visualization/expressionprofile/expressionprofile";

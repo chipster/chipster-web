@@ -20,17 +20,15 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule} from "@angular/forms";
 import {VisualizationModalComponent} from "./visualizationmodal.component";
 import {VisualizationModalService} from "./visualizationmodal.service";
-import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component";
-import {VisualizationTSVService} from "./visualizationTSV.service";
-import {ScatterPlotService} from "./scatterplotvisualization/scatterplot.service";
-import {VolcanoPlotComponent} from "./volcanoplot/volcanoplot.component";
-import {VolcanoPlotService} from "./volcanoplot/volcanoplot.service";
+import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component"
+import {VisualizationTSVService} from "./visualizationTSV.service"
+import {ScatterPlotService} from "./scatterplotvisualization/scatterplot.service"
+import {LinkButtonModule} from "../link-button/link-button.module";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule],
-  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent,
-                 PhenodataVisualizationComponent,ScatterPlotComponent,VolcanoPlotComponent],
-  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, ScatterPlotService,VolcanoPlotService],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule],
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,ScatterPlotComponent],
+  providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, ScatterPlotService],
   exports: [VisualizationsComponent],
   entryComponents: [VisualizationModalComponent]
 })

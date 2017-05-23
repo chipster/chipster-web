@@ -7,7 +7,7 @@ import JobParameter from "../../../../../model/session/jobparameter";
                 Parameters
                 <span class="lighter" *ngIf="parameters.length > defaultLimit"> {{limit}} of {{parameters.length}}</span>
              </span>
-             <span *ngIf="parameters.length > defaultLimit" ><a class="pull-right" (click)="toggleParameterList()">{{buttonText}}</a></span>
+             <span *ngIf="parameters.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
                 
              <table class="table table-condensed parameter-table">
                 <tr *ngFor="let param of parameters; let i = index">

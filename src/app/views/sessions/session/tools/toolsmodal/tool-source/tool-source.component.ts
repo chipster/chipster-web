@@ -4,7 +4,8 @@ import Tool from "../../../../../../model/session/tool";
 
 @Component({
   selector: 'ch-tool-source',
-  template: '<pre>{{source}}</pre>',
+  template: '<pre class="tool-source">{{source}}</pre>',
+  styleUrls: ['./tool-source.component.less']
 })
 export class ToolSourceComponent implements OnInit {
 

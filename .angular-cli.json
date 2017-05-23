@@ -61,7 +61,10 @@
   },
   "defaults": {
     "styleExt": "less",
-    "component": {}
+    "component": {
+      "viewEncapsulation": "Emulated",
+      "changeDetection": "Default"
+    }
   }
 }
 

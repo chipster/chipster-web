@@ -24,6 +24,7 @@ export class SessionComponent {
     sessionData: SessionData;
     deletedDatasets: Array<Dataset>;
     deletedDatasetsTimeout: any;
+    subscriptions: Array<any> = [];
 
     constructor(
         private router: Router,
@@ -65,14 +66,14 @@ export class SessionComponent {
 
       this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-      this.SessionEventService.getAuthorizationStream().subscribe(change => {
+      this.subscriptions.push(this.SessionEventService.getAuthorizationStream().subscribe(change => {
         if (change.event.type === 'DELETE') {
           alert('The session has been deleted.');
           this.router.navigate(['/sessions']);
         }
-      });
+      }));
 
-      this.SessionEventService.getJobStream().subscribe(change => {
+      this.subscriptions.push(this.SessionEventService.getJobStream().subscribe(change => {
 
         let oldValue = <Job>change.oldValue;
         let newValue = <Job>change.newValue;
@@ -93,13 +94,14 @@ export class SessionComponent {
             console.info(newValue);
           }
         }
-      });
+      }));
     }
-
-
 
     ngOnDestroy() {
       this.SessionEventService.unsubscribe();
+
+      this.subscriptions.forEach(subs => subs.unsubscribe());
+      this.subscriptions = [];
     }
 
     getSelectedDatasets() {

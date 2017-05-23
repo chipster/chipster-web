@@ -50,9 +50,9 @@
           <div class="row">
 
             <div class="col-6">
-              <div class="btn-group-vertical tool-list">
-                <button type="button" class="btn btn-secondary tool-list-item"
-                        [ngClass]="{'active':category===selectedCategory}"
+              <div class="list-group tool-list">
+                <button type="button" class="list-group-item list-group-item-action tool-list-item"
+                        [ngClass]="{active: category===selectedCategory}"
                         (click)="selectCategory(category)"
                         *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
                   <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
@@ -61,10 +61,10 @@
             </div>
 
             <div class="col-6">
-              <div class="btn-group-vertical tool-list" *ngIf="selectedCategory">
+              <div class="list-group tool-list" *ngIf="selectedCategory">
                 <button type="button"
-                        class="btn btn-secondary tool-list-item"
-                        [ngClass]="{'active':tool===toolSelection}"
+                        class="list-group-item list-group-item-action tool-list-item"
+                        [ngClass]="{active: tool===toolSelection?.tool}"
                         (click)="selectTool(tool)"
                         *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
                         id="tool-button-{{tool.id}}"
@@ -91,7 +91,7 @@
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <ng-template ngbTabTitle>Inputs</ng-template>
+        <ng-template ngbTabTitle><!--<span *ngIf="true" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>-->Inputs</ng-template>
         <ng-template ngbTabContent>
   			<ch-tool-inputs
           [sessionData]="sessionData"

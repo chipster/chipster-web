@@ -7,7 +7,7 @@ import {DatasetModalService} from "../datasetmodal.service";
 import {SessionComponent} from "../../session.component";
 import {SessionData} from "../../../../../model/session/session-data";
 
-import {StringModalService} from "../../stringmodal/stringmodal.service";
+import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 
 @Component({
   selector: 'ch-single-dataset',
@@ -30,7 +30,7 @@ export class SingleDatasetComponent {
     constructor(
       private sessionDataService: SessionDataService,
       private datasetModalService: DatasetModalService,
-      private stringModalService: StringModalService){}
+      private stringModalService: DialogModalService){}
 
     ngOnInit() {
         this.sourceJob = this.getSourceJob(this.dataset);

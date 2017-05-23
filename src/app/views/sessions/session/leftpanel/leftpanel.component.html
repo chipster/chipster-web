@@ -47,14 +47,16 @@
               </div>
             </div>
 
-            <div class="btn-group-vertical dataset-list">
-              <button type="button"
-                      class="btn btn-secondary"
-                      ngClass="{active:selectionService.isSelectedDatasetById(dataset.datasetId)}"
-                      (click)="toggleDatasetSelection($event, dataset)"
-                      *ngFor="let dataset of getDatasetList() | datasetsearch:datasetSearch">
-                {{dataset.name}}
-              </button>
+            <div class="dataset-list-panel">
+              <div class="list-group dataset-list">
+                <button type="button"
+                        class="dataset-list-button list-group-item list-group-item-action"
+                        [ngClass]="{active: selectionService.isSelectedDatasetById(dataset.datasetId)}"
+                        (click)="toggleDatasetSelection($event, dataset)"
+                        *ngFor="let dataset of getDatasetListSorted() | datasetsearch:datasetSearch">
+                  {{dataset.name}}
+                </button>
+              </div>
             </div>
           </ng-template>
         </ngb-tab>

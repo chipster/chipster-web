@@ -65,6 +65,9 @@ export class ToolsModalComponent {
 
     // trigger parameter validation
     if (this.toolSelection) {
+      // make sure the module and category are selected even after changing the session
+      this.selectModule(this.toolSelection.module);
+      this.selectCategory(this.toolSelection.category);
       this.selectTool(this.toolSelection.tool);
     } else {
       this.selectModule(this.modules[0]);
