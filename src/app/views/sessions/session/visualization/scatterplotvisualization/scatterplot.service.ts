@@ -33,21 +33,21 @@ export class ScatterPlotService {
       if (startXValue < endXValue) {
         if (startYValue < endYValue) {
           if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
-            selectedGenes.push(val.geneID);
+            selectedGenes.push(val.id);
           }
         } else if (startYValue > endYValue) {
           if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
-            selectedGenes.push(val.geneID);
+            selectedGenes.push(val.id);
           }
         }
       } else if (startXValue > endXValue) {
         if (startYValue < endYValue) {
           if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
-            selectedGenes.push(val.geneID);
+            selectedGenes.push(val.id);
           }
         } else if (startYValue > endYValue) {
           if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
-            selectedGenes.push(val.geneID);
+            selectedGenes.push(val.id);
           }
         }
       }

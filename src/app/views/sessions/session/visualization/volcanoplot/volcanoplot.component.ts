@@ -10,7 +10,6 @@ import {VolcanoPlotService} from "./volcanoplot.service";
 import {tsv} from "d3-request";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 import Point from "../model/point";
-import {Color} from "d3-color";
 
 
 @Component({
