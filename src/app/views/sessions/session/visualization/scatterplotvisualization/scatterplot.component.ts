@@ -8,7 +8,7 @@ import {SessionDataService} from "../../sessiondata.service";
 import Point from "../model/point";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import {ScatterPlotService} from "./scatterplot.service"
-import {PlotData} from "./plotData"
+import {PlotData} from "../model/plotData"
 
 @Component({
   selector: 'ch-scatter-plot',
@@ -40,7 +40,7 @@ export class ScatterPlotComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    const rowLimit = 5000;
+    const rowLimit =5000;
     let self = this;
     const datasetName = this.dataset.name;
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId)
@@ -66,7 +66,7 @@ export class ScatterPlotComponent implements OnChanges {
           }
 
         } else {
-          this.errorMessage = `Only microarray data supported, didn’t find any columns starting with chip.`;
+          this.errorMessage = 'Only microarray data supported, didn’t find any columns starting with chip.';
           self.scatterPlotVisible = false;
         }
       })
@@ -84,7 +84,7 @@ export class ScatterPlotComponent implements OnChanges {
     // Creating points for scatter plot combining two chip columns
     orderedGenesValues.forEach(function (geneRow) {
       let curPlotData = new PlotData();
-      curPlotData.geneID = geneRow.id;
+      curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(geneRow.values[self.chipHeaders.indexOf(self.selectedChipHeadX)], geneRow.values[self.chipHeaders.indexOf(self.selectedChipHeadY)]);
       self.plotData.push(curPlotData);
     });
@@ -100,25 +100,14 @@ export class ScatterPlotComponent implements OnChanges {
     const margin = {top: 10, right: 10, bottom: 10, left: 20};
     let size = {width: scatterPlotWidth - margin.left-margin.right, height: 500-margin.top-margin.bottom};
 
-    /*let scatterPlotArea = {
-      width: size.width,
-      height: size.height - margin.top - margin.bottom
-    };
-
-    console.log(scatterPlotArea.width);
-    console.log(scatterPlotArea.height);
-    */
     //Define the SVG
     this.svg.attr('width', size.width + margin.left + margin.right)
             .attr('height', size.height+margin.top+margin.bottom).attr('id', 'svg');
-
-    console.log(this.svg);
 
     //Adding the X-axis
     let xScale = d3.scaleLinear().range([0, size.width])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
     let xAxis = d3.axisBottom(xScale).ticks(10).tickSize(-size.height).tickSizeOuter(0);
-    ;
     this.svg.append('g')
       .attr('class', 'x axis').attr('transform', 'translate(' + margin.left + ',' + size.height + ')')
       .call(xAxis);
@@ -140,7 +129,7 @@ export class ScatterPlotComponent implements OnChanges {
     this.svg.selectAll(".dot").data(self.plotData)
       .enter().append("circle")
       .attr("class", "dot")
-      .attr('id', (d: PlotData) => 'dot' + d.geneID)
+      .attr('id', (d: PlotData) => 'dot' + d.id)
       .attr("r", 2)
       .attr("cx", function (d) {
         return xScale(d.plotPoint.x);

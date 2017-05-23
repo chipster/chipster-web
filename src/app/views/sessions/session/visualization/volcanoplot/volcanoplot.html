@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-8">
+    <div class *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
+    <div id="volcanoplot"></div>
+  </div>
+  <div class="col-4" *ngIf="volcanoPlotVisible" id="setting">
+    <div class="row">
+      <div class="my-card">
+        <div class="card">
+          <div class="card-header">Settings</div>
+          <div class="card-block">
+            <div class="table table-info">
+              <tr>
+                <td>
+                  <h6 class="card-subtitle">Fold Change</h6>
+                  <select [(ngModel)]="selectedXAxisHeader" (ngModelChange)="setColumnSelectionX($event)">
+                    <option *ngFor="let fcHeader of volcanoPlotFCHeaders">{{fcHeader}}</option>
+                  </select>
+                </td>
+                <td>
+                  <h6 class="card-subtitle">P Value</h6>
+                  <select [(ngModel)]="selectedYAxisHeader" (ngModelChange)="setColumnSelectionY($event)">
+                    <option *ngFor="let pheader of volcanoPlotPHeaders">{{pheader}}</option>
+                  </select>
+                </td>
+              </tr>
+            </div>
+          </div>
+          <div class="card" *ngIf="">
+            <div class="card-header">Selected</div>
+            <div class="card-block">
+              <div class="btn-group-vertical" role="group">
+                <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
+                </button>
+              </div>
+              <h6></h6>
+              <ul id="" *ngFor="">
+                <li></li>
+              </ul>
+              <button class="btn btn-info" (click)="resetSelections()">Clear Selection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

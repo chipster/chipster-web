@@ -1,8 +1,7 @@
 import {Injectable} from "@angular/core";
 import Point from "../model/point";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 import {VisualizationTSVService} from "../visualizationTSV.service";
-import {PlotData} from "./plotData";
+import {PlotData} from "../model/plotData";
 
 @Injectable()
 export class ScatterPlotService {

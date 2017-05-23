@@ -106,6 +106,17 @@
       </ng-template>
     </ngb-tab>
 
+    <ngb-tab id="{{getTabId('volcanoplot')}}"
+             *ngIf="isTabVisible('volcanoplot')">
+      <ng-template ngbTabTitle>Volcano Plot</ng-template>
+      <ng-template ngbTabContent>
+        <ch-volcano-plot
+          *ngIf="active === getTabId('volcanoplot')"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-volcano-plot>
+      </ng-template>
+    </ngb-tab>
+
   </ngb-tabset>
 </div>
 

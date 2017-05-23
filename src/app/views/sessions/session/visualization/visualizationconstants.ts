@@ -63,5 +63,12 @@ export default [
     typeTags: [Tags.TSV],
     anyInputCountSupported: false,
     supportedInputFileCounts: [2, 3]
-  }
+  },
+  {
+    id:'volcanoplot',
+    name:'Volcano Plot',
+    typeTags: [Tags.TSV],
+    anyInputCountSupported:false,
+    supportedInputFileCounts: [1]
+  },
 ];
