@@ -9,7 +9,6 @@ import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
-import {SelectionService} from "../../selection.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -38,7 +37,6 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     private tsvReader: TSVReader,
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
-    private selectionService: SelectionService,
     private zone: NgZone) {}
 
   ngOnInit() {
@@ -307,7 +305,7 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
 
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    this.datasets = this.selectionService.selectedDatasets.map(dataset => this.datasetsMap.get(dataset.datasetId));
+    this.datasets = this.datasets.map(dataset => this.datasetsMap.get(dataset.datasetId));
 
     var headers = this.getHeaders(this.datasets);
     var array = this.getRows(this.datasets, headers);
