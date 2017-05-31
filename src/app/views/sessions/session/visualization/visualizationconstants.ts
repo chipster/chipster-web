@@ -47,7 +47,7 @@ export default [
   {
     id: 'phenodata',
     name: 'Phenodata',
-    typeTags: [Tags.TSV, Tags.BAM],
+    typeTags: [Tags.GENE_EXPRS, Tags.BAM],
     anyInputCountSupported: true
   },
   {
