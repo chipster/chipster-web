@@ -6,10 +6,8 @@ import * as _ from "lodash";
 import {Component, Input, SimpleChanges, ViewEncapsulation, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
-import {SelectionService} from "../../selection.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -38,7 +36,6 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     private tsvReader: TSVReader,
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
-    private selectionService: SelectionService,
     private zone: NgZone) {}
 
   ngOnInit() {
@@ -64,6 +61,7 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     if (this.hot){
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
+        this.hot = null;
       });
     }
   }
@@ -131,14 +129,15 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   reset() {
+    this.datasets.forEach((dataset: Dataset) => this.resetDataset(dataset));
+  }
 
-    this.datasets.forEach((dataset: Dataset) => {
-      if (Utils.getFileExtension(dataset.name) === 'tsv') {
-        this.resetTsv(dataset);
-      } else {
-        this.resetGenericFile(dataset);
-      }
-    });
+  resetDataset(dataset: Dataset) {
+    if (Utils.getFileExtension(dataset.name) === 'tsv') {
+      this.resetTsv(dataset);
+    } else {
+      this.resetGenericFile(dataset);
+    }
   }
 
   remove() {
@@ -152,9 +151,7 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
 
   resetTsv(dataset: Dataset) {
 
-    this.tsvReader.getTSVFile(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((tsvFile: TSVFile) => {
-
-      let fileHeaders = tsvFile.headers.headers;
+    this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((fileHeaders: string[]) => {
 
       let metadata: MetadataEntry[] = [];
 
@@ -163,12 +160,16 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
       });
 
       chipHeaders.forEach((fileHeader) => {
-        var entry = <MetadataEntry>{
+        metadata.push(<MetadataEntry>{
           column: fileHeader,
           key: 'sample',
           value: fileHeader.replace('chip.', '')
-        };
-        metadata.push(entry);
+        });
+        metadata.push(<MetadataEntry>{
+          column: fileHeader,
+          key: 'group',
+          value: null
+        });
       });
 
       dataset.metadata = metadata;
@@ -179,11 +180,17 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   resetGenericFile(dataset: Dataset) {
-
+    /*
     dataset.metadata = [{
       column: null,
       key: 'sample',
       value: dataset.name
+    }];
+    */
+    dataset.metadata = [{
+      column: null,
+      key: 'group',
+      value: null
     }];
 
     this.updateView();
@@ -307,7 +314,12 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
 
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    this.datasets = this.selectionService.selectedDatasets.map(dataset => this.datasetsMap.get(dataset.datasetId));
+    this.datasets = this.datasets.map(dataset => this.datasetsMap.get(dataset.datasetId));
+
+    // generate phenodata for all datasets that don't have it yet
+    this.datasets
+      .filter(d => !d.metadata || d.metadata.length === 0)
+      .map(d => this.resetDataset(d));
 
     var headers = this.getHeaders(this.datasets);
     var array = this.getRows(this.datasets, headers);
@@ -334,7 +346,9 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     }
     this.array = array;
     this.zone.runOutsideAngular(() => {
-      this.hot.loadData(this.array);
+      if (this.hot) {
+        this.hot.loadData(this.array);
+      }
     });
   }
 

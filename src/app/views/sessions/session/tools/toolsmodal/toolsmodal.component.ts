@@ -6,7 +6,6 @@ import Category from "../../../../../model/session/category";
 import ToolParameter from "../../../../../model/session/toolparameter";
 import {SessionDataService} from "../../sessiondata.service";
 import {Observable, Subject} from "rxjs/Rx";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import * as _ from "lodash";
 import {Component, ViewChild, ElementRef, Input, Output, EventEmitter} from "@angular/core";
@@ -154,11 +153,9 @@ export class ToolsModalComponent {
     this.toolsModalRef.close();
   };
 
-
-
   // TODO move to service?
-  getDatasetHeaders(): Observable<TSVFile>[] {
-    return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFile(this.sessionDataService.getSessionId(), dataset.datasetId));
+  getDatasetHeaders(): Observable<Array<string>>[] {
+    return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId));
   }
 
   // TODO move to service?
@@ -168,8 +165,8 @@ export class ToolsModalComponent {
     }
 
     if (parameter.type === 'COLUMN_SEL') {
-      Observable.forkJoin(this.getDatasetHeaders()).subscribe((tsvFiles: Array<TSVFile>) => {
-        let columns = _.uniq(_.flatten(tsvFiles.map((tsvFile: TSVFile) => tsvFile.headers.headers)));
+      Observable.forkJoin(this.getDatasetHeaders()).subscribe((datasetsHeaders: Array<Array<string>>) => {
+        let columns = _.uniq(_.flatten(datasetsHeaders));
         parameter.selectionOptions = columns.map(function (column) {
           return {id: column};
         });
