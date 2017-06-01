@@ -1,13 +1,13 @@
 import {Component, Input, OnChanges, HostListener} from "@angular/core";
 import * as d3 from "d3";
 import Dataset from "../../../../../model/session/dataset";
-import {VisualizationTSVService} from "../visualizationTSV.service";
+import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {SessionDataService} from "../../sessiondata.service";
 import Point from "../model/point";
 import TSVRow from "../../../../../model/tsv/TSVRow";
-import {ScatterPlotService} from "./scatterplot.service"
+import {PlotService} from "../../../../../shared/visualization/plot.service"
 import {PlotData} from "../model/plotData"
 
 @Component({
@@ -35,7 +35,7 @@ export class ScatterPlotComponent implements OnChanges {
   constructor(private visualizationTSVService: VisualizationTSVService,
               private fileResource: FileResource,
               private sessionDataService: SessionDataService,
-              private scatterPlotService: ScatterPlotService) {
+              private plotService: PlotService) {
 
   }
 
@@ -97,17 +97,29 @@ export class ScatterPlotComponent implements OnChanges {
     var self = this;
     let scatterPlotWidth = document.getElementById('scatterplot').offsetWidth;
 
-    const margin = {top: 10, right: 10, bottom: 10, left: 20};
-    let size = {width: scatterPlotWidth - margin.left-margin.right, height: 500-margin.top-margin.bottom};
+    let margin = {top: 20, right: 20, bottom: 20, left: 20};
+    let padding = {top: 60, right: 60, bottom: 60, left: 60};
+      let outerWidth = scatterPlotWidth;
+      let outerHeight = 600;
+      let innerWidth = outerWidth - margin.left - margin.right;
+      let innerHeight = outerHeight - margin.top - margin.bottom;
+      let size={
+        width : innerWidth - padding.left - padding.right,
+        height : innerHeight - padding.top - padding.bottom
+    };
+
+
 
     //Define the SVG
-    this.svg.attr('width', size.width + margin.left + margin.right)
-            .attr('height', size.height+margin.top+margin.bottom).attr('id', 'svg');
+    this.svg.attr('width', outerWidth)
+            .attr('height', outerHeight).attr('id', 'svg')
+            .append("g");
 
+    console.log(this.visualizationTSVService.getDomainBoundaries(tsv));
     //Adding the X-axis
     let xScale = d3.scaleLinear().range([0, size.width])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let xAxis = d3.axisBottom(xScale).ticks(10).tickSize(-size.height).tickSizeOuter(0);
+    let xAxis = d3.axisBottom(xScale).ticks(10).tickSize(-size.height);
     this.svg.append('g')
       .attr('class', 'x axis').attr('transform', 'translate(' + margin.left + ',' + size.height + ')')
       .call(xAxis);
@@ -115,11 +127,11 @@ export class ScatterPlotComponent implements OnChanges {
     //Adding the Y-axis
     let yScale = d3.scaleLinear().range([size.height, 0])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let yAxis = d3.axisLeft(yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0);
+    let yAxis = d3.axisLeft(yScale).ticks(10).tickSize(-size.width);
 
     this.svg.append('g')
       .attr('class', 'y axis')
-      .attr('transform', 'translate(' + margin.left + ',0 )')
+      .attr('transform', 'translate(' + margin.left+ ',0 )')
       .call(yAxis);
 
     let drag = d3.drag();
@@ -202,20 +214,16 @@ export class ScatterPlotComponent implements OnChanges {
         //define the points that are within the drag boundary
         let dragEndPoint = new Point(endPoint.x, endPoint.y);
         let dragStartPoint = new Point(startPoint.x, startPoint.y);
-        this.selectedGeneIds = this.scatterPlotService.getSelectedGeneIds(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
+        this.selectedGeneIds = this.plotService.getSelectedDataPoints(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
 
         //Populate the selected gene list to show in the selected box view{
         this.selectedGeneRows = tsv.body.getTSVRows(this.selectedGeneIds);
-        this.addSelectedDataIds(this.selectedGeneIds);
         resetSelectionRectangle();
 
         this.selectedGeneIds.forEach(function (selectedId) {
           self.setSelectionStyle(selectedId);
         });
-
-
       }
-
     });
 
     // Hide the Rectangle after drag ends
@@ -226,11 +234,6 @@ export class ScatterPlotComponent implements OnChanges {
 
   }
 
-  // Do the stylings for the selected nodes
-  addSelectedDataIds(id: Array<string>) {
-
-
-  }
 
   setSelectionStyle(id: string) {
     d3.select('#dot' + id).classed('selected', true).style('fill', 'blue').attr('r', 3);
@@ -238,14 +241,12 @@ export class ScatterPlotComponent implements OnChanges {
 
   removeSelectionStyle(id: string) {
     d3.select('#dot' + id).classed('selected', false).style('fill', 'red').attr('r', 2);
-
   }
 
 
   resetSelections(): void {
     this.removeSelectedPoints(this.selectedGeneIds);
     this.selectedGeneRows = [];
-
   }
 
   removeSelectedPoints(ids: Array<string>): void {
@@ -273,11 +274,6 @@ export class ScatterPlotComponent implements OnChanges {
     this.svg = d3.select("#scatterplot").append('svg');
     this.populateDataSet(this.tsv);
 
-  }
-
-
-  isSelectionVisible(): boolean {
-    return this.dataSelectionModeEnable;
   }
 
   //New Dataset Creation  from selected datapoints

@@ -14,7 +14,7 @@ import {Component, Input, OnChanges} from "@angular/core";
 import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
-import {VisualizationTSVService} from "../visualizationTSV.service";
+import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 
 @Component({
   selector: 'ch-expression-profile',

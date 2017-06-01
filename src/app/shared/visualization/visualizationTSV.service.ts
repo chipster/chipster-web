@@ -2,11 +2,11 @@
  expressionprofileTSV service is replaced with this visualizationTSVservice as all the methods are used by other visualization components also
  */
 import {Injectable} from "@angular/core";
-import GeneExpression from "./expressionprofile/geneexpression"
-import TSVRow from "../../../../model/tsv/TSVRow";
-import DomainBoundaries from "./expressionprofile/domainboundaries";
-import TSVHeaders from "../../../../model/tsv/TSVHeaders";
-import TSVFile from "../../../../model/tsv/TSVFile";
+import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression"
+import TSVRow from "../../model/tsv/TSVRow";
+import DomainBoundaries from "../../views/sessions/session/visualization/expressionprofile/domainboundaries";
+import TSVHeaders from "../../model/tsv/TSVHeaders";
+import TSVFile from "../../model/tsv/TSVFile";
 import * as _ from "lodash";
 
 @Injectable()
