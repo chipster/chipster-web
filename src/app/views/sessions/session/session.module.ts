@@ -14,6 +14,7 @@ import {OpenSessionFile} from "../opensessionfile/opensessionfile.component";
 import {UploadService} from "../../../shared/services/upload.service";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {SelectionHandlerService} from "./selection-handler.service";
+import {ToolSelectionService} from "./tool.selection.service";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
 
@@ -22,7 +23,7 @@ import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
     CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule,
     NgbModule, DialogModalModule],
   declarations: [SessionComponent, SessionListComponent, OpenSessionFile, JobErrorModalComponent],
-  providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService],
+  providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService, ToolSelectionService],
   entryComponents: [JobErrorModalComponent]
 })
 export class SessionModule{}

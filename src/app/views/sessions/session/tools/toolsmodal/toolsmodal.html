@@ -12,7 +12,7 @@
   </div>
 
   <div class="modal-body">
-    <button class="btn btn-success pull-right" (click)="runJob()" [disabled]="!isRunEnabled()">
+    <button class="btn btn-success pull-right" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
       <span class="glyphicon glyphicon-play"></span> Run
     </button>
 
@@ -91,7 +91,7 @@
       </ngb-tab>
 
       <ngb-tab [disabled]="!toolSelection">
-        <ng-template ngbTabTitle><!--<span *ngIf="true" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>-->Inputs</ng-template>
+        <ng-template ngbTabTitle><span *ngIf="!(toolSelectionService.inputsValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span> Inputs</ng-template>
         <ng-template ngbTabContent>
   			<ch-tool-inputs
           [sessionData]="sessionData"
