@@ -36,12 +36,12 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.selectedDatasets$ = this.store.select('selectedDatasets');
 
-    this.datasetSelectionSubscription = this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
-      this.selectedDatasets = datasets;
-      this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
-      this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
-    });
-
+    this.datasetSelectionSubscription = this.selectedDatasets$
+      .subscribe((datasets: Array<Dataset>) => {
+        this.selectedDatasets = datasets;
+        this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
+        this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
+      });
   }
 
   ngOnDestroy() {
