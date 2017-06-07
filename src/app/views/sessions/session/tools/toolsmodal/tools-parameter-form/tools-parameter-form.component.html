@@ -10,7 +10,7 @@
     </thead>
     <tbody>
     <tr *ngFor="let parameter of tool.parameters"
-        ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave">
+        ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave" placement="right" container="body">
 
       <td>
         <strong>{{parameter.name.displayName}}</strong>
