@@ -61,7 +61,7 @@ export class OpenSessionFile {
       this.openSession.emit(sessionId);
     }, err => {
       this.errorService.headerError("failed to open the session file: " + err, true);
-      //this.sessionResource.deleteSession(sessionId).subscribe();
+      this.sessionResource.deleteSession(sessionId).subscribe();
     });
   }
 

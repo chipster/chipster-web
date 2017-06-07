@@ -1,9 +1,36 @@
+#session-preview {
+  height: calc(~"100vh - 130px");
+  //position: relative;
+}
+
 .session-list {
-  height: "calc(100vh - 130px)";
+  height: calc(~"100vh - 180px");
   position: relative;
+}
+
+.session-notes {
+  // trying to match full lines with the default text size
+  height: 10.8em;
+  // without this long words like urls in the notes stretch the layout
+  width: 500px;
+  overflow: hidden;
+}
+
+.workflow-preview-panel {
+  height: calc(~"100vh - 310px");
+  overflow: hidden;
 }
 
 .delete-session-button {
   border: 0 solid transparent;
   background: transparent;
+}
+
+.fadeout {
+  position: absolute;
+  bottom: 14em;
+  right: 0;
+  height: 2em;
+  width: 200px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
 }

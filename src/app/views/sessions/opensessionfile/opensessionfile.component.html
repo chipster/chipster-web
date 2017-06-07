@@ -1,11 +1,11 @@
-<p>
-  <span #browseFilesButton class="btn btn-sm btn-info">
-    <i class="icon icon-file"></i>Open session file
-  </span>
-</p>
 
-<p>
-  <i *ngIf="status" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> {{status}}
+<span #browseFilesButton class="btn btn-sm btn-info">
+  <i class="icon icon-file"></i>Open session file
+</span>
+
+<p *ngIf="status">
+  <br>
+  <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> {{status}}
 </p>
 
 <div *ngFor="let file of flow.files">

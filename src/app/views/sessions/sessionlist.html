@@ -4,8 +4,11 @@
       <!-- User Sessions -->
 
       <div class="row">
+          <h4>Sessions</h4>
+      </div>
+      <div class="row">
         <div class="col-md-6">
-          <h4>Open session</h4>
+          <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
         </div>
         <div class="col-md-6">
           <button class="btn btn-sm btn-info pull-right" (click)="createSession()">
@@ -14,6 +17,8 @@
           </button>
         </div>
       </div>
+
+      <br>
 
       <div class="scrollable session-list">
         <table class="table table-hover table-sm">
@@ -35,7 +40,7 @@
           </tbody>
         </table>
 
-        <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
+        <br>
 
         <!-- Example Sessions -->
         <h4>Example sessions</h4>
@@ -54,9 +59,13 @@
       <div id="workflow-dataset-panel" *ngIf="previewedSession">
 
         <h5>{{previewedSession.name}}</h5>
-        <p>{{previewedSession.notes}}</p>
+        <div>
+          <p class="session-notes">{{previewedSession.notes}}</p>
+          <div class="fadeout"></div>
+        </div>
 
-        <div *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
+        <div class="workflow-preview-panel"
+          *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
           <ch-workflow-graph
             [datasetsMap]="sessionData.datasetsMap"
             [jobsMap]="sessionData.jobsMap"
