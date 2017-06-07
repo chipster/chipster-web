@@ -74,7 +74,6 @@ export class SessionListComponent {
     }
 
     previewWorkflow(session: Session) {
-      console.log('preview', session.name);
       this.workflowPreviewLoading = true;
       this.sessionResource.loadSession(this.previewedSession.sessionId).subscribe((fullSession: SessionData) => {
         // don't show if the selection has already changed
