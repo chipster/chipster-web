@@ -64,6 +64,11 @@
           <div class="fadeout"></div>
         </div>
 
+        <p *ngIf="workflowPreviewLoading">
+          <br>
+          <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading workflow preview...
+        </p>
+
         <div class="workflow-preview-panel"
           *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
           <ch-workflow-graph

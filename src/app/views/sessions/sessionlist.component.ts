@@ -5,6 +5,7 @@ import {SessionData} from "../../model/session/session-data";
 import {Component} from "@angular/core";
 import {Router} from "@angular/router";
 import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
+import {Subject, Observable} from "rxjs";
 
 @Component({
   selector: 'ch-session-list',
@@ -18,6 +19,9 @@ export class SessionListComponent {
     public userSessions: Session[];
     public sessionData: SessionData;
     private selectedSessionId: string;
+    private workflowPreviewLoading = false;
+
+    private previewThrottle$ = new Subject();
 
     constructor(
         private router: Router,
@@ -26,6 +30,10 @@ export class SessionListComponent {
 
     ngOnInit() {
       this.updateSessions();
+
+      this.previewThrottle$.asObservable()
+        .debounce(() => Observable.timer(500))
+        .subscribe(this.previewWorkflow.bind(this));
     }
 
     createSession() {
@@ -57,14 +65,26 @@ export class SessionListComponent {
                 // hide the old session immediately
                 this.previousSession = session;
                 this.sessionData = null;
-                this.sessionResource.loadSession(this.previewedSession.sessionId).subscribe((fullSession: SessionData) => {
-                    // don't show if the selection has already changed
-                    if (this.previewedSession === session) {
-                        this.sessionData = fullSession;
-                    }
-                });
+                // hide the spinner even if we are still loading the previous
+                // session, because the session won't be shown
+                this.workflowPreviewLoading = false;
+                this.previewThrottle$.next(session);
             }
         }
+    }
+
+    previewWorkflow(session: Session) {
+      console.log('preview', session.name);
+      this.workflowPreviewLoading = true;
+      this.sessionResource.loadSession(this.previewedSession.sessionId).subscribe((fullSession: SessionData) => {
+        // don't show if the selection has already changed
+        if (this.previewedSession === session) {
+          this.sessionData = fullSession;
+        }
+        this.workflowPreviewLoading = false;
+      }, (err) => {
+        this.workflowPreviewLoading = false;
+      });
     }
 
     deleteSession(session: Session) {
