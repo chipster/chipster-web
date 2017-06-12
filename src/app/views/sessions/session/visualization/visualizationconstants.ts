@@ -67,7 +67,7 @@ export default [
   {
     id:'volcanoplot',
     name:'Volcano Plot',
-    typeTags: [Tags.GENE_EXPRS],
+    typeTags: [Tags.PVALUE_AND_FOLD_CHANGE],
     anyInputCountSupported:false,
     supportedInputFileCounts: [1]
   },

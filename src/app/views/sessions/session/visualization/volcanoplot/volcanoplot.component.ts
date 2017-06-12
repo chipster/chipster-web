@@ -164,7 +164,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
 
 
   setSelectionStyle(id: string) {
-    d3.select('#dot' + id).classed('selected', true).style('stroke', 'black').attr('r', 2);
+    d3.select('#dot' + id).classed('selected', true).style('stroke', 'black').style("stroke-width", 3) .attr('r', 2);
   }
 
   removeSelectionStyle(id: string) {
