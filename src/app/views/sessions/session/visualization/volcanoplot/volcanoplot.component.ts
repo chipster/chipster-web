@@ -12,7 +12,8 @@ import {PlotService} from "../../../../../shared/visualization/plot.service";
 
 @Component({
   selector: 'ch-volcano-plot',
-  templateUrl: './volcanoplot.html'
+  templateUrl: './volcanoplot.html',
+  styleUrls: ['./volcanoplot.less']
 })
 
 export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
@@ -34,6 +35,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
   ngOnChanges() {
     super.ngOnChanges();
 
+
   }
 
   checkTSVHeaders() {
@@ -54,6 +56,9 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
 
       this.svg = d3.select("#volcanoplot").append('svg');
       this.populatePlotData();
+    }else {
+      this.errorMessage = 'didn’t find any columns starting with pvalue or fold change value ';
+      this.plotVisible=false;
     }
   }
 
@@ -77,52 +82,48 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
     super.drawPlot();
 
     var self = this;
-    let volcanoPlotWidth = document.getElementById('volcanoplot').offsetWidth;
-    let outerWidth = volcanoPlotWidth;
-    let innerWidth = outerWidth - this.svgMargin.left - this.svgMargin.right;
-
-    let size = {
-      width: innerWidth - this.svgPadding.left - this.svgPadding.right,
-      height: this.svgInnerHeight - this.svgPadding.top - this.svgPadding.bottom
-    };
-
+    let size={width:document.getElementById('volcanoplot').offsetWidth, height:600};
+    let padding=50;
 
     //Define the SVG
-    this.svg.attr('width', outerWidth)
-      .attr('height', this.svgOuterHeight).attr('id', 'svg')
-      .append("g");
+    this.svg.attr('width', size.width)
+      .attr('height', size.height).attr('id', 'svg');
 
     //Adding the X-axis
-    this.xScale = d3.scaleLinear().range([0, size.width])
+    this.xScale = d3.scaleLinear().range([padding, size.width-padding])
       .domain([this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv).min, this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv).max]).nice();
-    let xAxis = d3.axisBottom(this.xScale).ticks(10).tickSize(-size.height).tickSizeOuter(0);
-    this.svg.append('g')
-      .attr('class', 'x axis').attr('transform', 'translate(' + this.svgMargin.left + ',' + size.height + ')')
-      .call(xAxis)
-      .append("text")
-      .attr("class", "label")
-      .attr("x", size.width)
-      .attr("y", -6)
-      .style("text-anchor", "end")
-      .text("Log2 Fold Changes");
 
+    let xAxis = d3.axisBottom(this.xScale).ticks(10).tickSize(-(size.height-padding)).tickPadding(5);
+    this.svg.append('g')
+      .attr('class', 'axis')
+      .attr("transform", "translate(0," + (size.height - padding) + ")")
+      .attr("shape-rendering","crispEdges")
+      .call(xAxis)
 
     // Adding the Y-Axis with log scale
-    this.yScale = d3.scaleLinear().range([size.height, 0])
+    this.yScale = d3.scaleLinear().range([size.height-padding, padding])
       .domain([0, this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv).max]).nice();
-    let yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0);
+    let yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0).tickPadding(5);
     this.svg.append('g')
-      .attr('class', 'y axis')
-      .attr('transform', 'translate(' + this.svgMargin.left + ',0 )')
-      .call(yAxis)
-      .append("text")
-      .attr("class", "label")
-      // We want to rotate the label so that it follows the axis orientation
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("-Log P-Value");
+      .attr('class', 'axis')
+      .attr("transform", "translate("+padding+",0)")
+      .attr("shape-rendering","crispEdges")
+      .call(yAxis);
+
+    this.svg.selectAll(".tick line").attr("opacity",0.3);
+    this.svg.selectAll(".tick text").style("font-size","12px");
+
+    //Appending text label for the x axis
+    this.svg.append("text")
+      .attr("transform", "translate("+ (size.width/2) +","+(size.height-(padding/3))+")")
+      .style("text-anchor", "middle")
+      .text("fold change (log2)");
+
+    this.svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate("+ (padding/2) +","+(size.height/2)+")rotate(-90)")
+      .text("-log(p)");
+
 
     // add the points
     this.svg.selectAll(".dot").data(self.plotData)
@@ -155,7 +156,6 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
     //Populate the selected Data Rows
     this.selectedDataRows=this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
-
     //change the color of the selected data points
     this.selectedDataPointIds.forEach(function(selectedId){
       self.setSelectionStyle(selectedId);
@@ -170,8 +170,6 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
   removeSelectionStyle(id: string) {
     // this need the coloring function
     d3.select('#dot' + id).classed('selected', true).style('stroke', 'none').attr('r', 2);
-
-
   }
 
 
@@ -188,6 +186,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
     this.sessionDataService.createDerivedDataset('newDataset.tsv',[this.dataset.datasetId],'Volcano Plot',data).subscribe();
 
   }
+
 
 
 }

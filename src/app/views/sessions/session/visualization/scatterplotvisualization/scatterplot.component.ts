@@ -9,133 +9,118 @@ import Point from "../model/point";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import {PlotService} from "../../../../../shared/visualization/plot.service"
 import {PlotData} from "../model/plotData"
+import {PlotComponent} from "../../../../../shared/visualization/plot.component";
 
 @Component({
   selector: 'ch-scatter-plot',
-  templateUrl: './scatterplot.html'
+  templateUrl: './scatterplot.html',
+  styleUrls: ['./scatterplot.less']
 
 })
 
-export class ScatterPlotComponent implements OnChanges {
-  @Input()
-  private dataset: Dataset;
-  private tsv: TSVFile;
-  private errorMessage: string;
-  private plotData: Array<PlotData>;
+export class ScatterPlotComponent extends PlotComponent implements OnChanges {
+
+
   private chipHeaders: Array<string> = [];
-  private selectedChipHeadX: string;
-  private selectedChipHeadY: string;
-  private svg;
-  private selectedGeneIds: Array<string>;
-  private selectedGeneRows: Array<TSVRow> = [];// contain the tsv rows for the selected Genes
-  private dataSelectionModeEnable: boolean = false;
-  private scatterPlotVisible: boolean = false;
+  private xScale:any;
+  private yScale:any;
 
 
-  constructor(private visualizationTSVService: VisualizationTSVService,
-              private fileResource: FileResource,
-              private sessionDataService: SessionDataService,
-              private plotService: PlotService) {
-
+  constructor(fileResource: FileResource,
+              sessionDataService: SessionDataService,
+              private plotService: PlotService,
+              private visualizationTSVService:VisualizationTSVService) {
+        super(fileResource,sessionDataService);
   }
 
   ngOnChanges() {
-    const rowLimit =5000;
-    let self = this;
-    const datasetName = this.dataset.name;
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId)
-      .subscribe((result: any) => {
-        let parsedTSV = d3.tsvParseRows(result);
-        this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
-        if (this.tsv.body.size() > rowLimit) {
-          this.errorMessage = 'Scatter Plot Visualization is not allowed for TSV files with more than 5000 data points';
-          this.scatterPlotVisible = false;
-        }
-        else if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
-          //Extracting header name without chip prefix
-          this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
-            self.scatterPlotVisible = true;
-            chipHeader = chipHeader.replace('chip.', '');
-            self.chipHeaders.push(chipHeader);
-          });
-          if (this.chipHeaders.length > 2) {
-            this.svg = d3.select("#scatterplot").append('svg');
-            this.selectedChipHeadX = this.chipHeaders[0];
-            this.selectedChipHeadY = this.chipHeaders[1];
-            this.populateDataSet(this.tsv);
-          }
+   super.ngOnChanges();
+  }
 
-        } else {
-          this.errorMessage = 'Only microarray data supported, didn’t find any columns starting with chip.';
-          self.scatterPlotVisible = false;
-        }
-      })
+  checkTSVHeaders(){
+    var self=this;
+    if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
+      //Extracting header name without chip prefix
+      this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
+        self.plotVisible = true;
+        chipHeader = chipHeader.replace('chip.', '');
+        self.chipHeaders.push(chipHeader);
+      });
+      if (this.chipHeaders.length > 2) {
+        this.svg = d3.select("#scatterplot").append('svg');
+        this.selectedXAxisHeader= this.chipHeaders[0];
+        this.selectedYAxisHeader = this.chipHeaders[1];
+        this.populatePlotData();
+      }
 
-
+    } else {
+      this.errorMessage = 'Only microarray data supported, didn’t find any columns starting with chip.';
+      this.plotVisible = false;
+    }
   }
 
   /*Load the data points for the scatterPlot*/
-  populateDataSet(tsv: TSVFile) {
+  populatePlotData() {
     this.plotData = [];
     let self = this;
-    let geneValue = this.visualizationTSVService.getGeneExpressions(tsv);
+    let geneValue = this.visualizationTSVService.getGeneExpressions(this.tsv);
     let orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(geneValue);
 
     // Creating points for scatter plot combining two chip columns
     orderedGenesValues.forEach(function (geneRow) {
       let curPlotData = new PlotData();
       curPlotData.id = geneRow.id;
-      curPlotData.plotPoint = new Point(geneRow.values[self.chipHeaders.indexOf(self.selectedChipHeadX)], geneRow.values[self.chipHeaders.indexOf(self.selectedChipHeadY)]);
+      curPlotData.plotPoint = new Point(geneRow.values[self.chipHeaders.indexOf(self.selectedXAxisHeader)], geneRow.values[self.chipHeaders.indexOf(self.selectedYAxisHeader)]);
       self.plotData.push(curPlotData);
     });
-    this.drawScatterPlot(tsv);
+    this.drawPlot();
 
   }
 
-  drawScatterPlot(tsv: TSVFile) {
-    this.dataSelectionModeEnable = false;
+  drawPlot() {
+    super.drawPlot();
     var self = this;
-    let scatterPlotWidth = document.getElementById('scatterplot').offsetWidth;
-
-    let margin = {top: 20, right: 20, bottom: 20, left: 20};
-    let padding = {top: 60, right: 60, bottom: 60, left: 60};
-      let outerWidth = scatterPlotWidth;
-      let outerHeight = 600;
-      let innerWidth = outerWidth - margin.left - margin.right;
-      let innerHeight = outerHeight - margin.top - margin.bottom;
-      let size={
-        width : innerWidth - padding.left - padding.right,
-        height : innerHeight - padding.top - padding.bottom
-    };
-
+    let size={width:document.getElementById('scatterplot').offsetWidth,height:600};
+    let padding=50;
 
 
     //Define the SVG
-    this.svg.attr('width', outerWidth)
-            .attr('height', outerHeight).attr('id', 'svg')
-            .append("g");
+    this.svg.attr('width', size.width)
+            .attr('height', size.height).attr('id', 'svg');
 
-    console.log(this.visualizationTSVService.getDomainBoundaries(tsv));
     //Adding the X-axis
-    let xScale = d3.scaleLinear().range([0, size.width])
-      .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let xAxis = d3.axisBottom(xScale).ticks(10).tickSize(-size.height);
+    this.xScale = d3.scaleLinear().range([padding, size.width-padding])
+      .domain([this.visualizationTSVService.getDomainBoundaries(this.tsv).min, this.visualizationTSVService.getDomainBoundaries(this.tsv).max]).nice();
+    console.log(this.xScale);
+    let xAxis = d3.axisBottom(this.xScale).ticks(10).tickSize(-(size.height-padding)).tickSizeOuter(5);
     this.svg.append('g')
-      .attr('class', 'x axis').attr('transform', 'translate(' + margin.left + ',' + size.height + ')')
-      .call(xAxis);
+      .attr('class', 'axis').attr("transform", "translate(0," + (size.height - padding) + ")")
+      .attr("shape-rendering","crispEdges")
+      .call(xAxis)
 
     //Adding the Y-axis
-    let yScale = d3.scaleLinear().range([size.height, 0])
-      .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]).nice();
-    let yAxis = d3.axisLeft(yScale).ticks(10).tickSize(-size.width);
-
+    this.yScale = d3.scaleLinear().range([size.height-padding, padding])
+      .domain([this.visualizationTSVService.getDomainBoundaries(this.tsv).min, this.visualizationTSVService.getDomainBoundaries(this.tsv).max]).nice();
+    let yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0).tickPadding(5);
     this.svg.append('g')
-      .attr('class', 'y axis')
-      .attr('transform', 'translate(' + margin.left+ ',0 )')
-      .call(yAxis);
+      .attr('class', 'axis')
+      .attr("transform", "translate("+padding+",0)")
+      .attr("shape-rendering","crispEdges")
+      .call(yAxis)
 
-    let drag = d3.drag();
-    this.svg.call(drag);
+    this.svg.selectAll(".tick line").attr("opacity",0.3);
+    this.svg.selectAll(".tick text").style("font-size","12px");
+
+    //Appending text label for the x axis
+    this.svg.append("text")
+      .attr("transform", "translate("+ (size.width/2) +","+(size.height-(padding/3))+")")
+      .style("text-anchor", "middle")
+      .text(this.selectedXAxisHeader);
+
+    this.svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate("+ (padding/2) +","+(size.height/2)+")rotate(-90)")
+      .text(this.selectedYAxisHeader);
 
     //Add the points in the svg
     this.svg.selectAll(".dot").data(self.plotData)
@@ -144,10 +129,10 @@ export class ScatterPlotComponent implements OnChanges {
       .attr('id', (d: PlotData) => 'dot' + d.id)
       .attr("r", 2)
       .attr("cx", function (d) {
-        return xScale(d.plotPoint.x);
+        return self.xScale(d.plotPoint.x);
       })
       .attr("cy", function (d) {
-        return yScale(d.plotPoint.y);
+        return self.yScale(d.plotPoint.y);
       })
       .attr("fill", "red")
       .on('mouseover', (d: any) => {
@@ -159,79 +144,18 @@ export class ScatterPlotComponent implements OnChanges {
       .on('click', (d: PlotData) => {
         //Need to store the datapoints what the user has clicked
       });
+  }
 
+  getSelectedDataSet(){
+    var self=this;
+    this.selectedDataPointIds=this.plotService.getSelectedDataPoints(this.dragStartPoint,this.dragEndPoint,this.xScale,this.yScale,this.plotData);
+    //Populate the selected gene list to show in the selected box view{
+    this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
+    this.resetSelectionRectangle();
 
-    //Creating the selection area
-    let dragGroup = this.svg.append("g").attr('id', 'dragGroup')
-      .attr('transform', 'translate(' + margin.left + ',0)');
-
-    let band = dragGroup.append("rect")
-      .attr("width", 0)
-      .attr("height", 0)
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("class", "band")
-      .attr('id', 'band')
-      .style("fill", "none").style("stroke", "blue").style("stroke-width", 1);
-
-    let bandPos = [-1, -1];
-    let startPoint = new Point(-1, -1);
-
-    //Register for drag handlers
-    drag.on("drag", () => {
-      this.dataSelectionModeEnable = true;//change the tab for showing selected gene
-      let pos = d3.mouse(document.getElementById('dragGroup'));
-      let endPoint = new Point(pos[0], pos[1]);
-      console.log("enddPoint" + endPoint);
-      if (endPoint.x < startPoint.x) {
-        d3.select(".band").attr("transform", "translate(" + (endPoint.x) + "," + startPoint.y + ")");
-      }
-      if (endPoint.y < startPoint.y) {
-        d3.select(".band").attr("transform", "translate(" + (endPoint.x) + "," + startPoint.y + ")");
-      }
-      if (endPoint.y < startPoint.y && endPoint.x > startPoint.x) {
-        d3.select(".band").attr("transform", "translate(" + (startPoint.x) + "," + endPoint.y + ")");
-      }
-
-      // Set new position of band
-      if (startPoint.x === -1) {
-        startPoint = new Point(endPoint.x, endPoint.y);
-        d3.select(".band").attr("transform", "translate(" + (startPoint.x) + "," + startPoint.y + ")");
-      }
-      d3.select(".band").transition().duration(1)
-        .attr("width", Math.abs(startPoint.x - endPoint.x))
-        .attr("height", Math.abs(startPoint.y - endPoint.y));
-
+    this.selectedDataPointIds.forEach(function (selectedId) {
+      self.setSelectionStyle(selectedId);
     });
-
-    drag.on("end", () => {
-      let pos = d3.mouse(document.getElementById('dragGroup'));
-      let endPoint = new Point(pos[0], pos[1]);
-      // need to get the points that included in the band
-      console.log(endPoint);
-      if ((startPoint.x !== -1 && startPoint.y !== -1) && ((startPoint.x !== endPoint.x) && (startPoint.y !== endPoint.y))) {
-        //this.resetSelections();
-        //define the points that are within the drag boundary
-        let dragEndPoint = new Point(endPoint.x, endPoint.y);
-        let dragStartPoint = new Point(startPoint.x, startPoint.y);
-        this.selectedGeneIds = this.plotService.getSelectedDataPoints(dragStartPoint, dragEndPoint, xScale, yScale, this.plotData);
-
-        //Populate the selected gene list to show in the selected box view{
-        this.selectedGeneRows = tsv.body.getTSVRows(this.selectedGeneIds);
-        resetSelectionRectangle();
-
-        this.selectedGeneIds.forEach(function (selectedId) {
-          self.setSelectionStyle(selectedId);
-        });
-      }
-    });
-
-    // Hide the Rectangle after drag ends
-    function resetSelectionRectangle() {
-      startPoint = new Point(-1, -1);
-      d3.select('.band').attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
-    }
-
   }
 
 
@@ -243,51 +167,25 @@ export class ScatterPlotComponent implements OnChanges {
     d3.select('#dot' + id).classed('selected', false).style('fill', 'red').attr('r', 2);
   }
 
-
-  resetSelections(): void {
-    this.removeSelectedPoints(this.selectedGeneIds);
-    this.selectedGeneRows = [];
+  redrawPlot() {
+    super.redrawPlot();
+    this.svg = d3.select('#scatterplot').append('svg');
+    this.populatePlotData();
   }
 
-  removeSelectedPoints(ids: Array<string>): void {
-    // Need to remove the set of points that are previously selected
-    //Should get the points
-    for (let id of ids) {
-      this.removeSelectionStyle(id);
-    }
-  }
-
-
-  setChipSelectionY(event) {
-    this.selectedChipHeadY = event;
-    this.redrawScatterPlot();
-  }
-
-  setChipSelectionX(event) {
-    this.selectedChipHeadX = event;
-    this.redrawScatterPlot();
-
-  }
 
   redrawScatterPlot() {
     this.svg.remove();
     this.svg = d3.select("#scatterplot").append('svg');
-    this.populateDataSet(this.tsv);
+    this.populatePlotData();
 
   }
 
-  //New Dataset Creation  from selected datapoints
+  //New Dataset Creation  from selected data points
   createDatasetFromSelected() {
-    let tsvData = this.tsv.getRawDataByRowIds(this.selectedGeneIds);
+    let tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     let data = d3.tsvFormatRows(tsvData);
     this.sessionDataService.createDerivedDataset('newDataset.tsv', [this.dataset.datasetId], "Scatter Plot", data).subscribe();
-
-  }
-
-  // Redraw the svg with the changed width of the window
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.redrawScatterPlot();
 
   }
 

@@ -23,16 +23,12 @@ export class PlotComponent implements OnChanges {
   selectedYAxisHeader: string;
   dataSelectionModeEnable: boolean = false;
   plotVisible: boolean = false;
-  svgMargin = {top: 20, right: 20, bottom: 20, left: 20};
-  svgPadding = {top: 60, right: 60, bottom: 60, left: 60};
-  svgOuterHeight = 600;
-  svgInnerHeight;
   dragStartPoint:Point;
   dragEndPoint:Point;
   selectedDataPointIds:Array<string>;
   selectedDataRows:Array<TSVRow>=[];
   startPoint:Point;
-
+  svgPadding=50;
   protected fileResource:FileResource;
   protected sessionDataService:SessionDataService;
 
@@ -62,25 +58,25 @@ export class PlotComponent implements OnChanges {
       });
   }
 
+  /** @description To check whether the file has the required column headers to create the visualization**/
   checkTSVHeaders() {
 
   }
-
+  /** @description Extract the data to draw the plot**/
   populatePlotData() {
 
   }
 
+  /** @description manipulation of the svg**/
   drawPlot() {
     this.dataSelectionModeEnable = false;
-    this.svgInnerHeight = this.svgOuterHeight - this.svgMargin.top - this.svgMargin.bottom;
 
     //creating drag element
     let drag = d3.drag();
     this.svg.call(drag);
 
     //Creating the selection area
-    let dragGroup = this.svg.append("g").attr('id', 'dragGroup')
-      .attr('transform', 'translate(' + this.svgMargin.left + ',0)');
+    let dragGroup = this.svg.append("g").attr('id', 'dragGroup');
 
     let band = dragGroup.append("rect")
       .attr("width", 0)
@@ -130,6 +126,7 @@ export class PlotComponent implements OnChanges {
         this.dragEndPoint = new Point(endPoint.x, endPoint.y);
         this.dragStartPoint = new Point(this.startPoint.x, this.startPoint.y);
         this.getSelectedDataSet();
+        this.resetSelectionRectangle();
       }
     });
 
@@ -138,24 +135,18 @@ export class PlotComponent implements OnChanges {
   resetSelectionRectangle(){
     this.startPoint = new Point(-1, -1);
     d3.select('.band').attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
-
   }
-  getSelectedDataSet(){
+  getSelectedDataSet(){}
 
-  }
+  setSelectionStyle(id: string) {}
 
-  setSelectionStyle(id: string) {
-
-  }
-
-  removeSelectionStyle(id: string) {
-
-  }
+  removeSelectionStyle(id: string) {}
 
   resetSelections(): void {
     for (let id of this.selectedDataPointIds) {
       this.removeSelectionStyle(id);
     }
+    this.selectedDataRows = [];
   }
 
   setXAxisHeader(event) {
@@ -173,10 +164,8 @@ export class PlotComponent implements OnChanges {
 
   }
 
-  //New Dataset Creation  from selected datapoints
-  createDatasetFromSelected() {
-
-  }
+  /** @description New Dataset Creation  from selected data points **/
+  createDatasetFromSelected() {}
 
   // Redraw the svg with the changed width of the window
   @HostListener('window:resize', ['$event'])

@@ -3,7 +3,7 @@
     <div class *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
     <div id="scatterplot"></div>
   </div>
-  <div class="col-4" *ngIf="scatterPlotVisible" id="setting">
+  <div class="col-4" *ngIf="plotVisible" id="setting">
     <div class="row">
       <div class="my-card">
         <div class="card">
@@ -13,28 +13,28 @@
               <tr>
                 <td>
                   <h6 class="card-subtitle">X-axis</h6>
-                  <select [(ngModel)]="selectedChipHeadX" (ngModelChange)="setChipSelectionX($event)">
+                  <select [(ngModel)]="selectedXAxisHeader" (ngModelChange)="setXAxisHeader($event)">
                     <option *ngFor="let header of chipHeaders">{{header}}</option>
                   </select>
                 </td>
                 <td>
                   <h6 class="card-subtitle">Y-axis</h6>
-                  <select [(ngModel)]="selectedChipHeadY" (ngModelChange)="setChipSelectionY($event)">
+                  <select [(ngModel)]="selectedYAxisHeader" (ngModelChange)="setYAxisHeader($event)">
                     <option *ngFor="let header of chipHeaders">{{header}}</option>
                   </select>
                 </td>
               </tr>
             </div>
           </div>
-          <div class="card" *ngIf="selectedGeneRows &&selectedGeneRows.length>0">
+          <div class="card" *ngIf="selectedDataRows && selectedDataRows.length>0">
             <div class="card-header">Selected</div>
             <div class="card-block">
               <div class="btn-group-vertical" role="group">
                 <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
                 </button>
               </div>
-              <h6>{{selectedGeneRows.length}} Genes Selected</h6>
-              <ul id="selectedGeneList" *ngFor="let gene of selectedGeneRows">
+              <h6>{{selectedDataRows.length}} Genes Selected</h6>
+              <ul id="selectedGeneList" *ngFor="let gene of selectedDataRows">
                 <li>{{gene.row[0]}}</li>
               </ul>
               <button class="btn btn-info" (click)="resetSelections()">Clear Selection</button>

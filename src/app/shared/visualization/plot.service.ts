@@ -13,7 +13,7 @@ export class PlotService {
   //Get the points inside the selection Rectangle
   getSelectedDataPoints(dragStartPoint: Point, dragEndPoint: Point, linearXScale: any, linearYScale: any, plotData: Array<PlotData>): Array<string> {
 
-
+    console.log(linearXScale);
     let startXValue = linearXScale.invert(dragStartPoint.x);
     let endXValue = linearXScale.invert(dragEndPoint.x);
 
@@ -22,37 +22,49 @@ export class PlotService {
 
     let selectedDataPoints: Array<string> = [];
 
+    console.log(startXValue);
+    console.log(startYValue);
+    console.log(endXValue);
+    console.log(endYValue);
+
     // get the chip values which are in this range
 
     plotData.forEach(function (val) {
+
       if (startXValue < endXValue) {
         if (startYValue < endYValue) {
           if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
             selectedDataPoints.push(val.id);
+            console.log(val.plotPoint);
           }
         } else if (startYValue > endYValue) {
           if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
             selectedDataPoints.push(val.id);
+            console.log(val.plotPoint);
           }
         }
       } else if (startXValue > endXValue) {
         if (startYValue < endYValue) {
           if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
             selectedDataPoints.push(val.id);
+            console.log(val.plotPoint);
           }
         } else if (startYValue > endYValue) {
           if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
             selectedDataPoints.push(val.id);
+            console.log(val.plotPoint);
           }
         }
       }
 
     });
 
-
+  console.log(selectedDataPoints);
     return selectedDataPoints;
 
 
   }
+
+
 
 }
