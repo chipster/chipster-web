@@ -13,6 +13,7 @@ import {Subject} from "rxjs";
 import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 import {SessionData} from "../../../../model/session/session-data";
 import {subscribeOn} from "rxjs/operator/subscribeOn";
+import {ToolSelectionService} from "../tool.selection.service";
 
 
 @Component({
@@ -29,6 +30,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   constructor(
     private SessionDataService: SessionDataService,
     private SelectionService: SelectionService,
+    private toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
     private store: Store<any>) {
   }
@@ -70,13 +72,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach((subs) => subs.unsubscribe());
     this.subscriptions = [];
-  }
-
-  isRunEnabled() {
-    // TODO add mandatory parameters check
-    // tool selected and either bindings ok or tool without inputs
-    return this.toolSelection && (this.toolService.checkBindings(this.toolSelection.inputBindings) ||
-      (!this.toolSelection.tool.inputs || this.toolSelection.tool.inputs.length === 0));
   }
 
   // Method for submitting a job

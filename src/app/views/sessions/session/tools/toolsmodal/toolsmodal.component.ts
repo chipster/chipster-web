@@ -19,6 +19,7 @@ import {Store} from "@ngrx/store";
 import {SET_TOOL_SELECTION} from "../../../../../state/selected-tool.reducer";
 import InputBinding from "../../../../../model/session/inputbinding";
 import {SessionData} from "../../../../../model/session/session-data";
+import {ToolSelectionService} from "../../tool.selection.service";
 
 @Component({
   selector: 'ch-tools-modal',
@@ -48,6 +49,7 @@ export class ToolsModalComponent {
 
   constructor(private tsvReader: TSVReader,
               private sessionDataService: SessionDataService,
+              private toolSelectionService: ToolSelectionService,
               private pipeService: PipeService,
               private toolService: ToolService,
               private ngbModal: NgbModal,
@@ -130,15 +132,6 @@ export class ToolsModalComponent {
       this.searchTool = null;
     }
   }
-
-
-  isRunEnabled() {
-    // TODO add mandatory parameters check
-    // tool selected and either bindings ok or tool without inputs
-    return this.toolSelection && (this.toolService.checkBindings(this.toolSelection.inputBindings) ||
-      (!this.toolSelection.tool.inputs || this.toolSelection.tool.inputs.length === 0));
-  }
-
 
   setInputDescription(description: string) {
     this.inputDescription = description;

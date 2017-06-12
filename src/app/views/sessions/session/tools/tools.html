@@ -20,7 +20,7 @@
 
         <div class="col-md-2">
             <button class="btn btn-success pull-right" (click)="runJob()"
-                    [disabled]="!isRunEnabled()">
+                    [disabled]="!(toolSelectionService.runEnabled$ | async)">
                 <span class="glyphicon glyphicon-play"></span> Run
             </button>
         </div>

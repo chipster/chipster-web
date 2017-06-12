@@ -3,6 +3,7 @@ import {UploadService} from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
+import {ErrorService} from "../../error/error.service";
 
 @Component({
   selector: 'ch-open-session-file',
@@ -22,7 +23,8 @@ export class OpenSessionFile {
     private uploadService: UploadService,
     private sessionResource: SessionResource,
     private sessionWorkerResource: SessionWorkerResource,
-    private changeDetectorRef: ChangeDetectorRef) {
+    private changeDetectorRef: ChangeDetectorRef,
+    private errorService: ErrorService) {
   }
 
   ngOnInit() {
@@ -33,7 +35,7 @@ export class OpenSessionFile {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
 
     this.status = 'Creating session';
-    let session = new Session('Opening session file...');
+    let session = new Session(file.name.replace('.zip', ''));
 
     this.sessionResource.createSession(session).subscribe((sessionId) => {
       // progress bar is enough for the upload status
@@ -53,9 +55,13 @@ export class OpenSessionFile {
       console.log('extracted, warnings: ', response.warnings);
       this.status = 'Deleting temporary copy';
       return this.sessionResource.deleteDataset(sessionId, datasetId);
-    }).subscribe(() => {
+    }).finally(() => {
       this.status = undefined;
+    }).subscribe(() => {
       this.openSession.emit(sessionId);
+    }, err => {
+      this.errorService.headerError("failed to open the session file: " + err, true);
+      this.sessionResource.deleteSession(sessionId).subscribe();
     });
   }
 

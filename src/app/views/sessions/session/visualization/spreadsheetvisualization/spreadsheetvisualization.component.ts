@@ -76,7 +76,10 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       const container = document.getElementById(this.tableContainerId);
 
       this.zone.runOutsideAngular(() => {
-        this.hot = new Handsontable(container, this.getSettings(headers, content, container));
+        // if the visualization isn't removed already
+        if (container != null) {
+          this.hot = new Handsontable(container, this.getSettings(headers, content, container));
+        }
       });
       this.dataReady = true;
     }, (e: Response) => {
