@@ -4,6 +4,7 @@ import {Observable} from "rxjs/Rx";
 import '../../rxjs-operators';
 import TSVFile from "../../model/tsv/TSVFile";
 import * as d3 from "d3";
+import Dataset from "../../model/session/dataset";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 
@@ -13,19 +14,19 @@ export class TSVReader {
    constructor(private fileResource: FileResource) {
     }
 
-    getTSV(sessionId: string, datasetId: string): Observable<any> {
-        return this.fileResource.getData(sessionId, datasetId);
+    getTSV(sessionId: string, dataset: Dataset): Observable<any> {
+        return this.fileResource.getData(sessionId, dataset);
     }
 
-    getTSVFile(sessionId: string, datasetId: string, maxBytes?: number): Observable<TSVFile> {
-        return this.fileResource.getLimitedData(sessionId, datasetId, maxBytes).map( (tsvData: any) => {
+    getTSVFile(sessionId: string, dataset: Dataset, maxBytes?: number): Observable<TSVFile> {
+        return this.fileResource.getLimitedData(sessionId, dataset, maxBytes).map( (tsvData: any) => {
             let parsedTSVData = d3.tsvParseRows(tsvData);
-            return new TSVFile(parsedTSVData, datasetId, 'dataset');
+            return new TSVFile(parsedTSVData, dataset.datasetId, 'dataset');
         });
     }
 
-  getTSVFileHeaders(sessionId: string, datasetId: string): Observable<Array<string>> {
-    return this.getTSVFile(sessionId, datasetId, MAX_HEADER_LENGTH)
+  getTSVFileHeaders(sessionId: string, dataset: Dataset): Observable<Array<string>> {
+    return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH)
       .map((tsvFile: TSVFile) => tsvFile.headers.headers);
   }
 }

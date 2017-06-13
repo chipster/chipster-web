@@ -37,8 +37,8 @@ export class VennDiagram implements OnChanges {
     }
 
     ngOnChanges() {
-        const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId);
-        const tsvObservables = datasetIds.map( (datasetId: string) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), datasetId));
+        const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset);
+        const tsvObservables = datasetIds.map( (dataset: Dataset) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), dataset));
 
         Observable.forkJoin(tsvObservables).subscribe( (resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)

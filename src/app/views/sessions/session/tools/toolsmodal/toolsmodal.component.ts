@@ -148,7 +148,7 @@ export class ToolsModalComponent {
 
   // TODO move to service?
   getDatasetHeaders(): Observable<Array<string>>[] {
-    return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId));
+    return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset));
   }
 
   // TODO move to service?

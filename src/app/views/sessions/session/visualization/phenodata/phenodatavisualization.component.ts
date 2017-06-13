@@ -151,7 +151,7 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
 
   resetTsv(dataset: Dataset) {
 
-    this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId).subscribe((fileHeaders: string[]) => {
+    this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset).subscribe((fileHeaders: string[]) => {
 
       let metadata: MetadataEntry[] = [];
 
