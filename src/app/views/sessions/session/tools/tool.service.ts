@@ -150,7 +150,7 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   getDatasetHeaders(datasets: Array<Dataset>): Observable<Array<string>>[] {
-    return datasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId));
+    return datasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset));
   }
 
 
