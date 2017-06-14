@@ -3,11 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {ToolService} from "../tool.service";
 import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
-import ToolParameter from "../../../../../model/session/toolparameter";
-import {SessionDataService} from "../../sessiondata.service";
-import {Observable, Subject} from "rxjs/Rx";
-import {TSVReader} from "../../../../../shared/services/TSVReader";
-import * as _ from "lodash";
+import {Subject} from "rxjs/Rx";
 import {Component, ViewChild, ElementRef, Input, Output, EventEmitter} from "@angular/core";
 import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
@@ -47,9 +43,7 @@ export class ToolsModalComponent {
   @ViewChild('toolsModalTemplate') toolsModalTemplate: ElementRef;
   toolsModalRef: NgbModalRef;
 
-  constructor(private tsvReader: TSVReader,
-              private sessionDataService: SessionDataService,
-              private toolSelectionService: ToolSelectionService,
+  constructor(private toolSelectionService: ToolSelectionService,
               private pipeService: PipeService,
               private toolService: ToolService,
               private ngbModal: NgbModal,
@@ -101,10 +95,10 @@ export class ToolsModalComponent {
 
 
   selectTool(tool: Tool) {
-    // TODO reset col_sel and metacol_sel if selected dataset has changed
-    for (let param of tool.parameters) {
-      this.populateParameterValues(param);
-    }
+    // // TODO reset col_sel and metacol_sel if selected dataset has changed
+    // for (let param of tool.parameters) {
+    //   this.populateParameterValues(param);
+    // }
 
     const toolSelection: ToolSelection = {
       tool: tool,
@@ -146,62 +140,6 @@ export class ToolsModalComponent {
     this.toolsModalRef.close();
   };
 
-  // TODO move to service?
-  getDatasetHeaders(): Observable<Array<string>>[] {
-    return this.selectedDatasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset));
-  }
-
-  // TODO move to service?
-  populateParameterValues(parameter: ToolParameter) {
-    if (!parameter.value) {
-      parameter.value = this.toolService.getDefaultValue(parameter);
-    }
-
-    if (parameter.type === 'COLUMN_SEL') {
-      Observable.forkJoin(this.getDatasetHeaders()).subscribe((datasetsHeaders: Array<Array<string>>) => {
-        let columns = _.uniq(_.flatten(datasetsHeaders));
-        parameter.selectionOptions = columns.map(function (column) {
-          return {id: column};
-        });
-
-        // reset value to empty if previous or default value is now invalid
-        if (parameter.value && !ToolsModalComponent.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
-          parameter.value = '';
-        }
-
-      });
-
-
-    }
-
-    // TODO reset value to empty if previous or default value is now invalid
-    if (parameter.type === 'METACOLUMN_SEL') {
-      parameter.selectionOptions = this.getMetadataColumns().map(function (column) {
-        return {id: column};
-      });
-    }
-  }
-
-  // TODO move to service
-  getMetadataColumns() {
-
-    let keySet = new Set();
-    for (let dataset of this.selectedDatasets) {
-      for (let entry of dataset.metadata) {
-        keySet.add(entry.key);
-      }
-    }
-    return Array.from(keySet);
-  }
-
-  static selectionOptionsContains(options: any[], value: string | number) {
-    for (let option of options) {
-      if (value === option.id) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   openToolsModal() {
     this.toolsModalRef = this.ngbModal.open(this.toolsModalTemplate, {size: 'lg'});

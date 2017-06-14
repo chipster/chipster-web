@@ -6,12 +6,16 @@ import ToolInput from "../../../../model/session/toolinput";
 import {Injectable} from "@angular/core";
 import {TypeTagService} from "../../../../shared/services/typetag.service";
 import {SessionData} from "../../../../model/session/session-data";
+import {Observable} from "rxjs";
+import {SessionDataService} from "../sessiondata.service";
+import {TSVReader} from "../../../../shared/services/TSVReader";
 
 @Injectable()
 export class ToolService {
 
-  constructor(
-    private typeTagService: TypeTagService) {}
+  constructor(private typeTagService: TypeTagService,
+              private sessionDataService: SessionDataService,
+              private tsvReader: TSVReader) {}
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
@@ -35,6 +39,10 @@ export class ToolService {
       return toolParameter.defaultValue;
     }
   };
+
+  isDefaultValue(parameter: ToolParameter, value: number | string) {
+    return parameter.defaultValue && parameter.defaultValue === value;
+  }
 
   //noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
@@ -128,6 +136,33 @@ export class ToolService {
     }
 
     return input.name.prefix + digits + input.name.postfix;
+  }
+
+  //noinspection JSMethodCanBeStatic
+  selectionOptionsContains(options: any[], value: string | number) {
+    for (let option of options) {
+      if (value === option.id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //noinspection JSMethodCanBeStatic
+  getDatasetHeaders(datasets: Array<Dataset>): Observable<Array<string>>[] {
+    return datasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset.datasetId));
+  }
+
+
+  //noinspection JSMethodCanBeStatic
+  getMetadataColumns(datasets: Array<Dataset>) {
+    let keySet = new Set();
+    for (let dataset of datasets) {
+      for (let entry of dataset.metadata) {
+        keySet.add(entry.key);
+      }
+    }
+    return Array.from(keySet);
   }
 
 }
