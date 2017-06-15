@@ -57,7 +57,17 @@ export class LeftPanelComponent {
 
   getDatasetListSorted(): Dataset[] {
     // sort by created date, oldest first (string comparison should do with the current date format)
-    return this.getDatasetList().sort((a, b) => a.created.localeCompare(b.created));
+    return this.getDatasetList().sort((a, b) => this.compareStringNullSafe(a.created, b.created));
+  }
+
+  compareStringNullSafe(a, b): number {
+    if (a) {
+      return a.localeCompare(b);
+    } else if (b) {
+      return b.localeCompare(a);
+    } else {
+      return 0;
+    }
   }
 
   downloadSession(): void {
