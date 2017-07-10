@@ -117,6 +117,16 @@
         </ch-volcano-plot>
       </ng-template>
     </ngb-tab>
+    <ngb-tab id="{{getTabId('bamviewer')}}"
+             *ngIf="isTabVisible('bamviewer')">
+      <ng-template ngbTabTitle>BAM Viewer</ng-template>
+      <ng-template ngbTabContent>
+        <ch-bam-viewer
+          *ngIf="active === getTabId('bamviewer')"
+          [dataset]="SelectionService.selectedDatasets[0]">
+        </ch-bam-viewer>
+      </ng-template>
+    </ngb-tab>
 
   </ngb-tabset>
 </div>

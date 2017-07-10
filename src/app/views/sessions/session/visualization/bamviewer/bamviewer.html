@@ -1,0 +1,22 @@
+<div>
+  <p>
+    {{samHeader}}
+  </p>
+  <table class="table-bordered table-hover bamtable">
+    <thead>
+    </thead>
+    <tbody>
+    <tr *ngFor="let bamRecord of bamRecordList">
+      <td>{{bamRecord.readName}}</td>
+      <td>{{chrName}}</td>
+      <td>{{bamRecord.pos}}</td>
+      <td>{{bamRecord.mapQ}}</td>
+      <td>{{bamRecord.cigar}}</td>
+      <td>{{bamRecord.nextSegPos}}</td>
+      <td>{{bamRecord.seq}}</td>
+      <td>{{bamRecord.qual}}</td>
+      <td>{{bamRecord.typeTag}}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>

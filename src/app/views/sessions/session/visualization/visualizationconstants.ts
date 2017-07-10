@@ -24,10 +24,10 @@ export default [
     supportedInputFileCounts: [1]
   },
   {
-    id:'scatterplot',
-    name:'Scatter Plot',
+    id: 'scatterplot',
+    name: 'Scatter Plot',
     typeTags: [Tags.GENE_EXPRS],
-    anyInputCountSupported:false,
+    anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
   {
@@ -65,10 +65,17 @@ export default [
     supportedInputFileCounts: [2, 3]
   },
   {
-    id:'volcanoplot',
-    name:'Volcano Plot',
+    id: 'volcanoplot',
+    name: 'Volcano Plot',
     typeTags: [Tags.PVALUE_AND_FOLD_CHANGE],
-    anyInputCountSupported:false,
+    anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
+  {
+    id: 'bamviewer',
+    name: 'BAM viewer',
+    typeTags: [Tags.BAM],
+    anyInputCountSupported: false,
+    supportedInputFileCounts: [1]
+  }
 ];

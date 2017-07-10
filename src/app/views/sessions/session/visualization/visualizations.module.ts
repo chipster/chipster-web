@@ -25,11 +25,15 @@ import {VisualizationTSVService} from "../../../../shared/visualization/visualiz
 import {PlotService} from "../../../../shared/visualization/plot.service"
 import {LinkButtonModule} from "../link-button/link-button.module";
 import {VolcanoPlotComponent} from "./volcanoplot/volcanoplot.component"
-import {VolcanoPlotService} from "./volcanoplot/volcanoplot.service"
+import {VolcanoPlotService} from "./volcanoplot/volcanoplot.service";
+import {BamViewerComponent} from './bamviewer/bamviewer.component';
+
+
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule],
-  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,ScatterPlotComponent,VolcanoPlotComponent],
+  declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,
+    ScatterPlotComponent,VolcanoPlotComponent, BamViewerComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, PlotService,VolcanoPlotService],
   exports: [VisualizationsComponent],
   entryComponents: [VisualizationModalComponent]
