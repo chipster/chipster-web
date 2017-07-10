@@ -38,7 +38,7 @@ export class BamViewerComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, -1, true).subscribe((result: any) => {
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, -1, true).subscribe((result: any) => {
 
       var arrayBuffer = result;
 

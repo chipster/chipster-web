@@ -1,4 +1,3 @@
-
 import {ConfigService} from "../services/config.service";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
@@ -9,35 +8,34 @@ import Dataset from "../../model/session/dataset";
 @Injectable()
 export class FileResource {
 
-	constructor(
-				private configService: ConfigService,
-        private restService: RestService) {
-	}
+  constructor(private configService: ConfigService,
+              private restService: RestService) {
+  }
 
   /**
    *
    * @param sessionId
-   * @param datasetId
+   * @param dataset
    * @param maxBytes -1 for full file
-   * @param isReqArrayBuffer is required response as an array buffer instead of text, false for normal text response
+   * @param isReqArrayBuffer
    * @returns {any}
    */
-  getData(sessionId: string, datasetId: string, maxBytes?: number, isReqArrayBuffer?: boolean): Observable<any> {
-    if (maxBytes && maxBytes > -1) {
-      return this.getLimitedData(sessionId, datasetId, maxBytes, isReqArrayBuffer);
+  getData(sessionId: string, dataset: Dataset, maxBytes?: number, isReqArrayBuffer?: boolean): Observable<any> {
+
+    if (maxBytes) {
+      return this.getLimitedData(sessionId, dataset, maxBytes, isReqArrayBuffer);
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    if (isReqArrayBuffer) {
-      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {responseType: ResponseContentType.ArrayBuffer}));
+    if (isReqArrayBuffer) {//For Bam Viewer, we need array buffer as reponse
+      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {responseType: ResponseContentType.ArrayBuffer}));
     } else {
-      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {responseType: ResponseContentType.Text}));
+      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {responseType: ResponseContentType.Text}));
     }
 
   }
 
-  getLimitedData(sessionId: string, datasetId: string, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
-  getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number): Observable<any> {
+  getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
 
     if (maxBytes) {
       maxBytes = Math.min(maxBytes, dataset.size);
@@ -50,18 +48,17 @@ export class FileResource {
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
     if (isReqArrayBuffer) {
-      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {
+      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {
         headers: new Headers({range: `bytes=0-${maxBytes}`}),
         responseType: ResponseContentType.ArrayBuffer
       }));
     } else {
-      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {
+      return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {
         headers: new Headers({range: `bytes=0-${maxBytes}`}),
         responseType: ResponseContentType.Text
       }));
     }
 
-    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {headers: new Headers({range: `bytes=0-${maxBytes}`}), responseType: ResponseContentType.Text} ));
   }
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
