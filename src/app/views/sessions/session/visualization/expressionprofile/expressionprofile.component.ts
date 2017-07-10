@@ -6,7 +6,6 @@ import {SessionDataService} from "../../sessiondata.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import GeneExpression from "./geneexpression";
-import {ExpressionProfileTSVService} from "./expressionprofileTSV.service";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
@@ -38,7 +37,7 @@ export class ExpressionProfileComponent implements OnChanges {
 
   ngOnChanges() {
     const datasetName = this.dataset.name;
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId).subscribe((result: any) => {
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset).subscribe((result: any) => {
       let parsedTSV = d3.tsvParseRows(result);
       this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
       if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
@@ -244,7 +243,6 @@ export class ExpressionProfileComponent implements OnChanges {
           // Line ids intersecting with selection as an array
           ids = ids.concat(_.map(intersectingLines, (line: Line) => line.lineId));
         }
-        ;
 
         this.resetSelections();
         this.addSelections(_.uniq(ids));

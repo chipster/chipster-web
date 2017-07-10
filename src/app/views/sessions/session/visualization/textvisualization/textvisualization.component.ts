@@ -8,9 +8,9 @@ import {VisualizationModalService} from "../visualizationmodal.service";
 @Component({
   selector: 'ch-text-visualization',
   template: `
-    <p *ngIf="!data">Loading data...</p>
+    <p *ngIf="!(data === '' || data)">Loading data...</p>
     
-    <div *ngIf="data">
+    <div *ngIf="data === '' || data">
       <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
       <ch-link-button class="pull-right" (click)="showAll()" *ngIf="!isCompleteFile()">Show all</ch-link-button>
       <pre>{{data}}</pre>
@@ -38,9 +38,10 @@ export class TextVisualizationComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
+    let maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((response: any) => {
+    console.log('getData()');
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).subscribe((response: any) => {
       this.data = response;
     }, (error: Response) => {
       console.error(error);

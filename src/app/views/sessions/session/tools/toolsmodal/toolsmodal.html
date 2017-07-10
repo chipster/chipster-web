@@ -84,7 +84,7 @@
 
       <!-- parameters -->
       <ngb-tab [disabled]="!toolSelection">
-        <ng-template ngbTabTitle>Parameters</ng-template>
+        <ng-template ngbTabTitle><span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span> Parameters</ng-template>
         <ng-template ngbTabContent>
           <ch-tools-parameter-form [tool]="toolSelection.tool"></ch-tools-parameter-form>
         </ng-template>

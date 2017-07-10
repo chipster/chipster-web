@@ -48,9 +48,9 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     // remove old table
     this.ngOnDestroy();
 
-    let maxBytes = this.showFullData ? -1 : this.fileSizeLimit;
+    let maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId, maxBytes).subscribe((result: any) => {
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).subscribe((result: any) => {
 
       let parsedTSV = d3.tsvParseRows(result);
 

@@ -1,15 +1,18 @@
+
 import {ConfigService} from "../services/config.service";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {ResponseContentType, Headers} from "@angular/http";
+import Dataset from "../../model/session/dataset";
 
 @Injectable()
 export class FileResource {
 
-  constructor(private configService: ConfigService,
-              private restService: RestService) {
-  }
+	constructor(
+				private configService: ConfigService,
+        private restService: RestService) {
+	}
 
   /**
    *
@@ -34,6 +37,17 @@ export class FileResource {
   }
 
   getLimitedData(sessionId: string, datasetId: string, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
+  getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number): Observable<any> {
+
+    if (maxBytes) {
+      maxBytes = Math.min(maxBytes, dataset.size);
+
+      if (maxBytes === 0) {
+        // 0-0 range would produce 416 - Requested range not satisfiable
+        return Observable.of('');
+      }
+    }
+
     const apiUrl$ = this.configService.getFileBrokerUrl();
     if (isReqArrayBuffer) {
       return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true, {
@@ -47,6 +61,7 @@ export class FileResource {
       }));
     }
 
+    return apiUrl$.flatMap((url: string) => this.restService.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, true, {headers: new Headers({range: `bytes=0-${maxBytes}`}), responseType: ResponseContentType.Text} ));
   }
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {

@@ -69,6 +69,10 @@ export default class TSVFile {
     const isMissingHeader = this.isMissingHeader(tsv);
     let headers = tsv[0];
 
+    if (!headers) {
+      return [];
+    }
+
     if (isMissingHeader) {
       headers.unshift('identifier');
       return headers;

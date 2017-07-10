@@ -44,7 +44,7 @@ export class PlotComponent implements OnChanges {
     const datasetName = this.dataset.name;
 
     //Get the file, this can be in a shared dataservice
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset.datasetId)
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset)
       .subscribe((result: any) => {
         let parsedTSV = d3.tsvParseRows(result);
         this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
