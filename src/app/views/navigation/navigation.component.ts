@@ -11,6 +11,7 @@ import {TokenService} from "../../core/authentication/token.service";
 export class NavigationComponent {
 
     host: Observable<string>;
+    username: string;
 
     constructor(
       private tokenService: TokenService,
@@ -19,6 +20,7 @@ export class NavigationComponent {
 
     ngOnInit() {
       this.host = this.getHost();
+      this.username = this.tokenService.getUsername();
     }
 
     logout() {

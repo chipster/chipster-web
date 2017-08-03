@@ -89,6 +89,19 @@
             </div>
             <div class="row">
               <div class="col-md-12">
+                <h4>Shared with</h4>
+                <div *ngFor="let rule of sessionData.session.rules">
+                  <p>
+                    <span>{{rule.username}}, </span>
+                    <span>{{rule.readWrite ? 'read-write' : 'read-only' }} </span>
+                    <span *ngIf="rule.sharedBy">(shared by {{rule.sharedBy}})</span>
+                    <span *ngIf="!rule.sharedBy">(owner)</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
               <textarea id="session-notes" rows="15" placeholder="Session notes"
                         (blur)="sessionDataService.updateSession(sessionData.session).subscribe()"
                         [(ngModel)]="sessionData.session.notes">

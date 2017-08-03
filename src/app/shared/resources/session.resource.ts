@@ -171,6 +171,11 @@ export class SessionResource {
     return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}`, true));
 	}
 
+  deleteRule(sessionId: string, ruleId: string) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/rules/${ruleId}`, true));
+  }
+
 	deleteDataset(sessionId: string, datasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => this.restService.delete(`${url}/sessions/${sessionId}/datasets/${datasetId}`, true));

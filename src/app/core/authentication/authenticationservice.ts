@@ -16,10 +16,9 @@ export class AuthenticationService {
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<void> {
     // clear any old tokens
-    this.tokenService.setAuthToken(null);
+    this.tokenService.setAuthToken(null, null);
     return this.requestToken(username, password).map((response: any) => {
-      let token = response.json().tokenKey;
-      this.tokenService.setAuthToken(token);
+      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username);
     });
   };
 
