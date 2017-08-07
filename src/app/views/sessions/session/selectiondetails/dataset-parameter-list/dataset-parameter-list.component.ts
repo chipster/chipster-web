@@ -51,9 +51,12 @@ export class DatasetParameterListComponent {
   checkParameterValue(){
     let self=this;
     this.parameters.forEach(function(param){
-      self.tool.parameters.forEach(function(toolParameter) {
-        param.isDefaultValueChanged=self.toolService.isDefaultValue(toolParameter,param.value);
-      });
+      //if (self.tool) {
+        self.tool.parameters.forEach(function(toolParameter) {
+          console.log('job param', param, 'tool param', toolParameter.name);
+          param.isDefaultValueChanged = self.toolService.isDefaultValue(toolParameter,param.value);
+        });
+      //}
     });
 
 
