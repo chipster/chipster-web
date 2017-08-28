@@ -51,12 +51,13 @@ export class DatasetParameterListComponent {
   checkParameterValue(){
     let self=this;
     this.parameters.forEach(function(param){
-      //if (self.tool) {
+      if (self.tool) {
         self.tool.parameters.forEach(function(toolParameter) {
-          console.log('job param', param, 'tool param', toolParameter.name);
           param.isDefaultValueChanged = self.toolService.isDefaultValue(toolParameter,param.value);
         });
-      //}
+      } else {
+        console.log('cannot set default parameter values because the tools is undefined', self.tool)
+      }
     });
 
 
