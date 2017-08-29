@@ -76,8 +76,11 @@ export class SingleDatasetComponent {
   getUsedToolFromToolset(){
     let self=this;
     this.sessionData.tools.forEach(function(tool){
-      if(tool.name.id===self.sourceJob.toolId){
-        self.tool=tool;
+      // imported files don't have sourceJob
+      if (self.sourceJob) {
+        if(tool.name.id===self.sourceJob.toolId){
+          self.tool=tool;
+        }
       }
     });
   }
