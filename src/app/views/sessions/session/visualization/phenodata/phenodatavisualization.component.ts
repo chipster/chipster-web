@@ -325,6 +325,9 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     var array = this.getRows(this.datasets, headers);
 
     if (!_.isEqual(headers, this.headers)) {
+
+      this.hideColumnIfEmpty(headers, array);
+
       this.headers = headers;
 
       // remove old table if this is an update
@@ -412,5 +415,16 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     }, () => {
         // modal dismissed
     });
+  }
+
+  private hideColumnIfEmpty(headers: string[], array: Row[]) {
+    // if the columnName is undefined on all rows (non-microarray phenodata)
+    if (array.filter(row => !!row.columnName).length === 0) {
+      let index = headers.indexOf('column');
+      // remove the column from the headers
+      headers.splice(index, 1);
+      // and from the array
+      array.forEach(row => row.splice(index, 1));
+    }
   }
 }
