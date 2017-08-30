@@ -8,7 +8,7 @@
       </div>
       <div class="row">
         <div class="col-md-6">
-          <ch-open-session-file (openSession)="openSession($event)"></ch-open-session-file>
+          <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
         </div>
         <div class="col-md-6">
           <button class="btn btn-sm btn-info pull-right" (click)="createSession()">

@@ -95,6 +95,14 @@ export class SessionListComponent {
       this.router.navigate(['/sessions', sessionId]);
     }
 
+    sessionsUploaded(sessionIds: string[]) {
+      if (sessionIds.length === 1) {
+        this.openSession(sessionIds[0]);
+      } else {
+        this.updateSessions();
+      }
+    }
+
     previewSession(session: Session) {
         this.previewedSession = session;
 
