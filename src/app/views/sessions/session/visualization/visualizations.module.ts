@@ -27,13 +27,14 @@ import {LinkButtonModule} from "../link-button/link-button.module";
 import {VolcanoPlotComponent} from "./volcanoplot/volcanoplot.component"
 import {VolcanoPlotService} from "./volcanoplot/volcanoplot.service";
 import {BamViewerComponent} from './bamviewer/bamviewer.component';
+import { GenomeBrowserComponent } from './genome-browser/genome-browser.component';
 
 
 
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule],
   declarations: [VisualizationsComponent, VennDiagram, PdfVisualizationComponent, PdfViewerComponent, HtmlvisualizationComponent, TextVisualizationComponent, VisualizationModalComponent, SpreadsheetVisualizationComponent, ExpressionProfileComponent, ImageVisualizationComponent, PhenodataVisualizationComponent,
-    ScatterPlotComponent,VolcanoPlotComponent, BamViewerComponent],
+    ScatterPlotComponent,VolcanoPlotComponent, BamViewerComponent, GenomeBrowserComponent],
   providers: [ExpressionProfileTSVService, ExpressionProfileService, VennDiagramService, TwoCircleVennDiagramService, ThreeCircleVennDiagramService, VisualizationModalService, VisualizationTSVService, PlotService,VolcanoPlotService],
   exports: [VisualizationsComponent],
   entryComponents: [VisualizationModalComponent]

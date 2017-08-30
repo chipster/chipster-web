@@ -16,7 +16,8 @@
     "types": [
       "d3",
       "handsontable",
-      "flowjs"
+      "flowjs",
+      "pileup"
     ]
   },
   "exclude": [

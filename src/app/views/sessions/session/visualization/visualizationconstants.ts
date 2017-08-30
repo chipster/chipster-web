@@ -77,5 +77,12 @@ export default [
     typeTags: [Tags.BAM],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
+  },
+  {
+    id: 'genomebrowser',
+    name: 'Genome Browser',
+    typeTags: [Tags.BAM,Tags.BAI],
+    anyInputCountSupported: false,
+    supportedInputFileCounts: [1,2]
   }
 ];

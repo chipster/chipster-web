@@ -48,19 +48,18 @@ export class DatasetParameterListComponent {
     }
   }
 
-  checkParameterValue(){
-    let self=this;
-    this.parameters.forEach(function(param){
-      self.tool.parameters.forEach(function(toolParameter) {
-        param.isDefaultValueChanged=self.toolService.isDefaultValue(toolParameter,param.value);
+  checkParameterValue() {
+    if (this.tool && this.tool.parameters && this.parameters) {
+      let self = this;
+      this.parameters.forEach(function (param) {
+        self.tool.parameters.forEach(function (toolParameter) {
+          console.log(self.toolService.isDefaultValue(toolParameter, param.value));
+          param.isDefaultValueChanged = self.toolService.isDefaultValue(toolParameter, param.value);
+        });
       });
-    });
 
-
-
+    }
+    console.log(this.parameters);
   }
-
-
-
 
 }

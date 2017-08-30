@@ -15,7 +15,7 @@
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-spreadsheet-visualization>
       </ng-template>
-  </ngb-tab>
+    </ngb-tab>
 
     <ngb-tab id="{{getTabId('text')}}"
              *ngIf="isTabVisible('text')">
@@ -26,7 +26,7 @@
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-text-visualization>
       </ng-template>
-  </ngb-tab>
+    </ngb-tab>
 
     <ngb-tab id="{{getTabId('expressionprofile')}}"
              *ngIf="isTabVisible('expressionprofile')">
@@ -62,7 +62,7 @@
       </ng-template>
     </ngb-tab>
 
-  <ngb-tab id="{{getTabId('pdf')}}"
+    <ngb-tab id="{{getTabId('pdf')}}"
              *ngIf="isTabVisible('pdf')">
       <ng-template ngbTabTitle><span class="glyphicon glyphicon-book"></span> PDF</ng-template>
       <ng-template ngbTabContent>
@@ -117,6 +117,7 @@
         </ch-volcano-plot>
       </ng-template>
     </ngb-tab>
+
     <ngb-tab id="{{getTabId('bamviewer')}}"
              *ngIf="isTabVisible('bamviewer')">
       <ng-template ngbTabTitle>BAM Viewer</ng-template>
@@ -125,6 +126,20 @@
           *ngIf="active === getTabId('bamviewer')"
           [dataset]="SelectionService.selectedDatasets[0]">
         </ch-bam-viewer>
+      </ng-template>
+    </ngb-tab>
+
+    <ngb-tab id="{{getTabId('genomebrowser')}}"
+             *ngIf="isTabVisible('genomebrowser')">
+      <ng-template ngbTabTitle>Genome Browser</ng-template>
+      <ng-template ngbTabContent>
+        <div class="row" style="padding:40px">
+          <ch-link-button (click)="openGnomeModal()">Open Genome Browser in a different window</ch-link-button>
+        </div>
+        <ch-genome-browser
+          *ngIf="active === getTabId('genomebrowser')"
+          [selectedDatasets]="SelectionService.selectedDatasets">
+        </ch-genome-browser>
       </ng-template>
     </ngb-tab>
 

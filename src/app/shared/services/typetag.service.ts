@@ -21,6 +21,7 @@ export const Tags = {
   GZIP: 'GZIP',
   VCF: 'VCF',
   BAM: 'BAM',
+  BAI:'BAI',
   QUAL: 'QUAL',
   MOTHUR_OLIGOS: 'MOTHUR_OLIGOS',
   MOTHUR_NAMES: 'MOTHUR_NAMES',
