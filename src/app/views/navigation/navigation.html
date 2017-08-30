@@ -1,4 +1,4 @@
-<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded" xmlns:padding-right="http://www.w3.org/1999/xhtml">
 
   <a class="navbar-brand" href="#">Chipster</a>
   <div class="collapse navbar-collapse" id="navbarNav">
@@ -18,9 +18,9 @@
   <!--end navbar form-->
   <ul class="nav justify-content-end">
     <li style="padding-right: 20px"><span>{{host | async}}</span></li>
-    <li><a routerLink="/login" *ngIf="!isLoggedIn()" routerLinkActive="active">Login</a></li>
-    <li><a routerLink="/home" *ngIf="isLoggedIn()" (click)="logout()" routerLinkActive="active">Logout</a></li>
+    <li *ngIf="!isLoggedIn()"><a routerLink="/login"  routerLinkActive="active">Login</a></li>
+    <li *ngIf="isLoggedIn()" style="padding-right: 20px"><span>{{username}}</span></li>
+    <li *ngIf="isLoggedIn()"><a routerLink="/home" (click)="logout()" routerLinkActive="active">Logout</a></li>
   </ul>
-
 
 </nav>

@@ -1,3 +1,4 @@
+import Rule from "./rule";
 export default class Session {
 
     constructor (public name: string) {
@@ -6,4 +7,5 @@ export default class Session {
     created: string;
     notes: string;
     sessionId: string;
+    rules: Array<Rule>
 }

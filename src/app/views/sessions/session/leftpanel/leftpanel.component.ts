@@ -12,7 +12,7 @@ import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {Store} from "@ngrx/store";
 import {SelectionHandlerService} from "../selection-handler.service";
 import {UrlTree, ActivatedRoute, Router} from "@angular/router";
-import copy from 'copy-to-clipboard';
+import * as copy from 'copy-to-clipboard';
 
 
 @Component({

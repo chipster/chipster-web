@@ -48,18 +48,23 @@ export class DatasetParameterListComponent {
     }
   }
 
-  checkParameterValue() {
-    if (this.tool && this.tool.parameters && this.parameters) {
-      let self = this;
-      this.parameters.forEach(function (param) {
-        self.tool.parameters.forEach(function (toolParameter) {
-          console.log(self.toolService.isDefaultValue(toolParameter, param.value));
-          param.isDefaultValueChanged = self.toolService.isDefaultValue(toolParameter, param.value);
+  checkParameterValue(){
+    let self=this;
+    this.parameters.forEach(function(param){
+      if (self.tool) {
+        self.tool.parameters.forEach(function(toolParameter) {
+          param.isDefaultValueChanged = self.toolService.isDefaultValue(toolParameter,param.value);
         });
-      });
+      } else {
+        console.log('cannot set default parameter values because the tools is undefined', self.tool)
+      }
+    });
 
-    }
-    console.log(this.parameters);
+
+
   }
+
+
+
 
 }

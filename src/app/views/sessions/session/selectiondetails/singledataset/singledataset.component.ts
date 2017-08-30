@@ -3,7 +3,6 @@ import {SessionDataService} from "../../sessiondata.service";
 import Job from "../../../../../model/session/job";
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {DatasetModalService} from "../datasetmodal.service";
-import {SessionComponent} from "../../session.component";
 import {SessionData} from "../../../../../model/session/session-data";
 
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
@@ -36,12 +35,12 @@ export class SingleDatasetComponent {
 
   ngOnInit() {
     this.sourceJob = this.getSourceJob(this.dataset);
-    this.getUsedToolFromToolset();
   }
 
   ngOnChanges(changes: any) {
     this.dataset = changes.dataset.currentValue;
     this.sourceJob = this.getSourceJob(this.dataset);
+    this.getUsedToolFromToolset();
   }
 
   renameDataset() {
@@ -77,11 +76,12 @@ export class SingleDatasetComponent {
   getUsedToolFromToolset(){
     let self=this;
     this.sessionData.tools.forEach(function(tool){
-      if(tool.name.id===self.sourceJob.toolId){
-        self.tool=tool;
+      // imported files don't have sourceJob
+      if (self.sourceJob) {
+        if(tool.name.id===self.sourceJob.toolId){
+          self.tool=tool;
+        }
       }
     });
-
-
   }
 }

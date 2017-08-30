@@ -21,38 +21,30 @@
       <br>
 
       <div class="scrollable session-list">
-        <table class="table table-hover table-sm">
-          <tbody>
-          <tr *ngFor="let session of userSessions"
-              (mouseover)="previewSession(session)"
-              (click)="openSession(session.sessionId)"
-              [ngClass]="{'table-active': isSessionSelected(session)}">
-            <td>
-            <span>{{session.name}}
-              <button class="btn btn-secondary btn-xs pull-right delete-session-button"
-                      (click)="deleteSession(session); $event.stopImmediatePropagation();"
-                      title="Delete session"><span class="fa fa-times"></span>
-              </button>
-            </span>
-            </td>
+        <div *ngFor="let sharedByUsername of sessionsByUserKeys">
 
-          </tr>
-          </tbody>
-        </table>
+          <h5 *ngIf="sharedByUsername">Shared by {{sharedByUsername}}</h5>
+          <table class="table table-hover table-sm">
+            <tbody>
+            <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)"
+                (mouseover)="previewSession(session)"
+                (click)="openSession(session.sessionId)"
+                [ngClass]="{'table-active': isSessionSelected(session)}">
+              <td>
+              <span>{{session.name}}
+                <button class="btn btn-secondary btn-xs pull-right delete-session-button"
+                        *ngIf="canDeleteRule(session.rules)"
+                        (click)="deleteSession(session); $event.stopImmediatePropagation();"
+                        title="Delete session"><span class="fa fa-times"></span>
+                </button>
+              </span>
+              </td>
 
-        <br>
-
-        <!-- Example Sessions -->
-        <h4>Example sessions</h4>
-        <table class="table table-hover">
-          <tbody>
-          <tr *ngFor="let session of localSessions">
-            <td class="text-left text-nowrap">
-              {{session.name}}
-            </td>
-          </tr>
-          </tbody>
-        </table>
+            </tr>
+            </tbody>
+          </table>
+          <br>
+        </div>
       </div>
     </div>
     <div class="col-md" id="session-preview"><!-- Session Detail -->

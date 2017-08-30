@@ -6,6 +6,8 @@ import {Component} from "@angular/core";
 import {Router} from "@angular/router";
 import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 import {Subject} from "rxjs";
+import {TokenService} from "../../core/authentication/token.service";
+import Rule from "../../model/session/rule";
 
 @Component({
   selector: 'ch-session-list',
@@ -16,7 +18,8 @@ export class SessionListComponent {
 
     public previewedSession: Session;
     public previousSession: Session;
-    public userSessions: Session[];
+    public sessionsByUserKeys: Array<string>;
+    public sessionsByUser: Map<string, Array<Session>>;
     public sessionData: SessionData;
     private selectedSessionId: string;
     private workflowPreviewLoading = false;
@@ -27,7 +30,8 @@ export class SessionListComponent {
     constructor(
         private router: Router,
         private sessionResource: SessionResource,
-        private dialogModalService: DialogModalService) {}
+        private dialogModalService: DialogModalService,
+        private tokenService: TokenService) {}
 
     ngOnInit() {
       this.updateSessions();
@@ -66,7 +70,22 @@ export class SessionListComponent {
     updateSessions() {
 
         this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
-            this.userSessions = sessions;
+
+            let sessionsByUser = new Map();
+            // show user's own sessions first
+            sessionsByUser.set(null, []);
+
+            sessions.forEach(s => {
+              this.getApplicableRules(s.rules).forEach(rule => {
+                if (!sessionsByUser.has(rule.sharedBy)) {
+                  sessionsByUser.set(rule.sharedBy, []);
+                }
+                sessionsByUser.get(rule.sharedBy).push(s);
+              });
+            });
+
+            this.sessionsByUser = sessionsByUser;
+            this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
         });
     }
 
@@ -92,7 +111,9 @@ export class SessionListComponent {
     deleteSession(session: Session) {
 
       this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
-        this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
+        //this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
+        // delete the session only from this user (i.e. the rule)
+        this.sessionResource.deleteRule(session.sessionId, this.getDeletableRules(session.rules)[0].ruleId).subscribe( () => {
           this.updateSessions();
           this.previewedSession = null;
         }, () => {
@@ -101,6 +122,39 @@ export class SessionListComponent {
       }, () => {
         // modal dismissed
       });
+    }
+
+    hasReadWriteAccess(rules: Array<Rule>) {
+      rules.forEach(r => {
+        if (r.readWrite) {
+          return true;
+        }
+      });
+      return false;
+    }
+
+    getDeletableRules(rules: Array<Rule>) {
+      if (this.hasReadWriteAccess(rules)) {
+        return this.getApplicableRules(rules);
+      } else {
+        return this.getPersonalRules(rules);
+      }
+    }
+
+    canDeleteRule(rules: Array<Rule>) {
+      return this.getDeletableRules(rules).length > 0;
+    }
+
+    getPersonalRules(rules: Array<Rule>) {
+      return rules.filter(r => r.username === this.tokenService.getUsername());
+    }
+
+    getPublicRules(rules: Array<Rule>) {
+      return rules.filter(r => r.username === 'everyone');
+    }
+
+    getApplicableRules(rules: Array<Rule>) {
+      return this.getPersonalRules(rules).concat(this.getPublicRules(rules));
     }
 
     isSessionSelected(session: Session) {
