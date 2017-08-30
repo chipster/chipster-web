@@ -39,10 +39,9 @@ export class SessionListComponent {
       this.previewThrottleSubscription = this.previewThrottle$.asObservable()
         // hide the loading indicator of the old session immediately
         .do(() => this.workflowPreviewLoading = false)
-        // wait a while to see if the user is really intersted about this session
-        .debounceTime(500)
-        // in switchMap the new request cancels the previous requests
-        .switchMap(session => {
+        // wait a while to see if the user is really interested about this session
+        .debounceTime(1000)
+        .flatMap(session => {
           this.workflowPreviewLoading = true;
           return this.sessionResource.loadSession(session.sessionId)
         })
