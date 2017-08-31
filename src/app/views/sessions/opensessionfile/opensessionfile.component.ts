@@ -4,7 +4,6 @@ import Session from "../../../model/session/session";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
 import {ErrorService} from "../../error/error.service";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'ch-open-session-file',
@@ -67,14 +66,10 @@ export class OpenSessionFile {
     file.cancel();
 
     this.fileStatus.set(file, 'Extracting session');
-    // don't wait for the extraction for now, because the OpenShift route will timeout
-    //return this.sessionWorkerResource.extractSession(sessionId, datasetId).flatMap(response => {
-    this.sessionWorkerResource.extractSession(sessionId, datasetId).subscribe(null, err => this.error(file, err));
-    return Observable.of({warnings: null}).flatMap(response => {
+    return this.sessionWorkerResource.extractSession(sessionId, datasetId).flatMap(response => {
       console.log('extracted, warnings: ', response.warnings);
       this.fileStatus.set(file, 'Deleting temporary copy');
-      //return this.sessionResource.deleteDataset(sessionId, datasetId);
-      return Observable.of(null);
+      return this.sessionResource.deleteDataset(sessionId, datasetId);
     }).subscribe(() => {
       this.fileStatus.set(file, undefined);
       this.finishedFiles.add(file);
