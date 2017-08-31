@@ -48,7 +48,7 @@ export class SessionListComponent {
         .do((fullSession: SessionData) => {
           this.workflowPreviewLoading = false;
           // don't show if the selection has already changed
-          if (this.previewedSession.sessionId === fullSession.session.sessionId) {
+          if (this.previewedSession && fullSession.session && this.previewedSession.sessionId === fullSession.session.sessionId) {
             this.sessionData = fullSession;
           }
         })
