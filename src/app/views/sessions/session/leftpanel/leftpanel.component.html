@@ -1,111 +1,81 @@
-<div class="sidebar">
 
+<div class="row">
+  <div class="col">
+    <h6 (click)="renameSessionModal()">&nbsp;{{sessionData.session.name}}</h6>
+  </div>
+  <div class="col-2">
+    <div class="dropdown pull-right">
 
-  <h6><span (click)="renameSessionModal()">&nbsp; {{sessionData.session.name}}</span></h6>
-
-  <div class="chipster-highlight ">
-    <div class="bar pull-right search-div">
-      <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
-             placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
-      <button class="clear-search-button no-border" *ngIf="datasetSearch"
-              (click)="datasetSearch = null">
-        <span class="glyphicon glyphicon-remove"></span>
+      <button class="btn btn-secondary" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-bars" aria-hidden="true"></i>
       </button>
+
+      <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
+        <a class="dropdown-item" (click)="renameSessionModal()">Rename</a>
+        <a class="dropdown-item" (click)="notesModal()">Notes</a>
+        <a class="dropdown-item" (click)="sharingModal()">Sharing</a>
+        <a class="dropdown-item" (click)="duplicateModal()">Duplicate session</a>
+        <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
+        <a class="dropdown-item" (click)="removeSessionModal()">Remove</a>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div>
 
-      <ngb-tabset>
+<div class="chipster-highlight ">
+  <div class="bar pull-right search-div">
+    <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
+           placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
+    <button class="btn btn-secondary clear-search-button" *ngIf="datasetSearch"
+            (click)="datasetSearch = null">
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
 
-        <ngb-tab id="workflow" title="Workflow">
-          <ng-template ngbTabContent>
-            <div class="workflow-dataset-static-panel">
-              <div class="add-dataset-button">
-                <ch-add-dataset-modal
-                  [datasetsMap]="sessionData.datasetsMap"
-                  [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
-              </div>
+  <div>
+
+    <ngb-tabset>
+
+      <ngb-tab id="workflow" title="Workflow">
+        <ng-template ngbTabContent>
+          <div class="workflow-dataset-static-panel">
+            <div class="add-dataset-button">
+              <ch-add-dataset-modal
+                [datasetsMap]="sessionData.datasetsMap"
+                [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
             </div>
+          </div>
 
-            <ch-workflow-graph
-              [datasetsMap]="sessionData.datasetsMap"
-              [jobsMap]="sessionData.jobsMap"
-              [modulesMap]="sessionData.modulesMap"
-              [datasetSearch]="datasetSearch"
-              [defaultScale]="1"
-              [enabled]="true"></ch-workflow-graph>
-          </ng-template>
-        </ngb-tab>
+          <ch-workflow-graph
+            [datasetsMap]="sessionData.datasetsMap"
+            [jobsMap]="sessionData.jobsMap"
+            [modulesMap]="sessionData.modulesMap"
+            [datasetSearch]="datasetSearch"
+            [defaultScale]="1"
+            [enabled]="true"></ch-workflow-graph>
+        </ng-template>
+      </ngb-tab>
 
-        <ngb-tab id="datasets" title="Files">
-          <ng-template ngbTabContent>
-            <div class="workflow-dataset-static-panel">
-              <div class="add-dataset-button">
-                <ch-add-dataset-modal
-                  [datasetsMap]="sessionData.datasetsMap"
-                  [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
-              </div>
+      <ngb-tab id="datasets" title="Files">
+        <ng-template ngbTabContent>
+          <div class="workflow-dataset-static-panel">
+            <div class="add-dataset-button">
+              <ch-add-dataset-modal
+                [datasetsMap]="sessionData.datasetsMap"
+                [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
             </div>
+          </div>
 
-            <div class="dataset-list-panel">
-              <div class="list-group dataset-list">
-                <button type="button"
-                        class="dataset-list-button list-group-item list-group-item-action"
-                        [ngClass]="{active: selectionService.isSelectedDatasetById(dataset.datasetId)}"
-                        (click)="toggleDatasetSelection($event, dataset)"
-                        *ngFor="let dataset of getDatasetListSorted() | datasetsearch:datasetSearch">
-                  {{dataset.name}}
+          <div class="dataset-list-panel">
+            <div class="list-group dataset-list">
+              <button type="button"
+                      class="dataset-list-button list-group-item list-group-item-action"
+                      [ngClass]="{active: selectionService.isSelectedDatasetById(dataset.datasetId)}"
+                      (click)="toggleDatasetSelection($event, dataset)"
+                      *ngFor="let dataset of getDatasetListSorted() | datasetsearch:datasetSearch">
+                {{dataset.name}}
                 </button>
-              </div>
-            </div>
-          </ng-template>
-        </ngb-tab>
-
-        <ngb-tab id="details" title="Details">
-          <ng-template ngbTabContent>
-            <div class="row">
-              <div class="col-md-12">
-
-                <button class="btn btn-secondary"
-                        (click)="openCopySessionModal()">
-                  Copy session
-                  <i *ngIf="isCopying" class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
-                </button>
-                <button class="btn btn-secondary" (click)="downloadSession()">
-                  Save session file
-                </button>
-                <button class="btn btn-secondary" (click)="saveCurrentUrlState()">Save current state url to clipboard</button>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <p>Created: {{sessionData.session.created | isodate }}</p>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <p>Accessed: {{sessionData.session.accessed | isodate }}</p>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <h4>Shared with</h4>
-                <div *ngFor="let rule of sessionData.session.rules">
-                  <p>
-                    <span>{{rule.username}}, </span>
-                    <span>{{rule.readWrite ? 'read-write' : 'read-only' }} </span>
-                    <span *ngIf="rule.sharedBy">(shared by {{rule.sharedBy}})</span>
-                    <span *ngIf="!rule.sharedBy">(owner)</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-              <textarea id="session-notes" rows="15" placeholder="Session notes"
-                        (blur)="sessionDataService.updateSession(sessionData.session).subscribe()"
-                        [(ngModel)]="sessionData.session.notes">
-              </textarea>
               </div>
             </div>
           </ng-template>
@@ -114,4 +84,3 @@
     </div>
 
   </div>
-</div>

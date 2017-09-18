@@ -1,7 +1,10 @@
 import {Injectable} from "@angular/core";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {StringModalComponent} from "./stringmodal.component";
-import {BooleanModalComponent} from "./booleanmodal.component";
+import {StringModalComponent} from "./stringmodal/stringmodal.component";
+import {BooleanModalComponent} from "./booleanmodal/booleanmodal.component";
+import {NotesModalComponent} from "./notesmodal/notesmodal.component";
+import {SharingModalComponent} from "./sharingmodal/sharingmodal.component";
+import {SpinnerModalComponent} from "./spinnermodal/spinnermodal.component";
 
 @Injectable()
 export class DialogModalService {
@@ -30,6 +33,25 @@ export class DialogModalService {
     modalRef.componentInstance.okButtonText = okButtonText;
     modalRef.componentInstance.cancelButtonText = cancelButtonText;
 
+    return modalRef.result;
+  }
+
+  openNotesModal(session) {
+    let modalRef = this.modalService.open(NotesModalComponent);
+    modalRef.componentInstance.session = session;
+    return modalRef.result;
+  }
+
+  openSharingModal(session) {
+    let modalRef = this.modalService.open(SharingModalComponent, {size: 'lg'});
+    modalRef.componentInstance.session = session;
+    return modalRef.result;
+  }
+
+  openSpinnerModal(message, observable) {
+    let modalRef = this.modalService.open(SpinnerModalComponent);
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.observable = observable;
     return modalRef.result;
   }
 }

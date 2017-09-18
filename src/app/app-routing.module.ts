@@ -17,7 +17,7 @@ const routes: Routes = [
   }, {
     path: 'sessions/:sessionId',
     component: SessionComponent,
-    resolve: { sessionData: SessionResolve },
+    // resolve: { sessionData: SessionResolve },
     canActivate: [AuthGuard]
   },
   { path: '', redirectTo: '/home', pathMatch: 'full' },

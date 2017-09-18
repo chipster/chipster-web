@@ -33,7 +33,7 @@
               <td>
               <span>{{session.name}}
                 <button class="btn btn-secondary btn-xs pull-right delete-session-button"
-                        *ngIf="canDeleteRule(session.rules)"
+                        *ngIf="sessionDataService.hasPersonalRule(session.rules)"
                         (click)="deleteSession(session); $event.stopImmediatePropagation();"
                         title="Delete session"><span class="fa fa-times"></span>
                 </button>

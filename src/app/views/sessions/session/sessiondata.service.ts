@@ -10,6 +10,7 @@ import {Observable} from "rxjs";
 import {TokenService} from "../../../core/authentication/token.service";
 import {ErrorService} from "../../error/error.service";
 import {RestService} from "../../../core/rest-services/restservice/rest.service";
+import Rule from "../../../model/session/rule";
 
 @Injectable()
 export class SessionDataService {
@@ -94,7 +95,7 @@ export class SessionDataService {
 
   deleteDatasets(datasets: Dataset[]) {
     let deleteDatasets$ = datasets.map((dataset: Dataset) => this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId));
-    Observable.merge(...deleteDatasets$).subscribe((res: any) => {
+    Observable.merge(...deleteDatasets$).subscribe(() => {
       console.info('Job deleted');
     });
   }
@@ -152,6 +153,36 @@ export class SessionDataService {
         "Please disable the pop-up blocker for this site or " +
         "export the files one by one.", true);
     }
+  }
+
+  hasReadWriteAccess(rules: Array<Rule>) {
+    rules.forEach(r => {
+      if (r.readWrite) {
+        return true;
+      }
+    });
+    return false;
+  }
+
+  hasPersonalRule(rules: Array<Rule>) {
+    return this.getPersonalRules(rules).length > 0;
+  }
+
+  getPersonalRules(rules: Array<Rule>) {
+    return rules.filter(r => r.username === this.tokenService.getUsername());
+  }
+
+  getPublicRules(rules: Array<Rule>) {
+    return rules.filter(r => r.username === 'everyone');
+  }
+
+  getApplicableRules(rules: Array<Rule>) {
+    return this.getPersonalRules(rules).concat(this.getPublicRules(rules));
+  }
+
+  deletePersonalRules(session: Session) {
+    return Observable.from(this.getPersonalRules(session.rules))
+      .concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId));
   }
 }
 
