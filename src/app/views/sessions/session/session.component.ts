@@ -12,7 +12,8 @@ import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
-import {Store} from "@ngrx/store";
+import {SessionResource} from "../../../shared/resources/session.resource";
+import {ErrorService} from "../../error/error.service";
 
 @Component({
   selector: 'ch-session',
@@ -20,7 +21,6 @@ import {Store} from "@ngrx/store";
 })
 export class SessionComponent {
 
-    toolDetailList: any = null;
     sessionData: SessionData;
     deletedDatasets: Array<Dataset>;
     deletedDatasetsTimeout: any;
@@ -30,17 +30,28 @@ export class SessionComponent {
         private router: Router,
         private SessionEventService: SessionEventService,
         private sessionDataService: SessionDataService,
+        private sessionResource: SessionResource,
         private selectionService: SelectionService,
         private selectionHandlerService: SelectionHandlerService,
         private route: ActivatedRoute,
-        private modalService: NgbModal) {
+        private modalService: NgbModal,
+        private errorService: ErrorService) {
     }
 
 
 
     ngOnInit() {
 
-      this.sessionData = this.route.snapshot.data['sessionData'];
+      // this.sessionData = this.route.snapshot.data['sessionData'];
+
+      this.route.params.flatMap(params => {
+        return this.sessionResource.loadSession(params['sessionId']);
+      }).subscribe(sessionData => {
+        this.sessionData = sessionData;
+        this.subscribeToEvents();
+      }, err => {
+        this.errorService.headerError('failed to load the session data ' + err, true);
+      });
 
       // Select datasets provided via queryparameter and clear queryparameters
       this.route.queryParams.subscribe( (queryParams: Params) => {
@@ -53,9 +64,18 @@ export class SessionComponent {
           this.router.navigateByUrl(urlTree);
         }
       }).unsubscribe();
+    }
 
+    ngOnDestroy() {
+      this.SessionEventService.unsubscribe();
+
+      this.subscriptions.forEach(subs => subs.unsubscribe());
+      this.subscriptions = [];
+    }
+
+    subscribeToEvents() {
       // Services don't have access to ActivatedRoute, so we have to set it
-      this.sessionDataService.setSessionId(this.route.snapshot.params['sessionId']);
+      this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
 
       // start listening for remote changes
       // in theory we may miss an update between the loadSession() and this subscribe(), but
@@ -97,27 +117,8 @@ export class SessionComponent {
       }));
     }
 
-    ngOnDestroy() {
-      this.SessionEventService.unsubscribe();
-
-      this.subscriptions.forEach(subs => subs.unsubscribe());
-      this.subscriptions = [];
-    }
-
-    getSelectedDatasets() {
-        return this.selectionService.selectedDatasets;
-    }
-
-    getSelectedJobs() {
-        return this.selectionService.selectedJobs;
-    }
-
     getJob(jobId: string): Job {
         return this.sessionData.jobsMap.get(jobId);
-    }
-
-    deleteJobs(jobs: Job[]) {
-        this.sessionDataService.deleteJobs(jobs);
     }
 
     deleteDatasetsNow() {

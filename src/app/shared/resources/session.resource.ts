@@ -12,18 +12,21 @@ import {Injectable} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
+import {ErrorService} from "../../views/error/error.service";
 
 @Injectable()
 export class SessionResource {
 
 	constructor(private configService: ConfigService,
 				private toolResource: ToolResource,
-        private restService: RestService) {}
+        private restService: RestService,
+        private errorService: ErrorService) {}
 
 	loadSession(sessionId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap( (url: string) => {
 
+      // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
       const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true)
         .do((x: any) => console.debug('session', x));
       const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true)
@@ -37,7 +40,7 @@ export class SessionResource {
       const types$ = this.getTypeTagsForSession(sessionId)
         .do((x: any) => console.debug('types', x));
 
-      return Observable.forkJoin([session$, sessionDatasets$, sessionJobs$, modules$, tools$, types$])
+      return this.forkJoinWithoutCancel([session$, sessionDatasets$, sessionJobs$, modules$, tools$, types$]);
 
     }).map( (param: any) => {
 
@@ -80,6 +83,33 @@ export class SessionResource {
       return data;
     });
 	}
+
+  /**
+   * forkJoin without cancellation
+   *
+   * By default, forkJoin() cancels all other requests when one of them fails, which creates
+   * ugly Broken pipe exceptions on the server. This method disables the cancellation functionality
+   * by hiding the failures from the forkJoin() and handling them here afterwards.
+   *
+   * @param observables
+   * @returns {Observable<any>}
+   */
+	forkJoinWithoutCancel(observables) {
+	  let errors = [];
+	  let catchedObservables = observables.map(o => o.catch(err => {
+	    errors.push(err);
+	    return Observable.of(null);
+    }));
+	  return Observable.forkJoin(catchedObservables).map(res => {
+	    if (errors.length > 0) {
+	      console.log('session loading failed', errors);
+	      // just report the first error, this is what the forkJoin would have done by default anyway
+	      throw new Error(errors[0]);
+      } else {
+	      return res;
+      }
+    });
+  }
 
 	getTypeTagsForDataset(sessionId: string, dataset: Dataset) {
 
