@@ -140,11 +140,12 @@ export class SessionDataService {
       url$.subscribe(url => {
         // but we can set it's location later asynchronously
         win.location.href = url;
+
         // we can close the useless empty tab, but unfortunately only after a while, otherwise the
         // download won't start
-        setTimeout(() => {
+         setTimeout(() => {
            win.close();
-        }, 1000);
+         }, 2000);
       });
     } else {
       // Chrome allows only one download

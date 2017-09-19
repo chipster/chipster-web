@@ -106,6 +106,8 @@ export class LeftPanelComponent {
       let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
 
       this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
+    }, () => {
+      // modal dismissed
     });
   }
 

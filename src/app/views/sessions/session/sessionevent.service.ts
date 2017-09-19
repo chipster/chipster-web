@@ -36,6 +36,8 @@ export class SessionEventService {
         if (this.wsSubject$) {
           this.wsSubject$.unsubscribe();
         }
+        // sessionId is used as a flag for cancelling the reconnection
+        this.sessionId = null;
     }
 
     setSessionData(sessionId: string, sessionData: SessionData) {
@@ -118,8 +120,11 @@ export class SessionEventService {
         this.errorService.headerError('Connection lost, please reload the page', false);
       }, () => {
         console.log('websocket closed');
-        // reconnect after clean close (server idle timeout)
-        this.connect(listener);
+        // if not unsubscribed
+        if (this.sessionId) {
+          // reconnect after clean close (server idle timeout)
+          this.connect(listener);
+        }
       });
     }
 
