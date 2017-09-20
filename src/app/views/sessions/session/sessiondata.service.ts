@@ -145,7 +145,7 @@ export class SessionDataService {
         // download won't start
          setTimeout(() => {
            win.close();
-         }, 2000);
+         }, 3000);
       });
     } else {
       // Chrome allows only one download
