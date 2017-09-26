@@ -1,55 +1,251 @@
 <div class="container">
-    <div class="view" id="chipsterInfoContainer">
-        <div class="row" id="chipsterInfoHeading">
-            <div class="col-12">
-                <h2>About Chipster</h2>
-                <p class="lead">Chipster is a user-friendly analysis software for high-throughput data. It contains over 340 analysis tools for next generation sequencing (NGS), microarray, proteomics and sequence data. Users can save and share automatic analysis workflows, and visualize data interactively using a built-in genome browser and many other visualizations.</p>
-            </div><!--end of col-12-->
-        </div><!--end chipsterInfoHeading-->
-
-        <div class="row" id="chipsterInfoContainer">
-            <div class="col-sm-4" id="chipsterInfo">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Using Chipster</h3>
-                    </div><!--end of panel heading-->
-                    <div class="panel-body">
-                            <p>If you would like to use the Chipster server running at CSC, you need a user account. If you would just like to have a quick look and not run anything, you can log in with the username guest. To know more</p>
-                    </div>
-                    
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/access.shtml" target="_blank" class="btn btn-info btn-block">Learn how to Access</a>
-                </div><!--end of fisrt panel-->
-            </div><!--end of first chipsterInfo column-->
-
-            <div class="col-sm-4" id="chipsterInfo">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Analysis Tools</h3>
-                    </div><!--end of panel heading-->
-                    <div class="panel-body">
-                            <p>Chipster provides hundreds of tools for different type of data analysis and sequencing. It also provides preprocessing tools and filtering of dataser.To know more</p>
-                    </div>
-                    
-
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/features.shtml" target="_blank" class="btn btn-info btn-block">Learn About Toolset</a>
-                </div><!--end of second panel-->
-            </div><!--end of second chipsterInfo column-->
-
-            <div class="col-sm-4" id="chipsterInfo">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Visualizations</h3>
-                    </div><!--end of panel heading-->
-                     <div class="panel-body">
-                             <p>Chipster offers different ways of visualization techniques for different type of data analysis and sequencing. Choose the best suited technique of visalization for your analysis.To know more</p>
-                    </div>
-                    <!--link to know more-->
-                    <a href="http://chipster.csc.fi/screenshots.shtml" target="_blank" class="btn btn-info btn-block">Explore Visualizations</a>
-                </div><!--end of third panel-->
-            </div><!--end of third chipsterInfo column-->       
-
-        </div><!--end of chipsterInfoContainer-->
+  <div class="row">
+    <div class="col">
+      <div class="jumbotron bg-image">
+        <h1 class="display-3">Chipster</h1>
+        <p class="lead">User-friendly open source tool for data analysis</p>
+        <hr class="my-4">
+        <p>Chipster is a user-friendly analysis software for high-throughput data. It contains over 340 analysis tools
+          for next generation sequencing (NGS), microarray, proteomics and sequence data. Users can save and share
+          automatic analysis workflows, and visualize data interactively using a built-in genome browser and many other
+          visualizations.</p>
+      </div>
     </div>
+  </div>
+
+  <div class="row" id="getstarted">
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Get started</h3>
+        </div>
+        <div class="panel-body">
+          <button class="btn btn-primary" [routerLink]="['/login']">Log in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <div class="row" id="analyze">
+    <div class="col">
+
+          <iframe width="240" height="160"
+                  src="https://www.youtube.com/embed/?listType=playlist&list=PLjiXAZO27elABzLA0aHKS9chVA2TldoPF&amp;showinfo=1"
+                  frameborder="0" allowfullscreen></iframe>
+
+          <iframe width="240" height="160"
+                  src="https://www.youtube.com/embed/?listType=playlist&list=PLjiXAZO27elBa5zGKCpwvRXxx-kF52Iuf&amp;showinfo=1"
+                  frameborder="0" allowfullscreen></iframe>
+
+          <iframe width="240" height="160"
+                  src="https://www.youtube.com/embed/?listType=playlist&list=PLjiXAZO27elCDh3RrkpmnQLfLuyIqL2Bz&amp;showinfo=1"
+                  frameborder="0" allowfullscreen></iframe>
+
+    </div>
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Analyze</h3>
+        </div>
+        <div class="panel-body">
+          <p>Chipster contains over 360 analysis tools and a large collection of reference genomes.</p>
+
+          <button class="btn btn-info" [routerLink]="['/manual']">Explore tools</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <div class="row" id="visualize">
+
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Visualize</h3>
+        </div><!--end of panel heading-->
+        <div class="panel-body">
+          <p>Visualize data interactively using for example the built-in genome browser. Being able to visualize your
+          data at every step helps you to decide how to analyze it and spot errors earlier.</p>
+        </div>
+
+        <a href="http://chipster.csc.fi/screenshots.shtml">Screenshots</a>
+      </div><!--end of third panel-->
+    </div><!--end of third chipsterInfo column-->
+    <div class="col">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/PzZQVVD812w?rel=0&amp;showinfo=0"
+              frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <div class="row" id="learn">
+
+    <div class="col">
+      <img src="/assets/workflow.png">
+    </div>
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Learn</h3>
+          <div class="panel-body">
+            <p>User-friendly user interface allows you to concentrate on the analysis methods while Chipster
+            takes care of recording your analysis history. Chipster empowers you to run complex tools and workflows
+            without spending time on learning the command line syntax of each program. Modular approach and standard
+            file formats allow you combine tools in novel ways.</p>
+
+            <p>All tool scripts are available for you to investigate if you wan't to know more about their internals.
+              The full source code is released under a <a href="https://opensource.org/licenses/MIT">MIT</a> license.</p>
+          </div>
+          <a href="http://chipster.github.io/chipster/">Open source project</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <h3>Getting access</h3>
+
+  <h4>Setting up a Chipster server at your institute</h4>
+
+  <div class="row" id="gettingaccess">
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">Virtual machine images</h5>
+        </div>
+        <div class="panel-body">
+          This is free of charge, but you need an IT person to help you and suitable computing resources to run the server. The actual installation is easy, because Chipster is available as a
+          <a href="http://chipster.github.io/chipster/">ready-to-use virtual machine image</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">EGI Federated cloud</h5>
+        </div>
+        <div class="panel-body">
+          If you have an IT support person but lack suitable computing resources, you can install and run the Chipster server free of charge in the
+          <a href="https://github.com/chipster/chipster/wiki/FedCloudChipster">EGI Federated cloud</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+
+  <h4>Use our Chipster server at CSC in Finland</h4>
+
+  <p>This is free of charge for users from Finnish universities (their usage is subsidized by the Ministry of Education), but others need to pay for the computing time. However, free 3-week evaluation accounts are available for everybody. Please see below how you can get a user account</p>
+  <br>
+
+  <div class="row">
+
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">Finnish universities</h5>
+        </div>
+        <div class="panel-body">
+          Free CSC user account can be obtained using CSC's <a href="https://sui.csc.fi/signup">SUI web service</a>:
+          Click on the purple HAKA link, log in with your HAKA username and password, and fill in the sign up form as
+          shown in the <a href="https://research.csc.fi/csc-guide-getting-access-to-csc-services#1.2.1">user guide</a>.
+          Users who already have a regular CSC username and password can use those for Chipster.
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">Free 3-week evaluation accounts</h5>
+        </div>
+        <div class="panel-body">
+          Free 3-week evaluation accounts can be obtained by filling in the <a href="https://chipster.csc.fi/evaluation/">form</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+
+  <div class="row">
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">Other universities and non-profit organizations</h5>
+        </div>
+        <div class="panel-body">
+          Long-term user accounts can be purchased online <a href="https://chipster.csc.fi/purchase/">here</a>. One year
+          personal single user account costs 500 euros. If you would like to buy user accounts for the whole group,
+          department or institute, please <a [routerLink]="['/contact']"> contact us </a> for a quote.
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">Corporate users</h5>
+        </div>
+        <div class="panel-body">
+          Both personal single user accounts as well as company accounts are available. Please
+          <a [routerLink]="['/contact']"> contact us </a> for a quote.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+
+  <h4>Use Chipster in the EGI Applications on Demand Service</h4>
+  <div class="row">
+    <div class="col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5 class="panel-title">EGI Applications on Demand Service</h5>
+        </div>
+        <div class="panel-body">
+          This is free of charge, but you need register for an EGI account
+          (please see the <a href="https://kannu.csc.fi/s/0cRInYCUpoEmCrR">instructions</a>). Please note that this service does not have
+          very large computational resources, so it is best suited for microarray analysis.
+        </div>
+      </div>
+    </div>
+    <div class="col"></div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <footer>
+    <hr>
+    <p>Chipster</p>
+    <p><a href="http://www.csc.fi">CSC - IT Center for Science</a></p>
+  </footer>
 </div>

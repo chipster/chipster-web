@@ -19,6 +19,8 @@ import {ErrorComponent} from "./views/error/error.component";
 import {AppErrorHandler} from "./views/error/apperrorhandler";
 import {ErrorService} from "./views/error/error.service";
 import {toolSelection} from "./state/selected-tool.reducer";
+import {ContactComponent} from "./views/contact/contact.component";
+import {ManualComponent} from "./views/manual/manual.component";
 
 @NgModule({
     imports: [
@@ -31,7 +33,7 @@ import {toolSelection} from "./state/selected-tool.reducer";
       AppRoutingModule,
       StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection})
     ],
-    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent ],
+    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent, ManualComponent ],
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })

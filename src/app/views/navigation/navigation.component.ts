@@ -5,8 +5,8 @@ import {Observable} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 
 @Component({
-    selector: 'ch-navigation',
-    templateUrl: './navigation.html'
+  selector: 'ch-navigation',
+  templateUrl: './navigation.html'
 })
 export class NavigationComponent {
 
