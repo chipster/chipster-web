@@ -133,11 +133,9 @@
              *ngIf="isTabVisible('genomebrowser')">
       <ng-template ngbTabTitle>Genome Browser</ng-template>
       <ng-template ngbTabContent>
-        <div class="row" style="padding:40px">
-          <ch-link-button (click)="openGnomeModal()">Open Genome Browser in a different window</ch-link-button>
-        </div>
         <ch-genome-browser
           *ngIf="active === getTabId('genomebrowser')"
+          [sessionData]="sessionData"
           [selectedDatasets]="SelectionService.selectedDatasets">
         </ch-genome-browser>
       </ng-template>

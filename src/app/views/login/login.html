@@ -2,7 +2,7 @@
 
     <h3>Log in</h3>
 
-    <form #myForm="ngForm" (submit)="login(myForm)">
+    <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
         <div class="form-group">
             <label for="username">Username</label>
             <input class="form-control" id="username" required autofocus [(ngModel)]="username" name="username" #name="ngModel" />
@@ -13,7 +13,7 @@
                    required/>
         </div>
         <div class="form-actions">
-            <button class="btn btn-primary" type="submit" [disabled]="myForm.invalid">Login</button>
+            <button class="btn btn-primary" type="button" (click)="login(myForm)" [disabled]="myForm.invalid">Login</button>
         </div>
         <div class="alert alert-warning" *ngIf="error">
             <strong>Login failed</strong>

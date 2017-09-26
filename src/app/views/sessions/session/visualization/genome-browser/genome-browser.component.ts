@@ -1,9 +1,14 @@
 import {Component, OnInit, Input, ViewChild, ElementRef} from '@angular/core';
 import * as pileup from "pileup";
-import Dataset from "../../../../../model/session/dataset";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SelectionService} from "../../selection.service";
 import {SessionDataService} from "../../sessiondata.service";
+import {SessionData} from "../../../../../model/session/session-data";
+import {TypeTagService} from "../../../../../shared/services/typetag.service";
+import {Observable} from 'rxjs/Observable';
+import Dataset from "../../../../../model/session/dataset";
+import {selectedDatasets} from "../../../../../state/selectedDatasets.reducer";
+
 
 @Component({
   selector: 'ch-genome-browser',
@@ -15,8 +20,8 @@ export class GenomeBrowserComponent implements OnInit {
 
   @ViewChild('iframe') iframe: ElementRef;
 
-  @Input()
-  selectedDatasets: Array<any>;
+  @Input() selectedDatasets: Array<any>;
+  @Input() sessionData: SessionData;
 
   private pos: string;
   private colorByStrand: string;
@@ -26,34 +31,73 @@ export class GenomeBrowserComponent implements OnInit {
   private p: any;
   private content: any;
   private bamUrl: string;
-  private baiUrl:string;
+  private baiUrl: string;
+  errorMessage: string;
+  private loadGenomeBrowser: boolean;
 
   constructor(private visualizationModalService: VisualizationModalService,
               private selectionService: SelectionService,
-              private sessionDataService:SessionDataService) {
+              private sessionDataService: SessionDataService,
+              private typeTagService: TypeTagService) {
 
 
   }
 
 
   ngOnChanges() {
-    console.log(this.selectedDatasets);
-
-
-    /*
-    this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
-      this.bamUrl = url;
-      this.initializeDataSources();
-      this.onLoad();
-      console.log(this.bamUrl);
-    });*/
-  }
-
-  getIndexFileUrl(){
+    this.getDatasetUrls();
 
   }
 
-  getVCFUrl(){
+  getDatasetUrls() {
+    //User can select either two dataset, or only BAM. If the user select only BAI file, show the error message
+    let bamDataset, baiDataset;
+    let self = this;
+
+    if ((this.selectedDatasets.length == 1) && (self.typeTagService.isCompatible(this.sessionData, this.selectedDatasets[0], "BAI"))) {
+      this.errorMessage = "Please Select the Corresponding BAM file to view the Genome Browser";
+      this.loadGenomeBrowser = false;
+    } else {
+      this.loadGenomeBrowser = true;
+      if (this.selectedDatasets.length > 1) {
+        this.selectedDatasets.forEach(function (dataset) {
+          //Check type
+          if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
+            bamDataset = dataset;
+          } else if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAI")) {
+            baiDataset = dataset;
+          }
+        })
+      } else if (this.typeTagService.isCompatible(this.sessionData, this.selectedDatasets[0], "BAM")) {
+        bamDataset = this.selectedDatasets[0];
+        //Here we need to extract the BAI file
+
+        this.sessionData.datasetsMap.forEach(function (dataset) {
+          if (((dataset.name.split('.').pop()) == "bai") && ((dataset.name.substr(0, dataset.name.indexOf('.')) === (bamDataset.name.substr(0, bamDataset.name.indexOf('.')))))) {
+            baiDataset = dataset;
+          }
+
+        })
+
+      }
+
+      if (bamDataset && baiDataset) {
+        //Populate the g.browser only when both bam and bai present
+        let bamDatasetUrl = this.sessionDataService.getDatasetUrl(bamDataset);
+        let baiDatasetUrl = this.sessionDataService.getDatasetUrl(baiDataset);
+
+        Observable.forkJoin([bamDatasetUrl, baiDatasetUrl]).subscribe(results => {
+          this.bamUrl = results[0];
+          this.baiUrl = results[1];
+          console.log(this.bamUrl, this.baiUrl)
+          this.initializeDataSources();
+          this.onLoad();
+
+        });
+      }
+
+    }
+
 
   }
 
@@ -61,14 +105,10 @@ export class GenomeBrowserComponent implements OnInit {
     this.doc = this.iframe.nativeElement.contentWindow;
     this.doc.document.write(this.content);
 
-    console.log(this.range);
-    console.log(this.sources);
-      this.p = pileup.create(this.doc.document.getElementById('pileup'), {
+    this.p = pileup.create(this.doc.document.getElementById('pileup'), {
       range: this.range,
       tracks: this.sources
     });
-    this.populateGenomeBrowser();
-
 
     this.doc.close();
 
@@ -77,12 +117,9 @@ export class GenomeBrowserComponent implements OnInit {
 
   initializeDataSources() {
     let bamSource = pileup.formats.bam({
-      //url: '../../../../../../assets/synth3.normal.17.7500000-7515000.bam',
-      //indexUrl: '../../../../../../assets/synth3.normal.17.7500000-7515000.bam.bai'
       url: this.bamUrl,
-      indexUrl: '../../../../../../assets/control_chr_1_sorted.bam.bai'
+      indexUrl: this.baiUrl
     });
-    console.log(bamSource);
 
     this.sources = [
       {
@@ -153,53 +190,10 @@ export class GenomeBrowserComponent implements OnInit {
       }
     ];
 
-    this.range = {contig: 'chr1', start: 70000, stop: 75000};
+    this.range = {contig: 'chr1', start: 72187, stop: 73813};
 
   }
 
-
-  populateGenomeBrowser() {
-
-    let self = this;
-
-
-
-    let pos = this.getParameterByName('pos');
-    console.log(pos);
-    if (pos) {
-      let m = /(.*):([0-9,]+)-([0-9,]+)/.exec(pos);
-      if (!m) {
-        throw 'Invalid range: ' + pos;
-      }
-      let makeNum = function (x) {
-        return Number(x.replace(/,/g, ''));
-      };
-      this.range = {contig: m[1], start: makeNum(m[2]), stop: makeNum(m[3])};
-      console.log(this.range);
-    } else {
-      // use default range from, e.g. data.js
-    }
-
-
-    this.colorByStrand = this.getParameterByName('colorByStrand');
-    console.log(this.colorByStrand);
-    if (this.colorByStrand) {
-      this.sources.forEach(source => {
-        if (source.viz.options) {
-          source.viz.options.colorByStrand = true;
-        }
-      });
-    }
-
-  }
-
-  getParameterByName(name: string): string {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-      results = regex.exec(location.search);
-    console.log(results);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
 
   openGnomeModal() {
     this.visualizationModalService.openVisualizationModal(this.selectionService.selectedDatasets[0], 'genomebrowser');

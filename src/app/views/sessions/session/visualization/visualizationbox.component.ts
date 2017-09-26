@@ -42,7 +42,6 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .subscribe((datasets: Array<Dataset>) => {
         this.selectedDatasets = datasets;
         this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
-        console.log(this.compatibleVisualizations);
         this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
       });
   }
@@ -58,7 +57,6 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   isCompatibleVisualization(id: string): boolean {
     let visualization = _.find(this.visualizations, visualization => visualization.id === id);
     let datasetSelectionCount = this.selectedDatasets.length;
-    console.log(visualization.typeTags);
     return this.containsTypeTags(visualization.typeTags) && ( visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount));
   }
 
