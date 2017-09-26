@@ -12,7 +12,6 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {AppComponent} from "./app.component";
 import {TokenService} from "./core/authentication/token.service";
 import {AppRoutingModule} from "./app-routing.module";
-import {SessionResolve} from "./views/sessions/session/session.resolve";
 import {StoreModule} from "@ngrx/store";
 import {selectedJobs} from "./state/selectedJobs.reducer";
 import {selectedDatasets} from "./state/selectedDatasets.reducer";
@@ -34,7 +33,7 @@ import {toolSelection} from "./state/selected-tool.reducer";
       StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection})
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent ],
-    providers: [SelectionService, TokenService, SessionResolve, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
+    providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })
 export class AppModule {}

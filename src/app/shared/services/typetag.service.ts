@@ -52,7 +52,6 @@ export class TypeTagService {
     if (!typeTags) {
       throw new Error('dataset ' + dataset.name + 'does not have type tags');
     }
-
     return typeTags.has(type);
   }
 }

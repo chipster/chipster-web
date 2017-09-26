@@ -32,7 +32,12 @@ export class SessionEventService {
     }
 
     unsubscribe() {
-        this.wsSubject$.unsubscribe();
+        // can be null when session loading fails (e.g. expired token)
+        if (this.wsSubject$) {
+          this.wsSubject$.unsubscribe();
+        }
+        // sessionId is used as a flag for cancelling the reconnection
+        this.sessionId = null;
     }
 
     setSessionData(sessionId: string, sessionData: SessionData) {
@@ -115,8 +120,11 @@ export class SessionEventService {
         this.errorService.headerError('Connection lost, please reload the page', false);
       }, () => {
         console.log('websocket closed');
-        // reconnect after clean close (server idle timeout)
-        this.connect(listener);
+        // if not unsubscribed
+        if (this.sessionId) {
+          // reconnect after clean close (server idle timeout)
+          this.connect(listener);
+        }
       });
     }
 
@@ -132,10 +140,6 @@ export class SessionEventService {
 
     getJobStream() {
         return this.jobStream$;
-    }
-
-    getSessionStream() {
-      return this.sessionStream$;
     }
 
     getAuthorizationStream() {
@@ -158,7 +162,7 @@ export class SessionEventService {
     handleSessionEvent(event: any, sessionId:any, sessionData: SessionData): Observable<SessionEvent> {
         if (event.type === 'UPDATE') {
            return this.sessionResource.getSession(sessionId).flatMap((remote: Session) => {
-                var local = sessionData.session;
+                let local = sessionData.session;
                 sessionData.session = remote;
                 return this.createEvent(event, local, remote);
             });
@@ -179,15 +183,15 @@ export class SessionEventService {
         } else if (event.type === 'UPDATE') {
           return this.sessionResource.getDataset(sessionId, event.resourceId)
               .flatMap((remote: Dataset) => {
-                var local = sessionData.datasetsMap.get(event.resourceId);
+                let local = sessionData.datasetsMap.get(event.resourceId);
                 sessionData.datasetsMap.set(event.resourceId, remote);
                 return this.createEvent(event, local, remote);
             });
 
         } else if (event.type === 'DELETE') {
-            var localCopy = sessionData.datasetsMap.get(event.resourceId);
-            sessionData.datasetsMap.delete(event.resourceId);
-            return this.createEvent(event, localCopy, null);
+          let localCopy = sessionData.datasetsMap.get(event.resourceId);
+          sessionData.datasetsMap.delete(event.resourceId);
+          return this.createEvent(event, localCopy, null);
 
         } else {
             console.warn("unknown event type", event);
@@ -197,7 +201,6 @@ export class SessionEventService {
     updateTypeTags(sessionId, sessionEvent, sessionData) {
 
       // update type tags before
-      let oldValue = <Dataset>sessionEvent.oldValue;
       let newValue = <Dataset>sessionEvent.newValue;
 
       if (newValue) {
@@ -229,15 +232,15 @@ export class SessionEventService {
 
         } else if (event.type === 'UPDATE') {
             return this.sessionResource.getJob(sessionId, event.resourceId).flatMap((remote: Job) => {
-                var local = sessionData.jobsMap.get(event.resourceId);
-                sessionData.jobsMap.set(event.resourceId, remote);
-                return this.createEvent(event, local, remote);
+              let local = sessionData.jobsMap.get(event.resourceId);
+              sessionData.jobsMap.set(event.resourceId, remote);
+              return this.createEvent(event, local, remote);
             });
 
         } else if (event.type === 'DELETE') {
-            var localCopy = sessionData.jobsMap.get(event.resourceId);
-            sessionData.jobsMap.delete(event.resourceId);
-            return this.createEvent(event, localCopy, null);
+          let localCopy = sessionData.jobsMap.get(event.resourceId);
+          sessionData.jobsMap.delete(event.resourceId);
+          return this.createEvent(event, localCopy, null);
 
         } else {
             console.warn("unknown event type", event.type, event);

@@ -8,6 +8,7 @@ import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 import {Subject} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 import Rule from "../../model/session/rule";
+import {SessionDataService} from "./session/sessiondata.service";
 
 @Component({
   selector: 'ch-session-list',
@@ -31,7 +32,7 @@ export class SessionListComponent {
         private router: Router,
         private sessionResource: SessionResource,
         private dialogModalService: DialogModalService,
-        private tokenService: TokenService) {}
+        private sessionDataService: SessionDataService) {}
 
     ngOnInit() {
       this.updateSessions();
@@ -39,17 +40,16 @@ export class SessionListComponent {
       this.previewThrottleSubscription = this.previewThrottle$.asObservable()
         // hide the loading indicator of the old session immediately
         .do(() => this.workflowPreviewLoading = false)
-        // wait a while to see if the user is really intersted about this session
-        .debounceTime(500)
-        // in switchMap the new request cancels the previous requests
-        .switchMap(session => {
+        // wait a while to see if the user is really interested about this session
+        .debounceTime(1000)
+        .flatMap(session => {
           this.workflowPreviewLoading = true;
           return this.sessionResource.loadSession(session.sessionId)
         })
         .do((fullSession: SessionData) => {
           this.workflowPreviewLoading = false;
           // don't show if the selection has already changed
-          if (this.previewedSession.sessionId === fullSession.session.sessionId) {
+          if (this.previewedSession && fullSession.session && this.previewedSession.sessionId === fullSession.session.sessionId) {
             this.sessionData = fullSession;
           }
         })
@@ -76,11 +76,14 @@ export class SessionListComponent {
             sessionsByUser.set(null, []);
 
             sessions.forEach(s => {
-              this.getApplicableRules(s.rules).forEach(rule => {
+              this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
                 if (!sessionsByUser.has(rule.sharedBy)) {
                   sessionsByUser.set(rule.sharedBy, []);
                 }
-                sessionsByUser.get(rule.sharedBy).push(s);
+                // show each session only once in each list, otherwise example_session_owner will see duplicates
+                if (sessionsByUser.get(rule.sharedBy).map(s => s.sessionId).indexOf(s.sessionId) === -1) {
+                  sessionsByUser.get(rule.sharedBy).push(s);
+                }
               });
             });
 
@@ -93,6 +96,14 @@ export class SessionListComponent {
       this.previewThrottleSubscription.unsubscribe();
       this.selectedSessionId = sessionId;
       this.router.navigate(['/sessions', sessionId]);
+    }
+
+    sessionsUploaded(sessionIds: string[]) {
+      if (sessionIds.length === 1) {
+        this.openSession(sessionIds[0]);
+      } else {
+        this.updateSessions();
+      }
     }
 
     previewSession(session: Session) {
@@ -113,7 +124,7 @@ export class SessionListComponent {
       this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
         //this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
         // delete the session only from this user (i.e. the rule)
-        this.sessionResource.deleteRule(session.sessionId, this.getDeletableRules(session.rules)[0].ruleId).subscribe( () => {
+        this.sessionDataService.deletePersonalRules(session).subscribe( () => {
           this.updateSessions();
           this.previewedSession = null;
         }, () => {
@@ -122,39 +133,6 @@ export class SessionListComponent {
       }, () => {
         // modal dismissed
       });
-    }
-
-    hasReadWriteAccess(rules: Array<Rule>) {
-      rules.forEach(r => {
-        if (r.readWrite) {
-          return true;
-        }
-      });
-      return false;
-    }
-
-    getDeletableRules(rules: Array<Rule>) {
-      if (this.hasReadWriteAccess(rules)) {
-        return this.getApplicableRules(rules);
-      } else {
-        return this.getPersonalRules(rules);
-      }
-    }
-
-    canDeleteRule(rules: Array<Rule>) {
-      return this.getDeletableRules(rules).length > 0;
-    }
-
-    getPersonalRules(rules: Array<Rule>) {
-      return rules.filter(r => r.username === this.tokenService.getUsername());
-    }
-
-    getPublicRules(rules: Array<Rule>) {
-      return rules.filter(r => r.username === 'everyone');
-    }
-
-    getApplicableRules(rules: Array<Rule>) {
-      return this.getPersonalRules(rules).concat(this.getPublicRules(rules));
     }
 
     isSessionSelected(session: Session) {

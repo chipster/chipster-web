@@ -89,7 +89,6 @@ export class RestService {
 
     return this.http.request(request).map( (response:Response) => {
         let resp: any;
-
         // handle response by expected responsetype
         switch(request.responseType) {
           case (ResponseContentType.Json):

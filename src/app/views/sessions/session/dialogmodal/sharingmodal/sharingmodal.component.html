@@ -1,0 +1,56 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{session.name}}</h4>
+</div>
+<div class="modal-body">
+
+  <br>
+  <h5>Access rules</h5>
+
+  <p>List of usernames that have access to this session. Adding new access rules is possible only
+  in the command line client at the moment.</p>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Username</th>
+      <th>Rights</th>
+      <th>Shared by</th>
+      <th>Role</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let rule of session.rules">
+      <th scope="row">{{rule.username}}</th>
+      <td>{{rule.readWrite ? 'read-write' : 'read-only' }}</td>
+      <td><span *ngIf="rule.sharedBy">{{rule.sharedBy}}</span></td>
+      <td><span *ngIf="!rule.sharedBy">owner</span></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <br>
+  <h5>Timestamps</h5>
+
+  <div class="row">
+    <div class="col">
+      <p>Created: {{session.created | isodate }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p>Accessed: {{session.accessed | isodate }}</p>
+    </div>
+  </div>
+
+  <br>
+  <h5>Direct visualization link</h5>
+
+  <p>Save a link of your current selected files and visualization to a clipboard.</p>
+
+  <button class="btn btn-secondary" (click)="saveCurrentUrlState()">Copy visualization link</button>
+
+</div>
+<div class="modal-footer">
+  <button type="submit" class="btn btn-info" (click)="save($event)" #submitButton>Close</button>
+  <!--<button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>-->
+</div>

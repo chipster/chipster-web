@@ -3,17 +3,13 @@ import {SessionDataService} from "../sessiondata.service";
 import Dataset from "../../../../model/session/dataset";
 import UtilsService from "../../../../shared/utilities/utils";
 import {SessionResource} from "../../../../shared/resources/session.resource";
-import {SelectionService} from "../selection.service";
 import {SessionWorkerResource} from "../../../../shared/resources/sessionworker.resource";
 import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
 import {DialogModalService} from "../dialogmodal/dialogmodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
-import {Store} from "@ngrx/store";
 import {SelectionHandlerService} from "../selection-handler.service";
-import {UrlTree, ActivatedRoute, Router} from "@angular/router";
-import * as copy from 'copy-to-clipboard';
-
+import {ErrorService} from "../../../error/error.service";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -23,25 +19,22 @@ import * as copy from 'copy-to-clipboard';
 export class LeftPanelComponent {
 
   @Input() sessionData: SessionData;
-  private isCopying = false;
+
   datasetSearch: string;
 
   constructor(
     private sessionResource: SessionResource,
     private sessionDataService: SessionDataService,
-    private router: Router,
-    private route: ActivatedRoute,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionNameModalService: DialogModalService,
+    private dialogModalService: DialogModalService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
-    private selectionService: SelectionService,
-    private store: Store<any>) {}
+    private errorService: ErrorService) {}
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
       // select highlighted datasets
-      var allDatasets = this.getDatasetList();
+      let allDatasets = this.getDatasetList();
       this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
       this.datasetSearch = null;
     }
@@ -70,11 +63,6 @@ export class LeftPanelComponent {
     }
   }
 
-  downloadSession(): void {
-    this.sessionDataService.download(
-      this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()));
-  }
-
   toggleDatasetSelection($event: any, dataset: Dataset): void {
     if(UtilsService.isCtrlKey($event) || UtilsService.isShiftKey($event)) {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
@@ -84,7 +72,7 @@ export class LeftPanelComponent {
   }
 
   renameSessionModal() {
-    this.sessionNameModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
+    this.dialogModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
       console.log('renameSessionModal', name);
       this.sessionData.session.name = name;
       this.sessionDataService.updateSession(this.sessionData.session).subscribe();
@@ -93,29 +81,46 @@ export class LeftPanelComponent {
     });
   }
 
-  saveCurrentUrlState() {
-    // copy current route and selected datasetids as queryparameters to clippath
-    this.store.select('selectedDatasets').subscribe( (datasets: Array<Dataset>) => {
-      const datasetIds = datasets.map( (dataset: Dataset) => dataset.datasetId);
-      const navigationExtras = { queryParams: { id: datasetIds } };
-      const sessionId = this.route.snapshot.params['sessionId'];
-      const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId], navigationExtras );
-      if(datasetIds.length > 0) {
-        copy(`${window.location.host}${urlTree.toString()}`);
-      }
-    }).unsubscribe();
+  notesModal() {
+
+    this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
+      this.sessionData.session.notes = notes;
+      this.sessionDataService.updateSession(this.sessionData.session).subscribe(() => {}, err => {
+        this.errorService.headerError('failed to update session notes: ' + err, true);
+      })
+    }, () => {
+      // modal dismissed
+    });
   }
 
-  openCopySessionModal() {
-    this.sessionNameModalService.openSessionNameModal('Copy session', this.sessionData.session.name + '_copy').then(name => {
-      console.log('openCopySessionModal()', name);
+  sharingModal() {
+    this.dialogModalService.openSharingModal(this.sessionData.session);
+  }
+
+  duplicateModal() {
+    this.dialogModalService.openSessionNameModal('Duplicate session', this.sessionData.session.name + '_copy').then(name => {
       if (!name) {
         name = 'unnamed session';
       }
-      this.isCopying = true;
-      this.sessionResource.copySession(this.sessionData, name).subscribe(() => {
-        console.log('copy done');
-        this.isCopying = false;
+
+      let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
+
+      this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
+    }, () => {
+      // modal dismissed
+    });
+  }
+
+  saveSessionFileModal() {
+    this.sessionDataService.download(
+      this.sessionWorkerResource.getPackageUrl(this.sessionDataService.getSessionId()));
+  }
+
+  removeSessionModal() {
+    this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + this.sessionData.session.name + '?', 'Delete', 'Cancel').then(() => {
+      // delete the session only from this user (i.e. the rule)
+      this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe( () => {}, err => {
+        this.errorService.headerError('failed to delete the session: ' + err, true);
       });
     }, () => {
       // modal dismissed

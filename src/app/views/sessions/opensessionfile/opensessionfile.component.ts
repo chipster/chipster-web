@@ -11,13 +11,13 @@ import {ErrorService} from "../../error/error.service";
 })
 export class OpenSessionFile {
 
-  private status;
-
   @ViewChild('browseFilesButton') browseFilesButton;
 
-  @Output('openSession') openSession = new EventEmitter();
+  @Output('done') done = new EventEmitter();
 
   private flow;
+  private fileStatus = new Map<any, string>();
+  private finishedFiles = new Set<any>();
 
   constructor(
     private uploadService: UploadService,
@@ -34,33 +34,55 @@ export class OpenSessionFile {
   fileAdded(file: any) {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
 
-    this.status = 'Creating session';
     let session = new Session(file.name.replace('.zip', ''));
+
+    this.fileStatus.set(file, 'Creating session');
 
     this.sessionResource.createSession(session).subscribe((sessionId) => {
       // progress bar is enough for the upload status
-      this.status = undefined;
+      this.fileStatus.set(file, undefined);
       this.uploadService.startUpload(sessionId, file, null);
+    }, err => {
+      this.error(file, err);
     });
   }
 
+  error(file: any, err) {
+    this.fileStatus.set(file, err);
+    this.finishedFiles.add(file);
+    this.errorService.headerError("failed to open the session file: " + err, true);
+  }
+
+  getFiles() {
+    return Array.from(this.fileStatus.keys());
+  }
+
   fileSuccess(file: any) {
-    // remove from the list
-    file.cancel();
+
     let sessionId = file.chipsterSessionId;
     let datasetId = file.chipsterDatasetId;
 
-    this.status = 'Extracting session';
+    // remove from the list
+    file.cancel();
+
+    this.fileStatus.set(file, 'Extracting session');
     return this.sessionWorkerResource.extractSession(sessionId, datasetId).flatMap(response => {
       console.log('extracted, warnings: ', response.warnings);
-      this.status = 'Deleting temporary copy';
+      this.fileStatus.set(file, 'Deleting temporary copy');
       return this.sessionResource.deleteDataset(sessionId, datasetId);
-    }).finally(() => {
-      this.status = undefined;
     }).subscribe(() => {
-      this.openSession.emit(sessionId);
+      this.fileStatus.set(file, undefined);
+      this.finishedFiles.add(file);
+
+      // let the caller know if this was the last one
+      if (this.fileStatus.size === this.finishedFiles.size) {
+        let sessionIds = Array.from(this.finishedFiles).map(f => file.chipsterSessionId);
+        this.fileStatus.clear();
+        this.finishedFiles.clear();
+        this.done.emit(sessionIds);
+      }
     }, err => {
-      this.errorService.headerError("failed to open the session file: " + err, true);
+      this.error(file, err);
       this.sessionResource.deleteSession(sessionId).subscribe();
     });
   }
@@ -71,7 +93,7 @@ export class OpenSessionFile {
 
   cancel(file: any) {
     file.cancel();
-    this.status = undefined;
+    this.fileStatus.delete(file);
     this.sessionResource.deleteSession(file.chipsterSessionId).subscribe(() => {
       console.log('session deleted');
     });
