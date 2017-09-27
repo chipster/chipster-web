@@ -41,6 +41,7 @@ export class SingleDatasetComponent {
     this.dataset = changes.dataset.currentValue;
     this.sourceJob = this.getSourceJob(this.dataset);
     this.getUsedToolFromToolset();
+    console.log(this.dataset);
   }
 
   renameDataset() {

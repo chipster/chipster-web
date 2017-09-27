@@ -36,7 +36,6 @@ export class LoginComponent {
 
   //Hack for the Enter key press for the button type="button"
   keyDownFunction(event){
-    console.log("key press activated");
     if(event.keyCode==13){
       if(this.myForm.value.username && this.myForm.value.password){
         this.login(this.myForm.value.username,this.myForm.value.password);

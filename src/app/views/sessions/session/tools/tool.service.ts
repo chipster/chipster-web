@@ -41,8 +41,8 @@ export class ToolService {
   };
 
   isDefaultValue(parameter: ToolParameter, value: number | string) {
-    console.log(value);
-    console.log(parameter.defaultValue && parameter.defaultValue === value);
+    //console.log(value);
+    //console.log(parameter.defaultValue && parameter.defaultValue === value);
     return parameter.defaultValue && parameter.defaultValue === value;
   }
 
