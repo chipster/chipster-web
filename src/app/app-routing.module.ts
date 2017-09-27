@@ -5,10 +5,14 @@ import {LoginComponent} from "./views/login/login.component";
 import {SessionListComponent} from "./views/sessions/sessionlist.component";
 import {SessionComponent} from "./views/sessions/session/session.component";
 import {AuthGuard} from "./core/authentication/auth-guard.service";
+import {ContactComponent} from "./views/contact/contact.component";
+import {ManualComponent} from "./views/manual/manual.component";
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent },
   { path: 'login',  component: LoginComponent },
+  { path: 'manual',  component: ManualComponent },
+  { path: 'contact',  component: ContactComponent },
   {
     path: 'sessions',
     component: SessionListComponent,
