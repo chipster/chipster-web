@@ -1,11 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Response, Request} from "@angular/http";
 import {Observable} from "rxjs";
+import {Router} from "@angular/router";
 
 @Injectable()
 export class ErrorHandlerService  {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   /*
    * @description: handler for http-request catch-clauses
@@ -34,5 +35,8 @@ export class ErrorHandlerService  {
     return Observable.throw(errorMessage);
   }
 
+  redirectToLoginPage() {
+    this.router.navigate(['/login']);
+  }
 
 }
