@@ -5,7 +5,7 @@ import {Observable} from "rxjs";
 import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
 
-const TOKEN_REFRESH_INTERVAL = 1000*5; // ms
+const TOKEN_REFRESH_INTERVAL = 1000*60*60; // ms
 
 @Injectable()
 export class AuthenticationService {
