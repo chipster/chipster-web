@@ -1,7 +1,7 @@
 import {
   AfterViewInit,
   Component,
-  ComponentFactoryResolver,
+  ComponentFactoryResolver, Input,
   ViewChild,
   ViewContainerRef
 } from "@angular/core";
@@ -42,6 +42,9 @@ import {ManualUtils} from "./manual-utils";
 })
 export class ManualComponent implements AfterViewInit {
 
+  @Input()
+  private page: string;
+
   private routerPath = 'manual/';
   private assetsPath = 'assets/manual/';
 
@@ -62,8 +65,12 @@ export class ManualComponent implements AfterViewInit {
     let query;
     this.activatedRoute.url
       .flatMap(() => {
-        // get the current route path
-        query = this.activatedRoute.snapshot.url.join('/');
+        if (this.page) {
+          query = this.page;
+        } else {
+          // get the current route path
+          query = this.activatedRoute.snapshot.url.join('/');
+        }
 
         // get the html file
         return this.getPage(this.assetsPath + query);

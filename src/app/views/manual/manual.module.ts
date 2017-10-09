@@ -21,7 +21,7 @@ import {ManualSpanComponent} from "./manual-components/manual-span.component";
     ManualSpanComponent
   ],
   providers: [],
-  exports: [],
+  exports: [ManualComponent],
   entryComponents: [
     ManualAComponent,
     ManualOlComponent,
