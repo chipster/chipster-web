@@ -5,7 +5,7 @@ export const TOGGLE_SELECTED_DATASET = 'TOGGLE_SELECTED_DATASET';
 export const CLEAR_DATASET_SELECTIONS = 'CLEAR_DATASET_SELECTIONS';
 export const SET_SELECTED_DATASETS = 'SET_SELECTED_DATASETS';
 
-export const selectedDatasets = ( state: Array<Dataset> = [], {type, payload} ) => {
+export function selectedDatasets( state: Array<Dataset> = [], {type, payload} ) {
 
   const stateDatasets = state.slice();
 
@@ -27,5 +27,4 @@ export const selectedDatasets = ( state: Array<Dataset> = [], {type, payload} ) 
     default:
       return state;
   }
-
-};
+}

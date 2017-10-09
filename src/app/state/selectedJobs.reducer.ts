@@ -5,7 +5,7 @@ export const TOGGLE_SELECTED_JOB = 'TOGGLE_SELECTED_JOB';
 export const CLEAR_JOB_SELECTIONS = 'CLEAR_JOB_SELECTIONS';
 export const SET_SELECTED_JOBS = 'SET_SELECTED_JOBS';
 
-export const selectedJobs = (state: Array<Job> = [], {type, payload}) => {
+export function selectedJobs(state: Array<Job> = [], {type, payload}) {
 
   const stateJobs = state.slice();
 
@@ -27,5 +27,4 @@ export const selectedJobs = (state: Array<Job> = [], {type, payload}) => {
     default:
       return state;
   }
-
-};
+}
