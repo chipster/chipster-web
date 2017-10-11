@@ -190,7 +190,9 @@ export class GenomeBrowserComponent implements OnInit {
       }
     ];
 
-    this.range = {contig: 'chr1', start: 72187, stop: 73813};
+    this.range = {contig: 'chr1', start: 3977895, stop: 3977975};
+
+    // need to test with GM12878.bam and position 3977895
 
   }
 

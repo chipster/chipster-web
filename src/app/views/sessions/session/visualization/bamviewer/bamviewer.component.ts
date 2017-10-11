@@ -17,13 +17,16 @@ export class BamViewerComponent implements OnChanges {
   @Input()
   private dataset: Dataset;
   private plain: any;
-  private samHeadeLen: number;
-  private samHeader: string = "";
+  private samHeaderLen: number;
+  private samHeader="";
   private headerEnd: number;
   private bamRecordList: Array<BamRecord> = [];
   private chrName: string;
   private bamRecord: BamRecord;
   private visibleBlockNumber = 2;//just a magic number,just showing records from first two blocks
+  private maxBytes= 5000000;
+  private errorMessage:string;
+
 
 
   //BGZF blocks
@@ -38,16 +41,24 @@ export class BamViewerComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, -1, true).subscribe((result: any) => {
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true).subscribe((result: any) => {
 
       var arrayBuffer = result;
 
       if (arrayBuffer) {
-        //72 is magic number retrieved by observing the hex dump
-        let headerBuffer = arrayBuffer.slice(0, 72);
-        let recordBuffer = arrayBuffer.slice(73);
+        //let determine the header block size to decode the header and the record part differently
 
+        let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
+        let ba = new Uint8Array(blockHeader)
+        let blockSize = (ba[17] << 8) | (ba[16]) + 1;
+
+        let headerBuffer = arrayBuffer.slice(0, blockSize-1);
+        let recordBuffer = arrayBuffer.slice(blockSize);
+
+
+        //Read the header part
         this.readHeader(headerBuffer);
+        //Read the record buffer
         this.getBGZFBlocks(recordBuffer);
 
       }
@@ -59,38 +70,40 @@ export class BamViewerComponent implements OnChanges {
 
     let headerPart = new Uint8Array(headerBuffer);
     let header = pako.inflate(headerPart);
-    let magic = this.readInt(header, 0);
-    this.samHeadeLen = this.readInt(header, 4);
+    this.samHeaderLen = this.readInt(header, 4);
 
 
-    for (var i = 0; i < this.samHeadeLen; ++i) {
-      this.samHeader += String.fromCharCode(header[i + 8]);
+    for (var i = 0; i < this.samHeaderLen; ++i) {
+      this.samHeader+= String.fromCharCode(header[i + 8]);
     }
 
-    //#ref sequence
-    let nRef = this.readInt(header, this.samHeadeLen + 8);
-    let p = this.samHeadeLen + 12;
-    let chrToIndex = {};
-    let indexToChr = [];
+    // In cases where SAM header text section is missing or not containing seq information
+    if(this.samHeaderLen==0||this.samHeader.indexOf("@SQ")==-1){
+      //#ref sequence
+      let nRef = this.readInt(header, this.samHeaderLen + 8);
+      let p = this.samHeaderLen + 12;
+
+      for (var i = 0; i < nRef; ++i) {
+        //lName=length of the reference nameplus 1
+        let lName = this.readInt(header, p);
+
+        let name = "";
+        for (var j = 0; j < lName - 1; ++j) {
+          name += String.fromCharCode(header[p + 4 + j]);
+        }
 
 
-    for (var i = 0; i < nRef; ++i) {
-      //lName=length of the reference nameplus 1
-      let lName = this.readInt(header, p);
-      let name = "";
-      for (var j = 0; j < lName - 1; ++j) {
-        name += String.fromCharCode(header[p + 4 + j]);
+        this.chrName = name;
+        //lRef= length of the reference sequence
+        let lRef = this.readInt(header, p + lName + 4);
+        this.samHeader+="@SQ"+ " "+"SN" +":" +" "+ name+" "+"LN:"+ lRef+ " ";
+
+        p = p + 8 + lName;
+
+        this.headerEnd = p;
       }
-      this.chrName = name;
-      //lRef= length of the reference sequence
-      let lRef = this.readInt(header, p + lName + 4);
-
-      chrToIndex[name] = i;
-      indexToChr.push(name);
-      p = p + 8 + lName;
-
-      this.headerEnd = p;
     }
+
 
   }
 
@@ -110,8 +123,11 @@ export class BamViewerComponent implements OnChanges {
 
       blockSizeList.push(blockSize);
 
+
+
       let compressedData = arrayBuffer.slice(this.filePos, this.filePos + this.BLOCK_HEADER_LENGTH + blockSize);
       totalSize += compressedData.byteLength;
+
 
       //some blocks still behave differently, so pako still throws some error as incorrect header check
       try {
@@ -124,9 +140,10 @@ export class BamViewerComponent implements OnChanges {
 
       this.filePos += blockSize;
 
-
     }
+
     let i;
+
     if (this.blockList.length > 0) {
       for (i = 0; i < this.visibleBlockNumber; ++i) {
         this.decodeBamRecord(this.blockList[i]);
@@ -138,7 +155,7 @@ export class BamViewerComponent implements OnChanges {
 
   decodeBamRecord(unComperessedData: any) {
     this.plain = unComperessedData;
-
+    const MAX_GZIP_BLOCK_SIZE = 65536;
     let offset = 0;
 
     while (true) {
@@ -156,15 +173,19 @@ export class BamViewerComponent implements OnChanges {
       blockSize = this.readInt(this.plain, offset);
       blockEnd = offset + blockSize + 4;
 
-      if (blockEnd > this.plain.length) {
+
+      if (blockSize > MAX_GZIP_BLOCK_SIZE||blockEnd>MAX_GZIP_BLOCK_SIZE) {
+        this.errorMessage=" Error loading the Bam Records";
         return;
       }
 
 
       refID = this.readInt(this.plain, offset + 4);
-      pos = this.readInt(this.plain, offset + 8) & 0x00ffffff;
+      pos = this.readInt(this.plain, offset + 8);
+
 
       if (refID < 0) {
+        this.errorMessage=" Error loading the Bam Records";
         return;
       }
 
@@ -194,11 +215,13 @@ export class BamViewerComponent implements OnChanges {
 
 
       //nc Number of cigarOpp
-      cigarArray = [];
+
+     cigarArray = [];
       for (c = 0; c < nc; ++c) {
         var cigop = this.readInt(this.plain, p);
         // what is the uppermost byte?
-        var opLen = ((cigop & 0x00ffffff) >> 4);
+        //var opLen = ((cigop & 0x00ffffff) >> 4);
+        var opLen = (cigop  >> 4);
         var opLtr = CIGAR_DECODER[cigop & 0xf];
         if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
           lengthOnRef += opLen;
@@ -207,7 +230,6 @@ export class BamViewerComponent implements OnChanges {
         cigarArray.push({len: opLen, ltr: opLtr});
 
       }
-
       this.bamRecord.cigar = cigar;
 
       seq = '';
@@ -233,7 +255,7 @@ export class BamViewerComponent implements OnChanges {
       } else {
         for (j = 0; j < lseq; ++j) {
           qual += String.fromCharCode(this.plain[p + j] + 33);
-        }
+       }
 
       }
 
@@ -243,7 +265,7 @@ export class BamViewerComponent implements OnChanges {
       let value, typeTag = '';
       let tags = {};
 
-      while (p < blockEnd) {
+      while (p < this.plain.length) {
 
         let tag = String.fromCharCode(this.plain[p], this.plain[p + 1]);
         let type = String.fromCharCode(this.plain[p + 2]);
@@ -290,6 +312,7 @@ export class BamViewerComponent implements OnChanges {
       p += blockEnd;
       offset = blockEnd;
 
+
       for (var x in tags) {
         if (tags.hasOwnProperty(x)) {
           typeTag += x + ":" + tags[x] + " ";
@@ -321,7 +344,7 @@ export class BamViewerComponent implements OnChanges {
 
   // Utility Functions
   readInt(ba, offset) {
-    return (ba[offset + 1] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
+    return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
   }
 
   readByte(offset) {

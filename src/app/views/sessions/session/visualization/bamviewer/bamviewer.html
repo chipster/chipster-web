@@ -1,7 +1,8 @@
 <div>
-  <p>
-    {{samHeader}}
-  </p>
+    <p>
+      {{samHeader}}
+    </p>
+  <div *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
   <table class="table-bordered table-hover bamtable">
     <thead>
     </thead>
