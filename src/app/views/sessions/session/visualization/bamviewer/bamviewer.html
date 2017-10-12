@@ -1,22 +1,23 @@
 <div>
-    <p>
-      {{samHeader}}
-    </p>
+    <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
+      <pre>{{entry}}</pre>
+    </ul>
   <div *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
   <table class="table-bordered table-hover bamtable">
     <thead>
     </thead>
     <tbody>
     <tr *ngFor="let bamRecord of bamRecordList">
-      <td>{{bamRecord.readName}}</td>
-      <td>{{chrName}}</td>
-      <td>{{bamRecord.pos}}</td>
-      <td>{{bamRecord.mapQ}}</td>
-      <td>{{bamRecord.cigar}}</td>
-      <td>{{bamRecord.nextSegPos}}</td>
-      <td>{{bamRecord.seq}}</td>
-      <td>{{bamRecord.qual}}</td>
-      <td>{{bamRecord.typeTag}}</td>
+      <td><pre>{{bamRecord.readName}}</pre></td>
+      <td><pre>{{chrName}}</pre></td>
+      <td><pre>{{bamRecord.pos}}</pre></td>
+      <td><pre>{{bamRecord.mapQ}}</pre></td>
+      <td><pre>{{bamRecord.cigar}}</pre></td>
+      <td><pre>{{bamRecord.nextSegPos}}</pre></td>
+      <td><pre>{{bamRecord.seq}}></pre></td>
+      <td><pre>{{bamRecord.qual}}</pre></td>
+      <td><pre>{{bamRecord.typeTag}}</pre></td>
+
     </tr>
     </tbody>
   </table>

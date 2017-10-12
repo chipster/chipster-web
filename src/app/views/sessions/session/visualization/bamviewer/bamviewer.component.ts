@@ -20,6 +20,7 @@ export class BamViewerComponent implements OnChanges {
   private samHeaderLen: number;
   private samHeader="";
   private headerEnd: number;
+  private samHeaderList:Array<string>=[];
   private bamRecordList: Array<BamRecord> = [];
   private chrName: string;
   private bamRecord: BamRecord;
@@ -73,6 +74,7 @@ export class BamViewerComponent implements OnChanges {
     this.samHeaderLen = this.readInt(header, 4);
 
 
+
     for (var i = 0; i < this.samHeaderLen; ++i) {
       this.samHeader+= String.fromCharCode(header[i + 8]);
     }
@@ -99,11 +101,20 @@ export class BamViewerComponent implements OnChanges {
         this.samHeader+="@SQ"+ " "+"SN" +":" +" "+ name+" "+"LN:"+ lRef+ " ";
 
         p = p + 8 + lName;
-
         this.headerEnd = p;
+
       }
     }
+    this.updateHeaderText();
 
+  }
+
+  updateHeaderText(){
+
+    let a=this.samHeader.split("@");
+    for(var i=1,j=0;i<a.length;i++,j++){
+      this.samHeaderList[j]="@"+a[i];
+    }
 
   }
 
