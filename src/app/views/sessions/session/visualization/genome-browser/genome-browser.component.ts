@@ -7,8 +7,6 @@ import {SessionData} from "../../../../../model/session/session-data";
 import {TypeTagService} from "../../../../../shared/services/typetag.service";
 import {Observable} from 'rxjs/Observable';
 import Dataset from "../../../../../model/session/dataset";
-import {FileResource} from "../../../../../shared/resources/fileresource";
-import * as pako from "pako";
 
 
 @Component({
@@ -77,58 +75,51 @@ export class GenomeBrowserComponent implements OnInit {
 
   getDatasetUrls() {
     var self = this;
-    // If the user have chosen only BAI file
-    if ((this.selectedDatasets.length == 1) && (self.typeTagService.isCompatible(self.sessionData, self.selectedDatasets[0], "BAI"))) {
-      this.errorMessage = "Please Select the Corresponding BAM file to view the Genome Browser";
-    }
-    else {
-      // if user have chosen one or more BAM files
-      this.selectedDatasets.forEach(function (dataset) {
+    // if user have chosen one or more BAM files
+    this.selectedDatasets.forEach(function (dataset) {
+      // check type of each file, put the Bam datasets in list
+      if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
+        let bamSource = new BamSource();
+        bamSource.bamDataset = dataset;
+        self.sessionData.datasetsMap.forEach(function (dataset) {
+          if (((dataset.name.split('.').pop()) == "bai") && ((dataset.name.substr(0,
+              dataset.name.indexOf('.')) === (bamSource.bamDataset.name.substr(0,
+              bamSource.bamDataset.name.indexOf('.')))))) {
+            bamSource.baiDataset = dataset;
+          }
 
-        // check type of each file, put the Bam datasets in list
-        if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
-          let bamSource = new BamSource();
-          bamSource.bamDataset = dataset;
-          self.sessionData.datasetsMap.forEach(function (dataset) {
-            if (((dataset.name.split('.').pop()) == "bai") && ((dataset.name.substr(0,
-                dataset.name.indexOf('.')) === (bamSource.bamDataset.name.substr(0,
-                bamSource.bamDataset.name.indexOf('.')))))) {
-              bamSource.baiDataset = dataset;
-            }
-
-          });
-          self.dataSourceList.push(bamSource);
-        }
-        else {
-          self.errorMessage = "Could not find corresponding BAI file";
-          console.log(self.errorMessage);
-        }
-      });
+        });
+        self.dataSourceList.push(bamSource);
+      }
+      else {
+        self.errorMessage = "Could not find corresponding BAI file";
+      }
+    });
 
 
-      let bam: Observable<any>;
-      let bai: Observable<any>;
-      let values1: Array<any> = [];
+    let bam: Observable<any>;
+    let bai: Observable<any>;
+    let bamSources$: Array<any> = [];
+
+    this.dataSourceList.forEach(function (bamSource) {
+      if (bamSource.bamDataset && bamSource.baiDataset) {
+
+        bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
+        bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
+        bamSources$.push(Observable.forkJoin(bam, bai));
+      }
+    });
+
+    Observable.forkJoin(bamSources$).subscribe(res => {
+      for (let i = 0; i < res.length; i++) {
+        this.dataSourceList[i].bamUrl = res[i][0];
+        this.dataSourceList[i].baiUrl = res[i][1];
+
+      }
+      this.initializeDataSources();
+    });
 
 
-      this.dataSourceList.forEach(function (bamSource) {
-        if (bamSource.bamDataset && bamSource.baiDataset) {
-
-          bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
-          bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
-
-
-          Observable.forkJoin(bam, bai).subscribe(res => {
-            bamSource.bamUrl = res[0];
-            bamSource.baiUrl = res[1];
-            values1.push(res);
-            if (values1.length == self.dataSourceList.length) {
-              self.initializeDataSources();
-            }
-          });
-        }
-      });
-    }
   }
 
 
@@ -183,7 +174,7 @@ export class GenomeBrowserComponent implements OnInit {
 
     console.log(this.dataSourceList);
 
-    for(var i=0;i<this.dataSourceList.length;i++){
+    for (var i = 0; i < this.dataSourceList.length; i++) {
       var bamCoverageEntry = new BamSourceEntry();
       var bamTrackEntry = new BamSourceEntry();
 
@@ -209,7 +200,6 @@ export class GenomeBrowserComponent implements OnInit {
       this.sources.push(bamTrackEntry);
 
     }
-
 
 
     //console.log(this.sources);
