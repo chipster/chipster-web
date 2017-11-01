@@ -16,7 +16,7 @@ export class NavigationComponent {
     constructor(
       private tokenService: TokenService,
       private authenticationService: AuthenticationService,
-                private configService: ConfigService){}
+      private configService: ConfigService){}
 
     ngOnInit() {
       this.host = this.getHost();

@@ -12,13 +12,15 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { ToolSourceComponent } from './toolsmodal/tool-source/tool-source.component';
 import { ToolInputsComponent } from './toolsmodal/tool-inputs/tool-inputs.component';
 import { FilterCompatibleDatasetsPipe } from './filter-compatible-datasets.pipe';
+import {ManualModule} from "../../../manual/manual.module";
 
 @NgModule({
   imports: [
     CommonModule,
     SharedModule,
     FormsModule,
-    NgbModule
+    NgbModule,
+    ManualModule
   ],
   declarations: [ToolTitleComponent,  ToolListItemComponent, ToolBoxComponent, ToolsModalComponent, ToolsParameterFormComponent, ToolSourceComponent, ToolInputsComponent, FilterCompatibleDatasetsPipe],
   providers: [ToolService],

@@ -11,7 +11,13 @@ import {ManualComponent} from "./views/manual/manual.component";
 const routes: Routes = [
   { path: 'home',  component: HomeComponent },
   { path: 'login',  component: LoginComponent },
-  { path: 'manual',  component: ManualComponent },
+  {
+    path: 'manual',
+    // route all sub-paths here
+    children: [
+      { path: '**', component: ManualComponent }
+    ]
+  },
   { path: 'contact',  component: ContactComponent },
   {
     path: 'sessions',

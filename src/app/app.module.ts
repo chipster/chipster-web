@@ -20,21 +20,24 @@ import {AppErrorHandler} from "./views/error/apperrorhandler";
 import {ErrorService} from "./views/error/error.service";
 import {toolSelection} from "./state/selected-tool.reducer";
 import {ContactComponent} from "./views/contact/contact.component";
-import {ManualComponent} from "./views/manual/manual.component";
+import {HttpClientModule} from "@angular/common/http";
+import {ManualModule} from "./views/manual/manual.module";
 
 
 @NgModule({
     imports: [
       BrowserModule,
       HttpModule,
+      HttpClientModule,
       FormsModule,
       CoreModule,
       SessionModule,
+      ManualModule,
       NgbModule.forRoot(),
       AppRoutingModule,
       StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection})
     ],
-    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent, ManualComponent ],
+    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent ],
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })

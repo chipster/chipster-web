@@ -7,7 +7,7 @@ import Job from "../../../model/session/job";
 import {SessionData} from "../../../model/session/session-data";
 import * as _ from "lodash";
 import WsEvent from "../../../model/events/wsevent";
-import {Component} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
@@ -19,7 +19,7 @@ import {ErrorService} from "../../error/error.service";
   selector: 'ch-session',
   templateUrl: './session.component.html'
 })
-export class SessionComponent {
+export class SessionComponent implements OnInit, OnDestroy{
 
     sessionData: SessionData;
     deletedDatasets: Array<Dataset>;
@@ -43,6 +43,8 @@ export class SessionComponent {
     ngOnInit() {
 
       // this.sessionData = this.route.snapshot.data['sessionData'];
+
+      this.selectionHandlerService.clearSelections();
 
       this.route.params.flatMap(params => {
         return this.sessionResource.loadSession(params['sessionId']);

@@ -10,6 +10,7 @@ import {DialogModalService} from "../dialogmodal/dialogmodal.service";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {SelectionHandlerService} from "../selection-handler.service";
 import {ErrorService} from "../../../error/error.service";
+import {SelectionService} from "../selection.service";
 
 @Component({
   selector: 'ch-leftpanel',
@@ -29,7 +30,8 @@ export class LeftPanelComponent {
     private dialogModalService: DialogModalService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
-    private errorService: ErrorService) {}
+    private errorService: ErrorService,
+    private selectionService: SelectionService) {} // used by template
 
   datasetSearchKeyEvent(e: any) {
     if (e.keyCode == 13) { // enter
