@@ -69,10 +69,10 @@ export class UploadService {
     file.pause();
   }
 
-  startUpload(sessionId: string, file: any, datasetsMap: Map<string, Dataset>) {
+  startUpload(sessionId: string, file: any) {
     Observable.forkJoin(
       this.ConfigService.getFileBrokerUrl(),
-      this.createDataset(sessionId, file.name, datasetsMap)
+      this.createDataset(sessionId, file.name)
 
     ).subscribe((value: [string, Dataset]) => {
       let url = value[0];
@@ -84,15 +84,10 @@ export class UploadService {
     });
   }
 
-  private createDataset(sessionId: string, name: string, datasetsMap: Map<string, Dataset>): Observable<Dataset> {
-    var d = new Dataset(name);
+  private createDataset(sessionId: string, name: string): Observable<Dataset> {
+    let d = new Dataset(name);
     return this.sessionResource.createDataset(sessionId, d).map((datasetId: string) => {
       d.datasetId = datasetId;
-      if (datasetsMap) {
-        var pos = this.workflowGraphService.newRootPosition(Utils.mapValues(datasetsMap));
-        d.x = pos.x;
-        d.y = pos.y;
-      }
       this.sessionResource.updateDataset(sessionId, d);
       return d;
     });

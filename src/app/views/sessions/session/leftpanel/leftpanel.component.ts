@@ -52,17 +52,7 @@ export class LeftPanelComponent {
 
   getDatasetListSorted(): Dataset[] {
     // sort by created date, oldest first (string comparison should do with the current date format)
-    return this.getDatasetList().sort((a, b) => this.compareStringNullSafe(a.created, b.created));
-  }
-
-  compareStringNullSafe(a, b): number {
-    if (a) {
-      return a.localeCompare(b);
-    } else if (b) {
-      return b.localeCompare(a);
-    } else {
-      return 0;
-    }
+    return this.getDatasetList().sort((a, b) => UtilsService.compareStringNullSafe(a.created, b.created));
   }
 
   toggleDatasetSelection($event: any, dataset: Dataset): void {
@@ -126,6 +116,17 @@ export class LeftPanelComponent {
       });
     }, () => {
       // modal dismissed
+    });
+  }
+
+  autoLayout() {
+    this.sessionData.datasetsMap.forEach(d => {
+      if (d.x || d.y) {
+        d.x = null;
+        d.y = null;
+
+        this.sessionDataService.updateDataset(d);
+      }
     });
   }
 }
