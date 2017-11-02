@@ -489,10 +489,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     datasetsMap.forEach((dataset: Dataset) => {
 
       let color = 'gray';
+      let sourceJob = null;
 
       if (dataset.sourceJob) {
         if (jobsMap.has(dataset.sourceJob)) {
-          let sourceJob = jobsMap.get(dataset.sourceJob);
+          sourceJob = jobsMap.get(dataset.sourceJob);
 
           let module = modulesMap.get(sourceJob.module);
           if (module) {
