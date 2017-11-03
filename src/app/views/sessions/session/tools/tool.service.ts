@@ -31,6 +31,41 @@ export class ToolService {
       parameter.type === 'PERCENT';
   };
 
+  //noinspection JSMethodCanBeStatic
+  /**
+   * Get the step size for number inputs
+   *
+   * Giving the correct step size helps a browser to set the correct width for the decimal inputs.
+   * It also makes the up/down buttons slightly less useless.
+   *
+   * @param {ToolParameter} parameter
+   * @returns {number}
+   */
+  getStepSize(parameter: ToolParameter) {
+
+    if (parameter.type === 'PERCENT') {
+
+      // not used much, but used to be round figures in the old Java client
+      return 0.01;
+
+    } else if (parameter.type === 'DECIMAL') {
+
+      // the same number of decimal places than the default value has
+      if (parameter.defaultValue && parameter.defaultValue.indexOf('.') !== -1) {
+
+        let decimalPlaces = parameter.defaultValue.split('.')[1].length;
+        return Math.pow(0.1, decimalPlaces);
+
+      } else {
+        // default value missing or does not have a decimal point
+        return 0.001
+      }
+    }
+
+    // integer parameters
+    return 1;
+  };
+
   getDefaultValue(toolParameter: ToolParameter): number | string {
     if (this.isNumberParameter(toolParameter)) {
       return Number(toolParameter.defaultValue);
@@ -40,6 +75,7 @@ export class ToolService {
     }
   };
 
+  //noinspection JSMethodCanBeStatic
   isDefaultValue(parameter: ToolParameter, value: number | string) {
     //console.log(value);
     //console.log(parameter.defaultValue && parameter.defaultValue === value);
