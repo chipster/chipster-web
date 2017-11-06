@@ -1,5 +1,5 @@
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input, ChangeDetectorRef, ViewChild} from '@angular/core';
+import {Component, Input, ChangeDetectorRef, ViewChild, AfterViewInit} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {UploadService} from "../../../../../shared/services/upload.service";
 
@@ -7,9 +7,8 @@ import {UploadService} from "../../../../../shared/services/upload.service";
   selector: 'ch-add-dataset-modal-content',
   templateUrl: './adddatasetmodal.content.html'
 })
-export class AddDatasetModalContent {
+export class AddDatasetModalContent implements AfterViewInit {
 
-  @Input() datasetsMap: Map<string, Dataset>;
   @Input() sessionId: string;
 
   @ViewChild('browseFilesButton') browseFilesButton;
@@ -30,7 +29,7 @@ export class AddDatasetModalContent {
 
   fileAdded(file: any) {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
-    this.uploadService.startUpload(this.sessionId, file, this.datasetsMap);
+    this.uploadService.startUpload(this.sessionId, file);
   }
 
   fileSuccess(file: any) {

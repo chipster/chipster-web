@@ -35,6 +35,7 @@
                name="parameter_{{i}}"
                min="{{parameter.from}}"
                max="{{parameter.to}}"
+               step="{{toolService.getStepSize(parameter)}}"
                required="{{!parameter.optional}}"
                (ngModelChange)="toolSelectionService.parametersChanged()"/>
 

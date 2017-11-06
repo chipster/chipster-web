@@ -3,12 +3,11 @@ import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
 import Node from "./node";
 import {Link} from "./link";
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from "@angular/core";
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from "@angular/core";
 import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
 import {PipeService} from "../../../../../shared/services/pipeservice.service";
-import UtilsService from "../../../../../shared/utilities/utils";
 import {SessionDataService} from "../../sessiondata.service";
 import * as d3 from "d3";
 import {WorkflowGraphService} from "./workflowgraph.service";
@@ -17,12 +16,13 @@ import * as _ from "lodash";
 import {SelectionHandlerService} from "../../selection-handler.service";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
+import UtilsService from "../../../../../shared/utilities/utils";
 
 @Component({
   selector: 'ch-workflow-graph',
   template: '<section id="workflowvisualization"></section>'
 })
-export class WorkflowGraphComponent implements OnInit, OnChanges {
+export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() datasetsMap: Map<string, Dataset>;
   @Input() jobsMap: Map<string, Job>;
@@ -218,15 +218,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   update() {
 
-    var datasetNodes = this.getDatasetNodes(this.datasetsMap, this.jobsMap, this.modulesMap);
-    var jobNodes = this.getJobNodes(this.jobsMap);
+    let datasetNodes = this.getDatasetNodes(this.datasetsMap, this.jobsMap, this.modulesMap);
+    let jobNodes = this.getJobNodes(this.jobsMap);
 
     // Add datasets before jobs, because the layout will be done in this order.
     // Jobs should make space for the datasets in the layout, because
     // the jobs are only temporary.
-    var allNodes = (<Array<Node>>datasetNodes).concat(jobNodes);
+    let allNodes = (<Array<Node>>datasetNodes).concat(jobNodes);
 
-    var links = this.getLinks(allNodes);
+    let links = this.getLinks(allNodes);
 
     this.doLayout(links, allNodes);
 
@@ -238,7 +238,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   renderJobs() {
 
-    var arc = d3.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
+    let arc = d3.arc().innerRadius(6).outerRadius(10).startAngle(0).endAngle(0.75 * 2 * Math.PI);
 
     this.d3JobNodes = this.d3JobNodesGroup.selectAll('rect').data(this.jobNodes);
 
@@ -301,7 +301,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   renderDatasets() {
 
-    var self = this;
+    let self = this;
 
     // store the selection of all existing and new elements
     this.d3DatasetNodes = this.d3DatasetNodesGroup.selectAll('rect')
@@ -485,18 +485,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   getDatasetNodes(datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>, modulesMap: Map<string, Module>) {
 
-    var datasetNodes: DatasetNode[] = [];
+    let datasetNodes: DatasetNode[] = [];
     datasetsMap.forEach((dataset: Dataset) => {
 
-      var color = 'gray';
+      let color = 'gray';
+      let sourceJob = null;
 
       if (dataset.sourceJob) {
         if (jobsMap.has(dataset.sourceJob)) {
-          var sourceJob = jobsMap.get(dataset.sourceJob);
+          sourceJob = jobsMap.get(dataset.sourceJob);
 
-          var module = modulesMap.get(sourceJob.module);
+          let module = modulesMap.get(sourceJob.module);
           if (module) {
-            var category = module.categoriesMap.get(sourceJob.toolCategory);
+            let category = module.categoriesMap.get(sourceJob.toolCategory);
             if (category) {
               color = category.color;
             } else {
@@ -534,14 +535,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   getJobNodes(jobsMap: Map<string, Job>) {
 
-    var jobNodes: JobNode[] = [];
+    let jobNodes: JobNode[] = [];
     jobsMap.forEach((job) => {
       // no need to show completed jobs
       if (job.state !== 'COMPLETED') {
 
-        var fgColor = '#4d4ddd';
-        var color = 'lightGray';
-        var spin = true;
+        let fgColor = '#4d4ddd';
+        let color = 'lightGray';
+        let spin = true;
 
         if (job.state === 'FAILED' || job.state === 'EXPIRED_WAITING') {
           color = 'yellow';
@@ -576,8 +577,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
       .duration(duration)
       .attrTween('transform', (d: JobNode) => {
 
-        var x = d.x + this.nodeWidth / 2;
-        var y = d.y + this.nodeHeight / 2;
+        let x = d.x + this.nodeWidth / 2;
+        let y = d.y + this.nodeHeight / 2;
 
         if (d.spin) {
           return d3.interpolateString(
@@ -601,10 +602,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
   getLinks(nodes: Node[]) {
 
-    var links: Link[] = [];
+    let links: Link[] = [];
 
     // map for searching source
-    var datasetNodesMap = new Map();
+    let datasetNodesMap = new Map();
     nodes.forEach((node: DatasetNode) => {
       if (node.dataset) {
         datasetNodesMap.set(node.dataset.datasetId, node);
@@ -614,10 +615,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
     nodes.forEach((targetNode: Node) => {
       if (targetNode.sourceJob) {
-        var sourceJob = targetNode.sourceJob;
+        let sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
         sourceJob.inputs.forEach(function (input) {
-          var sourceNode = datasetNodesMap.get(input.datasetId);
+          let sourceNode = datasetNodesMap.get(input.datasetId);
           if (sourceNode && targetNode) {
             links.push(<Link>{
               source: sourceNode,
@@ -635,10 +636,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
 
     // layout nodes that don't yet have a position
 
-    // layout nodes with parents (assumes that a parent precedes its childrens in the array)
-    links.forEach((link) => {
+    // layout nodes with parents
+    // sort by the creation date to make parents precede their children in the array
+    links.sort((a, b) => UtilsService.compareStringNullSafe(a.source.dataset.created, b.source.dataset.created)).forEach((link) => {
       if (!link.target.x || !link.target.y) {
-        var pos = this.workflowGraphService.newPosition(nodes, link.source.x, link.source.y);
+        if (!link.source.x || !link.source.y) {
+          // we have found an unpositioned parent
+          // it must be a root node, because otherwise this loop would have positioned it already
+          let pos = this.workflowGraphService.newRootPosition(nodes);
+          link.source.x = pos.x;
+          link.source.y = pos.y;
+        }
+        let pos = this.workflowGraphService.newPosition(nodes, link.source.x, link.source.y);
         link.target.x = pos.x;
         link.target.y = pos.y;
       }
@@ -647,7 +656,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges {
     // layout orphan nodes
     nodes.forEach((node) => {
       if (!node.x || !node.y) {
-        var pos = this.workflowGraphService.newRootPosition(nodes);
+        let pos = this.workflowGraphService.newRootPosition(nodes);
         node.x = pos.x;
         node.y = pos.y;
       }

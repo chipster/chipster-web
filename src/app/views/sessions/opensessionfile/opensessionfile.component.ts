@@ -1,4 +1,4 @@
-import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter} from '@angular/core';
+import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter, AfterViewInit} from '@angular/core';
 import {UploadService} from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import {SessionResource} from "../../../shared/resources/session.resource";
@@ -9,7 +9,7 @@ import {ErrorService} from "../../error/error.service";
   selector: 'ch-open-session-file',
   templateUrl: './opensessionfile.component.html'
 })
-export class OpenSessionFile {
+export class OpenSessionFile implements AfterViewInit {
 
   @ViewChild('browseFilesButton') browseFilesButton;
 
@@ -41,7 +41,7 @@ export class OpenSessionFile {
     this.sessionResource.createSession(session).subscribe((sessionId) => {
       // progress bar is enough for the upload status
       this.fileStatus.set(file, undefined);
-      this.uploadService.startUpload(sessionId, file, null);
+      this.uploadService.startUpload(sessionId, file);
     }, err => {
       this.error(file, err);
     });
