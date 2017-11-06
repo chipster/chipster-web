@@ -172,7 +172,6 @@ export class GenomeBrowserComponent implements OnInit {
 
     this.sources.push(genes);
 
-    console.log(this.dataSourceList);
 
     for (var i = 0; i < this.dataSourceList.length; i++) {
       var bamCoverageEntry = new BamSourceEntry();
@@ -205,10 +204,7 @@ export class GenomeBrowserComponent implements OnInit {
     //console.log(this.sources);
     this.range = {contig: 'chr20', start: 3976345, stop: 3979545};
 
-    this.range = {contig: 'chr1', start: 7500000, stop: 7500500};
-
-
-    //this.range = {contig: this.selectedChromosome, start: this.selectedLocation, stop: this.selectedLocation+500};
+    //this.range = {contig: 'chr1', start: 7500000, stop: 7500500};
 
     // need to test with GM12878.bam and position 3977895
 

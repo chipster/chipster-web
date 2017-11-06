@@ -41,7 +41,6 @@ export class SingleDatasetComponent {
     this.dataset = changes.dataset.currentValue;
     this.sourceJob = this.getSourceJob(this.dataset);
     this.getUsedToolFromToolset();
-    console.log(this.dataset);
   }
 
   renameDataset() {
@@ -78,6 +77,7 @@ export class SingleDatasetComponent {
     let self=this;
     this.sessionData.tools.forEach(function(tool){
       // imported files don't have sourceJob
+      console.log(self.sourceJob);
       if (self.sourceJob) {
         if(tool.name.id===self.sourceJob.toolId){
           self.tool=tool;
