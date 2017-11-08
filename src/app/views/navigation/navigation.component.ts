@@ -10,16 +10,13 @@ import {TokenService} from "../../core/authentication/token.service";
 })
 export class NavigationComponent {
 
-    host: Observable<string>;
     username: string;
 
     constructor(
       private tokenService: TokenService,
-      private authenticationService: AuthenticationService,
-      private configService: ConfigService){}
+      private authenticationService: AuthenticationService){}
 
     ngOnInit() {
-      this.host = this.getHost();
       this.username = this.tokenService.getUsername();
     }
 
@@ -31,9 +28,5 @@ export class NavigationComponent {
       if(this.tokenService.getToken()) {
         return true;
       }
-    };
-
-    getHost(): Observable<string> {
-      return this.configService.getSessionDbUrl();
     };
 }

@@ -20,7 +20,6 @@
 
   <!--end navbar form-->
   <ul class="nav justify-content-end">
-    <li style="padding-right: 20px"><span>{{host | async}}</span></li>
     <li *ngIf="!isLoggedIn()"><a routerLink="/login"  routerLinkActive="active">Login</a></li>
     <li *ngIf="isLoggedIn()" style="padding-right: 20px"><span>{{username}}</span></li>
     <li *ngIf="isLoggedIn()"><a routerLink="/home" (click)="logout()" routerLinkActive="active">Logout</a></li>
