@@ -41,6 +41,8 @@ export class SingleDatasetComponent {
     this.dataset = changes.dataset.currentValue;
     this.sourceJob = this.getSourceJob(this.dataset);
     this.getUsedToolFromToolset();
+    console.log("input source job"+ this.sourceJob.toolId);
+
   }
 
   renameDataset() {
@@ -75,14 +77,19 @@ export class SingleDatasetComponent {
 
   getUsedToolFromToolset(){
     let self=this;
+
+    let i=this.sessionData.tools.findIndex(x=>x.name.id==this.sourceJob.toolId);
+    this.tool=this.sessionData.tools[i];
+    console.log(this.sessionData.tools[i]);
+    /*
     this.sessionData.tools.forEach(function(tool){
       // imported files don't have sourceJob
-      console.log(self.sourceJob);
       if (self.sourceJob) {
         if(tool.name.id===self.sourceJob.toolId){
           self.tool=tool;
         }
       }
     });
+    console.log("input tool"+this.tool);*/
   }
 }

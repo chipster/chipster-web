@@ -5,9 +5,9 @@ import Tool from "../../../../../model/session/tool";
 
 @Component({
   selector: 'ch-dataset-parameter-list',
-  template: `<span class="h5">
+  template: `<span class="h5" *ngIf="parameterListForView.length > 0">
                 Parameters
-                <span class="lighter" *ngIf="parameters.length > defaultLimit"> {{limit}} of {{parameterListForView.length}}</span>
+                <span class="lighter" *ngIf="parameterListForView.length > defaultLimit"> {{limit}} of {{parameterListForView.length}}</span>
              </span>
              <span *ngIf="parameterListForView.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
                 
@@ -41,29 +41,28 @@ export class DatasetParameterListComponent {
 
   ngOnChanges(changes: any) {
     if(changes){
+      console.log("changes triggered");
       const tool: SimpleChange = changes.tool;
       const parameters: SimpleChange = changes.parameters;
 
-      this.currentTool = tool.currentValue;
-      this.currentJobParameter = parameters.currentValue;
-    }else{
-      this.currentTool=this.tool;
-      this.currentJobParameter=this.parameters;
+      if(tool) this.currentTool = tool.currentValue;
+      if(parameters) this.currentJobParameter = parameters.currentValue;
     }
+
+    console.log(this.currentJobParameter);
 
     if (this.currentTool && this.currentJobParameter) {
       this.orderJobParameterList();
     } else {
-      console.log('cannot set default parameter values because the tools is undefined', this.currentTool);
+      console.log('cannot set default parameter values because the tools is undefined');
     }
-    //console.log(this.currentTool.parameters);
-    //console.log(this.tool);
+
 
   }
 
   toggleParameterList() {
     if (this.limit === this.defaultLimit) {
-      this.limit = this.parameters.length;
+      this.limit = this.parameterListForView.length;
       this.buttonText = 'Hide';
     } else {
       this.limit = this.defaultLimit;
@@ -76,9 +75,14 @@ export class DatasetParameterListComponent {
     this.currentJobParameter.forEach(function (JobParameter) {
       let i = self.currentTool.parameters.findIndex(x => x.name.id == JobParameter.parameterId);
       self.parameterListForView[i] = JobParameter;
-      self.parameterListForView[i].displayName = self.currentTool.parameters[i].name.displayName;
+      // if the parameter does not have a display name
+      if(self.currentTool.parameters[i].name.displayName){
+        self.parameterListForView[i].displayName = self.currentTool.parameters[i].name.displayName;
+      }else{
+        self.parameterListForView[i].displayName = self.currentTool.parameters[i].name.id;
+      }
+
       self.parameterListForView[i].isDefaultValue = self.toolService.isDefaultValue(self.currentTool.parameters[i], self.parameterListForView[i].value);
-      console.log(self.parameterListForView[i].isDefaultValue);
     });
 
     console.log(this.parameterListForView);

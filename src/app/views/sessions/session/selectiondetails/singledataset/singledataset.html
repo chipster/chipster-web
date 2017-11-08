@@ -5,10 +5,10 @@
       <div class="col-md-6">
 
         <h4>{{dataset.name}}</h4>
-        <h5 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h5>
-        <h5 *ngIf="!sourceJob">Imported file</h5>
+        <h6 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h6>
+        <h6 *ngIf="!sourceJob">Imported file</h6>
 
-        <p>{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
+        <p class="ptext">{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
         <textarea [(ngModel)]="dataset.notes"
                   class="dataset-notes"
                   rows="1" placeholder="File notes"
