@@ -1,13 +1,11 @@
 import {Injectable, ChangeDetectorRef} from "@angular/core";
-import {WorkflowGraphService} from "../../views/sessions/session/leftpanel/workflowgraph/workflowgraph.service";
 import {SessionResource} from "../resources/session.resource";
 import {TokenService} from "../../core/authentication/token.service";
 import {ConfigService} from "./config.service";
 import {Observable} from 'rxjs/Rx';
 import Dataset from "../../model/session/dataset";
-import Utils from "../utilities/utils";
 
-declare var Flow: any;
+declare let Flow: any;
 
 @Injectable()
 export class UploadService {
@@ -15,8 +13,7 @@ export class UploadService {
   constructor(
     private ConfigService: ConfigService,
     private tokenService: TokenService,
-    private sessionResource: SessionResource,
-    private workflowGraphService: WorkflowGraphService) {
+    private sessionResource: SessionResource) {
   }
 
   getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {
@@ -36,7 +33,9 @@ export class UploadService {
       // make numbers easier to read (default 500)
       progressCallbacksInterval: 1000,
       // manual's recommendation for big files
-      speedSmoothingFactor: 0.02
+      speedSmoothingFactor: 0.02,
+      // allow the same file to be uploaded again
+      allowDuplicateUploads: true
     });
 
     if (!flow.support) {
@@ -48,6 +47,7 @@ export class UploadService {
       this.flowFileAdded(file, event, flow);
       fileAdded(file, event, flow);
     });
+    // noinspection JSUnusedLocalSymbols
     flow.on('fileSuccess', (file, message) => {
       //console.log(file, message);
       fileSuccess(file);
@@ -59,6 +59,7 @@ export class UploadService {
     return flow;
   }
 
+  // noinspection JSMethodCanBeStatic
   private flowFileAdded(file: any, event: any, flow: any) {
 
     // each file has a unique target url
