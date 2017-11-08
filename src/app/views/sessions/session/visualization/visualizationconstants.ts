@@ -4,14 +4,14 @@ export default [
   {
     id: 'spreadsheet',
     name: 'Spreadsheet',
-    typeTags: [Tags.TSV, Tags.BED, Tags.GTF],
+    typeTags: [Tags.TSV, Tags.BED, Tags.GTF, Tags.FAI],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
   {
     id: 'text',
     name: 'Text',
-    typeTags: [Tags.TEXT, Tags.TSV, Tags.BED, Tags.GTF],
+    typeTags: [Tags.TEXT, Tags.TSV, Tags.BED, Tags.GTF, Tags.FAI],
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },

@@ -9,7 +9,8 @@
       <ng-template ngbTabContent>
         <ch-spreadsheet-visualization
           *ngIf="active === getTabId('spreadsheet')"
-          [dataset]="SelectionService.selectedDatasets[0]">
+          [dataset]="SelectionService.selectedDatasets[0]"
+          [sessionData]="sessionData">
         </ch-spreadsheet-visualization>
       </ng-template>
     </ngb-tab>
