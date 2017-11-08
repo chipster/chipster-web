@@ -95,7 +95,7 @@ export class SessionListComponent {
       this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
     }, error => {
       console.log("getting sessions list failed", error);
-      this.errorHandlerService.redirectToLoginPage();
+      this.errorHandlerService.redirectToLoginAndBack();
     });
   }
 

@@ -104,7 +104,7 @@ export class SessionResource {
 	    if (errors.length > 0) {
 	      console.log('session loading failed', errors);
 	      // just report the first error, this is what the forkJoin would have done by default anyway
-	      throw new Error(errors[0]);
+	      throw errors[0];
       } else {
 	      return res;
       }
