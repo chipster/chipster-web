@@ -1,0 +1,15 @@
+<h6>File</h6>
+<div class="chipster-highlight">
+  <ch-single-dataset
+    *ngIf="selectionService.selectedDatasets.length === 1"
+    [dataset]="selectionService.selectedDatasets[0]"
+    [jobs]="sessionData.jobsMap"
+    [sessionData]="sessionData"
+    (onDelete)="onDelete.emit()"></ch-single-dataset>
+  <ch-dataset-details
+    *ngIf="selectionService.selectedDatasets.length > 1"
+    (onDelete)="onDelete.emit()"></ch-dataset-details>
+  <ch-visualizations
+    *ngIf="selectionService.selectedDatasets.length > 0"
+    [sessionData]="sessionData"></ch-visualizations>
+</div>
