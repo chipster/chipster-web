@@ -14,8 +14,6 @@ export class ErrorHandlerService  {
   handleError(error: Response | any, request: Request) {
     let errorMessage: string;
 
-    //console.log('error', error, request);
-
     if (error instanceof Response) {
       if (error.status === 0) {
         // dns name resolution failed,
@@ -35,8 +33,11 @@ export class ErrorHandlerService  {
     return Observable.throw(errorMessage);
   }
 
-  redirectToLoginPage() {
-    this.router.navigate(['/login']);
+  redirectToLoginAndBack() {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
   }
 
+  static isForbidden(error: Response | any) {
+    return error instanceof Response && error.status === 403;
+  }
 }

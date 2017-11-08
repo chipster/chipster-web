@@ -14,6 +14,7 @@ import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {ErrorService} from "../../error/error.service";
+import {ErrorHandlerService} from "../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-session',
@@ -35,7 +36,8 @@ export class SessionComponent implements OnInit, OnDestroy{
         private selectionHandlerService: SelectionHandlerService,
         private route: ActivatedRoute,
         private modalService: NgbModal,
-        private errorService: ErrorService) {
+        private errorService: ErrorService,
+        private errorHandler: ErrorHandlerService) {
     }
 
 
@@ -52,6 +54,13 @@ export class SessionComponent implements OnInit, OnDestroy{
         this.sessionData = sessionData;
         this.subscribeToEvents();
       }, err => {
+        console.log(err);
+        if (ErrorHandlerService.isForbidden(err)) {
+          this.errorHandler.redirectToLoginAndBack();
+          return;
+
+        }
+
         this.errorService.headerError('failed to load the session data ' + err, true);
       });
 
