@@ -27,7 +27,7 @@
   <div class="bar pull-right search-div">
     <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
            placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
-    <button class="btn btn-secondary clear-search-button" *ngIf="datasetSearch"
+    <button class="btn btn-outline-dark clear-search-button" *ngIf="datasetSearch"
             (click)="datasetSearch = null">
       <i class="fa fa-times" aria-hidden="true"></i>
     </button>
