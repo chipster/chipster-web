@@ -65,6 +65,7 @@ export class ManualComponent implements AfterViewInit {
     let query;
     this.activatedRoute.url
       .flatMap(() => {
+        console.log('route changed', this.activatedRoute.snapshot.url, this.page);
         if (this.page) {
           query = this.page;
         } else {
@@ -73,8 +74,10 @@ export class ManualComponent implements AfterViewInit {
         }
 
         // get the html file
-        return this.getPage(this.assetsPath + query);
+        return this.getPage(this.assetsPath + query)
       })
+      // parse the html
+      .map(htmlString => new DOMParser().parseFromString(htmlString, "text/html"))
       // fix the links and image source addresses
       .map(htmlDoc => this.rewrite(htmlDoc, query))
       // show
@@ -236,13 +239,19 @@ export class ManualComponent implements AfterViewInit {
    * @param path
    * @returns {Observable<HTMLDocument>}
    */
-  getPage(path): Observable<HTMLDocument> {
+  getPage(path): Observable<string> {
 
     console.log('GET', path);
 
-    return this.http.get(path, {responseType: 'text'}).map(data => {
-      return new DOMParser().parseFromString(data, "text/html");
-    });
+    return this.http.get(path, {responseType: 'text'})
+      // replace missing pages with nicer message
+      .catch(err => {
+        if (err.status === 404) {
+          return Observable.of('<html><body>Page not found</body></html>');
+        } else {
+          throw err;
+        }
+      })
   }
 
   /**

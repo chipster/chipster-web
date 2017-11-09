@@ -9,11 +9,13 @@ import {JobComponent} from "./job/job.component";
 import { DatasetHistorymodalComponent } from './datasethistorymodal/datasethistorymodal.component';
 import {DatasetModalService} from "./datasetmodal.service";
 import {LinkButtonModule} from "../link-button/link-button.module";
+import {FileComponent} from "./file/file.component";
+import {VisualizationsModule} from "../visualization/visualizations.module";
 
 @NgModule({
-  imports: [  CommonModule, FormsModule, SharedModule, LinkButtonModule ],
-  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, JobComponent, DatasetHistorymodalComponent],
-  exports: [JobComponent, DatasetDetailsComponent, SingleDatasetComponent],
+  imports: [  CommonModule, FormsModule, SharedModule, LinkButtonModule, VisualizationsModule ],
+  declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, FileComponent, JobComponent, DatasetHistorymodalComponent],
+  exports: [JobComponent, FileComponent, DatasetDetailsComponent, SingleDatasetComponent],
   providers: [DatasetModalService],
   entryComponents: [DatasetHistorymodalComponent]
 })

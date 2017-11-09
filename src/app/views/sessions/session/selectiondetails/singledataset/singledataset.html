@@ -1,30 +1,56 @@
-<h6>File</h6>
-<div class="chipster-highlight">
-  <div class="dataset-details">
-    <div class="row">
-      <div class="col-md-6">
+<div class="dataset-details">
+  <div class="row">
+    <div class="col-md-6">
 
-        <h4>{{dataset.name}}</h4>
-        <h6 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h6>
-        <h6 *ngIf="!sourceJob">Imported file</h6>
+      <!--<h5 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h5>-->
+      <!--<h5 *ngIf="!sourceJob">Imported file</h5>-->
 
-        <p class="sm-text">{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
-        <textarea [(ngModel)]="dataset.notes"
-                  class="dataset-notes"
-                  rows="1" placeholder="File notes"
-                  (blur)="updateDataset(dataset)">
-                </textarea>
-        <div class="btn-group btn-group-sm">
-          <button type="button" class="btn btn-sm btn-secondary" (click)="renameDataset()">Rename</button>
-          <button type="button" class="btn btn-sm btn-secondary" (click)="deleteDatasets()">Delete</button>
-          <button type="button" class="btn btn-sm btn-secondary" (click)="exportDatasets()">Export</button>
-          <button type="button" class="btn btn-sm btn-secondary" (click)="showHistory()">History</button>
-        </div>
+
+      <table>
+        <tr>
+          <td><span style="color: grey">Created with:</span></td>
+          <td>{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</td>
+        </tr>
+        <tr>
+          <td><span style="color: grey">Size:</span></td>
+          <td>{{dataset.size | bytes: 0}}</td>
+        </tr>
+        <tr>
+          <td><span style="color: grey">Date:</span></td>
+          <td>{{dataset.created | isodate}}</td>
+        </tr>
+        <tr>
+          <td><span style="color: grey">Notes:</span></td>
+          <td>{{dataset.notes}}</td>
+        </tr>
+
+
+      </table>
+
+      <!--<p style="margin-bottom: 0px"><span style="color: grey">Created with:</span> {{sourceJob.toolCategory}} / {{sourceJob.toolName}}</p>-->
+      <!--<p style="margin-bottom: 0px"><span style="color: grey">Size:</span> {{dataset.size | bytes: 0}}</p>-->
+      <!--<p style="margin-bottom: 0px"><span style="color: grey">Date:</span> {{dataset.created | isodate}}</p>-->
+      <!--<p style="margin-bottom: 0px"><span style="color: grey">Notes:</span></p>-->
+
+
+      <!--<textarea [(ngModel)]="dataset.notes"-->
+      <!--class="dataset-notes"-->
+      <!--rows="1" placeholder="File notes"-->
+      <!--(blur)="updateDataset(dataset)">-->
+      <!--</textarea>-->
+
+
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="renameDataset()">Rename</button>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="deleteDatasets()">Delete</button>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="exportDatasets()">Export</button>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="showHistory()">History</button>
       </div>
-      <div class="col-md-6">
-        <ch-dataset-parameter-list *ngIf="sourceJob && sourceJob.parameters.length > 0"
-                                   [parameters]="sourceJob.parameters" [tool]="tool"></ch-dataset-parameter-list>
-      </div>
+    </div>
+    <div class="col-md-6">
+      <ch-dataset-parameter-list
+        *ngIf="sourceJob && sourceJob.parameters.length > 0"
+        [parameters]="sourceJob.parameters" [tool]="tool"></ch-dataset-parameter-list>
     </div>
 
   </div>

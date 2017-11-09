@@ -17,6 +17,7 @@ export const Tags = {
   BED: 'BED',
   GTF: 'GTF',
   FASTA: 'FASTA',
+  FAI: 'FAI',
   FASTQ: 'FASTAQ',
   GZIP: 'GZIP',
   VCF: 'VCF',
@@ -35,11 +36,13 @@ export const Tags = {
   PHENODATA: 'PHENODATA',
   GENERIC: 'GENERIC',
   PVALUE_AND_FOLD_CHANGE: 'PVALUE_AND_FOLD_CHANGE',
+  COLUMN_TITLES: 'COLUMN_TITLES',
 };
 
 @Injectable()
 export class TypeTagService {
 
+  // noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
 
     const alwaysCompatible = [Tags.GENERIC, Tags.PHENODATA];
@@ -53,5 +56,16 @@ export class TypeTagService {
       throw new Error('dataset ' + dataset.name + ' does not have type tags');
     }
     return typeTags.has(type);
+  }
+
+  // noinspection JSMethodCanBeStatic
+  get(sessionData: SessionData, dataset: Dataset, type: string) {
+
+    let typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+
+    if (!typeTags) {
+      throw new Error('dataset ' + dataset.name + ' does not have type tags');
+    }
+    return typeTags.get(type);
   }
 }

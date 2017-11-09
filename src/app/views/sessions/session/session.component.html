@@ -23,28 +23,19 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col">
-              <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
-                <ch-single-dataset
-                  [dataset]="selectionService.selectedDatasets[0]"
-                  [jobs]="sessionData.jobsMap"
-                  [sessionData]="sessionData"
-                  (onDelete)="deleteDatasetsLater()"
-                  *ngIf="selectionService.selectedDatasets.length === 1"></ch-single-dataset>
-                <ch-dataset-details
-                  (onDelete)="deleteDatasetsLater()"
-                  *ngIf="selectionService.selectedDatasets.length > 1"></ch-dataset-details>
-            </div>
-        </div>
+      <div class="row">
+        <div class="col">
+          <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
 
-        <!-- Visualization -->
-        <div class="row">
-            <div class="col">
-                <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0"
-                  [sessionData]="sessionData"></ch-visualizations>
-            </div>
+          <ch-file
+            *ngIf="selectionService.selectedDatasets.length > 0"
+            [dataset]="selectionService.selectedDatasets[0]"
+            [jobs]="sessionData.jobsMap"
+            [sessionData]="sessionData"
+            (onDelete)="deleteDatasetsLater()"></ch-file>
         </div>
+      </div>
+
 
     </div>
 </div>

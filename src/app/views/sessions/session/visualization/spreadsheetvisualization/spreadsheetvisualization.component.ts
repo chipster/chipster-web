@@ -6,6 +6,8 @@ import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
 import Dataset from "../../../../../model/session/dataset";
 import {VisualizationModalService} from "../visualizationmodal.service";
+import {SessionData} from "../../../../../model/session/session-data";
+import {Tags, TypeTagService} from "../../../../../shared/services/typetag.service";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -27,6 +29,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
+  @Input() sessionData: SessionData;
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
@@ -40,6 +43,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private fileResource: FileResource,
     private sessionDataService: SessionDataService,
     private visualizationModalService: VisualizationModalService,
+    private typeTagService: TypeTagService,
     private zone: NgZone) {
   }
 
@@ -60,6 +64,14 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
         parsedTSV.pop();
       }
       this.lineCount = parsedTSV.length;
+
+      // type-service gives the column titles for some file types
+      let typeTitles = this.typeTagService.get(this.sessionData, this.dataset, Tags.COLUMN_TITLES);
+
+      if (typeTitles) {
+        // create a new first row from the column titles
+        parsedTSV.unshift(typeTitles.split('\t'));
+      }
 
       let normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
 
