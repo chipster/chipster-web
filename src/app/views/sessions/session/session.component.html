@@ -1,42 +1,54 @@
 <div class="container-fluid">
   <p *ngIf="!sessionData">Loading session...</p>
   <div *ngIf="sessionData" class="row session-view">
+    <div class="col">
 
-    <!-- Start of Workflow View -->
-    <div class="col-4">
-        <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
+      <vertical-split-pane
+        primary-component-initialratio="0.33"
+        primary-component-minsize="370"
+        secondary-component-minsize="300"
+        separator-thickness="10"
+        style="width: 100%"
+        id="session-split">
 
-        <div *ngIf="deletedDatasets" class="alert alert-danger">
+        <div class="split-pane-content-primary">
+          <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
+
+          <div *ngIf="deletedDatasets" class="alert alert-danger">
             <button type="button" class="btn btn-danger btn-sm"
-              (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
+                    (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
             <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
             <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
             <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
+          </div>
         </div>
-    </div>
+        <div class="split-pane-content-secondary">
 
-    <div class="col scrollable">
+          <div class="scrollable">
 
-        <div class="row">
-            <div class="col">
+            <div class="row">
+              <div class="col">
                 <ch-toolbox [sessionData]="sessionData"></ch-toolbox>
+              </div>
             </div>
+
+            <div class="row">
+              <div class="col">
+                <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
+
+                <ch-file
+                  *ngIf="selectionService.selectedDatasets.length > 0"
+                  [dataset]="selectionService.selectedDatasets[0]"
+                  [jobs]="sessionData.jobsMap"
+                  [sessionData]="sessionData"
+                  (onDelete)="deleteDatasetsLater()"></ch-file>
+              </div>
+            </div>
+
+
+          </div>
         </div>
-
-      <div class="row">
-        <div class="col">
-          <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
-
-          <ch-file
-            *ngIf="selectionService.selectedDatasets.length > 0"
-            [dataset]="selectionService.selectedDatasets[0]"
-            [jobs]="sessionData.jobsMap"
-            [sessionData]="sessionData"
-            (onDelete)="deleteDatasetsLater()"></ch-file>
-        </div>
-      </div>
-
-
+      </vertical-split-pane>
     </div>
-</div>
+  </div>
 </div>
