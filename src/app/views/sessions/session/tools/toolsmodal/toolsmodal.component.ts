@@ -159,12 +159,20 @@ export class ToolsModalComponent {
   }
 
   getManualPage() {
-    let extensions = ['.R', '.py', '.java'];
     let tool: string = this.toolSelection.tool.name.id;
 
-    for (let ext of extensions) {
-      if (tool.endsWith(ext)) {
-        return tool.slice(0, -1 * ext.length) + '.html';
+    if (tool.endsWith('.java')) {
+      // remove the java package name
+      let splitted = tool.split('.');
+      if (splitted.length > 2) {
+        // java class name
+        return splitted[splitted.length - 2] + '.html';
+      }
+    } else {
+      for (let ext of ['.R', '.py']) {
+        if (tool.endsWith(ext)) {
+          return tool.slice(0, -1 * ext.length) + '.html';
+        }
       }
     }
     return tool;
