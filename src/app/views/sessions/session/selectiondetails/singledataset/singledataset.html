@@ -8,7 +8,7 @@
         <h6 *ngIf="sourceJob">{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</h6>
         <h6 *ngIf="!sourceJob">Imported file</h6>
 
-        <p class="ptext">{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
+        <p class="sm-text">{{dataset.size | bytes: 0}}, {{dataset.created | isodate}}</p>
         <textarea [(ngModel)]="dataset.notes"
                   class="dataset-notes"
                   rows="1" placeholder="File notes"

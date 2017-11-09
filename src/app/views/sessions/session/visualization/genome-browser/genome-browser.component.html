@@ -1,6 +1,14 @@
 <div class *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
 <div *ngIf="!errorMessage">
   <div class="row">
+      <form>
+        <div class="form-group">
+          <label for="selectGenome">Select Reference Genome</label>
+          <select class="form-control" id="selectGenome" [(ngModel)]="selectedGenomeID" (ngModelChange)="setGenome($event)">
+            <option *ngFor="let genome of genomeList">{{genome.genomeID}}</option>
+          </select>
+        </div>
+      </form>
 
       <div class="col-sm-3">
         <div class="card">

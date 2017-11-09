@@ -5,20 +5,22 @@ import Tool from "../../../../../model/session/tool";
 
 @Component({
   selector: 'ch-dataset-parameter-list',
-  template: `<span class="h5" *ngIf="parameterListForView.length > 0">
+  template: `<span class="h6" *ngIf="parameterListForView.length > 0">
                 Parameters
                 <span class="lighter" *ngIf="parameterListForView.length > defaultLimit"> {{limit}} of {{parameterListForView.length}}</span>
              </span>
              <span *ngIf="parameterListForView.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
                 
-             <table class="table table-condensed parameter-table">
-                <tr *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': param.isDefaultValue? 'gray' : 'black'}">
+             <table class="table table-sm parameter-table">
+                <tr class="sm-text" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': param.isDefaultValue? 'gray' : 'black'}">
                    <ng-template [ngIf]="i < limit">
                       <td>{{param.displayName}}</td>
                          <td>{{param.value}}</td>
                    </ng-template>
                 </tr>
-             </table>`
+             </table>`,
+  styleUrls: ['./dataset-parameter-list.component.less']
+
 })
 export class DatasetParameterListComponent {
   @Input() private tool: Tool;
@@ -40,21 +42,26 @@ export class DatasetParameterListComponent {
   }
 
   ngOnChanges(changes: any) {
-    if(changes){
+    if (changes) {
       console.log("changes triggered");
       const tool: SimpleChange = changes.tool;
       const parameters: SimpleChange = changes.parameters;
 
-      if(tool) this.currentTool = tool.currentValue;
-      if(parameters) this.currentJobParameter = parameters.currentValue;
-    }
+      if (tool) this.currentTool = tool.currentValue;
+      if (parameters) this.currentJobParameter = parameters.currentValue;
 
-    console.log(this.currentJobParameter);
+    }
 
     if (this.currentTool && this.currentJobParameter) {
       this.orderJobParameterList();
-    } else {
-      console.log('cannot set default parameter values because the tools is undefined');
+    } else if (!this.currentTool && this.currentJobParameter) {
+      //just the show the normal job parameters
+      let self = this;
+      this.currentJobParameter.forEach(function (JobParameter) {
+        JobParameter.isDefaultValue = true;
+        self.parameterListForView.push(JobParameter);
+      })
+
     }
 
 
@@ -74,18 +81,21 @@ export class DatasetParameterListComponent {
     let self = this;
     this.currentJobParameter.forEach(function (JobParameter) {
       let i = self.currentTool.parameters.findIndex(x => x.name.id == JobParameter.parameterId);
-      self.parameterListForView[i] = JobParameter;
-      // if the parameter does not have a display name
-      if(self.currentTool.parameters[i].name.displayName){
-        self.parameterListForView[i].displayName = self.currentTool.parameters[i].name.displayName;
-      }else{
-        self.parameterListForView[i].displayName = self.currentTool.parameters[i].name.id;
+      if (i != -1) {
+        // if the parameter does not have a display name
+        if (self.currentTool.parameters[i].name.displayName) {
+          JobParameter.displayName = self.currentTool.parameters[i].name.displayName;
+        } else {
+          JobParameter.displayName = self.currentTool.parameters[i].name.id;
+        }
+        let isDefault = self.toolService.isDefaultValue(self.currentTool.parameters[i], JobParameter.value);
+        if (isDefault == null) isDefault = true;
+        JobParameter.isDefaultValue = isDefault;
+        self.parameterListForView.push(JobParameter);
       }
 
-      self.parameterListForView[i].isDefaultValue = self.toolService.isDefaultValue(self.currentTool.parameters[i], self.parameterListForView[i].value);
     });
 
-    console.log(this.parameterListForView);
   }
 
 
