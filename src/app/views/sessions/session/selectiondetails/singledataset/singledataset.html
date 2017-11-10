@@ -6,21 +6,21 @@
       <!--<h5 *ngIf="!sourceJob">Imported file</h5>-->
 
 
-      <table>
+      <table class="table table-sm sm-text">
         <tr>
-          <td><span style="color: grey">Created&nbsp;with:</span></td>
+          <td class="lighter">Created&nbsp;with:</td>
           <td>{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Size:</span></td>
+          <td class="lighter">Size:</td>
           <td>{{dataset.size | bytes: 0}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Date:</span></td>
+          <td class="lighter">Date:</td>
           <td>{{dataset.created | isodate}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Notes:</span></td>
+          <td class="lighter">Notes:</td>
           <td>{{dataset.notes}}</td>
         </tr>
 

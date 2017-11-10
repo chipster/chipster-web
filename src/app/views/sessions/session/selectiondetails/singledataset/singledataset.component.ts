@@ -11,12 +11,7 @@ import Tool from "../../../../../model/session/tool";
 @Component({
   selector: 'ch-single-dataset',
   templateUrl: './singledataset.html',
-  styles: [`
-    .dataset-notes {
-        border: none;
-        width: 100%;
-    }        
-  `]
+  styleUrls: ['./singledataset-component.less'],
 })
 export class SingleDatasetComponent {
 
