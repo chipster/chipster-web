@@ -1,4 +1,20 @@
-<h6><span style="color: grey">File: </span>{{dataset.name}}</h6>
+<h6>
+  <span style="color: grey">File: </span>{{dataset.name}}
+  <span class="dropdown">
+    <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
+      <i class="fa fa-chevron-circle-down" aria-hidden="true"></i>
+    </button>
+    <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
+      <a class="dropdown-item" (click)="renameDataset()">Rename</a>
+      <a class="dropdown-item" (click)="deleteDatasets()">Delete</a>
+      <a class="dropdown-item" (click)="exportDatasets()" >Export</a>
+      <a class="dropdown-item" (click)="showHistory()">History</a>
+    </div>
+  </span>
+</h6>
+
+
 <div class="chipster-highlight">
   <ch-single-dataset
     *ngIf="selectionService.selectedDatasets.length === 1"
