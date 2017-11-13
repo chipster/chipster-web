@@ -1,9 +1,7 @@
-@media (min-width: 990px) {
-  .session-view {
+.session-view {
 	position: fixed;
 	width: 100%;
-	height: 100%;
-  }
+  height: calc(~"100vh - 60px");
 }
 
 .close-well-button {
@@ -17,9 +15,12 @@
 }
 
 /*
-Disable the left border from the separator. Use id of the outer component to make this specific
-enough to override its default style.
+Disable the left border from the separator. Use :host ::ng-deep to bypass view encaplsulation, because
+it doesn't work for the dynamically added vertical-split-separator component.
+
+https://stackoverflow.com/questions/36265026/angular-2-innerhtml-styling
  */
-#session-split vertical-split-separator {
+//noinspection CssInvalidPseudoSelector
+:host ::ng-deep vertical-split-separator {
   border: 0;
 }
