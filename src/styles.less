@@ -1,42 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
-
-/* DATASET COMPONENT */
-
+// allow absolute positioning inside the search field
 .search-div {
   position: relative;
-}
-
-.visualization-area {
-  //noinspection CssInvalidPropertyValue
-  height: "calc(100vh - 110px)";
-}
-
-.thumbnail-button {
-  height: 28vh;
-  width: 22vw;
-  z-index: 1; /* disable iframe */
-  position: relative; /* required by z-index */
-}
-
-.thumbnail {
-  /* align to center */
-  display: inherit;
-  max-height: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  margin: 0;
-  z-index: -1; /* disable iframe */
-  position: relative; /* required by z-index */
-}
-
-.thumbnail-html {
-  height: 200%;
-  width: 200%;
-  max-height: 200%;
-  max-width: 200%;
-  transform: scale(0.5);
-  transform-origin: 0 0;
 }
 
 .scrollable {
@@ -53,124 +19,14 @@
   border-radius: 4px;
 }
 
-.non-scrollable-modal {
-  height: "calc(100vh - 160px)";
-}
-
-.visibility-hidden {
-  visibility: hidden;
-}
-
-
-.workflow-dataset-static-panel {
-  position: relative;
-}
-
-#session-notes {
-  border: none;
-  width: 100%;
-  height: auto;
-}
-
-.no-margin {
-  margin: 0;
-}
-
-.no-padding {
-  padding: 0;
-}
-
-.no-padding-right {
-  padding-right: 0;
-}
-
-.link-cursor {
-  cursor: pointer;
-}
-
-.tool-description {
-  overflow-y: auto;
-  height: "calc(100% - 30px)";
-  padding-top: 10px;
-}
-
 .thin-list-group-item {
   /*height: 2em;*/
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-.nav-pills {
-  margin-bottom: 10px;
-}
-
-.navbar{
-  margin-bottom: 10px;
-}
-
-.td-selected {
-  background-color: steelblue;
-}
-
-
-.td-selected>a {
-  color: white;
-}
-
-/* D3 graph related styles*/
-
-.node {
-  stroke: black;
-  stroke-width: 1px;
-}
-
-.node .selected {
-  stroke: black;
-  stroke-width: 2px;
-}
-
-
-.link {
-  stroke: #555;
-}
-
-.d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  border-radius: 2px;
-}
-
-.tab-content {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
-  height: "calc(100vh - 110px)";
-}
-
-.tab-content-without-padding {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  height: "calc(100vh - 110px)";
-}
-
-.nav-tabs {
-  margin-bottom: 0;
-}
-
-
 .lighter {
   color: grey;
-}
-
-// force z-index for pdf-viewers canvas to 0 from -1 or it won't show
-pdf-viewer canvas {
-  z-index: 0 !important;
-  border: 1px solid #ccc;
 }
 
 // extra large modal for visualizations
@@ -179,9 +35,3 @@ pdf-viewer canvas {
   margin-left: 30px;
   margin-right: 30px;
 }
-
-@import "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph.component.less";
-@import "./app/views/sessions/session/tools/tools";
-@import "./app/views/sessions/session/visualization/expressionprofile/expressionprofile";
-@import "./app/views/sessions/session/visualization/visualizationbox";
-@import "./app/views/sessions/session/leftpanel/workflowgraph/workflowgraph";

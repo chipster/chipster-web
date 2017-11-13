@@ -3,7 +3,7 @@ import {DatasetNode} from "./dataset-node";
 import {JobNode} from "./job-node";
 import Node from "./node";
 import {Link} from "./link";
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from "@angular/core";
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation} from "@angular/core";
 import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
 import Module from "../../../../../model/session/module";
@@ -20,7 +20,9 @@ import UtilsService from "../../../../../shared/utilities/utils";
 
 @Component({
   selector: 'ch-workflow-graph',
-  template: '<section id="workflowvisualization"></section>'
+  template: '<section id="workflowvisualization"></section>',
+  styleUrls: ['./workflowgraph.component.less'],
+  encapsulation: ViewEncapsulation.None
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -333,7 +335,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.showTooltip(this, d);
         }
       })
-      .on('mouseout', function (d) {
+      .on('mouseout', function () {
         if (self.enabled) {
           d3.select(this).classed('hovering-dataset', false);
           self.hideTooltip();
@@ -391,6 +393,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   //Function to describe drag behavior
+  // noinspection JSUnusedLocalSymbols
   dragNodes(x: number, dx: number, y: number, dy: number) {
 
     this.d3DatasetNodes

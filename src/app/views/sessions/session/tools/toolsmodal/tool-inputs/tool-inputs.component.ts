@@ -8,6 +8,7 @@ import {SessionData} from "../../../../../../model/session/session-data";
 @Component({
   selector: 'ch-tool-inputs',
   templateUrl: './tool-inputs.component.html',
+  styleUrls: ['./tool-inputs.component.less']
 })
 export class ToolInputsComponent implements OnChanges {
 

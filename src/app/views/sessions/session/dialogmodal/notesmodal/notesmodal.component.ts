@@ -3,7 +3,8 @@ import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 import Session from "../../../../../model/session/session";
 
 @Component({
-  templateUrl: './notesmodal.component.html'
+  templateUrl: './notesmodal.component.html',
+  styleUrls: ['./notesmodal.component.less']
 })
 export class NotesModalComponent implements AfterViewInit{
 
