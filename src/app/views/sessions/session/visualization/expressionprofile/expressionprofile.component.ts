@@ -9,7 +9,7 @@ import GeneExpression from "./geneexpression";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
-import {Component, Input, OnChanges} from "@angular/core";
+import {Component, Input, OnChanges, ViewEncapsulation} from "@angular/core";
 import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
@@ -17,7 +17,9 @@ import {VisualizationTSVService} from "../../../../../shared/visualization/visua
 
 @Component({
   selector: 'ch-expression-profile',
-  templateUrl: './expressionprofile.html'
+  templateUrl: './expressionprofile.html',
+  styleUrls: ['./expressionprofile.less'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ExpressionProfileComponent implements OnChanges {
 

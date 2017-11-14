@@ -1,12 +1,11 @@
 import {Component} from '@angular/core';
 import {AuthenticationService} from "../../core/authentication/authenticationservice";
-import {ConfigService} from "../../shared/services/config.service";
-import {Observable} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 
 @Component({
   selector: 'ch-navigation',
-  templateUrl: './navigation.html'
+  templateUrl: './navigation.html',
+  styleUrls: ['./navigation.component.less']
 })
 export class NavigationComponent {
 

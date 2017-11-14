@@ -18,7 +18,8 @@ import {ErrorHandlerService} from "../../../core/errorhandler/error-handler.serv
 
 @Component({
   selector: 'ch-session',
-  templateUrl: './session.component.html'
+  templateUrl: './session.component.html',
+  styleUrls: ['./session.component.less']
 })
 export class SessionComponent implements OnInit, OnDestroy{
 
@@ -198,7 +199,8 @@ export class SessionComponent implements OnInit, OnDestroy{
         this.sessionDataService.exportDatasets(datasets);
     }
 
-    parseQueryparametersArray(queryParams: Params, key: string ): Array<string> {
+    // noinspection JSMethodCanBeStatic
+  parseQueryparametersArray(queryParams: Params, key: string ): Array<string> {
       switch(typeof queryParams[key]) {
         case 'string':
           return [queryParams[key]];

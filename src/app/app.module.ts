@@ -35,7 +35,7 @@ import {ManualModule} from "./views/manual/manual.module";
       ManualModule,
       NgbModule.forRoot(),
       AppRoutingModule,
-      StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection})
+      StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection}),
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent ],
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],

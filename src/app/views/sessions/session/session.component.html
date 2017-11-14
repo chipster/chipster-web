@@ -1,27 +1,37 @@
-<div class="container-fluid">
-  <p *ngIf="!sessionData">Loading session...</p>
-  <div *ngIf="sessionData" class="row session-view">
 
-    <!-- Start of Workflow View -->
-    <div class="col-4">
-        <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
+<div *ngIf="!sessionData" class="container-fluid">
+  <p>Loading session...</p>
+</div>
+<div *ngIf="sessionData">
 
-        <div *ngIf="deletedDatasets" class="alert alert-danger">
-            <button type="button" class="btn btn-danger btn-sm"
-              (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
-            <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
-            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
-            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
-        </div>
+  <!--suppress HtmlUnknownAttribute -->
+  <vertical-split-pane
+    primary-component-initialratio="0.33"
+    primary-component-minsize="370"
+    secondary-component-minsize="300"
+    separator-thickness="10"
+    id="session-split"
+    class="session-view container-fluid">
+
+    <div class="split-pane-content-primary">
+      <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
+
+      <div *ngIf="deletedDatasets" class="alert alert-danger">
+        <button type="button" class="btn btn-danger btn-sm"
+                (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
+        <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
+        <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
+        <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
+      </div>
     </div>
 
-    <div class="col scrollable">
+    <div class="split-pane-content-secondary scrollable">
 
-        <div class="row">
-            <div class="col">
-                <ch-toolbox [sessionData]="sessionData"></ch-toolbox>
-            </div>
+      <div class="row">
+        <div class="col">
+          <ch-toolbox [sessionData]="sessionData"></ch-toolbox>
         </div>
+      </div>
 
       <div class="row">
         <div class="col">
@@ -36,7 +46,7 @@
         </div>
       </div>
 
-
     </div>
+  </vertical-split-pane>
 </div>
-</div>
+

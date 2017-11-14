@@ -11,12 +11,7 @@ import Tool from "../../../../../model/session/tool";
 @Component({
   selector: 'ch-single-dataset',
   templateUrl: './singledataset.html',
-  styles: [`
-    .dataset-notes {
-        border: none;
-        width: 100%;
-    }        
-  `]
+  styleUrls: ['./singledataset-component.less'],
 })
 export class SingleDatasetComponent {
 
@@ -43,18 +38,6 @@ export class SingleDatasetComponent {
     this.getUsedToolFromToolset();
   }
 
-  renameDataset() {
-
-    let dataset = _.clone(this.dataset);
-    this.stringModalService.openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename").then((name) => {
-      if (name) {
-        dataset.name = name;
-        this.sessionDataService.updateDataset(dataset);
-      }
-    }, () => {
-      // modal dismissed
-    });
-  }
 
   deleteDatasets() {
     this.onDelete.emit();
@@ -64,9 +47,6 @@ export class SingleDatasetComponent {
     this.sessionDataService.exportDatasets([this.dataset]);
   }
 
-  showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData);
-  }
 
 
   getSourceJob(dataset: Dataset) {

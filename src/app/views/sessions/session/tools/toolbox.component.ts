@@ -18,7 +18,8 @@ import {ToolSelectionService} from "../tool.selection.service";
 
 @Component({
   selector: 'ch-toolbox',
-  templateUrl: './tools.html'
+  templateUrl: './tools.html',
+  styleUrls: ['./tools.less']
 })
 export class ToolBoxComponent implements OnInit, OnDestroy {
 

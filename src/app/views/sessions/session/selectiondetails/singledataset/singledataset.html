@@ -6,21 +6,21 @@
       <!--<h5 *ngIf="!sourceJob">Imported file</h5>-->
 
 
-      <table>
+      <table class="table table-sm text-sm">
         <tr>
-          <td><span style="color: grey">Created with:</span></td>
+          <td class="lighter">Created&nbsp;with:</td>
           <td>{{sourceJob.toolCategory}} / {{sourceJob.toolName}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Size:</span></td>
+          <td class="lighter">Size:</td>
           <td>{{dataset.size | bytes: 0}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Date:</span></td>
+          <td class="lighter">Date:</td>
           <td>{{dataset.created | isodate}}</td>
         </tr>
         <tr>
-          <td><span style="color: grey">Notes:</span></td>
+          <td class="lighter">Notes:</td>
           <td>{{dataset.notes}}</td>
         </tr>
 
@@ -40,12 +40,12 @@
       <!--</textarea>-->
 
 
-      <div class="btn-group btn-group-sm">
-        <button type="button" class="btn btn-sm btn-secondary" (click)="renameDataset()">Rename</button>
-        <button type="button" class="btn btn-sm btn-secondary" (click)="deleteDatasets()">Delete</button>
-        <button type="button" class="btn btn-sm btn-secondary" (click)="exportDatasets()">Export</button>
-        <button type="button" class="btn btn-sm btn-secondary" (click)="showHistory()">History</button>
-      </div>
+      <!--<div class="btn-group btn-group-sm">-->
+        <!--<button type="button" class="btn btn-sm btn-secondary" (click)="renameDataset()">Rename</button>-->
+        <!--<button type="button" class="btn btn-sm btn-secondary" (click)="deleteDatasets()">Delete</button>-->
+        <!--<button type="button" class="btn btn-sm btn-secondary" (click)="exportDatasets()">Export</button>-->
+        <!--<button type="button" class="btn btn-sm btn-secondary" (click)="showHistory()">History</button>-->
+      <!--</div>-->
     </div>
     <div class="col-md-6">
       <ch-dataset-parameter-list
