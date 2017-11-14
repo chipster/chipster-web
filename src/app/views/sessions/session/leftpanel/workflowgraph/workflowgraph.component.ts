@@ -20,7 +20,7 @@ import UtilsService from "../../../../../shared/utilities/utils";
 
 @Component({
   selector: 'ch-workflow-graph',
-  template: '<section id="workflowvisualization"></section>',
+  template: '<section id="workflowvisualization" class="full-size"></section>',
   styleUrls: ['./workflowgraph.component.less'],
   encapsulation: ViewEncapsulation.None
 })
@@ -94,18 +94,20 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.selectedJobs$ = this.store.select('selectedJobs');
 
     // used for adjusting the svg size
-    this.svgContainer = d3.select('#workflowvisualization').append('div').classed('fill', true).classed('workflow-container', true);
+    this.svgContainer = d3.select('#workflowvisualization')
+      .append('div').classed('full-size', true).classed('workflow-container', true);
     this.outerSvg = this.svgContainer.append('svg');
+    this.outerSvg.classed('full-size', true);
 
     // draw background on outerSvg, so that it won't pan or zoom
-    // invisible rect for listening background clicks
+    // invisible rect for listening background clicks and scrolls
     this.background = this.outerSvg.append('g')
       .attr('class', 'background')
+      .attr('width', '100%')
+      .attr('height', '100%')
       .append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', this.width)
-      .attr('height', this.height)
+      .attr('width', '100%')
+      .attr('height', '100%')
       .attr('opacity', 0)
       .on('click', () => {
         this.selectionHandlerService.clearSelections();
@@ -162,7 +164,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // show
     this.update();
     this.renderGraph();
-    this.setSVGSize();
+
+    // how to call setScrollLimits() properly after the layout is done?
+    // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
+    // pan or zoom
+    setTimeout(this.setScrollLimits.bind(this), 0)
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -189,7 +195,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions = [];
   }
 
-  setSVGSize() {
+  setScrollLimits() {
 
     const jobNodesRect = document.getElementById('d3JobNodesGroup').getBoundingClientRect();
     const linksRect = document.getElementById('d3LinksGroup').getBoundingClientRect();
@@ -201,16 +207,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const contentWidth = _.max([jobNodesRect.right, linksRect.right, datasetNodesRect.right]) - parent.left;
     const contentHeight = _.max([jobNodesRect.bottom, linksRect.bottom, datasetNodesRect.bottom]) - parent.top;
 
-    // svg should fill the parent. It's only a viewport, so the content or zoomming doesn't change it's size
-    this.outerSvg.attr('width', parent.width).attr('height', parent.height);
-    this.background.attr('width', parent.width).attr('height', parent.height);
-
     // This sets limits for the scrolling.
     // It must be large enough to accommodate all the content, but let it still
     // fill the whole viewport if the content is smaller than the viewport.
     // Otherwise d3 centers the content.
-    const translateWidth = _.max([contentWidth, parent.width]);
-    const translateHeight = _.max([contentHeight, parent.height]);
+    const translateWidth = _.max([contentWidth, parent.width]) + 100;
+    const translateHeight = _.max([contentHeight, parent.height]) + 100;
 
     if (this.zoom) {
       this.zoom.translateExtent([[0, 0], [translateWidth, translateHeight]]);
@@ -364,7 +366,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // update the scroll limits if datasets were added or removed
     if (!this.d3DatasetNodes.enter().empty() || !this.d3DatasetNodes.exit().empty()) {
-      this.setSVGSize();
+      this.setScrollLimits();
     }
   }
 
@@ -476,7 +478,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
     // update scroll limits if datasets were moved
-    this.setSVGSize();
+    this.setScrollLimits();
   }
 
   renderGraph() {

@@ -13,15 +13,25 @@
     id="session-split"
     class="session-view container-fluid">
 
-    <div class="split-pane-content-primary">
-      <ch-leftpanel [sessionData]="sessionData"></ch-leftpanel>
+    <div class="split-pane-content-primary full-height">
+      <!-- flex layout arranges space for the undo box when necessary -->
+      <div class="d-flex flex-column full-height">
+        <div class="full-height">
 
-      <div *ngIf="deletedDatasets" class="alert alert-danger">
-        <button type="button" class="btn btn-danger btn-sm"
-                (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
-        <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
-        <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
-        <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
+          <ch-leftpanel [sessionData]="sessionData" class="full-height"></ch-leftpanel>
+        </div>
+        <div>
+
+          <div *ngIf="deletedDatasets" class="alert alert-info">
+
+            <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
+            <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
+            <br>
+            <button type="button" class="btn btn-danger btn-sm"
+                    (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove</button>
+            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i> Undo</button>
+          </div>
+        </div>
       </div>
     </div>
 
