@@ -188,6 +188,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   setSVGSize() {
+    console.log("setting svg size");
 
     const jobNodesRect = document.getElementById('d3JobNodesGroup').getBoundingClientRect();
     const linksRect = document.getElementById('d3LinksGroup').getBoundingClientRect();
