@@ -12,7 +12,7 @@ import Tool from "../../../../../model/session/tool";
              <span *ngIf="parameterListForView.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
                 
              <table class="table table-sm parameter-table">
-                <tr class="sm-text" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': param.isDefaultValue? 'gray' : 'black'}">
+                <tr class="text-sm" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': param.isDefaultValue? 'gray' : 'black'}">
                    <ng-template [ngIf]="i < limit">
                       <td>{{param.displayName}}</td>
                          <td>{{param.value}}</td>
