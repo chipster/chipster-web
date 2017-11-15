@@ -18,8 +18,7 @@ import Tool from "../../../../../model/session/tool";
                          <td>{{param.value}}</td>
                    </ng-template>
                 </tr>
-             </table>`,
-  styleUrls: ['./dataset-parameter-list.component.less']
+             </table>`
 
 })
 export class DatasetParameterListComponent {

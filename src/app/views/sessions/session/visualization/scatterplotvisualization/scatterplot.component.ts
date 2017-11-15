@@ -19,8 +19,6 @@ import {PlotComponent} from "../../../../../shared/visualization/plot.component"
 })
 
 export class ScatterPlotComponent extends PlotComponent implements OnChanges {
-
-
   private chipHeaders: Array<string> = [];
   private xScale:any;
   private yScale:any;

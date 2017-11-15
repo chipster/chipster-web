@@ -4,45 +4,37 @@
     <div id="volcanoplot"></div>
   </div>
   <div class="col-4" *ngIf="plotVisible" id="setting">
-    <div class="row">
-      <div class="my-card">
-        <div class="card">
-          <div class="card-header">Settings</div>
-          <div class="card-block">
-            <div class="table table-info">
-              <tr>
-                <td>
-                  <h6 class="card-subtitle">Fold Change</h6>
-                  <select [(ngModel)]="selectedXAxisHeader" (ngModelChange)="setXAxisHeader($event)">
-                    <option *ngFor="let fcHeader of volcanoPlotFCHeaders">{{fcHeader}}</option>
-                  </select>
-                </td>
-                <td>
-                  <h6 class="card-subtitle">P Value</h6>
-                  <select [(ngModel)]="selectedYAxisHeader" (ngModelChange)="setYAxisHeader($event)">
-                    <option *ngFor="let pheader of volcanoPlotPHeaders">{{pheader}}</option>
-                  </select>
-                </td>
-              </tr>
-            </div>
-          </div>
-          <div class="card" *ngIf="selectedDataRows && selectedDataRows.length>0">
-            <div class="card-header">Selected</div>
-            <div class="card-block">
-              <div class="btn-group-vertical" role="group">
-                <button class="btn btn-info" (click)="createDatasetFromSelected()">Create dataset from selected
-                </button>
-              </div>
-              <h6>{{selectedDataRows.length}} Genes Selected </h6>
-              <ul id="" *ngFor="let gene of selectedDataRows">
-                <li>{{gene.row[0]}}</li>
-              </ul>
-              <button class="btn btn-info" (click)="resetSelections()">Clear Selection</button>
-            </div>
-          </div>
-        </div>
+    <label for="selectXaxis" class="text-sm">Fold Change</label>
+    <select class="form-control" id="selectXaxis" [(ngModel)]="selectedXAxisHeader"
+            (ngModelChange)="setXAxisHeader($event)">
+      <option *ngFor="let fcHeader of volcanoPlotFCHeaders">{{fcHeader}}</option>
+    </select>
+
+    <label for="selectYaxis" class="text-sm">P Value</label>
+    <select class="form-control" id="selectYaxis" [(ngModel)]="selectedYAxisHeader"
+            (ngModelChange)="setYAxisHeader($event)">
+      <option *ngFor="let pheader of volcanoPlotPHeaders">{{pheader}}</option>
+    </select>
+
+
+    <div id="selectedGeneList" *ngIf="selectedDataRows && selectedDataRows.length>0">
+      <p class="text-sm-center">{{selectedDataRows.length}} Genes Selected</p>
+      <div class="table table-sm">
+        <tr *ngFor="let gene of selectedDataRows">
+          <td class="text-sm">{{gene.row[0]}}</td>
+        </tr>
       </div>
+      <div class="btn-group mr-2" role="group">
+        <button class="btn btn-info btn-sm" (click)="createDatasetFromSelected()">Create Dataset
+        </button>
+      </div>
+      <div class="btn-group mr-2" role="group">
+        <button class="btn btn-info btn-sm" (click)="resetSelections()">Clear Selection</button>
+      </div>
+
 
     </div>
   </div>
 </div>
+
+
