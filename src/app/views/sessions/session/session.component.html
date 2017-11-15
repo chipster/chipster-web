@@ -41,7 +41,9 @@
           </span>
         </h6>
 
-        <div class="full-height">
+        <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
+        hiding the undo panel -->
+        <div class="full-height no-scroll">
           <ch-leftpanel [sessionData]="sessionData" class="full-height"></ch-leftpanel>
         </div>
         <div>
