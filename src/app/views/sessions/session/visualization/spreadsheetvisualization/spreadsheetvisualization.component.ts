@@ -113,7 +113,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   showAll() {
-    this.visualizationModalService.openVisualizationModal(this.dataset, 'spreadsheet');
+    this.visualizationModalService.openVisualizationModal(this.dataset, 'spreadsheet', this.sessionData);
   }
 
   getSettings(headers: string[], content: string[][], container) {

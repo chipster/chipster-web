@@ -5,17 +5,8 @@
   z-index: 1;
 }
 
-.dataset-list {
-  width: 100%;
-}
-
 .dataset-list-button {
   text-align: left;
-}
-
-.dataset-list-panel {
-  overflow-y: auto;
-  height: calc(~"100vh - 270px");
 }
 
 .clear-search-button {
@@ -26,12 +17,21 @@
   padding: 0 6px 0 6px;
 }
 
-.dropdown-menu-button {
-  border: 0;
-  padding: 0 6px 0 6px;
-}
-
 // allow absolute positioning of the add-dataset-button
 .workflow-dataset-static-panel {
   position: relative;
+}
+
+.full-height {
+  height: 100%;
+}
+
+//noinspection CssInvalidPseudoSelector
+:host ::ng-deep #left-tabs .tab-content, .full-height-panel {
+  height: calc(~"100% - 20px");
+}
+
+//noinspection CssInvalidPseudoSelector
+:host ::ng-deep #datasets-panel, :host ::ng-deep #workflow-panel {
+  height: 100%;
 }
