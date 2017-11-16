@@ -25,7 +25,8 @@
   <ch-dataset-details
     *ngIf="selectionService.selectedDatasets.length > 1"
     (onDelete)="onDelete.emit()"></ch-dataset-details>
+</div>
+
   <ch-visualizations
     *ngIf="selectionService.selectedDatasets.length > 0"
     [sessionData]="sessionData"></ch-visualizations>
-</div>
