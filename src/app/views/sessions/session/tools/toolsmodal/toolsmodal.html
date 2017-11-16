@@ -12,9 +12,13 @@
   </div>
 
   <div class="modal-body">
-    <button class="btn btn-success pull-right" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
-      <span class="glyphicon glyphicon-play"></span> Run
-    </button>
+    <div class="tab-form-container">
+      <div class="tab-form">
+        <button class="btn btn-success" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
+          <span class="glyphicon glyphicon-play"></span> Run
+        </button>
+      </div>
+    </div>
 
     <ngb-tabset>
       <ngb-tab>
@@ -34,7 +38,7 @@
 
             </div>
             <div class="col">
-              <div class="search-div pull-right">
+              <div class="pull-right">
                 <input class="form-control" type="text" [(ngModel)]="searchTool"
                        [placeholder]="'Search tool'" (keyup)="toolSearchKeyEvent($event)">
               </div>

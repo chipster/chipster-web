@@ -1,11 +1,13 @@
 <div class="chipster-highlight full-height-panel">
-  <div class="bar pull-right search-div">
-    <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
-           placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
-    <button class="btn btn-outline-dark clear-search-button" *ngIf="datasetSearch"
-            (click)="datasetSearch = null">
-      <i class="fa fa-times" aria-hidden="true"></i>
-    </button>
+  <div class="tab-form-container">
+    <div class="tab-form">
+      <input id="dataset-search-input" type="text" [(ngModel)]="datasetSearch"
+             placeholder="search file" (keyup)="datasetSearchKeyEvent($event)">
+      <button class="btn btn-outline-dark clear-search-button" *ngIf="datasetSearch"
+              (click)="datasetSearch = null">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
   </div>
 
   <div class="full-height">
