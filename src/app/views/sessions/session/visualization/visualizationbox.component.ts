@@ -12,7 +12,8 @@ import {VisualizationModalService} from "./visualizationmodal.service";
 
 @Component({
   selector: 'ch-visualizations',
-  templateUrl: './visualizations.html'
+  templateUrl: './visualizations.html',
+  styleUrls: ['./visualizationbox.component.less']
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
 
