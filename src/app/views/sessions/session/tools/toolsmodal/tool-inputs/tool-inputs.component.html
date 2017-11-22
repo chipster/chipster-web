@@ -2,40 +2,42 @@
   No selected files
 </ngb-alert>
 
-<div class="row">
+<div class="container">
+  <div class="row">
 
-  <div class="col-md-7 no-padding-right">
+    <div class="col-md-7 no-padding-right">
 
-    <table *ngIf="localInputBindings.length > 0" class="table table-borderless table-condensed table-hover">
+      <table *ngIf="localInputBindings.length > 0" class="table table-borderless table-condensed table-hover">
 
-      <tr *ngFor="let inputBinding of localInputBindings"
-          (mouseover)="setInputDescription(inputBinding.toolInput.description )"
-          (mouseleave)="setInputDescription('')">
+        <tr *ngFor="let inputBinding of localInputBindings"
+            (mouseover)="setInputDescription(inputBinding.toolInput.description )"
+            (mouseleave)="setInputDescription('')">
 
-      <!--<tr *ngFor="let inputBinding of inputBindings"-->
-          <!--ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"-->
-          <!--placement="right">-->
+        <!--<tr *ngFor="let inputBinding of inputBindings"-->
+            <!--ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"-->
+            <!--placement="right">-->
 
-        <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
+          <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
 
 
-        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
+          <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
 
-          <select multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)"
-                  name="input_{{index}}">
-            <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
-          </select>
-        </td>
+            <select multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)"
+                    name="input_{{index}}">
+              <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
+            </select>
+          </td>
 
-        <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length == 0">No compatible files</td>
+          <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length == 0">No compatible files</td>
 
-        </tr>
-    </table>
+          </tr>
+      </table>
+    </div>
+
+    <!-- input description -->
+    <div class="col-md-5">
+      <p>{{inputDescription}}</p>
+    </div>
+
   </div>
-
-  <!-- input description -->
-  <div class="col-md-5">
-    <p>{{inputDescription}}</p>
-  </div>
-
 </div>

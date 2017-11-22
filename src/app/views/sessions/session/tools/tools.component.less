@@ -12,6 +12,29 @@
   border-color: @active-border-color;
 }
 
+.tool-panel-button {
+  //width: 16%;
+}
+
+.run-button {
+  width: 10em;
+}
+
+.tools-button {
+  width: 10em;
+}
+
 #close-tools-button {
   margin-right: 10px;
+}
+
+//noinspection CssInvalidPseudoSelector
+:host ::ng-deep .dropdown-menu {
+  left: 45px !important;
+  right: 45px;
+  box-shadow: 0 5px 30px 0 #555;
+}
+
+.tools-dropdown {
+  height: calc(~"100vh - 160px");
 }

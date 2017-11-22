@@ -1,52 +1,53 @@
 import {SessionDataService} from "../sessiondata.service";
 import {ToolService} from "./tool.service";
-import Module from "../../../../model/session/module";
 import Job from "../../../../model/session/job";
 import Dataset from "../../../../model/session/dataset";
-import Tool from "../../../../model/session/tool";
 import {SelectionService} from "../selection.service";
-import * as _ from "lodash";
-import {Component, Input, OnInit, OnDestroy} from "@angular/core";
+import {Component, Input, OnInit, OnDestroy, ViewChild} from "@angular/core";
 import {ToolSelection} from "./ToolSelection";
 import {Store} from "@ngrx/store";
 import {Subject} from "rxjs";
 import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 import {SessionData} from "../../../../model/session/session-data";
-import {subscribeOn} from "rxjs/operator/subscribeOn";
 import {ToolSelectionService} from "../tool.selection.service";
+import {NgbDropdown, NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
 
 
 @Component({
-  selector: 'ch-toolbox',
-  templateUrl: './tools.html',
-  styleUrls: ['./tools.less']
+  selector: 'ch-tools',
+  templateUrl: './tools.component.html',
+  styleUrls: ['./tools.component.less'],
+  providers: [NgbDropdownConfig]
 })
-export class ToolBoxComponent implements OnInit, OnDestroy {
+export class ToolsComponent implements OnInit, OnDestroy {
 
   @Input() sessionData: SessionData;
 
-  private modules: Array<Module>;
-  private tools: Array<Tool>;
+  @ViewChild('toolsDropdown') public toolsDropdown: NgbDropdown;
+
+  //initialization
+  toolSelection: ToolSelection = null;
+
+  toolSelection$ = new Subject();
+
+  selectedDatasets: Dataset[] = [];
+
+  subscriptions: Array<any> = [];
 
   constructor(
     private SessionDataService: SessionDataService,
     private SelectionService: SelectionService,
     private toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
-    private store: Store<any>) {
+    private store: Store<any>,
+    dropdownConfig: NgbDropdownConfig) {
+
+    // close only on outside click
+    dropdownConfig.autoClose = 'outside';
   }
 
-  toolSelection$ = new Subject();
-
-  //initialization
-  toolSelection: ToolSelection = null;
-  selectedDatasets: Dataset[] = [];
-
-  subscriptions: Array<any> = [];
-
   ngOnInit() {
-    this.tools = _.cloneDeep(this.sessionData.tools);
-    this.modules = _.cloneDeep(this.sessionData.modules);
+
     this.selectedDatasets = this.SelectionService.selectedDatasets;
 
     this.toolSelection$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection})).subscribe(this.store.dispatch.bind(this.store));
@@ -68,6 +69,62 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       },
       (error: any) => {console.error('Fetching selected datasets from store failed', error)}
     ));
+
+    // trigger parameter validation
+    if (this.toolSelection) {
+      this.selectTool(this.toolSelection);
+    }
+  }
+
+  // ngOnInit() {
+  //
+  //   this.modules = this.sessionData.modules;
+  //   this.tools = this.sessionData.tools;
+  //
+  //   this.selectTool$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection}))
+  //     .subscribe(this.store.dispatch.bind(this.store));
+  //
+
+  // }
+
+
+  selectTool(toolSelection: ToolSelection) {
+
+    console.log('selectTool', toolSelection);
+
+    // // TODO reset col_sel and metacol_sel if selected dataset has changed
+    // for (let param of tool.parameters) {
+    //   this.populateParameterValues(param);
+    // }
+
+    // this component knows the selected datasets, so we can create input bindings
+    toolSelection.inputBindings = this.toolService.bindInputs(
+      this.sessionData, toolSelection.tool, this.selectedDatasets);
+
+    this.toolSelection$.next(toolSelection);
+
+    this.toolsDropdown.close();
+
+  }
+
+  getManualPage() {
+    let tool: string = this.toolSelection.tool.name.id;
+
+    if (tool.endsWith('.java')) {
+      // remove the java package name
+      let splitted = tool.split('.');
+      if (splitted.length > 2) {
+        // java class name
+        return splitted[splitted.length - 2] + '.html';
+      }
+    } else {
+      for (let ext of ['.R', '.py']) {
+        if (tool.endsWith(ext)) {
+          return tool.slice(0, -1 * ext.length) + '.html';
+        }
+      }
+    }
+    return tool;
   }
 
   ngOnDestroy() {
@@ -150,5 +207,4 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       console.error('Failed running job', error);
     });
   }
-
 }

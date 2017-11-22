@@ -42,11 +42,13 @@ import {ManualUtils} from "./manual-utils";
 })
 export class ManualComponent implements AfterViewInit {
 
-  @Input()
-  private page: string;
+  @Input() private page: string;
+  @Input() private showControls = false;
 
   private routerPath = 'manual/';
   private assetsPath = 'assets/manual/';
+
+  private currentPage;
 
   @ViewChild('container', { read: ViewContainerRef }) viewContainerReference;
 
@@ -62,24 +64,23 @@ export class ManualComponent implements AfterViewInit {
    */
   ngAfterViewInit() {
 
-    let query;
     this.activatedRoute.url
       .flatMap(() => {
         console.log('route changed', this.activatedRoute.snapshot.url, this.page);
         if (this.page) {
-          query = this.page;
+          this.currentPage = this.page;
         } else {
           // get the current route path
-          query = this.activatedRoute.snapshot.url.join('/');
+          this.currentPage = this.activatedRoute.snapshot.url.join('/');
         }
 
         // get the html file
-        return this.getPage(this.assetsPath + query)
+        return this.getPage(this.assetsPath + this.currentPage)
       })
       // parse the html
       .map(htmlString => new DOMParser().parseFromString(htmlString, "text/html"))
       // fix the links and image source addresses
-      .map(htmlDoc => this.rewrite(htmlDoc, query))
+      .map(htmlDoc => this.rewrite(htmlDoc, this.currentPage))
       // show
       .map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment))
       .subscribe();
@@ -105,6 +106,7 @@ export class ManualComponent implements AfterViewInit {
     this.scrollToFragment(fragment);
   }
 
+  // noinspection JSMethodCanBeStatic
   /**
    * Scroll to given fragment
    *
@@ -301,5 +303,9 @@ export class ManualComponent implements AfterViewInit {
     });
 
     return htmlDoc;
+  }
+
+  openNewWindow() {
+    window.open(this.routerPath + this.currentPage, '_blank');
   }
 }

@@ -1,6 +1,4 @@
-import {
-  Component, Input
-} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import Tool from "../../../../../../model/session/tool";
 import {ToolService} from "../../tool.service";
 import {ToolSelectionService} from "../../../tool.selection.service";
@@ -16,8 +14,8 @@ export class ToolsParameterFormComponent {
 
   @Input() tool: Tool;
 
+  // noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService,
-              private toolSelectionService: ToolSelectionService) { }
-
-
+              private toolSelectionService: ToolSelectionService) {
+  }
 }
