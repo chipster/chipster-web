@@ -19,6 +19,8 @@ import {FileResource} from "./resources/fileresource";
 import {SessionResource} from "./resources/session.resource";
 import {ConfigService} from "./services/config.service";
 import {TypeTagService} from "./services/typetag.service";
+import {SearchBoxComponent} from "./components/search-box/search-box.component";
+import {FormsModule} from "@angular/forms";
 
 
 /*
@@ -27,10 +29,32 @@ import {TypeTagService} from "./services/typetag.service";
 
 @NgModule({
   imports: [
-    CommonModule, CoreModule
+    CommonModule,
+    CoreModule,
+    FormsModule,
   ],
-  declarations: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe],
+  declarations: [
+    BytesPipe,
+    TrustedResourcePipe,
+    IsoDatePipe,
+    DatasetsearchPipe,
+    ToolPipe,
+    CategoryPipe,
+    ModulePipe,
+    SecondsPipe,
+    SearchBoxComponent,
+  ],
   providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService],
-  exports: [BytesPipe, TrustedResourcePipe, IsoDatePipe, DatasetsearchPipe, ToolPipe, CategoryPipe, ModulePipe, SecondsPipe]
+  exports: [
+    BytesPipe,
+    TrustedResourcePipe,
+    IsoDatePipe,
+    DatasetsearchPipe,
+    ToolPipe,
+    CategoryPipe,
+    ModulePipe,
+    SecondsPipe,
+    SearchBoxComponent,
+  ]
 })
 export class SharedModule {  }

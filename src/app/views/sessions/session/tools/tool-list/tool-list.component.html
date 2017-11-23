@@ -12,15 +12,16 @@
       </div>
 
     </div>
+
+
     <div class="col">
-      <div class="pull-right">
-        <input class="form-control" type="text" [(ngModel)]="searchTool"
-               [placeholder]="'Search tool'" (keyup)="toolSearchKeyEvent($event)">
-      </div>
+      <ch-search-box #searchBox
+        placeholder="Search tool"
+        (onValueChange)="search($event)"
+        (onEnterKey)="searchEnter()"></ch-search-box>
     </div>
   </div>
 
-  <!--&lt;!&ndash; category and tool lists &ndash;&gt;-->
   <div class="row">
     <div class="col-5"><h5>Category</h5></div>
     <div class="col"><h5>Tool</h5></div>

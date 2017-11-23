@@ -23,7 +23,11 @@ import {SplitPaneModule} from "ng2-split-pane/lib/ng2-split-pane";
   imports: [
     CommonModule, VisualizationsModule, ToolsModule, DatasetModule, SharedModule, LeftPanelModule,
     NgbModule, DialogModalModule, SplitPaneModule],
-  declarations: [SessionComponent, SessionListComponent, OpenSessionFile, JobErrorModalComponent],
+  declarations: [
+    SessionComponent,
+    SessionListComponent,
+    OpenSessionFile,
+    JobErrorModalComponent],
   providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService, ToolSelectionService],
   entryComponents: [JobErrorModalComponent]
 })

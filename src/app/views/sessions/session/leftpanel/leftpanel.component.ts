@@ -26,17 +26,15 @@ export class LeftPanelComponent {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService) {} // used by template
 
-  datasetSearchKeyEvent(e: any) {
-    if (e.keyCode == 13) { // enter
-      // select highlighted datasets
-      let allDatasets = this.getDatasetList();
-      this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
-      this.datasetSearch = null;
-    }
-    if (e.keyCode == 27) { // escape key
-      // clear the search
-      this.datasetSearch = null;
-    }
+  search(value: any) {
+    this.datasetSearch = value;
+  }
+
+  searchEnter() {
+    // select highlighted datasets when the enter key is pressed
+    let allDatasets = this.getDatasetList();
+    this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
+    this.datasetSearch = null;
   }
 
   getDatasetList(): Dataset[] {

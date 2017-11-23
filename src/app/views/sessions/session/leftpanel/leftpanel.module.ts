@@ -13,7 +13,12 @@ import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 
 @NgModule({
   imports: [ CommonModule, SharedModule, FormsModule, NgbModule ],
-  declarations: [WorkflowGraphComponent, LeftPanelComponent, AddDatasetModalComponent, AddDatasetModalContent],
+  declarations: [
+    WorkflowGraphComponent,
+    LeftPanelComponent,
+    AddDatasetModalComponent,
+    AddDatasetModalContent,
+  ],
   providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
   exports: [LeftPanelComponent, WorkflowGraphComponent],
   entryComponents: [AddDatasetModalContent]

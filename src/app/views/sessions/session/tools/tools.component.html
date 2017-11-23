@@ -3,13 +3,14 @@
   {{toolSelection?.tool.name.displayName}}
 </h6>
 <div class="chipster-highlight">
-  <div ngbDropdown class="d-inline-block" #toolsDropdown="ngbDropdown">
+  <div ngbDropdown class="d-inline-block" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
     <button class="btn btn-secondary tools-button" id="toolsDropdown" ngbDropdownToggle>
       Select tool
     </button>
 
+    <!-- create the dropdown only when it's shown so that it can focus its search field by default -->
     <div ngbDropdownMenu aria-labelledby="toolsDropdown" class="tools-dropdown">
-      <ch-tool-list
+      <ch-tool-list #toolList
         [sessionData]="sessionData"
         [toolSelection]="toolSelection"
         (onToolSelection)="selectTool($event)"></ch-tool-list>
@@ -38,7 +39,7 @@
     <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection"
          class="tools-dropdown">
       <ch-scroller>
-        <ch-tools-parameter-form [tool]="toolSelection.tool"></ch-tools-parameter-form>
+        <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
       </ch-scroller>
     </div>
   </div>
@@ -47,6 +48,7 @@
     <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
             id="inputsDropdown"
             [disabled]="!toolSelection">
+      <!--suppress JSBitwiseOperatorUsage -->
       <span *ngIf="!(toolSelectionService.inputsValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
       <span *ngIf="(toolSelectionService.inputsValid$ | async)" class="fa fa-files-o" aria-hidden="true"></span>
       Inputs

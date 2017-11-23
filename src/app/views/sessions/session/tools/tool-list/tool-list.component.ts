@@ -1,23 +1,18 @@
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
-import Tool from "../../../../../../model/session/tool";
-import {ToolService} from "../../tool.service";
-import {ToolSelectionService} from "../../../tool.selection.service";
-import {ToolPipe} from "../../../../../../shared/pipes/toolpipe.pipe";
-import {SessionDataService} from "../../../sessiondata.service";
-import {SelectionService} from "../../../selection.service";
-import {PipeService} from "../../../../../../shared/services/pipeservice.service";
-import {Store} from "@ngrx/store";
-import {NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
-import Module from "../../../../../../model/session/module";
-import Category from "../../../../../../model/session/category";
-import {ModulePipe} from "../../../../../../shared/pipes/modulepipe.pipe";
-import {CategoryPipe} from "../../../../../../shared/pipes/categorypipe.pipe";
-import {ToolSelection} from "../../ToolSelection";
+import Tool from "../../../../../model/session/tool";
+import {ToolPipe} from "../../../../../shared/pipes/toolpipe.pipe";
+import {PipeService} from "../../../../../shared/services/pipeservice.service";
+import Module from "../../../../../model/session/module";
+import Category from "../../../../../model/session/category";
+import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
+import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
+import {ToolSelection} from "../ToolSelection";
 import {Subject} from "rxjs/Subject";
-import {SessionData} from "../../../../../../model/session/session-data";
-import InputBinding from "../../../../../../model/session/inputbinding";
+import {SessionData} from "../../../../../model/session/session-data";
+import InputBinding from "../../../../../model/session/inputbinding";
+import {SearchBoxComponent} from "../../../../../shared/components/search-box/search-box.component";
 
 
 @Component({
@@ -32,6 +27,8 @@ export class ToolListComponent {
   @Input() private toolSelection: ToolSelection;
 
   @Output() private onToolSelection = new EventEmitter<ToolSelection>();
+
+  @ViewChild('searchBox') private searchBox: SearchBoxComponent;
 
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
@@ -90,7 +87,6 @@ export class ToolListComponent {
 
   selectTool(tool: Tool) {
 
-
     const toolSelection: ToolSelection = {
       tool: tool,
       inputBindings: null,
@@ -114,19 +110,24 @@ export class ToolListComponent {
     this.selectTool$.next(toolSelection);
   }
 
-  toolSearchKeyEvent(e: any) {
-    if (e.keyCode == 13) { // enter
-      // select the first result
-      let visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
-      if (visibleTools[0]) {
-        this.searchTool = null;
-        // this.selectTool(visibleTools[0].name.id);
-        this.selectTool(visibleTools[0]);
-      }
-    }
-    if (e.keyCode == 27) { // escape key
-      // clear the search
+  search(value: any) {
+    this.searchTool = value;
+    this.selectFirstVisible();
+  }
+
+  searchEnter() {
+    // select the first result
+    let visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
+    if (visibleTools[0]) {
       this.searchTool = null;
+      // this.selectTool(visibleTools[0].name.id);
+      this.selectTool(visibleTools[0]);
+    }
+  }
+
+  openChange(isOpen) {
+    if (isOpen) {
+      this.searchBox.focus();
     }
   }
 }

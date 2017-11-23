@@ -1,9 +1,9 @@
 import {Component, Input, Output, EventEmitter, OnChanges, SimpleChanges} from '@angular/core';
-import InputBinding from "../../../../../../model/session/inputbinding";
-import Tool from "../../../../../../model/session/tool";
-import {ToolService} from "../../tool.service";
-import Dataset from "../../../../../../model/session/dataset";
-import {SessionData} from "../../../../../../model/session/session-data";
+import InputBinding from "../../../../../model/session/inputbinding";
+import Tool from "../../../../../model/session/tool";
+import {ToolService} from "../tool.service";
+import Dataset from "../../../../../model/session/dataset";
+import {SessionData} from "../../../../../model/session/session-data";
 
 @Component({
   selector: 'ch-tool-inputs',
@@ -59,6 +59,7 @@ export class ToolInputsComponent implements OnChanges {
     this.inputDescription = description;
   }
 
+  // noinspection JSMethodCanBeStatic
   getBindingsString(bindings: InputBinding[]) {
 
     let s: string = "";

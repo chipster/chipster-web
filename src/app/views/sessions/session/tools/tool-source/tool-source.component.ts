@@ -1,6 +1,6 @@
 import {Component, OnInit, Input} from '@angular/core';
-import {ToolResource} from "../../../../../../shared/resources/toolresource";
-import Tool from "../../../../../../model/session/tool";
+import {ToolResource} from "../../../../../shared/resources/toolresource";
+import Tool from "../../../../../model/session/tool";
 
 @Component({
   selector: 'ch-tool-source',
