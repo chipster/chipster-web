@@ -1,8 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
 
   <a class="navbar-brand" href="#">Chipster</a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+          aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
+    <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
         <a class="nav-link" routerLink="/home" routerLinkActive="active">Home</a>
       </li>
@@ -16,13 +22,12 @@
         <a class="nav-link" routerLink="/contact" routerLinkActive="active">Contact</a>
       </li>
     </ul>
+
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a *ngIf="isLoggedIn()" routerLink="/home" (click)="logout()" class="nav-link">Logout {{username}}</a>
+        <a *ngIf="!isLoggedIn()" routerLink="/login" class="nav-link" routerLinkActive="active">Login</a>
+      </li>
+    </ul>
   </div>
-
-  <!--end navbar form-->
-  <ul class="nav justify-content-end">
-    <li *ngIf="!isLoggedIn()"><a routerLink="/login"  routerLinkActive="active">Login</a></li>
-    <li *ngIf="isLoggedIn()" style="padding-right: 20px"><span>{{username}}</span></li>
-    <li *ngIf="isLoggedIn()"><a routerLink="/home" (click)="logout()" routerLinkActive="active">Logout</a></li>
-  </ul>
-
 </nav>
