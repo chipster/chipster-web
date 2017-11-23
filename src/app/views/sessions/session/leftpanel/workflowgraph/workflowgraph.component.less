@@ -60,6 +60,11 @@ div.dataset-tooltip-triangle {
   width:  100%;
 }
 
+// otherwise a zoom or pan breaks the layout completely
+.workflow-container {
+  position: relative;
+}
+
 // otherwise Safari shows too small workflow on the page load
 svg {
   position: absolute;
