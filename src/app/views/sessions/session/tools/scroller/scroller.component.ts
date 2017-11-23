@@ -19,25 +19,17 @@ export class ScrollerComponent {
   @HostListener('wheel', ['$event']) onMousewheel(event) {
 
     let element = this.scrollElement.nativeElement;
+    let scrollTop = element.scrollTop;
     let maxScrollTop = element.scrollHeight - element.clientHeight;
-
-    if (event.deltaMode !== WheelEvent.DOM_DELTA_PIXEL) {
-      // implement other modes if they are really used
-      console.warn('unsupported mouse wheel deltaMode: ' + event.deltaMode);
-    }
 
     if (event.deltaY > 0) {
       // scrolling down
-
-      if (event.deltaY > (maxScrollTop - element.scrollTop)) {
-        this.scrollElement.scrollTop = maxScrollTop;
+      if (scrollTop >= maxScrollTop) {
         event.preventDefault();
       }
     } else {
       // scrolling up
-
-      if (-event.deltaY > (element.scrollTop)) {
-        this.scrollElement.scrollTop = 0;
+      if (scrollTop <= 0) {
         event.preventDefault();
       }
     }
