@@ -4,5 +4,7 @@
 
 .tool-list-row {
   height: calc(~"100% - 100px");
+  // otherwise scrolling doesn't work in Firefox
+  flex-wrap: unset;
 }
 
