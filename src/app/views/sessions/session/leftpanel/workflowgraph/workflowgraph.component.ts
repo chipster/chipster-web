@@ -214,8 +214,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const translateWidth = _.max([contentWidth, parent.width]) + 100;
     const translateHeight = _.max([contentHeight, parent.height]) + 100;
 
-    console.log(translateWidth, translateHeight, jobNodesRect, linksRect, datasetNodesRect, parent);
-
     if (this.zoom) {
       this.zoom.translateExtent([[0, 0], [translateWidth, translateHeight]]);
     }
