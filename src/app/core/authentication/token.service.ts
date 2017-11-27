@@ -24,21 +24,21 @@ export class TokenService {
     return localStorage.getItem('ch-auth-username');
   }
 
-  getValid(): string {
-    return localStorage.getItem('ch-auth-valid');
+  getValidUntil(): Date {
+    return new Date(localStorage.getItem('ch-auth-valid-until'));
   }
 
 
-  setAuthToken(token: string, username: string, valid: string): void {
+  setAuthToken(token: string, username: string, validUntil: string): void {
     if (token) {
       localStorage.setItem('ch-auth-token', token);
       localStorage.setItem('ch-auth-username', username);
-      localStorage.setItem('ch-auth-valid', valid);
+      localStorage.setItem('ch-auth-valid-until', validUntil);
     } else {
       // item has to be removed explicitly, because setItem(..., null) would be converted to a 'null' string
       localStorage.removeItem('ch-auth-token');
       localStorage.removeItem('ch-auth-username');
-      localStorage.removeItem('ch-auth-valid');
+      localStorage.removeItem('ch-auth-valid-until');
     }
     this.updateTokenHeader();
   }

@@ -6,11 +6,13 @@ import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
 
 const TOKEN_REFRESH_INTERVAL = 1000*60*60; // ms
+const TOKEN_LOCAL_CHECK_INTERVAL = 1000; // ms
 
 @Injectable()
 export class AuthenticationService {
 
   tokenRefreshSchedulerId: number;
+  //tokenLocalCheckId: number;
 
   constructor(private http: Http,
               private ConfigService: ConfigService,
@@ -22,7 +24,8 @@ export class AuthenticationService {
     // clear any old tokens
     this.tokenService.setAuthToken(null, null, null);
     return this.requestToken(username, password).map((response: any) => {
-      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().valid);
+      console.log(response);
+      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().validUntil);
       this.scheduleTokenRefresh();
     });
   };
@@ -66,7 +69,7 @@ export class AuthenticationService {
         })
       });
     }).subscribe((response: any) => {
-      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().valid);
+      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().validUntil);
     }, (error: any) => {
 
       if (error.status === 403) {
@@ -80,10 +83,15 @@ export class AuthenticationService {
 
   scheduleTokenRefresh() {
     this.tokenRefreshSchedulerId = setInterval(this.refreshToken.bind(this), TOKEN_REFRESH_INTERVAL);
+    //this.tokenLocalCheckId = setInterval(this.checkTokenLocally.bind(this), TOKEN_LOCAL_CHECK_INTERVAL);
   }
 
   stopTokenRefresh() {
     clearInterval(this.tokenRefreshSchedulerId);
+    //clearInterval(this.tokenLocalCheckId);
+  }
+
+  checkTokenLocally() {
   }
 }
 
