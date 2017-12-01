@@ -119,6 +119,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   getSettings(headers: string[], content: string[][], container) {
 
     const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
+
     return {
       data: content,
       colHeaders: headers,
@@ -128,7 +129,9 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       readOnly: true,
       rowHeights: 23,
       height: tableHeight,
-      renderAllRows: false
+      renderAllRows: false,
+      scrollColHeaders: false,
+      scrollCompatibilityMode: false,
     }
   }
 }
