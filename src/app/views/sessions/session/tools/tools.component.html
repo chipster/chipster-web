@@ -17,15 +17,6 @@
     </div>
   </div>
 
-  <div class="d-inline-block">
-    <!--suppress JSBitwiseOperatorUsage -->
-    <button class="btn btn-success tool-panel-button run-button" (click)="runJob()"
-            [disabled]="!(toolSelectionService.runEnabled$ | async)">
-      <span class="fa fa-play"></span>
-      Run
-    </button>
-  </div>
-
   <div ngbDropdown class="d-inline-block">
     <button class="btn btn-outline-secondary" id="parametersDropdown" ngbDropdownToggle
             [disabled]="!toolSelection">
@@ -66,7 +57,16 @@
     </div>
   </div>
 
-  <div ngbDropdown class="d-inline-block pull-right">
+  <div class="d-inline-block">
+    <!--suppress JSBitwiseOperatorUsage -->
+    <button class="btn btn-success tool-panel-button run-button" (click)="runJob()"
+            [disabled]="!(toolSelectionService.runEnabled$ | async)">
+      <span class="fa fa-play"></span>
+      Run
+    </button>
+  </div>
+
+  <div ngbDropdown class="d-inline-block pull-right" #sourceCodeDropdown="ngbDropdown">
     <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
             id="sourceCodeDropdown"
             [disabled]="!toolSelection">
@@ -74,7 +74,7 @@
       Code
     </button>
 
-    <div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="toolSelection" class="tools-dropdown">
+    <div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="sourceCodeDropdown.isOpen()" class="tools-dropdown">
       <ch-scroller>
         <ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>
       </ch-scroller>
