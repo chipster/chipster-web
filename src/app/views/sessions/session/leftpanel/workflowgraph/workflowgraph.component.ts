@@ -384,7 +384,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .data(this.datasetNodes, d => d.datasetId);
 
     this.d3Labels.enter().append('text').merge(this.d3Labels)
-      .text((d: any) => UtilsService.getFileExtension(d.name).slice(0, 4))
+      .text((d: any) => UtilsService.getFileExtension(d.name).slice(0, 5))
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
       .attr('font-size', this.fontSize + 'px').attr('fill', 'black').attr('text-anchor', 'middle')

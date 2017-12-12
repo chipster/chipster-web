@@ -8,8 +8,8 @@ import {Injectable} from "@angular/core";
 @Injectable()
 export class WorkflowGraphService {
 
-	nodeHeight = 20;
-	nodeWidth = 32;
+	nodeHeight = 22;
+	nodeWidth = 36;
 
 	xMargin = this.nodeWidth / 2;
 	yMargin = this.nodeHeight;
