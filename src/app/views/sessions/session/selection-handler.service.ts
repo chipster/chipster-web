@@ -8,6 +8,7 @@ import {
 } from "../../../state/selectedDatasets.reducer";
 import Job from "../../../model/session/job";
 import {TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS} from "../../../state/selectedJobs.reducer";
+import {CLEAR_TOOL_SELECTION} from "../../../state/selected-tool.reducer";
 
 @Injectable()
 export class SelectionHandlerService {
@@ -57,11 +58,12 @@ export class SelectionHandlerService {
   }
 
   /*
-   * @description: clear dataset & job selections from store
+   * @description: clear dataset & job & tool selections from store
    */
   clearSelections(): void {
     this.clearDatasetSelection();
     this.clearJobSelection();
+    this.clearToolSelection();
   }
 
   /*
@@ -107,5 +109,10 @@ export class SelectionHandlerService {
   clearJobSelection(): void {
     this.clearJobSelections$.next();
   }
+
+  clearToolSelection() {
+    this.store.dispatch({type: CLEAR_TOOL_SELECTION});
+  }
+
 
 }

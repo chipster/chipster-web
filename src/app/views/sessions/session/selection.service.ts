@@ -1,6 +1,5 @@
 import Dataset from "../../../model/session/dataset";
 import Job from "../../../model/session/job";
-import Tool from "../../../model/session/tool";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
 import {Store} from "@ngrx/store";
