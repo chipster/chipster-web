@@ -388,7 +388,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .text((d: any) => UtilsService.getFileExtension(d.name).slice(0, 5))
       .attr('x', (d) => d.x + this.nodeWidth / 2)
       .attr('y', (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
-      .attr('font-size', this.fontSize + 'px').attr('fill', 'black').attr('text-anchor', 'middle')
+      .attr('font-size', (d) => {
+        // use smaller font if the file extension is long
+        if (UtilsService.getFileExtension(d.name).length <= 4) {
+          return this.fontSize + 'px';
+        } else {
+          return (this.fontSize - 2) + 'px';
+        }
+      })
+      .attr('fill', 'black')
+      .attr('text-anchor', 'middle')
       .style('pointer-events', 'none')
       .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
