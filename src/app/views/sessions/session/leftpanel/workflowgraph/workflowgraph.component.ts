@@ -110,7 +110,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr('height', '100%')
       .attr('opacity', 0)
       .on('click', () => {
-        this.selectionHandlerService.clearSelections();
+        this.selectionHandlerService.clearDatasetSelection();
+        this.selectionHandlerService.clearJobSelection();
       });
 
     this.svg = this.outerSvg.append('g');
