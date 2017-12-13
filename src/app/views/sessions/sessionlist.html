@@ -52,7 +52,14 @@
 
         <h5>{{previewedSession.name}}</h5>
         <div>
-          <p class="session-notes">{{previewedSession.notes}}</p>
+          <!-- fixed height div to keep the workflow preview stationary -->
+          <div class="session-notes">
+            <!-- Create divs to preserve new line characters. Don't use p element, because
+            the positioning of the fadeout effect below requires fixed row size. -->
+            <div *ngFor="let line of previewedSession.notes.split('\n')">
+              {{line}}
+            </div>
+          </div>
           <div class="fadeout"></div>
         </div>
 
