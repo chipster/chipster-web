@@ -58,6 +58,13 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
       let parsedTSV = d3.tsvParseRows(result);
 
+      // skip comment lines, e.g. lines starting with ## in a VCF file
+      let skipLines = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
+
+      if (skipLines) {
+        parsedTSV = parsedTSV.filter(row => !row[0].startsWith(skipLines));
+      }
+
       // if not full file, remove the last, possibly incomplete line
       // could be the only line, will then show first 0 lines instead of a truncated first line
       if (!this.isCompleteFile() && result.length >= this.fileSizeLimit) {
