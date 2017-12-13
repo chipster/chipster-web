@@ -3,7 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {SessionDataService} from "../../sessiondata.service";
 import MetadataEntry from "../../../../../model/session/metadataentry";
 import * as _ from "lodash";
-import {Component, Input, SimpleChanges, ViewEncapsulation, NgZone, OnDestroy, OnChanges} from "@angular/core";
+import {Component, Input, SimpleChanges, ViewEncapsulation, NgZone, OnDestroy, OnChanges, OnInit} from "@angular/core";
 import {Row} from "./phenodatarow.interface";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
@@ -17,7 +17,7 @@ import {SessionEventService} from "../../sessionevent.service";
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None
 })
-export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
+export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() private datasets: Array<Dataset>;
   @Input() private datasetsMap: Map<string, Dataset>;
@@ -110,9 +110,9 @@ export class PhenodataVisualizationComponent implements OnChanges, OnDestroy {
     button.id = 'phenodata-header-button';
     button.innerHTML = '&times;';
 
-    (<any>Handsontable).Dom.addEvent(button, 'click', () => {
+    button.addEventListener('click', () => {
       this.removeColumn(col);
-    });
+    }, false);
 
     if (TH.firstChild.lastChild.nodeName === 'A') {
       TH.firstChild.removeChild(TH.firstChild.lastChild);
