@@ -56,7 +56,7 @@
           <div class="session-notes">
             <!-- Create divs to preserve new line characters. Don't use p element, because
             the positioning of the fadeout effect below requires fixed row size. -->
-            <div *ngFor="let line of previewedSession.notes.split('\n')">
+            <div *ngFor="let line of previewedSession.notes?.split('\n')">
               {{line}}
             </div>
           </div>
