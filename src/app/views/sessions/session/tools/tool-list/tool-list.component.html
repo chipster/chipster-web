@@ -52,9 +52,12 @@
                   *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool"
                   id="tool-button-{{tool.id}}"
                   ngbPopover="{{tool.description}}"
-                  triggers="mouseenter:mouseleave"
+                  triggers="manual"
                   container="body"
-                  placement="left">
+                  placement="left"
+                  #p="ngbPopover"
+                  (mouseenter)="tool.description && p.open()"
+                  (mouseleave)="tool.description && p.close()">
             {{tool.name.displayName}}
           </button>
         </div>
