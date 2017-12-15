@@ -3,7 +3,7 @@
     <input id="search-input" type="text" [(ngModel)]="searchTerm"
            placeholder="{{placeholder}}" (keyup)="searchKeyEvent($event)" #searchInput>
     <button class="btn btn-outline-dark clear-search-button" *ngIf="searchTerm"
-            (click)="clear()">
+            (click)="clearClick($event)">
       <i class="fa fa-times" aria-hidden="true"></i>
     </button>
   </div>
