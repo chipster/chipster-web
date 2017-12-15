@@ -10,7 +10,7 @@
     secondary-component-minsize="300"
     separator-thickness="10"
     id="session-split"
-    class="session-view container-fluid">
+    class="session-view">
 
     <div class="split-pane-content-primary full-height">
       <!-- flex layout arranges space for the undo box when necessary -->
@@ -65,7 +65,6 @@
     </div>
 
     <div class="split-pane-content-secondary scrollable">
-
       <div class="row">
         <div class="col">
           <ch-tools [sessionData]="sessionData"></ch-tools>
@@ -84,7 +83,6 @@
             (onDelete)="deleteDatasetsLater()"></ch-file>
         </div>
       </div>
-
     </div>
   </vertical-split-pane>
 </div>

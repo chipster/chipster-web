@@ -126,6 +126,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   getSettings(headers: string[], content: string[][], container) {
 
     const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
+    const tableWidth = this.showFullData ? null : this.guessWidth(headers, content);
 
     return {
       data: content,
@@ -139,6 +140,61 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       renderAllRows: false,
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
+      width: tableWidth,
     }
+  }
+
+  /**
+   * Calculate the approximate widht of the table
+   *
+   * We need the whole right side of the main view to scroll to fit in all the components.
+   * The table's internal vertical scrolling has to be disabled, because nested scrolling elements
+   * would be difficult to use. But when we let the table to grow vertically, it's horizontal scroll bar
+   * will go out of the screen. Consequently we have to disable the internal vertical scrolling too.
+   * As far as I know, setting the table width is the only way to do it at the moment.
+   *
+   * The calculation is based on many guesses (margins, font size, font itself) but as long as the result is
+   * greater than the actual table width, the error will only create a larger margin.
+   *
+   * @param {string[]} headers
+   * @param {string[][]} content
+   * @returns {number}
+   */
+  guessWidth(headers: string[], content: string[][]) {
+    // create a new first row from headers
+    let table = content.slice();
+    table.unshift(headers);
+
+    let tableMargin = 20;
+    let colMargins = 10;
+    let colWidthSum = 0;
+    let columnCount = table[0].length;
+
+    let ctx = this.getTextMeasuringContext(18);
+
+    // iterate columns
+    for (let colIndex = 0; colIndex < columnCount; colIndex++) {
+      let colWidth = table
+
+        // text from this column on each row
+        .map(row => row[colIndex])
+
+        // width of the text
+        .map(cell => ctx.measureText(cell).width)
+
+        // max width in this column
+        .reduce((a, b) => Math.max(a, b));
+
+      colWidthSum += colWidth;
+    }
+
+    return colWidthSum + columnCount * colMargins + tableMargin;
+  }
+
+  getTextMeasuringContext(fontSize = 18) {
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
+    ctx.font = fontSize + 'px Arial';
+    return ctx;
   }
 }
