@@ -50,7 +50,9 @@ export class ToolSelectionService implements OnDestroy {
       });
     }).distinctUntilChanged();
 
-    this.parametersValid$ = this.parameterChecker$.asObservable().distinctUntilChanged().startWith(true);
+    this.parametersValid$ = this.parameterChecker$.asObservable()
+      .distinctUntilChanged()
+      .startWith(true);
 
     this.runEnabled$ = Observable.combineLatest(this.store.select('toolSelection'), this.inputsValid$, this.parametersValid$,
       (toolSelection: ToolSelection, inputsValid, parametersValid) => {
@@ -69,7 +71,8 @@ export class ToolSelectionService implements OnDestroy {
     } else {
       return this.currentToolSelection.tool.parameters.every((parameter: ToolParameter) => {
         return parameter.optional ||
-            parameter.value && parameter.value !== "";
+          // not null and not undefined and not an empty string, but 0 is fine
+          parameter.value !== null && parameter.value !== "";
       });
     }
   }
@@ -109,6 +112,4 @@ export class ToolSelectionService implements OnDestroy {
     this.subscriptions.forEach((subs) => subs.unsubscribe());
     this.subscriptions = [];
   }
-
-
 }

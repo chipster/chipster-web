@@ -23,14 +23,21 @@ export class SearchBoxComponent {
     }, 0);
   }
 
+  clearClick(e: any) {
+    // if this component is in a dropdown, this button shouldn't close it
+    e.stopPropagation();
+    this.clear();
+  }
+
   clear() {
     this.searchTerm = null;
     this.onValueChange.emit(this.searchTerm);
   }
 
   searchKeyEvent(e: any) {
-
     if (e.keyCode == 13) { // enter
+      // the search can be cleared (at least in the workflow view)
+      this.searchTerm = null;
       this.onEnterKey.emit();
     }
 

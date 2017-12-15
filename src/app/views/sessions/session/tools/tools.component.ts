@@ -148,12 +148,19 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // set parameters
     job.parameters = [];
     for (let toolParam of this.toolSelection.tool.parameters) {
+
+      let value = toolParam.value;
+      // the old client converts null values to empty strings, so let's keep the old behaviour for now
+      if (value == null) {
+        value = '';
+      }
+
       job.parameters.push({
         parameterId: toolParam.name.id,
         displayName: toolParam.name.displayName,
         description: toolParam.description,
         type: toolParam.type,
-        value: toolParam.value
+        value: value
         // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
       });
     }

@@ -125,6 +125,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetTooltip = d3.select("body").append("div").attr("class", "dataset-tooltip").style("opacity", 0).html("tooltip");
     this.datasetTooltipTriangle = d3.select("body").append("div").attr("class", "dataset-tooltip-triangle").style("opacity", 0).html('\u25BC');
 
+    this.configureShadow();
+
     if (this.enabled) {
       this.zoom = d3.zoom()
         .scaleExtent([0.2, 1])
@@ -196,6 +198,45 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions = [];
   }
 
+  configureShadow() {
+    // based on http://bl.ocks.org/cpbotha/5200394
+
+    // filters go in defs element
+    let defs = this.svg.append("defs");
+
+    // create filter with id #drop-shadow
+    // grow the size so that the shadow is not clipped
+    let filter = defs.append("filter")
+      .attr("id", "drop-shadow")
+      .attr("x", "-100%")
+      .attr("y", "-100%")
+      .attr("width", "300%")
+      .attr("height", "300%");
+
+    // SourceAlpha refers to opacity of graphic that this filter will be applied to
+    // convolve that with a Gaussian with standard deviation 3 and store result
+    // in blur
+    filter.append("feGaussianBlur")
+      .attr("in", "SourceAlpha")
+      .attr("stdDeviation", 2)
+      .attr("result", "blur");
+
+    // translate output of Gaussian blur to the right and downwards with 2px
+    // store result in offsetBlur
+    filter.append("feOffset")
+      .attr("in", "blur")
+      .attr("dx", 2)
+      .attr("dy", 2)
+      .attr("result", "offsetBlur");
+
+    // overlay original SourceGraphic over translated blurred opacity by using
+    // feMerge filter. Order of specifying inputs is important!
+    let feMerge = filter.append("feMerge");
+
+    feMerge.append("feMergeNode").attr("in", "offsetBlur");
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+  }
+
   setScrollLimits() {
 
     const jobNodesRect = document.getElementById('d3JobNodesGroup').getBoundingClientRect();
@@ -256,6 +297,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style('fill', (d) => d.color)
       .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter))
       .classed('selected-job', (d) => this.isSelectedJob(d.job))
+      .style('filter', (d) => {
+        if (this.isSelectedJob(d.job)) {
+          return 'url(#drop-shadow)'
+        } else {
+          return null;
+        }
+      })
       .on('click', (d) => {
         if (this.enabled) {
           this.selectionHandlerService.setJobSelection([d.job]);
@@ -323,6 +371,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("fill", (d) => d.color)
       .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
       .classed('selected-dataset', (d) => this.isSelectedDataset(d.dataset))
+      .style('filter', (d) => {
+        if (this.isSelectedDataset(d.dataset)) {
+          return 'url(#drop-shadow)'
+        } else {
+          return null;
+        }
+      })
       .on('click', function (d) {
         if (self.enabled) {
           self.selectionHandlerService.clearJobSelection();
@@ -639,8 +694,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               source: sourceNode,
               target: targetNode
             });
+          } else {
+            console.log('node is its own parent', sourceNode);
           }
         });
+        if (sourceJob.inputs.length === 0) {
+          //console.log('source job doesn\'t have inputs', sourceJob);
+        }
+      } else {
+        console.log('no source job for ', targetNode);
       }
     });
 
