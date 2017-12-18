@@ -2,6 +2,7 @@ import {Component, Input, OnChanges} from '@angular/core';
 import {timeout} from "d3-timer";
 import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-htmlvisualization',
@@ -16,13 +17,16 @@ export class HtmlvisualizationComponent implements OnChanges {
   private wrapperUrl: string = 'assets/htmlvisualizationwrapper.html';
 
   constructor(
-    private sessionDataService: SessionDataService) { }
+    private sessionDataService: SessionDataService,
+    private errorHandlerService: ErrorHandlerService) { }
 
   ngOnChanges() {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
       // we have to encode the url to get in one piece to the other side, because it contains
       // a query parameter itself
       this.src = encodeURIComponent(url);
+    }, (error: any) => {
+      this.errorHandlerService.handleError(error);
     });
   }
 

@@ -1,31 +1,29 @@
 import {ConfigService} from "../../shared/services/config.service";
 import {Injectable} from "@angular/core";
-import {Headers, Http, ResponseContentType, Response} from "@angular/http";
 import {Observable} from "rxjs";
 import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {TokenResponse} from "./token.response";
 
 const TOKEN_REFRESH_INTERVAL = 1000*60*60; // ms
-const TOKEN_LOCAL_CHECK_INTERVAL = 1000; // ms
 
 @Injectable()
 export class AuthenticationService {
 
-  tokenRefreshSchedulerId: number;
-  //tokenLocalCheckId: number;
+  private tokenRefreshSchedulerId: number;
 
-  constructor(private http: Http,
-              private ConfigService: ConfigService,
-              private tokenService: TokenService) {
+  constructor(private ConfigService: ConfigService,
+              private tokenService: TokenService,
+              private httpClient: HttpClient) {
   }
 
   // Do the authentication here based on userid and password
-  login(username: string, password: string): Observable<void> {
+  login(username: string, password: string): Observable<any> {
     // clear any old tokens
     this.tokenService.setAuthToken(null, null, null);
     return this.requestToken(username, password).map((response: any) => {
-      console.log(response);
-      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().validUntil);
+      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil);
       this.scheduleTokenRefresh();
     });
   };
@@ -35,18 +33,14 @@ export class AuthenticationService {
     this.tokenService.clear();
   };
 
-  requestToken(username: string, password: string): Observable<Response> {
+  requestToken(username: string, password: string): Observable<any> {
     console.log("request token");
     return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
       const url = `${coreServices.auth}/tokens`;
       const encodedString = btoa(`${username}:${password}`); // base64 encoding
-      return this.http.post(url, {}, {
-        withCredentials: true,
-        responseType: ResponseContentType.Text,
-        headers: new Headers({
-          Authorization: `Basic ${encodedString}`
-        })
-      });
+
+      return this.httpClient.post<TokenResponse>(url, {},
+        { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
     });
   }
 
@@ -61,15 +55,11 @@ export class AuthenticationService {
       const url = `${coreServices.auth}/tokens/refresh`;
       const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
 
-      return this.http.post(url, {}, {
-        withCredentials: true,
-        responseType: ResponseContentType.Text,
-        headers: new Headers({
-          Authorization: `Basic ${encodedString}`
-        })
-      });
-    }).subscribe((response: any) => {
-      this.tokenService.setAuthToken(response.json().tokenKey, response.json().username, response.json().validUntil);
+      return this.httpClient.post<TokenResponse>(url, {},
+        { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
+
+    }).subscribe((response: TokenResponse) => {
+      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil);
     }, (error: any) => {
 
       if (error.status === 403) {
@@ -83,15 +73,11 @@ export class AuthenticationService {
 
   scheduleTokenRefresh() {
     this.tokenRefreshSchedulerId = setInterval(this.refreshToken.bind(this), TOKEN_REFRESH_INTERVAL);
-    //this.tokenLocalCheckId = setInterval(this.checkTokenLocally.bind(this), TOKEN_LOCAL_CHECK_INTERVAL);
   }
 
   stopTokenRefresh() {
     clearInterval(this.tokenRefreshSchedulerId);
-    //clearInterval(this.tokenLocalCheckId);
   }
 
-  checkTokenLocally() {
-  }
 }
 

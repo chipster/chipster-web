@@ -14,6 +14,7 @@ import {SessionDataService} from "../../sessiondata.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
 import Circle from "../model/circle";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
     selector: 'ch-venn-diagram',
@@ -33,7 +34,8 @@ export class VennDiagram implements OnChanges {
 
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
-                private sessionDataService: SessionDataService) {
+                private sessionDataService: SessionDataService,
+                private errorHandlerService: ErrorHandlerService) {
     }
 
     ngOnChanges() {
@@ -51,7 +53,7 @@ export class VennDiagram implements OnChanges {
             this.columnKey = this.identifierComparingEnabled ? 'identifier' : 'symbol';
             this.drawVennDiagram(this.files);
         }, (error: any) => {
-            console.error('Fetching TSV-files failed', error);
+          this.errorHandlerService.handleError(error, 'Fetching TSV-files failed');
         })
     }
 

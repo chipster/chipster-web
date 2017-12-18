@@ -64,9 +64,10 @@
         </div>
 
         <p *ngIf="workflowPreviewLoading">
-          <br>
-          <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading workflow preview...
+          <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading preview...
         </p>
+
+        <p *ngIf="workflowPreviewFailed"><i>Loading preview failed</i></p>
 
         <div class="workflow-preview-panel"
           *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">

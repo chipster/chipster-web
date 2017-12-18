@@ -4,6 +4,7 @@ import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
 import * as pako from "pako";
 import BamRecord from "./bamRecord";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 
 @Component({
@@ -37,12 +38,14 @@ export class BamViewerComponent implements OnChanges {
 
 
   constructor(private fileResource: FileResource,
-              private sessionDataService: SessionDataService) {
+              private sessionDataService: SessionDataService,
+              private errorHandlerService: ErrorHandlerService) {
 
   }
 
   ngOnChanges() {
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true).subscribe((result: any) => {
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
+      .subscribe((result: any) => {
 
       var arrayBuffer = result;
 
@@ -63,7 +66,11 @@ export class BamViewerComponent implements OnChanges {
         this.getBGZFBlocks(recordBuffer);
 
       }
-    });
+    },(error: any) => {
+        this.errorMessage = "Loading data failed";
+        this.errorHandlerService.handleError(error);
+
+      });
   }
 
   // Decode the BAM File Header

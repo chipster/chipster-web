@@ -2,6 +2,9 @@ import {AuthenticationService} from "../../core/authentication/authenticationser
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from "@angular/router";
+import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
+import {ErrorService} from "../error/error.service";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'ch-login',
@@ -9,16 +12,17 @@ import {ActivatedRoute, Router} from "@angular/router";
 })
 export class LoginComponent implements OnInit {
 
-  error: string;
+  private error: string;
   private returnUrl: string;
 
   @ViewChild('myForm')
   private myForm: FormGroup;
 
 
-  constructor(private router: Router, private route: ActivatedRoute, private authenticationService: AuthenticationService) {
+  constructor(private router: Router,
+              private route: ActivatedRoute,
+              private authenticationService: AuthenticationService) {
   }
-
 
 
   ngOnInit() {
@@ -33,28 +37,28 @@ export class LoginComponent implements OnInit {
       //Route to Session creation page
       console.log("login successful");
       this.router.navigateByUrl(this.returnUrl);
-    }, (error: any) => {
-      console.log(error);
-      //this.authenticationService.logout();
-      if (error && error.status === 403) {
+    }, (errorResponse: HttpErrorResponse) => {
+
+      if (ErrorHandlerService.isForbidden(errorResponse)) {
         this.error = 'Incorrect username or password'
       } else {
-        throw error;
+        this.error = 'Connecting to authentication service failed'
+        console.error(errorResponse);
       }
     });
   }
 
   //Hack for the Enter key press for the button type="button"
-  keyDownFunction(event){
-    if(event.keyCode==13){
-      if(this.myForm.value.username && this.myForm.value.password){
-        this.login(this.myForm.value.username,this.myForm.value.password);
-      } else if(!this.myForm.value.username && !this.myForm.value.password){
-        this.error="Please Enter Username and Password to login";
-      }else if(!this.myForm.value.username){
-        this.error="Please Enter Username";
-      }else if(!this.myForm.value.password){
-        this.error="Please Enter Passsword";
+  keyDownFunction(event) {
+    if (event.keyCode == 13) {
+      if (this.myForm.value.username && this.myForm.value.password) {
+        this.login(this.myForm.value.username, this.myForm.value.password);
+      } else if (!this.myForm.value.username && !this.myForm.value.password) {
+        this.error = "Please Enter Username and Password to login";
+      } else if (!this.myForm.value.username) {
+        this.error = "Please Enter Username";
+      } else if (!this.myForm.value.password) {
+        this.error = "Please Enter Passsword";
       }
 
     }

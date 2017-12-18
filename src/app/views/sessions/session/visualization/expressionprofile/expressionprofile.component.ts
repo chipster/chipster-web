@@ -14,6 +14,7 @@ import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-expression-profile',
@@ -34,7 +35,8 @@ export class ExpressionProfileComponent implements OnChanges {
   constructor(private expressionProfileService: ExpressionProfileService,
               private sessionDataService: SessionDataService,
               private visualizationTSVService: VisualizationTSVService,
-              private fileResource: FileResource) {
+              private fileResource: FileResource,
+              private errorHandlerService: ErrorHandlerService) {
   }
 
   ngOnChanges() {
@@ -47,7 +49,9 @@ export class ExpressionProfileComponent implements OnChanges {
       } else {
         this.errorMessage = `Only microarray data supported, didn’t find any columns starting with chip.`;
       }
-
+    }, (error: any) => {
+      this.errorMessage = "Loading data failed";
+      this.errorHandlerService.handleError(error);
     });
 
     this.selectedGeneExpressions = [];

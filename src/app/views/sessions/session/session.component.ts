@@ -29,6 +29,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     deletedDatasets: Array<Dataset>;
     deletedDatasetsTimeout: any;
     subscriptions: Array<any> = [];
+    private statusText: string
 
     constructor(
         private router: Router,
@@ -48,7 +49,7 @@ export class SessionComponent implements OnInit, OnDestroy{
 
 
     ngOnInit() {
-
+      this.statusText = "Loading session...";
       // this.sessionData = this.route.snapshot.data['sessionData'];
 
       this.selectionHandlerService.clearSelections();
@@ -59,14 +60,14 @@ export class SessionComponent implements OnInit, OnDestroy{
         this.sessionData = sessionData;
         this.subscribeToEvents();
       }, err => {
-        console.log(err);
+        this.statusText = "";
+        console.error("loading session failed", err);
         if (ErrorHandlerService.isForbidden(err)) {
-          this.errorHandler.redirectToLoginAndBack();
+          this.errorService.headerErrorForbidden();
           return;
-
         }
 
-        this.errorService.headerError('failed to load the session data ' + err, true);
+        this.errorService.headerError('Loading session failed', true);
       });
 
       // Select datasets provided via queryparameter and clear queryparameters

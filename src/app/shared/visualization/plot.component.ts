@@ -32,6 +32,7 @@ export class PlotComponent implements OnChanges {
   protected fileResource:FileResource;
   protected sessionDataService:SessionDataService;
 
+
   constructor(fileResource: FileResource,
               sessionDataService: SessionDataService) {
     this.fileResource=fileResource;
@@ -55,6 +56,8 @@ export class PlotComponent implements OnChanges {
           this.checkTSVHeaders();
         }
 
+      }, (error: any) => {
+        console.log('FIXME');
       });
   }
 

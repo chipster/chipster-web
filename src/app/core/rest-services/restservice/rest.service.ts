@@ -5,16 +5,16 @@ import {
 } from "@angular/http";
 import {Observable} from "rxjs";
 import {HttpQueueService} from "../http-queue/http-queue.service";
-import {ErrorHandlerService} from "../../errorhandler/error-handler.service";
 import {TokenService} from "../../authentication/token.service";
+import {ErrorService} from "../../../views/error/error.service";
 
 @Injectable()
 export class RestService {
 
   constructor(private httpQueueu: HttpQueueService,
-              private errorHandler: ErrorHandlerService,
               private http: Http,
-              private tokenService: TokenService) {}
+              private tokenService: TokenService,
+              private errorService: ErrorService) {}
 
   /*
    * @description: build request options
@@ -107,12 +107,17 @@ export class RestService {
             resp = response.json();
         }
 
-      if (resp && resp.error) {
+        if (resp && resp.error) {
+          this.errorService.headerError(resp.error, true);
           throw resp;
         }
-        return resp;
-      }
-    )
+      return resp;
+    })
+      // log errors
+      .catch((error: any) => {
+        console.error("http request error", error);
+          throw error;
+      })
       .finally( () => this.httpQueueu.decrement());
   }
 

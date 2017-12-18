@@ -2,42 +2,44 @@ import {Injectable} from '@angular/core';
 import {Response, Request} from "@angular/http";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ErrorService} from "../../views/error/error.service";
 
 @Injectable()
 export class ErrorHandlerService  {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router,
+              private errorService: ErrorService) {
+  }
 
-  /*
-   * @description: handler for http-request catch-clauses
-   */
-  handleError(error: Response | any, request: Request) {
-    let errorMessage: string;
+  handleError(error: Response | any, message: string = "") {
 
-    if (error instanceof Response) {
-      if (error.status === 0) {
-        // dns name resolution failed,
-        // server did not answer or
-        // request aborted because of a CORS issue
-        errorMessage = 'Connection error ' + request.url;
-      } else {
-        // http error
-        const err = error.text() || '';
-        errorMessage = `${error.status} - ${error.statusText || ''} (${err})`;
-      }
+    // show alert
+    if (ErrorHandlerService.isForbidden(error)) {
+      this.errorService.headerErrorForbidden(message);
     } else {
-      // unreachable code?
-      errorMessage = error.message ? error.message : error.toString();
+      this.errorService.headerErrorConnectionFailed(message);
     }
 
-    return Observable.throw(errorMessage);
+    // log
+    console.error(message, error);
   }
 
   redirectToLoginAndBack() {
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
   }
 
-  static isForbidden(error: Response | any) {
-    return error instanceof Response && error.status === 403;
+  static isForbidden(error: HttpErrorResponse | any) {
+    return (error instanceof HttpErrorResponse || error instanceof Response) && error.status === 403;
   }
+
+  static isClientOrConnectionError(error: HttpErrorResponse){
+    //return error instanceof Error;
+    return error.status === 0;
+  }
+
+  static isServerSideError(error: HttpErrorResponse ) {
+    return !ErrorHandlerService.isClientOrConnectionError(error);
+  }
+
 }

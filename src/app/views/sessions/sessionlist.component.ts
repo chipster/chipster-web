@@ -25,6 +25,7 @@ export class SessionListComponent {
   public sessionData: SessionData;
   private selectedSessionId: string;
   private workflowPreviewLoading = false;
+  private workflowPreviewFailed = false;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
@@ -33,7 +34,6 @@ export class SessionListComponent {
     private router: Router,
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
-    private tokenService: TokenService,
     private errorHandlerService: ErrorHandlerService,
     private sessionDataService: SessionDataService) {}
 
@@ -43,7 +43,10 @@ export class SessionListComponent {
 
     this.previewThrottleSubscription = this.previewThrottle$.asObservable()
     // hide the loading indicator of the old session immediately
-      .do(() => this.workflowPreviewLoading = false)
+      .do(() => {
+        this.workflowPreviewLoading = false;
+        this.workflowPreviewFailed = false;
+      })
       // wait a while to see if the user is really interested about this session
       .debounceTime(1000)
       .flatMap(session => {
@@ -59,7 +62,11 @@ export class SessionListComponent {
       })
       // hide the spinner when unsubscribed (when the user has opened a session)
       .finally(() => this.workflowPreviewLoading = false)
-      .subscribe();
+      .subscribe(() => {},
+        (error: any) => {
+          this.workflowPreviewFailed = true;
+          this.errorHandlerService.handleError(error, "Loading session preview failed");
+        });
   }
 
   createSession() {
@@ -67,7 +74,9 @@ export class SessionListComponent {
     let session = new Session('New session');
     this.sessionResource.createSession(session).subscribe((sessionId: string) => {
       session.sessionId = sessionId;
-      this.openSession(sessionId);
+      this.openSession(sessionId)
+    }, (error: any) => {
+      this.errorHandlerService.handleError(error, "Creating a new session failed");
     });
   }
 
@@ -93,9 +102,9 @@ export class SessionListComponent {
 
       this.sessionsByUser = sessionsByUser;
       this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
-    }, error => {
-      console.log("getting sessions list failed", error);
-      this.errorHandlerService.redirectToLoginAndBack();
+    }, (error: any) => {
+      this.errorHandlerService.handleError(error, "Getting sessions failed");
+      //this.errorHandlerService.redirectToLoginAndBack();
     });
   }
 
@@ -126,6 +135,10 @@ export class SessionListComponent {
     }
   }
 
+  clearPreview() {
+    this.previewedSession = null;
+  }
+
   deleteSession(session: Session) {
 
     this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
@@ -134,8 +147,8 @@ export class SessionListComponent {
       this.sessionDataService.deletePersonalRules(session).subscribe( () => {
         this.updateSessions();
         this.previewedSession = null;
-      }, () => {
-        console.error('Error in deleting session');
+      }, (error: any) => {
+        this.errorHandlerService.handleError(error, "Deleting session failed");
       });
     }, () => {
       // modal dismissed

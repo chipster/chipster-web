@@ -12,7 +12,7 @@ import {Tags, TypeTagService} from "../../../../../shared/services/typetag.servi
 @Component({
   selector: 'ch-spreadsheet-visualization',
   template: `
-    <p *ngIf="!dataReady">Loading data...</p>
+    <p *ngIf="!dataReady">{{statusText}}</p>
 
     <div *ngIf="dataReady">
       <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label> 
@@ -34,6 +34,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
   private dataReady: boolean;
+  private statusText: string;
   private readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
   // MUST be handled outside Angular zone to prevent a change detection loop
@@ -48,6 +49,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
+    this.statusText = "Loading data";
 
     // remove old table
     this.ngOnDestroy();
@@ -102,6 +104,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       });
       this.dataReady = true;
     }, (e: Response) => {
+      this.statusText = "Loading data failed";
       console.error('Fetching TSVData failed', e);
     })
   }

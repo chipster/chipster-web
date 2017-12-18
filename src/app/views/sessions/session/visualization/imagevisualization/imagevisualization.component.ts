@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges} from "@angular/core";
 import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-image-visualization',
@@ -15,12 +16,15 @@ export class ImageVisualizationComponent implements OnChanges {
 
   private src: string;
 
-  constructor(private sessionDataService: SessionDataService,) {
+  constructor(private sessionDataService: SessionDataService,
+              private errorHandlerService: ErrorHandlerService) {
   }
 
   ngOnChanges() {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
       this.src = url;
+    }, (error: any) => {
+      this.errorHandlerService.handleError(error);
     });
   }
 }

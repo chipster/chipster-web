@@ -4,11 +4,12 @@ import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, OnChanges} from "@angular/core";
 import {Response} from "@angular/http";
 import {VisualizationModalService} from "../visualizationmodal.service";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-text-visualization',
   template: `
-    <p *ngIf="!(data === '' || data)">Loading data...</p>
+    <p *ngIf="!(data === '' || data)">{{status}}</p>
     
     <div *ngIf="data === '' || data">
       <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
@@ -29,22 +30,27 @@ export class TextVisualizationComponent implements OnChanges {
   @Input() showFullData: boolean;
 
   private data: string;
+  private status: string;
 
   fileSizeLimit = 10 * 1024;
 
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
-              private visualizationModalService: VisualizationModalService) {
+              private visualizationModalService: VisualizationModalService,
+              private errorHandlerService: ErrorHandlerService) {
   }
 
   ngOnChanges() {
+    this.data = null;
+    this.status = "Loading data...";
     let maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
     console.log('getData()');
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).subscribe((response: any) => {
       this.data = response;
     }, (error: Response) => {
-      console.error(error);
+      this.status = "Loading data failed";
+      this.errorHandlerService.handleError(error);
     });
   }
 

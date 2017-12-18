@@ -1,11 +1,7 @@
-<div class="container" *ngIf="msg">
-  <div class="row">
-    <div class="col">
+    <div *ngIf="msg" class="col-md-12">
       <p>
         <ngb-alert [dismissible]="dismissible" (close)="closeAlert(alert)">
-          <strong></strong> {{this.msg}}
+      <p [innerHTML]=msg></p>
         </ngb-alert>
       </p>
     </div>
-  </div>
-</div>
