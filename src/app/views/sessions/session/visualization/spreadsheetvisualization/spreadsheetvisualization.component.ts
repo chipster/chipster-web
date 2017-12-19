@@ -8,6 +8,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SessionData} from "../../../../../model/session/session-data";
 import {Tags, TypeTagService} from "../../../../../shared/services/typetag.service";
+import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -45,7 +46,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private sessionDataService: SessionDataService,
     private visualizationModalService: VisualizationModalService,
     private typeTagService: TypeTagService,
-    private zone: NgZone) {
+    private zone: NgZone,
+    private errorHandlerService: ErrorHandlerService) {
   }
 
   ngOnChanges() {
@@ -105,7 +107,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       this.dataReady = true;
     }, (e: Response) => {
       this.statusText = "Loading data failed";
-      console.error('Fetching TSVData failed', e);
+      this.errorHandlerService.handleError(e);
     })
   }
 
@@ -114,6 +116,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     if (this.hot){
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
+        // don't call destroy() twice even if the component is recycled and the loading of the second file fails
+        this.hot = null;
       });
     }
   }
