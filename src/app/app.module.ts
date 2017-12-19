@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import {NgModule, ErrorHandler} from '@angular/core';
+import {NgModule, ErrorHandler, Injector} from '@angular/core';
 import { HttpModule } from '@angular/http';
 import {NavigationComponent} from "./views/navigation/navigation.component";
 import {FormsModule} from "@angular/forms";
@@ -22,6 +22,7 @@ import {toolSelection} from "./state/selected-tool.reducer";
 import {ContactComponent} from "./views/contact/contact.component";
 import {HttpClientModule} from "@angular/common/http";
 import {ManualModule} from "./views/manual/manual.module";
+import {setAppInjector} from './app-injector';
 
 
 @NgModule({
@@ -41,4 +42,11 @@ import {ManualModule} from "./views/manual/manual.module";
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })
-export class AppModule {}
+
+export class AppModule {
+  constructor(injector: Injector) {
+    setAppInjector(injector);
+  }
+
+}
+

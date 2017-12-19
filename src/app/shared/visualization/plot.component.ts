@@ -9,6 +9,8 @@ import {PlotData} from "../../views/sessions/session/visualization/model/plotDat
 import * as d3 from "d3";
 import Point from "../../views/sessions/session/visualization/model/point";
 import TSVRow from "../../model/tsv/TSVRow";
+import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
+import {AppInjector} from "../../app-injector";
 @Component({})
 
 export class PlotComponent implements OnChanges {
@@ -31,12 +33,15 @@ export class PlotComponent implements OnChanges {
   svgPadding=50;
   protected fileResource:FileResource;
   protected sessionDataService:SessionDataService;
+  private errorHandlerService: ErrorHandlerService;
 
 
-  constructor(fileResource: FileResource,
+  constructor(
+              fileResource: FileResource,
               sessionDataService: SessionDataService) {
     this.fileResource=fileResource;
     this.sessionDataService=sessionDataService;
+    this.errorHandlerService = AppInjector.get(ErrorHandlerService);
   }
 
 
@@ -57,7 +62,7 @@ export class PlotComponent implements OnChanges {
         }
 
       }, (error: any) => {
-        console.log('FIXME');
+        this.errorHandlerService.handleError(error);
       });
   }
 
