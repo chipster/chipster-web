@@ -1,3 +1,13 @@
 .visualization-panel {
   padding-top: 15px;
+
+  /*
+  Keep the scroll position when changing visualizations
+
+  During initialization, visualizations may show only one status text line if anything. This would make the page
+  shorter and forces the browser to scroll it upwards. This min-height makes sure that the page is always long enough
+  to keep its scroll position. Value of 100vh should be always enough, because if the user would have scrolled more than
+  that, the tabs wouldn't be visible anymore and it wouldn't be possible to change the visualization.
+   */
+  min-height: 100vh;
 }
