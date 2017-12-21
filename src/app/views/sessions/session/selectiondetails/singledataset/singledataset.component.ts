@@ -23,9 +23,7 @@ export class SingleDatasetComponent {
   private tool:Tool;
 
 
-  constructor(private sessionDataService: SessionDataService,
-              private datasetModalService: DatasetModalService,
-              private stringModalService: DialogModalService) {
+  constructor(private sessionDataService: SessionDataService) {
   }
 
   ngOnInit() {
@@ -57,7 +55,7 @@ export class SingleDatasetComponent {
     let i=this.sessionData.tools.findIndex(x=>x.name.id==this.sourceJob.toolId);
     if(i!=-1) this.tool=this.sessionData.tools[i];
     else{
-      console.log("No Tool found with this ID");
+      console.log('No Tool found with this ID', this.sourceJob.toolId);
     }
     /*
     this.sessionData.tools.forEach(function(tool){

@@ -73,7 +73,7 @@ export class ToolSelectionService implements OnDestroy {
       return this.currentToolSelection.tool.parameters.every((parameter: ToolParameter) => {
         return parameter.optional ||
           // not null and not undefined and not an empty string, but 0 is fine
-          parameter.value !== null && parameter.value !== "";
+          parameter.value != null && parameter.value !== '';
       });
     }
   }

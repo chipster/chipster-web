@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges, SimpleChange} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import JobParameter from "../../../../../model/session/jobparameter";
 import {ToolService} from "../../tools/tool.service";
 import Tool from "../../../../../model/session/tool";
@@ -21,16 +21,17 @@ import Tool from "../../../../../model/session/tool";
              </table>`
 
 })
-export class DatasetParameterListComponent {
+export class DatasetParameterListComponent implements OnChanges {
   @Input() private tool: Tool;
   @Input() private parameters: Array<JobParameter>;
 
   private limit: number;
   private defaultLimit: number = 3;
   private buttonText: string;
+  // noinspection JSMismatchedCollectionQueryUpdate
   private parameterListForView: Array<JobParameter> = [];
   private currentTool: Tool;
-  private currentJobParameter: Array<JobParameter>
+  private currentJobParameter: Array<JobParameter>;
 
   constructor(private toolService: ToolService) {
   }
@@ -41,29 +42,35 @@ export class DatasetParameterListComponent {
   }
 
   ngOnChanges(changes: any) {
-    if (changes) {
-      console.log("changes triggered");
-      const tool: SimpleChange = changes.tool;
-      const parameters: SimpleChange = changes.parameters;
+    console.log('parameter changes triggered', changes, changes.tool, changes.tool !== null);
 
-      if (tool) this.currentTool = tool.currentValue;
-      if (parameters) this.currentJobParameter = parameters.currentValue;
-
+    if (changes.tool != null) {
+      this.currentTool = changes.tool.currentValue;
+    } else {
+      this.currentTool = null;
     }
 
-    if (this.currentTool && this.currentJobParameter) {
-      this.orderJobParameterList();
-    } else if (!this.currentTool && this.currentJobParameter) {
-      //just the show the normal job parameters
-      let self = this;
-      this.currentJobParameter.forEach(function (JobParameter) {
-        JobParameter.isDefaultValue = true;
-        self.parameterListForView.push(JobParameter);
-      })
-
+    if (changes.parameters != null) {
+      this.currentJobParameter = changes.parameters.currentValue;
+    } else {
+      this.currentJobParameter = null;
     }
 
+    this.parameterListForView = [];
 
+    if (this.currentJobParameter) {
+      if (this.currentTool) {
+        this.orderJobParameterList();
+
+      } else if (!this.currentTool) {
+        //just the show the normal job parameters
+        let self = this;
+        this.currentJobParameter.forEach(function (JobParameter) {
+          JobParameter.isDefaultValue = true;
+          self.parameterListForView.push(JobParameter);
+        });
+      }
+    }
   }
 
   toggleParameterList() {
