@@ -9,6 +9,7 @@ import {SessionData} from "../../../../model/session/session-data";
 import {Observable} from "rxjs";
 import {SessionDataService} from "../sessiondata.service";
 import {TSVReader} from "../../../../shared/services/TSVReader";
+import * as _ from 'lodash';
 
 @Injectable()
 export class ToolService {

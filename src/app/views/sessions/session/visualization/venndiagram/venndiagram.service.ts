@@ -49,7 +49,7 @@ export class VennDiagramService {
         const differenceValues = difference.map( (vennCircle: VennCircle) => vennCircle.data );
 
         // intersecting values from selected circles minus values in difference circles
-        return _.differenceBy(intersection, ...differenceValues, compareByIndex);
+        return _.differenceBy(intersection, ...differenceValues, <any>compareByIndex);
     }
 
 

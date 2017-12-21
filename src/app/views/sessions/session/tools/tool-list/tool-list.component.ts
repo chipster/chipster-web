@@ -13,7 +13,7 @@ import {Subject} from "rxjs/Subject";
 import {SessionData} from "../../../../../model/session/session-data";
 import InputBinding from "../../../../../model/session/inputbinding";
 import {SearchBoxComponent} from "../../../../../shared/components/search-box/search-box.component";
-
+import * as _ from 'lodash';
 
 @Component({
   selector: 'ch-tool-list',

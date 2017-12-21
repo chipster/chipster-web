@@ -6,6 +6,7 @@ import Job from "../../../../../model/session/job";
 import {SessionData} from "../../../../../model/session/session-data";
 import {DatasetModalService} from "../datasetmodal.service";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
+import * as _ from 'lodash';
 
 @Component({
   selector: 'ch-file',

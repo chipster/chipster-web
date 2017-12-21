@@ -6,6 +6,7 @@ import {Observable, Subject} from "rxjs";
 import ToolParameter from "../../../model/session/toolparameter";
 import {ToolService} from "./tools/tool.service";
 import Dataset from "../../../model/session/dataset";
+import * as _ from 'lodash';
 
 
 @Injectable()

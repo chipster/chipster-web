@@ -4,6 +4,7 @@ import TSVFile from "../../../../../model/tsv/TSVFile";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "../expressionprofile/domainboundaries";
+import * as _ from 'lodash';
 
 
 @Injectable()
