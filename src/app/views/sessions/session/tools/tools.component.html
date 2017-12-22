@@ -61,7 +61,8 @@
     <!--suppress JSBitwiseOperatorUsage -->
     <button class="btn btn-success tool-panel-button run-button" (click)="runJob()"
             [disabled]="!(toolSelectionService.runEnabled$ | async)">
-      <span class="fa fa-play"></span>
+      <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
+      <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
       Run
     </button>
   </div>
