@@ -73,12 +73,16 @@ export class VennDiagram implements OnChanges {
         // color category
         const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
+        // remove the previous graph, e.g. if a third file was just added
+        d3.select('#visualization').select('svg').remove();
+
         // svg-element
         let svg = d3.select('#visualization')
             .append('svg')
             .attr('width', size.width)
             .attr('height', size.height)
             .attr('id', 'svg');
+
 
         // draw vennCircles
         let circleGroup = svg.append('g').attr('id', 'circleGroup');
