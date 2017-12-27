@@ -1,12 +1,13 @@
 <div *ngFor="let error of errors" class="col-md-12">
   <ngb-alert [dismissible]="error.dismissible" (close)="closeAlert(error)">
     <p *ngIf="error.msg"><strong>{{error.msg}}</strong></p>
+    <p *ngIf="!error.msg"><strong>Something went wrong</strong></p>
 
     <div *ngIf="isForbidden(error.type)">Authentication failed. Please
       <button class="btn btn-sm btn-secondary" (click)="errorHandlerService.redirectToLoginAndBack()">Log in</button></div>
     <div *ngIf="isConnectionFailed(error.type)">Connection failed. Please
       <button class="btn btn-sm btn-secondary" (click)="reload()">Reload the page</button></div>
-    <div *ngIf="isDefault(error.type)">Something went wrong. Please
+    <div *ngIf="isDefault(error.type)">Please
       <button class="btn btn-sm btn-secondary" (click)="reload()">Reload the page</button></div>
   </ngb-alert>
 </div>
