@@ -12,7 +12,7 @@ import {Injectable} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
-s
+
 @Injectable()
 export class SessionResource {
 
