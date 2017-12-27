@@ -6,7 +6,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {ErrorService} from "./error.service";
 
 @Injectable()
-export class ErrorHandlerService  {
+export class RestErrorService  {
 
   constructor(private router: Router,
               private errorService: ErrorService) {
@@ -15,7 +15,7 @@ export class ErrorHandlerService  {
   handleError(error: Response | any, message: string = "") {
 
     // show alert
-    if (ErrorHandlerService.isForbidden(error)) {
+    if (RestErrorService.isForbidden(error)) {
       this.errorService.headerErrorForbidden(message);
     } else {
       this.errorService.headerErrorConnectionFailed(message);
@@ -39,7 +39,7 @@ export class ErrorHandlerService  {
   }
 
   static isServerSideError(error: HttpErrorResponse ) {
-    return !ErrorHandlerService.isClientOrConnectionError(error);
+    return !RestErrorService.isClientOrConnectionError(error);
   }
 
 }

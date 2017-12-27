@@ -14,7 +14,7 @@ import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-expression-profile',
@@ -36,7 +36,7 @@ export class ExpressionProfileComponent implements OnChanges {
               private sessionDataService: SessionDataService,
               private visualizationTSVService: VisualizationTSVService,
               private fileResource: FileResource,
-              private errorHandlerService: ErrorHandlerService) {
+              private errorHandlerService: RestErrorService) {
   }
 
   ngOnChanges() {

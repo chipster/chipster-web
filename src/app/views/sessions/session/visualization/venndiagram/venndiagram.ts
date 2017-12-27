@@ -14,7 +14,7 @@ import {SessionDataService} from "../../sessiondata.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
 import Circle from "../model/circle";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
     selector: 'ch-venn-diagram',
@@ -35,7 +35,7 @@ export class VennDiagram implements OnChanges {
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
                 private sessionDataService: SessionDataService,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: RestErrorService) {
     }
 
     ngOnChanges() {

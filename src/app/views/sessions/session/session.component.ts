@@ -14,7 +14,7 @@ import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {ErrorService} from "../../../core/errorhandler/error.service";
-import {ErrorHandlerService} from "../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {DialogModalService} from "./dialogmodal/dialogmodal.service";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
 
@@ -41,7 +41,7 @@ export class SessionComponent implements OnInit, OnDestroy{
         private route: ActivatedRoute,
         private modalService: NgbModal,
         private errorService: ErrorService,
-        private errorHandlerService: ErrorHandlerService,
+        private errorHandlerService: RestErrorService,
         private dialogModalService: DialogModalService,
         private sessionWorkerResource: SessionWorkerResource) {
     }

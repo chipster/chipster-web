@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {AuthenticationModule} from "./authentication/authentication.module";
-import {ErrorHandlerService} from "./errorhandler/error-handler.service";
+import {RestErrorService} from "./errorhandler/rest-error.service";
 import {RestServicesModule} from "./rest-services/rest-services.module";
 
 
@@ -17,6 +17,6 @@ import {RestServicesModule} from "./rest-services/rest-services.module";
     RestServicesModule
   ],
   declarations: [],
-  providers: [ErrorHandlerService]
+  providers: [RestErrorService]
 })
 export class CoreModule { }

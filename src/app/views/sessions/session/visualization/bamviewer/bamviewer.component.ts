@@ -4,7 +4,7 @@ import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
 import * as pako from "pako";
 import BamRecord from "./bamRecord";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 
 @Component({
@@ -39,7 +39,7 @@ export class BamViewerComponent implements OnChanges {
 
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
-              private errorHandlerService: ErrorHandlerService) {
+              private errorHandlerService: RestErrorService) {
 
   }
 

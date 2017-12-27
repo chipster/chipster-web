@@ -2,7 +2,7 @@ import {AuthenticationService} from "../../core/authentication/authenticationser
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from "@angular/router";
-import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
       this.router.navigateByUrl(this.returnUrl);
     }, (errorResponse: HttpErrorResponse) => {
 
-      if (ErrorHandlerService.isForbidden(errorResponse)) {
+      if (RestErrorService.isForbidden(errorResponse)) {
         this.error = 'Incorrect username or password'
       } else {
         this.error = 'Connecting to authentication service failed'

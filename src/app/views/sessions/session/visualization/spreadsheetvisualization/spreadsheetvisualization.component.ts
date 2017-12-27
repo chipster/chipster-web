@@ -8,7 +8,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SessionData} from "../../../../../model/session/session-data";
 import {Tags, TypeTagService} from "../../../../../shared/services/typetag.service";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -47,7 +47,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private visualizationModalService: VisualizationModalService,
     private typeTagService: TypeTagService,
     private zone: NgZone,
-    private errorHandlerService: ErrorHandlerService) {
+    private errorHandlerService: RestErrorService) {
   }
 
   ngOnChanges() {

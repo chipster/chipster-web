@@ -8,7 +8,7 @@ import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 import {Subject} from "rxjs";
 import {TokenService} from "../../core/authentication/token.service";
 import Rule from "../../model/session/rule";
-import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {SessionDataService} from "./session/sessiondata.service";
 
 @Component({
@@ -34,7 +34,7 @@ export class SessionListComponent {
     private router: Router,
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
-    private errorHandlerService: ErrorHandlerService,
+    private errorHandlerService: RestErrorService,
     private sessionDataService: SessionDataService) {}
 
 

@@ -2,7 +2,7 @@ import {Component, Input, OnChanges} from '@angular/core';
 import {timeout} from "d3-timer";
 import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-htmlvisualization',
@@ -30,7 +30,7 @@ export class HtmlvisualizationComponent implements OnChanges {
 
   constructor(
     private sessionDataService: SessionDataService,
-    private errorHandlerService: ErrorHandlerService) { }
+    private errorHandlerService: RestErrorService) { }
 
   ngOnChanges() {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {

@@ -1,7 +1,7 @@
 import {Component, OnChanges, Input} from '@angular/core';
 import Dataset from "../../../../../model/session/dataset";
 import {SessionDataService} from "../../sessiondata.service";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-pdf-visualization',
@@ -19,7 +19,7 @@ export class PdfVisualizationComponent implements OnChanges {
   zoom: number;
 
   constructor(private sessionDataService: SessionDataService,
-              private errorHandlerService: ErrorHandlerService) { }
+              private errorHandlerService: RestErrorService) { }
 
   ngOnChanges() {
     this.page = 1;

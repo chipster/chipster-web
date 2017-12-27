@@ -4,7 +4,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {Component, Input, OnChanges} from "@angular/core";
 import {Response} from "@angular/http";
 import {VisualizationModalService} from "../visualizationmodal.service";
-import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handler.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-text-visualization',
@@ -37,7 +37,7 @@ export class TextVisualizationComponent implements OnChanges {
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
               private visualizationModalService: VisualizationModalService,
-              private errorHandlerService: ErrorHandlerService) {
+              private errorHandlerService: RestErrorService) {
   }
 
   ngOnChanges() {
