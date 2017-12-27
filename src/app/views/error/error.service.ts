@@ -15,7 +15,7 @@ export class ErrorService {
     this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.FORBIDDEN));
   }
 
-  headerErrorConnectionFailed(msg?: string, dismissable?: boolean) {
+  headerErrorConnectionFailed(msg?: string, dismissable: boolean = true) {
     this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.CONNECTION_FAILED));
   }
 
