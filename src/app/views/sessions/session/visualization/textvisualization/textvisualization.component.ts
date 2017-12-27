@@ -9,7 +9,7 @@ import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handle
 @Component({
   selector: 'ch-text-visualization',
   template: `
-    <p *ngIf="!(data === '' || data)">{{status}}</p>
+    <p *ngIf="!(data === '' || data)"><i>{{status}}</i></p>
     
     <div *ngIf="data === '' || data">
       <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
@@ -50,7 +50,7 @@ export class TextVisualizationComponent implements OnChanges {
       this.data = response;
     }, (error: Response) => {
       this.status = "Loading data failed";
-      this.errorHandlerService.handleError(error);
+      this.errorHandlerService.handleError(error, "Loading data failed");
     });
   }
 

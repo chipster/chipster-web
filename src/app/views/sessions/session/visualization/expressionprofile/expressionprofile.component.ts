@@ -51,7 +51,7 @@ export class ExpressionProfileComponent implements OnChanges {
       }
     }, (error: any) => {
       this.errorMessage = "Loading data failed";
-      this.errorHandlerService.handleError(error);
+      this.errorHandlerService.handleError(error, "Loading data failed");
     });
 
     this.selectedGeneExpressions = [];

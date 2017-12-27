@@ -2,7 +2,7 @@
     <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
       <pre>{{entry}}</pre>
     </ul>
-  <div *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
+  <div *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
   <table class="table-bordered table-hover bamtable">
     <thead>
     </thead>

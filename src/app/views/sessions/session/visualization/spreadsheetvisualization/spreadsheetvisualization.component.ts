@@ -13,7 +13,7 @@ import {ErrorHandlerService} from "../../../../../core/errorhandler/error-handle
 @Component({
   selector: 'ch-spreadsheet-visualization',
   template: `
-    <p *ngIf="!dataReady">{{statusText}}</p>
+    <p *ngIf="!dataReady"><i>{{statusText}}</i></p>
 
     <div *ngIf="dataReady">
       <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label> 
@@ -107,7 +107,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       this.dataReady = true;
     }, (e: Response) => {
       this.statusText = "Loading data failed";
-      this.errorHandlerService.handleError(e);
+      this.errorHandlerService.handleError(e, "Loading data failed");
     })
   }
 

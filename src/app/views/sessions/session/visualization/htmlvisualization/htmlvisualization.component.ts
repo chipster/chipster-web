@@ -39,7 +39,7 @@ export class HtmlvisualizationComponent implements OnChanges {
       // a query parameter itself
       this.src = encodeURIComponent(url);
     }, (error: any) => {
-      this.errorHandlerService.handleError(error);
+      this.errorHandlerService.handleError(error, "Loading html file failed");
     });
   }
 

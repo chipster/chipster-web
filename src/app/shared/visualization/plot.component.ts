@@ -62,7 +62,7 @@ export class PlotComponent implements OnChanges {
         }
 
       }, (error: any) => {
-        this.errorHandlerService.handleError(error);
+        this.errorHandlerService.handleError(error, "Loading data failed");
       });
   }
 

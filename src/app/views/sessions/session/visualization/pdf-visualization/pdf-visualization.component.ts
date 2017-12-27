@@ -28,7 +28,7 @@ export class PdfVisualizationComponent implements OnChanges {
     this.sessionDataService.getDatasetUrl(this.dataset).subscribe(url => {
       this.src = url;
     }, (error: any) => {
-      this.errorHandlerService.handleError(error);
+      this.errorHandlerService.handleError(error, "Loading pdf file failed");
     });
   }
 
