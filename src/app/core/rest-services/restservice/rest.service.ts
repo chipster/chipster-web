@@ -6,15 +6,13 @@ import {
 import {Observable} from "rxjs";
 import {HttpQueueService} from "../http-queue/http-queue.service";
 import {TokenService} from "../../authentication/token.service";
-import {ErrorService} from "../../../views/error/error.service";
 
 @Injectable()
 export class RestService {
 
   constructor(private httpQueueu: HttpQueueService,
               private http: Http,
-              private tokenService: TokenService,
-              private errorService: ErrorService) {}
+              private tokenService: TokenService) {}
 
   /*
    * @description: build request options
@@ -108,8 +106,7 @@ export class RestService {
         }
 
         if (resp && resp.error) {
-          this.errorService.headerError(resp.error, true);
-          throw resp;
+          console.log("why are we here?");
         }
       return resp;
     })
