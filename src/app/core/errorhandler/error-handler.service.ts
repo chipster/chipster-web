@@ -3,7 +3,7 @@ import {Response, Request} from "@angular/http";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
 import {HttpErrorResponse} from "@angular/common/http";
-import {ErrorService} from "../../views/error/error.service";
+import {ErrorService} from "./error.service";
 
 @Injectable()
 export class ErrorHandlerService  {

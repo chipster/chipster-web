@@ -8,7 +8,7 @@ import Session from "../../../model/session/session";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {TokenService} from "../../../core/authentication/token.service";
-import {ErrorService} from "../../error/error.service";
+import {ErrorService} from "../../../core/errorhandler/error.service";
 import {RestService} from "../../../core/rest-services/restservice/rest.service";
 import Rule from "../../../model/session/rule";
 

@@ -13,7 +13,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {SessionResource} from "../../../shared/resources/session.resource";
-import {ErrorService} from "../../error/error.service";
+import {ErrorService} from "../../../core/errorhandler/error.service";
 import {ErrorHandlerService} from "../../../core/errorhandler/error-handler.service";
 import {DialogModalService} from "./dialogmodal/dialogmodal.service";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";

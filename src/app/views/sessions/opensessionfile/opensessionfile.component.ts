@@ -3,7 +3,7 @@ import {UploadService} from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
-import {ErrorService} from "../../error/error.service";
+import {ErrorService} from "../../../core/errorhandler/error.service";
 
 @Component({
   selector: 'ch-open-session-file',

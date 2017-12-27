@@ -10,7 +10,7 @@ import {Observable, Subject} from "rxjs";
 import SessionEvent from "../../../model/events/sessionevent";
 import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
 import WsEvent from "../../../model/events/wsevent";
-import {ErrorService} from "../../error/error.service";
+import {ErrorService} from "../../../core/errorhandler/error.service";
 
 @Injectable()
 export class SessionEventService {

@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
-import {ErrorService} from "./error.service";
-import {ErrorMessage} from "./errormessage";
+import {ErrorService} from "../../core/errorhandler/error.service";
+import {ErrorMessage} from "../../core/errorhandler/errormessage";
 import * as _ from 'lodash';
 import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
 import {NavigationEnd, Router} from "@angular/router";
