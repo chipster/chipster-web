@@ -103,8 +103,7 @@ export class SessionListComponent {
       this.sessionsByUser = sessionsByUser;
       this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
     }, (error: any) => {
-      this.errorHandlerService.handleError(error, "Getting sessions failed");
-      //this.errorHandlerService.redirectToLoginAndBack();
+      this.errorHandlerService.handleError(error, "Loading sessions failed");
     });
   }
 

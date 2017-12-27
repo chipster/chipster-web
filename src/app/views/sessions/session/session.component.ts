@@ -41,7 +41,7 @@ export class SessionComponent implements OnInit, OnDestroy{
         private route: ActivatedRoute,
         private modalService: NgbModal,
         private errorService: ErrorService,
-        private errorHandler: ErrorHandlerService,
+        private errorHandlerService: ErrorHandlerService,
         private dialogModalService: DialogModalService,
         private sessionWorkerResource: SessionWorkerResource) {
     }
@@ -59,15 +59,9 @@ export class SessionComponent implements OnInit, OnDestroy{
       }).subscribe(sessionData => {
         this.sessionData = sessionData;
         this.subscribeToEvents();
-      }, err => {
+      }, (error: any) => {
         this.statusText = "";
-        console.error("loading session failed", err);
-        if (ErrorHandlerService.isForbidden(err)) {
-          this.errorService.headerErrorForbidden();
-          return;
-        }
-
-        this.errorService.headerError('Loading session failed', true);
+        this.errorHandlerService.handleError(error, "Loading session failed");
       });
 
       // Select datasets provided via queryparameter and clear queryparameters
