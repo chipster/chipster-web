@@ -117,7 +117,7 @@ export class SessionEventService {
         listener.next(data);
       }, (err) => {
         console.log('websocket error', err);
-        this.errorService.headerError('Connection lost', false);
+        this.errorService.headerError('Connection lost', true);
       }, () => {
         console.log('websocket closed');
         // if not unsubscribed
