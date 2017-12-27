@@ -37,18 +37,6 @@ export class ErrorComponent {
     this.errors = _.without(this.errors, error);
   }
 
-  isForbidden(errorType: ErrorType) : boolean {
-    return ErrorType.FORBIDDEN === errorType;
-  }
-
-  isConnectionFailed(errorType: ErrorType) : boolean {
-    return ErrorType.CONNECTION_FAILED === errorType;
-  }
-
-  isDefault(errorType: ErrorType) : boolean {
-    return ErrorType.DEFAULT === errorType;
-  }
-
   reload() {
     window.location.reload();
   }
