@@ -238,7 +238,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
       this.sessionDataService.updateSession(this.sessionData.session).subscribe(() => {}, err => {
-        this.errorService.headerError('failed to update session notes: ' + err, true);
+        this.errorService.headerError('Failed to update session notes: ' + err, true);
       })
     }, () => {
       // modal dismissed
@@ -272,7 +272,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + this.sessionData.session.name + '?', 'Delete', 'Cancel').then(() => {
       // delete the session only from this user (i.e. the rule)
       this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe( () => {}, err => {
-        this.errorService.headerError('failed to delete the session: ' + err, true);
+        this.errorService.headerError('Failed to delete the session: ' + err, true);
       });
     }, () => {
       // modal dismissed

@@ -50,7 +50,7 @@ export class OpenSessionFile implements AfterViewInit {
   error(file: any, err) {
     this.fileStatus.set(file, err);
     this.finishedFiles.add(file);
-    this.errorService.headerError("failed to open the session file: " + err, true);
+    this.errorService.headerError("Failed to open the session file: " + err, true);
   }
 
   getFiles() {

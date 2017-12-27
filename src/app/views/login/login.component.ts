@@ -3,7 +3,6 @@ import {Component, OnInit, ViewChild} from "@angular/core";
 import {FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from "@angular/router";
 import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
-import {ErrorService} from "../error/error.service";
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({

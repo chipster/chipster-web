@@ -12,15 +12,13 @@ import {Injectable} from "@angular/core";
 import {SessionData} from "../../model/session/session-data";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {Observable} from "rxjs";
-import {ErrorService} from "../../views/error/error.service";
-
+s
 @Injectable()
 export class SessionResource {
 
 	constructor(private configService: ConfigService,
 				private toolResource: ToolResource,
-        private restService: RestService,
-        private errorService: ErrorService) {}
+        private restService: RestService) {}
 
 	loadSession(sessionId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
