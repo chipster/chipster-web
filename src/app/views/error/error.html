@@ -6,8 +6,8 @@
     <div *ngIf="error.isForbidden()">Authentication failed. Please
       <button class="btn btn-sm btn-secondary" (click)="errorHandlerService.redirectToLoginAndBack()">Log in</button></div>
     <div *ngIf="error.isConnectionFailed()">Connection failed. Please
-      <button class="btn btn-sm btn-secondary" (click)="reload()">Reload the page</button></div>
+      <button class="btn btn-sm btn-secondary" (click)="reload()">Reload page</button></div>
     <div *ngIf="error.isDefault()">Please
-      <button class="btn btn-sm btn-secondary" (click)="reload()">Reload the page</button></div>
+      <button class="btn btn-sm btn-secondary" (click)="reload()">Reload page</button></div>
   </ngb-alert>
 </div>
