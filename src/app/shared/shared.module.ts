@@ -21,6 +21,7 @@ import {ConfigService} from "./services/config.service";
 import {TypeTagService} from "./services/typetag.service";
 import {SearchBoxComponent} from "./components/search-box/search-box.component";
 import {FormsModule} from "@angular/forms";
+import {RouteService} from "./services/route.service";
 
 
 /*
@@ -44,7 +45,7 @@ import {FormsModule} from "@angular/forms";
     SecondsPipe,
     SearchBoxComponent,
   ],
-  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService],
+  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService, RouteService],
   exports: [
     BytesPipe,
     TrustedResourcePipe,

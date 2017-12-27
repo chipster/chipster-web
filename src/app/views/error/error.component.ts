@@ -2,8 +2,8 @@ import {Component} from "@angular/core";
 import {ErrorService} from "../../core/errorhandler/error.service";
 import {ErrorMessage} from "../../core/errorhandler/errormessage";
 import * as _ from 'lodash';
-import {ErrorHandlerService} from "../../core/errorhandler/error-handler.service";
 import {NavigationEnd, Router} from "@angular/router";
+import {RouteService} from "../../shared/services/route.service";
 
 @Component({
   selector: 'ch-error',
@@ -15,7 +15,7 @@ export class ErrorComponent {
 
   constructor(
     private errorService: ErrorService,
-    private errorHandlerService: ErrorHandlerService,
+    private routeService: RouteService,
     private router: Router) {}
 
   ngOnInit() {
@@ -41,4 +41,7 @@ export class ErrorComponent {
     window.location.reload();
   }
 
+  redirect() {
+    this.routeService.redirectToLoginAndBack()
+  }
 }
