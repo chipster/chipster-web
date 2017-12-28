@@ -295,7 +295,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr('height', this.nodeHeight)
       .attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')')
       .style('fill', (d) => d.color)
-      .style('opacity', (d) => WorkflowGraphComponent.getOpacity(!this.filter))
+      .style('opacity', () => WorkflowGraphComponent.getOpacity(!this.filter))
       .classed('selected-job', (d) => this.isSelectedJob(d.job))
       .style('filter', (d) => {
         if (this.isSelectedJob(d.job)) {
@@ -596,7 +596,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         sourceJob: sourceJob,
         color: color,
         dataset: dataset,
-        datasetId: dataset.datasetId
+        datasetId: dataset.datasetId,
+        created: dataset.created
       });
     });
 
@@ -632,6 +633,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           spin: spin,
           job: job,
           sourceJob: job, // to create links
+          created: job.startTime // for layout order
         });
       }
     });
@@ -711,11 +713,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   doLayout(links: Link[], nodes: Node[]) {
 
+    console.log('doLayout()');
+
+    links.forEach(l => console.log('link', l.source.dataset.name, l.target, l));
+
     // layout nodes that don't yet have a position
 
     // layout nodes with parents
     // sort by the creation date to make parents precede their children in the array
-    links.sort((a, b) => UtilsService.compareStringNullSafe(a.source.dataset.created, b.source.dataset.created)).forEach((link) => {
+    links.sort((a, b) => {
+      return UtilsService.compareStringNullSafe(a.target.created, b.target.created)
+    }).forEach((link) => {
       if (!link.target.x || !link.target.y) {
         if (!link.source.x || !link.source.y) {
           // we have found an unpositioned parent
