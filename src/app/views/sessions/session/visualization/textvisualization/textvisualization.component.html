@@ -1,0 +1,7 @@
+<div *ngIf="data === '' || data; else statusTemplate">
+  <label *ngIf="!isCompleteFile()">Showing {{getSizeShown() | bytes}} of {{getSizeFull() | bytes}}</label>
+  <ch-link-button class="pull-right" (click)="showAll()" *ngIf="!isCompleteFile()">Show all</ch-link-button>
+  <pre>{{data}}</pre>
+</div>
+
+<ng-template #statusTemplate><div class="ch-status">{{status}}</div></ng-template>
