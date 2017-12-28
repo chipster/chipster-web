@@ -57,15 +57,6 @@ export default class VennDiagramUtils {
     }
 
     /*
-     * @description: Distance between two points
-     */
-    static distance(point1: Point, point2: Point): number {
-        const dx = point1.x - point2.x;
-        const dy = point1.y - point2.y;
-        return Math.sqrt( (dx * dx) + (dy*dy) );
-    }
-
-    /*
      * @description: Create Vector2d with given start and end points
      */
     static createVector2d(from: Point, to: Point): Vector2d {
@@ -76,7 +67,7 @@ export default class VennDiagramUtils {
      * @description: Get Circles containing point
      */
     static getCirclesByPosition(circles: Array<VennCircle>, point: Point): Array<VennCircle> {
-        return circles.filter( (vennCircle: VennCircle) => this.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius);
+        return circles.filter( (vennCircle: VennCircle) => Point.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius);
     }
 
     /*

@@ -1,6 +1,4 @@
-
 import Point from "./point";
-import VennDiagramUtils from "../venndiagram/venndiagramutils";
 export default class Circle {
 
     center: Point;
@@ -16,7 +14,7 @@ export default class Circle {
     }
 
     containsPoint(point: Point): boolean {
-        return VennDiagramUtils.distance(this.center, point) <= this.radius;
+        return Point.distance(this.center, point) <= this.radius;
     }
 
 }
