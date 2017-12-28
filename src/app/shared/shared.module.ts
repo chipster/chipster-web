@@ -22,6 +22,7 @@ import {TypeTagService} from "./services/typetag.service";
 import {SearchBoxComponent} from "./components/search-box/search-box.component";
 import {FormsModule} from "@angular/forms";
 import {RouteService} from "./services/route.service";
+import {StatusComponent} from "./components/status.component";
 
 
 /*
@@ -44,8 +45,9 @@ import {RouteService} from "./services/route.service";
     ModulePipe,
     SecondsPipe,
     SearchBoxComponent,
+    StatusComponent,
   ],
-  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService, RouteService],
+  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService, RouteService ],
   exports: [
     BytesPipe,
     TrustedResourcePipe,
@@ -56,6 +58,7 @@ import {RouteService} from "./services/route.service";
     ModulePipe,
     SecondsPipe,
     SearchBoxComponent,
+    StatusComponent,
   ]
 })
 export class SharedModule {  }
