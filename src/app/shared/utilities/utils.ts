@@ -112,7 +112,7 @@ export default class UtilsService {
     if (a) {
       return a.localeCompare(b);
     } else if (b) {
-      return b.localeCompare(a);
+      return -b.localeCompare(a);
     } else {
       return 0;
     }
