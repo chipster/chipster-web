@@ -1,0 +1,24 @@
+<div *ngIf="src; else statusTemplate">
+  <a href="{{linkSrc}}" target="_blank" class="pull-right">
+    <i class="fa fa-external-link" aria-hidden="true"></i>
+    Open in new tab
+  </a>
+  <iframe #htmlframe
+          *ngIf="src"
+          width="100%"
+          [src]="wrapperUrl + '?location=' + src  | trustedresource"
+          scrolling="no"
+          frameborder="0"
+          (load)="run(htmlframe)">
+  </iframe>
+</div>
+
+<ng-template #statusTemplate>
+  <ch-status status="{{status}}"></ch-status>
+</ng-template>
+
+
+
+
+
+
