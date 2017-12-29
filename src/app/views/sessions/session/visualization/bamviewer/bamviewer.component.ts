@@ -1,10 +1,11 @@
-import {Component, OnInit, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
 import Dataset from "../../../../../model/session/dataset";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
 import * as pako from "pako";
 import BamRecord from "./bamRecord";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
+import {Subject} from "rxjs/Subject";
 
 
 @Component({
@@ -13,7 +14,7 @@ import {RestErrorService} from "../../../../../core/errorhandler/rest-error.serv
   styleUrls: ['./bamviewer.component.less'],
 
 })
-export class BamViewerComponent implements OnChanges {
+export class BamViewerComponent implements OnChanges, OnDestroy{
 
   @Input()
   private dataset: Dataset;
@@ -27,50 +28,58 @@ export class BamViewerComponent implements OnChanges {
   private bamRecord: BamRecord;
   private visibleBlockNumber = 2;//just a magic number,just showing records from first two blocks
   private maxBytes= 5000000;
-  private errorMessage:string;
 
-
+  private unsubscribe: Subject<any> = new Subject();
+  private status: string;
+  private dataReady: boolean = false;
 
   //BGZF blocks
   private BLOCK_HEADER_LENGTH = 18;
   private filePos = 0;
   private blockList = [];
 
-
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
               private errorHandlerService: RestErrorService) {
-
   }
 
   ngOnChanges() {
+    this.status = "Loading bam file...";
+    this.dataReady = false;
+
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
+      .takeUntil(this.unsubscribe)
       .subscribe((result: any) => {
 
-      var arrayBuffer = result;
+        var arrayBuffer = result;
 
-      if (arrayBuffer) {
-        //let determine the header block size to decode the header and the record part differently
+        if (arrayBuffer) {
+          //let determine the header block size to decode the header and the record part differently
 
-        let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
-        let ba = new Uint8Array(blockHeader)
-        let blockSize = (ba[17] << 8) | (ba[16]) + 1;
+          let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
+          let ba = new Uint8Array(blockHeader);
+          let blockSize = (ba[17] << 8) | (ba[16]) + 1;
 
-        let headerBuffer = arrayBuffer.slice(0, blockSize-1);
-        let recordBuffer = arrayBuffer.slice(blockSize);
+          let headerBuffer = arrayBuffer.slice(0, blockSize-1);
+          let recordBuffer = arrayBuffer.slice(blockSize);
 
 
-        //Read the header part
-        this.readHeader(headerBuffer);
-        //Read the record buffer
-        this.getBGZFBlocks(recordBuffer);
+          //Read the header part
+          this.readHeader(headerBuffer);
+          //Read the record buffer
+          this.getBGZFBlocks(recordBuffer);
 
-      }
-    },(error: any) => {
-        this.errorMessage = "Loading data failed";
-        this.errorHandlerService.handleError(error, "Loading data failed");
-
+          this.dataReady = true;
+        }
+      },(error: any) => {
+        this.status = "Loading bam file failed";
+        this.errorHandlerService.handleError(error, "Loading bam file failed");
       });
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   // Decode the BAM File Header
@@ -79,8 +88,6 @@ export class BamViewerComponent implements OnChanges {
     let headerPart = new Uint8Array(headerBuffer);
     let header = pako.inflate(headerPart);
     this.samHeaderLen = this.readInt(header, 4);
-
-
 
     for (var i = 0; i < this.samHeaderLen; ++i) {
       this.samHeader+= String.fromCharCode(header[i + 8]);
@@ -135,7 +142,7 @@ export class BamViewerComponent implements OnChanges {
 
     while (this.filePos < fileLimit) {
       let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
-      let ba = new Uint8Array(blockHeader)
+      let ba = new Uint8Array(blockHeader);
       let blockSize = (ba[17] << 8) | (ba[16]) + 1;
       if (blockSize < 28) break;
 
@@ -193,7 +200,7 @@ export class BamViewerComponent implements OnChanges {
 
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE||blockEnd>MAX_GZIP_BLOCK_SIZE) {
-        this.errorMessage=" Error loading the Bam Records";
+        this.status=" Error loading the Bam Records";
         return;
       }
 
@@ -203,7 +210,7 @@ export class BamViewerComponent implements OnChanges {
 
 
       if (refID < 0) {
-        this.errorMessage=" Error loading the Bam Records";
+        this.status=" Error loading the Bam Records";
         return;
       }
 
@@ -234,7 +241,7 @@ export class BamViewerComponent implements OnChanges {
 
       //nc Number of cigarOpp
 
-     cigarArray = [];
+      cigarArray = [];
       for (c = 0; c < nc; ++c) {
         var cigop = this.readInt(this.plain, p);
         // what is the uppermost byte?
@@ -273,7 +280,7 @@ export class BamViewerComponent implements OnChanges {
       } else {
         for (j = 0; j < lseq; ++j) {
           qual += String.fromCharCode(this.plain[p + j] + 33);
-       }
+        }
 
       }
 
@@ -318,7 +325,6 @@ export class BamViewerComponent implements OnChanges {
         } else {
           //Unknown type
           value = "Error unknown type" + type;
-          value = value;
           break;
         }
         tags[tag] = type + " " + value;

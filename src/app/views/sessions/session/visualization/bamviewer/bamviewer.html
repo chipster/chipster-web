@@ -1,7 +1,7 @@
-<div>
-    <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
-      <pre>{{entry}}</pre>
-    </ul>
+<div *ngIf="dataReady; else statusTemplate">
+  <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
+    <pre>{{entry}}</pre>
+  </ul>
   <div *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
   <table class="table-bordered table-hover bamtable">
     <thead>
@@ -17,8 +17,11 @@
       <td><pre>{{bamRecord.seq}}></pre></td>
       <td><pre>{{bamRecord.qual}}</pre></td>
       <td><pre>{{bamRecord.typeTag}}</pre></td>
-
     </tr>
     </tbody>
   </table>
 </div>
+
+<ng-template #statusTemplate>
+  <ch-status status="{{status}}"></ch-status>
+</ng-template>
