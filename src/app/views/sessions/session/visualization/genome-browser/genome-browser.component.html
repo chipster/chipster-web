@@ -1,13 +1,11 @@
 <div class *ngIf="errorMessage" class="alert alert-warning" role="alert">{{errorMessage}}</div>
+
 <div *ngIf="!errorMessage">
   <div class="row" id="genome-setting">
-          <label for="selectGenome" class="sm-text">Select Genome</label>
-          <select class="form-control" id="selectGenome" [(ngModel)]="selectedGenomeID" (ngModelChange)="setGenome($event)">
-            <option *ngFor="let genome of genomeList" [ngValue]="genome.genomeID">{{genome.genomeID}}</option>
-          </select>
-
-
-
+    <label for="selectGenome" class="sm-text">Select Genome</label>
+    <select class="form-control" id="selectGenome" [(ngModel)]="selectedGenomeID" (ngModelChange)="setGenome($event)">
+      <option *ngFor="let genome of genomeList" [ngValue]="genome.genomeID">{{genome.genomeID}}</option>
+    </select>
   </div>
 
   <div class="row">
