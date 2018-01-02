@@ -38,7 +38,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
-    this.state = new LoadState(State.Loading, "Loading data");
+    this.state = new LoadState(State.Loading, "Loading data...");
     this.data = null;
 
     let maxBytes = this.showFullData ? null : this.fileSizeLimit;
