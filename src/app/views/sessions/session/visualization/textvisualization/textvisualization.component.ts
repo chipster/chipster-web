@@ -6,6 +6,7 @@ import {Response} from "@angular/http";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 @Component({
   selector: 'ch-text-visualization',
@@ -22,10 +23,9 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() showFullData: boolean;
 
   private data: string;
-  private status: string;
 
   private unsubscribe: Subject<any> = new Subject();
-
+  private state: LoadState;
 
   fileSizeLimit = 10 * 1024;
 
@@ -36,20 +36,21 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
-    // unsubscribe from possible previous subscriptions
+    // unsubscribe from previous subscriptions
     this.unsubscribe.next();
-
+    this.state = new LoadState(State.Loading, "Loading data");
     this.data = null;
-    this.status = "Loading data";
+
     let maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
       .subscribe((response: any) => {
         this.data = response;
+        this.state = new LoadState(State.Ready);
       }, (error: Response) => {
-        this.status = "Loading data failed";
-        this.errorHandlerService.handleError(error, "Loading data failed");
+        this.state = new LoadState(State.Fail, "Loading data failed");
+        this.errorHandlerService.handleError(error, this.state.message);
       });
   }
 

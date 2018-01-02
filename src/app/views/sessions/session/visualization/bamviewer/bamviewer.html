@@ -1,4 +1,4 @@
-<div *ngIf="dataReady; else statusTemplate">
+<div *ngIf="state.isReady(); else statusTemplate">
   <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
     <pre>{{entry}}</pre>
   </ul>
@@ -23,5 +23,5 @@
 </div>
 
 <ng-template #statusTemplate>
-  <ch-status status="{{status}}"></ch-status>
+  <ch-status [state]="state"></ch-status>
 </ng-template>

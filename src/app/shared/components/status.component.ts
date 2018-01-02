@@ -1,9 +1,10 @@
 import {Component, Input} from "@angular/core";
+import {LoadState} from "../../model/loadstate";
 
 @Component({
   selector: 'ch-status',
   template: `
-    <div>{{status}}</div>
+    <div>{{state.message}}</div>
   `,
   styles: [`
     div {
@@ -13,5 +14,5 @@ import {Component, Input} from "@angular/core";
 })
 
 export class StatusComponent {
-  @Input() private status: string;
+  @Input() private state: LoadState;
 }

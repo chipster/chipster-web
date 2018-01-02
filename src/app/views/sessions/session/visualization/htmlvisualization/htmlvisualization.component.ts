@@ -4,6 +4,7 @@ import {SessionDataService} from "../../sessiondata.service";
 import Dataset from "../../../../../model/session/dataset";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 @Component({
   selector: 'ch-htmlvisualization',
@@ -15,7 +16,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   @Input()
   private dataset: Dataset;
   private unsubscribe: Subject<any> = new Subject();
-  private status: string;
+  private state: LoadState;
 
   private src: string;
   private linkSrc: string;
@@ -26,7 +27,9 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
     private errorHandlerService: RestErrorService) { }
 
   ngOnChanges() {
-    this.status = "Loading html file...";
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading html file...");
 
     this.sessionDataService.getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)
@@ -35,9 +38,10 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
         // we have to encode the url to get in one piece to the other side, because it contains
         // a query parameter itself
         this.src = encodeURIComponent(url);
+        this.state = new LoadState(State.Ready);
       }, (error: any) => {
-        this.status = "Loading html file failed";
-        this.errorHandlerService.handleError(error, "Loading html file failed");
+        this.state = new LoadState(State.Fail, "Loading html file failed");
+        this.errorHandlerService.handleError(error, this.state.message);
       });
   }
 

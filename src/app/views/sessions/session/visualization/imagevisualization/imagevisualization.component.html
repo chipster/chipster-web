@@ -1,0 +1,7 @@
+<div *ngIf="state.isReady(); else statusTemplate" class="scrollable">
+    <img [src]="src">
+</div>
+
+<ng-template #statusTemplate>
+  <ch-status state="{{state}}"></ch-status>
+</ng-template>

@@ -6,6 +6,7 @@ import * as pako from "pako";
 import BamRecord from "./bamRecord";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 
 @Component({
@@ -30,8 +31,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
   private maxBytes= 5000000;
 
   private unsubscribe: Subject<any> = new Subject();
-  private status: string;
-  private dataReady: boolean = false;
+  private state: LoadState;
 
   //BGZF blocks
   private BLOCK_HEADER_LENGTH = 18;
@@ -44,8 +44,9 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
   }
 
   ngOnChanges() {
-    this.status = "Loading bam file...";
-    this.dataReady = false;
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading bam file...");
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
       .takeUntil(this.unsubscribe)
@@ -69,11 +70,11 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
           //Read the record buffer
           this.getBGZFBlocks(recordBuffer);
 
-          this.dataReady = true;
+          this.state = new LoadState(State.Ready);
         }
       },(error: any) => {
-        this.status = "Loading bam file failed";
-        this.errorHandlerService.handleError(error, "Loading bam file failed");
+        this.state = new LoadState(State.Fail, "Loading bam file failed");
+        this.errorHandlerService.handleError(error, this.state.message);
       });
   }
 
@@ -200,7 +201,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
 
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE||blockEnd>MAX_GZIP_BLOCK_SIZE) {
-        this.status=" Error loading the Bam Records";
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 
@@ -210,7 +211,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
 
 
       if (refID < 0) {
-        this.status=" Error loading the Bam Records";
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 

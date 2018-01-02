@@ -3,6 +3,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {SessionDataService} from "../../sessiondata.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 @Component({
   selector: 'ch-pdf-visualization',
@@ -20,25 +21,28 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   zoom: number;
 
   private unsubscribe: Subject<any> = new Subject();
-
-  private status: string = "";
+  private state: LoadState;
 
   constructor(private sessionDataService: SessionDataService,
               private errorHandlerService: RestErrorService) { }
 
   ngOnChanges() {
-    this.status = "Loading pdf file...";
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading pdf file...");
+
     this.page = 1;
     this.zoom = 1;
 
     this.sessionDataService.getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)
       .subscribe(url => {
-      this.src = url;
-    }, (error: any) => {
-      this.status = "Loading pdf file failed";
-      this.errorHandlerService.handleError(error, "Loading pdf file failed");
-    });
+        this.src = url;
+        this.state = new LoadState(State.Ready);
+      }, (error: any) => {
+        this.state = new LoadState(State.Loading, "Loading pdf file failed");
+        this.errorHandlerService.handleError(error, this.state.message);
+      });
   }
 
   ngOnDestroy() {

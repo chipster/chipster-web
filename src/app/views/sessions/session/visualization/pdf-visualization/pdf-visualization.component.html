@@ -1,4 +1,4 @@
-<div *ngIf="src; else statusTemplate">
+<div *ngIf="state.isReady(); else statusTemplate">
   <nav class="pdf-view-navigation">
     <button class="btn btn-secondary" (click)="previousPage()"><</button>
     <button class="btn btn-secondary" (click)="nextPage()">></button>
@@ -15,5 +15,5 @@
 </div>
 
 <ng-template #statusTemplate>
-  <ch-status status="{{status}}"></ch-status>
+  <ch-status [state]="state"></ch-status>
 </ng-template>

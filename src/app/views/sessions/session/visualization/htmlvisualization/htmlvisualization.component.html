@@ -1,4 +1,4 @@
-<div *ngIf="src; else statusTemplate">
+<div *ngIf="state.isReady(); else statusTemplate">
   <a href="{{linkSrc}}" target="_blank" class="pull-right">
     <i class="fa fa-external-link" aria-hidden="true"></i>
     Open in new tab
@@ -14,7 +14,7 @@
 </div>
 
 <ng-template #statusTemplate>
-  <ch-status status="{{status}}"></ch-status>
+  <ch-status [state]="state"></ch-status>
 </ng-template>
 
 
