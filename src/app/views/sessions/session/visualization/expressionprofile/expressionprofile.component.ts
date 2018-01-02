@@ -9,12 +9,14 @@ import GeneExpression from "./geneexpression";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import * as d3 from "d3";
 import * as _ from "lodash";
-import {Component, Input, OnChanges, ViewEncapsulation} from "@angular/core";
+import {Component, Input, OnChanges, OnDestroy, ViewEncapsulation} from "@angular/core";
 import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import Dataset from "../../../../../model/session/dataset";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
+import {LoadState, State} from "../../../../../model/loadstate";
+import {Subject} from "rxjs/Subject";
 
 @Component({
   selector: 'ch-expression-profile',
@@ -22,7 +24,7 @@ import {RestErrorService} from "../../../../../core/errorhandler/rest-error.serv
   styleUrls: ['./expressionprofile.less'],
   encapsulation: ViewEncapsulation.None
 })
-export class ExpressionProfileComponent implements OnChanges {
+export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   @Input()
   private dataset: Dataset;
@@ -30,7 +32,9 @@ export class ExpressionProfileComponent implements OnChanges {
   private tsv: TSVFile;
   private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
   private viewSelectionList: Array<any>;
-  private errorMessage: string;
+
+  private unsubscribe: Subject<any> = new Subject();
+  private state: LoadState;
 
   constructor(private expressionProfileService: ExpressionProfileService,
               private sessionDataService: SessionDataService,
@@ -40,23 +44,35 @@ export class ExpressionProfileComponent implements OnChanges {
   }
 
   ngOnChanges() {
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading data...");
+
     const datasetName = this.dataset.name;
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset).subscribe((result: any) => {
-      let parsedTSV = d3.tsvParseRows(result);
-      this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
-      if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
-        this.drawLineChart(this.tsv);
-      } else {
-        this.errorMessage = `Only microarray data supported, didn’t find any columns starting with chip.`;
-      }
-    }, (error: any) => {
-      this.errorMessage = "Loading data failed";
-      this.errorHandlerService.handleError(error, "Loading data failed");
-    });
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset)
+      .takeUntil(this.unsubscribe)
+      .subscribe((result: any) => {
+        let parsedTSV = d3.tsvParseRows(result);
+        this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+        if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
+          this.drawLineChart(this.tsv);
+          this.state = new LoadState(State.Ready);
+        } else {
+          this.state = new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip found.");
+        }
+      }, (error: any) => {
+        this.state = new LoadState(State.Fail, "Loading data failed");
+        this.errorHandlerService.handleError(error, this.state.message);
+      });
 
     this.selectedGeneExpressions = [];
-
   }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+  }
+
 
   drawLineChart(tsv: TSVFile) {
     const that = this;
