@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, HostListener} from '@angular/core';
+import {Component, OnChanges} from '@angular/core';
 import * as d3 from "d3";
 import {PlotData} from "../model/plotData";
 import {VolcanoPlotService} from "./volcanoplot.service";
@@ -8,6 +8,7 @@ import {PlotComponent} from "../../../../../shared/visualization/plot.component"
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
 import {PlotService} from "../../../../../shared/visualization/plot.service";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 
 @Component({
@@ -34,13 +35,14 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
 
   ngOnChanges() {
     super.ngOnChanges();
+  }
 
-
+  ngOnDestroy() {
+    super.ngOnDestroy();
   }
 
   checkTSVHeaders() {
     if (this.volcanoPlotService.containsPValOrFCHeader(this.tsv)) {
-      this.plotVisible = true;
       //Extract the volcano plot related Headers needed to populate the list of option
       this.volcanoPlotFCHeaders = this.volcanoPlotService.getVolcanoPlotFCColumnHeaders(this.tsv);
       this.volcanoPlotPHeaders = this.volcanoPlotService.getVolcanoPlotPColumnHeaders(this.tsv);
@@ -56,9 +58,9 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
 
       this.svg = d3.select("#volcanoplot").append('svg');
       this.populatePlotData();
-    }else {
-      this.errorMessage = 'didn’t find any columns starting with pvalue or fold change value ';
-      this.plotVisible=false;
+      this.state = new LoadState(State.Ready);
+    } else {
+      this.state = new LoadState(State.Fail, "No columns starting with pvalue or fold change value found.");
     }
   }
 
@@ -98,7 +100,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
       .attr('class', 'axis')
       .attr("transform", "translate(0," + (size.height - padding) + ")")
       .attr("shape-rendering","crispEdges")
-      .call(xAxis)
+      .call(xAxis);
 
     // Adding the Y-Axis with log scale
     this.yScale = d3.scaleLinear().range([size.height-padding, padding])

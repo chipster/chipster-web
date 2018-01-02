@@ -1,15 +1,13 @@
-import {Component, Input, OnChanges, HostListener} from "@angular/core";
+import {Component, OnChanges, OnDestroy} from "@angular/core";
 import * as d3 from "d3";
-import Dataset from "../../../../../model/session/dataset";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 import {FileResource} from "../../../../../shared/resources/fileresource";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 import {SessionDataService} from "../../sessiondata.service";
 import Point from "../model/point";
-import TSVRow from "../../../../../model/tsv/TSVRow";
 import {PlotService} from "../../../../../shared/visualization/plot.service"
 import {PlotData} from "../model/plotData"
 import {PlotComponent} from "../../../../../shared/visualization/plot.component";
+import {LoadState, State} from "../../../../../model/loadstate";
 
 @Component({
   selector: 'ch-scatter-plot',
@@ -18,7 +16,7 @@ import {PlotComponent} from "../../../../../shared/visualization/plot.component"
 
 })
 
-export class ScatterPlotComponent extends PlotComponent implements OnChanges {
+export class ScatterPlotComponent extends PlotComponent implements OnChanges, OnDestroy {
   private chipHeaders: Array<string> = [];
   private xScale:any;
   private yScale:any;
@@ -28,11 +26,15 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
               sessionDataService: SessionDataService,
               private plotService: PlotService,
               private visualizationTSVService:VisualizationTSVService) {
-        super(fileResource,sessionDataService);
+    super(fileResource,sessionDataService);
   }
 
   ngOnChanges() {
-   super.ngOnChanges();
+    super.ngOnChanges();
+  }
+
+  ngOnDestroy() {
+    super.ngOnDestroy();
   }
 
   checkTSVHeaders(){
@@ -40,7 +42,6 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       //Extracting header name without chip prefix
       this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
-        self.plotVisible = true;
         chipHeader = chipHeader.replace('chip.', '');
         self.chipHeaders.push(chipHeader);
       });
@@ -49,11 +50,11 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
         this.selectedXAxisHeader= this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
         this.populatePlotData();
+        this.state = new LoadState(State.Ready);
       }
 
     } else {
-      this.errorMessage = 'Only microarray data supported, didn’t find any columns starting with chip.';
-      this.plotVisible = false;
+      this.state = new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found.");
     }
   }
 
@@ -84,7 +85,7 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
 
     //Define the SVG
     this.svg.attr('width', size.width)
-            .attr('height', size.height).attr('id', 'svg');
+      .attr('height', size.height).attr('id', 'svg');
 
     //Adding the X-axis
     this.xScale = d3.scaleLinear().range([padding, size.width-padding])
@@ -94,7 +95,7 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
     this.svg.append('g')
       .attr('class', 'axis').attr("transform", "translate(0," + (size.height - padding) + ")")
       .attr("shape-rendering","crispEdges")
-      .call(xAxis)
+      .call(xAxis);
 
     //Adding the Y-axis
     this.yScale = d3.scaleLinear().range([size.height-padding, padding])
@@ -104,7 +105,7 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges {
       .attr('class', 'axis')
       .attr("transform", "translate("+padding+",0)")
       .attr("shape-rendering","crispEdges")
-      .call(yAxis)
+      .call(yAxis);
 
     this.svg.selectAll(".tick line").attr("opacity",0.3);
     this.svg.selectAll(".tick text").style("font-size","12px");

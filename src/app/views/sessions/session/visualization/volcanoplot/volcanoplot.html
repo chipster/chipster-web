@@ -1,9 +1,10 @@
+<div *ngIf="!state.isReady(); then statusTemplate"></div>
+
 <div class="row">
   <div class="col-8">
-    <div class *ngIf="errorMessage"><i>{{errorMessage}}</i>s</div>
     <div id="volcanoplot"></div>
   </div>
-  <div class="col-4" *ngIf="plotVisible" id="setting">
+  <div class="col-4" *ngIf="state.isReady()" id="setting">
     <label for="selectXaxis" class="text-sm">Fold Change</label>
     <select class="form-control" id="selectXaxis" [(ngModel)]="selectedXAxisHeader"
             (ngModelChange)="setXAxisHeader($event)">
@@ -15,7 +16,6 @@
             (ngModelChange)="setYAxisHeader($event)">
       <option *ngFor="let pheader of volcanoPlotPHeaders">{{pheader}}</option>
     </select>
-
 
     <div id="selectedGeneList" *ngIf="selectedDataRows && selectedDataRows.length>0">
       <p class="text-sm-center">{{selectedDataRows.length}} Genes Selected</p>
@@ -31,10 +31,10 @@
       <div class="btn-group mr-2" role="group">
         <button class="btn btn-info btn-sm" (click)="resetSelections()">Clear Selection</button>
       </div>
-
-
     </div>
   </div>
 </div>
 
-
+<ng-template #statusTemplate>
+  <ch-status [state]="state"></ch-status>
+</ng-template>

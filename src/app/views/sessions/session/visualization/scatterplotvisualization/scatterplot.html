@@ -1,9 +1,10 @@
+<div *ngIf="!state.isReady(); then statusTemplate"></div>
+
 <div class="row">
   <div class="col-md-8">
-    <div class *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
     <div id="scatterplot"></div>
   </div>
-  <div class="col-md-4" *ngIf="plotVisible" id="setting">
+  <div class="col-md-4" *ngIf="state.isReady()" id="setting">
     <label for="selectXaxis" class="text-sm">X-axis</label>
     <select class="form-control" id="selectXaxis" [(ngModel)]="selectedXAxisHeader"
             (ngModelChange)="setXAxisHeader($event)">
@@ -30,8 +31,11 @@
         <button class="btn btn-info btn-sm" (click)="resetSelections()">Clear Selection</button>
       </div>
     </div>
-
   </div>
 </div>
+
+<ng-template #statusTemplate>
+  <ch-status [state]="state"></ch-status>
+</ng-template>
 
 

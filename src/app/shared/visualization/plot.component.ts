@@ -11,6 +11,8 @@ import Point from "../../views/sessions/session/visualization/model/point";
 import TSVRow from "../../model/tsv/TSVRow";
 import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {AppInjector} from "../../app-injector";
+import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../model/loadstate";
 @Component({})
 
 export class PlotComponent implements OnChanges {
@@ -18,13 +20,11 @@ export class PlotComponent implements OnChanges {
   @Input()
   dataset: Dataset;
   tsv: TSVFile;
-  errorMessage: string;
   plotData: Array<PlotData> = [];
   svg;
   selectedXAxisHeader: string;
   selectedYAxisHeader: string;
   dataSelectionModeEnable: boolean = false;
-  plotVisible: boolean = false;
   dragStartPoint:Point;
   dragEndPoint:Point;
   selectedDataPointIds:Array<string>;
@@ -35,10 +35,12 @@ export class PlotComponent implements OnChanges {
   protected sessionDataService:SessionDataService;
   private errorHandlerService: RestErrorService;
 
+  protected unsubscribe: Subject<any> = new Subject();
+  protected state: LoadState;
 
   constructor(
-              fileResource: FileResource,
-              sessionDataService: SessionDataService) {
+    fileResource: FileResource,
+    sessionDataService: SessionDataService) {
     this.fileResource=fileResource;
     this.sessionDataService=sessionDataService;
     this.errorHandlerService = AppInjector.get(RestErrorService);
@@ -46,24 +48,33 @@ export class PlotComponent implements OnChanges {
 
 
   ngOnChanges() {
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading data...");
+
     const rowLimit = 5000;
     const datasetName = this.dataset.name;
 
     //Get the file, this can be in a shared dataservice
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset)
+      .takeUntil(this.unsubscribe)
       .subscribe((result: any) => {
         let parsedTSV = d3.tsvParseRows(result);
         this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
         if (this.tsv.body.size() > rowLimit) {
-          this.errorMessage = 'Plot Visualization is not allowed for TSV files with more than 5000 data points';
-          this.plotVisible = false;
+          this.state = new LoadState(State.Fail, "Plot Visualization is not allowed for TSV files with more than 5000 data points");
         } else {
-          this.checkTSVHeaders();
+          this.checkTSVHeaders(); // will set this.state
         }
-
       }, (error: any) => {
-        this.errorHandlerService.handleError(error, "Loading data failed");
+        this.state = new LoadState(State.Fail, "Loading data failed");
+        this.errorHandlerService.handleError(error, this.state.message);
       });
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   /** @description To check whether the file has the required column headers to create the visualization**/
