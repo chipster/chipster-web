@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, ViewChild, ElementRef} from '@angular/core';
+import {Component, OnInit, Input, ViewChild, ElementRef, OnChanges, OnDestroy} from '@angular/core';
 import * as pileup from "pileup";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SelectionService} from "../../selection.service";
@@ -7,6 +7,9 @@ import {SessionData} from "../../../../../model/session/session-data";
 import {TypeTagService} from "../../../../../shared/services/typetag.service";
 import {Observable} from 'rxjs/Observable';
 import Dataset from "../../../../../model/session/dataset";
+import {Subject} from "rxjs/Subject";
+import {LoadState, State} from "../../../../../model/loadstate";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 
 @Component({
@@ -15,18 +18,20 @@ import Dataset from "../../../../../model/session/dataset";
   styleUrls: ['./genome-browser.component.less']
 
 })
-export class GenomeBrowserComponent implements OnInit {
+export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild('iframe') iframe: ElementRef;
 
   @Input() selectedDatasets: Array<any>;
   @Input() sessionData: SessionData;
 
+  private unsubscribe: Subject<any> = new Subject();
+  private state: LoadState;
+
   private range: any;
   private doc: any;
   private p: any;
   private content: any;
-  errorMessage: string;
   private showGenomeBrowser: boolean;
   private selectedGenomeID: string = 'hg38';
 
@@ -51,15 +56,21 @@ export class GenomeBrowserComponent implements OnInit {
   constructor(private visualizationModalService: VisualizationModalService,
               private selectionService: SelectionService,
               private sessionDataService: SessionDataService,
-              private typeTagService: TypeTagService) {
-
-
+              private typeTagService: TypeTagService,
+              private restErrorService: RestErrorService) {
   }
 
-
   ngOnChanges() {
-    this.getDatasetUrls();
+    // unsubscribe from previous subscriptions
+    this.unsubscribe.next();
+    this.state = new LoadState(State.Loading, "Loading data...");
 
+    this.getDatasetUrls();
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   setGenome(event) {
@@ -102,10 +113,14 @@ export class GenomeBrowserComponent implements OnInit {
         self.dataSourceList.push(bamSource);
       }
       else {
-        self.errorMessage = "Could not find corresponding BAI file";
+        self.state = new LoadState(State.Fail, "No corresponding BAI file found");
       }
     });
 
+    // don't continue if already failing
+    if (this.state.state === State.Fail) {
+      return;
+    }
 
     let bam: Observable<any>;
     let bai: Observable<any>;
@@ -120,17 +135,22 @@ export class GenomeBrowserComponent implements OnInit {
       }
     });
 
-    Observable.forkJoin(bamSources$).subscribe(res => {
-      for (let i = 0; i < res.length; i++) {
-        this.dataSourceList[i].bamUrl = res[i][0];
-        this.dataSourceList[i].baiUrl = res[i][1];
+    Observable.forkJoin(bamSources$)
+      .takeUntil(this.unsubscribe)
+      .subscribe(res => {
+          for (let i = 0; i < res.length; i++) {
+            this.dataSourceList[i].bamUrl = res[i][0];
+            this.dataSourceList[i].baiUrl = res[i][1];
 
-      }
-      this.initFrameContent();
-      this.initializeDataSources();
-    });
-
-
+          }
+          this.initFrameContent();
+          this.initializeDataSources();
+          this.state = new LoadState(State.Ready);
+        },
+        (error: any ) => {
+          this.state = new LoadState(State.Fail, "Loading data failed");
+          this.restErrorService.handleError(error, this.state.message);
+        });
   }
 
 
@@ -493,7 +513,7 @@ export class GenomeBrowserComponent implements OnInit {
 
 class BamSourceEntry {
   viz: any;
-  isReference?: boolean
+  isReference?: boolean;
   data?: any;
   cssClass?: any;
   name?: any;
