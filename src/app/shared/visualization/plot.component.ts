@@ -1,6 +1,6 @@
 //Super class for scatterplot and volcanoplot
 
-import {Component, OnChanges, Input, HostListener} from "@angular/core";
+import {OnChanges, Input, HostListener} from "@angular/core";
 import {FileResource} from "../resources/fileresource";
 import {SessionDataService} from "../../views/sessions/session/sessiondata.service";
 import Dataset from "../../model/session/dataset";
@@ -13,7 +13,6 @@ import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {AppInjector} from "../../app-injector";
 import {Subject} from "rxjs/Subject";
 import {LoadState, State} from "../../model/loadstate";
-@Component({})
 
 export class PlotComponent implements OnChanges {
 
