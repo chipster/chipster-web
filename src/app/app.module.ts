@@ -36,7 +36,7 @@ import {setAppInjector} from './app-injector';
       ManualModule,
       NgbModule.forRoot(),
       AppRoutingModule,
-      StoreModule.provideStore({selectedDatasets, selectedJobs, toolSelection}),
+      StoreModule.forRoot({selectedDatasets, selectedJobs, toolSelection}),
     ],
     declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent ],
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
