@@ -4,7 +4,7 @@
 <div class="chipster-highlight">
   <div class="row">
     <div class="col">
-      <div ngbDropdown class="d-inline-block" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
+      <div ngbDropdown class="d-inline-block dropdown-div" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
         <button class="btn btn-secondary tools-button" id="toolsDropdown" ngbDropdownToggle>
           Select tool
         </button>
@@ -18,7 +18,7 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block">
+      <div ngbDropdown class="d-inline-block dropdown-div">
         <button class="btn btn-outline-secondary" id="parametersDropdown" ngbDropdownToggle
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block">
+      <div ngbDropdown class="d-inline-block dropdown-div">
         <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="inputsDropdown"
                 [disabled]="!toolSelection">
@@ -58,7 +58,7 @@
         </div>
       </div>
 
-      <div class="d-inline-block">
+      <div class="d-inline-block dropdown-div">
         <!--suppress JSBitwiseOperatorUsage -->
         <button class="btn btn-success tool-panel-button run-button" (click)="runJob()"
                 [disabled]="!(toolSelectionService.runEnabled$ | async)">
@@ -68,7 +68,7 @@
         </button>
       </div>
 
-      <div ngbDropdown class="d-inline-block pull-right" #sourceCodeDropdown="ngbDropdown">
+      <div ngbDropdown class="d-inline-block  dropdown-div pull-right" #sourceCodeDropdown="ngbDropdown">
         <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="sourceCodeDropdown"
                 [disabled]="!toolSelection">
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block pull-right" #manualDropdown="ngbDropdown">
+      <div ngbDropdown class="d-inline-block  dropdown-div pull-right" #manualDropdown="ngbDropdown">
         <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="manualDropdown"
                 [disabled]="!toolSelection">

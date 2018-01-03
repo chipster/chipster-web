@@ -1,3 +1,2 @@
-declare function pileup(): any;
+declare var pileup: any;
 
-export = pileup;
