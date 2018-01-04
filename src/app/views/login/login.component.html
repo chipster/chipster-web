@@ -1,0 +1,28 @@
+<div class="col-md-4 offset-md-4 margin-top">
+
+  <div class="alert alert-warning" *ngIf="error">
+    <strong>Login failed</strong>
+    <p>{{error}}</p>
+  </div>
+
+  <h4 class="text-center">Log in to Chipster</h4>
+
+  <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input class="form-control" id="username" required autofocus [(ngModel)]="username" name="username"
+             #name="ngModel" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password"
+             #name="ngModel"
+             required/>
+    </div>
+    <div class="form-actions text-center margin-top" >
+      <button class="btn btn-primary" type="button" (click)="login(myForm)"
+              [disabled]="myForm.invalid">Log in</button>
+    </div>
+  </form>
+
+</div>

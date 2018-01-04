@@ -7,7 +7,8 @@ import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'ch-login',
-  templateUrl: './login.html'
+  templateUrl: './login.component.html',
+  styleUrls: ["./login.component.less"]
 })
 export class LoginComponent implements OnInit {
 
@@ -41,7 +42,7 @@ export class LoginComponent implements OnInit {
       if (RestErrorService.isForbidden(errorResponse)) {
         this.error = 'Incorrect username or password'
       } else {
-        this.error = 'Connecting to authentication service failed'
+        this.error = 'Connecting to authentication service failed';
         console.error(errorResponse);
       }
     });
