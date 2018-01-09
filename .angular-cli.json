@@ -21,7 +21,8 @@
       "styles": [
         "styles.less",
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
-        "../node_modules/font-awesome/css/font-awesome.min.css"
+        "../node_modules/font-awesome/css/font-awesome.min.css",
+        "assets/lib/handsontable/handsontable.full.css"
       ],
       "scripts": [
         "../node_modules/jquery/dist/jquery.min.js",
@@ -31,7 +32,8 @@
         "../node_modules/pdfjs-dist/build/pdf.js",
         "../node_modules/pdfjs-dist/build/pdf.worker.js",
         "../node_modules/@flowjs/flow.js/dist/flow.js",
-        "../node_modules/pileup/dist/pileup.js"
+        "../node_modules/pileup/dist/pileup.js",
+        "assets/lib/handsontable/handsontable.full.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

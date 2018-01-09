@@ -1,5 +1,4 @@
 import {Component, OnInit, Input, ViewChild, ElementRef, OnChanges, OnDestroy} from '@angular/core';
-import * as pileup from "pileup";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SelectionService} from "../../selection.service";
 import {SessionDataService} from "../../sessiondata.service";
@@ -11,6 +10,7 @@ import {Subject} from "rxjs/Subject";
 import {LoadState, State} from "../../../../../model/loadstate";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
+declare var pileup: any;
 
 @Component({
   selector: 'ch-genome-browser',
@@ -520,7 +520,6 @@ class BamSourceEntry {
   options?: any;
 
 }
-
 
 class BamSource {
   bamUrl: any;
