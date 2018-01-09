@@ -87,8 +87,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // SVG-element
     let drag = d3.drag();
-    let svg = d3.select('#expressionprofile')
-      .append('svg')
+
+    let profile = d3.select('#expressionprofile');
+
+    profile.select('svg').remove();
+
+    let svg = profile.append('svg')
       .attr('width', size.width)
       .attr('height', size.height)
       .attr('id', 'svg')

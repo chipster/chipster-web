@@ -46,10 +46,9 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges, On
         self.chipHeaders.push(chipHeader);
       });
       if (this.chipHeaders.length > 2) {
-        this.svg = d3.select("#scatterplot").append('svg');
         this.selectedXAxisHeader= this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
-        this.populatePlotData();
+        this.redrawPlot();
         this.state = new LoadState(State.Ready);
       }
 
@@ -167,17 +166,10 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges, On
   }
 
   redrawPlot() {
-    super.redrawPlot();
-    this.svg = d3.select('#scatterplot').append('svg');
+    this.plot = d3.select("#scatterplot");
+    super.clearPlot();
+    this.svg = this.plot.append('svg');
     this.populatePlotData();
-  }
-
-
-  redrawScatterPlot() {
-    this.svg.remove();
-    this.svg = d3.select("#scatterplot").append('svg');
-    this.populatePlotData();
-
   }
 
   //New Dataset Creation  from selected data points
@@ -185,10 +177,7 @@ export class ScatterPlotComponent extends PlotComponent implements OnChanges, On
     let tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     let data = d3.tsvFormatRows(tsvData);
     this.sessionDataService.createDerivedDataset('newDataset.tsv', [this.dataset.datasetId], "Scatter Plot", data).subscribe();
-
   }
-
-
 }
 
 

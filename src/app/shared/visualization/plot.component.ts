@@ -14,12 +14,13 @@ import {AppInjector} from "../../app-injector";
 import {Subject} from "rxjs/Subject";
 import {LoadState, State} from "../../model/loadstate";
 
-export class PlotComponent implements OnChanges {
+export abstract class PlotComponent implements OnChanges {
 
   @Input()
   dataset: Dataset;
   tsv: TSVFile;
   plotData: Array<PlotData> = [];
+  plot;
   svg;
   selectedXAxisHeader: string;
   selectedYAxisHeader: string;
@@ -47,9 +48,12 @@ export class PlotComponent implements OnChanges {
 
 
   ngOnChanges() {
+
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
+
+    this.clearPlot();
 
     const rowLimit = 5000;
     const datasetName = this.dataset.name;
@@ -177,9 +181,12 @@ export class PlotComponent implements OnChanges {
     this.redrawPlot();
   }
 
-  redrawPlot() {
-    this.svg.remove();
+  abstract redrawPlot();
 
+  clearPlot() {
+    if (this.plot) {
+      this.plot.selectAll('svg').remove();
+    }
   }
 
   /** @description New Dataset Creation  from selected data points **/

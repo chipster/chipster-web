@@ -43,7 +43,19 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .subscribe((datasets: Array<Dataset>) => {
         this.selectedDatasets = datasets;
         this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
-        this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
+
+        // check if the previous visualization is still compatible
+        let isActiveCompatible = Array.from(this.compatibleVisualizations)
+          .map(this.getTabId.bind(this)).indexOf(this.active) !== -1;
+
+        /*
+          We will get an empty selection in between when the selection is changed.
+          Don't clear the active visualization because we want to try to show the
+          same visualization for next selection too.
+         */
+        if (!isActiveCompatible && this.selectedDatasets.length > 0) {
+          this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
+        }
       });
   }
 

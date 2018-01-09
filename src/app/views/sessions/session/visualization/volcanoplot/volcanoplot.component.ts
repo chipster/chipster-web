@@ -56,8 +56,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
         this.selectedYAxisHeader = this.volcanoPlotPHeaders[0];
       }
 
-      this.svg = d3.select("#volcanoplot").append('svg');
-      this.populatePlotData();
+      this.redrawPlot();
       this.state = new LoadState(State.Ready);
     } else {
       this.state = new LoadState(State.Fail, "No columns starting with pvalue or fold change value found.");
@@ -65,6 +64,7 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
   }
 
   populatePlotData() {
+    this.plotData = [];
     var self = this;
 
     //Extracting DataRows
@@ -176,8 +176,9 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
 
 
   redrawPlot() {
-    super.redrawPlot();
-    this.svg = d3.select('#volcanoplot').append('svg');
+    this.plot = d3.select('#volcanoplot');
+    super.clearPlot();
+    this.svg = this.plot.append('svg');
     this.populatePlotData();
   }
 
@@ -188,7 +189,4 @@ export class VolcanoPlotComponent extends PlotComponent implements OnChanges {
     this.sessionDataService.createDerivedDataset('newDataset.tsv',[this.dataset.datasetId],'Volcano Plot',data).subscribe();
 
   }
-
-
-
 }
