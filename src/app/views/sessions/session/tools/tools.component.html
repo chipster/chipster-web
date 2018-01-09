@@ -5,7 +5,7 @@
   <div class="row">
     <div class="col">
       <div ngbDropdown class="d-inline-block dropdown-div" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
-        <button class="btn btn-secondary tools-button" id="toolsDropdown" ngbDropdownToggle>
+        <button class="btn btn-secondary tools-button btn-sm" id="toolsDropdown" ngbDropdownToggle>
           Select tool
         </button>
 
@@ -18,8 +18,8 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block dropdown-div">
-        <button class="btn btn-outline-secondary" id="parametersDropdown" ngbDropdownToggle
+      <div ngbDropdown class="d-inline-block" dropdown-div>
+        <button class="btn btn-outline-secondary btn-sm" id="parametersDropdown" ngbDropdownToggle
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
           <span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
@@ -31,13 +31,13 @@
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection"
              class="tools-dropdown">
           <ch-scroller>
-            <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
+            <ch-tool-parameters [tool]="oolSelection.tool"></ch-tool-parameters>
           </ch-scroller>
         </div>
       </div>
 
       <div ngbDropdown class="d-inline-block dropdown-div">
-        <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
+        <button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle
                 id="inputsDropdown"
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
@@ -60,7 +60,7 @@
 
       <div class="d-inline-block dropdown-div">
         <!--suppress JSBitwiseOperatorUsage -->
-        <button class="btn btn-success tool-panel-button run-button" (click)="runJob()"
+        <button class="btn btn-success tool-panel-button run-button btn-sm" (click)="runJob()"
                 [disabled]="!(toolSelectionService.runEnabled$ | async)">
           <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
           <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
@@ -68,23 +68,23 @@
         </button>
       </div>
 
-      <div ngbDropdown class="d-inline-block  dropdown-div pull-right" #sourceCodeDropdown="ngbDropdown">
-        <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
-                id="sourceCodeDropdown"
-                [disabled]="!toolSelection">
-          <span class="fa fa-code" aria-hidden="true"></span>
-          Code
-        </button>
+      <!--<div ngbDropdown class="d-inline-block dropdown-div pull-right btn-sm" #sourceCodeDropdown="ngbDropdown">-->
+        <!--<button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle-->
+                <!--id="sourceCodeDropdown"-->
+                <!--[disabled]="!toolSelection">-->
+          <!--<span class="fa fa-code" aria-hidden="true"></span>-->
+          <!--Code-->
+        <!--</button>-->
 
-        <div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="sourceCodeDropdown.isOpen()" class="tools-dropdown">
-          <ch-scroller>
-            <ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>
-          </ch-scroller>
-        </div>
-      </div>
+        <!--<div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="sourceCodeDropdown.isOpen()" class="tools-dropdown">-->
+          <!--<ch-scroller>-->
+            <!--<ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>-->
+          <!--</ch-scroller>-->
+        <!--</div>-->
+      <!--</div>-->
 
-      <div ngbDropdown class="d-inline-block  dropdown-div pull-right" #manualDropdown="ngbDropdown">
-        <button type="button" class="btn btn-outline-secondary tool-panel-button" ngbDropdownToggle
+      <div ngbDropdown class="d-inline-block dropdown-div pull-right" #manualDropdown="ngbDropdown">
+        <button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle
                 id="manualDropdown"
                 [disabled]="!toolSelection">
           <span class="fa fa-book" aria-hidden="true"></span>
@@ -103,7 +103,7 @@
   </div>
   <div class="row">
     <div class="col tool-name">
-      {{toolSelection?.tool.name.displayName}}&nbsp;
+      <span class="h6">{{toolSelection?.tool.name.displayName}}&nbsp;</span>
     </div>
   </div>
 </div>
