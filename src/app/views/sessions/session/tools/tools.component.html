@@ -4,10 +4,14 @@
 <div class="chipster-highlight">
   <div class="row">
     <div class="col">
-      <div ngbDropdown class="d-inline-block dropdown-div" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
+      <div ngbDropdown class="d-inline-block" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
         <button class="btn btn-secondary tools-button btn-sm" id="toolsDropdown" ngbDropdownToggle>
           Select tool
         </button>
+
+        <span class="h6">&nbsp;{{toolSelection?.tool.name.displayName}}&nbsp;</span>
+
+
 
         <!-- create the dropdown only when it's shown so that it can focus its search field by default -->
         <div ngbDropdownMenu aria-labelledby="toolsDropdown" class="tools-dropdown">
@@ -18,8 +22,16 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block" dropdown-div>
-        <button class="btn btn-outline-secondary btn-sm" id="parametersDropdown" ngbDropdownToggle
+
+
+    </div>
+  </div>
+
+<br/>
+  <div class="row">
+    <div class="col">
+      <div ngbDropdown class="d-inline-block">
+        <button class="btn btn-sm btn-outline-secondary" id="parametersDropdown" ngbDropdownToggle
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
           <span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
@@ -31,13 +43,13 @@
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection"
              class="tools-dropdown">
           <ch-scroller>
-            <ch-tool-parameters [tool]="oolSelection.tool"></ch-tool-parameters>
+            <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
           </ch-scroller>
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block dropdown-div">
-        <button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle
+      <div ngbDropdown class="d-inline-block">
+        <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="inputsDropdown"
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
@@ -58,33 +70,32 @@
         </div>
       </div>
 
-      <div class="d-inline-block dropdown-div">
-        <!--suppress JSBitwiseOperatorUsage -->
-        <button class="btn btn-success tool-panel-button run-button btn-sm" (click)="runJob()"
-                [disabled]="!(toolSelectionService.runEnabled$ | async)">
-          <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
-          <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
-          Run
+      <button class="btn btn-success tool-panel-button run-button btn-sm" (click)="runJob()"
+              [disabled]="!(toolSelectionService.runEnabled$ | async)">
+        <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
+        <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
+        Run
+      </button>
+
+
+
+      <div ngbDropdown class="d-inline-block pull-right" #sourceCodeDropdown="ngbDropdown">
+        <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
+                id="sourceCodeDropdown"
+                [disabled]="!toolSelection">
+          <span class="fa fa-code" aria-hidden="true"></span>
+          Code
         </button>
+
+        <div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="sourceCodeDropdown.isOpen()" class="tools-dropdown">
+          <ch-scroller>
+            <ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>
+          </ch-scroller>
+        </div>
       </div>
 
-      <!--<div ngbDropdown class="d-inline-block dropdown-div pull-right btn-sm" #sourceCodeDropdown="ngbDropdown">-->
-        <!--<button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle-->
-                <!--id="sourceCodeDropdown"-->
-                <!--[disabled]="!toolSelection">-->
-          <!--<span class="fa fa-code" aria-hidden="true"></span>-->
-          <!--Code-->
-        <!--</button>-->
-
-        <!--<div ngbDropdownMenu aria-labelledby="sourceCodeDropdown" *ngIf="sourceCodeDropdown.isOpen()" class="tools-dropdown">-->
-          <!--<ch-scroller>-->
-            <!--<ch-tool-source [selectedTool]="toolSelection.tool"></ch-tool-source>-->
-          <!--</ch-scroller>-->
-        <!--</div>-->
-      <!--</div>-->
-
-      <div ngbDropdown class="d-inline-block dropdown-div pull-right" #manualDropdown="ngbDropdown">
-        <button type="button" class="btn btn-outline-secondary tool-panel-button btn-sm" ngbDropdownToggle
+      <div ngbDropdown class="d-inline-block pull-right" #manualDropdown="ngbDropdown">
+        <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="manualDropdown"
                 [disabled]="!toolSelection">
           <span class="fa fa-book" aria-hidden="true"></span>
@@ -99,11 +110,6 @@
           </ch-scroller>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col tool-name">
-      <span class="h6">{{toolSelection?.tool.name.displayName}}&nbsp;</span>
     </div>
   </div>
 </div>
