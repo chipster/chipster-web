@@ -4,7 +4,7 @@
 <div class="chipster-highlight" id="tools-panel">
   <div class="row margin-bottom">
     <div class="col">
-      <div ngbDropdown class="d-inline-block" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
+      <div ngbDropdown class="d-inline-block dropdown-div" #toolsDropdown="ngbDropdown" (openChange)="toolList.openChange($event)">
         <button class="btn btn-secondary tools-button btn-sm button-wide" id="toolsDropdown" ngbDropdownToggle>
           Select tool
         </button>
@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block pull-right" #manualDropdown="ngbDropdown">
+      <div ngbDropdown class="d-inline-block dropdown-div pull-right" #manualDropdown="ngbDropdown">
         <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="manualDropdown"
                 [disabled]="!toolSelection">
@@ -46,7 +46,7 @@
 
   <div class="row">
     <div class="col">
-      <div ngbDropdown class="d-inline-block">
+      <div ngbDropdown class="d-inline-block dropdown-div">
         <button class="btn btn-sm btn-outline-secondary button-wide" id="parametersDropdown" ngbDropdownToggle
                 [disabled]="!toolSelection">
           <!--suppress JSBitwiseOperatorUsage -->
@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <div ngbDropdown class="d-inline-block">
+      <div ngbDropdown class="d-inline-block dropdown-div">
         <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
                 id="inputsDropdown"
                 [disabled]="!toolSelection">
@@ -95,7 +95,7 @@
 
 
 
-      <!--<div ngbDropdown class="d-inline-block pull-right" #sourceCodeDropdown="ngbDropdown">-->
+      <!--<div ngbDropdown class="d-inline-block dropdown-div pull-right" #sourceCodeDropdown="ngbDropdown">-->
         <!--<button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle-->
                 <!--id="sourceCodeDropdown"-->
                 <!--[disabled]="!toolSelection">-->
