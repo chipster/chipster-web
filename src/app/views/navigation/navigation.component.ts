@@ -6,7 +6,7 @@ import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'ch-navigation',
-  templateUrl: './navigation.html',
+  templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.less']
 })
 export class NavigationComponent {
