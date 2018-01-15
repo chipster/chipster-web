@@ -29,7 +29,7 @@ export class FileComponent {
 
   renameDataset() {
     let dataset = _.clone(this.dataset);
-    this.dialogModalService.openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename").then((name) => {
+    this.dialogModalService.openStringModal("Rename dataset", null, "Dataset name", dataset.name, "Rename").then((name) => {
       if (name) {
         dataset.name = name;
         this.sessionDataService.updateDataset(dataset);

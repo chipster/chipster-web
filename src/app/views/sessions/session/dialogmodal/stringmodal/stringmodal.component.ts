@@ -10,6 +10,7 @@ export class StringModalComponent implements AfterViewInit {
   @Input() description: string;
   @Input() value: string;
   @Input() title: string;
+  @Input() message: string;
 
   @ViewChild('valueInput') valueInput;
 

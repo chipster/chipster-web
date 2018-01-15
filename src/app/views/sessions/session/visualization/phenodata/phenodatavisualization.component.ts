@@ -399,7 +399,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   addColumnModal() {
 
-    this.stringModalService.openStringModal("Add new column", "Column name", "", "Add").then((name) => {
+    this.stringModalService.openStringModal("Add new column", null, "Column name", "", "Add").then((name) => {
       this.zone.runOutsideAngular(() => {
         var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
         this.hot.alter('insert_col', colHeaders.length);

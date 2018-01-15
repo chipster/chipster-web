@@ -13,13 +13,14 @@ export class DialogModalService {
   }
 
   openSessionNameModal(title, name) {
-    return this.openStringModal(title, "Session name", name, "Save");
+    return this.openStringModal(title, null, "Session name", name, "Save");
   }
 
-  openStringModal(title, description, value, buttonText) {
+  openStringModal(title, message, description, value, buttonText) {
     let modalRef = this.modalService.open(StringModalComponent);
     modalRef.componentInstance.value = value;
     modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
 

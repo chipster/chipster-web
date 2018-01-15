@@ -17,6 +17,7 @@ import {SelectionHandlerService} from "../../selection-handler.service";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import UtilsService from "../../../../../shared/utilities/utils";
+import {SessionData} from "../../../../../model/session/session-data";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -32,6 +33,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input() datasetSearch: string;
   @Input() defaultScale: number;
   @Input() enabled: boolean;
+  @Input() sessionData: SessionData;
 
   private zoom;
 
@@ -483,7 +485,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (d.dataset) {
           d.dataset.x = d.x;
           d.dataset.y = d.y;
-          this.sessionDataService.updateDataset(d.dataset);
+
+          //FIXME don't ask many times for own copy if multiple selection
+          this.sessionDataService.updateDataset(this.sessionData, d.dataset)
+            .subscribe(() => null,
+              err => console.log(err));
         }
       });
 

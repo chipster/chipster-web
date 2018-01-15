@@ -12,7 +12,7 @@ import Tool from "../../../../../model/session/tool";
              <span *ngIf="parameterListForView.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
                 
              <table class="table table-sm parameter-table">
-                <tr class="text-sm" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': param.isDefaultValue? 'gray' : 'black'}">
+                <tr class="text-sm" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': isDefaultValueMap.get(param)? 'gray' : 'black'}">
                    <ng-template [ngIf]="i < limit">
                       <td>{{param.displayName}}</td>
                          <td>{{param.value}}</td>
@@ -32,6 +32,8 @@ export class DatasetParameterListComponent implements OnChanges {
   private parameterListForView: Array<JobParameter> = [];
   private currentTool: Tool;
   private currentJobParameter: Array<JobParameter>;
+
+  private isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
   constructor(private toolService: ToolService) {
   }
@@ -65,8 +67,8 @@ export class DatasetParameterListComponent implements OnChanges {
       } else if (!this.currentTool) {
         //just the show the normal job parameters
         let self = this;
-        this.currentJobParameter.forEach(function (JobParameter) {
-          JobParameter.isDefaultValue = true;
+        this.currentJobParameter.forEach((JobParameter) => {
+          this.isDefaultValueMap.set(JobParameter, true);
           self.parameterListForView.push(JobParameter);
         });
       }
@@ -85,7 +87,8 @@ export class DatasetParameterListComponent implements OnChanges {
 
   orderJobParameterList() {
     let self = this;
-    this.currentJobParameter.forEach(function (JobParameter) {
+    this.isDefaultValueMap = new Map();
+    this.currentJobParameter.forEach((JobParameter) => {
       let i = self.currentTool.parameters.findIndex(x => x.name.id == JobParameter.parameterId);
       if (i != -1) {
         // if the parameter does not have a display name
@@ -96,7 +99,7 @@ export class DatasetParameterListComponent implements OnChanges {
         }
         let isDefault = self.toolService.isDefaultValue(self.currentTool.parameters[i], JobParameter.value);
         if (isDefault == null) isDefault = true;
-        JobParameter.isDefaultValue = isDefault;
+        this.isDefaultValueMap.set(JobParameter, isDefault);
         self.parameterListForView.push(JobParameter);
       }
 

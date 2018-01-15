@@ -49,12 +49,18 @@ export class SessionComponent implements OnInit, OnDestroy{
 
 
     ngOnInit() {
-      this.statusText = "Loading session...";
       // this.sessionData = this.route.snapshot.data['sessionData'];
 
-      this.selectionHandlerService.clearSelections();
-
       this.route.params.flatMap(params => {
+        /*
+        Load session after every route change, not just once
+
+        Also this component can be reused, e.g. when a user creates her own copy
+        of an example session, she is directed to the new session.
+         */
+        this.statusText = "Loading session...";
+        this.selectionHandlerService.clearSelections();
+        this.sessionData = null;
         return this.sessionResource.loadSession(params['sessionId']);
       }).subscribe(sessionData => {
         this.sessionData = sessionData;
@@ -224,20 +230,27 @@ export class SessionComponent implements OnInit, OnDestroy{
     }
 
   renameSessionModal() {
-    this.dialogModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
-      console.log('renameSessionModal', name);
-      this.sessionData.session.name = name;
-      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
-    }, () => {
-      // modal dismissed
-    });
+
+    // if (!this.sessionDataService.hasReadWriteAccess(this.sessionData)) {
+    //   // this will effectively do the rename already
+    //   this.sessionDataService.createOwnCopyModal(this.sessionData);
+    // } else {
+
+      this.dialogModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
+        console.log('renameSessionModal', name);
+        this.sessionData.session.name = name;
+        this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe();
+      }, () => {
+        // modal dismissed
+      });
+    // }
   }
 
   notesModal() {
 
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
-      this.sessionDataService.updateSession(this.sessionData.session).subscribe(() => {}, err => {
+      this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => {}, err => {
         this.errorService.headerError('Failed to update session notes: ' + err, true);
       })
     }, () => {
@@ -251,9 +264,6 @@ export class SessionComponent implements OnInit, OnDestroy{
 
   duplicateModal() {
     this.dialogModalService.openSessionNameModal('Duplicate session', this.sessionData.session.name + '_copy').then(name => {
-      if (!name) {
-        name = 'unnamed session';
-      }
 
       let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
 
@@ -284,8 +294,8 @@ export class SessionComponent implements OnInit, OnDestroy{
       if (d.x || d.y) {
         d.x = null;
         d.y = null;
-
-        this.sessionDataService.updateDataset(d);
+        //FIXME don't ask n times for own copy
+        this.sessionDataService.updateDataset(this.sessionData, d);
       }
     });
   }
