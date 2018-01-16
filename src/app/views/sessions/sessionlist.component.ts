@@ -70,22 +70,22 @@ export class SessionListComponent {
   createSession() {
     const defaultName = "New session";
 
-    this.dialogModalService.openStringModal("New session", "Session name",
-      defaultName, "Create").then(name => {
-      if (!name) {
-        name = defaultName;
-      }
+    this.dialogModalService.openSessionNameModal("New session", defaultName, "Create")
+      .then(name => {
+        if (!name) {
+          name = defaultName;
+        }
 
-      let session = new Session(name);
-      this.sessionResource.createSession(session).subscribe((sessionId: string) => {
-        session.sessionId = sessionId;
-        this.openSession(sessionId)
-      }, (error: any) => {
-        this.errorHandlerService.handleError(error, "Creating a new session failed");
+        let session = new Session(name);
+        this.sessionResource.createSession(session).subscribe((sessionId: string) => {
+          session.sessionId = sessionId;
+          this.openSession(sessionId)
+        }, (error: any) => {
+          this.errorHandlerService.handleError(error, "Creating a new session failed");
+        });
+      }, () => {
+        // modal dismissed
       });
-    }, () => {
-      // modal dismissed
-    });
   }
 
   updateSessions() {

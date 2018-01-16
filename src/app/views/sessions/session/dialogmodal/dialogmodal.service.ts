@@ -12,8 +12,8 @@ export class DialogModalService {
   constructor(private modalService: NgbModal) {
   }
 
-  openSessionNameModal(title, name) {
-    return this.openStringModal(title, "Session name", name, "Save");
+  openSessionNameModal(title: string, name: string, buttonText: string) {
+    return this.openStringModal(title, "Session name", name, buttonText);
   }
 
   openStringModal(title, description, value, buttonText) {
@@ -22,6 +22,7 @@ export class DialogModalService {
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
+    modalRef.componentInstance.placeHolder = "";
 
     return modalRef.result;
   }
