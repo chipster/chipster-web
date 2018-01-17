@@ -106,17 +106,8 @@ export class SessionDataService {
     });
   }
 
-  updateDataset(sessionData: SessionData, dataset: Dataset) {
-    let sessionId;
-    let datasetCopy = _.cloneDeep(dataset);
-    return this.checkReadWritaAccess(sessionData, dataset)
-      .do(sessionCopyMapping => {
-        // IDs have changed if the session was copied
-        sessionId = sessionCopyMapping.sessionId;
-        datasetCopy.datasetId = sessionCopyMapping.datasetIdMap.get(dataset.datasetId);
-      })
-      .flatMap(() => this.sessionResource.updateDataset(sessionId, datasetCopy))
-      .flatMap(() => this.navigateIfNecessary(sessionId));
+  updateDataset(dataset: Dataset) {
+    return this.sessionResource.updateDataset(this.sessionId, dataset);
   }
 
   updateJob(job: Job) {
@@ -124,15 +115,7 @@ export class SessionDataService {
   }
 
   updateSession(sessionData: SessionData, session: Session) {
-    // clone the session just in case we are going to put these changes to new session
-    let sessionCopy = _.cloneDeep(session);
-    return this.checkReadWritaAccess(sessionData, session)
-      // store the possibly new sessionId
-      .do (sessionCopyMapping => sessionCopy.sessionId = sessionCopyMapping.sessionId)
-      // update the session (of the new session if an own copy was created)
-      .flatMap(() => this.sessionResource.updateSession(session))
-      // navigate to the new session if an own copy was created
-      .flatMap(() => this.navigateIfNecessary(sessionCopy.sessionId));
+    return this.sessionResource.updateSession(session);
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
@@ -212,30 +195,36 @@ export class SessionDataService {
       .concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId));
   }
 
-  createOwnCopyModal(sessionData: SessionData, obj: Session|Dataset|Job): Observable<any> {
-    return Observable.fromPromise(this.dialogModalService.openStringModal(
+  createOwnCopyModal(sessionData: SessionData): Observable<any> {
+    return this.dialogModalService.openStringModal(
       'Create own copy',
-      'Do you want to create your own copy of this session to modify it?',
+      'You are not allowed to modify this session. Do you want to create your own copy of it?',
       'Session name',
       sessionData.session.name,
-      'Copy')).flatMap(name => {
+      'Copy')
+      .flatMap(name => {
 
         console.log('create own copy');
 
-      let copySessionObservable = this.sessionResource.copySession(sessionData, name)
-        .share();
+        let copySessionObservable = this.sessionResource.copySession(sessionData, name)
+          .share();
 
-      this.dialogModalService.openSpinnerModal('Create own copy', copySessionObservable);
+        this.dialogModalService.openSpinnerModal('Create own copy', copySessionObservable);
 
-      return copySessionObservable;
+        return copySessionObservable;
     });
   }
 
-  private checkReadWritaAccess(sessionData: SessionData, obj: Session|Dataset|Job): Observable<SessionCopyMapping> {
+  checkReadWriteAccess(sessionData: SessionData): Observable<boolean> {
     if(this.hasReadWriteAccess(sessionData)) {
-      return Observable.of(new SessionCopyMapping().dummy(sessionData));
+      return Observable.of(null);
     } else {
-      return this.createOwnCopyModal(sessionData, obj);
+      return this.createOwnCopyModal(sessionData)
+        .flatMap(sessionCopyMapping => {
+          let promise = this.router.navigate(['/sessions', sessionCopyMapping.sessionId]);
+          return Observable.fromPromise(promise)
+            .flatMap(() => Observable.never());
+        });
     }
   }
 

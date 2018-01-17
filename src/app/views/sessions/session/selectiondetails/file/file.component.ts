@@ -7,6 +7,7 @@ import {SessionData} from "../../../../../model/session/session-data";
 import {DatasetModalService} from "../datasetmodal.service";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import * as _ from 'lodash';
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'ch-file',
@@ -29,14 +30,18 @@ export class FileComponent {
 
   renameDataset() {
     let dataset = _.clone(this.dataset);
-    this.dialogModalService.openStringModal("Rename dataset", null, "Dataset name", dataset.name, "Rename").then((name) => {
-      if (name) {
-        dataset.name = name;
-        this.sessionDataService.updateDataset(dataset);
-      }
-    }, () => {
-      // modal dismissed
-    });
+    this.sessionDataService.checkReadWriteAccess(this.sessionData)
+      .flatMap(() => this.dialogModalService.openStringModal(
+          "Rename dataset", null, "Dataset name", dataset.name, "Rename"))
+      .flatMap((name) => {
+        if (name) {
+          dataset.name = name;
+          return this.sessionDataService.updateDataset(dataset);
+        } else {
+          return Observable.never<string>();
+        }
+      })
+      .subscribe(null, err => console.log('dataset rename error', err));
   }
 
   deleteDatasets() {

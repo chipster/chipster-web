@@ -18,6 +18,7 @@ import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import UtilsService from "../../../../../shared/utilities/utils";
 import {SessionData} from "../../../../../model/session/session-data";
+import {SessionCopyMapping} from "../../../../../shared/resources/session.resource";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -483,13 +484,24 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       })
       .each((d) => {
         if (d.dataset) {
-          d.dataset.x = d.x;
-          d.dataset.y = d.y;
+          let datasetCopy = _.cloneDeep(d.dataset);
+          datasetCopy.x = d.x;
+          datasetCopy.y = d.y;
 
           //FIXME don't ask many times for own copy if multiple selection
-          this.sessionDataService.updateDataset(this.sessionData, d.dataset)
+          //FIXME error handling
+          this.sessionDataService.checkReadWriteAccess(this.sessionData)
+            .catch(err => {
+              console.log('dialog dismissed');
+              this.update();
+              this.renderGraph();
+              return Observable.never<SessionCopyMapping>();
+            })
+            // update only if the session wasn't copied (because the IDs have changed
+            .filter(sessionCopyMapping => sessionCopyMapping.sessionId === this.sessionData.session.sessionId)
+            .flatMap(() => this.sessionDataService.updateDataset(datasetCopy))
             .subscribe(() => null,
-              err => console.log(err));
+              err => console.log('dataset update error', err));
         }
       });
 

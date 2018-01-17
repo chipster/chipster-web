@@ -5,6 +5,7 @@ import {BooleanModalComponent} from "./booleanmodal/booleanmodal.component";
 import {NotesModalComponent} from "./notesmodal/notesmodal.component";
 import {SharingModalComponent} from "./sharingmodal/sharingmodal.component";
 import {SpinnerModalComponent} from "./spinnermodal/spinnermodal.component";
+import {Observable} from "rxjs/Observable";
 
 @Injectable()
 export class DialogModalService {
@@ -24,7 +25,13 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
 
-    return modalRef.result;
+    console.log('dialog promise', modalRef.result);
+
+    return Observable.fromPromise(modalRef.result)
+      .catch(err => {
+        console.log('modal dismissed', err);
+        return Observable.never();
+      });
   }
 
   openBooleanModal(title, message, okButtonText, cancelButtonText) {
