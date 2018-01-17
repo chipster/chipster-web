@@ -172,7 +172,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
     // pan or zoom
-    setTimeout(this.setScrollLimits.bind(this), 0)
+    setTimeout(() => {
+      // check that the element isn't removed already (e.g. when removing many sessions fast)
+      if (document.getElementById('d3JobNodesGroup')) {
+        this.setScrollLimits();
+      }
+    }, 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -488,18 +493,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           datasetCopy.x = d.x;
           datasetCopy.y = d.y;
 
-          //FIXME don't ask many times for own copy if multiple selection
-          //FIXME error handling
-          this.sessionDataService.checkReadWriteAccess(this.sessionData)
-            .catch(err => {
-              console.log('dialog dismissed');
-              this.update();
-              this.renderGraph();
-              return Observable.never<SessionCopyMapping>();
-            })
-            // update only if the session wasn't copied (because the IDs have changed
-            .filter(sessionCopyMapping => sessionCopyMapping.sessionId === this.sessionData.session.sessionId)
-            .flatMap(() => this.sessionDataService.updateDataset(datasetCopy))
+            this.sessionDataService.updateDataset(datasetCopy)
             .subscribe(() => null,
               err => console.log('dataset update error', err));
         }

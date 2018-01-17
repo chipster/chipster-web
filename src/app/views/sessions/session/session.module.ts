@@ -18,6 +18,7 @@ import {ToolSelectionService} from "./tool.selection.service";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
 import {SplitPaneModule} from "ng2-split-pane/lib/ng2-split-pane";
+import {ModifiedSessionGuard} from "./modified-session.guard";
 
 @NgModule({
   imports: [
@@ -28,7 +29,14 @@ import {SplitPaneModule} from "ng2-split-pane/lib/ng2-split-pane";
     SessionListComponent,
     OpenSessionFile,
     JobErrorModalComponent],
-  providers: [SessionEventService, SessionDataService, UploadService, SelectionHandlerService, ToolSelectionService],
+  providers: [
+    SessionEventService,
+    SessionDataService,
+    UploadService,
+    SelectionHandlerService,
+    ToolSelectionService,
+    ModifiedSessionGuard
+  ],
   entryComponents: [JobErrorModalComponent]
 })
 export class SessionModule{}
