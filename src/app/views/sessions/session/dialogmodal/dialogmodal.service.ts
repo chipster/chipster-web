@@ -17,8 +17,18 @@ export class DialogModalService {
     return this.openStringModal(title, null, "Session name", name, buttonText);
   }
 
-  openStringModal(title, description, value, buttonText) {
-    let modalRef = this.modalService.open(StringModalComponent);
+  openStringModal(title, message, description, value, buttonText, cancelButtonText = 'Cancel', closeOnBackdropClick = true) {
+
+    let ngbModalOptions: NgbModalOptions = {};
+
+    if (!closeOnBackdropClick) {
+      ngbModalOptions = {
+        backdrop : 'static',
+        keyboard : false
+      };
+    }
+
+    let modalRef = this.modalService.open(StringModalComponent, ngbModalOptions);
     modalRef.componentInstance.value = value;
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.message = message;
@@ -27,7 +37,16 @@ export class DialogModalService {
     modalRef.componentInstance.cancelButtonText = cancelButtonText;
     modalRef.componentInstance.placeHolder = '';
 
-    return modalRef.result;
+    return Observable.fromPromise(modalRef.result)
+      .catch(err => {
+        if (err === undefined) {
+          // dialog dismissed
+          return Observable.empty();
+        } else {
+          // real error
+          throw err;
+        }
+      });
   }
 
   openBooleanModal(title, message, okButtonText, cancelButtonText) {
