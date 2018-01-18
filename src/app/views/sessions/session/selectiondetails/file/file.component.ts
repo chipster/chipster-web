@@ -30,7 +30,7 @@ export class FileComponent {
   renameDataset() {
     let dataset = _.clone(this.dataset);
     this.dialogModalService.openStringModal(
-      "Rename dataset", null, "Dataset name",
+      "Rename dataset", "Dataset name",
       dataset.name, "Rename")
       .flatMap(name => {
         dataset.name = name;

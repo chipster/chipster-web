@@ -33,7 +33,6 @@ export class SessionComponent implements OnInit, OnDestroy{
   private statusText: string;
 
   private PARAM_TEMP_COPY = 'tempCopy';
-  private NAME_TEMP_COPY_PREFIX = 'Copy of ';
 
   constructor(
     private router: Router,
@@ -69,8 +68,8 @@ export class SessionComponent implements OnInit, OnDestroy{
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
           return Observable.of(sessionData);
         } else {
-          this.statusText = "Creating own copy...";
-          return this.sessionResource.copySession(sessionData, this.NAME_TEMP_COPY_PREFIX + sessionData.session.name)
+          this.statusText = "Copying session...";
+          return this.sessionResource.copySession(sessionData, sessionData.session.name)
             .flatMap(sessionId => {
               let queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
@@ -109,50 +108,44 @@ export class SessionComponent implements OnInit, OnDestroy{
 
   canDeactivate() {
 
-    console.log('session view closing');
     if (this.PARAM_TEMP_COPY in this.route.snapshot.params) {
 
-      let sessionName = this.sessionData.session.name;
+      const keepButton = 'Keep';
+      const deleteButton = 'Delete';
 
-      if (sessionName.startsWith(this.NAME_TEMP_COPY_PREFIX)) {
-        sessionName = sessionName.slice(this.NAME_TEMP_COPY_PREFIX.length);
-      }
+      return this.dialogModalService.openTempCopyModal(
+        'Keep copy?',
+        'This session is a copy of another read-only session. Do you want to keep it?',
+        this.sessionData.session.name,
+        keepButton,
+        deleteButton)
 
-      return this.dialogModalService.openStringModal(
-        'Keep own copy?',
-        'This is your own copy of another read-only session. Do you want to keep it?',
-        'Session name', sessionName,
-        'Keep',
-        'Delete',
-        false)
-        .do(name => sessionName = name)
-        .isEmpty()
-        .flatMap(dialogCancelled => {
-          if (dialogCancelled) {
-            // dialog was cancelled if the sequence is empty
-            return this.delete();
-          } else {
-            return this.rename(sessionName);
+        .flatMap(dialogResult => {
+          if (dialogResult.button === keepButton) {
+
+            this.sessionData.session.name = dialogResult.value;
+            return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
+
+          } else if (dialogResult.button === deleteButton) {
+
+            // the user doesn't need to be notified that the session is deleted
+            this.SessionEventService.unsubscribe();
+            return this.sessionDataService.deletePersonalRules(this.sessionData.session);
           }
         })
-        // let the route change continue in any case
-        .map(() => true);
+        .map(() => true)
+        .catch(err => {
+            if (err === undefined || err === 0 || err === 1) {
+              // dialog cancel, backdrop click or esc
+              return Observable.of(false);
+            } else {
+              throw err;
+            }
+        });
+
     } else {
       return Observable.of(true);
     }
-  }
-
-  private rename(name: string) {
-    console.log('rename', name);
-    this.sessionData.session.name = name;
-    return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
-  }
-
-  private delete() {
-    console.log('delete session');
-    // the user doesn't need to be notified that the session is deleted
-    this.SessionEventService.unsubscribe();
-    return this.sessionDataService.deletePersonalRules(this.sessionData.session);
   }
 
   subscribeToEvents() {

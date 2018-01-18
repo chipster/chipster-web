@@ -1,11 +1,12 @@
 import {Injectable} from "@angular/core";
-import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {StringModalComponent} from "./stringmodal/stringmodal.component";
 import {BooleanModalComponent} from "./booleanmodal/booleanmodal.component";
 import {NotesModalComponent} from "./notesmodal/notesmodal.component";
 import {SharingModalComponent} from "./sharingmodal/sharingmodal.component";
 import {SpinnerModalComponent} from "./spinnermodal/spinnermodal.component";
 import {Observable} from "rxjs/Observable";
+import {TempCopyModalComponent} from "./temp-copy-modal/temp-copy-modal.component";
 
 @Injectable()
 export class DialogModalService {
@@ -14,27 +15,16 @@ export class DialogModalService {
   }
 
   openSessionNameModal(title, name, buttonText = 'Save'): Observable<string> {
-    return this.openStringModal(title, null, "Session name", name, buttonText);
+    return this.openStringModal(title, "Session name", name, buttonText);
   }
 
-  openStringModal(title, message, description, value, buttonText, cancelButtonText = 'Cancel', closeOnBackdropClick = true) {
+  openStringModal(title, description, value, buttonText) {
 
-    let ngbModalOptions: NgbModalOptions = {};
-
-    if (!closeOnBackdropClick) {
-      ngbModalOptions = {
-        backdrop : 'static',
-        keyboard : false
-      };
-    }
-
-    let modalRef = this.modalService.open(StringModalComponent, ngbModalOptions);
+    let modalRef = this.modalService.open(StringModalComponent);
     modalRef.componentInstance.value = value;
     modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
-    modalRef.componentInstance.cancelButtonText = cancelButtonText;
     modalRef.componentInstance.placeHolder = '';
 
     return Observable.fromPromise(modalRef.result)
@@ -48,6 +38,21 @@ export class DialogModalService {
         }
       });
   }
+
+  openTempCopyModal(title, message, value, button1Text, button2Text) {
+
+    let modalRef = this.modalService.open(TempCopyModalComponent);
+    modalRef.componentInstance.value = value;
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.description = 'Session name';
+    modalRef.componentInstance.button1Text = button1Text;
+    modalRef.componentInstance.button2Text = button2Text;
+    modalRef.componentInstance.placeHolder = '';
+
+    return Observable.fromPromise(modalRef.result);
+  }
+
 
   openBooleanModal(title, message, okButtonText, cancelButtonText) {
     let modalRef = this.modalService.open(BooleanModalComponent);

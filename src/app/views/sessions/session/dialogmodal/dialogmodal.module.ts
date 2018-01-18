@@ -9,12 +9,27 @@ import {BooleanModalComponent} from "./booleanmodal/booleanmodal.component";
 import {NotesModalComponent} from "./notesmodal/notesmodal.component";
 import {SharingModalComponent} from "./sharingmodal/sharingmodal.component";
 import {SpinnerModalComponent} from "./spinnermodal/spinnermodal.component";
+import {TempCopyModalComponent} from "./temp-copy-modal/temp-copy-modal.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
-  declarations: [StringModalComponent, BooleanModalComponent, NotesModalComponent, SharingModalComponent, SpinnerModalComponent],
+  declarations: [
+    StringModalComponent,
+    BooleanModalComponent,
+    NotesModalComponent,
+    SharingModalComponent,
+    SpinnerModalComponent,
+    TempCopyModalComponent
+  ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],
-  entryComponents: [StringModalComponent, BooleanModalComponent, NotesModalComponent, SharingModalComponent, SpinnerModalComponent]
+  entryComponents: [
+    StringModalComponent,
+    BooleanModalComponent,
+    NotesModalComponent,
+    SharingModalComponent,
+    SpinnerModalComponent,
+    TempCopyModalComponent
+  ]
 })
 export class DialogModalModule { }

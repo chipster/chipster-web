@@ -2,14 +2,16 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 
 @Component({
-  templateUrl: './stringmodal.component.html'
+  templateUrl: './temp-copy-modal.component.html'
 })
-export class StringModalComponent implements AfterViewInit {
+export class TempCopyModalComponent implements AfterViewInit {
 
-  @Input() buttonText: string;
+  @Input() button1Text: string;
+  @Input() button2Text: string;
   @Input() description: string;
   @Input() value: string;
   @Input() title: string;
+  @Input() message: string;
   @Input() placeHolder: string;
 
   @ViewChild('valueInput') valueInput;
@@ -22,8 +24,12 @@ export class StringModalComponent implements AfterViewInit {
     setTimeout(() => this.valueInput.nativeElement.select());
   }
 
-  save() {
-    this.activeModal.close(this.value);
+  save(button: string) {
+    console.log('save()', button, this.value);
+    this.activeModal.close({
+      value: this.value,
+      button: button
+    });
   }
 
   cancel() {

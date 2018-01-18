@@ -403,7 +403,6 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     this.stringModalService.openStringModal(
       'Add new column',
-      null,
       'Column name',
       '', 'Add')
       .do(name => {
