@@ -169,7 +169,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
     // pan or zoom
-    setTimeout(this.setScrollLimits.bind(this), 0);
+    setTimeout(() => {
+      // check that the element isn't removed already (e.g. when removing many sessions fast)
+      if (document.getElementById('d3JobNodesGroup')) {
+        this.setScrollLimits();
+      }
+    }, 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
