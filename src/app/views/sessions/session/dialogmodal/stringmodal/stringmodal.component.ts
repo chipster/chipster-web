@@ -2,7 +2,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 
 @Component({
-  templateUrl: './stringmodal.html'
+  templateUrl: './stringmodal.component.html'
 })
 export class StringModalComponent implements AfterViewInit {
 
@@ -12,6 +12,7 @@ export class StringModalComponent implements AfterViewInit {
   @Input() value: string;
   @Input() title: string;
   @Input() message: string;
+  @Input() placeHolder: string;
 
   @ViewChild('valueInput') valueInput;
 
@@ -20,6 +21,7 @@ export class StringModalComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.valueInput.nativeElement.focus();
+    setTimeout(() => this.valueInput.nativeElement.select());
   }
 
   save() {

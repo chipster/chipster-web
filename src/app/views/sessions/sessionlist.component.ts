@@ -6,8 +6,6 @@ import {Component} from "@angular/core";
 import {Router} from "@angular/router";
 import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
 import {Subject} from "rxjs";
-import {TokenService} from "../../core/authentication/token.service";
-import Rule from "../../model/session/rule";
 import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {SessionDataService} from "./session/sessiondata.service";
 
@@ -70,14 +68,24 @@ export class SessionListComponent {
   }
 
   createSession() {
+    const defaultName = "New session";
 
-    let session = new Session('New session');
-    this.sessionResource.createSession(session).subscribe((sessionId: string) => {
-      session.sessionId = sessionId;
-      this.openSession(sessionId)
-    }, (error: any) => {
-      this.errorHandlerService.handleError(error, "Creating a new session failed");
-    });
+    this.dialogModalService.openSessionNameModal("New session", defaultName, "Create")
+      .then(name => {
+        if (!name) {
+          name = defaultName;
+        }
+
+        let session = new Session(name);
+        this.sessionResource.createSession(session).subscribe((sessionId: string) => {
+          session.sessionId = sessionId;
+          this.openSession(sessionId)
+        }, (error: any) => {
+          this.errorHandlerService.handleError(error, "Creating a new session failed");
+        });
+      }, () => {
+        // modal dismissed
+      });
   }
 
   updateSessions() {

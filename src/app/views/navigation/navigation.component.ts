@@ -1,31 +1,31 @@
-import {Component} from '@angular/core';
 import {AuthenticationService} from "../../core/authentication/authenticationservice";
 import {TokenService} from "../../core/authentication/token.service";
 
+import {Component} from '@angular/core';
+import {Observable} from "rxjs/Observable";
+
 @Component({
   selector: 'ch-navigation',
-  templateUrl: './navigation.html',
+  templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.less']
 })
 export class NavigationComponent {
 
-    username: string;
+  username$: Observable<string>;
 
-    constructor(
-      private tokenService: TokenService,
-      private authenticationService: AuthenticationService){}
+  constructor(
+    private tokenService: TokenService,
+    private authenticationService: AuthenticationService) {
+    this.username$ = tokenService.getUsername$();
+  }
 
-    ngOnInit() {
-      this.username = this.tokenService.getUsername();
+  logout() {
+    this.authenticationService.logout();
+  };
+
+  isLoggedIn() {
+    if (this.tokenService.getToken()) {
+      return true;
     }
-
-    logout() {
-        this.authenticationService.logout();
-    };
-
-    isLoggedIn() {
-      if(this.tokenService.getToken()) {
-        return true;
-      }
-    };
+  };
 }

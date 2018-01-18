@@ -2,7 +2,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 
 @Component({
-  templateUrl: './booleanmodal.html'
+  templateUrl: './booleanmodal.component.html'
 })
 export class BooleanModalComponent implements AfterViewInit{
 

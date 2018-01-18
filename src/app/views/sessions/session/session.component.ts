@@ -17,7 +17,6 @@ import {ErrorService} from "../../../core/errorhandler/error.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {DialogModalService} from "./dialogmodal/dialogmodal.service";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
-import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'ch-session',
@@ -26,208 +25,138 @@ import {Observable} from "rxjs/Observable";
 })
 export class SessionComponent implements OnInit, OnDestroy{
 
-    sessionData: SessionData;
-    deletedDatasets: Array<Dataset>;
-    deletedDatasetsTimeout: any;
-    subscriptions: Array<any> = [];
-    private statusText: string;
+  sessionData: SessionData;
+  deletedDatasets: Array<Dataset>;
+  deletedDatasetsTimeout: any;
+  subscriptions: Array<any> = [];
+  private statusText: string;
 
-    private PARAM_TEMP_COPY = 'tempCopy';
-    private NAME_TEMP_COPY_PREFIX = 'Copy of ';
+  constructor(
+    private router: Router,
+    private SessionEventService: SessionEventService,
+    private sessionDataService: SessionDataService,
+    private sessionResource: SessionResource,
+    private selectionService: SelectionService,
+    private selectionHandlerService: SelectionHandlerService,
+    private route: ActivatedRoute,
+    private modalService: NgbModal,
+    private errorService: ErrorService,
+    private errorHandlerService: RestErrorService,
+    private dialogModalService: DialogModalService,
+    private sessionWorkerResource: SessionWorkerResource) {
+  }
 
-    constructor(
-        private router: Router,
-        private SessionEventService: SessionEventService,
-        private sessionDataService: SessionDataService,
-        private sessionResource: SessionResource,
-        private selectionService: SelectionService,
-        private selectionHandlerService: SelectionHandlerService,
-        private route: ActivatedRoute,
-        private modalService: NgbModal,
-        private errorService: ErrorService,
-        private errorHandlerService: RestErrorService,
-        private dialogModalService: DialogModalService,
-        private sessionWorkerResource: SessionWorkerResource) {
-    }
 
-    ngOnInit() {
-      // this.sessionData = this.route.snapshot.data['sessionData'];
 
-      this.route.params.flatMap(params => {
-        /*
-        Load session after every route change, not just once
+  ngOnInit() {
+    this.statusText = "Loading session...";
+    // this.sessionData = this.route.snapshot.data['sessionData'];
 
-        Also this component can be reused, e.g. when a user creates her own copy
-        of an example session, she is directed to the new session.
-         */
-        this.statusText = "Loading session...";
-        this.selectionHandlerService.clearSelections();
-        this.sessionData = null;
-        return this.sessionResource.loadSession(params['sessionId']);
-      })
-        .flatMap(sessionData => {
-          if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
-            return Observable.of(sessionData);
-          } else {
-            this.statusText = "Creating own copy...";
-            return this.sessionResource.copySession(sessionData, this.NAME_TEMP_COPY_PREFIX + sessionData.session.name)
-              .flatMap(sessionId => {
-                let queryParams = {};
-                queryParams[this.PARAM_TEMP_COPY] = true;
-                return Observable.fromPromise(this.router.navigate(
-                  ['/sessions', sessionId, queryParams]));
-              })
-              .flatMap(() => Observable.never<SessionData>());
-          }
-      }).subscribe(sessionData => {
-        this.sessionData = sessionData;
-        this.subscribeToEvents();
-      }, (error: any) => {
-        this.statusText = "";
-        this.errorHandlerService.handleError(error, "Loading session failed");
-      });
+    this.selectionHandlerService.clearSelections();
 
-      // Select datasets provided via queryparameter and clear queryparameters
-      this.route.queryParams.subscribe( (queryParams: Params) => {
-        const datasets = this.parseQueryparametersArray(queryParams, 'id')
-          .map( (datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
-        if(datasets.length > 0) {
-          this.selectionHandlerService.setDatasetSelection(datasets);
-          const sessionId = this.route.snapshot.params['sessionId'];
-          const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId] );
-          this.router.navigateByUrl(urlTree);
-        }
-      }).unsubscribe();
-    }
+    this.route.params.flatMap(params => {
+      return this.sessionResource.loadSession(params['sessionId']);
+    }).subscribe(sessionData => {
+      this.sessionData = sessionData;
+      this.subscribeToEvents();
+    }, (error: any) => {
+      this.statusText = "";
+      this.errorHandlerService.handleError(error, "Loading session failed");
+    });
 
-    ngOnDestroy() {
-      this.SessionEventService.unsubscribe();
-
-      this.subscriptions.forEach(subs => subs.unsubscribe());
-      this.subscriptions = [];
-    }
-
-  canDeactivate() {
-
-      console.log('session view closing');
-      if (this.PARAM_TEMP_COPY in this.route.snapshot.params) {
-
-        let sessionName = this.sessionData.session.name;
-
-        if (sessionName.startsWith(this.NAME_TEMP_COPY_PREFIX)) {
-          sessionName = sessionName.slice(this.NAME_TEMP_COPY_PREFIX.length);
-        }
-
-        return this.dialogModalService.openStringModal(
-          'Keep own copy?',
-          'This is your own copy of another read-only session. Do you want to keep it?',
-          'Session name', sessionName,
-          'Keep',
-          'Delete',
-          false)
-          .do(name => sessionName = name)
-          .isEmpty()
-          .flatMap(dialogCancelled => {
-            if (dialogCancelled) {
-              // dialog was cancelled if the sequence is empty
-              return this.delete();
-            } else {
-              return this.rename(sessionName);
-            }
-          })
-          // let the route change continue in any case
-          .map(() => true);
-      } else {
-        return Observable.of(true);
+    // Select datasets provided via queryparameter and clear queryparameters
+    this.route.queryParams.subscribe( (queryParams: Params) => {
+      const datasets = this.parseQueryparametersArray(queryParams, 'id')
+        .map( (datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
+      if(datasets.length > 0) {
+        this.selectionHandlerService.setDatasetSelection(datasets);
+        const sessionId = this.route.snapshot.params['sessionId'];
+        const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId] );
+        this.router.navigateByUrl(urlTree);
       }
-    }
+    }).unsubscribe();
+  }
 
-    private rename(name: string) {
-      console.log('rename', name);
-      this.sessionData.session.name = name;
-      return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
-    }
+  ngOnDestroy() {
+    this.SessionEventService.unsubscribe();
 
-    private delete() {
-      console.log('delete session');
-      // the user doesn't need to be notified that the session is deleted
-      this.SessionEventService.unsubscribe();
-      return this.sessionDataService.deletePersonalRules(this.sessionData.session);
-    }
+    this.subscriptions.forEach(subs => subs.unsubscribe());
+    this.subscriptions = [];
+  }
 
-    subscribeToEvents() {
-      // Services don't have access to ActivatedRoute, so we have to set it
-      this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
+  subscribeToEvents() {
+    // Services don't have access to ActivatedRoute, so we have to set it
+    this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
 
-      // start listening for remote changes
-      // in theory we may miss an update between the loadSession() and this subscribe(), but
-      // the safe way would be much more complicated:
-      // - subscribe but put the updates in queue
-      // - loadSession().then()
-      // - apply the queued updates
+    // start listening for remote changes
+    // in theory we may miss an update between the loadSession() and this subscribe(), but
+    // the safe way would be much more complicated:
+    // - subscribe but put the updates in queue
+    // - loadSession().then()
+    // - apply the queued updates
 
-      this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
+    this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-      this.subscriptions.push(this.SessionEventService.getAuthorizationStream().subscribe(change => {
-        if (change.event.type === 'DELETE') {
-          alert('The session has been deleted.');
-          this.router.navigate(['/sessions']);
+    this.subscriptions.push(this.SessionEventService.getAuthorizationStream().subscribe(change => {
+      if (change.event.type === 'DELETE') {
+        alert('The session has been deleted.');
+        this.router.navigate(['/sessions']);
+      }
+    }));
+
+    this.subscriptions.push(this.SessionEventService.getJobStream().subscribe(change => {
+
+      let oldValue = <Job>change.oldValue;
+      let newValue = <Job>change.newValue;
+
+      // if not cancelled
+      if (newValue) {
+        // if the job has just failed
+        if (newValue.state === 'EXPIRED_WAITING' && oldValue.state !== 'EXPIRED_WAITING') {
+          this.openErrorModal('Job expired', newValue);
+          console.info(newValue);
         }
-      }));
-
-      this.subscriptions.push(this.SessionEventService.getJobStream().subscribe(change => {
-
-        let oldValue = <Job>change.oldValue;
-        let newValue = <Job>change.newValue;
-
-        // if not cancelled
-        if (newValue) {
-          // if the job has just failed
-          if (newValue.state === 'EXPIRED_WAITING' && oldValue.state !== 'EXPIRED_WAITING') {
-            this.openErrorModal('Job expired', newValue);
-            console.info(newValue);
-          }
-          if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
-            this.openErrorModal('Job failed', newValue);
-            console.info(newValue);
-          }
-          if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
-            this.openErrorModal('Job error', newValue);
-            console.info(newValue);
-          }
+        if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+          this.openErrorModal('Job failed', newValue);
+          console.info(newValue);
         }
-      }));
-    }
+        if (newValue.state === 'ERROR' && oldValue.state !== 'ERROR') {
+          this.openErrorModal('Job error', newValue);
+          console.info(newValue);
+        }
+      }
+    }));
+  }
 
-    getJob(jobId: string): Job {
-        return this.sessionData.jobsMap.get(jobId);
-    }
+  getJob(jobId: string): Job {
+    return this.sessionData.jobsMap.get(jobId);
+  }
 
-    deleteDatasetsNow() {
-        // cancel the timer
-        clearTimeout(this.deletedDatasetsTimeout);
+  deleteDatasetsNow() {
+    // cancel the timer
+    clearTimeout(this.deletedDatasetsTimeout);
 
-        // delete from the server
-        this.sessionDataService.deleteDatasets(this.deletedDatasets);
+    // delete from the server
+    this.sessionDataService.deleteDatasets(this.deletedDatasets);
 
-        // hide the undo message
-        this.deletedDatasets = null;
-    }
+    // hide the undo message
+    this.deletedDatasets = null;
+  }
 
-    deleteDatasetsUndo() {
-        // cancel the deletion
-        clearTimeout(this.deletedDatasetsTimeout);
+  deleteDatasetsUndo() {
+    // cancel the deletion
+    clearTimeout(this.deletedDatasetsTimeout);
 
-        // show datasets again in the workflowgraph
-        this.deletedDatasets.forEach((dataset: Dataset) => {
-            let wsEvent = new WsEvent(
-              this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'CREATE');
-            this.SessionEventService.generateLocalEvent(wsEvent);
-        });
+    // show datasets again in the workflowgraph
+    this.deletedDatasets.forEach((dataset: Dataset) => {
+      let wsEvent = new WsEvent(
+        this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'CREATE');
+      this.SessionEventService.generateLocalEvent(wsEvent);
+    });
 
-        // hide the undo message
-        this.deletedDatasets = null;
-    }
+    // hide the undo message
+    this.deletedDatasets = null;
+  }
 
   /**
    * Poor man's undo for the dataset deletion.
@@ -239,79 +168,76 @@ export class SessionComponent implements OnInit, OnDestroy{
    */
   deleteDatasetsLater() {
 
-        // let's assume that user doesn't want to undo, if she is already
-        // deleting more
-        if (this.deletedDatasets) {
-          this.deleteDatasetsNow();
-        }
-
-        // make a copy so that further selection changes won't change the array
-        this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
-
-        // all selected datasets are going to be deleted
-        // clear selection to avoid problems in other parts of the UI
-        this.selectionHandlerService.clearDatasetSelection();
-
-        // hide from the workflowgraph
-        this.deletedDatasets.forEach((dataset: Dataset) => {
-          let wsEvent = new WsEvent(
-            this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'DELETE');
-          this.SessionEventService.generateLocalEvent(wsEvent);
-        });
-
-        // start timer to delete datasets from the server later
-        this.deletedDatasetsTimeout = setTimeout(() => {
-            this.deleteDatasetsNow();
-        }, 10 * 1000);
+    // let's assume that user doesn't want to undo, if she is already
+    // deleting more
+    if (this.deletedDatasets) {
+      this.deleteDatasetsNow();
     }
 
-    exportDatasets(datasets: Dataset[]) {
-        this.sessionDataService.exportDatasets(datasets);
-    }
+    // make a copy so that further selection changes won't change the array
+    this.deletedDatasets = _.clone(this.selectionService.selectedDatasets);
 
-    // noinspection JSMethodCanBeStatic
+    // all selected datasets are going to be deleted
+    // clear selection to avoid problems in other parts of the UI
+    this.selectionHandlerService.clearDatasetSelection();
+
+    // hide from the workflowgraph
+    this.deletedDatasets.forEach((dataset: Dataset) => {
+      let wsEvent = new WsEvent(
+        this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'DELETE');
+      this.SessionEventService.generateLocalEvent(wsEvent);
+    });
+
+    // start timer to delete datasets from the server later
+    this.deletedDatasetsTimeout = setTimeout(() => {
+      this.deleteDatasetsNow();
+    }, 10 * 1000);
+  }
+
+  exportDatasets(datasets: Dataset[]) {
+    this.sessionDataService.exportDatasets(datasets);
+  }
+
+  // noinspection JSMethodCanBeStatic
   parseQueryparametersArray(queryParams: Params, key: string ): Array<string> {
-      switch(typeof queryParams[key]) {
-        case 'string':
-          return [queryParams[key]];
-        case 'object':
-          return queryParams[key];
-        default:
-          return [];
-      }
+    switch(typeof queryParams[key]) {
+      case 'string':
+        return [queryParams[key]];
+      case 'object':
+        return queryParams[key];
+      default:
+        return [];
     }
+  }
 
-    openErrorModal(title: string, job: Job) {
-      let modalRef = this.modalService.open(JobErrorModalComponent, {size: 'lg'});
-      modalRef.componentInstance.title = title;
-      modalRef.componentInstance.job = job;
+  openErrorModal(title: string, job: Job) {
+    let modalRef = this.modalService.open(JobErrorModalComponent, {size: 'lg'});
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.job = job;
 
-      modalRef.result.then(() => {
-        this.sessionDataService.deleteJobs([job]);
-      }, () => {
-        // modal dismissed
-        this.sessionDataService.deleteJobs([job]);
-      });
-    }
+    modalRef.result.then(() => {
+      this.sessionDataService.deleteJobs([job]);
+    }, () => {
+      // modal dismissed
+      this.sessionDataService.deleteJobs([job]);
+    });
+  }
 
   renameSessionModal() {
-
-    this.dialogModalService.openSessionNameModal(
-      'Rename session',
-      this.sessionData.session.name)
-      .flatMap((name: string) => {
-        console.log('renameSessionModal', name);
-        this.sessionData.session.name = name;
-        return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
-      })
-      .subscribe(null, err => this.errorService.error('session rename error', err));
+    this.dialogModalService.openSessionNameModal('Rename session', this.sessionData.session.name,
+      "Rename").then(name => {
+      this.sessionData.session.name = name;
+      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
+    }, () => {
+      // modal dismissed
+    });
   }
 
   notesModal() {
 
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
-      this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => {}, err => {
+      this.sessionDataService.updateSession(this.sessionData.session).subscribe(() => {}, err => {
         this.errorService.headerError('Failed to update session notes: ' + err, true);
       })
     }, () => {
@@ -324,14 +250,19 @@ export class SessionComponent implements OnInit, OnDestroy{
   }
 
   duplicateModal() {
-    this.dialogModalService.openSessionNameModal(
-      'Duplicate session',
-      this.sessionData.session.name + '_copy')
-      .flatMap(name => {
-        let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
-        return this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
-      })
-      .subscribe(null, err => this.errorService.error('duplicate session failed', err));
+    this.dialogModalService.openSessionNameModal('Duplicate session',
+      this.sessionData.session.name + '_copy',
+      "Duplicate").then(name => {
+      if (!name) {
+        name = 'unnamed session';
+      }
+
+      let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
+
+      this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
+    }, () => {
+      // modal dismissed
+    });
   }
 
   saveSessionFileModal() {
@@ -355,6 +286,7 @@ export class SessionComponent implements OnInit, OnDestroy{
       if (d.x || d.y) {
         d.x = null;
         d.y = null;
+
         this.sessionDataService.updateDataset(d);
       }
     });
