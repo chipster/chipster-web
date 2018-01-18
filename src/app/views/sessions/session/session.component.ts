@@ -17,6 +17,7 @@ import {ErrorService} from "../../../core/errorhandler/error.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {DialogModalService} from "./dialogmodal/dialogmodal.service";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'ch-session',
@@ -29,7 +30,10 @@ export class SessionComponent implements OnInit, OnDestroy{
     deletedDatasets: Array<Dataset>;
     deletedDatasetsTimeout: any;
     subscriptions: Array<any> = [];
-    private statusText: string
+    private statusText: string;
+
+    private PARAM_TEMP_COPY = 'tempCopy';
+    private NAME_TEMP_COPY_PREFIX = 'Copy of ';
 
     constructor(
         private router: Router,
@@ -46,16 +50,35 @@ export class SessionComponent implements OnInit, OnDestroy{
         private sessionWorkerResource: SessionWorkerResource) {
     }
 
-
-
     ngOnInit() {
-      this.statusText = "Loading session...";
       // this.sessionData = this.route.snapshot.data['sessionData'];
 
-      this.selectionHandlerService.clearSelections();
-
       this.route.params.flatMap(params => {
+        /*
+        Load session after every route change, not just once
+
+        Also this component can be reused, e.g. when a user creates her own copy
+        of an example session, she is directed to the new session.
+         */
+        this.statusText = "Loading session...";
+        this.selectionHandlerService.clearSelections();
+        this.sessionData = null;
         return this.sessionResource.loadSession(params['sessionId']);
+      })
+        .flatMap(sessionData => {
+          if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
+            return Observable.of(sessionData);
+          } else {
+            this.statusText = "Creating own copy...";
+            return this.sessionResource.copySession(sessionData, this.NAME_TEMP_COPY_PREFIX + sessionData.session.name)
+              .flatMap(sessionId => {
+                let queryParams = {};
+                queryParams[this.PARAM_TEMP_COPY] = true;
+                return Observable.fromPromise(this.router.navigate(
+                  ['/sessions', sessionId, queryParams]));
+              })
+              .flatMap(() => Observable.never<SessionData>());
+          }
       }).subscribe(sessionData => {
         this.sessionData = sessionData;
         this.subscribeToEvents();
@@ -82,6 +105,54 @@ export class SessionComponent implements OnInit, OnDestroy{
 
       this.subscriptions.forEach(subs => subs.unsubscribe());
       this.subscriptions = [];
+    }
+
+  canDeactivate() {
+
+      console.log('session view closing');
+      if (this.PARAM_TEMP_COPY in this.route.snapshot.params) {
+
+        let sessionName = this.sessionData.session.name;
+
+        if (sessionName.startsWith(this.NAME_TEMP_COPY_PREFIX)) {
+          sessionName = sessionName.slice(this.NAME_TEMP_COPY_PREFIX.length);
+        }
+
+        return this.dialogModalService.openStringModal(
+          'Keep own copy?',
+          'This is your own copy of another read-only session. Do you want to keep it?',
+          'Session name', sessionName,
+          'Keep',
+          'Delete',
+          false)
+          .do(name => sessionName = name)
+          .isEmpty()
+          .flatMap(dialogCancelled => {
+            if (dialogCancelled) {
+              // dialog was cancelled if the sequence is empty
+              return this.delete();
+            } else {
+              return this.rename(sessionName);
+            }
+          })
+          // let the route change continue in any case
+          .map(() => true);
+      } else {
+        return Observable.of(true);
+      }
+    }
+
+    private rename(name: string) {
+      console.log('rename', name);
+      this.sessionData.session.name = name;
+      return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
+    }
+
+    private delete() {
+      console.log('delete session');
+      // the user doesn't need to be notified that the session is deleted
+      this.SessionEventService.unsubscribe();
+      return this.sessionDataService.deletePersonalRules(this.sessionData.session);
     }
 
     subscribeToEvents() {
@@ -224,20 +295,23 @@ export class SessionComponent implements OnInit, OnDestroy{
     }
 
   renameSessionModal() {
-    this.dialogModalService.openSessionNameModal('Rename session', this.sessionData.session.name).then(name => {
-      console.log('renameSessionModal', name);
-      this.sessionData.session.name = name;
-      this.sessionDataService.updateSession(this.sessionData.session).subscribe();
-    }, () => {
-      // modal dismissed
-    });
+
+    this.dialogModalService.openSessionNameModal(
+      'Rename session',
+      this.sessionData.session.name)
+      .flatMap((name: string) => {
+        console.log('renameSessionModal', name);
+        this.sessionData.session.name = name;
+        return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
+      })
+      .subscribe(null, err => this.errorService.error('session rename error', err));
   }
 
   notesModal() {
 
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
-      this.sessionDataService.updateSession(this.sessionData.session).subscribe(() => {}, err => {
+      this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => {}, err => {
         this.errorService.headerError('Failed to update session notes: ' + err, true);
       })
     }, () => {
@@ -250,17 +324,14 @@ export class SessionComponent implements OnInit, OnDestroy{
   }
 
   duplicateModal() {
-    this.dialogModalService.openSessionNameModal('Duplicate session', this.sessionData.session.name + '_copy').then(name => {
-      if (!name) {
-        name = 'unnamed session';
-      }
-
-      let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
-
-      this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
-    }, () => {
-      // modal dismissed
-    });
+    this.dialogModalService.openSessionNameModal(
+      'Duplicate session',
+      this.sessionData.session.name + '_copy')
+      .flatMap(name => {
+        let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
+        return this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
+      })
+      .subscribe(null, err => this.errorService.error('duplicate session failed', err));
   }
 
   saveSessionFileModal() {
@@ -284,7 +355,6 @@ export class SessionComponent implements OnInit, OnDestroy{
       if (d.x || d.y) {
         d.x = null;
         d.y = null;
-
         this.sessionDataService.updateDataset(d);
       }
     });

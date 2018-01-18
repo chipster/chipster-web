@@ -7,9 +7,11 @@ import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 export class StringModalComponent implements AfterViewInit {
 
   @Input() buttonText: string;
+  @Input() cancelButtonText: string;
   @Input() description: string;
   @Input() value: string;
   @Input() title: string;
+  @Input() message: string;
 
   @ViewChild('valueInput') valueInput;
 

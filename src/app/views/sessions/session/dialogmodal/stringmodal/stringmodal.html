@@ -2,6 +2,9 @@
   <h4 class="modal-title">{{title}}</h4>
 </div>
 <div class="modal-body">
+  <p *ngIf="message">
+    {{message}}
+  </p>
     <div class="form-group">
       <label>{{description}}</label>
       <input #valueInput type="text" class="form-control"
@@ -12,6 +15,6 @@
 </div>
 <div class="modal-footer">
     <button type="submit" class="btn btn-info" (click)="save($event)">{{buttonText}}</button>
-    <button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-secondary pull-right" (click)="cancel()">{{cancelButtonText}}</button>
 </div>
 

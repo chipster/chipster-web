@@ -29,14 +29,14 @@ export class FileComponent {
 
   renameDataset() {
     let dataset = _.clone(this.dataset);
-    this.dialogModalService.openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename").then((name) => {
-      if (name) {
+    this.dialogModalService.openStringModal(
+      "Rename dataset", null, "Dataset name",
+      dataset.name, "Rename")
+      .flatMap(name => {
         dataset.name = name;
-        this.sessionDataService.updateDataset(dataset);
-      }
-    }, () => {
-      // modal dismissed
-    });
+        return this.sessionDataService.updateDataset(dataset);
+      })
+      .subscribe(null, err => console.log('dataset rename error', err));
   }
 
   deleteDatasets() {

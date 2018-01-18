@@ -169,7 +169,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
     // pan or zoom
-    setTimeout(this.setScrollLimits.bind(this), 0)
+    setTimeout(this.setScrollLimits.bind(this), 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -481,9 +481,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       })
       .each((d) => {
         if (d.dataset) {
-          d.dataset.x = d.x;
-          d.dataset.y = d.y;
-          this.sessionDataService.updateDataset(d.dataset);
+          let datasetCopy = _.cloneDeep(d.dataset);
+          datasetCopy.x = d.x;
+          datasetCopy.y = d.y;
+
+            this.sessionDataService.updateDataset(datasetCopy)
+            .subscribe(() => null,
+              err => console.log('dataset update error', err));
         }
       });
 

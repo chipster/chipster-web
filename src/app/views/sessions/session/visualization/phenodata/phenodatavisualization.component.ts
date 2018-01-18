@@ -8,6 +8,7 @@ import {Row} from "./phenodatarow.interface";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
+import {ErrorService} from "../../../../../core/errorhandler/error.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -36,7 +37,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     private tsvReader: TSVReader,
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
-    private zone: NgZone) {}
+    private zone: NgZone,
+    private errorService: ErrorService) {}
 
   ngOnInit() {
     this.updateView();
@@ -399,22 +401,26 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   addColumnModal() {
 
-    this.stringModalService.openStringModal("Add new column", "Column name", "", "Add").then((name) => {
-      this.zone.runOutsideAngular(() => {
-        var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
-        this.hot.alter('insert_col', colHeaders.length);
-        // remove undefined column header
-        colHeaders.pop();
-        colHeaders.push(name);
-        this.hot.updateSettings({
-          colHeaders: colHeaders
-        }, false);
+    this.stringModalService.openStringModal(
+      'Add new column',
+      null,
+      'Column name',
+      '', 'Add')
+      .do(name => {
+        this.zone.runOutsideAngular(() => {
+          var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
+          this.hot.alter('insert_col', colHeaders.length);
+          // remove undefined column header
+          colHeaders.pop();
+          colHeaders.push(name);
+          this.hot.updateSettings({
+            colHeaders: colHeaders
+          }, false);
+        });
 
         this.updateDatasets(false);
-      });
-    }, () => {
-        // modal dismissed
-    });
+      })
+      .subscribe(null, err => this.errorService.error('add column failed', err));
   }
 
   private hideColumnIfEmpty(headers: string[], array: Row[]) {

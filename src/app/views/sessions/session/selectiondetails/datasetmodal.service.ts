@@ -8,16 +8,7 @@ import {DatasetHistorymodalComponent} from "./datasethistorymodal/datasethistory
 @Injectable()
 export class DatasetModalService {
 
-  constructor(private ngbModal: NgbModal,
-              private sessionDataService: SessionDataService) {
-  }
-
-  renameDatasetDialog(dataset: Dataset) {
-    var result = prompt('Change the name of the node', dataset.name);
-    if (result) {
-      dataset.name = result;
-    }
-    this.sessionDataService.updateDataset(dataset);
+  constructor(private ngbModal: NgbModal) {
   }
 
   openDatasetHistoryModal(dataset: Dataset,sessionData:SessionData) {

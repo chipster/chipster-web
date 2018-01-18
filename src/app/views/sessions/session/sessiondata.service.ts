@@ -11,6 +11,9 @@ import {TokenService} from "../../../core/authentication/token.service";
 import {ErrorService} from "../../../core/errorhandler/error.service";
 import {RestService} from "../../../core/rest-services/restservice/rest.service";
 import Rule from "../../../model/session/rule";
+import {SessionData} from "../../../model/session/session-data";
+import {DialogModalService} from "./dialogmodal/dialogmodal.service";
+import {Router} from "@angular/router";
 
 @Injectable()
 export class SessionDataService {
@@ -101,14 +104,14 @@ export class SessionDataService {
   }
 
   updateDataset(dataset: Dataset) {
-    return this.sessionResource.updateDataset(this.getSessionId(), dataset).toPromise();
+    return this.sessionResource.updateDataset(this.sessionId, dataset);
   }
 
   updateJob(job: Job) {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
-  updateSession(session: Session) {
+  updateSession(sessionData: SessionData, session: Session) {
     return this.sessionResource.updateSession(session);
   }
 
@@ -156,12 +159,15 @@ export class SessionDataService {
     }
   }
 
-  hasReadWriteAccess(rules: Array<Rule>) {
-    rules.forEach(r => {
-      if (r.readWrite) {
+  hasReadWriteAccess(sessionData: SessionData) {
+
+    let rules = this.getApplicableRules(sessionData.session.rules);
+
+    for (let rule of rules) {
+      if (rule.readWrite) {
         return true;
       }
-    });
+    }
     return false;
   }
 
