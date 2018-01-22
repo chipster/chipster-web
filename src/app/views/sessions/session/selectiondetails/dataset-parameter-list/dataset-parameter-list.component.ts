@@ -5,31 +5,18 @@ import Tool from "../../../../../model/session/tool";
 
 @Component({
   selector: 'ch-dataset-parameter-list',
-  template: `<span class="h6" *ngIf="parameterListForView.length > 0">
-                Parameters
-                <span class="lighter" *ngIf="parameterListForView.length > defaultLimit"> {{limit}} of {{parameterListForView.length}}</span>
-             </span>
-             <span *ngIf="parameterListForView.length > defaultLimit" ><ch-link-button class="pull-right" (click)="toggleParameterList()">{{buttonText}}</ch-link-button></span>
-                
-             <table class="table table-sm parameter-table">
-                <tr class="text-sm" *ngFor="let param of parameterListForView; let i = index"  [ngStyle]="{'color': isDefaultValueMap.get(param)? 'gray' : 'black'}">
-                   <ng-template [ngIf]="i < limit">
-                      <td>{{param.displayName}}</td>
-                         <td>{{param.value}}</td>
-                   </ng-template>
-                </tr>
-             </table>`
-
+  templateUrl: './dataset-parameter-list.component.html'
 })
+
 export class DatasetParameterListComponent implements OnChanges {
   @Input() private tool: Tool;
   @Input() private parameters: Array<JobParameter>;
 
-  private limit: number;
-  private defaultLimit: number = 3;
-  private buttonText: string;
+  limit: number;
+  defaultLimit: number = 3;
+  buttonText: string;
   // noinspection JSMismatchedCollectionQueryUpdate
-  private parameterListForView: Array<JobParameter> = [];
+  parameterListForView: Array<JobParameter> = [];
   private currentTool: Tool;
   private currentJobParameter: Array<JobParameter>;
 

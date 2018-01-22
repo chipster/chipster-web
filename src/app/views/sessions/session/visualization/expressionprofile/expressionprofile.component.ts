@@ -30,11 +30,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private dataset: Dataset;
 
   private tsv: TSVFile;
-  private selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
+  selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
   private viewSelectionList: Array<any>;
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   constructor(private expressionProfileService: ExpressionProfileService,
               private sessionDataService: SessionDataService,

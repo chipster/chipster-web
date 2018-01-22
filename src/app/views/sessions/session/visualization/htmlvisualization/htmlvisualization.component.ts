@@ -16,7 +16,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   @Input()
   private dataset: Dataset;
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   private src: string;
   private linkSrc: string;

@@ -14,7 +14,7 @@ export class AddDatasetModalContent implements AfterViewInit {
   @ViewChild('browseFilesButton') browseFilesButton;
   @ViewChild('browseDirButton') browseDirButton;
 
-  private flow;
+  flow;
 
   constructor(
     public activeModal: NgbActiveModal,

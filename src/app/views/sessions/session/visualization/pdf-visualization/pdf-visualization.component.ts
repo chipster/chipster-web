@@ -21,7 +21,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   zoom: number;
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   constructor(private sessionDataService: SessionDataService,
               private errorHandlerService: RestErrorService) { }

@@ -33,7 +33,7 @@ export class ToolListComponent {
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
 
-  private searchTool: string;
+  searchTool: string;
 
   selectedModule: Module = null; // used in modal to keep track of which module has been selected
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected

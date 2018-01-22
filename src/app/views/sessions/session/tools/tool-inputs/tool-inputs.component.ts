@@ -19,8 +19,8 @@ export class ToolInputsComponent implements OnChanges {
   @Input() selectedDatasets: Dataset[];
   @Output() updateBindings = new EventEmitter();
 
-  private inputDescription: string;
-  private localInputBindings: InputBinding[];
+  inputDescription: string;
+  localInputBindings: InputBinding[];
 
   //noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService) { }

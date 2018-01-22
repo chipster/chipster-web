@@ -36,7 +36,7 @@ export abstract class PlotComponent implements OnChanges {
   private errorHandlerService: RestErrorService;
 
   protected unsubscribe: Subject<any> = new Subject();
-  protected state: LoadState;
+  state: LoadState;
 
   constructor(
     fileResource: FileResource,

@@ -37,7 +37,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   constructor(
     private SessionDataService: SessionDataService,
     private SelectionService: SelectionService,
-    private toolSelectionService: ToolSelectionService,
+    public toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig) {

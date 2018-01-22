@@ -26,7 +26,7 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @Input() sessionData: SessionData;
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   private range: any;
   private doc: any;
