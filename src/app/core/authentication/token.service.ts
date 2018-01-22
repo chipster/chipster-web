@@ -60,4 +60,17 @@ export class TokenService {
     }
     this.tokenHeader['Authorization'] = 'Basic ' + btoa('token' + ':' + this.getToken())
   }
+
+  isLoggedIn() {
+    return this.isTokenValid();
+  };
+
+  isTokenValid() {
+    return this.getToken() && this.getValidUntil() > new Date();
+  }
+
+  tokenHasExpired() {
+    return this.getToken() && !this.isTokenValid();
+  }
+
 }

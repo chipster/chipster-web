@@ -19,9 +19,16 @@
         <div class="panel-heading">
           <h3 class="panel-title">Get started</h3>
         </div>
+
         <div class="panel-body">
-          <button class="btn btn-primary" [routerLink]="['/login']">Log in</button>
+          <p *ngIf="tokenHasExpired()"><i>Login expired, please log in again.</i></p>
+          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="['/login']">Log in</button>
         </div>
+
+        <ng-template #alreadyLoggedIn>
+          <p>You are logged in as <strong>{{username$ | async}}</strong>. To continue, go to <a routerLink="/sessions">Sessions</a>.</p>
+        </ng-template>
+
       </div>
     </div>
   </div>
