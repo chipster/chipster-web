@@ -6,7 +6,7 @@ import {VennDiagramService} from "./venndiagram/venndiagram.service";
 import {TwoCircleVennDiagramService} from "./venndiagram/twocirclevenndiagram.service";
 import {ThreeCircleVennDiagramService} from "./venndiagram/threecirclevenndiagram.service";
 import {PdfVisualizationComponent} from './pdf-visualization/pdf-visualization.component';
-import {PdfViewerComponent} from "ng2-pdf-viewer";
+import {PdfViewerModule} from "ng2-pdf-viewer";
 import {HtmlvisualizationComponent} from './htmlvisualization/htmlvisualization.component';
 import {TextVisualizationComponent} from "./textvisualization/textvisualization.component";
 import {SpreadsheetVisualizationComponent} from "./spreadsheetvisualization/spreadsheetvisualization.component";
@@ -30,12 +30,11 @@ import {BamViewerComponent} from './bamviewer/bamviewer.component';
 import { GenomeBrowserComponent } from './genome-browser/genome-browser.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule],
   declarations: [
     VisualizationsComponent,
     VennDiagram,
     PdfVisualizationComponent,
-    PdfViewerComponent,
     HtmlvisualizationComponent,
     TextVisualizationComponent,
     VisualizationModalComponent,
