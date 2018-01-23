@@ -15,11 +15,11 @@ import Tool from "../../../../../model/session/tool";
 })
 export class SingleDatasetComponent {
 
-  @Input() private dataset: Dataset;
+  @Input() dataset: Dataset;
   @Input() private jobs: Map<string, Job>;
   @Input() private sessionData: SessionData;
   @Output() onDelete: EventEmitter<any> = new EventEmitter();
-  private sourceJob: Job;
+  sourceJob: Job;
   private tool:Tool;
 
 

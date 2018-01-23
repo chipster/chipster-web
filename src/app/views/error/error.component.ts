@@ -7,11 +7,11 @@ import {RouteService} from "../../shared/services/route.service";
 
 @Component({
   selector: 'ch-error',
-  templateUrl: './error.html'
+  templateUrl: './error.component.html'
 })
 export class ErrorComponent {
 
-  private errors: ErrorMessage[] = [];
+  errors: ErrorMessage[] = [];
 
   constructor(
     private errorService: ErrorService,

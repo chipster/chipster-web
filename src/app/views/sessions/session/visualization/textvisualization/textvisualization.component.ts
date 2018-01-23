@@ -25,7 +25,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   private data: string;
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   fileSizeLimit = 10 * 1024;
 

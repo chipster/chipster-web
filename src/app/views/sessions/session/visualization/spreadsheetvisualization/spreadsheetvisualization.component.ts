@@ -25,10 +25,10 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
-  private readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
+  readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;

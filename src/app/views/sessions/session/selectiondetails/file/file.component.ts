@@ -15,13 +15,13 @@ import * as _ from 'lodash';
 })
 export class FileComponent {
 
-  @Input() private dataset: Dataset;
+  @Input() dataset: Dataset;
   @Input() private jobs: Map<string, Job>;
   @Input() private sessionData: SessionData;
   @Output() onDelete: EventEmitter<any> = new EventEmitter();
 
   constructor(
-    private selectionService: SelectionService, // used in template
+    public selectionService: SelectionService, // used in template
     private sessionDataService: SessionDataService,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService) {

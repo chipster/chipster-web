@@ -14,5 +14,5 @@ import {LoadState} from "../../model/loadstate";
 })
 
 export class StatusComponent {
-  @Input() private state: LoadState;
+  @Input() state: LoadState;
 }

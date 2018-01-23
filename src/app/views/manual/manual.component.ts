@@ -43,7 +43,7 @@ import {ManualUtils} from "./manual-utils";
 export class ManualComponent implements AfterViewInit {
 
   @Input() private page: string;
-  @Input() private showControls = false;
+  @Input() showControls = false;
 
   private routerPath = 'manual/';
   private assetsPath = 'assets/manual/';

@@ -12,18 +12,16 @@ import {HttpErrorResponse} from "@angular/common/http";
 })
 export class LoginComponent implements OnInit {
 
-  private error: string;
+  error: string;
   private returnUrl: string;
 
   @ViewChild('myForm')
   private myForm: FormGroup;
 
-
   constructor(private router: Router,
               private route: ActivatedRoute,
               private authenticationService: AuthenticationService) {
   }
-
 
   ngOnInit() {
     // get the return url from the query params
@@ -32,7 +30,7 @@ export class LoginComponent implements OnInit {
     // TODO unsubscribe?
   }
 
-  login(username: string, password: string) {
+  login() {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(() => {
       //Route to Session creation page
       console.log("login successful");
@@ -52,15 +50,14 @@ export class LoginComponent implements OnInit {
   keyDownFunction(event) {
     if (event.keyCode == 13) {
       if (this.myForm.value.username && this.myForm.value.password) {
-        this.login(this.myForm.value.username, this.myForm.value.password);
+        this.login();
       } else if (!this.myForm.value.username && !this.myForm.value.password) {
-        this.error = "Please Enter Username and Password to login";
+        this.error = "Please enter username and password to log in";
       } else if (!this.myForm.value.username) {
-        this.error = "Please Enter Username";
+        this.error = "Please enter username";
       } else if (!this.myForm.value.password) {
-        this.error = "Please Enter Passsword";
+        this.error = "Please enter password";
       }
-
     }
   }
 }

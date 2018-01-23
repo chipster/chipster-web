@@ -9,7 +9,7 @@ import Tool from "../../../../../model/session/tool";
 })
 export class ToolSourceComponent implements OnInit {
 
-  private source: string;
+  source: string;
   @Input() selectedTool: Tool;
 
   constructor(private toolResource: ToolResource) { }

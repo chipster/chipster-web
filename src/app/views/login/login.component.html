@@ -10,17 +10,17 @@
   <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
     <div class="form-group">
       <label for="username">Username</label>
-      <input class="form-control" id="username" required autofocus [(ngModel)]="username" name="username"
+      <input class="form-control" id="username" required autofocus ngModel name="username"
              #name="ngModel" />
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password"
+      <input id="password" type="password" class="form-control" ngModel name="password"
              #name="ngModel"
              required/>
     </div>
     <div class="form-actions text-center margin-top" >
-      <button class="btn btn-primary" type="button" (click)="login(myForm)"
+      <button class="btn btn-primary" type="button" (click)="login()"
               [disabled]="myForm.invalid">Log in</button>
     </div>
   </form>

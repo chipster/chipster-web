@@ -21,11 +21,9 @@ export class NavigationComponent {
 
   logout() {
     this.authenticationService.logout();
-  };
+  }
 
   isLoggedIn() {
-    if (this.tokenService.getToken()) {
-      return true;
-    }
-  };
+    return this.tokenService.isLoggedIn();
+  }
 }

@@ -15,7 +15,7 @@ import {LoadState, State} from "../../../../../model/loadstate";
   styleUrls: ['./bamviewer.component.less'],
 
 })
-export class BamViewerComponent implements OnChanges, OnDestroy{
+export class BamViewerComponent implements OnChanges, OnDestroy {
 
   @Input()
   private dataset: Dataset;
@@ -31,7 +31,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy{
   private maxBytes= 5000000;
 
   private unsubscribe: Subject<any> = new Subject();
-  private state: LoadState;
+  state: LoadState;
 
   //BGZF blocks
   private BLOCK_HEADER_LENGTH = 18;
