@@ -90,8 +90,11 @@ export class ToolSelectionService implements OnDestroy {
           return {id: column};
         });
 
-        // reset value to empty if previous or default value is now invalid
-        if (parameter.value && !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+        // reset value to empty if previous value is now invalid, unless it's the default
+        if (parameter.value
+          && parameter.value !== this.toolService.getDefaultValue(parameter)
+          && !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+
           parameter.value = null;
         }
       });
@@ -102,8 +105,11 @@ export class ToolSelectionService implements OnDestroy {
         return {id: column};
       });
 
-      // reset value to empty if previous or default value is now invalid
-      if (parameter.value && !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+      // reset value to empty if previous value is now invalid, unless it's the default
+      if (parameter.value
+        && parameter.value !== this.toolService.getDefaultValue(parameter)
+        && !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)) {
+
         parameter.value = null;
       }
     }
