@@ -11,6 +11,7 @@ import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 import {SessionData} from "../../../../model/session/session-data";
 import {ToolSelectionService} from "../tool.selection.service";
 import {NgbDropdown, NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
+import {RestErrorService} from "../../../../core/errorhandler/rest-error.service";
 
 
 @Component({
@@ -40,6 +41,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
     private store: Store<any>,
+    private restErrorService: RestErrorService,
     dropdownConfig: NgbDropdownConfig) {
 
     // close only on outside click
@@ -209,9 +211,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
 
     // runsys
-    this.SessionDataService.createJob(job).subscribe((result: any) => {
-    }, (error: any) => {
-      console.error('Failed running job', error);
+    this.SessionDataService.createJob(job).subscribe(null, (error: any) => {
+      this.restErrorService.handleError(error, 'Running a job failed');
     });
   }
 }

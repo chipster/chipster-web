@@ -8,7 +8,7 @@ import {Row} from "./phenodatarow.interface";
 import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
-import {ErrorService} from "../../../../../core/errorhandler/error.service";
+import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -38,7 +38,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
     private zone: NgZone,
-    private errorService: ErrorService) {}
+    private restErrorService: RestErrorService) {}
 
   ngOnInit() {
     this.updateView();
@@ -419,7 +419,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
         this.updateDatasets(false);
       })
-      .subscribe(null, err => this.errorService.error('add column failed', err));
+      .subscribe(null, err => this.restErrorService.handleError(err, 'Add column failed'));
   }
 
   private hideColumnIfEmpty(headers: string[], array: Row[]) {

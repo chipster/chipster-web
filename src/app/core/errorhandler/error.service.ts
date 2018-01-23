@@ -22,8 +22,4 @@ export class ErrorService {
   getErrors() {
     return this.errors$;
   }
-
-  error(msg: string, err: any) {
-    this.headerError(msg + ' (' + err + ')');
-  }
 }

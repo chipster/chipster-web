@@ -13,7 +13,6 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {SelectionHandlerService} from "./selection-handler.service";
 import {SessionResource} from "../../../shared/resources/session.resource";
-import {ErrorService} from "../../../core/errorhandler/error.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {DialogModalService} from "./dialogmodal/dialogmodal.service";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
@@ -43,8 +42,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     private selectionHandlerService: SelectionHandlerService,
     private route: ActivatedRoute,
     private modalService: NgbModal,
-    private errorService: ErrorService,
-    private errorHandlerService: RestErrorService,
+    private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private sessionWorkerResource: SessionWorkerResource) {
   }
@@ -83,7 +81,7 @@ export class SessionComponent implements OnInit, OnDestroy{
       this.subscribeToEvents();
     }, (error: any) => {
       this.statusText = "";
-      this.errorHandlerService.handleError(error, "Loading session failed");
+      this.restErrorService.handleError(error, "Loading session failed");
     });
 
     // Select datasets provided via queryparameter and clear queryparameters
@@ -297,7 +295,7 @@ export class SessionComponent implements OnInit, OnDestroy{
         this.sessionData.session.name = name;
         return this.sessionDataService.updateSession(this.sessionData, this.sessionData.session);
       })
-      .subscribe(null, err => this.errorService.error('session rename error', err));
+      .subscribe(null, err => this.restErrorService.handleError(err, 'Failed to rename the session'));
   }
 
   notesModal() {
@@ -305,7 +303,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
       this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => {}, err => {
-        this.errorService.headerError('Failed to update session notes: ' + err, true);
+        this.restErrorService.handleError(err, 'Failed to update session notes');
       })
     }, () => {
       // modal dismissed
@@ -324,7 +322,7 @@ export class SessionComponent implements OnInit, OnDestroy{
         let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
         return this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
       })
-      .subscribe(null, err => this.errorService.error('duplicate session failed', err));
+      .subscribe(null, err => this.restErrorService.handleError(err, 'Duplicate session failed'));
   }
 
   saveSessionFileModal() {
@@ -336,7 +334,7 @@ export class SessionComponent implements OnInit, OnDestroy{
     this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + this.sessionData.session.name + '?', 'Delete', 'Cancel').then(() => {
       // delete the session only from this user (i.e. the rule)
       this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe( () => {}, err => {
-        this.errorService.headerError('Failed to delete the session: ' + err, true);
+        this.restErrorService.handleError(err, 'Failed to delete the session');
       });
     }, () => {
       // modal dismissed
