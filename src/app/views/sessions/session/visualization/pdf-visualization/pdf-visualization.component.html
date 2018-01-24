@@ -9,8 +9,8 @@
         <button class="btn btn-secondary btn-sm" [disabled]="page === 1 || showAll" (click)="previousPage()" title="Previous page"><span class="fa fa-lg fa-angle-left"></span></button>
         <button class="btn btn-secondary btn-sm" [disabled]="page >= totalPages || showAll" (click)="nextPage()" title="Next page"><span class="fa fa-lg fa-angle-right"></span></button>
         <!--<button class="btn btn-secondary btn-sm" id="showAllButton" (click)="toggleShowAll()" [title]="showAllButtonText">{{showAllButtonText}}</button>-->
-        <button *ngIf="!showAll" class="btn btn-secondary btn-sm showAllButton" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-clone"></span></button>
-        <button *ngIf="showAll" class="btn btn-secondary btn-sm showAllButton" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-file-o"></span></button>
+        <button *ngIf="!showAll" class="btn btn-secondary btn-sm" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-clone"></span></button>
+        <button *ngIf="showAll" class="btn btn-secondary btn-sm" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-file-o"></span></button>
 
       </span>
     </div>
