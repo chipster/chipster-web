@@ -1,4 +1,10 @@
 <div *ngIf="state.isReady(); else statusTemplate">
+
+  <a href="{{src}}" target="_blank" class="pull-right">
+    <i class="fa fa-external-link" aria-hidden="true"></i>
+    Open in new tab
+  </a>
+
   <nav class="pdf-view-navigation">
     <button class="btn btn-secondary" (click)="previousPage()"><</button>
     <button class="btn btn-secondary" (click)="nextPage()">></button>
