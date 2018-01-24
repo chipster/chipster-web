@@ -34,6 +34,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
     this.page = 1;
     this.zoom = 1;
+    this.pdf = null;
 
     this.sessionDataService.getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)
