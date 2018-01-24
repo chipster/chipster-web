@@ -10,6 +10,7 @@ import {LoadState, State} from "../../../../../model/loadstate";
   templateUrl: './pdf-visualization.component.html',
   styleUrls: ['./pdf-visualization.component.less'],
 })
+
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input()
@@ -18,29 +19,43 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   src: string;
 
   page: number;
+  totalPages;
   zoom: number;
-  pdf: any;
+  showAll: boolean = false;
+
+  loadedBytes: number;
+  totalBytes: number;
+
+  showAllButtonText: string;
+  private readonly showAllPagesText: string = "Show all pages";
+  private readonly showSinglePagesText: string = "Show single page";
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
+  urlReady: boolean = false;
 
   constructor(private sessionDataService: SessionDataService,
-              private errorHandlerService: RestErrorService) { }
+              private errorHandlerService: RestErrorService) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading pdf file...");
+    this.urlReady = false;
+    this.loadedBytes = 0;
+    this.totalBytes = 0;
 
     this.page = 1;
+    this.totalPages = null;
     this.zoom = 1;
-    this.pdf = null;
+    this.showAll = false;
+    this.setShowAllButtonText();
 
     this.sessionDataService.getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)
       .subscribe(url => {
         this.src = url;
-        this.state = new LoadState(State.Ready);
+        this.urlReady = true;
       }, (error: any) => {
         this.state = new LoadState(State.Loading, "Loading pdf file failed");
         this.errorHandlerService.handleError(error, this.state.message);
@@ -52,23 +67,34 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.unsubscribe.complete();
   }
 
-  /**
-   * Get pdf information after it's loaded
-   * @param pdf
-   */
-  afterLoadComplete(pdf: any) {
-    this.pdf = pdf;
+  toggleShowAll() {
+    this.showAll = !this.showAll;
+    this.setShowAllButtonText();
+  }
+
+  pdfLoadComplete(pdf: any) {
+    this.totalPages = pdf.numPages;
+    this.state = new LoadState(State.Ready);
+  }
+
+  onProgress(progressData: any) {
+    this.loadedBytes = progressData.loaded;
+    this.totalBytes = progressData.total;
   }
 
   previousPage() {
-    if(this.page > 0) {
+    if (this.page > 1) {
       this.page -= 1;
+    } else {
+      this.page = 1;
     }
   }
 
   nextPage() {
-    if (this.pdf && this.page < this.pdf.numPages) {
+    if (this.page < this.totalPages) {
       this.page += 1;
+    } else {
+      this.page = this.totalPages;
     }
   }
 
@@ -78,6 +104,10 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   zoomOut() {
     this.zoom -= 0.2;
+  }
+
+  private setShowAllButtonText() {
+    this.showAllButtonText = this.showAll ? this.showSinglePagesText : this.showAllPagesText;
   }
 
 }
