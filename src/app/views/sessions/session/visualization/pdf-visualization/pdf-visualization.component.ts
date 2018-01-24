@@ -19,6 +19,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   page: number;
   zoom: number;
+  pdf: any;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -50,6 +51,14 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.unsubscribe.complete();
   }
 
+  /**
+   * Get pdf information after it's loaded
+   * @param pdf
+   */
+  afterLoadComplete(pdf: any) {
+    this.pdf = pdf;
+  }
+
   previousPage() {
     if(this.page > 0) {
       this.page -= 1;
@@ -57,7 +66,9 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   nextPage() {
-    this.page += 1;
+    if (this.pdf && this.page < this.pdf.numPages) {
+      this.page += 1;
+    }
   }
 
   zoomIn() {
