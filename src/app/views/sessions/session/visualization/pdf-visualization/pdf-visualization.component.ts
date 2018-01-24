@@ -27,12 +27,15 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   totalBytes: number;
 
   showAllButtonText: string;
-  private readonly showAllPagesText: string = "Show all pages";
-  private readonly showSinglePagesText: string = "Show single page";
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
   urlReady: boolean = false;
+
+  private readonly showAllPagesText: string = "Show all pages";
+  private readonly showSinglePagesText: string = "Show single page";
+  private readonly minZoom: number = 0.1;
+  private readonly maxZoom: number = 4.0;
 
   constructor(private sessionDataService: SessionDataService,
               private errorHandlerService: RestErrorService) {}
@@ -99,11 +102,11 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   zoomIn() {
-    this.zoom += 0.2;
+    this.zoom = this.zoom + 0.2 < this.maxZoom ? this.zoom + 0.2 : this.maxZoom;
   }
 
   zoomOut() {
-    this.zoom -= 0.2;
+    this.zoom = this.zoom - 0.2 > this.minZoom ? this.zoom - 0.2 : this.minZoom;
   }
 
   private setShowAllButtonText() {

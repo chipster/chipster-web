@@ -2,15 +2,41 @@
   <div class="row" id="pdf-view-navigation">
     <div class="col-md-5">
 
-      <button class="btn btn-secondary btn-sm ml-1" (click)="zoomIn()" title="Zoom in"><span class="fa fa-lg fa-search-plus"></span></button>
-      <button class="btn btn-secondary btn-sm mr-2" (click)="zoomOut()" title="Zoom out"><span class="fa fa-lg fa-search-minus"></span></button>
+      <button class="btn btn-secondary btn-sm ml-1"
+              (click)="zoomOut()"
+              title="Zoom out"
+              [disabled]="this.zoom <= this.minZoom">
+        <span class="fa fa-lg fa-search-minus"></span>
+      </button>
+      <button class="btn btn-secondary btn-sm mr-2"
+              (click)="zoomIn()" title="Zoom in"
+              [disabled]="this.zoom >= this.maxZoom">
+        <span class="fa fa-lg fa-search-plus"></span>
+      </button>
 
       <span *ngIf="totalPages > 1">
-        <button class="btn btn-secondary btn-sm" [disabled]="page === 1 || showAll" (click)="previousPage()" title="Previous page"><span class="fa fa-lg fa-angle-left"></span></button>
-        <button class="btn btn-secondary btn-sm" [disabled]="page >= totalPages || showAll" (click)="nextPage()" title="Next page"><span class="fa fa-lg fa-angle-right"></span></button>
-        <!--<button class="btn btn-secondary btn-sm" id="showAllButton" (click)="toggleShowAll()" [title]="showAllButtonText">{{showAllButtonText}}</button>-->
-        <button *ngIf="!showAll" class="btn btn-secondary btn-sm" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-clone"></span></button>
-        <button *ngIf="showAll" class="btn btn-secondary btn-sm" (click)="toggleShowAll()" [title]="showAllButtonText"><span class="fa fa-lg fa-file-o"></span></button>
+        <button class="btn btn-secondary btn-sm"
+                [disabled]="page === 1 || showAll"
+                (click)="previousPage()"
+                title="Previous page">
+          <span class="fa fa-lg fa-angle-left"></span>
+        </button>
+        <button class="btn btn-secondary btn-sm"
+                [disabled]="page >= totalPages || showAll"
+                (click)="nextPage()"
+                title="Next page">
+          <span class="fa fa-lg fa-angle-right"></span>
+        </button>
+
+        <button *ngIf="!showAll" class="btn btn-secondary btn-sm"
+                (click)="toggleShowAll()"
+                [title]="showAllButtonText">
+          <span class="fa fa-lg fa-clone"></span>
+        </button>
+        <button *ngIf="showAll" class="btn btn-secondary btn-sm"
+                (click)="toggleShowAll()"
+                [title]="showAllButtonText">
+          <span class="fa fa-lg fa-file-o"></span></button>
 
       </span>
     </div>
