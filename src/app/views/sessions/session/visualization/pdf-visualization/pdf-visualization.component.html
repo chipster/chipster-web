@@ -7,9 +7,9 @@
 
   <nav class="pdf-view-navigation">
     <div class="pdf-button-group">
-      <div class="pdf-text">Page: </div>
+      <div class="page-text">Page: </div>
       <button class="btn btn-secondary pdf-button" (click)="previousPage()" [disabled]="page == 1"> < </button>
-      <div class="pdf-text"><span *ngIf="pdf">{{page}} / {{pdf.numPages}}</span></div>
+      <div class="page-value"><span *ngIf="pdf">{{page}} / {{pdf.numPages}}</span></div>
       <button class="btn btn-secondary pdf-button" (click)="nextPage()" [disabled]="page == pdf?.numPages"> > </button>
     </div>
     <div class="pdf-button-group">
