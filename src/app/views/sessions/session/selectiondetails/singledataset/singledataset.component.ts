@@ -2,10 +2,7 @@ import Dataset from "../../../../../model/session/dataset";
 import {SessionDataService} from "../../sessiondata.service";
 import Job from "../../../../../model/session/job";
 import {Component, Input, Output, EventEmitter} from "@angular/core";
-import {DatasetModalService} from "../datasetmodal.service";
 import {SessionData} from "../../../../../model/session/session-data";
-
-import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import Tool from "../../../../../model/session/tool";
 
 @Component({
@@ -19,8 +16,11 @@ export class SingleDatasetComponent {
   @Input() private jobs: Map<string, Job>;
   @Input() private sessionData: SessionData;
   @Output() onDelete: EventEmitter<any> = new EventEmitter();
+
   sourceJob: Job;
   private tool:Tool;
+  toolCategory: string;
+  toolName: string;
 
 
   constructor(private sessionDataService: SessionDataService) {
@@ -33,6 +33,10 @@ export class SingleDatasetComponent {
   ngOnChanges(changes: any) {
     this.dataset = changes.dataset.currentValue;
     this.sourceJob = this.getSourceJob(this.dataset);
+
+    this.toolCategory = this.sourceJob ? this.sourceJob.toolCategory : '';
+    this.toolName = this.sourceJob ? this.sourceJob.toolName : '';
+
     this.getUsedToolFromToolset();
   }
 
@@ -52,10 +56,14 @@ export class SingleDatasetComponent {
   }
 
   getUsedToolFromToolset(){
-    let i=this.sessionData.tools.findIndex(x=>x.name.id==this.sourceJob.toolId);
-    if(i!=-1) this.tool=this.sessionData.tools[i];
-    else{
-      console.log('No Tool found with this ID', this.sourceJob.toolId);
+    if (this.sourceJob) {
+      let i=this.sessionData.tools.findIndex(x=>x.name.id==this.sourceJob.toolId);
+      if(i!=-1) this.tool=this.sessionData.tools[i];
+      else{
+        console.log('No Tool found with this ID', this.sourceJob.toolId);
+      }
+    } else {
+      console.log('source job is null');
     }
     /*
     this.sessionData.tools.forEach(function(tool){
