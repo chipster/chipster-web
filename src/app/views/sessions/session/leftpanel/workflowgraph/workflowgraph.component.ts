@@ -17,6 +17,7 @@ import {SelectionHandlerService} from "../../selection-handler.service";
 import {Store} from "@ngrx/store";
 import {Observable} from "rxjs";
 import UtilsService from "../../../../../shared/utilities/utils";
+import {Timer} from "d3-timer";
 
 @Component({
   selector: 'ch-workflow-graph',
@@ -68,6 +69,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3Labels: any;
   d3DatasetNodes: any;
   d3JobNodes: any;
+  d3JobArcs: any;
 
   nodeWidth: number = this.workflowGraphService.nodeWidth;
   nodeHeight: number = this.workflowGraphService.nodeHeight;
@@ -86,6 +88,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   subscriptions: Array<any> = [];
+  private jobSpinTimer: Timer;
 
   ngOnInit() {
 
@@ -279,56 +282,63 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3JobNodes.exit().remove();
 
     // create an arc for each job
-    let d3JobArcs = this.d3JobNodesGroup.selectAll('path').data(this.jobNodes, d => d.job.jobId);
+    let d3JobArcChanges = this.d3JobNodesGroup.selectAll('path').data(this.jobNodes, d => d.job.jobId);
 
-    d3JobArcs.enter().append('path').merge(d3JobArcs)
+    // keep the selection for the timer
+    this.d3JobArcs = d3JobArcChanges.enter().append('path').merge(d3JobArcChanges);
+
+    this.d3JobArcs
       .style('fill', (d) => d.fgColor)
       .attr('opacity', this.filter ? 0.1 : 0.4)
       .style('stroke-width', 0)
       .style('pointer-events', 'none')
-      .attr('d', arc)
-      .call(this.spin.bind(this), 10000);
+      .attr('d', arc);
 
-    d3JobArcs.exit().remove();
+    d3JobArcChanges.exit().remove();
+
+
+    // if there are running jobs but there is no timer
+    if (!this.d3JobArcs.empty() && !this.jobSpinTimer) {
+      // start the timer
+      this.jobSpinTimer = d3.timer(elapsed => {
+        // if there is a timer but no more running jobs
+        if (this.d3JobArcs.empty() && this.jobSpinTimer) {
+          // stop and delete the timer
+          this.jobSpinTimer.stop();
+          this.jobSpinTimer = null;
+        }
+
+        this.spinJobs(elapsed);
+      });
+    }
   }
 
-  spin(selection, duration) {
+  /*
+  Rotate job spinners
 
-    let self = this;
+  Rotation is based on a wall clock instead of setting up an own transition for each spinner to make them all spin in
+  the same phase and to be able to update the position without resetting the rotation.
+   */
+  spinJobs(elapsed: number) {
 
-    repeat();
+    const duration = 10000;
 
-    function repeat() {
-      selection
-        .interrupt()
-        .transition()
-        .duration(500) // how often to check if we should continue
-        .ease(d3.easeLinear)
-        .attrTween('transform', (d: JobNode) => {
+    this.d3JobArcs
+      .attr('transform', (d: JobNode) => {
 
-          let x = d.x + self.nodeWidth / 2;
-          let y = d.y + self.nodeHeight / 2;
+        let x = d.x + this.nodeWidth / 2;
+        let y = d.y + this.nodeHeight / 2;
 
-          return () => {
-            let translate = 'translate(' + x +   ',' + y + ')';
+        let translate = 'translate(' + x +   ',' + y + ')';
 
-          // rotation angle is based on a wall clock instead of the transition value
-          // to make them all spin in a same phase and to be able to update the position without resetting the rotation
-            let angle = new Date().getTime() / duration % 1 * 360;
+        let angle = elapsed / duration % 1 * 360;
 
-            // stop spinning immediately when the job fails
-            let rotate = d.spin ? 'rotate(' + angle + ')' : '';
+        // stop spinning immediately when the job fails
+        // but continue updating the position (i.e. translate)
+        let rotate = d.spin ? ' rotate(' + angle + ')' : '';
 
-            return translate + ' ' + rotate;
-          }
-        })
-        .on('end', (d: JobNode) => {
-          // schedule new rounds only if the job is still running
-          if (self.jobNodes.indexOf(d) !== -1 && d.spin) {
-            repeat();
-          }
-        });
-    }
+        return translate + rotate;
+      });
   }
 
   isSelectedJob(job: Job) {
