@@ -87,7 +87,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   subscriptions: Array<any> = [];
 
-
   ngOnInit() {
 
     this.selectedDatasets$ = this.store.select('selectedDatasets');
@@ -280,25 +279,56 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3JobNodes.exit().remove();
 
     // create an arc for each job
-    let d3JobArcs = this.d3JobNodesGroup.selectAll('path').data(this.jobNodes);
+    let d3JobArcs = this.d3JobNodesGroup.selectAll('path').data(this.jobNodes, d => d.job.jobId);
 
     d3JobArcs.enter().append('path').merge(d3JobArcs)
       .style('fill', (d) => d.fgColor)
+      .attr('opacity', this.filter ? 0.1 : 0.4)
       .style('stroke-width', 0)
-      .attr('opacity', this.filter ? 0.1 : 0.5)
       .style('pointer-events', 'none')
       .attr('d', arc)
-      .transition()
-      .duration(3000)
-      .ease(d3.easeLinear)
-      .attrTween('transform', (d: JobNode) => {
-        let x = d.x + this.nodeWidth / 2;
-        let y = d.y + this.nodeHeight / 2;
-        return d.spin ? d3.interpolateString(`translate(${x},${y})rotate(0)`, `translate(${x},${y})rotate(360)`) : d3.interpolateString(`translate(${x},${y})`, `translate(${x},${y})`);
-      });
+      .call(this.spin.bind(this), 10000);
 
     d3JobArcs.exit().remove();
+  }
 
+  spin(selection, duration) {
+
+    let self = this;
+
+    repeat();
+
+    function repeat() {
+      selection
+        .interrupt()
+        .transition()
+        .duration(500) // how often to check if we should continue
+        .ease(d3.easeLinear)
+        .attrTween('transform', (d: JobNode) => {
+
+          let x = d.x + self.nodeWidth / 2;
+          let y = d.y + self.nodeHeight / 2;
+
+          return () => {
+            let translate = 'translate(' + x +   ',' + y + ')';
+
+          // rotation angle is based on a wall clock instead of the transition value
+          // to make them all spin in a same phase and to be able to update the position without resetting the rotation
+            let angle = new Date().getTime() / duration % 1 * 360;
+
+            // stop spinning immediately when the job fails
+            let rotate = d.spin ? 'rotate(' + angle + ')' : '';
+
+            return translate + ' ' + rotate;
+          }
+        })
+        .on('end', (d: JobNode) => {
+          // schedule new rounds only if the job is still running
+          if (self.jobNodes.indexOf(d) !== -1 && d.spin) {
+            repeat();
+          }
+        });
+    }
   }
 
   isSelectedJob(job: Job) {
@@ -593,38 +623,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     });
     return jobNodes;
   }
-
-  spin(selection: any, duration: number) {
-
-    // first round
-    selection
-      .transition()
-      .ease('linear')
-      .duration(duration)
-      .attrTween('transform', (d: JobNode) => {
-
-        let x = d.x + this.nodeWidth / 2;
-        let y = d.y + this.nodeHeight / 2;
-
-        if (d.spin) {
-          return d3.interpolateString(
-            'translate(' + x + ',' + y + ')rotate(0)',
-            'translate(' + x + ',' + y + ')rotate(360)'
-          );
-        } else {
-          return d3.interpolateString(
-            'translate(' + x + ',' + y + ')',
-            'translate(' + x + ',' + y + ')'
-          );
-        }
-      });
-
-    // schedule the next round
-    setTimeout(() => {
-      this.spin(selection, duration);
-    }, duration);
-  }
-
 
   getLinks(nodes: Node[]) {
 
