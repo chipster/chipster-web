@@ -1,0 +1,54 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-2 menu">
+      <ul class="nav nav-stacked">
+        <li class="menu-li">
+          <button class="menu-button" routerLink="services" routerLinkActive="active">
+            <i class="fa fa-server fa-3x" aria-hidden="true"></i>
+            <br>
+            Services
+          </button>
+        </li>
+        <li class="menu-li">
+          <button class="menu-button" routerLink="clients" routerLinkActive="active">
+            <i class="fa fa-laptop fa-3x" aria-hidden="true"></i>
+            <br>
+            Clients
+          </button>
+        </li>
+        <li class="menu-li">
+          <button class="menu-button" routerLink="storage" routerLinkActive="active">
+            <i class="fa fa-database fa-3x" aria-hidden="true"></i>
+            <br>
+            Storage
+          </button>
+        </li>
+        <li class="menu-li">
+          <button class="menu-button" routerLink="jobs" routerLinkActive="active">
+            <i class="fa fa-hourglass-start fa-3x" aria-hidden="true"></i>
+            <br>
+            Jobs
+          </button>
+        </li>
+        <li class="menu-li">
+          <button class="menu-button" routerLink="history" routerLinkActive="active">
+            <i class="fa fa-calendar fa-3x" aria-hidden="true"></i>
+            <br>
+            Job History
+          </button>
+
+        </li>
+        <li class="menu-li">
+          <button class="menu-button" routerLink="statistics" routerLinkActive="active">
+            <i class="fa fa-bar-chart fa-3x" aria-hidden="true"></i>
+            <br>
+            Statistics
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="col content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
