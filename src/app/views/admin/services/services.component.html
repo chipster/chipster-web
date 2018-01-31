@@ -1,3 +1,31 @@
-<p>
-  services works!
-</p>
+<div class="scrollable">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Alive</th>
+        <th scope="col">Status info</th>
+        <th scope="col">URL</th>
+        <th scope="col">Admin URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let service of services">
+        <th scope="row">{{service.role}}</th>
+        <td>{{this.aliveMap.get(service.serviceId)}}</td>
+        <td>
+          <span *ngIf="getStatusString(service).length > 10" placement="right"
+                  ngbPopover="{{getStatusString(service)}}" popoverTitle="{{service.role}}" triggers="mouseenter:mouseleave">
+            {{getStatusCount(service)}} values
+          </span>
+          <!-- show http error codes directly -->
+          <span *ngIf="getStatusString(service).length <= 10">
+            {{getStatusString(service)}}
+          </span>
+        </td>
+        <td>{{service.publicUri}}</td>
+        <td>{{service.adminUri}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

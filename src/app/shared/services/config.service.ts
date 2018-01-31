@@ -4,20 +4,30 @@ import {Injectable} from "@angular/core";
 import * as _ from "lodash";
 import {CoreServices} from "../../core/core-services";
 import {Observable} from "rxjs";
+import {Service} from "../../model/service";
 
 @Injectable()
 export class ConfigService {
 
   private configuration$: Observable<any>;
+  private fullConfiguration: Service[];
 
   constructor(private configurationResource: ConfigurationResource) {
   }
 
-  getConfiguration() {
+  getConfiguration(): Observable<any> {
     if (!this.configuration$) {
-      this.configuration$ = this.configurationResource.getConfiguration().map(this.parseServices).publishReplay(1).refCount();
+      return this.configurationResource.getConfiguration().publishReplay(1).refCount()
+        .do(conf => {
+          this.fullConfiguration = conf;
+          this.configuration$ = Observable.of(this.parseServices(conf));
+        });
     }
     return this.configuration$;
+  }
+
+  getFullConfiguration(): Observable<Service[]> {
+    return this.getConfiguration().map(() => this.fullConfiguration);
   }
 
   getSessionDbUrl(): Observable<string> {

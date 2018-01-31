@@ -23,6 +23,7 @@ import {SearchBoxComponent} from "./components/search-box/search-box.component";
 import {FormsModule} from "@angular/forms";
 import {RouteService} from "./services/route.service";
 import {StatusComponent} from "./components/status.component";
+import {AuthHttpClientService} from "./services/auth-http-client.service";
 
 
 /*
@@ -47,7 +48,19 @@ import {StatusComponent} from "./components/status.component";
     SearchBoxComponent,
     StatusComponent,
   ],
-  providers: [PipeService, TSVReader, ConfigurationResource, ToolResource, SessionWorkerResource, FileResource, SessionResource, ConfigService, TypeTagService, RouteService ],
+  providers: [
+    PipeService,
+    TSVReader,
+    ConfigurationResource,
+    ToolResource,
+    SessionWorkerResource,
+    FileResource,
+    SessionResource,
+    ConfigService,
+    TypeTagService,
+    RouteService,
+    AuthHttpClientService,
+  ],
   exports: [
     BytesPipe,
     TrustedResourcePipe,

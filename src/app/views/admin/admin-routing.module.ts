@@ -8,6 +8,7 @@ import {StorageComponent} from "./storage/storage.component";
 import {JobsComponent} from "./jobs/jobs.component";
 import {HistoryComponent} from "./history/history.component";
 import {StatisticsComponent} from "./statistics/statistics.component";
+import {UsersComponent} from "./users/users.component";
 
 const routes: Routes = [
   {
@@ -18,6 +19,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'services', pathMatch: 'full' },
       { path: 'services', component: ServicesComponent },
       { path: 'clients', component: ClientsComponent },
+      { path: 'users', component: UsersComponent },
       { path: 'storage', component: StorageComponent },
       { path: 'jobs', component: JobsComponent },
       { path: 'history', component: HistoryComponent },
