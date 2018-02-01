@@ -17,11 +17,9 @@ export class ConfigService {
 
   getConfiguration(): Observable<any> {
     if (!this.configuration$) {
-      return this.configurationResource.getConfiguration().publishReplay(1).refCount()
-        .do(conf => {
-          this.fullConfiguration = conf;
-          this.configuration$ = Observable.of(this.parseServices(conf));
-        });
+      this.configuration$ = this.configurationResource.getConfiguration().publishReplay(1).refCount()
+        .do(conf => this.fullConfiguration = conf)
+        .map(conf => this.parseServices(conf));
     }
     return this.configuration$;
   }
@@ -65,6 +63,13 @@ export class ConfigService {
       services[camelCaseRole] = item.publicUri;
     });
     return services;
+  }
+
+  getService(s: string) {
+    return this.getFullConfiguration()
+      .flatMap(conf => Observable.from(conf))
+      .filter(service => service.role === s)
+      .take(1);
   }
 }
 

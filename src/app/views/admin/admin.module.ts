@@ -10,10 +10,12 @@ import {HistoryComponent} from "./history/history.component";
 import {AdminRoutingModule} from "./admin-routing.module";
 import { UsersComponent } from './users/users.component';
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import {SharedModule} from "../../shared/shared.module";
 
 @NgModule({
   imports: [
     CommonModule,
+    SharedModule,
     NgbModule,
     AdminRoutingModule,
   ],

@@ -1,7 +1,5 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {ConfigService} from "../../../shared/services/config.service";
-import {RestService} from "../../../core/rest-services/restservice/rest.service";
-import {ToolResource} from "../../../shared/resources/toolresource";
 import {Observable} from "rxjs/Observable";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
@@ -21,8 +19,6 @@ export class ServicesComponent implements OnInit {
 
   constructor(
     private configService: ConfigService,
-    private restService: RestService,
-    private toolResource: ToolResource,
     private restErrorService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
   ) { }
