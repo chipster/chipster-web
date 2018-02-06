@@ -12,7 +12,7 @@
     <th scope="row">{{user.username}}</th>
     <td>{{user.created | isodate}}</td>
     <td>{{user.address}}</td>
-    <td>{{user.xForwaredFor}}</td>
+    <td>{{user['X-Forwarded-For']}}</td>
   </tr>
   </tbody>
 </table>
