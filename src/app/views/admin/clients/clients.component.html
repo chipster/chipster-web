@@ -10,7 +10,7 @@
   <tbody>
   <tr *ngFor="let user of users">
     <th scope="row">{{user.username}}</th>
-    <td>{{user.created | isodate}}</td>
+    <td>{{user.created | localDate}}</td>
     <td>{{user.address}}</td>
     <td>{{user['X-Forwarded-For']}}</td>
   </tr>

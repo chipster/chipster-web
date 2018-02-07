@@ -98,8 +98,7 @@
                 id="jobsDropdown">
           <i *ngIf="runningJobs < 1" class="fa fa-list-ul fa-fw"></i>
           <i *ngIf="runningJobs > 0" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-
-          Jobs {{runningJobs}}
+          Jobs <span *ngIf="runningJobs > 0">{{runningJobs}}</span>
         </button>
 
         <div ngbDropdownMenu aria-labelledby="jobsDropdown" class="tools-dropdown-lower">
