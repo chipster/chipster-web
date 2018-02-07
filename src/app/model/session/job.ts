@@ -17,4 +17,5 @@ export default class Job {
     toolDescription: string;
     toolId: string;
     toolName: string;
+    createdBy: string;
 }
