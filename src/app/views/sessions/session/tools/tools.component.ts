@@ -12,6 +12,8 @@ import {SessionData} from "../../../../model/session/session-data";
 import {ToolSelectionService} from "../tool.selection.service";
 import {NgbDropdown, NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
 import {RestErrorService} from "../../../../core/errorhandler/rest-error.service";
+import UtilsService from "../../../../shared/utilities/utils";
+import {SessionEventService} from "../sessionevent.service";
 
 
 @Component({
@@ -25,6 +27,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;
 
   @ViewChild('toolsDropdown') public toolsDropdown: NgbDropdown;
+
+  runningJobs: number = 0;
+  jobList: Job[];
 
   //initialization
   toolSelection: ToolSelection = null;
@@ -42,6 +47,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private toolService: ToolService,
     private store: Store<any>,
     private restErrorService: RestErrorService,
+    private sessionEventService: SessionEventService,
     dropdownConfig: NgbDropdownConfig) {
 
     // close only on outside click
@@ -49,6 +55,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    this.updateJobs();
 
     this.selectedDatasets = this.SelectionService.selectedDatasets;
 
@@ -76,23 +84,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
     if (this.toolSelection) {
       this.selectTool(this.toolSelection);
     }
+
+    this.subscriptions.push(this.sessionEventService.getJobStream().subscribe(() => {
+      this.updateJobs();
+    }));
+
+
   }
 
-  // ngOnInit() {
-  //
-  //   this.modules = this.sessionData.modules;
-  //   this.tools = this.sessionData.tools;
-  //
-  //   this.selectTool$.map((toolSelection: ToolSelection) => ({type: SET_TOOL_SELECTION, payload: toolSelection}))
-  //     .subscribe(this.store.dispatch.bind(this.store));
-  //
-
-  // }
-
-
   selectTool(toolSelection: ToolSelection) {
-
-    console.log('selectTool', toolSelection);
 
     // // TODO reset col_sel and metacol_sel if selected dataset has changed
     // for (let param of tool.parameters) {
@@ -215,4 +215,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.restErrorService.handleError(error, 'Running a job failed');
     });
   }
+
+  getJobList(): Job[] {
+    return UtilsService.mapValues(this.sessionData.jobsMap);
+  }
+
+  updateJobs() {
+    this.jobList = this.getJobList();
+    this.runningJobs = this.jobList.reduce((runningCount, job) => {
+      if (job.state === "RUNNING" || job.state === "NEW") {
+        return runningCount + 1;
+      } else {
+        return runningCount;
+      }
+    }, 0);
+  }
+
 }

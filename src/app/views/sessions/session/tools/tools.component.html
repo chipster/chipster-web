@@ -23,7 +23,7 @@
       </div>
 
       <div ngbDropdown class="d-inline-block dropdown-div pull-right" #manualDropdown="ngbDropdown">
-        <button type="button" class="btn btn-sm btn-outline-secondary tool-panel-button" ngbDropdownToggle
+        <button type="button" class="btn btn-sm btn-outline-secondary button-w8 tool-panel-button" ngbDropdownToggle
                 id="manualDropdown"
                 [disabled]="!toolSelection">
           <span class="fa fa-book" aria-hidden="true"></span>
@@ -57,7 +57,7 @@
         </button>
 
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection"
-             class="tools-dropdown">
+             class="tools-dropdown-lower">
           <ch-scroller>
             <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
           </ch-scroller>
@@ -74,7 +74,7 @@
           Inputs
         </button>
 
-        <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="toolSelection" class="tools-dropdown">
+        <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="toolSelection" class="tools-dropdown-lower">
           <ch-scroller>
             <ch-tool-inputs
               [sessionData]="sessionData"
@@ -92,6 +92,22 @@
         <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
         Run
       </button>
+
+      <div ngbDropdown class="d-inline-block dropdown-div pull-right" #jobsDropdown="ngbDropdown">
+        <button type="button" class="btn btn-sm btn-outline-secondary button-w8 tool-panel-button" ngbDropdownToggle
+                id="jobsDropdown">
+          <i *ngIf="runningJobs < 1" class="fa fa-list-ul fa-fw"></i>
+          <i *ngIf="runningJobs > 0" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+
+          Jobs {{runningJobs}}
+        </button>
+
+        <div ngbDropdownMenu aria-labelledby="jobsDropdown" class="tools-dropdown-lower">
+          <ch-scroller>
+            <ch-job-list [jobs]="getJobList()"></ch-job-list>
+          </ch-scroller>
+        </div>
+      </div>
 
 
 

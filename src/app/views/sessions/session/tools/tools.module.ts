@@ -13,6 +13,7 @@ import { FilterCompatibleDatasetsPipe } from './filter-compatible-datasets.pipe'
 import {ManualModule} from "../../../manual/manual.module";
 import {ToolListComponent} from "./tool-list/tool-list.component";
 import {ScrollerComponent} from "./scroller/scroller.component";
+import {JobListComponent} from "./job-list/job-list.component";
 
 @NgModule({
   imports: [
@@ -20,7 +21,7 @@ import {ScrollerComponent} from "./scroller/scroller.component";
     SharedModule,
     FormsModule,
     NgbModule,
-    ManualModule
+    ManualModule,
   ],
   declarations: [
     ToolListItemComponent,
@@ -31,6 +32,7 @@ import {ScrollerComponent} from "./scroller/scroller.component";
     FilterCompatibleDatasetsPipe,
     ToolListComponent,
     ScrollerComponent,
+    JobListComponent,
   ],
   providers: [ToolService],
   exports: [ToolsComponent]
