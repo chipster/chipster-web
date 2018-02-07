@@ -19,6 +19,7 @@ import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
 import {DialogModalModule} from "./dialogmodal/dialogmodal.module";
 import {SplitPaneModule} from "ng2-split-pane/lib/ng2-split-pane";
 import {ModifiedSessionGuard} from "./modified-session.guard";
+import {JobService} from "./job.service";
 
 @NgModule({
   imports: [
@@ -35,6 +36,7 @@ import {ModifiedSessionGuard} from "./modified-session.guard";
     UploadService,
     SelectionHandlerService,
     ToolSelectionService,
+    JobService,
     ModifiedSessionGuard
   ],
   entryComponents: [JobErrorModalComponent]

@@ -1,4 +1,3 @@
-import {SessionDataService} from "../sessiondata.service";
 import {ToolService} from "./tool.service";
 import Job from "../../../../model/session/job";
 import Dataset from "../../../../model/session/dataset";
@@ -11,9 +10,9 @@ import {SET_TOOL_SELECTION} from "../../../../state/selected-tool.reducer";
 import {SessionData} from "../../../../model/session/session-data";
 import {ToolSelectionService} from "../tool.selection.service";
 import {NgbDropdown, NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
-import {RestErrorService} from "../../../../core/errorhandler/rest-error.service";
 import UtilsService from "../../../../shared/utilities/utils";
 import {SessionEventService} from "../sessionevent.service";
+import {JobService} from "../job.service";
 
 
 @Component({
@@ -41,13 +40,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   subscriptions: Array<any> = [];
 
   constructor(
-    private SessionDataService: SessionDataService,
     private SelectionService: SelectionService,
     public toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
     private store: Store<any>,
-    private restErrorService: RestErrorService,
     private sessionEventService: SessionEventService,
+    private jobService: JobService,
     dropdownConfig: NgbDropdownConfig) {
 
     // close only on outside click
@@ -134,86 +132,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  // Method for submitting a job
   runJob() {
-
-    // create job
-    let job: Job = <Job>{
-      toolId: this.toolSelection.tool.name.id,
-      toolCategory: this.toolSelection.category.name,
-      module: this.toolSelection.module.moduleId,
-      toolName: this.toolSelection.tool.name.displayName,
-      toolDescription: this.toolSelection.tool.description,
-      state: 'NEW',
-    };
-
-    // set parameters
-    job.parameters = [];
-    for (let toolParam of this.toolSelection.tool.parameters) {
-
-      let value = toolParam.value;
-      // the old client converts null values to empty strings, so let's keep the old behaviour for now
-      if (value == null) {
-        value = '';
-      }
-
-      job.parameters.push({
-        parameterId: toolParam.name.id,
-        displayName: toolParam.name.displayName,
-        description: toolParam.description,
-        type: toolParam.type,
-        value: value
-        // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
-      });
-    }
-
-    // set inputs
-    job.inputs = [];
-    // TODO bindings done already?
-    if (!this.toolSelection.inputBindings) {
-      console.error('NO INPUT BINDINGS ON SELECT TOOL - THIS SHOULDNT BE SHOWN');
-      console.warn("no input bindings before running a job, binding now");
-      // this.inputBindings = this.toolService.bindInputs(this.toolSelection.tool, this.SelectionService.selectedDatasets);
-    }
-
-    // TODO report to user
-    if (!this.toolService.checkBindings(this.toolSelection.inputBindings)) {
-      console.error("refusing to run a job due to invalid bindings");
-      return;
-    }
-
-    // add bound inputs
-    for (let inputBinding of this.toolSelection.inputBindings.filter(binding => binding.datasets.length > 0)) {
-
-      // single input
-      if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
-        job.inputs.push({
-          inputId: inputBinding.toolInput.name.id,
-          description: inputBinding.toolInput.description,
-          datasetId: inputBinding.datasets[0].datasetId,
-          displayName: inputBinding.datasets[0].name
-        });
-      }
-
-      // multi input
-      else {
-        let i = 0;
-        for (let dataset of inputBinding.datasets) {
-          job.inputs.push({
-            inputId: this.toolService.getMultiInputId(inputBinding.toolInput, i),
-            description: inputBinding.toolInput.description,
-            datasetId: dataset.datasetId,
-            displayName: dataset.name
-          });
-          i++;
-        }
-      }
-    }
-
-    // runsys
-    this.SessionDataService.createJob(job).subscribe(null, (error: any) => {
-      this.restErrorService.handleError(error, 'Running a job failed');
-    });
+    this.jobService.runJob(this.toolSelection);
   }
 
   getJobList(): Job[] {
