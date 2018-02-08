@@ -43,7 +43,7 @@ export class StorageComponent implements OnInit {
       .flatMap(user => {
           return this.authHttpClient.getAuth(sessionDbUrl + '/users/' + user + '/quota');
       })
-      .do(quota => this.quotas.set(quota.username, quota))
+      .do((quota: any) => this.quotas.set(quota.username, quota))
       .subscribe(null, err => this.restErrorService.handleError(err, 'get quotas failed'));
   }
 
