@@ -24,11 +24,11 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div class="modal-body">
+  <div class="modal-body scrollable-parent">
     <p *ngIf="!selectedUser">
       Loading sessions...
     </p>
-    <div *ngIf="selectedUser">
+    <div *ngIf="selectedUser" class="scrollable">
       <table class="table">
         <thead>
         <tr>
