@@ -26,8 +26,6 @@ export class JobsComponent implements OnInit {
 
     this.jobs = [];
 
-    console.log('jobs OnInit()');
-
     let sessionDbUrl;
 
     this.configService.getSessionDbUrl()

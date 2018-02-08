@@ -1,3 +1,13 @@
-<p>
-  users works!
-</p>
+<table class="table">
+  <thead>
+  <tr>
+    <th scope="col">Username</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let user of users">
+    <td scope="row">{{user}}</td>
+    <!--<td>{{job.createdBy}}</td>-->
+  </tr>
+  </tbody>
+</table>

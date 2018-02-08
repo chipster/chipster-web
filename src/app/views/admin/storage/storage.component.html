@@ -1,3 +1,58 @@
-<p>
-  storage works!
-</p>
+<table class="table table-hover">
+  <thead>
+  <tr>
+    <th scope="col">Username</th>
+    <th scope="col">Sessions (read-write)</th>
+    <th scope="col">Sessions (read only)</th>
+    <th scope="col">Storage usage</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let user of users" (click)="selectUser(user)">
+    <th scope="row">{{user}}</th>
+    <td>{{quotas.get(user)?.readWriteSessions}}</td>
+    <td>{{quotas.get(user)?.readOnlySessions}}</td>
+    <td>{{quotas.get(user)?.size | bytes: 0}}</td>
+  </tr>
+  </tbody>
+</table>
+
+<ng-template #modalContent let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Sessions of {{selectedUser}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p *ngIf="!selectedUser">
+      Loading sessions...
+    </p>
+    <div *ngIf="selectedUser">
+      <table class="table">
+        <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Size</th>
+          <th scope="col">Datasets</th>
+          <th scope="col">Jobs</th>
+          <th scope="col">Inputs</th>
+          <th scope="col">Parameters</th>
+          <th scope="col">Phenodata entries</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let session of sessions">
+          <th scope="row">{{session.name}}</th>
+          <td>{{session.size | bytes: 0}}</td>
+          <td>{{session.datasetCount}}</td>
+          <td>{{session.jobCount}}</td>
+          <td>{{session.inputCount}}</td>
+          <td>{{session.parameterCount}}</td>
+          <td>{{session.metadataCount}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-template>
