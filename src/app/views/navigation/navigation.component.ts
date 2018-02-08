@@ -16,7 +16,9 @@ export class NavigationComponent {
   constructor(
     private tokenService: TokenService,
     private authenticationService: AuthenticationService) {
+
     this.username$ = tokenService.getUsername$();
+    tokenService.getToken()
   }
 
   logout() {
@@ -25,5 +27,9 @@ export class NavigationComponent {
 
   isLoggedIn() {
     return this.tokenService.isLoggedIn();
+  }
+
+  isAdmin() {
+    return this.tokenService.hasRole('admin');
   }
 }

@@ -3,5 +3,6 @@ export interface TokenResponse {
   username: string;
   created: string;
   validUntil: string;
+  rolesJson: string;
 }
 

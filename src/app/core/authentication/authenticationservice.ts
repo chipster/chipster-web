@@ -21,9 +21,10 @@ export class AuthenticationService {
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
-    this.tokenService.setAuthToken(null, null, null);
+    this.tokenService.setAuthToken(null, null, null, null);
     return this.requestToken(username, password).map((response: any) => {
-      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil);
+      let roles = JSON.parse(response.rolesJson);
+      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil, roles);
       this.scheduleTokenRefresh();
     });
   };
@@ -59,7 +60,8 @@ export class AuthenticationService {
         { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
 
     }).subscribe((response: TokenResponse) => {
-      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil);
+      let roles = JSON.parse(response.rolesJson);
+      this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil, roles);
     }, (error: any) => {
 
       if (error.status === 403) {
