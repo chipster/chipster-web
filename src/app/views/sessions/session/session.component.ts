@@ -276,13 +276,6 @@ export class SessionComponent implements OnInit, OnDestroy{
     let modalRef = this.modalService.open(JobErrorModalComponent, {size: 'lg'});
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.job = job;
-
-    modalRef.result.then(() => {
-      this.sessionDataService.deleteJobs([job]);
-    }, () => {
-      // modal dismissed
-      this.sessionDataService.deleteJobs([job]);
-    });
   }
 
   renameSessionModal() {

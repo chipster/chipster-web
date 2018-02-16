@@ -3,6 +3,7 @@ import Job from "../../../model/session/job";
 import * as _ from "lodash";
 import {Injectable} from "@angular/core";
 import {Store} from "@ngrx/store";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 @Injectable()
 export class SelectionService {
@@ -10,6 +11,9 @@ export class SelectionService {
     // Selected datasets and jobs
     selectedDatasets: Array<Dataset>; // USE SELECTION-HANDLER SERVICE TO MODIFY
     selectedJobs: Array<Job>; // USE SELECTION-HANDLER SERVICE TO MODIFY
+
+    selectedJobs$: BehaviorSubject<Array<Job>>;
+
 
     constructor(private store: Store<any>) {
 
@@ -19,12 +23,17 @@ export class SelectionService {
         (error: any) => { console.error('Error fetching datasets from store', error) }
       );
 
+
+      this.selectedJobs$ =  new BehaviorSubject([]);
+
       // Sync selected jobs from store
       this.store.select('selectedJobs').subscribe(
-        (jobs: Array<Job>) => { this.selectedJobs = jobs },
+        (jobs: Array<Job>) => {
+          this.selectedJobs = jobs
+          this.selectedJobs$.next(jobs);
+          },
         (error: any) => { console.error('Error fetching jobs from store', error) }
       );
-
     }
 
     isJobSelected(): boolean {

@@ -13,6 +13,7 @@ import {NgbDropdown, NgbDropdownConfig} from "@ng-bootstrap/ng-bootstrap";
 import UtilsService from "../../../../shared/utilities/utils";
 import {SessionEventService} from "../sessionevent.service";
 import {JobService} from "../job.service";
+import {SelectionHandlerService} from "../selection-handler.service";
 
 
 @Component({
@@ -41,6 +42,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   constructor(
     private SelectionService: SelectionService,
+    private selectionHandlerService: SelectionHandlerService,
     public toolSelectionService: ToolSelectionService,
     private toolService: ToolService,
     private store: Store<any>,
@@ -102,9 +104,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.sessionData, toolSelection.tool, this.selectedDatasets);
 
     this.toolSelection$.next(toolSelection);
-
     this.toolsDropdown.close();
 
+  }
+
+  selectJob(job: Job) {
+    this.selectionHandlerService.setJobSelection([job]);
   }
 
   getManualPage() {

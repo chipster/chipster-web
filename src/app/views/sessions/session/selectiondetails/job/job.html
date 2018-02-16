@@ -1,35 +1,90 @@
-<h6>Job</h6>
-<div class="chipster-highlight">
-    <div class="row" *ngIf="isJobSelected()">
-        <div class="col-sm-8">
-            <h5>{{getJob().toolCategory}} / {{getJob().toolName}}</h5>
-        </div>
+<div *ngIf="job">
 
-        <div class="col-sm-4">
-            <div class="btn-group btn-group-sm pull-right">
-                <button type="button" class="btn btn-secondary" (click)="cancelJobs()">
-                    Cancel
-                </button>
-            </div>
-        </div>
-
-        <div class="col-sm-12">
-            <div class="indented">
-                <p>Status: {{getJob().state.toLowerCase()}}
-                    <span *ngIf="getJob().stateDetail">({{getJob().stateDetail}})</span>
-                </p>
-                <!--<p>{{selectedJobs[0].toolDescription}}</p> -->
-            </div>
-
-            <h5>Parameters</h5>
-            <div>
-                <table class="table table-condensed parameter-table">
-                    <tr *ngFor="let param of getJob().parameters">
-                        <td>{{param.displayName}}</td>
-                        <td>{{param.value}}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+  <div class="row">
+    <div class="col-md-11">
+      <h6><span class="lighter">Job:</span> {{job.toolCategory + " / " + job.toolName}}</h6>
     </div>
+
+    <div class="col-md-1">
+      <button class="btn btn-sm btn-link pull-right" (click)="close()">Close</button>
+    </div>
+  </div>
+  <div class="chipster-highlight">
+
+    <div>Status: {{state}} <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
+      <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button></div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-sm text-sm">
+          <tr>
+            <td class="lighter">Started:</td>
+            <td width="100%">{{job.startTime | localDate}}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Ended:</td>
+            <td>{{job.endTime | localDate}}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Duration:</td>
+            <td></td>
+          </tr>
+          <tr *ngIf="failed">
+            <td class="lighter" style="white-space: nowrap">Error message:</td>
+            <td><span *ngIf="job.stateDetail">{{job.stateDetail}}</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div>Parameters</div>
+        <div>
+          <table class="table table-sm text-sm">
+            <tr *ngFor="let param of job.parameters">
+              <td style="white-space: nowrap">{{param.displayName}}</td>
+              <td width="100%">{{param.value}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div>Inputs</div>
+        <div>
+          <table class="table table-sm text-sm">
+            <tr *ngFor="let input of job.inputs">
+              <td style="white-space: nowrap">{{input.inputId}}</td>
+              <td width="100%">{{input.datasetId}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <ngb-tabset>
+    <ngb-tab id="screenOutput">
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Screen output</ng-template>
+      <ng-template ngbTabContent>
+        <div class="visualization-panel">
+          <pre>{{job.screenOutput}}</pre>
+        </div>
+      </ng-template>
+    </ngb-tab>
+
+    <ngb-tab id="sourceCode">
+      <ng-template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Source code</ng-template>
+      <ng-template ngbTabContent>
+        <div class="visualization-panel">
+          <pre>{{job.sourceCode}}</pre>
+        </div>
+      </ng-template>
+    </ngb-tab>
+  </ngb-tabset>
+
 </div>
