@@ -4,6 +4,7 @@ import {FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from "@angular/router";
 import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ConfigService} from "../../shared/services/config.service";
 
 @Component({
   selector: 'ch-login',
@@ -15,12 +16,16 @@ export class LoginComponent implements OnInit {
   error: string;
   private returnUrl: string;
 
+  public ssoLoginUrl: string;
+
   @ViewChild('myForm')
   private myForm: FormGroup;
 
   constructor(private router: Router,
               private route: ActivatedRoute,
-              private authenticationService: AuthenticationService) {
+              private authenticationService: AuthenticationService,
+              private configService: ConfigService,
+              private restErrorService: RestErrorService) {
   }
 
   ngOnInit() {
@@ -28,6 +33,16 @@ export class LoginComponent implements OnInit {
     this.route.queryParams
       .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
     // TODO unsubscribe?
+
+    this.configService.getFullConfiguration()
+      .subscribe(conf => {
+        conf
+          .filter(s => s.role === 'haka')
+          .forEach(s => {
+            this.ssoLoginUrl = s.publicUri + '/secure'
+          });
+
+      }, err => this.restErrorService.handleError(err, 'get configuration failed'));
   }
 
   login() {

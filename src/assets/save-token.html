@@ -1,0 +1,26 @@
+<html>
+<head>
+  <script>
+
+window.onmessage = function(e) {
+  /*if (e.origin !== "http://example.com") {
+    return;
+  }*/
+
+  console.log('save token from ', e.origin, e.data);
+
+  var payload = JSON.parse(e.data);
+
+  window.localStorage.setItem('ch-auth-token', payload.tokenKey);
+  window.localStorage.setItem('ch-auth-username', payload.username);
+  window.localStorage.setItem('ch-auth-valid-until', payload.validUntil);
+  window.localStorage.setItem('ch-auth-roles', payload.rolesJson);
+};
+
+  </script>
+</head>
+<body style="margin: 0">
+Save token...
+</body>
+</html>
+
