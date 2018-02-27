@@ -1,6 +1,6 @@
-import {Component, Input, OnChanges} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output} from "@angular/core";
 import Job from "../../../../../model/session/job";
-
+import {NgbDropdown} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'ch-job-list',
@@ -11,7 +11,10 @@ export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];
   jobsSorted: Job[];
 
-  constructor() {}
+  @Output() private onJobSelection = new EventEmitter<Job>();
+
+  constructor(private dropDown: NgbDropdown) {
+  }
 
   ngOnChanges() {
     this.jobsSorted = this.jobs.sort((a, b) => {
@@ -21,8 +24,8 @@ export class JobListComponent implements OnChanges {
     });
   }
 
-  openJobDetails(job: Job) {
-    console.log("TODO open job details");
+  selectJob(job: Job) {
+    this.onJobSelection.emit(job);
+    this.dropDown.close();
   }
-
 }

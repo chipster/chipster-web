@@ -35,6 +35,6 @@ import {JobListComponent} from "./job-list/job-list.component";
     JobListComponent,
   ],
   providers: [ToolService],
-  exports: [ToolsComponent]
+  exports: [ToolsComponent],
 })
 export class ToolsModule { }

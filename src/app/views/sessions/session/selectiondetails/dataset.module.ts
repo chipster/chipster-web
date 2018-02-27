@@ -11,9 +11,10 @@ import {DatasetModalService} from "./datasetmodal.service";
 import {LinkButtonModule} from "../link-button/link-button.module";
 import {FileComponent} from "./file/file.component";
 import {VisualizationsModule} from "../visualization/visualizations.module";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
-  imports: [  CommonModule, FormsModule, SharedModule, LinkButtonModule, VisualizationsModule ],
+  imports: [ NgbModule, CommonModule, FormsModule, SharedModule, LinkButtonModule, VisualizationsModule ],
   declarations: [DatasetDetailsComponent, DatasetParameterListComponent, SingleDatasetComponent, FileComponent, JobComponent, DatasetHistorymodalComponent],
   exports: [JobComponent, FileComponent, DatasetDetailsComponent, SingleDatasetComponent],
   providers: [DatasetModalService],

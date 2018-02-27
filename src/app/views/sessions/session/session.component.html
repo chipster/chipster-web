@@ -73,7 +73,10 @@
 
       <div class="row">
         <div class="col">
-          <ch-job *ngIf="selectionService.selectedJobs.length > 0"></ch-job>
+          <ch-job
+            *ngIf="selectionService.selectedJobs.length > 0"
+            [sessionData]="sessionData">
+          </ch-job>
 
           <ch-file
             *ngIf="selectionService.selectedDatasets.length > 0"

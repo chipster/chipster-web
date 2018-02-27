@@ -99,6 +99,16 @@ export class JobService {
     });
   }
 
+  static isRunning(job: Job) : boolean {
+    return job.state === "NEW" ||
+      job.state === "WAITING" ||
+      job.state === "RUNNING";
+  }
 
+  static isSuccessful(job: Job) : boolean {
+    return !(job.state === "FAILED" ||
+      job.state === "FAILED_USER_ERROR" ||
+      job.state === "ERROR");
+  }
 
 }

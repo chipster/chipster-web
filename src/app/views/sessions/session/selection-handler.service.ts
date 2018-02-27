@@ -51,7 +51,6 @@ export class SelectionHandlerService {
    * @description: clear all selections and set new job selection to store
    */
   setJobSelection(jobs: Array<Job>): void {
-    this.clearDatasetSelection();
     this.store.dispatch({type: SET_SELECTED_JOBS, payload: jobs});
   }
 
