@@ -17,7 +17,10 @@ export class NavigationComponent {
     private tokenService: TokenService,
     private authenticationService: AuthenticationService) {
 
-    this.username$ = tokenService.getUsername$();
+    this.username$ = tokenService.getUsername$()
+      .flatMap(userId => authenticationService.getUser())
+      .map(user => user.name);  
+
     tokenService.getToken()
   }
 
