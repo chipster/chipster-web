@@ -33,6 +33,6 @@ export class NavigationComponent {
   }
 
   isAdmin() {
-    return this.tokenService.hasRole('admin');
+    return this.isLoggedIn() && this.tokenService.hasRole('admin');
   }
 }
