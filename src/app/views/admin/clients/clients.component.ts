@@ -3,6 +3,7 @@ import {ConfigService} from "../../../shared/services/config.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
 import * as _ from "lodash";
+import { Role } from '../../../model/role';
 
 @Component({
   selector: 'ch-clients',
@@ -21,7 +22,7 @@ export class ClientsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.configService.getService('session-db')
+    this.configService.getService(Role.SESSION_DB)
       .flatMap(service => {
         return this.auhtHttpClient.getAuth(service.adminUri + '/admin/topics');
       })

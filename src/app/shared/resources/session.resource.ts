@@ -21,8 +21,12 @@ export class SessionResource {
         private restService: RestService) {}
 
 	loadSession(sessionId: string) {
-    const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap( (url: string) => {
+    let enabledModules;
+
+    return this.configService.getModules()
+      .do(m => enabledModules = m)
+      .flatMap(() => this.configService.getSessionDbUrl())
+      .flatMap((url: string) => {
 
       // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
       const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true)
@@ -49,7 +53,6 @@ export class SessionResource {
       let tools: Tool[] = param[4];
       let types = param[5];
 
-      // is there any less ugly syntax for defining the types of anonymous object?
       let data = new SessionData();
 
       data.session = session;
@@ -57,7 +60,7 @@ export class SessionResource {
       data.jobsMap = UtilsService.arrayToMap(jobs, 'jobId');
 
       // show only configured modules
-      modules = modules.filter( (module: Module) => this.configService.getModules().indexOf(module.name) >= 0 );
+      modules = modules.filter( (module: Module) => enabledModules.indexOf(module.name) >= 0 );
 
       data.modules = modules;
       data.tools = tools;

@@ -28,7 +28,7 @@ export class ServicesComponent implements OnInit {
     this.aliveMap = new Map();
     this.statusMap = new Map();
 
-    this.configService.getFullConfiguration()
+    this.configService.getServices()
       .flatMap(conf => {
         // sort by role
         this.services = conf.sort((a, b) => a.role.localeCompare(b.role));

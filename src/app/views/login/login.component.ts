@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
       .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
     // TODO unsubscribe?
 
-    this.configService.getFullConfiguration()
+    this.configService.getServices()
       .subscribe(conf => {
         conf
           .filter(s => s.role === 'haka')

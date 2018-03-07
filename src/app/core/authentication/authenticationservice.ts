@@ -41,12 +41,14 @@ export class AuthenticationService {
 
   requestToken(username: string, password: string): Observable<any> {
     console.log("request token");
-    return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-      const url = `${coreServices.auth}/tokens`;
-      const encodedString = btoa(`${username}:${password}`); // base64 encoding
+    return this.ConfigService.getAuthUrl()
+      .do(url => console.log('url', url))
+      .flatMap(authUrl => {
+        const url = `${authUrl}/tokens`;
+        const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-      return this.httpClient.post<TokenResponse>(url, {},
-        { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
+        return this.httpClient.post<TokenResponse>(url, {},
+          { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
     });
   }
 
@@ -57,12 +59,13 @@ export class AuthenticationService {
     }
     console.log("refreshing token", this.tokenService.getToken(), new Date());
 
-    this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-      const url = `${coreServices.auth}/tokens/refresh`;
-      const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
+    this.ConfigService.getAuthUrl()
+      .flatMap(authUrl => {
+        const url = `${authUrl}/tokens/refresh`;
+        const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
 
-      return this.httpClient.post<TokenResponse>(url, {},
-        { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
+        return this.httpClient.post<TokenResponse>(url, {},
+          { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
 
     }).subscribe((response: TokenResponse) => {
       let roles = JSON.parse(response.rolesJson);
@@ -87,28 +90,30 @@ export class AuthenticationService {
   }
 
   getUser(): Observable<User> {
-    return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-      const userId = encodeURIComponent(this.tokenService.getUsername());
-      const url = `${coreServices.auth}/users/${userId}`;    
+    return this.ConfigService.getAuthUrl()
+      .flatMap(authUrl => {
+        const userId = encodeURIComponent(this.tokenService.getUsername());
+        const url = `${authUrl}/users/${userId}`;    
 
-      return <Observable<User>> this.authHttpClient.getAuth(url)
-        .catch(err => {
-          this.restErrorService.handleError(err, 'failed to get the user details');
-          throw err;
-        });
-    });
+        return <Observable<User>> this.authHttpClient.getAuth(url);
+      })
+      .catch(err => {
+        this.restErrorService.handleError(err, 'failed to get the user details');
+        throw err;
+      });
   }
 
   getUsers(): Observable<User[]> {
-    return this.ConfigService.getConfiguration().flatMap((coreServices: CoreServices) => {
-      const url = `${coreServices.auth}/users`;    
+    return this.ConfigService.getAuthUrl()
+      .flatMap(authUrl => {
+        const url = `${authUrl}/users`;    
 
-      return <Observable<User[]>> this.authHttpClient.getAuth(url)
-        .catch(err => {
-          this.restErrorService.handleError(err, 'failed to get users');
-          throw err;
-        });
-    });
+        return <Observable<User[]>> this.authHttpClient.getAuth(url)
+      })
+      .catch(err => {
+        this.restErrorService.handleError(err, 'failed to get users');
+        throw err;
+      });
   }
 }
 
