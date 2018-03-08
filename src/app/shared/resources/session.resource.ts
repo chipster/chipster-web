@@ -28,20 +28,20 @@ export class SessionResource {
       .flatMap(() => this.configService.getSessionDbUrl())
       .flatMap((url: string) => {
 
-      // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
-      const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true)
+        const session$ = this.restService.get(`${url}/sessions/${sessionId}`, true)
         .do((x: any) => console.debug('session', x));
-      const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true)
+        const sessionDatasets$ = this.restService.get(`${url}/sessions/${sessionId}/datasets`, true)
         .do((x: any) => console.debug('sessionDatasets', x));
-      const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true)
+        const sessionJobs$ = this.restService.get(`${url}/sessions/${sessionId}/jobs`, true)
         .do((x: any) => console.debug('sessionJobs', x));
-      const modules$ = this.toolResource.getModules()
+        const modules$ = this.toolResource.getModules()
         .do((x: any) => console.debug('modules', x));
-      const tools$ = this.toolResource.getTools()
+        const tools$ = this.toolResource.getTools()
         .do((x: any) => console.debug('tools', x));
-      const types$ = this.getTypeTagsForSession(sessionId)
+        const types$ = this.getTypeTagsForSession(sessionId)
         .do((x: any) => console.debug('types', x));
-
+        
+        // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
       return this.forkJoinWithoutCancel([session$, sessionDatasets$, sessionJobs$, modules$, tools$, types$]);
 
     }).map( (param: any) => {
