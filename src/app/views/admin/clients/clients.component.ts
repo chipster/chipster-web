@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import {ConfigService} from "../../../shared/services/config.service";
-import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
-import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
-import * as _ from "lodash";
+import {ConfigService} from '../../../shared/services/config.service';
+import {RestErrorService} from '../../../core/errorhandler/rest-error.service';
+import {AuthHttpClientService} from '../../../shared/services/auth-http-client.service';
+import * as _ from 'lodash';
 import { Role } from '../../../model/role';
+import { TokenService } from '../../../core/authentication/token.service';
 
 @Component({
   selector: 'ch-clients',
@@ -19,10 +20,11 @@ export class ClientsComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
+    private tokenService: TokenService,
   ) { }
 
   ngOnInit() {
-    this.configService.getService(Role.SESSION_DB)
+    this.configService.getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .flatMap(service => {
         return this.auhtHttpClient.getAuth(service.adminUri + '/admin/topics');
       })
@@ -31,13 +33,13 @@ export class ClientsComponent implements OnInit {
         this.users = [];
 
         // filter out server topics and get values as an array
-        let sessionIds = Object.keys(topics)
+        const sessionIds = Object.keys(topics)
           .filter(topicName => topicName !== 'jobs' && topicName !== 'files');
-        let sessionTopics = sessionIds.map(id => topics[id]);
+          const sessionTopics = sessionIds.map(id => topics[id]);
 
         sessionTopics.forEach(topic => {
           topic.forEach(user => {
-            let userCopy = _.clone(user);
+            const userCopy = _.clone(user);
             // clean up the user ip address
             let ip = userCopy.address;
             // why there is a slash in the beginning?

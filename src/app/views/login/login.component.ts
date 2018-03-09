@@ -1,15 +1,15 @@
-import {AuthenticationService} from "../../core/authentication/authenticationservice";
-import {Component, OnInit, ViewChild} from "@angular/core";
+import {AuthenticationService} from '../../core/authentication/authenticationservice';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormGroup} from '@angular/forms';
-import {ActivatedRoute, Router} from "@angular/router";
-import {RestErrorService} from "../../core/errorhandler/rest-error.service";
-import {HttpErrorResponse} from "@angular/common/http";
-import {ConfigService} from "../../shared/services/config.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {RestErrorService} from '../../core/errorhandler/rest-error.service';
+import {HttpErrorResponse} from '@angular/common/http';
+import {ConfigService} from '../../shared/services/config.service';
 
 @Component({
   selector: 'ch-login',
   templateUrl: './login.component.html',
-  styleUrls: ["./login.component.less"]
+  styleUrls: ['./login.component.less']
 })
 export class LoginComponent implements OnInit {
 
@@ -34,12 +34,12 @@ export class LoginComponent implements OnInit {
       .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
     // TODO unsubscribe?
 
-    this.configService.getServices()
+    this.configService.getPublicServices()
       .subscribe(conf => {
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            this.ssoLoginUrl = s.publicUri + '/secure'
+            this.ssoLoginUrl = s.publicUri + '/secure';
           });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
@@ -47,13 +47,13 @@ export class LoginComponent implements OnInit {
 
   login() {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(() => {
-      //Route to Session creation page
-      console.log("login successful");
+      // Route to Session creation page
+      console.log('login successful');
       this.router.navigateByUrl(this.returnUrl);
     }, (errorResponse: HttpErrorResponse) => {
 
       if (RestErrorService.isForbidden(errorResponse)) {
-        this.error = 'Incorrect username or password'
+        this.error = 'Incorrect username or password';
       } else {
         this.error = 'Connecting to authentication service failed';
         console.error(errorResponse);
@@ -61,17 +61,17 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  //Hack for the Enter key press for the button type="button"
+  // Hack for the Enter key press for the button type='button'
   keyDownFunction(event) {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       if (this.myForm.value.username && this.myForm.value.password) {
         this.login();
       } else if (!this.myForm.value.username && !this.myForm.value.password) {
-        this.error = "Please enter username and password to log in";
+        this.error = 'Please enter username and password to log in';
       } else if (!this.myForm.value.username) {
-        this.error = "Please enter username";
+        this.error = 'Please enter username';
       } else if (!this.myForm.value.password) {
-        this.error = "Please enter password";
+        this.error = 'Please enter password';
       }
     }
   }

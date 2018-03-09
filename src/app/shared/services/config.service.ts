@@ -1,25 +1,25 @@
-import {ConfigurationResource} from "../resources/configurationresource";
-import {Injectable} from "@angular/core";
-import * as _ from "lodash";
-import {CoreServices} from "../../core/core-services";
-import {Observable} from "rxjs";
-import {Service} from "../../model/service";
-import { Role } from "../../model/role";
+import {ConfigurationResource} from '../resources/configurationresource';
+import {Injectable} from '@angular/core';
+import * as _ from 'lodash';
+import {CoreServices} from '../../core/core-services';
+import {Observable} from 'rxjs/Observable';
+import {Service} from '../../model/service';
+import { Role } from '../../model/role';
 
 @Injectable()
 export class ConfigService {
-  
-  private conf$: Observable<any>
-  private services$: Observable<Service[]>
+
+  private conf$: Observable<any>;
+  private publicServices$: Observable<Service[]>;
 
   constructor(
     private configurationResource: ConfigurationResource) {
 
     this.conf$ = this.configurationResource.getConfiguration()
       .publishReplay(1).refCount();
-      
-    this.services$ = this.conf$
-      .flatMap(conf => this.configurationResource.getServices(conf))
+
+    this.publicServices$ = this.conf$
+      .flatMap(conf => this.configurationResource.getPublicServices(conf))
       .publishReplay(1).refCount();
   }
 
@@ -27,8 +27,19 @@ export class ConfigService {
     return this.conf$;
   }
 
-  getServices(): Observable<any> {
-    return this.services$;
+  getPublicServices(): Observable<any> {
+    return this.publicServices$;
+  }
+
+  getInternalServices(token: string): Observable<Service[]> {
+    return this.conf$
+      .flatMap(conf => this.configurationResource.getInternalServices(conf, token))
+      .publishReplay(1).refCount();
+  }
+
+  getInternalService(role: string, token: string): Observable<Service> {
+    return this.getInternalServices(token)
+      .map(services => this.getFirstByRole(role, services));
   }
 
   getAuthUrl(): any {
@@ -64,16 +75,14 @@ export class ConfigService {
       .map(conf => conf['modules']);
   }
 
-  getService(s: string): Observable<Service> {
-    return this.services$
-      // convert to the stream of Service objects
-      .flatMap(servicesArray => Observable.from(servicesArray))
-      .filter(service => service.role === s)
-      .take(1);
+  getFirstByRole(role: string, services: Service[]): Service {
+    return services
+      .filter(service => service.role === role)[0];
   }
 
-  getPublicUri(service: string) {
-    return this.getService(service)
+  getPublicUri(role: string) {
+    return this.getPublicServices()
+      .map(services => this.getFirstByRole(role, services))
       .map(s => s.publicUri);
   }
 }

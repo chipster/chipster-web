@@ -1,9 +1,10 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {ConfigService} from "../../../shared/services/config.service";
-import {Observable} from "rxjs/Observable";
-import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
-import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
-import {Service} from "../../../model/service";
+import {ConfigService} from '../../../shared/services/config.service';
+import {Observable} from 'rxjs/Observable';
+import {RestErrorService} from '../../../core/errorhandler/rest-error.service';
+import {AuthHttpClientService} from '../../../shared/services/auth-http-client.service';
+import {Service} from '../../../model/service';
+import { TokenService } from '../../../core/authentication/token.service';
 
 @Component({
   selector: 'ch-services',
@@ -21,6 +22,7 @@ export class ServicesComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
+    private tokenService: TokenService,
   ) { }
 
   ngOnInit() {
@@ -28,7 +30,7 @@ export class ServicesComponent implements OnInit {
     this.aliveMap = new Map();
     this.statusMap = new Map();
 
-    this.configService.getServices()
+    this.configService.getInternalServices(this.tokenService.getToken())
       .flatMap(conf => {
         // sort by role
         this.services = conf.sort((a, b) => a.role.localeCompare(b.role));
@@ -37,22 +39,22 @@ export class ServicesComponent implements OnInit {
       // skip services without adminUri
       .filter(service => service.adminUri != null)
       .flatMap(service => {
-        let requests = [];
+        const requests = [];
         requests.push(this.auhtHttpClient.get(service.adminUri + '/admin/alive')
           .do(() => this.aliveMap.set(service.serviceId, 'OK'))
           .catch(err => {
              console.log('alive check error', service.role, err);
-             this.aliveMap.set(service.serviceId, err.status);
+             this.aliveMap.set(service.role, err.status);
              return Observable.empty();
             }));
 
         requests.push(this.auhtHttpClient.getAuth(service.adminUri + '/admin/status')
           .do(stats => {
-            this.statusMap.set(service.serviceId, stats)
+            this.statusMap.set(service.role, stats);
           })
           .catch(err => {
             console.log('get status error', service.role, err, err.status);
-            this.statusMap.set(service.serviceId, err.status);
+            this.statusMap.set(service.role, err.status);
             return Observable.empty();
           }));
         return Observable.forkJoin(requests);
@@ -66,7 +68,7 @@ export class ServicesComponent implements OnInit {
 
   getStatusString(service) {
     if (service) {
-      let statusObj = this.getStatus(service);
+      const statusObj = this.getStatus(service);
       if (statusObj) {
         // 2 for pretty
         return JSON.stringify(statusObj, null, 2);
@@ -76,6 +78,6 @@ export class ServicesComponent implements OnInit {
   }
 
   getStatus(service) {
-    return this.statusMap.get(service.serviceId);
+    return this.statusMap.get(service.role);
   }
 }
