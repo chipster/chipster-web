@@ -89,7 +89,7 @@ export class JobComponent implements OnInit, OnDestroy {
   }
 
   cancelJob() {
-    this.sessionDataService.deleteJobs([this.job]);
+    this.sessionDataService.cancelJob(this.job);
   }
 
 }
