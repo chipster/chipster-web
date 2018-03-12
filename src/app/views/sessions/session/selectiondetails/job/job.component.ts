@@ -1,21 +1,21 @@
-import {SelectionService} from "../../selection.service";
-import {SessionDataService} from "../../sessiondata.service";
-import {Component, Input, OnInit} from "@angular/core";
-import Job from "../../../../../model/session/job";
-import {JobService} from "../../job.service";
-import {SessionEventService} from "../../sessionevent.service";
-import {Subject} from "rxjs/Subject";
-import SessionEvent from "../../../../../model/events/sessionevent";
-import {SessionData} from "../../../../../model/session/session-data";
-import * as _ from "lodash";
-import {SelectionHandlerService} from "../../selection-handler.service";
+import {SelectionService} from '../../selection.service';
+import {SessionDataService} from '../../sessiondata.service';
+import {Component, Input, OnInit, OnDestroy} from '@angular/core';
+import Job from '../../../../../model/session/job';
+import {JobService} from '../../job.service';
+import {SessionEventService} from '../../sessionevent.service';
+import {Subject} from 'rxjs/Subject';
+import SessionEvent from '../../../../../model/events/sessionevent';
+import {SessionData} from '../../../../../model/session/session-data';
+import * as _ from 'lodash';
+import {SelectionHandlerService} from '../../selection-handler.service';
 
 @Component({
   selector: 'ch-job',
   templateUrl: './job.html',
   styleUrls: ['./job.component.less']
 })
-export class JobComponent implements OnInit {
+export class JobComponent implements OnInit, OnDestroy {
 
   @Input() sessionData: SessionData;
 
@@ -23,6 +23,7 @@ export class JobComponent implements OnInit {
   isRunning: boolean;
   failed: boolean;
   state: string;
+  screenOutput: string;
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -59,12 +60,13 @@ export class JobComponent implements OnInit {
   // get job from session data and update state fields
   update(jobId: string) {
     if (jobId) {
-      let job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
+      const job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
       if (job) {
         this.job = job;
         this.isRunning = JobService.isRunning(job);
         this.failed = !JobService.isSuccessful(job);
         this.state = _.capitalize(job.state);
+        this.screenOutput = job.screenOutput;
         return;
       }
     }
@@ -74,6 +76,7 @@ export class JobComponent implements OnInit {
     this.isRunning = false;
     this.state = null;
     this.failed = false;
+    this.screenOutput = null;
   }
 
   close() {
