@@ -2,7 +2,7 @@
 <table class="table table-hover table-sm">
   <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)">
     <td>{{job.toolName}}</td>
-    <td class="lighter text-sm">{{job.startTime | localDate}} </td>
+    <td class="lighter text-sm">{{job.created | localDate}} </td>
     <td>{{job.state}}</td>
   </tr>
 
