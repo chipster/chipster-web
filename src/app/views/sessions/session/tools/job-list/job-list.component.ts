@@ -11,7 +11,7 @@ export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];
   jobsSorted: Job[];
 
-  @Output() private selectJobEmitter = new EventEmitter<Job>();
+  @Output() private jobSelected = new EventEmitter<Job>();
 
   constructor(private dropDown: NgbDropdown) {
   }
@@ -25,7 +25,7 @@ export class JobListComponent implements OnChanges {
   }
 
   selectJob(job: Job) {
-    this.selectJobEmitter.emit(job);
+    this.jobSelected.emit(job);
     this.dropDown.close();
   }
 }
