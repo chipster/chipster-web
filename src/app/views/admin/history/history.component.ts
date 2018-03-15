@@ -16,7 +16,7 @@ import {TokenService} from "../../../core/authentication/token.service";
   encapsulation: ViewEncapsulation.Emulated
 })
 export class HistoryComponent implements OnInit {
-  private jobHistoryList: Array<JobHistory>;
+  jobHistoryList: Array<JobHistory>;
 
   constructor(private configService: ConfigService,
               private errorHandlerService: RestErrorService,
