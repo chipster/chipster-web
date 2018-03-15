@@ -18,6 +18,10 @@
       <div class="col-md-12">
         <table class="table table-sm text-sm">
           <tr>
+            <td class="lighter">Created:</td>
+            <td width="100%">{{job.created | localDate}}</td>
+          </tr>
+          <tr>
             <td class="lighter">Started:</td>
             <td width="100%">{{job.startTime | localDate}}</td>
           </tr>
@@ -69,10 +73,11 @@
 
   <ngb-tabset>
     <ngb-tab id="screenOutput">
-      <ng-template ngbTabTitle><span class="glyphicon glyphicon-th"></span> Screen output</ng-template>
+      <ng-template ngbTabTitle><i *ngIf="isRunning" class="fa fa-circle-o-notch fa-spin fa-fw"></i>Screen output</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
-          <pre>{{job.screenOutput}}</pre>
+          <pre style="margin-bottom: 0em">{{screenOutput}}</pre>
+          <i *ngIf="isRunning" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
         </div>
       </ng-template>
     </ngb-tab>

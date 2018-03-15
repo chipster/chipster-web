@@ -85,8 +85,8 @@
     ],
     "prefer-const": true,
     "quotemark": [
-      true,
-      "single"
+      false,
+      "double"
     ],
     "radix": true,
     "semicolon": [
@@ -121,13 +121,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "ch",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      "ch",
       "kebab-case"
     ],
     "no-output-on-prefix": true,

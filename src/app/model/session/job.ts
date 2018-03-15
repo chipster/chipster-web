@@ -1,8 +1,9 @@
-import JobInput from "./jobinput";
-import JobParameter from "./jobparameter";
+import JobInput from './jobinput';
+import JobParameter from './jobparameter';
 
 export default class Job {
 
+    created: string;
     endTime: string;
     inputs: JobInput[];
     jobId: string;

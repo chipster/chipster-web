@@ -1,0 +1,3 @@
+modules: ['NGS', 'Microarray', 'Misc']
+service-locator: http://localhost:8003
+#service-locator: https://service-locator-chipster.rahti-int-app.csc.fi

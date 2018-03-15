@@ -17,7 +17,10 @@ export class NavigationComponent {
     private tokenService: TokenService,
     private authenticationService: AuthenticationService) {
 
-    this.username$ = tokenService.getUsername$();
+    this.username$ = tokenService.getUsername$()
+      .flatMap(userId => authenticationService.getUser())
+      .map(user => user.name);  
+
     tokenService.getToken()
   }
 
@@ -30,6 +33,6 @@ export class NavigationComponent {
   }
 
   isAdmin() {
-    return this.tokenService.hasRole('admin');
+    return this.isLoggedIn() && this.tokenService.hasRole('admin');
   }
 }

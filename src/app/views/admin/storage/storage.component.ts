@@ -41,7 +41,7 @@ export class StorageComponent implements OnInit {
       .do((users: string[]) => this.users = users)
       .flatMap((users: string[]) => Observable.from(users))
       .flatMap(user => {
-          return this.authHttpClient.getAuth(sessionDbUrl + '/users/' + user + '/quota');
+          return this.authHttpClient.getAuth(sessionDbUrl + '/users/' + encodeURIComponent(user) + '/quota');
       })
       .do((quota: any) => this.quotas.set(quota.username, quota))
       .subscribe(null, err => this.restErrorService.handleError(err, 'get quotas failed'));

@@ -1,35 +1,34 @@
-import {SessionResource} from "../../../shared/resources/session.resource";
-import {ConfigService} from "../../../shared/services/config.service";
-import Dataset from "../../../model/session/dataset";
-import Job from "../../../model/session/job";
-import JobInput from "../../../model/session/jobinput";
-import {FileResource} from "../../../shared/resources/fileresource";
-import Session from "../../../model/session/session";
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {TokenService} from "../../../core/authentication/token.service";
-import {ErrorService} from "../../../core/errorhandler/error.service";
-import {RestService} from "../../../core/rest-services/restservice/rest.service";
-import Rule from "../../../model/session/rule";
-import {SessionData} from "../../../model/session/session-data";
-import {DialogModalService} from "./dialogmodal/dialogmodal.service";
-import {Router} from "@angular/router";
+import { SessionResource } from '../../../shared/resources/session.resource';
+import { ConfigService } from '../../../shared/services/config.service';
+import Dataset from '../../../model/session/dataset';
+import Job from '../../../model/session/job';
+import JobInput from '../../../model/session/jobinput';
+import { FileResource } from '../../../shared/resources/fileresource';
+import Session from '../../../model/session/session';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { TokenService } from '../../../core/authentication/token.service';
+import { ErrorService } from '../../../core/errorhandler/error.service';
+import { RestService } from '../../../core/rest-services/restservice/rest.service';
+import Rule from '../../../model/session/rule';
+import { SessionData } from '../../../model/session/session-data';
+import { DialogModalService } from './dialogmodal/dialogmodal.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class SessionDataService {
-
   private sessionId: string;
 
   constructor(
-              private sessionResource: SessionResource,
-              private configService: ConfigService,
-              private fileResource: FileResource,
-              private errorService: ErrorService,
-              private restService: RestService,
-              private tokenService: TokenService) {
-  }
+    private sessionResource: SessionResource,
+    private configService: ConfigService,
+    private fileResource: FileResource,
+    private errorService: ErrorService,
+    private restService: RestService,
+    private tokenService: TokenService
+  ) {}
 
-  getSessionId() : string {
+  getSessionId(): string {
     return this.sessionId;
   }
 
@@ -61,43 +60,62 @@ export class SessionDataService {
    * @param content File content, the actual data
    * @returns Promise which resolves when all this is done
    */
-  createDerivedDataset(name: string, sourceDatasetIds: string[], toolName: string, content: string) {
-
-
+  createDerivedDataset(
+    name: string,
+    sourceDatasetIds: string[],
+    toolName: string,
+    content: string
+  ) {
     let job = new Job();
-    job.state = "COMPLETED";
-    job.toolCategory = "Interactive visualizations";
+    job.state = 'COMPLETED';
+    job.toolCategory = 'Interactive visualizations';
     job.toolName = toolName;
 
-    job.inputs = sourceDatasetIds.map((id) => {
+    job.inputs = sourceDatasetIds.map(id => {
       let input = new JobInput();
       input.datasetId = id;
       return input;
     });
 
-    return this.createJob(job).flatMap((jobId: string) => {
-      let d = new Dataset(name);
-      d.sourceJob = jobId;
-      return this.createDataset(d);
+    return this.createJob(job)
+      .flatMap((jobId: string) => {
+        let d = new Dataset(name);
+        d.sourceJob = jobId;
+        return this.createDataset(d);
+      })
+      .flatMap((datasetId: string) => {
+        return this.fileResource.uploadData(
+          this.getSessionId(),
+          datasetId,
+          content
+        );
+      })
+      .catch(err => {
+        console.log('create derived dataset failed', err);
+        throw err;
+      });
+  }
 
-    }).flatMap((datasetId: string) => {
-      return this.fileResource.uploadData(this.getSessionId(), datasetId, content);
+  cancelJob(job: Job) {
+    job.state = 'CANCELLED';
+    job.stateDetail = '';
 
-    }).catch(err => {
-      console.log('create derived dataset failed', err);
-      throw err;
-    });
+    this.updateJob(job);
   }
 
   deleteJobs(jobs: Job[]) {
-    let deleteJobs$ = jobs.map((job: Job) => this.sessionResource.deleteJob(this.getSessionId(), job.jobId));
+    let deleteJobs$ = jobs.map((job: Job) =>
+      this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
+    );
     Observable.merge(...deleteJobs$).subscribe(() => {
       console.info('Job deleted');
     });
   }
 
   deleteDatasets(datasets: Dataset[]) {
-    let deleteDatasets$ = datasets.map((dataset: Dataset) => this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId));
+    let deleteDatasets$ = datasets.map((dataset: Dataset) =>
+      this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
+    );
     Observable.merge(...deleteDatasets$).subscribe(() => {
       console.info('Job deleted');
     });
@@ -116,16 +134,29 @@ export class SessionDataService {
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
-    let datasetToken$ = this.configService.getSessionDbUrl()
-      .flatMap((sessionDbUrl: string) => this.restService.post(
-        sessionDbUrl +
-        '/datasettokens/sessions/' + this.getSessionId() +
-        '/datasets/' + dataset.datasetId, null, true))
+    let datasetToken$ = this.configService
+      .getSessionDbUrl()
+      .flatMap((sessionDbUrl: string) =>
+        this.restService.post(
+          sessionDbUrl +
+            '/datasettokens/sessions/' +
+            this.getSessionId() +
+            '/datasets/' +
+            dataset.datasetId,
+          null,
+          true
+        )
+      )
       .map((datasetToken: any) => datasetToken.tokenKey);
 
-    return Observable.forkJoin(datasetToken$, this.configService.getFileBrokerUrl()).map(results => {
+    return Observable.forkJoin(
+      datasetToken$,
+      this.configService.getFileBrokerUrl()
+    ).map(results => {
       let [datasetToken, url] = results;
-      return `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${datasetToken}`
+      return `${url}/sessions/${this.getSessionId()}/datasets/${
+        dataset.datasetId
+      }?token=${datasetToken}`;
     });
   }
 
@@ -138,7 +169,7 @@ export class SessionDataService {
   download(url$: Observable<string>) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
-    let win: any  = window.open('', "_blank");
+    let win: any = window.open('', '_blank');
     if (win) {
       url$.subscribe(url => {
         // but we can set it's location later asynchronously
@@ -146,21 +177,22 @@ export class SessionDataService {
 
         // we can close the useless empty tab, but unfortunately only after a while, otherwise the
         // download won't start
-         setTimeout(() => {
-           win.close();
-         }, 3000);
+        setTimeout(() => {
+          win.close();
+        }, 3000);
       });
     } else {
       // Chrome allows only one download
       this.errorService.headerError(
-        "Browser's pop-up blocker prevented some exports. " +
-        "Please disable the pop-up blocker for this site or " +
-        "export the files one by one.", true);
+        'Browser\'s pop-up blocker prevented some exports. ' +
+          'Please disable the pop-up blocker for this site or ' +
+          'export the files one by one.',
+        true
+      );
     }
   }
 
   hasReadWriteAccess(sessionData: SessionData) {
-
     let rules = this.getApplicableRules(sessionData.session.rules);
 
     for (let rule of rules) {
@@ -188,8 +220,9 @@ export class SessionDataService {
   }
 
   deletePersonalRules(session: Session) {
-    return Observable.from(this.getPersonalRules(session.rules))
-      .concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId));
+    return Observable.from(this.getPersonalRules(session.rules)).concatMap(
+      (rule: Rule) =>
+        this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
+    );
   }
 }
-

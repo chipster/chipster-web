@@ -104,7 +104,7 @@
         <div ngbDropdownMenu aria-labelledby="jobsDropdown" class="tools-dropdown-lower">
           <ch-scroller>
             <ch-job-list [jobs]="getJobList()"
-                         (onJobSelection)="selectJob($event)"></ch-job-list>
+                         (jobSelected)="onJobSelection($event)"></ch-job-list>
           </ch-scroller>
         </div>
       </div>

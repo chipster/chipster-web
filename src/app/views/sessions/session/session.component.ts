@@ -1,29 +1,29 @@
 
-import {SessionEventService} from "./sessionevent.service";
-import {SessionDataService} from "./sessiondata.service";
-import {SelectionService} from "./selection.service";
-import Dataset from "../../../model/session/dataset";
-import Job from "../../../model/session/job";
-import {SessionData} from "../../../model/session/session-data";
-import * as _ from "lodash";
-import WsEvent from "../../../model/events/wsevent";
-import {Component, OnDestroy, OnInit} from "@angular/core";
-import {ActivatedRoute, Router, Params, UrlTree} from "@angular/router";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {JobErrorModalComponent} from "./joberrormodal/joberrormodal.component";
-import {SelectionHandlerService} from "./selection-handler.service";
-import {SessionResource} from "../../../shared/resources/session.resource";
-import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
-import {DialogModalService} from "./dialogmodal/dialogmodal.service";
-import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
-import {Observable} from "rxjs/Observable";
+import { SessionEventService } from './sessionevent.service';
+import { SessionDataService } from './sessiondata.service';
+import { SelectionService } from './selection.service';
+import Dataset from '../../../model/session/dataset';
+import Job from '../../../model/session/job';
+import { SessionData } from '../../../model/session/session-data';
+import * as _ from 'lodash';
+import WsEvent from '../../../model/events/wsevent';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, Params, UrlTree } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { JobErrorModalComponent } from './joberrormodal/joberrormodal.component';
+import { SelectionHandlerService } from './selection-handler.service';
+import { SessionResource } from '../../../shared/resources/session.resource';
+import { RestErrorService } from '../../../core/errorhandler/rest-error.service';
+import { DialogModalService } from './dialogmodal/dialogmodal.service';
+import { SessionWorkerResource } from '../../../shared/resources/sessionworker.resource';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'ch-session',
   templateUrl: './session.component.html',
   styleUrls: ['./session.component.less']
 })
-export class SessionComponent implements OnInit, OnDestroy{
+export class SessionComponent implements OnInit, OnDestroy {
 
   sessionData: SessionData;
   deletedDatasets: Array<Dataset>;
@@ -35,7 +35,7 @@ export class SessionComponent implements OnInit, OnDestroy{
 
   constructor(
     private router: Router,
-    private SessionEventService: SessionEventService,
+    private sessionEventService: SessionEventService,
     private sessionDataService: SessionDataService,
     private sessionResource: SessionResource,
     private selectionService: SelectionService,
@@ -57,7 +57,7 @@ export class SessionComponent implements OnInit, OnDestroy{
 	  Also this component can be reused, e.g. when a user creates her own copy
 	  of an example session, she is directed to the new session.
 	   */
-      this.statusText = "Loading session...";
+      this.statusText = 'Loading session...';
       this.selectionHandlerService.clearSelections();
       this.sessionData = null;
       return this.sessionResource.loadSession(params['sessionId']);
@@ -66,10 +66,10 @@ export class SessionComponent implements OnInit, OnDestroy{
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
           return Observable.of(sessionData);
         } else {
-          this.statusText = "Copying session...";
+          this.statusText = 'Copying session...';
           return this.sessionResource.copySession(sessionData, sessionData.session.name)
             .flatMap(sessionId => {
-              let queryParams = {};
+              const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(this.router.navigate(
                 ['/sessions', sessionId, queryParams]));
@@ -77,28 +77,28 @@ export class SessionComponent implements OnInit, OnDestroy{
             .flatMap(() => Observable.never<SessionData>());
         }
       }).subscribe(sessionData => {
-      this.sessionData = sessionData;
-      this.subscribeToEvents();
-    }, (error: any) => {
-      this.statusText = "";
-      this.restErrorService.handleError(error, "Loading session failed");
-    });
+        this.sessionData = sessionData;
+        this.subscribeToEvents();
+      }, (error: any) => {
+        this.statusText = '';
+        this.restErrorService.handleError(error, 'Loading session failed');
+      });
 
     // Select datasets provided via queryparameter and clear queryparameters
-    this.route.queryParams.subscribe( (queryParams: Params) => {
+    this.route.queryParams.subscribe((queryParams: Params) => {
       const datasets = this.parseQueryparametersArray(queryParams, 'id')
-        .map( (datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
-      if(datasets.length > 0) {
+        .map((datasetId: string) => this.sessionData.datasetsMap.get(datasetId));
+      if (datasets.length > 0) {
         this.selectionHandlerService.setDatasetSelection(datasets);
         const sessionId = this.route.snapshot.params['sessionId'];
-        const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId] );
+        const urlTree: UrlTree = this.router.createUrlTree(['sessions', sessionId]);
         this.router.navigateByUrl(urlTree);
       }
     }).unsubscribe();
   }
 
   ngOnDestroy() {
-    this.SessionEventService.unsubscribe();
+    this.sessionEventService.unsubscribe();
 
     this.subscriptions.forEach(subs => subs.unsubscribe());
     this.subscriptions = [];
@@ -127,18 +127,18 @@ export class SessionComponent implements OnInit, OnDestroy{
           } else if (dialogResult.button === deleteButton) {
 
             // the user doesn't need to be notified that the session is deleted
-            this.SessionEventService.unsubscribe();
+            this.sessionEventService.unsubscribe();
             return this.sessionDataService.deletePersonalRules(this.sessionData.session);
           }
         })
         .map(() => true)
         .catch(err => {
-            if (err === undefined || err === 0 || err === 1) {
-              // dialog cancel, backdrop click or esc
-              return Observable.of(false);
-            } else {
-              throw err;
-            }
+          if (err === undefined || err === 0 || err === 1) {
+            // dialog cancel, backdrop click or esc
+            return Observable.of(false);
+          } else {
+            throw err;
+          }
         });
 
     } else {
@@ -157,28 +157,34 @@ export class SessionComponent implements OnInit, OnDestroy{
     // - loadSession().then()
     // - apply the queued updates
 
-    this.SessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
+    this.sessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-    this.subscriptions.push(this.SessionEventService.getAuthorizationStream().subscribe(change => {
+    this.subscriptions.push(this.sessionEventService.getAuthorizationStream().subscribe(change => {
       if (change.event.type === 'DELETE') {
         alert('The session has been deleted.');
         this.router.navigate(['/sessions']);
       }
     }));
 
-    this.subscriptions.push(this.SessionEventService.getJobStream().subscribe(change => {
+    this.subscriptions.push(this.sessionEventService.getJobStream().subscribe(change => {
 
-      let oldValue = <Job>change.oldValue;
-      let newValue = <Job>change.newValue;
+      const oldValue = <Job>change.oldValue;
+      const newValue = <Job>change.newValue;
 
       // if not cancelled
       if (newValue) {
+        console.log(newValue);
+
         // if the job has just failed
         if (newValue.state === 'EXPIRED_WAITING' && oldValue.state !== 'EXPIRED_WAITING') {
           this.openErrorModal('Job expired', newValue);
           console.info(newValue);
         }
         if (newValue.state === 'FAILED' && oldValue.state !== 'FAILED') {
+          this.openErrorModal('Job failed', newValue);
+          console.info(newValue);
+        }
+        if (newValue.state === 'FAILED_USER_ERROR' && oldValue.state !== 'FAILED_USER_ERROR') {
           this.openErrorModal('Job failed', newValue);
           console.info(newValue);
         }
@@ -211,9 +217,9 @@ export class SessionComponent implements OnInit, OnDestroy{
 
     // show datasets again in the workflowgraph
     this.deletedDatasets.forEach((dataset: Dataset) => {
-      let wsEvent = new WsEvent(
+      const wsEvent = new WsEvent(
         this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'CREATE');
-      this.SessionEventService.generateLocalEvent(wsEvent);
+      this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
     // hide the undo message
@@ -245,9 +251,9 @@ export class SessionComponent implements OnInit, OnDestroy{
 
     // hide from the workflowgraph
     this.deletedDatasets.forEach((dataset: Dataset) => {
-      let wsEvent = new WsEvent(
+      const wsEvent = new WsEvent(
         this.sessionDataService.getSessionId(), 'DATASET', dataset.datasetId, 'DELETE');
-      this.SessionEventService.generateLocalEvent(wsEvent);
+      this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
     // start timer to delete datasets from the server later
@@ -261,8 +267,8 @@ export class SessionComponent implements OnInit, OnDestroy{
   }
 
   // noinspection JSMethodCanBeStatic
-  parseQueryparametersArray(queryParams: Params, key: string ): Array<string> {
-    switch(typeof queryParams[key]) {
+  parseQueryparametersArray(queryParams: Params, key: string): Array<string> {
+    switch (typeof queryParams[key]) {
       case 'string':
         return [queryParams[key]];
       case 'object':
@@ -273,7 +279,7 @@ export class SessionComponent implements OnInit, OnDestroy{
   }
 
   openErrorModal(title: string, job: Job) {
-    let modalRef = this.modalService.open(JobErrorModalComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(JobErrorModalComponent, { size: 'lg' });
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.job = job;
   }
@@ -295,9 +301,9 @@ export class SessionComponent implements OnInit, OnDestroy{
 
     this.dialogModalService.openNotesModal(this.sessionData.session).then(notes => {
       this.sessionData.session.notes = notes;
-      this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => {}, err => {
+      this.sessionDataService.updateSession(this.sessionData, this.sessionData.session).subscribe(() => { }, err => {
         this.restErrorService.handleError(err, 'Failed to update session notes');
-      })
+      });
     }, () => {
       // modal dismissed
     });
@@ -312,7 +318,7 @@ export class SessionComponent implements OnInit, OnDestroy{
       'Duplicate session',
       this.sessionData.session.name + '_copy')
       .flatMap(name => {
-        let copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
+        const copySessionObservable = this.sessionResource.copySession(this.sessionData, name);
         return this.dialogModalService.openSpinnerModal('Duplicate session', copySessionObservable);
       })
       .subscribe(null, err => this.restErrorService.handleError(err, 'Duplicate session failed'));
@@ -324,14 +330,15 @@ export class SessionComponent implements OnInit, OnDestroy{
   }
 
   removeSessionModal() {
-    this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + this.sessionData.session.name + '?', 'Delete', 'Cancel').then(() => {
-      // delete the session only from this user (i.e. the rule)
-      this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe( () => {}, err => {
-        this.restErrorService.handleError(err, 'Failed to delete the session');
+    this.dialogModalService.openBooleanModal('Delete session', 'Delete session '
+      + this.sessionData.session.name + '?', 'Delete', 'Cancel').then(() => {
+        // delete the session only from this user (i.e. the rule)
+        this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe(() => { }, err => {
+          this.restErrorService.handleError(err, 'Failed to delete the session');
+        });
+      }, () => {
+        // modal dismissed
       });
-    }, () => {
-      // modal dismissed
-    });
   }
 
   autoLayout() {

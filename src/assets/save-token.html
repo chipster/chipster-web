@@ -1,23 +1,28 @@
 <html>
 <head>
-  <script>
+<script>
+
+console.log('waiting for the sso token');
 
 window.onmessage = function(e) {
-  /*if (e.origin !== "http://example.com") {
-    return;
-  }*/
 
-  console.log('save token from ', e.origin, e.data);
+  /* 
+  Any domain can send these messages
+  
+  Usually we should check e.origin before doing anything, but here the check is
+  deferred to the app side, because we need the app configs to do it
+  */
+  console.log('save a sso token from ', e.origin, e.data);
 
-  var payload = JSON.parse(e.data);
+  window.localStorage.setItem('ch-auth-insecure-origin', e.origin);
+  window.localStorage.setItem('ch-auth-insecure-token', e.data);
 
-  window.localStorage.setItem('ch-auth-token', payload.tokenKey);
-  window.localStorage.setItem('ch-auth-username', payload.username);
-  window.localStorage.setItem('ch-auth-valid-until', payload.validUntil);
-  window.localStorage.setItem('ch-auth-roles', payload.rolesJson);
+  console.log('sso token saved, report to parent', e.origin, e.source);
+
+  e.source.postMessage('saved', e.origin);
 };
 
-  </script>
+</script>
 </head>
 <body style="margin: 0">
 Save token...
