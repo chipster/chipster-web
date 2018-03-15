@@ -19,4 +19,5 @@ export class Role {
 	public static WEB_SERVER = 'web-server';
 	public static PROXY_ADMIN = 'proxy-admin';
 	public static SSO = 'sso';
+	public static JOB_HISTORY="job-history"
 }

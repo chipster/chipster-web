@@ -6,6 +6,8 @@ import {RestService} from "../../../core/rest-services/restservice/rest.service"
 import {JobHistory} from "../../../model/jobhistory";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
+import {Role} from "../../../model/role";
+import {TokenService} from "../../../core/authentication/token.service";
 
 @Component({
   selector: 'ch-history',
@@ -18,14 +20,15 @@ export class HistoryComponent implements OnInit {
 
   constructor(private configService: ConfigService,
               private errorHandlerService: RestErrorService,
-              private auhtHttpClient: AuthHttpClientService,) {
+              private auhtHttpClient: AuthHttpClientService,
+              private tokenService:TokenService) {
   }
 
   ngOnInit() {
-    this.configService.getService('job-history')
-      .flatMap(service => {
-        console.log(service.publicUri);
-        return this.auhtHttpClient.getAuth(service.publicUri + '/jobhistory');
+    this.configService.getPublicUri(Role.JOB_HISTORY)
+      .flatMap(url => {
+        console.log(url);
+        return this.auhtHttpClient.getAuth(url + '/jobhistory');
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
         console.log(jobHistoryList);
