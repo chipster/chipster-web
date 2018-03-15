@@ -49,6 +49,7 @@ export class LeftPanelComponent {
   toggleDatasetSelection($event: any, dataset: Dataset): void {
     if(UtilsService.isCtrlKey($event) || UtilsService.isShiftKey($event)) {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
+      console.log([dataset]);
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
     }
