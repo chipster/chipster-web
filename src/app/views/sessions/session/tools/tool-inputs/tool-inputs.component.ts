@@ -30,7 +30,7 @@ export class ToolInputsComponent implements OnChanges {
       // create copy of the datasets property of each InputBinding as it's used as the model of the select
       // element in the template (and thus get's modified)
 
-      this.localInputBindings = this.inputBindings.map((b) => { return { toolInput: b.toolInput, datasets: b.datasets.slice() }});
+      this.localInputBindings = this.inputBindings.map((b) => ({ toolInput: b.toolInput, datasets: b.datasets.slice() }));
       console.log("updated bindings:", this.getBindingsString(this.localInputBindings));
     }
   }
@@ -38,6 +38,7 @@ export class ToolInputsComponent implements OnChanges {
 
   inputSelected(userEditedBinding: InputBinding) {
 
+    console.log("input selected");
     // // if not multi input, the model changes binding.datasets to object instead of array
     // if (!_.isArray(userEditedBinding.datasets)) {
     //   userEditedBinding.datasets = [userEditedBinding.datasets];
@@ -45,11 +46,11 @@ export class ToolInputsComponent implements OnChanges {
 
     // generate new input bindings: remove from other bindings the datasets which are present in the binding
     // edited by the user
-    let updatedBindings = this.localInputBindings.map(binding => {
+    const updatedBindings = this.localInputBindings.map(binding => {
       if (binding.toolInput === userEditedBinding.toolInput) {
-        return {toolInput: binding.toolInput, datasets: binding.datasets.slice()}
+        return {toolInput: binding.toolInput, datasets: binding.datasets.slice()};
       } else {
-        return {toolInput: binding.toolInput, datasets: _.difference(binding.datasets, userEditedBinding.datasets)}
+        return {toolInput: binding.toolInput, datasets: _.difference(binding.datasets, userEditedBinding.datasets)};
       }
     });
 
@@ -63,15 +64,15 @@ export class ToolInputsComponent implements OnChanges {
   // noinspection JSMethodCanBeStatic
   getBindingsString(bindings: InputBinding[]) {
 
-    let s: string = "";
+    let s = "";
     if (!bindings || bindings.length < 1) {
       return s;
     }
 
     s += "-----\n";
 
-    for (let binding of bindings) {
-      let datasetsString: string = binding.datasets.reduce((a: string, b) => a + b.name + " ", "");
+    for (const binding of bindings) {
+      const datasetsString: string = binding.datasets.reduce((a: string, b) => a + b.name + " ", "");
 
       s += binding.toolInput.name.id ? binding.toolInput.name.id : binding.toolInput.name.prefix;
       s += " -> " + datasetsString;
