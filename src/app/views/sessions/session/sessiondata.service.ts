@@ -6,7 +6,7 @@ import JobInput from '../../../model/session/jobinput';
 import { FileResource } from '../../../shared/resources/fileresource';
 import Session from '../../../model/session/session';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
 import { TokenService } from '../../../core/authentication/token.service';
 import { ErrorService } from '../../../core/errorhandler/error.service';
 import { RestService } from '../../../core/rest-services/restservice/rest.service';
@@ -44,6 +44,10 @@ export class SessionDataService {
     return this.sessionResource.createJob(this.getSessionId(), job);
   }
 
+  createRule(rule: Rule) {
+    return this.sessionResource.createRule(this.getSessionId(), rule);
+  }
+
   getJobById(jobId: string, jobs: Map<string, Job>) {
     return jobs.get(jobId);
   }
@@ -66,20 +70,20 @@ export class SessionDataService {
     toolName: string,
     content: string
   ) {
-    let job = new Job();
+    const job = new Job();
     job.state = 'COMPLETED';
     job.toolCategory = 'Interactive visualizations';
     job.toolName = toolName;
 
     job.inputs = sourceDatasetIds.map(id => {
-      let input = new JobInput();
+      const input = new JobInput();
       input.datasetId = id;
       return input;
     });
 
     return this.createJob(job)
       .flatMap((jobId: string) => {
-        let d = new Dataset(name);
+        const d = new Dataset(name);
         d.sourceJob = jobId;
         return this.createDataset(d);
       })
@@ -104,7 +108,7 @@ export class SessionDataService {
   }
 
   deleteJobs(jobs: Job[]) {
-    let deleteJobs$ = jobs.map((job: Job) =>
+    const deleteJobs$ = jobs.map((job: Job) =>
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
     Observable.merge(...deleteJobs$).subscribe(() => {
@@ -113,12 +117,16 @@ export class SessionDataService {
   }
 
   deleteDatasets(datasets: Dataset[]) {
-    let deleteDatasets$ = datasets.map((dataset: Dataset) =>
+    const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
     Observable.merge(...deleteDatasets$).subscribe(() => {
       console.info('Job deleted');
     });
+  }
+
+  deleteRule(ruleId: string) {
+    return this.sessionResource.deleteRule(this.getSessionId(), ruleId);
   }
 
   updateDataset(dataset: Dataset) {
@@ -134,7 +142,7 @@ export class SessionDataService {
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
-    let datasetToken$ = this.configService
+    const datasetToken$ = this.configService
       .getSessionDbUrl()
       .flatMap((sessionDbUrl: string) =>
         this.restService.post(
@@ -153,7 +161,7 @@ export class SessionDataService {
       datasetToken$,
       this.configService.getFileBrokerUrl()
     ).map(results => {
-      let [datasetToken, url] = results;
+      const [datasetToken, url] = results;
       return `${url}/sessions/${this.getSessionId()}/datasets/${
         dataset.datasetId
       }?token=${datasetToken}`;
@@ -161,7 +169,7 @@ export class SessionDataService {
   }
 
   exportDatasets(datasets: Dataset[]) {
-    for (let d of datasets) {
+    for (const d of datasets) {
       this.download(this.getDatasetUrl(d).map(url => url + '&download'));
     }
   }
@@ -169,7 +177,7 @@ export class SessionDataService {
   download(url$: Observable<string>) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
-    let win: any = window.open('', '_blank');
+    const win: any = window.open('', '_blank');
     if (win) {
       url$.subscribe(url => {
         // but we can set it's location later asynchronously
@@ -193,9 +201,9 @@ export class SessionDataService {
   }
 
   hasReadWriteAccess(sessionData: SessionData) {
-    let rules = this.getApplicableRules(sessionData.session.rules);
+    const rules = this.getApplicableRules(sessionData.session.rules);
 
-    for (let rule of rules) {
+    for (const rule of rules) {
       if (rule.readWrite) {
         return true;
       }

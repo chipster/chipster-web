@@ -3,7 +3,7 @@ import {
   Headers, RequestOptionsArgs, RequestMethod, Request, RequestOptions, Http, Response,
   ResponseContentType
 } from "@angular/http";
-import {Observable} from "rxjs";
+import {Observable} from "rxjs/Observable";
 import {HttpQueueService} from "../http-queue/http-queue.service";
 import {TokenService} from "../../authentication/token.service";
 
@@ -32,7 +32,7 @@ export class RestService {
     if (requestOptions.responseType === ResponseContentType.Json) {
       requestOptions.headers.append('Accept', 'application/json; charset=UTF-8');
     }
-    if(authentication) {
+    if (authentication) {
       requestOptions.headers.append( 'Authorization', this.tokenService.getTokenHeader().Authorization );
     }
     requestOptions.method = method;
@@ -57,7 +57,9 @@ export class RestService {
   /*
    * @description: Create PUT http-request
    */
-  put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs, jsonRequest?: boolean): Observable<any> {
+  put(url: string, payload: any, authenticationRequired?: boolean, requestOptions?: RequestOptionsArgs,
+    jsonRequest?: boolean): Observable<any> {
+
     const opts = this.buildRequestOptionArgs(url, RequestMethod.Put, requestOptions, authenticationRequired, payload, jsonRequest);
     return this.doRequest(new Request(new RequestOptions(opts)));
   }
@@ -85,10 +87,10 @@ export class RestService {
   private doRequest(request: Request): Observable<any> {
     this.httpQueueu.increment();
 
-    return this.http.request(request).map( (response:Response) => {
+    return this.http.request(request).map( (response: Response) => {
         let resp: any;
         // handle response by expected responsetype
-        switch(request.responseType) {
+        switch (request.responseType) {
           case (ResponseContentType.Json):
             resp = response.json();
             break;

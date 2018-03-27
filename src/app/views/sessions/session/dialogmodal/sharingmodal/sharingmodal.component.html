@@ -3,31 +3,63 @@
 </div>
 <div class="modal-body">
 
-  <br>
+  <h5>Your UserID</h5>
+  <p>
+    Your UserID is <strong>{{getUsername()}}</strong>. Give it to others that want
+    to share sessions with you.
+  </p>  
+
   <h5>Access rules</h5>
 
-  <p>List of usernames that have access to this session. Adding new access rules is possible only
-  in the command line client at the moment.</p>
+  <p>List of users that have access to this session. </p>
 
   <table class="table">
     <thead>
     <tr>
-      <th>Username</th>
+      <th>UserID</th>
       <th>Rights</th>
       <th>Shared by</th>
       <th>Role</th>
+      <th></th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let rule of session.rules">
+    <tr *ngFor="let rule of rules">
       <th scope="row">{{rule.username}}</th>
       <td>{{rule.readWrite ? 'read-write' : 'read-only' }}</td>
       <td><span *ngIf="rule.sharedBy">{{rule.sharedBy}}</span></td>
       <td><span *ngIf="!rule.sharedBy">owner</span></td>
+      <td>
+        <button *ngIf="isDeleteEnabled(rule)" class="btn btn-outline-dark btn-no-border" (click)="deleteRule(rule.ruleId)">
+            <span class="fa fa-times"></span>
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="newRule">
+      <th scope="row">
+        <input #usernameInput type="text" [(ngModel)]="newRule.username" (keyup.enter)="saveRule()">
+      </th>
+      <td>
+        <select [(ngModel)]="newRule.readWrite">
+          <option value="true">read-write</option>
+          <option value="false">read-only</option>
+        </select>
+      </td>
+      <td></td>
+      <td></td>
     </tr>
     </tbody>
   </table>
 
+  <button class="btn btn-primary" *ngIf="!newRule" (click)="addNewRule()">
+    Add rule</button>
+
+  <div *ngIf="newRule">
+    <button class="btn btn-secondary" (click)="newRule = null">Cancel</button>
+    <button class="btn btn-success" (click)="saveRule()">Save</button>
+  </div>
+
+  <br>
   <br>
   <h5>Timestamps</h5>
 

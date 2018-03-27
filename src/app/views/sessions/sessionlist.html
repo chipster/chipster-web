@@ -32,7 +32,7 @@
                 [ngClass]="{'table-active': isSessionSelected(session)}">
               <td>
               <span>{{session.name}}
-                <button class="btn btn-outline-dark btn-sm pull-right delete-session-button"
+                <button class="btn btn-outline-dark btn-sm pull-right btn-no-border"
                         *ngIf="sessionDataService.hasPersonalRule(session.rules)"
                         (click)="deleteSession(session); $event.stopImmediatePropagation();"
                         title="Delete session"><span class="fa fa-times"></span>

@@ -10,7 +10,8 @@ import UtilsService from '../utilities/utils';
 import { Injectable } from '@angular/core';
 import { SessionData } from '../../model/session/session-data';
 import { RestService } from '../../core/rest-services/restservice/rest.service';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
+import Rule from '../../model/session/rule';
 
 @Injectable()
 export class SessionResource {
@@ -113,8 +114,8 @@ export class SessionResource {
    * @returns {Observable<any>}
    */
   forkJoinWithoutCancel(observables) {
-    let errors = [];
-    let catchedObservables = observables.map(o =>
+    const errors = [];
+    const catchedObservables = observables.map(o =>
       o.catch(err => {
         errors.push(err);
         return Observable.of(null);
@@ -160,8 +161,8 @@ export class SessionResource {
       })
       .map(typesObj => {
         // convert js objects to es6 Maps
-        let typesMap = new Map();
-        for (let datasetId of Object.keys(typesObj)) {
+        const typesMap = new Map();
+        for (const datasetId of Object.keys(typesObj)) {
           typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
         }
         return typesMap;
@@ -169,7 +170,7 @@ export class SessionResource {
   }
 
   objectToMap(obj) {
-    let map = new Map();
+    const map = new Map();
     for (const key of Object.keys(obj)) {
       map.set(key, obj[key]);
     }
@@ -214,6 +215,15 @@ export class SessionResource {
       .map((response: any) => response.jobId);
   }
 
+  createRule(sessionId: string, rule: Rule): Observable<string> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$
+      .flatMap((url: string) =>
+        this.restService.post(`${url}/sessions/${sessionId}/rules`, rule, true)
+      )
+      .map((response: any) => response.ruleId);
+  }
+
   getSession(sessionId: string): Observable<Session> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap((url: string) =>
@@ -236,6 +246,13 @@ export class SessionResource {
     return apiUrl$.flatMap((url: string) =>
       this.restService.get(`${url}/sessions/${sessionId}/jobs/${jobId}`, true)
     );
+  }
+
+  getRule(sessionId: string, ruleId: string) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap((url: string) => {
+      return this.restService.get(`${url}/sessions/${sessionId}/rules/${ruleId}`, true);
+    });
   }
 
   updateSession(session: Session) {
@@ -313,12 +330,12 @@ export class SessionResource {
       name = 'unnamed session';
     }
 
-    let newSession: Session = _.clone(sessionData.session);
+    const newSession: Session = _.clone(sessionData.session);
     newSession.sessionId = null;
     newSession.name = name;
     let createdSessionId: string;
-    let datasetIdMap = new Map<string, string>();
-    let jobIdMap = new Map<string, string>();
+    const datasetIdMap = new Map<string, string>();
+    const jobIdMap = new Map<string, string>();
 
     // create session
     const createSession$ = this.createSession(newSession);
@@ -365,7 +382,7 @@ export class SessionResource {
         return Observable.forkJoin(...createRequests);
       })
       .flatMap(() => {
-        let updateRequests: Array<Observable<string>> = [];
+        const updateRequests: Array<Observable<string>> = [];
 
         // // update datasets' sourceJob id
         sessionData.datasetsMap.forEach((oldDataset: Dataset) => {

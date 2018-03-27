@@ -7,5 +7,5 @@ export default class Session {
     created: string;
     notes: string;
     sessionId: string;
-    rules: Array<Rule>
+    rules: Array<Rule>;
 }
