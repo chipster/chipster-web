@@ -2,7 +2,7 @@ export type Resource =
     'DATASET' |
     'JOB' |
     'SESSION' |
-    'AUTHORIZATION';
+    'RULE';
 
 export type EventType =
     'CREATE' |

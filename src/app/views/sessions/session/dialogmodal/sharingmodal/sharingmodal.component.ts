@@ -36,7 +36,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.sessionEventService.getAuthorizationStream()
+    this.sessionEventService.getRuleStream()
       .subscribe(() => {
         this.rules = this.session.rules;
       });

@@ -22,7 +22,7 @@ export class SessionEventService {
     datasetStream$: Observable<SessionEvent>;
     jobStream$: Observable<SessionEvent>;
     sessionStream$: Observable<SessionEvent>;
-    authorizationStream$: Observable<SessionEvent>;
+    ruleStream$: Observable<SessionEvent>;
     wsSubject$: WebSocketSubject<WsEvent>;
     localSubject$: Subject<WsEvent>;
 
@@ -68,16 +68,16 @@ export class SessionEventService {
         .flatMap(data => this.handleSessionEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
-      this.authorizationStream$ = stream
-        .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
-        .flatMap(data => this.handleAuthorizationEvent(data, this.sessionId, sessionData))
+      this.ruleStream$ = stream
+        .filter(wsData => wsData.resourceType === 'RULE')
+        .flatMap(data => this.handleRuleEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
       // update sessionData even if no one else subscribes
       this.datasetStream$.subscribe();
       this.jobStream$.subscribe();
       this.sessionStream$.subscribe();
-      this.authorizationStream$.subscribe();
+      this.ruleStream$.subscribe();
     }
 
   /**
@@ -144,15 +144,15 @@ export class SessionEventService {
         return this.jobStream$;
     }
 
-    getAuthorizationStream() {
-      return this.authorizationStream$;
+    getRuleStream() {
+      return this.ruleStream$;
     }
 
     createEvent(event, oldValue, newValue) {
         return Observable.of(new SessionEvent(event, oldValue, newValue));
     }
 
-  handleAuthorizationEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
+  handleRuleEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
     if (event.type === 'CREATE') {
       return this.sessionResource.getRule(sessionId, event.resourceId).flatMap((rule: Rule) => {
           sessionData.session.rules.push(rule);

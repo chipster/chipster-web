@@ -162,8 +162,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     this.sessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-    this.subscriptions.push(this.sessionEventService.getAuthorizationStream().subscribe(change => {
-      console.log('rule changed', change);
+    this.subscriptions.push(this.sessionEventService.getRuleStream().subscribe(change => {
       const rule: Rule = <Rule> change.oldValue;
       if (change.event.type === 'DELETE' && rule.username === this.tokenService.getUsername()) {
         alert('The session has been deleted.');
