@@ -44,9 +44,9 @@ export class ManualComponent implements AfterViewInit {
 
   @Input() private page: string;
   @Input() showControls = false;
+  @Input() assetsPath?= 'assets/manual/';
 
   private routerPath = 'manual/';
-  private assetsPath = 'assets/manual/';
 
   private currentPage;
 
@@ -75,7 +75,7 @@ export class ManualComponent implements AfterViewInit {
         }
 
         // get the html file
-        return this.getPage(this.assetsPath + this.currentPage)
+        return this.getPage(this.assetsPath + this.currentPage);
       })
       // parse the html
       .map(htmlString => new DOMParser().parseFromString(htmlString, "text/html"))
@@ -99,7 +99,7 @@ export class ManualComponent implements AfterViewInit {
 
     // create a root component because angularize() wants one
     const factory = this.componentFactoryResolver.resolveComponentFactory(ManualDivComponent);
-    let componentRef = this.viewContainerReference.createComponent(factory);
+    const componentRef = this.viewContainerReference.createComponent(factory);
 
     this.angularize(htmlDoc, componentRef);
 
@@ -118,8 +118,8 @@ export class ManualComponent implements AfterViewInit {
    * @param {string} fragment
    */
   scrollToFragment(fragment: string) {
-    let byId = document.getElementById(fragment);
-    let byName = document.getElementsByName(fragment);
+    const byId = document.getElementById(fragment);
+    const byName = document.getElementsByName(fragment);
 
     console.debug('scroll to', fragment, byId, byName);
 
@@ -171,8 +171,8 @@ export class ManualComponent implements AfterViewInit {
     // iterate children
     for (let i = 0; i < sourceDoc.childNodes.length; i++) {
 
-      let element = sourceDoc.childNodes[i];
-      let nodeName = element.nodeName.toUpperCase();
+      const element = sourceDoc.childNodes[i];
+      const nodeName = element.nodeName.toUpperCase();
 
       if (keepChilren.has(nodeName)) {
         // omit the tag, process children
@@ -184,8 +184,8 @@ export class ManualComponent implements AfterViewInit {
 
       } else if (components.has(nodeName)) {
         // create an Angular component
-        let component = components.get(element.tagName);
-        let componentRef = this.addComponent(component, targetComponentRef);
+        const component = components.get(element.tagName);
+        const componentRef = this.addComponent(component, targetComponentRef);
 
         // give attributes of the original element as an input for the new component
         componentRef.instance.attributes = element.attributes;
@@ -201,7 +201,7 @@ export class ManualComponent implements AfterViewInit {
         // somenthing else
         console.log('unknown element', nodeName, element);
         // try to replace the component with div
-        let componentRef = this.addComponent(ManualDivComponent, targetComponentRef);
+        const componentRef = this.addComponent(ManualDivComponent, targetComponentRef);
         this.angularize(element, componentRef);
       }
     }
@@ -214,11 +214,11 @@ export class ManualComponent implements AfterViewInit {
    * @param targetComponentRef
    */
   addElement(element, targetComponentRef) {
-    let clone = element.cloneNode(true);
+    const clone = element.cloneNode(true);
 
     // Wrap the element into an additional span component to keep the content in order. Otherwise all the
     // remaining components will be put above these native elements.
-    let componentRef = this.addComponent(ManualSpanComponent, targetComponentRef);
+    const componentRef = this.addComponent(ManualSpanComponent, targetComponentRef);
     componentRef.instance.appendChild(clone);
   }
 
@@ -245,7 +245,7 @@ export class ManualComponent implements AfterViewInit {
 
     console.log('GET', path);
 
-    return this.http.get(path, {responseType: 'text'})
+    return this.http.get(path, { responseType: 'text' })
       // replace missing pages with nicer message
       .catch(err => {
         if (err.status === 404) {
@@ -253,7 +253,7 @@ export class ManualComponent implements AfterViewInit {
         } else {
           throw err;
         }
-      })
+      });
   }
 
   /**
@@ -271,11 +271,11 @@ export class ManualComponent implements AfterViewInit {
    */
   rewrite(htmlDoc: HTMLDocument, path: string) {
 
-    let links = htmlDoc.getElementsByTagName('a');
+    const links = htmlDoc.getElementsByTagName('a');
     Array.from(links).forEach(link => {
 
       // use getAttribute(), because link.href converts the url to absolute
-      let href = link.getAttribute('href');
+      const href = link.getAttribute('href');
 
       if (link.name) {
         // link target, nothing to do
@@ -295,10 +295,10 @@ export class ManualComponent implements AfterViewInit {
       }
     });
 
-    let imgs = htmlDoc.getElementsByTagName('img');
+    const imgs = htmlDoc.getElementsByTagName('img');
     Array.from(imgs).forEach(img => {
 
-      let src = img.getAttribute('src');
+      const src = img.getAttribute('src');
       img.src = this.assetsPath + src;
     });
 

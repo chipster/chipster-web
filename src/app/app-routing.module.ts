@@ -1,4 +1,4 @@
-import { NgModule }             from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {HomeComponent} from "./views/home/home.component";
 import {LoginComponent} from "./views/login/login.component";
@@ -8,10 +8,12 @@ import {AuthGuard} from "./core/authentication/auth-guard.service";
 import {ContactComponent} from "./views/contact/contact.component";
 import {ManualComponent} from "./views/manual/manual.component";
 import {ModifiedSessionGuard} from "./views/sessions/session/modified-session.guard";
+import { TermsComponent } from './views/terms/terms.component';
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent },
-  { path: 'login',  component: LoginComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'terms',  component: TermsComponent },
   {
     path: 'manual',
     // route all sub-paths here

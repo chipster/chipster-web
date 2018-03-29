@@ -1,3 +1,6 @@
 modules: ['NGS', 'Microarray', 'Misc']
+terms-of-use-auths: ['haka']
+terms-of-use-path: assets/csc-terms-of-use-v1.html
+terms-of-use-version: 1
 service-locator: http://localhost:8003
 #service-locator: https://service-locator-chipster.rahti-int-app.csc.fi

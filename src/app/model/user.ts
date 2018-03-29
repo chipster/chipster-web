@@ -4,6 +4,9 @@ export class User {
     public mail: string;
     public organization: string;
     public name: string;
+    public termsAccepted: string;
+    public termsVersion: number;
+
     public version: number;
     public created: string;
     public modified: string;
