@@ -6,6 +6,7 @@
     <th scope="col">Organization</th>
     <th scope="col">Name</th>
     <th scope="col">Mail</th>
+    <th scope="col">Terms of Use accepted</th>
     <th scope="col">Created</th>
     <th scope="col">Modified</th>
   </tr>
@@ -17,6 +18,7 @@
     <td>{{user.organization}}</td>
     <td>{{user.name}}</td>
     <td>{{user.mail}}</td>
+    <td title="version: {{user.termsVersion}}">{{user.termsAccepted | localDate}}</td>
     <td>{{user.created | localDate}}</td>
     <td>{{user.modified | localDate}}</td>
   </tr>
