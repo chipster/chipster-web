@@ -346,12 +346,19 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   autoLayout() {
+
+    const updates: Observable<any>[] = [];
     this.sessionData.datasetsMap.forEach(d => {
       if (d.x || d.y) {
         d.x = null;
         d.y = null;
-        this.sessionDataService.updateDataset(d);
+        updates.push(this.sessionDataService.updateDataset(d));
       }
     });
+
+    Observable.forkJoin(updates)
+      .subscribe(
+        () => console.log(updates.length + ' datasets updated'),
+        err => this.restErrorService.handleError(err, 'layout update failed'));
   }
 }
