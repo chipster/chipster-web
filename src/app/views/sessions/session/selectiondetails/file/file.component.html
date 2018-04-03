@@ -39,7 +39,7 @@
 
 <div class="chipster-highlight">
   <ch-single-dataset *ngIf="selectionService.selectedDatasets.length === 1" [dataset]="selectionService.selectedDatasets[0]"
-    [jobs]="sessionData.jobsMap" [sessionData]="sessionData" (onDelete)="onDelete.emit()"></ch-single-dataset>
+    [jobs]="sessionData.jobsMap" [sessionData]="sessionData"></ch-single-dataset>
   <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="onDelete.emit()"></ch-dataset-details>
 </div>
 

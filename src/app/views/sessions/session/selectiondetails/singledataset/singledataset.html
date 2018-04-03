@@ -21,7 +21,14 @@
         </tr>
         <tr>
           <td class="lighter">Notes:</td>
-          <td>{{dataset.notes}}</td>
+          <td>
+            <textarea [(ngModel)]="dataset.notes"
+              class="dataset-notes"
+              rows="1" placeholder="{{notesPlaceholderInactive}}"
+              (focus)="editNotes(notesInput)"
+              (focusout)="saveNotes(dataset, notesInput)" #notesInput>
+            </textarea>
+          </td>
         </tr>
 
 
@@ -33,11 +40,6 @@
       <!--<p style="margin-bottom: 0px"><span style="color: grey">Notes:</span></p>-->
 
 
-      <!--<textarea [(ngModel)]="dataset.notes"-->
-      <!--class="dataset-notes"-->
-      <!--rows="1" placeholder="File notes"-->
-      <!--(blur)="updateDataset(dataset)">-->
-      <!--</textarea>-->
 
 
       <!--<div class="btn-group btn-group-sm">-->
