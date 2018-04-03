@@ -1,25 +1,28 @@
-<div class="container">
+<div class="container-fluid">
+  <div class=row>
+    <div class="col">
+      <h4>Sessions</h4>
+    </div>
+  </div>
   <div class="row">
-    <div class="col-md">
-      <!-- User Sessions -->
-
+    <div class="col-2">
       <div class="row">
-          <h4>Sessions</h4>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
-          <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
-        </div>
-        <div class="col-md-6">
-          <button class="btn btn-sm btn-info pull-right" (click)="createSession()">
+        <div class="col">
+          <button class="btn btn-sm btn-block btn-info" (click)="createSession()">
             <span class="fa fa-plus" aria-hidden="true"></span>
             New session
           </button>
         </div>
       </div>
-
       <br>
+      <div class="row">
+        <div class="col">
+          <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
+        </div>
+      </div>
+    </div>
 
+    <div class="col-5">
       <div class="scrollable session-list">
         <div *ngFor="let sharedByUsername of sessionsByUserKeys">
 
@@ -29,7 +32,8 @@
             <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)"
                 (mouseover)="previewSession(session)"
                 (click)="openSession(session.sessionId)"
-                [ngClass]="{'table-active': isSessionSelected(session)}">
+                [ngClass]="{'table-active': isSessionSelected(session)}"
+                class="session-list-item">
               <td>
               <span>{{session.name}}
                 <button class="btn btn-outline-dark btn-sm pull-right btn-no-border"
@@ -47,37 +51,47 @@
         </div>
       </div>
     </div>
-    <div class="col-md" id="session-preview"><!-- Session Detail -->
+    <div class="col-5" id="session-preview">
+      <div id="workflow-dataset-panel" class="lighter" *ngIf="!previewedSession">
+        <p>Sessions are a way to organize your analysis projects. Create a new session for each 
+          experiment. The session keeps your raw data files and analysis results together. 
+          It keeps track of the analysis history and makes it easy to understand 
+          afterwards how the data was analyzed.</p>
+
+        <p>Sessions are stored on the server, but you can save it to a local zip file to take a 
+          backup copy of your data or transfer data between different Chipster servers.</p>
+      </div>
+
       <div id="workflow-dataset-panel" *ngIf="previewedSession">
 
         <h5>{{previewedSession.name}}</h5>
-        <div>
-          <!-- fixed height div to keep the workflow preview stationary -->
-          <div class="session-notes">
-            <!-- Create divs to preserve new line characters. Don't use p element, because
-            the positioning of the fadeout effect below requires fixed row size. -->
-            <div *ngFor="let line of previewedSession.notes?.split('\n')">
-              {{line}}
-            </div>
-          </div>
-          <div class="fadeout"></div>
-        </div>
 
-        <p *ngIf="workflowPreviewLoading">
-          <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading preview...
-        </p>
+        <div class="workflow-preview-panel">
 
-        <p *ngIf="workflowPreviewFailed"><i>Loading preview failed</i></p>
-
-        <div class="workflow-preview-panel"
-          *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
-          <ch-workflow-graph
+          <p *ngIf="workflowPreviewLoading">
+            <br>
+            <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading preview...
+          </p>
+          
+          <p *ngIf="workflowPreviewFailed"><i>Loading preview failed</i></p>
+          
+          <div class="workflow-graph-panel" *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
+            <ch-workflow-graph
             [datasetsMap]="sessionData.datasetsMap"
             [jobsMap]="sessionData.jobsMap"
             [modulesMap]="sessionData.modulesMap"
             [defaultScale]="0.5"
             [enabled]="false"></ch-workflow-graph>
+          </div>
         </div>
+
+        <div>
+            <!-- Create new element for each paragraph to preserve new line characters -->
+            <p *ngFor="let line of previewedSession.notes?.split('\n')">
+              {{line}}
+            </p>
+        </div>
+
       </div>
     </div>
   </div>

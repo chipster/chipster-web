@@ -1,31 +1,24 @@
 #session-preview {
-  height: calc(~"100vh - 130px");
+  height: calc(~"100vh - 120px");
   //position: relative;
+  overflow-y: auto;
 }
 
 .session-list {
-  height: calc(~"100vh - 180px");
+  height: calc(~"100vh - 120px");
   position: relative;
 }
 
-.session-notes {
-  // trying to match full lines with the default text size
-  height: 10.8em;
-  // without this long words like urls in the notes stretch the layout
-  width: 500px;
-  overflow: hidden;
+.session-list-item {
+  // hand cursor like shown on links. Maybe it makes it more clear that the list items open the session
+  cursor: pointer;
 }
 
 .workflow-preview-panel {
-  height: calc(~"100vh - 310px");
-  overflow: hidden;
+  height: calc(~"100vh / 3");
 }
 
-.fadeout {
-  position: absolute;
-  top: 10.8em;
-  right: 0;
-  height: 2em;
-  width: 200px;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
+.workflow-graph-panel {
+  height: 100%;
+  overflow: hidden;
 }

@@ -1,4 +1,4 @@
-import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter, AfterViewInit} from '@angular/core';
+import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter, AfterViewInit, OnInit} from '@angular/core';
 import {UploadService} from "../../../shared/services/upload.service";
 import Session from "../../../model/session/session";
 import {SessionResource} from "../../../shared/resources/session.resource";
@@ -7,9 +7,10 @@ import {ErrorService} from "../../../core/errorhandler/error.service";
 
 @Component({
   selector: 'ch-open-session-file',
-  templateUrl: './opensessionfile.component.html'
+  templateUrl: './opensessionfile.component.html',
+  styleUrls: ['./opensessionfile.component.less'],
 })
-export class OpenSessionFile implements AfterViewInit {
+export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
   @ViewChild('browseFilesButton') browseFilesButton;
 
@@ -34,7 +35,7 @@ export class OpenSessionFile implements AfterViewInit {
   fileAdded(file: any) {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
 
-    let session = new Session(file.name.replace('.zip', ''));
+    const session = new Session(file.name.replace('.zip', ''));
 
     this.fileStatus.set(file, 'Creating session');
 
@@ -59,8 +60,8 @@ export class OpenSessionFile implements AfterViewInit {
 
   fileSuccess(file: any) {
 
-    let sessionId = file.chipsterSessionId;
-    let datasetId = file.chipsterDatasetId;
+    const sessionId = file.chipsterSessionId;
+    const datasetId = file.chipsterDatasetId;
 
     // remove from the list
     file.cancel();
@@ -76,7 +77,7 @@ export class OpenSessionFile implements AfterViewInit {
 
       // let the caller know if this was the last one
       if (this.fileStatus.size === this.finishedFiles.size) {
-        let sessionIds = Array.from(this.finishedFiles).map(f => file.chipsterSessionId);
+        const sessionIds = Array.from(this.finishedFiles).map(f => file.chipsterSessionId);
         this.fileStatus.clear();
         this.finishedFiles.clear();
         this.done.emit(sessionIds);

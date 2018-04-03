@@ -2,10 +2,10 @@
 import {SessionResource} from "../../shared/resources/session.resource";
 import Session from "../../model/session/session";
 import {SessionData} from "../../model/session/session-data";
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {Router} from "@angular/router";
 import {DialogModalService} from "./session/dialogmodal/dialogmodal.service";
-import {Subject} from "rxjs";
+import {Subject} from "rxjs/Subject";
 import {RestErrorService} from "../../core/errorhandler/rest-error.service";
 import {SessionDataService} from "./session/sessiondata.service";
 
@@ -14,7 +14,7 @@ import {SessionDataService} from "./session/sessiondata.service";
   templateUrl: './sessionlist.html',
   styleUrls: ['./sessionlist.less']
 })
-export class SessionListComponent {
+export class SessionListComponent implements OnInit {
 
   public previewedSession: Session;
   public previousSession: Session;
@@ -49,9 +49,10 @@ export class SessionListComponent {
       .debounceTime(1000)
       .flatMap(session => {
         this.workflowPreviewLoading = true;
-        return this.sessionResource.loadSession(session.sessionId)
+        return this.sessionResource.loadSession(session.sessionId);
       })
       .do((fullSession: SessionData) => {
+        console.log('sessionData', fullSession);
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (this.previewedSession && fullSession.session && this.previewedSession.sessionId === fullSession.session.sessionId) {
@@ -81,8 +82,8 @@ export class SessionListComponent {
         return this.sessionResource.createSession(session);
       })
       .do((sessionId: string) => {
-          session.sessionId = sessionId;
-          this.openSession(sessionId)
+        session.sessionId = sessionId;
+        this.openSession(sessionId);
       })
       .subscribe(null, (error: any) => {
           this.errorHandlerService.handleError(error, "Creating a new session failed");
@@ -93,7 +94,7 @@ export class SessionListComponent {
 
     this.sessionResource.getSessions().subscribe((sessions: Session[]) => {
 
-      let sessionsByUser = new Map();
+      const sessionsByUser = new Map();
       // show user's own sessions first
       sessionsByUser.set(null, []);
 
@@ -103,7 +104,7 @@ export class SessionListComponent {
             sessionsByUser.set(rule.sharedBy, []);
           }
           // show each session only once in each list, otherwise example_session_owner will see duplicates
-          if (sessionsByUser.get(rule.sharedBy).map(s => s.sessionId).indexOf(s.sessionId) === -1) {
+          if (sessionsByUser.get(rule.sharedBy).map(s2 => s2.sessionId).indexOf(s.sessionId) === -1) {
             sessionsByUser.get(rule.sharedBy).push(s);
           }
         });
@@ -150,7 +151,7 @@ export class SessionListComponent {
   deleteSession(session: Session) {
 
     this.dialogModalService.openBooleanModal('Delete session', 'Delete session ' + session.name + '?', 'Delete', 'Cancel').then(() => {
-      //this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
+      // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
       // delete the session only from this user (i.e. the rule)
       this.sessionDataService.deletePersonalRules(session).subscribe( () => {
         this.updateSessions();

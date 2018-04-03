@@ -10,7 +10,7 @@ import {SessionEventService} from "./sessionevent.service";
 import {SessionDataService} from "./sessiondata.service";
 import {SessionListComponent} from "../sessionlist.component";
 import {SessionComponent} from "./session.component";
-import {OpenSessionFile} from "../opensessionfile/opensessionfile.component";
+import {OpenSessionFileComponent} from "../opensessionfile/opensessionfile.component";
 import {UploadService} from "../../../shared/services/upload.service";
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {SelectionHandlerService} from "./selection-handler.service";
@@ -28,7 +28,7 @@ import {JobService} from "./job.service";
   declarations: [
     SessionComponent,
     SessionListComponent,
-    OpenSessionFile,
+    OpenSessionFileComponent,
     JobErrorModalComponent],
   providers: [
     SessionEventService,
@@ -41,5 +41,5 @@ import {JobService} from "./job.service";
   ],
   entryComponents: [JobErrorModalComponent]
 })
-export class SessionModule{}
+export class SessionModule {}
 
