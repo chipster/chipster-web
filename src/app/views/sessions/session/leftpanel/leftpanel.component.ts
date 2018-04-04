@@ -6,7 +6,8 @@ import {SessionData} from "../../../../model/session/session-data";
 import {Component, Input} from "@angular/core";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {SelectionHandlerService} from "../selection-handler.service";
-import {SelectionService} from "../selection.service";
+import { SelectionService } from "../selection.service";
+import _ = require("lodash");
 
 @Component({
   selector: 'ch-leftpanel',
@@ -32,7 +33,7 @@ export class LeftPanelComponent {
 
   searchEnter() {
     // select highlighted datasets when the enter key is pressed
-    let allDatasets = this.getDatasetList();
+    const allDatasets = this.getDatasetList();
     this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
     this.datasetSearch = null;
   }
@@ -47,9 +48,26 @@ export class LeftPanelComponent {
   }
 
   toggleDatasetSelection($event: any, dataset: Dataset): void {
-    if(UtilsService.isCtrlKey($event) || UtilsService.isShiftKey($event)) {
+    if (UtilsService.isCtrlKey($event)) {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
       console.log([dataset]);
+
+    } else if (UtilsService.isShiftKey($event)) {
+
+      //  datasets and their ids in the order of the dataset list
+      const allDatasets = this.getDatasetListSorted();
+      const allIds = allDatasets.map(d => d.datasetId);
+
+      // indexes of the old selection in the dataset list
+      const selectedIndexes = this.selectionService.selectedDatasets.map(d => allIds.indexOf(d.datasetId));
+      const clickIndex = allIds.indexOf(dataset.datasetId);
+      const newMin = Math.min(clickIndex, ...selectedIndexes);
+      const newMax = Math.max(clickIndex, ...selectedIndexes);
+
+      // datasets within the index range
+      const newSelection = _.range(newMin, newMax + 1).map(i => allDatasets[i]);
+      this.selectionHandlerService.setDatasetSelection(newSelection);
+
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
     }
