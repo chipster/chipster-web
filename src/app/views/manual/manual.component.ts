@@ -38,7 +38,8 @@ import {ManualUtils} from "./manual-utils";
  */
 @Component({
   selector: 'ch-manual',
-  templateUrl: './manual.component.html'
+  templateUrl: './manual.component.html',
+  styleUrls: ['./manual.component.less'],
 })
 export class ManualComponent implements AfterViewInit {
 
@@ -194,6 +195,11 @@ export class ManualComponent implements AfterViewInit {
         this.angularize(element, componentRef);
 
       } else if (clone.has(nodeName)) {
+
+        if (element.classList) {
+          element.classList.add('ch-html-component');
+        }
+
         // clone element and it's children
         this.addElement(element, targetComponentRef);
 

@@ -16,7 +16,7 @@
       <!-- flex layout arranges space for the undo box when necessary -->
       <div class="d-flex flex-column full-height">
 
-        <h6>
+        <h3 class="h3-xs">
 
           <span class="lighter">Session: </span>
           <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
@@ -39,7 +39,7 @@
               <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
             </div>
           </span>
-        </h6>
+        </h3>
 
         <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
         hiding the undo panel -->
