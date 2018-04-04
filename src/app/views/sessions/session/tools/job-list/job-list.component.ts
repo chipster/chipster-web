@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import Job from '../../../../../model/session/job';
 import {NgbDropdown} from '@ng-bootstrap/ng-bootstrap';
+import { SelectionService } from '../../selection.service';
 
 @Component({
   selector: 'ch-job-list',
@@ -13,7 +14,9 @@ export class JobListComponent implements OnChanges {
 
   @Output() private jobSelected = new EventEmitter<Job>();
 
-  constructor(private dropDown: NgbDropdown) {
+  constructor(
+    private dropDown: NgbDropdown,
+    private selectionService: SelectionService) {
   }
 
   ngOnChanges() {
