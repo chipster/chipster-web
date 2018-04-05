@@ -11,6 +11,7 @@ import {Tags, TypeTagService} from "../../../../../shared/services/typetag.servi
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {LoadState, State} from "../../../../../model/loadstate";
 import {Subject} from "rxjs/Subject";
+import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -39,7 +40,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private visualizationModalService: VisualizationModalService,
     private typeTagService: TypeTagService,
     private zone: NgZone,
-    private errorHandlerService: RestErrorService) {
+    private errorHandlerService: RestErrorService,
+    private spreadsheetService: SpreadsheetService) {
   }
 
   ngOnChanges() {
@@ -50,7 +52,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     // remove old table
     this.destroyHot();
 
-    let maxBytes = this.showFullData ? null : this.fileSizeLimit;
+    const maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
@@ -58,7 +60,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
         let parsedTSV = d3.tsvParseRows(result);
 
         // skip comment lines, e.g. lines starting with ## in a VCF file
-        let skipLines = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
+        const skipLines = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
 
         if (skipLines) {
           parsedTSV = parsedTSV.filter(row => !row[0].startsWith(skipLines));
@@ -72,14 +74,14 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
         this.lineCount = parsedTSV.length;
 
         // type-service gives the column titles for some file types
-        let typeTitles = this.typeTagService.get(this.sessionData, this.dataset, Tags.COLUMN_TITLES);
+        const typeTitles = this.typeTagService.get(this.sessionData, this.dataset, Tags.COLUMN_TITLES);
 
         if (typeTitles) {
           // create a new first row from the column titles
           parsedTSV.unshift(typeTitles.split('\t'));
         }
 
-        let normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
+        const normalizedTSV = new TSVFile(parsedTSV, this.dataset.datasetId, 'file');
 
         let headers = normalizedTSV.getRawData()[0];
         let content = normalizedTSV.getRawData().slice(1);
@@ -103,17 +105,17 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       }, (error: Response) => {
         this.state = new LoadState(State.Fail, "Loading data failed");
         this.errorHandlerService.handleError(error, this.state.message);
-      })
+      });
   }
 
   ngOnDestroy() {
-    this.destroyHot()
+    this.destroyHot();
     this.unsubscribe.next();
     this.unsubscribe.complete();
   }
 
   destroyHot() {
-    if (this.hot){
+    if (this.hot) {
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
         // don't call destroy() twice even if the component is recycled and the loading of the second file fails
@@ -134,7 +136,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   getSettings(headers: string[], content: string[][], container) {
 
     const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
-    const tableWidth = this.showFullData ? null : this.guessWidth(headers, content);
+    const tableWidth = this.showFullData ? null : this.spreadsheetService.guessWidth(headers, content);
 
     return {
       data: content,
@@ -149,60 +151,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
       width: tableWidth,
-    }
-  }
-
-  /**
-   * Calculate the approximate widht of the table
-   *
-   * We need the whole right side of the main view to scroll to fit in all the components.
-   * The table's internal vertical scrolling has to be disabled, because nested scrolling elements
-   * would be difficult to use. But when we let the table to grow vertically, it's horizontal scroll bar
-   * will go out of the screen. Consequently we have to disable the internal vertical scrolling too.
-   * As far as I know, setting the table width is the only way to do it at the moment.
-   *
-   * The calculation is based on many guesses (margins, font size, font itself) but as long as the result is
-   * greater than the actual table width, the error will only create a larger margin.
-   *
-   * @param {string[]} headers
-   * @param {string[][]} content
-   * @returns {number}
-   */
-  guessWidth(headers: string[], content: string[][]) {
-    // create a new first row from headers
-    let table = content.slice();
-    table.unshift(headers);
-
-    let tableMargin = 20;
-    let colMargins = 10;
-    let colWidthSum = 0;
-    let columnCount = table[0].length;
-
-    let ctx = this.getTextMeasuringContext(18);
-
-    // iterate columns
-    for (let colIndex = 0; colIndex < columnCount; colIndex++) {
-      let colWidth = table
-
-      // text from this column on each row
-        .map(row => row[colIndex])
-
-        // width of the text
-        .map(cell => ctx.measureText(cell).width)
-
-        // max width in this column
-        .reduce((a, b) => Math.max(a, b));
-
-      colWidthSum += colWidth;
-    }
-
-    return colWidthSum + columnCount * colMargins + tableMargin;
-  }
-
-  getTextMeasuringContext(fontSize = 18) {
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-    ctx.font = fontSize + 'px Arial';
-    return ctx;
+    };
   }
 }

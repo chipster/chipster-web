@@ -10,6 +10,7 @@ import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import { Observable } from "rxjs/Observable";
+import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -39,7 +40,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
     private zone: NgZone,
-    private restErrorService: RestErrorService) {}
+    private restErrorService: RestErrorService,
+    private spreadsheetService: SpreadsheetService) { }
 
   ngOnInit() {
     this.updateView();
@@ -68,14 +70,37 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       });
     }
   }
+  
+  getWidth(array: string[][], headers: string[]) {
+    return this.spreadsheetService.guessWidth(headers, array) + 100;
+  }
+
+  getHeight(array: string[][], headers: string[]) {
+    return array.length * 23 + 50; // extra for header-row and borders
+  }
+
+  updateSize(array: string[][], headers: string[]) {
+    const container = document.getElementById('tableContainer');
+
+    container.style.width = this.getWidth(array, headers) + "px";
+    container.style.height = this.getHeight(array, headers) + "px";
+  }
 
   getSettings(array: string[][], headers: string[]) {
+
     return {
       data: array,
       colHeaders: headers,
       columnSorting: true,
       manualColumnResize: true,
       sortIndicator: true,
+      rowHeights: 23,
+      scrollColHeaders: false,
+      scrollCompatibilityMode: false,
+      renderAllRows: false,
+      width: this.getWidth(array, headers),
+      height: this.getHeight(array, headers),
+
       afterGetColHeader: (col: number, TH: any) => {
         if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
           // removal not allowed
@@ -344,7 +369,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       const container = document.getElementById('tableContainer');
 
       if (!container) {
-        // timer or event triggered the update, t
+        // timer or event triggered the update
         console.log('cancelling the phenodata update, because the container has been removed already');
         return;
       }
@@ -357,6 +382,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         this.hot = new Handsontable(container, this.getSettings(array, this.headers));
       });
     }
+
+    this.updateSize(array, headers);
+
     this.array = array;
     this.zone.runOutsideAngular(() => {
       if (this.hot) {
