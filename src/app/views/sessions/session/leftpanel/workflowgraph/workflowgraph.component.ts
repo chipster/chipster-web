@@ -41,6 +41,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input() defaultScale: number;
   @Input() enabled: boolean;
 
+
+  private zoomScale: number;
   private zoomMin = 0.2;
   private zoomMax = 2;
 
@@ -115,6 +117,30 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
+    // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
+    this.scrollerDiv.on("mousewheel", () => {
+      const scroll = this.scrollerDiv.node();
+      const event = d3.event;
+
+      // We don't want to scroll below zero or above the width and height
+      const maxX = scroll.scrollWidth - scroll.offsetWidth;
+      const maxY = scroll.scrollHeight - scroll.offsetHeight;
+
+      // If this event looks like it will scroll beyond the bounds of the element, prevent it and set the scroll to the boundary manually
+      if (scroll.scrollLeft + event.deltaX < 0 ||
+        scroll.scrollLeft + event.deltaX > maxX ||
+        scroll.scrollTop + event.deltaY < 0 ||
+        scroll.scrollTop + event.deltaY > maxY) {
+
+        console.log("back or forward gesture prevented");
+        event.preventDefault();
+
+        // Manually set the scroll to the boundary
+        scroll.scrollLeft = Math.max(0, Math.min(maxX, scroll.scrollLeft + event.deltaX));
+        scroll.scrollTop = Math.max(0, Math.min(maxY, scroll.scrollTop + event.deltaY));
+      }
+    });
+
     if (this.enabled) {
       const toolbarDiv = section.append("div").classed("toolbar-div", true)
         .classed("btn-group", true);
@@ -155,7 +181,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("opacity", 0)
       .html("\u25BC");
 
-    this.applyZoom("translate(0, 0) scale(" + this.defaultScale + ")");
+    this.zoomScale = this.defaultScale;
+    this.applyZoom(this.zoomScale);
 
     if (this.enabled) {
       this.subscriptions.push(
@@ -227,7 +254,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // calculate the new scale
     const factor = (1 + 0.2 * direction);
-    const targetScale = this.defaultScale * factor;
+    const targetScale = this.zoomScale * factor;
 
     // check if it is within limits
     if (targetScale < this.zoomMin || targetScale > this.zoomMax) {
@@ -236,8 +263,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // zoom
-    this.defaultScale = targetScale;
-    this.applyZoom("translate(0, 0) scale(" + this.defaultScale + ")");
+    this.zoomScale = targetScale;
+    this.applyZoom(this.zoomScale);
 
     // adjust scrolling
 
@@ -257,8 +284,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.updateSvgSize();
   }
 
-  applyZoom(transform: any) {
-    this.zoomGroup.attr("transform", transform);
+  applyZoom(scale: number) {
+    this.zoomGroup.attr("transform", "translate(0, 0) scale(" + scale + ")");
   }
 
 
@@ -272,8 +299,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const height = Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
 
     // graph size in pixels after the zoom
-    const scaledWidth = width * this.defaultScale;
-    const scaledHeight = height * this.defaultScale;
+    const scaledWidth = width * this.zoomScale;
+    const scaledHeight = height * this.zoomScale;
 
     return { width: scaledWidth, height: scaledHeight };
   }
