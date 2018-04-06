@@ -95,11 +95,7 @@ export class AuthenticationService {
         const userId = encodeURIComponent(this.tokenService.getUsername());
         const url = `${authUrl}/users/${userId}`;
 
-        return <Observable<User>> this.authHttpClient.getAuth(url);
-      })
-      .catch(err => {
-        this.restErrorService.handleError(err, 'failed to get the user details');
-        throw err;
+        return <Observable<User>>this.authHttpClient.getAuth(url);
       });
   }
 

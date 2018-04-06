@@ -3,11 +3,16 @@
     <p *ngIf="error.msg"><strong>{{error.msg}}</strong></p>
     <p *ngIf="!error.msg"><strong>Something went wrong</strong></p>
 
-    <div *ngIf="error.isForbidden()">Authentication failed. Please
+    <div *ngIf="error.isForbidden()">Authentication failed
       <button class="btn btn-sm btn-secondary" (click)="redirect()">Log in</button></div>
-    <div *ngIf="error.isConnectionFailed()">Connection failed. Please
+
+    <div *ngIf="error.isNotFound()">Not found</div>
+
+    <div *ngIf="error.isConnectionFailed()">Connection failed
       <button class="btn btn-sm btn-secondary" (click)="reload()">Reload page</button></div>
-    <div *ngIf="error.isDefault()">Please
+
+    <div *ngIf="error.isDefault()">
       <button class="btn btn-sm btn-secondary" (click)="reload()">Reload page</button></div>
+      
   </ngb-alert>
 </div>

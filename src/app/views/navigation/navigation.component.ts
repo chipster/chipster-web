@@ -3,6 +3,7 @@ import {TokenService} from "../../core/authentication/token.service";
 
 import {Component} from '@angular/core';
 import {Observable} from "rxjs/Observable";
+import { User } from "../../model/user";
 
 @Component({
   selector: 'ch-navigation',
@@ -18,10 +19,18 @@ export class NavigationComponent {
     private authenticationService: AuthenticationService) {
 
     this.username$ = tokenService.getUsername$()
-      .flatMap(userId => authenticationService.getUser())
-      .map(user => user.name);  
+      .flatMap(userId => {
+        return authenticationService.getUser()
+          .catch(err => {
+            console.log('failed to get the user details', err);
+            // An error message from this request would be confusing, because the user didn't ask for it.
+            // Most likely the authentication has expired, but the user will notice it soon anyway.
+            return Observable.of({ name: userId });
+          });
+      })
+      .map(user => user.name);
 
-    tokenService.getToken()
+    tokenService.getToken();
   }
 
   logout() {

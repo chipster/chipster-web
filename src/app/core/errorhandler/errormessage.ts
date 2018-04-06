@@ -1,8 +1,8 @@
 export enum ErrorType {
   CONNECTION_FAILED = "Connection failed",
   FORBIDDEN = "Authentication",
-  DEFAULT = "Something went wrong"
-
+  DEFAULT = "Something went wrong",
+  NOT_FOUND = "Not found"
 }
 
 export class ErrorMessage {
@@ -13,17 +13,19 @@ export class ErrorMessage {
     public type: ErrorType = ErrorType.DEFAULT) {}
 
 
-  isForbidden() : boolean {
+  isForbidden(): boolean {
     return this.type === ErrorType.FORBIDDEN;
   }
 
-  isConnectionFailed() : boolean {
+  isNotFound(): boolean {
+    return this.type === ErrorType.NOT_FOUND;
+  }
+
+  isConnectionFailed(): boolean {
     return this.type === ErrorType.CONNECTION_FAILED;
   }
 
-  isDefault() : boolean {
+  isDefault(): boolean {
     return this.type === ErrorType.DEFAULT;
   }
-
-
 }
