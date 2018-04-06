@@ -174,7 +174,18 @@ export class SessionDataService {
     }
   }
 
+  openNewTab(dataset: Dataset) {
+    this.newTab(this.getDatasetUrl(dataset).map(url => url), null,
+      'Browser\'s pop-up blocker prevented opening a new tab');
+  }
+
   download(url$: Observable<string>) {
+    this.newTab(url$, 3000, 'Browser\'s pop-up blocker prevented some exports. ' +
+      'Please disable the pop-up blocker for this site or ' +
+      'export the files one by one.');
+  }
+
+  newTab(url$: Observable<string>, autoCloseDelay: number, popupErrorText: string) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
     const win: any = window.open('', '_blank');
@@ -185,18 +196,15 @@ export class SessionDataService {
 
         // we can close the useless empty tab, but unfortunately only after a while, otherwise the
         // download won't start
-        setTimeout(() => {
-          win.close();
-        }, 3000);
+        if (autoCloseDelay) {
+          setTimeout(() => {
+            win.close();
+          }, autoCloseDelay);
+        }
       });
     } else {
       // Chrome allows only one download
-      this.errorService.headerError(
-        'Browser\'s pop-up blocker prevented some exports. ' +
-          'Please disable the pop-up blocker for this site or ' +
-          'export the files one by one.',
-        true
-      );
+      this.errorService.headerError(popupErrorText, true);
     }
   }
 

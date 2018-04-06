@@ -20,7 +20,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
 
   private src: string;
   private linkSrc: string;
-  private wrapperUrl: string = 'assets/htmlvisualizationwrapper.html';
+  private wrapperUrl = 'assets/htmlvisualizationwrapper.html';
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -55,7 +55,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
       if (!htmlframe.contentWindow) {
         return;
       }
-      let height = htmlframe.contentWindow.document.body.style.height;
+      const height = htmlframe.contentWindow.document.body.style.height;
 
       if (height) {
         htmlframe.height = height + 'px';
@@ -63,5 +63,9 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
         this.run(htmlframe);
       }
     }, 100);
+  }
+
+  openNewTab() {
+    this.sessionDataService.openNewTab(this.dataset);
   }
 }
