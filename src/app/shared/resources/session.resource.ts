@@ -358,7 +358,9 @@ export class SessionResource {
           createRequests.push(request);
         });
 
-        return Observable.forkJoin(...createRequests);
+        // emit and empty array if the forkJoin completes without emitting anything
+        // otherwise this won't continue to the next flatMap() when the session is empty
+        return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
       })
       .flatMap(() => {
         const createRequests: Array<Observable<string>> = [];
@@ -379,7 +381,8 @@ export class SessionResource {
           createRequests.push(request);
         });
 
-        return Observable.forkJoin(...createRequests);
+        // see the comment of the forkJoin above
+        return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
       })
       .flatMap(() => {
         const updateRequests: Array<Observable<string>> = [];
@@ -397,7 +400,8 @@ export class SessionResource {
           }
         });
 
-        return Observable.forkJoin(...updateRequests);
+        // see the comment of the forkJoin above
+        return Observable.forkJoin(...updateRequests).defaultIfEmpty([]);
       })
       .map(() => createdSessionId);
   }
