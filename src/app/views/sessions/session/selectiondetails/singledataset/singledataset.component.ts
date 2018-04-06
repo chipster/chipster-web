@@ -62,24 +62,12 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   getUsedToolFromToolset() {
     if (this.sourceJob) {
-      const i = this.sessionData.tools.findIndex(x => x.name.id === this.sourceJob.toolId);
-      if (i !== -1) {
-        this.tool = this.sessionData.tools[i];
-      } else {
+      this.tool = this.sessionData.tools.find(x => x.name.id === this.sourceJob.toolId);
+      if (!this.tool) {
         console.log('No Tool found with this ID', this.sourceJob.toolId);
       }
     } else {
       console.log('source job is null');
     }
-    /*
-    this.sessionData.tools.forEach(function(tool){
-      // imported files don't have sourceJob
-      if (self.sourceJob) {
-        if(tool.name.id===self.sourceJob.toolId){
-          self.tool=tool;
-        }
-      }
-    });
-    console.log("input tool"+this.tool);*/
   }
 }

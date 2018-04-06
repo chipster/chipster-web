@@ -1,69 +1,58 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import JobParameter from "../../../../../model/session/jobparameter";
 import {ToolService} from "../../tools/tool.service";
 import Tool from "../../../../../model/session/tool";
+import _ = require('lodash');
 
 @Component({
   selector: 'ch-dataset-parameter-list',
   templateUrl: './dataset-parameter-list.component.html'
 })
 
-export class DatasetParameterListComponent implements OnChanges {
+export class DatasetParameterListComponent implements OnChanges, OnInit {
   @Input() private tool: Tool;
   @Input() private parameters: Array<JobParameter>;
 
+  showAll = false;
   limit: number;
-  defaultLimit: number = 3;
+  defaultLimit = 3;
   buttonText: string;
+
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
-  private currentTool: Tool;
-  private currentJobParameter: Array<JobParameter>;
-
-  private isDefaultValueMap: Map<JobParameter, boolean> = new Map();
+  isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
   constructor(private toolService: ToolService) {
   }
 
   ngOnInit() {
-    this.limit = this.defaultLimit;
-    this.buttonText = 'Show all';
+    this.udpateLimits();
   }
 
   ngOnChanges(changes: any) {
-    console.log('parameter changes triggered', changes, changes.tool, changes.tool !== null);
+    let tool = null;
+    let parameters = null;
 
     if (changes.tool != null) {
-      this.currentTool = changes.tool.currentValue;
-    } else {
-      this.currentTool = null;
+      tool = changes.tool.currentValue;
     }
 
     if (changes.parameters != null) {
-      this.currentJobParameter = changes.parameters.currentValue;
-    } else {
-      this.currentJobParameter = null;
+      parameters = changes.parameters.currentValue;
     }
 
     this.parameterListForView = [];
 
-    if (this.currentJobParameter) {
-      if (this.currentTool) {
-        this.orderJobParameterList();
-
-      } else if (!this.currentTool) {
-        //just the show the normal job parameters
-        let self = this;
-        this.currentJobParameter.forEach((JobParameter) => {
-          this.isDefaultValueMap.set(JobParameter, true);
-          self.parameterListForView.push(JobParameter);
-        });
-      }
+    if (parameters) {
+        this.showWithTool(parameters, tool);
     }
+
+    // number of params may change if all parameters are shown when a new dataset is selected
+    this.udpateLimits();
   }
 
-  toggleParameterList() {
-    if (this.limit === this.defaultLimit) {
+  udpateLimits() {
+    if (this.showAll) {
       this.limit = this.parameterListForView.length;
       this.buttonText = 'Hide';
     } else {
@@ -72,27 +61,52 @@ export class DatasetParameterListComponent implements OnChanges {
     }
   }
 
-  orderJobParameterList() {
-    let self = this;
-    this.isDefaultValueMap = new Map();
-    this.currentJobParameter.forEach((JobParameter) => {
-      let i = self.currentTool.parameters.findIndex(x => x.name.id == JobParameter.parameterId);
-      if (i != -1) {
-        // if the parameter does not have a display name
-        if (self.currentTool.parameters[i].name.displayName) {
-          JobParameter.displayName = self.currentTool.parameters[i].name.displayName;
-        } else {
-          JobParameter.displayName = self.currentTool.parameters[i].name.id;
-        }
-        let isDefault = self.toolService.isDefaultValue(self.currentTool.parameters[i], JobParameter.value);
-        if (isDefault == null) isDefault = true;
-        this.isDefaultValueMap.set(JobParameter, isDefault);
-        self.parameterListForView.push(JobParameter);
-      }
-
-    });
-
+  toggleParameterList() {
+    this.showAll = !this.showAll;
+    this.udpateLimits();
   }
 
+  showWithTool(parameters: JobParameter[], tool: Tool) {
 
+    this.isDefaultValueMap = new Map();
+
+    parameters.forEach(jobParameter => {
+
+      const clone = _.clone(jobParameter);
+      let isDefault = false;
+
+      if (tool) {
+        const toolParameter = tool.parameters.find(p => p.name.id === jobParameter.parameterId);
+
+        if (toolParameter) {
+          // get the parameters display name from the tool
+          clone.displayName = toolParameter.name.displayName;
+
+          // if an enum parameter
+          if (toolParameter.selectionOptions) {
+            // find the value's display name from the tool
+            const toolOption = toolParameter.selectionOptions.find(o => o.id === jobParameter.value);
+            if (toolOption) {
+              if (toolOption.displayName) {
+                clone.value = toolOption.displayName;
+              }
+            } else {
+              console.warn('job parameter value' + jobParameter.value + 'not found from the current tool '
+                + 'paramater options, showing the id');
+            }
+          }
+
+          isDefault = this.toolService.isDefaultValue(toolParameter, jobParameter.value);
+        }
+      }
+      this.isDefaultValueMap.set(clone, isDefault);
+      this.parameterListForView.push(clone);
+    });
+
+    this.parameterListForView
+      .filter(p => p.displayName == null)
+      .forEach(p => {
+        p.displayName = p.parameterId;
+      });
+  }
 }

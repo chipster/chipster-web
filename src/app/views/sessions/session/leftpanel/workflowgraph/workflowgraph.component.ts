@@ -122,22 +122,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const scroll = this.scrollerDiv.node();
       const event = d3.event;
 
-      // We don't want to scroll below zero or above the width and height
+      // We don't want to scroll below zero or above the width
       const maxX = scroll.scrollWidth - scroll.offsetWidth;
-      const maxY = scroll.scrollHeight - scroll.offsetHeight;
 
       // If this event looks like it will scroll beyond the bounds of the element, prevent it and set the scroll to the boundary manually
       if (scroll.scrollLeft + event.deltaX < 0 ||
-        scroll.scrollLeft + event.deltaX > maxX ||
-        scroll.scrollTop + event.deltaY < 0 ||
-        scroll.scrollTop + event.deltaY > maxY) {
+        scroll.scrollLeft + event.deltaX > maxX) {
 
-        console.log("back or forward gesture prevented");
         event.preventDefault();
 
         // Manually set the scroll to the boundary
         scroll.scrollLeft = Math.max(0, Math.min(maxX, scroll.scrollLeft + event.deltaX));
-        scroll.scrollTop = Math.max(0, Math.min(maxY, scroll.scrollTop + event.deltaY));
       }
     });
 

@@ -7,8 +7,4 @@ export default class JobParameter {
     description: string;
     type: string;
     value: number|string;
-    isDefaultValue?: boolean;// added for showing the changed parameter value in grey
-
-
-
 }
