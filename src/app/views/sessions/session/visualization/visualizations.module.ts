@@ -1,7 +1,7 @@
 import {NgModule} from "@angular/core";
 import {ExpressionProfileService} from "./expressionprofile/expressionprofile.service";
 import {ExpressionProfileTSVService} from "./expressionprofile/expressionprofileTSV.service";
-import {VennDiagram} from "./venndiagram/venndiagram";
+import {VennDiagramComponent} from "./venndiagram/venndiagram";
 import {VennDiagramService} from "./venndiagram/venndiagram.service";
 import {TwoCircleVennDiagramService} from "./venndiagram/twocirclevenndiagram.service";
 import {ThreeCircleVennDiagramService} from "./venndiagram/threecirclevenndiagram.service";
@@ -20,11 +20,11 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule} from "@angular/forms";
 import {VisualizationModalComponent} from "./visualizationmodal.component";
 import {VisualizationModalService} from "./visualizationmodal.service";
-import {ScatterPlotComponent} from "./scatterplotvisualization/scatterplot.component"
-import {VisualizationTSVService} from "../../../../shared/visualization/visualizationTSV.service"
-import {PlotService} from "../../../../shared/visualization/plot.service"
+import { ScatterPlotComponent } from "./scatterplotvisualization/scatterplot.component";
+import { VisualizationTSVService } from "../../../../shared/visualization/visualizationTSV.service";
+import { PlotService } from "../../../../shared/visualization/plot.service";
 import {LinkButtonModule} from "../link-button/link-button.module";
-import {VolcanoPlotComponent} from "./volcanoplot/volcanoplot.component"
+import { VolcanoPlotComponent } from "./volcanoplot/volcanoplot.component";
 import {VolcanoPlotService} from "./volcanoplot/volcanoplot.service";
 import {BamViewerComponent} from './bamviewer/bamviewer.component';
 import { GenomeBrowserComponent } from './genome-browser/genome-browser.component';
@@ -33,7 +33,7 @@ import { GenomeBrowserComponent } from './genome-browser/genome-browser.componen
   imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule],
   declarations: [
     VisualizationsComponent,
-    VennDiagram,
+    VennDiagramComponent,
     PdfVisualizationComponent,
     HtmlvisualizationComponent,
     TextVisualizationComponent,

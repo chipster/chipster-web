@@ -1,7 +1,10 @@
 <section id="venndiagram">
 
-    <div class="row">
-
+    <div *ngIf="!isEnabled">
+        <button class="btn btn-secondary" (click)="enable()">Draw</button>
+    </div>
+    <div class="row" *ngIf="isEnabled">
+        
         <div class="col-md-8">
             <div id="visualization"></div>
         </div>
