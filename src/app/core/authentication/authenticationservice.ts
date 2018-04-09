@@ -99,6 +99,20 @@ export class AuthenticationService {
       });
   }
 
+  getUsersDisplayName$() {
+    return this.tokenService.getUsername$()
+    .flatMap(userId => {
+      return this.getUser()
+        .catch(err => {
+          console.log('failed to get the user details', err);
+          // An error message from this request would be confusing, because the user didn't ask for it.
+          // Most likely the authentication has expired, but the user will notice it soon anyway.
+          return Observable.of({ name: userId });
+        });
+    })
+      .map(user => user.name);
+  }
+
   getUsers(): Observable<User[]> {
     return this.configService.getAuthUrl()
       .flatMap(authUrl => {
