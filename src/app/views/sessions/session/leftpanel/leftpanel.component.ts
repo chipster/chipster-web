@@ -38,8 +38,25 @@ export class LeftPanelComponent {
     this.datasetSearch = null;
   }
 
+  getCompleteDatasets() {
+    /*
+    Filter out uploading datasets
+
+    Datasets are created when comp starts to upload them, but there are no type tags until the
+    upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
+    When those cannot be selected, those cannot cause problems in the visualization, which assumes that
+    the type tags are do exist.
+    */
+    // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
+    return new Map(Array.from(this.sessionData.datasetsMap)
+      .filter(entry => {
+        const dataset = entry[1];
+        return dataset.fileId != null;
+      }));
+  }
+
   getDatasetList(): Dataset[] {
-    return UtilsService.mapValues(this.sessionData.datasetsMap);
+    return UtilsService.mapValues(this.getCompleteDatasets());
   }
 
   getDatasetListSorted(): Dataset[] {

@@ -188,17 +188,17 @@ export class SessionEventService {
 
         if (event.type === 'CREATE') {
           return this.sessionResource.getDataset(sessionId, event.resourceId).flatMap((remote: Dataset) => {
-                sessionData.datasetsMap.set(event.resourceId, remote);
-                return this.createEvent(event, null, remote);
-            });
+            sessionData.datasetsMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          });
 
         } else if (event.type === 'UPDATE') {
           return this.sessionResource.getDataset(sessionId, event.resourceId)
-              .flatMap((remote: Dataset) => {
-                const local = sessionData.datasetsMap.get(event.resourceId);
-                sessionData.datasetsMap.set(event.resourceId, remote);
-                return this.createEvent(event, local, remote);
-            });
+            .flatMap((remote: Dataset) => {
+              const local = sessionData.datasetsMap.get(event.resourceId);
+              sessionData.datasetsMap.set(event.resourceId, remote);
+              return this.createEvent(event, local, remote);
+          });
 
         } else if (event.type === 'DELETE') {
           const localCopy = sessionData.datasetsMap.get(event.resourceId);
