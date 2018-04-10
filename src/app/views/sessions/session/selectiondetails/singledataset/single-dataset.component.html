@@ -1,0 +1,40 @@
+<div class="dataset-details">
+  <div class="row">
+    <div class="col-md-7">
+      <table class="table table-sm text-sm">
+        <tr>
+          <td class="lighter">Created&nbsp;with:</td>
+          <td class="width-max">{{toolCategory}} / {{toolName}}</td>
+        </tr>
+        <tr>
+          <td class="lighter">Parameters:</td>
+          <td id="parameters-container">
+            <ch-dataset-parameter-list *ngIf="sourceJob && sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters" [tool]="tool"></ch-dataset-parameter-list>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="col-md-5">
+      <table class="table table-sm text-sm">
+        <tr>
+          <td class="lighter">Size:</td>
+          <td class="width-max">{{dataset.size | bytes: 0}}</td>
+        </tr>
+        <tr>
+          <td class="lighter">Date:</td>
+          <td>{{dataset.created | localDate}}</td>
+        </tr>
+        <tr>
+          <td class="lighter">Notes:</td>
+          <td>
+            <textarea [(ngModel)]="dataset.notes" class="dataset-notes" rows="1" placeholder="{{notesPlaceholderInactive}}" (focus)="editNotes(notesInput)"
+              (focusout)="saveNotes(dataset, notesInput)" #notesInput>
+                  </textarea>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
