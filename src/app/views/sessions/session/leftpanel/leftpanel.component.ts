@@ -7,7 +7,7 @@ import {Component, Input} from "@angular/core";
 import {DatasetsearchPipe} from "../../../../shared/pipes/datasetsearch.pipe";
 import {SelectionHandlerService} from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
-import _ = require("lodash");
+import * as _ from "lodash";
 
 @Component({
   selector: 'ch-leftpanel',
