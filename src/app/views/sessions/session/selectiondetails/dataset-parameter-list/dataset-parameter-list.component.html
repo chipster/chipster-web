@@ -1,5 +1,5 @@
 <table class="table table-sm text-sm">
-  <tr *ngFor="let param of parameterListForView; let i = index" [ngStyle]="{ 'background-color': i === 1? 'red' : 'blue'}">
+  <tr *ngFor="let param of parameterListForView; let i = index" [ngStyle]="{'color': isDefaultValueMap.get(param)? 'gray' : 'black'}">
     <ng-template [ngIf]="i < limit">
       <td>{{param.displayName}}</td>
       <td>{{param.value}}</td>
