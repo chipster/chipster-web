@@ -32,7 +32,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   toolName: string;
 
   notesPlaceholderInactive = "click to edit";
-  notesPlaceholderActive = "notes about this file";
+  notesPlaceholderActive = "";
 
   constructor(
     private sessionDataService: SessionDataService,
