@@ -28,8 +28,8 @@
         <tr>
           <td class="lighter">Notes:</td>
           <td>
-            <textarea [(ngModel)]="dataset.notes" class="dataset-notes" rows="1" placeholder="{{notesPlaceholderInactive}}" (focus)="editNotes(notesInput)"
-              (focusout)="saveNotes(dataset, notesInput)" #notesInput>
+            <textarea #notesArea [(ngModel)]="dataset.notes " class="dataset-notes " rows="2 " placeholder="{{notesPlaceholderInactive}} "
+              (focus)="editNotes(notesInput) " (focusout)="saveNotes(dataset, notesInput) " #notesInput>
                   </textarea>
           </td>
         </tr>

@@ -24,6 +24,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input() private jobs: Map<string, Job>;
   @Input() private sessionData: SessionData;
 
+  @ViewChild("notesInput") notesArea;
+
   sourceJob: Job;
   private tool: Tool;
   toolCategory: string;
@@ -56,6 +58,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   saveNotes(dataset: Dataset, input) {
+    this.notesArea.nativeElement.scrollTop = 0;
+
     this.sessionDataService
       .updateDataset(dataset)
       .subscribe(null, err =>
