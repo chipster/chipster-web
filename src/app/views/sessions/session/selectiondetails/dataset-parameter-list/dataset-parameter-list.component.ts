@@ -2,7 +2,7 @@ import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import JobParameter from "../../../../../model/session/jobparameter";
 import {ToolService} from "../../tools/tool.service";
 import Tool from "../../../../../model/session/tool";
-import _ = require('lodash');
+import * as _ from "lodash";
 
 @Component({
   selector: 'ch-dataset-parameter-list',
