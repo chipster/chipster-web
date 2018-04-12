@@ -7,6 +7,7 @@ import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { Subject } from "rxjs/Subject";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/sessiondata.service";
+import { TokenService } from "../../core/authentication/token.service";
 
 @Component({
   selector: "ch-session-list",
@@ -14,6 +15,8 @@ import { SessionDataService } from "./session/sessiondata.service";
   styleUrls: ["./session-list.component.less"]
 })
 export class SessionListComponent implements OnInit {
+  static readonly exampleSessionOwnerUserId = "jaas/example_session_owner";
+
   public previewedSession: Session;
   public previousSession: Session;
   public sessionsByUserKeys: Array<string>;
@@ -199,5 +202,23 @@ export class SessionListComponent implements OnInit {
 
   isSessionSelected(session: Session) {
     return this.selectedSessionId === session.sessionId;
+  }
+
+  getSharedByTitlePart(userId: string): string {
+    if (!userId) {
+      return "Your sessions";
+    } else if (userId === SessionListComponent.exampleSessionOwnerUserId) {
+      return "Example sessions";
+    } else {
+      return "Shared to you by ";
+    }
+  }
+
+  getSharedByUsernamePart(userId: string): string {
+    if (!userId || userId === SessionListComponent.exampleSessionOwnerUserId) {
+      return "";
+    } else {
+      return TokenService.getUsernameFromUserId(userId);
+    }
   }
 }
