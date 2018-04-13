@@ -32,10 +32,10 @@
           <table class="table table-hover table-sm">
             <tbody>
               <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="previewSession(session)" (click)="openSession(session.sessionId)"
-                [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item">
+                [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item" title="Open session">
                 <td>
                   <span>{{session.name}}
-                    <button class="btn btn-outline-dark btn-sm pull-right btn-no-border" *ngIf="sessionDataService.hasPersonalRule(session.rules)"
+                    <button class="btn btn-outline-dark btn-sm pull-right btn-no-border showOnRowHover" *ngIf="sessionDataService.hasPersonalRule(session.rules)"
                       (click)="deleteSession(session); $event.stopImmediatePropagation();" title="Delete session">
                       <span class="fa fa-times"></span>
                     </button>
