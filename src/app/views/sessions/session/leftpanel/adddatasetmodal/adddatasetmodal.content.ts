@@ -1,30 +1,38 @@
 import Dataset from "../../../../../model/session/dataset";
-import {Component, Input, ChangeDetectorRef, ViewChild, AfterViewInit} from '@angular/core';
-import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {UploadService} from "../../../../../shared/services/upload.service";
+import {
+  Component,
+  Input,
+  ChangeDetectorRef,
+  ViewChild,
+  AfterViewInit,
+  OnInit
+} from "@angular/core";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { UploadService } from "../../../../../shared/services/upload.service";
 
 @Component({
-  selector: 'ch-add-dataset-modal-content',
-  templateUrl: './adddatasetmodal.content.html'
+  selector: "ch-add-dataset-modal-content",
+  templateUrl: "./adddatasetmodal.content.html"
 })
-export class AddDatasetModalContent implements AfterViewInit {
-
+export class AddDatasetModalContent implements AfterViewInit, OnInit {
   @Input() sessionId: string;
 
-  @ViewChild('browseFilesButton') browseFilesButton;
-  @ViewChild('browseDirButton') browseDirButton;
+  @ViewChild("browseFilesButton") browseFilesButton;
+  @ViewChild("browseDirButton") browseDirButton;
 
   flow;
 
   constructor(
     public activeModal: NgbActiveModal,
     private uploadService: UploadService,
-    private changeDetectorRef: ChangeDetectorRef) {
-  }
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(
-      this.fileAdded.bind(this), this.fileSuccess.bind(this));
+      this.fileAdded.bind(this),
+      this.fileSuccess.bind(this)
+    );
   }
 
   fileAdded(file: any) {
