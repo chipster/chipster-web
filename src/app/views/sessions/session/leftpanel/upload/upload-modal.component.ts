@@ -12,9 +12,9 @@ import { UploadService } from "../../../../../shared/services/upload.service";
 
 @Component({
   selector: "ch-add-dataset-modal-content",
-  templateUrl: "./adddatasetmodal.content.html"
+  templateUrl: "./upload-modal.component.html"
 })
-export class AddDatasetModalContent implements AfterViewInit, OnInit {
+export class UploadModalComponent implements AfterViewInit, OnInit {
   @Input() sessionId: string;
 
   @ViewChild("browseFilesButton") browseFilesButton;
