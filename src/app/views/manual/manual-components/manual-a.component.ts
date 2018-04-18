@@ -1,4 +1,4 @@
-import {Component} from '@angular/core'
+import { Component } from '@angular/core';
 import {Router} from "@angular/router";
 import {ManualUtils} from "../manual-utils";
 import {ManualBaseComponent} from "./manual-base.component";

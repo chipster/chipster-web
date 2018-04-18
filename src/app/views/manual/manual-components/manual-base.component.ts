@@ -1,6 +1,6 @@
-import {Input, ViewChild, ViewContainerRef} from '@angular/core'
+import { Input, ViewChild, ViewContainerRef, AfterViewInit } from '@angular/core';
 
-export class ManualBaseComponent {
+export class ManualBaseComponent implements AfterViewInit {
 
   // Angular component, like <ch-manual-a-component>
   @ViewChild('container', {read: ViewContainerRef}) public viewContainerRef: ViewContainerRef;
@@ -15,12 +15,12 @@ export class ManualBaseComponent {
     // apply the given attributes for the new element
     if (this.attributes) {
       for (let j = 0; j < this.attributes.length; j++) {
-        let attrib = this.attributes[j];
-        //console.log(attrib.name + " = " + attrib.value);
+        const attrib = this.attributes[j];
+        // console.log(attrib.name + " = " + attrib.value);
         if (this.elementViewContainerRef) {
           this.elementViewContainerRef.element.nativeElement.setAttribute(attrib.name, attrib.value);
         } else {
-          console.log('component', this, 'unable to set attribute', attrib.name, attrib.value)
+          console.log('component', this, 'unable to set attribute', attrib.name, attrib.value);
         }
       }
     }

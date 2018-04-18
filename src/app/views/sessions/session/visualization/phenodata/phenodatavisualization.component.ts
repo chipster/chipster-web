@@ -70,7 +70,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       });
     }
   }
-  
+
   getWidth(array: string[][], headers: string[]) {
     return this.spreadsheetService.guessWidth(headers, array) + 100;
   }

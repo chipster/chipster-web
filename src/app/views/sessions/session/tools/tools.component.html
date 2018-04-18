@@ -28,7 +28,7 @@
 
         <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="manualDropdown.isOpen()" class="tools-dropdown">
           <ch-scroller>
-            <ch-manual [page]="getManualPage()" [showControls]=true></ch-manual>
+            <ch-manual [page]="getManualPage() | async" [showControls]=true></ch-manual>
           </ch-scroller>
         </div>
       </div>

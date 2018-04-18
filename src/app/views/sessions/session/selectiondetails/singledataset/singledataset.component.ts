@@ -62,7 +62,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   getUsedToolFromToolset() {
     if (this.sourceJob) {
-      this.tool = this.sessionData.tools.find(x => x.name.id === this.sourceJob.toolId);
+      this.tool = this.sessionData.tools.find(t => t.name.id === this.sourceJob.toolId);
       if (!this.tool) {
         console.log('No Tool found with this ID', this.sourceJob.toolId);
       }

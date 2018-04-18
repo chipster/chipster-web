@@ -3,7 +3,8 @@ import {
   Component,
   ComponentFactoryResolver, Input,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
+  OnInit
 } from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
@@ -15,6 +16,8 @@ import {ManualOlComponent} from "./manual-components/manual-ol.component";
 import {ManualDivComponent} from "./manual-components/manual-div.component";
 import {ManualSpanComponent} from "./manual-components/manual-span.component";
 import {ManualUtils} from "./manual-utils";
+import { ConfigService } from "../../shared/services/config.service";
+import { ManualPComponent } from "./manual-components/manual-p.component";
 
 /**
  * Show HTML files in an Angular app
@@ -45,17 +48,22 @@ export class ManualComponent implements AfterViewInit {
 
   @Input() private page: string;
   @Input() showControls = false;
-  @Input() assetsPath?= 'assets/manual/';
-
-  private routerPath = 'manual/';
+  @Input() assetsPath? = null;
 
   private currentPage;
 
+  private relativeLinkPrefix: string;
+  private toolPostfix: string;
+  private routerPath: string;
+
   @ViewChild('container', { read: ViewContainerRef }) viewContainerReference;
 
-  constructor (private http: HttpClient,
-               private activatedRoute: ActivatedRoute,
-               private componentFactoryResolver: ComponentFactoryResolver) {
+  constructor(
+    private http: HttpClient,
+    private activatedRoute: ActivatedRoute,
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private configService: ConfigService,
+    ) {
   }
 
   /**
@@ -66,6 +74,19 @@ export class ManualComponent implements AfterViewInit {
   ngAfterViewInit() {
 
     this.activatedRoute.url
+      // get configs
+      .flatMap(() => {
+        if (this.assetsPath) {
+          return Observable.of(this.assetsPath);
+        }
+        return this.configService.getManualPath();
+      })
+      .do(path => this.assetsPath = path)
+      .flatMap(() => this.configService.getManualRelativeLinkPrefix())
+      .do(prefix => this.relativeLinkPrefix = prefix)
+      .flatMap(() => this.configService.getManualRouterPath())
+      .do(path => this.routerPath = path)
+
       .flatMap(() => {
         console.log('route changed', this.activatedRoute.snapshot.url, this.page);
         if (this.page) {
@@ -150,13 +171,18 @@ export class ManualComponent implements AfterViewInit {
   angularize(sourceDoc, targetComponentRef) {
 
     // process the children of these tags, but the tag itself can be omitted
-    const keepChilren = new Set(['HTML', 'BODY']);
+    const keepChilren = new Set(['HTML', 'BODY', 'ARTICLE', 'SECTION']);
 
     // skip these tags and don't process their children
     const skip = new Set(['HEAD', 'TITLE']);
 
-    // these tags are simply cloned and links inside these won't use the Angular router
-    const clone = new Set(['#TEXT', '#COMMENT', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'B', 'U', 'I', 'BR', 'HR', 'IMG']);
+    // These tags are simply cloned and links inside these won't use the Angular router.
+    // The current way of making Angular components doesn't work for table elements,
+    // because there is extra divs arond each element.
+    const clone = new Set([
+      '#TEXT', '#COMMENT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'B', 'U', 'I', 'BR', 'HR',
+      'IMG', 'EM', 'BODY', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH'
+    ]);
 
     // replace the original tag with a Angular component to be able to listen for link clicks
     const components = new Map<string, any>([
@@ -167,6 +193,7 @@ export class ManualComponent implements AfterViewInit {
       ['A', ManualAComponent],
       ['DIV', ManualDivComponent],
       ['SPAN', ManualSpanComponent],
+      ['P', ManualPComponent],
     ]);
 
     // iterate children
@@ -198,6 +225,12 @@ export class ManualComponent implements AfterViewInit {
 
         if (element.classList) {
           element.classList.add('ch-html-component');
+        }
+
+        if (nodeName === 'TABLE') {
+          // bootstap table syle
+          element.classList.add('table');
+          element.classList.add('table-striped');
         }
 
         // clone element and it's children
@@ -281,23 +314,31 @@ export class ManualComponent implements AfterViewInit {
     Array.from(links).forEach(link => {
 
       // use getAttribute(), because link.href converts the url to absolute
-      const href = link.getAttribute('href');
+      let href = link.getAttribute('href');
 
       if (link.name) {
         // link target, nothing to do
 
       } else if (ManualUtils.isAbsoluteUrl(href)) {
-        // open absolute urls in a new tab
-        link.target = '_blank';
-
+        // no relativeLinkPrefix for absolute links
       } else if (href.startsWith('#')) {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page
-        link.href = this.routerPath + path + href;
+        link.href = this.relativeLinkPrefix + path + href;
 
       } else {
         // relative urls navigate with the Angular router
-        link.href = this.routerPath + href;
+        link.href = this.relativeLinkPrefix + href;
+      }
+
+      /* Open absolute links in new tab
+
+      Check it here after adding the relativeLinkPrefix, because it can be used to
+      make relative links to absolute (e.g. in Kielipankki) */
+      href = link.getAttribute('href');
+      if (href && ManualUtils.isAbsoluteUrl(href)) {
+        // open absolute urls in a new tab
+        link.target = '_blank';
       }
     });
 

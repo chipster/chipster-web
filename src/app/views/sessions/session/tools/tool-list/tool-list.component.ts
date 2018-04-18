@@ -48,7 +48,6 @@ export class ToolListComponent implements OnInit {
   ngOnInit() {
     this.tools = _.cloneDeep(this.sessionData.tools);
     this.modules = _.cloneDeep(this.sessionData.modules);
-    this.modules = _.cloneDeep(this.sessionData.modules);
 
     // trigger parameter validation
     if (this.toolSelection) {
@@ -60,6 +59,7 @@ export class ToolListComponent implements OnInit {
       this.selectModule(this.modules[0]);
       this.selectCategory(this.selectedModule.categories[0]);
     }
+
   }
 
   selectModule(module: Module) {

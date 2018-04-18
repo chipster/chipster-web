@@ -15,6 +15,7 @@ import { SessionEventService } from "../sessionevent.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import InputBinding from "../../../../model/session/inputbinding";
+import { ConfigService } from "../../../../shared/services/config.service";
 
 @Component({
   selector: "ch-tools",
@@ -47,6 +48,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     private sessionEventService: SessionEventService,
     private jobService: JobService,
+    private configService: ConfigService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // close only on outside click
@@ -135,21 +137,24 @@ export class ToolsComponent implements OnInit, OnDestroy {
   getManualPage() {
     const tool: string = this.toolSelection.tool.name.id;
 
-    if (tool.endsWith(".java")) {
-      // remove the java package name
-      const splitted = tool.split(".");
-      if (splitted.length > 2) {
-        // java class name
-        return splitted[splitted.length - 2] + ".html";
-      }
-    } else {
-      for (const ext of [".R", ".py"]) {
-        if (tool.endsWith(ext)) {
-          return tool.slice(0, -1 * ext.length) + ".html";
+    return this.configService.getManualToolPostfix()
+      .map(manualPostfix => {
+        if (tool.endsWith(".java")) {
+          // remove the java package name
+          const splitted = tool.split(".");
+          if (splitted.length > 2) {
+            // java class name
+            return splitted[splitted.length - 2] + manualPostfix;
+          }
+        } else {
+          for (const ext of [".R", ".py"]) {
+            if (tool.endsWith(ext)) {
+              return tool.slice(0, -1 * ext.length) + manualPostfix;
+            }
+          }
         }
-      }
-    }
-    return tool;
+        return tool;
+      });
   }
 
   ngOnDestroy() {
