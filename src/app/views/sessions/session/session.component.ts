@@ -17,6 +17,8 @@ import { RestErrorService } from '../../../core/errorhandler/rest-error.service'
 import { DialogModalService } from './dialogmodal/dialogmodal.service';
 import { SessionWorkerResource } from '../../../shared/resources/sessionworker.resource';
 import { Observable } from 'rxjs/Observable';
+import { TokenService } from '../../../core/authentication/token.service';
+import Rule from '../../../model/session/rule';
 
 @Component({
   selector: 'ch-session',
@@ -44,7 +46,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
-    private sessionWorkerResource: SessionWorkerResource) {
+    private sessionWorkerResource: SessionWorkerResource,
+    private tokenService: TokenService) {
   }
 
   ngOnInit() {
@@ -159,8 +162,9 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     this.sessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
-    this.subscriptions.push(this.sessionEventService.getAuthorizationStream().subscribe(change => {
-      if (change.event.type === 'DELETE') {
+    this.subscriptions.push(this.sessionEventService.getRuleStream().subscribe(change => {
+      const rule: Rule = <Rule> change.oldValue;
+      if (change.event.type === 'DELETE' && rule.username === this.tokenService.getUsername()) {
         alert('The session has been deleted.');
         this.router.navigate(['/sessions']);
       }
@@ -342,12 +346,19 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   autoLayout() {
+
+    const updates: Observable<any>[] = [];
     this.sessionData.datasetsMap.forEach(d => {
       if (d.x || d.y) {
         d.x = null;
         d.y = null;
-        this.sessionDataService.updateDataset(d);
+        updates.push(this.sessionDataService.updateDataset(d));
       }
     });
+
+    Observable.forkJoin(updates)
+      .subscribe(
+        () => console.log(updates.length + ' datasets updated'),
+        err => this.restErrorService.handleError(err, 'layout update failed'));
   }
 }

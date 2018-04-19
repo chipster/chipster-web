@@ -9,13 +9,13 @@
   <div class="container">
     <div class="row">
       <div class="col-3">
-        <span #browseFilesButton class="btn btn-small btn-success btn-block">
+        <span #browseFilesButton class="btn btn-sm btn-success btn-block">
           <i class="fa fa-file" aria-hidden="true"></i>&nbsp;
           Upload File
         </span>
       </div>
       <div class="col-3">
-          <span #browseDirButton class="btn btn-small btn-success btn-block">
+          <span #browseDirButton class="btn btn-sm btn-success btn-block">
             <i class="fa fa-folder-open" aria-hidden="true"></i>&nbsp;
             Upload Folder
           </span>
@@ -26,19 +26,19 @@
 
     <div class="row">
       <div class="col-3">
-        <button class="btn btn-secondary btn-block" (click)="flow.pause()">
+        <button class="btn btn-secondary btn-block btn-sm" (click)="flow.pause()">
           <i class="fa fa-pause" aria-hidden="true"></i>
           Pause all
         </button>
       </div>
       <div class="col-3">
-        <button class="btn btn-secondary btn-block" (click)="flow.resume()">
+        <button class="btn btn-secondary btn-block btn-sm" (click)="flow.resume()">
           <i class="fa fa-play" aria-hidden="true"></i>
           Resume all
         </button>
       </div>
       <div class="col-3">
-        <button class="btn btn-secondary btn-block" (click)="flow.cancel()">
+        <button class="btn btn-secondary btn-block btn-sm" (click)="flow.cancel()">
           <i class="fa fa-times" aria-hidden="true"></i>
           Cancel all
         </button>

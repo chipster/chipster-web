@@ -21,7 +21,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   page: number;
   totalPages;
   zoom: number;
-  showAll: boolean = false;
+  showAll = false;
 
   loadedBytes: number;
   totalBytes: number;
@@ -30,7 +30,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
-  urlReady: boolean = false;
+  urlReady = false;
 
   private readonly showAllPagesText: string = "Show all pages";
   private readonly showSinglePagesText: string = "Show single page";
@@ -63,6 +63,10 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         this.state = new LoadState(State.Loading, "Loading pdf file failed");
         this.errorHandlerService.handleError(error, this.state.message);
       });
+  }
+
+  openNewTab() {
+    this.sessionDataService.openNewTab(this.dataset);
   }
 
   ngOnDestroy() {

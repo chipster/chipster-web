@@ -1,0 +1,34 @@
+#session-preview {
+  height: calc(~"100vh - 120px");
+  //position: relative;
+  overflow-y: auto;
+}
+
+.session-list {
+  height: calc(~"100vh - 120px");
+  position: relative;
+}
+
+.session-list-item {
+  // hand cursor like shown on links. Maybe it makes it more clear that the list items open the session
+  cursor: pointer;
+}
+
+.workflow-preview-panel {
+  height: calc(~"100vh / 3");
+}
+
+.workflow-graph-panel {
+  height: 100%;
+  overflow: hidden;
+}
+
+button.showOnRowHover {
+  display: none;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+table tr:hover button.showOnRowHover {
+  display: block;
+}

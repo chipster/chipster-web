@@ -4,31 +4,26 @@
 <div *ngIf="sessionData">
 
   <!--suppress HtmlUnknownAttribute -->
-  <vertical-split-pane
-    primary-component-initialratio="0.33"
-    primary-component-minsize="370"
-    secondary-component-minsize="300"
-    separator-thickness="10"
-    id="session-split"
-    class="session-view">
+  <vertical-split-pane primary-component-initialratio="0.33" primary-component-minsize="370" secondary-component-minsize="300"
+    separator-thickness="10" id="session-split" class="session-view">
 
     <div class="split-pane-content-primary full-height">
       <!-- flex layout arranges space for the undo box when necessary -->
       <div class="d-flex flex-column full-height">
 
-        <h6>
+        <h3 class="h3-xs">
 
           <span class="lighter">Session: </span>
           <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
           <span class="dropdown">
-            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fa fa-chevron-circle-down" aria-hidden="true"></i>
+            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false" title="Actions">
+              <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
               <!--<i class="fa fa-bars" aria-hidden="true"></i>-->
 
             </button>
 
-                    <!--suppress HtmlUnknownTag -->
+            <!--suppress HtmlUnknownTag -->
             <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
               <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
               <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
@@ -39,7 +34,7 @@
               <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
             </div>
           </span>
-        </h6>
+        </h3>
 
         <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
         hiding the undo panel -->
@@ -53,10 +48,11 @@
             <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
             <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
             <br>
-            <button type="button" class="btn btn-danger btn-sm"
-                    (click)="deleteDatasetsNow()"><i class="fa fa-times"></i> Remove
+            <button type="button" class="btn btn-danger btn-sm" (click)="deleteDatasetsNow()">
+              <i class="fa fa-times"></i> Remove
             </button>
-            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()"><i class="fa fa-undo"></i>
+            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
+              <i class="fa fa-undo"></i>
               Undo
             </button>
           </div>
@@ -73,20 +69,13 @@
 
       <div class="row">
         <div class="col">
-          <ch-job
-            *ngIf="selectionService.selectedJobs.length > 0"
-            [sessionData]="sessionData">
+          <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData">
           </ch-job>
 
-          <ch-file
-            *ngIf="selectionService.selectedDatasets.length > 0"
-            [dataset]="selectionService.selectedDatasets[0]"
-            [jobs]="sessionData.jobsMap"
-            [sessionData]="sessionData"
-            (onDelete)="deleteDatasetsLater()"></ch-file>
+          <ch-file *ngIf="selectionService.selectedDatasets.length > 0" [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap"
+            [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
         </div>
       </div>
     </div>
   </vertical-split-pane>
 </div>
-

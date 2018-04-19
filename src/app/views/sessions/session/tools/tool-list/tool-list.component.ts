@@ -1,34 +1,37 @@
 import {
-  Component, EventEmitter, Input, Output, ViewChild
-} from '@angular/core';
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  OnInit
+} from "@angular/core";
 import Tool from "../../../../../model/session/tool";
-import {ToolPipe} from "../../../../../shared/pipes/toolpipe.pipe";
-import {PipeService} from "../../../../../shared/services/pipeservice.service";
+import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
+import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import Module from "../../../../../model/session/module";
 import Category from "../../../../../model/session/category";
-import {ModulePipe} from "../../../../../shared/pipes/modulepipe.pipe";
-import {CategoryPipe} from "../../../../../shared/pipes/categorypipe.pipe";
-import {ToolSelection} from "../ToolSelection";
-import {Subject} from "rxjs/Subject";
-import {SessionData} from "../../../../../model/session/session-data";
+import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
+import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
+import { ToolSelection } from "../ToolSelection";
+import { Subject } from "rxjs/Subject";
+import { SessionData } from "../../../../../model/session/session-data";
 import InputBinding from "../../../../../model/session/inputbinding";
-import {SearchBoxComponent} from "../../../../../shared/components/search-box/search-box.component";
-import * as _ from 'lodash';
+import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
+import * as _ from "lodash";
 
 @Component({
-  selector: 'ch-tool-list',
-  templateUrl: './tool-list.component.html',
-  styleUrls: ['./tool-list.component.less']
+  selector: "ch-tool-list",
+  templateUrl: "./tool-list.component.html",
+  styleUrls: ["./tool-list.component.less"]
 })
-
-export class ToolListComponent {
-
+export class ToolListComponent implements OnInit {
   @Input() private sessionData: SessionData;
   @Input() private toolSelection: ToolSelection;
 
-  @Output() private onToolSelection = new EventEmitter<ToolSelection>();
+  @Output() private selectToolOutput = new EventEmitter<ToolSelection>();
 
-  @ViewChild('searchBox') private searchBox: SearchBoxComponent;
+  @ViewChild("searchBox") private searchBox: SearchBoxComponent;
 
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
@@ -40,14 +43,10 @@ export class ToolListComponent {
 
   selectTool$ = new Subject();
 
-
-  constructor(
-    private pipeService: PipeService) {
-  }
+  constructor(private pipeService: PipeService) {}
 
   ngOnInit() {
     this.tools = _.cloneDeep(this.sessionData.tools);
-    this.modules = _.cloneDeep(this.sessionData.modules);
     this.modules = _.cloneDeep(this.sessionData.modules);
 
     // trigger parameter validation
@@ -60,6 +59,7 @@ export class ToolListComponent {
       this.selectModule(this.modules[0]);
       this.selectCategory(this.selectedModule.categories[0]);
     }
+
   }
 
   selectModule(module: Module) {
@@ -67,26 +67,38 @@ export class ToolListComponent {
     this.selectFirstVisible();
   }
 
-  //defines which tool category the user have selected
+  // defines which tool category the user have selected
   selectCategory(category: Category) {
     this.selectedCategory = category;
   }
 
   selectFirstVisible() {
-    let filteredModules = new ModulePipe(this.pipeService).transform(this.modules, this.searchTool);
-    if (filteredModules && filteredModules.indexOf(this.selectedModule) < 0 && filteredModules[0]) {
+    const filteredModules = new ModulePipe(this.pipeService).transform(
+      this.modules,
+      this.searchTool
+    );
+    if (
+      filteredModules &&
+      filteredModules.indexOf(this.selectedModule) < 0 &&
+      filteredModules[0]
+    ) {
       this.selectModule(filteredModules[0]);
     }
 
-    let filteredCategories = new CategoryPipe(this.pipeService).transform(this.selectedModule.categories, this.searchTool);
-    if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
+    const filteredCategories = new CategoryPipe(this.pipeService).transform(
+      this.selectedModule.categories,
+      this.searchTool
+    );
+    if (
+      filteredCategories &&
+      filteredCategories.indexOf(this.selectedCategory) < 0 &&
+      filteredCategories[0]
+    ) {
       this.selectCategory(filteredCategories[0]);
     }
   }
 
-
   selectTool(tool: Tool) {
-
     const toolSelection: ToolSelection = {
       tool: tool,
       inputBindings: null,
@@ -94,20 +106,9 @@ export class ToolListComponent {
       module: this.selectedModule
     };
 
-    console.log('selectTool', tool, toolSelection);
+    console.log("selectTool", tool, toolSelection);
 
-    this.onToolSelection.emit(toolSelection);
-  }
-
-  updateBindings(updatedBindings: InputBinding[]) {
-    const toolSelection: ToolSelection = {
-      tool: this.toolSelection.tool,
-      inputBindings: updatedBindings,
-      category: this.selectedCategory,
-      module: this.selectedModule
-    };
-
-    this.selectTool$.next(toolSelection);
+    this.selectToolOutput.emit(toolSelection);
   }
 
   search(value: any) {
@@ -117,7 +118,10 @@ export class ToolListComponent {
 
   searchEnter() {
     // select the first result
-    let visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
+    const visibleTools = new ToolPipe(this.pipeService).transform(
+      this.selectedCategory.tools,
+      this.searchTool
+    );
     if (visibleTools[0]) {
       this.searchTool = null;
       // this.selectTool(visibleTools[0].name.id);

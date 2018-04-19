@@ -7,7 +7,8 @@ import {ManualOlComponent} from "./manual-components/manual-ol.component";
 import {ManualLiComponent} from "./manual-components/manual-li.component";
 import {ManualUlComponent} from "./manual-components/manual-ul.component";
 import {ManualDivComponent} from "./manual-components/manual-div.component";
-import {ManualSpanComponent} from "./manual-components/manual-span.component";
+import { ManualSpanComponent } from "./manual-components/manual-span.component";
+import { ManualPComponent } from './manual-components/manual-p.component';
 
 @NgModule({
   imports: [ CommonModule, SharedModule],
@@ -18,7 +19,8 @@ import {ManualSpanComponent} from "./manual-components/manual-span.component";
     ManualLiComponent,
     ManualUlComponent,
     ManualDivComponent,
-    ManualSpanComponent
+    ManualSpanComponent,
+    ManualPComponent,
   ],
   providers: [],
   exports: [ManualComponent],
@@ -29,6 +31,7 @@ import {ManualSpanComponent} from "./manual-components/manual-span.component";
     ManualUlComponent,
     ManualDivComponent,
     ManualSpanComponent,
+    ManualPComponent,
   ]
 })
 export class ManualModule { }

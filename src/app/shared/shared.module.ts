@@ -24,6 +24,7 @@ import {FormsModule} from "@angular/forms";
 import {RouteService} from "./services/route.service";
 import {StatusComponent} from "./components/status.component";
 import {AuthHttpClientService} from "./services/auth-http-client.service";
+import { SpreadsheetService } from './services/spreadsheet.service';
 
 
 /*
@@ -60,6 +61,7 @@ import {AuthHttpClientService} from "./services/auth-http-client.service";
     TypeTagService,
     RouteService,
     AuthHttpClientService,
+    SpreadsheetService,
   ],
   exports: [
     BytesPipe,

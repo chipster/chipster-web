@@ -21,7 +21,7 @@
       </div>
 
       <ch-workflow-graph
-        [datasetsMap]="sessionData.datasetsMap"
+        [datasetsMap]="getCompleteDatasets()"
         [jobsMap]="sessionData.jobsMap"
         [modulesMap]="sessionData.modulesMap"
         [datasetSearch]="datasetSearch"
@@ -39,7 +39,6 @@
       <div class="workflow-dataset-static-panel">
         <div class="add-dataset-button">
           <ch-add-dataset-modal
-            [datasetsMap]="sessionData.datasetsMap"
             [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
         </div>
       </div>

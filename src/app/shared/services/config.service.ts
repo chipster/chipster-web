@@ -75,6 +75,41 @@ export class ConfigService {
       .map(conf => conf['modules']);
   }
 
+  getTermsOfUsePath(): Observable<string> {
+    return this.conf$
+      .map(conf => conf['terms-of-use-path']);
+  }
+
+  getTermsOfUseAuths(): Observable<string[]> {
+    return this.conf$
+      .map(conf => conf['terms-of-use-auths']);
+  }
+
+  getTermsOfUseVersion(): Observable<number> {
+    return this.conf$
+      .map(conf => conf['terms-of-use-version']);
+  }
+
+  getManualPath(): Observable<string> {
+    return this.conf$
+      .map(conf => conf['manual-path']);
+  }
+
+  getManualToolPostfix(): Observable<string> {
+    return this.conf$
+      .map(conf => conf['manual-tool-postfix']);
+  }
+
+  getManualRouterPath(): Observable<string> {
+    return this.conf$
+      .map(conf => conf['manual-router-path']);
+  }
+
+  getManualRelativeLinkPrefix(): Observable<string> {
+    return this.conf$
+      .map(conf => conf['manual-relative-link-prefix']);
+  }
+
   getFirstByRole(role: string, services: Service[]): Service {
     return services
       .filter(service => service.role === role)[0];

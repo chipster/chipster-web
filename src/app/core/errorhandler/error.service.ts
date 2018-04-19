@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {Subject} from "rxjs";
+import {Subject} from "rxjs/Subject";
 import {ErrorMessage, ErrorType} from "./errormessage";
 
 @Injectable()
@@ -17,6 +17,10 @@ export class ErrorService {
 
   headerErrorConnectionFailed(msg?: string, dismissable: boolean = true) {
     this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.CONNECTION_FAILED));
+  }
+
+  headerErrorNotFound(msg?: string, dismissable: boolean = true) {
+    this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.NOT_FOUND));
   }
 
   getErrors() {

@@ -27,8 +27,6 @@ div.dataset-tooltip-triangle {
 
 #workflowvisualization {
 
-  overflow: hidden;
-
   .selected-dataset {
     stroke-width: 3px;
   }
@@ -56,17 +54,19 @@ div.dataset-tooltip-triangle {
   stroke: #555;
 }
 
-.full-size {
+section {
+  position: relative;
   height: 100%;
   width:  100%;
 }
 
-// otherwise a zoom or pan breaks the layout completely
-.workflow-container {
-  position: relative;
+.scroller-div {
+  overflow: auto;
+  height: 100%;
+  width: 100%;
 }
 
-// otherwise Safari shows too small workflow on the page load
-svg {
+.toolbar-div {
   position: absolute;
+  bottom: 10px;
 }

@@ -24,6 +24,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {ManualModule} from "./views/manual/manual.module";
 import {setAppInjector} from './app-injector';
 import {AdminModule} from "./views/admin/admin.module";
+import { TermsComponent } from './views/terms/terms.component';
 
 @NgModule({
     imports: [
@@ -39,7 +40,15 @@ import {AdminModule} from "./views/admin/admin.module";
       StoreModule.forRoot({selectedDatasets, selectedJobs, toolSelection}),
       AppRoutingModule, // must be last because a wildcard route is defined here
     ],
-    declarations: [ NavigationComponent, LoginComponent, HomeComponent, AppComponent, ErrorComponent, ContactComponent ],
+  declarations: [
+    NavigationComponent,
+    LoginComponent,
+    HomeComponent,
+    AppComponent,
+    ErrorComponent,
+    ContactComponent,
+    TermsComponent,
+  ],
     providers: [SelectionService, TokenService, ErrorService, {provide: ErrorHandler, useClass: AppErrorHandler}],
     bootstrap: [ AppComponent ]
 })

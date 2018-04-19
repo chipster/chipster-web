@@ -9,6 +9,8 @@ import {DialogModalService} from "../../dialogmodal/dialogmodal.service";
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import {SessionEventService} from "../../sessionevent.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
+import { Observable } from "rxjs/Observable";
+import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 
 @Component({
   selector: 'ch-phenodata-visualization',
@@ -38,7 +40,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
     private zone: NgZone,
-    private restErrorService: RestErrorService) {}
+    private restErrorService: RestErrorService,
+    private spreadsheetService: SpreadsheetService) { }
 
   ngOnInit() {
     this.updateView();
@@ -50,7 +53,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    for (let propName in changes) {
+    for (const propName in changes) {
       if (propName === 'datasets') {
         if (this.datasets.length > 0) {
           this.updateViewLater();
@@ -60,7 +63,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnDestroy() {
-    if (this.hot){
+    if (this.hot) {
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
         this.hot = null;
@@ -68,13 +71,36 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
   }
 
+  getWidth(array: string[][], headers: string[]) {
+    return this.spreadsheetService.guessWidth(headers, array) + 100;
+  }
+
+  getHeight(array: string[][], headers: string[]) {
+    return array.length * 23 + 50; // extra for header-row and borders
+  }
+
+  updateSize(array: string[][], headers: string[]) {
+    const container = document.getElementById('tableContainer');
+
+    container.style.width = this.getWidth(array, headers) + "px";
+    container.style.height = this.getHeight(array, headers) + "px";
+  }
+
   getSettings(array: string[][], headers: string[]) {
+
     return {
       data: array,
       colHeaders: headers,
       columnSorting: true,
       manualColumnResize: true,
       sortIndicator: true,
+      rowHeights: 23,
+      scrollColHeaders: false,
+      scrollCompatibilityMode: false,
+      renderAllRows: false,
+      width: this.getWidth(array, headers),
+      height: this.getHeight(array, headers),
+
       afterGetColHeader: (col: number, TH: any) => {
         if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
           // removal not allowed
@@ -96,17 +122,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
          we must not update the scope, because it would create an infinite
          loop.
          */
-        //console.log(source);
-        if (source === 'edit' || source === 'autofill' || source === 'paste') {
+        // console.log(source);
+        if (source === 'edit' || source === 'Autofill.fill' || source === 'CopyPaste.paste') {
           this.latestEdit = new Date().getTime();
           this.updateDatasets(false);
         }
       }
-    }
+    };
   }
 
   createRemoveButton(col: number, TH: any) {
-    var button = document.createElement('A');
+    const button = document.createElement('A');
     button.className = 'pull-right';
     // use id instead of class to make it more specific than the 'color: inherit' rule in the bootstrap styles
     button.id = 'phenodata-header-button';
@@ -155,9 +181,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset).subscribe((fileHeaders: string[]) => {
 
-      let metadata: MetadataEntry[] = [];
+      const metadata: MetadataEntry[] = [];
 
-      var chipHeaders = fileHeaders.filter(function (header) {
+      const chipHeaders = fileHeaders.filter(function (header) {
         return Utils.startsWith(header, 'chip.');
       });
 
@@ -202,7 +228,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   getHeaders(datasets: Dataset[]) {
     // collect all headers
-    var headers = {
+    const headers = {
       dataset: true,
       column: true
     };
@@ -219,7 +245,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   createRow(length: number, datasetId: string, columnName: string) {
     // create a plain JS array, because Handsontable doesn't recognize typescript Array
     // and doesn't allow columns to be added on object data source
-    let row = <Row>[];
+    const row = <Row>[];
     for (let i = 0; i < length; i++) {
       row.push(undefined);
     }
@@ -233,7 +259,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   // or create a new row
   getRow(dataset: Dataset, column: string, array: Row[], headers: string[]) {
     // find the existing row
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
       if (array[i].datasetId === dataset.datasetId && array[i].columnName === column) {
         return array[i];
       }
@@ -241,7 +267,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     // create a new row
     // fill the row with undefined values
-    var row = this.createRow(headers.length, dataset.datasetId, column);
+    const row = this.createRow(headers.length, dataset.datasetId, column);
 
     row[0] = dataset.name;
     row[1] = column;
@@ -251,20 +277,20 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   getRows(datasets: Dataset[], headers: string[]) {
 
-    var array: Row[] = [];
+    const array: Row[] = [];
 
     datasets.forEach((dataset: Dataset) => {
       if (dataset.metadata) {
         if (dataset.metadata.length > 0) {
           dataset.metadata.forEach((entry: MetadataEntry) => {
-            var row = this.getRow(dataset, entry.column, array, headers);
+            const row = this.getRow(dataset, entry.column, array, headers);
             row[headers.indexOf(entry.key)] = entry.value;
             if (array.indexOf(row) === -1) {
               array.push(row);
             }
           });
         } else {
-          var row = this.getRow(dataset, null, array, headers);
+          const row = this.getRow(dataset, null, array, headers);
           array.push(row);
         }
       }
@@ -274,13 +300,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   updateDatasets(updateAll: boolean) {
 
-    var metadataMap = new Map<string, MetadataEntry[]>();
-    var array = this.array;
-    var headers = this.headers;
+    const metadataMap = new Map<string, MetadataEntry[]>();
+    const array = this.array;
+    const headers = this.headers;
 
     array.forEach((row: Row) => {
 
-      for (var i = 0; i < headers.length; i++) {
+      for (let i = 0; i < headers.length; i++) {
         // dataset and column are only presented for the user
         // the column information will be stored to entries
         // and the dataset information is unnecessary, because each dataset has it's own metadata
@@ -288,7 +314,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           continue;
         }
 
-        var entry = {
+        const entry = {
           column: row.columnName,
           key: headers[i],
           value: row[i]
@@ -302,14 +328,21 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       }
     });
 
+    const updates: Observable<any>[] = [];
+
     this.datasets.forEach((dataset: Dataset) => {
-      var newMetadata = metadataMap.get(dataset.datasetId);
+      const newMetadata = metadataMap.get(dataset.datasetId);
 
       if (updateAll || !_.isEqual(newMetadata, dataset.metadata)) {
         dataset.metadata = newMetadata;
-        this.sessionDataService.updateDataset(dataset);
+        updates.push(this.sessionDataService.updateDataset(dataset));
       }
     });
+
+    Observable.forkJoin(updates)
+      .subscribe(
+        () => console.log(updates.length + ' datasets updated'),
+        err => this.restErrorService.handleError(err, 'dataset updates failed'));
   }
 
   updateView() {
@@ -323,8 +356,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .filter(d => !d.metadata || d.metadata.length === 0)
       .map(d => this.resetDataset(d));
 
-    var headers = this.getHeaders(this.datasets);
-    var array = this.getRows(this.datasets, headers);
+    const headers = this.getHeaders(this.datasets);
+    const array = this.getRows(this.datasets, headers);
 
     if (!_.isEqual(headers, this.headers)) {
 
@@ -333,10 +366,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       this.headers = headers;
 
       // remove old table if this is an update
-      var container = document.getElementById('tableContainer');
+      const container = document.getElementById('tableContainer');
 
       if (!container) {
-        // timer or event triggered the update, t
+        // timer or event triggered the update
         console.log('cancelling the phenodata update, because the container has been removed already');
         return;
       }
@@ -349,6 +382,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         this.hot = new Handsontable(container, this.getSettings(array, this.headers));
       });
     }
+
+    this.updateSize(array, headers);
+
     this.array = array;
     this.zone.runOutsideAngular(() => {
       if (this.hot) {
@@ -407,7 +443,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       '', 'Add')
       .do(name => {
         this.zone.runOutsideAngular(() => {
-          var colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
+          const colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings()).colHeaders;
           this.hot.alter('insert_col', colHeaders.length);
           // remove undefined column header
           colHeaders.pop();
@@ -425,7 +461,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private hideColumnIfEmpty(headers: string[], array: Row[]) {
     // if the columnName is undefined on all rows (non-microarray phenodata)
     if (array.filter(row => !!row.columnName).length === 0) {
-      let index = headers.indexOf('column');
+      const index = headers.indexOf('column');
       // remove the column from the headers
       headers.splice(index, 1);
       // and from the array

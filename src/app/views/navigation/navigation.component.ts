@@ -3,6 +3,7 @@ import {TokenService} from "../../core/authentication/token.service";
 
 import {Component} from '@angular/core';
 import {Observable} from "rxjs/Observable";
+import { User } from "../../model/user";
 
 @Component({
   selector: 'ch-navigation',
@@ -17,11 +18,8 @@ export class NavigationComponent {
     private tokenService: TokenService,
     private authenticationService: AuthenticationService) {
 
-    this.username$ = tokenService.getUsername$()
-      .flatMap(userId => authenticationService.getUser())
-      .map(user => user.name);  
-
-    tokenService.getToken()
+    this.username$ = authenticationService.getUsersDisplayName$();
+    tokenService.getToken();
   }
 
   logout() {

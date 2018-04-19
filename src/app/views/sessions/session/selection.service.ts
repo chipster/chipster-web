@@ -19,8 +19,8 @@ export class SelectionService {
 
       // Sync selected datasets from store
       this.store.select('selectedDatasets').subscribe(
-        (datasets: Array<Dataset>) => { this.selectedDatasets = datasets },
-        (error: any) => { console.error('Error fetching datasets from store', error) }
+        (datasets: Array<Dataset>) => this.selectedDatasets = datasets,
+        (error: any) => console.error('Error fetching datasets from store', error)
       );
 
 
@@ -29,10 +29,10 @@ export class SelectionService {
       // Sync selected jobs from store
       this.store.select('selectedJobs').subscribe(
         (jobs: Array<Job>) => {
-          this.selectedJobs = jobs
+          this.selectedJobs = jobs;
           this.selectedJobs$.next(jobs);
           },
-        (error: any) => { console.error('Error fetching jobs from store', error) }
+        (error: any) => console.error('Error fetching jobs from store', error)
       );
     }
 
@@ -43,15 +43,19 @@ export class SelectionService {
     /*
      * @description: search by dataset object if given dataset is currently selected
      */
-    isSelectedDataset(dataset: Dataset):boolean {
+    isSelectedDataset(dataset: Dataset): boolean {
       return this.isSelectedDatasetById(dataset.datasetId);
     }
 
     /*
      * @description: search by id if given dataset is currently selected
      */
-    isSelectedDatasetById(datasetId: string):boolean {
+    isSelectedDatasetById(datasetId: string): boolean {
       return _.some( this.selectedDatasets, (dataset: Dataset) => dataset.datasetId === datasetId);
+    }
+
+    isSelectedJobById(jobId: string): boolean {
+      return _.some( this.selectedJobs, (job: Job) => job.jobId === jobId);
     }
 
 }

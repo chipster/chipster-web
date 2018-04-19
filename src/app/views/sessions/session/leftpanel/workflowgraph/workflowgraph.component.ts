@@ -33,12 +33,18 @@ import { Timer } from "d3-timer";
   encapsulation: ViewEncapsulation.None
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
+  svg: any;
   @Input() datasetsMap: Map<string, Dataset>;
   @Input() jobsMap: Map<string, Job>;
   @Input() modulesMap: Map<string, Module>;
   @Input() datasetSearch: string;
   @Input() defaultScale: number;
   @Input() enabled: boolean;
+
+
+  private zoomScale: number;
+  private zoomMin = 0.2;
+  private zoomMax = 2;
 
   private zoom;
 
@@ -59,9 +65,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   selectedDatasets$: Observable<Array<Dataset>>;
 
   // var shiftKey, ctrlKey;
-  svgContainer: any;
-  svg: any;
-  outerSvg: any;
+  scrollerDiv: any;
+  zoomGroup: any;
 
   d3DatasetNodesGroup: any;
   d3LinksGroup: any;
@@ -101,44 +106,63 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.selectedDatasets$ = this.store.select("selectedDatasets");
 
-    // used for adjusting the svg size
-    this.svgContainer = d3
-      .select("#workflowvisualization")
-      .append("div")
-      .classed("full-size", true)
-      .classed("workflow-container", true);
-    this.outerSvg = this.svgContainer.append("svg");
-    this.outerSvg.classed("full-size", true);
+    const section = d3.select("#workflowvisualization");
+    this.scrollerDiv = section.append("div").classed("scroller-div", true);
 
-    // draw background on outerSvg, so that it won't pan or zoom
-    // invisible rect for listening background clicks and scrolls
-    this.background = this.outerSvg
-      .append("g")
-      .attr("class", "background")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .append("rect")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .attr("opacity", 0)
-      .on("click", () => {
+    // listern for background clicks
+    section.on("click", () => {
+      if (d3.event.target.tagName.toUpperCase() === "SVG") {
         this.selectionHandlerService.clearDatasetSelection();
         this.selectionHandlerService.clearJobSelection();
-      });
+      }
+    });
 
-    this.svg = this.outerSvg.append("g");
+    // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
+    this.scrollerDiv.on("mousewheel", () => {
+      const scroll = this.scrollerDiv.node();
+      const event = d3.event;
 
-    // order of these appends will determine the drawing order
-    this.d3LinksGroup = this.svg
+      // We don't want to scroll below zero or above the width
+      const maxX = scroll.scrollWidth - scroll.offsetWidth;
+
+      // If this event looks like it will scroll beyond the bounds of the element, prevent it and set the scroll to the boundary manually
+      if (scroll.scrollLeft + event.deltaX < 0 ||
+        scroll.scrollLeft + event.deltaX > maxX) {
+
+        event.preventDefault();
+
+        // Manually set the scroll to the boundary
+        scroll.scrollLeft = Math.max(0, Math.min(maxX, scroll.scrollLeft + event.deltaX));
+      }
+    });
+
+    if (this.enabled) {
+      const toolbarDiv = section.append("div").classed("toolbar-div", true)
+        .classed("btn-group", true);
+
+      toolbarDiv.append("button").classed("btn btn-secondary", true)
+        .on("click", e => this.zoomClick(1))
+        .append("i").classed("fa fa-search-plus", true);
+
+      toolbarDiv.append("button").classed("btn btn-secondary", true)
+        .on("click", e => this.zoomClick(-1))
+        .append("i").classed("fa fa-search-minus", true);
+    }
+
+    this.svg = this.scrollerDiv.append("svg");
+    this.zoomGroup = this.svg.append("g");
+
+      // order of these appends will determine the drawing order
+    this.d3LinksGroup = this.zoomGroup
       .append("g")
       .attr("class", "link")
       .attr("id", "d3LinksGroup");
     this.d3LinksDefsGroup = this.d3LinksGroup.append("defs");
-    this.d3DatasetNodesGroup = this.svg
+    this.d3DatasetNodesGroup = this.zoomGroup
       .append("g")
       .attr("class", "dataset node")
       .attr("id", "d3DatasetNodesGroup");
-    this.d3LabelsGroup = this.svg.append("g").attr("class", "label");
+    this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
     this.datasetTooltip = d3
       .select("body")
       .append("div")
@@ -152,23 +176,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("opacity", 0)
       .html("\u25BC");
 
-    if (this.enabled) {
-      this.zoom = d3
-        .zoom()
-        .scaleExtent([0.2, 1])
-        .on("zoom", () => {
-          this.svg.attr("transform", d3.event.transform);
-        });
+    this.zoomScale = this.defaultScale;
+    this.applyZoom(this.zoomScale);
 
-      d3.select("g.background").call(this.zoom);
-    } else {
-      this.svg.attr(
-        "transform",
-        "translate(0,0) scale(" + this.defaultScale + ")"
-      );
-    }
-
-    // apply zoom
     if (this.enabled) {
       this.subscriptions.push(
         this.sessionEventService.getDatasetStream().subscribe(() => {
@@ -196,13 +206,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     setTimeout(() => {
       // check that the element isn't removed already (e.g. when removing many sessions fast)
       if (document.getElementById("d3DatasetNodesGroup")) {
-        this.setScrollLimits();
+        this.updateSvgSize();
       }
     }, 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!this.svg) {
+    if (!this.zoomGroup) {
       // not yet initialized
       return;
     }
@@ -226,36 +236,101 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions = [];
   }
 
-  setScrollLimits() {
-    const linksRect = document
-      .getElementById("d3LinksGroup")
-      .getBoundingClientRect();
-    const datasetNodesRect = document
-      .getElementById("d3DatasetNodesGroup")
-      .getBoundingClientRect();
-    const parent = document
-      .getElementById("workflowvisualization")
-      .getBoundingClientRect();
+  /**
+   * Apply zoom changes
+   *
+   * Calculate the new zoom scale, check limits and apply the new transformation.
+   * The default d3 zoom implementation isn't used, because it uses scroll events.
+   *
+   * The scrolling position is adjusted to keep the center of the graph stationary
+   * when zooming.
+   */
+  zoomClick(direction: number) {
 
-    // have to calculate from the absolute coordinates (right, bottom etc.),
-    // because bounding rect's width and height don't start the from the origo
-    const contentWidth =
-      _.max([linksRect.right, datasetNodesRect.right]) -
-      parent.left;
-    const contentHeight =
-      _.max([linksRect.bottom, datasetNodesRect.bottom]) -
-      parent.top;
+    // calculate the new scale
+    const factor = (1 + 0.2 * direction);
+    const targetScale = this.zoomScale * factor;
+
+    // check if it is within limits
+    if (targetScale < this.zoomMin || targetScale > this.zoomMax) {
+      console.log("zoom limit reached");
+      return false;
+    }
+
+    // zoom
+    this.zoomScale = targetScale;
+    this.applyZoom(this.zoomScale);
+
+    // adjust scrolling
+
+    // coordinates of the viewport center
+    const scroll = this.scrollerDiv.node();
+    const centerX = scroll.scrollLeft + scroll.clientWidth / 2;
+    const centerY = scroll.scrollTop + scroll.clientHeight / 2;
+
+    // coordinates of the center after zooming
+    const newCenterX = centerX * factor;
+    const newCenterY = centerY * factor;
+
+    // adjust scrolling to keep the center stationary
+    scroll.scrollLeft = newCenterX - scroll.clientWidth / 2;
+    scroll.scrollTop = newCenterY - scroll.clientHeight / 2;
+
+    this.updateSvgSize();
+  }
+
+  applyZoom(scale: number) {
+    this.zoomGroup.attr("transform", "translate(0, 0) scale(" + scale + ")");
+  }
+
+
+  getParentSize() {
+    return this.scrollerDiv.node().getBoundingClientRect();
+  }
+
+  getContentSize() {
+    // graph size in graph coordinates
+    const width = Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
+    const height = Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
+
+    // graph size in pixels after the zoom
+    const scaledWidth = width * this.zoomScale;
+    const scaledHeight = height * this.zoomScale;
+
+    return { width: scaledWidth, height: scaledHeight };
+  }
+
+  getSvgSize() {
+
+    const parent = this.getParentSize();
+    const content = this.getContentSize();
 
     // This sets limits for the scrolling.
     // It must be large enough to accommodate all the content, but let it still
     // fill the whole viewport if the content is smaller than the viewport.
-    // Otherwise d3 centers the content.
-    const translateWidth = _.max([contentWidth, parent.width]) + 100;
-    const translateHeight = _.max([contentHeight, parent.height]) + 100;
+    // Otherwise the content is centered.
+    const translateWidth = _.max([content.width, parent.width]);
+    const translateHeight = _.max([content.height, parent.height]);
 
-    if (this.zoom) {
-      this.zoom.translateExtent([[0, 0], [translateWidth, translateHeight]]);
-    }
+    return { width: translateWidth, height: translateHeight };
+  }
+
+  /**
+   * Update svg size
+   *
+   * Scrolling is done using the standard CSS overflow feature. When the content
+   * changes (datasets added or moved) or the zoom changes, we must adjust the size
+   * of the SVG element.
+   *
+   * This allows us to use the scroll events for actually scrolling and this should work
+   * nicely on different devices. Usually d3 would use drag events for scrolling and implements
+   * it with svg translates.
+   */
+  updateSvgSize() {
+    const size = this.getSvgSize();
+
+    this.svg.attr("width", size.width);
+    this.svg.attr("height", size.height);
   }
 
   update() {
@@ -356,7 +431,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       !this.d3DatasetNodes.enter().empty() ||
       !this.d3DatasetNodes.exit().empty()
     ) {
-      this.setScrollLimits();
+      this.updateSvgSize();
     }
   }
 
@@ -500,7 +575,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
     // update scroll limits if datasets were moved
-    this.setScrollLimits();
+    this.updateSvgSize();
   }
 
   renderGraph() {

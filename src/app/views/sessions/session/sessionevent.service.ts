@@ -6,11 +6,13 @@ import Job from "../../../model/session/job";
 import {Injectable} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {SessionData} from "../../../model/session/session-data";
-import {Observable, Subject} from "rxjs";
+import {Observable} from "rxjs/Observable";
+import {Subject} from "rxjs/Subject";
 import SessionEvent from "../../../model/events/sessionevent";
 import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
 import WsEvent from "../../../model/events/wsevent";
 import {ErrorService} from "../../../core/errorhandler/error.service";
+import Rule from "../../../model/session/rule";
 
 @Injectable()
 export class SessionEventService {
@@ -20,7 +22,7 @@ export class SessionEventService {
     datasetStream$: Observable<SessionEvent>;
     jobStream$: Observable<SessionEvent>;
     sessionStream$: Observable<SessionEvent>;
-    authorizationStream$: Observable<SessionEvent>;
+    ruleStream$: Observable<SessionEvent>;
     wsSubject$: WebSocketSubject<WsEvent>;
     localSubject$: Subject<WsEvent>;
 
@@ -28,7 +30,7 @@ export class SessionEventService {
       private configService: ConfigService,
       private tokenService: TokenService,
       private sessionResource: SessionResource,
-      private errorService: ErrorService){
+      private errorService: ErrorService) {
     }
 
     unsubscribe() {
@@ -45,7 +47,7 @@ export class SessionEventService {
       this.sessionId = sessionId;
 
       this.localSubject$ = new Subject();
-      let stream = this.localSubject$.publish().refCount();
+      const stream = this.localSubject$.publish().refCount();
 
       this.connect(this.localSubject$);
 
@@ -66,16 +68,16 @@ export class SessionEventService {
         .flatMap(data => this.handleSessionEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
-      this.authorizationStream$ = stream
-        .filter(wsData => wsData.resourceType === 'AUTHORIZATION')
-        .flatMap(data => this.handleAuthorizationEvent(data, sessionData))
+      this.ruleStream$ = stream
+        .filter(wsData => wsData.resourceType === 'RULE')
+        .flatMap(data => this.handleRuleEvent(data, this.sessionId, sessionData))
         .publish().refCount();
 
       // update sessionData even if no one else subscribes
       this.datasetStream$.subscribe();
       this.jobStream$.subscribe();
       this.sessionStream$.subscribe();
-      this.authorizationStream$.subscribe();
+      this.ruleStream$.subscribe();
     }
 
   /**
@@ -89,9 +91,9 @@ export class SessionEventService {
    */
   connect(listener) {
       // get the url of the websocket server
-      this.configService.getSessionDbEventsUrl(this.sessionId).flatMap( (eventsUrl:string) => {
+      this.configService.getSessionDbEventsUrl(this.sessionId).flatMap( (eventsUrl: string) => {
 
-        let wsUrl = `${eventsUrl}/events/${this.sessionId}?token=${this.tokenService.getToken()}`;
+        const wsUrl = `${eventsUrl}/events/${this.sessionId}?token=${this.tokenService.getToken()}`;
         console.debug('event URL', wsUrl);
 
         // convert websocket to observable
@@ -142,27 +144,37 @@ export class SessionEventService {
         return this.jobStream$;
     }
 
-    getAuthorizationStream() {
-      return this.authorizationStream$;
+    getRuleStream() {
+      return this.ruleStream$;
     }
 
     createEvent(event, oldValue, newValue) {
         return Observable.of(new SessionEvent(event, oldValue, newValue));
     }
 
-    handleAuthorizationEvent(event: any, sessionData: SessionData): Observable<SessionEvent> {
-        if (event.type === 'DELETE') {
-            return this.createEvent(event, sessionData.session, null);
+  handleRuleEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
+    if (event.type === 'CREATE') {
+      return this.sessionResource.getRule(sessionId, event.resourceId).flatMap((rule: Rule) => {
+          sessionData.session.rules.push(rule);
+          return this.createEvent(event, null, rule);
+      });
 
-        } else {
-            console.warn("unknown event type", event);
-        }
+    } else if (event.type === 'DELETE') {
+
+      const rule = sessionData.session.rules.find(r => r.ruleId === event.resourceId);
+      sessionData.session.rules = sessionData.session.rules
+        .filter(r => r.ruleId !== event.resourceId);
+      return this.createEvent(event, rule, null);
+
+    } else {
+      console.warn("unknown event type", event);
     }
+  }
 
-    handleSessionEvent(event: any, sessionId:any, sessionData: SessionData): Observable<SessionEvent> {
+    handleSessionEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
         if (event.type === 'UPDATE') {
            return this.sessionResource.getSession(sessionId).flatMap((remote: Session) => {
-                let local = sessionData.session;
+                const local = sessionData.session;
                 sessionData.session = remote;
                 return this.createEvent(event, local, remote);
             });
@@ -176,20 +188,20 @@ export class SessionEventService {
 
         if (event.type === 'CREATE') {
           return this.sessionResource.getDataset(sessionId, event.resourceId).flatMap((remote: Dataset) => {
-                sessionData.datasetsMap.set(event.resourceId, remote);
-                return this.createEvent(event, null, remote);
-            });
+            sessionData.datasetsMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          });
 
         } else if (event.type === 'UPDATE') {
           return this.sessionResource.getDataset(sessionId, event.resourceId)
-              .flatMap((remote: Dataset) => {
-                let local = sessionData.datasetsMap.get(event.resourceId);
-                sessionData.datasetsMap.set(event.resourceId, remote);
-                return this.createEvent(event, local, remote);
-            });
+            .flatMap((remote: Dataset) => {
+              const local = sessionData.datasetsMap.get(event.resourceId);
+              sessionData.datasetsMap.set(event.resourceId, remote);
+              return this.createEvent(event, local, remote);
+          });
 
         } else if (event.type === 'DELETE') {
-          let localCopy = sessionData.datasetsMap.get(event.resourceId);
+          const localCopy = sessionData.datasetsMap.get(event.resourceId);
           sessionData.datasetsMap.delete(event.resourceId);
           return this.createEvent(event, localCopy, null);
 
@@ -201,11 +213,11 @@ export class SessionEventService {
     updateTypeTags(sessionId, sessionEvent, sessionData) {
 
       // update type tags before
-      let newValue = <Dataset>sessionEvent.newValue;
+      const newValue = <Dataset>sessionEvent.newValue;
 
       if (newValue) {
         if (!newValue.fileId) {
-          //dataset created, but fileId is missing
+          // dataset created, but fileId is missing
           // get type tags later when the fileId is added
           return Observable.of(sessionEvent);
         }
@@ -232,13 +244,13 @@ export class SessionEventService {
 
         } else if (event.type === 'UPDATE') {
             return this.sessionResource.getJob(sessionId, event.resourceId).flatMap((remote: Job) => {
-              let local = sessionData.jobsMap.get(event.resourceId);
+              const local = sessionData.jobsMap.get(event.resourceId);
               sessionData.jobsMap.set(event.resourceId, remote);
               return this.createEvent(event, local, remote);
             });
 
         } else if (event.type === 'DELETE') {
-          let localCopy = sessionData.jobsMap.get(event.resourceId);
+          const localCopy = sessionData.jobsMap.get(event.resourceId);
           sessionData.jobsMap.delete(event.resourceId);
           return this.createEvent(event, localCopy, null);
 

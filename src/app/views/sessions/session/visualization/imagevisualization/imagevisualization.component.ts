@@ -9,7 +9,7 @@ import {LoadState, State} from "../../../../../model/loadstate";
   selector: 'ch-image-visualization',
   templateUrl: './imagevisualization.component.html'})
 
-export class ImageVisualizationComponent implements OnChanges, OnDestroy{
+export class ImageVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input()
   private dataset: Dataset;
@@ -45,5 +45,8 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy{
     this.unsubscribe.complete();
   }
 
+  openNewTab() {
+    this.sessionDataService.openNewTab(this.dataset);
+  }
 }
 
