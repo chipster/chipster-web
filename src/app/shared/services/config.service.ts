@@ -10,6 +10,7 @@ import { Role } from '../../model/role';
 export class ConfigService {
 
   public static readonly KEY_CUSTOM_CSS = 'custom-css';
+  public static readonly KEY_FAVICON = 'favicon';
   public static readonly KEY_APP_NAME = 'app-name';
 
   private conf$: Observable<any>;

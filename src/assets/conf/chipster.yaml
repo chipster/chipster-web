@@ -12,7 +12,9 @@ manual-path: assets/manual/
 manual-tool-postfix: .html
 manual-relative-link-prefix: 'manual/'
 app-name: Chipster
+favicon: assets/chipster_icon.png
 
+#favicon: https://www.kielipankki.fi/wp-content/themes/kielipankki/favicon-96x96.png
 #custom-css: assets/custom.css
 #app-name: Mylly
 # Kielipankki modules and manual

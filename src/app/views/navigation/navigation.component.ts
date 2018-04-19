@@ -43,6 +43,17 @@ export class NavigationComponent implements OnInit {
         document.getElementsByTagName('head')[0].appendChild(link);
       }
     }, err => this.errorService.headerError('failed to get the custom css path: ' + err, true));
+
+    this.configService.get(ConfigService.KEY_FAVICON).subscribe(path => {
+      console.log('load custom favicon from', path);
+      if (path) {
+        const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = path;
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+    }, err => this.errorService.headerError('failed to get the custom favicon path: ' + err, true));
   }
 
   logout() {
