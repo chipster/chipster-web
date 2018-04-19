@@ -1,31 +1,61 @@
-<div>
-  Header
+<div class="conatiner-fluid">
+  <div class="row">
+    <div class="col col-8">
+      <div class="form-group">
+        <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
+
+          <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
+            <div [formGroupName]="i">
+              <select formControlName="selectedAttribute">
+                <option value=""></option>
+                <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">{{attribute}}
+                </option>
+              </select>
+              <input type="text" formControlName="value" placeholder=""/>
+            </div>
+          </div>
+          <button type="submit">Search</button>
+        </form>
+        <div>
+        </div>
+    </div>
+
+
+    </div>
+    <div class="col col-4">
+
+      <button type="button" (click)="addItem()">Add Filter</button>
+
+    </div>
+
+
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">Username</th>
+        <th scope="col">Operation</th>
+        <th scope="col">Comp host</th>
+        <th scope="col">Durtaion</th>
+        <th scope="col">Start time</th>
+        <th scope="col">End time</th>
+        <th scope="col"></th>
+        <th scope="col">Error</th>
+        <th scope="col">Status</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let jobhistory of jobHistoryList">
+        <td>{{jobhistory.userName}}</td>
+        <td>{{jobhistory.toolName}}</td>
+        <td>{{jobhistory.compName}}</td>
+        <td>{{jobhistory.timeDuration}}</td>
+        <td>{{jobhistory.startTime|date:"yyyy-mm-dd HH:mm"}}</td>
+        <td>{{jobhistory.endTime|date:"yyyy-mm-dd HH:mm"}}</td>
+        <td><a href="">Output</a></td>
+        <td>{{jobhistory.error}}</td>
+        <td>{{jobhistory.jobStatus}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="table">
-  <thead>
-  <tr>
-    <th scope="col">Username</th>
-    <th scope="col">Operation</th>
-    <th scope="col">Comp host</th>
-    <th scope="col">Durtaion</th>
-    <th scope="col">Start time</th>
-    <th scope="col">End time</th>
-    <th scope="col"></th>
-    <th scope="col">Error</th>
-    <th scope="col">Status</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr *ngFor="let jobhistory of jobHistoryList">
-    <td>{{jobhistory.userName}}</td>
-    <td>{{jobhistory.toolName}}</td>
-    <td>{{jobhistory.compName}}</td>
-    <td>{{jobhistory.timeDuration}}</td>
-    <td>{{jobhistory.startTime}}</td>
-    <td>{{jobhistory.endTime}}</td>
-    <td>{{jobhistory.output}}</td>
-    <td>{{jobhistory.error}}</td>
-    <td>{{jobhistory.jobStatus}}</td>
-  </tr>
-  </tbody>
-</table>

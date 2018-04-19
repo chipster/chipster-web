@@ -21,4 +21,13 @@ export class AuthHttpClientService {
 
     return this.httpClient.get(url, {headers: headers});
   }
+
+  getAuthWithParams(url, params?): Observable<any> {
+    console.log(params);
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Basic ' + btoa('token:' + this.tokenService.getToken()));
+
+    return this.httpClient.get(url, {headers: headers, params: params});
+
+  }
 }
