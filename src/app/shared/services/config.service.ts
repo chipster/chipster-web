@@ -9,6 +9,8 @@ import { Role } from '../../model/role';
 @Injectable()
 export class ConfigService {
 
+  public static readonly KEY_APP_NAME = "app-name";
+
   private conf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
 
@@ -108,6 +110,11 @@ export class ConfigService {
   getManualRelativeLinkPrefix(): Observable<string> {
     return this.conf$
       .map(conf => conf['manual-relative-link-prefix']);
+  }
+
+  get(key: string): Observable<string> {
+    return this.conf$
+      .map(conf => conf[key]);
   }
 
   getFirstByRole(role: string, services: Service[]): Service {

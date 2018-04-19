@@ -14,6 +14,8 @@ import {ConfigService} from '../../shared/services/config.service';
 export class LoginComponent implements OnInit {
 
   error: string;
+  appName$;
+
   private returnUrl: string;
 
   public ssoLoginUrl: string;
@@ -43,6 +45,8 @@ export class LoginComponent implements OnInit {
           });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
+
+    this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
   }
 
   login() {

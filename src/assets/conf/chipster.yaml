@@ -11,7 +11,9 @@ modules: ['NGS', 'Microarray', 'Misc']
 manual-path: assets/manual/
 manual-tool-postfix: .html
 manual-relative-link-prefix: 'manual/'
+app-name: Chipster
 
+#app-name: Mylly
 # Kielipankki modules and manual
 # modules: ['Kielipankki']
 # # Link Kielipankki manuals here on the dev machine to be able to switch between manuals simply in
