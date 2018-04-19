@@ -9,7 +9,8 @@ import { Role } from '../../model/role';
 @Injectable()
 export class ConfigService {
 
-  public static readonly KEY_APP_NAME = "app-name";
+  public static readonly KEY_CUSTOM_CSS = 'custom-css';
+  public static readonly KEY_APP_NAME = 'app-name';
 
   private conf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
@@ -113,6 +114,7 @@ export class ConfigService {
   }
 
   get(key: string): Observable<string> {
+    console.log('get conf key', key, this.conf$);
     return this.conf$
       .map(conf => conf[key]);
   }

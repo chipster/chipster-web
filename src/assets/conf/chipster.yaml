@@ -13,6 +13,7 @@ manual-tool-postfix: .html
 manual-relative-link-prefix: 'manual/'
 app-name: Chipster
 
+#custom-css: assets/custom.css
 #app-name: Mylly
 # Kielipankki modules and manual
 # modules: ['Kielipankki']

@@ -5,6 +5,8 @@ import {Component, OnInit} from '@angular/core';
 import {Observable} from "rxjs/Observable";
 import { User } from "../../model/user";
 import { ConfigService } from "../../shared/services/config.service";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
 
 @Component({
   selector: 'ch-navigation',
@@ -19,7 +21,8 @@ export class NavigationComponent implements OnInit {
   constructor(
     private tokenService: TokenService,
     private authenticationService: AuthenticationService,
-    private configService: ConfigService) {
+    private configService: ConfigService,
+    private errorService: ErrorService) {
   }
 
   ngOnInit() {
@@ -27,6 +30,19 @@ export class NavigationComponent implements OnInit {
     this.tokenService.getToken();
 
     this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
+
+    this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(path => {
+      console.log('load custom css from', path);
+      if (path) {
+        const link = document.createElement('link');
+        link.href = path;
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.media = 'screen,print';
+
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+    }, err => this.errorService.headerError('failed to get the custom css path: ' + err, true));
   }
 
   logout() {
