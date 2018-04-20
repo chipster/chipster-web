@@ -31,6 +31,7 @@ export class NavigationComponent implements OnInit {
 
     this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
 
+    // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(path => {
       console.log('load custom css from', path);
       if (path) {
@@ -54,6 +55,12 @@ export class NavigationComponent implements OnInit {
         document.getElementsByTagName('head')[0].appendChild(link);
       }
     }, err => this.errorService.headerError('failed to get the custom favicon path: ' + err, true));
+
+    this.configService.get(ConfigService.KEY_APP_NAME).subscribe(name => {
+      if (name) {
+        document.title = name;
+      }
+    }, err => this.errorService.headerError('failed to get the app name: ' + err, true));
   }
 
   logout() {
