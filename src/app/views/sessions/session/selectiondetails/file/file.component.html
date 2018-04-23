@@ -40,7 +40,20 @@
 
 
 <div class="chipster-highlight">
-  <div *ngIf="selectionService.selectedDatasets.length === 1">{{selectionService.selectedDatasets[0].name}}</div>
+  <div *ngIf="selectionService.selectedDatasets.length === 1">{{selectionService.selectedDatasets[0].name}}
+    <span class="dropdown">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false" title="Actions">
+        <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
+        <a class="dropdown-item" (click)="renameDataset()">Rename...</a>
+        <a class="dropdown-item" (click)="deleteDatasets()">Delete...</a>
+        <a class="dropdown-item" (click)="exportDatasets()">Export</a>
+        <a class="dropdown-item" (click)="showHistory()">History...</a>
+      </div>
+    </span>
+  </div>
 
   <!-- <ch-single-dataset *ngIf="selectionService.selectedDatasets.length === 1" [dataset]="selectionService.selectedDatasets[0]"
     [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [parametersLimit]="3"></ch-single-dataset>
