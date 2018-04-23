@@ -12,8 +12,8 @@ import { VisualizationModalService } from "./visualizationmodal.service";
 
 @Component({
   selector: "ch-visualizations",
-  templateUrl: "./visualizations.html",
-  styleUrls: ["./visualizationbox.component.less"]
+  templateUrl: "./visualizations.component.html",
+  styleUrls: ["./visualizations.component.less"]
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
