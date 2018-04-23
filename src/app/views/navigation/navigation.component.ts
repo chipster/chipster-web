@@ -60,7 +60,7 @@ export class NavigationComponent implements OnInit {
     }, err => {
       // why error service doesn't show these reliably?
       console.log('failed to get the favicon path', err);
-      this.errorService.headerError('failed to get the custom favicon path: ' + err, true)
+      this.errorService.headerError('failed to get the custom favicon path: ' + err, true);
     });
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(name => {
@@ -72,7 +72,7 @@ export class NavigationComponent implements OnInit {
     }, err => {
       // why error service doesn't show these reliably?
       console.log('failed to get the app name', err);
-      this.errorService.headerError('failed to get the app name: ' + err, true)
+      this.errorService.headerError('failed to get the app name: ' + err, true);
     });
   }
 
