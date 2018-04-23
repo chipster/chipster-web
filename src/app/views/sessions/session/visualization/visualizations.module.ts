@@ -28,6 +28,10 @@ import { VolcanoPlotComponent } from "./volcanoplot/volcanoplot.component";
 import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
 import { BamViewerComponent } from "./bamviewer/bamviewer.component";
 import { GenomeBrowserComponent } from "./genome-browser/genome-browser.component";
+import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
+import { DatasetModule } from "../selectiondetails/dataset.module";
+import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
+import { DatasetParameterListComponent } from "../selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 
 @NgModule({
   imports: [
@@ -52,7 +56,10 @@ import { GenomeBrowserComponent } from "./genome-browser/genome-browser.componen
     ScatterPlotComponent,
     VolcanoPlotComponent,
     BamViewerComponent,
-    GenomeBrowserComponent
+    GenomeBrowserComponent,
+    DetailsVisualizationComponent,
+    SingleDatasetComponent,
+    DatasetParameterListComponent
   ],
   providers: [
     ExpressionProfileTSVService,
@@ -65,7 +72,7 @@ import { GenomeBrowserComponent } from "./genome-browser/genome-browser.componen
     PlotService,
     VolcanoPlotService
   ],
-  exports: [VisualizationsComponent],
+  exports: [VisualizationsComponent, SingleDatasetComponent],
   entryComponents: [VisualizationModalComponent]
 })
 export class VisualizationsModule {}

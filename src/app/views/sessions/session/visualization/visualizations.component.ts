@@ -1,7 +1,7 @@
 import { SelectionService } from "../selection.service";
 import Dataset from "../../../../model/session/dataset";
 import * as _ from "lodash";
-import visualizations from "./visualizationconstants";
+import visualizations from "./visualization-constants";
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
@@ -80,7 +80,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     );
     const datasetSelectionCount = this.selectedDatasets.length;
     return (
-      this.containsTypeTags(visualization.typeTags) &&
+      (visualization.supportAllTypes ||
+        this.containsTypeTags(visualization.typeTags)) &&
       (visualization.anyInputCountSupported ||
         _.includes(
           visualization.supportedInputFileCounts,

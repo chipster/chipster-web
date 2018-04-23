@@ -9,7 +9,8 @@
         <tr>
           <td class="lighter">Parameters:</td>
           <td id="parameters-container">
-            <ch-dataset-parameter-list *ngIf="sourceJob && sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters" [tool]="tool"></ch-dataset-parameter-list>
+            <ch-dataset-parameter-list *ngIf="sourceJob && sourceJob.parameters.length > 0" [parameters]="sourceJob.parameters" [parametersLimit]="parametersLimit"
+              [tool]="tool"></ch-dataset-parameter-list>
           </td>
         </tr>
       </table>

@@ -4,6 +4,17 @@
 
 <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" activeId="{{active}}">
 
+  <ngb-tab id="{{getTabId('details')}}" *ngIf="isTabVisible('details')">
+    <ng-template ngbTabTitle>
+      <span class="glyphicon glyphicon-th"></span> Details</ng-template>
+    <ng-template ngbTabContent>
+      <div class="visualization-panel">
+        <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
+        </ch-details-visualization>
+      </div>
+    </ng-template>
+  </ngb-tab>
+
   <ngb-tab id="{{getTabId('spreadsheet')}}" *ngIf="isTabVisible('spreadsheet')">
     <ng-template ngbTabTitle>
       <span class="glyphicon glyphicon-th"></span> Spreadsheet</ng-template>
