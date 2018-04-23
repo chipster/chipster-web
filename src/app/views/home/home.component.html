@@ -41,11 +41,11 @@
 
         <div class="panel-body">
           <p *ngIf="tokenHasExpired()"><i>Login expired, please log in again.</i></p>
-          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="['/login']">Log in</button>
+          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="['../login']">Log in</button>
         </div>
 
         <ng-template #alreadyLoggedIn>
-          <p>You are logged in as <strong>{{username$ | async}}</strong>. To continue, go to <a routerLink="/sessions">Sessions</a>.</p>
+          <p>You are logged in as <strong>{{username$ | async}}</strong>. To continue, go to <a routerLink="../sessions">Sessions</a>.</p>
         </ng-template>
 
       </div>
@@ -81,7 +81,7 @@
         <div class="panel-body">
           <p>Chipster contains over 360 analysis tools and a large collection of reference genomes.</p>
 
-          <button class="btn btn-info" [routerLink]="['/manual']">Explore tools</button>
+          <button class="btn btn-info" [routerLink]="['../manual']">Explore tools</button>
 
         </div>
       </div>
@@ -226,7 +226,7 @@
         <div class="panel-body">
           Long-term user accounts can be purchased online <a href="https://chipster.csc.fi/purchase/">here</a>. One year
           personal single user account costs 500 euros. If you would like to buy user accounts for the whole group,
-          department or institute, please <a [routerLink]="['/contact']"> contact us </a> for a quote.
+          department or institute, please <a [routerLink]="['../contact']"> contact us </a> for a quote.
         </div>
       </div>
     </div>
@@ -238,7 +238,7 @@
         </div>
         <div class="panel-body">
           Both personal single user accounts as well as company accounts are available. Please
-          <a [routerLink]="['/contact']"> contact us </a> for a quote.
+          <a [routerLink]="['../contact']"> contact us </a> for a quote.
         </div>
       </div>
     </div>

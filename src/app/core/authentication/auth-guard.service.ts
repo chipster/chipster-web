@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { User } from '../../model/user';
 import { TermsComponent } from '../../views/terms/terms.component';
 import { ConfigService } from '../../shared/services/config.service';
+import { RouteService } from '../../shared/services/route.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -14,17 +15,21 @@ export class AuthGuard implements CanActivate {
     private tokenService: TokenService,
     private router: Router,
     private authenticationService: AuthenticationService,
-    private configService: ConfigService) {
+    private configService: ConfigService,
+    private routeService: RouteService) {
   }
 
   canActivate(): Observable<boolean> {
 
     if (this.tokenService.getToken()) {
 
+      // All these must come from the primary configuration (chipster.yaml) so that
+      // the route change can continue. We can't use the final configuraton here, because
+      // it waits for the route and we would create a deadlock.
       const observables = [
         this.authenticationService.getUser(),
-        this.configService.getTermsOfUseAuths(),
-        this.configService.getTermsOfUseVersion()
+        this.configService.getChipsterConfiguration().map(c => c[ConfigService.KEY_TERMS_OF_USE_AUTHS]),
+        this.configService.getChipsterConfiguration().map(c => c[ConfigService.KEY_TERMS_OF_USE_VERSION])
       ];
 
       return Observable.forkJoin(observables)
@@ -49,12 +54,12 @@ export class AuthGuard implements CanActivate {
               ', accpeted version:', user.termVersion,
               ', latest version:', latestVersion,
               ', accepted timestamp:', user.termsAccepted);
-            this.router.navigate(['/terms']);
+            this.routeService.navigateAbsolute(['terms']);
             return false;
           }
         });
     } else {
-      this.router.navigate(['/login']);
+      this.routeService.navigateAbsolute(['login']);
       return Observable.of(false);
     }
   }

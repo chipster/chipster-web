@@ -8,6 +8,7 @@ import {ConfigService} from '../../shared/services/config.service';
 import { AuthGuard } from '../../core/authentication/auth-guard.service';
 import { User } from '../../model/user';
 import { flatMap } from 'rxjs/operators';
+import { RouteService } from '../../shared/services/route.service';
 
 @Component({
   selector: 'ch-terms',
@@ -23,11 +24,12 @@ export class TermsComponent implements OnInit {
   constructor(private router: Router,
     private authenticationService: AuthenticationService,
     private restErrorService: RestErrorService,
-    private configService: ConfigService) {
+    private configService: ConfigService,
+    private routeService: RouteService) {
   }
 
   ngOnInit() {
-    this.configService.getTermsOfUsePath()
+    this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH)
       .subscribe(path => {
         this.termsOfUse = path;
       }, err => this.restErrorService.handleError(err, 'failed to get the configuration'));
@@ -37,7 +39,7 @@ export class TermsComponent implements OnInit {
 
     let latestVersion;
 
-    this.configService.getTermsOfUseVersion()
+    this.configService.get(ConfigService.KEY_TERMS_OF_USE_VERSION)
       .flatMap(v => {
         latestVersion = v;
         return this.authenticationService.getUser();
@@ -48,7 +50,7 @@ export class TermsComponent implements OnInit {
         return this.authenticationService.updateUser(user);
       })
       .subscribe(() => {
-        this.router.navigate(['/sessions']);
+        this.routeService.navigateAbsolute(['sessions']);
       }, err => this.restErrorService.handleError(err, 'updating the user object failed'));
   }
 }

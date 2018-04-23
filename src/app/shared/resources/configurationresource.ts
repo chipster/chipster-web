@@ -7,6 +7,8 @@ import { Role } from '../../model/role';
 import { TokenService } from '../../core/authentication/token.service';
 import { AuthHttpClientService } from '../services/auth-http-client.service';
 import { Service } from '../../model/service';
+import { ActivatedRoute, Router, NavigationEnd, NavigationStart } from '@angular/router';
+import { RouteService } from '../services/route.service';
 
 declare let YAML: any;
 
@@ -14,29 +16,30 @@ declare let YAML: any;
 export class ConfigurationResource {
 
     constructor(
-      private httpClient: HttpClient) {}
+      private httpClient: HttpClient) { }
 
-    getConfiguration(): Observable<any> {
-      return this.httpClient.get('/assets/conf/chipster.yaml', { responseType: 'text' })
-        .map(conf => YAML.parse(conf));
-    }
+  getConfiguration(file: string): Observable<any> {
 
-    getPublicServices(conf: any): Observable<Service[]> {
-      const serviceLocatorUrl = conf[Role.SERVICE_LOCATOR];
-      return <any> this.httpClient.get(serviceLocatorUrl + '/services');
-    }
+    return this.httpClient.get('/assets/conf/' + file, { responseType: 'text' })
+      .map(conf => YAML.parse(conf));
+  }
 
-    getInternalServices(conf: any, token: string): Observable<Service[]> {
-      const serviceLocatorUrl = conf[Role.SERVICE_LOCATOR];
-      const url = serviceLocatorUrl + '/services/internal';
+  getPublicServices(conf: any): Observable<Service[]> {
+    const serviceLocatorUrl = conf[Role.SERVICE_LOCATOR];
+    return <any> this.httpClient.get(serviceLocatorUrl + '/services');
+  }
 
-      // injecting AuhtHttpClientService would create a circular dependency
-      // maybe we need some kind of static util class adding auth header?
-      let headers = new HttpHeaders();
-      headers = headers.append('Authorization', 'Basic ' + btoa('token:' + token));
+  getInternalServices(conf: any, token: string): Observable<Service[]> {
+    const serviceLocatorUrl = conf[Role.SERVICE_LOCATOR];
+    const url = serviceLocatorUrl + '/services/internal';
 
-      return <any> this.httpClient.get(url, {headers: headers});
-    }
+    // injecting AuhtHttpClientService would create a circular dependency
+    // maybe we need some kind of static util class adding auth header?
+    let headers = new HttpHeaders();
+    headers = headers.append('Authorization', 'Basic ' + btoa('token:' + token));
+
+    return <any> this.httpClient.get(url, {headers: headers});
+  }
 }
 
 

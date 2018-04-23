@@ -5,6 +5,8 @@ import {CoreServices} from '../../core/core-services';
 import {Observable} from 'rxjs/Observable';
 import {Service} from '../../model/service';
 import { Role } from '../../model/role';
+import { Router, NavigationEnd } from '@angular/router';
+import { RouteService } from './route.service';
 
 @Injectable()
 export class ConfigService {
@@ -12,31 +14,67 @@ export class ConfigService {
   public static readonly KEY_CUSTOM_CSS = 'custom-css';
   public static readonly KEY_FAVICON = 'favicon';
   public static readonly KEY_APP_NAME = 'app-name';
+  public static readonly KEY_TERMS_OF_USE_AUTHS = 'terms-of-use-auths';
+  public static readonly KEY_TERMS_OF_USE_VERSION = 'terms-of-use-version';
+  public static readonly KEY_TERMS_OF_USE_PATH = 'terms-of-use-path';
 
   private conf$: Observable<any>;
+  private chipsterConf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
 
   constructor(
-    private configurationResource: ConfigurationResource) {
+    private configurationResource: ConfigurationResource,
+    private router: Router,
+    private routeService: RouteService) {
+  }
 
-    this.conf$ = this.configurationResource.getConfiguration()
-      .publishReplay(1).refCount();
-
-    this.publicServices$ = this.conf$
-      .flatMap(conf => this.configurationResource.getPublicServices(conf))
-      .publishReplay(1).refCount();
+  getChipsterConfiguration(): Observable<any> {
+    if (!this.chipsterConf$) {
+      this.chipsterConf$ = this.configurationResource.getConfiguration('chipster.yaml')
+        .publishReplay(1).refCount();
+    }
+    return this.chipsterConf$;
   }
 
   getConfiguration(): Observable<any> {
+    if (!this.conf$) {
+      this.conf$ = this.router.events
+          .filter(e => e instanceof NavigationEnd)
+          .do(x => console.log('get app', x))
+          .flatMap((e: NavigationEnd) => {
+            const appRoute = this.routeService.getAppRoute(e.url);
+            if (appRoute === 'chipster') {
+              return this.getChipsterConfiguration();
+            }
+            // don't allow relative paths or anything else weird
+            if (!RegExp('^\\w+$').test(appRoute) || appRoute.length > 16) {
+              throw Error('illegal app route (max 16 alphanumerics allowed): ' + appRoute);
+            }
+
+            return Observable.forkJoin([
+              this.getChipsterConfiguration(),
+              this.configurationResource.getConfiguration(appRoute + '.yaml')
+            ]).map(confs => {
+              // get all properties from the chipster.yaml and override with the appRoute file
+              return Object.assign(confs[0], confs[1]);
+            });
+        })
+        .publishReplay(1).refCount();
+      }
     return this.conf$;
   }
 
   getPublicServices(): Observable<any> {
+    if (!this.publicServices$) {
+      this.publicServices$ = this.getChipsterConfiguration()
+        .flatMap(conf => this.configurationResource.getPublicServices(conf))
+        .publishReplay(1).refCount();
+    }
     return this.publicServices$;
   }
 
   getInternalServices(token: string): Observable<Service[]> {
-    return this.conf$
+    return this.getConfiguration()
       .flatMap(conf => this.configurationResource.getInternalServices(conf, token))
       .publishReplay(1).refCount();
   }
@@ -75,48 +113,33 @@ export class ConfigService {
   }
 
   getModules(): Observable<string[]> {
-    return this.conf$
+    return this.getConfiguration()
       .map(conf => conf['modules']);
   }
 
-  getTermsOfUsePath(): Observable<string> {
-    return this.conf$
-      .map(conf => conf['terms-of-use-path']);
-  }
-
-  getTermsOfUseAuths(): Observable<string[]> {
-    return this.conf$
-      .map(conf => conf['terms-of-use-auths']);
-  }
-
-  getTermsOfUseVersion(): Observable<number> {
-    return this.conf$
-      .map(conf => conf['terms-of-use-version']);
-  }
-
   getManualPath(): Observable<string> {
-    return this.conf$
+    return this.getConfiguration()
       .map(conf => conf['manual-path']);
   }
 
   getManualToolPostfix(): Observable<string> {
-    return this.conf$
+    return this.getConfiguration()
       .map(conf => conf['manual-tool-postfix']);
   }
 
   getManualRouterPath(): Observable<string> {
-    return this.conf$
+    return this.getConfiguration()
       .map(conf => conf['manual-router-path']);
   }
 
   getManualRelativeLinkPrefix(): Observable<string> {
-    return this.conf$
+    return this.getConfiguration()
       .map(conf => conf['manual-relative-link-prefix']);
   }
 
   get(key: string): Observable<string> {
-    console.log('get conf key', key, this.conf$);
-    return this.conf$
+    console.debug('get conf key', key, this.getConfiguration());
+    return this.getConfiguration()
       .map(conf => conf[key]);
   }
 

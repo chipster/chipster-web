@@ -16,7 +16,8 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 export class NavigationComponent implements OnInit {
 
   username$: Observable<string>;
-  appName$: Observable<string>;
+  appName = '';
+  appRoute: string;
 
   constructor(
     private tokenService: TokenService,
@@ -28,8 +29,6 @@ export class NavigationComponent implements OnInit {
   ngOnInit() {
     this.username$ = this.authenticationService.getUsersDisplayName$();
     this.tokenService.getToken();
-
-    this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
 
     // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(path => {
@@ -43,7 +42,11 @@ export class NavigationComponent implements OnInit {
 
         document.getElementsByTagName('head')[0].appendChild(link);
       }
-    }, err => this.errorService.headerError('failed to get the custom css path: ' + err, true));
+    }, err => {
+      // why error service doesn't show these reliably?
+      console.log('failed to get the custom css path', err);
+      this.errorService.headerError('failed to get the custom css path: ' + err, true);
+    });
 
     this.configService.get(ConfigService.KEY_FAVICON).subscribe(path => {
       console.log('load custom favicon from', path);
@@ -54,13 +57,23 @@ export class NavigationComponent implements OnInit {
         link.href = path;
         document.getElementsByTagName('head')[0].appendChild(link);
       }
-    }, err => this.errorService.headerError('failed to get the custom favicon path: ' + err, true));
+    }, err => {
+      // why error service doesn't show these reliably?
+      console.log('failed to get the favicon path', err);
+      this.errorService.headerError('failed to get the custom favicon path: ' + err, true)
+    });
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(name => {
       if (name) {
+        this.appName = name;
+        this.appRoute = name.toLowerCase();
         document.title = name;
       }
-    }, err => this.errorService.headerError('failed to get the app name: ' + err, true));
+    }, err => {
+      // why error service doesn't show these reliably?
+      console.log('failed to get the app name', err);
+      this.errorService.headerError('failed to get the app name: ' + err, true)
+    });
   }
 
   logout() {

@@ -11,28 +11,28 @@ import { ModifiedSessionGuard } from "./views/sessions/session/modified-session.
 import { TermsComponent } from "./views/terms/terms.component";
 
 const routes: Routes = [
-  { path: "home", component: HomeComponent },
-  { path: "login", component: LoginComponent },
-  { path: "terms", component: TermsComponent },
+  { path: ":appName/home", component: HomeComponent },
+  { path: ":appName/login", component: LoginComponent },
+  { path: ":appName/terms", component: TermsComponent },
   {
-    path: "manual",
+    path: ":appName/manual",
     // route all sub-paths here
     children: [{ path: "**", component: ManualComponent }]
   },
-  { path: "contact", component: ContactComponent },
+  { path: ":appName/contact", component: ContactComponent },
   {
-    path: "sessions",
+    path: ":appName/sessions",
     component: SessionListComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: "sessions/:sessionId",
+    path: ":appName/sessions/:sessionId",
     component: SessionComponent,
     canActivate: [AuthGuard],
     canDeactivate: [ModifiedSessionGuard]
   },
-  { path: "", redirectTo: "/home", pathMatch: "full" },
-  { path: "**", redirectTo: "/home" }
+  { path: "", redirectTo: "chipster/home", pathMatch: "full" },
+  { path: "**", redirectTo: "chipster/home" }
 ];
 
 @NgModule({

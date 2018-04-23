@@ -1,5 +1,5 @@
 import {ConfigService} from "../../shared/services/config.service";
-import {Injectable} from "@angular/core";
+import {Injectable, OnInit} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
@@ -16,11 +16,29 @@ export class AuthenticationService {
 
   private tokenRefreshSchedulerId: number;
 
-  constructor(private configService: ConfigService,
-              private tokenService: TokenService,
-              private httpClient: HttpClient,
-              private authHttpClient: AuthHttpClientService,
-              private restErrorService: RestErrorService) {
+  private user$: Observable<User>;
+
+  constructor(
+    private configService: ConfigService,
+    private tokenService: TokenService,
+    private httpClient: HttpClient,
+    private authHttpClient: AuthHttpClientService,
+    private restErrorService: RestErrorService) {
+
+    this.init();
+  }
+
+  init() {
+    this.user$ = this.configService.getAuthUrl()
+      .do(x => console.log('auth url', x))
+      .flatMap(authUrl => {
+        const userId = encodeURIComponent(this.tokenService.getUsername());
+        const url = `${authUrl}/users/${userId}`;
+
+        return <Observable<User>>this.authHttpClient.getAuth(url);
+      })
+      .do(x => console.log('user', x))
+      .publishReplay(1).refCount();
   }
 
   // Do the authentication here based on userid and password
@@ -90,13 +108,7 @@ export class AuthenticationService {
   }
 
   getUser(): Observable<User> {
-    return this.configService.getAuthUrl()
-      .flatMap(authUrl => {
-        const userId = encodeURIComponent(this.tokenService.getUsername());
-        const url = `${authUrl}/users/${userId}`;
-
-        return <Observable<User>>this.authHttpClient.getAuth(url);
-      });
+    return this.user$;
   }
 
   getUsersDisplayName$() {
