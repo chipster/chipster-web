@@ -12,7 +12,6 @@
       <div class="d-flex flex-column full-height">
 
         <h3 class="h3-xs">
-
           <span>Session</span>
         </h3>
         <div class="chipster-highlight">
@@ -23,7 +22,6 @@
               <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false" title="Actions">
                 <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
-
               </button>
 
               <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
@@ -43,9 +41,7 @@
             <ch-leftpanel [sessionData]="sessionData" class="full-height"></ch-leftpanel>
           </div>
           <div>
-
             <div *ngIf="deletedDatasets" class="alert alert-info">
-
               <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
               <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
               <br>
