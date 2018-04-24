@@ -17,6 +17,9 @@ export class ConfigService {
   public static readonly KEY_TERMS_OF_USE_AUTHS = 'terms-of-use-auths';
   public static readonly KEY_TERMS_OF_USE_VERSION = 'terms-of-use-version';
   public static readonly KEY_TERMS_OF_USE_PATH = 'terms-of-use-path';
+  public static readonly KEY_HOME_PATH = 'home-path';
+  public static readonly KEY_HOME_HEADER_PATH = 'home-header-path';
+  public static readonly KEY_CONTACT_PATH = 'contact-path';
 
   private conf$: Observable<any>;
   private chipsterConf$: Observable<any>;
@@ -132,15 +135,13 @@ export class ConfigService {
       .map(conf => conf['manual-router-path']);
   }
 
-  getManualRelativeLinkPrefix(): Observable<string> {
-    return this.getConfiguration()
-      .map(conf => conf['manual-relative-link-prefix']);
-  }
-
   get(key: string): Observable<string> {
-    console.debug('get conf key', key, this.getConfiguration());
     return this.getConfiguration()
-      .map(conf => conf[key]);
+    .take(1) // otherwise we would have to unsubscribe
+    .map(conf => {
+      console.debug('get conf key', key, conf);
+      return conf[key];
+    });
   }
 
   getFirstByRole(role: string, services: Service[]): Service {

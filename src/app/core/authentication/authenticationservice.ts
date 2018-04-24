@@ -30,14 +30,14 @@ export class AuthenticationService {
 
   init() {
     this.user$ = this.configService.getAuthUrl()
-      .do(x => console.log('auth url', x))
+      .do(x => console.debug('auth url', x))
       .flatMap(authUrl => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
         const url = `${authUrl}/users/${userId}`;
 
         return <Observable<User>>this.authHttpClient.getAuth(url);
       })
-      .do(x => console.log('user', x))
+      .do(x => console.debug('user', x))
       .publishReplay(1).refCount();
   }
 

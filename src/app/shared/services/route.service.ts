@@ -22,7 +22,7 @@ export class RouteService {
    * without knowing the first part of the url, i.e. the app name.
    */
   navigateAbsolute(urlSegments: string[], options?) {
-    const appRoute = this.getAppRoute(this.router.routerState.snapshot.url);
+    const appRoute = this.getAppRouteCurrent();
     urlSegments.slice().unshift(appRoute);
     return this.router.navigate(urlSegments, options);
   }
@@ -39,12 +39,34 @@ export class RouteService {
     return this.router.navigate(urlSegments, { relativeTo: activatedRoute });
   }
 
+  getAppRouteCurrent() {
+    return this.getAppRoute(this.router.routerState.snapshot.url);
+  }
+
   getAppRoute(url: string): string {
     // get the app name fron the current route
     const appRoute = url.split('/')[1];
     if (appRoute == null) {
-      throw Error('cannot find the app name from the url ' + this.router.routerState.snapshot.url);
+      throw Error('cannot find the app name from the url ' + url);
     }
     return appRoute;
+  }
+
+  /**
+   * Get the file name from the url or path
+   *
+   * @param path string after the last slash
+   */
+  basename(path) {
+    return path.split('/').reverse()[0];
+  }
+
+  /**
+   * Remove the filename from the url or path
+   *
+   * @param path string before the last slash
+   */
+  dirname(path) {
+    return path.slice(0, path.lastIndexOf('/'));
   }
 }

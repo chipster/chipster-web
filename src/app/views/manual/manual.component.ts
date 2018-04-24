@@ -4,7 +4,8 @@ import {
   ComponentFactoryResolver, Input,
   ViewChild,
   ViewContainerRef,
-  OnInit
+  OnInit,
+  OnDestroy
 } from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
@@ -18,6 +19,8 @@ import {ManualSpanComponent} from "./manual-components/manual-span.component";
 import {ManualUtils} from "./manual-utils";
 import { ConfigService } from "../../shared/services/config.service";
 import { ManualPComponent } from "./manual-components/manual-p.component";
+import { Subject } from "rxjs/Subject";
+import { RouteService } from "../../shared/services/route.service";
 
 /**
  * Show HTML files in an Angular app
@@ -44,17 +47,19 @@ import { ManualPComponent } from "./manual-components/manual-p.component";
   templateUrl: './manual.component.html',
   styleUrls: ['./manual.component.less'],
 })
-export class ManualComponent implements AfterViewInit {
+export class ManualComponent implements AfterViewInit, OnDestroy {
+
+  private unsubscribe: Subject<any> = new Subject();
 
   @Input() private page: string;
   @Input() showControls = false;
   @Input() assetsPath? = null;
+  @Input() addContainer? = true;
+  @Input() routerPath?: string = null;
 
   private currentPage;
 
-  private relativeLinkPrefix: string;
   private toolPostfix: string;
-  private routerPath: string;
 
   @ViewChild('container', { read: ViewContainerRef }) viewContainerReference;
 
@@ -63,7 +68,7 @@ export class ManualComponent implements AfterViewInit {
     private activatedRoute: ActivatedRoute,
     private componentFactoryResolver: ComponentFactoryResolver,
     private configService: ConfigService,
-    ) {
+    private routeService: RouteService) {
   }
 
   /**
@@ -73,7 +78,12 @@ export class ManualComponent implements AfterViewInit {
    */
   ngAfterViewInit() {
 
+    if (!this.routerPath) {
+      this.routerPath = this.routeService.getAppRouteCurrent() + '/manual/';
+    }
+
     this.activatedRoute.url
+      .takeUntil(this.unsubscribe)
       // get configs
       .flatMap(() => {
         if (this.assetsPath) {
@@ -82,13 +92,8 @@ export class ManualComponent implements AfterViewInit {
         return this.configService.getManualPath();
       })
       .do(path => this.assetsPath = path)
-      .flatMap(() => this.configService.getManualRelativeLinkPrefix())
-      .do(prefix => this.relativeLinkPrefix = prefix)
-      .flatMap(() => this.configService.getManualRouterPath())
-      .do(path => this.routerPath = path)
-
       .flatMap(() => {
-        console.log('route changed', this.activatedRoute.snapshot.url, this.page);
+        console.debug('route changed', this.activatedRoute.snapshot.url, this.page);
         if (this.page) {
           this.currentPage = this.page;
         } else {
@@ -106,6 +111,11 @@ export class ManualComponent implements AfterViewInit {
       // show
       .map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment))
       .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   /**
@@ -181,7 +191,7 @@ export class ManualComponent implements AfterViewInit {
     // because there is extra divs arond each element.
     const clone = new Set([
       '#TEXT', '#COMMENT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'B', 'U', 'I', 'BR', 'HR',
-      'IMG', 'EM', 'BODY', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH'
+      'IMG', 'EM', 'BODY', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH', 'FOOTER', 'IFRAME'
     ]);
 
     // replace the original tag with a Angular component to be able to listen for link clicks
@@ -314,31 +324,22 @@ export class ManualComponent implements AfterViewInit {
     Array.from(links).forEach(link => {
 
       // use getAttribute(), because link.href converts the url to absolute
-      let href = link.getAttribute('href');
+      const href = link.getAttribute('href');
 
       if (link.name) {
         // link target, nothing to do
 
       } else if (ManualUtils.isAbsoluteUrl(href)) {
-        // no relativeLinkPrefix for absolute links
+        // open absolute links in a new tab
+        link.target = '_blank';
       } else if (href.startsWith('#')) {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page
-        link.href = this.relativeLinkPrefix + path + href;
+        link.href = this.routerPath + path + href;
 
       } else {
         // relative urls navigate with the Angular router
-        link.href = this.relativeLinkPrefix + href;
-      }
-
-      /* Open absolute links in new tab
-
-      Check it here after adding the relativeLinkPrefix, because it can be used to
-      make relative links to absolute (e.g. in Kielipankki) */
-      href = link.getAttribute('href');
-      if (href && ManualUtils.isAbsoluteUrl(href)) {
-        // open absolute urls in a new tab
-        link.target = '_blank';
+        link.href = this.routerPath + href;
       }
     });
 
@@ -346,7 +347,9 @@ export class ManualComponent implements AfterViewInit {
     Array.from(imgs).forEach(img => {
 
       const src = img.getAttribute('src');
-      img.src = this.assetsPath + src;
+      if (src && !ManualUtils.isAbsoluteUrl(src)) {
+        img.src = this.assetsPath + src;
+      }
     });
 
     return htmlDoc;

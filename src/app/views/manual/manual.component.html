@@ -1,7 +1,6 @@
-<div class="container">
+<div [ngClass]="{ container : addContainer }">
   <div class="row">
     <div class="col">
-
       <div *ngIf="showControls">
         <button class="btn btn-secondary btn-sm pull-right" (click)="openNewWindow()">Open in new tab</button>
       </div>
