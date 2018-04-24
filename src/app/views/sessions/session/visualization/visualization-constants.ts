@@ -2,14 +2,6 @@ import { Tags } from "../../../../shared/services/typetag.service";
 
 export default [
   {
-    id: "details",
-    name: "Details",
-    typeTags: [],
-    supportAllTypes: true,
-    anyInputCountSupported: false,
-    supportedInputFileCounts: [1]
-  },
-  {
     id: "spreadsheet",
     name: "Spreadsheet",
     typeTags: [Tags.TSV, Tags.BED, Tags.GTF, Tags.FAI, Tags.VCF],
@@ -59,13 +51,6 @@ export default [
     supportedInputFileCounts: [1]
   },
   {
-    id: "phenodata",
-    name: "Phenodata",
-    supportAllTypes: false,
-    typeTags: [Tags.GENE_EXPRS, Tags.BAM],
-    anyInputCountSupported: true
-  },
-  {
     id: "html",
     name: "Html",
     typeTags: [Tags.HTML],
@@ -103,5 +88,21 @@ export default [
     supportAllTypes: false,
     typeTags: [Tags.BAM, Tags.BAI],
     anyInputCountSupported: true
+  },
+  {
+    id: "phenodata",
+    name: "Phenodata",
+    supportAllTypes: false,
+    typeTags: [Tags.GENE_EXPRS, Tags.BAM],
+    anyInputCountSupported: true
+  },
+
+  {
+    id: "details",
+    name: "Details",
+    typeTags: [],
+    supportAllTypes: true,
+    anyInputCountSupported: false,
+    supportedInputFileCounts: [1]
   }
 ];
