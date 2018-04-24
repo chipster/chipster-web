@@ -56,6 +56,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
   @Input() assetsPath? = null;
   @Input() addContainer? = true;
   @Input() routerPath?: string = null;
+  @Input() manualStyles? = true;
 
   private currentPage;
 
@@ -233,7 +234,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
       } else if (clone.has(nodeName)) {
 
-        if (element.classList) {
+        if (element.classList && this.manualStyles) {
           element.classList.add('ch-html-component');
         }
 

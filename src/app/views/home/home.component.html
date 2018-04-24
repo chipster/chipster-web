@@ -20,10 +20,12 @@
 
   <div *ngIf="homeHeaderPath">
     <ch-manual 
-    assetsPath="{{homeHeaderPath}}" 
-    page="{{homeHeaderFile}}" 
+    [assetsPath]="homeHeaderPath" 
+    [page]="homeHeaderFile" 
     [showControls]=false
-    [addContainer]=false></ch-manual>
+    [addContainer]=false
+    [routerPath]="homeRouterPath"
+    [manualStyles]=false></ch-manual>
   </div>
 
   <div class="row" id="getstarted">
@@ -52,6 +54,7 @@
      [page]="homeFile"
      [showControls]=false
      [addContainer]=false
-     [routerPath]="homeRouterPath"></ch-manual>     
+     [routerPath]="homeRouterPath"
+     [manualStyles]=false></ch-manual>     
   </div>
 </div>
