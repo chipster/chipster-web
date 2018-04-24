@@ -1,6 +1,4 @@
 import { NgModule } from "@angular/core";
-import { DatasetParameterListComponent } from "./dataset-parameter-list/dataset-parameter-list.component";
-import { SingleDatasetComponent } from "./singledataset/single-dataset.component";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { SharedModule } from "../../../../shared/shared.module";
@@ -24,18 +22,11 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
   ],
   declarations: [
     DatasetDetailsComponent,
-    DatasetParameterListComponent,
-    SingleDatasetComponent,
     FileComponent,
     JobComponent,
     DatasetHistorymodalComponent
   ],
-  exports: [
-    JobComponent,
-    FileComponent,
-    DatasetDetailsComponent,
-    SingleDatasetComponent
-  ],
+  exports: [JobComponent, FileComponent, DatasetDetailsComponent],
   providers: [DatasetModalService],
   entryComponents: [DatasetHistorymodalComponent]
 })

@@ -1,12 +1,13 @@
 <h3 class="h3-xs">
   <!-- single dataset selected -->
   <div *ngIf="selectionService.selectedDatasets.length === 1;">
-    <span class="lighter">File: </span>{{dataset.name}}
+    <span>File </span>
+    <!--
+    {{dataset.name}}
 
     <span class="dropdown">
       <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
         aria-haspopup="true" aria-expanded="false" title="Actions">
-        <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
         <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
       </button>
       <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
@@ -16,6 +17,7 @@
         <a class="dropdown-item" (click)="showHistory()">History...</a>
       </div>
     </span>
+  -->
   </div>
 
   <!-- multiple datasets selected -->
@@ -38,9 +40,25 @@
 
 
 <div class="chipster-highlight">
-  <ch-single-dataset *ngIf="selectionService.selectedDatasets.length === 1" [dataset]="selectionService.selectedDatasets[0]"
-    [jobs]="sessionData.jobsMap" [sessionData]="sessionData"></ch-single-dataset>
-  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="onDelete.emit()"></ch-dataset-details>
-</div>
+  <div *ngIf="selectionService.selectedDatasets.length === 1">{{selectionService.selectedDatasets[0].name}}
+    <span class="dropdown">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false" title="Actions">
+        <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
+        <a class="dropdown-item" (click)="renameDataset()">Rename...</a>
+        <a class="dropdown-item" (click)="deleteDatasets()">Delete...</a>
+        <a class="dropdown-item" (click)="exportDatasets()">Export</a>
+        <a class="dropdown-item" (click)="showHistory()">History...</a>
+      </div>
+    </span>
+  </div>
 
-<ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" [sessionData]="sessionData"></ch-visualizations>
+  <!-- <ch-single-dataset *ngIf="selectionService.selectedDatasets.length === 1" [dataset]="selectionService.selectedDatasets[0]"
+    [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [parametersLimit]="3"></ch-single-dataset>
+   -->
+  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="onDelete.emit()"></ch-dataset-details>
+  <br>
+  <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" [sessionData]="sessionData"></ch-visualizations>
+</div>
