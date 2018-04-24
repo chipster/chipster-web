@@ -46,7 +46,7 @@ export class ConfigService {
           .do(x => console.log('get app', x))
           .flatMap((e: NavigationEnd) => {
             const appRoute = this.routeService.getAppRoute(e.url);
-            if (appRoute === 'chipster') {
+            if (appRoute === '' || appRoute === 'chipster') {
               return this.getChipsterConfiguration();
             }
             // don't allow relative paths or anything else weird
