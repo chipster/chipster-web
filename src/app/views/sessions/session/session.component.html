@@ -17,28 +17,26 @@
         </h3>
         <div class="chipster-highlight">
 
-          <div>{{sessionData.session.name}}</div>
-          <!--
-          <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
-          <span class="dropdown">
-            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false" title="Actions">
-              <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+          <div style="margin-bottom: 0.5em">
+            <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
+            <span class="dropdown">
+              <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false" title="Actions">
+                <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
 
-            </button>
+              </button>
 
-            <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
-              <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
-              <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
-              <a class="dropdown-item" (click)="notesModal()">Notes...</a>
-              <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
-              <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
-              <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
-              <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
-            </div>
-          </span>
-        -->
-
+              <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
+                <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
+                <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
+                <a class="dropdown-item" (click)="notesModal()">Notes...</a>
+                <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
+                <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
+                <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
+                <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
+              </div>
+            </span>
+          </div>
           <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
         hiding the undo panel -->
           <div class="full-height no-scroll">
