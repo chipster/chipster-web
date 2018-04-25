@@ -31,6 +31,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [ModifiedSessionGuard]
   },
+  { path: ":appName", redirectTo: ":appName/home" },
   { path: "", redirectTo: "chipster/home", pathMatch: "full" },
   { path: "**", redirectTo: "chipster/home" }
 ];
