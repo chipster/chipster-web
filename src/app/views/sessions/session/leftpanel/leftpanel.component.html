@@ -11,16 +11,19 @@
       <ng-template ngbTabContent>
         <div class="full-height-panel">
 
-          <div class="mt-3 mb-1">
+          <div class="mt-3 mb-1 ml-1 mr-1">
             <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
 
-            <button class="btn btn-secondary btn-sm pull-right tool-bar-button" title="Reset view" (click)="workflowGraph.resetZoomAndScroll()">
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm pull-right tool-bar-button" title="Reset view"
+              (click)="workflowGraph.resetZoomAndScroll()">
               <span class="fa fa-lg fa-undo"></span>
             </button>
-            <button class="btn btn-secondary btn-sm mr-2 pull-right tool-bar-button" title="Zoom out" (click)="workflowGraph.zoomOut()">
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-2 pull-right tool-bar-button" title="Zoom out"
+              (click)="workflowGraph.zoomOut()">
               <span class="fa fa-lg fa-search-minus"></span>
             </button>
-            <button class="btn btn-secondary btn-sm mr-1 pull-right tool-bar-button" title="Zoom in" (click)="workflowGraph.zoomIn()">
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-1 pull-right tool-bar-button" title="Zoom in"
+              (click)="workflowGraph.zoomIn()">
               <span class=" fa fa-lg fa-search-plus "></span>
             </button>
           </div>
@@ -36,7 +39,7 @@
       <!--suppress HtmlUnknownAttribute -->
       <ng-template ngbTabContent class=" ">
         <!--<div class="chipster-highlight full-height-panel ">-->
-        <div class="mt-3">
+        <div class="mt-3 ml-1">
           <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
         </div>
 
