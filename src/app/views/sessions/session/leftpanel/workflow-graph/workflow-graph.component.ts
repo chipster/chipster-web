@@ -17,7 +17,7 @@ import Module from "../../../../../model/session/module";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SessionDataService } from "../../sessiondata.service";
 import * as d3 from "d3";
-import { WorkflowGraphService } from "./workflowgraph.service";
+import { WorkflowGraphService } from "./workflow-graph.service";
 import { SessionEventService } from "../../sessionevent.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -28,8 +28,8 @@ import { Timer } from "d3-timer";
 
 @Component({
   selector: "ch-workflow-graph",
-  template: '<section id="workflowvisualization" class="full-size"></section>',
-  styleUrls: ["./workflowgraph.component.less"],
+  templateUrl: "./workflow-graph.component.html",
+  styleUrls: ["./workflow-graph.component.less"],
   encapsulation: ViewEncapsulation.None
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {

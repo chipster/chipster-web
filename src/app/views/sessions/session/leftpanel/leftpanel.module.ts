@@ -1,8 +1,8 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { WorkflowGraphComponent } from "./workflowgraph/workflowgraph.component";
+import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
 import { SharedModule } from "../../../../shared/shared.module";
-import { WorkflowGraphService } from "./workflowgraph/workflowgraph.service";
+import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
 import { LeftPanelComponent } from "./leftpanel.component";
 import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
