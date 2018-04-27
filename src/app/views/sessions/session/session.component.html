@@ -9,13 +9,14 @@
 
     <div class="split-pane-content-primary full-height">
       <!-- flex layout arranges space for the undo box when necessary -->
-      <div class="d-flex flex-column full-height">
+      <div class="full-height">
 
         <h3 class="h3-xs">
           <span>Session</span>
         </h3>
-        <div class="chipster-highlight">
+        <div class="d-flex flex-column chipster-highlight full-height-panel">
 
+          <!-- session name and menu -->
           <div style="margin-bottom: 0.5em">
             <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
             <span class="dropdown">
@@ -35,24 +36,29 @@
               </div>
             </span>
           </div>
+
+          <!-- workflow and files -->
           <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
         hiding the undo panel -->
           <div class="full-height no-scroll">
             <ch-leftpanel [sessionData]="sessionData" class="full-height"></ch-leftpanel>
           </div>
-          <div>
-            <div *ngIf="deletedDatasets" class="alert alert-info">
-              <span *ngIf="deletedDatasets.length === 1">File {{deletedDatasets[0].name}} is being deleted </span>
-              <span *ngIf="deletedDatasets.length !== 1">{{deletedDatasets.length}} files are being deleted</span>
-              <br>
-              <button type="button" class="btn btn-danger btn-sm" (click)="deleteDatasetsNow()">
-                <i class="fa fa-times"></i> Remove
-              </button>
-              <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
-                <i class="fa fa-undo"></i>
-                Undo
-              </button>
+
+          <!-- undo alert -->
+          <div *ngIf="deletedDatasets" class="alert alert-info mb-0">
+            <div class="mb-2">
+              <span *ngIf="deletedDatasets.length === 1">Deleting file
+                <i>{{deletedDatasets[0].name}}</i>
+              </span>
+              <span *ngIf="deletedDatasets.length !== 1">Deleting {{deletedDatasets.length}} files</span>
             </div>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow()">
+              <i class="fa fa-times"></i> Delete
+            </button>
+            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
+              <i class="fa fa-undo"></i>
+              Undo
+            </button>
           </div>
         </div>
       </div>
