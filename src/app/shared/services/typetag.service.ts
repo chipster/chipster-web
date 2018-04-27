@@ -49,7 +49,7 @@ export class TypeTagService {
       return true;
     }
 
-    let typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
 
     if (!typeTags) {
       throw new Error("dataset " + dataset.name + " does not have type tags");
@@ -59,7 +59,7 @@ export class TypeTagService {
 
   // noinspection JSMethodCanBeStatic
   get(sessionData: SessionData, dataset: Dataset, type: string) {
-    let typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
 
     if (!typeTags) {
       throw new Error("dataset " + dataset.name + " does not have type tags");
