@@ -17,7 +17,6 @@ export default [
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
   },
-
   {
     id: "expressionprofile",
     name: "Expression profile",
@@ -96,7 +95,6 @@ export default [
     typeTags: [Tags.GENE_EXPRS, Tags.BAM],
     anyInputCountSupported: true
   },
-
   {
     id: "details",
     name: "Details",
