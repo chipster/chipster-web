@@ -17,7 +17,7 @@ import Module from "../../../../../model/session/module";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SessionDataService } from "../../sessiondata.service";
 import * as d3 from "d3";
-import { WorkflowGraphService } from "./workflowgraph.service";
+import { WorkflowGraphService } from "./workflow-graph.service";
 import { SessionEventService } from "../../sessionevent.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -28,8 +28,8 @@ import { Timer } from "d3-timer";
 
 @Component({
   selector: "ch-workflow-graph",
-  template: '<section id="workflowvisualization" class="full-size"></section>',
-  styleUrls: ["./workflowgraph.component.less"],
+  templateUrl: "./workflow-graph.component.html",
+  styleUrls: ["./workflow-graph.component.less"],
   encapsulation: ViewEncapsulation.None
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
@@ -41,10 +41,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input() defaultScale: number;
   @Input() enabled: boolean;
 
-
   private zoomScale: number;
   private zoomMin = 0.2;
   private zoomMax = 2;
+  private zoomStepFactor = 0.2;
 
   private zoom;
 
@@ -126,33 +126,24 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const maxX = scroll.scrollWidth - scroll.offsetWidth;
 
       // If this event looks like it will scroll beyond the bounds of the element, prevent it and set the scroll to the boundary manually
-      if (scroll.scrollLeft + event.deltaX < 0 ||
-        scroll.scrollLeft + event.deltaX > maxX) {
-
+      if (
+        scroll.scrollLeft + event.deltaX < 0 ||
+        scroll.scrollLeft + event.deltaX > maxX
+      ) {
         event.preventDefault();
 
         // Manually set the scroll to the boundary
-        scroll.scrollLeft = Math.max(0, Math.min(maxX, scroll.scrollLeft + event.deltaX));
+        scroll.scrollLeft = Math.max(
+          0,
+          Math.min(maxX, scroll.scrollLeft + event.deltaX)
+        );
       }
     });
-
-    if (this.enabled) {
-      const toolbarDiv = section.append("div").classed("toolbar-div", true)
-        .classed("btn-group", true);
-
-      toolbarDiv.append("button").classed("btn btn-secondary", true)
-        .on("click", e => this.zoomClick(1))
-        .append("i").classed("fa fa-search-plus", true);
-
-      toolbarDiv.append("button").classed("btn btn-secondary", true)
-        .on("click", e => this.zoomClick(-1))
-        .append("i").classed("fa fa-search-minus", true);
-    }
 
     this.svg = this.scrollerDiv.append("svg");
     this.zoomGroup = this.svg.append("g");
 
-      // order of these appends will determine the drawing order
+    // order of these appends will determine the drawing order
     this.d3LinksGroup = this.zoomGroup
       .append("g")
       .attr("class", "link")
@@ -236,6 +227,30 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions = [];
   }
 
+  zoomIn() {
+    this.applyZoom((1 + this.zoomStepFactor) * this.zoomScale);
+  }
+
+  zoomOut() {
+    this.applyZoom((1 - this.zoomStepFactor) * this.zoomScale);
+  }
+
+  resetZoomAndScroll() {
+    // reset zoom
+    this.zoomGroup.attr(
+      "transform",
+      "translate(0, 0) scale(" + this.defaultScale + ")"
+    );
+    this.zoomScale = this.defaultScale;
+
+    // reset scrolling
+    const scroll = this.scrollerDiv.node();
+    scroll.scrollLeft = 0;
+    scroll.scrollTop = 0;
+
+    this.updateSvgSize();
+  }
+
   /**
    * Apply zoom changes
    *
@@ -245,21 +260,31 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
    * The scrolling position is adjusted to keep the center of the graph stationary
    * when zooming.
    */
-  zoomClick(direction: number) {
-
-    // calculate the new scale
-    const factor = (1 + 0.2 * direction);
-    const targetScale = this.zoomScale * factor;
-
+  applyZoom(targetScale: number) {
     // check if it is within limits
-    if (targetScale < this.zoomMin || targetScale > this.zoomMax) {
-      console.log("zoom limit reached");
-      return false;
+    let limitedTargetScale;
+    if (targetScale < this.zoomMin) {
+      limitedTargetScale = this.zoomMin;
+    } else if (targetScale > this.zoomMax) {
+      limitedTargetScale = this.zoomMax;
+    } else {
+      limitedTargetScale = targetScale;
     }
 
+    // check if it is actually changing
+    if (this.zoomScale === limitedTargetScale) {
+      return;
+    }
+
+    // calculate oldzoom / newZoom factor for adjusting scrolling
+    const factor = limitedTargetScale / this.zoomScale;
+
     // zoom
-    this.zoomScale = targetScale;
-    this.applyZoom(this.zoomScale);
+    this.zoomGroup.attr(
+      "transform",
+      "translate(0, 0) scale(" + limitedTargetScale + ")"
+    );
+    this.zoomScale = limitedTargetScale;
 
     // adjust scrolling
 
@@ -279,19 +304,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.updateSvgSize();
   }
 
-  applyZoom(scale: number) {
-    this.zoomGroup.attr("transform", "translate(0, 0) scale(" + scale + ")");
-  }
-
-
   getParentSize() {
     return this.scrollerDiv.node().getBoundingClientRect();
   }
 
   getContentSize() {
     // graph size in graph coordinates
-    const width = Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
-    const height = Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
+    const width =
+      Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
+    const height =
+      Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
 
     // graph size in pixels after the zoom
     const scaledWidth = width * this.zoomScale;
@@ -301,7 +323,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getSvgSize() {
-
     const parent = this.getParentSize();
     const content = this.getContentSize();
 
@@ -347,7 +368,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetNodes = datasetNodes;
     this.links = links;
   }
-
 
   isSelectedDataset(dataset: Dataset) {
     return (
@@ -636,7 +656,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     return datasetNodes;
   }
-
 
   getLinks(nodes: Node[]) {
     const links: Link[] = [];

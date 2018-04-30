@@ -4,17 +4,6 @@
 
 <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" activeId="{{active}}">
 
-  <ngb-tab id="{{getTabId('details')}}" *ngIf="isTabVisible('details')">
-    <ng-template ngbTabTitle>
-      <span class="glyphicon glyphicon-th"></span> Details</ng-template>
-    <ng-template ngbTabContent>
-      <div class="visualization-panel">
-        <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
-        </ch-details-visualization>
-      </div>
-    </ng-template>
-  </ngb-tab>
-
   <ngb-tab id="{{getTabId('spreadsheet')}}" *ngIf="isTabVisible('spreadsheet')">
     <ng-template ngbTabTitle>
       <span class="glyphicon glyphicon-th"></span> Spreadsheet</ng-template>
@@ -55,17 +44,6 @@
       <div class="visualization-panel">
         <ch-image-visualization *ngIf="active === getTabId('image')" [dataset]="selectionService.selectedDatasets[0]">
         </ch-image-visualization>
-      </div>
-    </ng-template>
-  </ngb-tab>
-
-  <ngb-tab id="{{getTabId('phenodata')}}" *ngIf="isTabVisible('phenodata')">
-    <ng-template ngbTabTitle>
-      <span class="glyphicon glyphicon-edit"></span> Phenodata</ng-template>
-    <ng-template ngbTabContent>
-      <div class="visualization-panel">
-        <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')" [datasets]="selectionService.selectedDatasets" [datasetsMap]="sessionData.datasetsMap">
-        </ch-phenodata-visualization>
       </div>
     </ng-template>
   </ngb-tab>
@@ -142,4 +120,32 @@
       </div>
     </ng-template>
   </ngb-tab>
+
+  <ngb-tab id="{{getTabId('phenodata')}}" *ngIf="isTabVisible('phenodata')">
+    <ng-template ngbTabTitle>
+      <span class="glyphicon glyphicon-edit"></span> Phenodata</ng-template>
+    <ng-template ngbTabContent>
+      <div class="visualization-panel">
+        <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')" [datasets]="selectionService.selectedDatasets" [datasetsMap]="sessionData.datasetsMap">
+        </ch-phenodata-visualization>
+      </div>
+    </ng-template>
+  </ngb-tab>
+
+  <ngb-tab id="{{getTabId('details')}}" *ngIf="isTabVisible('details')">
+    <ng-template ngbTabTitle>
+      <span class="glyphicon glyphicon-th"></span> Details</ng-template>
+    <ng-template ngbTabContent>
+      <div class="visualization-panel">
+        <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
+        </ch-details-visualization>
+      </div>
+    </ng-template>
+  </ngb-tab>
+
+
+
+
+
+
 </ngb-tabset>

@@ -12,7 +12,7 @@ import { TextVisualizationComponent } from "./textvisualization/textvisualizatio
 import { SpreadsheetVisualizationComponent } from "./spreadsheetvisualization/spreadsheetvisualization.component";
 import { ExpressionProfileComponent } from "./expressionprofile/expressionprofile.component";
 import { ImageVisualizationComponent } from "./imagevisualization/imagevisualization.component";
-import { PhenodataVisualizationComponent } from "./phenodata/phenodatavisualization.component";
+import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
 import { CommonModule } from "@angular/common";
 import { SharedModule } from "../../../../shared/shared.module";
 import { VisualizationsComponent } from "./visualizations.component";
