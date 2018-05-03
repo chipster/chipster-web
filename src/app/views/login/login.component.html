@@ -5,7 +5,7 @@
     <p>{{error}}</p>
   </div>
 
-  <h4 class="text-center">Log in to Chipster</h4>
+  <h4 class="text-center">Log in to {{appName$ | async}}</h4>
 
   <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
     <div class="form-group">

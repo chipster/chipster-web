@@ -11,5 +11,5 @@ export class SessionData {
   modules: Module[];
   tools: Tool[];
   modulesMap: Map<string, Module>;
-  datasetTypeTags: Map<string, Map<string, string>>
+  datasetTypeTags: Map<string, Map<string, string>>;
 }

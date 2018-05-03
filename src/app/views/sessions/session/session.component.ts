@@ -19,6 +19,7 @@ import { SessionWorkerResource } from '../../../shared/resources/sessionworker.r
 import { Observable } from 'rxjs/Observable';
 import { TokenService } from '../../../core/authentication/token.service';
 import Rule from '../../../model/session/rule';
+import { RouteService } from '../../../shared/services/route.service';
 
 @Component({
   selector: 'ch-session',
@@ -47,7 +48,9 @@ export class SessionComponent implements OnInit, OnDestroy {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private sessionWorkerResource: SessionWorkerResource,
-    private tokenService: TokenService) {
+    private tokenService: TokenService,
+    private activatedRoute: ActivatedRoute,
+    private routeService: RouteService) {
   }
 
   ngOnInit() {
@@ -74,8 +77,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             .flatMap(sessionId => {
               const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
-              return Observable.fromPromise(this.router.navigate(
-                ['/sessions', sessionId, queryParams]));
+              return Observable.fromPromise(this.routeService.navigateAbsolute(['sessions']));
             })
             .flatMap(() => Observable.never<SessionData>());
         }
@@ -163,10 +165,12 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.sessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
     this.subscriptions.push(this.sessionEventService.getRuleStream().subscribe(change => {
-      const rule: Rule = <Rule> change.oldValue;
-      if (change.event.type === 'DELETE' && rule.username === this.tokenService.getUsername()) {
+      const rule: Rule = <Rule>change.oldValue;
+
+      // rule seems to be null when we delete our own session in another browser or tab
+      if (change.event.type === 'DELETE' && rule == null || rule.username === this.tokenService.getUsername()) {
         alert('The session has been deleted.');
-        this.router.navigate(['/sessions']);
+        this.routeService.navigateAbsolute(['sessions']);
       }
     }));
 

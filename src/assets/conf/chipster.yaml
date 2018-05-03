@@ -4,21 +4,13 @@ terms-of-use-version: 1
 service-locator: http://localhost:8003
 #service-locator: https://service-locator-chipster.rahti-int-app.csc.fi
 
-manual-router-path: 'manual/'
+home-path: assets/manual/app-home.html
+home-header-path: assets/manual/app-home-header.html
+contact-path: assets/manual/app-contact.html
 
 # Bio modules and manual
 modules: ['NGS', 'Microarray', 'Misc']
 manual-path: assets/manual/
 manual-tool-postfix: .html
-manual-relative-link-prefix: 'manual/'
-
-# Kielipankki modules and manual
-# modules: ['Kielipankki']
-# # Link Kielipankki manuals here on the dev machine to be able to switch between manuals simply in
-# # this configuration. Restart ng serve after creating this link.
-# manual-path: assets/manual-mylly/
-# # naming convention in the Kielipankki manual pages
-# manual-tool-postfix: .en.src.html
-# # open relative links from the wordpress site
-# # 'tool-placeholder' is a workaround for the relative links starting with ../
-# manual-relative-link-prefix: https://www.kielipankki.fi/support/mylly/tool-placeholder/
+app-name: Chipster
+favicon: assets/manual/app-chipster-icon.png

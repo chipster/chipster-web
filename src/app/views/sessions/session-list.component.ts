@@ -2,12 +2,13 @@ import { SessionResource } from "../../shared/resources/session.resource";
 import Session from "../../model/session/session";
 import { SessionData } from "../../model/session/session-data";
 import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { Subject } from "rxjs/Subject";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
+import { RouteService } from "../../shared/services/route.service";
 
 @Component({
   selector: "ch-session-list",
@@ -34,7 +35,9 @@ export class SessionListComponent implements OnInit {
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
-    private sessionDataService: SessionDataService
+    private sessionDataService: SessionDataService,
+    private activatedRoute: ActivatedRoute,
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -141,7 +144,7 @@ export class SessionListComponent implements OnInit {
   openSession(sessionId: string) {
     this.previewThrottleSubscription.unsubscribe();
     this.selectedSessionId = sessionId;
-    this.router.navigate(["/sessions", sessionId]);
+    this.routeService.navigateRelative([sessionId], this.activatedRoute);
   }
 
   sessionsUploaded(sessionIds: string[]) {

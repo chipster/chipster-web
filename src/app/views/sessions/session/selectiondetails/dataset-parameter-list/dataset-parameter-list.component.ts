@@ -9,10 +9,12 @@ import * as _ from "lodash";
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"]
 })
-export class DatasetParameterListComponent implements OnChanges, OnInit {
+export class DatasetParameterListComponent implements OnChanges {
   @Input() private tool: Tool;
   @Input() private parameters: Array<JobParameter>;
+  @Input() private parametersLimit: number;
 
+  noLimit = false;
   showAll = false;
   limit: number;
   defaultLimit = 3;
@@ -23,10 +25,6 @@ export class DatasetParameterListComponent implements OnChanges, OnInit {
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
   constructor(private toolService: ToolService) {}
-
-  ngOnInit() {
-    this.udpateLimits();
-  }
 
   ngOnChanges(changes: any) {
     let tool = null;
@@ -51,11 +49,15 @@ export class DatasetParameterListComponent implements OnChanges, OnInit {
   }
 
   udpateLimits() {
-    if (this.showAll) {
+    if (this.parametersLimit < 0) {
+      this.noLimit = true;
+    }
+
+    if (this.noLimit || this.showAll) {
       this.limit = this.parameterListForView.length;
       this.buttonText = "Show less";
     } else {
-      this.limit = this.defaultLimit;
+      this.limit = this.parametersLimit;
       this.buttonText = "Show all";
     }
   }
