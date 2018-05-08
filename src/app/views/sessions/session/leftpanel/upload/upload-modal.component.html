@@ -41,7 +41,7 @@
             <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.resume()" *ngIf="file.paused && !file.isComplete()">
               <i class="fa fa-play" aria-hidden="true"></i>
             </button>
-            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm pull-right" (click)="file.cancel()" *ngIf="!file.isComplete()">
+            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm pull-right" (click)="cancelUpload(file)" *ngIf="!file.isComplete()">
               <i class="fa fa-times" aria-hidden="true"></i>
             </button>
           </div>

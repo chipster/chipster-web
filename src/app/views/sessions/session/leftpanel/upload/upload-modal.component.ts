@@ -10,6 +10,7 @@ import {
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
+import { SessionResource } from "../../../../../shared/resources/session.resource";
 
 @Component({
   selector: "ch-add-dataset-modal-content",
@@ -34,7 +35,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   constructor(
     public activeModal: NgbActiveModal,
     private uploadService: UploadService,
-    private changeDetectorRef: ChangeDetectorRef
+    private sessionResource: SessionResource
   ) {}
 
   ngOnInit() {
@@ -57,5 +58,12 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   ngAfterViewInit() {
     this.flow.assignBrowse(this.uploadFilesButton);
     this.flow.assignBrowse(this.uploadFolderButton, true);
+  }
+
+  cancelUpload(file: any) {
+    file.cancel();
+    this.sessionResource
+      .deleteDataset(file.chipsterSessionId, file.chipsterDatasetId)
+      .subscribe();
   }
 }
