@@ -1,61 +1,74 @@
-<div class="conatiner-fluid">
-  <div class="row">
-    <div class="col col-8">
-      <div class="form-group">
-        <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
 
-          <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
-            <div [formGroupName]="i">
-              <select formControlName="selectedAttribute">
-                <option value=""></option>
-                <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">{{attribute}}
-                </option>
-              </select>
-              <input type="text" formControlName="value" placeholder=""/>
-            </div>
+  <div class="form-group" style="margin: 1em">
+    <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
+      <div class="col col-6">
+        <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
+          <div [formGroupName]="i">
+            <select formControlName="selectedAttribute" style="margin-bottom: 0.5em">
+              <option value=""></option>
+              <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">
+                {{attribute}}
+              </option>
+            </select>
+            <input type="text" formControlName="value" placeholder=""/>
           </div>
-          <button type="submit">Search</button>
-        </form>
-        <div>
         </div>
-    </div>
+      </div>
 
+      <div class="col col-3">
+        <div [formGroup]="startTimeInputForm">
+          <label class="text-sm">Job Start Time:
+            <input type="datetime-local" formControlName="startTimeInput">
+          </label>
+        </div>
+      </div>
 
-    </div>
-    <div class="col col-4">
+      <div class="col col-3">
+        <div [formGroup]="endTimeInputForm">
+          <label class="text-sm">Job End Time:
+            <input type="datetime-local" formControlName="endTimeInput">
+          </label>
+        </div>
+      </div>
 
-      <button type="button" (click)="addItem()">Add Filter</button>
-
-    </div>
-
-
-    <table class="table">
-      <thead>
-      <tr>
-        <th scope="col">Username</th>
-        <th scope="col">Operation</th>
-        <th scope="col">Comp host</th>
-        <th scope="col">Durtaion</th>
-        <th scope="col">Start time</th>
-        <th scope="col">End time</th>
-        <th scope="col"></th>
-        <th scope="col">Error</th>
-        <th scope="col">Status</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let jobhistory of jobHistoryList">
-        <td>{{jobhistory.userName}}</td>
-        <td>{{jobhistory.toolName}}</td>
-        <td>{{jobhistory.compName}}</td>
-        <td>{{jobhistory.timeDuration}}</td>
-        <td>{{jobhistory.startTime|date:"yyyy-mm-dd HH:mm"}}</td>
-        <td>{{jobhistory.endTime|date:"yyyy-mm-dd HH:mm"}}</td>
-        <td><a href="">Output</a></td>
-        <td>{{jobhistory.error}}</td>
-        <td>{{jobhistory.jobStatus}}</td>
-      </tr>
-      </tbody>
-    </table>
+      <div class="col col-3">
+        <button type="btn btn-sm btn-info submit" class="fa fa-search"></button>
+        <button type="btn btn-sm btn-info" class="fa fa-plus" (click)="addItem()"></button>
+        <button type="btn btn-sm btn-info" class="fa fa-refresh" (click)="reload()"></button>
+      </div>
+    </form>
   </div>
+
+
+
+
+
+<div class="row">
+  <table class="table">
+    <thead>
+    <tr>
+      <th scope="col">Username</th>
+      <th scope="col">Operation</th>
+      <th scope="col">Durtaion</th>
+      <th scope="col">Start time</th>
+      <th scope="col">End time</th>
+      <th scope="col"></th>
+      <th scope="col">Error</th>
+      <th scope="col">Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let jobhistory of currentJobHistoryList" class="text-sm">
+      <td>{{jobhistory.userName}}</td>
+      <td>{{jobhistory.toolName}}</td>
+      <td>{{jobhistory.timeDuration}}</td>
+      <td>{{jobhistory.startTime|date:'short'}}</td>
+      <td>{{jobhistory.endTime|date:'short'}}</td>
+      <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal()">Output</button></td>
+      <td>{{jobhistory.error}}</td>
+      <td>{{jobhistory.jobStatus}}</td>
+    </tr>
+    </tbody>
+  </table>
 </div>
+

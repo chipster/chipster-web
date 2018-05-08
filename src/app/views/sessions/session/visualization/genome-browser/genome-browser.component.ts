@@ -33,7 +33,7 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   private p: any;
   private content: any;
   private showGenomeBrowser: boolean;
-  private selectedGenomeID: string = 'hg38';
+  private selectedGenomeID:'hg38';
 
   //Multiple Bam related stuff
   private dataSourceList: Array<BamSource> = [];

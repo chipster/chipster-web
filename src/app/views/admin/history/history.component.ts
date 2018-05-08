@@ -7,6 +7,9 @@ import {Role} from "../../../model/role";
 import {FormGroup, FormBuilder, FormControl, FormArray} from "@angular/forms";
 import {HttpParams} from "@angular/common/http";
 import {FilterParam} from "./FilterParam";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {JobOutputModalComponent} from "./joboutputmodal.component";
+
 
 
 @Component({
@@ -18,17 +21,25 @@ import {FilterParam} from "./FilterParam";
 
 export class HistoryComponent implements OnInit {
   jobHistoryList: Array<JobHistory>;
-  jobFilterAttributeSet: Array<string> = ["userName", "toolName", "compName", "startTime", "endTime", "timeDuration", "jobStatus"];
+  jobHistoryListWithParam: Array<JobHistory>;
+  currentJobHistoryList: Array<JobHistory>;
+  jobFilterAttributeSet: Array<string> = ["userName", "toolName", "compName", "timeDuration", "jobStatus"];
   selectedFilterAttribute: string;
   filteredSearchForm: FormGroup;
   selectAttributeForm: FormGroup;
+  startTimeInputForm: FormGroup;
+  endTimeInputForm: FormGroup;
+  haveFilterAttribute: Boolean = false;
+
+
   filterAttributeSet: Array<FilterParam> = [];
 
 
   constructor(private configService: ConfigService,
               private errorHandlerService: RestErrorService,
               private auhtHttpClient: AuthHttpClientService,
-              private formBuilder: FormBuilder) {
+              private formBuilder: FormBuilder,
+              private modalService: NgbModal) {
   }
 
   ngOnInit() {
@@ -40,13 +51,22 @@ export class HistoryComponent implements OnInit {
       selectedAttribute: ''
     });
 
-    //this.getJobByUserName("admin");
+    this.startTimeInputForm = this.formBuilder.group({
+      startTimeInput: ''
+    });
+
+    this.endTimeInputForm = this.formBuilder.group({
+      endTimeInput: ''
+    });
+
+    // this.getJobByUserName("admin");
+    this.currentJobHistoryList = [];
     this.getAllJob();
     this.selectedFilterAttribute = this.jobFilterAttributeSet[0];
 
     this.selectAttributeForm.valueChanges.subscribe(() => {
       console.log(this.selectAttributeForm.value);
-    })
+    });
   }
 
 
@@ -59,7 +79,7 @@ export class HistoryComponent implements OnInit {
 
   get items(): FormArray {
     return this.filteredSearchForm.get('items') as FormArray;
-  };
+  }
 
   addItem(): void {
     this.items.push(this.createItem());
@@ -67,22 +87,49 @@ export class HistoryComponent implements OnInit {
 
   public OnSubmit(formValue: any) {
     this.filterAttributeSet = [];
-    var arrayControl = this.filteredSearchForm.get('items') as FormArray;
-    for (var i = 0; i < arrayControl.length; i++) {
-      var filterParam = new FilterParam();
-      if (arrayControl.value[i].selectedAttribute === "startTime" || arrayControl.value[i].selectedAttribute === "endTime") {
-        console.log(arrayControl.value[i].value);
-        var event = new Date(arrayControl.value[i].value);
-        console.log(event);
-        console.log(event.toISOString());
-      }
+    const arrayControl = this.filteredSearchForm.get('items') as FormArray;
+
+    for (let i = 0; i < arrayControl.length; i++) {
+      const filterParam = new FilterParam();
       filterParam.name = arrayControl.value[i].selectedAttribute;
-      filterParam.value = arrayControl.value[i].value;
+      if (arrayControl.value[i].value) {
+        this. haveFilterAttribute = true;
+        filterParam.value = arrayControl.value[i].value;
+      }
+      this.filterAttributeSet.push(filterParam);
+    }
+
+    // Manipulating time inputs
+    const startTimeControl = this.startTimeInputForm.get('startTimeInput');
+    if (startTimeControl.value) {
+      this. haveFilterAttribute = true;
+      const filterParam = new FilterParam();
+      filterParam.name = "startTime=gt";
+      // console.log(typeof startTimeControl, typeof startTimeControl.value, startTimeControl.value);
+      filterParam.value = new Date(startTimeControl.value).toISOString();
+      this.filterAttributeSet.push(filterParam);
+    }
+
+    const endTimeControl = this.endTimeInputForm.get('endTimeInput');
+    if (endTimeControl.value) {
+      this. haveFilterAttribute = true;
+      const filterParam = new FilterParam();
+      filterParam.name = "endTime=lt";
+      filterParam.value = new Date(endTimeControl.value).toISOString();
       this.filterAttributeSet.push(filterParam);
     }
     this.getJobByParam();
-    console.log(this.filterAttributeSet);
+    // console.log(this.filterAttributeSet);
 
+  }
+
+  resetForm() {
+    this.filteredSearchForm.reset({
+      selectedAttribute: '',
+      value: ''
+    });
+    this.startTimeInputForm.reset();
+    this.endTimeInputForm.reset();
   }
 
   getAllJob() {
@@ -93,6 +140,8 @@ export class HistoryComponent implements OnInit {
       .subscribe((jobHistoryList: JobHistory[]) => {
         this.jobHistoryList = jobHistoryList;
         console.log(jobHistoryList);
+        this.currentJobHistoryList = [];
+        this.currentJobHistoryList = this.jobHistoryList;
 
       }, err => this.errorHandlerService.handleError(err, 'get clients failed'));
   }
@@ -100,7 +149,7 @@ export class HistoryComponent implements OnInit {
 
   getJobByParam() {
     let params = new HttpParams();
-    for (var i = 0; i < this.filterAttributeSet.length; i++) {
+    for (let i = 0; i < this.filterAttributeSet.length; i++) {
       params = params.append(this.filterAttributeSet[i].name, this.filterAttributeSet[i].value);
     }
     this.configService.getPublicUri(Role.JOB_HISTORY)
@@ -108,17 +157,34 @@ export class HistoryComponent implements OnInit {
         return this.auhtHttpClient.getAuthWithParams(url + '/jobhistory', params);
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
-        this.jobHistoryList = jobHistoryList;
-        console.log(this.jobHistoryList);
+        this.jobHistoryListWithParam = jobHistoryList;
+        this.currentJobHistoryList = [];
+        this.currentJobHistoryList = this.jobHistoryListWithParam;
+
+        // console.log(this.jobHistoryList);
 
 
       }, err => this.errorHandlerService.handleError(err, 'get clients failed'));
   }
 
   changeValue() {
+    console.log("some value changed");
     console.log(this.selectAttributeForm.value);
-
   }
+
+  reload() {
+    this.resetForm();
+    this.haveFilterAttribute = false;
+    this.filterAttributeSet = [];
+    this.getAllJob();
+  }
+
+  openJobOutputModal() {
+    const modalRef = this.modalService.open(JobOutputModalComponent);
+    modalRef.componentInstance.output = "JobOutput";
+  }
+
+
 
 
 }

@@ -12,6 +12,8 @@ import { UsersComponent } from './users/users.component';
 import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {SharedModule} from "../../shared/shared.module";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {JobOutputModalComponent} from "./history/joboutputmodal.component";
+
 
 @NgModule({
   imports: [
@@ -21,10 +23,12 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     AdminRoutingModule,
     FormsModule,
     ReactiveFormsModule
+
   ],
   declarations: [
     AdminComponent, ServicesComponent, ClientsComponent, StorageComponent, JobsComponent,
-     HistoryComponent, StatisticsComponent, UsersComponent,
-  ]
+     HistoryComponent, StatisticsComponent, UsersComponent, JobOutputModalComponent
+  ],
+  entryComponents: [JobOutputModalComponent]
 })
 export class AdminModule { }
