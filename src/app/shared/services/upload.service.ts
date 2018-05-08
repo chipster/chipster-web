@@ -64,8 +64,8 @@ export class UploadService {
   // noinspection JSMethodCanBeStatic
   private flowFileAdded(file: any, event: any, flow: any) {
     // each file has a unique target url
-    flow.opts.target = function(file: any) {
-      return file.chipsterTarget;
+    flow.opts.target = function(file2: any) {
+      return file2.chipsterTarget;
     };
 
     file.pause();
@@ -104,7 +104,9 @@ export class UploadService {
    * Schedule a next view update after a second as long as flow.js has files.
    */
   scheduleViewUpdate(changeDetectorRef: ChangeDetectorRef, flow: any) {
+    console.log("scheduling view update");
     Observable.timer(1000).subscribe(() => {
+      // TODO check if view not destroyed
       changeDetectorRef.detectChanges();
 
       if (flow.files.length > 0) {
