@@ -39,18 +39,14 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   fileAdded(file: any) {
-    console.log("file added", file);
-
+    // open modal if not already open
     if (!this.modalOpen) {
-      console.log("opening upload modal");
-
       this.modalRef = this.modalService.open(UploadModalComponent, {
         size: "lg"
       });
 
       this.modalRef.componentInstance.sessionId = this.sessionId;
       this.modalRef.componentInstance.flow = this.flow;
-
       this.modalOpen = true;
 
       this.modalRef.result.then(
@@ -61,12 +57,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
           this.modalOpen = false;
         }
       );
-    } else {
-      console.log("upload modal already open");
     }
 
-    console.log("modal ref", this.modalRef);
-
+    // notify modal that file file was added
     this.modalRef.componentInstance.fileAdded(file);
   }
 
