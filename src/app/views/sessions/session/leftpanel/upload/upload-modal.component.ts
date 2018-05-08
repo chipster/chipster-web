@@ -26,11 +26,15 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   files = [];
 
-  // function reference like this needed for the flow.off in ngOnDestroy
-  update = function() {
+  // function references needed for the flow.off in ngOnDestroy
+  // 'this' used inside so need to use => or bind
+  update = () => {
     this.files = this.flow.files.slice().reverse();
-    // this.changeDetectorRef.detectChanges();
-  }.bind(this);
+  };
+
+  complete = () => {
+    // this.activeModal.close();
+  };
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -42,12 +46,14 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
     this.flow.on("progress", this.update);
     this.flow.on("fileRemoved", this.update);
     this.flow.on("error", (message, file, chunk) => this.update);
+    this.flow.on("complete", this.complete);
   }
 
   ngOnDestroy() {
     this.flow.off("progress", this.update);
     this.flow.off("fileRemoved", this.update);
     this.flow.off("error", this.update);
+    this.flow.off("complete", this.complete);
   }
 
   // called by upload.component
