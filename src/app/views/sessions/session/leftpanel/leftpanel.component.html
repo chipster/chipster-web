@@ -16,7 +16,8 @@
 
             <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm pull-right tool-bar-button" title="Reset view"
               (click)="workflowGraph.resetZoomAndScroll()">
-              <span class="fa fa-lg fa-undo"></span>
+              <!-- <span class="fa fa-lg fa-undo"></span> -->
+              <span>1:1</span>
             </button>
             <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-2 pull-right tool-bar-button" title="Zoom out"
               (click)="workflowGraph.zoomOut()">
