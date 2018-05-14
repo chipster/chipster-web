@@ -2,7 +2,8 @@
 
   <div class="row">
     <div class="col-md-11">
-      <h3 class="h3-xs"><span class="lighter">Job:</span> {{job.toolCategory + " / " + job.toolName}}</h3>
+      <h3 class="h3-xs">
+        <span class="lighter">Job:</span> {{job.toolCategory + " / " + job.toolName}}</h3>
     </div>
 
     <div class="col-md-1">
@@ -11,8 +12,10 @@
   </div>
   <div class="chipster-highlight">
 
-    <div>Status: {{state}} <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
-      <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button></div>
+    <div>Status: {{state}}
+      <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
+      <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+    </div>
 
     <div class="row">
       <div class="col-md-12">
@@ -35,7 +38,9 @@
           </tr>
           <tr *ngIf="failed">
             <td class="lighter" style="white-space: nowrap">Error message:</td>
-            <td><span *ngIf="job.stateDetail">{{job.stateDetail}}</span></td>
+            <td>
+              <span *ngIf="job.stateDetail">{{job.stateDetail}}</span>
+            </td>
           </tr>
         </table>
       </div>
@@ -70,10 +75,9 @@
     </div>
   </div>
 
-
   <ngb-tabset>
     <ngb-tab id="screenOutput">
-      <ng-template ngbTabTitle><i *ngIf="isRunning" class="fa fa-circle-o-notch fa-spin fa-fw"></i>Screen output</ng-template>
+      <ng-template ngbTabTitle>Screen output</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
           <pre style="margin-bottom: 0em">{{screenOutput}}</pre>
@@ -83,7 +87,8 @@
     </ngb-tab>
 
     <ngb-tab id="sourceCode">
-      <ng-template ngbTabTitle><span class="glyphicon glyphicon-font"></span> Source code</ng-template>
+      <ng-template ngbTabTitle>
+        <span class="glyphicon glyphicon-font"></span> Source code</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
           <pre>{{job.sourceCode}}</pre>
