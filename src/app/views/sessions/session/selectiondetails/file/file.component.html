@@ -22,7 +22,7 @@
 
   <!-- multiple datasets selected -->
   <div *ngIf="selectionService.selectedDatasets.length > 1">
-    <span class="lighter">Multiple files: </span>
+    <span class="">Files ({{selectionService.selectedDatasets.length}})</span>
 
     <span class="dropdown">
       <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
