@@ -9,6 +9,7 @@ import {HttpParams} from "@angular/common/http";
 import {FilterParam} from "./FilterParam";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {JobOutputModalComponent} from "./joboutputmodal.component";
+import {TokenService} from "../../../core/authentication/token.service";
 
 
 
@@ -39,7 +40,8 @@ export class HistoryComponent implements OnInit {
               private errorHandlerService: RestErrorService,
               private auhtHttpClient: AuthHttpClientService,
               private formBuilder: FormBuilder,
-              private modalService: NgbModal) {
+              private modalService: NgbModal,
+              private tokenService:TokenService) {
   }
 
   ngOnInit() {
@@ -133,9 +135,9 @@ export class HistoryComponent implements OnInit {
   }
 
   getAllJob() {
-    this.configService.getPublicUri(Role.JOB_HISTORY)
-      .flatMap(url => {
-        return this.auhtHttpClient.getAuth(url + '/jobhistory');
+    this.configService.getInternalService(Role.JOB_HISTORY,this.tokenService.getToken())
+      .flatMap(service => {
+        return this.auhtHttpClient.getAuth(service.adminUri+ '/admin/jobhistory');
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
         this.jobHistoryList = jobHistoryList;
