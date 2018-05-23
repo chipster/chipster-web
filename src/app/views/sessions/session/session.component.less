@@ -1,7 +1,7 @@
 .session-view {
   position: fixed;
   width: 100%;
-  height: calc(~"100vh - 80px");
+  height: calc(~"100vh - 85px");
 }
 
 .close-well-button {
@@ -10,40 +10,15 @@
   top: -15px;
 }
 
-.full-height {
-  height: 100%;
-}
-
-.no-scroll {
-  overflow: hidden;
-}
-
-.split-pane-content-primary {
+.split-1 {
   padding-left: 15px;
 }
 
-.split-pane-content-secondary {
+.split-2 {
   padding-right: 15px;
   padding-bottom: 15px;
 }
 
-//noinspection CssInvalidPseudoSelector
-.full-height-panel {
-  height: calc(~"100% - 35px");
-}
-
-/*
-Disable the left border from the separator. Use :host ::ng-deep to bypass view encaplsulation, because
-it doesn't work for the dynamically added vertical-split-separator component.
-
-https://stackoverflow.com/questions/36265026/angular-2-innerhtml-styling
- */
-//noinspection CssInvalidPseudoSelector
-:host ::ng-deep vertical-split-separator {
-  border: 0;
-}
-
-//noinspection CssInvalidPseudoSelector
-:host ::ng-deep vertical-split-separator .handle {
-  display: none;
+:host ::ng-deep split-gutter {
+  background-color: white !important;
 }

@@ -1,3 +1,25 @@
+#workflowvisualization {
+  height: 100%;
+  width: 100%;
+  position: absolute; // seems to be needed for height: 100% to work inside flex container
+
+  .selected-dataset {
+    stroke-width: 3px;
+  }
+
+  .hovering-dataset {
+    fill-opacity: 1;
+  }
+
+  .selected-job {
+    stroke-width: 3px;
+  }
+
+  .hovering-job {
+    fill-opacity: 1;
+  }
+}
+
 div.dataset-tooltip {
   position: absolute;
   text-align: center;
@@ -25,25 +47,6 @@ div.dataset-tooltip-triangle {
   pointer-events: none;
 }
 
-#workflowvisualization {
-
-  .selected-dataset {
-    stroke-width: 3px;
-  }
-
-  .hovering-dataset {
-    fill-opacity: 1;
-  }
-
-  .selected-job {
-    stroke-width: 3px;
-  }
-
-  .hovering-job {
-    fill-opacity: 1;
-  }
-}
-
 .node {
   stroke: black;
   stroke-width: 1px;
@@ -54,15 +57,10 @@ div.dataset-tooltip-triangle {
   stroke: #555;
 }
 
-section {
-  position: relative;
-  height: 100%;
-  width:  100%;
-}
-
 .scroller-div {
   overflow: auto;
   height: 100%;
+  //flex-grow: 1;
   width: 100%;
 }
 

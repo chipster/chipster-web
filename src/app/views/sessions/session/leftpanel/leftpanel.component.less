@@ -21,27 +21,25 @@
   padding-top: 15px;
 }
 
-.full-height {
-  height: 100%;
-}
-
 #file-list {
   overflow-y: auto;
-  height: calc(~"100vh - 290px");
 }
 
 //noinspection CssInvalidPseudoSelector
 :host ::ng-deep #left-tabs .tab-content {
-  height: calc(~"100% - 45px");
-}
-
-//noinspection CssInvalidPseudoSelector
-.full-height-panel {
-  height: calc(~"100% - 15px");
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 //noinspection CssInvalidPseudoSelector
 :host ::ng-deep #datasets-panel,
 :host ::ng-deep #workflow-panel {
-  height: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#workflow-graph {
+  position: relative; // seems to be needed for height:100% to work for nested elements
 }

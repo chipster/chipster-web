@@ -16,9 +16,9 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
 import { DialogModalModule } from "./dialogmodal/dialogmodal.module";
-import { SplitPaneModule } from "ng2-split-pane/lib/ng2-split-pane";
 import { ModifiedSessionGuard } from "./modified-session.guard";
 import { JobService } from "./job.service";
+import { AngularSplitModule } from "angular-split";
 
 @NgModule({
   imports: [
@@ -30,7 +30,7 @@ import { JobService } from "./job.service";
     LeftPanelModule,
     NgbModule,
     DialogModalModule,
-    SplitPaneModule
+    AngularSplitModule
   ],
   declarations: [
     SessionComponent,
