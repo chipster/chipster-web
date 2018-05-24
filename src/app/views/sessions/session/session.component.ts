@@ -79,7 +79,7 @@ export class SessionComponent implements OnInit, OnDestroy {
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(this.routeService.navigateAbsolute(['sessions']));
             })
-            .flatMap(() => Observable.never<SessionData>());
+            .flatMap(() => Observable.never()); // Removed the parameter as new version of rxjs was giving error
         }
       }).subscribe(sessionData => {
         this.sessionData = sessionData;

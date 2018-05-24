@@ -41,7 +41,7 @@ export class HistoryComponent implements OnInit {
               private auhtHttpClient: AuthHttpClientService,
               private formBuilder: FormBuilder,
               private modalService: NgbModal,
-              private tokenService:TokenService) {
+              private tokenService: TokenService) {
   }
 
   ngOnInit() {
@@ -61,7 +61,6 @@ export class HistoryComponent implements OnInit {
       endTimeInput: ''
     });
 
-    // this.getJobByUserName("admin");
     this.currentJobHistoryList = [];
     this.getAllJob();
     this.selectedFilterAttribute = this.jobFilterAttributeSet[0];
@@ -135,9 +134,9 @@ export class HistoryComponent implements OnInit {
   }
 
   getAllJob() {
-    this.configService.getInternalService(Role.JOB_HISTORY,this.tokenService.getToken())
+    this.configService.getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .flatMap(service => {
-        return this.auhtHttpClient.getAuth(service.adminUri+ '/admin/jobhistory');
+        return this.auhtHttpClient.getAuth(service.adminUri + '/admin/jobhistory');
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
         this.jobHistoryList = jobHistoryList;
@@ -164,8 +163,6 @@ export class HistoryComponent implements OnInit {
         this.currentJobHistoryList = this.jobHistoryListWithParam;
 
         // console.log(this.jobHistoryList);
-
-
       }, err => this.errorHandlerService.handleError(err, 'get clients failed'));
   }
 

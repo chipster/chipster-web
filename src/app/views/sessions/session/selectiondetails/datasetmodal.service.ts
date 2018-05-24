@@ -11,9 +11,9 @@ export class DatasetModalService {
   constructor(private ngbModal: NgbModal) {
   }
 
-  openDatasetHistoryModal(dataset: Dataset,sessionData:SessionData) {
+  openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData) {
     const modalRef = this.ngbModal.open(DatasetHistorymodalComponent, {size: "lg"});
     modalRef.componentInstance.dataset = dataset;
-    modalRef.componentInstance.sessionData= sessionData;
+    modalRef.componentInstance.sessionData = sessionData;
   }
 }
