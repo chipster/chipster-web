@@ -42,6 +42,6 @@ export class ErrorComponent {
   }
 
   redirect() {
-    this.routeService.redirectToLoginAndBack()
+    this.routeService.redirectToLoginAndBack();
   }
 }

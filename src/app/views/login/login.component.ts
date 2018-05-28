@@ -5,6 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {RestErrorService} from '../../core/errorhandler/rest-error.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ConfigService} from '../../shared/services/config.service';
+import { RouteService } from '../../shared/services/route.service';
 
 @Component({
   selector: 'ch-login',
@@ -27,13 +28,17 @@ export class LoginComponent implements OnInit {
               private route: ActivatedRoute,
               private authenticationService: AuthenticationService,
               private configService: ConfigService,
-              private restErrorService: RestErrorService) {
+              private restErrorService: RestErrorService,
+              private routeService: RouteService) {
   }
 
   ngOnInit() {
+
+    const defaultReturnUrl = '/' + this.routeService.getAppRouteCurrent() + '/sessions';
+
     // get the return url from the query params
     this.route.queryParams
-      .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
+      .subscribe(params => this.returnUrl = params['returnUrl'] || defaultReturnUrl);
     // TODO unsubscribe?
 
     this.configService.getPublicServices()
@@ -52,7 +57,7 @@ export class LoginComponent implements OnInit {
   login() {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(() => {
       // Route to Session creation page
-      console.log('login successful');
+      console.log('login successful, return to ' + this.returnUrl);
       this.router.navigateByUrl(this.returnUrl);
     }, (errorResponse: HttpErrorResponse) => {
 

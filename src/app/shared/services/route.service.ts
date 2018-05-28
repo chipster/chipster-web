@@ -10,7 +10,7 @@ export class RouteService {
     private errorService: ErrorService) { }
 
   redirectToLoginAndBack() {
-    this.navigateAbsolute(['/login'], {queryParams: {returnUrl: this.router.routerState.snapshot.url}});
+    this.navigateAbsolute(['login'], {queryParams: {returnUrl: this.router.routerState.snapshot.url}});
   }
 
   /**
@@ -23,8 +23,9 @@ export class RouteService {
    */
   navigateAbsolute(urlSegments: string[], options?) {
     const appRoute = this.getAppRouteCurrent();
-    urlSegments.slice().unshift(appRoute);
-    return this.router.navigate(urlSegments, options);
+    const urlSegmentsCopy = urlSegments.slice();
+    urlSegmentsCopy.unshift(appRoute);
+    return this.router.navigate(urlSegmentsCopy, options);
   }
 
   /**
