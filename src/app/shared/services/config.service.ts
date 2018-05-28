@@ -43,9 +43,7 @@ export class ConfigService {
 
     let previousAppRoute = null;
 
-    console.log('getConfiguration()', this.conf$);
     if (!this.conf$) {
-      console.log('create configuration', this.conf$);
       this.conf$ = this.router.events
           .filter(e => e instanceof NavigationEnd)
           .do(x => console.log('get app', x))
@@ -63,8 +61,7 @@ export class ConfigService {
             }
             return Observable.never();
           })
-          .do(x => console.log('appRoute distinct', x))
-          .flatMap((appRoute: String) => {
+          .flatMap((appRoute: string) => {
             if (appRoute === '' || appRoute === 'chipster') {
               return this.getChipsterConfiguration();
             }
