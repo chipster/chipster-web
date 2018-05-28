@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
 import { SharedModule } from "../../../../shared/shared.module";
 import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
-import { LeftPanelComponent } from "./leftpanel.component";
+import { SessionPanelComponent } from "./session-panel.component";
 import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { UploadComponent } from "./upload/upload.component";
@@ -15,12 +15,12 @@ import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
   declarations: [
     WorkflowGraphComponent,
-    LeftPanelComponent,
+    SessionPanelComponent,
     UploadModalComponent,
     UploadComponent
   ],
   providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
-  exports: [LeftPanelComponent, WorkflowGraphComponent],
+  exports: [SessionPanelComponent, WorkflowGraphComponent],
   entryComponents: [UploadModalComponent]
 })
-export class LeftPanelModule {}
+export class SessionPanelModule {}

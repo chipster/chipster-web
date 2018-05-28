@@ -9,11 +9,11 @@ import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
 
 @Component({
-  selector: "ch-leftpanel",
-  templateUrl: "./leftpanel.component.html",
-  styleUrls: ["./leftpanel.component.less"]
+  selector: "ch-session-panel",
+  templateUrl: "./session-panel.component.html",
+  styleUrls: ["./session-panel.component.less"]
 })
-export class LeftPanelComponent {
+export class SessionPanelComponent {
   @Input() sessionData: SessionData;
 
   datasetSearch: string;

@@ -1,70 +1,64 @@
 <div *ngIf="!sessionData" class="container-fluid">
   <p>{{statusText}}</p>
 </div>
-<div *ngIf="sessionData">
+<div *ngIf="sessionData" class="session-view">
 
   <!--suppress HtmlUnknownAttribute -->
-  <vertical-split-pane primary-component-initialratio="0.33" primary-component-minsize="370" secondary-component-minsize="300"
-    separator-thickness="10" id="session-split" class="session-view">
+  <split [direction]="vertical">
 
-    <div class="split-pane-content-primary full-height">
-      <!-- flex layout arranges space for the undo box when necessary -->
-      <div class="full-height">
+    <!-- split 1 -->
+    <split-area size="33" class="split-1 d-flex flex-column">
 
-        <h3 class="h3-xs">
-          <span>Session</span>
-        </h3>
-        <div class="d-flex flex-column chipster-highlight full-height-panel">
+      <h3 class="h3-xs">
+        <span>Session</span>
+      </h3>
 
-          <!-- session name and menu -->
-          <div style="margin-bottom: 0.5em">
-            <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
-            <span class="dropdown">
-              <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false" title="Actions">
-                <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
-              </button>
+      <div class="d-flex flex-column flex-grow-1 chipster-highlight">
 
-              <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
-                <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
-                <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
-                <a class="dropdown-item" (click)="notesModal()">Notes...</a>
-                <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
-                <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
-                <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
-                <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
-              </div>
-            </span>
-          </div>
-
-          <!-- workflow and files -->
-          <!-- without no-scroll the scrolling dataset panel will take all the space from this flex
-        hiding the undo panel -->
-          <div class="full-height no-scroll">
-            <ch-leftpanel [sessionData]="sessionData" class="full-height"></ch-leftpanel>
-          </div>
-
-          <!-- undo alert -->
-          <div *ngIf="deletedDatasets" class="alert alert-info mb-0">
-            <div class="mb-2">
-              <span *ngIf="deletedDatasets.length === 1">Deleting file
-                <i>{{deletedDatasets[0].name}}</i>
-              </span>
-              <span *ngIf="deletedDatasets.length !== 1">Deleting {{deletedDatasets.length}} files</span>
+        <!-- session name and menu -->
+        <div style="margin-bottom: 0.5em">
+          <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
+          <span class="dropdown">
+            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false" title="Actions">
+              <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
+              <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
+              <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
+              <a class="dropdown-item" (click)="notesModal()">Notes...</a>
+              <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
+              <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
+              <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
+              <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow()">
-              <i class="fa fa-times"></i> Delete
-            </button>
-            <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
-              <i class="fa fa-undo"></i>
-              Undo
-            </button>
+          </span>
+        </div>
+
+        <!-- workflow and files -->
+        <ch-session-panel [sessionData]="sessionData" class="d-flex flex-column flex-grow-1"></ch-session-panel>
+
+        <!-- undo alert -->
+        <div *ngIf="deletedDatasets" class="alert alert-info mb-0">
+          <div class="mb-2">
+            <span *ngIf="deletedDatasets.length === 1">Deleting file
+              <i>{{deletedDatasets[0].name}}</i>
+            </span>
+            <span *ngIf="deletedDatasets.length !== 1">Deleting {{deletedDatasets.length}} files</span>
           </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow()">
+            <i class="fa fa-times"></i> Delete
+          </button>
+          <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
+            <i class="fa fa-undo"></i>
+            Undo
+          </button>
         </div>
       </div>
-    </div>
+    </split-area>
 
-    <div class="split-pane-content-secondary scrollable">
+    <!-- split 2-->
+    <split-area size="67" class="split-2 scrollable">
       <div class="row">
         <div class="col">
           <ch-tools [sessionData]="sessionData"></ch-tools>
@@ -80,6 +74,6 @@
             [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
         </div>
       </div>
-    </div>
-  </vertical-split-pane>
+    </split-area>
+  </split>
 </div>

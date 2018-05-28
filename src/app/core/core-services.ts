@@ -6,5 +6,5 @@ export class CoreServices {
   toolbox: string;
   sessionWorker: string;
   typeService: string;
-  jobHistory:string;
+  jobHistory: string;
 }
