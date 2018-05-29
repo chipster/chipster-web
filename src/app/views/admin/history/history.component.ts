@@ -24,7 +24,7 @@ export class HistoryComponent implements OnInit {
   jobHistoryList: Array<JobHistory>;
   jobHistoryListWithParam: Array<JobHistory>;
   currentJobHistoryList: Array<JobHistory>;
-  jobFilterAttributeSet: Array<string> = ["userName", "toolName", "compName", "timeDuration", "jobStatus"];
+  jobFilterAttributeSet: Array<string> = ["userName", "toolName","timeDuration", "jobStatus"];
   selectedFilterAttribute: string;
   filteredSearchForm: FormGroup;
   selectAttributeForm: FormGroup;
@@ -89,16 +89,22 @@ export class HistoryComponent implements OnInit {
   public OnSubmit(formValue: any) {
     this.filterAttributeSet = [];
     const arrayControl = this.filteredSearchForm.get('items') as FormArray;
+    console.log(arrayControl.length);
 
     for (let i = 0; i < arrayControl.length; i++) {
       const filterParam = new FilterParam();
-      filterParam.name = arrayControl.value[i].selectedAttribute;
-      if (arrayControl.value[i].value) {
-        this. haveFilterAttribute = true;
-        filterParam.value = arrayControl.value[i].value;
+      if(arrayControl.value[i].selectedAttribute!=""){
+        filterParam.name = arrayControl.value[i].selectedAttribute;
+        if (arrayControl.value[i].value) {
+          this.haveFilterAttribute = true;
+          filterParam.value = arrayControl.value[i].value;
+        }
+        this.filterAttributeSet.push(filterParam);
       }
-      this.filterAttributeSet.push(filterParam);
+
     }
+
+    console.log(this.filterAttributeSet);
 
     // Manipulating time inputs
     const startTimeControl = this.startTimeInputForm.get('startTimeInput');
@@ -153,9 +159,9 @@ export class HistoryComponent implements OnInit {
     for (let i = 0; i < this.filterAttributeSet.length; i++) {
       params = params.append(this.filterAttributeSet[i].name, this.filterAttributeSet[i].value);
     }
-    this.configService.getPublicUri(Role.JOB_HISTORY)
-      .flatMap(url => {
-        return this.auhtHttpClient.getAuthWithParams(url + '/jobhistory', params);
+    this.configService.getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
+      .flatMap(service => {
+        return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory', params);
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
         this.jobHistoryListWithParam = jobHistoryList;
