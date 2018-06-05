@@ -41,26 +41,9 @@ export class ConfigService {
 
   getConfiguration(): Observable<any> {
 
-    let previousAppRoute = null;
-
     if (!this.conf$) {
-      this.conf$ = this.router.events
-          .filter(e => e instanceof NavigationEnd)
-          .do(x => console.log('get app', x))
-          .map((e: NavigationEnd) => this.routeService.getAppRoute(e.url))
-          .flatMap(appRoute => {
-            /* Send events only when the appRoute has really changed
-
-            Otherwise everything depending on the config is re-evalueated after each route change.
-
-            why distinctUntilChanged() doesn't work here?
-           */
-            if (appRoute !== previousAppRoute) {
-              previousAppRoute = appRoute;
-              return Observable.of(appRoute);
-            }
-            return Observable.never();
-          })
+      this.conf$ = this.routeService.getAppRoute$()
+          .distinctUntilChanged()
           .flatMap((appRoute: string) => {
             if (appRoute === '' || appRoute === 'chipster') {
               return this.getChipsterConfiguration();

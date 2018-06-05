@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-sm navbar-light bg-light">
 
-  <a class="navbar-brand" routerLink="/{{appRoute}}/home">{{appName}}</a>
+  <a class="navbar-brand" [routerLink]="routerLinkHome">{{appName}}</a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
           aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
@@ -10,21 +10,21 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" routerLink="/{{appRoute}}/sessions" routerLinkActive="active">Sessions</a>
+        <a class="nav-link" [routerLink]="routerLinkSessions" routerLinkActive="active">Sessions</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/{{appRoute}}/manual" routerLinkActive="active">Manual</a>
+        <a class="nav-link" [routerLink]="routerLinkManual" routerLinkActive="active">Manual</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/{{appRoute}}/contact" routerLinkActive="active">Contact</a>
+        <a class="nav-link" [routerLink]="routerLinkContact" routerLinkActive="active">Contact</a>
       </li>
       <li class="nav-item" *ngIf="isAdmin()">
-        <a class="nav-link" routerLink="/{{appRoute}}/admin" routerLinkActive="active">Admin</a>
+        <a class="nav-link" [routerLink]="routerLinkAdmin" routerLinkActive="active">Admin</a>
       </li>
 
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li class="nav-item">        
-        <a class="nav-link" routerLink="/{{appRoute}}/home" routerLinkActive="active">
+        <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active">
           <i class="fa fa-exclamation-triangle"></i>
           Service in limited use!
         </a>
@@ -33,8 +33,8 @@
 
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a *ngIf="isLoggedIn()" routerLink="/{{appRoute}}/home" (click)="logout()" class="nav-link">Logout {{username$ | async}}</a>
-        <a *ngIf="!isLoggedIn()" routerLink="/{{appRoute}}/login" class="nav-link" routerLinkActive="active">Login</a>
+        <a *ngIf="isLoggedIn()" [routerLink]="routerLinkHome" (click)="logout()" class="nav-link">Logout {{username$ | async}}</a>
+        <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Login</a>
       </li>
     </ul>
   </div>

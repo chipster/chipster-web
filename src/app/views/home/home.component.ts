@@ -13,6 +13,8 @@ import { RouteService } from "../../shared/services/route.service";
 })
 export class HomeComponent implements OnInit {
 
+  routerLinkLogin: string;
+  routerLinkSessions: string;
   username$: Observable<string>;
   homePath: string;
   homeFile: string;
@@ -53,6 +55,9 @@ export class HomeComponent implements OnInit {
     }, err => {
       this.errorService.headerError('failed to get the path of the home page header', true);
     });
+
+    this.routerLinkSessions = this.routeService.getRouterLink('sessions');
+    this.routerLinkLogin = this.routeService.getRouterLink('login');
   }
 
   isLoggedIn() {

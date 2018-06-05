@@ -7,6 +7,9 @@ import { User } from "../../model/user";
 import { ConfigService } from "../../shared/services/config.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
+import { RouteService } from "../../shared/services/route.service";
+import { ActivatedRoute } from "@angular/router";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'ch-navigation',
@@ -15,6 +18,12 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 })
 export class NavigationComponent implements OnInit {
 
+  routerLinkAdmin: string;
+  routerLinkLogin: string;
+  routerLinkManual: string;
+  routerLinkContact: string;
+  routerLinkHome: string;
+  routerLinkSessions: string;
   username$: Observable<string>;
   appName = '';
   appRoute: string;
@@ -23,7 +32,10 @@ export class NavigationComponent implements OnInit {
     private tokenService: TokenService,
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
-    private errorService: ErrorService) {
+    private errorService: ErrorService,
+    private routeService: RouteService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router) {
   }
 
   ngOnInit() {
@@ -61,12 +73,31 @@ export class NavigationComponent implements OnInit {
       // why error service doesn't show these reliably?
       console.log('failed to get the favicon path', err);
       this.errorService.headerError('failed to get the custom favicon path: ' + err, true);
-    });
+      });
+
+    // Navigation component has to use the async version. When the page is loaded without any path, this
+    // component is shown before the router redirects because this is outside of the router outlet.
+    this.routeService.getAppRoute$()
+      .flatMap(() => this.routeService.getRouterLink$('sessions'))
+      .do(url => this.routerLinkSessions = url)
+      .flatMap(() => this.routeService.getRouterLink$('home'))
+      .do(url => this.routerLinkHome = url)
+      .flatMap(() => this.routeService.getRouterLink$('contact'))
+      .do(url => this.routerLinkContact = url)
+      .flatMap(() => this.routeService.getRouterLink$('manual'))
+      .do(url => this.routerLinkManual = url)
+      .flatMap(() => this.routeService.getRouterLink$('login'))
+      .do(url => this.routerLinkLogin = url)
+      .flatMap(() => this.routeService.getRouterLink$('admin'))
+      .do(url => this.routerLinkAdmin = url)
+      .subscribe(null, err => {
+        console.log('failed to get the app route', err);
+        this.errorService.headerError('failed to get the app route: ' + err, true);
+      });
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(name => {
       if (name) {
         this.appName = name;
-        this.appRoute = name.toLowerCase();
         document.title = name;
       }
     }, err => {
