@@ -2,11 +2,16 @@ import { SessionDataService } from "../sessiondata.service";
 import Dataset from "../../../../model/session/dataset";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";
-import { Component, Input } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
+import { Observable } from "rxjs/Observable";
+import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
+import { DialogModalService } from "../dialogmodal/dialogmodal.service";
+import { SessionResource } from "../../../../shared/resources/session.resource";
+import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
 
 @Component({
   selector: "ch-session-panel",
@@ -15,15 +20,21 @@ import * as _ from "lodash";
 })
 export class SessionPanelComponent {
   @Input() sessionData: SessionData;
+  @Output() deleteDatasetsNow = new EventEmitter<void>();
+  @Output() deleteDatasetsUndo = new EventEmitter<void>();
 
   datasetSearch: string;
 
   // noinspection JSUnusedLocalSymbols
   constructor(
-    private sessionDataService: SessionDataService, // used by template
+    public sessionDataService: SessionDataService, // used by template
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
-    private selectionService: SelectionService
+    private selectionService: SelectionService,
+    private restErrorService: RestErrorService,
+    private dialogModalService: DialogModalService,
+    private sessionResource: SessionResource,
+    private sessionWorkerResource: SessionWorkerResource
   ) {} // used by template
 
   search(value: any) {
@@ -91,5 +102,121 @@ export class SessionPanelComponent {
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
     }
+  }
+
+  autoLayout() {
+    const updates: Observable<any>[] = [];
+    this.sessionData.datasetsMap.forEach(d => {
+      if (d.x || d.y) {
+        d.x = null;
+        d.y = null;
+        updates.push(this.sessionDataService.updateDataset(d));
+      }
+    });
+
+    Observable.forkJoin(updates).subscribe(
+      () => console.log(updates.length + " datasets updated"),
+      err => this.restErrorService.handleError(err, "layout update failed")
+    );
+  }
+
+  renameSessionModal() {
+    this.dialogModalService
+      .openSessionNameModal("Rename session", this.sessionData.session.name)
+      .flatMap((name: string) => {
+        console.log("renameSessionModal", name);
+        this.sessionData.session.name = name;
+        return this.sessionDataService.updateSession(
+          this.sessionData,
+          this.sessionData.session
+        );
+      })
+      .subscribe(null, err =>
+        this.restErrorService.handleError(err, "Failed to rename the session")
+      );
+  }
+
+  notesModal() {
+    this.dialogModalService.openNotesModal(this.sessionData.session).then(
+      notes => {
+        this.sessionData.session.notes = notes;
+        this.sessionDataService
+          .updateSession(this.sessionData, this.sessionData.session)
+          .subscribe(
+            () => {},
+            err => {
+              this.restErrorService.handleError(
+                err,
+                "Failed to update session notes"
+              );
+            }
+          );
+      },
+      () => {
+        // modal dismissed
+      }
+    );
+  }
+
+  sharingModal() {
+    this.dialogModalService.openSharingModal(this.sessionData.session);
+  }
+
+  duplicateModal() {
+    this.dialogModalService
+      .openSessionNameModal(
+        "Duplicate session",
+        this.sessionData.session.name + "_copy"
+      )
+      .flatMap(name => {
+        const copySessionObservable = this.sessionResource.copySession(
+          this.sessionData,
+          name
+        );
+        return this.dialogModalService.openSpinnerModal(
+          "Duplicate session",
+          copySessionObservable
+        );
+      })
+      .subscribe(null, err =>
+        this.restErrorService.handleError(err, "Duplicate session failed")
+      );
+  }
+
+  saveSessionFileModal() {
+    this.sessionDataService.download(
+      this.sessionWorkerResource.getPackageUrl(
+        this.sessionDataService.getSessionId()
+      )
+    );
+  }
+
+  removeSessionModal() {
+    this.dialogModalService
+      .openBooleanModal(
+        "Delete session",
+        "Delete session " + this.sessionData.session.name + "?",
+        "Delete",
+        "Cancel"
+      )
+      .then(
+        () => {
+          // delete the session only from this user (i.e. the rule)
+          this.sessionDataService
+            .deletePersonalRules(this.sessionData.session)
+            .subscribe(
+              () => {},
+              err => {
+                this.restErrorService.handleError(
+                  err,
+                  "Failed to delete the session"
+                );
+              }
+            );
+        },
+        () => {
+          // modal dismissed
+        }
+      );
   }
 }

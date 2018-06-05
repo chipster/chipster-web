@@ -1,55 +1,103 @@
-<ch-search-box placeholder="Search file" (onValueChange)="search($event)" (onEnterKey)="searchEnter()"></ch-search-box>
+<h3 class="h3-xs">
+  <span>Session</span>
+</h3>
 
-<!-- css uses this id to find the tab-content element-->
-<ngb-tabset class="flex-grow-1 d-flex flex-column" id="left-tabs">
+<div class="d-flex flex-column flex-grow-1 chipster-highlight">
 
-  <!-- an element id workflow-panel is generated from this and used in CSS -->
-  <ngb-tab id="workflow" title="Workflow">
-    <!--suppress HtmlUnknownAttribute -->
-    <ng-template ngbTabContent>
-      <div id="workflow-graph-panel" class="flex-grow-1 d-flex flex-column">
+  <!-- session name and menu -->
+  <div style="margin-bottom: 0.5em">
+    <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
+    <span class="dropdown">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false" title="Actions">
+        <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
+        <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
+        <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
+        <a class="dropdown-item" (click)="notesModal()">Notes...</a>
+        <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
+        <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
+        <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
+        <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
+      </div>
+    </span>
+  </div>
 
-        <div class="mt-3 mb-1 ml-1 mr-1">
-          <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
 
-          <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm pull-right tool-bar-button" title="Reset view"
-            (click)="workflowGraph.resetZoomAndScroll()">
-            <!-- <span class="fa fa-lg fa-undo"></span> -->
-            <span>1:1</span>
-          </button>
-          <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-2 pull-right tool-bar-button" title="Zoom out"
-            (click)="workflowGraph.zoomOut()">
-            <span class="fa fa-lg fa-search-minus"></span>
-          </button>
-          <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-1 pull-right tool-bar-button" title="Zoom in"
-            (click)="workflowGraph.zoomIn()">
-            <span class=" fa fa-lg fa-search-plus "></span>
-          </button>
-        </div>
 
-        <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets() " [jobsMap]="sessionData.jobsMap
+  <!-- workflow and files tabs -->
+
+  <ch-search-box placeholder="Search file" (onValueChange)="search($event)" (onEnterKey)="searchEnter()"></ch-search-box>
+
+  <!-- css uses this id to find the tab-content element-->
+  <ngb-tabset class="flex-grow-1 d-flex flex-column" id="left-tabs">
+
+    <!-- an element id workflow-panel is generated from this and used in CSS -->
+    <ngb-tab id="workflow" title="Workflow">
+      <!--suppress HtmlUnknownAttribute -->
+      <ng-template ngbTabContent>
+        <div id="workflow-graph-panel" class="flex-grow-1 d-flex flex-column">
+
+          <div class="mt-3 mb-1 ml-1 mr-1">
+            <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
+
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm pull-right tool-bar-button" title="Reset view"
+              (click)="workflowGraph.resetZoomAndScroll()">
+              <!-- <span class="fa fa-lg fa-undo"></span> -->
+              <span>1:1</span>
+            </button>
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-2 pull-right tool-bar-button" title="Zoom out"
+              (click)="workflowGraph.zoomOut()">
+              <span class="fa fa-lg fa-search-minus"></span>
+            </button>
+            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-1 pull-right tool-bar-button" title="Zoom in"
+              (click)="workflowGraph.zoomIn()">
+              <span class=" fa fa-lg fa-search-plus "></span>
+            </button>
+          </div>
+
+          <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets() " [jobsMap]="sessionData.jobsMap
               " [modulesMap]="sessionData.modulesMap " [datasetSearch]="datasetSearch " [defaultScale]="1 " [enabled]="true "></ch-workflow-graph>
-      </div>
-    </ng-template>
-  </ngb-tab>
-
-  <!-- an element id datasets-panel is generated from this and used in CSS -->
-  <ngb-tab id="datasets" title="Files ">
-    <!--suppress HtmlUnknownAttribute -->
-    <ng-template ngbTabContent>
-      <div class="mt-3 ml-1 mb-2">
-        <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
-      </div>
-
-      <div id="file-list" class="p-0">
-        <div class="list-group dataset-list list-group-sm pt-0">
-          <button type="button " class="dataset-list-button list-group-item list-group-item-action " [ngClass]="{active:
-            selectionService.isSelectedDatasetById(dataset.datasetId)} " (click)="toggleDatasetSelection($event, dataset) "
-            *ngFor="let dataset of getDatasetListSorted() | datasetsearch:datasetSearch ">
-            {{dataset.name}}
-          </button>
         </div>
-      </div>
-    </ng-template>
-  </ngb-tab>
-</ngb-tabset>
+      </ng-template>
+    </ngb-tab>
+
+    <!-- an element id datasets-panel is generated from this and used in CSS -->
+    <ngb-tab id="datasets" title="Files ">
+      <!--suppress HtmlUnknownAttribute -->
+      <ng-template ngbTabContent>
+        <div class="mt-3 ml-1 mb-2">
+          <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
+        </div>
+
+        <div id="file-list" class="p-0">
+          <div class="list-group dataset-list list-group-sm pt-0">
+            <button type="button " class="dataset-list-button list-group-item list-group-item-action " [ngClass]="{active:
+            selectionService.isSelectedDatasetById(dataset.datasetId)} " (click)="toggleDatasetSelection($event, dataset) "
+              *ngFor="let dataset of getDatasetListSorted() | datasetsearch:datasetSearch ">
+              {{dataset.name}}
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </ngb-tab>
+  </ngb-tabset>
+
+  <!-- undo alert -->
+  <div *ngIf="sessionData.deletedDatasets" class="alert alert-info mb-0">
+    <div class="mb-2">
+      <span *ngIf="sessionData.deletedDatasets.length === 1">Deleting file
+        <i>{{sessionData.deletedDatasets[0].name}}</i>
+      </span>
+      <span *ngIf="sessionData.deletedDatasets.length !== 1">Deleting {{sessionData.deletedDatasets.length}} files</span>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow.emit()">
+      <i class="fa fa-times"></i> Delete
+    </button>
+    <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo.emit()">
+      <i class="fa fa-undo"></i>
+      Undo
+    </button>
+  </div>
+</div>
