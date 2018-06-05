@@ -33,9 +33,7 @@ export class NavigationComponent implements OnInit {
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService,
-    private activatedRoute: ActivatedRoute,
-    private router: Router) {
+    private routeService: RouteService) {
   }
 
   ngOnInit() {
