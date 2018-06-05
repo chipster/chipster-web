@@ -9,52 +9,12 @@
     <!-- split 1 -->
     <split-area size="33" class="split-1 d-flex flex-column">
 
-      <h3 class="h3-xs">
-        <span>Session</span>
-      </h3>
 
-      <div class="d-flex flex-column flex-grow-1 chipster-highlight">
+      <!-- workflow and files -->
+      <ch-session-panel [sessionData]="sessionData" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()"
+        class="d-flex flex-column flex-grow-1"></ch-session-panel>
 
-        <!-- session name and menu -->
-        <div style="margin-bottom: 0.5em">
-          <span (click)="renameSessionModal()"> {{sessionData.session.name}}</span>
-          <span class="dropdown">
-            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false" title="Actions">
-              <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
-              <a class="dropdown-item" (click)="autoLayout()">Auto layout</a>
-              <a class="dropdown-item" (click)="renameSessionModal()">Rename...</a>
-              <a class="dropdown-item" (click)="notesModal()">Notes...</a>
-              <a class="dropdown-item" (click)="sharingModal()">Sharing...</a>
-              <a class="dropdown-item" (click)="duplicateModal()">Duplicate session...</a>
-              <a class="dropdown-item" (click)="saveSessionFileModal()">Save session file</a>
-              <a class="dropdown-item" (click)="removeSessionModal()">Remove...</a>
-            </div>
-          </span>
-        </div>
 
-        <!-- workflow and files -->
-        <ch-session-panel [sessionData]="sessionData" class="d-flex flex-column flex-grow-1"></ch-session-panel>
-
-        <!-- undo alert -->
-        <div *ngIf="deletedDatasets" class="alert alert-info mb-0">
-          <div class="mb-2">
-            <span *ngIf="deletedDatasets.length === 1">Deleting file
-              <i>{{deletedDatasets[0].name}}</i>
-            </span>
-            <span *ngIf="deletedDatasets.length !== 1">Deleting {{deletedDatasets.length}} files</span>
-          </div>
-          <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow()">
-            <i class="fa fa-times"></i> Delete
-          </button>
-          <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo()">
-            <i class="fa fa-undo"></i>
-            Undo
-          </button>
-        </div>
-      </div>
     </split-area>
 
     <!-- split 2-->
