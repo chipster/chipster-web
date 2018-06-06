@@ -50,7 +50,7 @@ export class TermsComponent implements OnInit {
         return this.authenticationService.updateUser(user);
       })
       .subscribe(() => {
-        this.routeService.navigateAbsolute(['sessions']);
+        this.routeService.navigateAbsolute('/sessions');
       }, err => this.restErrorService.handleError(err, 'updating the user object failed'));
   }
 }

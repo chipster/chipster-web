@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // get the return url from the query params
     this.route.queryParams
-      .subscribe(params => this.returnUrl = params['returnUrl'] || 'sessions');
+      .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
     // TODO unsubscribe?
 
     this.configService.getPublicServices()
@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(() => {
       // Route to Session creation page
       console.log('login successful, return to ' + this.returnUrl);
-      this.routeService.navigateAbsoluteUrl(this.returnUrl);
+      this.routeService.navigateAbsolute(this.returnUrl);
     }, (errorResponse: HttpErrorResponse) => {
 
       if (RestErrorService.isForbidden(errorResponse)) {

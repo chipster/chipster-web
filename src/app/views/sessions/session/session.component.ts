@@ -76,7 +76,7 @@ export class SessionComponent implements OnInit, OnDestroy {
               const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(
-                this.routeService.navigateAbsolute(["sessions"])
+                this.routeService.navigateAbsolute("/sessions")
               );
             })
             .flatMap(() => Observable.never()); // Removed the parameter as new version of rxjs was giving error
@@ -188,7 +188,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           rule.username === this.tokenService.getUsername()
         ) {
           alert("The session has been deleted.");
-          this.routeService.navigateAbsolute(["sessions"]);
+          this.routeService.navigateAbsolute("/sessions");
         }
       })
     );

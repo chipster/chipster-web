@@ -76,17 +76,17 @@ export class NavigationComponent implements OnInit {
     // Navigation component has to use the async version. When the page is loaded without any path, this
     // component is shown before the router redirects because this is outside of the router outlet.
     this.routeService.getAppRoute$()
-      .flatMap(() => this.routeService.getRouterLink$('sessions'))
+      .flatMap(() => this.routeService.getRouterLink$('/sessions'))
       .do(url => this.routerLinkSessions = url)
-      .flatMap(() => this.routeService.getRouterLink$('home'))
+      .flatMap(() => this.routeService.getRouterLink$('/home'))
       .do(url => this.routerLinkHome = url)
-      .flatMap(() => this.routeService.getRouterLink$('contact'))
+      .flatMap(() => this.routeService.getRouterLink$('/contact'))
       .do(url => this.routerLinkContact = url)
-      .flatMap(() => this.routeService.getRouterLink$('manual'))
+      .flatMap(() => this.routeService.getRouterLink$('/manual'))
       .do(url => this.routerLinkManual = url)
-      .flatMap(() => this.routeService.getRouterLink$('login'))
+      .flatMap(() => this.routeService.getRouterLink$('/login'))
       .do(url => this.routerLinkLogin = url)
-      .flatMap(() => this.routeService.getRouterLink$('admin'))
+      .flatMap(() => this.routeService.getRouterLink$('/admin'))
       .do(url => this.routerLinkAdmin = url)
       .subscribe(null, err => {
         console.log('failed to get the app route', err);

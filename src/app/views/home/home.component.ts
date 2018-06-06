@@ -56,8 +56,8 @@ export class HomeComponent implements OnInit {
       this.errorService.headerError('failed to get the path of the home page header', true);
     });
 
-    this.routerLinkSessions = this.routeService.getRouterLink('sessions');
-    this.routerLinkLogin = this.routeService.getRouterLink('login');
+    this.routerLinkSessions = this.routeService.getRouterLink('/sessions');
+    this.routerLinkLogin = this.routeService.getRouterLink('/login');
   }
 
   isLoggedIn() {

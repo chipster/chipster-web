@@ -7,6 +7,8 @@ import { User } from '../../model/user';
 import { TermsComponent } from '../../views/terms/terms.component';
 import { ConfigService } from '../../shared/services/config.service';
 import { RouteService } from '../../shared/services/route.service';
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { RouterStateSnapshot } from '@angular/router';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,10 +21,11 @@ export class AuthGuard implements CanActivate {
     private routeService: RouteService) {
   }
 
-  canActivate(): Observable<boolean> {
+  canActivate(route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot): Observable<boolean> {
 
-    if (this.tokenService.getToken()) {
-
+    if (this.tokenService.isTokenValid()) {
+      console.log('found token');
       // All these must come from the primary configuration (chipster.yaml) so that
       // the route change can continue. We can't use the final configuraton here, because
       // it waits for the route and we would create a deadlock.
@@ -54,12 +57,14 @@ export class AuthGuard implements CanActivate {
               ', accpeted version:', user.termVersion,
               ', latest version:', latestVersion,
               ', accepted timestamp:', user.termsAccepted);
-            this.routeService.navigateAbsolute(['terms']);
+            this.routeService.navigateAbsolute('/terms');
             return false;
           }
         });
     } else {
-      this.routeService.navigateAbsolute(['login']);
+
+      this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
+
       return Observable.of(false);
     }
   }

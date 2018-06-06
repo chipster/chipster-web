@@ -14,8 +14,14 @@ export class RouteService {
     private errorService: ErrorService) { }
 
   redirectToLoginAndBack() {
-    const appUrl = this.removeAppRoute(this.router.routerState.snapshot.url);
-    this.navigateAbsolute(['login'], {queryParams: {returnUrl: appUrl}});
+    const appUrl = this.removeAppRoute(this.getCurrentUrl());
+    this.navigateAbsolute('/login', {queryParams: {returnUrl: appUrl}});
+  }
+
+  redirectToLoginAndBackWithCustomCurrentUrl(currentUrl: string) {
+
+    const appUrl = this.removeAppRoute(currentUrl);
+    this.navigateAbsoluteWithCustomCurrentUrl('/login', currentUrl, {queryParams: {returnUrl: appUrl}});
   }
 
   /**
@@ -26,44 +32,23 @@ export class RouteService {
    * need aboslute urls. This method allows you to use absolute urls
    * without knowing the first part of the url, i.e. the app route.
    */
-  navigateAbsolute(urlSegments: string[], options?) {
-    const urlSegmentsCopy = this.buildRouterLinkArray(this.getAppRouteCurrent(), urlSegments);
-    return this.router.navigate(urlSegmentsCopy, options);
+  navigateAbsolute(url: string, options?) {
+    this.navigateAbsoluteWithCustomCurrentUrl(url, this.getCurrentUrl(), options);
   }
 
-  /**
-   * Like navigateAbsolute(), but takes the url as string instead of string array
-   */
-  navigateAbsoluteUrl(url: string) {
-    if (url.startsWith('/')) {
-      // absolute urls start with slash, but it would create an empty cell to the splitted array
-      url = url.slice(1);
-    }
-    this.navigateAbsolute(url.split('/'));
+  navigateAbsoluteWithCustomCurrentUrl(targetUrl: string, currentUrl: string, options?) {
+    const appRoute = this.getAppRouteOfUrl(currentUrl);
+    const url = this.buildRouterLink(appRoute, targetUrl);
+
+    // split to array because navigateByUrl() doesn't apply query parameters
+    this.router.navigate(url.split('/'), options);
   }
 
-  /**
-   * Conver app urls to host urls e.g. for the routerLinks
-   *
-   * The first part of the url defines the client config to be used, i.e. app route.
-   * The name "host url" refers to the full url which includes the app route and the name
-   * "app url" refers to the shorter url without the app route.
-   *
-   * App urls are useful in the code becasue there is usually no need to care about the
-   * app route. Use the navigateAbsolute() method when navigating explicitly.
-   * Use this method instead when you need the actual host url, e.g. when creating routerLinks.
-   */
-  absoluteAppUrlArrayToHostUrlCurrent(urlSegments: string[]): string[] {
-    const appRoute = this.getAppRouteCurrent();
-    const urlSegmentsCopy = urlSegments.slice();
-    urlSegmentsCopy.unshift(appRoute);
-    return urlSegmentsCopy;
-  }
-
-  /**
+   /**
    * Convert app url to host url using the current path
    */
   getRouterLink(url: string): string {
+    console.log('getRouterLink()', url, this.buildRouterLink(this.getAppRouteCurrent(), url));
     return this.buildRouterLink(this.getAppRouteCurrent(), url);
   }
 
@@ -77,14 +62,8 @@ export class RouteService {
       .take(1);
   }
 
-  private buildRouterLink(appRoute: string, url: string): string {
-    return '/' + this.buildRouterLinkArray(appRoute, url.split('/')).join('/');
-  }
-
-  private buildRouterLinkArray(appRoute: string, urlSegments: string[]): string[] {
-    const urlSegmentsCopy = urlSegments.slice();
-    urlSegmentsCopy.unshift(appRoute);
-    return urlSegmentsCopy;
+  buildRouterLink(appRoute: string, url: string): string {
+    return '/' + appRoute + url;
   }
 
   /**
@@ -99,8 +78,12 @@ export class RouteService {
     return this.router.navigate(urlSegments, { relativeTo: activatedRoute });
   }
 
+  getCurrentUrl() {
+    return this.router.routerState.snapshot.url;
+  }
+
   getAppRouteCurrent() {
-    return this.getAppRouteOfUrl(this.router.routerState.snapshot.url);
+    return this.getAppRouteOfUrl(this.getCurrentUrl());
   }
 
   getAppRouteOfUrl(url: string): string {
@@ -117,6 +100,12 @@ export class RouteService {
     return url.slice(appRoute.length + 1);
   }
 
+  /**
+   * Get the app route observable
+   *
+   * Get the app route of the previous route change or wait for the first non-empty
+   * route to get it.
+  */
   getAppRoute$(): Observable<string> {
     if (!this.appRoute$) {
       this.appRoute$ = this.router.events

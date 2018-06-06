@@ -49,6 +49,6 @@ export class RestErrorService  {
   }
 
   redirectToLoginAndBack() {
-    this.routeService.navigateAbsolute(['/login'], { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
+    this.routeService.navigateAbsolute('/login', { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
   }
 }
