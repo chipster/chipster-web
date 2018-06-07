@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, query } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router, UrlTree } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as _ from "lodash";
