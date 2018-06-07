@@ -33,7 +33,7 @@ export class RouteService {
    * without knowing the first part of the url, i.e. the app route.
    */
   navigateAbsolute(url: string, options?) {
-    this.navigateAbsoluteWithCustomCurrentUrl(url, this.getCurrentUrl(), options);
+    return this.navigateAbsoluteWithCustomCurrentUrl(url, this.getCurrentUrl(), options);
   }
 
   navigateAbsoluteWithCustomCurrentUrl(targetUrl: string, currentUrl: string, options?) {
@@ -41,7 +41,7 @@ export class RouteService {
     const url = this.buildRouterLink(appRoute, targetUrl);
 
     // split to array because navigateByUrl() doesn't apply query parameters
-    this.router.navigate(url.split('/'), options);
+    return this.router.navigate(url.split('/'), options);
   }
 
    /**

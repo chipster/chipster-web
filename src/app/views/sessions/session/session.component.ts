@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, query } from "@angular/core";
 import { ActivatedRoute, Params, Router, UrlTree } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as _ from "lodash";
@@ -79,37 +79,19 @@ export class SessionComponent implements OnInit, OnDestroy {
                 this.routeService.navigateAbsolute("/sessions")
               );
             })
-            .flatMap(() => Observable.never()); // Removed the parameter as new version of rxjs was giving error
+            .flatMap(() => Observable.never());
         }
       })
-      .subscribe(
-        sessionData => {
-          this.sessionData = sessionData;
-          this.subscribeToEvents();
-        },
+      .do(sessionData => {
+        this.sessionData = sessionData;
+        this.subscribeToEvents();
+      })
+      .subscribe(null,
         (error: any) => {
           this.statusText = "";
           this.restErrorService.handleError(error, "Loading session failed");
         }
       );
-
-    // Select datasets provided via queryparameter and clear queryparameters
-    this.route.queryParams
-      .subscribe((queryParams: Params) => {
-        const datasets = this.parseQueryparametersArray(queryParams, "id").map(
-          (datasetId: string) => this.sessionData.datasetsMap.get(datasetId)
-        );
-        if (datasets.length > 0) {
-          this.selectionHandlerService.setDatasetSelection(datasets);
-          const sessionId = this.route.snapshot.params["sessionId"];
-          const urlTree: UrlTree = this.router.createUrlTree([
-            "sessions",
-            sessionId
-          ]);
-          this.router.navigateByUrl(urlTree);
-        }
-      })
-      .unsubscribe();
   }
 
   ngOnDestroy() {

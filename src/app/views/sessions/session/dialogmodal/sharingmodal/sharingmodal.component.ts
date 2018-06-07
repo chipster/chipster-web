@@ -10,6 +10,7 @@ import { TokenService } from "../../../../../core/authentication/token.service";
 import { SessionDataService } from "../../sessiondata.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionEventService } from "../../sessionevent.service";
+import { RouteService } from "../../../../../shared/services/route.service";
 
 @Component({
   templateUrl: './sharingmodal.component.html'
@@ -32,7 +33,8 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
     private tokenService: TokenService,
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
-    private sessionEventService: SessionEventService) { }
+    private sessionEventService: SessionEventService,
+    private routeService: RouteService) { }
 
   ngOnInit() {
     this.rules = this.session.rules;
@@ -54,19 +56,6 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
 
   cancel() {
     this.activeModal.dismiss();
-  }
-
-  saveCurrentUrlState() {
-    // copy current route and selected datasetids as queryparameters to clippath
-    this.store.select('selectedDatasets').subscribe( (datasets: Array<Dataset>) => {
-      const datasetIds = datasets.map( (dataset: Dataset) => dataset.datasetId);
-      const navigationExtras = { queryParams: { id: datasetIds } };
-      const sessionId = this.route.snapshot.params['sessionId'];
-      const urlTree: UrlTree = this.router.createUrlTree( ['sessions', sessionId], navigationExtras );
-      if (datasetIds.length > 0) {
-        copy(`${window.location.host}${urlTree.toString()}`);
-      }
-    }).unsubscribe();
   }
 
   saveRule() {
