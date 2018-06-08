@@ -4,7 +4,6 @@ import {ActivatedRoute, Router, UrlTree} from "@angular/router";
 import {Store} from "@ngrx/store";
 import Session from "../../../../../model/session/session";
 import Dataset from "../../../../../model/session/dataset";
-import * as copy from 'copy-to-clipboard';
 import Rule from "../../../../../model/session/rule";
 import { TokenService } from "../../../../../core/authentication/token.service";
 import { SessionDataService } from "../../sessiondata.service";

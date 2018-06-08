@@ -28,10 +28,7 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/tether/dist/js/tether.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/pdfjs-dist/build/pdf.js",
-              "node_modules/pdfjs-dist/build/pdf.worker.js",
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "node_modules/pileup/dist/pileup.js",
               "src/assets/lib/handsontable/handsontable.full.js",
@@ -85,10 +82,7 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/tether/dist/js/tether.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/pdfjs-dist/build/pdf.js",
-              "node_modules/pdfjs-dist/build/pdf.worker.js",
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "node_modules/pileup/dist/pileup.js",
               "src/assets/lib/handsontable/handsontable.full.js",
