@@ -10,6 +10,7 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
 import { ActivatedRoute } from "@angular/router";
 import { Router } from "@angular/router";
+import log from 'loglevel';
 
 @Component({
   selector: 'ch-navigation',
@@ -42,7 +43,7 @@ export class NavigationComponent implements OnInit {
 
     // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(path => {
-      console.log('load custom css from', path);
+      log.info('load custom css from', path);
       if (path) {
         const link = document.createElement('link');
         link.href = path;
@@ -54,12 +55,12 @@ export class NavigationComponent implements OnInit {
       }
     }, err => {
       // why error service doesn't show these reliably?
-      console.log('failed to get the custom css path', err);
+      log.error('failed to get the custom css path', err);
       this.errorService.headerError('failed to get the custom css path: ' + err, true);
     });
 
     this.configService.get(ConfigService.KEY_FAVICON).subscribe(path => {
-      console.log('load custom favicon from', path);
+      log.info('load custom favicon from', path);
       if (path) {
         const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
         link.type = 'image/x-icon';
@@ -69,7 +70,7 @@ export class NavigationComponent implements OnInit {
       }
     }, err => {
       // why error service doesn't show these reliably?
-      console.log('failed to get the favicon path', err);
+      log.error('failed to get the favicon path', err);
       this.errorService.headerError('failed to get the custom favicon path: ' + err, true);
       });
 
@@ -89,7 +90,7 @@ export class NavigationComponent implements OnInit {
       .flatMap(() => this.routeService.getRouterLink$('/admin'))
       .do(url => this.routerLinkAdmin = url)
       .subscribe(null, err => {
-        console.log('failed to get the app route', err);
+        log.info('failed to get the app route', err);
         this.errorService.headerError('failed to get the app route: ' + err, true);
       });
 
@@ -100,7 +101,7 @@ export class NavigationComponent implements OnInit {
       }
     }, err => {
       // why error service doesn't show these reliably?
-      console.log('failed to get the app name', err);
+      log.error('failed to get the app name', err);
       this.errorService.headerError('failed to get the app name: ' + err, true);
     });
   }

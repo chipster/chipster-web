@@ -19,6 +19,7 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./sessiondata.service";
 import { SessionEventService } from "./sessionevent.service";
+import log from 'loglevel';
 
 @Component({
   selector: "ch-session",
@@ -182,7 +183,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
         // if not cancelled
         if (newValue) {
-          console.log(newValue);
+          log.info(newValue);
 
           // if the job has just failed
           if (
@@ -190,22 +191,22 @@ export class SessionComponent implements OnInit, OnDestroy {
             oldValue.state !== "EXPIRED_WAITING"
           ) {
             this.openErrorModal("Job expired", newValue);
-            console.info(newValue);
+            log.info(newValue);
           }
           if (newValue.state === "FAILED" && oldValue.state !== "FAILED") {
             this.openErrorModal("Job failed", newValue);
-            console.info(newValue);
+            log.info(newValue);
           }
           if (
             newValue.state === "FAILED_USER_ERROR" &&
             oldValue.state !== "FAILED_USER_ERROR"
           ) {
             this.openErrorModal("Job failed", newValue);
-            console.info(newValue);
+            log.info(newValue);
           }
           if (newValue.state === "ERROR" && oldValue.state !== "ERROR") {
             this.openErrorModal("Job error", newValue);
-            console.info(newValue);
+            log.info(newValue);
           }
         }
       })
