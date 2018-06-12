@@ -16,6 +16,9 @@ import { TokenService } from '../../core/authentication/token.service';
 })
 export class LoginComponent implements OnInit {
 
+  // hide this login page initially to avoid flash of it when returning from the SSO and
+  // redirecting immediately
+  show = false;
   error: string;
   appName$;
 
@@ -44,6 +47,9 @@ export class LoginComponent implements OnInit {
     // handle returnUrls after SSO login here
     if (this.tokenService.isLoggedIn()) {
       this.redirect();
+    } else {
+      // not going to redirect, show the page
+      this.show = true;
     }
 
     this.configService.getPublicServices()

@@ -19,7 +19,7 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./sessiondata.service";
 import { SessionEventService } from "./sessionevent.service";
-import log from 'loglevel';
+import log from "loglevel";
 
 @Component({
   selector: "ch-session",
