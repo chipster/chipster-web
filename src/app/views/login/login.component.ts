@@ -6,6 +6,8 @@ import {RestErrorService} from '../../core/errorhandler/rest-error.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ConfigService} from '../../shared/services/config.service';
 import { RouteService } from '../../shared/services/route.service';
+import log from 'loglevel';
+import { TokenService } from '../../core/authentication/token.service';
 
 @Component({
   selector: 'ch-login',
@@ -24,26 +26,32 @@ export class LoginComponent implements OnInit {
   @ViewChild('myForm')
   private myForm: FormGroup;
 
-  constructor(private router: Router,
-              private route: ActivatedRoute,
-              private authenticationService: AuthenticationService,
-              private configService: ConfigService,
-              private restErrorService: RestErrorService,
-              private routeService: RouteService) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private authenticationService: AuthenticationService,
+    private configService: ConfigService,
+    private restErrorService: RestErrorService,
+    private routeService: RouteService,
+    private tokenService: TokenService) {
   }
 
   ngOnInit() {
     // get the return url from the query params
     this.route.queryParams
       .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
-    // TODO unsubscribe?
+
+    // handle returnUrls after SSO login here
+    if (this.tokenService.isLoggedIn()) {
+      this.redirect();
+    }
 
     this.configService.getPublicServices()
       .subscribe(conf => {
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            this.ssoLoginUrl = s.publicUri + '/secure';
+            this.ssoLoginUrl = s.publicUri + '/secure?appRoute="' + this.routeService.getAppRouteCurrent() + '"';
           });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
@@ -51,18 +59,23 @@ export class LoginComponent implements OnInit {
     this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
   }
 
+  redirect() {
+    log.info('logged in, return to ' + this.returnUrl);
+    this.routeService.navigateAbsolute(this.returnUrl);
+  }
+
   login() {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(() => {
       // Route to Session creation page
-      console.log('login successful, return to ' + this.returnUrl);
-      this.routeService.navigateAbsolute(this.returnUrl);
+      this.redirect();
+
     }, (errorResponse: HttpErrorResponse) => {
 
       if (RestErrorService.isForbidden(errorResponse)) {
         this.error = 'Incorrect username or password';
       } else {
         this.error = 'Connecting to authentication service failed';
-        console.error(errorResponse);
+        log.error(errorResponse);
       }
     });
   }
