@@ -77,8 +77,8 @@ export class SessionComponent implements OnInit, OnDestroy {
               const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(
-                this.routeService.navigateAbsolute("/sessions")
-              );
+                this.routeService.navigateAbsolute("/sessions/" + sessionId,
+                  { queryParams: queryParams }));
             })
             .flatMap(() => Observable.never());
         }
@@ -103,7 +103,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   canDeactivate() {
-    if (this.PARAM_TEMP_COPY in this.route.snapshot.params) {
+    if (this.route.snapshot.queryParamMap.has(this.PARAM_TEMP_COPY)) {
       const keepButton = "Keep";
       const deleteButton = "Delete";
 

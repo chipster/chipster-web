@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot): Observable<boolean> {
 
     if (this.tokenService.isTokenValid()) {
-      console.log('found token');
+
       // All these must come from the primary configuration (chipster.yaml) so that
       // the route change can continue. We can't use the final configuraton here, because
       // it waits for the route and we would create a deadlock.
