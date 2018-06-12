@@ -51,7 +51,7 @@ export class LoginComponent implements OnInit {
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            this.ssoLoginUrl = s.publicUri + '/secure?appRoute="' + this.routeService.getAppRouteCurrent() + '"';
+            this.ssoLoginUrl = s.publicUri + '/secure?appRoute=' + this.routeService.getAppRouteCurrent() + ';';
           });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
