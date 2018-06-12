@@ -1,4 +1,4 @@
-<h3 class="h3-xs">
+<h3 class="panel-title">
   <!-- single dataset selected -->
   <div *ngIf="selectionService.selectedDatasets.length === 1;">
     <span>File </span>
@@ -40,7 +40,8 @@
 
 
 <div class="chipster-highlight">
-  <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">{{selectionService.selectedDatasets[0].name}}
+  <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
+    <span class="h6">{{selectionService.selectedDatasets[0].name}}</span>
     <span class="dropdown">
       <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
         aria-haspopup="true" aria-expanded="false" title="Actions">
