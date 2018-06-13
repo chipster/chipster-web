@@ -9,6 +9,7 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
+import log from 'loglevel';
 
 @Component({
   selector: "ch-session-list",
@@ -57,7 +58,7 @@ export class SessionListComponent implements OnInit {
         return this.sessionResource.loadSession(session.sessionId);
       })
       .do((fullSession: SessionData) => {
-        console.log("sessionData", fullSession);
+        log.info("sessionData", fullSession);
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
@@ -182,6 +183,12 @@ export class SessionListComponent implements OnInit {
       )
       .then(
         () => {
+
+          // remove from the view first to prevent user to delete it twice
+          this.sessionsByUser.forEach((array, key) => {
+            this.sessionsByUser.set(key, array.filter(s => s !== session));
+          });
+
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
           // delete the session only from this user (i.e. the rule)
           this.sessionDataService.deletePersonalRules(session).subscribe(
