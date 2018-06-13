@@ -8,6 +8,7 @@ import {ConfigService} from '../../shared/services/config.service';
 import { RouteService } from '../../shared/services/route.service';
 import log from 'loglevel';
 import { TokenService } from '../../core/authentication/token.service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'ch-login',
@@ -41,8 +42,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     // get the return url from the query params
-    this.route.queryParams
-      .subscribe(params => this.returnUrl = params['returnUrl'] || '/sessions');
+    this.getReturnUrl$()
+      .subscribe(url => this.returnUrl = url);
 
     // handle returnUrls after SSO login here
     if (this.tokenService.isLoggedIn()) {
@@ -52,17 +53,30 @@ export class LoginComponent implements OnInit {
       this.show = true;
     }
 
-    this.configService.getPublicServices()
-      .subscribe(conf => {
+    Observable.forkJoin(
+      this.configService.getPublicServices(),
+      this.routeService.getAppRoute$().take(1),
+      this.getReturnUrl$().take(1))
+      .subscribe(res => {
+        const conf = res[0];
+        const appRoute = res[1];
+        const returnUrl = res[2];
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            this.ssoLoginUrl = s.publicUri + '/secure?appRoute=' + this.routeService.getAppRouteCurrent() + ';';
-          });
+            this.ssoLoginUrl = s.publicUri + '/secure?'
+              + 'appRoute=' + encodeURIComponent(appRoute) + ';'
+              + 'returnUrl=' + encodeURIComponent(returnUrl) + ';';
+            });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
 
     this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
+  }
+
+  getReturnUrl$() {
+    return this.route.queryParams
+      .map(params => params['returnUrl'] || '/sessions');
   }
 
   redirect() {
