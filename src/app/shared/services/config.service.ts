@@ -40,7 +40,7 @@ export class ConfigService {
     return this.chipsterConf$;
   }
 
-  getConfiguration(name?: string): Observable<any> {
+  getConfiguration(): Observable<any> {
 
     if (!this.conf$) {
       this.conf$ = this.routeService.getAppRoute$()
@@ -116,7 +116,7 @@ export class ConfigService {
   }
 
   getModules(): Observable<string[]> {
-    return this.getConfiguration("modules")
+    return this.getConfiguration()
       .map(conf => conf['modules']);
   }
 
