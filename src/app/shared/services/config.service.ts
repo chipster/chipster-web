@@ -62,7 +62,7 @@ export class ConfigService {
               return Object.assign(confs[0], confs[1]);
             });
         })
-        .share();
+        .publishReplay(1).refCount();
       }
     return this.conf$;
   }
