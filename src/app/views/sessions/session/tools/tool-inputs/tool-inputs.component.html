@@ -22,8 +22,11 @@
 
           <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
 
-            <select multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)"
-                    name="input_{{index}}">
+            <select *ngIf="inputBinding.toolInput.name.spliced" multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)">
+              <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
+            </select>
+
+            <select *ngIf="!inputBinding.toolInput.name.spliced" [(ngModel)]="inputBinding.datasets[0]" (ngModelChange)="inputSelected(inputBinding)">
               <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
             </select>
           </td>

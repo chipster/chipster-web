@@ -5,6 +5,7 @@ import {ToolService} from "../tool.service";
 import Dataset from "../../../../../model/session/dataset";
 import {SessionData} from "../../../../../model/session/session-data";
 import * as _ from 'lodash';
+import log from 'loglevel';
 
 @Component({
   selector: 'ch-tool-inputs',
@@ -31,19 +32,16 @@ export class ToolInputsComponent implements OnChanges {
       // element in the template (and thus get's modified)
 
       this.localInputBindings = this.inputBindings.map((b) => ({ toolInput: b.toolInput, datasets: b.datasets.slice() }));
-      console.log("updated bindings:", this.getBindingsString(this.localInputBindings));
+
+      log.info('input bindings', this.localInputBindings);
+      log.info("updated bindings:", this.getBindingsString(this.localInputBindings));
     }
   }
 
 
   inputSelected(userEditedBinding: InputBinding) {
 
-    console.log("input selected");
-    // // if not multi input, the model changes binding.datasets to object instead of array
-    // if (!_.isArray(userEditedBinding.datasets)) {
-    //   userEditedBinding.datasets = [userEditedBinding.datasets];
-    // }
-
+    log.info("input selected");
     // generate new input bindings: remove from other bindings the datasets which are present in the binding
     // edited by the user
     const updatedBindings = this.localInputBindings.map(binding => {
