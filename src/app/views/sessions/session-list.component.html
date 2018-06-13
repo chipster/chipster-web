@@ -35,13 +35,15 @@
                 [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item" title="Open session">
                 <td>
                   <span>{{session.name}}
-                    <button class="btn btn-outline-dark btn-sm pull-right btn-no-border showOnRowHover" *ngIf="sessionDataService.hasPersonalRule(session.rules)"
-                      (click)="deleteSession(session); $event.stopImmediatePropagation();" title="Delete session">
-                      <span class="fa fa-times"></span>
-                    </button>
+                    <span *ngIf="sessionDataService.hasPersonalRule(session.rules)">
+                      <button *ngIf="!deletingSessions.has(session)" class="btn btn-outline-dark btn-sm pull-right btn-no-border showOnRowHover"
+                        (click)="deleteSession(session); $event.stopImmediatePropagation();" title="Delete session">
+                        <span class="fa fa-times"></span>
+                      </button>
+                      <span class="pull-right" *ngIf="deletingSessions.has(session)">Deleting...</span>
+                    </span>
                   </span>
                 </td>
-
               </tr>
             </tbody>
           </table>

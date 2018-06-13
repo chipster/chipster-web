@@ -23,10 +23,11 @@ export class SessionListComponent implements OnInit {
   public previousSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
+  public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
   private selectedSessionId: string;
-  private workflowPreviewLoading = false;
-  private workflowPreviewFailed = false;
+  public workflowPreviewLoading = false;
+  public workflowPreviewFailed = false;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
@@ -36,7 +37,7 @@ export class SessionListComponent implements OnInit {
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
-    private sessionDataService: SessionDataService,
+    public sessionDataService: SessionDataService,
     private activatedRoute: ActivatedRoute,
     private routeService: RouteService,
   ) {}
@@ -184,10 +185,7 @@ export class SessionListComponent implements OnInit {
       .then(
         () => {
 
-          // remove from the view first to prevent user to delete it twice
-          this.sessionsByUser.forEach((array, key) => {
-            this.sessionsByUser.set(key, array.filter(s => s !== session));
-          });
+          this.deletingSessions.add(session);
 
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
           // delete the session only from this user (i.e. the rule)
@@ -195,8 +193,10 @@ export class SessionListComponent implements OnInit {
             () => {
               this.updateSessions();
               this.previewedSession = null;
+              this.deletingSessions.delete(session);
             },
             (error: any) => {
+              this.deletingSessions.delete(session);
               this.errorHandlerService.handleError(
                 error,
                 "Deleting session failed"
