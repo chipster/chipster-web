@@ -7,6 +7,7 @@ import {Service} from '../../model/service';
 import { Role } from '../../model/role';
 import { Router, NavigationEnd } from '@angular/router';
 import { RouteService } from './route.service';
+import log from 'loglevel';
 
 @Injectable()
 export class ConfigService {
@@ -34,17 +35,17 @@ export class ConfigService {
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {
       this.chipsterConf$ = this.configurationResource.getConfiguration('chipster.yaml')
-        .publishReplay(1).refCount();
+      .publishReplay(1).refCount();
     }
     return this.chipsterConf$;
   }
 
-  getConfiguration(): Observable<any> {
+  getConfiguration(name?: string): Observable<any> {
 
     if (!this.conf$) {
       this.conf$ = this.routeService.getAppRoute$()
-          .distinctUntilChanged()
-          .flatMap((appRoute: string) => {
+        .distinctUntilChanged()
+        .flatMap((appRoute: string) => {
             if (appRoute === '' || appRoute === 'chipster') {
               return this.getChipsterConfiguration();
             }
@@ -61,7 +62,7 @@ export class ConfigService {
               return Object.assign(confs[0], confs[1]);
             });
         })
-        .publishReplay(1).refCount();
+        .share();
       }
     return this.conf$;
   }
@@ -115,7 +116,7 @@ export class ConfigService {
   }
 
   getModules(): Observable<string[]> {
-    return this.getConfiguration()
+    return this.getConfiguration("modules")
       .map(conf => conf['modules']);
   }
 
@@ -138,7 +139,7 @@ export class ConfigService {
     return this.getConfiguration()
     .take(1) // otherwise we would have to unsubscribe
     .map(conf => {
-      console.debug('get conf key', key, conf);
+      log.debug('get conf key', key, conf);
       return conf[key];
     });
   }

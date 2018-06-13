@@ -51,8 +51,6 @@ export class SessionComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // this.sessionData = this.route.snapshot.data['sessionData'];
-
     this.route.params
       .flatMap(params => {
         /*

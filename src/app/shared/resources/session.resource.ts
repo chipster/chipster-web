@@ -12,6 +12,7 @@ import { SessionData } from '../../model/session/session-data';
 import { RestService } from '../../core/rest-services/restservice/rest.service';
 import { Observable } from 'rxjs/Observable';
 import Rule from '../../model/session/rule';
+import log from 'loglevel';
 
 @Injectable()
 export class SessionResource {
@@ -31,21 +32,21 @@ export class SessionResource {
       .flatMap((url: string) => {
         const session$ = this.restService
           .get(`${url}/sessions/${sessionId}`, true)
-          .do((x: any) => console.debug('session', x));
+          .do((x: any) => log.debug('session', x));
         const sessionDatasets$ = this.restService
           .get(`${url}/sessions/${sessionId}/datasets`, true)
-          .do((x: any) => console.debug('sessionDatasets', x));
+          .do((x: any) => log.debug('sessionDatasets', x));
         const sessionJobs$ = this.restService
           .get(`${url}/sessions/${sessionId}/jobs`, true)
-          .do((x: any) => console.debug('sessionJobs', x));
+          .do((x: any) => log.debug('sessionJobs', x));
         const modules$ = this.toolResource
           .getModules()
-          .do((x: any) => console.debug('modules', x));
+          .do((x: any) => log.debug('modules', x));
         const tools$ = this.toolResource
           .getTools()
-          .do((x: any) => console.debug('tools', x));
+          .do((x: any) => log.debug('tools', x));
         const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
-          console.debug('types', x)
+          log.debug('types', x)
         );
 
         // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
