@@ -12,7 +12,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(public settingsService: SettingsService) {}
 
   ngOnInit() {
     this.settingsService.showToolsPanel$
