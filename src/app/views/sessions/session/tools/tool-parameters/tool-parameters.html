@@ -4,71 +4,63 @@
     <table class="table table-sm table-hover" *ngIf="tool.parameters.length > 0">
       <!--<thead class="thead-default">-->
       <!--<tr>-->
-        <!--<th>Name</th>-->
-        <!--<th>Value</th>-->
-        <!--<th></th>-->
+      <!--<th>Name</th>-->
+      <!--<th>Value</th>-->
+      <!--<th></th>-->
       <!--</tr>-->
       <!--</thead>-->
       <tbody>
 
-      <tr *ngFor="let parameter of tool.parameters; let i = index;"
-          ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave" placement="left" container="body">
+        <tr *ngFor="let parameter of tool.parameters; let i = index;" ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave"
+          placement="left" container="body">
 
-        <td>
-          <strong>{{parameter.name.displayName}}</strong>
-        </td>
-
-        <td>
-          <span>
-          <!--[(ngModel)]="toolSelectionService.parameterValues[tool.name.id][parameter.name.id]"-->
-            <select *ngIf="toolService.isSelectionParameter(parameter)"
-                  name="parameter_{{i}}"
-                  [(ngModel)]="parameter.value"
-                  (ngModelChange)="toolSelectionService.parametersChanged()">
-            <!--required="!parameter.optional"-->
-            <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
-              {{option.displayName || option.id}}<span *ngIf="toolService.isDefaultValue(parameter, option.id)"> (default)</span>
-            </option>
-          </select>
-
-          <input *ngIf="toolService.isNumberParameter(parameter)" type="number"
-                 [(ngModel)]="parameter.value"
-                 name="parameter_{{i}}"
-                 min="{{parameter.from}}"
-                 max="{{parameter.to}}"
-                 step="{{toolService.getStepSize(parameter)}}"
-                 required="{{!parameter.optional}}"
-                 (ngModelChange)="toolSelectionService.parametersChanged()"/>
-
-          <input *ngIf="parameter.type === 'STRING'" type="text"
-                 name="parameter_{{i}}"
-                 [(ngModel)]="parameter.value"
-                 required="{{!parameter.optional}}"
-                 (ngModelChange)="toolSelectionService.parametersChanged()"/>
-
-            <!--<label class="label label-warning"-->
-            <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
-            <!--value</label>-->
-            <!--<label class="label label-warning"-->
-            <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
-            <!--value: {{parameter.from}}</label>-->
-            <!--<label class="label label-warning"-->
-            <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
-            <!--value: {{parameter.to}}</label>-->
+          <td>
+            {{parameter.name.displayName}}
+            <span class="text-sm lighter" *ngIf="parameter.optional">
+              <i>(optional)</i>
             </span>
-        </td>
 
-        <!-- reset parameter to default button -->
-        <td>
-          <button type="button" class="btn btn-secondary btn-sm"
-                  *ngIf="parameter.value !== toolService.getDefaultValue(parameter)"
-                  (click)="parameter.value = toolService.getDefaultValue(parameter)"
-                  title="Reset to default value">
-            Reset to default
-          </button>
-        </td>
+          </td>
 
-      </tr>
+          <td>
+            <span>
+              <!--[(ngModel)]="toolSelectionService.parameterValues[tool.name.id][parameter.name.id]"-->
+              <select *ngIf="toolService.isSelectionParameter(parameter)" name="parameter_{{i}}" [(ngModel)]="parameter.value" (ngModelChange)="toolSelectionService.parametersChanged()">
+                <!--required="!parameter.optional"-->
+                <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
+                  {{option.displayName || option.id}}
+                  <span *ngIf="toolService.isDefaultValue(parameter, option.id)"> (default)</span>
+                </option>
+              </select>
+
+              <input *ngIf="toolService.isNumberParameter(parameter)" type="number" [(ngModel)]="parameter.value" name="parameter_{{i}}"
+                min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}" required="{{!parameter.optional}}"
+                (ngModelChange)="toolSelectionService.parametersChanged()" />
+
+              <input *ngIf="parameter.type === 'STRING'" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value" required="{{!parameter.optional}}"
+                (ngModelChange)="toolSelectionService.parametersChanged()" />
+
+              <!--<label class="label label-warning"-->
+              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
+              <!--value</label>-->
+              <!--<label class="label label-warning"-->
+              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
+              <!--value: {{parameter.from}}</label>-->
+              <!--<label class="label label-warning"-->
+              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
+              <!--value: {{parameter.to}}</label>-->
+            </span>
+          </td>
+
+          <!-- reset parameter to default button -->
+          <td>
+            <button type="button" class="btn btn-secondary btn-sm" *ngIf="parameter.value !== toolService.getDefaultValue(parameter)"
+              (click)="parameter.value = toolService.getDefaultValue(parameter)" title="Reset to default value">
+              Reset to default
+            </button>
+          </td>
+
+        </tr>
       </tbody>
     </table>
   </form>

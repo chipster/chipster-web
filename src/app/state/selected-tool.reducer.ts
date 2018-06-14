@@ -1,11 +1,10 @@
-import {ToolSelection} from "../views/sessions/session/tools/ToolSelection";
+import { ToolSelection } from "../views/sessions/session/tools/ToolSelection";
 
-export const CLEAR_TOOL_SELECTION = 'CLEAR_TOOL_SELECTION';
-export const SET_TOOL_SELECTION = 'SET_TOOL_SELECTION';
+export const CLEAR_TOOL_SELECTION = "CLEAR_TOOL_SELECTION";
+export const SET_TOOL_SELECTION = "SET_TOOL_SELECTION";
 
-export function toolSelection(state: ToolSelection = null, {type, payload}) {
-
-  switch(type) {
+export function toolSelection(state: ToolSelection = null, { type, payload }) {
+  switch (type) {
     case CLEAR_TOOL_SELECTION:
       return null;
     case SET_TOOL_SELECTION:
@@ -13,5 +12,4 @@ export function toolSelection(state: ToolSelection = null, {type, payload}) {
     default:
       return state;
   }
-
 }

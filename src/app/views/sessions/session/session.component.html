@@ -1,39 +1,60 @@
 <div *ngIf="!sessionData" class="container-fluid">
   <p>{{statusText}}</p>
 </div>
-<div *ngIf="sessionData" class="session-view">
+<div *ngIf="sessionData" class="session-view container-fluid">
 
   <!--suppress HtmlUnknownAttribute -->
   <split [direction]="vertical">
 
     <!-- split 1 -->
-    <split-area size="33" class="split-1 d-flex flex-column">
-
+    <split-area [size]="split1Size" class="split-1 d-flex flex-column">
 
       <!-- workflow and files -->
       <ch-session-panel [sessionData]="sessionData" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()"
         class="d-flex flex-column flex-grow-1"></ch-session-panel>
 
-
     </split-area>
+
 
     <!-- split 2-->
-    <split-area size="67" class="split-2 scrollable">
-      <div class="row">
-        <div class="col">
-          <ch-tools [sessionData]="sessionData"></ch-tools>
+    <split-area [size]="split2Size" class="split-2 scrollable">
+      <div *ngIf="!split3Visible; else selectionPanel">
+
+        <div class="row">
+          <div class="col">
+            <ch-tools [sessionData]="sessionData"></ch-tools>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData">
+            </ch-job>
+
+            <ch-file *ngIf="selectionService.selectedDatasets.length > 0" [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap"
+              [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
+          </div>
         </div>
       </div>
 
+      <ng-template #selectionPanel>
+        <ch-selection-panel [sessionData]="sessionData"></ch-selection-panel>
+      </ng-template>
+
+    </split-area>
+
+
+    <!-- split 3-->
+    <split-area *ngIf="split3Visible" [size]="split3Size" class="split-3 scrollable">
       <div class="row">
         <div class="col">
-          <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData">
-          </ch-job>
-
-          <ch-file *ngIf="selectionService.selectedDatasets.length > 0" [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap"
-            [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
+          <!-- <ch-tools [sessionData]="sessionData"></ch-tools> -->
+          <ch-tool-list-accordion [sessionData]="sessionData "></ch-tool-list-accordion>
         </div>
       </div>
     </split-area>
+
+
+
   </split>
 </div>
