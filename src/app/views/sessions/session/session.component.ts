@@ -19,7 +19,10 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./sessiondata.service";
 import { SessionEventService } from "./sessionevent.service";
+import { ConfigService } from "../../../shared/services/config.service";
+import { Subject } from "rxjs/Subject";
 import log from "loglevel";
+import { SettingsService } from "../../../shared/services/settings.service";
 
 @Component({
   selector: "ch-session",
@@ -29,10 +32,15 @@ import log from "loglevel";
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;
   deletedDatasetsTimeout: any;
-  subscriptions: Array<any> = [];
   statusText: string;
 
+  split3Visible = false;
+  split1Size = 33;
+  split2Size = 67;
+  split3Size = 33;
+
   private PARAM_TEMP_COPY = "tempCopy";
+  private unsubscribe: Subject<any> = new Subject();
 
   constructor(
     private router: Router,
@@ -47,7 +55,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private dialogModalService: DialogModalService,
     private tokenService: TokenService,
     private activatedRoute: ActivatedRoute,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
@@ -75,8 +84,10 @@ export class SessionComponent implements OnInit, OnDestroy {
               const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(
-                this.routeService.navigateAbsolute("/sessions/" + sessionId,
-                  { queryParams: queryParams }));
+                this.routeService.navigateAbsolute("/sessions/" + sessionId, {
+                  queryParams: queryParams
+                })
+              );
             })
             .flatMap(() => Observable.never());
         }
@@ -85,19 +96,34 @@ export class SessionComponent implements OnInit, OnDestroy {
         this.sessionData = sessionData;
         this.subscribeToEvents();
       })
-      .subscribe(null,
-        (error: any) => {
-          this.statusText = "";
-          this.restErrorService.handleError(error, "Loading session failed");
+      .subscribe(null, (error: any) => {
+        this.statusText = "";
+        this.restErrorService.handleError(error, "Loading session failed");
+      });
+
+    // subscribe to view settings
+    this.settingsService.showToolsPanel$
+      .takeUntil(this.unsubscribe)
+      .subscribe((showToolsPanel: boolean) => {
+        if (showToolsPanel) {
+          this.split3Visible = true;
+          this.split1Size = 33;
+          this.split2Size = 42;
+          this.split3Size = 25;
+        } else {
+          this.split3Visible = false;
+          this.split1Size = 33;
+          this.split2Size = 67;
+          this.split3Size = 33;
         }
-      );
+      });
   }
 
   ngOnDestroy() {
     this.sessionEventService.unsubscribe();
 
-    this.subscriptions.forEach(subs => subs.unsubscribe());
-    this.subscriptions = [];
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   canDeactivate() {
@@ -159,8 +185,11 @@ export class SessionComponent implements OnInit, OnDestroy {
       this.sessionData
     );
 
-    this.subscriptions.push(
-      this.sessionEventService.getRuleStream().subscribe(change => {
+    // rule stream
+    this.sessionEventService
+      .getRuleStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(change => {
         const rule: Rule = <Rule>change.oldValue;
 
         // rule seems to be null when we delete our own session in another browser or tab
@@ -171,11 +200,13 @@ export class SessionComponent implements OnInit, OnDestroy {
           alert("The session has been deleted.");
           this.routeService.navigateAbsolute("/sessions");
         }
-      })
-    );
+      });
 
-    this.subscriptions.push(
-      this.sessionEventService.getJobStream().subscribe(change => {
+    // job stream
+    this.sessionEventService
+      .getJobStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(change => {
         const oldValue = <Job>change.oldValue;
         const newValue = <Job>change.newValue;
 
@@ -207,8 +238,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             log.info(newValue);
           }
         }
-      })
-    );
+      });
   }
 
   getJob(jobId: string): Job {

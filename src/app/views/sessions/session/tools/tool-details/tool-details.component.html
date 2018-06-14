@@ -1,0 +1,43 @@
+<h3 class="h3-xs lighter">
+  <span>Tool</span>
+</h3>
+
+<div *ngIf="toolSelection" class="chipster-highlight mb-3">
+  <div class="mb-2">
+    <h6>{{toolSelection.tool.name.displayName}}</h6>
+    <button class="btn btn-sm btn-success ml-1 float-right">Run</button>
+  </div>
+
+  <div class="mb-3">{{toolSelection.tool.description}}</div>
+
+
+  <span class="">
+    <button class="btn btn-sm btn-secondary-outline">Parameters</button>
+    <button class="btn btn-sm btn-secondary-outline ml-1">Inputs</button>
+    <button class="btn btn-sm btn-success ml-1">Run</button>
+  </span>
+
+  <h4 class=h4-xs>Parameters
+    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseParameters" aria-expanded="false"
+      aria-controls="collapseParameters">
+      Show
+    </button>
+  </h4>
+
+  <div class="collapse" id="collapseParameters">
+    <ch-tool-parameters class="mb-2" [tool]="toolSelection.tool"></ch-tool-parameters>
+  </div>
+
+
+  <h4 class=h4-xs>Inputs
+    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseInputs" aria-expanded="false" aria-controls="collapseInputs">
+      Show
+    </button>
+
+  </h4>
+
+  <div class="collapse" id="collapseInputs">
+    <ch-tool-inputs class="mb-2" [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool"
+      [selectedDatasets]="selectedDatasets" (updateBindings)="updateBindings($event)"></ch-tool-inputs>
+  </div>
+</div>

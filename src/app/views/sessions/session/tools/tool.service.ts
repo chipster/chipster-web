@@ -3,34 +3,39 @@ import Dataset from "../../../../model/session/dataset";
 import InputBinding from "../../../../model/session/inputbinding";
 import Tool from "../../../../model/session/tool";
 import ToolInput from "../../../../model/session/toolinput";
-import {Injectable} from "@angular/core";
-import {TypeTagService} from "../../../../shared/services/typetag.service";
-import {SessionData} from "../../../../model/session/session-data";
-import {Observable} from "rxjs";
-import {SessionDataService} from "../sessiondata.service";
-import {TSVReader} from "../../../../shared/services/TSVReader";
-import * as _ from 'lodash';
+import { Injectable } from "@angular/core";
+import { TypeTagService } from "../../../../shared/services/typetag.service";
+import { SessionData } from "../../../../model/session/session-data";
+import { Observable } from "rxjs";
+import { SessionDataService } from "../sessiondata.service";
+import { TSVReader } from "../../../../shared/services/TSVReader";
+import * as _ from "lodash";
 
 @Injectable()
 export class ToolService {
-
-  constructor(private typeTagService: TypeTagService,
-              private sessionDataService: SessionDataService,
-              private tsvReader: TSVReader) {}
+  constructor(
+    private typeTagService: TypeTagService,
+    private sessionDataService: SessionDataService,
+    private tsvReader: TSVReader
+  ) {}
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
-    return parameter.type === 'ENUM' ||
-      parameter.type === 'COLUMN_SEL' ||
-      parameter.type === 'METACOLUMN_SEL';
-  };
+    return (
+      parameter.type === "ENUM" ||
+      parameter.type === "COLUMN_SEL" ||
+      parameter.type === "METACOLUMN_SEL"
+    );
+  }
 
   //noinspection JSMethodCanBeStatic
   isNumberParameter(parameter: ToolParameter) {
-    return parameter.type === 'INTEGER' ||
-      parameter.type === 'DECIMAL' ||
-      parameter.type === 'PERCENT';
-  };
+    return (
+      parameter.type === "INTEGER" ||
+      parameter.type === "DECIMAL" ||
+      parameter.type === "PERCENT"
+    );
+  }
 
   //noinspection JSMethodCanBeStatic
   /**
@@ -43,38 +48,34 @@ export class ToolService {
    * @returns {number}
    */
   getStepSize(parameter: ToolParameter) {
-
-    if (parameter.type === 'PERCENT') {
-
+    if (parameter.type === "PERCENT") {
       // not used much, but used to be round figures in the old Java client
       return 0.01;
-
-    } else if (parameter.type === 'DECIMAL') {
-
+    } else if (parameter.type === "DECIMAL") {
       // the same number of decimal places than the default value has
-      if (parameter.defaultValue && parameter.defaultValue.indexOf('.') !== -1) {
-
-        let decimalPlaces = parameter.defaultValue.split('.')[1].length;
+      if (
+        parameter.defaultValue &&
+        parameter.defaultValue.indexOf(".") !== -1
+      ) {
+        const decimalPlaces = parameter.defaultValue.split(".")[1].length;
         return Math.pow(0.1, decimalPlaces);
-
       } else {
         // default value missing or does not have a decimal point
-        return 0.001
+        return 0.001;
       }
     }
 
     // integer parameters
     return 1;
-  };
+  }
 
   getDefaultValue(toolParameter: ToolParameter): number | string {
     if (this.isNumberParameter(toolParameter)) {
       return Number(toolParameter.defaultValue);
-    }
-    else {
+    } else {
       return toolParameter.defaultValue;
     }
-  };
+  }
 
   //noinspection JSMethodCanBeStatic
   isDefaultValue(parameter: ToolParameter, value: number | string) {
@@ -86,32 +87,39 @@ export class ToolService {
     return this.typeTagService.isCompatible(sessionData, dataset, type);
   }
 
-
-  bindInputs(sessionData: SessionData, tool: Tool, datasets: Dataset[]): InputBinding[] {
-
+  bindInputs(
+    sessionData: SessionData,
+    tool: Tool,
+    datasets: Dataset[]
+  ): InputBinding[] {
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
 
     // see OperationDefinition.bindInputs()
 
-    let inputBindings: InputBinding[] = [];
+    const inputBindings: InputBinding[] = [];
 
     // go through inputs, optional inputs last
-    for (let toolInput of tool.inputs.filter(input => !input.optional).concat(tool.inputs.filter(input => input.optional))) {
-
+    for (const toolInput of tool.inputs
+      .filter(input => !input.optional)
+      .concat(tool.inputs.filter(input => input.optional))) {
       // ignore phenodata input, it gets generated on server side TODO should we check that it exists?
       if (toolInput.meta) {
         continue;
       }
 
       // get compatible datasets
-      let compatibleDatasets = unboundDatasets.filter(dataset => this.isCompatible(sessionData, dataset, toolInput.type.name));
+      const compatibleDatasets = unboundDatasets.filter(dataset =>
+        this.isCompatible(sessionData, dataset, toolInput.type.name)
+      );
 
       // if no compatible datasets found, binding gets empty datasets array
       let datasetsToBind: Dataset[] = [];
       if (compatibleDatasets.length > 0) {
         // pick the first or all if multi input
-        datasetsToBind = this.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0,1);
+        datasetsToBind = this.isMultiInput(toolInput)
+          ? compatibleDatasets
+          : compatibleDatasets.slice(0, 1);
       }
 
       inputBindings.push({
@@ -119,9 +127,19 @@ export class ToolService {
         datasets: datasetsToBind
       });
 
-      let toolId = toolInput.name.id ? toolInput.name.id : toolInput.name.prefix + toolInput.name.postfix;
-      console.log("binding", toolId, "->", datasetsToBind.reduce((a, b) => {
-        return a + b.name + " " ;}, "").trim());
+      const toolId = toolInput.name.id
+        ? toolInput.name.id
+        : toolInput.name.prefix + toolInput.name.postfix;
+      console.log(
+        "binding",
+        toolId,
+        "->",
+        datasetsToBind
+          .reduce((a, b) => {
+            return a + b.name + " ";
+          }, "")
+          .trim()
+      );
 
       // remove bound datasets from unbound
       unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
@@ -138,16 +156,23 @@ export class ToolService {
    * at least one dataset bound
    */
   checkBindings(bindings: InputBinding[]): boolean {
-    return bindings && bindings.every(binding => binding.toolInput.optional || binding.datasets && binding.datasets.length > 0);
+    return (
+      bindings &&
+      bindings.every(
+        binding =>
+          binding.toolInput.optional ||
+          (binding.datasets && binding.datasets.length > 0)
+      )
+    );
   }
-
 
   //noinspection JSMethodCanBeStatic
   isMultiInput(input: ToolInput) {
-    return (input.name.prefix && input.name.prefix.length > 0) ||
-      (input.name.postfix && input.name.postfix.length > 0);
+    return (
+      (input.name.prefix && input.name.prefix.length > 0) ||
+      (input.name.postfix && input.name.postfix.length > 0)
+    );
   }
-
 
   /** Return the id of the nth input instance of multi input
    *
@@ -177,7 +202,7 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   selectionOptionsContains(options: any[], value: string | number) {
-    for (let option of options) {
+    for (const option of options) {
       if (value === option.id) {
         return true;
       }
@@ -187,19 +212,22 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   getDatasetHeaders(datasets: Array<Dataset>): Observable<Array<string>>[] {
-    return datasets.map((dataset: Dataset) => this.tsvReader.getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset));
+    return datasets.map((dataset: Dataset) =>
+      this.tsvReader.getTSVFileHeaders(
+        this.sessionDataService.getSessionId(),
+        dataset
+      )
+    );
   }
-
 
   //noinspection JSMethodCanBeStatic
   getMetadataColumns(datasets: Array<Dataset>) {
-    let keySet = new Set();
-    for (let dataset of datasets) {
-      for (let entry of dataset.metadata) {
+    const keySet = new Set();
+    for (const dataset of datasets) {
+      for (const entry of dataset.metadata) {
         keySet.add(entry.key);
       }
     }
     return Array.from(keySet);
   }
-
 }

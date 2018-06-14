@@ -19,14 +19,14 @@ import { SessionData } from "../../../../../model/session/session-data";
 import InputBinding from "../../../../../model/session/inputbinding";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
 import * as _ from "lodash";
-import { SettingsService } from "../../../../../shared/services/settings.service";
+import { ToolSelectionService } from "../../tool.selection.service";
 
 @Component({
-  selector: "ch-tool-list",
-  templateUrl: "./tool-list.component.html",
-  styleUrls: ["./tool-list.component.less"]
+  selector: "ch-tool-list-accordion",
+  templateUrl: "./tool-list-accordion.component.html",
+  styleUrls: ["./tool-list-accordion.component.less"]
 })
-export class ToolListComponent implements OnInit {
+export class ToolListAccordionComponent implements OnInit {
   @Input() private sessionData: SessionData;
   @Input() private toolSelection: ToolSelection;
 
@@ -44,11 +44,9 @@ export class ToolListComponent implements OnInit {
 
   selectTool$ = new Subject();
 
-  compactToolList = true;
-
   constructor(
     private pipeService: PipeService,
-    public settingsService: SettingsService
+    private toolSelectionService: ToolSelectionService
   ) {}
 
   ngOnInit() {
@@ -111,9 +109,10 @@ export class ToolListComponent implements OnInit {
       module: this.selectedModule
     };
 
-    console.log("selectTool", tool, toolSelection);
-
-    this.selectToolOutput.emit(toolSelection);
+    this.toolSelectionService.selectToolAndBindInputs(
+      toolSelection,
+      this.sessionData
+    );
   }
 
   search(value: any) {

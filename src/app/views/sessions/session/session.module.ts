@@ -19,6 +19,7 @@ import { DialogModalModule } from "./dialogmodal/dialogmodal.module";
 import { ModifiedSessionGuard } from "./modified-session.guard";
 import { JobService } from "./job.service";
 import { AngularSplitModule } from "angular-split";
+import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
 
 @NgModule({
   imports: [
@@ -36,7 +37,8 @@ import { AngularSplitModule } from "angular-split";
     SessionComponent,
     SessionListComponent,
     OpenSessionFileComponent,
-    JobErrorModalComponent
+    JobErrorModalComponent,
+    SelectionPanelComponent
   ],
   providers: [
     SessionEventService,

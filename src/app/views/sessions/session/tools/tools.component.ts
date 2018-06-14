@@ -16,6 +16,7 @@ import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import InputBinding from "../../../../model/session/inputbinding";
 import { ConfigService } from "../../../../shared/services/config.service";
+import { SettingsService } from "../../../../shared/services/settings.service";
 
 @Component({
   selector: "ch-tools",
@@ -49,6 +50,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private sessionEventService: SessionEventService,
     private jobService: JobService,
     private configService: ConfigService,
+    public settingsService: SettingsService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // close only on outside click
@@ -114,20 +116,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(toolSelection: ToolSelection) {
-    // // TODO reset col_sel and metacol_sel if selected dataset has changed
-    // for (let param of tool.parameters) {
-    //   this.populateParameterValues(param);
-    // }
-
-    // this component knows the selected datasets, so we can create input bindings
-    toolSelection.inputBindings = this.toolService.bindInputs(
-      this.sessionData,
-      toolSelection.tool,
-      this.selectedDatasets
+    this.toolSelectionService.selectToolAndBindInputs(
+      toolSelection,
+      this.sessionData
     );
 
-    this.toolSelection$.next(toolSelection);
-    this.toolsDropdown.close();
+    if (this.toolsDropdown) {
+      this.toolsDropdown.close();
+    }
   }
 
   onJobSelection(job: Job) {
@@ -137,24 +133,23 @@ export class ToolsComponent implements OnInit, OnDestroy {
   getManualPage() {
     const tool: string = this.toolSelection.tool.name.id;
 
-    return this.configService.getManualToolPostfix()
-      .map(manualPostfix => {
-        if (tool.endsWith(".java")) {
-          // remove the java package name
-          const splitted = tool.split(".");
-          if (splitted.length > 2) {
-            // java class name
-            return splitted[splitted.length - 2] + manualPostfix;
-          }
-        } else {
-          for (const ext of [".R", ".py"]) {
-            if (tool.endsWith(ext)) {
-              return tool.slice(0, -1 * ext.length) + manualPostfix;
-            }
+    return this.configService.getManualToolPostfix().map(manualPostfix => {
+      if (tool.endsWith(".java")) {
+        // remove the java package name
+        const splitted = tool.split(".");
+        if (splitted.length > 2) {
+          // java class name
+          return splitted[splitted.length - 2] + manualPostfix;
+        }
+      } else {
+        for (const ext of [".R", ".py"]) {
+          if (tool.endsWith(ext)) {
+            return tool.slice(0, -1 * ext.length) + manualPostfix;
           }
         }
-        return tool;
-      });
+      }
+      return tool;
+    });
   }
 
   ngOnDestroy() {
