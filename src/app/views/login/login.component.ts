@@ -64,12 +64,27 @@ export class LoginComponent implements OnInit {
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            // after logged in in the IDP, got to the servlet
+            /* There will be many navigations and redirections
+
+            We have to pass appRoute through this chaing to be able to return to the
+            correct appRoute after the login. Likewise with returnUrl, when the user's
+            token has expired.
+
+            1. user navigates to Shibboleth.sso/Login (determined by the link address)
+            2. discovery service
+            3. IDP
+            4. ShibbolethServlet (determined by the target parameter given in step 1)
+            5. back in this app (determined by the appRoute and returnUrl query parameters given in the step 4)
+            */
+            // url for the ShibbolethServlet in step 4, including the parameters
+            // for constructing the url to step 5
             const afterIdpUrl = s.publicUri + '/secure?'
               + 'appRoute=' + encodeURIComponent(appRoute) + '&'
               + 'returnUrl=' + encodeURIComponent(returnUrl);
 
-            this.ssoLoginUrl = s.publicUri + '/secure?'
+            // url for the Shibboleth login step 1, including the above url for the step 4
+            // (which in turn includes the parameters for the step 5)
+            this.ssoLoginUrl = s.publicUri + '/Shibboleth.sso/Login?'
               + 'target=' + encodeURIComponent(afterIdpUrl);
           });
 
