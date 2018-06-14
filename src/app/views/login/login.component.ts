@@ -64,10 +64,14 @@ export class LoginComponent implements OnInit {
         conf
           .filter(s => s.role === 'haka')
           .forEach(s => {
-            this.ssoLoginUrl = s.publicUri + '/secure?'
+            // after logged in in the IDP, got to the servlet
+            const afterIdpUrl = s.publicUri + '/secure?'
               + 'appRoute=' + encodeURIComponent(appRoute) + '&'
               + 'returnUrl=' + encodeURIComponent(returnUrl);
-            });
+
+            this.ssoLoginUrl = s.publicUri + '/secure?'
+              + 'target=' + encodeURIComponent(afterIdpUrl);
+          });
 
       }, err => this.restErrorService.handleError(err, 'get configuration failed'));
 
