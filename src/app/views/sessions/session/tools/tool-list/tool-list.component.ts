@@ -19,6 +19,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import InputBinding from "../../../../../model/session/inputbinding";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
 import * as _ from "lodash";
+import { SettingsService } from "../../../../../shared/services/settings.service";
 
 @Component({
   selector: "ch-tool-list",
@@ -43,7 +44,12 @@ export class ToolListComponent implements OnInit {
 
   selectTool$ = new Subject();
 
-  constructor(private pipeService: PipeService) {}
+  compactToolList = true;
+
+  constructor(
+    private pipeService: PipeService,
+    public settingsService: SettingsService
+  ) {}
 
   ngOnInit() {
     this.tools = _.cloneDeep(this.sessionData.tools);
@@ -59,7 +65,6 @@ export class ToolListComponent implements OnInit {
       this.selectModule(this.modules[0]);
       this.selectCategory(this.selectedModule.categories[0]);
     }
-
   }
 
   selectModule(module: Module) {

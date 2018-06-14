@@ -43,4 +43,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
       !this.settingsService.alwaysShowTools$.getValue()
     );
   }
+
+  toggleCompactToolList() {
+    this.settingsService.compactToolList$.next(
+      !this.settingsService.compactToolList$.getValue()
+    );
+  }
 }
