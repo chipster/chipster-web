@@ -107,8 +107,8 @@ export class SessionComponent implements OnInit, OnDestroy {
       .subscribe((showToolsPanel: boolean) => {
         if (showToolsPanel) {
           this.split3Visible = true;
-          this.split1Size = 33;
-          this.split2Size = 42;
+          this.split1Size = 30;
+          this.split2Size = 45;
           this.split3Size = 25;
         } else {
           this.split3Visible = false;
