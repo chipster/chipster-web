@@ -18,7 +18,8 @@
       <div class="col col-3">
         <div [formGroup]="startTimeInputForm">
           <label class="text-sm">Job Start Time:
-            <input type="datetime-local" formControlName="startTimeInput">
+            <input type="date" formControlName="startDateInput">
+            <input type="time" formControlName="startTimeInput">
           </label>
         </div>
       </div>
@@ -26,7 +27,8 @@
       <div class="col col-3">
         <div [formGroup]="endTimeInputForm">
           <label class="text-sm">Job End Time:
-            <input type="datetime-local" formControlName="endTimeInput">
+            <input type="date" formControlName="endDateInput">
+            <input type="time" formControlName="endTimeInput">
           </label>
         </div>
       </div>
@@ -38,13 +40,15 @@
       </div>
     </form>
   </div>
-
-
-
-
-
+<div class="row" style="margin-left: 5em">
+   <ngb-pagination class="d-flex justify-content-center" [collectionSize]="collectionSize" [directionLinks] = "true"  [maxSize] = "10" [(page)]="page" (pageChange) = "onPageChange(page)"></ngb-pagination>
+</div>
 <div class="row">
-  <table class="table">
+    <p *ngIf="jobListLoading" style="margin-left: 10em">
+        <br>
+        <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading Job List..
+      </p>
+  <table class="table" *ngIf="!jobListLoading">
     <thead>
     <tr>
       <th scope="col">Username</th>
@@ -58,17 +62,18 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let jobhistory of currentJobHistoryList" class="text-sm">
+    <tr *ngFor="let jobhistory of jobHistoryListWithParam" class="text-sm">
       <td>{{jobhistory.userName}}</td>
       <td>{{jobhistory.toolName}}</td>
       <td>{{jobhistory.timeDuration}}</td>
       <td>{{jobhistory.startTime|date:'short'}}</td>
       <td>{{jobhistory.endTime|date:'short'}}</td>
-      <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal()">Output</button></td>
+      <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
       <td>{{jobhistory.error}}</td>
       <td>{{jobhistory.jobStatus}}</td>
     </tr>
     </tbody>
   </table>
 </div>
+
 

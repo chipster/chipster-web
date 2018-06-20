@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import Dataset from "../../../../../model/session/dataset";
 import {SessionData} from "../../../../../model/session/session-data";
-import Job from  "../../../../../model/session/job";
+import Job from "../../../../../model/session/job";
 import JobParameter from "../../../../../model/session/jobparameter";
 
 
@@ -17,7 +17,7 @@ export class DatasetHistorymodalComponent implements OnInit {
   @Input('sessionData') sessionData: SessionData;
 
 
-  //manipulating the checkboxes for history options
+  // manipulating the checkboxes for history options
   historyFilterOptions = ['StepTitle', 'DatasetName', 'CreationDate', 'AppliedTool', 'Parameter', 'SourceCode'];
   historyOptionMap = {StepTitle: false, DatasetName: false, CreationDate: false,
     AppliedTool: false, Parameter: false, SourceCode: false};
@@ -39,15 +39,13 @@ export class DatasetHistorymodalComponent implements OnInit {
   }
 
   initHistoryOptionMap() {
-    for (var x = 0; x < this.historyFilterOptions.length; x++) {
+    for (let x = 0; x < this.historyFilterOptions.length; x++) {
       this.historyOptionMap[this.historyFilterOptions[x]] = true;
-
     }
   }
 
   updateCheckedOptions(option, event) {
     this.historyOptionMap[option] = event.target.checked;
-
   }
 
   getCheckedOptionStatus(index: number) {
@@ -60,14 +58,14 @@ export class DatasetHistorymodalComponent implements OnInit {
     let curSourceJob: Job;
 
 
-    //if this is not the first input dataset, otherwise sourceJob is null or
-    //there will be no input file, so we need to check both
+    // if this is not the first input dataset, otherwise sourceJob is null or
+    // there will be no input file, so we need to check both
 
     while (this.sessionData.datasetsMap.has(datasetId) && this.sessionData.jobsMap.has(sourceJobId) &&
     (this.sessionData.jobsMap.get(sourceJobId)).inputs.length > 0) {
 
-      let curStepDetail: DatasetHistoryStep = new DatasetHistoryStep();
-      //Populate history data
+      const curStepDetail: DatasetHistoryStep = new DatasetHistoryStep();
+      // Populate history data
         curSourceJob = this.sessionData.jobsMap.get(sourceJobId);
         curStepDetail.datasetName = this.sessionData.datasetsMap.get(datasetId).name;
         curStepDetail.creationDate = this.sessionData.session.created;
@@ -83,7 +81,7 @@ export class DatasetHistorymodalComponent implements OnInit {
 
     }
 
-    //Reverse the order of steps so that it shows analysis history from root to leaf
+    // Reverse the order of steps so that it shows analysis history from root to leaf
     this.datasetHistorySteps.reverse();
 
   }

@@ -1,6 +1,5 @@
 
 import {Component, Input} from '@angular/core';
-
 import {NgbModal, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -22,7 +21,9 @@ import {NgbModal, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 })
 
 export class JobOutputModalComponent {
-  @Input() output;
+  @Input() output: String;
 
-  constructor(public activeModal: NgbActiveModal) {}
+  constructor(public activeModal: NgbActiveModal) {
+    console.log(this.output);
+  }
 }
