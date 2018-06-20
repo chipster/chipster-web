@@ -1,4 +1,6 @@
 <div class="container">
+  <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
+
   <form name="paramForm" *ngIf="tool">
     <div *ngIf="tool.parameters.length === 0" class="alert alert-info">No parameters to modify for this tool</div>
     <table class="table table-sm table-hover" *ngIf="tool.parameters.length > 0">
