@@ -5,7 +5,7 @@ import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item
 import { ToolsComponent } from "./tools.component";
 import { SharedModule } from "../../../../shared/shared.module";
 import { FormsModule } from "@angular/forms";
-import { ToolParametersComponent } from "./tool-parameters/tool-parameters";
+import { ToolParametersComponent } from "./tool-parameters/tool-parameters.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ToolInputsComponent } from "./tool-inputs/tool-inputs.component";
 import { FilterCompatibleDatasetsPipe } from "./filter-compatible-datasets.pipe";

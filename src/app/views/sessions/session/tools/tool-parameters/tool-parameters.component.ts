@@ -5,8 +5,8 @@ import { ToolSelectionService } from "../../tool.selection.service";
 
 @Component({
   selector: "ch-tool-parameters",
-  templateUrl: "./tool-parameters.html",
-  styleUrls: ["./toos-parameters.less"]
+  templateUrl: "./tool-parameters.component.html",
+  styleUrls: ["./toos-parameters.component.less"]
 })
 export class ToolParametersComponent {
   @Input() tool: Tool;
