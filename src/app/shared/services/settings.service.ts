@@ -13,10 +13,6 @@ export class SettingsService {
     false
   );
 
-  public alwaysShowTools$: BehaviorSubject<boolean> = new BehaviorSubject(
-    false
-  );
-
   public compactToolList$: BehaviorSubject<boolean> = new BehaviorSubject(
     false
   );
