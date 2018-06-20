@@ -1,16 +1,16 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from "@angular/core";
 import Module from "../../model/session/module";
-import {PipeService} from "../services/pipeservice.service";
+import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
-  name: 'modulepipe'
+  name: "modulepipe"
 })
 export class ModulePipe implements PipeTransform {
-
   constructor(private pipeService: PipeService) {}
 
-  transform(modules: Array<Module>, searchWord: string){
-    return searchWord ? this.pipeService.findModulesContainingTool(modules, searchWord) : modules;
+  transform(modules: Array<Module>, searchWord: string) {
+    return searchWord
+      ? this.pipeService.findModulesContainingTool(modules, searchWord)
+      : modules;
   }
-
 }
