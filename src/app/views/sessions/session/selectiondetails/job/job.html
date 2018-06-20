@@ -2,8 +2,7 @@
 
   <div class="row">
     <div class="col-md-11">
-      <h3 class="h3-xs">
-        <span class="lighter">Job:</span> {{job.toolCategory + " / " + job.toolName}}</h3>
+      <h3 class="panel-title">Job</h3>
     </div>
 
     <div class="col-md-1">
@@ -12,6 +11,10 @@
   </div>
   <div class="chipster-highlight">
 
+
+    <h6>
+      {{job.toolCategory + " / " + job.toolName}}
+    </h6>
     <div>Status: {{state}}
       <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
       <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>

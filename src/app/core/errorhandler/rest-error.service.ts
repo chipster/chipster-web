@@ -4,6 +4,7 @@ import {Observable} from "rxjs/Observable";
 import {Router} from "@angular/router";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ErrorService} from "./error.service";
+import { RouteService } from '../../shared/services/route.service';
 
 @Injectable()
 export class RestErrorService  {
@@ -24,8 +25,10 @@ export class RestErrorService  {
     return !RestErrorService.isClientOrConnectionError(error);
   }
 
-  constructor(private router: Router,
-              private errorService: ErrorService) {
+  constructor(
+    private router: Router,
+    private errorService: ErrorService,
+    private routeService: RouteService) {
   }
 
   handleError(error: Response | any, message: string = "") {
@@ -46,6 +49,6 @@ export class RestErrorService  {
   }
 
   redirectToLoginAndBack() {
-    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
+    this.routeService.navigateAbsolute('/login', { queryParams: { returnUrl: this.router.routerState.snapshot.url }});
   }
 }

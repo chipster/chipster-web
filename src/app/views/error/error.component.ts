@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {ErrorService} from "../../core/errorhandler/error.service";
 import {ErrorMessage} from "../../core/errorhandler/errormessage";
 import * as _ from 'lodash';
@@ -9,7 +9,7 @@ import {RouteService} from "../../shared/services/route.service";
   selector: 'ch-error',
   templateUrl: './error.component.html'
 })
-export class ErrorComponent {
+export class ErrorComponent implements OnInit {
 
   errors: ErrorMessage[] = [];
 
@@ -42,6 +42,6 @@ export class ErrorComponent {
   }
 
   redirect() {
-    this.routeService.redirectToLoginAndBack()
+    this.routeService.redirectToLoginAndBack();
   }
 }

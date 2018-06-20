@@ -3,4 +3,5 @@ export default class Name {
   id: string;
   prefix: string;
   postfix: string;
+  spliced: boolean;
 }

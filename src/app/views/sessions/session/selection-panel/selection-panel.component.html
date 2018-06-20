@@ -1,0 +1,19 @@
+<!-- no selection, show something -->
+<div *ngIf="!(showTool || showFile || showJob)">
+  <h3 class="panel-title">Selection</h3>
+  <div class="chipster-highlight">
+    <i>No file, tool or job selected</i>
+  </div>
+</div>
+
+<!-- tool -->
+<ch-tool-details *ngIf="showTool || settingsService.splitSelectionPanel$.getValue()" [toolSelection]="toolSelection" [sessionData]="sessionData"
+  [selectedDatasets]="selectionService.selectedDatasets"></ch-tool-details>
+
+<!-- job -->
+<ch-job *ngIf="showJob" [sessionData]="sessionData">
+</ch-job>
+
+<!-- file -->
+<ch-file *ngIf="showFile || settingsService.splitSelectionPanel$.getValue()" [dataset]="selectionService.selectedDatasets[0]"
+  [jobs]="sessionData.jobsMap" [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>

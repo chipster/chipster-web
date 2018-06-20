@@ -9,28 +9,30 @@
 
       <table *ngIf="localInputBindings.length > 0" class="table table-borderless table-condensed table-hover">
 
-        <tr *ngFor="let inputBinding of localInputBindings"
-            (mouseover)="setInputDescription(inputBinding.toolInput.description )"
-            (mouseleave)="setInputDescription('')">
+        <tr *ngFor="let inputBinding of localInputBindings" (mouseover)="setInputDescription(inputBinding.toolInput.description )"
+          (mouseleave)="setInputDescription('')">
 
-        <!--<tr *ngFor="let inputBinding of inputBindings"-->
-            <!--ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"-->
-            <!--placement="right">-->
+          <!--<tr *ngFor="let inputBinding of inputBindings"-->
+          <!--ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"-->
+          <!--placement="right">-->
 
           <td>{{inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}</td>
 
 
           <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length > 0">
 
-            <select multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)"
-                    name="input_{{index}}">
+            <select *ngIf="inputBinding.toolInput.name.spliced" multiple [(ngModel)]="inputBinding.datasets" (ngModelChange)="inputSelected(inputBinding)">
+              <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
+            </select>
+
+            <select *ngIf="!inputBinding.toolInput.name.spliced" [(ngModel)]="inputBinding.datasets[0]" (ngModelChange)="inputSelected(inputBinding)">
               <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{dataset.name}}</option>
             </select>
           </td>
 
           <td *ngIf="(selectedDatasets | filterCompatibleDatasets:inputBinding.toolInput:sessionData).length == 0">No compatible files</td>
 
-          </tr>
+        </tr>
       </table>
     </div>
 

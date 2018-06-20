@@ -52,7 +52,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset)
       .takeUntil(this.unsubscribe)
       .subscribe((result: any) => {
-        let parsedTSV = d3.tsvParseRows(result);
+        const parsedTSV = d3.tsvParseRows(result);
         this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
         if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
           this.drawLineChart(this.tsv);
@@ -77,22 +77,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   drawLineChart(tsv: TSVFile) {
     const that = this;
     // Configurate svg and graph-area
-    let expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
+    const expressionprofileWidth = document.getElementById('expressionprofile').offsetWidth;
     const margin = {top: 10, right: 0, bottom: 150, left: 40};
-    let size = {width: expressionprofileWidth, height: 600};
-    let graphArea = {
+    const size = {width: expressionprofileWidth, height: 600};
+    const graphArea = {
       width: size.width,
       height: size.height - margin.top - margin.bottom
     };
 
     // SVG-element
-    let drag = d3.drag();
+    const drag = d3.drag();
 
-    let profile = d3.select('#expressionprofile');
+    const profile = d3.select('#expressionprofile');
 
     profile.select('svg').remove();
 
-    let svg = profile.append('svg')
+    const svg = profile.append('svg')
       .attr('width', size.width)
       .attr('height', size.height)
       .attr('id', 'svg')
@@ -100,15 +100,15 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .call(drag);
 
     // Custom headers for x-axis
-    let firstDataset: any = this.dataset;
-    let phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => {
+    const firstDataset: any = this.dataset;
+    const phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => {
       return metadata.key === 'description';
     });
 
     // Change default headers to values defined in phenodata if description value has been defined
-    let headers = _.map(this.visualizationTSVService.getChipHeaders(tsv), header => {
+    const headers = _.map(this.visualizationTSVService.getChipHeaders(tsv), header => {
       // find if there is a phenodata description matching header and containing a value
-      let phenodataHeader: any = _.find(phenodataDescriptions, (item: any) => {
+      const phenodataHeader: any = _.find(phenodataDescriptions, (item: any) => {
         return item.column === header && item.value !== null;
       });
       return phenodataHeader ? phenodataHeader.value : header;
@@ -116,10 +116,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // X-axis and scale
     // Calculate points (in pixels) for positioning x-axis points
-    let chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index);
-    let xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
-    //compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not assignable to parameter of type 'AxisScale<string>'.
-    let xAxis = d3.axisBottom(<any>xScale).ticks(headers.length);
+    const chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index);
+    const xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
+    // compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not
+    // assignable to parameter of type 'AxisScale<string>'.
+    const xAxis = d3.axisBottom(<any>xScale).ticks(headers.length);
     svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(' + margin.left + ',' + graphArea.height + ')')
@@ -129,30 +130,30 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .style('text-anchor', 'end');
 
     // Linear x-axis to determine selection-rectangle position scaled to tsv-data
-    let linearXScale = d3.scaleLinear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
+    const linearXScale = d3.scaleLinear().range([0, graphArea.width - (graphArea.width / headers.length)]).domain([0, headers.length - 1]);
 
     // Y-axis and scale
-    let yScale = d3.scaleLinear()
+    const yScale = d3.scaleLinear()
       .range([graphArea.height, 0])
       .domain([this.visualizationTSVService.getDomainBoundaries(tsv).min, this.visualizationTSVService.getDomainBoundaries(tsv).max]);
-    let yAxis = d3.axisLeft(yScale).ticks(5);
+    const yAxis = d3.axisLeft(yScale).ticks(5);
     svg.append('g')
       .attr('class', 'y axis')
       .attr('transform', 'translate(' + margin.left + ',0 )')
       .call(yAxis);
 
     // Paths
-    let pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
-    let lineGenerator = d3.line()
+    const pathsGroup = svg.append("g").attr('id', 'pathsGroup').attr('transform', 'translate(' + margin.left + ',0)');
+    const lineGenerator = d3.line()
       .x((d: [number, number], i: number) => parseFloat(xScale(headers[i]).toString()))
       .y((d: any) => yScale(d));
 
-    let color = d3.scaleOrdinal(d3.schemeCategory20);
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    let geneExpressions = this.visualizationTSVService.getGeneExpressions(tsv);
-    let orderedExpressionGenes = this.visualizationTSVService.orderBodyByFirstValue(geneExpressions);
+    const geneExpressions = this.visualizationTSVService.getGeneExpressions(tsv);
+    const orderedExpressionGenes = this.visualizationTSVService.orderBodyByFirstValue(geneExpressions);
 
-    let paths = pathsGroup.selectAll('.path')
+    const paths = pathsGroup.selectAll('.path')
       .data(orderedExpressionGenes)
       .enter()
       .append('path')
@@ -165,8 +166,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr('stroke', (d: any, i: number) => {
         //     There are 20 different colors in colorcategory. Setting same color for each consecutive 5% of lines.
         //     So for 100 lines 5 first lines gets first color in category, next 5 lines get second color and so on.
-        let colorIndex = (_.floor((i / tsv.body.size() ) * 20)).toString();
-        return color(colorIndex)
+        const colorIndex = (_.floor((i / tsv.body.size() ) * 20)).toString();
+        return color(colorIndex);
       })
       .on('mouseover', (d: any) => {
         that.setSelectionHoverStyle(d.id);
@@ -175,9 +176,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         that.removeSelectionHoverStyle(d.id);
       })
       .on('click', (d: GeneExpression) => {
-        let id = d.id;
-        let isCtrl = UtilsService.isCtrlKey(d3.event);
-        let isShift = UtilsService.isShiftKey(d3.event);
+        const id = d.id;
+        const isCtrl = UtilsService.isCtrlKey(d3.event);
+        const isShift = UtilsService.isShiftKey(d3.event);
         if (isShift) {
           that.addSelections([id]);
         } else if (isCtrl) {
@@ -198,10 +199,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     //     .attr('stroke-dashoffset', 0);
 
     // Dragging
-    let dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
+    const dragGroup = svg.append("g").attr('id', 'dragGroup').attr('transform', 'translate(' + margin.left + ',0)');
 
     // Create selection rectangle
-    let band = dragGroup.append("rect")
+    const band = dragGroup.append("rect")
       .attr("width", 0)
       .attr("height", 0)
       .attr("x", 0)
@@ -209,13 +210,13 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("class", "band")
       .attr('id', 'band');
 
-    let bandPos = [-1, -1];
+    const bandPos = [-1, -1];
     let startPoint = new Point(-1, -1); // startpoint for dragging
 
     // Register drag handlers
     drag.on("drag", () => {
-      let pos = d3.mouse(document.getElementById('dragGroup'));
-      let endPoint = new Point(pos[0], pos[1]);
+      const pos = d3.mouse(document.getElementById('dragGroup'));
+      const endPoint = new Point(pos[0], pos[1]);
 
       if (endPoint.x < startPoint.x) {
         d3.select(".band").attr("transform", "translate(" + (endPoint.x) + "," + startPoint.y + ")");
@@ -227,7 +228,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         d3.select(".band").attr("transform", "translate(" + (startPoint.x) + "," + endPoint.y + ")");
       }
 
-      //set new position of band when user initializes drag
+      // set new position of band when user initializes drag
       if (startPoint.x === -1) {
         startPoint = new Point(endPoint.x, endPoint.y);
         d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + startPoint.y + ")");
@@ -239,30 +240,30 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     });
 
     drag.on("end", () => {
-      let pos = d3.mouse(document.getElementById('dragGroup'));
-      let endPoint = new Point(pos[0], pos[1]);
+      const pos = d3.mouse(document.getElementById('dragGroup'));
+      const endPoint = new Point(pos[0], pos[1]);
 
       if ((startPoint.x !== -1 && startPoint.y !== -1) && ((startPoint.x !== endPoint.x) && (startPoint.y !== endPoint.y))) {
         this.resetSelections();
         d3.selectAll('.path').attr('stroke-width', 1);
-        let p1 = new Point(endPoint.x, endPoint.y);
-        let p2 = new Point(startPoint.x, startPoint.y);
+        const p1 = new Point(endPoint.x, endPoint.y);
+        const p2 = new Point(startPoint.x, startPoint.y);
 
-        let intervalIndexes = that.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, tsv);
-        var intervals: Array<Interval> = [];
+        const intervalIndexes = that.expressionProfileService.getCrossingIntervals(endPoint, startPoint, linearXScale, tsv);
+        const intervals: Array<Interval> = [];
 
         // create intervals
         for (let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++) {
-          let lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
-          let intervalStartIndex = chipValueIndex;
+          const lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
+          const intervalStartIndex = chipValueIndex;
 
-          let rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
+          const rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
           intervals.push(new Interval(intervalStartIndex, lines, rectangle));
         }
 
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
-        for (let interval of intervals) {
-          let intersectingLines = _.filter(interval.lines, (line: Line) => {
+        for (const interval of intervals) {
+          const intersectingLines = _.filter(interval.lines, (line: Line) => {
             return that.expressionProfileService.isIntersecting(line, interval.rectangle);
           });
 
@@ -286,15 +287,15 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         .attr("width", 0)
         .attr("height", 0)
         .attr("x", 0)
-        .attr("y", 0)
+        .attr("y", 0);
     }
 
   }
 
   createNewDataset() {
-    let selectedGeneExpressionIds = this.getSelectionIds();
-    let tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
-    let data = d3.tsvFormatRows(tsvData);
+    const selectedGeneExpressionIds = this.getSelectionIds();
+    const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
+    const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService.createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data).subscribe();
   }
 
@@ -308,29 +309,29 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   removeSelections(ids: Array<string>): void {
-    for (let id of ids) {
+    for (const id of ids) {
       this.removeSelectionStyle(id);
     }
 
-    let selectedGeneIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
+    const selectedGeneIds = _.filter(this.getSelectionIds(), selectionId => !_.includes(ids, selectionId));
     this.selectedGeneExpressions = _.map(selectedGeneIds, id => this.visualizationTSVService.getGeneExpression(this.tsv, id));
   }
 
   addSelections(ids: Array<string>) {
-    let selectionIds = this.getSelectionIds();
-    let missingSelectionIds = _.difference(ids, selectionIds);
-    let missingGeneExpressions = _.map(missingSelectionIds, id => this.visualizationTSVService.getGeneExpression(this.tsv, id));
+    const selectionIds = this.getSelectionIds();
+    const missingSelectionIds = _.difference(ids, selectionIds);
+    const missingGeneExpressions = _.map(missingSelectionIds, id => this.visualizationTSVService.getGeneExpression(this.tsv, id));
     this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
     missingSelectionIds.forEach(id => {
-      this.setSelectionStyle(id)
+      this.setSelectionStyle(id);
     });
     this.setViewSelectionList();
-  };
+  }
 
   toggleSelections(ids: Array<string>) {
-    let selectionIds = this.getSelectionIds();
-    let selectionIdsToAdd = _.difference(ids, selectionIds);
-    let selectionIdsToRemove = _.intersection(ids, selectionIds);
+    const selectionIds = this.getSelectionIds();
+    const selectionIdsToAdd = _.difference(ids, selectionIds);
+    const selectionIdsToRemove = _.intersection(ids, selectionIds);
     this.addSelections(selectionIdsToAdd);
     this.removeSelections(selectionIdsToRemove);
   }
@@ -344,7 +345,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   setSelectionHoverStyle(id: string) {
-    d3.select('#path' + id).classed('pathover', true)
+    d3.select('#path' + id).classed('pathover', true);
   }
 
   removeSelectionHoverStyle(id: string) {
@@ -352,10 +353,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   setViewSelectionList(): void {
-    let rowIds = this.selectedGeneExpressions.map((geneExpression: GeneExpression) => geneExpression.id);
-    let rawTSVRows = this.tsv.body.getTSVRows(rowIds);
-    let tsvSymbolIndex = this.tsv.getColumnIndex('symbol');
-    let tsvIdentifierIndex = this.tsv.getColumnIndex('identifier');
+    const rowIds = this.selectedGeneExpressions.map((geneExpression: GeneExpression) => geneExpression.id);
+    const rawTSVRows = this.tsv.body.getTSVRows(rowIds);
+    const tsvSymbolIndex = this.tsv.getColumnIndex('symbol');
+    const tsvIdentifierIndex = this.tsv.getColumnIndex('identifier');
     this.viewSelectionList = rawTSVRows.map((row: TSVRow) => {
       return {symbol: row.row[tsvSymbolIndex], identifier: row.row[tsvIdentifierIndex]};
     });

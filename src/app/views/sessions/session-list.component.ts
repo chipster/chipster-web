@@ -9,6 +9,7 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
+import log from 'loglevel';
 
 @Component({
   selector: "ch-session-list",
@@ -22,10 +23,11 @@ export class SessionListComponent implements OnInit {
   public previousSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
+  public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
   private selectedSessionId: string;
-  private workflowPreviewLoading = false;
-  private workflowPreviewFailed = false;
+  public workflowPreviewLoading = false;
+  public workflowPreviewFailed = false;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
@@ -35,7 +37,7 @@ export class SessionListComponent implements OnInit {
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
-    private sessionDataService: SessionDataService,
+    public sessionDataService: SessionDataService,
     private activatedRoute: ActivatedRoute,
     private routeService: RouteService,
   ) {}
@@ -57,7 +59,7 @@ export class SessionListComponent implements OnInit {
         return this.sessionResource.loadSession(session.sessionId);
       })
       .do((fullSession: SessionData) => {
-        console.log("sessionData", fullSession);
+        log.info("sessionData", fullSession);
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
@@ -182,14 +184,19 @@ export class SessionListComponent implements OnInit {
       )
       .then(
         () => {
+
+          this.deletingSessions.add(session);
+
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
           // delete the session only from this user (i.e. the rule)
           this.sessionDataService.deletePersonalRules(session).subscribe(
             () => {
               this.updateSessions();
               this.previewedSession = null;
+              this.deletingSessions.delete(session);
             },
             (error: any) => {
+              this.deletingSessions.delete(session);
               this.errorHandlerService.handleError(
                 error,
                 "Deleting session failed"

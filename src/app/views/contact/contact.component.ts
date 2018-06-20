@@ -15,14 +15,14 @@ export class ContactComponent implements OnInit {
   constructor(
     private errorService: ErrorService,
     private configService: ConfigService,
-    private routeServcie: RouteService) {
+    private routeService: RouteService) {
   }
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe(path => {
       if (path) {
-        this.contactFile = this.routeServcie.basename(path);
-        this.contactPath = this.routeServcie.dirname(path) + '/';
+        this.contactFile = this.routeService.basename(path);
+        this.contactPath = this.routeService.dirname(path) + '/';
       }
     }, err => {
       console.error('failed to get the contact page path', err);

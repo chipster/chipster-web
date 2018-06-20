@@ -5,4 +5,5 @@ export default class ToolInput {
     name: Name;
     optional: boolean;
     type: any;
+    spliced: boolean;
 }
