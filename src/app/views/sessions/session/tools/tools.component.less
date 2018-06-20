@@ -1,41 +1,39 @@
-// disable different color when 'pressed'
-@active-backgroud-color: #337ab7;
-@active-border-color: #2e6da4;
-.module-button.btn-primary:hover {
-  background-color: @active-backgroud-color;
-  border-color: @active-border-color;
-}
-.module-button.btn-primary:focus {
-  background-color: @active-backgroud-color;
-  border-color: @active-border-color;
+#tool-list {
+  overflow-y: scroll;
 }
 
-#tools-panel {
-  margin-bottom: 2em;
+// .tools-panel-dropdown {
+//   height: 100%;
+// }
+
+.col-left {
+  padding-left: 0px;
+  padding-right: 8px;
 }
 
-.margin-bottom {
-  margin-bottom: 10px;
+.col-middle {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
-.button-wide {
-  width: 9em;
+.col-right {
+  padding-right: 0px;
+  padding-left: 8px;
 }
 
-.w-6 {
-  width: 6em;
+.tool-list-item {
+  padding-left: 0.8em;
+  padding-right: 0.8em;
 }
 
-.w-7 {
-  width: 6em;
+.compact {
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
 }
 
-.w-8 {
-  width: 8em;
-}
-
-#close-tools-button {
-  margin-right: 10px;
+.dropdown-div {
+  // dropdown calculates its width from the parent div
+  position: unset;
 }
 
 //noinspection CssInvalidPseudoSelector
@@ -45,19 +43,7 @@
   box-shadow: 0 5px 30px 0 #555;
 }
 
-.tools-dropdown {
-  height: calc(~"100vh - 170px");
-}
-
-.tools-dropdown-lower {
-  height: calc(~"100vh - 210px");
-}
-
-.tool-name {
-  padding-top: 10px;
-}
-
-.dropdown-div {
-  // dropdown calculates its width from the parent div
-  position: unset;
+.hidden-dropdown-button {
+  visibility: hidden;
+  position: absolute;
 }

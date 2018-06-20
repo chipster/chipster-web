@@ -93,6 +93,10 @@ export class ToolSelectionService implements OnDestroy {
     this.store.dispatch({ type: SET_TOOL_SELECTION, payload: toolSelection });
   }
 
+  selectTool(toolSelection: ToolSelection) {
+    this.store.dispatch({ type: SET_TOOL_SELECTION, payload: toolSelection });
+  }
+
   parametersChanged() {
     this.parameterChecker$.next(this.checkCurrentToolParameters());
   }

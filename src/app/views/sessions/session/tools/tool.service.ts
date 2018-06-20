@@ -10,13 +10,15 @@ import { Observable } from "rxjs";
 import { SessionDataService } from "../sessiondata.service";
 import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
+import { ConfigService } from "../../../../shared/services/config.service";
 
 @Injectable()
 export class ToolService {
   constructor(
     private typeTagService: TypeTagService,
     private sessionDataService: SessionDataService,
-    private tsvReader: TSVReader
+    private tsvReader: TSVReader,
+    private configService: ConfigService
   ) {}
 
   //noinspection JSMethodCanBeStatic
@@ -229,5 +231,25 @@ export class ToolService {
       }
     }
     return Array.from(keySet);
+  }
+
+  getManualPage(toolId: string) {
+    return this.configService.getManualToolPostfix().map(manualPostfix => {
+      if (toolId.endsWith(".java")) {
+        // remove the java package name
+        const splitted = toolId.split(".");
+        if (splitted.length > 2) {
+          // java class name
+          return splitted[splitted.length - 2] + manualPostfix;
+        }
+      } else {
+        for (const ext of [".R", ".py"]) {
+          if (toolId.endsWith(ext)) {
+            return toolId.slice(0, -1 * ext.length) + manualPostfix;
+          }
+        }
+      }
+      return toolId;
+    });
   }
 }
