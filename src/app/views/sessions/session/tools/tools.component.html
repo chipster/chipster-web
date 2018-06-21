@@ -109,51 +109,54 @@
 
       <!-- action buttons and tool description-->
       <div class="col col-right">
-        <div class="row mb-2">
-          <div class="col d-flex">
+        <div style="position: relative; height: 100%;">
+          <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
+            <div class="row mb-2">
+              <div class="col d-flex">
 
-            <!-- manual -->
-            <!-- <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
+                <!-- manual -->
+                <!-- <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
               [disabled]="!toolSelection">
               <span class="fa fa-info" aria-hidden="true"></span>
             </button> -->
 
-            <!-- parameters -->
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); parametersDropdown.toggle();"
-              title="Parameters" [disabled]="!toolSelection">
-              <!--suppress JSBitwiseOperatorUsage -->
-              <span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
-              <!--suppress JSBitwiseOperatorUsage -->
-              <span class="fa fa-cog ml-1" aria-hidden="true"></span>
-            </button>
+                <!-- parameters -->
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); parametersDropdown.toggle();"
+                  title="Parameters" [disabled]="!toolSelection">
+                  <!--suppress JSBitwiseOperatorUsage -->
+                  <span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
+                  <!--suppress JSBitwiseOperatorUsage -->
+                  <span class="fa fa-cog ml-1" aria-hidden="true"></span>
+                </button>
 
-            <!-- inputs -->
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); inputsDropdown.toggle();"
-              title="Inputs" [disabled]="!toolSelection">
-              <!--suppress JSBitwiseOperatorUsage -->
-              <span *ngIf="!(toolSelectionService.inputsValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
-              <span class="fa fa-files-o ml-1" aria-hidden="true"></span>
-            </button>
+                <!-- inputs -->
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); inputsDropdown.toggle();"
+                  title="Inputs" [disabled]="!toolSelection">
+                  <!--suppress JSBitwiseOperatorUsage -->
+                  <span *ngIf="!(toolSelectionService.inputsValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
+                  <span class="fa fa-files-o ml-1" aria-hidden="true"></span>
+                </button>
 
-            <!-- run -->
-            <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
-              <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
-              <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
-              Run
-            </button>
-          </div>
-        </div>
+                <!-- run -->
+                <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
+                  <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
+                  <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
+                  Run
+                </button>
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col">
-            <div *ngIf="toolSelection">
-              <span>{{toolSelection.tool.description}} </span>
-              <span class="btn-link" (click)="openManualModal()">More&nbsp;info&hellip;</span>
+            <div class="row">
+              <div class="col">
+                <div *ngIf="toolSelection">
+                  <span>{{toolSelection.tool.description}} </span>
+                  <span class="btn-link" (click)="openManualModal()">More&nbsp;info&hellip;</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
 </div>
