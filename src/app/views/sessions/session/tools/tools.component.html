@@ -12,9 +12,7 @@
       <div ngbDropdown #jobsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="jobsDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="jobsDropdown" class="tools-panel-dropdown">
-          <ch-scroller>
-            <ch-job-list [jobs]="getJobList()" (jobSelected)="onJobSelection($event)"></ch-job-list>
-          </ch-scroller>
+          <ch-job-list [jobs]="getJobList()" (jobSelected)="onJobSelection($event)"></ch-job-list>
         </div>
       </div>
 
@@ -66,9 +64,7 @@
       <div ngbDropdown #parametersDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="parametersDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-scroller>
-            <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
-          </ch-scroller>
+          <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
         </div>
       </div>
 
@@ -76,10 +72,8 @@
       <div ngbDropdown #inputsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="inputsDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-scroller>
-            <ch-tool-inputs [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool" [selectedDatasets]="selectionService.selectedDatasets"
-              (updateBindings)="setBindings($event)"></ch-tool-inputs>
-          </ch-scroller>
+          <ch-tool-inputs [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool" [selectedDatasets]="selectionService.selectedDatasets"
+            (updateBindings)="setBindings($event)"></ch-tool-inputs>
         </div>
       </div>
 
@@ -87,9 +81,7 @@
       <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-scroller>
-            <ch-manual [page]="toolService.getManualPage(toolSelection.tool.name.id) | async" [showControls]=true></ch-manual>
-          </ch-scroller>
+          <ch-manual [page]="toolService.getManualPage(toolSelection.tool.name.id) | async" [showControls]=true></ch-manual>
         </div>
       </div>
 
