@@ -305,11 +305,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getParentSize() {
-    const rect = this.scrollerDiv.node().getBoundingClientRect();
-    // prevent IE from showing scrollbars unnecessarily
-    rect.height--;
-    rect.width--;
-    return rect;
+    return this.scrollerDiv.node().getBoundingClientRect();
   }
 
   getContentSize() {
