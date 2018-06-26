@@ -1,22 +1,30 @@
-import { ToolService } from "./tool.service";
-import Job from "../../../../model/session/job";
-import Dataset from "../../../../model/session/dataset";
-import { SelectionService } from "../selection.service";
-import { Component, Input, OnInit, OnDestroy, ViewChild } from "@angular/core";
-import { ToolSelection } from "./ToolSelection";
-import { Store } from "@ngrx/store";
-import { Subject } from "rxjs/Subject";
-import { SET_TOOL_SELECTION } from "../../../../state/selected-tool.reducer";
+import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../model/session/session-data";
+import { OnInit, OnDestroy, Input, ViewChild, Component } from "@angular/core";
+import { SearchBoxComponent } from "../../../../shared/components/search-box/search-box.component";
+import { ToolSelection } from "./ToolSelection";
+import Job from "../../../../model/session/job";
+import Module from "../../../../model/session/module";
+import Tool from "../../../../model/session/tool";
+import Category from "../../../../model/session/category";
+import { Subject } from "rxjs/Subject";
+import { PipeService } from "../../../../shared/services/pipeservice.service";
+import { SettingsService } from "../../../../shared/services/settings.service";
 import { ToolSelectionService } from "../tool.selection.service";
-import { NgbDropdown, NgbDropdownConfig } from "@ng-bootstrap/ng-bootstrap";
-import UtilsService from "../../../../shared/utilities/utils";
-import { SessionEventService } from "../sessionevent.service";
+import { SelectionService } from "../selection.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
-import InputBinding from "../../../../model/session/inputbinding";
+import { SessionEventService } from "../sessionevent.service";
 import { ConfigService } from "../../../../shared/services/config.service";
-import { SettingsService } from "../../../../shared/services/settings.service";
+import { ToolService } from "./tool.service";
+import * as _ from "lodash";
+import Dataset from "../../../../model/session/dataset";
+import { ModulePipe } from "../../../../shared/pipes/modulepipe.pipe";
+import { CategoryPipe } from "../../../../shared/pipes/categorypipe.pipe";
+import { ToolPipe } from "../../../../shared/pipes/toolpipe.pipe";
+import InputBinding from "../../../../model/session/inputbinding";
+import UtilsService from "../../../../shared/utilities/utils";
+import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 
 @Component({
   selector: "ch-tools",
@@ -25,140 +33,185 @@ import { SettingsService } from "../../../../shared/services/settings.service";
   providers: [NgbDropdownConfig]
 })
 export class ToolsComponent implements OnInit, OnDestroy {
-  @Input() sessionData: SessionData;
+  @Input() public sessionData: SessionData;
 
-  @ViewChild("toolsDropdown") public toolsDropdown: NgbDropdown;
+  @ViewChild("searchBox") private searchBox: SearchBoxComponent;
 
-  runningJobs = 0;
-  jobList: Job[];
+  public toolSelection: ToolSelection;
+  public runningJobs = 0;
+  public jobList: Job[];
 
-  // initialization
-  toolSelection: ToolSelection = null;
+  modules: Array<Module> = [];
+  tools: Array<Tool> = [];
 
-  toolSelection$ = new Subject();
+  searchTool: string;
 
-  selectedDatasets: Dataset[] = [];
+  selectedModule: Module = null; // used in modal to keep track of which module has been selected
+  selectedCategory: Category = null; // used in modal to keep track of which category has been selected
 
-  subscriptions: Array<any> = [];
+  compactToolList = true;
+
+  private unsubscribe: Subject<any> = new Subject();
 
   constructor(
-    private selectionService: SelectionService,
-    private selectionHandlerService: SelectionHandlerService,
-    public toolSelectionService: ToolSelectionService,
-    private toolService: ToolService,
-    private store: Store<any>,
-    private sessionEventService: SessionEventService,
-    private jobService: JobService,
-    private configService: ConfigService,
+    private pipeService: PipeService,
     public settingsService: SettingsService,
+    public toolSelectionService: ToolSelectionService,
+    public selectionService: SelectionService,
+    private jobService: JobService,
+    private selectionHandlerService: SelectionHandlerService,
+    private sessionEventService: SessionEventService,
+    private configService: ConfigService,
+    public toolService: ToolService,
+    private modalService: NgbModal,
     dropdownConfig: NgbDropdownConfig
   ) {
-    // close only on outside click
+    // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
   }
 
   ngOnInit() {
-    this.updateJobs();
+    this.tools = _.cloneDeep(this.sessionData.tools);
+    this.modules = _.cloneDeep(this.sessionData.modules);
 
-    this.selectedDatasets = this.selectionService.selectedDatasets;
+    // subscribe to tool selection
+    this.toolSelectionService.toolSelection$
+      .takeUntil(this.unsubscribe)
+      .subscribe((toolSelection: ToolSelection) => {
+        this.toolSelection = toolSelection;
+      });
 
-    this.toolSelection$
-      .map((toolSelection: ToolSelection) => ({
-        type: SET_TOOL_SELECTION,
-        payload: toolSelection
-      }))
-      .subscribe(this.store.dispatch.bind(this.store));
-
-    this.subscriptions.push(
-      this.store.select("toolSelection").subscribe(
-        (toolSelection: ToolSelection) => {
-          this.toolSelection = toolSelection;
-        },
-        (error: any) => {
-          console.error("Fetching tool from store failed", error);
+    // subscribe to file selection
+    this.selectionService.selectedDatasets$
+      .takeUntil(this.unsubscribe)
+      .subscribe((selectedDatasets: Array<Dataset>) => {
+        if (this.toolSelection) {
+          const updatedInputBindings = this.toolService.bindInputs(
+            this.sessionData,
+            this.toolSelection.tool,
+            this.selectionService.selectedDatasets
+          );
+          const newToolSelection = Object.assign({}, this.toolSelection, {
+            inputBindings: updatedInputBindings
+          });
+          this.toolSelectionService.selectTool(newToolSelection);
         }
-      )
-    );
-
-    // fetch selectedDatasets from store and if tool is selected update it's inputbindings and update store
-    this.subscriptions.push(
-      this.store.select("selectedDatasets").subscribe(
-        (selectedDatasets: Array<Dataset>) => {
-          this.selectedDatasets = selectedDatasets;
-          if (this.toolSelection) {
-            const updatedInputBindings = this.toolService.bindInputs(
-              this.sessionData,
-              this.toolSelection.tool,
-              this.selectionService.selectedDatasets
-            );
-            const newToolSelection = Object.assign({}, this.toolSelection, {
-              inputBindings: updatedInputBindings
-            });
-            this.toolSelection$.next(newToolSelection);
-          }
-        },
-        (error: any) => {
-          console.error("Fetching selected datasets from store failed", error);
-        }
-      )
-    );
+      });
 
     // trigger parameter validation
     if (this.toolSelection) {
-      this.selectTool(this.toolSelection);
+      // make sure the module and category are selected even after changing the session
+      this.selectModule(this.toolSelection.module);
+      this.selectCategory(this.toolSelection.category);
+      this.selectTool(this.toolSelection.tool); // TODO is this really needed?
+    } else {
+      this.selectModule(this.modules[0]);
+      this.selectCategory(this.selectedModule.categories[0]);
     }
 
-    this.subscriptions.push(
-      this.sessionEventService.getJobStream().subscribe(() => {
+    this.updateJobs();
+
+    // subscribe to job events
+    this.sessionEventService
+      .getJobStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(() => {
         this.updateJobs();
-      })
-    );
+      });
   }
 
-  selectTool(toolSelection: ToolSelection) {
+  selectModule(module: Module) {
+    this.selectedModule = module;
+    this.selectFirstVisible();
+  }
+
+  // defines which tool category the user have selected
+  selectCategory(category: Category) {
+    this.selectedCategory = category;
+  }
+
+  selectFirstVisible() {
+    const filteredModules = new ModulePipe(this.pipeService).transform(
+      this.modules,
+      this.searchTool
+    );
+    if (
+      filteredModules &&
+      filteredModules.indexOf(this.selectedModule) < 0 &&
+      filteredModules[0]
+    ) {
+      this.selectModule(filteredModules[0]);
+    }
+
+    const filteredCategories = new CategoryPipe(this.pipeService).transform(
+      this.selectedModule.categories,
+      this.searchTool
+    );
+    if (
+      filteredCategories &&
+      filteredCategories.indexOf(this.selectedCategory) < 0 &&
+      filteredCategories[0]
+    ) {
+      this.selectCategory(filteredCategories[0]);
+    }
+  }
+
+  selectTool(tool: Tool) {
+    const toolSelection: ToolSelection = {
+      tool: tool,
+      inputBindings: null,
+      category: this.selectedCategory,
+      module: this.selectedModule
+    };
+
     this.toolSelectionService.selectToolAndBindInputs(
       toolSelection,
       this.sessionData
     );
+  }
 
-    if (this.toolsDropdown) {
-      this.toolsDropdown.close();
+  search(value: any) {
+    this.searchTool = value;
+    this.selectFirstVisible();
+  }
+
+  searchEnter() {
+    // select the first result
+    const visibleTools = new ToolPipe(this.pipeService).transform(
+      this.selectedCategory.tools,
+      this.searchTool
+    );
+    if (visibleTools[0]) {
+      this.searchTool = null;
+      // this.selectTool(visibleTools[0].name.id);
+      this.selectTool(visibleTools[0]);
     }
   }
 
-  onJobSelection(job: Job) {
-    this.selectionHandlerService.setJobSelection([job]);
-  }
-
-  getManualPage() {
-    const tool: string = this.toolSelection.tool.name.id;
-
-    return this.configService.getManualToolPostfix().map(manualPostfix => {
-      if (tool.endsWith(".java")) {
-        // remove the java package name
-        const splitted = tool.split(".");
-        if (splitted.length > 2) {
-          // java class name
-          return splitted[splitted.length - 2] + manualPostfix;
-        }
-      } else {
-        for (const ext of [".R", ".py"]) {
-          if (tool.endsWith(ext)) {
-            return tool.slice(0, -1 * ext.length) + manualPostfix;
-          }
-        }
-      }
-      return tool;
-    });
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(subs => subs.unsubscribe());
-    this.subscriptions = [];
+  openChange(isOpen) {
+    if (isOpen) {
+      this.searchBox.focus();
+    }
   }
 
   runJob() {
     this.jobService.runJob(this.toolSelection);
+  }
+
+  setBindings(updatedBindings: InputBinding[]) {
+    const toolSelection: ToolSelection = {
+      tool: this.toolSelection.tool,
+      inputBindings: updatedBindings,
+      category: this.toolSelection.category,
+      module: this.toolSelection.module
+    };
+
+    this.toolSelectionService.selectTool(toolSelection);
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   getJobList(): Job[] {
@@ -176,14 +229,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  updateBindings(updatedBindings: InputBinding[]) {
-    const toolSelection: ToolSelection = {
-      tool: this.toolSelection.tool,
-      inputBindings: updatedBindings,
-      category: this.toolSelection.category,
-      module: this.toolSelection.module
-    };
+  onJobSelection(job: Job) {
+    this.selectionHandlerService.setJobSelection([job]);
+  }
 
-    this.toolSelection$.next(toolSelection);
+  openManualModal() {
+    const modalRef = this.modalService.open(ManualModalComponent, {
+      size: "lg"
+    });
+    modalRef.componentInstance.tool = this.toolSelection.tool;
   }
 }

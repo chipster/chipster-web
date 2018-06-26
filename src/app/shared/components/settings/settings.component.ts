@@ -38,11 +38,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
       !this.settingsService.splitSelectionPanel$.getValue()
     );
   }
-  toggleAlwaysShowTools() {
-    this.settingsService.alwaysShowTools$.next(
-      !this.settingsService.alwaysShowTools$.getValue()
-    );
-  }
 
   toggleCompactToolList() {
     this.settingsService.compactToolList$.next(

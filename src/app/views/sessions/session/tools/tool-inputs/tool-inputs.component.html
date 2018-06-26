@@ -1,8 +1,10 @@
-<ngb-alert *ngIf="inputBindings.length > 0 && selectedDatasets.length == 0" [dismissible]="false">
-  No selected files
-</ngb-alert>
-
 <div class="container">
+  <h3 class="h3-xs mt-1 mb-2">Input files</h3>
+
+  <ngb-alert *ngIf="inputBindings.length > 0 && selectedDatasets.length == 0" [dismissible]="false">
+    No selected files
+  </ngb-alert>
+
   <div class="row">
 
     <div class="col-md-7 no-padding-right">

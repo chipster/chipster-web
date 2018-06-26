@@ -27,6 +27,7 @@ import { AuthHttpClientService } from "./services/auth-http-client.service";
 import { SpreadsheetService } from "./services/spreadsheet.service";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { SettingsService } from "./services/settings.service";
+import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
 
 /*
  * @description: Shared module should contain application global resources
@@ -45,7 +46,8 @@ import { SettingsService } from "./services/settings.service";
     SecondsPipe,
     SearchBoxComponent,
     StatusComponent,
-    SettingsComponent
+    SettingsComponent,
+    ToolSourceComponent
   ],
   providers: [
     PipeService,
@@ -73,7 +75,8 @@ import { SettingsService } from "./services/settings.service";
     SecondsPipe,
     SearchBoxComponent,
     StatusComponent,
-    SettingsComponent
+    SettingsComponent,
+    ToolSourceComponent
   ]
 })
 export class SharedModule {}
