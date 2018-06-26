@@ -16,7 +16,7 @@ export class DatasetDetailsComponent {
   datasets: Array<Dataset>;
 
 	constructor(
-		public selectionService: SelectionService,
+    public selectionService: SelectionService,
 		private SessionDataService: SessionDataService,
     private store: Store<any>) {}
 

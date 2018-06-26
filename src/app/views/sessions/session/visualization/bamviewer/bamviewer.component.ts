@@ -21,7 +21,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private dataset: Dataset;
   private plain: any;
   private samHeaderLen: number;
-  private samHeader="";
+  private samHeader = "";
   private headerEnd: number;
   private samHeaderList:Array<string>=[];
   private bamRecordList: Array<BamRecord> = [];
@@ -72,7 +72,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
           this.state = new LoadState(State.Ready);
         }
-      },(error: any) => {
+      }, ( error: any) => {
         this.state = new LoadState(State.Fail, "Loading bam file failed");
         this.errorHandlerService.handleError(error, this.state.message);
       });
@@ -113,7 +113,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         this.chrName = name;
         //lRef= length of the reference sequence
         let lRef = this.readInt(header, p + lName + 4);
-        this.samHeader+="@SQ"+ " "+"SN" +":" +" "+ name+" "+"LN:"+ lRef+ " ";
+        this.samHeader+= "@SQ"+ " "+"SN" +":" +" "+ name+" "+"LN:"+ lRef+ " ";
 
         p = p + 8 + lName;
         this.headerEnd = p;
