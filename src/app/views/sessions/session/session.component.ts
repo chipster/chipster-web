@@ -247,12 +247,10 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   deleteDatasetsNow() {
-    console.log("in delete dataset now");
     this.sessionDataService.deleteDatasetsNow(this.sessionData);
   }
 
   deleteDatasetsUndo() {
-    console.log("in delte dataset undo");
     this.sessionDataService.deleteDatasetsUndo(this.sessionData);
   }
 

@@ -254,7 +254,6 @@ export class SessionDataService {
 
   // Added the delete dataset code here as two components are sharing the code
   deleteDatasetsNow(sessionData: SessionData) {
-    console.log( "recieved the delete event");
     // cancel the timer
     clearTimeout(this.deletedDatasetsTimeout);
 
@@ -295,7 +294,6 @@ export class SessionDataService {
   deleteDatasetsLater(sessionData: SessionData) {
     // let's assume that user doesn't want to undo, if she is already
     // deleting more
-    console.log("came here");
     if (sessionData.deletedDatasets) {
         this.deleteDatasetsNow(sessionData);
     }

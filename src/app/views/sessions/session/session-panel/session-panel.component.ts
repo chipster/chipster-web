@@ -223,7 +223,6 @@ export class SessionPanelComponent {
   }
 
   deleteDataset() {
-    console.log("delete dataset propageted");
     this.deleteStart.emit();
   }
 }
