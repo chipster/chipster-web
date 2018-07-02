@@ -13,6 +13,7 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
 
+
 @Component({
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
@@ -22,6 +23,7 @@ export class SessionPanelComponent {
   @Input() sessionData: SessionData;
   @Output() deleteDatasetsNow = new EventEmitter<void>();
   @Output() deleteDatasetsUndo = new EventEmitter<void>();
+  @Output() deleteStart = new EventEmitter<void>();
 
   datasetSearch: string;
 
@@ -218,5 +220,10 @@ export class SessionPanelComponent {
           // modal dismissed
         }
       );
+  }
+
+  deleteDataset() {
+    console.log("delete dataset propageted");
+    this.deleteStart.emit();
   }
 }

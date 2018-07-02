@@ -14,10 +14,17 @@ import Rule from '../../../model/session/rule';
 import { SessionData } from '../../../model/session/session-data';
 import { DialogModalService } from './dialogmodal/dialogmodal.service';
 import { Router } from '@angular/router';
+import { SessionEventService } from './sessionevent.service';
+import WsEvent from "../../../model/events/wsevent";
+import { SelectionService } from './selection.service';
+import * as _ from "lodash";
+import { SelectionHandlerService } from './selection-handler.service';
+
 
 @Injectable()
 export class SessionDataService {
   private sessionId: string;
+  deletedDatasetsTimeout: any;
 
   constructor(
     private sessionResource: SessionResource,
@@ -25,7 +32,10 @@ export class SessionDataService {
     private fileResource: FileResource,
     private errorService: ErrorService,
     private restService: RestService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private sessionEventService: SessionEventService,
+    private selectionService: SelectionService,
+    private selectionHandlerService: SelectionHandlerService
   ) {}
 
   getSessionId(): string {
@@ -241,4 +251,79 @@ export class SessionDataService {
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
     );
   }
+
+  // Added the delete dataset code here as two components are sharing the code
+  deleteDatasetsNow(sessionData: SessionData) {
+    console.log( "recieved the delete event");
+    // cancel the timer
+    clearTimeout(this.deletedDatasetsTimeout);
+
+    // delete from the server
+    this.deleteDatasets(sessionData.deletedDatasets);
+
+    // hide the undo message
+    sessionData.deletedDatasets = null;
+  }
+
+  deleteDatasetsUndo(sessionData: SessionData) {
+    // cancel the deletion
+    clearTimeout(this.deletedDatasetsTimeout);
+
+    // show datasets again in the workflowgraph
+    sessionData.deletedDatasets.forEach((dataset: Dataset) => {
+      const wsEvent = new WsEvent(
+        this.getSessionId(),
+        "DATASET",
+        dataset.datasetId,
+        "CREATE"
+      );
+      this.sessionEventService.generateLocalEvent(wsEvent);
+    });
+
+    // hide the undo message
+    sessionData.deletedDatasets = null;
+  }
+
+  /**
+   * Poor man's undo for the dataset deletion.
+   *
+   * Hide the dataset from the client for ten
+   * seconds and delete from the server only after that. deleteDatasetsUndo() will
+   * cancel the timer and make the datasets visible again. Session copying and sharing
+   * should filter out these hidden datasets or we need a proper server side support for this.
+   */
+  deleteDatasetsLater(sessionData: SessionData) {
+    // let's assume that user doesn't want to undo, if she is already
+    // deleting more
+    console.log("came here");
+    if (sessionData.deletedDatasets) {
+        this.deleteDatasetsNow(sessionData);
+    }
+
+    // make a copy so that further selection changes won't change the array
+    sessionData.deletedDatasets = _.clone(
+      this.selectionService.selectedDatasets
+    );
+
+    // all selected datasets are going to be deleted
+    // clear selection to avoid problems in other parts of the UI
+    this.selectionHandlerService.clearDatasetSelection();
+
+    // hide from the workflowgraph
+    sessionData.deletedDatasets.forEach((dataset: Dataset) => {
+      const wsEvent = new WsEvent(
+        this.getSessionId(),
+        "DATASET",
+        dataset.datasetId,
+        "DELETE"
+      );
+      this.sessionEventService.generateLocalEvent(wsEvent);
+    });
+
+    // start timer to delete datasets from the server later
+    this.deletedDatasetsTimeout = setTimeout(() => {
+      this.deleteDatasetsNow(sessionData);
+    }, 10 * 1000);
+  }
+
 }

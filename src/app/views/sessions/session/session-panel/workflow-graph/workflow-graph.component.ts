@@ -46,7 +46,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input() defaultScale: number;
   @Input() enabled: boolean;
   @Input() sessionData: SessionData;
-  @Output() onDelete: EventEmitter<any> = new EventEmitter();
+  @Output() delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -410,7 +410,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
           title: 'Delete',
           action: function(d, i) {
-            // self.onDelete.emit();
+            console.log(d.dataset);
+            console.log(self.selectionService.selectedDatasets);
+            self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+            console.log(self.selectionService.selectedDatasets);
+            self.delete.emit();
           }
       },
       {
