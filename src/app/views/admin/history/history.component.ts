@@ -210,7 +210,7 @@ export class HistoryComponent implements OnInit {
 
   checkIfValue(x: any): boolean {
     console.log(x);
-    if ( x || x !== undefined || x != null || x!== '' ) {
+    if ( x || x !== undefined || x != null || x !== '' ) {
       return true;
     } else {
       return false;

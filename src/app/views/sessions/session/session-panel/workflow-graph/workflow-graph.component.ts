@@ -5,11 +5,13 @@ import { Link } from "./link";
 import {
   Component,
   Input,
+  Output,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
-  ViewEncapsulation
+  ViewEncapsulation,
+  EventEmitter
 } from "@angular/core";
 import Dataset from "../../../../../model/session/dataset";
 import Job from "../../../../../model/session/job";
@@ -24,7 +26,10 @@ import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
 import UtilsService from "../../../../../shared/utilities/utils";
-import { Timer } from "d3-timer";
+import * as d3ContextMenu from 'd3-context-menu';
+import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
+import { SessionData } from "../../../../../model/session/session-data";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -40,6 +45,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input() datasetSearch: string;
   @Input() defaultScale: number;
   @Input() enabled: boolean;
+  @Input() sessionData: SessionData;
+  @Output() delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -47,7 +54,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private zoomStepFactor = 0.2;
 
   private zoom;
-
   constructor(
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
@@ -55,7 +61,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private pipeService: PipeService,
     private workflowGraphService: WorkflowGraphService,
     private selectionHandlerService: SelectionHandlerService,
-    private store: Store<any>
+    private store: Store<any>,
+    private datasetModalService: DatasetModalService,
+    private dialogModalService: DialogModalService
   ) {}
 
   // actually selected datasets
@@ -190,7 +198,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // show
     this.update();
     this.renderGraph();
-
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
     // pan or zoom
@@ -384,6 +391,51 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .selectAll("rect")
       .data(this.datasetNodes, d => d.datasetId);
 
+      // context menu items
+    const menu = [
+      {
+          title: 'Rename',
+          action: function(d, i) {
+            const dataset = _.clone(d.dataset);
+            self.dialogModalService
+              .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename")
+              .flatMap(name => {
+                dataset.name = name;
+                return self.sessionDataService.updateDataset(dataset);
+              })
+              .subscribe(null, err => console.log("dataset rename error", err));
+          },
+          disabled: false // optional, defaults to false
+      },
+      {
+          title: 'Delete',
+          action: function(d, i) {
+            console.log(d.dataset);
+            console.log(self.selectionService.selectedDatasets);
+            self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+            console.log(self.selectionService.selectedDatasets);
+            self.delete.emit();
+          }
+      },
+      {
+        title: 'Export',
+        action: function(d, i) {
+            console.log('The dataset is : ' + d.dataset);
+            self.sessionDataService.exportDatasets([d.dataset]);
+        }
+    },
+    {
+      title: 'Show History as text',
+      action: function(d, i) {
+        self.datasetModalService.openDatasetHistoryModal(
+          d.dataset,
+          self.sessionData
+        );
+      }
+  }
+  ];
+
+
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
     this.d3DatasetNodes
       .enter()
@@ -402,6 +454,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         )
       )
       .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
+      .on("contextmenu", d3ContextMenu(menu))
       .on("click", function(d) {
         if (self.enabled) {
           self.selectionHandlerService.clearJobSelection();
@@ -446,7 +499,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.d3DatasetNodes.exit().remove();
 
-    // update the scroll limits if datasets were added or removed
+    // update the scroll limits if datasets were added or removedn
     if (
       !this.d3DatasetNodes.enter().empty() ||
       !this.d3DatasetNodes.exit().empty()

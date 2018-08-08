@@ -15,14 +15,14 @@ export class DatasetDetailsComponent {
 
   datasets: Array<Dataset>;
 
-	constructor(
-		public selectionService: SelectionService,
-		private SessionDataService: SessionDataService,
+  constructor(
+    public selectionService: SelectionService,
+    private sessionDataService: SessionDataService,
     private store: Store<any>) {}
 
-	ngOnInit() {
-	  const datasets$ = this.store.select('selectedDatasets');
-	  datasets$.subscribe( (datasets: Array<Dataset>) => {
+    ngOnInit() {
+      const datasets$ = this.store.select('selectedDatasets');
+      datasets$.subscribe( (datasets: Array<Dataset>) => {
       this.datasets = datasets;
     });
   }
@@ -31,7 +31,7 @@ export class DatasetDetailsComponent {
     this.onDelete.emit();
   }
 
-	exportDatasets() {
-		this.SessionDataService.exportDatasets(this.selectionService.selectedDatasets);
-	}
+ exportDatasets() {
+    this.sessionDataService.exportDatasets(this.selectionService.selectedDatasets);
+ }
 }

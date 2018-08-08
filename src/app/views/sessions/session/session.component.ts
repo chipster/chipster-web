@@ -23,6 +23,7 @@ import { ConfigService } from "../../../shared/services/config.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
+import { selectedDatasets } from "../../../state/selectedDatasets.reducer";
 
 @Component({
   selector: "ch-session",
@@ -246,75 +247,16 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   deleteDatasetsNow() {
-    // cancel the timer
-    clearTimeout(this.deletedDatasetsTimeout);
-
-    // delete from the server
-    this.sessionDataService.deleteDatasets(this.sessionData.deletedDatasets);
-
-    // hide the undo message
-    this.sessionData.deletedDatasets = null;
+    this.sessionDataService.deleteDatasetsNow(this.sessionData);
   }
 
   deleteDatasetsUndo() {
-    // cancel the deletion
-    clearTimeout(this.deletedDatasetsTimeout);
-
-    // show datasets again in the workflowgraph
-    this.sessionData.deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(
-        this.sessionDataService.getSessionId(),
-        "DATASET",
-        dataset.datasetId,
-        "CREATE"
-      );
-      this.sessionEventService.generateLocalEvent(wsEvent);
-    });
-
-    // hide the undo message
-    this.sessionData.deletedDatasets = null;
+    this.sessionDataService.deleteDatasetsUndo(this.sessionData);
   }
 
-  /**
-   * Poor man's undo for the dataset deletion.
-   *
-   * Hide the dataset from the client for ten
-   * seconds and delete from the server only after that. deleteDatasetsUndo() will
-   * cancel the timer and make the datasets visible again. Session copying and sharing
-   * should filter out these hidden datasets or we need a proper server side support for this.
-   */
-  deleteDatasetsLater() {
-    // let's assume that user doesn't want to undo, if she is already
-    // deleting more
-    if (this.sessionData.deletedDatasets) {
-      this.deleteDatasetsNow();
-    }
-
-    // make a copy so that further selection changes won't change the array
-    this.sessionData.deletedDatasets = _.clone(
-      this.selectionService.selectedDatasets
-    );
-
-    // all selected datasets are going to be deleted
-    // clear selection to avoid problems in other parts of the UI
-    this.selectionHandlerService.clearDatasetSelection();
-
-    // hide from the workflowgraph
-    this.sessionData.deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(
-        this.sessionDataService.getSessionId(),
-        "DATASET",
-        dataset.datasetId,
-        "DELETE"
-      );
-      this.sessionEventService.generateLocalEvent(wsEvent);
-    });
-
-    // start timer to delete datasets from the server later
-    this.deletedDatasetsTimeout = setTimeout(() => {
-      this.deleteDatasetsNow();
-    }, 10 * 1000);
-  }
+ deleteDatasetsLater() {
+   this.sessionDataService.deleteDatasetsLater(this.sessionData);
+ }
 
   exportDatasets(datasets: Dataset[]) {
     this.sessionDataService.exportDatasets(datasets);

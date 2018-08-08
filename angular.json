@@ -23,7 +23,8 @@
               "src/styles.less",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
-              "src/assets/lib/handsontable/handsontable.full.css"
+              "src/assets/lib/handsontable/handsontable.full.css",
+              "node_modules/d3-context-menu/css/d3-context-menu.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
@@ -32,7 +33,8 @@
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "node_modules/pileup/dist/pileup.js",
               "src/assets/lib/handsontable/handsontable.full.js",
-              "node_modules/yamljs/dist/yaml.min.js"
+              "node_modules/yamljs/dist/yaml.min.js",
+              "node_modules/d3-context-menu/js/d3-context-menu.js"
             ]
           },
           "configurations": {
@@ -86,7 +88,8 @@
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "node_modules/pileup/dist/pileup.js",
               "src/assets/lib/handsontable/handsontable.full.js",
-              "node_modules/yamljs/dist/yaml.min.js"
+              "node_modules/yamljs/dist/yaml.min.js",
+              "node_modules/d3-context-menu/js/d3-context-menu.js"
             ],
             "styles": [
               "src/styles.less",

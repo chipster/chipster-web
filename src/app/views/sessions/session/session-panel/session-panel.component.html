@@ -58,7 +58,7 @@
           </div>
 
           <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets() " [jobsMap]="sessionData.jobsMap
-              " [modulesMap]="sessionData.modulesMap " [datasetSearch]="datasetSearch " [defaultScale]="1 " [enabled]="true "></ch-workflow-graph>
+              " [modulesMap]="sessionData.modulesMap " [datasetSearch]="datasetSearch " [defaultScale]="1 " [enabled]="true " [sessionData]= "sessionData" (delete)=" deleteDataset()"></ch-workflow-graph>
         </div>
       </ng-template>
     </ngb-tab>
