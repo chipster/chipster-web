@@ -1,5 +1,5 @@
 import { SessionDataService } from "../sessiondata.service";
-import Dataset from "../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";
 import { Component, Input, Output, EventEmitter } from "@angular/core";

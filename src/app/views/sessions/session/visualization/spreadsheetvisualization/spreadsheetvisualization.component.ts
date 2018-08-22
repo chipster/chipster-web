@@ -4,7 +4,7 @@ import {Input, Component, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {Response} from "@angular/http";
-import Dataset from "../../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SessionData} from "../../../../../model/session/session-data";
 import {Tags, TypeTagService} from "../../../../../shared/services/typetag.service";

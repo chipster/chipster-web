@@ -3,7 +3,7 @@ import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {RestService} from "../../core/rest-services/restservice/rest.service";
 import {ResponseContentType, Headers} from "@angular/http";
-import Dataset from "../../model/session/dataset";
+import Dataset from "chipster-js-common";
 
 @Injectable()
 export class FileResource {

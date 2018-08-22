@@ -5,7 +5,7 @@ import {SessionDataService} from "../../sessiondata.service";
 import {SessionData} from "../../../../../model/session/session-data";
 import {TypeTagService} from "../../../../../shared/services/typetag.service";
 import {Observable} from 'rxjs/Observable';
-import Dataset from "../../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import {Subject} from "rxjs/Subject";
 import {LoadState, State} from "../../../../../model/loadstate";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";

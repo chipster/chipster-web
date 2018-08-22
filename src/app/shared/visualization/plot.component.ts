@@ -3,7 +3,7 @@
 import {OnChanges, Input, HostListener} from "@angular/core";
 import {FileResource} from "../resources/fileresource";
 import {SessionDataService} from "../../views/sessions/session/sessiondata.service";
-import Dataset from "../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import TSVFile from "../../model/tsv/TSVFile";
 import {PlotData} from "../../views/sessions/session/visualization/model/plotData";
 import * as d3 from "d3";

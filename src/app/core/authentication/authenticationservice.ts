@@ -7,7 +7,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {TokenResponse} from "./token.response";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
-import { User } from "../../model/user";
+import { User } from "chipster-js-common";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 

@@ -1,5 +1,5 @@
 import { SessionResource } from "../../shared/resources/session.resource";
-import Session from "../../model/session/session";
+import Session from "chipster-js-common";
 import { SessionData } from "../../model/session/session-data";
 import { Component, OnInit } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";

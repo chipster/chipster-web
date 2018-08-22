@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { SessionDataService } from "../../sessiondata.service";
 import { SelectionService } from "../../selection.service";
-import Dataset from "../../../../../model/session/dataset";
-import Job from "../../../../../model/session/job";
+import Dataset from "chipster-js-common";
+import Job from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetModalService } from "../datasetmodal.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";

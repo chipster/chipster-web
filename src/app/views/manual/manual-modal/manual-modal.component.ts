@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { ToolService } from "../../sessions/session/tools/tool.service";
-import Tool from "../../../model/session/tool";
+import Tool from "chipster-js-common";
 
 @Component({
   selector: "ch-manual-modal-component",

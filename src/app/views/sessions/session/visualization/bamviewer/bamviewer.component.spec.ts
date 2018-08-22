@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BamviewerComponent } from './bamviewer.component';
+import { BamViewerComponent } from './bamviewer.component';
 
 describe('BamviewerComponent', () => {
-  let component: BamviewerComponent;
-  let fixture: ComponentFixture<BamviewerComponent>;
+  let component: BamViewerComponent;
+  let fixture: ComponentFixture<BamViewerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BamviewerComponent ]
+      declarations: [ BamViewerComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BamviewerComponent);
+    fixture = TestBed.createComponent(BamViewerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

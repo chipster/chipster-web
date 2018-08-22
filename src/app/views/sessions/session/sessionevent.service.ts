@@ -1,18 +1,18 @@
 import {ConfigService} from "../../../shared/services/config.service";
 import {SessionResource} from "../../../shared/resources/session.resource";
-import Session from "../../../model/session/session";
-import Dataset from "../../../model/session/dataset";
-import Job from "../../../model/session/job";
+import Session from "chipster-js-common";
+import Dataset from "chipster-js-common";
+import Job from "chipster-js-common";
 import {Injectable} from "@angular/core";
 import {TokenService} from "../../../core/authentication/token.service";
 import {SessionData} from "../../../model/session/session-data";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
-import SessionEvent from "../../../model/events/sessionevent";
+import SessionEvent from "chipster-js-common";
 import {WebSocketSubject} from "rxjs/observable/dom/WebSocketSubject";
-import WsEvent from "../../../model/events/wsevent";
+import WsEvent from "chipster-js-common";
 import {ErrorService} from "../../../core/errorhandler/error.service";
-import Rule from "../../../model/session/rule";
+import Rule from "chipster-js-common";
 
 @Injectable()
 export class SessionEventService {

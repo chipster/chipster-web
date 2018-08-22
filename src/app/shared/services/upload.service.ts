@@ -3,7 +3,7 @@ import { SessionResource } from "../resources/session.resource";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "./config.service";
 import { Observable } from "rxjs/Rx";
-import Dataset from "../../model/session/dataset";
+import Dataset from "chipster-js-common";
 
 declare let Flow: any;
 

@@ -1,6 +1,6 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import {TSVReader} from "../../../../../shared/services/TSVReader";
-import Dataset from "../../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import {Observable} from "rxjs/Observable";

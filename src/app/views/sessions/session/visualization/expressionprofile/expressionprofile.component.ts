@@ -12,7 +12,7 @@ import * as _ from "lodash";
 import {Component, Input, OnChanges, OnDestroy, ViewEncapsulation} from "@angular/core";
 import Line from "./line";
 import {FileResource} from "../../../../../shared/resources/fileresource";
-import Dataset from "../../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {LoadState, State} from "../../../../../model/loadstate";

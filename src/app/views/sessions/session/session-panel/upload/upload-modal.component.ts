@@ -1,4 +1,4 @@
-import Dataset from "../../../../../model/session/dataset";
+import Dataset from "chipster-js-common";
 import {
   Component,
   Input,

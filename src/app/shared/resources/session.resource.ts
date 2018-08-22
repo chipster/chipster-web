@@ -1,17 +1,12 @@
 import { ConfigService } from '../services/config.service';
 import { ToolResource } from './toolresource';
-import Session from '../../model/session/session';
-import Dataset from '../../model/session/dataset';
-import Module from '../../model/session/module';
-import Tool from '../../model/session/tool';
-import Job from '../../model/session/job';
+import { Session, Dataset, Module, Tool, Job, Rule } from 'chipster-js-common';
 import * as _ from 'lodash';
 import UtilsService from '../utilities/utils';
 import { Injectable } from '@angular/core';
 import { SessionData } from '../../model/session/session-data';
 import { RestService } from '../../core/rest-services/restservice/rest.service';
 import { Observable } from 'rxjs/Observable';
-import Rule from '../../model/session/rule';
 import log from 'loglevel';
 
 @Injectable()

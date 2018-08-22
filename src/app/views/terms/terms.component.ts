@@ -6,7 +6,7 @@ import {RestErrorService} from '../../core/errorhandler/rest-error.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ConfigService} from '../../shared/services/config.service';
 import { AuthGuard } from '../../core/authentication/auth-guard.service';
-import { User } from '../../model/user';
+import { User } from 'chipster-js-common';
 import { flatMap } from 'rxjs/operators';
 import { RouteService } from '../../shared/services/route.service';
 

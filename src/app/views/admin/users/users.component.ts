@@ -3,7 +3,7 @@ import {ConfigService} from "../../../shared/services/config.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
 import { AuthenticationService } from '../../../core/authentication/authenticationservice';
-import { User } from '../../../model/user';
+import { User } from 'chipster-js-common';
 
 @Component({
   selector: 'ch-users',

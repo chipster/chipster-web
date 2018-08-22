@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import Tool from "../../model/session/tool";
+import Tool from "chipster-js-common";
 import {PipeService} from "../services/pipeservice.service";
 
 @Pipe({

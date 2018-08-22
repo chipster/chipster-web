@@ -3,7 +3,6 @@ import { CanActivate, Router } from '@angular/router';
 import { TokenService } from './token.service';
 import { AuthenticationService } from './authenticationservice';
 import { Observable } from 'rxjs/Observable';
-import { User } from '../../model/user';
 import { TermsComponent } from '../../views/terms/terms.component';
 import { ConfigService } from '../../shared/services/config.service';
 import { RouteService } from '../../shared/services/route.service';

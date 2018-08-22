@@ -13,9 +13,9 @@ import {
   ViewEncapsulation,
   EventEmitter
 } from "@angular/core";
-import Dataset from "../../../../../model/session/dataset";
-import Job from "../../../../../model/session/job";
-import Module from "../../../../../model/session/module";
+import Dataset from "chipster-js-common";
+import Job from "chipster-js-common";
+import Module from "chipster-js-common";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SessionDataService } from "../../sessiondata.service";
 import * as d3 from "d3";

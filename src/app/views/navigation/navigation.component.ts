@@ -3,7 +3,7 @@ import { TokenService } from "../../core/authentication/token.service";
 
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs/Observable";
-import { User } from "../../model/user";
+import { User } from "chipster-js-common";
 import { ConfigService } from "../../shared/services/config.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ErrorService } from "../../core/errorhandler/error.service";

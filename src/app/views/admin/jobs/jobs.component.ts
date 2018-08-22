@@ -3,7 +3,7 @@ import {ConfigService} from "../../../shared/services/config.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
 import {Observable} from "rxjs/Observable";
-import Job from "../../../model/session/job";
+import Job from "chipster-js-common";
 import {IdPair} from "../../../model/id-pair";
 
 @Component({
