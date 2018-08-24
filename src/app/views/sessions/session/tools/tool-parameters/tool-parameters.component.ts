@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import Tool from "chipster-js-common";
+import { Tool } from "chipster-js-common";
 import { ToolService } from "../tool.service";
 import { ToolSelectionService } from "../../tool.selection.service";
 

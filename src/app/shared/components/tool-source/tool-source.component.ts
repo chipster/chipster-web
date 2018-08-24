@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import Tool from "chipster-js-common";
+import { Tool } from "chipster-js-common";
 import { ToolResource } from "../../resources/toolresource";
 
 @Component({

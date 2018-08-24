@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import Dataset from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../model/session/session-data";
 
 // tags for code completion and usage search

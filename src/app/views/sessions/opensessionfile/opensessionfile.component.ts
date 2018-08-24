@@ -1,6 +1,6 @@
 import {Component, ChangeDetectorRef, ViewChild, Output, EventEmitter, AfterViewInit, OnInit} from '@angular/core';
 import {UploadService} from "../../../shared/services/upload.service";
-import Session from "chipster-js-common";
+import { Session } from "chipster-js-common";
 import {SessionResource} from "../../../shared/resources/session.resource";
 import {SessionWorkerResource} from "../../../shared/resources/sessionworker.resource";
 import {ErrorService} from "../../../core/errorhandler/error.service";

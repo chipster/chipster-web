@@ -1,6 +1,6 @@
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
-import Dataset from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import {Component, Input, OnChanges, OnDestroy} from "@angular/core";
 import {Response} from "@angular/http";
 import {VisualizationModalService} from "../visualizationmodal.service";

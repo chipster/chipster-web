@@ -1,7 +1,6 @@
 import { Component, Input, OnChanges, OnInit } from "@angular/core";
-import JobParameter from "chipster-js-common";
+import { Tool, JobParameter } from "chipster-js-common";
 import { ToolService } from "../../tools/tool.service";
-import Tool from "chipster-js-common";
 import * as _ from "lodash";
 
 @Component({

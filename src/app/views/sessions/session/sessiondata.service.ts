@@ -1,6 +1,6 @@
 import { SessionResource } from '../../../shared/resources/session.resource';
 import { ConfigService } from '../../../shared/services/config.service';
-import Dataset from 'chipster-js-common';
+import { Dataset } from 'chipster-js-common';
 import { Job, JobInput, Session, Rule, WsEvent } from 'chipster-js-common';
 import { FileResource } from '../../../shared/resources/fileresource';
 import { Injectable } from '@angular/core';

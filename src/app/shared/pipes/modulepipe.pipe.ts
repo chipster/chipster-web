@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import Module from "chipster-js-common";
+import { Module } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({

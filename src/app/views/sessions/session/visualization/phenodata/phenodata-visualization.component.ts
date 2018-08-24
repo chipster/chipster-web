@@ -1,7 +1,6 @@
 import Utils from "../../../../../shared/utilities/utils";
-import Dataset from "chipster-js-common";
+import { Dataset, MetadataEntry } from "chipster-js-common";
 import { SessionDataService } from "../../sessiondata.service";
-import MetadataEntry from "chipster-js-common";
 import * as _ from "lodash";
 import {
   Component,

@@ -1,4 +1,4 @@
-import Job from "chipster-js-common";
+import { Job } from "chipster-js-common";
 import * as _ from "lodash";
 
 export const TOGGLE_SELECTED_JOB = 'TOGGLE_SELECTED_JOB';

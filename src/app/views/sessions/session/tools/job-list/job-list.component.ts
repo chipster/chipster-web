@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import Job from 'chipster-js-common';
+import { Job } from 'chipster-js-common';
 import {NgbDropdown} from '@ng-bootstrap/ng-bootstrap';
 import { SelectionService } from '../../selection.service';
 

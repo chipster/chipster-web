@@ -1,11 +1,9 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { ToolSelection } from "./tools/ToolSelection";
-import InputBinding from "chipster-js-common";
+import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
 import { Observable, Subject } from "rxjs";
-import ToolParameter from "chipster-js-common";
 import { ToolService } from "./tools/tool.service";
-import Dataset from "chipster-js-common";
 import * as _ from "lodash";
 import { SessionData } from "../../../model/session/session-data";
 import { SelectionService } from "./selection.service";

@@ -1,4 +1,4 @@
-import Dataset from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import * as _ from "lodash";
 
 export const TOGGLE_SELECTED_DATASET = 'TOGGLE_SELECTED_DATASET';

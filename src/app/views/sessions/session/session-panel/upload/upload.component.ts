@@ -1,4 +1,4 @@
-import Dataset from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import {
   Component,
   Input,

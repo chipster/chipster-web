@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import Job from "chipster-js-common";
+import { Job } from "chipster-js-common";
 import {ToolService} from "./tools/tool.service";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {ToolSelection} from "./tools/ToolSelection";

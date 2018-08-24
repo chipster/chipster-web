@@ -1,5 +1,5 @@
 import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
-import Dataset from "chipster-js-common";
+import { Service, Dataset } from "chipster-js-common";
 import {FileResource} from "../../../../../shared/resources/fileresource";
 import {SessionDataService} from "../../sessiondata.service";
 import * as pako from "pako";

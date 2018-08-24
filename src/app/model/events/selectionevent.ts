@@ -1,5 +1,5 @@
-import Dataset from "chipster-js-common";
-import Job from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
+import { Job } from "chipster-js-common";
 
 export enum Action {
   Add,

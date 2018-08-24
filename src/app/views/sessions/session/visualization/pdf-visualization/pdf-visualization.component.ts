@@ -1,5 +1,5 @@
 import {Component, OnChanges, Input, OnDestroy} from '@angular/core';
-import Dataset from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import {SessionDataService} from "../../sessiondata.service";
 import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
 import {Subject} from "rxjs/Subject";
