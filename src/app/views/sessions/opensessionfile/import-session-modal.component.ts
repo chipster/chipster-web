@@ -1,11 +1,9 @@
 import {Component, OnInit, OnDestroy, Input, ChangeDetectorRef, EventEmitter, Output} from "@angular/core";
-import { Message } from "../../../../../node_modules/@angular/compiler/src/i18n/i18n_ast";
 import { UploadService } from "../../../shared/services/upload.service";
-import Session from "../../../model/session/session";
+import { Session } from "chipster-js-common";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
-import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 
 
 @Component({
