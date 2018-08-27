@@ -20,6 +20,7 @@ import { ModifiedSessionGuard } from "./modified-session.guard";
 import { JobService } from "./job.service";
 import { AngularSplitModule } from "angular-split";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
+import { ImportSessionModalComponent } from "../opensessionfile/import-session-modal.component";
 
 @NgModule({
   imports: [
@@ -38,7 +39,8 @@ import { SelectionPanelComponent } from "./selection-panel/selection-panel.compo
     SessionListComponent,
     OpenSessionFileComponent,
     JobErrorModalComponent,
-    SelectionPanelComponent
+    SelectionPanelComponent,
+    ImportSessionModalComponent
   ],
   providers: [
     SessionEventService,
@@ -49,6 +51,6 @@ import { SelectionPanelComponent } from "./selection-panel/selection-panel.compo
     JobService,
     ModifiedSessionGuard
   ],
-  entryComponents: [JobErrorModalComponent]
+  entryComponents: [JobErrorModalComponent, ImportSessionModalComponent]
 })
 export class SessionModule {}

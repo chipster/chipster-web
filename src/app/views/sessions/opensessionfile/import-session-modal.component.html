@@ -1,0 +1,52 @@
+<div class="modal-header">
+    <h4 class="modal-title">Import Sessions</h4>
+    <button type="button" class="close" (click)="activeModal.close()">
+      <span>&times;</span>
+    </button>
+  </div>
+  
+  <div class="modal-body">
+    <div *ngFor="let file of getFiles()">
+  
+      <br>
+      <p>{{file.name}}</p>
+    
+      <p *ngIf="!!fileStatus.get(file)">
+        <span *ngIf="!finishedFiles.has(file)">
+          <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+        </span>
+        <span>
+          {{fileStatus.get(file)}}
+        </span>
+      </p>
+    
+      <div *ngIf="!file.isComplete()">
+    
+        <p *ngIf="file.size">Uploading {{file.size | bytes}}
+          <span *ngIf="file.currentSpeed">({{file.currentSpeed | bytes}}/s)</span>
+        </p>
+    
+        <p>
+          <ngb-progressbar *ngIf="!file.error"
+                         [value]="file.progress() * 100"
+                         [max]="100"></ngb-progressbar>
+        </p>
+    
+        <p *ngIf="flow.timeRemaining()">{{flow.timeRemaining() | secondspipe}} remaining</p>
+    
+        <div class="alert alert-danger" role="alert" *ngIf="file.error">
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          Upload error: {{file.errorMessage}}
+        </div>
+    
+        <p>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="cancel(file)"
+                  *ngIf="!file.isComplete()">
+            <i class="fa fa-times" aria-hidden="true"></i>
+            Cancel
+          </button>
+        </p>
+      </div>
+    
+    </div>
+  </div>
