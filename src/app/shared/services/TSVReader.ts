@@ -4,7 +4,7 @@ import {Observable} from "rxjs/Rx";
 import '../../rxjs-operators';
 import TSVFile from "../../model/tsv/TSVFile";
 import * as d3 from "d3";
-import Dataset from "../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 

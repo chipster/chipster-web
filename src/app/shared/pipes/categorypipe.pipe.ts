@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import Category from "../../model/session/category";
+import { Category } from "chipster-js-common";
 import {PipeService} from "../services/pipeservice.service";
 
 @Pipe({

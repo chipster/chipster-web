@@ -1,9 +1,8 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {ConfigService} from "../../../shared/services/config.service";
-import {JobHistory} from "../../../model/jobhistory";
+import {JobHistory, Role} from "chipster-js-common";
 import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
 import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
-import {Role} from "../../../model/role";
 import {FormGroup, FormBuilder, FormControl, FormArray} from "@angular/forms";
 import {HttpParams} from "@angular/common/http";
 import {FilterParam} from "./FilterParam";

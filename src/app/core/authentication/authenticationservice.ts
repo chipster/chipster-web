@@ -4,10 +4,10 @@ import {Observable} from "rxjs/Observable";
 import {CoreServices} from "../core-services";
 import {TokenService} from "./token.service";
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {TokenResponse} from "./token.response";
+import { Token } from "chipster-js-common";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
-import { User } from "../../model/user";
+import { User } from "chipster-js-common";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
@@ -65,7 +65,7 @@ export class AuthenticationService {
         const url = `${authUrl}/tokens`;
         const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-        return this.httpClient.post<TokenResponse>(url, {},
+        return this.httpClient.post<Token>(url, {},
           { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
     });
   }
@@ -82,10 +82,10 @@ export class AuthenticationService {
         const url = `${authUrl}/tokens/refresh`;
         const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
 
-        return this.httpClient.post<TokenResponse>(url, {},
+        return this.httpClient.post<Token>(url, {},
           { headers: new HttpHeaders().set('Authorization', `Basic ${encodedString}`) });
 
-    }).subscribe((response: TokenResponse) => {
+    }).subscribe((response: Token) => {
       const roles = JSON.parse(response.rolesJson);
       this.tokenService.setAuthToken(response.tokenKey, response.username, response.validUntil, roles);
     }, (error: any) => {

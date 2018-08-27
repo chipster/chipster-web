@@ -6,17 +6,14 @@ import {
   ViewChild,
   OnInit
 } from "@angular/core";
-import Tool from "../../../../../model/session/tool";
+import { Tool, Module, Category, InputBinding } from "chipster-js-common";
 import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
-import Module from "../../../../../model/session/module";
-import Category from "../../../../../model/session/category";
 import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
 import { ToolSelection } from "../ToolSelection";
 import { Subject } from "rxjs/Subject";
 import { SessionData } from "../../../../../model/session/session-data";
-import InputBinding from "../../../../../model/session/inputbinding";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
 import * as _ from "lodash";
 import { ToolSelectionService } from "../../tool.selection.service";

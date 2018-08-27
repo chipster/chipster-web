@@ -1,5 +1,5 @@
-import Dataset from "../../../model/session/dataset";
-import Job from "../../../model/session/job";
+import { Dataset } from "chipster-js-common";
+import { Job } from "chipster-js-common";
 import * as _ from "lodash";
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";

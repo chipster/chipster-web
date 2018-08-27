@@ -1,9 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import Dataset from "../../../../../model/session/dataset";
 import {SessionData} from "../../../../../model/session/session-data";
-import Job from "../../../../../model/session/job";
-import JobParameter from "../../../../../model/session/jobparameter";
+import { Job, JobParameter, Dataset } from "chipster-js-common";
 
 
 @Component({

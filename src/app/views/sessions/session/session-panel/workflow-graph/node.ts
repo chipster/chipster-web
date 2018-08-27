@@ -1,4 +1,4 @@
-import Job from "../../../../../model/session/job";
+import { Job } from "chipster-js-common";
 
 export default class Node {
     x: number;

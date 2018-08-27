@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {ToolService} from "./tool.service";
-import Dataset from "../../../../model/session/dataset";
-import ToolInput from "../../../../model/session/toolinput";
+import { Dataset, ToolInput } from "chipster-js-common";
 import {SessionData} from "../../../../model/session/session-data";
 
 

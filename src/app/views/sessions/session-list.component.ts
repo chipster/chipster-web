@@ -1,5 +1,4 @@
 import { SessionResource } from "../../shared/resources/session.resource";
-import Session from "../../model/session/session";
 import { SessionData } from "../../model/session/session-data";
 import { Component, OnInit } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
@@ -10,6 +9,7 @@ import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import log from 'loglevel';
+import { Session } from "chipster-js-common";
 
 @Component({
   selector: "ch-session-list",

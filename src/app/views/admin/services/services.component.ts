@@ -3,7 +3,7 @@ import {ConfigService} from '../../../shared/services/config.service';
 import {Observable} from 'rxjs/Observable';
 import {RestErrorService} from '../../../core/errorhandler/rest-error.service';
 import {AuthHttpClientService} from '../../../shared/services/auth-http-client.service';
-import {Service} from '../../../model/service';
+import {Service} from 'chipster-js-common';
 import { TokenService } from '../../../core/authentication/token.service';
 
 @Component({

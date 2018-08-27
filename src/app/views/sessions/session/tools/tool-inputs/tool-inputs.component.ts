@@ -6,13 +6,11 @@ import {
   OnChanges,
   SimpleChanges
 } from "@angular/core";
-import InputBinding from "../../../../../model/session/inputbinding";
-import Tool from "../../../../../model/session/tool";
+import { InputBinding, Tool, Dataset } from "chipster-js-common";
 import { ToolService } from "../tool.service";
-import Dataset from "../../../../../model/session/dataset";
-import { SessionData } from "../../../../../model/session/session-data";
 import * as _ from "lodash";
 import log from "loglevel";
+import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
   selector: "ch-tool-inputs",

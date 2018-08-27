@@ -1,8 +1,4 @@
-import Module from "./module";
-import Session from "./session";
-import Dataset from "./dataset";
-import Job from "./job";
-import Tool from "./tool";
+import { Module, Dataset, Job, Tool, Session } from "chipster-js-common";
 
 export class SessionData {
   session: Session;

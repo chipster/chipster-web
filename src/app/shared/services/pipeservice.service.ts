@@ -1,9 +1,6 @@
 
 import {Injectable} from "@angular/core";
-import Tool from "../../model/session/tool";
-import Dataset from "../../model/session/dataset";
-import Category from "../../model/session/category";
-import Module from "../../model/session/module";
+import { Tool, Dataset, Category, Module } from "chipster-js-common";
 import * as _ from 'lodash';
 
 @Injectable()

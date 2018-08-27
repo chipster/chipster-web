@@ -1,6 +1,6 @@
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Component, Input} from '@angular/core';
-import Job from '../../../../model/session/job';
+import { Job } from 'chipster-js-common';
 
 @Component({
   templateUrl: './joberrormodal.component.html'

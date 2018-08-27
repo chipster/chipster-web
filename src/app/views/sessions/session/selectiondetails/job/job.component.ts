@@ -1,11 +1,10 @@
 import {SelectionService} from '../../selection.service';
 import {SessionDataService} from '../../sessiondata.service';
 import {Component, Input, OnInit, OnDestroy} from '@angular/core';
-import Job from '../../../../../model/session/job';
+import { Job, SessionEvent} from 'chipster-js-common';
 import {JobService} from '../../job.service';
 import {SessionEventService} from '../../sessionevent.service';
 import {Subject} from 'rxjs/Subject';
-import SessionEvent from '../../../../../model/events/sessionevent';
 import {SessionData} from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
 import {SelectionHandlerService} from '../../selection-handler.service';

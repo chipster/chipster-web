@@ -1,6 +1,6 @@
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
-import Session from "../../../../../model/session/session";
+import { Session } from "chipster-js-common";
 
 @Component({
   templateUrl: './notesmodal.component.html',

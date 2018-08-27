@@ -1,5 +1,5 @@
 import { SessionDataService } from "../sessiondata.service";
-import Dataset from "../../../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";
 import {
@@ -22,7 +22,7 @@ import { SessionWorkerResource } from "../../../../shared/resources/sessionworke
 import { ToolSelectionService } from "../tool.selection.service";
 import { Subject } from "rxjs/Subject";
 import { ToolSelection } from "../tools/ToolSelection";
-import Job from "../../../../model/session/job";
+import { Job } from "chipster-js-common";
 import { SettingsService } from "../../../../shared/services/settings.service";
 
 @Component({

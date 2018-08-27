@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import Dataset from "../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 import {PipeService} from "../services/pipeservice.service";
 
 @Pipe({

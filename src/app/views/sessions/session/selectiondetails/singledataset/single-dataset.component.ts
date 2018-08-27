@@ -1,6 +1,5 @@
-import Dataset from "../../../../../model/session/dataset";
+import { Dataset, Job, Tool } from "chipster-js-common";
 import { SessionDataService } from "../../sessiondata.service";
-import Job from "../../../../../model/session/job";
 import {
   Component,
   Input,
@@ -11,7 +10,6 @@ import {
   OnInit
 } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
-import Tool from "../../../../../model/session/tool";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({

@@ -3,10 +3,9 @@ import '../../rxjs-operators';
 import {RestService} from '../../core/rest-services/restservice/rest.service';
 import {Observable} from 'rxjs/Observable';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Role } from '../../model/role';
+import { Role, Service } from 'chipster-js-common';
 import { TokenService } from '../../core/authentication/token.service';
 import { AuthHttpClientService } from '../services/auth-http-client.service';
-import { Service } from '../../model/service';
 import { ActivatedRoute, Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { RouteService } from '../services/route.service';
 

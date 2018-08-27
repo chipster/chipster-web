@@ -3,7 +3,7 @@ import {ConfigService} from '../../../shared/services/config.service';
 import {RestErrorService} from '../../../core/errorhandler/rest-error.service';
 import {AuthHttpClientService} from '../../../shared/services/auth-http-client.service';
 import * as _ from 'lodash';
-import { Role } from '../../../model/role';
+import { Role } from 'chipster-js-common';
 import { TokenService } from '../../../core/authentication/token.service';
 
 @Component({

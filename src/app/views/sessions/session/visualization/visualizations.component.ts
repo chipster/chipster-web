@@ -1,5 +1,5 @@
 import { SelectionService } from "../selection.service";
-import Dataset from "../../../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 import * as _ from "lodash";
 import visualizations from "./visualization-constants";
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";

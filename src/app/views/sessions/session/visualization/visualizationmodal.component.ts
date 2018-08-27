@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import Dataset from "../../../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 import {SessionData} from "../../../../model/session/session-data";
 
 @Component({

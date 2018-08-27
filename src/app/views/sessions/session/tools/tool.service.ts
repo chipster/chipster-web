@@ -1,8 +1,4 @@
-import ToolParameter from "../../../../model/session/toolparameter";
-import Dataset from "../../../../model/session/dataset";
-import InputBinding from "../../../../model/session/inputbinding";
-import Tool from "../../../../model/session/tool";
-import ToolInput from "../../../../model/session/toolinput";
+import { ToolParameter, Dataset, InputBinding, Tool, ToolInput } from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { SessionData } from "../../../../model/session/session-data";

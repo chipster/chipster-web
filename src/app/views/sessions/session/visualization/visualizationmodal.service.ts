@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {VisualizationModalComponent} from "./visualizationmodal.component";
-import Dataset from "../../../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 
 @Injectable()
 export class VisualizationModalService {

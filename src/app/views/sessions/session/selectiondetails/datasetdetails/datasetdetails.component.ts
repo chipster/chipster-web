@@ -2,7 +2,7 @@ import {SelectionService} from "../../selection.service";
 import {SessionDataService} from "../../sessiondata.service";
 import {Component, Output, EventEmitter} from "@angular/core";
 import {Store} from "@ngrx/store";
-import Dataset from "../../../../../model/session/dataset";
+import { Dataset } from "chipster-js-common";
 
 @Component({
   selector: 'ch-dataset-details',
