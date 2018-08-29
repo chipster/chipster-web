@@ -26,6 +26,7 @@ import { setAppInjector } from "./app-injector";
 import { AdminModule } from "./views/admin/admin.module";
 import { TermsComponent } from "./views/terms/terms.component";
 import { SharedModule } from "./shared/shared.module";
+import { HotkeyModule } from "angular2-hotkeys";
 
 @NgModule({
   imports: [
@@ -40,6 +41,7 @@ import { SharedModule } from "./shared/shared.module";
     AdminModule,
     StoreModule.forRoot({ selectedDatasets, selectedJobs, toolSelection }),
     SharedModule,
+    HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here
   ],
   declarations: [

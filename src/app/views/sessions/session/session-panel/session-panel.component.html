@@ -28,7 +28,8 @@
 
   <!-- workflow and files tabs -->
 
-  <ch-search-box placeholder="Search file" (onValueChange)="search($event)" (onEnterKey)="searchEnter()"></ch-search-box>
+  <ch-search-box placeholder="Find file" focusHotkey="f" focusHotkeyDescription="Find file" (valueChange)="search($event)"
+    (enterKey)="searchEnter()"></ch-search-box>
 
   <!-- css uses this id to find the tab-content element-->
   <ngb-tabset class="flex-grow-1 d-flex flex-column" id="left-tabs">
@@ -58,7 +59,8 @@
           </div>
 
           <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets() " [jobsMap]="sessionData.jobsMap
-              " [modulesMap]="sessionData.modulesMap " [datasetSearch]="datasetSearch " [defaultScale]="1 " [enabled]="true " [sessionData]= "sessionData" (delete)=" deleteDataset()"></ch-workflow-graph>
+              " [modulesMap]="sessionData.modulesMap " [datasetSearch]="datasetSearch " [defaultScale]="1 " [enabled]="true "
+            [sessionData]="sessionData" (delete)=" deleteDataset()"></ch-workflow-graph>
         </div>
       </ng-template>
     </ngb-tab>

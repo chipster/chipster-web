@@ -28,7 +28,8 @@
 
       <!-- search box -->
       <div class="col col-middle">
-        <ch-search-box #searchBox placeholder="Search tool" (onValueChange)="search($event)" (onEnterKey)="searchEnter()"></ch-search-box>
+        <ch-search-box #searchBox placeholder="Find tool" focusHotkey="t" focusHotkeyDescription="Find tool" (valueChange)="search($event)"
+          (enterKey)="searchEnter()"></ch-search-box>
       </div>
 
       <!-- jobs button -->
