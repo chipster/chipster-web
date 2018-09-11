@@ -21,6 +21,7 @@ import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
 import { selectedDatasets } from "../../../state/selectedDatasets.reducer";
+import { HotkeysService, Hotkey } from "angular2-hotkeys";
 
 @Component({
   selector: "ch-session",
@@ -54,10 +55,21 @@ export class SessionComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     private activatedRoute: ActivatedRoute,
     private routeService: RouteService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private _hotkeysService: HotkeysService
   ) {}
 
   ngOnInit() {
+    this._hotkeysService.add(
+      new Hotkey(
+        "meta+shift+g",
+        (event: KeyboardEvent): boolean => {
+          console.log("Typed hotkey");
+          return false; // Prevent bubbling
+        }
+      )
+    );
+
     this.route.params
       .flatMap(params => {
         /*
@@ -251,9 +263,9 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.sessionDataService.deleteDatasetsUndo(this.sessionData);
   }
 
- deleteDatasetsLater() {
-   this.sessionDataService.deleteDatasetsLater(this.sessionData);
- }
+  deleteDatasetsLater() {
+    this.sessionDataService.deleteDatasetsLater(this.sessionData);
+  }
 
   exportDatasets(datasets: Dataset[]) {
     this.sessionDataService.exportDatasets(datasets);

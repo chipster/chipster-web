@@ -1,25 +1,66 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  OnInit,
+  OnDestroy
+} from "@angular/core";
+import { HotkeysService, Hotkey } from "angular2-hotkeys";
 
 @Component({
-  selector: 'ch-search-box',
-  templateUrl: './search-box.component.html',
-  styleUrls: ['./search-box.component.less'],
+  selector: "ch-search-box",
+  templateUrl: "./search-box.component.html",
+  styleUrls: ["./search-box.component.less"]
 })
-export class SearchBoxComponent {
+export class SearchBoxComponent implements OnInit, OnDestroy {
+  @Input()
+  placeholder: string;
+  @Input()
+  focusOnInit = false;
+  @Input()
+  focusHotkey: string;
+  @Input()
+  focusHotkeyDescription: string;
 
-  @Input() placeholder: string;
-  @Input() focusOnInit = false;
-  @Output() onValueChange = new EventEmitter<string>();
-  @Output() onEnterKey = new EventEmitter<void>();
+  @Output()
+  valueChange = new EventEmitter<string>();
+  @Output()
+  enterKey = new EventEmitter<void>();
 
-  @ViewChild('searchInput') searchInput;
+  @ViewChild("searchInput")
+  searchInput;
 
   searchTerm: string;
+
+  private hotkey: Hotkey | Hotkey[];
+
+  constructor(private hotkeysService: HotkeysService) {}
+
+  ngOnInit() {
+    // add focus hotkey
+    this.hotkey = this.hotkeysService.add(
+      new Hotkey(
+        this.focusHotkey,
+        (event: KeyboardEvent): boolean => {
+          this.focus();
+          return false; // Prevent bubbling
+        },
+        undefined,
+        this.focusHotkeyDescription
+      )
+    );
+  }
+
+  ngOnDestroy() {
+    this.hotkeysService.remove(this.hotkey);
+  }
 
   focus() {
     // why this doesn't work without setTimeout()?
     setTimeout(() => {
-        this.searchInput.nativeElement.focus();
+      this.searchInput.nativeElement.focus();
     }, 0);
   }
 
@@ -31,25 +72,26 @@ export class SearchBoxComponent {
 
   clear() {
     this.searchTerm = null;
-    this.onValueChange.emit(this.searchTerm);
+    this.valueChange.emit(this.searchTerm);
   }
 
   searchKeyEvent(e: any) {
-    if (e.keyCode == 13) { // enter
+    if (e.keyCode === 13) {
+      // enter
       // the search can be cleared (at least in the workflow view)
       this.searchTerm = null;
-      this.onEnterKey.emit();
+      this.enterKey.emit();
     }
 
-    if (e.keyCode == 27) { // escape key
+    if (e.keyCode === 27) {
+      // escape key
       // don't close the dropdown if there is something to clear
       if (this.searchTerm) {
         e.stopPropagation();
       }
       this.clear();
     } else {
-
-      this.onValueChange.emit(this.searchTerm);
+      this.valueChange.emit(this.searchTerm);
     }
   }
 }

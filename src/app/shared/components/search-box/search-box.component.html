@@ -1,9 +1,9 @@
 <div class="tab-form-container">
   <div class="tab-form">
-    <input id="search-input" type="text" [(ngModel)]="searchTerm"
-           placeholder="{{placeholder}}" (keyup)="searchKeyEvent($event)" #searchInput>
-    <button class="btn btn-outline-dark clear-search-button" *ngIf="searchTerm"
-            (click)="clearClick($event)">
+    <i class="fa fa-search lighter mr-1"></i>
+    <input id="search-input" type="text" [(ngModel)]="searchTerm" placeholder="{{placeholder}}" (keyup)="searchKeyEvent($event)"
+      #searchInput>
+    <button class="btn btn-outline-dark clear-search-button" *ngIf="searchTerm" (click)="clearClick($event)">
       <i class="fa fa-times" aria-hidden="true"></i>
     </button>
   </div>
