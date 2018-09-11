@@ -64,7 +64,14 @@
     <tbody>
     <tr *ngFor="let jobhistory of jobHistoryListWithParam" class="text-sm">
       <td>{{jobhistory.userName}}</td>
-      <td>{{jobhistory.toolName}}</td>
+      <td><div *ngIf="jobhistory.toolId;then toolid; else toolname"></div>
+          <ng-template #toolid>
+           <span>{{jobhistory.toolId}}</span> 
+          </ng-template>
+        <ng-template #toolname>
+            <span>{{jobhistory.toolName}}</span> 
+         </ng-template>
+      </td>
       <td>{{jobhistory.timeDuration}}</td>
       <td>{{jobhistory.startTime|date:'short'}}</td>
       <td>{{jobhistory.endTime|date:'short'}}</td>

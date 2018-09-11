@@ -12,7 +12,7 @@ import {NgbModal, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
       </button>
     </div>
     <div class="modal-body">
-     {{output}}
+     <pre>{{output}}</pre>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
@@ -21,9 +21,10 @@ import {NgbModal, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 })
 
 export class JobOutputModalComponent {
-  @Input() output: String;
+  @Input() output;
 
   constructor(public activeModal: NgbActiveModal) {
     console.log(this.output);
   }
+
 }

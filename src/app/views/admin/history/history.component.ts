@@ -108,7 +108,6 @@ export class HistoryComponent implements OnInit {
       filterParam.value = new Date(endDateControl.value + "T" + endTimeControl.value).toISOString();
       this.filterAttributeSet.push(filterParam);
     }
-    console.log(this.filterAttributeSet);
     this.getTotalJobCount();
 
   }
@@ -152,9 +151,11 @@ export class HistoryComponent implements OnInit {
         return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory', params);
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
+        console.log(jobHistoryList);
         this.jobListLoading = false;
         this.jobHistoryListWithParam = [];
         this.jobHistoryListWithParam = jobHistoryList;
+        this.jobHistoryListWithParam.sort(this.sortListByDate);
         this.filterAttributeSet = [];
         console.log ( this.jobHistoryListWithParam.length );
         if (this.jobHistoryListWithParam.length < 1) {
@@ -166,13 +167,12 @@ export class HistoryComponent implements OnInit {
   reload() {
     this.resetForm();
     this.filterAttributeSet = [];
-    console.log(this.filterAttributeSet);
     this.page = 1;
     this.getTotalJobCount();
   }
 
   openJobOutputModal(jobhistory: JobHistory) {
-    const modalRef = this.modalService.open(JobOutputModalComponent);
+    const modalRef = this.modalService.open(JobOutputModalComponent, {size: 'lg'});
     modalRef.componentInstance.output = jobhistory.output;
   }
 
@@ -217,4 +217,8 @@ export class HistoryComponent implements OnInit {
 
   }
 
+
+  sortListByDate(a: JobHistory, b: JobHistory) {
+    return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+  }
 }
