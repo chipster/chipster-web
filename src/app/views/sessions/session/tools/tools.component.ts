@@ -1,25 +1,45 @@
 import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../model/session/session-data";
-import { OnInit, OnDestroy, Input, ViewChild, Component } from "@angular/core";
-import { SearchBoxComponent } from "../../../../shared/components/search-box/search-box.component";
+import {
+  OnInit,
+  OnDestroy,
+  Input,
+  ViewChild,
+  Component,
+  Inject
+} from "@angular/core";
 import { ToolSelection } from "./ToolSelection";
-import { Job, Module, Tool, Category, Dataset, InputBinding } from "chipster-js-common";
+import {
+  Job,
+  Module,
+  Tool,
+  Category,
+  Dataset,
+  InputBinding
+} from "chipster-js-common";
 import { Subject } from "rxjs/Subject";
-import { PipeService } from "../../../../shared/services/pipeservice.service";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { SelectionService } from "../selection.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SessionEventService } from "../sessionevent.service";
-import { ConfigService } from "../../../../shared/services/config.service";
 import { ToolService } from "./tool.service";
 import * as _ from "lodash";
-import { ModulePipe } from "../../../../shared/pipes/modulepipe.pipe";
-import { CategoryPipe } from "../../../../shared/pipes/categorypipe.pipe";
-import { ToolPipe } from "../../../../shared/pipes/toolpipe.pipe";
 import UtilsService from "../../../../shared/utilities/utils";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
+import { DOCUMENT } from "@angular/common";
+import { HotkeysService, Hotkey } from "angular2-hotkeys";
+
+interface ToolSearchListItem {
+  moduleName: string;
+  moduleId: string;
+  category: string;
+  tool: Tool;
+  toolName: string;
+  toolId: string;
+  description: string;
+}
 
 @Component({
   selector: "ch-tools",
@@ -28,9 +48,13 @@ import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.
   providers: [NgbDropdownConfig]
 })
 export class ToolsComponent implements OnInit, OnDestroy {
-  @Input() public sessionData: SessionData;
+  @Input()
+  public sessionData: SessionData;
 
-  @ViewChild("searchBox") private searchBox: SearchBoxComponent;
+  @ViewChild("searchBox")
+  searchBox;
+
+  public toolSearchList: Array<ToolSearchListItem>;
 
   public toolSelection: ToolSelection;
   public runningJobs = 0;
@@ -39,8 +63,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
 
-  searchTool: string;
-
   selectedModule: Module = null; // used in modal to keep track of which module has been selected
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected
 
@@ -48,17 +70,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
+  public searchBoxModel: ToolSearchListItem;
+  private searchBoxHotkey: Hotkey | Hotkey[];
+
   constructor(
-    private pipeService: PipeService,
+    @Inject(DOCUMENT) private document: any,
     public settingsService: SettingsService,
     public toolSelectionService: ToolSelectionService,
     public selectionService: SelectionService,
     private jobService: JobService,
     private selectionHandlerService: SelectionHandlerService,
     private sessionEventService: SessionEventService,
-    private configService: ConfigService,
     public toolService: ToolService,
     private modalService: NgbModal,
+    private hotkeysService: HotkeysService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
@@ -68,6 +93,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.tools = _.cloneDeep(this.sessionData.tools);
     this.modules = _.cloneDeep(this.sessionData.modules);
+    this.toolSearchList = this.createToolSearchList();
 
     // subscribe to tool selection
     this.toolSelectionService.toolSelection$
@@ -79,7 +105,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // subscribe to file selection
     this.selectionService.selectedDatasets$
       .takeUntil(this.unsubscribe)
-      .subscribe((selectedDatasets: Array<Dataset>) => {
+      .subscribe(() => {
         if (this.toolSelection) {
           const updatedInputBindings = this.toolService.bindInputs(
             this.sessionData,
@@ -100,8 +126,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.selectCategory(this.toolSelection.category);
       this.selectTool(this.toolSelection.tool); // TODO is this really needed?
     } else {
-      this.selectModule(this.modules[0]);
-      this.selectCategory(this.selectedModule.categories[0]);
+      this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
     }
 
     this.updateJobs();
@@ -113,41 +138,55 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.updateJobs();
       });
+
+    // add search box hotkey
+    this.searchBoxHotkey = this.hotkeysService.add(
+      new Hotkey(
+        "t",
+        (): boolean => {
+          this.searchBox.focus();
+          return false;
+        },
+        undefined,
+        "Find tool"
+      )
+    );
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+    this.hotkeysService.remove(this.searchBoxHotkey);
   }
 
   selectModule(module: Module) {
     this.selectedModule = module;
-    this.selectFirstVisible();
   }
 
-  // defines which tool category the user have selected
+  selectModuleAndFirstCategoryAndFirstTool(module: Module) {
+    this.selectedModule = module;
+    if (module.categories.length > 0) {
+      this.selectCategoryAndFirstTool(module.categories[0]);
+    }
+  }
+
   selectCategory(category: Category) {
     this.selectedCategory = category;
   }
 
-  selectFirstVisible() {
-    const filteredModules = new ModulePipe(this.pipeService).transform(
-      this.modules,
-      this.searchTool
-    );
-    if (
-      filteredModules &&
-      filteredModules.indexOf(this.selectedModule) < 0 &&
-      filteredModules[0]
-    ) {
-      this.selectModule(filteredModules[0]);
-    }
+  selectCategoryAndFirstTool(category: Category) {
+    this.selectedCategory = category;
+    const categoryElementId = "category-button-" + category.name;
+    setTimeout(() => {
+      this.scrollIntoViewByElementId(categoryElementId);
+    });
 
-    const filteredCategories = new CategoryPipe(this.pipeService).transform(
-      this.selectedModule.categories,
-      this.searchTool
-    );
-    if (
-      filteredCategories &&
-      filteredCategories.indexOf(this.selectedCategory) < 0 &&
-      filteredCategories[0]
-    ) {
-      this.selectCategory(filteredCategories[0]);
+    if (category.tools.length > 0) {
+      this.selectTool(category.tools[0]);
+      const toolElementId = "tool-button-" + category.tools[0].name.id;
+      setTimeout(() => {
+        this.scrollIntoViewByElementId(toolElementId);
+      });
     }
   }
 
@@ -163,24 +202,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
       toolSelection,
       this.sessionData
     );
-  }
-
-  search(value: any) {
-    this.searchTool = value;
-    this.selectFirstVisible();
-  }
-
-  searchEnter() {
-    // select the first result
-    const visibleTools = new ToolPipe(this.pipeService).transform(
-      this.selectedCategory.tools,
-      this.searchTool
-    );
-    if (visibleTools[0]) {
-      this.searchTool = null;
-      // this.selectTool(visibleTools[0].name.id);
-      this.selectTool(visibleTools[0]);
-    }
   }
 
   openChange(isOpen) {
@@ -202,11 +223,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     };
 
     this.toolSelectionService.selectTool(toolSelection);
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next();
-    this.unsubscribe.complete();
   }
 
   getJobList(): Job[] {
@@ -233,5 +249,77 @@ export class ToolsComponent implements OnInit, OnDestroy {
       size: "lg"
     });
     modalRef.componentInstance.tool = this.toolSelection.tool;
+  }
+
+  private createToolSearchList(): ToolSearchListItem[] {
+    const list: ToolSearchListItem[] = [];
+    this.modules.forEach((module: Module) => {
+      module.categories.forEach((category: Category) => {
+        category.tools.forEach((tool: Tool) => {
+          // TODO ignore hidden
+          list.push({
+            moduleId: module.moduleId,
+            moduleName: module.name,
+            category: category.name,
+            tool: tool,
+            toolName: tool.name.displayName,
+            toolId: tool.name.id,
+            description: tool.description
+          });
+        });
+      });
+    });
+
+    return list;
+  }
+
+  public filterTool(term: string, item: any): boolean {
+    const termTokens = term
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((s: string) => s.length > 0);
+
+    return termTokens.every((termToken: string) => {
+      return (
+        item.toolName.toLowerCase().indexOf(termToken) !== -1 ||
+        item.description.toLowerCase().indexOf(termToken) !== -1 ||
+        item.category.toLowerCase().indexOf(termToken) !== -1 ||
+        item.moduleName.toLowerCase().indexOf(termToken) !== -1
+      );
+    });
+  }
+
+  public searchBoxSelect(item) {
+    // at least clicking clear text after selecting an item results as change(undefined)
+    if (!item) {
+      return;
+    }
+
+    const module = this.sessionData.modulesMap.get(item.moduleId);
+    this.selectModule(module);
+    this.selectCategory(module.categoriesMap.get(item.category));
+    this.selectTool(item.tool);
+    const categoryElementId = "category-button-" + item.category;
+    const toolElementId = "tool-button-" + item.toolId;
+
+    setTimeout(() => {
+      this.searchBoxModel = null;
+
+      this.scrollIntoViewByElementId(categoryElementId);
+      this.scrollIntoViewByElementId(toolElementId);
+
+      this.document.getElementById(toolElementId).focus();
+    });
+  }
+
+  public searchBoxBlur(event) {
+    this.searchBoxModel = null;
+  }
+
+  private scrollIntoViewByElementId(elementId: string) {
+    this.document
+      .getElementById(elementId)
+      .scrollIntoView({ behavior: "smooth" });
   }
 }
