@@ -9,14 +9,7 @@ import {
   Inject
 } from "@angular/core";
 import { ToolSelection } from "./ToolSelection";
-import {
-  Job,
-  Module,
-  Tool,
-  Category,
-  Dataset,
-  InputBinding
-} from "chipster-js-common";
+import { Job, Module, Tool, Category, InputBinding } from "chipster-js-common";
 import { Subject } from "rxjs/Subject";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ToolSelectionService } from "../tool.selection.service";
@@ -48,6 +41,9 @@ interface ToolSearchListItem {
   providers: [NgbDropdownConfig]
 })
 export class ToolsComponent implements OnInit, OnDestroy {
+  public readonly categoryElementIdPrefix = "category-button-";
+  public readonly toolElementIdPrefix = "tool-button-";
+
   @Input()
   public sessionData: SessionData;
 
@@ -176,14 +172,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   selectCategoryAndFirstTool(category: Category) {
     this.selectedCategory = category;
-    const categoryElementId = "category-button-" + category.name;
+    const categoryElementId = this.categoryElementIdPrefix + category.name;
     setTimeout(() => {
       this.scrollIntoViewByElementId(categoryElementId);
     });
 
     if (category.tools.length > 0) {
       this.selectTool(category.tools[0]);
-      const toolElementId = "tool-button-" + category.tools[0].name.id;
+      const toolElementId =
+        this.toolElementIdPrefix + category.tools[0].name.id;
       setTimeout(() => {
         this.scrollIntoViewByElementId(toolElementId);
       });
@@ -300,8 +297,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.selectModule(module);
     this.selectCategory(module.categoriesMap.get(item.category));
     this.selectTool(item.tool);
-    const categoryElementId = "category-button-" + item.category;
-    const toolElementId = "tool-button-" + item.toolId;
+    const categoryElementId = this.categoryElementIdPrefix + item.category;
+    const toolElementId = this.toolElementIdPrefix + item.toolId;
 
     setTimeout(() => {
       this.searchBoxModel = null;

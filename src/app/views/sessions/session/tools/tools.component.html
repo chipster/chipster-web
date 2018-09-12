@@ -96,7 +96,7 @@
       <div class="col col-left">
         <div class="list-group-sm" id="category-list" #categoryList>
           <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: category===selectedCategory, compact: settingsService.compactToolList$.getValue()}"
-            (click)="selectCategoryAndFirstTool(category)" *ngFor="let category of selectedModule.categories" id="category-button-{{category.name}}">
+            (click)="selectCategoryAndFirstTool(category)" *ngFor="let category of selectedModule.categories" id="{{categoryElementIdPrefix + category.name}}">
             <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
           </button>
         </div>
@@ -107,7 +107,7 @@
         <div style="position: relative; height: 100%;">
           <div class="list-group-sm" *ngIf="selectedCategory" id="tool-list" style="position: absolute; height: 100%; width: 100%">
             <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool.name.id===toolSelection?.tool.name.id, compact: settingsService.compactToolList$.getValue()}"
-              (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools" id="tool-button-{{tool.name.id}}">
+              (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools" id="{{toolElementIdPrefix + tool.name.id}}">
               {{tool.name.displayName}}
             </button>
           </div>
