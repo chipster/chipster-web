@@ -19,17 +19,23 @@
       <!-- module buttons -->
       <div class="col col-left">
         <div class="btn-group">
-          <button type="button" class="btn btn-sm" (click)="selectModule(module)" *ngFor="let module of modules | modulepipe:searchTool"
-            [ngClass]="{'btn-primary':module === selectedModule,
-          'btn-light':module !== selectedModule}">{{module.name}}
+          <button type="button" class="btn btn-sm" (click)="selectModuleAndFirstCategoryAndFirstTool(module)" *ngFor="let module of modules"
+            [ngClass]="{'btn-primary':module.moduleId === selectedModule.moduleId,
+          'btn-light':module.moduleId !== selectedModule.moduleId}">{{module.name}}
           </button>
         </div>
       </div>
 
       <!-- search box -->
       <div class="col col-middle">
-        <ch-search-box #searchBox placeholder="Find tool" focusHotkey="t" focusHotkeyDescription="Find tool" (valueChange)="search($event)"
-          (enterKey)="searchEnter()"></ch-search-box>
+        <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true" [searchFn]="filterTool"
+          [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found" (blur)="searchBoxBlur($event)">
+          <ng-template ng-option-tmp let-item="item">
+            <div style="font-size: smaller">{{ item.moduleName }} - {{item.category}}</div>
+            <div style="font-weight: bolder">{{item.toolName}}</div>
+          </ng-template>
+        </ng-select>
+        <i style="padding-top: 0.6em;" class="fa fa-search lighter mr-2 float-right"></i>
       </div>
 
       <!-- jobs button -->
@@ -90,7 +96,7 @@
       <div class="col col-left">
         <div class="list-group-sm" id="category-list" #categoryList>
           <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: category===selectedCategory, compact: settingsService.compactToolList$.getValue()}"
-            (click)="selectCategory(category)" *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
+            (click)="selectCategoryAndFirstTool(category)" *ngFor="let category of selectedModule.categories" id="{{categoryElementIdPrefix + category.name}}">
             <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
           </button>
         </div>
@@ -100,8 +106,8 @@
       <div class="col col-middle">
         <div style="position: relative; height: 100%;">
           <div class="list-group-sm" *ngIf="selectedCategory" id="tool-list" style="position: absolute; height: 100%; width: 100%">
-            <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool===toolSelection?.tool, compact: settingsService.compactToolList$.getValue()}"
-              (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool" id="tool-button-{{tool.id}}">
+            <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool.name.id===toolSelection?.tool.name.id, compact: settingsService.compactToolList$.getValue()}"
+              (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools" id="{{toolElementIdPrefix + tool.name.id}}">
               {{tool.name.displayName}}
             </button>
           </div>
