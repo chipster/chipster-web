@@ -11,7 +11,6 @@ import {JobOutputModalComponent} from "./joboutputmodal.component";
 import {TokenService} from "../../../core/authentication/token.service";
 
 
-
 @Component({
   selector: 'ch-history',
   templateUrl: './history.component.html',
@@ -31,6 +30,7 @@ export class HistoryComponent implements OnInit {
   filterAttributeSet: Array<FilterParam> = [];
   page = 1;
   collectionSize = 70;
+  jobNumber = 0;
 
 
   constructor(private configService: ConfigService,
@@ -71,6 +71,12 @@ export class HistoryComponent implements OnInit {
   public OnSubmit(formValue: any) {
     this.filterAttributeSet = [];
     this.page = 1;
+    this.getFormControlValues();
+    this.getTotalJobCount();
+
+  }
+
+  getFormControlValues() {
     const arrayControl = this.filteredSearchForm.get('items') as FormArray;
     console.log ( "array control length " + arrayControl.length);
     for (let i = 0; i < arrayControl.length; i++) {
@@ -101,14 +107,12 @@ export class HistoryComponent implements OnInit {
     const endDateControl = this.endTimeInputForm.get('endDateInput');
     const endTimeControl = this.endTimeInputForm.get('endTimeInput');
 
-    console.log(endDateControl.value);
     if (endDateControl.value && endTimeControl.value) {
       const filterParam = new FilterParam();
       filterParam.name = "endTime=lt";
       filterParam.value = new Date(endDateControl.value + "T" + endTimeControl.value).toISOString();
       this.filterAttributeSet.push(filterParam);
     }
-    this.getTotalJobCount();
 
   }
 
@@ -130,6 +134,7 @@ export class HistoryComponent implements OnInit {
       })
       .subscribe((recordNumber ) => {
           console.log( " total record num ", recordNumber);
+          this.jobNumber = recordNumber;
           this.collectionSize =   Math.ceil(recordNumber / 500) * 10;
           this.getJobByParam();
       }, err => this.errorHandlerService.handleError(err, 'get job numbers failed'));
@@ -139,6 +144,7 @@ export class HistoryComponent implements OnInit {
     let params = new HttpParams();
     // first set the page number for which getting the record
     params = params.append("page", this.page.toString());
+    console.log(this.filterAttributeSet);
     for (let i = 0; i < this.filterAttributeSet.length; i++) {
       if (this.filterAttributeSet[i].name !== null &&  this.filterAttributeSet[i].name !== undefined
         && this.filterAttributeSet[i].name !== "") {
@@ -155,7 +161,6 @@ export class HistoryComponent implements OnInit {
         this.jobListLoading = false;
         this.jobHistoryListWithParam = [];
         this.jobHistoryListWithParam = jobHistoryList;
-        this.jobHistoryListWithParam.sort(this.sortListByDate);
         this.filterAttributeSet = [];
         console.log ( this.jobHistoryListWithParam.length );
         if (this.jobHistoryListWithParam.length < 1) {
@@ -165,6 +170,7 @@ export class HistoryComponent implements OnInit {
   }
 
   reload() {
+    console.log("reload is called");
     this.resetForm();
     this.filterAttributeSet = [];
     this.page = 1;
@@ -179,6 +185,7 @@ export class HistoryComponent implements OnInit {
   onPageChange(page) {
     console.log( " page has changed " + page);
     this.page = page;
+    this.getFormControlValues();
     this.getJobByParam();
   }
 
@@ -217,8 +224,8 @@ export class HistoryComponent implements OnInit {
 
   }
 
-
+/*
   sortListByDate(a: JobHistory, b: JobHistory) {
     return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
-  }
+  }*/
 }
