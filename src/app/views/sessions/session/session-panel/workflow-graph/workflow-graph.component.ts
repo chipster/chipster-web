@@ -24,7 +24,7 @@ import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
 import UtilsService from "../../../../../shared/utilities/utils";
-import * as d3ContextMenu from 'd3-context-menu';
+import * as d3ContextMenu from "d3-context-menu";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -37,14 +37,22 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   svg: any;
-  @Input() datasetsMap: Map<string, Dataset>;
-  @Input() jobsMap: Map<string, Job>;
-  @Input() modulesMap: Map<string, Module>;
-  @Input() datasetSearch: string;
-  @Input() defaultScale: number;
-  @Input() enabled: boolean;
-  @Input() sessionData: SessionData;
-  @Output() delete: EventEmitter<any> = new EventEmitter();
+  @Input()
+  datasetsMap: Map<string, Dataset>;
+  @Input()
+  jobsMap: Map<string, Job>;
+  @Input()
+  modulesMap: Map<string, Module>;
+  @Input()
+  datasetSearch: string;
+  @Input()
+  defaultScale: number;
+  @Input()
+  enabled: boolean;
+  @Input()
+  sessionData: SessionData;
+  @Output()
+  delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -93,7 +101,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   datasetNodes: Array<DatasetNode>;
   links: Array<Link>;
-  filter: Map<string, Dataset>;
+  filter: Map<string, Dataset> = null;
   datasetTooltip: any;
   datasetTooltipTriangle: any;
 
@@ -389,50 +397,54 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .selectAll("rect")
       .data(this.datasetNodes, d => d.datasetId);
 
-      // context menu items
+    // context menu items
     const menu = [
       {
-          title: 'Rename',
-          action: function(d, i) {
-            const dataset = _.clone(d.dataset);
-            self.dialogModalService
-              .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename")
-              .flatMap(name => {
-                dataset.name = name;
-                return self.sessionDataService.updateDataset(dataset);
-              })
-              .subscribe(null, err => console.log("dataset rename error", err));
-          },
-          disabled: false // optional, defaults to false
-      },
-      {
-          title: 'Delete',
-          action: function(d, i) {
-            console.log(d.dataset);
-            console.log(self.selectionService.selectedDatasets);
-            self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
-            console.log(self.selectionService.selectedDatasets);
-            self.delete.emit();
-          }
-      },
-      {
-        title: 'Export',
+        title: "Rename",
         action: function(d, i) {
-            console.log('The dataset is : ' + d.dataset);
-            self.sessionDataService.exportDatasets([d.dataset]);
+          const dataset = _.clone(d.dataset);
+          self.dialogModalService
+            .openStringModal(
+              "Rename dataset",
+              "Dataset name",
+              dataset.name,
+              "Rename"
+            )
+            .flatMap(name => {
+              dataset.name = name;
+              return self.sessionDataService.updateDataset(dataset);
+            })
+            .subscribe(null, err => console.log("dataset rename error", err));
+        },
+        disabled: false // optional, defaults to false
+      },
+      {
+        title: "Delete",
+        action: function(d, i) {
+          console.log(d.dataset);
+          console.log(self.selectionService.selectedDatasets);
+          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+          console.log(self.selectionService.selectedDatasets);
+          self.delete.emit();
         }
-    },
-    {
-      title: 'History',
-      action: function(d, i) {
-        self.datasetModalService.openDatasetHistoryModal(
-          d.dataset,
-          self.sessionData
-        );
+      },
+      {
+        title: "Export",
+        action: function(d, i) {
+          console.log("The dataset is : " + d.dataset);
+          self.sessionDataService.exportDatasets([d.dataset]);
+        }
+      },
+      {
+        title: "History",
+        action: function(d, i) {
+          self.datasetModalService.openDatasetHistoryModal(
+            d.dataset,
+            self.sessionData
+          );
+        }
       }
-  }
-  ];
-
+    ];
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
     this.d3DatasetNodes
@@ -593,7 +605,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M 0,0 m -7,-7 L 7,0 L -7,7 Z")
-      .style("fill", "#555");
+      .style("fill", "#555")
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(this.filter === null)
+      );
 
     // Define the xy positions of the link
     this.d3Links = this.d3LinksGroup.selectAll("line").data(this.links);
@@ -606,6 +621,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("y1", d => d.source.y + this.nodeHeight)
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
       .attr("y2", d => d.target.y)
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(this.filter === null)
+      )
+
       .on("click", function(d) {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
