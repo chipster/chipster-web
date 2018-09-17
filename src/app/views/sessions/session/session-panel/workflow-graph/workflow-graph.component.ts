@@ -423,7 +423,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         }
     },
     {
-      title: 'Show History as text',
+      title: 'History',
       action: function(d, i) {
         self.datasetModalService.openDatasetHistoryModal(
           d.dataset,
