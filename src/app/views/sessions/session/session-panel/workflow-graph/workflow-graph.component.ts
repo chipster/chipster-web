@@ -181,9 +181,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("opacity", 0)
       .html("\u25BC");
 
-    this.zoomScale = this.defaultScale;
-    this.applyZoom(this.zoomScale);
+    // needs to be before applyZoom if enabled is true
+    // otherwise datasets is null when calculating scroll stuff
+    this.update();
 
+    this.applyZoom(this.defaultScale);
     if (this.enabled) {
       this.subscriptions.push(
         this.sessionEventService.getDatasetStream().subscribe(() => {
@@ -202,7 +204,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // show
-    this.update();
     this.renderGraph();
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
@@ -285,36 +286,39 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // check if it is actually changing
-    if (this.zoomScale === limitedTargetScale) {
+    if (this.zoomScale && this.zoomScale === limitedTargetScale) {
       return;
     }
-
-    // calculate oldzoom / newZoom factor for adjusting scrolling
-    const factor = limitedTargetScale / this.zoomScale;
-
     // zoom
     this.zoomGroup.attr(
       "transform",
       "translate(0, 0) scale(" + limitedTargetScale + ")"
     );
+
     this.zoomScale = limitedTargetScale;
+    const oldZoomScale = this.zoomScale;
 
-    // adjust scrolling
+    if (this.enabled) {
+      // calculate oldzoom / newZoom factor for adjusting scrolling
+      const factor = this.zoomScale / oldZoomScale;
 
-    // coordinates of the viewport center
-    const scroll = this.scrollerDiv.node();
-    const centerX = scroll.scrollLeft + scroll.clientWidth / 2;
-    const centerY = scroll.scrollTop + scroll.clientHeight / 2;
+      // adjust scrolling
 
-    // coordinates of the center after zooming
-    const newCenterX = centerX * factor;
-    const newCenterY = centerY * factor;
+      // coordinates of the viewport center
+      const scroll = this.scrollerDiv.node();
+      const centerX = scroll.scrollLeft + scroll.clientWidth / 2;
+      const centerY = scroll.scrollTop + scroll.clientHeight / 2;
 
-    // adjust scrolling to keep the center stationary
-    scroll.scrollLeft = newCenterX - scroll.clientWidth / 2;
-    scroll.scrollTop = newCenterY - scroll.clientHeight / 2;
+      // coordinates of the center after zooming
+      const newCenterX = centerX * factor;
+      const newCenterY = centerY * factor;
 
-    this.updateSvgSize();
+      // adjust scrolling to keep the center stationary
+      scroll.scrollLeft = newCenterX - scroll.clientWidth / 2;
+      scroll.scrollTop = newCenterY - scroll.clientHeight / 2;
+
+      this.updateSvgSize();
+    }
   }
 
   getParentSize() {
