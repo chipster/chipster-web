@@ -71,6 +71,7 @@ export class HistoryComponent implements OnInit {
   public OnSubmit(formValue: any) {
     this.filterAttributeSet = [];
     this.page = 1;
+    this.jobNumber = 0;
     this.getFormControlValues();
     this.getTotalJobCount();
 
@@ -78,7 +79,6 @@ export class HistoryComponent implements OnInit {
 
   getFormControlValues() {
     const arrayControl = this.filteredSearchForm.get('items') as FormArray;
-    console.log ( "array control length " + arrayControl.length);
     for (let i = 0; i < arrayControl.length; i++) {
       const filterParam = new FilterParam();
       console.log(this.checkIfValue (arrayControl.value[i].selectedAttribute));
@@ -101,7 +101,6 @@ export class HistoryComponent implements OnInit {
       filterParam.name = "startTime=gt";
       // console.log(typeof startTimeControl, typeof startTimeControl.value, startTimeControl.value);
       filterParam.value = new Date(startDateControl.value + "T" + startTimeControl.value).toISOString();
-      console.log(filterParam.value);
       this.filterAttributeSet.push(filterParam);
     }
     const endDateControl = this.endTimeInputForm.get('endDateInput');
@@ -121,7 +120,7 @@ export class HistoryComponent implements OnInit {
     let params = new HttpParams();
     // first set the page number for which getting the record
     params = params.append("page", this.page.toString());
-    console.log(" fetching new set of records ");
+    console.log("fetching new set of records ");
     for (let i = 0; i < this.filterAttributeSet.length; i++) {
       if (this.filterAttributeSet[i].name !== "" && this.filterAttributeSet[i].name !== null
       &&  this.filterAttributeSet[i].name !== undefined) {
@@ -157,7 +156,6 @@ export class HistoryComponent implements OnInit {
         return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory', params);
       })
       .subscribe((jobHistoryList: JobHistory[]) => {
-        console.log(jobHistoryList);
         this.jobListLoading = false;
         this.jobHistoryListWithParam = [];
         this.jobHistoryListWithParam = jobHistoryList;
@@ -170,10 +168,10 @@ export class HistoryComponent implements OnInit {
   }
 
   reload() {
-    console.log("reload is called");
     this.resetForm();
     this.filterAttributeSet = [];
     this.page = 1;
+    this.jobNumber = 0;
     this.getTotalJobCount();
   }
 
@@ -224,8 +222,4 @@ export class HistoryComponent implements OnInit {
 
   }
 
-/*
-  sortListByDate(a: JobHistory, b: JobHistory) {
-    return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
-  }*/
 }

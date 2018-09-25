@@ -1,7 +1,7 @@
 import { AuthenticationService } from "../../core/authentication/authenticationservice";
 import { TokenService } from "../../core/authentication/token.service";
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnChanges } from "@angular/core";
 import { Observable } from "rxjs/Observable";
 import { User } from "chipster-js-common";
 import { ConfigService } from "../../shared/services/config.service";
@@ -34,10 +34,12 @@ export class NavigationComponent implements OnInit {
     private configService: ConfigService,
     private errorService: ErrorService,
     private routeService: RouteService
-  ) {}
+  ) {
+     this.username$ = authenticationService.getUsersDisplayName$();
+  }
+
 
   ngOnInit() {
-    this.username$ = this.authenticationService.getUsersDisplayName$();
     this.tokenService.getToken();
 
     // apply configurable styles
