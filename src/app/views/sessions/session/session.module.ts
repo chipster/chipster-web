@@ -9,7 +9,7 @@ import { SessionEventService } from "./sessionevent.service";
 import { SessionDataService } from "./sessiondata.service";
 import { SessionListComponent } from "../session-list.component";
 import { SessionComponent } from "./session.component";
-import { OpenSessionFileComponent } from "../opensessionfile/opensessionfile.component";
+import { OpenSessionFileComponent } from "../open-session-file/open-session-file.component";
 import { UploadService } from "../../../shared/services/upload.service";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { SelectionHandlerService } from "./selection-handler.service";
@@ -20,7 +20,7 @@ import { ModifiedSessionGuard } from "./modified-session.guard";
 import { JobService } from "./job.service";
 import { AngularSplitModule } from "angular-split";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
-import { ImportSessionModalComponent } from "../opensessionfile/import-session-modal.component";
+import { ImportSessionModalComponent } from "../open-session-file/import-session-modal.component";
 
 @NgModule({
   imports: [

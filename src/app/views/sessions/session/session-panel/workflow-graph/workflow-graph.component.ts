@@ -24,7 +24,7 @@ import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
 import UtilsService from "../../../../../shared/utilities/utils";
-import * as d3ContextMenu from 'd3-context-menu';
+import * as d3ContextMenu from "d3-context-menu";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -37,14 +37,22 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   svg: any;
-  @Input() datasetsMap: Map<string, Dataset>;
-  @Input() jobsMap: Map<string, Job>;
-  @Input() modulesMap: Map<string, Module>;
-  @Input() datasetSearch: string;
-  @Input() defaultScale: number;
-  @Input() enabled: boolean;
-  @Input() sessionData: SessionData;
-  @Output() delete: EventEmitter<any> = new EventEmitter();
+  @Input()
+  datasetsMap: Map<string, Dataset>;
+  @Input()
+  jobsMap: Map<string, Job>;
+  @Input()
+  modulesMap: Map<string, Module>;
+  @Input()
+  datasetSearch: string;
+  @Input()
+  defaultScale: number;
+  @Input()
+  enabled: boolean;
+  @Input()
+  sessionData: SessionData;
+  @Output()
+  delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -93,7 +101,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   datasetNodes: Array<DatasetNode>;
   links: Array<Link>;
-  filter: Map<string, Dataset>;
+  filter: Map<string, Dataset> = null;
   datasetTooltip: any;
   datasetTooltipTriangle: any;
 
@@ -173,9 +181,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("opacity", 0)
       .html("\u25BC");
 
-    this.zoomScale = this.defaultScale;
-    this.applyZoom(this.zoomScale);
+    // needs to be before applyZoom if enabled is true
+    // otherwise datasets is null when calculating scroll stuff
+    this.update();
 
+    this.applyZoom(this.defaultScale);
     if (this.enabled) {
       this.subscriptions.push(
         this.sessionEventService.getDatasetStream().subscribe(() => {
@@ -194,7 +204,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // show
-    this.update();
     this.renderGraph();
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
@@ -277,36 +286,39 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // check if it is actually changing
-    if (this.zoomScale === limitedTargetScale) {
+    if (this.zoomScale && this.zoomScale === limitedTargetScale) {
       return;
     }
-
-    // calculate oldzoom / newZoom factor for adjusting scrolling
-    const factor = limitedTargetScale / this.zoomScale;
-
     // zoom
     this.zoomGroup.attr(
       "transform",
       "translate(0, 0) scale(" + limitedTargetScale + ")"
     );
+
     this.zoomScale = limitedTargetScale;
+    const oldZoomScale = this.zoomScale;
 
-    // adjust scrolling
+    if (this.enabled) {
+      // calculate oldzoom / newZoom factor for adjusting scrolling
+      const factor = this.zoomScale / oldZoomScale;
 
-    // coordinates of the viewport center
-    const scroll = this.scrollerDiv.node();
-    const centerX = scroll.scrollLeft + scroll.clientWidth / 2;
-    const centerY = scroll.scrollTop + scroll.clientHeight / 2;
+      // adjust scrolling
 
-    // coordinates of the center after zooming
-    const newCenterX = centerX * factor;
-    const newCenterY = centerY * factor;
+      // coordinates of the viewport center
+      const scroll = this.scrollerDiv.node();
+      const centerX = scroll.scrollLeft + scroll.clientWidth / 2;
+      const centerY = scroll.scrollTop + scroll.clientHeight / 2;
 
-    // adjust scrolling to keep the center stationary
-    scroll.scrollLeft = newCenterX - scroll.clientWidth / 2;
-    scroll.scrollTop = newCenterY - scroll.clientHeight / 2;
+      // coordinates of the center after zooming
+      const newCenterX = centerX * factor;
+      const newCenterY = centerY * factor;
 
-    this.updateSvgSize();
+      // adjust scrolling to keep the center stationary
+      scroll.scrollLeft = newCenterX - scroll.clientWidth / 2;
+      scroll.scrollTop = newCenterY - scroll.clientHeight / 2;
+
+      this.updateSvgSize();
+    }
   }
 
   getParentSize() {
@@ -389,50 +401,54 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .selectAll("rect")
       .data(this.datasetNodes, d => d.datasetId);
 
-      // context menu items
+    // context menu items
     const menu = [
       {
-          title: 'Rename',
-          action: function(d, i) {
-            const dataset = _.clone(d.dataset);
-            self.dialogModalService
-              .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename")
-              .flatMap(name => {
-                dataset.name = name;
-                return self.sessionDataService.updateDataset(dataset);
-              })
-              .subscribe(null, err => console.log("dataset rename error", err));
-          },
-          disabled: false // optional, defaults to false
-      },
-      {
-          title: 'Delete',
-          action: function(d, i) {
-            console.log(d.dataset);
-            console.log(self.selectionService.selectedDatasets);
-            self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
-            console.log(self.selectionService.selectedDatasets);
-            self.delete.emit();
-          }
-      },
-      {
-        title: 'Export',
+        title: "Rename",
         action: function(d, i) {
-            console.log('The dataset is : ' + d.dataset);
-            self.sessionDataService.exportDatasets([d.dataset]);
+          const dataset = _.clone(d.dataset);
+          self.dialogModalService
+            .openStringModal(
+              "Rename dataset",
+              "Dataset name",
+              dataset.name,
+              "Rename"
+            )
+            .flatMap(name => {
+              dataset.name = name;
+              return self.sessionDataService.updateDataset(dataset);
+            })
+            .subscribe(null, err => console.log("dataset rename error", err));
+        },
+        disabled: false // optional, defaults to false
+      },
+      {
+        title: "Delete",
+        action: function(d, i) {
+          console.log(d.dataset);
+          console.log(self.selectionService.selectedDatasets);
+          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+          console.log(self.selectionService.selectedDatasets);
+          self.delete.emit();
         }
-    },
-    {
-      title: 'Show History as text',
-      action: function(d, i) {
-        self.datasetModalService.openDatasetHistoryModal(
-          d.dataset,
-          self.sessionData
-        );
+      },
+      {
+        title: "Export",
+        action: function(d, i) {
+          console.log("The dataset is : " + d.dataset);
+          self.sessionDataService.exportDatasets([d.dataset]);
+        }
+      },
+      {
+        title: "History",
+        action: function(d, i) {
+          self.datasetModalService.openDatasetHistoryModal(
+            d.dataset,
+            self.sessionData
+          );
+        }
       }
-  }
-  ];
-
+    ];
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
     this.d3DatasetNodes
@@ -593,7 +609,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M 0,0 m -7,-7 L 7,0 L -7,7 Z")
-      .style("fill", "#555");
+      .style("fill", "#555")
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(this.filter === null)
+      );
 
     // Define the xy positions of the link
     this.d3Links = this.d3LinksGroup.selectAll("line").data(this.links);
@@ -606,6 +625,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("y1", d => d.source.y + this.nodeHeight)
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
       .attr("y2", d => d.target.y)
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(this.filter === null)
+      )
+
       .on("click", function(d) {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
