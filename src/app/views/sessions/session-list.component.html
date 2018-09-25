@@ -1,46 +1,59 @@
 <div class="container-fluid">
-  <div class=row>
-    <div class="col">
-      <h4>Sessions</h4>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-2">
-      <div class="row">
-        <div class="col">
-          <button class="btn btn-sm btn-block btn-info" (click)="createSession()">
-            <span class="fa fa-plus" aria-hidden="true"></span>
-            New session
-          </button>
-        </div>
-      </div>
-      <br>
-      <div class="row">
-        <div class="col">
-          <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
-        </div>
-      </div>
-    </div>
+  <h3 class="mt-4 mb-3">Sessions</h3>
 
-    <div class="col-5">
+  <div class="row">
+
+    <div class="col">
+
+      <div class="lighter">
+        <p>Get started by creating a new session or play around with the example sessions. To open a session, click on the
+          session name.</p>
+      </div>
+
+      <div class="mt-2 mb-4">
+        <button class="btn btn-sm btn-info mr-2" (click)="createSession()">
+          <span class="fa fa-plus" aria-hidden="true"></span>
+          New session
+        </button>
+        <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
+      </div>
+
       <div class="scrollable session-list">
         <div *ngFor="let sharedByUsername of sessionsByUserKeys">
 
           <h5>{{getSharedByTitlePart(sharedByUsername)}}
             <i>{{getSharedByUsernamePart(sharedByUsername)}}</i>
+
+            <!-- <span *ngIf="sharedByUsername === null" class="float-right">
+              <button class="btn btn-sm btn-info mr-2" (click)="createSession()">
+                <span class="fa fa-plus" aria-hidden="true"></span>
+                New session
+              </button>
+              <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
+            </span> -->
           </h5>
+
+          <!-- <div *ngIf="sharedByUsername === null" class="mt-2 mb-4">
+            <button class="btn btn-sm btn-info mr-2" (click)="createSession()">
+              <span class="fa fa-plus" aria-hidden="true"></span>
+              New session
+            </button>
+            <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
+          </div> -->
+
           <table class="table table-hover table-sm">
             <tbody>
-              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="previewSession(session)" (click)="openSession(session.sessionId)"
-                [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item" title="Open session">
+              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="previewSession(session)" (mouseout)="previewSession(null)"
+                (click)="openSession(session.sessionId)" [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item"
+                title="Open session">
                 <td>
                   <span>{{session.name}}
-                    <span *ngIf="sessionDataService.hasPersonalRule(session.rules)">
-                      <button *ngIf="!deletingSessions.has(session)" class="btn btn-outline-dark btn-sm pull-right btn-no-border showOnRowHover"
-                        (click)="deleteSession(session); $event.stopImmediatePropagation();" title="Delete session">
-                        <span class="fa fa-times"></span>
+                    <span *ngIf="sessionDataService.hasPersonalRule(session.rules) ">
+                      <button *ngIf="!deletingSessions.has(session) " class="btn btn-outline-dark btn-sm pull-right btn-no-border
+                            showOnRowHover " (click)="deleteSession(session); $event.stopImmediatePropagation(); " title="Delete session ">
+                        <span class="fa fa-times "></span>
                       </button>
-                      <span class="pull-right" *ngIf="deletingSessions.has(session)">Deleting...</span>
+                      <span class="pull-right " *ngIf="deletingSessions.has(session) ">Deleting...</span>
                     </span>
                   </span>
                 </td>
@@ -50,46 +63,57 @@
           <br>
         </div>
       </div>
-    </div>
-    <div class="col-5" id="session-preview">
-      <div id="workflow-dataset-panel" class="lighter" *ngIf="!previewedSession">
-        <p>Sessions keep your analysis projects organized. Create a new session for each experiment. The session keeps your raw
-          data files and analysis results together. It keeps track of the analysis history and makes it easy to understand
-          afterwards how the data was analyzed.</p>
 
-        <p>Sessions are stored on the server, but you can save it to a local zip file to take a backup copy of your data or
-          transfer data between different Chipster servers.</p>
+    </div>
+
+
+
+    <div class="col">
+
+      <div id="workflow-dataset-panel" class="lighter">
+        <p>Sessions keep your analysis projects organized. Create a new session for each experiment. The session keeps your
+          raw data files and analysis results together. </p>
+
+        <p>It keeps track of the analysis history and makes it easy to understand afterwards how the data was analyzed.
+        </p>
+
+        <p>Sessions are stored on the server, but you can save it to a local zip file to take a backup copy of your data
+          or transfer data between different Chipster servers.</p>
       </div>
 
-      <div id="workflow-dataset-panel" *ngIf="previewedSession">
 
-        <h5>{{previewedSession.name}}</h5>
+      <div id="session-preview" style="position: relative">
+        <div id="preview-container" *ngIf="previewedSession ">
 
-        <div class="workflow-preview-panel">
+          <h5> {{previewedSession.name}} <span style="font-size: 80%" class="lighter float-right"><i>preview</i></span></h5>
 
-          <p *ngIf="workflowPreviewLoading">
-            <br>
-            <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading preview...
-          </p>
+          <div class="workflow-preview-panel ">
 
-          <p *ngIf="workflowPreviewFailed">
-            <i>Loading preview failed</i>
-          </p>
+            <p *ngIf="workflowPreviewLoading ">
+              <br>
+              <i class="fa fa-circle-o-notch fa-spin " style="font-size:22px "></i> Loading preview...
+            </p>
 
-          <div class="workflow-graph-panel" *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap">
-            <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap" [modulesMap]="sessionData.modulesMap"
-              [defaultScale]="0.5" [enabled]="false"></ch-workflow-graph>
+            <p *ngIf="workflowPreviewFailed ">
+              <i>Loading preview failed</i>
+            </p>
+
+            <div class="workflow-graph-panel " *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap ">
+              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap " [jobsMap]="sessionData.jobsMap " [modulesMap]="sessionData.modulesMap "
+                [defaultScale]="0.5 " [enabled]="false "></ch-workflow-graph>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <!-- Create new element for each paragraph to preserve new line characters -->
-          <p *ngFor="let line of previewedSession.notes?.split('\n')">
-            {{line}}
-          </p>
-        </div>
+          <div>
+            <!-- Create new element for each paragraph to preserve new line characters -->
+            <p *ngFor="let line of previewedSession.notes?.split( '\n') ">
+              {{line}}
+            </p>
+          </div>
 
+        </div>
       </div>
-    </div>
-  </div>
+
+    </div> <!-- col-->
+  </div> <!-- row-->
 </div>

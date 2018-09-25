@@ -8,7 +8,7 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
-import log from 'loglevel';
+import log from "loglevel";
 import { Session } from "chipster-js-common";
 
 @Component({
@@ -39,7 +39,7 @@ export class SessionListComponent implements OnInit {
     private errorHandlerService: RestErrorService,
     public sessionDataService: SessionDataService,
     private activatedRoute: ActivatedRoute,
-    private routeService: RouteService,
+    private routeService: RouteService
   ) {}
 
   ngOnInit() {
@@ -49,13 +49,13 @@ export class SessionListComponent implements OnInit {
       .asObservable()
       // hide the loading indicator of the old session immediately
       .do(() => {
-        this.workflowPreviewLoading = false;
         this.workflowPreviewFailed = false;
+        this.workflowPreviewLoading = true;
       })
       // wait a while to see if the user is really interested about this session
-      .debounceTime(1000)
+      .debounceTime(500)
+      .filter(() => this.previewedSession !== null)
       .flatMap(session => {
-        this.workflowPreviewLoading = true;
         return this.sessionResource.loadSession(session.sessionId);
       })
       .do((fullSession: SessionData) => {
@@ -118,6 +118,7 @@ export class SessionListComponent implements OnInit {
         sessionsByUser.set(null, []);
 
         sessions.forEach(s => {
+          console.log(s.rules);
           this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
             if (!sessionsByUser.has(rule.sharedBy)) {
               sessionsByUser.set(rule.sharedBy, []);
@@ -184,7 +185,6 @@ export class SessionListComponent implements OnInit {
       )
       .then(
         () => {
-
           this.deletingSessions.add(session);
 
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
