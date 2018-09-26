@@ -1,7 +1,7 @@
 
-  <div class="col-md-12 offset-md-2" >
+  <div class="form-group" >
     <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
-      <div class="col col-3">
+      <div class="col col-6">
         <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
           <div [formGroupName]="i">
             <select formControlName="selectedAttribute" style="margin-bottom: 0.5em">
@@ -34,13 +34,12 @@
       </div>
 
       <div class="col col-3">
-        <div class="row">
-            <button type="btn btn-sm submit">Search</button>
-            <button type="btn btn-sm" (click)="addItem()">Add Another Field</button>
-            <button type="btn btn-sm" (click)="reload()">Reload</button>
-        </div>
+        <button class="btn btn-sm btn-info" type="submit"> Search</button>
       </div>
     </form>
+
+    <button class="btn btn-sm btn-info btn-space" (click)="addItem()">Add Another Field</button>
+    <button class="btn btn-sm btn-info btn-space" (click)="reload()">Reload</button>
     <div *ngIf="jobNumber>0"> 
     <span class= "text-sm">Total Job Number : {{jobNumber}}</span>
   </div>
