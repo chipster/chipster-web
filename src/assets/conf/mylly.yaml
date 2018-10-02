@@ -1,0 +1,14 @@
+app-name: Mylly
+# Kielipankki modules and manual
+modules: ['Kielipankki']
+# Link Kielipankki manuals here on the dev machine to be able to switch between manuals simply in
+# this configuration. Restart ng serve after creating this link.
+manual-path: assets/manual-mylly/
+# naming convention in the Kielipankki manual pages
+manual-tool-postfix: .en.src.html
+
+custom-css: assets/manual-mylly/app-mylly-styles.css
+favicon: assets/manual-mylly/app-mylly-favicon.png
+home-path: assets/manual-mylly/app-home.html
+home-header-path: assets/manual-mylly/app-home-header.html
+contact-path: assets/manual-mylly/app-contact.html
