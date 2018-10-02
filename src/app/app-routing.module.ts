@@ -34,7 +34,7 @@ const routes: Routes = [
   {
     path: ":appName/analyze",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [AnalyzeGuard]
+    canActivate: [AuthGuard, AnalyzeGuard]
   },
   {
     path: ":appName/sessions",
