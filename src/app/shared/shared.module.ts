@@ -28,6 +28,7 @@ import { SpreadsheetService } from "./services/spreadsheet.service";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { SettingsService } from "./services/settings.service";
 import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
+import { DummyRouteComponent } from "./components/dummy-route.component";
 
 /*
  * @description: Shared module should contain application global resources
@@ -47,7 +48,8 @@ import { ToolSourceComponent } from "./components/tool-source/tool-source.compon
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,
-    ToolSourceComponent
+    ToolSourceComponent,
+    DummyRouteComponent
   ],
   providers: [
     PipeService,

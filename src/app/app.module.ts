@@ -13,12 +13,9 @@ import { AppComponent } from "./app.component";
 import { TokenService } from "./core/authentication/token.service";
 import { AppRoutingModule } from "./app-routing.module";
 import { StoreModule } from "@ngrx/store";
-import { selectedJobs } from "./state/selectedJobs.reducer";
-import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { ErrorComponent } from "./views/error/error.component";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { ErrorService } from "./core/errorhandler/error.service";
-import { toolSelection } from "./state/selected-tool.reducer";
 import { ContactComponent } from "./views/contact/contact.component";
 import { HttpClientModule } from "@angular/common/http";
 import { ManualModule } from "./views/manual/manual.module";
@@ -27,6 +24,10 @@ import { AdminModule } from "./views/admin/admin.module";
 import { TermsComponent } from "./views/terms/terms.component";
 import { SharedModule } from "./shared/shared.module";
 import { HotkeyModule } from "angular2-hotkeys";
+import { selectedJobs } from "./state/selectedJobs.reducer";
+import { selectedDatasets } from "./state/selectedDatasets.reducer";
+import { toolSelection } from "./state/selected-tool.reducer";
+import { latestSession } from "./state/latest-session.reducer";
 
 @NgModule({
   imports: [
@@ -39,7 +40,12 @@ import { HotkeyModule } from "angular2-hotkeys";
     ManualModule,
     NgbModule.forRoot(),
     AdminModule,
-    StoreModule.forRoot({ selectedDatasets, selectedJobs, toolSelection }),
+    StoreModule.forRoot({
+      selectedDatasets,
+      selectedJobs,
+      toolSelection,
+      latestSession
+    }),
     SharedModule,
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here

@@ -1,13 +1,13 @@
-import { ConfigService } from '../services/config.service';
-import { ToolResource } from './toolresource';
-import { Session, Dataset, Module, Tool, Job, Rule } from 'chipster-js-common';
-import * as _ from 'lodash';
-import UtilsService from '../utilities/utils';
-import { Injectable } from '@angular/core';
-import { SessionData } from '../../model/session/session-data';
-import { RestService } from '../../core/rest-services/restservice/rest.service';
-import { Observable } from 'rxjs/Observable';
-import log from 'loglevel';
+import { ConfigService } from "../services/config.service";
+import { ToolResource } from "./toolresource";
+import { Session, Dataset, Module, Tool, Job, Rule } from "chipster-js-common";
+import * as _ from "lodash";
+import UtilsService from "../utilities/utils";
+import { Injectable } from "@angular/core";
+import { SessionData } from "../../model/session/session-data";
+import { RestService } from "../../core/rest-services/restservice/rest.service";
+import { Observable } from "rxjs/Observable";
+import log from "loglevel";
 
 @Injectable()
 export class SessionResource {
@@ -27,21 +27,21 @@ export class SessionResource {
       .flatMap((url: string) => {
         const session$ = this.restService
           .get(`${url}/sessions/${sessionId}`, true)
-          .do((x: any) => log.debug('session', x));
+          .do((x: any) => log.debug("session", x));
         const sessionDatasets$ = this.restService
           .get(`${url}/sessions/${sessionId}/datasets`, true)
-          .do((x: any) => log.debug('sessionDatasets', x));
+          .do((x: any) => log.debug("sessionDatasets", x));
         const sessionJobs$ = this.restService
           .get(`${url}/sessions/${sessionId}/jobs`, true)
-          .do((x: any) => log.debug('sessionJobs', x));
+          .do((x: any) => log.debug("sessionJobs", x));
         const modules$ = this.toolResource
           .getModules()
-          .do((x: any) => log.debug('modules', x));
+          .do((x: any) => log.debug("modules", x));
         const tools$ = this.toolResource
           .getTools()
-          .do((x: any) => log.debug('tools', x));
+          .do((x: any) => log.debug("tools", x));
         const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
-          log.debug('types', x)
+          log.debug("types", x)
         );
 
         // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
@@ -65,8 +65,8 @@ export class SessionResource {
         const data = new SessionData();
 
         data.session = session;
-        data.datasetsMap = UtilsService.arrayToMap(datasets, 'datasetId');
-        data.jobsMap = UtilsService.arrayToMap(jobs, 'jobId');
+        data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
+        data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
 
         // show only configured modules
         modules = modules.filter(
@@ -84,12 +84,12 @@ export class SessionResource {
           return module;
         });
 
-        data.modulesMap = UtilsService.arrayToMap(modules, 'moduleId');
+        data.modulesMap = UtilsService.arrayToMap(modules, "moduleId");
 
         data.modulesMap.forEach((module: any) => {
           module.categoriesMap = UtilsService.arrayToMap(
             module.categories,
-            'name'
+            "name"
           );
         });
 
@@ -119,7 +119,7 @@ export class SessionResource {
     );
     return Observable.forkJoin(catchedObservables).map(res => {
       if (errors.length > 0) {
-        console.log('session loading failed', errors);
+        log.warn("session loading failed", errors);
         // just report the first error, this is what the forkJoin would have done by default anyway
         throw errors[0];
       } else {
@@ -134,9 +134,9 @@ export class SessionResource {
       .flatMap(typeServiceUrl => {
         return this.restService.get(
           typeServiceUrl +
-            '/sessions/' +
+            "/sessions/" +
             sessionId +
-            '/datasets/' +
+            "/datasets/" +
             dataset.datasetId,
           true
         );
@@ -151,7 +151,7 @@ export class SessionResource {
       .getTypeService()
       .flatMap(typeServiceUrl => {
         return this.restService.get(
-          typeServiceUrl + '/sessions/' + sessionId,
+          typeServiceUrl + "/sessions/" + sessionId,
           true
         );
       })
@@ -247,7 +247,10 @@ export class SessionResource {
   getRule(sessionId: string, ruleId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$.flatMap((url: string) => {
-      return this.restService.get(`${url}/sessions/${sessionId}/rules/${ruleId}`, true);
+      return this.restService.get(
+        `${url}/sessions/${sessionId}/rules/${ruleId}`,
+        true
+      );
     });
   }
 
@@ -323,7 +326,7 @@ export class SessionResource {
 
   copySession(sessionData: SessionData, name: string): Observable<any> {
     if (!name) {
-      name = 'unnamed session';
+      name = "unnamed session";
     }
 
     const newSession: Session = _.clone(sessionData.session);
