@@ -29,6 +29,7 @@ import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { toolSelection } from "./state/selected-tool.reducer";
 import { latestSession } from "./state/latest-session.reducer";
 import { NotFoundComponent } from "./views/error/not-found.component";
+import { RoutingModule } from "./core/routing/routing.module";
 
 @NgModule({
   imports: [
@@ -48,6 +49,7 @@ import { NotFoundComponent } from "./views/error/not-found.component";
       latestSession
     }),
     SharedModule,
+    RoutingModule,
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here
   ],

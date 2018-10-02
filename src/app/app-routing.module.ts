@@ -13,6 +13,7 @@ import { LandGuard } from "./core/authentication/land-guard.service";
 import { AnalyzeGuard } from "./core/authentication/analyze-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
+import { AppNameGuard } from "./core/routing/app-name-guard.service";
 
 const routes: Routes = [
   { path: ":appName/home", component: HomeComponent },
@@ -28,30 +29,35 @@ const routes: Routes = [
   {
     path: ":appName/analyze/:sessionId",
     component: SessionComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AppNameGuard, AuthGuard],
     canDeactivate: [ModifiedSessionGuard]
   },
 
   {
     path: ":appName/analyze",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [AuthGuard, AnalyzeGuard]
+    canActivate: [AppNameGuard, AuthGuard, AnalyzeGuard]
   },
   {
     path: ":appName/sessions",
     component: SessionListComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AppNameGuard, AuthGuard]
   },
+
+  { path: "notfound", component: NotFoundComponent, pathMatch: "full" },
+
   {
     path: ":appName",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [LandGuard]
+    canActivate: [AppNameGuard, LandGuard]
   },
+
   { path: "", redirectTo: "chipster", pathMatch: "full" },
   { path: "**", component: NotFoundComponent }
 ];
 
 @NgModule({
+  // imports: [RouterModule.forRoot(routes, { enableTracing: true })],
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
