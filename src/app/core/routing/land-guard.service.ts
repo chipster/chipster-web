@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { CanActivate } from "@angular/router";
-import { TokenService } from "./token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { ActivatedRouteSnapshot } from "@angular/router";
 import { RouterStateSnapshot } from "@angular/router";
+import { TokenService } from "../authentication/token.service";
 
 /**
  * Redirect to analyze if user is logged in, otherwise to home.
