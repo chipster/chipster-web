@@ -28,6 +28,7 @@ import { selectedJobs } from "./state/selectedJobs.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { toolSelection } from "./state/selected-tool.reducer";
 import { latestSession } from "./state/latest-session.reducer";
+import { NotFoundComponent } from "./views/error/not-found.component";
 
 @NgModule({
   imports: [
@@ -57,7 +58,8 @@ import { latestSession } from "./state/latest-session.reducer";
     AppComponent,
     ErrorComponent,
     ContactComponent,
-    TermsComponent
+    TermsComponent,
+    NotFoundComponent
   ],
   providers: [
     SelectionService,

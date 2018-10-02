@@ -12,6 +12,7 @@ import { TermsComponent } from "./views/terms/terms.component";
 import { LandGuard } from "./core/authentication/land-guard.service";
 import { AnalyzeGuard } from "./core/authentication/analyze-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
+import { NotFoundComponent } from "./views/error/not-found.component";
 
 const routes: Routes = [
   { path: ":appName/home", component: HomeComponent },
@@ -47,7 +48,7 @@ const routes: Routes = [
     canActivate: [LandGuard]
   },
   { path: "", redirectTo: "chipster", pathMatch: "full" },
-  { path: "**", redirectTo: "chipster" }
+  { path: "**", component: NotFoundComponent }
 ];
 
 @NgModule({
