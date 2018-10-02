@@ -1,6 +1,6 @@
 import {SelectionService} from "../../selection.service";
 import {SessionDataService} from "../../sessiondata.service";
-import {Component, Output, EventEmitter} from "@angular/core";
+import {Component, Output, EventEmitter, OnInit} from "@angular/core";
 import {Store} from "@ngrx/store";
 import { Dataset } from "chipster-js-common";
 
@@ -9,7 +9,7 @@ import { Dataset } from "chipster-js-common";
   templateUrl: './datasetdetails.html',
   styleUrls: ['./datasetdetails.less']
 })
-export class DatasetDetailsComponent {
+export class DatasetDetailsComponent implements OnInit {
 
   @Output() onDelete: EventEmitter<any> = new EventEmitter();
 

@@ -69,6 +69,7 @@ export class HistoryComponent implements OnInit {
   }
 
   public OnSubmit(formValue: any) {
+    console.log("submit is called");
     this.filterAttributeSet = [];
     this.page = 1;
     this.jobNumber = 0;

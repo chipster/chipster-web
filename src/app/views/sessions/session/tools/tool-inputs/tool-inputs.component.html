@@ -1,5 +1,13 @@
 <div class="container">
-  <h3 class="h3-xs mt-1 mb-2">Input files</h3>
+    <div class="row">
+        <div class="col col-md-9">
+            <h3 class="h3-xs mt-1 mb-2">Input files</h3>
+        </div>
+        <div class="col col-md-3">
+          <button class="btn btn-small" style="float: right" (click)="closeDropDown()" >
+            <i class="fa fa-window-close"></i></button>
+        </div>
+    </div>
 
   <ngb-alert *ngIf="inputBindings.length > 0 && selectedDatasets.length == 0" [dismissible]="false">
     No selected files

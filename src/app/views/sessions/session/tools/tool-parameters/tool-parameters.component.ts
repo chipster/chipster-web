@@ -1,7 +1,9 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../tool.service";
 import { ToolSelectionService } from "../../tool.selection.service";
+import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
+
 
 @Component({
   selector: "ch-tool-parameters",
@@ -14,6 +16,11 @@ export class ToolParametersComponent {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public toolService: ToolService,
-    public toolSelectionService: ToolSelectionService
+    public toolSelectionService: ToolSelectionService,
+    private dropDown: NgbDropdown
   ) {}
+
+  closeDropDownDialog() {
+    this.dropDown.close();
+  }
 }

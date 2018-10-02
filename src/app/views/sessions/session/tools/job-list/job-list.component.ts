@@ -31,4 +31,8 @@ export class JobListComponent implements OnChanges {
     this.jobSelected.emit(job);
     this.dropDown.close();
   }
+
+  closeDropDown() {
+    this.dropDown.close();
+  }
 }

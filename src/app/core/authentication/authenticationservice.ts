@@ -10,6 +10,7 @@ import { RestErrorService } from "../errorhandler/rest-error.service";
 import { User } from "chipster-js-common";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
+
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
 @Injectable()
@@ -35,7 +36,6 @@ export class AuthenticationService {
       .do(x => console.debug('auth url', x))
       .flatMap(authUrl => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
-        console.log("user Id", userId);
         const url = `${authUrl}/users/${userId}`;
 
         return <Observable<User>>this.authHttpClient.getAuth(url);

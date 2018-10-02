@@ -11,6 +11,7 @@ import { ToolService } from "../tool.service";
 import * as _ from "lodash";
 import log from "loglevel";
 import { SessionData } from "../../../../../model/session/session-data";
+import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: "ch-tool-inputs",
@@ -27,8 +28,10 @@ export class ToolInputsComponent implements OnChanges {
   inputDescription: string;
   localInputBindings: InputBinding[];
 
+
   //noinspection JSUnusedLocalSymbols
-  constructor(private toolService: ToolService) {}
+  constructor(private toolService: ToolService,
+    private dropDown: NgbDropdown) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["inputBindings"]) {
@@ -96,5 +99,9 @@ export class ToolInputsComponent implements OnChanges {
     }
 
     return s;
+  }
+
+  closeDropDown() {
+    this.dropDown.close();
   }
 }

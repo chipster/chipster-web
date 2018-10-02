@@ -1,5 +1,13 @@
 <div class="container">
-  <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
+    <div class="row">
+        <div class="col col-md-9">
+            <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
+        </div>
+        <div class="col col-md-3">
+          <button class="btn btn-xs" style="float: right" (click)="closeDropDownDialog()" >
+            <i class="fa fa-window-close"></i></button>
+        </div>
+      </div>
 
   <form name="paramForm" *ngIf="tool">
     <div *ngIf="tool.parameters.length === 0" class="alert alert-info">No parameters to modify for this tool</div>
