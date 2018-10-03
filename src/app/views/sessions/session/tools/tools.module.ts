@@ -14,9 +14,17 @@ import { ScrollerComponent } from "./scroller/scroller.component";
 import { JobListComponent } from "./job-list/job-list.component";
 import { ToolListAccordionComponent } from "./tool-list/tool-list-accordion.component";
 import { ToolDetailsComponent } from "./tool-details/tool-details.component";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule],
+  imports: [
+    CommonModule,
+    SharedModule,
+    FormsModule,
+    NgbModule,
+    ManualModule,
+    NgSelectModule
+  ],
   declarations: [
     ToolListItemComponent,
     ToolsComponent,

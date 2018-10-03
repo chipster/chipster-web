@@ -1,12 +1,12 @@
-import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
 import { Service, Dataset } from "chipster-js-common";
-import {FileResource} from "../../../../../shared/resources/fileresource";
-import {SessionDataService} from "../../sessiondata.service";
+import { FileResource } from "../../../../../shared/resources/fileresource";
+import { SessionDataService } from "../../sessiondata.service";
 import * as pako from "pako";
 import BamRecord from "./bamRecord";
-import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
-import {Subject} from "rxjs/Subject";
-import {LoadState, State} from "../../../../../model/loadstate";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { Subject } from "rxjs/Subject";
+import { LoadState, State } from "../../../../../model/loadstate";
 
 
 @Component({
@@ -23,24 +23,24 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private samHeaderLen: number;
   private samHeader = "";
   private headerEnd: number;
-  private samHeaderList:Array<string>=[];
+  private samHeaderList: Array<string> = [];
   private bamRecordList: Array<BamRecord> = [];
   private chrName: string;
   private bamRecord: BamRecord;
-  private visibleBlockNumber = 2;//just a magic number,just showing records from first two blocks
-  private maxBytes= 5000000;
+  private visibleBlockNumber = 2; // just a magic number,just showing records from first two blocks
+  private maxBytes = 5000000;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  //BGZF blocks
+  // BGZF blocks
   private BLOCK_HEADER_LENGTH = 18;
   private filePos = 0;
   private blockList = [];
 
   constructor(private fileResource: FileResource,
-              private sessionDataService: SessionDataService,
-              private errorHandlerService: RestErrorService) {
+    private sessionDataService: SessionDataService,
+    private errorHandlerService: RestErrorService) {
   }
 
   ngOnChanges() {
@@ -52,27 +52,27 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       .takeUntil(this.unsubscribe)
       .subscribe((result: any) => {
 
-        var arrayBuffer = result;
+        const arrayBuffer = result;
 
         if (arrayBuffer) {
-          //let determine the header block size to decode the header and the record part differently
+          // let determine the header block size to decode the header and the record part differently
 
-          let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
-          let ba = new Uint8Array(blockHeader);
-          let blockSize = (ba[17] << 8) | (ba[16]) + 1;
+          const blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
+          const ba = new Uint8Array(blockHeader);
+          const blockSize = (ba[17] << 8) | (ba[16]) + 1;
 
-          let headerBuffer = arrayBuffer.slice(0, blockSize-1);
-          let recordBuffer = arrayBuffer.slice(blockSize);
+          const headerBuffer = arrayBuffer.slice(0, blockSize - 1);
+          const recordBuffer = arrayBuffer.slice(blockSize);
 
 
-          //Read the header part
+          // Read the header part
           this.readHeader(headerBuffer);
-          //Read the record buffer
+          // Read the record buffer
           this.getBGZFBlocks(recordBuffer);
 
           this.state = new LoadState(State.Ready);
         }
-      }, ( error: any) => {
+      }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading bam file failed");
         this.errorHandlerService.handleError(error, this.state.message);
       });
@@ -86,22 +86,22 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   // Decode the BAM File Header
   readHeader(headerBuffer: ArrayBuffer) {
 
-    let headerPart = new Uint8Array(headerBuffer);
-    let header = pako.inflate(headerPart);
+    const headerPart = new Uint8Array(headerBuffer);
+    const header = pako.inflate(headerPart);
     this.samHeaderLen = this.readInt(header, 4);
 
     for (var i = 0; i < this.samHeaderLen; ++i) {
-      this.samHeader+= String.fromCharCode(header[i + 8]);
+      this.samHeader += String.fromCharCode(header[i + 8]);
     }
 
     // In cases where SAM header text section is missing or not containing seq information
-    if(this.samHeaderLen==0||this.samHeader.indexOf("@SQ")==-1){
+    if (this.samHeaderLen === 0 || this.samHeader.indexOf("@SQ") === -1) {
       //#ref sequence
       let nRef = this.readInt(header, this.samHeaderLen + 8);
       let p = this.samHeaderLen + 12;
 
       for (var i = 0; i < nRef; ++i) {
-        //lName=length of the reference nameplus 1
+        // lName=length of the reference nameplus 1
         let lName = this.readInt(header, p);
 
         let name = "";
@@ -111,9 +111,9 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
 
         this.chrName = name;
-        //lRef= length of the reference sequence
+        // lRef= length of the reference sequence
         let lRef = this.readInt(header, p + lName + 4);
-        this.samHeader+= "@SQ"+ " "+"SN" +":" +" "+ name+" "+"LN:"+ lRef+ " ";
+        this.samHeader += "@SQ" + " " + "SN" + ":" + " " + name + " " + "LN:" + lRef + " ";
 
         p = p + 8 + lName;
         this.headerEnd = p;
@@ -124,11 +124,11 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   }
 
-  updateHeaderText(){
+  updateHeaderText() {
 
-    let a=this.samHeader.split("@");
-    for(var i=1,j=0;i<a.length;i++,j++){
-      this.samHeaderList[j]="@"+a[i];
+    let a = this.samHeader.split("@");
+    for (var i = 1, j = 0; i < a.length; i++ , j++) {
+      this.samHeaderList[j] = "@" + a[i];
     }
 
   }
@@ -145,7 +145,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
       let ba = new Uint8Array(blockHeader);
       let blockSize = (ba[17] << 8) | (ba[16]) + 1;
-      if (blockSize < 28) break;
+      if (blockSize < 28)
+        break;
 
       blockSizeList.push(blockSize);
 
@@ -155,12 +156,12 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       totalSize += compressedData.byteLength;
 
 
-      //some blocks still behave differently, so pako still throws some error as incorrect header check
+      // some blocks still behave differently, so pako still throws some error as incorrect header check
       try {
         let unCompressedData = pako.inflate(new Uint8Array(compressedData));
         this.blockList.push(unCompressedData);
       } catch (e) {
-        //console.log(e);
+        // console.log(e);
         break;
       }
 
@@ -200,7 +201,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       blockEnd = offset + blockSize + 4;
 
 
-      if (blockSize > MAX_GZIP_BLOCK_SIZE||blockEnd>MAX_GZIP_BLOCK_SIZE) {
+      if (blockSize > MAX_GZIP_BLOCK_SIZE || blockEnd > MAX_GZIP_BLOCK_SIZE) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
@@ -240,20 +241,20 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       cigar = '';
 
 
-      //nc Number of cigarOpp
+      // nc Number of cigarOpp
 
       cigarArray = [];
       for (c = 0; c < nc; ++c) {
         var cigop = this.readInt(this.plain, p);
         // what is the uppermost byte?
         //var opLen = ((cigop & 0x00ffffff) >> 4);
-        var opLen = (cigop  >> 4);
+        var opLen = (cigop >> 4);
         var opLtr = CIGAR_DECODER[cigop & 0xf];
         if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
           lengthOnRef += opLen;
         cigar = cigar + opLen + opLtr;
         p += 4;
-        cigarArray.push({len: opLen, ltr: opLtr});
+        cigarArray.push({ len: opLen, ltr: opLtr });
 
       }
       this.bamRecord.cigar = cigar;
@@ -338,7 +339,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       offset = blockEnd;
 
 
-      for (var x in tags) {
+      for ( var x in tags) {
         if (tags.hasOwnProperty(x)) {
           typeTag += x + ":" + tags[x] + " ";
         }
@@ -347,7 +348,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       typeTag = typeTag.replace(/[c|C|s|S|i|I|f]/g, "i");
 
 
-      //assign the bam record fields
+      // assign the bam record fields
       this.bamRecord.flag = flag;
       this.bamRecord.pos = pos + 1;
       this.bamRecord.nextSegment = nextRefID;

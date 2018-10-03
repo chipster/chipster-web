@@ -8,6 +8,7 @@ import { Token } from "chipster-js-common";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
 import { User } from "chipster-js-common";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
@@ -16,7 +17,8 @@ export class AuthenticationService {
 
   private tokenRefreshSchedulerId: number;
 
-  private user$: Observable<User>;
+  private user$: BehaviorSubject<any>;
+
 
   constructor(
     private configService: ConfigService,
@@ -33,6 +35,7 @@ export class AuthenticationService {
       .do(x => console.debug('auth url', x))
       .flatMap(authUrl => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
+        console.log("user Id", userId);
         const url = `${authUrl}/users/${userId}`;
 
         return <Observable<User>>this.authHttpClient.getAuth(url);
@@ -107,7 +110,15 @@ export class AuthenticationService {
     clearInterval(this.tokenRefreshSchedulerId);
   }
 
+  // Not very sure, is it the right way..
   getUser(): Observable<User> {
+    this.user$ = this.configService.getAuthUrl()
+    .flatMap(authUrl => {
+      const userId = encodeURIComponent(this.tokenService.getUsername());
+      const url = `${authUrl}/users/${userId}`;
+
+     return <Observable<User>>this.authHttpClient.getAuth(url);
+    });
     return this.user$;
   }
 
@@ -122,7 +133,7 @@ export class AuthenticationService {
           return Observable.of({ name: userId });
         });
     })
-      .map(user => user.name);
+    .map(user => user.name);
   }
 
   getUsers(): Observable<User[]> {

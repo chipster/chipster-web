@@ -1,7 +1,7 @@
 import { AuthenticationService } from "../../core/authentication/authenticationservice";
 import { TokenService } from "../../core/authentication/token.service";
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnChanges } from "@angular/core";
 import { Observable } from "rxjs/Observable";
 import { User } from "chipster-js-common";
 import { ConfigService } from "../../shared/services/config.service";
@@ -24,6 +24,7 @@ export class NavigationComponent implements OnInit {
   routerLinkContact: string;
   routerLinkHome: string;
   routerLinkSessions: string;
+  routerLinkAnalyze: string;
   username$: Observable<string>;
   appName = "";
   appRoute: string;
@@ -34,10 +35,12 @@ export class NavigationComponent implements OnInit {
     private configService: ConfigService,
     private errorService: ErrorService,
     private routeService: RouteService
-  ) {}
+  ) {
+     this.username$ = authenticationService.getUsersDisplayName$();
+  }
+
 
   ngOnInit() {
-    this.username$ = this.authenticationService.getUsersDisplayName$();
     this.tokenService.getToken();
 
     // apply configurable styles
@@ -91,17 +94,25 @@ export class NavigationComponent implements OnInit {
     // component is shown before the router redirects because this is outside of the router outlet.
     this.routeService
       .getAppRoute$()
-      .flatMap(() => this.routeService.getRouterLink$("/sessions"))
+      .flatMap(() =>
+        this.routeService.getRouterLink$(RouteService.PATH_SESSIONS)
+      )
       .do(url => (this.routerLinkSessions = url))
-      .flatMap(() => this.routeService.getRouterLink$("/home"))
+      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_HOME))
       .do(url => (this.routerLinkHome = url))
-      .flatMap(() => this.routeService.getRouterLink$("/contact"))
+      .flatMap(() =>
+        this.routeService.getRouterLink$(RouteService.PATH_CONTACT)
+      )
       .do(url => (this.routerLinkContact = url))
-      .flatMap(() => this.routeService.getRouterLink$("/manual"))
+      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_MANUAL))
       .do(url => (this.routerLinkManual = url))
-      .flatMap(() => this.routeService.getRouterLink$("/login"))
+      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_LOGIN))
       .do(url => (this.routerLinkLogin = url))
-      .flatMap(() => this.routeService.getRouterLink$("/admin"))
+      .flatMap(() =>
+        this.routeService.getRouterLink$(RouteService.PATH_ANALYZE)
+      )
+      .do(url => (this.routerLinkAnalyze = url))
+      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_ADMIN))
       .do(url => (this.routerLinkAdmin = url))
       .subscribe(null, err => {
         log.info("failed to get the app route", err);

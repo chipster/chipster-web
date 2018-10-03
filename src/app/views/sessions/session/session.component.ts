@@ -1,14 +1,13 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, Params, Router, UrlTree } from "@angular/router";
+import { ActivatedRoute, Params } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { WsEvent, Dataset, Job, Rule } from "chipster-js-common";
+import { Dataset, Job, Rule } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
-import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 import { RouteService } from "../../../shared/services/route.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
@@ -16,12 +15,12 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./sessiondata.service";
 import { SessionEventService } from "./sessionevent.service";
-import { ConfigService } from "../../../shared/services/config.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
-import { selectedDatasets } from "../../../state/selectedDatasets.reducer";
 import { HotkeysService, Hotkey } from "angular2-hotkeys";
+import { Store } from "@ngrx/store";
+import { SET_LATEST_SESSION } from "../../../state/latest-session.reducer";
 
 @Component({
   selector: "ch-session",
@@ -42,7 +41,6 @@ export class SessionComponent implements OnInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
 
   constructor(
-    private router: Router,
     private sessionEventService: SessionEventService,
     private sessionDataService: SessionDataService,
     private sessionResource: SessionResource,
@@ -53,23 +51,12 @@ export class SessionComponent implements OnInit, OnDestroy {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private tokenService: TokenService,
-    private activatedRoute: ActivatedRoute,
     private routeService: RouteService,
     private settingsService: SettingsService,
-    private _hotkeysService: HotkeysService
+    private store: Store<any>
   ) {}
 
   ngOnInit() {
-    this._hotkeysService.add(
-      new Hotkey(
-        "meta+shift+g",
-        (event: KeyboardEvent): boolean => {
-          console.log("Typed hotkey");
-          return false; // Prevent bubbling
-        }
-      )
-    );
-
     this.route.params
       .flatMap(params => {
         /*
@@ -94,7 +81,7 @@ export class SessionComponent implements OnInit, OnDestroy {
               const queryParams = {};
               queryParams[this.PARAM_TEMP_COPY] = true;
               return Observable.fromPromise(
-                this.routeService.navigateAbsolute("/sessions/" + sessionId, {
+                this.routeService.navigateAbsolute("/analyze/" + sessionId, {
                   queryParams: queryParams
                 })
               );
@@ -104,6 +91,13 @@ export class SessionComponent implements OnInit, OnDestroy {
       })
       .do(sessionData => {
         this.sessionData = sessionData;
+
+        // save session id to store
+        this.store.dispatch({
+          type: SET_LATEST_SESSION,
+          payload: sessionData.session.sessionId
+        });
+
         this.subscribeToEvents();
       })
       .subscribe(null, (error: any) => {
