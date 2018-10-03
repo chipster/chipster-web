@@ -5,11 +5,10 @@ export enum State {
 }
 
 export class LoadState {
-
   public state: State;
   private _message: string;
 
-  constructor (state: State, message?: string) {
+  constructor(state: State, message?: string) {
     this.state = state;
     this._message = message;
   }
@@ -18,8 +17,7 @@ export class LoadState {
     return this._message ? this._message : this.state;
   }
 
-  isReady() : boolean {
-    return this.state === State.Ready
+  isReady(): boolean {
+    return this.state === State.Ready;
   }
-
 }

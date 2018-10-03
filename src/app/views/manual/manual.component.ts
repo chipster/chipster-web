@@ -1,22 +1,23 @@
 import {
   AfterViewInit,
   Component,
-  ComponentFactoryResolver, Input,
+  ComponentFactoryResolver,
+  Input,
   ViewChild,
   ViewContainerRef,
   OnInit,
   OnDestroy
 } from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import {ManualAComponent} from "./manual-components/manual-a.component";
-import {ManualLiComponent} from "./manual-components/manual-li.component";
-import {ManualUlComponent} from "./manual-components/manual-ul.component";
-import {ManualOlComponent} from "./manual-components/manual-ol.component";
-import {ManualDivComponent} from "./manual-components/manual-div.component";
-import {ManualSpanComponent} from "./manual-components/manual-span.component";
-import {ManualUtils} from "./manual-utils";
+import { HttpClient } from "@angular/common/http";
+import { ActivatedRoute } from "@angular/router";
+import { Observable } from "rxjs/Observable";
+import { ManualAComponent } from "./manual-components/manual-a.component";
+import { ManualLiComponent } from "./manual-components/manual-li.component";
+import { ManualUlComponent } from "./manual-components/manual-ul.component";
+import { ManualOlComponent } from "./manual-components/manual-ol.component";
+import { ManualDivComponent } from "./manual-components/manual-div.component";
+import { ManualSpanComponent } from "./manual-components/manual-span.component";
+import { ManualUtils } from "./manual-utils";
 import { ConfigService } from "../../shared/services/config.service";
 import { ManualPComponent } from "./manual-components/manual-p.component";
 import { Subject } from "rxjs/Subject";
@@ -43,34 +44,40 @@ import { RouteService } from "../../shared/services/route.service";
  * Absolute links are changed to open in a new tab.
  */
 @Component({
-  selector: 'ch-manual',
-  templateUrl: './manual.component.html',
-  styleUrls: ['./manual.component.less'],
+  selector: "ch-manual",
+  templateUrl: "./manual.component.html",
+  styleUrls: ["./manual.component.less"]
 })
 export class ManualComponent implements AfterViewInit, OnDestroy {
-
   private unsubscribe: Subject<any> = new Subject();
 
-  @Input() private page: string;
-  @Input() showControls = false;
-  @Input() assetsPath? = null;
-  @Input() addContainer? = true;
-  @Input() routerPath?: string = null;
-  @Input() manualStyles? = true;
+  @Input()
+  private page: string;
+  @Input()
+  showControls = false;
+  @Input()
+  assetsPath? = null;
+  @Input()
+  addContainer? = true;
+  @Input()
+  routerPath?: string = null;
+  @Input()
+  manualStyles? = true;
 
   private currentPage;
 
   private toolPostfix: string;
 
-  @ViewChild('container', { read: ViewContainerRef }) viewContainerReference;
+  @ViewChild("container", { read: ViewContainerRef })
+  viewContainerReference;
 
   constructor(
     private http: HttpClient,
     private activatedRoute: ActivatedRoute,
     private componentFactoryResolver: ComponentFactoryResolver,
     private configService: ConfigService,
-    private routeService: RouteService) {
-  }
+    private routeService: RouteService
+  ) {}
 
   /**
    * Listen for route changes and show the corresponding page
@@ -78,9 +85,8 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * Do this in AfterViewInit() because building the html view requres access to DOM.
    */
   ngAfterViewInit() {
-
     if (!this.routerPath) {
-      this.routerPath = this.routeService.getAppRouteCurrent() + '/manual/';
+      this.routerPath = this.routeService.getAppRouteCurrent() + "/manual/";
     }
 
     this.activatedRoute.url
@@ -92,21 +98,27 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
         }
         return this.configService.getManualPath();
       })
-      .do(path => this.assetsPath = path)
+      .do(path => (this.assetsPath = path))
       .flatMap(() => {
-        console.debug('route changed', this.activatedRoute.snapshot.url, this.page);
+        console.debug(
+          "route changed",
+          this.activatedRoute.snapshot.url,
+          this.page
+        );
         if (this.page) {
           this.currentPage = this.page;
         } else {
           // get the current route path
-          this.currentPage = this.activatedRoute.snapshot.url.join('/');
+          this.currentPage = this.activatedRoute.snapshot.url.join("/");
         }
 
         // get the html file
         return this.getPage(this.assetsPath + this.currentPage);
       })
       // parse the html
-      .map(htmlString => new DOMParser().parseFromString(htmlString, "text/html"))
+      .map(htmlString =>
+        new DOMParser().parseFromString(htmlString, "text/html")
+      )
       // fix the links and image source addresses
       .map(htmlDoc => this.rewrite(htmlDoc, this.currentPage))
       // show
@@ -126,12 +138,13 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @param {string} fragment
    */
   viewPage(htmlDoc: HTMLDocument, fragment: string) {
-
     // remove previous page
     this.viewContainerReference.clear();
 
     // create a root component because angularize() wants one
-    const factory = this.componentFactoryResolver.resolveComponentFactory(ManualDivComponent);
+    const factory = this.componentFactoryResolver.resolveComponentFactory(
+      ManualDivComponent
+    );
     const componentRef = this.viewContainerReference.createComponent(factory);
 
     this.angularize(htmlDoc, componentRef);
@@ -154,20 +167,20 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     const byId = document.getElementById(fragment);
     const byName = document.getElementsByName(fragment);
 
-    console.debug('scroll to', fragment, byId, byName);
+    console.debug("scroll to", fragment, byId, byName);
 
     if (!fragment) {
       // show new pages from the start
       window.scroll(null, 0);
-
     } else if (byId) {
       byId.scrollIntoView();
-
     } else if (byName.length > 0) {
       byName[0].scrollIntoView();
-
     } else {
-      console.log('unable to scroll, element not found by id or name', fragment);
+      console.log(
+        "unable to scroll, element not found by id or name",
+        fragment
+      );
     }
   }
 
@@ -180,47 +193,65 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @param targetComponentRef
    */
   angularize(sourceDoc, targetComponentRef) {
-
     // process the children of these tags, but the tag itself can be omitted
-    const keepChilren = new Set(['HTML', 'BODY', 'ARTICLE', 'SECTION']);
+    const keepChilren = new Set(["HTML", "BODY", "ARTICLE", "SECTION"]);
 
     // skip these tags and don't process their children
-    const skip = new Set(['HEAD', 'TITLE']);
+    const skip = new Set(["HEAD", "TITLE"]);
 
     // These tags are simply cloned and links inside these won't use the Angular router.
     // The current way of making Angular components doesn't work for table elements,
     // because there is extra divs arond each element.
     const clone = new Set([
-      '#TEXT', '#COMMENT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'B', 'U', 'I', 'BR', 'HR',
-      'IMG', 'EM', 'BODY', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH', 'FOOTER', 'IFRAME'
+      "#TEXT",
+      "#COMMENT",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "B",
+      "U",
+      "I",
+      "BR",
+      "HR",
+      "IMG",
+      "EM",
+      "BODY",
+      "TABLE",
+      "THEAD",
+      "TBODY",
+      "TR",
+      "TD",
+      "TH",
+      "FOOTER",
+      "IFRAME"
     ]);
 
     // replace the original tag with a Angular component to be able to listen for link clicks
     const components = new Map<string, any>([
-      ['A', ManualAComponent],
-      ['UL', ManualUlComponent],
-      ['OL', ManualOlComponent],
-      ['LI', ManualLiComponent],
-      ['A', ManualAComponent],
-      ['DIV', ManualDivComponent],
-      ['SPAN', ManualSpanComponent],
-      ['P', ManualPComponent],
+      ["A", ManualAComponent],
+      ["UL", ManualUlComponent],
+      ["OL", ManualOlComponent],
+      ["LI", ManualLiComponent],
+      ["A", ManualAComponent],
+      ["DIV", ManualDivComponent],
+      ["SPAN", ManualSpanComponent],
+      ["P", ManualPComponent]
     ]);
 
     // iterate children
     for (let i = 0; i < sourceDoc.childNodes.length; i++) {
-
       const element = sourceDoc.childNodes[i];
       const nodeName = element.nodeName.toUpperCase();
 
       if (keepChilren.has(nodeName)) {
         // omit the tag, process children
         this.angularize(element, targetComponentRef);
-
       } else if (skip.has(nodeName)) {
         // skip the tag and it's children
         continue;
-
       } else if (components.has(nodeName)) {
         // create an Angular component
         const component = components.get(element.tagName);
@@ -231,27 +262,27 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
         // process children
         this.angularize(element, componentRef);
-
       } else if (clone.has(nodeName)) {
-
         if (element.classList && this.manualStyles) {
-          element.classList.add('ch-html-component');
+          element.classList.add("ch-html-component");
         }
 
-        if (nodeName === 'TABLE') {
+        if (nodeName === "TABLE") {
           // bootstap table syle
-          element.classList.add('table');
-          element.classList.add('table-striped');
+          element.classList.add("table");
+          element.classList.add("table-striped");
         }
 
         // clone element and it's children
         this.addElement(element, targetComponentRef);
-
       } else {
         // somenthing else
-        console.log('unknown element', nodeName, element);
+        console.log("unknown element", nodeName, element);
         // try to replace the component with div
-        const componentRef = this.addComponent(ManualDivComponent, targetComponentRef);
+        const componentRef = this.addComponent(
+          ManualDivComponent,
+          targetComponentRef
+        );
         this.angularize(element, componentRef);
       }
     }
@@ -268,7 +299,10 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
     // Wrap the element into an additional span component to keep the content in order. Otherwise all the
     // remaining components will be put above these native elements.
-    const componentRef = this.addComponent(ManualSpanComponent, targetComponentRef);
+    const componentRef = this.addComponent(
+      ManualSpanComponent,
+      targetComponentRef
+    );
     componentRef.instance.appendChild(clone);
   }
 
@@ -280,9 +314,12 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @returns {ComponentRef<any>}
    */
   addComponent(component, targetComponentRef) {
-
-    const factory = this.componentFactoryResolver.resolveComponentFactory(component);
-    return targetComponentRef.instance.viewContainerRef.createComponent(factory);
+    const factory = this.componentFactoryResolver.resolveComponentFactory(
+      component
+    );
+    return targetComponentRef.instance.viewContainerRef.createComponent(
+      factory
+    );
   }
 
   /**
@@ -292,18 +329,20 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @returns {Observable<HTMLDocument>}
    */
   getPage(path): Observable<string> {
+    console.log("GET", path);
 
-    console.log('GET', path);
-
-    return this.http.get(path, { responseType: 'text' })
-      // replace missing pages with nicer message
-      .catch(err => {
-        if (err.status === 404) {
-          return Observable.of('<html><body>Page not found</body></html>');
-        } else {
-          throw err;
-        }
-      });
+    return (
+      this.http
+        .get(path, { responseType: "text" })
+        // replace missing pages with nicer message
+        .catch(err => {
+          if (err.status === 404) {
+            return Observable.of("<html><body>Page not found</body></html>");
+          } else {
+            throw err;
+          }
+        })
+    );
   }
 
   /**
@@ -320,34 +359,29 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @returns {HTMLDocument}
    */
   rewrite(htmlDoc: HTMLDocument, path: string) {
-
-    const links = htmlDoc.getElementsByTagName('a');
+    const links = htmlDoc.getElementsByTagName("a");
     Array.from(links).forEach(link => {
-
       // use getAttribute(), because link.href converts the url to absolute
-      const href = link.getAttribute('href');
+      const href = link.getAttribute("href");
 
       if (link.name) {
         // link target, nothing to do
-
       } else if (ManualUtils.isAbsoluteUrl(href)) {
         // open absolute links in a new tab
-        link.target = '_blank';
-      } else if (href.startsWith('#')) {
+        link.target = "_blank";
+      } else if (href.startsWith("#")) {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page
         link.href = this.routerPath + path + href;
-
       } else {
         // relative urls navigate with the Angular router
         link.href = this.routerPath + href;
       }
     });
 
-    const imgs = htmlDoc.getElementsByTagName('img');
+    const imgs = htmlDoc.getElementsByTagName("img");
     Array.from(imgs).forEach(img => {
-
-      const src = img.getAttribute('src');
+      const src = img.getAttribute("src");
       if (src && !ManualUtils.isAbsoluteUrl(src)) {
         img.src = this.assetsPath + src;
       }
@@ -357,6 +391,6 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
   }
 
   openNewWindow() {
-    window.open(this.routerPath + this.currentPage, '_blank');
+    window.open(this.routerPath + this.currentPage, "_blank");
   }
 }

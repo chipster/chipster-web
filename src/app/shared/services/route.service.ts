@@ -1,27 +1,35 @@
-import {Router, ActivatedRoute} from "@angular/router";
-import {Injectable} from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
+import { Injectable } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { NavigationEnd } from "@angular/router";
 import { Observable } from "rxjs/internal/Observable";
+import log from "loglevel";
 
 @Injectable()
 export class RouteService {
+  static readonly PATH_HOME = "/home";
+  static readonly PATH_SESSIONS = "/sessions";
+  static readonly PATH_ANALYZE = "/analyze";
+  static readonly PATH_MANUAL = "/manual";
+  static readonly PATH_CONTACT = "/contact";
+  static readonly PATH_LOGIN = "/login";
+  static readonly PATH_ADMIN = "/admin";
 
   appRoute$: Observable<string>;
+  private backupAppName: string;
 
-  constructor(
-    private router: Router,
-    private errorService: ErrorService) { }
+  constructor(private router: Router, private errorService: ErrorService) {}
 
   redirectToLoginAndBack() {
     const appUrl = this.removeAppRoute(this.getCurrentUrl());
-    this.navigateAbsolute('/login', {queryParams: {returnUrl: appUrl}});
+    this.navigateAbsolute("/login", { queryParams: { returnUrl: appUrl } });
   }
 
   redirectToLoginAndBackWithCustomCurrentUrl(currentUrl: string) {
-
     const appUrl = this.removeAppRoute(currentUrl);
-    this.navigateAbsoluteWithCustomCurrentUrl('/login', currentUrl, {queryParams: {returnUrl: appUrl}});
+    this.navigateAbsoluteWithCustomCurrentUrl("/login", currentUrl, {
+      queryParams: { returnUrl: appUrl }
+    });
   }
 
   /**
@@ -33,22 +41,50 @@ export class RouteService {
    * without knowing the first part of the url, i.e. the app route.
    */
   navigateAbsolute(url: string, options?) {
-    return this.navigateAbsoluteWithCustomCurrentUrl(url, this.getCurrentUrl(), options);
+    return this.navigateAbsoluteWithCustomCurrentUrl(
+      url,
+      this.getCurrentUrl(),
+      options
+    );
   }
 
-  navigateAbsoluteWithCustomCurrentUrl(targetUrl: string, currentUrl: string, options?) {
+  navigateAbsoluteWithCustomCurrentUrl(
+    targetUrl: string,
+    currentUrl: string,
+    options?
+  ) {
     const appRoute = this.getAppRouteOfUrl(currentUrl);
     const url = this.buildRouterLink(appRoute, targetUrl);
 
     // split to array because navigateByUrl() doesn't apply query parameters
-    return this.router.navigate(url.split('/'), options);
+    return this.router.navigate(url.split("/"), options);
   }
 
-   /**
+  navigateToSession(sessionId: string) {
+    this.navigateAbsolute(RouteService.PATH_ANALYZE + "/" + sessionId);
+  }
+
+  navigateToSessions() {
+    this.navigateAbsolute(RouteService.PATH_SESSIONS);
+  }
+
+  navigateToAnalyze() {
+    this.navigateAbsolute(RouteService.PATH_ANALYZE);
+  }
+
+  navigateToHome() {
+    this.navigateAbsolute(RouteService.PATH_HOME);
+  }
+
+  /**
    * Convert app url to host url using the current path
    */
   getRouterLink(url: string): string {
-    console.log('getRouterLink()', url, this.buildRouterLink(this.getAppRouteCurrent(), url));
+    console.log(
+      "getRouterLink()",
+      url,
+      this.buildRouterLink(this.getAppRouteCurrent(), url)
+    );
     return this.buildRouterLink(this.getAppRouteCurrent(), url);
   }
 
@@ -56,14 +92,16 @@ export class RouteService {
    * Convert app url to host url asynchronously using the first non-empty app route
    */
   getRouterLink$(appUrl: string): Observable<string> {
-    return this.getAppRoute$()
-      .map(appRoute => this.buildRouterLink(appRoute, appUrl))
-      // complete after the first result to allow use in forkJoin
-      .take(1);
+    return (
+      this.getAppRoute$()
+        .map(appRoute => this.buildRouterLink(appRoute, appUrl))
+        // complete after the first result to allow use in forkJoin
+        .take(1)
+    );
   }
 
   buildRouterLink(appRoute: string, url: string): string {
-    return '/' + appRoute + url;
+    return "/" + appRoute + url;
   }
 
   /**
@@ -73,7 +111,7 @@ export class RouteService {
    */
   navigateRelative(urlSegments: string[], activatedRoute: ActivatedRoute) {
     if (!activatedRoute) {
-      throw Error('cannot do relative navigation without the activatedRoute');
+      throw Error("cannot do relative navigation without the activatedRoute");
     }
     return this.router.navigate(urlSegments, { relativeTo: activatedRoute });
   }
@@ -83,14 +121,33 @@ export class RouteService {
   }
 
   getAppRouteCurrent() {
-    return this.getAppRouteOfUrl(this.getCurrentUrl());
+    let appRoute;
+    try {
+      appRoute = this.getAppRouteOfUrl(this.getCurrentUrl());
+    } catch (e) {
+      if (this.backupAppName) {
+        appRoute = this.backupAppName;
+      } else {
+        throw Error(
+          "cannot find the app name from the url and no backup name available"
+        );
+      }
+    }
+    return appRoute;
   }
 
   getAppRouteOfUrl(url: string): string {
     // get the app name fron the current route
-    const appRoute = url.split('/')[1];
+    let appRoute = url.split("/")[1];
     if (appRoute == null) {
-      throw Error('cannot find the app name from the url ' + url);
+      if (this.backupAppName) {
+        appRoute = this.backupAppName;
+      } else {
+        throw Error(
+          "cannot find the app name from the url and no backup name available " +
+            url
+        );
+      }
     }
     return appRoute;
   }
@@ -105,7 +162,7 @@ export class RouteService {
    *
    * Get the app route of the previous route change or wait for the first non-empty
    * route to get it.
-  */
+   */
   getAppRoute$(): Observable<string> {
     if (!this.appRoute$) {
       this.appRoute$ = this.router.events
@@ -124,7 +181,7 @@ export class RouteService {
    * @param path string after the last slash
    */
   basename(path) {
-    return path.split('/').reverse()[0];
+    return path.split("/").reverse()[0];
   }
 
   /**
@@ -133,6 +190,11 @@ export class RouteService {
    * @param path string before the last slash
    */
   dirname(path) {
-    return path.slice(0, path.lastIndexOf('/'));
+    return path.slice(0, path.lastIndexOf("/"));
+  }
+
+  setBackupAppName(appName: string) {
+    log.info("setting backup application name to", appName);
+    this.backupAppName = appName;
   }
 }
