@@ -1,4 +1,5 @@
 import {Injectable} from "@angular/core";
+import { combineAll } from "rxjs/operators";
 
 @Injectable()
 export class SpreadsheetService {
@@ -59,4 +60,5 @@ export class SpreadsheetService {
     ctx.font = fontSize + 'px Arial';
     return ctx;
   }
+
 }

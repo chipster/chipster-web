@@ -12,6 +12,8 @@ import {RestErrorService} from "../../../../../core/errorhandler/rest-error.serv
 import {LoadState, State} from "../../../../../model/loadstate";
 import {Subject} from "rxjs/Subject";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { log } from "util";
+
 
 @Component({
   selector: 'ch-spreadsheet-visualization',
@@ -23,6 +25,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
   @Input() sessionData: SessionData;
+  @Input() divWidth: any;
 
   private fileSizeLimit = 10 * 1024;
   private lineCount: number;
@@ -134,7 +137,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   getSettings(headers: string[], content: string[][], container) {
-
     const tableHeight = this.showFullData ? container.style.height : content.length * 23 + 50; // extra for header-row and borders
     const tableWidth = this.showFullData ? null : this.spreadsheetService.guessWidth(headers, content);
 
