@@ -280,7 +280,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     return termTokens.every((termToken: string) => {
       return (
         item.toolName.toLowerCase().indexOf(termToken) !== -1 ||
-        item.description.toLowerCase().indexOf(termToken) !== -1 ||
+        (item.description &&
+          item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
         item.moduleName.toLowerCase().indexOf(termToken) !== -1
       );
