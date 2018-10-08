@@ -92,11 +92,6 @@ export class RouteService {
    * Convert app url to host url using the current path
    */
   getRouterLink(url: string): string {
-    console.log(
-      "getRouterLink()",
-      url,
-      this.buildRouterLink(this.getAppRouteCurrent(), url)
-    );
     return this.buildRouterLink(this.getAppRouteCurrent(), url);
   }
 
