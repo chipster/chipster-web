@@ -31,11 +31,13 @@
         <div class="panel-body">
           <p *ngIf="tokenHasExpired()"><i>Login expired, please log in again.</i></p>
           <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="routerLinkLogin">Log
-            In</button>
+            In
+          </button>
         </div>
 
         <ng-template #alreadyLoggedIn>
-          <p>You are logged in as <strong>{{username$ | async}}</strong>. To continue, go to <a [routerLink]="routerLinkSessions">Sessions</a>.</p>
+          <p>You are logged in as <strong>{{username$ | async}}</strong>. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a>
+            or <a [routerLink]="routerLinkSessions">Sessions</a> to continue.</p>
         </ng-template>
 
       </div>

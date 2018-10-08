@@ -76,6 +76,18 @@ export class RouteService {
     this.navigateAbsolute(RouteService.PATH_HOME);
   }
 
+  getRouterLinkSessions() {
+    return this.getRouterLink(RouteService.PATH_SESSIONS);
+  }
+
+  getRouterLinkAnalyze() {
+    return this.getRouterLink(RouteService.PATH_ANALYZE);
+  }
+
+  getRouterLinkLogin() {
+    return this.getRouterLink(RouteService.PATH_LOGIN);
+  }
+
   /**
    * Convert app url to host url using the current path
    */
