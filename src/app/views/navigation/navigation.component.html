@@ -47,7 +47,7 @@
 
       <li class="nav-item">
         <a *ngIf="isLoggedIn()" [routerLink]="routerLinkHome" (click)="logout()" class="nav-link">Logout {{username$ | async}}</a>
-        <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Login</a>
+        <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Log In</a>
       </li>
     </ul>
   </div>
