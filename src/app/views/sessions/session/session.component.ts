@@ -18,9 +18,7 @@ import { SessionEventService } from "./sessionevent.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
-import { HotkeysService, Hotkey } from "angular2-hotkeys";
-import { Store } from "@ngrx/store";
-import { SET_LATEST_SESSION } from "../../../state/latest-session.reducer";
+import { UserService } from "../../../shared/services/user.service";
 
 @Component({
   selector: "ch-session",
@@ -53,7 +51,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     private routeService: RouteService,
     private settingsService: SettingsService,
-    private store: Store<any>
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -92,11 +90,14 @@ export class SessionComponent implements OnInit, OnDestroy {
       .do(sessionData => {
         this.sessionData = sessionData;
 
-        // save session id to store
-        this.store.dispatch({
-          type: SET_LATEST_SESSION,
-          payload: sessionData.session.sessionId
-        });
+        // save latest session id
+        log.info(
+          "saving latest session id",
+          this.sessionData.session.sessionId
+        );
+        this.userService.updateLatestSession(
+          this.sessionData.session.sessionId
+        );
 
         this.subscribeToEvents();
       })

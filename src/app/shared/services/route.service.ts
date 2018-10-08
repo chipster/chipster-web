@@ -2,7 +2,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { Injectable } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { NavigationEnd } from "@angular/router";
-import { Observable } from "rxjs/internal/Observable";
+import { Observable } from "rxjs/Observable";
 import log from "loglevel";
 
 @Injectable()
