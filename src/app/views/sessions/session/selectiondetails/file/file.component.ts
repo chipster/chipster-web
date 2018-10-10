@@ -14,10 +14,14 @@ import * as _ from "lodash";
   styleUrls: ["./file.component.less"]
 })
 export class FileComponent {
-  @Input() dataset: Dataset;
-  @Input() private jobs: Map<string, Job>;
-  @Input() private sessionData: SessionData;
-  @Output() onDelete: EventEmitter<any> = new EventEmitter();
+  @Input()
+  dataset: Dataset;
+  @Input()
+  private jobs: Map<string, Job>;
+  @Input()
+  sessionData: SessionData;
+  @Output()
+  onDelete: EventEmitter<any> = new EventEmitter();
 
   constructor(
     public selectionService: SelectionService, // used in template
