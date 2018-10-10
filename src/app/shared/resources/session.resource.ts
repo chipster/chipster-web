@@ -21,7 +21,6 @@ export class SessionResource {
     let enabledModules;
     return this.configService
       .getModules()
-      .take(1) // FIXME should not be needed here
       .do(m => (enabledModules = m))
       .flatMap(() => this.configService.getSessionDbUrl())
       .flatMap((url: string) => {
