@@ -46,7 +46,7 @@ export class ToolSelectionService implements OnDestroy {
             this.populateParameterValues(parameter, boundDatasets);
           });
 
-          this.checkParameters();
+          this.checkParameters(); // make sure this gets called also when no parameters
         }
       });
 
