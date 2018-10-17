@@ -1,15 +1,10 @@
 import { AuthenticationService } from "../../core/authentication/authenticationservice";
 import { TokenService } from "../../core/authentication/token.service";
-
-import { Component, OnInit, OnChanges } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs/Observable";
-import { User } from "chipster-js-common";
 import { ConfigService } from "../../shared/services/config.service";
-import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
-import { ActivatedRoute } from "@angular/router";
-import { Router } from "@angular/router";
 import log from "loglevel";
 
 @Component({
@@ -27,6 +22,7 @@ export class NavigationComponent implements OnInit {
   routerLinkAnalyze: string;
   username$: Observable<string>;
   appName = "";
+  appNameReady = false;
   appRoute: string;
 
   constructor(
@@ -36,9 +32,8 @@ export class NavigationComponent implements OnInit {
     private errorService: ErrorService,
     private routeService: RouteService
   ) {
-     this.username$ = authenticationService.getUsersDisplayName$();
+    this.username$ = authenticationService.getUsersDisplayName$();
   }
-
 
   ngOnInit() {
     this.tokenService.getToken();
@@ -127,6 +122,7 @@ export class NavigationComponent implements OnInit {
         if (name) {
           this.appName = name;
           document.title = name;
+          this.appNameReady = true;
         }
       },
       err => {
