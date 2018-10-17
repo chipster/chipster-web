@@ -13,17 +13,20 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
 
-
 @Component({
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"]
 })
 export class SessionPanelComponent {
-  @Input() sessionData: SessionData;
-  @Output() deleteDatasetsNow = new EventEmitter<void>();
-  @Output() deleteDatasetsUndo = new EventEmitter<void>();
-  @Output() deleteStart = new EventEmitter<void>();
+  @Input()
+  sessionData: SessionData;
+  @Output()
+  deleteDatasetsNow = new EventEmitter<void>();
+  @Output()
+  deleteDatasetsUndo = new EventEmitter<void>();
+  @Output()
+  deleteStart = new EventEmitter<void>();
 
   datasetSearch: string;
 
@@ -128,10 +131,7 @@ export class SessionPanelComponent {
       .flatMap((name: string) => {
         console.log("renameSessionModal", name);
         this.sessionData.session.name = name;
-        return this.sessionDataService.updateSession(
-          this.sessionData,
-          this.sessionData.session
-        );
+        return this.sessionDataService.updateSession(this.sessionData.session);
       })
       .subscribe(null, err =>
         this.restErrorService.handleError(err, "Failed to rename the session")
@@ -143,7 +143,7 @@ export class SessionPanelComponent {
       notes => {
         this.sessionData.session.notes = notes;
         this.sessionDataService
-          .updateSession(this.sessionData, this.sessionData.session)
+          .updateSession(this.sessionData.session)
           .subscribe(
             () => {},
             err => {

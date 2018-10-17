@@ -17,25 +17,27 @@ import { Session } from "chipster-js-common";
 export class SessionListComponent implements OnInit {
   static readonly exampleSessionOwnerUserId = "jaas/example_session_owner";
 
-  public previewedSession: Session;
+  public selectedSession: Session;
   public previousSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
-  private selectedSessionId: string;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
 
+  public selectionDisabled = false; // disable session selection when session context menu is open
+
   constructor(
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
     public sessionDataService: SessionDataService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private restErrorService: RestErrorService
   ) {}
 
   ngOnInit() {
@@ -50,7 +52,7 @@ export class SessionListComponent implements OnInit {
       })
       // wait a while to see if the user is really interested about this session
       .debounceTime(500)
-      .filter(() => this.previewedSession !== null)
+      .filter(() => this.selectedSession !== null)
       .flatMap(session => {
         return this.sessionResource.loadSession(session.sessionId);
       })
@@ -58,9 +60,9 @@ export class SessionListComponent implements OnInit {
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
-          this.previewedSession &&
+          this.selectedSession &&
           fullSession.session &&
-          this.previewedSession.sessionId === fullSession.session.sessionId
+          this.selectedSession.sessionId === fullSession.session.sessionId
         ) {
           this.sessionData = fullSession;
         }
@@ -138,9 +140,18 @@ export class SessionListComponent implements OnInit {
     );
   }
 
+  onSessionClick(session: Session) {
+    if (this.selectionDisabled) {
+      this.selectionDisabled = false;
+      this.selectSession(session);
+      return;
+    } else {
+      this.openSession(session.sessionId);
+    }
+  }
+
   openSession(sessionId: string) {
     this.previewThrottleSubscription.unsubscribe();
-    this.selectedSessionId = sessionId;
     this.routeService.navigateToSession(sessionId);
   }
 
@@ -152,10 +163,14 @@ export class SessionListComponent implements OnInit {
     }
   }
 
-  previewSession(session: Session) {
-    this.previewedSession = session;
+  selectSession(session: Session) {
+    if (this.selectionDisabled) {
+      return;
+    }
 
-    if (this.previewedSession) {
+    this.selectedSession = session;
+
+    if (this.selectedSession) {
       if (session !== this.previousSession) {
         // hide the old session immediately
         this.previousSession = session;
@@ -163,10 +178,6 @@ export class SessionListComponent implements OnInit {
         this.previewThrottle$.next(session);
       }
     }
-  }
-
-  clearPreview() {
-    this.previewedSession = null;
   }
 
   deleteSession(session: Session) {
@@ -186,7 +197,7 @@ export class SessionListComponent implements OnInit {
           this.sessionDataService.deletePersonalRules(session).subscribe(
             () => {
               this.updateSessions();
-              this.previewedSession = null;
+              this.selectedSession = null;
               this.deletingSessions.delete(session);
             },
             (error: any) => {
@@ -205,7 +216,7 @@ export class SessionListComponent implements OnInit {
   }
 
   isSessionSelected(session: Session) {
-    return this.selectedSessionId === session.sessionId;
+    return this.selectedSession === session;
   }
 
   getSharedByTitlePart(userId: string): string {
@@ -224,5 +235,23 @@ export class SessionListComponent implements OnInit {
     } else {
       return TokenService.getUsernameFromUserId(userId);
     }
+  }
+
+  renameSessionModal(session: Session) {
+    event.stopPropagation();
+
+    this.dialogModalService
+      .openSessionNameModal("Rename session", session.name)
+      .flatMap((name: string) => {
+        session.name = name;
+        return this.sessionDataService.updateSession(session);
+      })
+      .subscribe(null, err =>
+        this.restErrorService.handleError(err, "Failed to rename the session")
+      );
+  }
+
+  sessionMenuOpenChange(open: boolean) {
+    this.selectionDisabled = open;
   }
 }

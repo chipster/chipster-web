@@ -18,7 +18,7 @@
         <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
       </div>
 
-      <div class="scrollable session-list">
+      <div class="session-list">
         <div *ngFor="let sharedByUsername of sessionsByUserKeys">
 
           <h5>{{getSharedByTitlePart(sharedByUsername)}}
@@ -41,20 +41,43 @@
             <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
           </div> -->
 
-          <table class="table table-hover table-sm">
+          <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
             <tbody>
-              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="previewSession(session)" (mouseout)="previewSession(null)"
-                (click)="openSession(session.sessionId)" [ngClass]="{'table-active': isSessionSelected(session)}" class="session-list-item"
+              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="selectSession(session)" (mouseout)="selectSession(null)"
+                (click)="onSessionClick(session)" [ngClass]="{'selected-session': isSessionSelected(session)}" class="session-list-item"
                 title="Open session">
                 <td>
+
+                  <!-- <button class="btn btn-sm btn-outline-dark btn-no-border show-on-row-hover" title="">
+                    <span class="fa fa-arrow-circle-o-right"></span>
+                  </button> -->
+
                   <span>{{session.name}}
-                    <span *ngIf="sessionDataService.hasPersonalRule(session.rules) ">
-                      <button *ngIf="!deletingSessions.has(session) " class="btn btn-outline-dark btn-sm pull-right btn-no-border
-                            showOnRowHover " (click)="deleteSession(session); $event.stopImmediatePropagation(); " title="Delete session ">
+
+                    <!-- delete button -->
+                    <span *ngIf="sessionDataService.hasPersonalRule(session.rules)">
+                      <button *ngIf="!deletingSessions.has(session)" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
+                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" (click)="deleteSession(session); $event.stopImmediatePropagation(); "
+                        title="Delete session ">
                         <span class="fa fa-times "></span>
                       </button>
                       <span class="pull-right " *ngIf="deletingSessions.has(session) ">Deleting...</span>
                     </span>
+
+                    <!-- context menu button -->
+                    <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block" placement="bottom-right" (openChange)="sessionMenuOpenChange($event)">
+                      <button (click)="$event.stopPropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
+                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown" ngbDropdownToggle>
+                        <i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                      <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
+                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();renameSessionModal(session)">Rename</button>
+
+                        <!-- <button class="dropdown-item" (click)="jobsDropdown.toggle();notesModal(session)">Notes</button>
+                        <button class="dropdown-item" (click)="jobsDropdown.toggle();sharingModal()">Sharing</button>
+                        <button class="dropdown-item" (click)="jobsDropdown.toggle();duplicateModal()">Duplicate</button>
+                        <button class="dropdown-item" (click)="jobsDropdown.toggle();saveSessionFileModal()">Download</button> -->
+                      </div>
+                    </div>
                   </span>
                 </td>
               </tr>
@@ -83,9 +106,9 @@
 
 
       <div id="session-preview" style="position: relative">
-        <div id="preview-container" *ngIf="previewedSession ">
+        <div id="preview-container" *ngIf="selectedSession ">
 
-          <h5> {{previewedSession.name}} <span style="font-size: 80%" class="lighter float-right"><i>preview</i></span></h5>
+          <h5> {{selectedSession.name}} <span style="font-size: 80%" class="lighter float-right"><i>preview</i></span></h5>
 
           <div class="workflow-preview-panel ">
 
@@ -106,7 +129,7 @@
 
           <div>
             <!-- Create new element for each paragraph to preserve new line characters -->
-            <p *ngFor="let line of previewedSession.notes?.split( '\n') ">
+            <p *ngFor="let line of selectedSession.notes?.split( '\n') ">
               {{line}}
             </p>
           </div>

@@ -149,7 +149,6 @@ export class SessionComponent implements OnInit, OnDestroy {
           if (dialogResult.button === keepButton) {
             this.sessionData.session.name = dialogResult.value;
             return this.sessionDataService.updateSession(
-              this.sessionData,
               this.sessionData.session
             );
           } else if (dialogResult.button === deleteButton) {
