@@ -58,7 +58,7 @@
                     <span *ngIf="sessionDataService.hasPersonalRule(session.rules)">
                       <button *ngIf="!deletingSessions.has(session)" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
                         class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" (click)="deleteSession(session); $event.stopImmediatePropagation(); "
-                        title="Delete session ">
+                        title="Delete">
                         <span class="fa fa-times "></span>
                       </button>
                       <span class="pull-right " *ngIf="deletingSessions.has(session) ">Deleting...</span>
@@ -67,10 +67,12 @@
                     <!-- context menu button -->
                     <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block" placement="bottom-right" (openChange)="sessionMenuOpenChange($event)">
                       <button (click)="$event.stopPropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown" ngbDropdownToggle>
+                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown" title="Actions"
+                        ngbDropdownToggle>
                         <i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
                       <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
                         <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();renameSessionModal(session)">Rename</button>
+                        <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicateModal(session)">Duplicate</button>
 
                         <!-- <button class="dropdown-item" (click)="jobsDropdown.toggle();notesModal(session)">Notes</button>
                         <button class="dropdown-item" (click)="jobsDropdown.toggle();sharingModal()">Sharing</button>
