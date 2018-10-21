@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { OnChanges, Input, HostListener } from "@angular/core";
+import { OnChanges, Input, HostListener, OnDestroy } from "@angular/core";
 import { FileResource } from "../resources/fileresource";
 import { SessionDataService } from "../../views/sessions/session/session-data.service";
 import { Dataset } from "chipster-js-common";
