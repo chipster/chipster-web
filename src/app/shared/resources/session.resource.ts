@@ -17,7 +17,7 @@ export class SessionResource {
     private restService: RestService
   ) {}
 
-  loadSession(sessionId: string) {
+  loadSession(sessionId: string): Observable<SessionData> {
     let enabledModules;
     return this.configService
       .getModules()

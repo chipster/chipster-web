@@ -8,6 +8,8 @@ import { SessionDataService } from "./session/sessiondata.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { Session } from "chipster-js-common";
+import { Observable } from "rxjs";
+import log from "loglevel";
 
 @Component({
   selector: "ch-session-list",
@@ -237,7 +239,7 @@ export class SessionListComponent implements OnInit {
     }
   }
 
-  renameSessionModal(session: Session) {
+  openRenameModal(session: Session) {
     event.stopPropagation();
 
     this.dialogModalService
@@ -248,6 +250,48 @@ export class SessionListComponent implements OnInit {
       })
       .subscribe(null, err =>
         this.restErrorService.handleError(err, "Failed to rename the session")
+      );
+  }
+
+  openDuplicateModal(session: Session) {
+    event.stopPropagation();
+
+    let duplicateName; // ugly
+    this.dialogModalService
+      .openSessionNameModal("Duplicate session", session.name + "_copy")
+      .flatMap(name => {
+        duplicateName = name;
+        // use sessionData from preview if available
+        if (
+          this.sessionData &&
+          this.sessionData.session.sessionId === session.sessionId
+        ) {
+          log.info("using session data from preview for duplicate");
+          return Observable.of(this.sessionData);
+        } else {
+          log.info(
+            "no session data from preview available, getting from server"
+          );
+          return this.sessionResource.loadSession(session.sessionId);
+        }
+      })
+      .flatMap((sessionData: SessionData) => {
+        const copySessionObservable = this.sessionResource.copySession(
+          sessionData,
+          duplicateName
+        );
+        return this.dialogModalService.openSpinnerModal(
+          "Duplicate session",
+          copySessionObservable
+        );
+      })
+      .subscribe(
+        () => {
+          log.info("updating sessions after duplicate");
+          this.updateSessions();
+        },
+        err =>
+          this.restErrorService.handleError(err, "Duplicate session failed")
       );
   }
 
