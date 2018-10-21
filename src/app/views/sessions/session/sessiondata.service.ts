@@ -9,12 +9,11 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestService } from "../../../core/rest-services/restservice/rest.service";
 import { SessionData } from "../../../model/session/session-data";
-import { DialogModalService } from "./dialogmodal/dialogmodal.service";
-import { Router } from "@angular/router";
 import { SessionEventService } from "./sessionevent.service";
 import { SelectionService } from "./selection.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "./selection-handler.service";
+import log from "loglevel";
 
 @Injectable()
 export class SessionDataService {
@@ -100,7 +99,7 @@ export class SessionDataService {
         );
       })
       .catch(err => {
-        console.log("create derived dataset failed", err);
+        log.info("create derived dataset failed", err);
         throw err;
       });
   }
@@ -117,7 +116,7 @@ export class SessionDataService {
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
     Observable.merge(...deleteJobs$).subscribe(() => {
-      console.info("Job deleted");
+      log.info("Job deleted");
     });
   }
 
@@ -126,7 +125,7 @@ export class SessionDataService {
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
     Observable.merge(...deleteDatasets$).subscribe(() => {
-      console.info("Job deleted");
+      log.info("Job deleted");
     });
   }
 
@@ -140,10 +139,6 @@ export class SessionDataService {
 
   updateJob(job: Job) {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
-  }
-
-  updateSession(session: Session) {
-    return this.sessionResource.updateSession(session);
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {

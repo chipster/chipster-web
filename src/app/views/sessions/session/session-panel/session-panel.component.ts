@@ -12,6 +12,7 @@ import { RestErrorService } from "../../../../core/errorhandler/rest-error.servi
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
+import { SessionService } from "../session.service";
 
 @Component({
   selector: "ch-session-panel",
@@ -33,6 +34,7 @@ export class SessionPanelComponent {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public sessionDataService: SessionDataService, // used by template
+    private sessionService: SessionService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
@@ -126,38 +128,11 @@ export class SessionPanelComponent {
   }
 
   renameSessionModal() {
-    this.dialogModalService
-      .openSessionNameModal("Rename session", this.sessionData.session.name)
-      .flatMap((name: string) => {
-        console.log("renameSessionModal", name);
-        this.sessionData.session.name = name;
-        return this.sessionDataService.updateSession(this.sessionData.session);
-      })
-      .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Failed to rename the session")
-      );
+    this.sessionService.openRenameModalAndUpdate(this.sessionData.session);
   }
 
   notesModal() {
-    this.dialogModalService.openNotesModal(this.sessionData.session).then(
-      notes => {
-        this.sessionData.session.notes = notes;
-        this.sessionDataService
-          .updateSession(this.sessionData.session)
-          .subscribe(
-            () => {},
-            err => {
-              this.restErrorService.handleError(
-                err,
-                "Failed to update session notes"
-              );
-            }
-          );
-      },
-      () => {
-        // modal dismissed
-      }
-    );
+    this.sessionService.openNotesModalAndUpdate(this.sessionData.session);
   }
 
   sharingModal() {

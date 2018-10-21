@@ -9,6 +9,7 @@ import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { Session } from "chipster-js-common";
 import { Observable } from "rxjs";
+import { SessionService } from "./session/session.service";
 import log from "loglevel";
 
 @Component({
@@ -38,6 +39,7 @@ export class SessionListComponent implements OnInit {
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
     public sessionDataService: SessionDataService,
+    private sessionService: SessionService,
     private routeService: RouteService,
     private restErrorService: RestErrorService
   ) {}
@@ -239,21 +241,17 @@ export class SessionListComponent implements OnInit {
     }
   }
 
-  openRenameModal(session: Session) {
+  rename(session: Session) {
     event.stopPropagation();
-
-    this.dialogModalService
-      .openSessionNameModal("Rename session", session.name)
-      .flatMap((name: string) => {
-        session.name = name;
-        return this.sessionDataService.updateSession(session);
-      })
-      .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Failed to rename the session")
-      );
+    this.sessionService.openRenameModalAndUpdate(session);
   }
 
-  openDuplicateModal(session: Session) {
+  notes(session: Session) {
+    event.stopPropagation();
+    this.sessionService.openNotesModalAndUpdate(session);
+  }
+
+  duplicate(session: Session) {
     event.stopPropagation();
 
     let duplicateName; // ugly

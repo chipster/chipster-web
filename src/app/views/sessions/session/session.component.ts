@@ -19,6 +19,7 @@ import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
 import { UserService } from "../../../shared/services/user.service";
+import { SessionService } from "./session.service";
 
 @Component({
   selector: "ch-session",
@@ -42,6 +43,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private sessionEventService: SessionEventService,
     private sessionDataService: SessionDataService,
     private sessionResource: SessionResource,
+    private sessionService: SessionService,
     public selectionService: SelectionService,
     private selectionHandlerService: SelectionHandlerService,
     private route: ActivatedRoute,
@@ -148,9 +150,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         .flatMap(dialogResult => {
           if (dialogResult.button === keepButton) {
             this.sessionData.session.name = dialogResult.value;
-            return this.sessionDataService.updateSession(
-              this.sessionData.session
-            );
+            return this.sessionService.updateSession(this.sessionData.session);
           } else if (dialogResult.button === deleteButton) {
             // the user doesn't need to be notified that the session is deleted
             this.sessionEventService.unsubscribe();
