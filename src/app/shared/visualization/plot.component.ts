@@ -14,7 +14,7 @@ import { AppInjector } from "../../app-injector";
 import { Subject } from "rxjs/Subject";
 import { LoadState, State } from "../../model/loadstate";
 
-export abstract class PlotComponent implements OnChanges {
+export abstract class PlotComponent implements OnChanges, OnDestroy {
   @Input()
   dataset: Dataset;
   tsv: TSVFile;
