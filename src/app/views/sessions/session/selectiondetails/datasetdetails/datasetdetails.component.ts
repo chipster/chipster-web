@@ -1,5 +1,5 @@
 import {SelectionService} from "../../selection.service";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import {Component, Output, EventEmitter, OnInit} from "@angular/core";
 import {Store} from "@ngrx/store";
 import { Dataset } from "chipster-js-common";

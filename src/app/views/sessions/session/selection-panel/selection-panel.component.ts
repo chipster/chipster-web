@@ -1,4 +1,4 @@
-import { SessionDataService } from "../sessiondata.service";
+import { SessionDataService } from "../session-data.service";
 import { Dataset } from "chipster-js-common";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";

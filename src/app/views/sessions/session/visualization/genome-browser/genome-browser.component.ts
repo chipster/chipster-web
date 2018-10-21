@@ -1,7 +1,7 @@
 import {Component, OnInit, Input, ViewChild, ElementRef, OnChanges, OnDestroy} from '@angular/core';
 import {VisualizationModalService} from "../visualizationmodal.service";
 import {SelectionService} from "../../selection.service";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import {SessionData} from "../../../../../model/session/session-data";
 import {TypeTagService} from "../../../../../shared/services/typetag.service";
 import {Observable} from 'rxjs/Observable';

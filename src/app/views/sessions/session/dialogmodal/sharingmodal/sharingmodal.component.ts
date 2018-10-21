@@ -11,7 +11,7 @@ import { ActivatedRoute, Router, UrlTree } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { Session, Dataset, Rule } from "chipster-js-common";
 import { TokenService } from "../../../../../core/authentication/token.service";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionEventService } from "../../sessionevent.service";
 import { RouteService } from "../../../../../shared/services/route.service";

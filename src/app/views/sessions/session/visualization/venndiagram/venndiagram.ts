@@ -10,7 +10,7 @@ import {VennDiagramService} from "./venndiagram.service";
 import VennDiagramUtils from "./venndiagramutils";
 import UtilsService from "../../../../../shared/utilities/utils";
 import VennCircle from "./venncircle";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
 import Circle from "../model/circle";

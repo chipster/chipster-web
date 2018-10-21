@@ -13,7 +13,7 @@ import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
-import { SessionDataService } from "./sessiondata.service";
+import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./sessionevent.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";

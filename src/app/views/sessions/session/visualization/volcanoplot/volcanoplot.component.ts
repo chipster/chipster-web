@@ -6,7 +6,7 @@ import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 import Point from "../model/point";
 import {PlotComponent} from "../../../../../shared/visualization/plot.component";
 import {FileResource} from "../../../../../shared/resources/fileresource";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import {PlotService} from "../../../../../shared/visualization/plot.service";
 import {LoadState, State} from "../../../../../model/loadstate";
 

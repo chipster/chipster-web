@@ -4,7 +4,7 @@ import { Component, OnInit } from "@angular/core";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { Subject } from "rxjs/Subject";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { SessionDataService } from "./session/sessiondata.service";
+import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { Session } from "chipster-js-common";

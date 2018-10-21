@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import { SelectionService } from "../../selection.service";
 import { Dataset } from "chipster-js-common";
 import { Job } from "chipster-js-common";

@@ -6,7 +6,7 @@ import { CommonModule } from "@angular/common";
 import { SharedModule } from "../../../shared/shared.module";
 import { SessionPanelModule } from "./session-panel/session-panel.module";
 import { SessionEventService } from "./sessionevent.service";
-import { SessionDataService } from "./sessiondata.service";
+import { SessionDataService } from "./session-data.service";
 import { SessionListComponent } from "../session-list.component";
 import { SessionComponent } from "./session.component";
 import { OpenSessionFileComponent } from "../open-session-file/open-session-file.component";

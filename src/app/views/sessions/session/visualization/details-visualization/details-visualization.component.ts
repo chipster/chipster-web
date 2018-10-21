@@ -1,5 +1,5 @@
 import { FileResource } from "../../../../../shared/resources/fileresource";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Response } from "@angular/http";

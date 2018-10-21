@@ -2,7 +2,7 @@ import {Component, OnChanges, OnDestroy} from "@angular/core";
 import * as d3 from "d3";
 import {VisualizationTSVService} from "../../../../../shared/visualization/visualizationTSV.service";
 import {FileResource} from "../../../../../shared/resources/fileresource";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import Point from "../model/point";
 import {PlotService} from "../../../../../shared/visualization/plot.service"
 import {PlotData} from "../model/plotData"
