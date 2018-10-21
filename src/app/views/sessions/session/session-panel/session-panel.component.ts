@@ -160,12 +160,8 @@ export class SessionPanelComponent {
       );
   }
 
-  saveSessionFileModal() {
-    this.sessionDataService.download(
-      this.sessionWorkerResource.getPackageUrl(
-        this.sessionDataService.getSessionId()
-      )
-    );
+  downloadSession() {
+    this.sessionService.downloadSession(this.sessionDataService.getSessionId());
   }
 
   removeSessionModal() {

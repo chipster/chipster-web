@@ -4,13 +4,17 @@ import { Injectable } from "@angular/core";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import * as _ from "lodash";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionDataService } from "./session-data.service";
+import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 
 @Injectable()
 export class SessionService {
   constructor(
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private sessionDataService: SessionDataService,
+    private sessionWorkerResource: SessionWorkerResource
   ) {}
 
   updateSession(session: Session) {
@@ -39,5 +43,11 @@ export class SessionService {
       .subscribe(null, err =>
         this.restErrorService.handleError(err, "Failed to edit session notes")
       );
+  }
+
+  downloadSession(sessionId: string) {
+    this.sessionDataService.download(
+      this.sessionWorkerResource.getPackageUrl(sessionId)
+    );
   }
 }

@@ -251,6 +251,11 @@ export class SessionListComponent implements OnInit {
     this.sessionService.openNotesModalAndUpdate(session);
   }
 
+  download(session: Session) {
+    event.stopPropagation();
+    this.sessionService.downloadSession(session.sessionId);
+  }
+
   duplicate(session: Session) {
     event.stopPropagation();
 
