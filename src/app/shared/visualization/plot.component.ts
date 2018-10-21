@@ -1,4 +1,4 @@
-//Super class for scatterplot and volcanoplot
+// Super class for scatterplot and volcanoplot
 
 import { OnChanges, Input, HostListener } from "@angular/core";
 import { FileResource } from "../resources/fileresource";
@@ -23,7 +23,7 @@ export abstract class PlotComponent implements OnChanges {
   svg;
   selectedXAxisHeader: string;
   selectedYAxisHeader: string;
-  dataSelectionModeEnable: boolean = false;
+  dataSelectionModeEnable = false;
   dragStartPoint: Point;
   dragEndPoint: Point;
   selectedDataPointIds: Array<string>;
@@ -56,13 +56,13 @@ export abstract class PlotComponent implements OnChanges {
     const rowLimit = 5000;
     const datasetName = this.dataset.name;
 
-    //Get the file, this can be in a shared dataservice
+    // Get the file, this can be in a shared dataservice
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset)
       .takeUntil(this.unsubscribe)
       .subscribe(
         (result: any) => {
-          let parsedTSV = d3.tsvParseRows(result);
+          const parsedTSV = d3.tsvParseRows(result);
           this.tsv = new TSVFile(
             parsedTSV,
             this.dataset.datasetId,
@@ -98,14 +98,14 @@ export abstract class PlotComponent implements OnChanges {
   drawPlot() {
     this.dataSelectionModeEnable = false;
 
-    //creating drag element
-    let drag = d3.drag();
+    // creating drag element
+    const drag = d3.drag();
     this.svg.call(drag);
 
-    //Creating the selection area
-    let dragGroup = this.svg.append("g").attr("id", "dragGroup");
+    // Creating the selection area
+    const dragGroup = this.svg.append("g").attr("id", "dragGroup");
 
-    let band = dragGroup
+    const band = dragGroup
       .append("rect")
       .attr("width", 0)
       .attr("height", 0)
@@ -117,14 +117,14 @@ export abstract class PlotComponent implements OnChanges {
       .style("stroke", "blue")
       .style("stroke-width", 1);
 
-    let bandPos = [-1, -1];
+    const bandPos = [-1, -1];
     this.startPoint = new Point(-1, -1);
 
-    //Register for drag handlers
+    // Register for drag handlers
     drag.on("drag", () => {
-      this.dataSelectionModeEnable = true; //change the tab for showing selected gene
-      let pos = d3.mouse(document.getElementById("dragGroup"));
-      let endPoint = new Point(pos[0], pos[1]);
+      this.dataSelectionModeEnable = true; // change the tab for showing selected gene
+      const pos = d3.mouse(document.getElementById("dragGroup"));
+      const endPoint = new Point(pos[0], pos[1]);
       if (endPoint.x < this.startPoint.x) {
         d3.select(".band").attr(
           "transform",
@@ -160,16 +160,16 @@ export abstract class PlotComponent implements OnChanges {
     });
 
     drag.on("end", () => {
-      let pos = d3.mouse(document.getElementById("dragGroup"));
-      let endPoint = new Point(pos[0], pos[1]);
+      const pos = d3.mouse(document.getElementById("dragGroup"));
+      const endPoint = new Point(pos[0], pos[1]);
       // need to get the points that included in the band
       if (
         this.startPoint.x !== -1 &&
         this.startPoint.y !== -1 &&
         (this.startPoint.x !== endPoint.x && this.startPoint.y !== endPoint.y)
       ) {
-        //this.resetSelections();
-        //define the points that are within the drag boundary
+        // this.resetSelections();
+        // define the points that are within the drag boundary
         this.dragEndPoint = new Point(endPoint.x, endPoint.y);
         this.dragStartPoint = new Point(this.startPoint.x, this.startPoint.y);
         this.getSelectedDataSet();
@@ -193,7 +193,7 @@ export abstract class PlotComponent implements OnChanges {
   removeSelectionStyle(id: string) {}
 
   resetSelections(): void {
-    for (let id of this.selectedDataPointIds) {
+    for (const id of this.selectedDataPointIds) {
       this.removeSelectionStyle(id);
     }
     this.selectedDataRows = [];
