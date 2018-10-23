@@ -327,4 +327,10 @@ export class SessionListComponent implements OnInit {
   sessionMenuOpenChange(open: boolean) {
     this.selectionDisabled = open;
   }
+
+  public getNotesButtonText(session: Session) {
+    return this.sessionDataService.hasPersonalRule(session.rules)
+      ? "Edit notes"
+      : "View notes";
+  }
 }

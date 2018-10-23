@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
-import { NotesModalComponent } from "./notesmodal/notesmodal.component";
+import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { Observable } from "rxjs/Observable";
@@ -72,8 +72,8 @@ export class DialogModalService {
 
   private observableFromPromiseWithDismissHandling(result: Promise<any>) {
     return Observable.fromPromise(result).catch(err => {
-      if (err === 0) {
-        // dialog dismissed
+      // dialog dismissed, cancel -> undefined, backdrop -> 0, esc -> 1
+      if (err === undefined || err === 0 || err === 1) {
         return Observable.empty();
       } else {
         // real error
