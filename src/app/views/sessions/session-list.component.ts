@@ -34,6 +34,7 @@ export class SessionListComponent implements OnInit {
   private previewThrottleSubscription;
 
   public selectionDisabled = false; // disable session selection when session context menu is open
+  public noPersonalSessions = true;
 
   constructor(
     private sessionResource: SessionResource,
@@ -151,6 +152,7 @@ export class SessionListComponent implements OnInit {
           );
         });
 
+        this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
         this.sessionsByUser = sessionsByUser;
       },
       (error: any) => {

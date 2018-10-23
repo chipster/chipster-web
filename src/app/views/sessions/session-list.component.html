@@ -5,10 +5,10 @@
 
     <div class="col">
 
-      <div class="lighter">
+      <!-- <div class="lighter">
         <p>Get started by creating a new session or play around with the example sessions. To open a session, click on the
           session name.</p>
-      </div>
+      </div> -->
 
       <div class="mt-2 mb-4">
         <button class="btn btn-sm btn-info mr-2" (click)="createSession()">
@@ -40,6 +40,15 @@
             </button>
             <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
           </div> -->
+
+
+          <table *ngIf="noPersonalSessions && sharedByUsername === null" class="table table-sm">
+            <tbody>
+              <tr class="session-list-item">
+                <td style="font-size: smaller"><i>No sessions yet.</i></td>
+              </tr>
+            </tbody>
+          </table>
 
           <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
             <tbody>
@@ -86,22 +95,22 @@
           <br>
         </div>
       </div>
-
     </div>
-
-
 
     <div class="col">
 
       <div id="workflow-dataset-panel" class="lighter">
-        <p>Sessions keep your analysis projects organized. Create a new session for each experiment. The session keeps your
-          raw data files and analysis results together. </p>
-
-        <p>It keeps track of the analysis history and makes it easy to understand afterwards how the data was analyzed.
+        <p>To open a session, click on the session name.
         </p>
 
-        <p>Sessions are stored on the server, but you can save it to a local zip file to take a backup copy of your data
-          or transfer data between different Chipster servers.</p>
+        <p>Sessions keep your analysis projects organized. They combine together your raw data files and analysis results
+          and also keep track of the analysis history. This makes it easy to understand afterwards how the data was analyzed.
+        </p>
+
+        <p>Creating a new session for each experiment is usually a good approach.</p>
+
+        <p>Sessions are stored on the server, but you can download session to a local zip file to have a backup copy of your
+          data or transfer data between different Chipster servers.</p>
       </div>
 
 
