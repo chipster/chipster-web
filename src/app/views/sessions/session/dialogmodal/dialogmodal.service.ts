@@ -23,16 +23,7 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
     modalRef.componentInstance.placeHolder = "";
-
-    return Observable.fromPromise(modalRef.result).catch(err => {
-      if (err === undefined) {
-        // dialog dismissed
-        return Observable.empty();
-      } else {
-        // real error
-        throw err;
-      }
-    });
+    return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openTempCopyModal(title, message, value, button1Text, button2Text) {
@@ -61,23 +52,15 @@ export class DialogModalService {
   openNotesModal(session): Observable<string> {
     const modalRef = this.modalService.open(NotesModalComponent);
     modalRef.componentInstance.session = session;
-    return Observable.fromPromise(modalRef.result).catch(err => {
-      if (err === undefined) {
-        // dialog dismissed
-        return Observable.empty();
-      } else {
-        // real error
-        throw err;
-      }
-    });
+    return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openSharingModal(session) {
+  openSharingModal(session): Observable<any> {
     const modalRef = this.modalService.open(SharingModalComponent, {
       size: "lg"
     });
     modalRef.componentInstance.session = session;
-    return modalRef.result;
+    return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openSpinnerModal(message, observable) {
@@ -85,5 +68,17 @@ export class DialogModalService {
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.observable = observable;
     return modalRef.result;
+  }
+
+  private observableFromPromiseWithDismissHandling(result: Promise<any>) {
+    return Observable.fromPromise(result).catch(err => {
+      if (err === 0) {
+        // dialog dismissed
+        return Observable.empty();
+      } else {
+        // real error
+        throw err;
+      }
+    });
   }
 }

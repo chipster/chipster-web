@@ -11,6 +11,7 @@ import { Session } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { SessionService } from "./session/session.service";
 import log from "loglevel";
+import { SessionEventService } from "./session/sessionevent.service";
 
 @Component({
   selector: "ch-session-list",
@@ -41,7 +42,8 @@ export class SessionListComponent implements OnInit {
     public sessionDataService: SessionDataService,
     private sessionService: SessionService,
     private routeService: RouteService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private sessionEventService: SessionEventService
   ) {}
 
   ngOnInit() {
@@ -254,6 +256,30 @@ export class SessionListComponent implements OnInit {
   download(session: Session) {
     event.stopPropagation();
     this.sessionService.downloadSession(session.sessionId);
+  }
+
+  share(session: Session) {
+    event.stopPropagation();
+
+    // HORRIBLE HACK to deal with stateful SessionEventService which
+    // needs sessionData at the moment
+    // FIXME refactor SessionEventService to deal with situations like this
+
+    // load session data if not already loaded for preview
+    const sessionData$ =
+      this.sessionData &&
+      this.sessionData.session.sessionId === session.sessionId
+        ? Observable.of(this.sessionData)
+        : this.sessionResource.loadSession(session.sessionId);
+
+    sessionData$
+      .flatMap((sessionData: SessionData) => {
+        this.sessionEventService.setSessionData(session.sessionId, sessionData);
+        return this.dialogModalService.openSharingModal(session).finally(() => {
+          this.sessionEventService.unsubscribe();
+        });
+      })
+      .subscribe();
   }
 
   duplicate(session: Session) {
