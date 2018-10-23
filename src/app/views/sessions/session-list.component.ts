@@ -137,8 +137,21 @@ export class SessionListComponent implements OnInit {
           });
         });
 
-        this.sessionsByUser = sessionsByUser;
         this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
+
+        // sort sessions by name
+        this.sessionsByUserKeys.forEach((user: string) => {
+          sessionsByUser.set(
+            user,
+            sessionsByUser
+              .get(user)
+              .sort((s1: Session, s2: Session) =>
+                s1.name.localeCompare(s2.name)
+              )
+          );
+        });
+
+        this.sessionsByUser = sessionsByUser;
       },
       (error: any) => {
         this.errorHandlerService.handleError(error, "Loading sessions failed");
@@ -328,7 +341,7 @@ export class SessionListComponent implements OnInit {
     this.selectionDisabled = open;
   }
 
-  public getNotesButtonText(session: Session) {
+  getNotesButtonText(session: Session) {
     return this.sessionDataService.hasPersonalRule(session.rules)
       ? "Edit notes"
       : "View notes";
