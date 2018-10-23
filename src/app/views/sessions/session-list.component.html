@@ -71,10 +71,12 @@
                         ngbDropdownToggle>
                         <i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
                       <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
-                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();rename(session)">Rename</button>
-                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();notes(session)">Notes</button>
-                        <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicate(session)">Duplicate</button>
-                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();share(session)">Share</button>
+                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();rename(session)">Rename&hellip;</button>
+                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();notes(session)">View
+                          notes&hellip;
+                        </button>
+                        <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
+                        <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();share(session)">Share&hellip;</button>
                         <button class="dropdown-item" (click)="sessionDropdown.toggle();download(session)">Download</button>
                       </div>
                     </div>
