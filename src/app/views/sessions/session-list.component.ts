@@ -164,9 +164,12 @@ export class SessionListComponent implements OnInit {
   onSessionClick(session: Session) {
     if (this.selectionDisabled) {
       this.selectionDisabled = false;
-      this.selectSession(session);
+
+      if (!this.deletingSessions.has(session)) {
+        this.selectSession(session);
+      }
       return;
-    } else {
+    } else if (!this.deletingSessions.has(session)) {
       this.openSession(session.sessionId);
     }
   }
@@ -185,7 +188,7 @@ export class SessionListComponent implements OnInit {
   }
 
   selectSession(session: Session) {
-    if (this.selectionDisabled) {
+    if (this.selectionDisabled || this.deletingSessions.has(session)) {
       return;
     }
 
