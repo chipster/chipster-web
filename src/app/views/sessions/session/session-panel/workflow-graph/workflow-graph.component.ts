@@ -28,6 +28,7 @@ import * as d3ContextMenu from "d3-context-menu";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { DatasetNodeToolTip } from "./data-node-tooltip";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -101,11 +102,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   datasetNodes: Array<DatasetNode>;
   links: Array<Link>;
-  filter: Map<string, Dataset> = null;
+  filter: Map<string, Dataset>;
   datasetTooltip: any;
   datasetTooltipTriangle: any;
 
+  datasetToolTipArray: Array<DatasetNodeToolTip> = [];
+
   dragStarted: boolean;
+
+  searchEnabled: boolean;
 
   subscriptions: Array<any> = [];
 
@@ -114,6 +119,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       return 1.0;
     } else {
       return 0.25;
+    }
+  }
+
+  static getToolTipOpacity(isVisible: boolean) {
+    if (isVisible) {
+      return 0.75;
+    } else {
+      return 0.0;
     }
   }
 
@@ -133,6 +146,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
     this.scrollerDiv.on("mousewheel", () => {
+      this.removeDatasetNodeToolTips();
       const scroll = this.scrollerDiv.node();
       const event = d3.event;
 
@@ -229,8 +243,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           this.datasetSearch
         );
         this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
+        this.searchEnabled = true;
       } else {
         this.filter = null;
+        this.searchEnabled = false;
       }
       this.renderGraph();
     }
@@ -242,10 +258,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   zoomIn() {
+    this.removeDatasetNodeToolTips();
     this.applyZoom((1 + this.zoomStepFactor) * this.zoomScale);
   }
 
   zoomOut() {
+    this.removeDatasetNodeToolTips();
     this.applyZoom((1 - this.zoomStepFactor) * this.zoomScale);
   }
 
@@ -425,17 +443,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Delete",
         action: function(d, i) {
-          console.log(d.dataset);
-          console.log(self.selectionService.selectedDatasets);
           self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
-          console.log(self.selectionService.selectedDatasets);
           self.delete.emit();
         }
       },
       {
         title: "Export",
         action: function(d, i) {
-          console.log("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
@@ -510,6 +524,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             }
           })
       );
+    this.datasetToolTipArray = [];
+    this.d3DatasetNodes.each(function(d, i) {
+      const selection = d3.select(this).node();
+      self.createTooltipById(selection, d, i);
+    });
+   // this.setToolTipText();
+    this.d3DatasetNodes.each(function(d, i) {
+      if (self.searchEnabled) {
+        self.showToolTipId(d, i);
+      } else {
+        self.hideToolTipById(d, i);
+      }
+    });
 
     this.d3DatasetNodes.exit().remove();
 
@@ -673,6 +700,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   renderGraph() {
+    // before rendering the graph, remove the previously added tooltip divs
+    this.removeDatasetNodeToolTips();
     this.renderLinks();
     this.renderDatasets();
     this.renderLabels();
@@ -853,5 +882,81 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .transition()
       .duration(delay)
       .style("opacity", 0);
+  }
+
+  // creating tooltip for every node which will be hidden and when search is enabled, it will be shown
+  createTooltipById(element, dataset, id) {
+    const tooltip = new DatasetNodeToolTip();
+    this.datasetToolTipArray[id] = tooltip;
+    this.datasetToolTipArray[id].datasetId = dataset.datasetId;
+    this.datasetToolTipArray[id].datasetName = dataset.name;
+    this.datasetToolTipArray[id].dataNodeToolTip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "dataset-node-tooltip")
+      .attr("id", dataset.datasetId)
+      .style("opacity", 0)
+      .html("tooltip");
+
+    const datasetLeft = element.getBoundingClientRect().left;
+    const datasetTop = element.getBoundingClientRect().top;
+    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
+      .height;
+
+    if (dataset) {
+      this.datasetToolTipArray[id].dataNodeToolTip.html(
+        dataset.name.split(".")[0]
+      );
+    }
+    this.datasetToolTipArray[id].dataNodeToolTip
+      .style("left", datasetLeft - 5 + "px")
+      .style("top", datasetTop - tooltipHeight + 3 + "px");
+  }
+
+  showToolTipId(d, i) {
+    // Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
+
+    const curRect = document
+      .getElementById(this.datasetToolTipArray[i].datasetId)
+      .getBoundingClientRect();
+
+    // If the tooltip intersects with each other, show shorter name
+    for (let k = 0; k < this.datasetToolTipArray.length; k++) {
+      if (
+        this.datasetToolTipArray[i].datasetId !==
+        this.datasetToolTipArray[k].datasetId && this.filter.has(this.datasetToolTipArray[k].datasetId)
+      ) {
+        const rectB = document
+          .getElementById(this.datasetToolTipArray[k].datasetId)
+          .getBoundingClientRect();
+
+        if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
+          this.datasetToolTipArray[i].dataNodeToolTip.html(
+            this.datasetToolTipArray[i].datasetName.split(".")[0].slice(0, 5) +
+              "..."
+          );
+        }
+      }
+    }
+    // show the tooltip only if it contained inside the svg
+    if (
+      curRect.left + curRect.width < this.getParentSize().right - 20 &&
+      curRect.top < this.getParentSize().bottom - 20
+    ) {
+      this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", x =>
+        WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
+      );
+    }
+  }
+
+  hideToolTipById(d, i) {
+    this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", 0);
+  }
+
+  removeDatasetNodeToolTips() {
+    const elements = document.getElementsByClassName("dataset-node-tooltip");
+    while (elements.length > 0) {
+      elements[0].parentNode.removeChild(elements[0]);
+    }
   }
 }

@@ -7,7 +7,7 @@ import {PipeService} from "../services/pipeservice.service";
 })
 export class DatasetsearchPipe implements PipeTransform {
 
-  constructor(private pipeService: PipeService){}
+  constructor(private pipeService: PipeService) {}
 
   transform(array: Dataset[], expression: string): any {
     return this.pipeService.findDataset(array, expression);

@@ -1,5 +1,6 @@
 import Node from "./node";
 import { Injectable } from "@angular/core";
+import { DatasetNodeToolTip } from "./data-node-tooltip";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
@@ -66,4 +67,27 @@ export class WorkflowGraphService {
       return false;
     }
   }
+
+ isOverLapping(rectA: any, rectB: any) {
+  const rectAx = rectA.left;
+  const rectAy = rectA.top;
+  const rectAxMax = rectA.left + rectA.width;
+  const rectAyMax = rectA.top + rectA.height;
+
+  const rectBx = rectB.left;
+  const rectBy = rectB.top;
+  const rectBxMax = rectB.left + rectB.width;
+  const rectByMax = rectB.top + rectB.height;
+
+  const x_overlap = Math.max(0, Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx));
+  const y_overlap = Math.max(0, Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy));
+
+  const overlap = x_overlap * y_overlap;
+  if (overlap > 0 ) { return true; }
+
+    return false;
+
+
+ }
+
 }
