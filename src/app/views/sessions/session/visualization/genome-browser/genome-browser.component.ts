@@ -1,29 +1,38 @@
-import {Component, OnInit, Input, ViewChild, ElementRef, OnChanges, OnDestroy} from '@angular/core';
-import {VisualizationModalService} from "../visualizationmodal.service";
-import {SelectionService} from "../../selection.service";
-import {SessionDataService} from "../../sessiondata.service";
-import {SessionData} from "../../../../../model/session/session-data";
-import {TypeTagService} from "../../../../../shared/services/typetag.service";
-import {Observable} from 'rxjs/Observable';
+import {
+  Component,
+  OnInit,
+  Input,
+  ViewChild,
+  ElementRef,
+  OnChanges,
+  OnDestroy
+} from "@angular/core";
+import { VisualizationModalService } from "../visualizationmodal.service";
+import { SelectionService } from "../../selection.service";
+import { SessionDataService } from "../../session-data.service";
+import { SessionData } from "../../../../../model/session/session-data";
+import { TypeTagService } from "../../../../../shared/services/typetag.service";
+import { Observable } from "rxjs/Observable";
 import { Dataset } from "chipster-js-common";
-import {Subject} from "rxjs/Subject";
-import {LoadState, State} from "../../../../../model/loadstate";
-import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
+import { Subject } from "rxjs/Subject";
+import { LoadState, State } from "../../../../../model/loadstate";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 declare var pileup: any;
 
 @Component({
-  selector: 'ch-genome-browser',
-  templateUrl: 'genome-browser.component.html',
-  styleUrls: ['./genome-browser.component.less']
-
+  selector: "ch-genome-browser",
+  templateUrl: "genome-browser.component.html",
+  styleUrls: ["./genome-browser.component.less"]
 })
 export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
+  @ViewChild("iframe")
+  iframe: ElementRef;
 
-  @ViewChild('iframe') iframe: ElementRef;
-
-  @Input() selectedDatasets: Array<any>;
-  @Input() sessionData: SessionData;
+  @Input()
+  selectedDatasets: Array<any>;
+  @Input()
+  sessionData: SessionData;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -33,32 +42,32 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   private p: any;
   private content: any;
   private showGenomeBrowser: boolean;
-  private selectedGenomeID: 'hg38';
+  private selectedGenomeID: "hg38";
 
-  //Multiple Bam related stuff
+  // Multiple Bam related stuff
   private dataSourceList: Array<BamSource> = [];
   private sources: Array<BamSourceEntry> = [];
 
-
-  private selectedGenomeUrl: string = 'http://www.biodalliance.org/datasets/hg38.2bit';
+  private selectedGenomeUrl = "http://www.biodalliance.org/datasets/hg38.2bit";
 
   private genomeList = [
     {
-      genomeID: 'hg19',
-      url: 'http://www.biodalliance.org/datasets/hg19.2bit'
+      genomeID: "hg19",
+      url: "http://www.biodalliance.org/datasets/hg19.2bit"
     },
     {
-      genomeID: 'hg38',
-      url: 'http://www.biodalliance.org/datasets/hg38.2bit'
+      genomeID: "hg38",
+      url: "http://www.biodalliance.org/datasets/hg38.2bit"
     }
   ];
 
-  constructor(private visualizationModalService: VisualizationModalService,
-              private selectionService: SelectionService,
-              private sessionDataService: SessionDataService,
-              private typeTagService: TypeTagService,
-              private restErrorService: RestErrorService) {
-  }
+  constructor(
+    private visualizationModalService: VisualizationModalService,
+    private selectionService: SelectionService,
+    private sessionDataService: SessionDataService,
+    private typeTagService: TypeTagService,
+    private restErrorService: RestErrorService
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -76,9 +85,9 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   setGenome(event) {
     this.selectedGenomeID = event;
     console.log(this.selectedGenomeID);
-    var self = this;
-    this.genomeList.forEach(function (genome) {
-      if (event == genome.genomeID) {
+    const self = this;
+    this.genomeList.forEach(function(genome) {
+      if (event === genome.genomeID) {
         self.selectedGenomeUrl = genome.url;
       }
     });
@@ -90,30 +99,34 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
       this.initializeDataSources();
       this.loadPileUp();
     }
-
   }
 
-
   getDatasetUrls() {
-    var self = this;
+    const self = this;
     // if user have chosen one or more BAM files
-    this.selectedDatasets.forEach(function (dataset) {
+    this.selectedDatasets.forEach(function(dataset) {
       // check type of each file, put the Bam datasets in list
       if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
-        let bamSource = new BamSource();
+        const bamSource = new BamSource();
         bamSource.bamDataset = dataset;
-        self.sessionData.datasetsMap.forEach(function (dataset) {
-          if (((dataset.name.split('.').pop()) == "bai") && ((dataset.name.substr(0,
-              dataset.name.indexOf('.')) === (bamSource.bamDataset.name.substr(0,
-              bamSource.bamDataset.name.indexOf('.')))))) {
+        self.sessionData.datasetsMap.forEach(function(dataset) {
+          if (
+            dataset.name.split(".").pop() === "bai" &&
+            dataset.name.substr(0, dataset.name.indexOf(".")) ===
+              bamSource.bamDataset.name.substr(
+                0,
+                bamSource.bamDataset.name.indexOf(".")
+              )
+          ) {
             bamSource.baiDataset = dataset;
           }
-
         });
         self.dataSourceList.push(bamSource);
-      }
-      else {
-        self.state = new LoadState(State.Fail, "No corresponding BAI file found");
+      } else {
+        self.state = new LoadState(
+          State.Fail,
+          "No corresponding BAI file found"
+        );
       }
     });
 
@@ -124,11 +137,10 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
 
     let bam: Observable<any>;
     let bai: Observable<any>;
-    let bamSources$: Array<any> = [];
+    const bamSources$: Array<any> = [];
 
-    this.dataSourceList.forEach(function (bamSource) {
+    this.dataSourceList.forEach(function(bamSource) {
       if (bamSource.bamDataset && bamSource.baiDataset) {
-
         bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
         bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
         bamSources$.push(Observable.forkJoin(bam, bai));
@@ -137,78 +149,73 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
 
     Observable.forkJoin(bamSources$)
       .takeUntil(this.unsubscribe)
-      .subscribe(res => {
+      .subscribe(
+        res => {
           for (let i = 0; i < res.length; i++) {
             this.dataSourceList[i].bamUrl = res[i][0];
             this.dataSourceList[i].baiUrl = res[i][1];
-
           }
           this.initFrameContent();
           this.initializeDataSources();
           this.state = new LoadState(State.Ready);
         },
-        (error: any ) => {
+        (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.handleError(error, this.state.message);
-        });
+        }
+      );
   }
-
 
   initFrameContent() {
     this.showGenomeBrowser = true;
     this.doc = this.iframe.nativeElement.contentWindow;
     this.doc.document.write(this.content);
     this.doc.close();
-
   }
 
   loadPileUp() {
-    this.p = pileup.create(this.doc.document.getElementById('pileup'), {
+    this.p = pileup.create(this.doc.document.getElementById("pileup"), {
       range: this.range,
       tracks: this.sources
     });
   }
 
-
   initializeDataSources() {
-    let refGenome = new BamSourceEntry();
+    const refGenome = new BamSourceEntry();
 
     refGenome.viz = pileup.viz.genome();
     refGenome.isReference = true;
     refGenome.data = pileup.formats.twoBit({
       url: this.selectedGenomeUrl
     });
-    refGenome.name = 'Reference';
+    refGenome.name = "Reference";
 
     this.sources.push(refGenome);
 
-    var scale = new BamSourceEntry();
+    const scale = new BamSourceEntry();
     scale.viz = pileup.viz.scale();
-    scale.name = 'Scale';
+    scale.name = "Scale";
 
     this.sources.push(scale);
 
-    var location = new BamSourceEntry();
+    const location = new BamSourceEntry();
     location.viz = pileup.viz.location();
-    location.name = 'Location';
+    location.name = "Location";
 
     this.sources.push(location);
 
-    var genes = new BamSourceEntry();
+    const genes = new BamSourceEntry();
     genes.viz = pileup.viz.genes();
     genes.data = pileup.formats.bigBed({
-      url: 'http://www.biodalliance.org/datasets/ensGene.bb'
+      url: "http://www.biodalliance.org/datasets/ensGene.bb"
     });
-    genes.name = 'Genes';
-
+    genes.name = "Genes";
 
     this.sources.push(genes);
 
-
-    for (var i = 0; i < this.dataSourceList.length; i++) {
-      var bamCoverageEntry = new BamSourceEntry();
-      var bamTrackEntry = new BamSourceEntry();
-
+    for (let i = 0; i < this.dataSourceList.length; i++) {
+      const bamCoverageEntry = new BamSourceEntry();
+      const bamTrackEntry = new BamSourceEntry();
 
       bamCoverageEntry.viz = pileup.viz.coverage();
       bamCoverageEntry.data = pileup.formats.bam({
@@ -216,37 +223,34 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
         indexUrl: this.dataSourceList[i].baiUrl
       });
       bamCoverageEntry.cssClass = "normal";
-      bamCoverageEntry.name = 'Coverage';
-
+      bamCoverageEntry.name = "Coverage";
 
       bamTrackEntry.viz = pileup.viz.pileup();
       bamTrackEntry.data = pileup.formats.bam({
         url: this.dataSourceList[i].bamUrl,
         indexUrl: this.dataSourceList[i].baiUrl
       });
-      bamTrackEntry.cssClass = 'normal';
-      bamTrackEntry.name = 'Alignments';
+      bamTrackEntry.cssClass = "normal";
+      bamTrackEntry.name = "Alignments";
 
       this.sources.push(bamCoverageEntry);
       this.sources.push(bamTrackEntry);
-
     }
 
+    // console.log(this.sources);
+    this.range = { contig: "chr20", start: 3976345, stop: 3979545 };
 
-    //console.log(this.sources);
-    this.range = {contig: 'chr20', start: 3976345, stop: 3979545};
-
-    //this.range = {contig: 'chr1', start: 7500000, stop: 7500500};
+    // this.range = {contig: 'chr1', start: 7500000, stop: 7500500};
 
     // need to test with GM12878.bam and position 3977895
     this.loadPileUp();
-
-
   }
 
-
   openGnomeModal() {
-    this.visualizationModalService.openVisualizationModal(this.selectionService.selectedDatasets[0], 'genomebrowser');
+    this.visualizationModalService.openVisualizationModal(
+      this.selectionService.selectedDatasets[0],
+      "genomebrowser"
+    );
   }
 
   ngOnInit() {
@@ -505,9 +509,7 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
 <div id="pileup">
  </div>`;
 
-
-    //let pileup = window['pileup'];
-
+    // let pileup = window['pileup'];
   }
 }
 
@@ -518,7 +520,6 @@ class BamSourceEntry {
   cssClass?: any;
   name?: any;
   options?: any;
-
 }
 
 class BamSource {
@@ -527,5 +528,3 @@ class BamSource {
   bamDataset: Dataset;
   baiDataset: Dataset;
 }
-
-

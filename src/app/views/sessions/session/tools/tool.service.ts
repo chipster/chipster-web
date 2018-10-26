@@ -1,9 +1,15 @@
-import { ToolParameter, Dataset, InputBinding, Tool, ToolInput } from "chipster-js-common";
+import {
+  ToolParameter,
+  Dataset,
+  InputBinding,
+  Tool,
+  ToolInput
+} from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Observable } from "rxjs";
-import { SessionDataService } from "../sessiondata.service";
+import { SessionDataService } from "../session-data.service";
 import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
 import { ConfigService } from "../../../../shared/services/config.service";

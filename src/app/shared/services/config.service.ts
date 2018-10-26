@@ -65,8 +65,8 @@ export class ConfigService {
             return Object.assign(confs[0], confs[1]);
           });
         })
-        .publishReplay(1)
-        .refCount();
+        .shareReplay(1)
+        .take(1);
     }
     return this.conf$;
   }

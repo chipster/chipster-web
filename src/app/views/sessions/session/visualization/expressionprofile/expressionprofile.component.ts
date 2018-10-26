@@ -2,7 +2,7 @@ import {ExpressionProfileService} from "./expressionprofile.service";
 import Point from "../model/point";
 import Rectangle from "./rectangle";
 import Interval from "./interval";
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import GeneExpression from "./geneexpression";

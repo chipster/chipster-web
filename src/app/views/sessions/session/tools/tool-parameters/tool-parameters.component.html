@@ -1,13 +1,13 @@
 <div class="container">
-    <div class="row">
-        <div class="col col-md-9">
-            <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
-        </div>
-        <div class="col col-md-3">
-          <button class="btn btn-xs" style="float: right" (click)="closeDropDownDialog()" >
-            <i class="fa fa-window-close"></i></button>
-        </div>
-      </div>
+  <div class="row">
+    <div class="col col-md-9">
+      <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
+    </div>
+    <div class="col col-md-3">
+      <button class="btn btn-xs" style="float: right" (click)="closeDropDownDialog()">
+        <i class="fa fa-window-close"></i></button>
+    </div>
+  </div>
 
   <form name="paramForm" *ngIf="tool">
     <div *ngIf="tool.parameters.length === 0" class="alert alert-info">No parameters to modify for this tool</div>
@@ -35,7 +35,7 @@
           <td>
             <span>
               <!--[(ngModel)]="toolSelectionService.parameterValues[tool.name.id][parameter.name.id]"-->
-              <select *ngIf="toolService.isSelectionParameter(parameter)" name="parameter_{{i}}" [(ngModel)]="parameter.value" (ngModelChange)="toolSelectionService.parametersChanged()">
+              <select *ngIf="toolService.isSelectionParameter(parameter)" name="parameter_{{i}}" [(ngModel)]="parameter.value" (ngModelChange)="toolSelectionService.checkParameters()">
                 <!--required="!parameter.optional"-->
                 <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
                   {{option.displayName || option.id}}
@@ -45,10 +45,10 @@
 
               <input *ngIf="toolService.isNumberParameter(parameter)" type="number" [(ngModel)]="parameter.value" name="parameter_{{i}}"
                 min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}" required="{{!parameter.optional}}"
-                (ngModelChange)="toolSelectionService.parametersChanged()" />
+                (ngModelChange)="toolSelectionService.checkParameters()" />
 
               <input *ngIf="parameter.type === 'STRING'" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value" required="{{!parameter.optional}}"
-                (ngModelChange)="toolSelectionService.parametersChanged()" />
+                (ngModelChange)="toolSelectionService.checkParameters()" />
 
               <!--<label class="label label-warning"-->
               <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->

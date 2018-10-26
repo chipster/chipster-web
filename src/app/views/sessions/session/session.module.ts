@@ -6,7 +6,7 @@ import { CommonModule } from "@angular/common";
 import { SharedModule } from "../../../shared/shared.module";
 import { SessionPanelModule } from "./session-panel/session-panel.module";
 import { SessionEventService } from "./sessionevent.service";
-import { SessionDataService } from "./sessiondata.service";
+import { SessionDataService } from "./session-data.service";
 import { SessionListComponent } from "../session-list.component";
 import { SessionComponent } from "./session.component";
 import { OpenSessionFileComponent } from "../open-session-file/open-session-file.component";
@@ -21,6 +21,7 @@ import { JobService } from "./job.service";
 import { AngularSplitModule } from "angular-split";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
 import { ImportSessionModalComponent } from "../open-session-file/import-session-modal.component";
+import { SessionService } from "./session.service";
 
 @NgModule({
   imports: [
@@ -45,6 +46,7 @@ import { ImportSessionModalComponent } from "../open-session-file/import-session
   providers: [
     SessionEventService,
     SessionDataService,
+    SessionService,
     UploadService,
     SelectionHandlerService,
     ToolSelectionService,

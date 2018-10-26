@@ -1,31 +1,24 @@
 <div class="container">
 
-<div class="alert alert-warning" role="alert">
-  <h4>Not ready yet</h4>
+  <div class="alert alert-warning" role="alert">
+    <h4>Not ready yet</h4>
     <p>
-      This service is still in development. Please use the 
-      <a href="https://chipster.csc.fi" class="alert-link">Java client</a> for any real
-      work for now.
+      This service is still in development. Please use the
+      <a href="https://chipster.csc.fi" class="alert-link">Java client</a> for any real work for now.
     </p>
 
     <p>
-      You are welcome to try this and give feedback. Please bear in
-      mind caveats:      
+      You are welcome to try this and give feedback. Please bear in mind caveats:
     </p>
     <ul>
       <li>a lot of service breaks and no announcements about them</li>
-      <li>jobs and data are sometimes deleted due to version updates, maintenance or bugs</li> 
+      <li>jobs and data are sometimes deleted due to version updates, maintenance or bugs</li>
     </ul>
   </div>
 
   <div *ngIf="homeHeaderPath">
-    <ch-manual 
-    [assetsPath]="homeHeaderPath" 
-    [page]="homeHeaderFile" 
-    [showControls]=false
-    [addContainer]=false
-    [routerPath]="homeRouterPath"
-    [manualStyles]=false></ch-manual>
+    <ch-manual [assetsPath]="homeHeaderPath" [page]="homeHeaderFile" [showControls]=false [addContainer]=false [routerPath]="homeRouterPath"
+      [manualStyles]=false></ch-manual>
   </div>
 
   <div class="row" id="getstarted">
@@ -37,11 +30,14 @@
 
         <div class="panel-body">
           <p *ngIf="tokenHasExpired()"><i>Login expired, please log in again.</i></p>
-          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="routerLinkLogin">Log in</button>
+          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="routerLinkLogin">Log
+            In
+          </button>
         </div>
 
         <ng-template #alreadyLoggedIn>
-          <p>You are logged in as <strong>{{username$ | async}}</strong>. To continue, go to <a [routerLink]="routerLinkSessions">Sessions</a>.</p>
+          <p>You are logged in as <strong>{{username$ | async}}</strong>. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a>
+            or <a [routerLink]="routerLinkSessions">Sessions</a> to continue.</p>
         </ng-template>
 
       </div>
@@ -49,12 +45,7 @@
   </div>
 
   <div *ngIf="homePath && homeFile && homeRouterPath">
-    <ch-manual
-     [assetsPath]="homePath"
-     [page]="homeFile"
-     [showControls]=false
-     [addContainer]=false
-     [routerPath]="homeRouterPath"
-     [manualStyles]=false></ch-manual>     
+    <ch-manual [assetsPath]="homePath" [page]="homeFile" [showControls]=false [addContainer]=false [routerPath]="homeRouterPath"
+      [manualStyles]=false></ch-manual>
   </div>
 </div>

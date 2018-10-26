@@ -9,3 +9,4 @@ src/app/**/*.js
 src/app/**/*.js.map
 *.iml
 .settings/
+src/assets/manual-mylly

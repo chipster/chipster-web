@@ -1,21 +1,19 @@
-import { SessionResource } from '../../../shared/resources/session.resource';
-import { ConfigService } from '../../../shared/services/config.service';
-import { Dataset } from 'chipster-js-common';
-import { Job, JobInput, Session, Rule, WsEvent } from 'chipster-js-common';
-import { FileResource } from '../../../shared/resources/fileresource';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { TokenService } from '../../../core/authentication/token.service';
-import { ErrorService } from '../../../core/errorhandler/error.service';
-import { RestService } from '../../../core/rest-services/restservice/rest.service';
-import { SessionData } from '../../../model/session/session-data';
-import { DialogModalService } from './dialogmodal/dialogmodal.service';
-import { Router } from '@angular/router';
-import { SessionEventService } from './sessionevent.service';
-import { SelectionService } from './selection.service';
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { ConfigService } from "../../../shared/services/config.service";
+import { Dataset } from "chipster-js-common";
+import { Job, JobInput, Session, Rule, WsEvent } from "chipster-js-common";
+import { FileResource } from "../../../shared/resources/fileresource";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs/Observable";
+import { TokenService } from "../../../core/authentication/token.service";
+import { ErrorService } from "../../../core/errorhandler/error.service";
+import { RestService } from "../../../core/rest-services/restservice/rest.service";
+import { SessionData } from "../../../model/session/session-data";
+import { SessionEventService } from "./sessionevent.service";
+import { SelectionService } from "./selection.service";
 import * as _ from "lodash";
-import { SelectionHandlerService } from './selection-handler.service';
-
+import { SelectionHandlerService } from "./selection-handler.service";
+import log from "loglevel";
 
 @Injectable()
 export class SessionDataService {
@@ -77,8 +75,8 @@ export class SessionDataService {
     content: string
   ) {
     const job = new Job();
-    job.state = 'COMPLETED';
-    job.toolCategory = 'Interactive visualizations';
+    job.state = "COMPLETED";
+    job.toolCategory = "Interactive visualizations";
     job.toolName = toolName;
 
     job.inputs = sourceDatasetIds.map(id => {
@@ -101,14 +99,14 @@ export class SessionDataService {
         );
       })
       .catch(err => {
-        console.log('create derived dataset failed', err);
+        log.info("create derived dataset failed", err);
         throw err;
       });
   }
 
   cancelJob(job: Job) {
-    job.state = 'CANCELLED';
-    job.stateDetail = '';
+    job.state = "CANCELLED";
+    job.stateDetail = "";
 
     this.updateJob(job);
   }
@@ -118,7 +116,7 @@ export class SessionDataService {
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
     Observable.merge(...deleteJobs$).subscribe(() => {
-      console.info('Job deleted');
+      log.info("Job deleted");
     });
   }
 
@@ -127,7 +125,7 @@ export class SessionDataService {
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
     Observable.merge(...deleteDatasets$).subscribe(() => {
-      console.info('Job deleted');
+      log.info("Job deleted");
     });
   }
 
@@ -143,19 +141,15 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
-  updateSession(sessionData: SessionData, session: Session) {
-    return this.sessionResource.updateSession(session);
-  }
-
   getDatasetUrl(dataset: Dataset): Observable<string> {
     const datasetToken$ = this.configService
       .getSessionDbUrl()
       .flatMap((sessionDbUrl: string) =>
         this.restService.post(
           sessionDbUrl +
-            '/datasettokens/sessions/' +
+            "/datasettokens/sessions/" +
             this.getSessionId() +
-            '/datasets/' +
+            "/datasets/" +
             dataset.datasetId,
           null,
           true
@@ -176,25 +170,36 @@ export class SessionDataService {
 
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
-      this.download(this.getDatasetUrl(d).map(url => url + '&download'));
+      this.download(this.getDatasetUrl(d).map(url => url + "&download"));
     }
   }
 
   openNewTab(dataset: Dataset) {
-    this.newTab(this.getDatasetUrl(dataset).map(url => url), null,
-      'Browser\'s pop-up blocker prevented opening a new tab');
+    this.newTab(
+      this.getDatasetUrl(dataset).map(url => url),
+      null,
+      "Browser's pop-up blocker prevented opening a new tab"
+    );
   }
 
   download(url$: Observable<string>) {
-    this.newTab(url$, 3000, 'Browser\'s pop-up blocker prevented some exports. ' +
-      'Please disable the pop-up blocker for this site or ' +
-      'export the files one by one.');
+    this.newTab(
+      url$,
+      3000,
+      "Browser's pop-up blocker prevented some exports. " +
+        "Please disable the pop-up blocker for this site or " +
+        "export the files one by one."
+    );
   }
 
-  newTab(url$: Observable<string>, autoCloseDelay: number, popupErrorText: string) {
+  newTab(
+    url$: Observable<string>,
+    autoCloseDelay: number,
+    popupErrorText: string
+  ) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
-    const win: any = window.open('', '_blank');
+    const win: any = window.open("", "_blank");
     if (win) {
       url$.subscribe(url => {
         // but we can set it's location later asynchronously
@@ -234,7 +239,7 @@ export class SessionDataService {
   }
 
   getPublicRules(rules: Array<Rule>) {
-    return rules.filter(r => r.username === 'everyone');
+    return rules.filter(r => r.username === "everyone");
   }
 
   getApplicableRules(rules: Array<Rule>) {
@@ -291,7 +296,7 @@ export class SessionDataService {
     // let's assume that user doesn't want to undo, if she is already
     // deleting more
     if (sessionData.deletedDatasets) {
-        this.deleteDatasetsNow(sessionData);
+      this.deleteDatasetsNow(sessionData);
     }
 
     // make a copy so that further selection changes won't change the array
@@ -319,5 +324,4 @@ export class SessionDataService {
       this.deleteDatasetsNow(sessionData);
     }, 10 * 1000);
   }
-
 }

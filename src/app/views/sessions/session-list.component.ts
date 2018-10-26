@@ -4,10 +4,14 @@ import { Component, OnInit } from "@angular/core";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { Subject } from "rxjs/Subject";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { SessionDataService } from "./session/sessiondata.service";
+import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { Session } from "chipster-js-common";
+import { Observable } from "rxjs";
+import { SessionService } from "./session/session.service";
+import log from "loglevel";
+import { SessionEventService } from "./session/sessionevent.service";
 
 @Component({
   selector: "ch-session-list",
@@ -17,25 +21,30 @@ import { Session } from "chipster-js-common";
 export class SessionListComponent implements OnInit {
   static readonly exampleSessionOwnerUserId = "jaas/example_session_owner";
 
-  public previewedSession: Session;
+  public selectedSession: Session;
   public previousSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
-  private selectedSessionId: string;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
 
+  public selectionDisabled = false; // disable session selection when session context menu is open
+  public noPersonalSessions = true;
+
   constructor(
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private errorHandlerService: RestErrorService,
     public sessionDataService: SessionDataService,
-    private routeService: RouteService
+    private sessionService: SessionService,
+    private routeService: RouteService,
+    private restErrorService: RestErrorService,
+    private sessionEventService: SessionEventService
   ) {}
 
   ngOnInit() {
@@ -50,7 +59,7 @@ export class SessionListComponent implements OnInit {
       })
       // wait a while to see if the user is really interested about this session
       .debounceTime(500)
-      .filter(() => this.previewedSession !== null)
+      .filter(() => this.selectedSession !== null)
       .flatMap(session => {
         return this.sessionResource.loadSession(session.sessionId);
       })
@@ -58,9 +67,9 @@ export class SessionListComponent implements OnInit {
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
-          this.previewedSession &&
+          this.selectedSession &&
           fullSession.session &&
-          this.previewedSession.sessionId === fullSession.session.sessionId
+          this.selectedSession.sessionId === fullSession.session.sessionId
         ) {
           this.sessionData = fullSession;
         }
@@ -129,8 +138,22 @@ export class SessionListComponent implements OnInit {
           });
         });
 
-        this.sessionsByUser = sessionsByUser;
         this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
+
+        // sort sessions by name
+        this.sessionsByUserKeys.forEach((user: string) => {
+          sessionsByUser.set(
+            user,
+            sessionsByUser
+              .get(user)
+              .sort((s1: Session, s2: Session) =>
+                s1.name.localeCompare(s2.name)
+              )
+          );
+        });
+
+        this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
+        this.sessionsByUser = sessionsByUser;
       },
       (error: any) => {
         this.errorHandlerService.handleError(error, "Loading sessions failed");
@@ -138,9 +161,21 @@ export class SessionListComponent implements OnInit {
     );
   }
 
+  onSessionClick(session: Session) {
+    if (this.selectionDisabled) {
+      this.selectionDisabled = false;
+
+      if (!this.deletingSessions.has(session)) {
+        this.selectSession(session);
+      }
+      return;
+    } else if (!this.deletingSessions.has(session)) {
+      this.openSession(session.sessionId);
+    }
+  }
+
   openSession(sessionId: string) {
     this.previewThrottleSubscription.unsubscribe();
-    this.selectedSessionId = sessionId;
     this.routeService.navigateToSession(sessionId);
   }
 
@@ -152,10 +187,14 @@ export class SessionListComponent implements OnInit {
     }
   }
 
-  previewSession(session: Session) {
-    this.previewedSession = session;
+  selectSession(session: Session) {
+    if (this.selectionDisabled || this.deletingSessions.has(session)) {
+      return;
+    }
 
-    if (this.previewedSession) {
+    this.selectedSession = session;
+
+    if (this.selectedSession) {
       if (session !== this.previousSession) {
         // hide the old session immediately
         this.previousSession = session;
@@ -163,10 +202,6 @@ export class SessionListComponent implements OnInit {
         this.previewThrottle$.next(session);
       }
     }
-  }
-
-  clearPreview() {
-    this.previewedSession = null;
   }
 
   deleteSession(session: Session) {
@@ -186,7 +221,7 @@ export class SessionListComponent implements OnInit {
           this.sessionDataService.deletePersonalRules(session).subscribe(
             () => {
               this.updateSessions();
-              this.previewedSession = null;
+              this.selectedSession = null;
               this.deletingSessions.delete(session);
             },
             (error: any) => {
@@ -205,7 +240,7 @@ export class SessionListComponent implements OnInit {
   }
 
   isSessionSelected(session: Session) {
-    return this.selectedSessionId === session.sessionId;
+    return this.selectedSession === session;
   }
 
   getSharedByTitlePart(userId: string): string {
@@ -224,5 +259,96 @@ export class SessionListComponent implements OnInit {
     } else {
       return TokenService.getUsernameFromUserId(userId);
     }
+  }
+
+  rename(session: Session) {
+    event.stopPropagation();
+    this.sessionService.openRenameModalAndUpdate(session);
+  }
+
+  notes(session: Session) {
+    event.stopPropagation();
+    this.sessionService.openNotesModalAndUpdate(session);
+  }
+
+  download(session: Session) {
+    event.stopPropagation();
+    this.sessionService.downloadSession(session.sessionId);
+  }
+
+  share(session: Session) {
+    event.stopPropagation();
+
+    // HORRIBLE HACK to deal with stateful SessionEventService which
+    // needs sessionData at the moment
+    // FIXME refactor SessionEventService to deal with situations like this
+
+    // load session data if not already loaded for preview
+    const sessionData$ =
+      this.sessionData &&
+      this.sessionData.session.sessionId === session.sessionId
+        ? Observable.of(this.sessionData)
+        : this.sessionResource.loadSession(session.sessionId);
+
+    sessionData$
+      .flatMap((sessionData: SessionData) => {
+        this.sessionEventService.setSessionData(session.sessionId, sessionData);
+        return this.dialogModalService.openSharingModal(session).finally(() => {
+          this.sessionEventService.unsubscribe();
+        });
+      })
+      .subscribe();
+  }
+
+  duplicate(session: Session) {
+    event.stopPropagation();
+
+    let duplicateName; // ugly
+    this.dialogModalService
+      .openSessionNameModal("Duplicate session", session.name + "_copy")
+      .flatMap(name => {
+        duplicateName = name;
+        // use sessionData from preview if available
+        if (
+          this.sessionData &&
+          this.sessionData.session.sessionId === session.sessionId
+        ) {
+          log.info("using session data from preview for duplicate");
+          return Observable.of(this.sessionData);
+        } else {
+          log.info(
+            "no session data from preview available, getting from server"
+          );
+          return this.sessionResource.loadSession(session.sessionId);
+        }
+      })
+      .flatMap((sessionData: SessionData) => {
+        const copySessionObservable = this.sessionResource.copySession(
+          sessionData,
+          duplicateName
+        );
+        return this.dialogModalService.openSpinnerModal(
+          "Duplicate session",
+          copySessionObservable
+        );
+      })
+      .subscribe(
+        () => {
+          log.info("updating sessions after duplicate");
+          this.updateSessions();
+        },
+        err =>
+          this.restErrorService.handleError(err, "Duplicate session failed")
+      );
+  }
+
+  sessionMenuOpenChange(open: boolean) {
+    this.selectionDisabled = open;
+  }
+
+  getNotesButtonText(session: Session) {
+    return this.sessionDataService.hasPersonalRule(session.rules)
+      ? "Edit notes"
+      : "View notes";
   }
 }

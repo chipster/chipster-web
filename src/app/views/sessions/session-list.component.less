@@ -1,6 +1,5 @@
 #session-preview {
   height: calc(~"100vh - 120px");
-  //position: relative;
   overflow-y: auto;
 }
 
@@ -23,25 +22,20 @@
   overflow: hidden;
 }
 
-button.showOnRowHover {
-  display: none;
-  padding-top: 0;
-  padding-bottom: 0;
+button.show-on-row-hover {
+  visibility: hidden;
 }
 
-table tr:hover button.showOnRowHover {
-  display: block;
+button.visible-button {
+  visibility: visible;
 }
 
-span.showOnRowHover {
-  display: none;
-  padding-top: 0;
-  padding-bottom: 0;
+.hidden {
+  visibility: hidden;
 }
 
-table tr:hover span.showOnRowHover {
-  display: inline;
-  font-size: 80%;
+table tr:hover button.show-on-row-hover {
+  visibility: visible;
 }
 
 #preview-container {
@@ -57,4 +51,19 @@ table tr:hover span.showOnRowHover {
   box-shadow: 0 5px 30px 0 #555;
   z-index: 1000;
   background-color: white;
+}
+
+// hide caret from dropdown button
+.dropdown-toggle::after {
+  display: none;
+}
+
+// same background as bootstrap table-hover
+.selected-session {
+  background: rgba(0, 0, 0, 0.075);
+}
+
+#datesTable td {
+  border: none;
+  padding: 0;
 }

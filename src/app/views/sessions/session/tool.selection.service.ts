@@ -8,6 +8,7 @@ import * as _ from "lodash";
 import { SessionData } from "../../../model/session/session-data";
 import { SelectionService } from "./selection.service";
 import { SET_TOOL_SELECTION } from "../../../state/selected-tool.reducer";
+import log from "loglevel";
 
 @Injectable()
 export class ToolSelectionService implements OnDestroy {
@@ -43,8 +44,9 @@ export class ToolSelectionService implements OnDestroy {
 
           toolSelection.tool.parameters.forEach((parameter: ToolParameter) => {
             this.populateParameterValues(parameter, boundDatasets);
-            this.parametersChanged();
           });
+
+          this.checkParameters(); // make sure this gets called also when no parameters
         }
       });
 
@@ -81,7 +83,7 @@ export class ToolSelectionService implements OnDestroy {
     toolSelection: ToolSelection,
     sessionData: SessionData
   ) {
-    console.log("selecting tool: ", toolSelection.tool.name.displayName);
+    log.info("selecting tool: ", toolSelection.tool.name.displayName);
     toolSelection.inputBindings = this.toolService.bindInputs(
       sessionData,
       toolSelection.tool,
@@ -95,7 +97,7 @@ export class ToolSelectionService implements OnDestroy {
     this.store.dispatch({ type: SET_TOOL_SELECTION, payload: toolSelection });
   }
 
-  parametersChanged() {
+  checkParameters() {
     this.parameterChecker$.next(this.checkCurrentToolParameters());
   }
 

@@ -15,7 +15,7 @@ import {
 } from "@angular/core";
 import { Dataset, Job, Module } from "chipster-js-common";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import * as d3 from "d3";
 import { WorkflowGraphService } from "./workflow-graph.service";
 import { SessionEventService } from "../../sessionevent.service";

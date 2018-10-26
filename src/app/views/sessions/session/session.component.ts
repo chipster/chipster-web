@@ -13,14 +13,13 @@ import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
-import { SessionDataService } from "./sessiondata.service";
+import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./sessionevent.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
-import { HotkeysService, Hotkey } from "angular2-hotkeys";
-import { Store } from "@ngrx/store";
-import { SET_LATEST_SESSION } from "../../../state/latest-session.reducer";
+import { UserService } from "../../../shared/services/user.service";
+import { SessionService } from "./session.service";
 
 @Component({
   selector: "ch-session",
@@ -44,6 +43,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private sessionEventService: SessionEventService,
     private sessionDataService: SessionDataService,
     private sessionResource: SessionResource,
+    private sessionService: SessionService,
     public selectionService: SelectionService,
     private selectionHandlerService: SelectionHandlerService,
     private route: ActivatedRoute,
@@ -53,7 +53,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     private routeService: RouteService,
     private settingsService: SettingsService,
-    private store: Store<any>
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -92,11 +92,14 @@ export class SessionComponent implements OnInit, OnDestroy {
       .do(sessionData => {
         this.sessionData = sessionData;
 
-        // save session id to store
-        this.store.dispatch({
-          type: SET_LATEST_SESSION,
-          payload: sessionData.session.sessionId
-        });
+        // save latest session id
+        log.info(
+          "saving latest session id",
+          this.sessionData.session.sessionId
+        );
+        this.userService.updateLatestSession(
+          this.sessionData.session.sessionId
+        );
 
         this.subscribeToEvents();
       })
@@ -147,10 +150,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         .flatMap(dialogResult => {
           if (dialogResult.button === keepButton) {
             this.sessionData.session.name = dialogResult.value;
-            return this.sessionDataService.updateSession(
-              this.sessionData,
-              this.sessionData.session
-            );
+            return this.sessionService.updateSession(this.sessionData.session);
           } else if (dialogResult.button === deleteButton) {
             // the user doesn't need to be notified that the session is deleted
             this.sessionEventService.unsubscribe();

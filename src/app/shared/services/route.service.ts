@@ -2,7 +2,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { Injectable } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { NavigationEnd } from "@angular/router";
-import { Observable } from "rxjs/internal/Observable";
+import { Observable } from "rxjs/Observable";
 import log from "loglevel";
 
 @Injectable()
@@ -76,15 +76,22 @@ export class RouteService {
     this.navigateAbsolute(RouteService.PATH_HOME);
   }
 
+  getRouterLinkSessions() {
+    return this.getRouterLink(RouteService.PATH_SESSIONS);
+  }
+
+  getRouterLinkAnalyze() {
+    return this.getRouterLink(RouteService.PATH_ANALYZE);
+  }
+
+  getRouterLinkLogin() {
+    return this.getRouterLink(RouteService.PATH_LOGIN);
+  }
+
   /**
    * Convert app url to host url using the current path
    */
   getRouterLink(url: string): string {
-    console.log(
-      "getRouterLink()",
-      url,
-      this.buildRouterLink(this.getAppRouteCurrent(), url)
-    );
     return this.buildRouterLink(this.getAppRouteCurrent(), url);
   }
 

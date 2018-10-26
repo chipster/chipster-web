@@ -29,6 +29,7 @@ import { SettingsComponent } from "./components/settings/settings.component";
 import { SettingsService } from "./services/settings.service";
 import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
 import { DummyRouteComponent } from "./components/dummy-route.component";
+import { UserService } from "./services/user.service";
 
 /*
  * @description: Shared module should contain application global resources
@@ -64,7 +65,8 @@ import { DummyRouteComponent } from "./components/dummy-route.component";
     RouteService,
     AuthHttpClientService,
     SpreadsheetService,
-    SettingsService
+    SettingsService,
+    UserService
   ],
   exports: [
     BytesPipe,

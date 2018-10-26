@@ -1,5 +1,5 @@
 import { Dataset, Job, Tool } from "chipster-js-common";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import {
   Component,
   Input,

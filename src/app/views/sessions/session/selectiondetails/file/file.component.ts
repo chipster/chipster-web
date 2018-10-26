@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import { SelectionService } from "../../selection.service";
 import { Dataset } from "chipster-js-common";
 import { Job } from "chipster-js-common";
@@ -14,10 +14,14 @@ import * as _ from "lodash";
   styleUrls: ["./file.component.less"]
 })
 export class FileComponent {
-  @Input() dataset: Dataset;
-  @Input() private jobs: Map<string, Job>;
-  @Input() private sessionData: SessionData;
-  @Output() onDelete: EventEmitter<any> = new EventEmitter();
+  @Input()
+  dataset: Dataset;
+  @Input()
+  private jobs: Map<string, Job>;
+  @Input()
+  sessionData: SessionData;
+  @Output()
+  onDelete: EventEmitter<any> = new EventEmitter();
 
   constructor(
     public selectionService: SelectionService, // used in template

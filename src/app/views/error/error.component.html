@@ -4,7 +4,7 @@
     <p *ngIf="!error.msg"><strong>Something went wrong</strong></p>
 
     <div *ngIf="error.isForbidden()">Authentication failed
-      <button class="btn btn-sm btn-secondary" (click)="redirect()">Log in</button></div>
+      <button class="btn btn-sm btn-secondary" (click)="redirect()">Log In</button></div>
 
     <div *ngIf="error.isNotFound()">Not found</div>
 
@@ -13,6 +13,6 @@
 
     <div *ngIf="error.isDefault()">
       <button class="btn btn-sm btn-secondary" (click)="reload()">Reload page</button></div>
-      
+
   </ngb-alert>
 </div>

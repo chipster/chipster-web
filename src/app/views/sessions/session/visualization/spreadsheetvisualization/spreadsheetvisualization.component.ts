@@ -1,4 +1,4 @@
-import {SessionDataService} from "../../sessiondata.service";
+import {SessionDataService} from "../../session-data.service";
 import * as d3 from "d3";
 import {Input, Component, NgZone, OnDestroy, OnChanges} from "@angular/core";
 import TSVFile from "../../../../../model/tsv/TSVFile";

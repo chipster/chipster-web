@@ -1,23 +1,32 @@
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {Component, Input, AfterViewInit, ViewChild, OnChanges, OnInit} from "@angular/core";
-import {ActivatedRoute, Router, UrlTree} from "@angular/router";
-import {Store} from "@ngrx/store";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import {
+  Component,
+  Input,
+  AfterViewInit,
+  ViewChild,
+  OnChanges,
+  OnInit
+} from "@angular/core";
+import { ActivatedRoute, Router, UrlTree } from "@angular/router";
+import { Store } from "@ngrx/store";
 import { Session, Dataset, Rule } from "chipster-js-common";
 import { TokenService } from "../../../../../core/authentication/token.service";
-import { SessionDataService } from "../../sessiondata.service";
+import { SessionDataService } from "../../session-data.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionEventService } from "../../sessionevent.service";
 import { RouteService } from "../../../../../shared/services/route.service";
 
 @Component({
-  templateUrl: './sharingmodal.component.html'
+  templateUrl: "./sharingmodal.component.html"
 })
 export class SharingModalComponent implements AfterViewInit, OnInit {
+  @Input()
+  session: Session;
 
-  @Input() session: Session;
-
-  @ViewChild('submitButton') submitButton;
-  @ViewChild('usernameInput') usernameInput;
+  @ViewChild("submitButton")
+  submitButton;
+  @ViewChild("usernameInput")
+  usernameInput;
 
   public rules: Rule[];
   public newRule: Rule;
@@ -31,20 +40,26 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
     private sessionEventService: SessionEventService,
-    private routeService: RouteService) { }
+    private routeService: RouteService
+  ) {}
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.sessionEventService.getRuleStream()
-      .subscribe(() => {
-        this.rules = this.session.rules;
-      });
+    this.sessionEventService.getRuleStream().subscribe(() => {
+      this.rules = this.session.rules;
+    });
   }
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened
     // autofocus attribute would work only once when the component is created
-    this.submitButton.nativeElement.focus();
+    setTimeout(() => {
+      // needs setTimeout or the page scrolls to the bottom
+      // should be fixed in ng-bootstrap 3.3.0
+      // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
+      // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
+      this.submitButton.nativeElement.focus();
+    });
   }
 
   save() {
@@ -56,12 +71,13 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
   }
 
   saveRule() {
-    this.sessionDataService.createRule(this.newRule)
-      .subscribe(resp => {
+    this.sessionDataService.createRule(this.newRule).subscribe(
+      resp => {
         console.log(resp);
         this.newRule = null;
-
-      }, err => this.restErrorService.handleError(err, 'failed to add a new rule'));
+      },
+      err => this.restErrorService.handleError(err, "failed to add a new rule")
+    );
   }
 
   addNewRule() {
@@ -72,9 +88,13 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
   }
 
   deleteRule(ruleId: string) {
-    this.sessionDataService.deleteRule(ruleId)
-      .subscribe(resp => console.log('rule deleted'),
-        err => this.restErrorService.handleError(err, 'failed to delete the rule'));
+    this.sessionDataService
+      .deleteRule(ruleId)
+      .subscribe(
+        resp => console.log("rule deleted"),
+        err =>
+          this.restErrorService.handleError(err, "failed to delete the rule")
+      );
   }
 
   getUsername() {
