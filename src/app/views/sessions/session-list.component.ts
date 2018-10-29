@@ -48,7 +48,9 @@ export class SessionListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.updateSessions();
+    this.updateSessions().subscribe(null, (error: any) => {
+      this.errorHandlerService.handleError(error, "Updating sessions failed");
+    });
 
     this.previewThrottleSubscription = this.previewThrottle$
       .asObservable()
@@ -114,51 +116,45 @@ export class SessionListComponent implements OnInit {
       });
   }
 
-  updateSessions() {
-    this.sessionResource.getSessions().subscribe(
-      (sessions: Session[]) => {
-        const sessionsByUser = new Map();
-        // show user's own sessions first
-        sessionsByUser.set(null, []);
+  updateSessions(): Observable<Map<string, Array<Session>>> {
+    return this.sessionResource.getSessions().map((sessions: Session[]) => {
+      const sessionsByUser = new Map<string, Array<Session>>();
 
-        sessions.forEach(s => {
-          this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
-            if (!sessionsByUser.has(rule.sharedBy)) {
-              sessionsByUser.set(rule.sharedBy, []);
-            }
-            // show each session only once in each list, otherwise example_session_owner will see duplicates
-            if (
-              sessionsByUser
-                .get(rule.sharedBy)
-                .map(s2 => s2.sessionId)
-                .indexOf(s.sessionId) === -1
-            ) {
-              sessionsByUser.get(rule.sharedBy).push(s);
-            }
-          });
-        });
+      // show user's own sessions first
+      sessionsByUser.set(null, []);
 
-        this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
-
-        // sort sessions by name
-        this.sessionsByUserKeys.forEach((user: string) => {
-          sessionsByUser.set(
-            user,
+      sessions.forEach(s => {
+        this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
+          if (!sessionsByUser.has(rule.sharedBy)) {
+            sessionsByUser.set(rule.sharedBy, []);
+          }
+          // show each session only once in each list, otherwise example_session_owner will see duplicates
+          if (
             sessionsByUser
-              .get(user)
-              .sort((s1: Session, s2: Session) =>
-                s1.name.localeCompare(s2.name)
-              )
-          );
+              .get(rule.sharedBy)
+              .map(s2 => s2.sessionId)
+              .indexOf(s.sessionId) === -1
+          ) {
+            sessionsByUser.get(rule.sharedBy).push(s);
+          }
         });
+      });
 
-        this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
-        this.sessionsByUser = sessionsByUser;
-      },
-      (error: any) => {
-        this.errorHandlerService.handleError(error, "Loading sessions failed");
-      }
-    );
+      this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
+      // sort sessions by name
+      this.sessionsByUserKeys.forEach((user: string) => {
+        sessionsByUser.set(
+          user,
+          sessionsByUser
+            .get(user)
+            .sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name))
+        );
+      });
+
+      this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
+      this.sessionsByUser = sessionsByUser;
+      return sessionsByUser;
+    });
   }
 
   onSessionClick(session: Session) {
@@ -183,7 +179,9 @@ export class SessionListComponent implements OnInit {
     if (sessionIds.length === 1) {
       this.openSession(sessionIds[0]);
     } else {
-      this.updateSessions();
+      this.updateSessions().subscribe(null, (error: any) => {
+        this.errorHandlerService.handleError(error, "Updating sessions failed");
+      });
     }
   }
 
@@ -220,9 +218,19 @@ export class SessionListComponent implements OnInit {
           // delete the session only from this user (i.e. the rule)
           this.sessionDataService.deletePersonalRules(session).subscribe(
             () => {
-              this.updateSessions();
-              this.selectedSession = null;
-              this.deletingSessions.delete(session);
+              this.updateSessions()
+                .finally(() => {
+                  if (this.selectedSession === session) {
+                    this.selectedSession = null;
+                  }
+                  this.deletingSessions.delete(session);
+                })
+                .subscribe(null, (error: any) => {
+                  this.errorHandlerService.handleError(
+                    error,
+                    "Updating sessions failed"
+                  );
+                });
             },
             (error: any) => {
               this.deletingSessions.delete(session);
@@ -335,7 +343,12 @@ export class SessionListComponent implements OnInit {
       .subscribe(
         () => {
           log.info("updating sessions after duplicate");
-          this.updateSessions();
+          this.updateSessions().subscribe(null, (error: any) => {
+            this.errorHandlerService.handleError(
+              error,
+              "Updating sessions failed"
+            );
+          });
         },
         err =>
           this.restErrorService.handleError(err, "Duplicate session failed")
