@@ -28,7 +28,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   @Input() divWidth: any;
 
   private fileSizeLimit = 10 * 1024;
-  private lineCount: number;
+  public lineCount: number;
   readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
   private unsubscribe: Subject<any> = new Subject();
