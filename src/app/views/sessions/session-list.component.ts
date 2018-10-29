@@ -313,7 +313,11 @@ export class SessionListComponent implements OnInit {
 
     let duplicateName; // ugly
     this.dialogModalService
-      .openSessionNameModal("Duplicate session", session.name + "_copy")
+      .openSessionNameModal(
+        "Duplicate session",
+        session.name + "_copy",
+        "Duplicate"
+      )
       .flatMap(name => {
         duplicateName = name;
         // use sessionData from preview if available
