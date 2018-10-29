@@ -1,0 +1,15 @@
+<div id="cont" class="scrolling-wrapper">
+  <div *ngIf="state.isReady(); else statusTemplate">
+    <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label>
+    <label *ngIf="isCompleteFile()">Showing all {{lineCount}} rows</label>
+    <ch-link-button *ngIf="!isCompleteFile()" (click)="showAll()" class="pull-right">Show all</ch-link-button>
+  </div>
+
+  <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->
+  <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+
+  <ng-template #statusTemplate>
+    <ch-status [state]="state"></ch-status>
+  </ng-template>
+
+</div>
