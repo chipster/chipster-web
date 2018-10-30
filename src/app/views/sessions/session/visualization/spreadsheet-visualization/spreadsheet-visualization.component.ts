@@ -170,7 +170,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   getSettings(headers: string[], content: string[][], container) {
     const tableHeight = this.modalMode
       ? container.style.height
-      : content.length * 23 + 50; // extra for header-row and borders
+      : content.length * 23 + 30; // extra for header-row and borders
     const tableWidth = this.modalMode
       ? null
       : this.spreadsheetService.guessWidth(headers, content);
@@ -187,7 +187,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
       renderAllRows: false,
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
-      width: tableWidth
+      width: tableWidth,
+      wordWrap: false
     };
   }
 }
