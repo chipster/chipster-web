@@ -18,7 +18,8 @@ import { VisualizationModalService } from "./visualizationmodal.service";
 export class VisualizationsComponent implements OnInit, OnDestroy {
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
 
-  @Input() private sessionData: SessionData;
+  @Input()
+  sessionData: SessionData;
 
   active: string; // id of the active vis tab
   visualizations: Array<any> = visualizations;
@@ -29,7 +30,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   private compatibleVisualizations = new Set<string>();
 
   constructor(
-    private selectionService: SelectionService,
+    public selectionService: SelectionService, // used in template
     private store: Store<any>,
     private typeTagService: TypeTagService,
     private visualizationModalService: VisualizationModalService
