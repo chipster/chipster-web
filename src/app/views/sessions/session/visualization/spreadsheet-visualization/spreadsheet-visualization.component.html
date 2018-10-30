@@ -1,15 +1,21 @@
-<div id="cont" class="scrolling-wrapper">
-  <div *ngIf="state.isReady(); else statusTemplate">
-    <label *ngIf="!isCompleteFile()">Showing first {{lineCount}} rows</label>
-    <label *ngIf="isCompleteFile()">Showing all {{lineCount}} rows</label>
-    <ch-link-button *ngIf="!isCompleteFile()" (click)="showAll()" class="pull-right">Show all</ch-link-button>
-  </div>
-
-  <!-- tableContainer needs to be around or new Handsontable fails, so no ngIf for it -->
-  <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
-
-  <ng-template #statusTemplate>
-    <ch-status [state]="state"></ch-status>
-  </ng-template>
+<div *ngIf="state.isReady(); else statusTemplate">
+  <label style="font-size: smaller;" *ngIf="!fullFileVisible">First {{lineCount}} rows. <span style=" font-style: italic">View
+      in <span class="btn-link" (click)="showAll()">full screen
+      </span> to see all the rows. </span></label>
+  <label style="font-size: smaller;" *ngIf="fullFileVisible">{{lineCount}} rows</label>
+  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
 
 </div>
+
+<!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
+
+<!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->
+<div *ngIf="!modalMode" class="horizontal-scroll">
+  <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+</div>
+
+<div *ngIf="modalMode" id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+
+<ng-template #statusTemplate>
+  <ch-status [state]="state"></ch-status>
+</ng-template>

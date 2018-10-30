@@ -15,7 +15,6 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { LoadState, State } from "../../../../../model/loadstate";
 import { Subject } from "rxjs/Subject";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
-import { log } from "util";
 
 @Component({
   selector: "ch-spreadsheet-visualization",
@@ -26,7 +25,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   @Input()
   dataset: Dataset;
   @Input()
-  showFullData: boolean;
+  modalMode: boolean;
   @Input()
   sessionData: SessionData;
   @Input()
@@ -34,6 +33,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
   private fileSizeLimit = 10 * 1024;
   public lineCount: number;
+  public fullFileVisible;
   readonly tableContainerId: string =
     "tableContainer-" +
     Math.random()
@@ -64,7 +64,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     // remove old table
     this.destroyHot();
 
-    const maxBytes = this.showFullData ? null : this.fileSizeLimit;
+    const maxBytes = this.modalMode ? null : this.fileSizeLimit;
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
@@ -86,9 +86,13 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
 
           // if not full file, remove the last, possibly incomplete line
           // could be the only line, will then show first 0 lines instead of a truncated first line
-          if (!this.isCompleteFile() && result.length >= this.fileSizeLimit) {
+          if (result.length < this.dataset.size) {
+            this.fullFileVisible = false;
             parsedTSV.pop();
+          } else {
+            this.fullFileVisible = true;
           }
+
           this.lineCount = parsedTSV.length;
 
           // type-service gives the column titles for some file types
@@ -155,10 +159,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     }
   }
 
-  isCompleteFile() {
-    return this.showFullData;
-  }
-
   showAll() {
     this.visualizationModalService.openVisualizationModal(
       this.dataset,
@@ -168,10 +168,10 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   getSettings(headers: string[], content: string[][], container) {
-    const tableHeight = this.showFullData
+    const tableHeight = this.modalMode
       ? container.style.height
       : content.length * 23 + 50; // extra for header-row and borders
-    const tableWidth = this.showFullData
+    const tableWidth = this.modalMode
       ? null
       : this.spreadsheetService.guessWidth(headers, content);
 
