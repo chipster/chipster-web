@@ -72,7 +72,6 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const fixedMaxBytes = maxBytes--;
     if (isReqArrayBuffer) {
       return apiUrl$.flatMap((url: string) =>
         this.restService.get(
