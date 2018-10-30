@@ -28,7 +28,7 @@
   </ngb-tab>
 
   <ngb-tab id="{{getTabId('expressionprofile')}}" *ngIf="isTabVisible('expressionprofile')">
-    <ng-template ngbTabTitle>Expression profile</ng-template>
+    <ng-template ngbTabTitle>Expression Profile</ng-template>
     <ng-template ngbTabContent>
       <div class="visualization-panel">
         <ch-expression-profile *ngIf="active === getTabId('expressionprofile')" [dataset]="selectionService.selectedDatasets[0]">
