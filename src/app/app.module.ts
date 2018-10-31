@@ -30,6 +30,8 @@ import { toolSelection } from "./state/selected-tool.reducer";
 import { latestSession } from "./state/latest-session.reducer";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { RoutingModule } from "./core/routing/routing.module";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { ToastrModule } from "ngx-toastr";
 
 @NgModule({
   imports: [
@@ -50,6 +52,12 @@ import { RoutingModule } from "./core/routing/routing.module";
     }),
     SharedModule,
     RoutingModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      preventDuplicates: true,
+      resetTimeoutOnDuplicate: true,
+      timeOut: 1500
+    }),
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here
   ],

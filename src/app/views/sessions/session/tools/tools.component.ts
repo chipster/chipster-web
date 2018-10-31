@@ -23,6 +23,7 @@ import UtilsService from "../../../../shared/utilities/utils";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 import { DOCUMENT } from "@angular/common";
 import { HotkeysService, Hotkey } from "angular2-hotkeys";
+import { ToastrService } from "ngx-toastr";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -80,6 +81,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     public toolService: ToolService,
     private modalService: NgbModal,
     private hotkeysService: HotkeysService,
+    private toastrService: ToastrService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
@@ -209,6 +211,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob() {
     this.jobService.runJob(this.toolSelection);
+    this.toastrService.info("Job submitted", "");
   }
 
   setBindings(updatedBindings: InputBinding[]) {
