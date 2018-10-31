@@ -201,6 +201,19 @@ export class SessionResource {
       .map((response: any) => response.datasetId);
   }
 
+  createDatasets(sessionId: string, datasets: Dataset[]): Observable<Dataset[]> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$
+      .flatMap((url: string) =>
+        this.restService.post(
+          `${url}/sessions/${sessionId}/datasets/array`,
+          datasets,
+          true
+        )
+      )
+      .map((response: any) => response.datasets);
+  }
+
   createJob(sessionId: string, job: Job): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$
@@ -208,6 +221,15 @@ export class SessionResource {
         this.restService.post(`${url}/sessions/${sessionId}/jobs`, job, true)
       )
       .map((response: any) => response.jobId);
+  }
+
+  createJobs(sessionId: string, jobs: Job[]): Observable<Job[]> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$
+      .flatMap((url: string) =>
+        this.restService.post(`${url}/sessions/${sessionId}/jobs/array`, jobs, true)
+      )
+      .map((response: any) => response.jobs);
   }
 
   createRule(sessionId: string, rule: Rule): Observable<string> {
@@ -270,6 +292,17 @@ export class SessionResource {
       this.restService.put(
         `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
         dataset,
+        true
+      )
+    );
+  }
+
+  updateDatasets(sessionId: string, datasets: Dataset[]) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap((url: string) =>
+      this.restService.put(
+        `${url}/sessions/${sessionId}/datasets/array`,
+        datasets,
         true
       )
     );
@@ -345,39 +378,59 @@ export class SessionResource {
         const createRequests: Array<Observable<string>> = [];
 
         // create datasets
-        sessionData.datasetsMap.forEach((dataset: Dataset) => {
-          const datasetCopy = _.clone(dataset);
-          datasetCopy.datasetId = null;
-          const request = this.createDataset(createdSessionId, datasetCopy).do(
-            (newId: string) => {
-              datasetIdMap.set(dataset.datasetId, newId);
-            }
-          );
-          createRequests.push(request);
-        });
+        // sessionData.datasetsMap.forEach((dataset: Dataset) => {
+        //   const datasetCopy = _.clone(dataset);
+        //   datasetCopy.datasetId = null;
+        //   const request = this.createDataset(createdSessionId, datasetCopy).do(
+        //     (newId: string) => {
+        //       datasetIdMap.set(dataset.datasetId, newId);
+        //     }
+        //   );
+        //   createRequests.push(request);
+        // });
 
-        // emit and empty array if the forkJoin completes without emitting anything
+        // create datasets
+        const oldDatasets = Array.from(sessionData.datasetsMap.values());
+        const clones = oldDatasets.map((dataset: Dataset) => {
+            const clone = _.clone(dataset);
+            clone.datasetId = null;
+            return clone;
+          });
+
+        const request = this.createDatasets(createdSessionId, clones).do(
+          (newIds: Dataset[]) => {
+            for (let i = 0; i < oldDatasets.length; i++) {
+              datasetIdMap.set(oldDatasets[i].datasetId, newIds[i].datasetId);
+            }
+          });
+        createRequests.push(request);
+
+        // emit an empty array if the forkJoin completes without emitting anything
         // otherwise this won't continue to the next flatMap() when the session is empty
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
       })
       .flatMap(() => {
-        const createRequests: Array<Observable<string>> = [];
+        const createRequests: Array<Observable<any>> = [];
 
         // create jobs
-        sessionData.jobsMap.forEach((oldJob: Job) => {
+        const oldJobs = Array.from(sessionData.jobsMap.values());
+        const jobCopies = oldJobs.map((oldJob: Job) => {
           const jobCopy = _.clone(oldJob);
           jobCopy.jobId = null;
           // SessionDb requires valid datasetIds
           jobCopy.inputs.forEach(input => {
             input.datasetId = datasetIdMap.get(input.datasetId);
           });
-          const request = this.createJob(createdSessionId, jobCopy).do(
-            (newId: string) => {
-              jobIdMap.set(oldJob.jobId, newId);
-            }
-          );
-          createRequests.push(request);
+          return jobCopy;
         });
+
+        const request = this.createJobs(createdSessionId, jobCopies).do(
+          (newIds: Job[]) => {
+            for (let i = 0; i < newIds.length; i++) {
+              jobIdMap.set(oldJobs[i].jobId, newIds[i].jobId);
+            }
+           });
+         createRequests.push(request);
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
@@ -386,17 +439,18 @@ export class SessionResource {
         const updateRequests: Array<Observable<string>> = [];
 
         // // update datasets' sourceJob id
-        sessionData.datasetsMap.forEach((oldDataset: Dataset) => {
-          const sourceJobId = oldDataset.sourceJob;
-          if (sourceJobId) {
+        const updatedDatasets = Array.from(sessionData.datasetsMap.values())
+          .filter((d: Dataset) => d.sourceJob != null)
+          .map((oldDataset: Dataset) => {
+            const sourceJobId = oldDataset.sourceJob;
             const datasetCopy = _.clone(oldDataset);
             datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
             datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-            updateRequests.push(
-              this.updateDataset(createdSessionId, datasetCopy)
-            );
-          }
-        });
+            return datasetCopy;
+          });
+
+          updateRequests.push(this.updateDatasets(createdSessionId, updatedDatasets));
+
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...updateRequests).defaultIfEmpty([]);
