@@ -375,7 +375,7 @@ export class SessionResource {
       .flatMap((sessionId: string) => {
         createdSessionId = sessionId;
 
-        const createRequests: Array<Observable<string>> = [];
+        const createRequests: Array<Observable<any>> = [];
 
         // create datasets
         // sessionData.datasetsMap.forEach((dataset: Dataset) => {
