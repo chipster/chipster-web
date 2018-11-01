@@ -1,0 +1,10 @@
+// These are here because when having directly in the angular.json
+// the bootstrap stuff didn't seem to get loaded before ngx-toaster --> errors.
+// https://github.com/scttcper/ngx-toastr/issues/318
+
+// needed by toastr.scss
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+@import "~ngx-toastr/toastr-bs4-alert.scss";
