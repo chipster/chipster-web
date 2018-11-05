@@ -82,6 +82,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // var shiftKey, ctrlKey;
   scrollerDiv: any;
   zoomGroup: any;
+  toolTipDiv: any;
 
   d3DatasetNodesGroup: any;
   d3LinksGroup: any;
@@ -146,7 +147,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
     this.scrollerDiv.on("mousewheel", () => {
-      this.removeDatasetNodeToolTips();
+      // this.removeDatasetNodeToolTips();
       const scroll = this.scrollerDiv.node();
       const event = d3.event;
 
@@ -253,12 +254,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.removeDatasetNodeToolTips();
     this.subscriptions.forEach(subs => subs.unsubscribe());
     this.subscriptions = [];
   }
 
   zoomIn() {
-    this.removeDatasetNodeToolTips();
+    // this.removeDatasetNodeToolTips();
     this.applyZoom((1 + this.zoomStepFactor) * this.zoomScale);
   }
 
@@ -307,6 +309,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     if (this.zoomScale && this.zoomScale === limitedTargetScale) {
       return;
     }
+
     // zoom
     this.zoomGroup.attr(
       "transform",
@@ -314,7 +317,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     this.zoomScale = limitedTargetScale;
+    this.onZoom(limitedTargetScale);
     const oldZoomScale = this.zoomScale;
+
+    // this.enables might be dealing with the scrolling, need to fix something here for find file tooltips
 
     if (this.enabled) {
       // calculate oldzoom / newZoom factor for adjusting scrolling
@@ -471,6 +477,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .merge(this.d3DatasetNodes)
       .attr("x", d => d.x)
       .attr("y", d => d.y)
+      .attr("id", function(d) {
+        return "node_" + d.datasetId;
+      })
       .attr("rx", this.nodeRadius)
       .attr("ry", this.nodeRadius)
       .attr("width", this.nodeWidth)
@@ -529,7 +538,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const selection = d3.select(this).node();
       self.createTooltipById(selection, d, i);
     });
-   // this.setToolTipText();
+    // this.setToolTipText();
     this.d3DatasetNodes.each(function(d, i) {
       if (self.searchEnabled) {
         self.showToolTipId(d, i);
@@ -840,6 +849,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showTooltip(element: any, dataset: any, delay = 200) {
     const datasetLeft = element.getBoundingClientRect().left;
+    console.log(datasetLeft);
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
@@ -890,6 +900,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetToolTipArray[id] = tooltip;
     this.datasetToolTipArray[id].datasetId = dataset.datasetId;
     this.datasetToolTipArray[id].datasetName = dataset.name;
+
+    // try to append scrolling
     this.datasetToolTipArray[id].dataNodeToolTip = d3
       .select("body")
       .append("div")
@@ -904,9 +916,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .height;
 
     if (dataset) {
-      this.datasetToolTipArray[id].dataNodeToolTip.html(
-        dataset.name.split(".")[0]
-      );
+      this.datasetToolTipArray[id].dataNodeToolTip.html(dataset.name);
     }
     this.datasetToolTipArray[id].dataNodeToolTip
       .style("left", datasetLeft - 5 + "px")
@@ -924,7 +934,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
       if (
         this.datasetToolTipArray[i].datasetId !==
-        this.datasetToolTipArray[k].datasetId && this.filter.has(this.datasetToolTipArray[k].datasetId)
+          this.datasetToolTipArray[k].datasetId &&
+        this.filter.has(this.datasetToolTipArray[k].datasetId)
       ) {
         const rectB = document
           .getElementById(this.datasetToolTipArray[k].datasetId)
@@ -957,6 +968,47 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const elements = document.getElementsByClassName("dataset-node-tooltip");
     while (elements.length > 0) {
       elements[0].parentNode.removeChild(elements[0]);
+    }
+  }
+
+  onZoom(zoomfactor: number) {
+    for (let i = 0; i < this.datasetToolTipArray.length; i++) {
+      if ( this.filter && this.filter.has(this.datasetToolTipArray[i].datasetId)) {
+        let datasetLeft, datasetTop;
+        const element = document.getElementById(
+          "node_" + this.datasetToolTipArray[i].datasetId
+        );
+        if (element) {
+          datasetLeft = element.getBoundingClientRect().left;
+          datasetTop = element.getBoundingClientRect().top;
+          console.log("after zooming" + datasetTop);
+        }
+        const curToolTip = document.getElementById(
+          this.datasetToolTipArray[i].datasetId
+        );
+        if (curToolTip) {
+          const tooltipLeft = curToolTip.getBoundingClientRect().left;
+          const tooltipTop = curToolTip.getBoundingClientRect().top;
+          console.log("tooltiptop" + tooltipTop);
+          const deltaX = datasetLeft - tooltipLeft - 5;
+          const deltaY = datasetTop - tooltipTop  - 5;
+          console.log("deltaY" + deltaY);
+          curToolTip.style.transform =
+            "scale(" +
+            zoomfactor +
+            ")" +
+            "translate(" +
+            deltaX +
+            "px, " +
+            deltaY +
+            "px" +
+            ")";
+            console.log(document.getElementById(
+              this.datasetToolTipArray[i].datasetId
+            ).getBoundingClientRect().top);
+
+        }
+      }
     }
   }
 }
