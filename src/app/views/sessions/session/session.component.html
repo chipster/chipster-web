@@ -10,8 +10,8 @@
     <split-area [size]="split1Size" class="split-1 d-flex flex-column">
 
       <!-- workflow and files -->
-      <ch-session-panel [sessionData]="sessionData" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()" (deleteStart)="deleteDatasetsLater()"
-        class="d-flex flex-column flex-grow-1"></ch-session-panel>
+      <ch-session-panel [sessionData]="sessionData" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()"
+        (deleteStart)="deleteDatasetsLater()" class="d-flex flex-column flex-grow-1"></ch-session-panel>
 
     </split-area>
 
@@ -28,11 +28,17 @@
 
         <div class="row">
           <div class="col">
+            <!-- TODO refactor logic choosing whether to show job or file or session info -->
+
             <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData">
             </ch-job>
 
-            <ch-file *ngIf="selectionService.selectedDatasets.length > 0" [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap"
-              [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
+            <ch-session-details *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)" [session]="sessionData.session"
+              [sessionData]="sessionData">
+            </ch-session-details>
+
+            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)" [dataset]="selectionService.selectedDatasets[0]"
+              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
           </div>
         </div>
       </div>
