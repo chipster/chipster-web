@@ -1,14 +1,6 @@
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  ViewChild,
-  OnChanges,
-  OnInit
-} from "@angular/core";
+import { Component, Input, ViewChild, OnChanges, OnInit } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
@@ -18,15 +10,20 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
   styleUrls: ["./single-dataset.component.less"]
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
-  @Input() dataset: Dataset;
-  @Input() private jobs: Map<string, Job>;
-  @Input() private sessionData: SessionData;
-  @Input() parametersLimit: number;
+  @Input()
+  dataset: Dataset;
+  @Input()
+  private jobs: Map<string, Job>;
+  @Input()
+  private sessionData: SessionData;
+  @Input()
+  parametersLimit: number;
 
-  @ViewChild("notesInput") notesArea;
+  @ViewChild("notesInput")
+  notesArea;
 
   sourceJob: Job;
-  private tool: Tool;
+  tool: Tool;
   toolCategory: string;
   toolName: string;
 
