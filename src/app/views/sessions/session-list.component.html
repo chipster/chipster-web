@@ -129,6 +129,12 @@
             <tr>
               <td class="lighter pr-2">Created:</td>
               <td style="width: 100%">{{selectedSession.created | localDate}}</td>
+            </tr>
+            <tr>
+              <td class="lighter">Size:</td>
+              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes: 0}}</td>
+              <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
+
               <!-- <td class="lighter">Last opened:</td>
               <td>{{selectedSession.accessed | localDate}}</td> -->
             </tr>

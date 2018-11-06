@@ -27,6 +27,7 @@ export class SessionListComponent implements OnInit {
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
+  public sessionSize: number;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
 
@@ -74,6 +75,9 @@ export class SessionListComponent implements OnInit {
           this.selectedSession.sessionId === fullSession.session.sessionId
         ) {
           this.sessionData = fullSession;
+          this.sessionSize = this.sessionDataService.getSessionSize(
+            this.sessionData
+          );
         }
       })
       // hide the spinner when unsubscribed (when the user has opened a session)
@@ -197,6 +201,7 @@ export class SessionListComponent implements OnInit {
         // hide the old session immediately
         this.previousSession = session;
         this.sessionData = null;
+        this.sessionSize = null;
         this.previewThrottle$.next(session);
       }
     }
