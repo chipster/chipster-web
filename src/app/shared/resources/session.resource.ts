@@ -1,6 +1,6 @@
 import { ConfigService } from "../services/config.service";
 import { ToolResource } from "./toolresource";
-import { Session, Dataset, Module, Tool, Job, Rule } from "chipster-js-common";
+import { Session, Dataset, Module, Job, Rule } from "chipster-js-common";
 import * as _ from "lodash";
 import UtilsService from "../utilities/utils";
 import { Injectable } from "@angular/core";
@@ -36,9 +36,6 @@ export class SessionResource {
         const modules$ = this.toolResource
           .getModules()
           .do((x: any) => log.debug("modules", x));
-        const tools$ = this.toolResource
-          .getTools()
-          .do((x: any) => log.debug("tools", x));
         const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
           log.debug("types", x)
         );
@@ -49,7 +46,6 @@ export class SessionResource {
           sessionDatasets$,
           sessionJobs$,
           modules$,
-          tools$,
           types$
         ]);
       })
@@ -58,8 +54,7 @@ export class SessionResource {
         const datasets: Dataset[] = param[1];
         const jobs: Job[] = param[2];
         let modules: Module[] = param[3];
-        const tools: Tool[] = param[4];
-        const types = param[5];
+        const types = param[4];
 
         const data = new SessionData();
 
@@ -73,7 +68,6 @@ export class SessionResource {
         );
 
         data.modules = modules;
-        data.tools = tools;
 
         // build maps for modules and categories
 
@@ -201,7 +195,10 @@ export class SessionResource {
       .map((response: any) => response.datasetId);
   }
 
-  createDatasets(sessionId: string, datasets: Dataset[]): Observable<Dataset[]> {
+  createDatasets(
+    sessionId: string,
+    datasets: Dataset[]
+  ): Observable<Dataset[]> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$
       .flatMap((url: string) =>
@@ -227,7 +224,11 @@ export class SessionResource {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$
       .flatMap((url: string) =>
-        this.restService.post(`${url}/sessions/${sessionId}/jobs/array`, jobs, true)
+        this.restService.post(
+          `${url}/sessions/${sessionId}/jobs/array`,
+          jobs,
+          true
+        )
       )
       .map((response: any) => response.jobs);
   }
@@ -392,17 +393,18 @@ export class SessionResource {
         // create datasets
         const oldDatasets = Array.from(sessionData.datasetsMap.values());
         const clones = oldDatasets.map((dataset: Dataset) => {
-            const clone = _.clone(dataset);
-            clone.datasetId = null;
-            return clone;
-          });
+          const clone = _.clone(dataset);
+          clone.datasetId = null;
+          return clone;
+        });
 
         const request = this.createDatasets(createdSessionId, clones).do(
           (newIds: Dataset[]) => {
             for (let i = 0; i < oldDatasets.length; i++) {
               datasetIdMap.set(oldDatasets[i].datasetId, newIds[i].datasetId);
             }
-          });
+          }
+        );
         createRequests.push(request);
 
         // emit an empty array if the forkJoin completes without emitting anything
@@ -429,8 +431,9 @@ export class SessionResource {
             for (let i = 0; i < newIds.length; i++) {
               jobIdMap.set(oldJobs[i].jobId, newIds[i].jobId);
             }
-           });
-         createRequests.push(request);
+          }
+        );
+        createRequests.push(request);
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
@@ -449,8 +452,9 @@ export class SessionResource {
             return datasetCopy;
           });
 
-          updateRequests.push(this.updateDatasets(createdSessionId, updatedDatasets));
-
+        updateRequests.push(
+          this.updateDatasets(createdSessionId, updatedDatasets)
+        );
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...updateRequests).defaultIfEmpty([]);

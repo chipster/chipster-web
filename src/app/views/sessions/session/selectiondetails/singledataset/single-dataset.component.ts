@@ -17,6 +17,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()
   private sessionData: SessionData;
   @Input()
+  private tools: Tool[];
+  @Input()
   parametersLimit: number;
 
   @ViewChild("notesInput")
@@ -70,9 +72,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   getUsedToolFromToolset() {
     if (this.sourceJob) {
-      this.tool = this.sessionData.tools.find(
-        t => t.name.id === this.sourceJob.toolId
-      );
+      this.tool = this.tools.find(t => t.name.id === this.sourceJob.toolId);
 
       if (!this.tool) {
         console.log("No Tool found with this ID", this.sourceJob.toolId);

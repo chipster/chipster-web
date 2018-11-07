@@ -56,9 +56,6 @@
     </span>
   </div>
 
-  <!-- <ch-single-dataset *ngIf="selectionService.selectedDatasets.length === 1" [dataset]="selectionService.selectedDatasets[0]"
-    [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [parametersLimit]="3"></ch-single-dataset>
-   -->
   <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="onDelete.emit()"></ch-dataset-details>
-  <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" [sessionData]="sessionData"></ch-visualizations>
+  <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
 </div>

@@ -1,7 +1,7 @@
-<div *ngIf="!sessionData" class="container-fluid">
+<div *ngIf="!loadingDone" class="container-fluid">
   <p>{{statusText}}</p>
 </div>
-<div *ngIf="sessionData" class="session-view container-fluid">
+<div *ngIf="loadingDone" class="session-view container-fluid">
 
   <split>
 
@@ -21,7 +21,7 @@
 
         <div class="row">
           <div class="col">
-            <ch-tools [sessionData]="sessionData"></ch-tools>
+            <ch-tools [sessionData]="sessionData" [toolsArray]="tools"></ch-tools>
           </div>
         </div>
 
@@ -37,13 +37,13 @@
             </ch-session-details>
 
             <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)" [dataset]="selectionService.selectedDatasets[0]"
-              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" (onDelete)="deleteDatasetsLater()"></ch-file>
+              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools" (delete)="deleteDatasetsLater()"></ch-file>
           </div>
         </div>
       </div>
 
       <ng-template #selectionPanel>
-        <ch-selection-panel [sessionData]="sessionData"></ch-selection-panel>
+        <ch-selection-panel [sessionData]="sessionData" [tools]="tools"></ch-selection-panel>
       </ng-template>
 
     </split-area>
@@ -53,13 +53,10 @@
     <split-area *ngIf="split3Visible" [size]="split3Size" class="split-3 scrollable">
       <div class="row">
         <div class="col">
-          <!-- <ch-tools [sessionData]="sessionData"></ch-tools> -->
-          <ch-tool-list-accordion [sessionData]="sessionData "></ch-tool-list-accordion>
+          <ch-tool-list-accordion [sessionData]="sessionData" [toolsArray]="tools"></ch-tool-list-accordion>
         </div>
       </div>
     </split-area>
-
-
 
   </split>
 </div>

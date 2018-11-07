@@ -1,5 +1,5 @@
 import { SelectionService } from "../selection.service";
-import { Dataset } from "chipster-js-common";
+import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import visualizations from "./visualization-constants";
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
@@ -20,6 +20,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   @Input()
   sessionData: SessionData;
+  @Input()
+  tools: Tool[];
 
   active: string; // id of the active vis tab
   visualizations: Array<any> = visualizations;

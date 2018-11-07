@@ -137,7 +137,8 @@
       <span class="glyphicon glyphicon-th"></span> Details</ng-template>
     <ng-template ngbTabContent>
       <div class="visualization-panel">
-        <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
+        <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData"
+          [tools]="tools">
         </ch-details-visualization>
       </div>
     </ng-template>

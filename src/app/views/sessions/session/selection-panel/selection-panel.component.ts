@@ -1,24 +1,9 @@
 import { SessionDataService } from "../session-data.service";
-import { Dataset } from "chipster-js-common";
-import UtilsService from "../../../../shared/utilities/utils";
+import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnDestroy
-} from "@angular/core";
-import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
-import { SelectionHandlerService } from "../selection-handler.service";
+import { Component, Input, OnInit, OnDestroy } from "@angular/core";
 import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
-import { Observable } from "rxjs/Observable";
-import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
-import { DialogModalService } from "../dialogmodal/dialogmodal.service";
-import { SessionResource } from "../../../../shared/resources/session.resource";
-import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
 import { ToolSelectionService } from "../tool.selection.service";
 import { Subject } from "rxjs/Subject";
 import { ToolSelection } from "../tools/ToolSelection";
@@ -31,7 +16,10 @@ import { SettingsService } from "../../../../shared/services/settings.service";
   styleUrls: ["./selection-panel.component.less"]
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
-  @Input() sessionData: SessionData;
+  @Input()
+  sessionData: SessionData;
+  @Input()
+  tools: Tool[];
 
   public toolSelection: ToolSelection;
   public selectedDatasets: Array<Dataset>;
@@ -96,5 +84,9 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next();
     this.unsubscribe.complete();
+  }
+
+  deleteDatasetsLater() {
+    this.sessionDataService.deleteDatasetsLater(this.sessionData);
   }
 }

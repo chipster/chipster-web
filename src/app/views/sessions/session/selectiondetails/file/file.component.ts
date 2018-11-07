@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { SessionDataService } from "../../session-data.service";
 import { SelectionService } from "../../selection.service";
-import { Dataset } from "chipster-js-common";
+import { Dataset, Tool } from "chipster-js-common";
 import { Job } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetModalService } from "../datasetmodal.service";
@@ -20,8 +20,11 @@ export class FileComponent {
   private jobs: Map<string, Job>;
   @Input()
   sessionData: SessionData;
+  @Input()
+  tools: Tool[];
+
   @Output()
-  onDelete: EventEmitter<any> = new EventEmitter();
+  delete: EventEmitter<any> = new EventEmitter();
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -42,7 +45,7 @@ export class FileComponent {
   }
 
   deleteDatasets() {
-    this.onDelete.emit();
+    this.delete.emit();
   }
 
   exportDatasets() {
