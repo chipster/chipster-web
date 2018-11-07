@@ -211,7 +211,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob() {
     this.jobService.runJob(this.toolSelection);
-    this.toastrService.info("Job submitted", "");
+    this.toastrService.info("Job started", "");
   }
 
   setBindings(updatedBindings: InputBinding[]) {
