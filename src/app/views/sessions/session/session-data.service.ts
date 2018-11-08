@@ -327,9 +327,14 @@ export class SessionDataService {
   }
 
   getSessionSize(sessionData: SessionData): number {
-    return this.getDatasetList(sessionData)
-      .map((dataset: Dataset) => dataset.size)
-      .reduce((total, current) => total + current, 0);
+    const datasetList = this.getDatasetList(sessionData);
+    if (datasetList.length > 0) {
+      return this.getDatasetList(sessionData)
+        .map((dataset: Dataset) => dataset.size)
+        .reduce((total, current) => total + current, 0);
+    } else {
+      return 0; // return 0 when no datasets
+    }
   }
 
   /*
