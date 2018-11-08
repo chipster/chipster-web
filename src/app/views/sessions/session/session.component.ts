@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { Dataset, Job, Rule, Tool } from "chipster-js-common";
+import { Dataset, Job, Rule, Tool, Module } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
