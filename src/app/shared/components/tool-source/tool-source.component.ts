@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { Tool } from "chipster-js-common";
-import { ToolResource } from "../../resources/toolresource";
+import { ToolResource } from "../../resources/tool-resource";
 
 @Component({
   selector: "ch-tool-source",
@@ -9,7 +9,8 @@ import { ToolResource } from "../../resources/toolresource";
 })
 export class ToolSourceComponent implements OnInit {
   source: string;
-  @Input() selectedTool: Tool;
+  @Input()
+  selectedTool: Tool;
 
   constructor(private toolResource: ToolResource) {}
 

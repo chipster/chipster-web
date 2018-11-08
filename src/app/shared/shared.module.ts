@@ -13,7 +13,7 @@ import { CategoryPipe } from "./pipes/categorypipe.pipe";
 import { TSVReader } from "./services/TSVReader";
 import { ConfigurationResource } from "./resources/configurationresource";
 import { CoreModule } from "../core/core.module";
-import { ToolResource } from "./resources/toolresource";
+import { ToolResource } from "./resources/tool-resource";
 import { SessionWorkerResource } from "./resources/sessionworker.resource";
 import { FileResource } from "./resources/fileresource";
 import { SessionResource } from "./resources/session.resource";

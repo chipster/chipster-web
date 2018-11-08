@@ -1,5 +1,5 @@
 import { ConfigService } from "../services/config.service";
-import { ToolResource } from "./toolresource";
+import { ToolResource } from "./tool-resource";
 import { Session, Dataset, Module, Job, Rule } from "chipster-js-common";
 import * as _ from "lodash";
 import UtilsService from "../utilities/utils";
