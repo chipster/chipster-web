@@ -9,7 +9,7 @@
     <split-area [size]="split1Size" class="split-1 d-flex flex-column">
 
       <!-- workflow and files -->
-      <ch-session-panel [sessionData]="sessionData" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()"
+      <ch-session-panel [sessionData]="sessionData" [modulesMap]="modulesMap" (deleteDatasetsNow)="deleteDatasetsNow()" (deleteDatasetsUndo)="deleteDatasetsUndo()"
         (deleteStart)="deleteDatasetsLater()" class="d-flex flex-column flex-grow-1"></ch-session-panel>
 
     </split-area>
@@ -21,7 +21,7 @@
 
         <div class="row">
           <div class="col">
-            <ch-tools [sessionData]="sessionData" [toolsArray]="tools"></ch-tools>
+            <ch-tools [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules" [modulesMap]="modulesMap"></ch-tools>
           </div>
         </div>
 
@@ -53,7 +53,7 @@
     <split-area *ngIf="split3Visible" [size]="split3Size" class="split-3 scrollable">
       <div class="row">
         <div class="col">
-          <ch-tool-list-accordion [sessionData]="sessionData" [toolsArray]="tools"></ch-tool-list-accordion>
+          <ch-tool-list-accordion [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules"></ch-tool-list-accordion>
         </div>
       </div>
     </split-area>

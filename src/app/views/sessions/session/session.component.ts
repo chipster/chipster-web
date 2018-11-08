@@ -31,6 +31,8 @@ import { forkJoin } from "rxjs";
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;
   tools: Tool[];
+  modules: Module[];
+  modulesMap: Map<string, Module>;
   deletedDatasetsTimeout: any;
   loadingDone = false;
   statusText: string;
@@ -76,14 +78,18 @@ export class SessionComponent implements OnInit, OnDestroy {
 
         const sessionData$ = this.getSessionData(params["sessionId"]);
         const tools$ = this.toolsService.getTools();
+        const modules$ = this.toolsService.getModules();
+        const modulesMap$ = this.toolsService.getModulesMap();
 
-        return forkJoin(sessionData$, tools$);
+        return forkJoin(sessionData$, tools$, modules$, modulesMap$);
       })
       .subscribe(
         results => {
           // save loaded stuff
           this.sessionData = results[0];
           this.tools = results[1];
+          this.modules = results[2];
+          this.modulesMap = results[3];
 
           // save latest session id
           log.info(

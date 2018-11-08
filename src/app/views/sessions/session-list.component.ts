@@ -7,11 +7,12 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
-import { Session } from "chipster-js-common";
-import { Observable } from "rxjs";
+import { Session, Module } from "chipster-js-common";
+import { Observable, forkJoin } from "rxjs";
 import { SessionService } from "./session/session.service";
 import log from "loglevel";
 import { SessionEventService } from "./session/sessionevent.service";
+import { ToolsService } from "../../shared/services/tools.service";
 
 @Component({
   selector: "ch-session-list",
@@ -27,6 +28,7 @@ export class SessionListComponent implements OnInit {
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
+  public modulesMap: Map<string, Module>;
   public sessionSize: number;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
@@ -45,7 +47,8 @@ export class SessionListComponent implements OnInit {
     private sessionService: SessionService,
     private routeService: RouteService,
     private restErrorService: RestErrorService,
-    private sessionEventService: SessionEventService
+    private sessionEventService: SessionEventService,
+    private toolsService: ToolsService
   ) {}
 
   ngOnInit() {
@@ -64,17 +67,23 @@ export class SessionListComponent implements OnInit {
       .debounceTime(500)
       .filter(() => this.selectedSession !== null)
       .flatMap(session => {
-        return this.sessionResource.loadSession(session.sessionId);
+        return forkJoin(
+          this.sessionResource.loadSession(session.sessionId),
+          this.toolsService.getModulesMap()
+        );
       })
-      .do((fullSession: SessionData) => {
+      .do(results => {
+        const sData = results[0];
+        this.modulesMap = results[1];
+
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
           this.selectedSession &&
-          fullSession.session &&
-          this.selectedSession.sessionId === fullSession.session.sessionId
+          sData.session &&
+          this.selectedSession.sessionId === sData.session.sessionId
         ) {
-          this.sessionData = fullSession;
+          this.sessionData = sData;
           this.sessionSize = this.sessionDataService.getSessionSize(
             this.sessionData
           );

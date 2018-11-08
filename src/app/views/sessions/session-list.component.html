@@ -119,8 +119,8 @@
               data in this session.</div>
 
             <div class="workflow-graph-panel" *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap && sessionData.datasetsMap.size > 0">
-              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap " [jobsMap]="sessionData.jobsMap " [modulesMap]="sessionData.modulesMap "
-                [defaultScale]="0.5 " [enabled]="false "></ch-workflow-graph>
+              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap" [modulesMap]="modulesMap" [defaultScale]="0.5 "
+                [enabled]="false "></ch-workflow-graph>
             </div>
           </div>
 

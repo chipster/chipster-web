@@ -1,5 +1,5 @@
 import { SessionDataService } from "../session-data.service";
-import { Dataset } from "chipster-js-common";
+import { Dataset, Module } from "chipster-js-common";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";
 import { Component, Input, Output, EventEmitter } from "@angular/core";
@@ -18,6 +18,9 @@ import { RestErrorService } from "../../../../core/errorhandler/rest-error.servi
 export class SessionPanelComponent {
   @Input()
   sessionData: SessionData;
+  @Input()
+  modulesMap: Map<string, Module>;
+
   @Output()
   deleteDatasetsNow = new EventEmitter<void>();
   @Output()

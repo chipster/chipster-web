@@ -51,6 +51,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @Input()
   private toolsArray: Tool[]; // stupid name, but tools used for internal copy
 
+  @Input()
+  private modulesArray: Module[]; // stupid name, but modules used for internal copy
+
+  @Input()
+  private modulesMap: Map<string, Module>;
+
   @ViewChild("searchBox")
   searchBox;
 
@@ -94,7 +100,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // TODO why the copies?
     this.tools = _.cloneDeep(this.toolsArray);
-    this.modules = _.cloneDeep(this.sessionData.modules);
+    this.modules = _.cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
     // subscribe to tool selection
@@ -301,7 +307,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const module = this.sessionData.modulesMap.get(item.moduleId);
+    const module = this.modulesMap.get(item.moduleId);
     this.selectModule(module);
     this.selectCategory(module.categoriesMap.get(item.category));
     this.selectTool(item.tool);
