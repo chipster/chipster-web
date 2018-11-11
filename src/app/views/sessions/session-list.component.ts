@@ -284,22 +284,22 @@ export class SessionListComponent implements OnInit {
   }
 
   rename(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.openRenameModalAndUpdate(session);
   }
 
   notes(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.openNotesModalAndUpdate(session);
   }
 
   download(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.downloadSession(session.sessionId);
   }
 
   share(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     // HORRIBLE HACK to deal with stateful SessionEventService which
     // needs sessionData at the moment
@@ -323,7 +323,7 @@ export class SessionListComponent implements OnInit {
   }
 
   duplicate(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     let duplicateName; // ugly
     this.dialogModalService
