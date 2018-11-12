@@ -1,6 +1,6 @@
 import { ConfigService } from "../services/config.service";
-import { ToolResource } from "./toolresource";
-import { Session, Dataset, Module, Job, Rule } from "chipster-js-common";
+import { ToolResource } from "./tool-resource";
+import { Session, Dataset, Job, Rule } from "chipster-js-common";
 import * as _ from "lodash";
 import UtilsService from "../utilities/utils";
 import { Injectable } from "@angular/core";
@@ -18,11 +18,8 @@ export class SessionResource {
   ) {}
 
   loadSession(sessionId: string): Observable<SessionData> {
-    let enabledModules;
     return this.configService
-      .getModules()
-      .do(m => (enabledModules = m))
-      .flatMap(() => this.configService.getSessionDbUrl())
+      .getSessionDbUrl()
       .flatMap((url: string) => {
         const session$ = this.restService
           .get(`${url}/sessions/${sessionId}`, true)
@@ -33,9 +30,6 @@ export class SessionResource {
         const sessionJobs$ = this.restService
           .get(`${url}/sessions/${sessionId}/jobs`, true)
           .do((x: any) => log.debug("sessionJobs", x));
-        const modules$ = this.toolResource
-          .getModules()
-          .do((x: any) => log.debug("modules", x));
         const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
           log.debug("types", x)
         );
@@ -45,7 +39,6 @@ export class SessionResource {
           session$,
           sessionDatasets$,
           sessionJobs$,
-          modules$,
           types$
         ]);
       })
@@ -53,38 +46,13 @@ export class SessionResource {
         const session: Session = param[0];
         const datasets: Dataset[] = param[1];
         const jobs: Job[] = param[2];
-        let modules: Module[] = param[3];
-        const types = param[4];
+        const types = param[3];
 
         const data = new SessionData();
 
         data.session = session;
         data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
-
-        // show only configured modules
-        modules = modules.filter(
-          (module: Module) => enabledModules.indexOf(module.name) >= 0
-        );
-
-        data.modules = modules;
-
-        // build maps for modules and categories
-
-        // generate moduleIds
-        modules.map((module: any) => {
-          module.moduleId = module.name.toLowerCase();
-          return module;
-        });
-
-        data.modulesMap = UtilsService.arrayToMap(modules, "moduleId");
-
-        data.modulesMap.forEach((module: any) => {
-          module.categoriesMap = UtilsService.arrayToMap(
-            module.categories,
-            "name"
-          );
-        });
 
         data.datasetTypeTags = types;
 

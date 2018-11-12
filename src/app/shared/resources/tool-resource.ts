@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 import { RestService } from "../../core/rest-services/restservice/rest.service";
 import { ResponseContentType } from "@angular/http";
-import { Tool } from "chipster-js-common";
+import { Tool, Module } from "chipster-js-common";
 
 @Injectable()
 export class ToolResource {
@@ -12,7 +12,7 @@ export class ToolResource {
     private restService: RestService
   ) {}
 
-  getModules(): Observable<any> {
+  getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
     return apiUrl$.flatMap((apiUrl: string) =>
       this.restService.get(`${apiUrl}/modules`)

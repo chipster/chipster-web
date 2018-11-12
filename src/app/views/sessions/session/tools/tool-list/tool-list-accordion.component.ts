@@ -29,6 +29,9 @@ export class ToolListAccordionComponent implements OnInit {
   @Input()
   private toolsArray: Tool[];
   @Input()
+  private modulesArray: Module[];
+
+  @Input()
   private toolSelection: ToolSelection;
 
   @Output()
@@ -53,8 +56,9 @@ export class ToolListAccordionComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // TODO why copies?
     this.tools = _.cloneDeep(this.toolsArray);
-    this.modules = _.cloneDeep(this.sessionData.modules);
+    this.modules = _.cloneDeep(this.modulesArray);
 
     // trigger parameter validation
     if (this.toolSelection) {
