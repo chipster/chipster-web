@@ -379,32 +379,14 @@ export class SessionResource {
         const createRequests: Array<Observable<any>> = [];
 
         // create datasets
-        // sessionData.datasetsMap.forEach((dataset: Dataset) => {
-        //   const datasetCopy = _.clone(dataset);
-        //   datasetCopy.datasetId = null;
-        //   const request = this.createDataset(createdSessionId, datasetCopy).do(
-        //     (newId: string) => {
-        //       datasetIdMap.set(dataset.datasetId, newId);
-        //     }
-        //   );
-        //   createRequests.push(request);
-        // });
-
-        // create datasets
         const oldDatasets = Array.from(sessionData.datasetsMap.values());
         const clones = oldDatasets.map((dataset: Dataset) => {
           const clone = _.clone(dataset);
-          clone.datasetId = null;
+          clone.sessionId = null;
           return clone;
         });
 
-        const request = this.createDatasets(createdSessionId, clones).do(
-          (newIds: Dataset[]) => {
-            for (let i = 0; i < oldDatasets.length; i++) {
-              datasetIdMap.set(oldDatasets[i].datasetId, newIds[i].datasetId);
-            }
-          }
-        );
+        const request = this.createDatasets(createdSessionId, clones);
         createRequests.push(request);
 
         // emit an empty array if the forkJoin completes without emitting anything
@@ -418,46 +400,15 @@ export class SessionResource {
         const oldJobs = Array.from(sessionData.jobsMap.values());
         const jobCopies = oldJobs.map((oldJob: Job) => {
           const jobCopy = _.clone(oldJob);
-          jobCopy.jobId = null;
-          // SessionDb requires valid datasetIds
-          jobCopy.inputs.forEach(input => {
-            input.datasetId = datasetIdMap.get(input.datasetId);
-          });
+          jobCopy.sessionId = null;
           return jobCopy;
         });
 
-        const request = this.createJobs(createdSessionId, jobCopies).do(
-          (newIds: Job[]) => {
-            for (let i = 0; i < newIds.length; i++) {
-              jobIdMap.set(oldJobs[i].jobId, newIds[i].jobId);
-            }
-          }
-        );
+        const request = this.createJobs(createdSessionId, jobCopies);
         createRequests.push(request);
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
-      })
-      .flatMap(() => {
-        const updateRequests: Array<Observable<string>> = [];
-
-        // // update datasets' sourceJob id
-        const updatedDatasets = Array.from(sessionData.datasetsMap.values())
-          .filter((d: Dataset) => d.sourceJob != null)
-          .map((oldDataset: Dataset) => {
-            const sourceJobId = oldDataset.sourceJob;
-            const datasetCopy = _.clone(oldDataset);
-            datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
-            datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-            return datasetCopy;
-          });
-
-        updateRequests.push(
-          this.updateDatasets(createdSessionId, updatedDatasets)
-        );
-
-        // see the comment of the forkJoin above
-        return Observable.forkJoin(...updateRequests).defaultIfEmpty([]);
       })
       .map(() => createdSessionId);
   }
