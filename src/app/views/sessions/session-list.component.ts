@@ -323,7 +323,7 @@ export class SessionListComponent implements OnInit {
   }
 
   duplicate(session: Session) {
-    event.stopImmediatePropagation();
+    event.stopPropagation();
 
     let duplicateName; // ugly
     this.dialogModalService
