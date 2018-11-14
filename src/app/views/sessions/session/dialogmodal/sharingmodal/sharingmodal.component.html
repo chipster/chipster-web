@@ -7,7 +7,7 @@
   <p>
     Your UserID is <strong>{{getUsername()}}</strong>. Give it to others that want
     to share sessions with you.
-  </p>  
+  </p>
 
   <h5>Access rules</h5>
 
@@ -15,39 +15,39 @@
 
   <table class="table">
     <thead>
-    <tr>
-      <th>UserID</th>
-      <th>Rights</th>
-      <th>Shared by</th>
-      <th>Role</th>
-      <th></th>
-    </tr>
+      <tr>
+        <th>UserID</th>
+        <th>Rights</th>
+        <th>Shared by</th>
+        <th>Role</th>
+        <th></th>
+      </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let rule of rules">
-      <th scope="row">{{rule.username}}</th>
-      <td>{{rule.readWrite ? 'read-write' : 'read-only' }}</td>
-      <td><span *ngIf="rule.sharedBy">{{rule.sharedBy}}</span></td>
-      <td><span *ngIf="!rule.sharedBy">owner</span></td>
-      <td>
-        <button *ngIf="isDeleteEnabled(rule)" class="btn btn-outline-dark btn-no-border" (click)="deleteRule(rule.ruleId)">
-            <span class="fa fa-times"></span>
-        </button>
-      </td>
-    </tr>
-    <tr *ngIf="newRule">
-      <th scope="row">
-        <input #usernameInput type="text" [(ngModel)]="newRule.username" (keyup.enter)="saveRule()">
-      </th>
-      <td>
-        <select [(ngModel)]="newRule.readWrite">
-          <option value="true">read-write</option>
-          <option value="false">read-only</option>
-        </select>
-      </td>
-      <td></td>
-      <td></td>
-    </tr>
+      <tr *ngFor="let rule of rules">
+        <th scope="row">{{rule.username}}</th>
+        <td>{{rule.readWrite ? 'read-write' : 'read-only' }}</td>
+        <td><span *ngIf="rule.sharedBy">{{rule.sharedBy}}</span></td>
+        <td><span *ngIf="!rule.sharedBy">owner</span></td>
+        <td>
+          <button *ngIf="isDeleteEnabled(rule)" class="btn btn-outline-dark btn-no-border" (click)="deleteRule(rule.ruleId)">
+            <span class="fas fa-times"></span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="newRule">
+        <th scope="row">
+          <input #usernameInput type="text" [(ngModel)]="newRule.username" (keyup.enter)="saveRule()">
+        </th>
+        <td>
+          <select [(ngModel)]="newRule.readWrite">
+            <option value="true">read-write</option>
+            <option value="false">read-only</option>
+          </select>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
     </tbody>
   </table>
 

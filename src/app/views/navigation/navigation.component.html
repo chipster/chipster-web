@@ -1,6 +1,7 @@
 <nav *ngIf="appNameReady" class="navbar navbar-expand-sm navbar-light bg-light">
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-expanded="false"
+    aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -28,7 +29,7 @@
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li class="nav-item">
         <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active">
-          <i class="fa fa-exclamation-triangle"></i>
+          <i class="fas fa-exclamation-triangle"></i>
           Service in limited use!
         </a>
       </li>
@@ -37,8 +38,9 @@
     <ul class="navbar-nav">
 
       <li *ngIf="isLoggedIn()" class="nav-item dropdown">
-        <a class="nav-link" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-cog"></i>
+        <a class="nav-link" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false">
+          <i class="fas fa-cog"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
           <ch-settings></ch-settings>
@@ -46,7 +48,8 @@
       </li>
 
       <li class="nav-item">
-        <a *ngIf="isLoggedIn()" [routerLink]="routerLinkHome" (click)="logout()" class="nav-link">Logout {{username$ | async}}</a>
+        <a *ngIf="isLoggedIn()" [routerLink]="routerLinkHome" (click)="logout()" class="nav-link">Logout {{username$ |
+          async}}</a>
         <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Log In</a>
       </li>
     </ul>

@@ -1,21 +1,19 @@
-
-  <div class="row">
-    <div class="col col-md-9">
-      <div class="text-sm" style="text-align: center"><i>Click on job for details</i></div>
-    </div>
-    <div class="col col-md-3">
-      <button class="btn btn-small" style="float: right" (click)="closeDropDown()">
-        <i class="fa fa-window-close"></i></button>
-    </div>
+<div class="row">
+  <div class="col col-md-9">
+    <div class="text-sm" style="text-align: center"><i>Click on job for details</i></div>
   </div>
+  <div class="col col-md-3">
+    <button class="btn btn-small" style="float: right" (click)="closeDropDown()">
+      <i class="fas fa-window-close"></i></button>
+  </div>
+</div>
 
 <table class="table table-hover table-sm">
-  <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)"
-  [class.bg-primary]="selectionService.isSelectedJobById(job.jobId)"
-  [class.text-white]="selectionService.isSelectedJobById(job.jobId)">
+  <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)" [class.bg-primary]="selectionService.isSelectedJobById(job.jobId)"
+    [class.text-white]="selectionService.isSelectedJobById(job.jobId)">
     <td>{{job.toolName}}</td>
-    <td class="text-sm"
-      [ngClass]="(selectionService.isSelectedJobById(job.jobId)) ? 'text-light' : 'lighter'">{{job.created | localDate}} </td>
+    <td class="text-sm" [ngClass]="(selectionService.isSelectedJobById(job.jobId)) ? 'text-light' : 'lighter'">{{job.created
+      | localDate}} </td>
     <td>{{job.state}}</td>
   </tr>
 
