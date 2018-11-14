@@ -293,7 +293,6 @@ export class SessionComponent implements OnInit, OnDestroy {
       if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
         return Observable.of(sessionData);
       } else {
-        this.statusText = "Copying session...";
         return this.sessionResource
           .copySession(sessionData, sessionData.session.name)
           .flatMap(id => {
