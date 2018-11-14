@@ -172,6 +172,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.svg = this.scrollerDiv.append("svg");
     this.zoomGroup = this.svg.append("g");
 
+    // adding the tooltip div
+    this.toolTipDiv = this.scrollerDiv
+      .append("div")
+      .classed("dataset-tooltip-div", true);
+    this.toolTipDiv.id = "some_id";
+
     // order of these appends will determine the drawing order
     this.d3LinksGroup = this.zoomGroup
       .append("g")
@@ -260,12 +266,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   zoomIn() {
-    // this.removeDatasetNodeToolTips();
     this.applyZoom((1 + this.zoomStepFactor) * this.zoomScale);
   }
 
   zoomOut() {
-    this.removeDatasetNodeToolTips();
     this.applyZoom((1 - this.zoomStepFactor) * this.zoomScale);
   }
 
@@ -317,7 +321,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     this.zoomScale = limitedTargetScale;
-    this.onZoom(limitedTargetScale);
+    this.onZoomInandOut(); // for managing the dataset search tooltips after zoom 
     const oldZoomScale = this.zoomScale;
 
     // this.enables might be dealing with the scrolling, need to fix something here for find file tooltips
@@ -615,13 +619,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("y1", d => d.source.y + this.nodeHeight);
 
     this.d3Links
-      .filter(
-        d =>
-          d.target.dataset
-            ? this.selectionService.isSelectedDatasetById(
-                (<DatasetNode>d.target).dataset.datasetId
-              )
-            : false
+      .filter(d =>
+        d.target.dataset
+          ? this.selectionService.isSelectedDatasetById(
+              (<DatasetNode>d.target).dataset.datasetId
+            )
+          : false
       )
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
       .attr("y2", d => d.target.y);
@@ -902,8 +905,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetToolTipArray[id].datasetName = dataset.name;
 
     // try to append scrolling
-    this.datasetToolTipArray[id].dataNodeToolTip = d3
-      .select("body")
+    this.datasetToolTipArray[id].dataNodeToolTip = this.toolTipDiv
       .append("div")
       .attr("class", "dataset-node-tooltip")
       .attr("id", dataset.datasetId)
@@ -919,16 +921,28 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.datasetToolTipArray[id].dataNodeToolTip.html(dataset.name);
     }
     this.datasetToolTipArray[id].dataNodeToolTip
-      .style("left", datasetLeft - 5 + "px")
-      .style("top", datasetTop - tooltipHeight + 3 + "px");
+      .style(
+        "left",
+        datasetLeft - this.svg.node().getBoundingClientRect().left - 5 + "px"
+      )
+      .style(
+        "top",
+        datasetTop -
+          this.svg.node().getBoundingClientRect().top -
+          tooltipHeight +
+          5 +
+          "px"
+      );
   }
 
   showToolTipId(d, i) {
-    // Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
+    //  Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
 
     const curRect = document
       .getElementById(this.datasetToolTipArray[i].datasetId)
       .getBoundingClientRect();
+
+    console.log(curRect.top, curRect.left, curRect.right, curRect.bottom);
 
     // If the tooltip intersects with each other, show shorter name
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
@@ -950,14 +964,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
     // show the tooltip only if it contained inside the svg
-    if (
-      curRect.left + curRect.width < this.getParentSize().right - 20 &&
-      curRect.top < this.getParentSize().bottom - 20
-    ) {
-      this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", x =>
-        WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
-      );
-    }
+    this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", x =>
+      WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
+    );
   }
 
   hideToolTipById(d, i) {
@@ -971,9 +980,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onZoom(zoomfactor: number) {
+  onZoomInandOut() {
+    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
+      .height;
     for (let i = 0; i < this.datasetToolTipArray.length; i++) {
-      if ( this.filter && this.filter.has(this.datasetToolTipArray[i].datasetId)) {
+      if (
+        this.filter &&
+        this.filter.has(this.datasetToolTipArray[i].datasetId)
+      ) {
         let datasetLeft, datasetTop;
         const element = document.getElementById(
           "node_" + this.datasetToolTipArray[i].datasetId
@@ -981,32 +995,49 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (element) {
           datasetLeft = element.getBoundingClientRect().left;
           datasetTop = element.getBoundingClientRect().top;
-          console.log("after zooming" + datasetTop);
+          this.datasetToolTipArray[i].dataNodeToolTip
+            .style(
+              "left",
+              datasetLeft -
+                this.svg.node().getBoundingClientRect().left -
+                5 +
+                "px"
+            )
+            .style(
+              "top",
+              datasetTop -
+                this.svg.node().getBoundingClientRect().top -
+                tooltipHeight +
+                5 +
+                "px"
+            );
         }
-        const curToolTip = document.getElementById(
-          this.datasetToolTipArray[i].datasetId
+        this.datasetToolTipArray[i].dataNodeToolTip.html(
+          this.datasetToolTipArray[i].datasetName
         );
-        if (curToolTip) {
-          const tooltipLeft = curToolTip.getBoundingClientRect().left;
-          const tooltipTop = curToolTip.getBoundingClientRect().top;
-          console.log("tooltiptop" + tooltipTop);
-          const deltaX = datasetLeft - tooltipLeft - 5;
-          const deltaY = datasetTop - tooltipTop  - 5;
-          console.log("deltaY" + deltaY);
-          curToolTip.style.transform =
-            "scale(" +
-            zoomfactor +
-            ")" +
-            "translate(" +
-            deltaX +
-            "px, " +
-            deltaY +
-            "px" +
-            ")";
-            console.log(document.getElementById(
-              this.datasetToolTipArray[i].datasetId
-            ).getBoundingClientRect().top);
+      }
+      const curRect = document
+        .getElementById(this.datasetToolTipArray[i].datasetId)
+        .getBoundingClientRect();
 
+      // checking the name
+      for (let k = 0; k < this.datasetToolTipArray.length; k++) {
+        if (
+          this.datasetToolTipArray[i].datasetId !==
+            this.datasetToolTipArray[k].datasetId &&
+          this.filter.has(this.datasetToolTipArray[k].datasetId)
+        ) {
+          const rectB = document
+            .getElementById(this.datasetToolTipArray[k].datasetId)
+            .getBoundingClientRect();
+
+          if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
+            this.datasetToolTipArray[i].dataNodeToolTip.html(
+              this.datasetToolTipArray[i].datasetName
+                .split(".")[0]
+                .slice(0, 5) + "..."
+            );
+          }
         }
       }
     }
