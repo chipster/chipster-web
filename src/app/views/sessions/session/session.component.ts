@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { Dataset, Job, Rule } from "chipster-js-common";
+import { Dataset, Job, Rule, Tool, Module } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
@@ -20,6 +20,8 @@ import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";
 import { UserService } from "../../../shared/services/user.service";
 import { SessionService } from "./session.service";
+import { ToolsService } from "../../../shared/services/tools.service";
+import { forkJoin } from "rxjs";
 
 @Component({
   selector: "ch-session",
@@ -28,7 +30,11 @@ import { SessionService } from "./session.service";
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;
+  tools: Tool[];
+  modules: Module[];
+  modulesMap: Map<string, Module>;
   deletedDatasetsTimeout: any;
+  loadingDone = false;
   statusText: string;
 
   split3Visible = false;
@@ -53,7 +59,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     private routeService: RouteService,
     private settingsService: SettingsService,
-    private userService: UserService
+    private userService: UserService,
+    private toolsService: ToolsService
   ) {}
 
   ngOnInit() {
@@ -68,45 +75,41 @@ export class SessionComponent implements OnInit, OnDestroy {
         this.statusText = "Loading session...";
         this.selectionHandlerService.clearSelections();
         this.sessionData = null;
-        return this.sessionResource.loadSession(params["sessionId"]);
+
+        const sessionData$ = this.getSessionData(params["sessionId"]);
+        const tools$ = this.toolsService.getTools();
+        const modules$ = this.toolsService.getModules();
+        const modulesMap$ = this.toolsService.getModulesMap();
+
+        return forkJoin(sessionData$, tools$, modules$, modulesMap$);
       })
-      .flatMap(sessionData => {
-        if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
-          return Observable.of(sessionData);
-        } else {
-          this.statusText = "Copying session...";
-          return this.sessionResource
-            .copySession(sessionData, sessionData.session.name)
-            .flatMap(sessionId => {
-              const queryParams = {};
-              queryParams[this.PARAM_TEMP_COPY] = true;
-              return Observable.fromPromise(
-                this.routeService.navigateAbsolute("/analyze/" + sessionId, {
-                  queryParams: queryParams
-                })
-              );
-            })
-            .flatMap(() => Observable.never());
+      .subscribe(
+        results => {
+          // save loaded stuff
+          this.sessionData = results[0];
+          this.tools = results[1];
+          this.modules = results[2];
+          this.modulesMap = results[3];
+
+          // save latest session id
+          log.info(
+            "saving latest session id",
+            this.sessionData.session.sessionId
+          );
+          this.userService.updateLatestSession(
+            this.sessionData.session.sessionId
+          );
+
+          this.subscribeToEvents();
+
+          // ready to go
+          this.loadingDone = true;
+        },
+        (error: any) => {
+          this.statusText = "";
+          this.restErrorService.handleError(error, "Loading session failed");
         }
-      })
-      .do(sessionData => {
-        this.sessionData = sessionData;
-
-        // save latest session id
-        log.info(
-          "saving latest session id",
-          this.sessionData.session.sessionId
-        );
-        this.userService.updateLatestSession(
-          this.sessionData.session.sessionId
-        );
-
-        this.subscribeToEvents();
-      })
-      .subscribe(null, (error: any) => {
-        this.statusText = "";
-        this.restErrorService.handleError(error, "Loading session failed");
-      });
+      );
 
     // subscribe to view settings
     this.settingsService.showToolsPanel$
@@ -283,5 +286,27 @@ export class SessionComponent implements OnInit, OnDestroy {
     });
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.job = job;
+  }
+
+  private getSessionData(sessionId: string) {
+    return this.sessionResource.loadSession(sessionId).flatMap(sessionData => {
+      if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
+        return Observable.of(sessionData);
+      } else {
+        this.statusText = "Copying session...";
+        return this.sessionResource
+          .copySession(sessionData, sessionData.session.name)
+          .flatMap(id => {
+            const queryParams = {};
+            queryParams[this.PARAM_TEMP_COPY] = true;
+            return Observable.fromPromise(
+              this.routeService.navigateAbsolute("/analyze/" + id, {
+                queryParams: queryParams
+              })
+            );
+          })
+          .flatMap(() => Observable.never());
+      }
+    });
   }
 }

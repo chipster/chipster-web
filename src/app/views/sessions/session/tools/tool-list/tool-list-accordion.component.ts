@@ -24,12 +24,21 @@ import { ToolSelectionService } from "../../tool.selection.service";
   styleUrls: ["./tool-list-accordion.component.less"]
 })
 export class ToolListAccordionComponent implements OnInit {
-  @Input() private sessionData: SessionData;
-  @Input() private toolSelection: ToolSelection;
+  @Input()
+  private sessionData: SessionData;
+  @Input()
+  private toolsArray: Tool[];
+  @Input()
+  private modulesArray: Module[];
 
-  @Output() private selectToolOutput = new EventEmitter<ToolSelection>();
+  @Input()
+  private toolSelection: ToolSelection;
 
-  @ViewChild("searchBox") private searchBox: SearchBoxComponent;
+  @Output()
+  private selectToolOutput = new EventEmitter<ToolSelection>();
+
+  @ViewChild("searchBox")
+  private searchBox: SearchBoxComponent;
 
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
@@ -47,8 +56,9 @@ export class ToolListAccordionComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.tools = _.cloneDeep(this.sessionData.tools);
-    this.modules = _.cloneDeep(this.sessionData.modules);
+    // TODO why copies?
+    this.tools = _.cloneDeep(this.toolsArray);
+    this.modules = _.cloneDeep(this.modulesArray);
 
     // trigger parameter validation
     if (this.toolSelection) {

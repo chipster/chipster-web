@@ -1,14 +1,6 @@
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  ViewChild,
-  OnChanges,
-  OnInit
-} from "@angular/core";
+import { Component, Input, ViewChild, OnChanges, OnInit } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
@@ -18,15 +10,22 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
   styleUrls: ["./single-dataset.component.less"]
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
-  @Input() dataset: Dataset;
-  @Input() private jobs: Map<string, Job>;
-  @Input() private sessionData: SessionData;
-  @Input() parametersLimit: number;
+  @Input()
+  dataset: Dataset;
+  @Input()
+  private jobs: Map<string, Job>;
+  @Input()
+  private sessionData: SessionData;
+  @Input()
+  private tools: Tool[];
+  @Input()
+  parametersLimit: number;
 
-  @ViewChild("notesInput") notesArea;
+  @ViewChild("notesInput")
+  notesArea;
 
   sourceJob: Job;
-  private tool: Tool;
+  tool: Tool;
   toolCategory: string;
   toolName: string;
 
@@ -73,9 +72,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   getUsedToolFromToolset() {
     if (this.sourceJob) {
-      this.tool = this.sessionData.tools.find(
-        t => t.name.id === this.sourceJob.toolId
-      );
+      this.tool = this.tools.find(t => t.name.id === this.sourceJob.toolId);
 
       if (!this.tool) {
         console.log("No Tool found with this ID", this.sourceJob.toolId);

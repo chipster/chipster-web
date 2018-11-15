@@ -1,5 +1,5 @@
 import { SessionDataService } from "../session-data.service";
-import { Dataset } from "chipster-js-common";
+import { Dataset, Module } from "chipster-js-common";
 import UtilsService from "../../../../shared/utilities/utils";
 import { SessionData } from "../../../../model/session/session-data";
 import { Component, Input, Output, EventEmitter } from "@angular/core";
@@ -9,10 +9,6 @@ import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
-import { DialogModalService } from "../dialogmodal/dialogmodal.service";
-import { SessionResource } from "../../../../shared/resources/session.resource";
-import { SessionWorkerResource } from "../../../../shared/resources/sessionworker.resource";
-import { SessionService } from "../session.service";
 
 @Component({
   selector: "ch-session-panel",
@@ -22,6 +18,9 @@ import { SessionService } from "../session.service";
 export class SessionPanelComponent {
   @Input()
   sessionData: SessionData;
+  @Input()
+  modulesMap: Map<string, Module>;
+
   @Output()
   deleteDatasetsNow = new EventEmitter<void>();
   @Output()
@@ -34,14 +33,10 @@ export class SessionPanelComponent {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public sessionDataService: SessionDataService, // used by template
-    private sessionService: SessionService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private sessionResource: SessionResource,
-    private sessionWorkerResource: SessionWorkerResource
+    private restErrorService: RestErrorService
   ) {} // used by template
 
   search(value: any) {
@@ -50,40 +45,13 @@ export class SessionPanelComponent {
 
   searchEnter() {
     // select highlighted datasets when the enter key is pressed
-    const allDatasets = this.getDatasetList();
+    const allDatasets = this.sessionDataService.getDatasetList(
+      this.sessionData
+    );
     this.selectionHandlerService.setDatasetSelection(
       this.datasetsearchPipe.transform(allDatasets, this.datasetSearch)
     );
     this.datasetSearch = null;
-  }
-
-  getCompleteDatasets() {
-    /*
-    Filter out uploading datasets
-
-    Datasets are created when comp starts to upload them, but there are no type tags until the
-    upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
-    When those cannot be selected, those cannot cause problems in the visualization, which assumes that
-    the type tags are do exist.
-    */
-    // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
-    return new Map(
-      Array.from(this.sessionData.datasetsMap).filter(entry => {
-        const dataset = entry[1];
-        return dataset.fileId != null;
-      })
-    );
-  }
-
-  getDatasetList(): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets());
-  }
-
-  getDatasetListSorted(): Dataset[] {
-    // sort by created date, oldest first (string comparison should do with the current date format)
-    return this.getDatasetList().sort((a, b) =>
-      UtilsService.compareStringNullSafe(a.created, b.created)
-    );
   }
 
   toggleDatasetSelection($event: any, dataset: Dataset): void {
@@ -92,7 +60,9 @@ export class SessionPanelComponent {
       console.log([dataset]);
     } else if (UtilsService.isShiftKey($event)) {
       //  datasets and their ids in the order of the dataset list
-      const allDatasets = this.getDatasetListSorted();
+      const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(
+        this.sessionData
+      );
       const allIds = allDatasets.map(d => d.datasetId);
 
       // indexes of the old selection in the dataset list
@@ -127,73 +97,17 @@ export class SessionPanelComponent {
     );
   }
 
-  renameSessionModal() {
-    this.sessionService.openRenameModalAndUpdate(this.sessionData.session);
-  }
-
-  notesModal() {
-    this.sessionService.openNotesModalAndUpdate(this.sessionData.session);
-  }
-
-  sharingModal() {
-    this.dialogModalService.openSharingModal(this.sessionData.session);
-  }
-
-  duplicateModal() {
-    this.dialogModalService
-      .openSessionNameModal(
-        "Duplicate session",
-        this.sessionData.session.name + "_copy"
-      )
-      .flatMap(name => {
-        const copySessionObservable = this.sessionResource.copySession(
-          this.sessionData,
-          name
-        );
-        return this.dialogModalService.openSpinnerModal(
-          "Duplicate session",
-          copySessionObservable
-        );
-      })
-      .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Duplicate session failed")
-      );
-  }
-
-  downloadSession() {
-    this.sessionService.downloadSession(this.sessionDataService.getSessionId());
-  }
-
-  removeSessionModal() {
-    this.dialogModalService
-      .openBooleanModal(
-        "Delete session",
-        "Delete session " + this.sessionData.session.name + "?",
-        "Delete",
-        "Cancel"
-      )
-      .then(
-        () => {
-          // delete the session only from this user (i.e. the rule)
-          this.sessionDataService
-            .deletePersonalRules(this.sessionData.session)
-            .subscribe(
-              () => {},
-              err => {
-                this.restErrorService.handleError(
-                  err,
-                  "Failed to delete the session"
-                );
-              }
-            );
-        },
-        () => {
-          // modal dismissed
-        }
-      );
-  }
-
   deleteDataset() {
     this.deleteStart.emit();
+  }
+
+  getCompleteDatasets() {
+    return this.sessionDataService.getCompleteDatasets(this.sessionData);
+  }
+
+  getDatasetListSorted() {
+    return this.sessionDataService.getDatasetListSortedByCreated(
+      this.sessionData
+    );
   }
 }

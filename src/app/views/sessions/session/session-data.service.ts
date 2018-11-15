@@ -14,6 +14,7 @@ import { SelectionService } from "./selection.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "./selection-handler.service";
 import log from "loglevel";
+import UtilsService from "../../../shared/utilities/utils";
 
 @Injectable()
 export class SessionDataService {
@@ -323,5 +324,45 @@ export class SessionDataService {
     this.deletedDatasetsTimeout = setTimeout(() => {
       this.deleteDatasetsNow(sessionData);
     }, 10 * 1000);
+  }
+
+  getSessionSize(sessionData: SessionData): number {
+    const datasetList = this.getDatasetList(sessionData);
+    if (datasetList.length > 0) {
+      return this.getDatasetList(sessionData)
+        .map((dataset: Dataset) => dataset.size)
+        .reduce((total, current) => total + current, 0);
+    } else {
+      return 0; // return 0 when no datasets
+    }
+  }
+
+  /*
+    Filter out uploading datasets
+
+    Datasets are created when comp starts to upload them, but there are no type tags until the
+    upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
+    When those cannot be selected, those cannot cause problems in the visualization, which assumes that
+    the type tags are do exist.
+    */
+  getCompleteDatasets(sessionData: SessionData): Map<string, Dataset> {
+    // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
+    return new Map(
+      Array.from(sessionData.datasetsMap).filter(entry => {
+        const dataset = entry[1];
+        return dataset.fileId != null;
+      })
+    );
+  }
+
+  getDatasetList(sessionData: SessionData): Dataset[] {
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData));
+  }
+
+  getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {
+    // sort by created date, oldest first (string comparison should do with the current date format)
+    return this.getDatasetList(sessionData).sort((a, b) =>
+      UtilsService.compareStringNullSafe(a.created, b.created)
+    );
   }
 }

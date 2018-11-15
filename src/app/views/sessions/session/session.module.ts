@@ -22,6 +22,7 @@ import { AngularSplitModule } from "angular-split";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
 import { ImportSessionModalComponent } from "../open-session-file/import-session-modal.component";
 import { SessionService } from "./session.service";
+import { SessionDetailsComponent } from "./session-details/session-details.component";
 
 @NgModule({
   imports: [
@@ -41,7 +42,8 @@ import { SessionService } from "./session.service";
     OpenSessionFileComponent,
     JobErrorModalComponent,
     SelectionPanelComponent,
-    ImportSessionModalComponent
+    ImportSessionModalComponent,
+    SessionDetailsComponent
   ],
   providers: [
     SessionEventService,

@@ -7,11 +7,12 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
-import { Session } from "chipster-js-common";
-import { Observable } from "rxjs";
+import { Session, Module } from "chipster-js-common";
+import { Observable, forkJoin } from "rxjs";
 import { SessionService } from "./session/session.service";
 import log from "loglevel";
 import { SessionEventService } from "./session/sessionevent.service";
+import { ToolsService } from "../../shared/services/tools.service";
 
 @Component({
   selector: "ch-session-list",
@@ -27,6 +28,8 @@ export class SessionListComponent implements OnInit {
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
+  public modulesMap: Map<string, Module>;
+  public sessionSize: number;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
 
@@ -44,11 +47,14 @@ export class SessionListComponent implements OnInit {
     private sessionService: SessionService,
     private routeService: RouteService,
     private restErrorService: RestErrorService,
-    private sessionEventService: SessionEventService
+    private sessionEventService: SessionEventService,
+    private toolsService: ToolsService
   ) {}
 
   ngOnInit() {
-    this.updateSessions();
+    this.updateSessions().subscribe(null, (error: any) => {
+      this.errorHandlerService.handleError(error, "Updating sessions failed");
+    });
 
     this.previewThrottleSubscription = this.previewThrottle$
       .asObservable()
@@ -61,17 +67,26 @@ export class SessionListComponent implements OnInit {
       .debounceTime(500)
       .filter(() => this.selectedSession !== null)
       .flatMap(session => {
-        return this.sessionResource.loadSession(session.sessionId);
+        return forkJoin(
+          this.sessionResource.loadSession(session.sessionId),
+          this.toolsService.getModulesMap()
+        );
       })
-      .do((fullSession: SessionData) => {
+      .do(results => {
+        const sData = results[0];
+        this.modulesMap = results[1];
+
         this.workflowPreviewLoading = false;
         // don't show if the selection has already changed
         if (
           this.selectedSession &&
-          fullSession.session &&
-          this.selectedSession.sessionId === fullSession.session.sessionId
+          sData.session &&
+          this.selectedSession.sessionId === sData.session.sessionId
         ) {
-          this.sessionData = fullSession;
+          this.sessionData = sData;
+          this.sessionSize = this.sessionDataService.getSessionSize(
+            this.sessionData
+          );
         }
       })
       // hide the spinner when unsubscribed (when the user has opened a session)
@@ -114,51 +129,45 @@ export class SessionListComponent implements OnInit {
       });
   }
 
-  updateSessions() {
-    this.sessionResource.getSessions().subscribe(
-      (sessions: Session[]) => {
-        const sessionsByUser = new Map();
-        // show user's own sessions first
-        sessionsByUser.set(null, []);
+  updateSessions(): Observable<Map<string, Array<Session>>> {
+    return this.sessionResource.getSessions().map((sessions: Session[]) => {
+      const sessionsByUser = new Map<string, Array<Session>>();
 
-        sessions.forEach(s => {
-          this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
-            if (!sessionsByUser.has(rule.sharedBy)) {
-              sessionsByUser.set(rule.sharedBy, []);
-            }
-            // show each session only once in each list, otherwise example_session_owner will see duplicates
-            if (
-              sessionsByUser
-                .get(rule.sharedBy)
-                .map(s2 => s2.sessionId)
-                .indexOf(s.sessionId) === -1
-            ) {
-              sessionsByUser.get(rule.sharedBy).push(s);
-            }
-          });
-        });
+      // show user's own sessions first
+      sessionsByUser.set(null, []);
 
-        this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
-
-        // sort sessions by name
-        this.sessionsByUserKeys.forEach((user: string) => {
-          sessionsByUser.set(
-            user,
+      sessions.forEach(s => {
+        this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
+          if (!sessionsByUser.has(rule.sharedBy)) {
+            sessionsByUser.set(rule.sharedBy, []);
+          }
+          // show each session only once in each list, otherwise example_session_owner will see duplicates
+          if (
             sessionsByUser
-              .get(user)
-              .sort((s1: Session, s2: Session) =>
-                s1.name.localeCompare(s2.name)
-              )
-          );
+              .get(rule.sharedBy)
+              .map(s2 => s2.sessionId)
+              .indexOf(s.sessionId) === -1
+          ) {
+            sessionsByUser.get(rule.sharedBy).push(s);
+          }
         });
+      });
 
-        this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
-        this.sessionsByUser = sessionsByUser;
-      },
-      (error: any) => {
-        this.errorHandlerService.handleError(error, "Loading sessions failed");
-      }
-    );
+      this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
+      // sort sessions by name
+      this.sessionsByUserKeys.forEach((user: string) => {
+        sessionsByUser.set(
+          user,
+          sessionsByUser
+            .get(user)
+            .sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name))
+        );
+      });
+
+      this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
+      this.sessionsByUser = sessionsByUser;
+      return sessionsByUser;
+    });
   }
 
   onSessionClick(session: Session) {
@@ -183,7 +192,9 @@ export class SessionListComponent implements OnInit {
     if (sessionIds.length === 1) {
       this.openSession(sessionIds[0]);
     } else {
-      this.updateSessions();
+      this.updateSessions().subscribe(null, (error: any) => {
+        this.errorHandlerService.handleError(error, "Updating sessions failed");
+      });
     }
   }
 
@@ -199,6 +210,7 @@ export class SessionListComponent implements OnInit {
         // hide the old session immediately
         this.previousSession = session;
         this.sessionData = null;
+        this.sessionSize = null;
         this.previewThrottle$.next(session);
       }
     }
@@ -220,9 +232,19 @@ export class SessionListComponent implements OnInit {
           // delete the session only from this user (i.e. the rule)
           this.sessionDataService.deletePersonalRules(session).subscribe(
             () => {
-              this.updateSessions();
-              this.selectedSession = null;
-              this.deletingSessions.delete(session);
+              this.updateSessions()
+                .finally(() => {
+                  if (this.selectedSession === session) {
+                    this.selectedSession = null;
+                  }
+                  this.deletingSessions.delete(session);
+                })
+                .subscribe(null, (error: any) => {
+                  this.errorHandlerService.handleError(
+                    error,
+                    "Updating sessions failed"
+                  );
+                });
             },
             (error: any) => {
               this.deletingSessions.delete(session);
@@ -262,22 +284,22 @@ export class SessionListComponent implements OnInit {
   }
 
   rename(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.openRenameModalAndUpdate(session);
   }
 
   notes(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.openNotesModalAndUpdate(session);
   }
 
   download(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.sessionService.downloadSession(session.sessionId);
   }
 
   share(session: Session) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     // HORRIBLE HACK to deal with stateful SessionEventService which
     // needs sessionData at the moment
@@ -305,7 +327,11 @@ export class SessionListComponent implements OnInit {
 
     let duplicateName; // ugly
     this.dialogModalService
-      .openSessionNameModal("Duplicate session", session.name + "_copy")
+      .openSessionNameModal(
+        "Duplicate session",
+        session.name + "_copy",
+        "Duplicate"
+      )
       .flatMap(name => {
         duplicateName = name;
         // use sessionData from preview if available
@@ -335,7 +361,12 @@ export class SessionListComponent implements OnInit {
       .subscribe(
         () => {
           log.info("updating sessions after duplicate");
-          this.updateSessions();
+          this.updateSessions().subscribe(null, (error: any) => {
+            this.errorHandlerService.handleError(
+              error,
+              "Updating sessions failed"
+            );
+          });
         },
         err =>
           this.restErrorService.handleError(err, "Duplicate session failed")

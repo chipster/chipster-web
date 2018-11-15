@@ -23,6 +23,7 @@ import UtilsService from "../../../../shared/utilities/utils";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 import { DOCUMENT } from "@angular/common";
 import { HotkeysService, Hotkey } from "angular2-hotkeys";
+import { ToastrService } from "ngx-toastr";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -46,6 +47,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   @Input()
   public sessionData: SessionData;
+
+  @Input()
+  private toolsArray: Tool[]; // stupid name, but tools used for internal copy
+
+  @Input()
+  private modulesArray: Module[]; // stupid name, but modules used for internal copy
+
+  @Input()
+  private modulesMap: Map<string, Module>;
 
   @ViewChild("searchBox")
   searchBox;
@@ -80,6 +90,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     public toolService: ToolService,
     private modalService: NgbModal,
     private hotkeysService: HotkeysService,
+    private toastrService: ToastrService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
@@ -87,8 +98,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.tools = _.cloneDeep(this.sessionData.tools);
-    this.modules = _.cloneDeep(this.sessionData.modules);
+    // TODO why the copies?
+    this.tools = _.cloneDeep(this.toolsArray);
+    this.modules = _.cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
     // subscribe to tool selection
@@ -209,6 +221,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob() {
     this.jobService.runJob(this.toolSelection);
+    this.toastrService.info("Job started", "");
   }
 
   setBindings(updatedBindings: InputBinding[]) {
@@ -294,7 +307,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const module = this.sessionData.modulesMap.get(item.moduleId);
+    const module = this.modulesMap.get(item.moduleId);
     this.selectModule(module);
     this.selectCategory(module.categoriesMap.get(item.category));
     this.selectTool(item.tool);

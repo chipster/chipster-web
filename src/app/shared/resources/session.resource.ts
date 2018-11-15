@@ -1,6 +1,6 @@
 import { ConfigService } from "../services/config.service";
-import { ToolResource } from "./toolresource";
-import { Session, Dataset, Module, Tool, Job, Rule } from "chipster-js-common";
+import { ToolResource } from "./tool-resource";
+import { Session, Dataset, Job, Rule } from "chipster-js-common";
 import * as _ from "lodash";
 import UtilsService from "../utilities/utils";
 import { Injectable } from "@angular/core";
@@ -18,11 +18,8 @@ export class SessionResource {
   ) {}
 
   loadSession(sessionId: string): Observable<SessionData> {
-    let enabledModules;
     return this.configService
-      .getModules()
-      .do(m => (enabledModules = m))
-      .flatMap(() => this.configService.getSessionDbUrl())
+      .getSessionDbUrl()
       .flatMap((url: string) => {
         const session$ = this.restService
           .get(`${url}/sessions/${sessionId}`, true)
@@ -33,12 +30,6 @@ export class SessionResource {
         const sessionJobs$ = this.restService
           .get(`${url}/sessions/${sessionId}/jobs`, true)
           .do((x: any) => log.debug("sessionJobs", x));
-        const modules$ = this.toolResource
-          .getModules()
-          .do((x: any) => log.debug("modules", x));
-        const tools$ = this.toolResource
-          .getTools()
-          .do((x: any) => log.debug("tools", x));
         const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
           log.debug("types", x)
         );
@@ -48,8 +39,6 @@ export class SessionResource {
           session$,
           sessionDatasets$,
           sessionJobs$,
-          modules$,
-          tools$,
           types$
         ]);
       })
@@ -57,40 +46,13 @@ export class SessionResource {
         const session: Session = param[0];
         const datasets: Dataset[] = param[1];
         const jobs: Job[] = param[2];
-        let modules: Module[] = param[3];
-        const tools: Tool[] = param[4];
-        const types = param[5];
+        const types = param[3];
 
         const data = new SessionData();
 
         data.session = session;
         data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
-
-        // show only configured modules
-        modules = modules.filter(
-          (module: Module) => enabledModules.indexOf(module.name) >= 0
-        );
-
-        data.modules = modules;
-        data.tools = tools;
-
-        // build maps for modules and categories
-
-        // generate moduleIds
-        modules.map((module: any) => {
-          module.moduleId = module.name.toLowerCase();
-          return module;
-        });
-
-        data.modulesMap = UtilsService.arrayToMap(modules, "moduleId");
-
-        data.modulesMap.forEach((module: any) => {
-          module.categoriesMap = UtilsService.arrayToMap(
-            module.categories,
-            "name"
-          );
-        });
 
         data.datasetTypeTags = types;
 
@@ -201,6 +163,22 @@ export class SessionResource {
       .map((response: any) => response.datasetId);
   }
 
+  createDatasets(
+    sessionId: string,
+    datasets: Dataset[]
+  ): Observable<Dataset[]> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$
+      .flatMap((url: string) =>
+        this.restService.post(
+          `${url}/sessions/${sessionId}/datasets/array`,
+          datasets,
+          true
+        )
+      )
+      .map((response: any) => response.datasets);
+  }
+
   createJob(sessionId: string, job: Job): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$
@@ -208,6 +186,19 @@ export class SessionResource {
         this.restService.post(`${url}/sessions/${sessionId}/jobs`, job, true)
       )
       .map((response: any) => response.jobId);
+  }
+
+  createJobs(sessionId: string, jobs: Job[]): Observable<Job[]> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$
+      .flatMap((url: string) =>
+        this.restService.post(
+          `${url}/sessions/${sessionId}/jobs/array`,
+          jobs,
+          true
+        )
+      )
+      .map((response: any) => response.jobs);
   }
 
   createRule(sessionId: string, rule: Rule): Observable<string> {
@@ -270,6 +261,17 @@ export class SessionResource {
       this.restService.put(
         `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
         dataset,
+        true
+      )
+    );
+  }
+
+  updateDatasets(sessionId: string, datasets: Dataset[]) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap((url: string) =>
+      this.restService.put(
+        `${url}/sessions/${sessionId}/datasets/array`,
+        datasets,
         true
       )
     );
@@ -342,64 +344,39 @@ export class SessionResource {
       .flatMap((sessionId: string) => {
         createdSessionId = sessionId;
 
-        const createRequests: Array<Observable<string>> = [];
+        const createRequests: Array<Observable<any>> = [];
 
         // create datasets
-        sessionData.datasetsMap.forEach((dataset: Dataset) => {
-          const datasetCopy = _.clone(dataset);
-          datasetCopy.datasetId = null;
-          const request = this.createDataset(createdSessionId, datasetCopy).do(
-            (newId: string) => {
-              datasetIdMap.set(dataset.datasetId, newId);
-            }
-          );
-          createRequests.push(request);
+        const oldDatasets = Array.from(sessionData.datasetsMap.values());
+        const clones = oldDatasets.map((dataset: Dataset) => {
+          const clone = _.clone(dataset);
+          clone.sessionId = null;
+          return clone;
         });
 
-        // emit and empty array if the forkJoin completes without emitting anything
+        const request = this.createDatasets(createdSessionId, clones);
+        createRequests.push(request);
+
+        // emit an empty array if the forkJoin completes without emitting anything
         // otherwise this won't continue to the next flatMap() when the session is empty
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
       })
       .flatMap(() => {
-        const createRequests: Array<Observable<string>> = [];
+        const createRequests: Array<Observable<any>> = [];
 
         // create jobs
-        sessionData.jobsMap.forEach((oldJob: Job) => {
+        const oldJobs = Array.from(sessionData.jobsMap.values());
+        const jobCopies = oldJobs.map((oldJob: Job) => {
           const jobCopy = _.clone(oldJob);
-          jobCopy.jobId = null;
-          // SessionDb requires valid datasetIds
-          jobCopy.inputs.forEach(input => {
-            input.datasetId = datasetIdMap.get(input.datasetId);
-          });
-          const request = this.createJob(createdSessionId, jobCopy).do(
-            (newId: string) => {
-              jobIdMap.set(oldJob.jobId, newId);
-            }
-          );
-          createRequests.push(request);
+          jobCopy.sessionId = null;
+          return jobCopy;
         });
+
+        const request = this.createJobs(createdSessionId, jobCopies);
+        createRequests.push(request);
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
-      })
-      .flatMap(() => {
-        const updateRequests: Array<Observable<string>> = [];
-
-        // // update datasets' sourceJob id
-        sessionData.datasetsMap.forEach((oldDataset: Dataset) => {
-          const sourceJobId = oldDataset.sourceJob;
-          if (sourceJobId) {
-            const datasetCopy = _.clone(oldDataset);
-            datasetCopy.datasetId = datasetIdMap.get(oldDataset.datasetId);
-            datasetCopy.sourceJob = jobIdMap.get(sourceJobId);
-            updateRequests.push(
-              this.updateDataset(createdSessionId, datasetCopy)
-            );
-          }
-        });
-
-        // see the comment of the forkJoin above
-        return Observable.forkJoin(...updateRequests).defaultIfEmpty([]);
       })
       .map(() => createdSessionId);
   }

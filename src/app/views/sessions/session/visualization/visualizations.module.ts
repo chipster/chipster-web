@@ -9,7 +9,7 @@ import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { HtmlvisualizationComponent } from "./htmlvisualization/htmlvisualization.component";
 import { TextVisualizationComponent } from "./textvisualization/textvisualization.component";
-import { SpreadsheetVisualizationComponent } from "./spreadsheetvisualization/spreadsheetvisualization.component";
+import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
 import { ExpressionProfileComponent } from "./expressionprofile/expressionprofile.component";
 import { ImageVisualizationComponent } from "./imagevisualization/imagevisualization.component";
 import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
@@ -29,7 +29,6 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
 import { BamViewerComponent } from "./bamviewer/bamviewer.component";
 import { GenomeBrowserComponent } from "./genome-browser/genome-browser.component";
 import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
-import { DatasetModule } from "../selectiondetails/dataset.module";
 import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
 import { DatasetParameterListComponent } from "../selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 

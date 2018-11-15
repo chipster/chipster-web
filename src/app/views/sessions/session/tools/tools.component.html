@@ -1,13 +1,11 @@
-<h3 class="panel-title">
-  <span>Tools</span>
-</h3>
+<h3 class="panel-title"><span>Tools</span></h3>
 <div class="chipster-highlight mb-3">
-
   <div class="container-fluid">
     <div class="row mb-2">
-
       <!-- jobs dropdown panel -->
-      <!-- located here because needs full width parent to get size and position right, also here at the same -->
+      <!--
+        located here because needs full width parent to get size and position right, also here at the same
+      -->
       <!-- height as the controlling button -->
       <div ngbDropdown #jobsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="jobsDropdown" ngbDropdownToggle></button>
@@ -20,19 +18,25 @@
       <div class="col col-left">
         <div class="btn-group">
           <button type="button" class="btn btn-sm" (click)="selectModuleAndFirstCategoryAndFirstTool(module)" *ngFor="let module of modules"
-            [ngClass]="{'btn-primary':module.moduleId === selectedModule.moduleId,
-          'btn-light':module.moduleId !== selectedModule.moduleId}">{{module.name}}
+            [ngClass]="{
+              'btn-primary': module.moduleId === selectedModule.moduleId,
+              'btn-light': module.moduleId !== selectedModule.moduleId
+            }">
+            {{ module.name }}
           </button>
         </div>
       </div>
 
       <!-- search box -->
       <div class="col col-middle">
-        <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true" [searchFn]="filterTool"
-          [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found" (blur)="searchBoxBlur($event)">
+        <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true"
+          [searchFn]="filterTool" [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found"
+          (blur)="searchBoxBlur($event)">
           <ng-template ng-option-tmp let-item="item">
-            <div style="font-size: smaller">{{ item.moduleName }} - {{item.category}}</div>
-            <div style="font-weight: bolder">{{item.toolName}}</div>
+            <div style="font-size: smaller">
+              {{ item.moduleName }} - {{ item.category }}
+            </div>
+            <div style="font-weight: bolder">{{ item.toolName }}</div>
           </ng-template>
         </ng-select>
         <i style="padding-top: 0.5em; font-size: 110%;" class="fa fa-search lighter mr-2 float-right"></i>
@@ -40,18 +44,16 @@
 
       <!-- jobs button -->
       <div class="col col-right">
-        <button class="btn btn-sm btn-outline-secondary btn-no-border float-right" (click)="$event.stopPropagation(); jobsDropdown.toggle();"
+        <button class="btn btn-sm btn-outline-secondary btn-no-border float-right" (click)="$event.stopPropagation(); jobsDropdown.toggle()"
           title="Jobs">
           <i *ngIf="runningJobs < 1" class="fa fa-list-ul fa-fw"></i>
           <i *ngIf="runningJobs > 0" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-          Jobs
-          <span *ngIf="runningJobs > 0">{{runningJobs}}</span>
+          Jobs <span *ngIf="runningJobs > 0">{{ runningJobs }}</span>
         </button>
       </div>
     </div>
 
-
-    <!-- tool list column titles-->
+    <!-- tool list column titles -->
     <div class="row">
       <div class="col col-left">
         <h4 class="h4-xs lighter">Category</h4>
@@ -62,25 +64,18 @@
       <div class="col col-right"></div>
     </div>
 
-
     <div class="row">
-
       <!-- parameters dropdown panel -->
-      <!-- located here because needs full width parent to get size and position right, also here at the same -->
+      <!--
+        located here because needs full width parent to get size and position right, also here at the same
+      -->
       <!-- height as the controlling button -->
       <div ngbDropdown #parametersDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="parametersDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
           <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
-        </div>
-      </div>
-
-      <!-- inputs dropdown panel -->
-      <div ngbDropdown #inputsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
-        <button class="btn btn-sm hidden-dropdown-button" id="inputsDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-tool-inputs [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool" [selectedDatasets]="selectionService.selectedDatasets"
-            (updateBindings)="setBindings($event)"></ch-tool-inputs>
+          <ch-tool-inputs [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool"
+            [selectedDatasets]="selectionService.selectedDatasets" (updateBindings)="setBindings($event)"></ch-tool-inputs>
         </div>
       </div>
 
@@ -88,65 +83,79 @@
       <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-manual [page]="toolService.getManualPage(toolSelection.tool.name.id) | async" [showControls]=true></ch-manual>
+          <ch-manual [page]="
+              toolService.getManualPage(toolSelection.tool.name.id) | async
+            "
+            [showControls]="true"></ch-manual>
         </div>
       </div>
 
       <!-- category list -->
       <div class="col col-left">
         <div class="list-group-sm" id="category-list" #categoryList>
-          <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: category===selectedCategory, compact: settingsService.compactToolList$.getValue()}"
+          <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{
+              active: category === selectedCategory,
+              compact: settingsService.compactToolList$.getValue()
+            }"
             (click)="selectCategoryAndFirstTool(category)" *ngFor="let category of selectedModule.categories" id="{{categoryElementIdPrefix + category.name}}">
             <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
           </button>
         </div>
       </div>
 
-      <!-- tool list-->
+      <!-- tool list -->
       <div class="col col-middle">
         <div style="position: relative; height: 100%;">
           <div class="list-group-sm" *ngIf="selectedCategory" id="tool-list" style="position: absolute; height: 100%; width: 100%">
-            <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool.name.id===toolSelection?.tool.name.id, compact: settingsService.compactToolList$.getValue()}"
+            <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{
+                active: tool.name.id === toolSelection?.tool.name.id,
+                compact: settingsService.compactToolList$.getValue()
+              }"
               (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools" id="{{toolElementIdPrefix + tool.name.id}}">
-              {{tool.name.displayName}}
+              {{ tool.name.displayName }}
             </button>
           </div>
         </div>
       </div>
 
-      <!-- action buttons and tool description-->
+      <!-- action buttons and tool description -->
       <div class="col col-right">
         <div style="position: relative; height: 100%;">
           <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
             <div class="row mb-2">
               <div class="col d-flex">
-
                 <!-- manual -->
-                <!-- <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
-              [disabled]="!toolSelection">
-              <span class="fa fa-info" aria-hidden="true"></span>
-            </button> -->
+                <!--
+                  <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
+                    [disabled]="!toolSelection">
+                    <span class="fa fa-info" aria-hidden="true"></span>
+                  </button>
+                -->
 
                 <!-- parameters -->
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); parametersDropdown.toggle();"
-                  title="Parameters" [disabled]="!toolSelection">
-                  <!--suppress JSBitwiseOperatorUsage -->
-                  <span *ngIf="!(toolSelectionService.parametersValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
-                  <!--suppress JSBitwiseOperatorUsage -->
-                  <span class="fa fa-cog ml-1" aria-hidden="true"></span>
-                </button>
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
+                    $event.stopPropagation(); parametersDropdown.toggle()
+                  "
+                  title="Edit parameters and inputs" [disabled]="!toolSelection">
+                  <span *ngIf="
+                      !(toolSelectionService.parametersValid$ | async) ||
+                      !(toolSelectionService.inputsValid$ | async)
+                    "
+                    class="fa fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span>
+                  <!-- suppress JSBitwiseOperatorUsage -->
 
-                <!-- inputs -->
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1 w-4" (click)="$event.stopPropagation(); inputsDropdown.toggle();"
-                  title="Inputs" [disabled]="!toolSelection">
-                  <!--suppress JSBitwiseOperatorUsage -->
-                  <span *ngIf="!(toolSelectionService.inputsValid$ | async)" class="fa fa-exclamation-circle text-warning" aria-hidden="true"></span>
-                  <span class="fa fa-files-o ml-1" aria-hidden="true"></span>
+                  <span *ngIf="
+                      (toolSelectionService.parametersValid$ | async) &&
+                      (toolSelectionService.inputsValid$ | async)
+                    "
+                    class="fa fa-fw fa-sliders" aria-hidden="true"></span>
+
+                  Parameters
                 </button>
 
                 <!-- run -->
                 <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
-                  <span *ngIf="toolSelectionService.runEnabled$ | async" class="fa fa-play"></span>
+                  <span *ngIf="(toolSelectionService.runEnabled$ | async)" class="fa fa-play"></span>
                   <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fa fa-ban"></span>
                   Run
                 </button>
@@ -156,7 +165,7 @@
             <div class="row">
               <div class="col">
                 <div *ngIf="toolSelection">
-                  <span>{{toolSelection.tool.description}} </span>
+                  <span>{{ toolSelection.tool.description }} </span>
                   <span class="btn-link" (click)="openManualModal()">More&nbsp;info&hellip;</span>
                 </div>
               </div>

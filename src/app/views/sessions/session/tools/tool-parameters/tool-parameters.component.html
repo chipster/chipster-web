@@ -1,45 +1,57 @@
 <div class="container">
   <div class="row">
-    <div class="col col-md-9">
-      <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
-    </div>
-    <div class="col col-md-3">
-      <button class="btn btn-xs" style="float: right" (click)="closeDropDownDialog()">
-        <i class="fa fa-window-close"></i></button>
+    <div class="col text-center">
+      <span *ngIf="showWarning">
+        <i class="fa fa-fw fa-exclamation-circle text-warning"></i>
+
+        <span class="text-warning" style="font-style: italic">{{
+          warningText
+          }}</span>
+      </span>
+
+      <button class="btn btn-xs float-right p-0" (click)="closeDropDownDialog()">
+        <i class="fa fa-times"></i>
+      </button>
     </div>
   </div>
+  <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
 
   <form name="paramForm" *ngIf="tool">
-    <div *ngIf="tool.parameters.length === 0" class="alert alert-info">No parameters to modify for this tool</div>
+    <!--
+      <div *ngIf="tool.parameters.length === 0" class="font-italic text-smaller">
+        No parameters.
+      </div>
+    -->
     <table class="table table-sm table-hover" *ngIf="tool.parameters.length > 0">
-      <!--<thead class="thead-default">-->
-      <!--<tr>-->
-      <!--<th>Name</th>-->
-      <!--<th>Value</th>-->
-      <!--<th></th>-->
-      <!--</tr>-->
-      <!--</thead>-->
+      <!-- <thead class="thead-default"> -->
+      <!-- <tr> -->
+      <!-- <th>Name</th> -->
+      <!-- <th>Value</th> -->
+      <!-- <th></th> -->
+      <!-- </tr> -->
+      <!-- </thead> -->
       <tbody>
-
-        <tr *ngFor="let parameter of tool.parameters; let i = index;" ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave"
+        <tr *ngFor="let parameter of tool.parameters; let i = index" ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave"
           placement="left" container="body">
-
           <td>
-            {{parameter.name.displayName}}
+            {{ parameter.name.displayName }}
             <span class="text-sm lighter" *ngIf="parameter.optional">
               <i>(optional)</i>
             </span>
-
           </td>
 
           <td>
             <span>
-              <!--[(ngModel)]="toolSelectionService.parameterValues[tool.name.id][parameter.name.id]"-->
-              <select *ngIf="toolService.isSelectionParameter(parameter)" name="parameter_{{i}}" [(ngModel)]="parameter.value" (ngModelChange)="toolSelectionService.checkParameters()">
-                <!--required="!parameter.optional"-->
+              <!--
+                [(ngModel)]="toolSelectionService.parameterValues[tool.name.id][parameter.name.id]"
+              -->
+              <select *ngIf="toolService.isSelectionParameter(parameter)" name="parameter_{{i}}" [(ngModel)]="parameter.value"
+                (ngModelChange)="toolSelectionService.checkParameters()">
+                <!-- required="!parameter.optional" -->
                 <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
-                  {{option.displayName || option.id}}
-                  <span *ngIf="toolService.isDefaultValue(parameter, option.id)"> (default)</span>
+                  {{ option.displayName || option.id }}
+                  <span *ngIf="toolService.isDefaultValue(parameter, option.id)">
+                    (default)</span>
                 </option>
               </select>
 
@@ -47,18 +59,24 @@
                 min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}" required="{{!parameter.optional}}"
                 (ngModelChange)="toolSelectionService.checkParameters()" />
 
-              <input *ngIf="parameter.type === 'STRING'" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value" required="{{!parameter.optional}}"
-                (ngModelChange)="toolSelectionService.checkParameters()" />
+              <input *ngIf="parameter.type === 'STRING'" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value"
+                required="{{!parameter.optional}}" (ngModelChange)="toolSelectionService.checkParameters()" />
 
-              <!--<label class="label label-warning"-->
-              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required-->
-              <!--value</label>-->
-              <!--<label class="label label-warning"-->
-              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min-->
-              <!--value: {{parameter.from}}</label>-->
-              <!--<label class="label label-warning"-->
-              <!--[ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max-->
-              <!--value: {{parameter.to}}</label>-->
+              <!-- <label class="label label-warning" -->
+              <!--
+                [ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.required}">Required
+              -->
+              <!-- value</label> -->
+              <!-- <label class="label label-warning" -->
+              <!--
+                [ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.min}">Min
+              -->
+              <!-- value: {{parameter.from}}</label> -->
+              <!-- <label class="label label-warning" -->
+              <!--
+                [ngClass]="{'visibility-hidden': !paramForm['parameter_{{index}}'].$error.max}">Max
+              -->
+              <!-- value: {{parameter.to}}</label> -->
             </span>
           </td>
 
@@ -69,7 +87,6 @@
               Reset to default
             </button>
           </td>
-
         </tr>
       </tbody>
     </table>

@@ -50,7 +50,7 @@
 
                       <!-- context menu button -->
                       <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block" placement="bottom-right" (openChange)="sessionMenuOpenChange($event)">
-                        <button (click)="$event.stopPropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
+                        <button (click)="$event.stopImmediatePropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
                           class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown" title="Actions"
                           ngbDropdownToggle>
                           <i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
@@ -115,12 +115,12 @@
               <i>Loading preview failed.</i>
             </div>
 
-            <div *ngIf="sessionData && !sessionData.datasetsMap.size > 0" style="font-size: smaller; font-style:italic">No
+            <div *ngIf="sessionData && !(sessionData.datasetsMap.size > 0)" style="font-size: smaller; font-style:italic">No
               data in this session.</div>
 
             <div class="workflow-graph-panel" *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap && sessionData.datasetsMap.size > 0">
-              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap " [jobsMap]="sessionData.jobsMap " [modulesMap]="sessionData.modulesMap "
-                [defaultScale]="0.5 " [enabled]="false "></ch-workflow-graph>
+              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap" [modulesMap]="modulesMap" [defaultScale]="0.5 "
+                [enabled]="false "></ch-workflow-graph>
             </div>
           </div>
 
@@ -129,6 +129,12 @@
             <tr>
               <td class="lighter pr-2">Created:</td>
               <td style="width: 100%">{{selectedSession.created | localDate}}</td>
+            </tr>
+            <tr>
+              <td class="lighter">Size:</td>
+              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes: 0}}</td>
+              <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
+
               <!-- <td class="lighter">Last opened:</td>
               <td>{{selectedSession.accessed | localDate}}</td> -->
             </tr>

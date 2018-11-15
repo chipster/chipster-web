@@ -1,12 +1,5 @@
-import { FileResource } from "../../../../../shared/resources/fileresource";
-import { SessionDataService } from "../../session-data.service";
-import { Dataset } from "chipster-js-common";
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
-import { Response } from "@angular/http";
-import { VisualizationModalService } from "../visualizationmodal.service";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs/Subject";
-import { LoadState, State } from "../../../../../model/loadstate";
+import { Dataset, Tool } from "chipster-js-common";
+import { Component, Input } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
@@ -14,8 +7,12 @@ import { SessionData } from "../../../../../model/session/session-data";
   templateUrl: "./details-visualization.component.html"
 })
 export class DetailsVisualizationComponent {
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
+  @Input()
+  dataset: Dataset;
+  @Input()
+  sessionData: SessionData;
+  @Input()
+  tools: Tool[];
 
   constructor() {}
 }

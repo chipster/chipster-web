@@ -147,7 +147,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
     this.scrollerDiv.on("mousewheel", () => {
-      // this.removeDatasetNodeToolTips();
       const scroll = this.scrollerDiv.node();
       const event = d3.event;
 
@@ -250,7 +249,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           this.datasetSearch
         );
         this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
-        this.searchEnabled = true;
       } else {
         this.filter = null;
         this.searchEnabled = false;
@@ -313,7 +311,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     if (this.zoomScale && this.zoomScale === limitedTargetScale) {
       return;
     }
-
     // zoom
     this.zoomGroup.attr(
       "transform",
@@ -321,7 +318,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     this.zoomScale = limitedTargetScale;
-    this.onZoomInandOut(); // for managing the dataset search tooltips after zoom 
+    this.onZoomInandOut(); // for managing the dataset search tooltips after zoom
     const oldZoomScale = this.zoomScale;
 
     // this.enables might be dealing with the scrolling, need to fix something here for find file tooltips
@@ -460,6 +457,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Export",
         action: function(d, i) {
+          console.log("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
