@@ -1,3 +1,4 @@
+
 <div class="container-fluid">
   <h3 class="mt-4 mb-3">Sessions</h3>
 
@@ -131,12 +132,13 @@
               <td style="width: 100%">{{selectedSession.created | localDate}}</td>
             </tr>
             <tr>
+              <td class="lighter pr-2">Last&nbsp;opened:</td>
+              <td style="width: 100%">{{selectedSession.accessed | localDate}}</td>
+            </tr>
+            <tr>
               <td class="lighter">Size:</td>
               <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes: 0}}</td>
               <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
-
-              <!-- <td class="lighter">Last opened:</td>
-              <td>{{selectedSession.accessed | localDate}}</td> -->
             </tr>
           </table>
 

@@ -68,7 +68,7 @@ export class SessionListComponent implements OnInit {
       .filter(() => this.selectedSession !== null)
       .flatMap(session => {
         return forkJoin(
-          this.sessionResource.loadSession(session.sessionId),
+          this.sessionResource.loadSession(session.sessionId, true),
           this.toolsService.getModulesMap()
         );
       })
@@ -310,7 +310,7 @@ export class SessionListComponent implements OnInit {
       this.sessionData &&
       this.sessionData.session.sessionId === session.sessionId
         ? Observable.of(this.sessionData)
-        : this.sessionResource.loadSession(session.sessionId);
+        : this.sessionResource.loadSession(session.sessionId, true);
 
     sessionData$
       .flatMap((sessionData: SessionData) => {

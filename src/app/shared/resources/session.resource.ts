@@ -17,12 +17,25 @@ export class SessionResource {
     private restService: RestService
   ) {}
 
-  loadSession(sessionId: string): Observable<SessionData> {
+  loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService
       .getSessionDbUrl()
       .flatMap((url: string) => {
+
+        let sessionUrl = `${url}/sessions/${sessionId}`;
+        let types$;
+
+        if (preview) {
+          sessionUrl += '?preview';
+          types$ = Observable.of(null);
+        } else {
+          // types are not needed in the preview
+          types$ = this.getTypeTagsForSession(sessionId)
+            .do((x: any) => log.debug("types", x));
+        }
+
         const session$ = this.restService
-          .get(`${url}/sessions/${sessionId}`, true)
+          .get(sessionUrl, true)
           .do((x: any) => log.debug("session", x));
         const sessionDatasets$ = this.restService
           .get(`${url}/sessions/${sessionId}/datasets`, true)
@@ -30,9 +43,6 @@ export class SessionResource {
         const sessionJobs$ = this.restService
           .get(`${url}/sessions/${sessionId}/jobs`, true)
           .do((x: any) => log.debug("sessionJobs", x));
-        const types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
-          log.debug("types", x)
-        );
 
         // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
         return this.forkJoinWithoutCancel([
