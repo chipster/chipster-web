@@ -249,6 +249,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           this.datasetSearch
         );
         this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
+        this.searchEnabled = true;
       } else {
         this.filter = null;
         this.searchEnabled = false;
@@ -543,7 +544,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // this.setToolTipText();
     this.d3DatasetNodes.each(function(d, i) {
       if (self.searchEnabled) {
-        self.showToolTipId(d, i);
+        self.showToolTipById(d, i);
       } else {
         self.hideToolTipById(d, i);
       }
@@ -902,7 +903,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetToolTipArray[id].datasetId = dataset.datasetId;
     this.datasetToolTipArray[id].datasetName = dataset.name;
 
-    // try to append scrolling
+    // append tooltips to scolling div
     this.datasetToolTipArray[id].dataNodeToolTip = this.toolTipDiv
       .append("div")
       .attr("class", "dataset-node-tooltip")
@@ -933,35 +934,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       );
   }
 
-  showToolTipId(d, i) {
+  showToolTipById(d, i) {
     //  Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
-
-    const curRect = document
-      .getElementById(this.datasetToolTipArray[i].datasetId)
-      .getBoundingClientRect();
-
-    console.log(curRect.top, curRect.left, curRect.right, curRect.bottom);
-
-    // If the tooltip intersects with each other, show shorter name
-    for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-      if (
-        this.datasetToolTipArray[i].datasetId !==
-          this.datasetToolTipArray[k].datasetId &&
-        this.filter.has(this.datasetToolTipArray[k].datasetId)
-      ) {
-        const rectB = document
-          .getElementById(this.datasetToolTipArray[k].datasetId)
-          .getBoundingClientRect();
-
-        if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-          this.datasetToolTipArray[i].dataNodeToolTip.html(
-            this.datasetToolTipArray[i].datasetName.split(".")[0].slice(0, 5) +
-              "..."
-          );
-        }
-      }
-    }
-    // show the tooltip only if it contained inside the svg
+    this.setCurrentToolTipName(i);
     this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", x =>
       WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
     );
@@ -1010,34 +985,41 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
                 "px"
             );
         }
-        this.datasetToolTipArray[i].dataNodeToolTip.html(
-          this.datasetToolTipArray[i].datasetName
-        );
-      }
-      const curRect = document
-        .getElementById(this.datasetToolTipArray[i].datasetId)
-        .getBoundingClientRect();
-
-      // checking the name
-      for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-        if (
-          this.datasetToolTipArray[i].datasetId !==
-            this.datasetToolTipArray[k].datasetId &&
-          this.filter.has(this.datasetToolTipArray[k].datasetId)
-        ) {
-          const rectB = document
-            .getElementById(this.datasetToolTipArray[k].datasetId)
-            .getBoundingClientRect();
-
-          if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-            this.datasetToolTipArray[i].dataNodeToolTip.html(
-              this.datasetToolTipArray[i].datasetName
-                .split(".")[0]
-                .slice(0, 5) + "..."
-            );
-          }
-        }
+        this.setCurrentToolTipName(i);
       }
     }
+  }
+
+  setCurrentToolTipName(id: any) {
+
+    // First set the full name again
+    this.datasetToolTipArray[id].dataNodeToolTip.html(
+      this.datasetToolTipArray[id].datasetName
+    );
+    const curRect = document
+    .getElementById(this.datasetToolTipArray[id].datasetId)
+    .getBoundingClientRect();
+
+  // checking the name
+  for (let k = 0; k < this.datasetToolTipArray.length; k++) {
+    if (
+      this.datasetToolTipArray[id].datasetId !==
+        this.datasetToolTipArray[k].datasetId &&
+      this.filter.has(this.datasetToolTipArray[k].datasetId)
+    ) {
+      const rectB = document
+        .getElementById(this.datasetToolTipArray[k].datasetId)
+        .getBoundingClientRect();
+
+      if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
+        this.datasetToolTipArray[id].dataNodeToolTip.html(
+          this.datasetToolTipArray[id].datasetName
+            .split(".")[0]
+            .slice(0, 5) + "..."
+        );
+      }
+    }
+  }
+
   }
 }
