@@ -1,24 +1,13 @@
 <div *ngIf="state.isReady(); else statusTemplate">
   <button type="button" class="btn btn-link pull-right" (click)="openNewTab()">
-    <span class="fa fa-external-link"></span>
+    <span class="fas fa-external-link"></span>
     Open in new tab
   </button>
-  <iframe #htmlframe
-          *ngIf="src"
-          width="100%"
-          [src]="wrapperUrl + '?location=' + src  | trustedresource"
-          scrolling="no"
-          frameborder="0"
-          (load)="run(htmlframe)">
+  <iframe #htmlframe *ngIf="src" width="100%" [src]="wrapperUrl + '?location=' + src  | trustedresource" scrolling="no"
+    frameborder="0" (load)="run(htmlframe)">
   </iframe>
 </div>
 
 <ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>
 </ng-template>
-
-
-
-
-
-

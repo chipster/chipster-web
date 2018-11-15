@@ -1,15 +1,15 @@
 <!-- <a class="dropdown-item" (click)="toggleShowToolsPanel()">
-  <i class="fa fa-blank fa-fw"></i>
+  <i class="fas fa-blank fa-fw"></i>
   <span *ngIf="!showToolsPanel"> Show tools side panel </span>
   <span *ngIf="showToolsPanel"> Hide tools side panel </span>
 </a>
 
 <a class="dropdown-item" (click)="toggleSplitSelectionPanel()">
-  <i class="fa fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.splitSelectionPanel$.getValue()}"></i>
+  <i class="fas fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.splitSelectionPanel$.getValue()}"></i>
   Always show both tool and file selection in the middle panel</a> -->
 
 <h6 class="dropdown-header">View settings</h6>
 
 <a class="dropdown-item" (click)="toggleCompactToolList()">
-  <i class="fa fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.compactToolList$.getValue()}"></i>
+  <i class="fas fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.compactToolList$.getValue()}"></i>
   Compact tool list</a>

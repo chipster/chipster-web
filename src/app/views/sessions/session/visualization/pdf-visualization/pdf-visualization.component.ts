@@ -1,18 +1,16 @@
-import {Component, OnChanges, Input, OnDestroy} from '@angular/core';
+import { Component, OnChanges, Input, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import {SessionDataService} from "../../session-data.service";
-import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
-import {Subject} from "rxjs/Subject";
-import {LoadState, State} from "../../../../../model/loadstate";
+import { SessionDataService } from "../../session-data.service";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { Subject } from "rxjs/Subject";
+import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
-  selector: 'ch-pdf-visualization',
-  templateUrl: './pdf-visualization.component.html',
-  styleUrls: ['./pdf-visualization.component.less'],
+  selector: "ch-pdf-visualization",
+  templateUrl: "./pdf-visualization.component.html",
+  styleUrls: ["./pdf-visualization.component.less"]
 })
-
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
-
   @Input()
   dataset: Dataset;
 
@@ -34,11 +32,13 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   private readonly showAllPagesText: string = "Show all pages";
   private readonly showSinglePagesText: string = "Show single page";
-  private readonly minZoom: number = 0.1;
-  private readonly maxZoom: number = 4.0;
+  public readonly minZoom: number = 0.1;
+  public readonly maxZoom: number = 4.0;
 
-  constructor(private sessionDataService: SessionDataService,
-              private errorHandlerService: RestErrorService) {}
+  constructor(
+    private sessionDataService: SessionDataService,
+    private errorHandlerService: RestErrorService
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -54,15 +54,19 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.showAll = false;
     this.setShowAllButtonText();
 
-    this.sessionDataService.getDatasetUrl(this.dataset)
+    this.sessionDataService
+      .getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)
-      .subscribe(url => {
-        this.src = url;
-        this.urlReady = true;
-      }, (error: any) => {
-        this.state = new LoadState(State.Loading, "Loading pdf file failed");
-        this.errorHandlerService.handleError(error, this.state.message);
-      });
+      .subscribe(
+        url => {
+          this.src = url;
+          this.urlReady = true;
+        },
+        (error: any) => {
+          this.state = new LoadState(State.Loading, "Loading pdf file failed");
+          this.errorHandlerService.handleError(error, this.state.message);
+        }
+      );
   }
 
   openNewTab() {
@@ -114,7 +118,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   private setShowAllButtonText() {
-    this.showAllButtonText = this.showAll ? this.showSinglePagesText : this.showAllPagesText;
+    this.showAllButtonText = this.showAll
+      ? this.showSinglePagesText
+      : this.showAllPagesText;
   }
-
 }

@@ -1,90 +1,89 @@
-
-  <div class="form-group" >
-    <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
-      <div class="col col-6">
-        <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
-          <div [formGroupName]="i">
-            <select formControlName="selectedAttribute" style="margin-bottom: 0.5em">
-              <option value=""></option>
-              <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">
-                {{attribute}}
-              </option>
-            </select>
-            <input type="text" formControlName="value" placeholder=""/>
-          </div>
+<div class="form-group">
+  <form [formGroup]="filteredSearchForm" (ngSubmit)="OnSubmit(filteredSearchForm.value)">
+    <div class="col col-6">
+      <div formArrayName="items" *ngFor="let item of items.controls; let i = index;">
+        <div [formGroupName]="i">
+          <select formControlName="selectedAttribute" style="margin-bottom: 0.5em">
+            <option value=""></option>
+            <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">
+              {{attribute}}
+            </option>
+          </select>
+          <input type="text" formControlName="value" placeholder="" />
         </div>
       </div>
+    </div>
 
-      <div class="col col-3">
-        <div [formGroup]="startTimeInputForm">
-          <label class="text-sm">Job Start Time:
-            <input type="date" formControlName="startDateInput">
-            <input type="time" formControlName="startTimeInput">
-          </label>
-        </div>
+    <div class="col col-3">
+      <div [formGroup]="startTimeInputForm">
+        <label class="text-sm">Job Start Time:
+          <input type="date" formControlName="startDateInput">
+          <input type="time" formControlName="startTimeInput">
+        </label>
       </div>
+    </div>
 
-      <div class="col col-3">
-        <div [formGroup]="endTimeInputForm">
-          <label class="text-sm">Job End Time:
-            <input type="date" formControlName="endDateInput">
-            <input type="time" formControlName="endTimeInput">
-          </label>
-        </div>
+    <div class="col col-3">
+      <div [formGroup]="endTimeInputForm">
+        <label class="text-sm">Job End Time:
+          <input type="date" formControlName="endDateInput">
+          <input type="time" formControlName="endTimeInput">
+        </label>
       </div>
+    </div>
 
-      <div class="col col-3">
-        <button class="btn btn-sm btn-info" type="submit"> Search</button>
-      </div>
-    </form>
+    <div class="col col-3">
+      <button class="btn btn-sm btn-info" type="submit"> Search</button>
+    </div>
+  </form>
 
-    <button class="btn btn-sm btn-info btn-space" (click)="addItem()">Add Another Field</button>
-    <button class="btn btn-sm btn-info btn-space" (click)="reload()">Reload</button>
-    <div *ngIf="jobNumber>0"> 
-    <span class= "text-sm">Total Job Number : {{jobNumber}}</span>
+  <button class="btn btn-sm btn-info btn-space" (click)="addItem()">Add Another Field</button>
+  <button class="btn btn-sm btn-info btn-space" (click)="reload()">Reload</button>
+  <div *ngIf="jobNumber>0">
+    <span class="text-sm">Total Job Number : {{jobNumber}}</span>
   </div>
-  </div>
+</div>
 <div class="row" style="margin-left: 10em">
-   <ngb-pagination class="d-flex justify-content-center" [collectionSize]="collectionSize" [directionLinks] = "true"  [maxSize] = "10" [(page)]="page" (pageChange) = "onPageChange(page)"></ngb-pagination>
+  <ngb-pagination class="d-flex justify-content-center" [collectionSize]="collectionSize" [directionLinks]="true"
+    [maxSize]="10" [(page)]="page" (pageChange)="onPageChange(page)"></ngb-pagination>
 </div>
 <div class="row">
-    <p *ngIf="jobListLoading" style="margin-left: 10em">
-        <br>
-        <i class="fa fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading Job List..
-      </p>
+  <p *ngIf="jobListLoading" style="margin-left: 10em">
+    <br>
+    <i class="fas fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading Job List..
+  </p>
   <table class="table" *ngIf="!jobListLoading">
     <thead>
-    <tr>
-      <th scope="col">Username</th>
-      <th scope="col">Operation</th>
-      <th scope="col">Durtaion</th>
-      <th scope="col">Start time</th>
-      <th scope="col">End time</th>
-      <th scope="col"></th>
-      <th scope="col">Error</th>
-      <th scope="col">Status</th>
-    </tr>
+      <tr>
+        <th scope="col">Username</th>
+        <th scope="col">Operation</th>
+        <th scope="col">Durtaion</th>
+        <th scope="col">Start time</th>
+        <th scope="col">End time</th>
+        <th scope="col"></th>
+        <th scope="col">Error</th>
+        <th scope="col">Status</th>
+      </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let jobhistory of jobHistoryListWithParam" class="text-sm">
-      <td>{{jobhistory.userName}}</td>
-      <td><div *ngIf="jobhistory.toolId;then toolid; else toolname"></div>
+      <tr *ngFor="let jobhistory of jobHistoryListWithParam" class="text-sm">
+        <td>{{jobhistory.userName}}</td>
+        <td>
+          <div *ngIf="jobhistory.toolId;then toolid; else toolname"></div>
           <ng-template #toolid>
-           <span>{{jobhistory.toolId}}</span> 
+            <span>{{jobhistory.toolId}}</span>
           </ng-template>
-        <ng-template #toolname>
-            <span>{{jobhistory.toolName}}</span> 
-         </ng-template>
-      </td>
-      <td>{{jobhistory.timeDuration}}s</td>
-      <td>{{jobhistory.startTime|date:'short'}}</td>
-      <td>{{jobhistory.endTime|date:'short'}}</td>
-      <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
-      <td>{{jobhistory.error}}</td>
-      <td>{{jobhistory.jobStatus}}</td>
-    </tr>
+          <ng-template #toolname>
+            <span>{{jobhistory.toolName}}</span>
+          </ng-template>
+        </td>
+        <td>{{jobhistory.timeDuration}}s</td>
+        <td>{{jobhistory.startTime|date:'short'}}</td>
+        <td>{{jobhistory.endTime|date:'short'}}</td>
+        <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
+        <td>{{jobhistory.error}}</td>
+        <td>{{jobhistory.jobStatus}}</td>
+      </tr>
     </tbody>
   </table>
 </div>
-
-
