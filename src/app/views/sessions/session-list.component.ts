@@ -13,6 +13,9 @@ import { SessionService } from "./session/session.service";
 import log from "loglevel";
 import { SessionEventService } from "./session/sessionevent.service";
 import { ToolsService } from "../../shared/services/tools.service";
+import { ConfigService } from "../../shared/services/config.service";
+import { tap } from "rxjs/internal/operators/tap";
+import { mergeMap } from "rxjs/operators";
 
 @Component({
   selector: "ch-session-list",
@@ -20,7 +23,7 @@ import { ToolsService } from "../../shared/services/tools.service";
   styleUrls: ["./session-list.component.less"]
 })
 export class SessionListComponent implements OnInit {
-  static readonly exampleSessionOwnerUserId = "jaas/example_session_owner";
+  private exampleSessionOwnerUserId: string;
 
   public selectedSession: Session;
   public previousSession: Session;
@@ -48,11 +51,15 @@ export class SessionListComponent implements OnInit {
     private routeService: RouteService,
     private restErrorService: RestErrorService,
     private sessionEventService: SessionEventService,
-    private toolsService: ToolsService
+    private toolsService: ToolsService,
+    private configService: ConfigService,
   ) {}
 
   ngOnInit() {
-    this.updateSessions().subscribe(null, (error: any) => {
+    this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID).pipe(
+      tap(userId => this.exampleSessionOwnerUserId = userId),
+      mergeMap(() => this.updateSessions())
+    ).subscribe(null, (error: any) => {
       this.errorHandlerService.handleError(error, "Updating sessions failed");
     });
 
@@ -268,7 +275,7 @@ export class SessionListComponent implements OnInit {
   getSharedByTitlePart(userId: string): string {
     if (!userId) {
       return "Your sessions";
-    } else if (userId === SessionListComponent.exampleSessionOwnerUserId) {
+    } else if (userId === this.exampleSessionOwnerUserId) {
       return "Example sessions";
     } else {
       return "Shared to you by ";
@@ -276,7 +283,7 @@ export class SessionListComponent implements OnInit {
   }
 
   getSharedByUsernamePart(userId: string): string {
-    if (!userId || userId === SessionListComponent.exampleSessionOwnerUserId) {
+    if (!userId || userId === this.exampleSessionOwnerUserId) {
       return "";
     } else {
       return TokenService.getUsernameFromUserId(userId);
