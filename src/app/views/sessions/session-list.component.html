@@ -8,7 +8,7 @@
       <!-- new session and import sessions buttons -->
       <div class="mt-2 mb-4">
         <button class="btn btn-sm btn-info mr-2" (click)="createSession()">
-          <span class="fa fa-plus" aria-hidden="true"></span>
+          <span class="fas fa-plus" aria-hidden="true"></span>
           New session
         </button>
         <ch-open-session-file (done)="sessionsUploaded($event)"></ch-open-session-file>
@@ -35,9 +35,9 @@
           <!-- session rows -->
           <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
             <tbody>
-              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="selectSession(session)" (mouseout)="selectSession(null)"
-                (click)="onSessionClick(session)" [ngClass]="{'selected-session': isSessionSelected(session)}" class="session-list-item"
-                title="Open session">
+              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="selectSession(session)"
+                (mouseout)="selectSession(null)" (click)="onSessionClick(session)" [ngClass]="{'selected-session': isSessionSelected(session)}"
+                class="session-list-item" title="Open session">
                 <td>
                   <span>{{session.name}}
 
@@ -45,21 +45,25 @@
                     <span *ngIf="!this.deletingSessions.has(session)">
                       <!-- delete button -->
                       <button class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" [ngClass]="{'visible-button': this.isSessionSelected(session) && this.sessionDataService.hasPersonalRule(session.rules) && !this.deletingSessions.has(session)}"
-                        (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation(); " title="Delete">
-                        <span class="fa fa-times "></span>
+                        (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation(); "
+                        title="Delete">
+                        <span class="fas fa-times "></span>
                       </button>
 
                       <!-- context menu button -->
-                      <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block" placement="bottom-right" (openChange)="sessionMenuOpenChange($event)">
-                        <button (click)="$event.stopImmediatePropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                          class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown" title="Actions"
-                          ngbDropdownToggle>
-                          <i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                      <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block" placement="bottom-right"
+                        (openChange)="sessionMenuOpenChange($event)">
+                        <button (click)="$event.stopImmediatePropagation();" [ngClass]="{'visible-button': isSessionSelected(session)}"
+                          [ngClass]="{'show-on-row-hover': !selectionDisabled}" class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                          id="sessionDropdown" title="Actions" ngbDropdownToggle>
+                          <i class="fas fa-ellipsis-h" aria-hidden="true"></i></button>
                         <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
-                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();rename(session)">Rename&hellip;</button>
+                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item"
+                            (click)="sessionDropdown.toggle();rename(session)">Rename&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
-                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item" (click)="sessionDropdown.toggle();share(session)">Share&hellip;</button>
+                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item"
+                            (click)="sessionDropdown.toggle();share(session)">Share&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();download(session)">Download</button>
                         </div>
                       </div>
@@ -69,7 +73,7 @@
                     <span *ngIf="deletingSessions.has(session)" class="float-right" style="font-size: smaller; font-style: italic">
                       <!-- use hidden button to keep the row height static -->
                       <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
-                        <span class="fa fa-times "></span>
+                        <span class="fas fa-times "></span>
                       </button>
                       Deleting&hellip;
                     </span>
@@ -91,13 +95,16 @@
         <p>To open a session, click on the session name.
         </p>
 
-        <p>Sessions keep your analysis projects organized. They combine together your raw data files and analysis results
-          and also keep track of the analysis history. This makes it easy to understand afterwards how the data was analyzed.
+        <p>Sessions keep your analysis projects organized. They combine together your raw data files and analysis
+          results
+          and also keep track of the analysis history. This makes it easy to understand afterwards how the data was
+          analyzed.
         </p>
 
         <p>Creating a new session for each experiment is usually a good approach.</p>
 
-        <p>Sessions are stored on the server, but you can download session to a local zip file to have a backup copy of your
+        <p>Sessions are stored on the server, but you can download session to a local zip file to have a backup copy of
+          your
           data or transfer data between different Chipster servers.</p>
       </div>
 
@@ -120,8 +127,8 @@
               data in this session.</div>
 
             <div class="workflow-graph-panel" *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap && sessionData.datasetsMap.size > 0">
-              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap" [modulesMap]="modulesMap" [defaultScale]="0.5 "
-                [enabled]="false "></ch-workflow-graph>
+              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap" [modulesMap]="modulesMap"
+                [defaultScale]="0.5 " [enabled]="false "></ch-workflow-graph>
             </div>
           </div>
 
@@ -137,7 +144,8 @@
             </tr>
             <tr>
               <td class="lighter">Size:</td>
-              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes: 0}}</td>
+              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes:
+                0}}</td>
               <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
             </tr>
           </table>

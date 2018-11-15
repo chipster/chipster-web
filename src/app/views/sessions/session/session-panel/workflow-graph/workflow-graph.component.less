@@ -36,6 +36,7 @@ div.dataset-tooltip {
   pointer-events: none;
 }
 
+
 div.dataset-tooltip-triangle {
   position: absolute;
   text-align: left;
@@ -65,6 +66,7 @@ div.dataset-tooltip-triangle {
   height: 100%;
   //flex-grow: 1;
   width: 100%;
+  position : relative;
 }
 
 .toolbar-div {
@@ -72,7 +74,28 @@ div.dataset-tooltip-triangle {
   bottom: 10px;
 }
 
+
+.dataset-tooltip-div{
+  position : absolute;
+}
+
 svg {
   // default is inline adding extra margin and showing scrollbar(s) unnecessarily
   display: block;
+  position : absolute;
+  padding-top: 15px;
+}
+
+
+div.dataset-node-tooltip {
+  text-align: center;
+  padding: 1px 1px 1px 2px;
+  font-size: 10px;
+  color: white;
+  background: #333333;
+  border: 0;
+  border-radius: 5px;
+  pointer-events: none;
+  position: absolute;
+  white-space: nowrap;
 }
