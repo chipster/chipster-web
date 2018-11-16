@@ -200,10 +200,8 @@ export class SessionComponent implements OnInit, OnDestroy {
         const rule: Rule = <Rule>change.oldValue;
 
         // rule seems to be null when we delete our own session in another browser or tab
-        if (
-          (change.event.type === "DELETE" && rule == null) ||
-          rule.username === this.tokenService.getUsername()
-        ) {
+        console.log('sesison.component rule deleted', change.event.type, rule, change);
+        if (change.event.type === "DELETE" && rule.username === this.tokenService.getUsername()) {
           alert("The session has been deleted.");
           this.routeService.navigateAbsolute("/sessions");
         }
