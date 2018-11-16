@@ -10,7 +10,8 @@ import {
   NgZone,
   OnDestroy,
   OnChanges,
-  OnInit
+  OnInit,
+  AfterViewInit
 } from "@angular/core";
 import { Row } from "./phenodatarow.interface";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -19,6 +20,8 @@ import { SessionEventService } from "../../sessionevent.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { Observable } from "rxjs/Observable";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { ViewChild } from "@angular/core";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
 
 @Component({
   selector: "ch-phenodata-visualization",
@@ -29,7 +32,7 @@ import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.s
   encapsulation: ViewEncapsulation.None
 })
 export class PhenodataVisualizationComponent
-  implements OnInit, OnChanges, OnDestroy {
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() private datasets: Array<Dataset>;
   @Input() private datasetsMap: Map<string, Dataset>;
 
@@ -48,8 +51,11 @@ export class PhenodataVisualizationComponent
     private sessionEventService: SessionEventService,
     private zone: NgZone,
     private restErrorService: RestErrorService,
-    private spreadsheetService: SpreadsheetService
-  ) {}
+    private spreadsheetService: SpreadsheetService,
+    private nativeElementService: NativeElementService,
+  ) { }
+
+  @ViewChild('horizontalScroll') horizontalScrollDiv;
 
   ngOnInit() {
     this.updateView();
@@ -58,6 +64,13 @@ export class PhenodataVisualizationComponent
     this.sessionEventService.getDatasetStream().subscribe(() => {
       this.updateViewLater();
     });
+  }
+
+  ngAfterViewInit() {
+    // not created in modal
+    if (this.horizontalScrollDiv) {
+      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {

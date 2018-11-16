@@ -10,7 +10,7 @@
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
 
 <!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->
-<div *ngIf="!modalMode" class="horizontal-scroll">
+<div *ngIf="!modalMode" class="horizontal-scroll" #horizontalScroll>
   <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
 </div>
 
