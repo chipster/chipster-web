@@ -15,6 +15,7 @@ import { JobListComponent } from "./job-list/job-list.component";
 import { ToolListAccordionComponent } from "./tool-list/tool-list-accordion.component";
 import { ToolDetailsComponent } from "./tool-details/tool-details.component";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
 
 @NgModule({
   imports: [
@@ -34,7 +35,8 @@ import { NgSelectModule } from "@ng-select/ng-select";
     ScrollerComponent,
     JobListComponent,
     ToolListAccordionComponent,
-    ToolDetailsComponent
+    ToolDetailsComponent,
+    CounterSpinnerComponent
   ],
   providers: [ToolService],
   exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent]
