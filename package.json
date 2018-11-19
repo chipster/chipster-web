@@ -57,7 +57,6 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/jquery": "3.3.2",
     "@types/lodash": "^4.14.91",
-    "@types/node": "~8.9.4",
     "@types/pako": "^1.0.0",
     "@types/pdf": "0.0.31",
     "codelyzer": "~4.2.1",
