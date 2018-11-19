@@ -5,6 +5,7 @@ import { AuthenticationService } from "../../core/authentication/authentication-
 import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-home",
@@ -41,7 +42,7 @@ export class HomeComponent implements OnInit {
         if (path) {
           this.homeFile = this.routeService.basename(path);
           this.homePath = this.routeService.dirname(path) + "/";
-          console.log("loading custom home page", this.homePath, this.homeFile);
+          log.info("loading custom home page", this.homePath, this.homeFile);
         }
       },
       err => {
@@ -57,7 +58,7 @@ export class HomeComponent implements OnInit {
         if (path) {
           this.homeHeaderFile = this.routeService.basename(path);
           this.homeHeaderPath = this.routeService.dirname(path) + "/";
-          console.log(
+          log.info(
             "loading custom home page header",
             this.homePath,
             this.homeFile

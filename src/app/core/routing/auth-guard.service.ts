@@ -7,6 +7,7 @@ import { RouteService } from "../../shared/services/route.service";
 import { ActivatedRouteSnapshot } from "@angular/router";
 import { RouterStateSnapshot } from "@angular/router";
 import { TokenService } from "../authentication/token.service";
+import log from "loglevel";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -50,10 +51,10 @@ export class AuthGuard implements CanActivate {
         if (!approvalRequired) {
           return true;
         } else if (approved) {
-          console.log("terms of use accepted already");
+          log.info("terms of use accepted already");
           return true;
         } else {
-          console.log(
+          log.info(
             "terms of use must be accepted first",
             ", required for this auth:",
             approvalRequired,
