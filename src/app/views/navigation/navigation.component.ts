@@ -1,4 +1,4 @@
-import { AuthenticationService } from "../../core/authentication/authenticationservice";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs/Observable";

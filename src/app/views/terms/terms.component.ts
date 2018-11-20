@@ -1,4 +1,4 @@
-import { AuthenticationService } from "../../core/authentication/authenticationservice";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { Component, OnInit } from "@angular/core";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
