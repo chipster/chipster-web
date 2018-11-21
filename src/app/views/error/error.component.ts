@@ -2,9 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ErrorMessage } from "../../core/errorhandler/errormessage";
 import * as _ from "lodash";
-import { NavigationEnd, Router } from "@angular/router";
+import { Router, NavigationStart } from "@angular/router";
 import { RouteService } from "../../shared/services/route.service";
-
+import log from "loglevel";
 @Component({
   selector: "ch-error",
   templateUrl: "./error.component.html"
@@ -20,6 +20,7 @@ export class ErrorComponent implements OnInit {
 
   ngOnInit() {
     this.errorService.getErrors().subscribe((error: ErrorMessage) => {
+      log.info("error component got new error", error);
       if (error) {
         this.errors = this.errors.concat(error);
       }
@@ -27,7 +28,7 @@ export class ErrorComponent implements OnInit {
 
     // clear errors when navigating to a new url
     this.router.events
-      .filter(event => event instanceof NavigationEnd)
+      .filter(event => event instanceof NavigationStart)
       .subscribe(event => {
         this.errors = [];
       });
