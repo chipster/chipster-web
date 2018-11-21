@@ -46,15 +46,9 @@ export class AuthenticationService {
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
-    this.tokenService.setAuthToken(null, null, null, null);
-    return this.requestToken(username, password).map((response: any) => {
-      const roles = JSON.parse(response.rolesJson);
-      this.tokenService.setAuthToken(
-        response.tokenKey,
-        response.username,
-        response.validUntil,
-        roles
-      );
+    this.tokenService.setAuthToken(null, null, null, null, null);
+    return this.requestToken(username, password).map((response: Token) => {
+      this.saveToken(response);
       this.scheduleTokenRefresh();
     });
   }
@@ -116,6 +110,7 @@ export class AuthenticationService {
           this.tokenService.setAuthToken(
             response.tokenKey,
             response.username,
+            response.name,
             response.validUntil,
             roles
           );
@@ -133,15 +128,53 @@ export class AuthenticationService {
       );
   }
 
+  checkToken(): Observable<boolean> {
+    if (!this.tokenService.getToken()) {
+      log.warn("no token to check");
+      return Observable.of(false);
+    }
+
+    return this.configService.getAuthUrl().flatMap(authUrl => {
+      const url = `${authUrl}/tokens/check`;
+      const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
+
+      return this.httpClient
+        .post<Token>(
+          url,
+          {},
+          {
+            headers: new HttpHeaders().set(
+              "Authorization",
+              `Basic ${encodedString}`
+            )
+          }
+        )
+        .map((response: Token) => {
+          this.saveToken(response);
+          return Observable.of(true);
+        })
+        .catch(error => {
+          if (error.status === 403) {
+            // token is invalid
+            log.info("check token got 403 -> token invalid");
+            return Observable.of(false);
+          } else {
+            // for now, throw others
+            throw error;
+          }
+        });
+    });
+  }
+
   scheduleTokenRefresh() {
-    this.tokenRefreshSchedulerId = setInterval(
+    this.tokenRefreshSchedulerId = window.setInterval(
       this.refreshToken.bind(this),
       TOKEN_REFRESH_INTERVAL
     );
   }
 
   stopTokenRefresh() {
-    clearInterval(this.tokenRefreshSchedulerId);
+    window.clearInterval(this.tokenRefreshSchedulerId);
   }
 
   // Not very sure, is it the right way..
@@ -190,5 +223,16 @@ export class AuthenticationService {
 
       return <Observable<User>>this.authHttpClient.putAuth(url, user);
     });
+  }
+
+  private saveToken(token: Token) {
+    const roles = JSON.parse(token.rolesJson);
+    this.tokenService.setAuthToken(
+      token.tokenKey,
+      token.username,
+      token.name,
+      token.validUntil,
+      roles
+    );
   }
 }

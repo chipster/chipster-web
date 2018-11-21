@@ -1,8 +1,5 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { ConfigService } from "../../shared/services/config.service";
-import { RestErrorService } from "../errorhandler/rest-error.service";
-import { Observable } from "rxjs/Observable";
 
 @Injectable()
 export class TokenService {
@@ -10,10 +7,7 @@ export class TokenService {
 
   private username$: BehaviorSubject<string> = new BehaviorSubject(null);
 
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService
-  ) {
+  constructor() {
     this.username$.next(localStorage.getItem("ch-auth-username"));
   }
 
@@ -50,6 +44,10 @@ export class TokenService {
     return this.username$.value;
   }
 
+  getName(): string {
+    return localStorage.getItem("ch-auth-name");
+  }
+
   getUsername$() {
     return this.username$;
   }
@@ -61,12 +59,14 @@ export class TokenService {
   setAuthToken(
     token: string,
     username: string,
+    name: string,
     validUntil: string,
     roles: string[]
   ): void {
     if (token) {
       localStorage.setItem("ch-auth-token", token);
       localStorage.setItem("ch-auth-username", username);
+      localStorage.setItem("ch-auth-name", name);
       localStorage.setItem("ch-auth-valid-until", validUntil);
       localStorage.setItem("ch-auth-roles", JSON.stringify(roles));
       this.username$.next(username);
@@ -74,6 +74,7 @@ export class TokenService {
       // item has to be removed explicitly, because setItem(..., null) would be converted to a 'null' string
       localStorage.removeItem("ch-auth-token");
       localStorage.removeItem("ch-auth-username");
+      localStorage.removeItem("ch-auth-name");
       localStorage.removeItem("ch-auth-valid-until");
       localStorage.removeItem("ch-auth-roles");
       this.username$.next(null);

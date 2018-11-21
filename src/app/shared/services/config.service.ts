@@ -20,7 +20,8 @@ export class ConfigService {
   public static readonly KEY_HOME_PATH = "home-path";
   public static readonly KEY_HOME_HEADER_PATH = "home-header-path";
   public static readonly KEY_CONTACT_PATH = "contact-path";
-  public static readonly KEY_EXAMPLE_SESSION_OWNER_USER_ID = "example-session-owner-user-id";
+  public static readonly KEY_EXAMPLE_SESSION_OWNER_USER_ID =
+    "example-session-owner-user-id";
 
   private conf$: Observable<any>;
   private chipsterConf$: Observable<any>;

@@ -1,7 +1,7 @@
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormGroup } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { HttpErrorResponse } from "@angular/common/http";
 import { ConfigService } from "../../shared/services/config.service";
@@ -9,7 +9,6 @@ import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
 import { Observable } from "rxjs/Observable";
-
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
@@ -19,18 +18,17 @@ export class LoginComponent implements OnInit {
   // hide this login page initially to avoid flash of it when returning from the SSO and
   // redirecting immediately
   show = false;
+  initFailed = false;
   error: string;
-  appName$;
+  appName: string;
 
   private returnUrl: string;
-
   public ssoLoginUrl: string;
 
   @ViewChild("myForm")
   private myForm: FormGroup;
 
   constructor(
-    private router: Router,
     private route: ActivatedRoute,
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
@@ -40,26 +38,53 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // get the return url from the query params
-    this.getReturnUrl$().subscribe(url => (this.returnUrl = url));
+    // return url is needed in all cases, so start with it
+    this.getReturnUrl$().subscribe(url => {
+      this.returnUrl = url;
 
-    // handle returnUrls after SSO login here
-    if (this.tokenService.isLoggedIn()) {
-      this.redirect();
-    } else {
-      // not going to redirect, show the page
-      this.show = true;
-    }
+      // if already logged in -> redirect
+      if (this.tokenService.isLoggedIn()) {
+        // check also from server that token is actually valid
+        this.authenticationService.checkToken().subscribe(
+          (tokenValid: boolean) => {
+            if (tokenValid) {
+              // existing token is valid, continue
+              this.redirect();
+            } else {
+              // local token exists, but server says it is not valid, clear and continue
+              log.info("auth says token is invalid, clearing local token");
+              this.tokenService.clear();
+              this.continueInit();
+            }
+          },
+          error => {
+            log.warn("checking token failed", error);
+            this.initFailed = true;
+            this.restErrorService.handleError(
+              error,
+              "Initializing login page failed"
+            );
+          }
+        );
+      } else {
+        // no local token -> continue
+        this.continueInit();
+      }
+    });
+  }
 
+  private continueInit() {
+    // fetch everything that's needed
     Observable.forkJoin(
       this.configService.getPublicServices(),
       this.routeService.getAppRoute$().take(1),
-      this.getReturnUrl$().take(1)
+      this.configService.get(ConfigService.KEY_APP_NAME).take(1)
     ).subscribe(
       res => {
         const conf = res[0];
         const appRoute = res[1];
-        const returnUrl = res[2];
+        this.appName = res[2];
+
         conf
           .filter(s => s.role === "haka")
           .forEach(s => {
@@ -84,7 +109,7 @@ export class LoginComponent implements OnInit {
               encodeURIComponent(appRoute) +
               "&" +
               "returnUrl=" +
-              encodeURIComponent(returnUrl);
+              encodeURIComponent(this.returnUrl);
 
             // url for the Shibboleth login step 1, including the above url for the step 4
             // (which in turn includes the parameters for the step 5)
@@ -94,20 +119,28 @@ export class LoginComponent implements OnInit {
               "target=" +
               encodeURIComponent(afterIdpUrl);
           });
-      },
-      err => this.restErrorService.handleError(err, "get configuration failed")
-    );
 
-    this.appName$ = this.configService.get(ConfigService.KEY_APP_NAME);
+        // everything ready, show login
+        this.show = true;
+      },
+      error => {
+        this.restErrorService.handleError(
+          error,
+          "Initializing login page failed"
+        );
+        log.warn("get configuration failed", error);
+        this.initFailed = true;
+      }
+    );
   }
 
-  getReturnUrl$() {
+  private getReturnUrl$() {
     return this.route.queryParams.map(
       params => params["returnUrl"] || "/sessions"
     );
   }
 
-  redirect() {
+  private redirect() {
     log.info("logged in, return to " + this.returnUrl);
     this.routeService.navigateAbsolute(this.returnUrl);
   }

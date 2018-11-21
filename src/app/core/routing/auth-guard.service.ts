@@ -37,38 +37,50 @@ export class AuthGuard implements CanActivate {
           .map(c => c[ConfigService.KEY_TERMS_OF_USE_VERSION])
       ];
 
-      return Observable.forkJoin(observables).map(res => {
-        const user = res[0];
-        const askForAuths = res[1];
-        const latestVersion = res[2];
+      return Observable.forkJoin(observables)
+        .map(res => {
+          const user = res[0];
+          const askForAuths = res[1];
+          const latestVersion = res[2];
 
-        // is approval required for this authenticator
-        const approvalRequired = askForAuths.indexOf(user.auth) !== -1;
-        // has user already approved the terms of use
-        const approved =
-          user.termsVersion >= latestVersion && user.termsAccepted != null;
+          // is approval required for this authenticator
+          const approvalRequired = askForAuths.indexOf(user.auth) !== -1;
+          // has user already approved the terms of use
+          const approved =
+            user.termsVersion >= latestVersion && user.termsAccepted != null;
 
-        if (!approvalRequired) {
-          return true;
-        } else if (approved) {
-          log.info("terms of use accepted already");
-          return true;
-        } else {
-          log.info(
-            "terms of use must be accepted first",
-            ", required for this auth:",
-            approvalRequired,
-            ", accpeted version:",
-            user.termVersion,
-            ", latest version:",
-            latestVersion,
-            ", accepted timestamp:",
-            user.termsAccepted
+          if (!approvalRequired) {
+            return true;
+          } else if (approved) {
+            log.info("terms of use accepted already");
+            return true;
+          } else {
+            log.info(
+              "terms of use must be accepted first",
+              ", required for this auth:",
+              approvalRequired,
+              ", accpeted version:",
+              user.termVersion,
+              ", latest version:",
+              latestVersion,
+              ", accepted timestamp:",
+              user.termsAccepted
+            );
+            this.routeService.navigateAbsolute("/terms");
+            return false;
+          }
+        })
+        .catch(e => {
+          if (e.status === 403) {
+            log.info("auth guard got 403, redirecting to login");
+          } else {
+            log.warn("error in auth guard, redirecting to login");
+          }
+          this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(
+            state.url
           );
-          this.routeService.navigateAbsolute("/terms");
-          return false;
-        }
-      });
+          return Observable.of(false);
+        });
     } else {
       this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
 
