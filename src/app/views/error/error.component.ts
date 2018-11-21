@@ -1,35 +1,35 @@
-import {Component, OnInit} from "@angular/core";
-import {ErrorService} from "../../core/errorhandler/error.service";
-import {ErrorMessage} from "../../core/errorhandler/errormessage";
-import * as _ from 'lodash';
-import {NavigationEnd, Router} from "@angular/router";
-import {RouteService} from "../../shared/services/route.service";
+import { Component, OnInit } from "@angular/core";
+import { ErrorService } from "../../core/errorhandler/error.service";
+import { ErrorMessage } from "../../core/errorhandler/errormessage";
+import * as _ from "lodash";
+import { NavigationEnd, Router } from "@angular/router";
+import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-  selector: 'ch-error',
-  templateUrl: './error.component.html'
+  selector: "ch-error",
+  templateUrl: "./error.component.html"
 })
 export class ErrorComponent implements OnInit {
-
   errors: ErrorMessage[] = [];
 
   constructor(
     private errorService: ErrorService,
     private routeService: RouteService,
-    private router: Router) {}
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.errorService.getErrors().subscribe((error: ErrorMessage) => {
       if (error) {
-        this.errors.push(error);
+        this.errors = this.errors.concat(error);
       }
     });
 
     // clear errors when navigating to a new url
     this.router.events
-      .filter((event) => event instanceof NavigationEnd)
-      .subscribe((event) => {
-        this.errors =  [];
+      .filter(event => event instanceof NavigationEnd)
+      .subscribe(event => {
+        this.errors = [];
       });
   }
 
