@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { SET_LATEST_SESSION } from "../../state/latest-session.reducer";
-import { AuthenticationService } from "../../core/authentication/authenticationservice";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs/Observable";

@@ -15,13 +15,16 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { LoadState, State } from "../../../../../model/loadstate";
 import { Subject } from "rxjs/Subject";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { ViewChild } from "@angular/core";
+import { AfterViewInit } from "@angular/core";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
 
 @Component({
   selector: "ch-spreadsheet-visualization",
   templateUrl: "./spreadsheet-visualization.component.html",
   styleUrls: ["./spreadsheet-visualization.component.less"]
 })
-export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
+export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
   @Input()
   dataset: Dataset;
   @Input()
@@ -30,6 +33,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
   sessionData: SessionData;
   @Input()
   divWidth: any;
+
+  @ViewChild('horizontalScroll') horizontalScrollDiv;
 
   private fileSizeLimit = 10 * 1024;
   public lineCount: number;
@@ -53,7 +58,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
     private typeTagService: TypeTagService,
     private zone: NgZone,
     private errorHandlerService: RestErrorService,
-    private spreadsheetService: SpreadsheetService
+    private spreadsheetService: SpreadsheetService,
+    private nativeElementService: NativeElementService,
   ) {}
 
   ngOnChanges() {
@@ -140,7 +146,14 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.errorHandlerService.handleError(error, this.state.message);
         }
-      );
+    );
+  }
+
+  ngAfterViewInit() {
+    // not created in modal
+    if (this.horizontalScrollDiv) {
+      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
+    }
   }
 
   ngOnDestroy() {

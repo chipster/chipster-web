@@ -13,6 +13,8 @@ import { SessionWorkerResource } from "../../../shared/resources/sessionworker.r
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ImportSessionModalComponent } from "./import-session-modal.component";
+import log from "loglevel";
+import { throwError } from "rxjs";
 
 @Component({
   selector: "ch-open-session-file",
@@ -83,7 +85,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
       .flatMap(response => {
-        console.log("extracted, warnings: ", response.warnings);
+        if (response.errors.length > 0) {
+          return throwError(response.errors);
+        }
+        log.log("extracted, warnings: ", response.warnings, response);
         this.fileStatus.set(file, "Deleting temporary copy");
         return this.sessionResource.deleteDataset(sessionId, datasetId);
       })

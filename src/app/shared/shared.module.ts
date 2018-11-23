@@ -31,6 +31,7 @@ import { ToolSourceComponent } from "./components/tool-source/tool-source.compon
 import { DummyRouteComponent } from "./components/dummy-route.component";
 import { UserService } from "./services/user.service";
 import { ToolsService } from "./services/tools.service";
+import { NativeElementService } from "./services/native-element.service";
 
 /*
  * @description: Shared module should contain application global resources
@@ -68,7 +69,8 @@ import { ToolsService } from "./services/tools.service";
     SpreadsheetService,
     SettingsService,
     UserService,
-    ToolsService
+    ToolsService,
+    NativeElementService,
   ],
   exports: [
     BytesPipe,

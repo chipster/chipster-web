@@ -29,9 +29,8 @@ import { DatasetModalService } from "../../selectiondetails/datasetmodal.service
 import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
-import { throwError } from "rxjs";
-import { ConditionalExpr } from "@angular/compiler";
-import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
+
 
 @Component({
   selector: "ch-workflow-graph",
@@ -73,8 +72,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private selectionHandlerService: SelectionHandlerService,
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService
-  ) { }
+    private dialogModalService: DialogModalService,
+    private nativeElementService: NativeElementService,
+  ) {}
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -148,28 +148,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    // disable back and forward gestures in Safari https://stackoverflow.com/a/27023848
-    this.scrollerDiv.on("mousewheel", () => {
-      const scroll = this.scrollerDiv.node();
-      const event = d3.event;
-
-      // We don't want to scroll below zero or above the width
-      const maxX = scroll.scrollWidth - scroll.offsetWidth;
-
-      // If this event looks like it will scroll beyond the bounds of the element, prevent it and set the scroll to the boundary manually
-      if (
-        scroll.scrollLeft + event.deltaX < 0 ||
-        scroll.scrollLeft + event.deltaX > maxX
-      ) {
-        event.preventDefault();
-
-        // Manually set the scroll to the boundary
-        scroll.scrollLeft = Math.max(
-          0,
-          Math.min(maxX, scroll.scrollLeft + event.deltaX)
-        );
-      }
-    });
+    // disable back and forward gestures in Safari
+    this.nativeElementService.disableGestures(this.scrollerDiv.node());
 
     this.svg = this.scrollerDiv.append("svg");
     this.zoomGroup = this.svg.append("g");

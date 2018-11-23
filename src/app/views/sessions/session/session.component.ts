@@ -137,7 +137,19 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   canDeactivate() {
-    if (this.route.snapshot.queryParamMap.has(this.PARAM_TEMP_COPY)) {
+
+    /*
+    No need to ask if the session was already deleted
+
+    If user opens an example session and then deletes it, the client receives a websocket
+    event about the deleted rule and deletes that rule from the sessionData.
+    */
+    const sessionExists = (this.sessionData != null
+      && this.sessionDataService.getApplicableRules(this.sessionData.session.rules).length > 0);
+    const isTemptCopy = this.route.snapshot.queryParamMap.has(this.PARAM_TEMP_COPY);
+
+    if (sessionExists && isTemptCopy) {
+
       const keepButton = "Keep";
       const deleteButton = "Delete";
 
@@ -199,11 +211,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       .subscribe(change => {
         const rule: Rule = <Rule>change.oldValue;
 
-        // rule seems to be null when we delete our own session in another browser or tab
-        if (
-          (change.event.type === "DELETE" && rule == null) ||
-          rule.username === this.tokenService.getUsername()
-        ) {
+        if (change.event.type === "DELETE" && rule.username === this.tokenService.getUsername()) {
           alert("The session has been deleted.");
           this.routeService.navigateAbsolute("/sessions");
         }

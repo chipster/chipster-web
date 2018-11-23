@@ -1,7 +1,6 @@
-import { AuthenticationService } from "../../core/authentication/authenticationservice";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
 import { Component, OnInit } from "@angular/core";
-import { Observable } from "rxjs/Observable";
 import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -20,24 +19,19 @@ export class NavigationComponent implements OnInit {
   routerLinkHome: string;
   routerLinkSessions: string;
   routerLinkAnalyze: string;
-  username$: Observable<string>;
   appName = "";
   appNameReady = false;
   appRoute: string;
 
   constructor(
-    private tokenService: TokenService,
+    public tokenService: TokenService, // used in template
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
     private routeService: RouteService
-  ) {
-    this.username$ = authenticationService.getUsersDisplayName$();
-  }
+  ) {}
 
   ngOnInit() {
-    this.tokenService.getToken();
-
     // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(
       path => {

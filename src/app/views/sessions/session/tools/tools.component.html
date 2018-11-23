@@ -44,11 +44,12 @@
 
       <!-- jobs button -->
       <div class="col col-right">
-        <button class="btn btn-sm btn-outline-secondary btn-no-border float-right" (click)="$event.stopPropagation(); jobsDropdown.toggle()"
-          title="Jobs">
-          <i *ngIf="runningJobs < 1" class="fas fa-list-ul fa-fw"></i>
-          <i *ngIf="runningJobs > 0" class="fas fa-circle-o-notch fa-spin fa-fw"></i>
-          Jobs <span *ngIf="runningJobs > 0">{{ runningJobs }}</span>
+        <span class="float-right position-relative">
+          <ch-counter-spinner [count]="runningJobs">
+          </ch-counter-spinner>
+        </span>
+        <button class="btn btn-link float-right pr-3 mr-4" (click)="$event.stopPropagation(); jobsDropdown.toggle()"
+          title="Jobs">Jobs
         </button>
       </div>
     </div>

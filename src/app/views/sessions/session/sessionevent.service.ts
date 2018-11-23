@@ -213,6 +213,10 @@ export class SessionEventService {
           sessionData.session = remote;
           return this.createEvent(event, local, remote);
         });
+
+    } else if (event.type === "DELETE") {
+      // nothing to do, the client reacts when the Rule is deleted
+      return Observable.never();
     } else {
       console.warn("unknown event type", event);
     }

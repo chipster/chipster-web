@@ -10,7 +10,8 @@ import {
   NgZone,
   OnDestroy,
   OnChanges,
-  OnInit
+  OnInit,
+  AfterViewInit
 } from "@angular/core";
 import { Row } from "./phenodatarow.interface";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -19,6 +20,9 @@ import { SessionEventService } from "../../sessionevent.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { Observable } from "rxjs/Observable";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { ViewChild } from "@angular/core";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-phenodata-visualization",
@@ -29,7 +33,7 @@ import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.s
   encapsulation: ViewEncapsulation.None
 })
 export class PhenodataVisualizationComponent
-  implements OnInit, OnChanges, OnDestroy {
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() private datasets: Array<Dataset>;
   @Input() private datasetsMap: Map<string, Dataset>;
 
@@ -38,7 +42,7 @@ export class PhenodataVisualizationComponent
   array: Row[];
   headers: string[];
   latestEdit: number;
-  deferredUpdatesTimer: any;
+  deferredUpdatesTimerId: number | null = null;
   unremovableColumns = ["sample", "original_name", "dataset", "column"];
 
   constructor(
@@ -48,8 +52,11 @@ export class PhenodataVisualizationComponent
     private sessionEventService: SessionEventService,
     private zone: NgZone,
     private restErrorService: RestErrorService,
-    private spreadsheetService: SpreadsheetService
+    private spreadsheetService: SpreadsheetService,
+    private nativeElementService: NativeElementService
   ) {}
+
+  @ViewChild("horizontalScroll") horizontalScrollDiv;
 
   ngOnInit() {
     this.updateView();
@@ -58,6 +65,15 @@ export class PhenodataVisualizationComponent
     this.sessionEventService.getDatasetStream().subscribe(() => {
       this.updateViewLater();
     });
+  }
+
+  ngAfterViewInit() {
+    // not created in modal
+    if (this.horizontalScrollDiv) {
+      this.nativeElementService.disableGestures(
+        this.horizontalScrollDiv.nativeElement
+      );
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -129,7 +145,7 @@ export class PhenodataVisualizationComponent
          we must not update the scope, because it would create an infinite
          loop.
          */
-        // console.log(source);
+        // log.info(source);
         if (
           source === "edit" ||
           source === "Autofill.fill" ||
@@ -356,7 +372,7 @@ export class PhenodataVisualizationComponent
     });
 
     Observable.forkJoin(updates).subscribe(
-      () => console.log(updates.length + " datasets updated"),
+      () => log.info(updates.length + " datasets updated"),
       err => this.restErrorService.handleError(err, "dataset updates failed")
     );
   }
@@ -386,7 +402,7 @@ export class PhenodataVisualizationComponent
 
       if (!container) {
         // timer or event triggered the update
-        console.log(
+        log.info(
           "cancelling the phenodata update, because the container has been removed already"
         );
         return;
@@ -442,11 +458,11 @@ export class PhenodataVisualizationComponent
        to apply them to the table.
        */
 
-      if (!this.deferredUpdatesTimer) {
-        this.deferredUpdatesTimer = setInterval(() => {
+      if (this.deferredUpdatesTimerId == null) {
+        this.deferredUpdatesTimerId = window.setInterval(() => {
           if (!this.isEditingNow()) {
-            clearInterval(this.deferredUpdatesTimer);
-            this.deferredUpdatesTimer = undefined;
+            window.clearInterval(this.deferredUpdatesTimerId);
+            this.deferredUpdatesTimerId = null;
             this.updateView();
           }
         }, 100);
@@ -459,8 +475,9 @@ export class PhenodataVisualizationComponent
       .openStringModal("Add new column", "Column name", "", "Add")
       .do(name => {
         this.zone.runOutsideAngular(() => {
-          const colHeaders = <Array<string>>(<ht.Options>this.hot.getSettings())
-            .colHeaders;
+          const colHeaders = <Array<string>>(
+            (<ht.Options>this.hot.getSettings()).colHeaders
+          );
           this.hot.alter("insert_col", colHeaders.length);
           // remove undefined column header
           colHeaders.pop();
