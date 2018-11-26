@@ -30,6 +30,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -72,7 +73,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService,
+    private nativeElementService: NativeElementService
   ) {}
 
   // actually selected datasets
@@ -426,21 +427,20 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => console.log("dataset rename error", err));
+            .subscribe(null, err => log.warn("dataset rename error", err));
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "Delete",
         action: function(d, i) {
-          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
           self.delete.emit();
         }
       },
       {
         title: "Export",
         action: function(d, i) {
-          console.log("The dataset is : " + d.dataset);
+          log.info("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
@@ -683,7 +683,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .updateDataset(datasetCopy)
             .subscribe(
               () => null,
-              err => console.log("dataset update error", err)
+              err => log.warn("dataset update error", err)
             );
         }
       });
@@ -720,16 +720,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             if (category) {
               color = category.color;
             } else {
-              // console.log('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
+              // log.info('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
             }
           } else {
-            // console.log('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
+            // log.info('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
           }
         } else {
-          // console.log("source job of dataset " + dataset.name + " not found");
+          // log.info("source job of dataset " + dataset.name + " not found");
         }
       } else {
-        // console.log('dataset source job ' +  dataset.name + ' is null');
+        // log.info('dataset source job ' +  dataset.name + ' is null');
       }
 
       // when opening a session file, datasets may be without names for some time
@@ -776,14 +776,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               target: targetNode
             });
           } else {
-            console.log("node is its own parent", sourceNode);
+            log.info("node is its own parent", sourceNode);
           }
         });
         if (sourceJob.inputs.length === 0) {
-          // console.log('source job doesn\'t have inputs', sourceJob);
+          // log.info('source job doesn\'t have inputs', sourceJob);
         }
       } else {
-        // console.log("no source job for ", targetNode);
+        // log.info("no source job for ", targetNode);
       }
     });
 
@@ -833,7 +833,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showTooltip(element: any, dataset: any, delay = 200) {
     const datasetLeft = element.getBoundingClientRect().left;
-    console.log(datasetLeft);
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
@@ -973,35 +972,32 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   setCurrentToolTipName(id: any) {
-
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
       this.datasetToolTipArray[id].datasetName
     );
     const curRect = document
-    .getElementById(this.datasetToolTipArray[id].datasetId)
-    .getBoundingClientRect();
+      .getElementById(this.datasetToolTipArray[id].datasetId)
+      .getBoundingClientRect();
 
-  // checking the name
-  for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-    if (
-      this.datasetToolTipArray[id].datasetId !==
-        this.datasetToolTipArray[k].datasetId &&
-      this.filter.has(this.datasetToolTipArray[k].datasetId)
-    ) {
-      const rectB = document
-        .getElementById(this.datasetToolTipArray[k].datasetId)
-        .getBoundingClientRect();
+    // checking the name
+    for (let k = 0; k < this.datasetToolTipArray.length; k++) {
+      if (
+        this.datasetToolTipArray[id].datasetId !==
+          this.datasetToolTipArray[k].datasetId &&
+        this.filter.has(this.datasetToolTipArray[k].datasetId)
+      ) {
+        const rectB = document
+          .getElementById(this.datasetToolTipArray[k].datasetId)
+          .getBoundingClientRect();
 
-      if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-        this.datasetToolTipArray[id].dataNodeToolTip.html(
-          this.datasetToolTipArray[id].datasetName
-            .split(".")[0]
-            .slice(0, 5) + "..."
-        );
+        if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
+          this.datasetToolTipArray[id].dataNodeToolTip.html(
+            this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) +
+              "..."
+          );
+        }
       }
     }
-  }
-
   }
 }
