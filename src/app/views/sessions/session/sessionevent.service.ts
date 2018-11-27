@@ -28,6 +28,8 @@ export class SessionEventService {
   wsSubject$: WebSocketSubject<WsEvent>;
   localSubject$: Subject<WsEvent>;
 
+  sessionHasChanged = false;
+
   constructor(
     private configService: ConfigService,
     private tokenService: TokenService,
@@ -45,12 +47,18 @@ export class SessionEventService {
   }
 
   setSessionData(sessionId: string, sessionData: SessionData) {
+    this.sessionHasChanged = false;
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.publish().refCount();
 
     this.connect(this.localSubject$);
+
+    // track any changes to session
+    stream.subscribe(() => {
+      this.sessionHasChanged = true;
+    });
 
     this.datasetStream$ = stream
       .filter(wsData => wsData.resourceType === "DATASET")
@@ -213,7 +221,6 @@ export class SessionEventService {
           sessionData.session = remote;
           return this.createEvent(event, local, remote);
         });
-
     } else if (event.type === "DELETE") {
       // nothing to do, the client reacts when the Rule is deleted
       return Observable.never();

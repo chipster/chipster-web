@@ -3,17 +3,13 @@
 </div>
 <div class="modal-body">
   <div class="form-group">
-    <p>{{message}}</p>
-    <label for="value">{{description}}</label>
-    <input id="value" #valueInput type="text" class="form-control"
-           [(ngModel)]="value"
-           [placeholder]="placeHolder"
-           (keydown.enter)="save(button1Text)">
+    <div [innerHtml]="message"></div>
+    <label class="lighter text-smaller" for="value">{{description}}</label>
+    <input id="value" #valueInput type="text" class="form-control" [(ngModel)]="value" [placeholder]="placeHolder">
   </div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
-  <button type="submit" class="btn btn-info" (click)="save(button2Text)">{{button2Text}}</button>
-  <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save(button1Text)">{{button1Text}}</button>
+  <button type="button" class="btn btn-sm btn-secondary" (click)="cancel()">Cancel</button>
+  <button type="submit" class="btn btn-sm btn-info" (click)="save(button2Text)">{{button2Text}}</button>
+  <button type="submit" [disabled]="!value" class="btn btn-sm btn-info" (click)="save(button1Text)">{{button1Text}}</button>
 </div>
-

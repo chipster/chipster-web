@@ -31,7 +31,7 @@ export class DialogModalService {
     modalRef.componentInstance.value = value;
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.message = message;
-    modalRef.componentInstance.description = "Session name";
+    modalRef.componentInstance.description = "New session name";
     modalRef.componentInstance.button1Text = button1Text;
     modalRef.componentInstance.button2Text = button2Text;
     modalRef.componentInstance.placeHolder = "";
