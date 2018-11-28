@@ -76,6 +76,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	  of an example session, she is directed to the new session.
 	   */
         this.statusText = "Loading session...";
+        this.loadingDone = false;
         this.selectionHandlerService.clearSelections();
         this.sessionData = null;
 
