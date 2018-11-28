@@ -246,6 +246,33 @@ export class SessionDataService {
     );
   }
 
+  isMySession(session: Session): boolean {
+    return session.rules.some(
+      rule =>
+        rule.username === this.tokenService.getUsername() && !rule.sharedBy
+    );
+  }
+
+  /**
+   * TODO get exampleSessionOwnerUserId from somewhere else
+   * @param session
+   * @param exampleSessionOwnerUserId
+   */
+  isExampleSession(
+    session: Session,
+    exampleSessionOwnerUserId: string
+  ): boolean {
+    return session.rules.some(rule => {
+      return (
+        exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId
+      );
+    });
+  }
+
+  isReadOnlySession(session: Session) {
+    return !this.getApplicableRules(session.rules).some(rule => rule.readWrite);
+  }
+
   // Added the delete dataset code here as two components are sharing the code
   deleteDatasetsNow(sessionData: SessionData) {
     // cancel the timer

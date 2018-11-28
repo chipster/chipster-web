@@ -61,7 +61,25 @@ export class UserService {
               return Observable.of(idFromStore);
             } else {
               log.info("no valid latest session id in store");
-              return this.getLatestSessionFromSessionDb();
+              return this.getLatestSessionFromSessionDb().mergeMap(
+                (idFromSessionDb: string) => {
+                  if (
+                    idFromSessionDb !== null &&
+                    sessions.some(
+                      session => session.sessionId === idFromSessionDb
+                    )
+                  ) {
+                    log.info(
+                      "found valid latest session id from sessionDb",
+                      idFromSessionDb
+                    );
+                    return Observable.of(idFromSessionDb);
+                  } else {
+                    log.info("no valid latest session id in sessionDb");
+                    return Observable.of(null);
+                  }
+                }
+              );
             }
           }
         );

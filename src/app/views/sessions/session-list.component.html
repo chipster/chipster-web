@@ -1,4 +1,3 @@
-
 <div class="container-fluid">
   <h3 class="mt-4 mb-3">Sessions</h3>
 
@@ -58,11 +57,11 @@
                           id="sessionDropdown" title="Actions" ngbDropdownToggle>
                           <i class="fas fa-ellipsis-h" aria-hidden="true"></i></button>
                         <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
-                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item"
+                          <button [disabled]="sessionDataService.isReadOnlySession(session)" class="dropdown-item"
                             (click)="sessionDropdown.toggle();rename(session)">Rename&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
-                          <button [disabled]="!sessionDataService.hasPersonalRule(session.rules)" class="dropdown-item"
+                          <button [disabled]="sessionDataService.isReadOnlySession(session)" class="dropdown-item"
                             (click)="sessionDropdown.toggle();share(session)">Share&hellip;</button>
                           <button class="dropdown-item" (click)="sessionDropdown.toggle();download(session)">Download</button>
                         </div>

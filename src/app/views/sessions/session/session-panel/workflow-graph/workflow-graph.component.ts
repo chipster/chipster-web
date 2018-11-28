@@ -73,7 +73,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService,
+    private nativeElementService: NativeElementService
   ) {}
 
   // actually selected datasets
@@ -427,14 +427,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => log.info("dataset rename error", err));
+            .subscribe(null, err => log.warn("dataset rename error", err));
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "Delete",
         action: function(d, i) {
-          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
           self.delete.emit();
         }
       },
@@ -684,7 +683,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .updateDataset(datasetCopy)
             .subscribe(
               () => null,
-              err => log.info("dataset update error", err)
+              err => log.warn("dataset update error", err)
             );
         }
       });
@@ -834,7 +833,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showTooltip(element: any, dataset: any, delay = 200) {
     const datasetLeft = element.getBoundingClientRect().left;
-    log.info(datasetLeft);
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
@@ -974,35 +972,32 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   setCurrentToolTipName(id: any) {
-
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
       this.datasetToolTipArray[id].datasetName
     );
     const curRect = document
-    .getElementById(this.datasetToolTipArray[id].datasetId)
-    .getBoundingClientRect();
+      .getElementById(this.datasetToolTipArray[id].datasetId)
+      .getBoundingClientRect();
 
-  // checking the name
-  for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-    if (
-      this.datasetToolTipArray[id].datasetId !==
-        this.datasetToolTipArray[k].datasetId &&
-      this.filter.has(this.datasetToolTipArray[k].datasetId)
-    ) {
-      const rectB = document
-        .getElementById(this.datasetToolTipArray[k].datasetId)
-        .getBoundingClientRect();
+    // checking the name
+    for (let k = 0; k < this.datasetToolTipArray.length; k++) {
+      if (
+        this.datasetToolTipArray[id].datasetId !==
+          this.datasetToolTipArray[k].datasetId &&
+        this.filter.has(this.datasetToolTipArray[k].datasetId)
+      ) {
+        const rectB = document
+          .getElementById(this.datasetToolTipArray[k].datasetId)
+          .getBoundingClientRect();
 
-      if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-        this.datasetToolTipArray[id].dataNodeToolTip.html(
-          this.datasetToolTipArray[id].datasetName
-            .split(".")[0]
-            .slice(0, 5) + "..."
-        );
+        if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
+          this.datasetToolTipArray[id].dataNodeToolTip.html(
+            this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) +
+              "..."
+          );
+        }
       }
     }
-  }
-
   }
 }

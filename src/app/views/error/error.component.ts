@@ -20,7 +20,6 @@ export class ErrorComponent implements OnInit {
 
   ngOnInit() {
     this.errorService.getErrors().subscribe((error: ErrorMessage) => {
-      log.info("error component got new error", error);
       if (error) {
         this.errors = this.errors.concat(error);
       }

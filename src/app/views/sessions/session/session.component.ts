@@ -22,6 +22,7 @@ import { UserService } from "../../../shared/services/user.service";
 import { SessionService } from "./session.service";
 import { ToolsService } from "../../../shared/services/tools.service";
 import { forkJoin } from "rxjs";
+import { ConfigService } from "../../../shared/services/config.service";
 
 @Component({
   selector: "ch-session",
@@ -42,6 +43,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   split2Size = 67;
   split3Size = 33;
 
+  private exampleSessionOwnerUserId: string;
   private PARAM_TEMP_COPY = "tempCopy";
   private unsubscribe: Subject<any> = new Subject();
 
@@ -60,7 +62,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private routeService: RouteService,
     private settingsService: SettingsService,
     private userService: UserService,
-    private toolsService: ToolsService
+    private toolsService: ToolsService,
+    private configService: ConfigService
   ) {}
 
   ngOnInit() {
@@ -73,6 +76,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	  of an example session, she is directed to the new session.
 	   */
         this.statusText = "Loading session...";
+        this.loadingDone = false;
         this.selectionHandlerService.clearSelections();
         this.sessionData = null;
 
@@ -80,8 +84,17 @@ export class SessionComponent implements OnInit, OnDestroy {
         const tools$ = this.toolsService.getTools();
         const modules$ = this.toolsService.getModules();
         const modulesMap$ = this.toolsService.getModulesMap();
+        const exampleSessionOwner$ = this.configService.get(
+          ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID
+        );
 
-        return forkJoin(sessionData$, tools$, modules$, modulesMap$);
+        return forkJoin(
+          sessionData$,
+          tools$,
+          modules$,
+          modulesMap$,
+          exampleSessionOwner$
+        );
       })
       .subscribe(
         results => {
@@ -90,6 +103,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.tools = results[1];
           this.modules = results[2];
           this.modulesMap = results[3];
+          this.exampleSessionOwnerUserId = results[4];
 
           // save latest session id
           log.info(
@@ -136,53 +150,29 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.unsubscribe.complete();
   }
 
-  canDeactivate() {
-
+  canDeactivate(): Observable<boolean> {
     /*
     No need to ask if the session was already deleted
 
     If user opens an example session and then deletes it, the client receives a websocket
     event about the deleted rule and deletes that rule from the sessionData.
     */
-    const sessionExists = (this.sessionData != null
-      && this.sessionDataService.getApplicableRules(this.sessionData.session.rules).length > 0);
-    const isTemptCopy = this.route.snapshot.queryParamMap.has(this.PARAM_TEMP_COPY);
+    const sessionExists =
+      this.sessionData != null &&
+      this.sessionDataService.getApplicableRules(this.sessionData.session.rules)
+        .length > 0;
+    const isTempCopy = this.route.snapshot.queryParamMap.has(
+      this.PARAM_TEMP_COPY
+    );
 
-    if (sessionExists && isTemptCopy) {
-
-      const keepButton = "Keep";
-      const deleteButton = "Delete";
-
-      return this.dialogModalService
-        .openTempCopyModal(
-          "Keep copy?",
-          "This session is a copy of another read-only session. Do you want to keep it?",
-          this.sessionData.session.name,
-          keepButton,
-          deleteButton
-        )
-
-        .flatMap(dialogResult => {
-          if (dialogResult.button === keepButton) {
-            this.sessionData.session.name = dialogResult.value;
-            return this.sessionService.updateSession(this.sessionData.session);
-          } else if (dialogResult.button === deleteButton) {
-            // the user doesn't need to be notified that the session is deleted
-            this.sessionEventService.unsubscribe();
-            return this.sessionDataService.deletePersonalRules(
-              this.sessionData.session
-            );
-          }
-        })
-        .map(() => true)
-        .catch(err => {
-          if (err === undefined || err === 0 || err === 1) {
-            // dialog cancel, backdrop click or esc
-            return Observable.of(false);
-          } else {
-            throw err;
-          }
-        });
+    if (isTempCopy && sessionExists) {
+      if (!this.sessionEventService.sessionHasChanged) {
+        // session has not changed --> just delete it
+        return this.deleteTempSession();
+      } else {
+        // session has changed --> ask what to do
+        return this.askKeepOrDiscardSession();
+      }
     } else {
       return Observable.of(true);
     }
@@ -211,7 +201,10 @@ export class SessionComponent implements OnInit, OnDestroy {
       .subscribe(change => {
         const rule: Rule = <Rule>change.oldValue;
 
-        if (change.event.type === "DELETE" && rule.username === this.tokenService.getUsername()) {
+        if (
+          change.event.type === "DELETE" &&
+          rule.username === this.tokenService.getUsername()
+        ) {
           alert("The session has been deleted.");
           this.routeService.navigateAbsolute("/sessions");
         }
@@ -315,5 +308,62 @@ export class SessionComponent implements OnInit, OnDestroy {
           .flatMap(() => Observable.never());
       }
     });
+  }
+
+  /**
+   * Return true when done.
+   */
+  private deleteTempSession(): Observable<boolean> {
+    // the user doesn't need to be notified that the session is deleted
+    this.sessionEventService.unsubscribe();
+    return this.sessionDataService
+      .deletePersonalRules(this.sessionData.session)
+      .map(() => true);
+  }
+
+  askKeepOrDiscardSession(): Observable<boolean> {
+    const keepButton = "Save new session";
+    const deleteButton = "Discard changes";
+
+    return this.dialogModalService
+      .openTempCopyModal(
+        "Save changes?",
+        "<p>" +
+          this.getKeepDialogFirstParagraph() +
+          "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
+        this.sessionData.session.name,
+        keepButton,
+        deleteButton
+      )
+      .flatMap(dialogResult => {
+        if (dialogResult.button === keepButton) {
+          this.sessionData.session.name = dialogResult.value;
+          return this.sessionService
+            .updateSession(this.sessionData.session)
+            .map(() => true);
+        } else if (dialogResult.button === deleteButton) {
+          return this.deleteTempSession();
+        }
+      })
+      .catch(err => {
+        if (err === undefined || err === 0 || err === 1) {
+          // dialog cancel, backdrop click or esc
+          return Observable.of(false);
+        } else {
+          throw err;
+        }
+      });
+  }
+
+  private getKeepDialogFirstParagraph(): string {
+    if (
+      this.sessionData.session.rules.some(
+        (rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId
+      )
+    ) {
+      return "You have made changes to a <em>read-only<em> example session.";
+    } else {
+      return "You have made changes to a <em>read-only</em> shared session.";
+    }
   }
 }
