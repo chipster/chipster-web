@@ -14,7 +14,7 @@ import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component"
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./session-data.service";
-import { SessionEventService } from "./sessionevent.service";
+import { SessionEventService } from "./session-event.service";
 import { Subject } from "rxjs/Subject";
 import log from "loglevel";
 import { SettingsService } from "../../../shared/services/settings.service";

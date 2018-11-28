@@ -16,6 +16,7 @@ import { Subject } from "rxjs/Subject";
 import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import log from "loglevel";
+import { WebSocketService } from "../../../shared/services/websocket.service";
 
 @Injectable()
 export class SessionEventService {
@@ -32,16 +33,12 @@ export class SessionEventService {
     private configService: ConfigService,
     private tokenService: TokenService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private websocketService: WebSocketService,
   ) {}
 
   unsubscribe() {
-    // can be null when session loading fails (e.g. expired token)
-    if (this.wsSubject$) {
-      this.wsSubject$.unsubscribe();
-    }
-    // sessionId is used as a flag for cancelling the reconnection
-    this.sessionId = null;
+    this.websocketService.unsubscribe();
   }
 
   setSessionData(sessionId: string, sessionData: SessionData) {
@@ -50,7 +47,7 @@ export class SessionEventService {
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.publish().refCount();
 
-    this.connect(this.localSubject$);
+    this.websocketService.connect(this.localSubject$, sessionId);
 
     this.datasetStream$ = stream
       .filter(wsData => wsData.resourceType === "DATASET")
@@ -80,7 +77,7 @@ export class SessionEventService {
 
     this.ruleStream$ = stream
       .filter(wsData => wsData.resourceType === "RULE")
-      .flatMap(data => this.handleRuleEvent(data, this.sessionId, sessionData))
+      .flatMap(data => this.handleRuleEvent(data, sessionData.session))
       .publish()
       .refCount();
 
@@ -89,68 +86,6 @@ export class SessionEventService {
     this.jobStream$.subscribe();
     this.sessionStream$.subscribe();
     this.ruleStream$.subscribe();
-  }
-
-  /**
-   * Connect to websocket and copy events to the listener Subject
-   *
-   * There are two Subjects, the listener Subject and
-   * the real websocket Subject. The listener Subject collects the subscriptions, while the websocket
-   * Subject is kept hidden behing the scenes. All received websocket messages are pushed to the listener
-   * Subject. When the websocket Subject completes beause of the server's
-   * idle timeout, we can simply create a new websocket Subject, without loosing the current subscriptions.
-   */
-  connect(listener) {
-    // get the url of the websocket server
-    this.configService
-      .getSessionDbEventsUrl(this.sessionId)
-      .flatMap((eventsUrl: string) => {
-        const wsUrl = `${eventsUrl}/events/${
-          this.sessionId
-        }?token=${this.tokenService.getToken()}`;
-        log.debug("event URL", wsUrl);
-
-        // convert websocket to observable
-        this.wsSubject$ = Observable.webSocket({
-          url: wsUrl,
-          openObserver: {
-            next: x => {
-              log.info("websocket open", x);
-            }
-          }
-        });
-
-        return this.wsSubject$;
-      })
-      // convert unclean idle timeouts to clean (about 20% of them for unknown reason)
-      .catch(err => {
-        if (err.code === 1001 && err.reason === "Idle Timeout") {
-          return Observable.empty();
-        } else {
-          return Observable.throw(err);
-        }
-      })
-      .subscribe(
-        data => {
-          log.info("websocket event", data);
-          listener.next(data);
-        },
-        err => {
-          log.info("websocket error", err);
-          this.errorService.headerError(
-            "Connection lost, please reload page.",
-            false
-          );
-        },
-        () => {
-          log.info("websocket closed");
-          // if not unsubscribed
-          if (this.sessionId) {
-            // reconnect after clean close (server idle timeout)
-            this.connect(listener);
-          }
-        }
-      );
   }
 
   /**
@@ -177,21 +112,20 @@ export class SessionEventService {
 
   handleRuleEvent(
     event: any,
-    sessionId: any,
-    sessionData: SessionData
-  ): Observable<SessionEvent> {
+    session: Session): Observable<SessionEvent> {
+    log.info("handle rule event", event, session);
     if (event.type === "CREATE") {
       return this.sessionResource
-        .getRule(sessionId, event.resourceId)
+        .getRule(session.sessionId, event.resourceId)
         .flatMap((rule: Rule) => {
-          sessionData.session.rules.push(rule);
+          session.rules.push(rule);
           return this.createEvent(event, null, rule);
         });
     } else if (event.type === "DELETE") {
-      const rule = sessionData.session.rules.find(
+      const rule = session.rules.find(
         r => r.ruleId === event.resourceId
       );
-      sessionData.session.rules = sessionData.session.rules.filter(
+      session.rules = session.rules.filter(
         r => r.ruleId !== event.resourceId
       );
       return this.createEvent(event, rule, null);

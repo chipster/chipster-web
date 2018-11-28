@@ -3,7 +3,7 @@ import { SessionDataService } from "../../session-data.service";
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
 import { Job, SessionEvent, Dataset } from "chipster-js-common";
 import { JobService } from "../../job.service";
-import { SessionEventService } from "../../sessionevent.service";
+import { SessionEventService } from "../../session-event.service";
 import { Subject } from "rxjs/Subject";
 import { SessionData } from "../../../../../model/session/session-data";
 import * as _ from "lodash";

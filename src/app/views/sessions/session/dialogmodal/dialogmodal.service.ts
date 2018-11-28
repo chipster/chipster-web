@@ -7,6 +7,7 @@ import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { Observable } from "rxjs/Observable";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
+import { SessionEvent } from "chipster-js-common";
 
 @Injectable()
 export class DialogModalService {
@@ -55,11 +56,12 @@ export class DialogModalService {
     return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openSharingModal(session): Observable<any> {
+  openSharingModal(session, ruleStream$: Observable<SessionEvent>): Observable<any> {
     const modalRef = this.modalService.open(SharingModalComponent, {
       size: "lg"
     });
     modalRef.componentInstance.session = session;
+    modalRef.componentInstance.ruleStream$ = ruleStream$;
     return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

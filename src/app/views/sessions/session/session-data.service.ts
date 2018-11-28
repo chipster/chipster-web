@@ -9,7 +9,7 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestService } from "../../../core/rest-services/restservice/rest.service";
 import { SessionData } from "../../../model/session/session-data";
-import { SessionEventService } from "./sessionevent.service";
+import { SessionEventService } from "./session-event.service";
 import { SelectionService } from "./selection.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "./selection-handler.service";
@@ -47,10 +47,6 @@ export class SessionDataService {
 
   createJob(job: Job) {
     return this.sessionResource.createJob(this.getSessionId(), job);
-  }
-
-  createRule(rule: Rule) {
-    return this.sessionResource.createRule(this.getSessionId(), rule);
   }
 
   getJobById(jobId: string, jobs: Map<string, Job>) {
@@ -128,10 +124,6 @@ export class SessionDataService {
     Observable.merge(...deleteDatasets$).subscribe(() => {
       log.info("Job deleted");
     });
-  }
-
-  deleteRule(ruleId: string) {
-    return this.sessionResource.deleteRule(this.getSessionId(), ruleId);
   }
 
   updateDataset(dataset: Dataset) {

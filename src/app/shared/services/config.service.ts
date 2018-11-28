@@ -106,7 +106,7 @@ export class ConfigService {
     return this.getPublicUri(Role.SESSION_DB);
   }
 
-  getSessionDbEventsUrl(sessionId: string): Observable<string> {
+  getSessionDbEventsUrl(): Observable<string> {
     return this.getPublicUri(Role.SESSION_DB_EVENTS);
   }
 

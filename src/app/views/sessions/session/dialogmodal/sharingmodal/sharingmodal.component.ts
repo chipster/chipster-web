@@ -4,24 +4,24 @@ import {
   Input,
   AfterViewInit,
   ViewChild,
-  OnChanges,
-  OnInit
+  OnInit,
+  OnDestroy
 } from "@angular/core";
-import { ActivatedRoute, Router, UrlTree } from "@angular/router";
-import { Store } from "@ngrx/store";
-import { Session, Dataset, Rule } from "chipster-js-common";
+import { Session, Rule, SessionEvent } from "chipster-js-common";
 import { TokenService } from "../../../../../core/authentication/token.service";
-import { SessionDataService } from "../../session-data.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { SessionEventService } from "../../sessionevent.service";
-import { RouteService } from "../../../../../shared/services/route.service";
+import { SessionResource } from "../../../../../shared/resources/session.resource";
+import { Observable, Subject } from "rxjs";
+import log from "loglevel";
 
 @Component({
   templateUrl: "./sharingmodal.component.html"
 })
-export class SharingModalComponent implements AfterViewInit, OnInit {
+export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()
   session: Session;
+  @Input()
+  ruleStream$: Observable<SessionEvent>;
 
   @ViewChild("submitButton")
   submitButton;
@@ -31,23 +31,27 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
   public rules: Rule[];
   public newRule: Rule;
 
+  private unsubscribe: Subject<any> = new Subject();
+
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private store: Store<any>,
     private activeModal: NgbActiveModal,
     private tokenService: TokenService,
-    private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
-    private sessionEventService: SessionEventService,
-    private routeService: RouteService
+    private sessionResource: SessionResource,
   ) {}
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.sessionEventService.getRuleStream().subscribe(() => {
+    this.ruleStream$
+      .takeUntil(this.unsubscribe)
+      .subscribe(() => {
       this.rules = this.session.rules;
     });
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   ngAfterViewInit() {
@@ -71,9 +75,9 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
   }
 
   saveRule() {
-    this.sessionDataService.createRule(this.newRule).subscribe(
+    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
       resp => {
-        console.log(resp);
+        log.info("rule created", resp);
         this.newRule = null;
       },
       err => this.restErrorService.handleError(err, "failed to add a new rule")
@@ -88,10 +92,9 @@ export class SharingModalComponent implements AfterViewInit, OnInit {
   }
 
   deleteRule(ruleId: string) {
-    this.sessionDataService
-      .deleteRule(ruleId)
+    this.sessionResource.deleteRule(this.session.sessionId, ruleId)
       .subscribe(
-        resp => console.log("rule deleted"),
+        resp => log.info("rule deleted"),
         err =>
           this.restErrorService.handleError(err, "failed to delete the rule")
       );

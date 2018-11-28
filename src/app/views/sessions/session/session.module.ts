@@ -5,7 +5,7 @@ import { DatasetModule } from "./selectiondetails/dataset.module";
 import { CommonModule } from "@angular/common";
 import { SharedModule } from "../../../shared/shared.module";
 import { SessionPanelModule } from "./session-panel/session-panel.module";
-import { SessionEventService } from "./sessionevent.service";
+import { SessionEventService } from "./session-event.service";
 import { SessionDataService } from "./session-data.service";
 import { SessionListComponent } from "../session-list.component";
 import { SessionComponent } from "./session.component";
@@ -23,6 +23,7 @@ import { SelectionPanelComponent } from "./selection-panel/selection-panel.compo
 import { ImportSessionModalComponent } from "../open-session-file/import-session-modal.component";
 import { SessionService } from "./session.service";
 import { SessionDetailsComponent } from "./session-details/session-details.component";
+import { UserEventService } from "../user-event.service";
 
 @NgModule({
   imports: [
@@ -53,7 +54,8 @@ import { SessionDetailsComponent } from "./session-details/session-details.compo
     SelectionHandlerService,
     ToolSelectionService,
     JobService,
-    ModifiedSessionGuard
+    ModifiedSessionGuard,
+    UserEventService,
   ],
   entryComponents: [JobErrorModalComponent, ImportSessionModalComponent]
 })

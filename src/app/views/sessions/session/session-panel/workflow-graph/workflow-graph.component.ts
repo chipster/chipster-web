@@ -18,7 +18,7 @@ import { PipeService } from "../../../../../shared/services/pipeservice.service"
 import { SessionDataService } from "../../session-data.service";
 import * as d3 from "d3";
 import { WorkflowGraphService } from "./workflow-graph.service";
-import { SessionEventService } from "../../sessionevent.service";
+import { SessionEventService } from "../../session-event.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
@@ -30,6 +30,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -426,7 +427,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => console.log("dataset rename error", err));
+            .subscribe(null, err => log.info("dataset rename error", err));
         },
         disabled: false // optional, defaults to false
       },
@@ -440,7 +441,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Export",
         action: function(d, i) {
-          console.log("The dataset is : " + d.dataset);
+          log.info("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
@@ -683,7 +684,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .updateDataset(datasetCopy)
             .subscribe(
               () => null,
-              err => console.log("dataset update error", err)
+              err => log.info("dataset update error", err)
             );
         }
       });
@@ -720,16 +721,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             if (category) {
               color = category.color;
             } else {
-              // console.log('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
+              // log.info('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
             }
           } else {
-            // console.log('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
+            // log.info('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
           }
         } else {
-          // console.log("source job of dataset " + dataset.name + " not found");
+          // log.info("source job of dataset " + dataset.name + " not found");
         }
       } else {
-        // console.log('dataset source job ' +  dataset.name + ' is null');
+        // log.info('dataset source job ' +  dataset.name + ' is null');
       }
 
       // when opening a session file, datasets may be without names for some time
@@ -776,14 +777,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               target: targetNode
             });
           } else {
-            console.log("node is its own parent", sourceNode);
+            log.info("node is its own parent", sourceNode);
           }
         });
         if (sourceJob.inputs.length === 0) {
-          // console.log('source job doesn\'t have inputs', sourceJob);
+          // log.info('source job doesn\'t have inputs', sourceJob);
         }
       } else {
-        // console.log("no source job for ", targetNode);
+        // log.info("no source job for ", targetNode);
       }
     });
 
@@ -833,7 +834,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showTooltip(element: any, dataset: any, delay = 200) {
     const datasetLeft = element.getBoundingClientRect().left;
-    console.log(datasetLeft);
+    log.info(datasetLeft);
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()

@@ -6,6 +6,7 @@ import { RestErrorService } from "../../../../core/errorhandler/rest-error.servi
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { SessionData } from "../../../../model/session/session-data";
+import { SessionEventService } from "../session-event.service";
 
 @Component({
   selector: "ch-session-details",
@@ -21,6 +22,7 @@ export class SessionDetailsComponent {
 
   constructor(
     private sessionDataService: SessionDataService,
+    private sessionEventService: SessionEventService,
     private sessionService: SessionService,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
@@ -36,7 +38,7 @@ export class SessionDetailsComponent {
   }
 
   sharingModal() {
-    this.dialogModalService.openSharingModal(this.session);
+    this.dialogModalService.openSharingModal(this.session, this.sessionEventService.getRuleStream());
   }
 
   duplicateModal() {
