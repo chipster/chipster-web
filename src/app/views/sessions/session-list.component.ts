@@ -52,16 +52,19 @@ export class SessionListComponent implements OnInit {
     private restErrorService: RestErrorService,
     private sessionEventService: SessionEventService,
     private toolsService: ToolsService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID).pipe(
-      tap(userId => this.exampleSessionOwnerUserId = userId),
-      mergeMap(() => this.updateSessions())
-    ).subscribe(null, (error: any) => {
-      this.errorHandlerService.handleError(error, "Updating sessions failed");
-    });
+    this.configService
+      .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
+      .pipe(
+        tap(userId => (this.exampleSessionOwnerUserId = userId)),
+        mergeMap(() => this.updateSessions())
+      )
+      .subscribe(null, (error: any) => {
+        this.errorHandlerService.handleError(error, "Updating sessions failed");
+      });
 
     this.previewThrottleSubscription = this.previewThrottle$
       .asObservable()
