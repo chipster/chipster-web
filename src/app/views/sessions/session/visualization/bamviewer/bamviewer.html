@@ -1,26 +1,25 @@
 <div *ngIf="state.isReady(); else statusTemplate">
-  <ul class="list-unstyled bamlist" *ngFor="let entry of samHeaderList">
-    <pre>{{entry}}</pre>
-  </ul>
+  <div class="text-sm">
+    <pre>{{samHeader}}</pre>
+  </div>
   <div *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
-  <table class="table-bordered table-hover bamtable">
-    <thead>
-    </thead>
-    <tbody>
-    <tr *ngFor="let bamRecord of bamRecordList">
-      <td><pre>{{bamRecord.readName}}</pre></td>
-      <td><pre>{{chrName}}</pre></td>
-      <td><pre>{{bamRecord.pos}}</pre></td>
-      <td><pre>{{bamRecord.mapQ}}</pre></td>
-      <td><pre>{{bamRecord.cigar}}</pre></td>
-      <td><pre>{{bamRecord.nextSegPos}}</pre></td>
-      <td><pre>{{bamRecord.seq}}></pre></td>
-      <td><pre>{{bamRecord.qual}}</pre></td>
-      <td><pre>{{bamRecord.typeTag}}</pre></td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="horizontal-scroll">
+    <table class="table-bordered table-hover bamtable text-sm">
+      <thead>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bamRecord of  bamRecordList">
+          <pre>{{bamRecord.readName}} {{chrName}}{{bamRecord.pos}} {{bamRecord.mapQ}} {{bamRecord.cigar}} {{bamRecord.nextSegPos}} {{bamRecord.seq}}
+             {{bamRecord.qual}} {{bamRecord.typeTag}}</pre>
+
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
 </div>
+
 
 <ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>

@@ -115,6 +115,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled: boolean;
+  selectionEnabled : boolean = false; 
 
   subscriptions: Array<any> = [];
 
@@ -200,6 +201,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.subscriptions.push(
         this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
+          this.selectionEnabled = true;
           this.update();
           this.renderGraph();
         })
@@ -269,6 +271,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     scroll.scrollTop = 0;
 
     this.updateSvgSize();
+    this.onZoomInandOut();
   }
 
   /**
@@ -535,7 +538,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    if (this.selectedDatasets.length > 0 && !this.searchEnabled) {
+    if (this.selectionEnabled && this.selectedDatasets.length >0) {
       this.showToolTipByIdForSelection();
     }
 
@@ -925,7 +928,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showToolTipByIdForSearch(d, i) {
     //  Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
-    this.setCurrentToolTipNameForSearch(i);
+    this.setCurrentToolTipName(i);
     this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", x =>
       WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
     );
@@ -933,7 +936,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showToolTipByIdForSelection() {
     for (let k = 0; k < this.selectedDatasets.length; k++) {
-      this.setCurrentToolTipNameForSelection(this.datasetToolTipArray.findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
+      this.setCurrentToolTipName(this.datasetToolTipArray.findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
       this.datasetToolTipArray.find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
     }
   }
@@ -950,27 +953,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onZoomInandOut() {
-    console.log(!this.filter);
-    console.log(this.filter != null && this.filter != undefined);
-    console.log(this.filter != undefined);
-    console.log(this.selectedDatasets != null && this.selectedDatasets != undefined);
-
-
-    if (!this.filter && this.selectedDatasets != null && this.selectedDatasets != undefined) {
-      console.log(" now working on selected dataset");
-      //them do the filter specific things
-      this.redrawToolTipsAfterZoomForSelection();
-    } else if (this.searchEnabled && this.filter != null && this.filter != undefined) {
-      this.redrawToolTipsAfterZoomForSearch();
-    }
-
-  }
-
-  redrawToolTipsAfterZoomForSearch() {
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
       .height;
     for (let i = 0; i < this.datasetToolTipArray.length; i++) {
-      if (this.filter.has(this.datasetToolTipArray[i].datasetId)) {
+      const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[i].datasetId);
+      const isSelected =  this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length > 0;
+      if (isInSearch || isSelected) {
         let datasetLeft, datasetTop;
         const element = document.getElementById(
           "node_" + this.datasetToolTipArray[i].datasetId
@@ -995,47 +983,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               "px"
             );
         }
-        this.setCurrentToolTipNameForSearch(i);
+        this.setCurrentToolTipName(i);
       }
     }
   }
 
-  redrawToolTipsAfterZoomForSelection() {
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
-      .height;
-    for (let i = 0; i < this.datasetToolTipArray.length; i++) {
-      if (this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length > 0) {
-        let datasetLeft, datasetTop;
-        const element = document.getElementById(
-          "node_" + this.datasetToolTipArray[i].datasetId
-        );
-        if (element) {
-          datasetLeft = element.getBoundingClientRect().left;
-          datasetTop = element.getBoundingClientRect().top;
-          this.datasetToolTipArray[i].dataNodeToolTip
-            .style(
-              "left",
-              datasetLeft -
-              this.svg.node().getBoundingClientRect().left -
-              5 +
-              "px"
-            )
-            .style(
-              "top",
-              datasetTop -
-              this.svg.node().getBoundingClientRect().top -
-              tooltipHeight +
-              2 +
-              "px"
-            );
-        }
-        this.setCurrentToolTipNameForSelection(i);
-      }
-    }
+  
 
-  }
-
-  setCurrentToolTipNameForSearch(id: any) {
+  setCurrentToolTipName(id: any) {
 
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
@@ -1047,10 +1002,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // checking the name
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-      if (
-        this.datasetToolTipArray[id].datasetId !==
-        this.datasetToolTipArray[k].datasetId &&
-        this.filter.has(this.datasetToolTipArray[k].datasetId)
+      const isNotSameDataset = this.datasetToolTipArray[id].datasetId !==this.datasetToolTipArray[k].datasetId;
+      const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[k].datasetId);
+      const isSelected =  this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId).length > 0;
+      if (isNotSameDataset && (isSelected || isInSearch)
       ) {
         const rectB = document
           .getElementById(this.datasetToolTipArray[k].datasetId)
@@ -1068,36 +1023,5 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
-  setCurrentToolTipNameForSelection(id: any) {
-    // First set the full name again
-    this.datasetToolTipArray[id].dataNodeToolTip.html(
-      this.datasetToolTipArray[id].datasetName
-    );
-    console.log(this.datasetToolTipArray[id].datasetName);
-    const curRect = document
-      .getElementById(this.datasetToolTipArray[id].datasetId)
-      .getBoundingClientRect();
-
-    // checking the name
-    for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-      if (
-        this.datasetToolTipArray[id].datasetId !==
-        this.datasetToolTipArray[k].datasetId &&
-        this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId).length > 0) {
-        const rectB = document
-          .getElementById(this.datasetToolTipArray[k].datasetId)
-          .getBoundingClientRect();
-
-        if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-          this.datasetToolTipArray[id].dataNodeToolTip.html(
-            this.datasetToolTipArray[id].datasetName
-              .split(".")[0]
-              .slice(0, 5) + "..."
-          );
-        }
-      }
-    }
-
-
-  }
+  
 }
