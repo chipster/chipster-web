@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Response, Request} from "@angular/http";
-import {Observable} from "rxjs/Observable";
+import {Response} from "@angular/http";
 import {Router} from "@angular/router";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ErrorService} from "./error.service";
@@ -40,8 +39,11 @@ export class RestErrorService  {
     } else if (RestErrorService.isNotFound(error)) {
       this.errorService.headerErrorNotFound(message);
 
-    } else {
+    } else if (RestErrorService.isClientOrConnectionError(error)) {
       this.errorService.headerErrorConnectionFailed(message);
+
+    } else {
+      this.errorService.headerError(message);
     }
 
     // log

@@ -32,6 +32,7 @@ import { NotFoundComponent } from "./views/error/not-found.component";
 import { RoutingModule } from "./core/routing/routing.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ToastrModule } from "ngx-toastr";
+import { ActionToastComponent } from "./views/error/action-toast";
 
 @NgModule({
   imports: [
@@ -54,9 +55,7 @@ import { ToastrModule } from "ngx-toastr";
     RoutingModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
-      preventDuplicates: true,
-      resetTimeoutOnDuplicate: true,
-      timeOut: 1500
+      toastComponent: ActionToastComponent,
     }),
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here
@@ -69,7 +68,11 @@ import { ToastrModule } from "ngx-toastr";
     ErrorComponent,
     ContactComponent,
     TermsComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    ActionToastComponent,
+  ],
+  entryComponents: [
+    ActionToastComponent,
   ],
   providers: [
     SelectionService,

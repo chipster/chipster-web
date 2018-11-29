@@ -5,6 +5,7 @@ import {ErrorMessage, ErrorType} from "./errormessage";
 @Injectable()
 export class ErrorService {
 
+  // handle the errors in component, because it can access the router
   private errors$ = new Subject();
 
   headerError(msg?: string, dismissible: boolean = true) {
