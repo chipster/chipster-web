@@ -16,7 +16,7 @@ import { ToolSelectionService } from "../tool.selection.service";
 import { SelectionService } from "../selection.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
-import { SessionEventService } from "../sessionevent.service";
+import { SessionEventService } from "../session-event.service";
 import { ToolService } from "./tool.service";
 import * as _ from "lodash";
 import UtilsService from "../../../../shared/utilities/utils";

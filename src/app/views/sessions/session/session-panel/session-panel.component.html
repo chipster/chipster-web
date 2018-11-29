@@ -23,8 +23,8 @@
 
             <!-- dropdown -->
             <span class="dropdown">
-              <button class="btn btn-secondary btn-sm float-right tool-bar-button" id="workflowDropdownMenuButton"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+              <button [disabled]="sessionData.datasetsMap.size === 0" class="btn btn-secondary btn-sm float-right tool-bar-button"
+                id="workflowDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
                 <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="workflowDropdownMenuButton">
@@ -34,11 +34,11 @@
             </span>
 
             <!-- zoom buttons-->
-            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-2 float-right tool-bar-button"
+            <button [disabled]="sessionData.datasetsMap.size === 0" class="btn btn-secondary btn-sm mr-2 float-right tool-bar-button"
               title="Zoom in" (click)="workflowGraph.zoomIn()">
               <span class=" fa fa-lg fa-search-plus "></span>
             </button>
-            <button *ngIf="sessionData.datasetsMap.size > 0" class="btn btn-secondary btn-sm mr-1 float-right tool-bar-button"
+            <button [disabled]="sessionData.datasetsMap.size === 0" class="btn btn-secondary btn-sm mr-1 float-right tool-bar-button"
               title="Zoom out" (click)="workflowGraph.zoomOut()">
               <span class="fas fa-lg fa-search-minus"></span>
             </button>

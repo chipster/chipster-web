@@ -37,7 +37,6 @@ export class TempCopyModalComponent implements AfterViewInit {
   }
 
   save(button: string) {
-    console.log("save()", button, this.value);
     this.activeModal.close({
       value: this.value,
       button: button

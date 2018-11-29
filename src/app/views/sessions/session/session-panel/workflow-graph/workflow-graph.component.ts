@@ -18,7 +18,7 @@ import { PipeService } from "../../../../../shared/services/pipeservice.service"
 import { SessionDataService } from "../../session-data.service";
 import * as d3 from "d3";
 import { WorkflowGraphService } from "./workflow-graph.service";
-import { SessionEventService } from "../../sessionevent.service";
+import { SessionEventService } from "../../session-event.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
@@ -30,6 +30,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import log from "loglevel";
 
 
 @Component({
@@ -73,8 +74,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService,
-  ) {}
+    private nativeElementService: NativeElementService
+  ) { }
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -115,7 +116,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled: boolean;
-  selectionEnabled : boolean = false; 
+  selectionEnabled: boolean = false;
 
   subscriptions: Array<any> = [];
 
@@ -430,21 +431,20 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => console.log("dataset rename error", err));
+            .subscribe(null, err => log.warn("dataset rename error", err));
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "Delete",
         action: function (d, i) {
-          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
           self.delete.emit();
         }
       },
       {
         title: "Export",
         action: function (d, i) {
-          console.log("The dataset is : " + d.dataset);
+          log.info("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
@@ -538,7 +538,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    if (this.selectionEnabled && this.selectedDatasets.length >0) {
+    if (this.selectionEnabled && this.selectedDatasets.length > 0) {
       this.showToolTipByIdForSelection();
     }
 
@@ -694,7 +694,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .updateDataset(datasetCopy)
             .subscribe(
               () => null,
-              err => console.log("dataset update error", err)
+              err => log.warn("dataset update error", err)
             );
         }
       });
@@ -731,16 +731,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             if (category) {
               color = category.color;
             } else {
-              // console.log('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
+              // log.info('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
             }
           } else {
-            // console.log('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
+            // log.info('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
           }
         } else {
-          // console.log("source job of dataset " + dataset.name + " not found");
+          // log.info("source job of dataset " + dataset.name + " not found");
         }
       } else {
-        // console.log('dataset source job ' +  dataset.name + ' is null');
+        // log.info('dataset source job ' +  dataset.name + ' is null');
       }
 
       // when opening a session file, datasets may be without names for some time
@@ -787,14 +787,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               target: targetNode
             });
           } else {
-            console.log("node is its own parent", sourceNode);
+            log.info("node is its own parent", sourceNode);
           }
         });
         if (sourceJob.inputs.length === 0) {
-          // console.log('source job doesn\'t have inputs', sourceJob);
+          // log.info('source job doesn\'t have inputs', sourceJob);
         }
       } else {
-        // console.log("no source job for ", targetNode);
+        // log.info("no source job for ", targetNode);
       }
     });
 
@@ -957,7 +957,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .height;
     for (let i = 0; i < this.datasetToolTipArray.length; i++) {
       const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[i].datasetId);
-      const isSelected =  this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length > 0;
+      const isSelected = this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length > 0;
       if (isInSearch || isSelected) {
         let datasetLeft, datasetTop;
         const element = document.getElementById(
@@ -988,10 +988,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  
+
 
   setCurrentToolTipName(id: any) {
-
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
       this.datasetToolTipArray[id].datasetName
@@ -1002,9 +1001,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // checking the name
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-      const isNotSameDataset = this.datasetToolTipArray[id].datasetId !==this.datasetToolTipArray[k].datasetId;
+      const isNotSameDataset = this.datasetToolTipArray[id].datasetId !== this.datasetToolTipArray[k].datasetId;
       const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[k].datasetId);
-      const isSelected =  this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId).length > 0;
+      const isSelected = this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId).length > 0;
       if (isNotSameDataset && (isSelected || isInSearch)
       ) {
         const rectB = document
@@ -1023,5 +1022,5 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
-  
+
 }
