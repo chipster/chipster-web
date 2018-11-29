@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { Service, Dataset } from "chipster-js-common";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
@@ -7,13 +7,16 @@ import BamRecord from "./bamRecord";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { Subject } from "rxjs/Subject";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { Observable, BehaviorSubject, observable } from 'rxjs';
+import { thresholdFreedmanDiaconis } from 'd3';
+import { TouchSequence } from 'selenium-webdriver';
+
 
 
 @Component({
   selector: 'ch-bam-viewer',
   templateUrl: 'bamviewer.html',
   styleUrls: ['./bamviewer.component.less'],
-
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
 
@@ -21,29 +24,42 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private dataset: Dataset;
   private plain: any;
   private samHeaderLen: number;
-  private samHeader = "";
+  private samHeader;
   private headerEnd: number;
-  private samHeaderList: Array<string> = [];
-  private bamRecordList: Array<BamRecord> = [];
+  private samHeaderList: Array<string>;
+
+  private bamRecordList: BamRecord[];
+  private observableBamRecordList: BehaviorSubject<BamRecord[]>;
+  private bamLis$: Observable<BamRecord[]>;
+
   private chrName: string;
-  private bamRecord: BamRecord;
   private visibleBlockNumber = 2; // just a magic number,just showing records from first two blocks
-  private maxBytes = 5000000;
+  private maxBytes = 500000;
+
+  
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
   // BGZF blocks
   private BLOCK_HEADER_LENGTH = 18;
-  private filePos = 0;
-  private blockList = [];
+  private filePos;
+  private blockList;
 
   constructor(private fileResource: FileResource,
     private sessionDataService: SessionDataService,
     private errorHandlerService: RestErrorService) {
+    this.bamRecordList = new Array<BamRecord>();
+    this.observableBamRecordList = <BehaviorSubject<BamRecord[]>>new BehaviorSubject([]);
+
   }
 
   ngOnChanges() {
+    this.samHeaderList = [];
+    this.filePos = 0;
+    this.blockList = [];
+    this.bamRecordList = [];
+    this.samHeader = "";
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading bam file...");
@@ -64,19 +80,23 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
           const headerBuffer = arrayBuffer.slice(0, blockSize - 1);
           const recordBuffer = arrayBuffer.slice(blockSize);
 
-
           // Read the header part
           this.readHeader(headerBuffer);
           // Read the record buffer
           this.getBGZFBlocks(recordBuffer);
+          console.log( "now setting the state" );
+          this.state = new LoadState(State.Ready, "Loading Bam file complete");
+        
 
-          this.state = new LoadState(State.Ready);
         }
       }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading bam file failed");
         this.errorHandlerService.handleError(error, this.state.message);
       });
+
+    
   }
+
 
   ngOnDestroy() {
     this.unsubscribe.next();
@@ -93,7 +113,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     for (var i = 0; i < this.samHeaderLen; ++i) {
       this.samHeader += String.fromCharCode(header[i + 8]);
     }
-
+   
     // In cases where SAM header text section is missing or not containing seq information
     if (this.samHeaderLen === 0 || this.samHeader.indexOf("@SQ") === -1) {
       //#ref sequence
@@ -118,13 +138,16 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         p = p + 8 + lName;
         this.headerEnd = p;
 
+
       }
+
     }
-    this.updateHeaderText();
+    // this.updateHeaderText();
 
   }
 
   updateHeaderText() {
+    // console.log(this.samHeader);
 
     let a = this.samHeader.split("@");
     for (var i = 1, j = 0; i < a.length; i++ , j++) {
@@ -139,6 +162,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     let totalSize = 0;
     let blockSizeList = [];
+    console.log("File position in record blocks" + this.filePos);
 
 
     while (this.filePos < fileLimit) {
@@ -169,15 +193,15 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     }
 
-    let i;
+    console.log(this.filePos);
 
     if (this.blockList.length > 0) {
-      for (i = 0; i < this.visibleBlockNumber; ++i) {
-        this.decodeBamRecord(this.blockList[i]);
-      }
+      console.log("started decoding blocks", this.visibleBlockNumber);
+      this.decodeBamRecord(this.blockList[0]);
+
     }
 
-
+    return null;
   }
 
   decodeBamRecord(unComperessedData: any) {
@@ -185,8 +209,10 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     const MAX_GZIP_BLOCK_SIZE = 65536;
     let offset = 0;
 
-    while (true) {
-      this.bamRecord = new BamRecord();
+
+    console.log(offset, this.plain.length);
+    while (offset < MAX_GZIP_BLOCK_SIZE) {
+      let bamRecord = new BamRecord();
       let blockSize, blockEnd, refID, pos, bmn, bin, mq, nl, flag_nc, flag, nc, lseq, nextRefID,
         nextPos, readName, j, p, lengthOnRef, cigar, c, cigarArray, seq, seqBytes;
 
@@ -196,9 +222,14 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       if (offset >= this.plain.length) {
         return;
       }
-
+    
       blockSize = this.readInt(this.plain, offset);
+      if (blockSize > MAX_GZIP_BLOCK_SIZE) {
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
+        return;
+      }
       blockEnd = offset + blockSize + 4;
+      console.log(blockSize, blockEnd);
 
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE || blockEnd > MAX_GZIP_BLOCK_SIZE) {
@@ -235,7 +266,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       for (j = 0; j < nl - 1; ++j) {
         readName += String.fromCharCode(this.plain[offset + 36 + j]);
       }
-
+      console.log(readName);
       p = offset + 36 + nl;
       lengthOnRef = 0;
       cigar = '';
@@ -257,7 +288,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         cigarArray.push({ len: opLen, ltr: opLtr });
 
       }
-      this.bamRecord.cigar = cigar;
+      bamRecord.cigar = cigar;
 
       seq = '';
       seqBytes = (lseq + 1) >> 1;
@@ -339,7 +370,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       offset = blockEnd;
 
 
-      for ( var x in tags) {
+      for (var x in tags) {
         if (tags.hasOwnProperty(x)) {
           typeTag += x + ":" + tags[x] + " ";
         }
@@ -349,24 +380,25 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
 
       // assign the bam record fields
-      this.bamRecord.flag = flag;
-      this.bamRecord.pos = pos + 1;
-      this.bamRecord.nextSegment = nextRefID;
-      this.bamRecord.nextSegPos = nextPos + 1;
-      this.bamRecord.readName = readName;
-      this.bamRecord.seq = seq;
-      this.bamRecord.qual = qual;
-      this.bamRecord.chrName = this.chrName;
-      this.bamRecord.mapQ = mq;
-      this.bamRecord.typeTag = typeTag;
+      bamRecord.flag = flag;
+      bamRecord.pos = pos + 1;
+      bamRecord.nextSegment = nextRefID;
+      bamRecord.nextSegPos = nextPos + 1;
+      bamRecord.readName = readName;
+      bamRecord.seq = seq;
+      bamRecord.qual = qual;
+      bamRecord.chrName = this.chrName;
+      bamRecord.mapQ = mq;
+      bamRecord.typeTag = typeTag;
 
-
-      this.bamRecordList.push(this.bamRecord);
-
+      this.bamRecordList.push(bamRecord);
+      if (this.bamRecordList.length > 200) {
+        return;
+      }
     }
-
-
   }
+
+
 
   // Utility Functions
   readInt(ba, offset) {
@@ -386,6 +418,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       littleEndian = true;
     return dataView.getFloat32(offset, littleEndian);
   }
+
+
 
 
 }
