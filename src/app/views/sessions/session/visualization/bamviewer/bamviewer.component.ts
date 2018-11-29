@@ -392,7 +392,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       bamRecord.typeTag = typeTag;
 
       this.bamRecordList.push(bamRecord);
-      console.log(bamRecord);
       if (this.bamRecordList.length > 200) {
         return;
       }
