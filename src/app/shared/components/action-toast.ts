@@ -38,10 +38,14 @@ Added:
     <div *ngIf="options.progressBar">
         <div class="toast-progress" [style.width]="width + '%'"></div>
     </div>
-    <div *ngIf="options['buttonText']">
-        <button class="btn btn-sm btn-secondary btn-toast" (click)="action(options['buttonText'], $event)">
-            {{ options['buttonText'] }}
-        </button>
+    <div class="row">
+        <div *ngFor="let b of options['buttons']">
+            <button class="btn btn-sm btn-toast ml-3 px-3 {{b.class || 'btn-secondary'}}"
+            (click)="action(b.text, $event)">
+                <i *ngIf="b.icon" [class]="b.icon"></i>
+                {{ b.text }}
+            </button>
+        </div>
     </div>
     `,
     animations: [
@@ -65,8 +69,6 @@ Added:
     preserveWhitespaces: false
 })
 export class ActionToastComponent extends Toast {
-    // used for demo purposes
-    undoString = 'undo';
 
     // constructor is only necessary when not using AoT
     constructor(

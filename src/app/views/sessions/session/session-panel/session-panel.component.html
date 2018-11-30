@@ -47,7 +47,7 @@
           <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets()"
             [jobsMap]="sessionData.jobsMap
               " [modulesMap]="modulesMap" [datasetSearch]="datasetSearch"
-            [defaultScale]="1" [enabled]="true" [sessionData]="sessionData" (delete)=" deleteDataset()"></ch-workflow-graph>
+            [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
         </div>
       </ng-template>
     </ngb-tab>
@@ -72,21 +72,4 @@
       </ng-template>
     </ngb-tab>
   </ngb-tabset>
-
-  <!-- undo alert -->
-  <div *ngIf="sessionData.deletedDatasets" class="alert alert-info mb-0">
-    <div class="mb-2">
-      <span *ngIf="sessionData.deletedDatasets.length === 1">Deleting file
-        <i>{{sessionData.deletedDatasets[0].name}}</i>
-      </span>
-      <span *ngIf="sessionData.deletedDatasets.length !== 1">Deleting {{sessionData.deletedDatasets.length}} files</span>
-    </div>
-    <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDatasetsNow.emit()">
-      <i class="fas fa-times"></i> Delete
-    </button>
-    <button class="btn btn-info btn-sm float-right" (click)="deleteDatasetsUndo.emit()">
-      <i class="fas fa-undo"></i>
-      Undo
-    </button>
-  </div>
 </div>

@@ -32,7 +32,7 @@ import { NotFoundComponent } from "./views/error/not-found.component";
 import { RoutingModule } from "./core/routing/routing.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ToastrModule } from "ngx-toastr";
-import { ActionToastComponent } from "./views/error/action-toast";
+import { ActionToastComponent } from "./shared/components/action-toast";
 
 @NgModule({
   imports: [
@@ -69,10 +69,6 @@ import { ActionToastComponent } from "./views/error/action-toast";
     ContactComponent,
     TermsComponent,
     NotFoundComponent,
-    ActionToastComponent,
-  ],
-  entryComponents: [
-    ActionToastComponent,
   ],
   providers: [
     SelectionService,

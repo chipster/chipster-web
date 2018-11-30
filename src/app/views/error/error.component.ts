@@ -50,7 +50,11 @@ export class ErrorComponent implements OnInit {
           closeButton: dismissible,
           disableTimeOut: true,
           tapToDismiss: dismissible && buttonText == null,
-          buttonText: buttonText,
+          buttons: [
+            {
+              text: buttonText,
+            },
+          ],
         };
 
         const toast = this.toastrService.warning(msg, title, options);

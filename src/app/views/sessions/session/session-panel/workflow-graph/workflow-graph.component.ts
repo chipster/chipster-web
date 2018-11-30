@@ -55,8 +55,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   enabled: boolean;
   @Input()
   sessionData: SessionData;
-  @Output()
-  delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -438,7 +436,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Delete",
         action: function (d, i) {
-          self.delete.emit();
+          self.sessionDataService.deleteDatasetsLater(self.selectionService.selectedDatasets);
         }
       },
       {
@@ -936,8 +934,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showToolTipByIdForSelection() {
     for (let k = 0; k < this.selectedDatasets.length; k++) {
-      this.setCurrentToolTipName(this.datasetToolTipArray.findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
-      this.datasetToolTipArray.find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
+      this.setCurrentToolTipName(this.datasetToolTipArray
+        .findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
+      this.datasetToolTipArray
+        .find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
     }
   }
 

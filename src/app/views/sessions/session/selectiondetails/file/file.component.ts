@@ -23,9 +23,6 @@ export class FileComponent {
   @Input()
   tools: Tool[];
 
-  @Output()
-  delete: EventEmitter<any> = new EventEmitter();
-
   constructor(
     public selectionService: SelectionService, // used in template
     private sessionDataService: SessionDataService,
@@ -45,7 +42,7 @@ export class FileComponent {
   }
 
   deleteDatasets() {
-    this.delete.emit();
+    this.sessionDataService.deleteDatasetsLater(this.selectionService.selectedDatasets);
   }
 
   exportDatasets() {

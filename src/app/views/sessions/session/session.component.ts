@@ -63,7 +63,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private userService: UserService,
     private toolsService: ToolsService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -251,18 +251,6 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   getJob(jobId: string): Job {
     return this.sessionData.jobsMap.get(jobId);
-  }
-
-  deleteDatasetsNow() {
-    this.sessionDataService.deleteDatasetsNow(this.sessionData);
-  }
-
-  deleteDatasetsUndo() {
-    this.sessionDataService.deleteDatasetsUndo(this.sessionData);
-  }
-
-  deleteDatasetsLater() {
-    this.sessionDataService.deleteDatasetsLater(this.sessionData);
   }
 
   exportDatasets(datasets: Dataset[]) {

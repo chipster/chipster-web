@@ -33,6 +33,7 @@ import { UserService } from "./services/user.service";
 import { ToolsService } from "./services/tools.service";
 import { NativeElementService } from "./services/native-element.service";
 import { WebSocketService } from "./services/websocket.service";
+import { ActionToastComponent } from "./components/action-toast";
 
 /*
  * @description: Shared module should contain application global resources
@@ -53,7 +54,8 @@ import { WebSocketService } from "./services/websocket.service";
     StatusComponent,
     SettingsComponent,
     ToolSourceComponent,
-    DummyRouteComponent
+    DummyRouteComponent,
+    ActionToastComponent,
   ],
   providers: [
     PipeService,
@@ -86,7 +88,11 @@ import { WebSocketService } from "./services/websocket.service";
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,
-    ToolSourceComponent
-  ]
+    ToolSourceComponent,
+    ActionToastComponent,
+  ],
+  entryComponents: [
+    ActionToastComponent,
+  ],
 })
 export class SharedModule {}
