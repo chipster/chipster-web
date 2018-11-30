@@ -5,13 +5,11 @@ import { Link } from "./link";
 import {
   Component,
   Input,
-  Output,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
-  EventEmitter
 } from "@angular/core";
 import { Dataset, Job, Module } from "chipster-js-common";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
@@ -114,7 +112,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled: boolean;
-  selectionEnabled: boolean = false;
+  selectionEnabled = false;
 
   subscriptions: Array<any> = [];
 
@@ -221,6 +219,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+
     if (!this.zoomGroup) {
       // not yet initialized
       return;
@@ -384,7 +383,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   update() {
     const datasetNodes = this.getDatasetNodes(
-      this.datasetsMap,
+      this.sessionDataService.getCompleteDatasets(this.datasetsMap),
       this.jobsMap,
       this.modulesMap
     );
@@ -988,8 +987,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-
-
   setCurrentToolTipName(id: any) {
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
@@ -1021,6 +1018,4 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
   }
-
-
 }

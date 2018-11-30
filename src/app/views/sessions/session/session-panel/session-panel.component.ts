@@ -90,10 +90,6 @@ export class SessionPanelComponent {
     );
   }
 
-  getCompleteDatasets() {
-    return this.sessionDataService.getCompleteDatasets(this.sessionData);
-  }
-
   getDatasetListSorted() {
     return this.sessionDataService.getDatasetListSortedByCreated(
       this.sessionData

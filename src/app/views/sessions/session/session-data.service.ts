@@ -390,12 +390,12 @@ export class SessionDataService {
     Datasets are created when comp starts to upload them, but there are no type tags until the
     upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that
-    the type tags are do exist.
+    the type tags do exist.
     */
-  getCompleteDatasets(sessionData: SessionData): Map<string, Dataset> {
+  getCompleteDatasets(datasetsMap: Map<string, Dataset>): Map<string, Dataset> {
     // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
     return new Map(
-      Array.from(sessionData.datasetsMap).filter(entry => {
+      Array.from(datasetsMap).filter(entry => {
         const dataset = entry[1];
         return dataset.fileId != null;
       })
@@ -403,7 +403,7 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets(sessionData));
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {

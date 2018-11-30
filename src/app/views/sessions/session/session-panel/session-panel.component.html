@@ -42,7 +42,7 @@
             </button>
           </div>
 
-          <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="getCompleteDatasets()"
+          <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="sessionData.datasetsMap"
             [jobsMap]="sessionData.jobsMap
               " [modulesMap]="modulesMap" [datasetSearch]="datasetSearch"
             [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
