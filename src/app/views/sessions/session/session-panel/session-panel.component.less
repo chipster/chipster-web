@@ -23,23 +23,11 @@
 
 #file-list {
   overflow-y: auto;
-}
-
-//noinspection CssInvalidPseudoSelector
-:host ::ng-deep #left-tabs .tab-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-//noinspection CssInvalidPseudoSelector
-:host ::ng-deep #datasets-panel,
-:host ::ng-deep #workflow-panel {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  height: calc(~"100vh - 225px");
 }
 
 #workflow-graph {
   position: relative; // seems to be needed for height:100% to work for nested elements
+  height: calc(~"100vh - 225px");
+  display: block;
 }

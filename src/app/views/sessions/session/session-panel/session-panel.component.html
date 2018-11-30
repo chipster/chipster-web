@@ -2,21 +2,19 @@
   <span>Files</span>
 </h3>
 
-<div class="d-flex flex-column flex-grow-1 chipster-highlight">
+<div class="chipster-highlight">
 
   <!-- workflow and files tabs -->
 
   <ch-search-box placeholder="Find file" focusHotkey="f" focusHotkeyDescription="Find file" (valueChange)="search($event)"
     (enterKey)="searchEnter()"></ch-search-box>
 
-  <!-- css uses this id to find the tab-content element-->
-  <ngb-tabset class="flex-grow-1 d-flex flex-column" id="left-tabs">
+  <ngb-tabset>
 
-    <!-- an element id workflow-panel is generated from this and used in CSS -->
-    <ngb-tab id="workflow" title="Workflow">
+    <ngb-tab title="Workflow">
       <!--suppress HtmlUnknownAttribute -->
       <ng-template ngbTabContent>
-        <div id="workflow-graph-panel" class="flex-grow-1 d-flex flex-column">
+        <div id="workflow-graph-panel">
 
           <div class="mt-3 mb-1 ml-1 mr-1">
             <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
@@ -44,7 +42,7 @@
             </button>
           </div>
 
-          <ch-workflow-graph id="workflow-graph" class="flex-grow-1" #workflowGraph [datasetsMap]="getCompleteDatasets()"
+          <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="getCompleteDatasets()"
             [jobsMap]="sessionData.jobsMap
               " [modulesMap]="modulesMap" [datasetSearch]="datasetSearch"
             [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
@@ -52,8 +50,7 @@
       </ng-template>
     </ngb-tab>
 
-    <!-- an element id datasets-panel is generated from this and used in CSS -->
-    <ngb-tab id="datasets" title="List">
+    <ngb-tab title="List">
       <!--suppress HtmlUnknownAttribute -->
       <ng-template ngbTabContent>
         <div class="mt-3 ml-1 mb-2">
