@@ -29,9 +29,12 @@
 
       <!-- search box -->
       <div class="col col-middle">
+        <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines, 
+          maybe if the machine is slower to render the content below and the ng-select thinks there 
+          isn't enough space below it? -->
         <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true"
           [searchFn]="filterTool" [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found"
-          (blur)="searchBoxBlur($event)">
+          (blur)="searchBoxBlur($event)" [dropdownPosition]="'bottom'">
           <ng-template ng-option-tmp let-item="item">
             <div style="font-size: smaller">
               {{ item.moduleName }} - {{ item.category }}
