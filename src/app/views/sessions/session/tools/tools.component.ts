@@ -79,6 +79,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public searchBoxModel: ToolSearchListItem;
   private searchBoxHotkey: Hotkey | Hotkey[];
 
+  private lastJobStartedToastId: number;
+
   constructor(
     @Inject(DOCUMENT) private document: any,
     public settingsService: SettingsService,
@@ -91,7 +93,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
-    dropdownConfig: NgbDropdownConfig
+    dropdownConfig: NgbDropdownConfig,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
@@ -221,7 +223,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob() {
     this.jobService.runJob(this.toolSelection);
-    this.toastrService.info("Job started", "");
+    // close the previous toastr not to cover the run button
+    // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
+    if (this.lastJobStartedToastId != null) {
+      this.toastrService.remove(this.lastJobStartedToastId);
+    }
+    this.lastJobStartedToastId = this.toastrService.info("Job started", "", {
+      timeOut: 1500,
+    }).toastId;
   }
 
   setBindings(updatedBindings: InputBinding[]) {

@@ -86,7 +86,7 @@ export class WebSocketService {
         err => {
           log.info("websocket error", err);
           this.errorService.headerError(
-            "Connection lost, please reload page.",
+            "Connection lost, please reload the page.",
             false
           );
         },

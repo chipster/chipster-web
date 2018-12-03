@@ -85,8 +85,4 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     this.unsubscribe.next();
     this.unsubscribe.complete();
   }
-
-  deleteDatasetsLater() {
-    this.sessionDataService.deleteDatasetsLater(this.sessionData);
-  }
 }

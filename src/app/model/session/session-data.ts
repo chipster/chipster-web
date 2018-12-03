@@ -5,5 +5,4 @@ export class SessionData {
   datasetsMap: Map<string, Dataset>;
   jobsMap: Map<string, Job>;
   datasetTypeTags: Map<string, Map<string, string>>;
-  deletedDatasets: Array<Dataset>;
 }

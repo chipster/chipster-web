@@ -5,13 +5,11 @@ import { Link } from "./link";
 import {
   Component,
   Input,
-  Output,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
-  EventEmitter
 } from "@angular/core";
 import { Dataset, Job, Module } from "chipster-js-common";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
@@ -55,8 +53,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   enabled: boolean;
   @Input()
   sessionData: SessionData;
-  @Output()
-  delete: EventEmitter<any> = new EventEmitter();
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -116,7 +112,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled: boolean;
-  selectionEnabled: boolean = false;
+  selectionEnabled = false;
 
   subscriptions: Array<any> = [];
 
@@ -223,6 +219,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+
     if (!this.zoomGroup) {
       // not yet initialized
       return;
@@ -386,7 +383,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   update() {
     const datasetNodes = this.getDatasetNodes(
-      this.datasetsMap,
+      this.sessionDataService.getCompleteDatasets(this.datasetsMap),
       this.jobsMap,
       this.modulesMap
     );
@@ -438,7 +435,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Delete",
         action: function (d, i) {
-          self.delete.emit();
+          self.sessionDataService.deleteDatasetsLater([d.dataset]);
         }
       },
       {
@@ -936,8 +933,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showToolTipByIdForSelection() {
     for (let k = 0; k < this.selectedDatasets.length; k++) {
-      this.setCurrentToolTipName(this.datasetToolTipArray.findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
-      this.datasetToolTipArray.find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
+      this.setCurrentToolTipName(this.datasetToolTipArray
+        .findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
+      this.datasetToolTipArray
+        .find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
     }
   }
 
@@ -988,8 +987,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-
-
   setCurrentToolTipName(id: any) {
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
@@ -1021,6 +1018,4 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
   }
-
-
 }

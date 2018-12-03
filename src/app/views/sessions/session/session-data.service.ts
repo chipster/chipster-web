@@ -10,16 +10,15 @@ import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestService } from "../../../core/rest-services/restservice/rest.service";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionEventService } from "./session-event.service";
-import { SelectionService } from "./selection.service";
 import * as _ from "lodash";
 import { SelectionHandlerService } from "./selection-handler.service";
 import log from "loglevel";
 import UtilsService from "../../../shared/utilities/utils";
+import { ToastrService } from "ngx-toastr";
 
 @Injectable()
 export class SessionDataService {
   private sessionId: string;
-  deletedDatasetsTimeout: any;
 
   constructor(
     private sessionResource: SessionResource,
@@ -29,8 +28,8 @@ export class SessionDataService {
     private restService: RestService,
     private tokenService: TokenService,
     private sessionEventService: SessionEventService,
-    private selectionService: SelectionService,
-    private selectionHandlerService: SelectionHandlerService
+    private selectionHandlerService: SelectionHandlerService,
+    private toastrService: ToastrService,
   ) {}
 
   getSessionId(): string {
@@ -274,23 +273,16 @@ export class SessionDataService {
   }
 
   // Added the delete dataset code here as two components are sharing the code
-  deleteDatasetsNow(sessionData: SessionData) {
-    // cancel the timer
-    clearTimeout(this.deletedDatasetsTimeout);
+  deleteDatasetsNow(deletedDatasets: Dataset[]) {
 
     // delete from the server
-    this.deleteDatasets(sessionData.deletedDatasets);
-
-    // hide the undo message
-    sessionData.deletedDatasets = null;
+    this.deleteDatasets(deletedDatasets);
   }
 
-  deleteDatasetsUndo(sessionData: SessionData) {
-    // cancel the deletion
-    clearTimeout(this.deletedDatasetsTimeout);
+  deleteDatasetsUndo(deletedDatasets: Dataset[]) {
 
     // show datasets again in the workflowgraph
-    sessionData.deletedDatasets.forEach((dataset: Dataset) => {
+    deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
         this.getSessionId(),
         "DATASET",
@@ -299,9 +291,6 @@ export class SessionDataService {
       );
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
-
-    // hide the undo message
-    sessionData.deletedDatasets = null;
   }
 
   /**
@@ -312,24 +301,17 @@ export class SessionDataService {
    * cancel the timer and make the datasets visible again. Session copying and sharing
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
-  deleteDatasetsLater(sessionData: SessionData) {
-    // let's assume that user doesn't want to undo, if she is already
-    // deleting more
-    if (sessionData.deletedDatasets) {
-      this.deleteDatasetsNow(sessionData);
-    }
+  deleteDatasetsLater(datasets: Dataset[]) {
 
     // make a copy so that further selection changes won't change the array
-    sessionData.deletedDatasets = _.clone(
-      this.selectionService.selectedDatasets
-    );
+    const deletedDatasets = _.clone(datasets);
 
-    // all selected datasets are going to be deleted
+        // all selected datasets are going to be deleted
     // clear selection to avoid problems in other parts of the UI
     this.selectionHandlerService.clearDatasetSelection();
 
     // hide from the workflowgraph
-    sessionData.deletedDatasets.forEach((dataset: Dataset) => {
+    deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
         this.getSessionId(),
         "DATASET",
@@ -339,10 +321,56 @@ export class SessionDataService {
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
-    // start timer to delete datasets from the server later
-    this.deletedDatasetsTimeout = setTimeout(() => {
-      this.deleteDatasetsNow(sessionData);
-    }, 10 * 1000);
+    let msg;
+
+    if (deletedDatasets.length === 1) {
+      msg = "Deleting file " + deletedDatasets[0].name;
+    } else {
+      msg = "Deleting " + deletedDatasets.length + " files";
+    }
+
+    const BTN_DELETE = "Delete";
+    const BTN_UNDO = "Undo";
+
+    const options = {
+      positionClass: 'toast-bottom-left',
+      closeButton: true,
+      tapToDismiss: false,
+      timeOut: 5000,
+      extendedTimeOut: 5000,
+      buttons: [
+        {
+          text: BTN_DELETE,
+          icon: "fas fa-times",
+          class: "btn-secondary",
+        },
+        {
+          text: BTN_UNDO,
+          icon: "fas fa-undo",
+          class: "btn-info",
+        }
+      ],
+    };
+
+    const toast = this.toastrService.info(msg, "", options);
+
+    toast.onAction
+      .filter(text => text === BTN_UNDO)
+      .subscribe(buttonText => {
+        this.deleteDatasetsUndo(deletedDatasets);
+      this.toastrService.clear(toast.toastId);
+    }, err => {
+      log.error("toastr subscribe failed");
+    });
+
+    toast.onHidden.takeUntil(toast.onAction) // only if there was no action
+      .merge(toast.onAction.filter(text => text === BTN_DELETE))
+      .subscribe(() => {
+        this.deleteDatasetsNow(deletedDatasets);
+        this.toastrService.clear(toast.toastId);
+    }, err => {
+      log.error("toastr subscribe failed");
+    });
   }
 
   getSessionSize(sessionData: SessionData): number {
@@ -362,12 +390,12 @@ export class SessionDataService {
     Datasets are created when comp starts to upload them, but there are no type tags until the
     upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that
-    the type tags are do exist.
+    the type tags do exist.
     */
-  getCompleteDatasets(sessionData: SessionData): Map<string, Dataset> {
+  getCompleteDatasets(datasetsMap: Map<string, Dataset>): Map<string, Dataset> {
     // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
     return new Map(
-      Array.from(sessionData.datasetsMap).filter(entry => {
+      Array.from(datasetsMap).filter(entry => {
         const dataset = entry[1];
         return dataset.fileId != null;
       })
@@ -375,7 +403,7 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets(sessionData));
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {

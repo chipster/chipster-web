@@ -21,13 +21,6 @@ export class SessionPanelComponent {
   @Input()
   modulesMap: Map<string, Module>;
 
-  @Output()
-  deleteDatasetsNow = new EventEmitter<void>();
-  @Output()
-  deleteDatasetsUndo = new EventEmitter<void>();
-  @Output()
-  deleteStart = new EventEmitter<void>();
-
   datasetSearch: string;
 
   // noinspection JSUnusedLocalSymbols
@@ -95,14 +88,6 @@ export class SessionPanelComponent {
       () => console.log(updates.length + " datasets updated"),
       err => this.restErrorService.handleError(err, "layout update failed")
     );
-  }
-
-  deleteDataset() {
-    this.deleteStart.emit();
-  }
-
-  getCompleteDatasets() {
-    return this.sessionDataService.getCompleteDatasets(this.sessionData);
   }
 
   getDatasetListSorted() {
