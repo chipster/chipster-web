@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { Dataset, Job, Rule, Tool, Module } from "chipster-js-common";
+import { Dataset, Job, Rule, Tool, Module, Session } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
@@ -23,7 +23,14 @@ import { SessionService } from "./session.service";
 import { ToolsService } from "../../../shared/services/tools.service";
 import { forkJoin } from "rxjs";
 import { ConfigService } from "../../../shared/services/config.service";
+import { ToastrService } from "ngx-toastr";
 
+export enum ComponentState {
+  LOADING_SESSION = "Loading session...",
+  DELETING_SESSION = "Deleting session...",
+  READY = "Session ready",
+  FAIL = "" // empty to avoid duplicate error messages
+}
 @Component({
   selector: "ch-session",
   templateUrl: "./session.component.html",
@@ -35,8 +42,9 @@ export class SessionComponent implements OnInit, OnDestroy {
   modules: Module[];
   modulesMap: Map<string, Module>;
   deletedDatasetsTimeout: any;
-  loadingDone = false;
-  statusText: string;
+
+  ComponentState = ComponentState; // for using the enum in template
+  state = ComponentState.LOADING_SESSION;
 
   split3Visible = false;
   split1Size = 33;
@@ -64,6 +72,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private toolsService: ToolsService,
     private configService: ConfigService,
+    private toastrService: ToastrService
   ) {}
 
   ngOnInit() {
@@ -75,8 +84,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	  Also this component can be reused, e.g. when a user creates her own copy
 	  of an example session, she is directed to the new session.
 	   */
-        this.statusText = "Loading session...";
-        this.loadingDone = false;
+        this.state = ComponentState.LOADING_SESSION;
         this.selectionHandlerService.clearSelections();
         this.sessionData = null;
 
@@ -117,10 +125,10 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.subscribeToEvents();
 
           // ready to go
-          this.loadingDone = true;
+          this.state = ComponentState.READY;
         },
         (error: any) => {
-          this.statusText = "";
+          this.state = ComponentState.FAIL;
           this.restErrorService.handleError(error, "Loading session failed");
         }
       );
@@ -157,6 +165,10 @@ export class SessionComponent implements OnInit, OnDestroy {
     If user opens an example session and then deletes it, the client receives a websocket
     event about the deleted rule and deletes that rule from the sessionData.
     */
+    if (this.state === ComponentState.DELETING_SESSION) {
+      return Observable.of(true);
+    }
+
     const sessionExists =
       this.sessionData != null &&
       this.sessionDataService.getApplicableRules(this.sessionData.session.rules)
@@ -205,7 +217,11 @@ export class SessionComponent implements OnInit, OnDestroy {
           change.event.type === "DELETE" &&
           rule.username === this.tokenService.getUsername()
         ) {
-          alert("The session has been deleted.");
+          this.sessionEventService.unsubscribe();
+          this.toastrService.info(
+            this.sessionData.session.name,
+            "Session deleted"
+          );
           this.routeService.navigateAbsolute("/sessions");
         }
       });
@@ -302,11 +318,34 @@ export class SessionComponent implements OnInit, OnDestroy {
    * Return true when done.
    */
   private deleteTempSession(): Observable<boolean> {
+    this.state = ComponentState.DELETING_SESSION;
+
     // the user doesn't need to be notified that the session is deleted
     this.sessionEventService.unsubscribe();
     return this.sessionDataService
       .deletePersonalRules(this.sessionData.session)
       .map(() => true);
+  }
+
+  /**
+   * Just send the delete rule request. React to deletion when rule deletion event arrives in the
+   * rule stream.
+   *
+   * @param session
+   */
+  public onDeleteSession(session: Session) {
+    this.state = ComponentState.DELETING_SESSION;
+
+    this.sessionDataService
+      .deletePersonalRules(this.sessionData.session)
+      .subscribe(
+        () => {
+          log.debug("delete session request done");
+        },
+        error => {
+          // TODO add error handling
+        }
+      );
   }
 
   askKeepOrDiscardSession(): Observable<boolean> {

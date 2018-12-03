@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, EventEmitter, Output } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../session-data.service";
 import { SessionService } from "../session.service";
@@ -19,6 +19,8 @@ export class SessionDetailsComponent {
 
   @Input()
   sessionData: SessionData; // needed for duplicate session
+
+  @Output() deleteSession: EventEmitter<Session> = new EventEmitter();
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -73,18 +75,7 @@ export class SessionDetailsComponent {
       )
       .then(
         () => {
-          // delete the session only from this user (i.e. the rule)
-          this.sessionDataService
-            .deletePersonalRules(this.sessionData.session)
-            .subscribe(
-              () => {},
-              err => {
-                this.restErrorService.handleError(
-                  err,
-                  "Failed to delete the session"
-                );
-              }
-            );
+          this.deleteSession.emit(this.session);
         },
         () => {
           // modal dismissed
