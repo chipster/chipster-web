@@ -29,6 +29,7 @@ export enum ComponentState {
   LOADING_SESSION = "Loading session...",
   DELETING_SESSION = "Deleting session...",
   READY = "Session ready",
+  NOT_FOUND = "Session not found",
   FAIL = "" // empty to avoid duplicate error messages
 }
 @Component({
@@ -67,7 +68,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private tokenService: TokenService,
-    private routeService: RouteService,
+    public routeService: RouteService, // used from template
     private settingsService: SettingsService,
     private userService: UserService,
     private toolsService: ToolsService,
@@ -128,8 +129,12 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.state = ComponentState.READY;
         },
         (error: any) => {
-          this.state = ComponentState.FAIL;
-          this.restErrorService.handleError(error, "Loading session failed");
+          if (RestErrorService.isNotFound(error)) {
+            this.state = ComponentState.NOT_FOUND;
+          } else {
+            this.state = ComponentState.FAIL;
+            this.restErrorService.handleError(error, "Loading session failed");
+          }
         }
       );
 
