@@ -43,9 +43,8 @@
               [session]="sessionData.session" [sessionData]="sessionData" (deleteSession)="onDeleteSession($event)">
             </ch-session-details>
 
-            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)"
-              [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap" [sessionData]="sessionData"
-              [tools]="tools" (delete)="deleteDatasetsLater()"></ch-file>
+            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)" [dataset]="selectionService.selectedDatasets[0]"
+              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools"></ch-file>
           </div>
         </div>
       </div>
