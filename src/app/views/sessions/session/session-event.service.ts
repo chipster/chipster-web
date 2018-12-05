@@ -1,4 +1,3 @@
-import { ConfigService } from "../../../shared/services/config.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import {
   Session,
@@ -9,12 +8,10 @@ import {
   SessionEvent
 } from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { TokenService } from "../../../core/authentication/token.service";
 import { SessionData } from "../../../model/session/session-data";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
 import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
-import { ErrorService } from "../../../core/errorhandler/error.service";
 import log from "loglevel";
 import { WebSocketService } from "../../../shared/services/websocket.service";
 
@@ -32,11 +29,8 @@ export class SessionEventService {
   sessionHasChanged = false;
 
   constructor(
-    private configService: ConfigService,
-    private tokenService: TokenService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    private websocketService: WebSocketService,
+    private websocketService: WebSocketService
   ) {}
 
   unsubscribe() {
@@ -50,7 +44,10 @@ export class SessionEventService {
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.publish().refCount();
 
-    this.websocketService.connect(this.localSubject$, sessionId);
+    this.websocketService.connect(
+      this.localSubject$,
+      sessionId
+    );
 
     // track any changes to session
     stream.subscribe(() => {
@@ -118,9 +115,7 @@ export class SessionEventService {
     return Observable.of(new SessionEvent(event, oldValue, newValue));
   }
 
-  handleRuleEvent(
-    event: any,
-    session: Session): Observable<SessionEvent> {
+  handleRuleEvent(event: any, session: Session): Observable<SessionEvent> {
     log.info("handle rule event", event, session);
     if (event.type === "CREATE") {
       return this.sessionResource
@@ -130,12 +125,8 @@ export class SessionEventService {
           return this.createEvent(event, null, rule);
         });
     } else if (event.type === "DELETE") {
-      const rule = session.rules.find(
-        r => r.ruleId === event.resourceId
-      );
-      session.rules = session.rules.filter(
-        r => r.ruleId !== event.resourceId
-      );
+      const rule = session.rules.find(r => r.ruleId === event.resourceId);
+      session.rules = session.rules.filter(r => r.ruleId !== event.resourceId);
       return this.createEvent(event, rule, null);
     } else {
       console.warn("unknown event type", event);
