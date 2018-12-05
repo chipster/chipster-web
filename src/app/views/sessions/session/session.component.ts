@@ -236,35 +236,46 @@ export class SessionComponent implements OnInit, OnDestroy {
       .getJobStream()
       .takeUntil(this.unsubscribe)
       .subscribe(change => {
+        const event = change.event;
         const oldValue = <Job>change.oldValue;
         const newValue = <Job>change.newValue;
 
+        // log to catch unexpected null oldvalue
+        if (event.type !== "CREATE" && !oldValue) {
+          log.warn(
+            "got job event with no old value when even type is other than CREATE, investigate further",
+            "event:",
+            event,
+            "old value:",
+            oldValue,
+            "new value:",
+            newValue
+          );
+        }
+
         // if not cancelled
         if (newValue) {
-          log.info(newValue);
-
           // if the job has just failed
           if (
             newValue.state === "EXPIRED_WAITING" &&
-            oldValue.state !== "EXPIRED_WAITING"
+            (oldValue || oldValue.state !== "EXPIRED_WAITING")
           ) {
             this.openErrorModal("Job expired", newValue);
-            log.info(newValue);
-          }
-          if (newValue.state === "FAILED" && oldValue.state !== "FAILED") {
-            this.openErrorModal("Job failed", newValue);
-            log.info(newValue);
-          }
-          if (
-            newValue.state === "FAILED_USER_ERROR" &&
-            oldValue.state !== "FAILED_USER_ERROR"
+          } else if (
+            newValue.state === "FAILED" &&
+            (oldValue || oldValue.state !== "FAILED")
           ) {
             this.openErrorModal("Job failed", newValue);
-            log.info(newValue);
-          }
-          if (newValue.state === "ERROR" && oldValue.state !== "ERROR") {
+          } else if (
+            newValue.state === "FAILED_USER_ERROR" &&
+            (oldValue || oldValue.state !== "FAILED_USER_ERROR")
+          ) {
+            this.openErrorModal("Job failed", newValue);
+          } else if (
+            newValue.state === "ERROR" &&
+            (oldValue || oldValue.state !== "ERROR")
+          ) {
             this.openErrorModal("Job error", newValue);
-            log.info(newValue);
           }
         }
       });

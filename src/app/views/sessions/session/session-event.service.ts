@@ -129,7 +129,7 @@ export class SessionEventService {
       session.rules = session.rules.filter(r => r.ruleId !== event.resourceId);
       return this.createEvent(event, rule, null);
     } else {
-      console.warn("unknown event type", event);
+      log.warn("unknown event type", event);
     }
   }
 
@@ -150,7 +150,7 @@ export class SessionEventService {
       // nothing to do, the client reacts when the Rule is deleted
       return Observable.never();
     } else {
-      console.warn("unknown event type", event);
+      log.warn("unknown event type", event);
     }
   }
 
@@ -179,7 +179,7 @@ export class SessionEventService {
       sessionData.datasetsMap.delete(event.resourceId);
       return this.createEvent(event, localCopy, null);
     } else {
-      console.warn("unknown event type", event);
+      log.warn("unknown event type", event);
     }
   }
 
@@ -233,7 +233,7 @@ export class SessionEventService {
       sessionData.jobsMap.delete(event.resourceId);
       return this.createEvent(event, localCopy, null);
     } else {
-      console.warn("unknown event type", event.type, event);
+      log.warn("unknown event type", event.type, event);
     }
   }
 
