@@ -57,13 +57,13 @@
                           id="sessionDropdown" title="Actions" ngbDropdownToggle>
                           <i class="fas fa-ellipsis-h" aria-hidden="true"></i></button>
                         <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
-                          <button [disabled]="sessionDataService.isReadOnlySession(session)" class="dropdown-item"
-                            (click)="sessionDropdown.toggle();rename(session)">Rename&hellip;</button>
-                          <button class="dropdown-item" (click)="sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
-                          <button class="dropdown-item" (click)="sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
-                          <button [disabled]="sessionDataService.isReadOnlySession(session)" class="dropdown-item"
-                            (click)="sessionDropdown.toggle();share(session)">Share&hellip;</button>
-                          <button class="dropdown-item" (click)="sessionDropdown.toggle();download(session)">Download</button>
+                          <button class="dropdown-item" (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();rename(session)"
+                            [disabled]="sessionDataService.isReadOnlySession(session)">Rename&hellip;</button>
+                          <button class="dropdown-item" (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
+                          <button class="dropdown-item" (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
+                          <button class="dropdown-item" (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();share(session)"
+                            [disabled]="sessionDataService.isReadOnlySession(session)">Share&hellip;</button>
+                          <button class="dropdown-item" (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();download(session)">Download</button>
                         </div>
                       </div>
                     </span>
