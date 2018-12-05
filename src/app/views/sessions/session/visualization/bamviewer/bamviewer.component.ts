@@ -84,7 +84,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
           this.readHeader(headerBuffer);
           // Read the record buffer
           this.getBGZFBlocks(recordBuffer);
-          console.log( "now setting the state" );
           this.state = new LoadState(State.Ready, "Loading Bam file complete");
         
 
@@ -162,8 +161,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     let totalSize = 0;
     let blockSizeList = [];
-    console.log("File position in record blocks" + this.filePos);
-
+  
 
     while (this.filePos < fileLimit) {
       let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
@@ -193,10 +191,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     }
 
-    console.log(this.filePos);
-
     if (this.blockList.length > 0) {
-      console.log("started decoding blocks", this.visibleBlockNumber);
       this.decodeBamRecord(this.blockList[0]);
 
     }
@@ -209,8 +204,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     const MAX_GZIP_BLOCK_SIZE = 65536;
     let offset = 0;
 
-
-    console.log(offset, this.plain.length);
     while (offset < MAX_GZIP_BLOCK_SIZE) {
       let bamRecord = new BamRecord();
       let blockSize, blockEnd, refID, pos, bmn, bin, mq, nl, flag_nc, flag, nc, lseq, nextRefID,
@@ -229,7 +222,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         return;
       }
       blockEnd = offset + blockSize + 4;
-      console.log(blockSize, blockEnd);
 
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE || blockEnd > MAX_GZIP_BLOCK_SIZE) {
@@ -266,7 +258,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       for (j = 0; j < nl - 1; ++j) {
         readName += String.fromCharCode(this.plain[offset + 36 + j]);
       }
-      console.log(readName);
       p = offset + 36 + nl;
       lengthOnRef = 0;
       cigar = '';

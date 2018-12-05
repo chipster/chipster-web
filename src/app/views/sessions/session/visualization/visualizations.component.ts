@@ -2,7 +2,7 @@ import { SelectionService } from "../selection.service";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import visualizations from "./visualization-constants";
-import { Component, OnInit, OnDestroy, Input } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
@@ -15,8 +15,10 @@ import { VisualizationModalService } from "./visualizationmodal.service";
   templateUrl: "./visualizations.component.html",
   styleUrls: ["./visualizations.component.less"]
 })
-export class VisualizationsComponent implements OnInit, OnDestroy {
+export class VisualizationsComponent implements OnInit, OnDestroy, AfterViewInit{
+
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
+  @ViewChild ('visTab') el : ElementRef;
 
   @Input()
   sessionData: SessionData;
@@ -30,14 +32,19 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   selectedDatasets$: Observable<Array<Dataset>>;
   selectedDatasets: Array<Dataset>;
   private compatibleVisualizations = new Set<string>();
+  private tabChanged: boolean = false;
+ 
 
   constructor(
     public selectionService: SelectionService, // used in template
     private store: Store<any>,
     private typeTagService: TypeTagService,
     private visualizationModalService: VisualizationModalService
-  ) {}
+  ) { }
 
+  ngAfterViewInit(): void {
+    console.log( "ngAfterViewInit");
+  }
   ngOnInit() {
     this.selectedDatasets$ = this.store.select("selectedDatasets");
 
@@ -47,23 +54,31 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
         this.compatibleVisualizations = new Set(
           this.getCompatibleVisualizations()
         );
-
         // check if the previous visualization is still compatible
         const isActiveCompatible =
           Array.from(this.compatibleVisualizations)
             .map(this.getTabId.bind(this))
             .indexOf(this.active) !== -1;
 
+
         /*
           We will get an empty selection in between when the selection is changed.
           Don't clear the active visualization because we want to try to show the
           same visualization for next selection too.
          */
-        if (!isActiveCompatible && this.selectedDatasets.length > 0) {
+        const notCompatibleAndNotTabChnanged = !isActiveCompatible && this.selectedDatasets.length > 0 && !this.tabChanged;
+        const isCompatibleAndNotTabChanged = isActiveCompatible && this.selectedDatasets.length > 0 && !this.tabChanged;
+        const notCompatibleAndTabChanged = !isActiveCompatible && this.selectedDatasets.length > 0 && this.tabChanged;
+
+        // if the user changed the tab to details, then details will be shown, otherwise the first available visualization will be shown
+
+        if (notCompatibleAndNotTabChnanged || isCompatibleAndNotTabChanged || notCompatibleAndTabChanged) {
           this.active = this.getTabId(
             _.first(Array.from(this.compatibleVisualizations))
           );
+          this.tabChanged = false;
         }
+
       }
     );
   }
@@ -116,6 +131,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   tabChange(event: NgbTabChangeEvent) {
     this.active = event.nextId;
+    this.tabChanged = true;
   }
 
   //noinspection JSMethodCanBeStatic
@@ -133,4 +149,11 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     // this.visualizationModalService.openVisualizationModal(this.selectionService.selectedDatasets[0], 'genomebrowser');
     // window.open('genomebrowser');
   }
+
+  moveToSpecificView(): void {
+    console.log("moving");
+    setTimeout(() => {
+        this.el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start'}, 1000);
+    });
+}
 }
