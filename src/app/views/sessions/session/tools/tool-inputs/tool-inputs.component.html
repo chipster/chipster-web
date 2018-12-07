@@ -17,10 +17,7 @@
           <!-- placement="right"> -->
 
           <td>
-            {{
-            inputBinding.toolInput.name.displayName ||
-            inputBinding.toolInput.name.id
-            }}
+            {{ getDisplayName(inputBinding.toolInput) }}
           </td>
 
           <td *ngIf="

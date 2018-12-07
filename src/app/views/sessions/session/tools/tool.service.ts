@@ -254,4 +254,11 @@ export class ToolService {
       return toolId;
     });
   }
+
+  getDisplayName(obj: ToolParameter | ToolInput | Tool) {
+    if (obj.name.displayName != null) {
+      return obj.name.displayName;
+    }
+    return obj.name.id;
+  }
 }
