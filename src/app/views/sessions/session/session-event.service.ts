@@ -5,7 +5,10 @@ import {
   Job,
   Rule,
   WsEvent,
-  SessionEvent
+  SessionEvent,
+  SessionState,
+  EventType,
+  Resource,
 } from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { SessionData } from "../../../model/session/session-data";
@@ -55,7 +58,7 @@ export class SessionEventService {
     });
 
     this.datasetStream$ = stream
-      .filter(wsData => wsData.resourceType === "DATASET")
+      .filter(wsData => wsData.resourceType === Resource.Dataset)
       .flatMap(data =>
         this.handleDatasetEvent(data, this.sessionId, sessionData)
       )
@@ -67,13 +70,13 @@ export class SessionEventService {
       .refCount();
 
     this.jobStream$ = stream
-      .filter(wsData => wsData.resourceType === "JOB")
+      .filter(wsData => wsData.resourceType === Resource.Job)
       .flatMap(data => this.handleJobEvent(data, this.sessionId, sessionData))
       .publish()
       .refCount();
 
     this.sessionStream$ = stream
-      .filter(wsData => wsData.resourceType === "SESSION")
+      .filter(wsData => wsData.resourceType === Resource.Session)
       .flatMap(data =>
         this.handleSessionEvent(data, this.sessionId, sessionData)
       )
@@ -81,7 +84,7 @@ export class SessionEventService {
       .refCount();
 
     this.ruleStream$ = stream
-      .filter(wsData => wsData.resourceType === "RULE")
+      .filter(wsData => wsData.resourceType === Resource.Rule)
       .flatMap(data => this.handleRuleEvent(data, sessionData.session))
       .publish()
       .refCount();
@@ -117,7 +120,7 @@ export class SessionEventService {
 
   handleRuleEvent(event: any, session: Session): Observable<SessionEvent> {
     log.info("handle rule event", event, session);
-    if (event.type === "CREATE") {
+    if (event.type === EventType.Create) {
       return this.sessionResource
         .getRule(session.sessionId, event.resourceId)
         .flatMap((rule: Rule) => {
@@ -138,15 +141,21 @@ export class SessionEventService {
     sessionId: any,
     sessionData: SessionData
   ): Observable<SessionEvent> {
-    if (event.type === "UPDATE") {
-      return this.sessionResource
-        .getSession(sessionId)
-        .flatMap((remote: Session) => {
-          const local = sessionData.session;
-          sessionData.session = remote;
-          return this.createEvent(event, local, remote);
-        });
-    } else if (event.type === "DELETE") {
+    if (event.type === EventType.Update) {
+      if (event.state !== SessionState.Delete) {
+        return this.sessionResource
+          .getSession(sessionId)
+          .flatMap((remote: Session) => {
+            const local = sessionData.session;
+            sessionData.session = remote;
+            log.info('session updated', remote.name, remote.state);
+            return this.createEvent(event, local, remote);
+          });
+      } else {
+        // nothing to do, the client reacts when the Rule is deleted
+      return Observable.never();
+      }
+    } else if (event.type === EventType.Delete) {
       // nothing to do, the client reacts when the Rule is deleted
       return Observable.never();
     } else {
@@ -159,14 +168,14 @@ export class SessionEventService {
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
-    if (event.type === "CREATE") {
+    if (event.type === EventType.Create) {
       return this.sessionResource
         .getDataset(sessionId, event.resourceId)
         .flatMap((remote: Dataset) => {
           sessionData.datasetsMap.set(event.resourceId, remote);
           return this.createEvent(event, null, remote);
         });
-    } else if (event.type === "UPDATE") {
+    } else if (event.type === EventType.Update) {
       return this.sessionResource
         .getDataset(sessionId, event.resourceId)
         .flatMap((remote: Dataset) => {
@@ -174,7 +183,7 @@ export class SessionEventService {
           sessionData.datasetsMap.set(event.resourceId, remote);
           return this.createEvent(event, local, remote);
         });
-    } else if (event.type === "DELETE") {
+    } else if (event.type === EventType.Delete) {
       const localCopy = sessionData.datasetsMap.get(event.resourceId);
       sessionData.datasetsMap.delete(event.resourceId);
       return this.createEvent(event, localCopy, null);
@@ -213,14 +222,14 @@ export class SessionEventService {
     sessionId: any,
     sessionData: SessionData
   ): Observable<SessionEvent> {
-    if (event.type === "CREATE") {
+    if (event.type === EventType.Create) {
       return this.sessionResource
         .getJob(sessionId, event.resourceId)
         .flatMap((remote: Job) => {
           sessionData.jobsMap.set(event.resourceId, remote);
           return this.createEvent(event, null, remote);
         });
-    } else if (event.type === "UPDATE") {
+    } else if (event.type === EventType.Update) {
       return this.sessionResource
         .getJob(sessionId, event.resourceId)
         .flatMap((remote: Job) => {
@@ -228,7 +237,7 @@ export class SessionEventService {
           sessionData.jobsMap.set(event.resourceId, remote);
           return this.createEvent(event, local, remote);
         });
-    } else if (event.type === "DELETE") {
+    } else if (event.type === EventType.Delete) {
       const localCopy = sessionData.jobsMap.get(event.resourceId);
       sessionData.jobsMap.delete(event.resourceId);
       return this.createEvent(event, localCopy, null);

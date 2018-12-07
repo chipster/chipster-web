@@ -1,7 +1,9 @@
 import { SessionResource } from "../../shared/resources/session.resource";
 import {
   WsEvent,
-  Session
+  Session,
+  Resource,
+  EventType
 } from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs/Observable";
@@ -44,7 +46,7 @@ export class UserEventService {
     this.webSocketService.connect(this.localSubject$, topic);
 
     this.ruleStream$ = stream
-      .filter(wsData => wsData.resourceType === "RULE")
+      .filter(wsData => wsData.resourceType === Resource.Rule)
       .flatMap(data => this.handleRuleEvent(data, data.sessionId, userEventData))
       .publish()
       .refCount();
@@ -78,19 +80,19 @@ export class UserEventService {
    */
   handleRuleEvent(event: any, sessionId: any, userEventData: UserEventData): Observable<WsEvent> {
     log.info('handleRuleEvent()', event);
-    if (event.type === "CREATE") {
+    if (event.type === EventType.Create) {
       // new session was shared to us
       if (!userEventData.sessions.has(sessionId)) {
         return this.sessionResource.getSession(sessionId)
           .map((session: Session) => {
-            log.info('session added', session.name);
+            log.info('session added', session.name, session.state);
             userEventData.sessions.set(session.sessionId, session);
             return event;
           });
       } else {
         return of(event);
       }
-    } else if (event.type === "DELETE") {
+    } else if (event.type === EventType.Delete) {
 
       const oldSession = userEventData.sessions.get(sessionId);
       const rule = oldSession.rules.find(r => r.ruleId === event.resourceId);

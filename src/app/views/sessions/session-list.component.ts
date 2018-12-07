@@ -17,6 +17,7 @@ import { tap } from "rxjs/internal/operators/tap";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { UserEventService } from "./user-event.service";
 import { UserEventData } from "./user-event-data";
+import { SessionState } from "chipster-js-common/lib/model/session";
 
 @Component({
   selector: "ch-session-list",
@@ -181,6 +182,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         }
 
         session = new Session(name);
+        session.state = SessionState.Temporary;
         return this.sessionResource.createSession(session);
       })
       .do((sessionId: string) => {
@@ -388,7 +390,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .flatMap((sessionData: SessionData) => {
         const copySessionObservable = this.sessionResource.copySession(
           sessionData,
-          duplicateName
+          duplicateName,
+          false
         );
         return this.dialogModalService.openSpinnerModal(
           "Duplicate session",

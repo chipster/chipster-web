@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { Dataset, Job, Rule, Tool, Module, Session } from "chipster-js-common";
+import { Dataset, Job, Rule, Tool, Module, Session, EventType, JobState } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
@@ -219,7 +219,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         const rule: Rule = <Rule>change.oldValue;
 
         if (
-          change.event.type === "DELETE" &&
+          change.event.type === EventType.Delete &&
           rule.username === this.tokenService.getUsername()
         ) {
           this.sessionEventService.unsubscribe();
@@ -257,24 +257,24 @@ export class SessionComponent implements OnInit, OnDestroy {
         if (newValue) {
           // if the job has just failed
           if (
-            newValue.state === "EXPIRED_WAITING" &&
-            (oldValue || oldValue.state !== "EXPIRED_WAITING")
+            newValue.state === JobState.ExpiredWaiting &&
+            (oldValue || oldValue.state !== JobState.ExpiredWaiting)
           ) {
             this.openErrorModal("Job expired", newValue);
           } else if (
-            newValue.state === "FAILED" &&
-            (oldValue || oldValue.state !== "FAILED")
+            newValue.state === JobState.Failed &&
+            (oldValue || oldValue.state !== JobState.Failed)
           ) {
             this.openErrorModal("Job failed", newValue);
           } else if (
-            newValue.state === "FAILED_USER_ERROR" &&
-            (oldValue || oldValue.state !== "FAILED_USER_ERROR")
+            newValue.state === JobState.FailedUserError &&
+            (oldValue || oldValue.state !== JobState.FailedUserError)
           ) {
             this.openErrorModal("Job failed", newValue);
           } else if (
-            newValue.state === "ERROR" &&
-            (oldValue || oldValue.state !== "ERROR")
-          ) {
+            newValue.state === JobState.Error &&
+            (oldValue || oldValue.state !== JobState.Error)
+           ) {
             this.openErrorModal("Job error", newValue);
           }
         }
@@ -314,8 +314,9 @@ export class SessionComponent implements OnInit, OnDestroy {
       if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
         return Observable.of(sessionData);
       } else {
+        log.info("read-only sesssion, create copy");
         return this.sessionResource
-          .copySession(sessionData, sessionData.session.name)
+          .copySession(sessionData, sessionData.session.name, true)
           .flatMap(id => {
             const queryParams = {};
             queryParams[this.PARAM_TEMP_COPY] = true;

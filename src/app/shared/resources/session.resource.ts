@@ -8,6 +8,7 @@ import { SessionData } from "../../model/session/session-data";
 import { RestService } from "../../core/rest-services/restservice/rest.service";
 import { Observable } from "rxjs/Observable";
 import log from "loglevel";
+import { SessionState } from "chipster-js-common/lib/model/session";
 
 @Injectable()
 export class SessionResource {
@@ -335,7 +336,8 @@ export class SessionResource {
     );
   }
 
-  copySession(sessionData: SessionData, name: string): Observable<any> {
+  copySession(sessionData: SessionData, name: string, temporary: boolean): Observable<any> {
+    log.info("copySession()", sessionData, name, temporary);
     if (!name) {
       name = "unnamed session";
     }
@@ -343,9 +345,8 @@ export class SessionResource {
     const newSession: Session = _.clone(sessionData.session);
     newSession.sessionId = null;
     newSession.name = name;
+    newSession.state = SessionState.Import;
     let createdSessionId: string;
-    const datasetIdMap = new Map<string, string>();
-    const jobIdMap = new Map<string, string>();
 
     // create session
     const createSession$ = this.createSession(newSession);
@@ -387,6 +388,17 @@ export class SessionResource {
 
         // see the comment of the forkJoin above
         return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
+      })
+      .flatMap(() => this.getSession(createdSessionId))
+      .flatMap(session => {
+        log.info("session copied, current state", session.state, temporary);
+        if (temporary) {
+          session.state = SessionState.Temporary;
+        } else {
+          session.state = SessionState.Ready;
+        }
+        log.info("set to", session.state);
+        return this.updateSession(session);
       })
       .map(() => createdSessionId);
   }

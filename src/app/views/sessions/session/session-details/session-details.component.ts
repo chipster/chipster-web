@@ -49,7 +49,8 @@ export class SessionDetailsComponent {
       .flatMap(name => {
         const copySessionObservable = this.sessionResource.copySession(
           this.sessionData,
-          name
+          name,
+          false
         );
         return this.dialogModalService.openSpinnerModal(
           "Duplicate session",
