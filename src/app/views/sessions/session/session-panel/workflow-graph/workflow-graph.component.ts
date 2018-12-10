@@ -216,10 +216,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.updateSvgSize();
       }
     }, 0);
+
+    /* Workaround for stuck svg rendering in Safari
+
+    The svg text nodes and zoom changes aren't shown
+    even if DOM is fine, until you move the split panel or something else changes.
+    https://stackoverflow.com/questions/3485365/how-can-i-force-webkit-to-redraw-repaint-to-propagate-style-changes
+    */
+    const sel = <any>d3.select("#workflowvisualization").node();
+    // tslint:disable-next-line:no-unused-expression
+    sel.offsetHeight; // no need to store this anywhere, the reference is enough
   }
 
   ngOnChanges(changes: SimpleChanges) {
-
     if (!this.zoomGroup) {
       // not yet initialized
       return;
