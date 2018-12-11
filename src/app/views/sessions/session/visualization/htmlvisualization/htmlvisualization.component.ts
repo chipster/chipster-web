@@ -19,9 +19,9 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  private src: string;
+  public src: string;
+  public wrapperUrl = 'assets/htmlvisualizationwrapper.html';
   private linkSrc: string;
-  private wrapperUrl = 'assets/htmlvisualizationwrapper.html';
 
   constructor(
     private sessionDataService: SessionDataService,

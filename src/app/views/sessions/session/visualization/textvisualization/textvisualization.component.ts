@@ -24,7 +24,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() showFullData: boolean;
   @Input() modalMode: boolean;
 
-  private data: string;
+  public data: string;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;

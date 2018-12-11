@@ -2,7 +2,7 @@ import { SelectionService } from "../selection.service";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import visualizations from "./visualization-constants";
-import { Component, OnInit, OnDestroy, Input, Output,EventEmitter } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
@@ -34,7 +34,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   selectedDatasets$: Observable<Array<Dataset>>;
   selectedDatasets: Array<Dataset>;
   private compatibleVisualizations = new Set<string>();
-  private tabChanged: boolean = false;
+  private tabChanged = false;
 
 
   constructor(
