@@ -2,7 +2,7 @@ import { SelectionService } from "../selection.service";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import visualizations from "./visualization-constants";
-import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input, Output,EventEmitter } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
@@ -10,20 +10,22 @@ import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { VisualizationModalService } from "./visualizationmodal.service";
 
+
 @Component({
   selector: "ch-visualizations",
   templateUrl: "./visualizations.component.html",
   styleUrls: ["./visualizations.component.less"]
 })
-export class VisualizationsComponent implements OnInit, OnDestroy, AfterViewInit{
+export class VisualizationsComponent implements OnInit, OnDestroy {
 
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
-  @ViewChild ('visTab') el : ElementRef;
-
   @Input()
   sessionData: SessionData;
   @Input()
   tools: Tool[];
+
+  @Output()
+  scrollFix = new EventEmitter();
 
   active: string; // id of the active vis tab
   visualizations: Array<any> = visualizations;
@@ -33,18 +35,16 @@ export class VisualizationsComponent implements OnInit, OnDestroy, AfterViewInit
   selectedDatasets: Array<Dataset>;
   private compatibleVisualizations = new Set<string>();
   private tabChanged: boolean = false;
- 
+
 
   constructor(
     public selectionService: SelectionService, // used in template
     private store: Store<any>,
     private typeTagService: TypeTagService,
     private visualizationModalService: VisualizationModalService
+
   ) { }
 
-  ngAfterViewInit(): void {
-    console.log( "ngAfterViewInit");
-  }
   ngOnInit() {
     this.selectedDatasets$ = this.store.select("selectedDatasets");
 
@@ -78,6 +78,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy, AfterViewInit
           );
           this.tabChanged = false;
         }
+        // need to emit some event to session top so that the tool and visulazation div scrollTop changes to show some part of tool section
+        this.scrollFix.emit()
 
       }
     );
@@ -149,11 +151,4 @@ export class VisualizationsComponent implements OnInit, OnDestroy, AfterViewInit
     // this.visualizationModalService.openVisualizationModal(this.selectionService.selectedDatasets[0], 'genomebrowser');
     // window.open('genomebrowser');
   }
-
-  moveToSpecificView(): void {
-    console.log("moving");
-    setTimeout(() => {
-        this.el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start'}, 1000);
-    });
-}
 }

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, HostListener } from "@angular/core";
 import { ActivatedRoute, Params } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as _ from "lodash";
@@ -373,8 +373,8 @@ export class SessionComponent implements OnInit, OnDestroy {
       .openTempCopyModal(
         "Save changes?",
         "<p>" +
-          this.getKeepDialogFirstParagraph() +
-          "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
+        this.getKeepDialogFirstParagraph() +
+        "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
         this.sessionData.session.name,
         keepButton,
         deleteButton
@@ -410,4 +410,21 @@ export class SessionComponent implements OnInit, OnDestroy {
       return "You have made changes to a <em>read-only</em> shared session.";
     }
   }
+
+
+  doScrollFix() {
+    let scrollToTop = setInterval(() => {
+      let div = document.getElementById("myDiv");
+      let visRect = document.getElementById("visTab").getBoundingClientRect();
+      let toolVisRect = document.getElementById("myDiv").getBoundingClientRect();
+      if (visRect.top < 1) {
+       div.scrollTo(0, 0);
+      } else {
+        clearInterval(scrollToTop);
+      }
+    }, 16);
+
+  }
+
+
 }

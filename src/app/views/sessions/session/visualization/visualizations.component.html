@@ -1,7 +1,7 @@
 <p *ngIf="!active">
   <i>No visualization available</i>
 </p>
-<div #visTab>
+<div id = "visTab" (scroll)="scrollHandler($event)">
 <ngb-tabset *ngIf="active" (tabChange)="tabChange($event)" activeId="{{active}}">
 
   <ngb-tab id="{{getTabId('spreadsheet')}}" *ngIf="isTabVisible('spreadsheet')">
