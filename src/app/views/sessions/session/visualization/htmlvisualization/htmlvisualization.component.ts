@@ -8,7 +8,8 @@ import {LoadState, State} from "../../../../../model/loadstate";
 
 @Component({
   selector: 'ch-htmlvisualization',
-  templateUrl: './htmlvisualization.component.html'
+  templateUrl: './htmlvisualization.component.html',
+  styleUrls: ['./htmlvisualization.component.less']
 })
 
 export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
@@ -57,9 +58,11 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
         return;
       }
       const height = htmlframe.contentWindow.document.body.style.height;
+      const width = htmlframe.contentWindow.document.body.style.width;
 
-      if (height) {
-        htmlframe.height = height + 'px';
+      if (height && width) {
+        htmlframe.height = height;
+        htmlframe.width = width;
       } else {
         this.run(htmlframe);
       }

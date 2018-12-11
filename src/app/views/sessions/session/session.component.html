@@ -1,7 +1,15 @@
-<div *ngIf="!loadingDone" class="container-fluid">
-  <p>{{statusText}}</p>
+<div *ngIf="state !== ComponentState.READY && state !== ComponentState.NOT_FOUND" class="container-fluid">
+  {{state}}
 </div>
-<div *ngIf="loadingDone" class="session-view container-fluid">
+
+<div *ngIf="state === ComponentState.NOT_FOUND" class="container-fluid">
+  <h3 class="h3-xs">Session not found</h3>
+  <p>Go to <a [routerLink]="routeService.getRouterLinkSessions()">Sessions</a> to open an existing
+    session or to create a new one.</p>
+</div>
+
+
+<div *ngIf="state === ComponentState.READY" class="session-view container-fluid">
 
   <split>
 
@@ -9,13 +17,13 @@
     <split-area [size]="split1Size" class="split-1 d-flex flex-column">
 
       <!-- workflow and files -->
-      <ch-session-panel [sessionData]="sessionData" [modulesMap]="modulesMap"  class="d-flex flex-column flex-grow-1"></ch-session-panel>
+      <ch-session-panel [sessionData]="sessionData" [modulesMap]="modulesMap" class="d-flex flex-column flex-grow-1"></ch-session-panel>
 
     </split-area>
 
 
     <!-- split 2-->
-    <split-area  id = "myDiv" [size]="split2Size" class="split-2 scrollable">
+    <split-area id="myDiv" [size]="split2Size" class="split-2 scrollable">
       <div *ngIf="!split3Visible; else selectionPanel">
 
         <div class="row">
@@ -24,19 +32,20 @@
           </div>
         </div>
 
-        <div class="row" id = "visTab">
+        <div class="row" id="visTab">
           <div class="col">
             <!-- TODO refactor logic choosing whether to show job or file or session info -->
 
             <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData">
             </ch-job>
 
-            <ch-session-details *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)" [session]="sessionData.session"
-              [sessionData]="sessionData">
+            <ch-session-details *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)"
+              [session]="sessionData.session" [sessionData]="sessionData" (deleteSession)="onDeleteSession($event)">
             </ch-session-details>
 
-            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)" [dataset]="selectionService.selectedDatasets[0]"
-              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools" (delete)="deleteDatasetsLater()"  (doScrollFix) = "doScrollFix()"></ch-file>
+            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)"
+              [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap" [sessionData]="sessionData"
+              [tools]="tools" (doScrollFix)="doScrollFix()"></ch-file>
           </div>
         </div>
       </div>

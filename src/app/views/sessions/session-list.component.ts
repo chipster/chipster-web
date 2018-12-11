@@ -17,6 +17,7 @@ import { tap } from "rxjs/internal/operators/tap";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { UserEventService } from "./user-event.service";
 import { UserEventData } from "./user-event-data";
+import { SessionState } from "chipster-js-common/lib/model/session";
 
 @Component({
   selector: "ch-session-list",
@@ -58,24 +59,26 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private userEventService: UserEventService,
     private toolsService: ToolsService,
     private configService: ConfigService,
-    private tokenService: TokenService,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID).pipe(
-      tap(userId => this.exampleSessionOwnerUserId = userId),
-      mergeMap(() => this.sessionResource.getSessions()),
-      tap((sessions: Session[]) => {
-
-        const sessionMap = new Map<string, Session>();
-        sessions.forEach(s => sessionMap.set(s.sessionId, s));
-        this.userEventData.sessions = sessionMap;
-      }),
-      tap(() => this.subscribeToEvents()),
-      tap(() => this.updateSessions()),
-    ).subscribe(null, (error: any) => {
-      this.errorHandlerService.handleError(error, "Updating sessions failed");
-    });
+    this.configService
+      .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
+      .pipe(
+        tap(userId => (this.exampleSessionOwnerUserId = userId)),
+        mergeMap(() => this.sessionResource.getSessions()),
+        tap((sessions: Session[]) => {
+          const sessionMap = new Map<string, Session>();
+          sessions.forEach(s => sessionMap.set(s.sessionId, s));
+          this.userEventData.sessions = sessionMap;
+        }),
+        tap(() => this.subscribeToEvents()),
+        tap(() => this.updateSessions())
+      )
+      .subscribe(null, (error: any) => {
+        this.errorHandlerService.handleError(error, "Updating sessions failed");
+      });
 
     this.previewThrottleSubscription = this.previewThrottle$
       .asObservable()
@@ -128,26 +131,36 @@ export class SessionListComponent implements OnInit, OnDestroy {
     // start listening for remote changes
     const sessions = this.userEventData.sessions;
 
-    this.tokenService.getUsername$().pipe(
-      tap(username => this.userEventService.connect(username, this.userEventData)),
-      mergeMap(() => this.userEventService.getRuleStream()),
-      takeUntil(this.unsubscribe),
-
-    ).subscribe((wsEvent: WsEvent) => {
-      this.updateSessions();
-      const sessionId = wsEvent.sessionId;
-      // if the session was just removed
-      if (!this.userEventData.sessions.has(sessionId)) {
-        // try to delete from the deletingSessions
-        this.deletingSessions.forEach(s => {
-          if (s.sessionId === sessionId) {
-            this.deletingSessions.delete(s);
+    this.tokenService
+      .getUsername$()
+      .pipe(
+        tap(username =>
+          this.userEventService.connect(
+            username,
+            this.userEventData
+          )
+        ),
+        mergeMap(() => this.userEventService.getRuleStream()),
+        takeUntil(this.unsubscribe)
+      )
+      .subscribe(
+        (wsEvent: WsEvent) => {
+          this.updateSessions();
+          const sessionId = wsEvent.sessionId;
+          // if the session was just removed
+          if (!this.userEventData.sessions.has(sessionId)) {
+            // try to delete from the deletingSessions
+            this.deletingSessions.forEach(s => {
+              if (s.sessionId === sessionId) {
+                this.deletingSessions.delete(s);
+              }
+            });
           }
-        });
-      }
-    }, err => {
-      this.restErrorService.handleError(err, "Error in event handling");
-    });
+        },
+        err => {
+          this.restErrorService.handleError(err, "Error in event handling");
+        }
+      );
   }
 
   ngOnDestroy() {
@@ -169,6 +182,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         }
 
         session = new Session(name);
+        session.state = SessionState.Temporary;
         return this.sessionResource.createSession(session);
       })
       .do((sessionId: string) => {
@@ -184,7 +198,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   updateSessions() {
-
     const sessions = Array.from(this.userEventData.sessions.values());
 
     const sessionsByUser = new Map<string, Array<Session>>();
@@ -275,23 +288,23 @@ export class SessionListComponent implements OnInit, OnDestroy {
         "Cancel"
       )
       .then(
-      () => {
-        if (this.selectedSession === session) {
-          this.selectedSession = null;
-        }
-        this.deletingSessions.add(session);
+        () => {
+          if (this.selectedSession === session) {
+            this.selectedSession = null;
+          }
+          this.deletingSessions.add(session);
 
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
           // delete the session only from this user (i.e. the rule)
-          this.sessionDataService.deletePersonalRules(session).subscribe(null,
-            (error: any) => {
+          this.sessionDataService
+            .deletePersonalRules(session)
+            .subscribe(null, (error: any) => {
               this.deletingSessions.delete(session);
               this.errorHandlerService.handleError(
                 error,
                 "Deleting session failed"
               );
-            }
-          );
+            });
         },
         () => {
           // modal dismissed
@@ -322,34 +335,35 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   rename(session: Session) {
-    event.stopImmediatePropagation();
     this.sessionService.openRenameModalAndUpdate(session);
   }
 
   notes(session: Session) {
-    event.stopImmediatePropagation();
     this.sessionService.openNotesModalAndUpdate(session);
   }
 
   download(session: Session) {
-    event.stopImmediatePropagation();
     this.sessionService.downloadSession(session.sessionId);
   }
 
   share(session: Session) {
-    event.stopImmediatePropagation();
-
     // get the session to get all rules, because session list sessions have only user's own rule
-    this.sessionResource.getSession(session.sessionId).pipe(
-      tap(s => this.dialogModalService.openSharingModal(s, this.userEventService.applyRuleStreamOfSession(s))),
-    ).subscribe(null, err => {
-      this.restErrorService.handleError(err, "Get session failed");
-    });
+    this.sessionResource
+      .getSession(session.sessionId)
+      .pipe(
+        tap(s =>
+          this.dialogModalService.openSharingModal(
+            s,
+            this.userEventService.applyRuleStreamOfSession(s)
+          )
+        )
+      )
+      .subscribe(null, err => {
+        this.restErrorService.handleError(err, "Get session failed");
+      });
   }
 
   duplicate(session: Session) {
-    event.stopPropagation();
-
     let duplicateName; // ugly
     this.dialogModalService
       .openSessionNameModal(
@@ -376,19 +390,23 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .flatMap((sessionData: SessionData) => {
         const copySessionObservable = this.sessionResource.copySession(
           sessionData,
-          duplicateName
+          duplicateName,
+          false
         );
         return this.dialogModalService.openSpinnerModal(
           "Duplicate session",
           copySessionObservable
         );
       })
-      .subscribe(() => {
+      .subscribe(
+        () => {
           log.info("updating sessions after duplicate");
           this.updateSessions();
-      }, err => {
-        this.restErrorService.handleError(err, "Duplicate session failed");
-      });
+        },
+        err => {
+          this.restErrorService.handleError(err, "Duplicate session failed");
+        }
+      );
   }
 
   sessionMenuOpenChange(open: boolean) {

@@ -32,7 +32,13 @@
 
           var height = Math.max( body.scrollHeight, body.offsetHeight,
             html.clientHeight, html.scrollHeight, html.offsetHeight );
-          document.getElementsByTagName('body')[0].style.height = height + "px";
+          var width = Math.max( body.scrollWidth, body.offsetWidth,
+            html.clientWidth, html.scrollWidth, html.offsetWidth );
+            
+          var style = document.getElementsByTagName('body')[0].style;
+          style.height = height + "px";
+          style.width = width + "px";
+          style.margin = "0 0 0 0";
         }
       }
 

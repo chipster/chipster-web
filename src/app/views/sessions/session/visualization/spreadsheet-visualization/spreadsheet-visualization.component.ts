@@ -36,7 +36,13 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
   @ViewChild('horizontalScroll') horizontalScrollDiv;
 
-  private fileSizeLimit = 10 * 1024;
+  // takes ~100 ms with ADSL
+  private fileSizeLimit = 100 * 1024;
+  // nice round number for tables with reasonable number of columns
+  private maxRowsimit = 100;
+  // limit the number of rows even further if there are hundreds or thousands
+  // of columns to keep the page somewhat responsive
+  private maxCellsLimit = 10 * 1000;
   public lineCount: number;
   public fullFileVisible;
   readonly tableContainerId: string =
@@ -76,8 +82,20 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
       .subscribe(
-        (result: any) => {
+      (result: any) => {
+          // parse all loaded data
           let parsedTSV = d3.tsvParseRows(result);
+
+          // limit the number of rows to show
+          if (parsedTSV.length > this.maxRowsimit + 1) {
+            parsedTSV = parsedTSV.slice(0, this.maxRowsimit + 1);
+          }
+
+          // limit the number of cells to show
+          const columns = parsedTSV[0].length;
+          if (parsedTSV.length * columns > this.maxCellsLimit) {
+            parsedTSV = parsedTSV.slice(0, this.maxCellsLimit / columns);
+          }
 
           // skip comment lines, e.g. lines starting with ## in a VCF file
           const skipLines = this.typeTagService.get(

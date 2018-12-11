@@ -34,7 +34,7 @@
         <tr *ngFor="let parameter of tool.parameters; let i = index" ngbPopover="{{parameter.description}}" triggers="mouseenter:mouseleave"
           placement="left" container="body">
           <td>
-            {{ parameter.name.displayName }}
+            {{ getDisplayName(parameter) }}
             <span class="text-sm lighter" *ngIf="parameter.optional">
               <i>(optional)</i>
             </span>

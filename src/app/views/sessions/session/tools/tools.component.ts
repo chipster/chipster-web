@@ -186,18 +186,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   selectCategoryAndFirstTool(category: Category) {
     this.selectedCategory = category;
-    const categoryElementId = this.categoryElementIdPrefix + category.name;
-    setTimeout(() => {
-      this.scrollIntoViewByElementId(categoryElementId);
-    });
 
     if (category.tools.length > 0) {
       this.selectTool(category.tools[0]);
-      const toolElementId =
-        this.toolElementIdPrefix + category.tools[0].name.id;
-      setTimeout(() => {
-        this.scrollIntoViewByElementId(toolElementId);
-      });
     }
   }
 
@@ -325,21 +316,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       this.searchBoxModel = null;
-
-      this.scrollIntoViewByElementId(categoryElementId);
-      this.scrollIntoViewByElementId(toolElementId);
-
       this.document.getElementById(toolElementId).focus();
     });
   }
 
   public searchBoxBlur(event) {
     this.searchBoxModel = null;
-  }
-
-  private scrollIntoViewByElementId(elementId: string) {
-    this.document
-      .getElementById(elementId)
-      .scrollIntoView({ behavior: "smooth" });
   }
 }

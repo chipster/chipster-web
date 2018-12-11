@@ -72,4 +72,8 @@ export class ToolParametersComponent implements OnInit, OnDestroy {
       this.warningText = "";
     }
   }
+
+  public getDisplayName(obj) {
+    return this.toolService.getDisplayName(obj);
+  }
 }
