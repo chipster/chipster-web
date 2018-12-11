@@ -182,7 +182,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         }
 
         session = new Session(name);
-        session.state = SessionState.Temporary;
+        session.state = SessionState.TemporaryUnmodified;
         return this.sessionResource.createSession(session);
       })
       .do((sessionId: string) => {

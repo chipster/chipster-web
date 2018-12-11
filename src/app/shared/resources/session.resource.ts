@@ -22,17 +22,17 @@ export class SessionResource {
     return this.configService
       .getSessionDbUrl()
       .flatMap((url: string) => {
-
         let sessionUrl = `${url}/sessions/${sessionId}`;
         let types$;
 
         if (preview) {
-          sessionUrl += '?preview';
+          sessionUrl += "?preview";
           types$ = Observable.of(null);
         } else {
           // types are not needed in the preview
-          types$ = this.getTypeTagsForSession(sessionId)
-            .do((x: any) => log.debug("types", x));
+          types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
+            log.debug("types", x)
+          );
         }
 
         const session$ = this.restService
@@ -336,7 +336,11 @@ export class SessionResource {
     );
   }
 
-  copySession(sessionData: SessionData, name: string, temporary: boolean): Observable<any> {
+  copySession(
+    sessionData: SessionData,
+    name: string,
+    temporary: boolean
+  ): Observable<any> {
     log.info("copySession()", sessionData, name, temporary);
     if (!name) {
       name = "unnamed session";
@@ -393,7 +397,7 @@ export class SessionResource {
       .flatMap(session => {
         log.info("session copied, current state", session.state, temporary);
         if (temporary) {
-          session.state = SessionState.Temporary;
+          session.state = SessionState.TemporaryUnmodified;
         } else {
           session.state = SessionState.Ready;
         }
