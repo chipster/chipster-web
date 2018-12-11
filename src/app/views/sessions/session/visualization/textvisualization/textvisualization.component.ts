@@ -16,11 +16,13 @@ import {LoadState, State} from "../../../../../model/loadstate";
       background-color: white;
     }
   `],
+  styleUrls: ['./textvisualization.component.less'],
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
 
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
+  @Input() modalMode: boolean;
 
   private data: string;
 

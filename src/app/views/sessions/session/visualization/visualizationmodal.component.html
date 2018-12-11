@@ -7,7 +7,7 @@
 
 <div class="modal-body">
   <div class="visualization-modal-content">
-    <ch-text-visualization *ngIf="visualizationId === 'text'" [dataset]="dataset" [showFullData]=true>
+    <ch-text-visualization *ngIf="visualizationId === 'text'" [dataset]="dataset" [showFullData]=true [modalMode]=true>
     </ch-text-visualization>
 
     <ch-spreadsheet-visualization class="modal-spreadsheet" *ngIf="visualizationId === 'spreadsheet'" [dataset]="dataset" [sessionData]="sessionData"

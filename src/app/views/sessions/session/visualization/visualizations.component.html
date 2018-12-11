@@ -21,7 +21,7 @@
       <span class="glyphicon glyphicon-font"></span> Text</ng-template>
     <ng-template ngbTabContent>
       <div class="visualization-panel">
-        <ch-text-visualization *ngIf="active === getTabId('text')" [dataset]="selectionService.selectedDatasets[0]">
+        <ch-text-visualization *ngIf="active === getTabId('text')" [dataset]="selectionService.selectedDatasets[0]" [modalMode]=false>
         </ch-text-visualization>
       </div>
     </ng-template>
