@@ -19,6 +19,8 @@ export class DatasetParameterListComponent implements OnChanges {
   defaultLimit = 3;
   buttonText: string;
 
+  currentTool: Tool = null;
+
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
@@ -26,11 +28,11 @@ export class DatasetParameterListComponent implements OnChanges {
   constructor(private toolService: ToolService) {}
 
   ngOnChanges(changes: any) {
-    let tool = null;
     let parameters = null;
 
     if (changes.tool != null) {
-      tool = changes.tool.currentValue;
+      // tool doesn't change if you several datasets were produced by the same tool
+      this.currentTool = changes.tool.currentValue;
     }
 
     if (changes.parameters != null) {
@@ -40,7 +42,7 @@ export class DatasetParameterListComponent implements OnChanges {
     this.parameterListForView = [];
 
     if (parameters) {
-      this.showWithTool(parameters, tool);
+      this.showWithTool(parameters, this.currentTool);
     }
 
     // number of params may change if all parameters are shown when a new dataset is selected
