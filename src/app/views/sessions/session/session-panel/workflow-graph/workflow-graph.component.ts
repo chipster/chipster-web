@@ -60,6 +60,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private zoomStepFactor = 0.2;
 
   private zoom;
+  private isContextMenuOpen = false;
+
   constructor(
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
@@ -138,9 +140,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const section = d3.select("#workflowvisualization");
     this.scrollerDiv = section.append("div").classed("scroller-div", true);
 
-    // listern for background clicks
-    section.on("click", () => {
-      if (d3.event.target.tagName.toUpperCase() === "SVG") {
+    /*
+    Listen for background clicks
+
+    Don't do anything if the context menu is open, because then the user clicked just to close
+    it. Listen for mousedown events like the context menu. This listener seems to be fired before the
+    contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
+    in the context menu onClose doesn't help also, because this was called earlier.
+    */
+    section.on("mousedown", () => {
+      if (d3.event.target.tagName.toUpperCase() === "SVG" && !this.isContextMenuOpen) {
         this.selectionHandlerService.clearDatasetSelection();
         this.selectionHandlerService.clearJobSelection();
       }
@@ -486,7 +495,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         )
       )
       .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
-      .on("contextmenu", d3ContextMenu(menu))
+      .on("contextmenu", d3ContextMenu(menu, {
+        onOpen: () => {
+          console.info("context menu open");
+          this.isContextMenuOpen = true;
+        },
+        onClose: () => {
+          console.info("context menu close");
+          this.isContextMenuOpen = false;
+        }
+      }))
       .on("mouseover", function (d) {
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", true);
