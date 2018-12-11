@@ -83,7 +83,7 @@
           <!-- reset parameter to default button -->
           <td>
             <button type="button" class="btn btn-secondary btn-sm" *ngIf="parameter.value !== toolService.getDefaultValue(parameter)"
-              (click)="parameter.value = toolService.getDefaultValue(parameter)" title="Reset to default value">
+              (click)="reset(parameter, $event)" title="Reset to default value">
               Reset to default
             </button>
           </td>

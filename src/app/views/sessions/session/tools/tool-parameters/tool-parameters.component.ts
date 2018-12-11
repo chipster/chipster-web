@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import { Tool } from "chipster-js-common";
+import { Tool, ToolParameter } from "chipster-js-common";
 import { ToolService } from "../tool.service";
 import { ToolSelectionService } from "../../tool.selection.service";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
@@ -71,6 +71,12 @@ export class ToolParametersComponent implements OnInit, OnDestroy {
     } else {
       this.warningText = "";
     }
+  }
+
+  reset(parameter: ToolParameter, $event: Event) {
+    // don't close the dropdown
+    $event.stopPropagation();
+    parameter.value = this.toolService.getDefaultValue(parameter);
   }
 
   public getDisplayName(obj) {
