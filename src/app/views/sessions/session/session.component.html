@@ -15,7 +15,7 @@
 
 
     <!-- split 2-->
-    <split-area [size]="split2Size" class="split-2 scrollable">
+    <split-area  id = "myDiv" [size]="split2Size" class="split-2 scrollable">
       <div *ngIf="!split3Visible; else selectionPanel">
 
         <div class="row">
@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="row" id = "visTab">
           <div class="col">
             <!-- TODO refactor logic choosing whether to show job or file or session info -->
 
@@ -36,7 +36,7 @@
             </ch-session-details>
 
             <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)" [dataset]="selectionService.selectedDatasets[0]"
-              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools" (delete)="deleteDatasetsLater()"></ch-file>
+              [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools" (delete)="deleteDatasetsLater()"  (doScrollFix) = "doScrollFix()"></ch-file>
           </div>
         </div>
       </div>

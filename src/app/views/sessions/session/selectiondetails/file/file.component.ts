@@ -23,6 +23,8 @@ export class FileComponent {
   @Input()
   tools: Tool[];
 
+  @Output() doScrollFix = new EventEmitter();
+
   constructor(
     public selectionService: SelectionService, // used in template
     private sessionDataService: SessionDataService,
@@ -55,4 +57,5 @@ export class FileComponent {
       this.sessionData
     );
   }
+
 }
