@@ -413,12 +413,8 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 
   doScrollFix() {
-    console.log(document.getElementById("myDiv").getBoundingClientRect());
-    console.log(document.getElementById("visTab").getBoundingClientRect());  
-   
     let scrollToTop = setInterval(() => {
       let div = document.getElementById("myDiv");
-      console.log(div.offsetTop);
       let visRect = document.getElementById("visTab").getBoundingClientRect();
       let toolVisRect = document.getElementById("myDiv").getBoundingClientRect();
       if (visRect.top < 1) {
