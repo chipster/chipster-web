@@ -4,6 +4,7 @@ import { Session } from "chipster-js-common";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
+import { SessionState } from "chipster-js-common/lib/model/session";
 
 
 @Component({
@@ -35,6 +36,7 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
     fileAdded(file: any) {
         this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);
         const session = new Session(file.name.replace('.zip', ''));
+        session.state = SessionState.Import;
 
         this.fileStatus.set(file, 'Creating session');
 

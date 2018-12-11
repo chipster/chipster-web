@@ -24,6 +24,7 @@ import { ImportSessionModalComponent } from "../open-session-file/import-session
 import { SessionService } from "./session.service";
 import { SessionDetailsComponent } from "./session-details/session-details.component";
 import { UserEventService } from "../user-event.service";
+import { RouterModule } from "@angular/router";
 
 @NgModule({
   imports: [
@@ -35,7 +36,8 @@ import { UserEventService } from "../user-event.service";
     SessionPanelModule,
     NgbModule,
     DialogModalModule,
-    AngularSplitModule
+    AngularSplitModule,
+    RouterModule
   ],
   declarations: [
     SessionComponent,
@@ -55,7 +57,7 @@ import { UserEventService } from "../user-event.service";
     ToolSelectionService,
     JobService,
     ModifiedSessionGuard,
-    UserEventService,
+    UserEventService
   ],
   entryComponents: [JobErrorModalComponent, ImportSessionModalComponent]
 })

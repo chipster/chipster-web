@@ -1,6 +1,6 @@
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
-import { Dataset } from "chipster-js-common";
+import { Dataset, JobState, Resource, EventType } from "chipster-js-common";
 import { Job, JobInput, Session, Rule, WsEvent } from "chipster-js-common";
 import { FileResource } from "../../../shared/resources/fileresource";
 import { Injectable } from "@angular/core";
@@ -71,7 +71,7 @@ export class SessionDataService {
     content: string
   ) {
     const job = new Job();
-    job.state = "COMPLETED";
+    job.state = JobState.Completed;
     job.toolCategory = "Interactive visualizations";
     job.toolName = toolName;
 
@@ -101,7 +101,7 @@ export class SessionDataService {
   }
 
   cancelJob(job: Job) {
-    job.state = "CANCELLED";
+    job.state = JobState.Cancelled;
     job.stateDetail = "";
 
     this.updateJob(job);
@@ -285,9 +285,10 @@ export class SessionDataService {
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
         this.getSessionId(),
-        "DATASET",
+        Resource.Dataset,
         dataset.datasetId,
-        "CREATE"
+        EventType.Create,
+        null
       );
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
@@ -314,9 +315,10 @@ export class SessionDataService {
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
         this.getSessionId(),
-        "DATASET",
+        Resource.Dataset,
         dataset.datasetId,
-        "DELETE"
+        EventType.Delete,
+        null
       );
       this.sessionEventService.generateLocalEvent(wsEvent);
     });

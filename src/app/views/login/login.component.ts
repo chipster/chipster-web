@@ -1,5 +1,5 @@
 import { AuthenticationService } from "../../core/authentication/authentication-service";
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
@@ -27,6 +27,9 @@ export class LoginComponent implements OnInit {
 
   @ViewChild("myForm")
   private myForm: FormGroup;
+
+  @ViewChild("usernameInput")
+  private usernameInput: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -122,6 +125,10 @@ export class LoginComponent implements OnInit {
 
         // everything ready, show login
         this.show = true;
+        // allow Angular to create the element first
+        setTimeout(() => {
+          this.usernameInput.nativeElement.focus();
+        }, 0);
       },
       error => {
         this.restErrorService.handleError(

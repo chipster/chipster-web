@@ -83,7 +83,17 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   isDefaultValue(parameter: ToolParameter, value: number | string) {
-    return parameter.defaultValue && parameter.defaultValue === value;
+    if (parameter.defaultValue == null) {
+      // if the default is not set, allow also null, undefined and empty string here
+      return value == null || value === "";
+    } else {
+      if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
+        // consider "0" and "0.0" equal
+        return parseFloat(value.toString()) === parseFloat(parameter.defaultValue);
+      } else {
+        return parameter.defaultValue === value;
+      }
+    }
   }
 
   //noinspection JSMethodCanBeStatic
@@ -253,5 +263,12 @@ export class ToolService {
       }
       return toolId;
     });
+  }
+
+  getDisplayName(obj: ToolParameter | ToolInput | Tool) {
+    if (obj.name.displayName != null) {
+      return obj.name.displayName;
+    }
+    return obj.name.id;
   }
 }

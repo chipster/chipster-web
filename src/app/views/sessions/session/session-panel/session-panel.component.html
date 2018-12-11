@@ -20,8 +20,8 @@
             <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
 
             <!-- dropdown -->
-            <span class="dropdown">
-              <button [disabled]="sessionData.datasetsMap.size === 0" class="btn btn-secondary btn-sm float-right tool-bar-button"
+            <span class="dropdown float-right">
+              <button [disabled]="sessionData.datasetsMap.size === 0" class="btn btn-secondary btn-sm tool-bar-button"
                 id="workflowDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
                 <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
               </button>
@@ -42,10 +42,8 @@
             </button>
           </div>
 
-          <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="sessionData.datasetsMap"
-            [jobsMap]="sessionData.jobsMap
-              " [modulesMap]="modulesMap" [datasetSearch]="datasetSearch"
-            [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
+          <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap"
+            [modulesMap]="modulesMap" [datasetSearch]="datasetSearch" [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
         </div>
       </ng-template>
     </ngb-tab>

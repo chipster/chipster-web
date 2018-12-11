@@ -27,7 +27,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  fileSizeLimit = 10 * 1024;
+  fileSizeLimit = 100 * 1024;
 
   constructor(private fileResource: FileResource,
               private sessionDataService: SessionDataService,
@@ -41,7 +41,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading data...");
     this.data = null;
 
-    let maxBytes = this.showFullData ? null : this.fileSizeLimit;
+    const maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
     this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
