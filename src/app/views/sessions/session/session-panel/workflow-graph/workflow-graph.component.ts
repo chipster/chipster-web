@@ -497,11 +497,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
       .on("contextmenu", d3ContextMenu(menu, {
         onOpen: () => {
-          console.info("context menu open");
           this.isContextMenuOpen = true;
         },
         onClose: () => {
-          console.info("context menu close");
           this.isContextMenuOpen = false;
         }
       }))

@@ -79,7 +79,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           this.tabChanged = false;
         }
         // need to emit some event to session top so that the tool and visulazation div scrollTop changes to show some part of tool section
-        this.scrollFix.emit()
+        this.scrollFix.emit();
 
       }
     );
