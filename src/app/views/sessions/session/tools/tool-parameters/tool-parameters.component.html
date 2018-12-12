@@ -59,7 +59,7 @@
                 min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}" required="{{!parameter.optional}}"
                 (ngModelChange)="toolSelectionService.checkParameters()" />
 
-              <input *ngIf="parameter.type === 'STRING'" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value"
+              <input *ngIf="toolService.isStringParameter(parameter)" type="text" name="parameter_{{i}}" [(ngModel)]="parameter.value"
                 required="{{!parameter.optional}}" (ngModelChange)="toolSelectionService.checkParameters()" />
 
               <!-- <label class="label label-warning" -->

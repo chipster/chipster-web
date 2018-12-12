@@ -41,6 +41,14 @@ export class ToolService {
     );
   }
 
+    //noinspection JSMethodCanBeStatic
+  isStringParameter(parameter: ToolParameter) {
+      return (
+        parameter.type === "STRING" ||
+        parameter.type === "UNCHECKED_STRING"
+      );
+    }
+
   //noinspection JSMethodCanBeStatic
   /**
    * Get the step size for number inputs
