@@ -12,6 +12,6 @@
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
-  <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save()">{{buttonText}}</button>
+  <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save($event)">{{buttonText}}</button>
 </div>
 
