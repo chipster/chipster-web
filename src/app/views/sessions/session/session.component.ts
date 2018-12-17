@@ -1,5 +1,10 @@
 import { Component, OnDestroy, OnInit, HostListener } from "@angular/core";
-import { ActivatedRoute, Params } from "@angular/router";
+import {
+  ActivatedRoute,
+  Params,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot
+} from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
@@ -183,7 +188,21 @@ export class SessionComponent implements OnInit, OnDestroy {
    * For a temporary session with changes, ask whether to keep or discard the session
    *
    */
-  canDeactivate(): Observable<boolean> {
+  canDeactivate(
+    sessionComponent: SessionComponent,
+    currentRoute: ActivatedRouteSnapshot,
+    currentState: RouterStateSnapshot,
+    nextState?: RouterStateSnapshot
+  ): Observable<boolean> {
+    // cancel navigation if destination is appName/analyze, e.g. when clicking Analyze in nav bar when in session view
+    if (
+      nextState &&
+      nextState.url &&
+      nextState.url === this.routeService.getRouterLinkAnalyze()
+    ) {
+      return Observable.of(false);
+    }
+
     /*
     No need to ask if the session was already deleted
 
