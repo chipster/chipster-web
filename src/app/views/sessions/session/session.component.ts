@@ -442,9 +442,6 @@ export class SessionComponent implements OnInit, OnDestroy {
     const scrollToTop = setInterval(() => {
       const div = document.getElementById("myDiv");
       const visRect = document.getElementById("visTab").getBoundingClientRect();
-      const toolVisRect = document
-        .getElementById("myDiv")
-        .getBoundingClientRect();
       if (visRect.top < 1) {
         div.scrollTo(0, 0);
       } else {
