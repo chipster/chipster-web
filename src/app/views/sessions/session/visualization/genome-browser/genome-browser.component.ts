@@ -187,6 +187,7 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
    for( let i= 0;  i < this.dataSourceList.length ; i++){
       let bamSourceEntry = new BamSourceEntry();
       
+      
    }
 
   }
