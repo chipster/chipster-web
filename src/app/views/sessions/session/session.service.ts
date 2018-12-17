@@ -1,5 +1,5 @@
 import { SessionResource } from "../../../shared/resources/session.resource";
-import { Session } from "chipster-js-common";
+import { Session, SessionState } from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import * as _ from "lodash";
@@ -26,6 +26,15 @@ export class SessionService {
       .openSessionNameModal("Rename session", session.name)
       .flatMap((name: string) => {
         session.name = name;
+
+        // 'save' temp session when renaming it
+        if (
+          session.state === SessionState.TemporaryUnmodified ||
+          session.state === SessionState.TemporaryModified
+        ) {
+          session.state = SessionState.Ready;
+        }
+
         return this.updateSession(session);
       })
       .subscribe(null, err =>
