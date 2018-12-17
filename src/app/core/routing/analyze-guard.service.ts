@@ -5,7 +5,7 @@ import { ActivatedRouteSnapshot } from "@angular/router";
 import { RouterStateSnapshot } from "@angular/router";
 import { Observable } from "rxjs/Observable";
 import { SessionResource } from "../../shared/resources/session.resource";
-import { Session } from "chipster-js-common";
+import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { UserService } from "../../shared/services/user.service";
 
@@ -33,7 +33,7 @@ export class AnalyzeGuard implements CanActivate {
           return Observable.of(false); // doesn't really matter if it's true or false, since navigating before?
         } else {
           log.info("no valid latest session, creating new session");
-          return this.createNewSession().map((newSessionId: string) => {
+          return this.createNewTempSession().map((newSessionId: string) => {
             if (newSessionId !== null) {
               log.info("created new session", newSessionId);
               this.routeService.navigateToSession(newSessionId);
@@ -48,7 +48,9 @@ export class AnalyzeGuard implements CanActivate {
       });
   }
 
-  private createNewSession(): Observable<string> {
-    return this.sessionResource.createSession(new Session("New session"));
+  private createNewTempSession(): Observable<string> {
+    const s: Session = new Session("New session");
+    s.state = SessionState.TemporaryUnmodified;
+    return this.sessionResource.createSession(s);
   }
 }

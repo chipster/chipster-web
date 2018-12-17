@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { SET_LATEST_SESSION } from "../../state/latest-session.reducer";
+import {
+  SET_LATEST_SESSION,
+  LatestSession
+} from "../../state/latest-session.reducer";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { User } from "chipster-js-common";
 import log from "loglevel";
@@ -15,19 +18,29 @@ export class UserService {
     private sessionResource: SessionResource
   ) {}
 
-  public updateLatestSession(sessionId: string) {
-    this.updateLatestSessionToStore(sessionId);
+  public updateLatestSession(sessionId: string, sourceSessionId?: string) {
+    this.updateLatestSessionToStore(sessionId, sourceSessionId);
     this.updateLatestSessionToSessionDb(sessionId);
   }
 
-  updateLatestSessionToStore(sessionId: string) {
-    this.store.dispatch({
-      type: SET_LATEST_SESSION,
-      payload: sessionId
-    });
+  private updateLatestSessionToStore(
+    sessionId: string,
+    sourceSessionId?: string
+  ) {
+    if (sourceSessionId) {
+      this.store.dispatch({
+        type: SET_LATEST_SESSION,
+        payload: { sessionId: sessionId, sourceSessionId: sourceSessionId }
+      });
+    } else {
+      this.store.dispatch({
+        type: SET_LATEST_SESSION,
+        payload: { sessionId: sessionId }
+      });
+    }
   }
 
-  updateLatestSessionToSessionDb(sessionId: string) {
+  private updateLatestSessionToSessionDb(sessionId: string) {
     // FIXME only update if changed?
     this.authenticationService
       .getUser()
@@ -52,41 +65,58 @@ export class UserService {
       .do(s => (sessions = s))
       .mergeMap(() => {
         return this.getLatestSessionFromStore().mergeMap(
-          (idFromStore: string) => {
+          (latestSession: LatestSession) => {
+            // valid id from store?
+            const idFromStore = latestSession.sessionId;
             if (
-              idFromStore !== null &&
+              idFromStore &&
               sessions.some(session => session.sessionId === idFromStore)
             ) {
               log.info("found valid latest session id from store", idFromStore);
               return Observable.of(idFromStore);
             } else {
-              log.info("no valid latest session id in store");
-              return this.getLatestSessionFromSessionDb().mergeMap(
-                (idFromSessionDb: string) => {
-                  if (
-                    idFromSessionDb !== null &&
-                    sessions.some(
-                      session => session.sessionId === idFromSessionDb
-                    )
-                  ) {
-                    log.info(
-                      "found valid latest session id from sessionDb",
-                      idFromSessionDb
-                    );
-                    return Observable.of(idFromSessionDb);
-                  } else {
-                    log.info("no valid latest session id in sessionDb");
-                    return Observable.of(null);
+              // valid source session id from store?
+              const sourceSessionIdFromStore = latestSession.sourceSessionId;
+              if (
+                sourceSessionIdFromStore &&
+                sessions.some(
+                  session => session.sessionId === sourceSessionIdFromStore
+                )
+              ) {
+                log.info(
+                  "found valid source session id from store",
+                  sourceSessionIdFromStore
+                );
+                return Observable.of(sourceSessionIdFromStore);
+              } else {
+                // valid id from session db?
+                return this.getLatestSessionFromSessionDb().mergeMap(
+                  (idFromSessionDb: string) => {
+                    if (
+                      idFromSessionDb !== null &&
+                      sessions.some(
+                        session => session.sessionId === idFromSessionDb
+                      )
+                    ) {
+                      log.info(
+                        "found valid latest session id from sessionDb",
+                        idFromSessionDb
+                      );
+                      return Observable.of(idFromSessionDb);
+                    } else {
+                      log.info("no valid latest session id in sessionDb");
+                      return Observable.of(null);
+                    }
                   }
-                }
-              );
+                );
+              }
             }
           }
         );
       });
   }
 
-  getLatestSessionFromStore(): Observable<string> {
+  getLatestSessionFromStore(): Observable<LatestSession> {
     return this.store.select("latestSession").take(1);
   }
 
