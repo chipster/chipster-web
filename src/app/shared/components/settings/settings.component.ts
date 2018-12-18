@@ -1,5 +1,8 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { SettingsService } from "../../services/settings.service";
+import {
+  SettingsService,
+  SessionListMode
+} from "../../services/settings.service";
 import { Subject } from "rxjs/Subject";
 
 @Component({
@@ -8,6 +11,8 @@ import { Subject } from "rxjs/Subject";
   styleUrls: ["./settings.component.less"]
 })
 export class SettingsComponent implements OnInit, OnDestroy {
+  public SessionListMode = SessionListMode; // ref for using enum in template
+
   public showToolsPanel: boolean;
 
   private unsubscribe: Subject<any> = new Subject();
@@ -43,5 +48,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.settingsService.compactToolList$.next(
       !this.settingsService.compactToolList$.getValue()
     );
+  }
+
+  setSessionListMode(mode: SessionListMode) {
+    this.settingsService.sessionListMode$.next(mode);
   }
 }

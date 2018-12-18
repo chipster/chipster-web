@@ -18,6 +18,10 @@ import { mergeMap, takeUntil } from "rxjs/operators";
 import { UserEventService } from "./user-event.service";
 import { UserEventData } from "./user-event-data";
 import { SessionState } from "chipster-js-common/lib/model/session";
+import {
+  SettingsService,
+  SessionListMode
+} from "../../shared/services/settings.service";
 
 @Component({
   selector: "ch-session-list",
@@ -25,10 +29,14 @@ import { SessionState } from "chipster-js-common/lib/model/session";
   styleUrls: ["./session-list.component.less"]
 })
 export class SessionListComponent implements OnInit, OnDestroy {
+  public SessionListMode = SessionListMode; // ref for using enum in template
+
+  public mode = SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN;
   private exampleSessionOwnerUserId: string;
 
   public selectedSession: Session;
   public previousSession: Session;
+  public lightSelectedSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
   public deletingSessions = new Set<Session>();
@@ -59,10 +67,18 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private userEventService: UserEventService,
     private toolsService: ToolsService,
     private configService: ConfigService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
+    // subscribe to mode change
+    this.settingsService.sessionListMode$.subscribe(
+      (newMode: SessionListMode) => {
+        this.mode = newMode;
+      }
+    );
+
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
@@ -238,15 +254,111 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   onSessionClick(session: Session) {
-    if (this.selectionDisabled) {
-      this.selectionDisabled = false;
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
+        if (this.selectionDisabled) {
+          this.selectionDisabled = false;
 
-      if (!this.deletingSessions.has(session)) {
+          if (!this.deletingSessions.has(session)) {
+            this.selectSession(session);
+          }
+          return;
+        } else if (!this.deletingSessions.has(session)) {
+          this.openSession(session.sessionId);
+        }
+        break;
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        if (this.selectionDisabled) {
+          this.selectionDisabled = false;
+
+          if (!this.deletingSessions.has(session)) {
+            this.selectSession(session);
+          }
+          return;
+        } else if (!this.deletingSessions.has(session)) {
+          this.openSession(session.sessionId);
+        }
+
+        break;
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        if (this.selectionDisabled) {
+          this.selectionDisabled = false;
+
+          if (!this.deletingSessions.has(session)) {
+            this.selectSession(session);
+            this.lightSelectSession(session);
+          }
+          return;
+        } else if (!this.deletingSessions.has(session)) {
+          if (this.isSessionSelected(session)) {
+            this.lightSelectSession(session);
+            this.selectSession(null);
+          } else {
+            this.selectSession(session);
+            this.lightSelectSession(session);
+          }
+        }
+        break;
+    }
+  }
+
+  onSessionMouseover(session: Session) {
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         this.selectSession(session);
-      }
-      return;
-    } else if (!this.deletingSessions.has(session)) {
-      this.openSession(session.sessionId);
+        break;
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        this.lightSelectSession(session);
+        break;
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        this.lightSelectSession(session);
+        break;
+    }
+  }
+
+  onSessionMouseout(session: Session) {
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
+        this.selectSession(null);
+        break;
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        // this.lightSelectSession(null);
+        break;
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        break;
+    }
+  }
+
+  rowHighlighted(session: Session) {
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
+        return this.isSessionSelected(session);
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        return this.isSessionLightSelected(session);
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        return this.isSessionLightSelected(session);
+    }
+  }
+
+  buttonsVisible(session: Session) {
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
+        return this.isSessionSelected(session);
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        return this.isSessionLightSelected(session);
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        return this.isSessionLightSelected(session);
+    }
+  }
+
+  getSessionRowTitle() {
+    switch (this.mode) {
+      case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
+        return "Open";
+      case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
+        return "Open";
+      case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
+        return "Preview";
     }
   }
 
@@ -279,6 +391,13 @@ export class SessionListComponent implements OnInit, OnDestroy {
     }
   }
 
+  lightSelectSession(session: Session) {
+    if (this.selectionDisabled || this.deletingSessions.has(session)) {
+      return;
+    }
+    this.lightSelectedSession = session;
+  }
+
   deleteSession(session: Session) {
     this.dialogModalService
       .openBooleanModal(
@@ -299,6 +418,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.sessionDataService
             .deletePersonalRules(session)
             .subscribe(null, (error: any) => {
+              // FIXME close preview if open
               this.deletingSessions.delete(session);
               this.errorHandlerService.handleError(
                 error,
@@ -314,6 +434,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   isSessionSelected(session: Session) {
     return this.selectedSession === session;
+  }
+
+  isSessionLightSelected(session: Session) {
+    return this.lightSelectedSession === session;
   }
 
   getSharedByTitlePart(userId: string): string {
@@ -417,5 +541,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
     return this.sessionDataService.hasPersonalRule(session.rules)
       ? "Edit notes"
       : "View notes";
+  }
+
+  closePreview() {
+    this.selectSession(null);
   }
 }
