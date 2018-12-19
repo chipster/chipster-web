@@ -5,6 +5,9 @@ import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
+import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { SettingsComponent } from "../../shared/components/settings/settings.component";
 
 @Component({
   selector: "ch-navigation",
@@ -28,7 +31,8 @@ export class NavigationComponent implements OnInit {
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private modalService: NgbModal
   ) {}
 
   ngOnInit() {
@@ -140,5 +144,9 @@ export class NavigationComponent implements OnInit {
 
   isAdmin() {
     return this.isLoggedIn() && this.tokenService.hasRole("admin");
+  }
+
+  openSettings() {
+    this.modalService.open(SettingsComponent);
   }
 }

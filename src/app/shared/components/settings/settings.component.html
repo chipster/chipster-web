@@ -1,45 +1,38 @@
-<!-- <a class="dropdown-item" (click)="toggleShowToolsPanel()">
-  <i class="fas fa-blank fa-fw"></i>
-  <span *ngIf="!showToolsPanel"> Show tools side panel </span>
-  <span *ngIf="showToolsPanel"> Hide tools side panel </span>
-</a>
+<div class="modal-header mb-3">
+  <h4 class="modal-title">Settings</h4>
+  <button type="button" class="close" (click)="activeModal.close()">
+    <span>&times;</span>
+  </button>
+</div>
 
-<a class="dropdown-item" (click)="toggleSplitSelectionPanel()">
-  <i class="fas fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.splitSelectionPanel$.getValue()}"></i>
-  Always show both tool and file selection in the middle panel</a> -->
+<div class="container">
+  <h4 class="h4-xs">Session list mode</h4>
 
-<h6 class="dropdown-header">View settings</h6>
+  <form class="px-2">
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW)"
+        checked>
+      <label class="form-check-label" for="exampleRadios1">
+        {{SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW}}
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW)">
+      <label class="form-check-label" for="exampleRadios2">
+        {{SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW}}
+      </label>
+    </div>
+    <div class="form-check disabled">
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" (click)="setSessionListMode(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN)">
+      <label class="form-check-label" for="exampleRadios3">
+        {{SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN}}
+      </label>
+    </div>
+  </form>
+</div>
 
-<a class="dropdown-item" (click)="toggleCompactToolList()">
-  <i class="fas fa-check fa-fw" [ngClass]="{ 'hidden' : !settingsService.compactToolList$.getValue()}"></i>
-  Compact tool list</a>
-
-<div class="dropdown-divider"></div>
-
-<h6 class="dropdown-header">Session list mode</h6>
-
-<form class="px-4">
-  <div class="form-check">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW)"
-      checked>
-    <label class="form-check-label" for="exampleRadios1">
-      {{SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW}}
-    </label>
+<div class="modal-footer mt-3">
+  <div class="col px-0">
+    <button type="button" class="btn btn-sm btn-secondary float-right" (click)="activeModal.close()">Close</button>
   </div>
-  <div class="form-check">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW)">
-    <label class="form-check-label" for="exampleRadios2">
-      {{SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW}}
-    </label>
-  </div>
-  <div class="form-check disabled">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" (click)="setSessionListMode(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN)">
-    <label class="form-check-label" for="exampleRadios3">
-      {{SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN}}
-    </label>
-  </div>
-
-  <div class="dropdown-divider"></div>
-
-  <!-- <button type="submit" class="btn btn-sm btn-secondary float-right">Close</button> -->
-</form>
+</div>

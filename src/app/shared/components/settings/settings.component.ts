@@ -4,6 +4,7 @@ import {
   SessionListMode
 } from "../../services/settings.service";
 import { Subject } from "rxjs/Subject";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: "ch-settings",
@@ -17,7 +18,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(public settingsService: SettingsService) {}
+  constructor(
+    public settingsService: SettingsService,
+    public activeModal: NgbActiveModal
+  ) {}
 
   ngOnInit() {
     this.settingsService.showToolsPanel$

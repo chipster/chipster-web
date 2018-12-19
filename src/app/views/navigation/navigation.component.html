@@ -36,20 +36,19 @@
     </ul>
 
     <ul class="navbar-nav">
-
       <li *ngIf="isLoggedIn()" class="nav-item dropdown">
-        <a class="nav-link" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-          aria-expanded="false">
-          <i class="fas fa-cog"></i>
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          {{tokenService.getName()}}
         </a>
-        <div class="dropdown-menu dropdown-menu-right" style="z-index: 1001;min-width: 20rem" aria-labelledby="navbarDropdownMenuLink">
-          <ch-settings></ch-settings>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" (click)="openSettings()"><i class="fas fa-cog lighter"></i> Settings</a>
+          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()"><i class="fas fa-sign-out-alt lighter"></i>
+            Logout</a>
         </div>
       </li>
 
       <li class="nav-item">
-        <a *ngIf="isLoggedIn()" [routerLink]="routerLinkHome" (click)="logout()" class="nav-link">Logout
-          {{tokenService.getName()}}</a>
         <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Log In</a>
       </li>
     </ul>
