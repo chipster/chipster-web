@@ -1,6 +1,16 @@
 <div class="container">
-  <div class="row">
+  <div class="row" *ngIf="isLoggedIn()">
     <div class="col">
+      <h3>Contact support</h3>
+      <p>In case something doesn't work, please use the Contact support feature to tell 
+        server maintainers what went wrong. You can share your last session, which often
+        makes it easier and faster to troubleshoot the errors.
+      </p>
+      <button class="btn btn-secondary" (click)="contactSupportModal()">Contact support</button>
+    </div>
+  </div> 
+  <div class="row">
+    <div class="col">      
         <div *ngIf="contactPath">
           <ch-manual 
           assetsPath="{{contactPath}}" 

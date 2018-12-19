@@ -8,9 +8,11 @@ import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { Observable } from "rxjs/Observable";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
 import { SessionEvent } from "chipster-js-common";
+import { ContactSupportModalComponent } from "./contact-support-modal/contact-support-modal.component";
 
 @Injectable()
 export class DialogModalService {
+
   constructor(private modalService: NgbModal) {}
 
   openSessionNameModal(title, name, buttonText = "Save"): Observable<string> {
@@ -70,6 +72,13 @@ export class DialogModalService {
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.observable = observable;
     return modalRef.result;
+  }
+
+  openContactSupportModal(): Observable<any> {
+    const modalRef = this.modalService.open(ContactSupportModalComponent, {
+      size: "lg"
+    });
+    return this.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   private observableFromPromiseWithDismissHandling(result: Promise<any>) {
