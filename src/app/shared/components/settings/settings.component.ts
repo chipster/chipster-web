@@ -13,9 +13,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template
-
-  public showToolsPanel: boolean;
-
   private unsubscribe: Subject<any> = new Subject();
 
   constructor(
@@ -23,13 +20,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     public activeModal: NgbActiveModal
   ) {}
 
-  ngOnInit() {
-    this.settingsService.showToolsPanel$
-      .takeUntil(this.unsubscribe)
-      .subscribe((showTools: boolean) => {
-        this.showToolsPanel = showTools;
-      });
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
     this.unsubscribe.next();
