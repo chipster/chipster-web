@@ -118,6 +118,16 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     }
   }
 
+  getHostUrl() {
+    // get the url of the app server
+    // the current url is correct also when using "ng serve"
+    let url = this.document.location.protocol + "//" + this.document.location.hostname;
+    if (this.document.location.port != null) {
+      url += ":" + this.document.location.port;
+    }
+    return url;
+  }
+
   /**
    * returns the url of the new session
    */
@@ -126,9 +136,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     let copySessionId: string;
     const userId = this.user.auth + "/" + this.user.username;
     const utcDate = new Date().toISOString().split('T')[0];
-    // get the url of the app server
-    // the current url is correct also when using "ng serve"
-    const appHostUrl = this.document.location.protocol + "//" + this.document.location.hostname + ":" + this.document.location.port;
+    const appHostUrl = this.document.location.protocol + "//" + this.document.location.hostname;
 
     // the "preview" version of the sessionData is enough
     return this.sessionResource.loadSession(sessionId, true).pipe(
@@ -157,7 +165,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
       map(() => {
         // return the url of the new session
         const appRoute = this.routeService.getAppRouteCurrent();
-        return appHostUrl + "/" + appRoute + "/analyze/" + copySessionId;
+        return this.getHostUrl() + "/" + appRoute + "/analyze/" + copySessionId;
       }),
     );
   }
