@@ -48,6 +48,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private sessionResource: SessionResource,
     private authenticationService: AuthenticationService,
     private routeService: RouteService,
+    private configService: ConfigService,
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document,
   ) { }
@@ -105,7 +106,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
       copySessionId$.pipe(
         mergeMap((sessionUrl: string) => {
           console.log("support session url", sessionUrl);
-          return this.sessionWorkerResource.supportRequest(this.message, sessionUrl, this.email);
+          return this.sessionWorkerResource.supportRequest(
+            this.message, sessionUrl, this.email, this.routeService.getAppRouteCurrent());
         }),
       ).subscribe(resp => {
         this.activeModal.close();
@@ -135,13 +137,15 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         const name = utcDate + "_" + userId + "_" + sessionData.session.name;
         return this.sessionResource.copySession(sessionData, name, false);
       }),
-      mergeMap((id: string) => {
+      tap((id: string) => {
         copySessionId = id;
+      }),
+      mergeMap(() => this.configService.get(ConfigService.KEY_SUPPORT_SESSION_OWNER_USER_ID)),
+      mergeMap((supportSessionOwner: string) => {
         // share the session to the special user
         const rule = new Rule();
         rule.readWrite = true;
-        //FIXME make configurable
-        rule.username = "jaas/support_session_owner";
+        rule.username = supportSessionOwner;
         return this.sessionResource.createRule(copySessionId, rule);
       }),
       // find out the ruleId of user's own rule to delete it
