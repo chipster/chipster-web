@@ -53,7 +53,7 @@
       <small class="form-text text-muted" *ngIf="isVerifiedEmail">        
           This email address was received from your login details. If it's not correct, 
           please contact the organization that provided your login credentials to update 
-          it. Support personnel may not respond to unverified addresses for privacy reasons.
+          it.
       </small>
     </div>
   </form>
@@ -61,6 +61,7 @@
 
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button type="submit" class="btn btn-info pull right" 
+  <button *ngIf="!isSending" type="submit" class="btn btn-info pull right" 
   (click)="save(contactSupportForm)" #submitButton>Send</button>
+  <small *ngIf="isSending">Sending, please wait...</small>
 </div>

@@ -38,6 +38,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public user: User;
   public isVerifiedEmail = false;
   public formSubmitAttempt = false;
+  public isSending = false;
 
   constructor(
     private activeModal: NgbActiveModal,
@@ -92,6 +93,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
     if (form.valid) {
 
+      this.isSending = true;
       let copySessionId$: Observable<string>;
 
       if (this.session != null && this.attach === "yes") {
@@ -106,8 +108,11 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           return this.sessionWorkerResource.supportRequest(this.message, sessionUrl, this.email);
         }),
       ).subscribe(resp => {
-          this.activeModal.close(this.session.notes);
-        }, err => this.restErrorService.handleError(err));
+        this.activeModal.close();
+      }, err => {
+        this.isSending = false;
+        this.restErrorService.handleError(err);
+      });
     }
   }
 
