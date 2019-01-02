@@ -44,20 +44,18 @@ export class RestErrorService  {
 
     } else {
       if ((error instanceof HttpErrorResponse || error instanceof Response) && error.status === 429) {
-        if (message === "") {
-          const retryAfterSeconds = parseInt(error.headers.get("Retry-After"), 10);
+        const title = message;
 
-          message = "Too many requests, try again ";
-          if (retryAfterSeconds != null) {
-            message += "after " + this.secondsToHumanReadable(retryAfterSeconds);
-          } else {
-            message += "later";
-          }
+        const retryAfterSeconds = parseInt(error.headers.get("Retry-After"), 10);
+
+        message = "Too many requests, try again ";
+        if (retryAfterSeconds != null) {
+          message += "after " + this.secondsToHumanReadable(retryAfterSeconds);
+        } else {
+          message += "later";
         }
-        //FIXME remove the reload button
-        this.errorService.headerError(message);
-      } else {
-        this.errorService.headerError(message);
+
+        this.errorService.headerErrorWithoutReload(message, true, title);
       }
     }
 

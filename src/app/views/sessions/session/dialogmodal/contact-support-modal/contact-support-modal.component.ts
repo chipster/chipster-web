@@ -1,7 +1,6 @@
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import {
   Component,
-  Input,
   AfterViewInit,
   ViewChild,
   OnInit,
@@ -20,6 +19,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { ConfigService } from "../../../../../shared/services/config.service";
 import { DOCUMENT } from "@angular/platform-browser";
 import { RouteService } from "../../../../../shared/services/route.service";
+import { DialogModalService } from "../dialogmodal.service";
 
 @Component({
   templateUrl: "./contact-support-modal.component.html",
@@ -38,7 +38,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public user: User;
   public isVerifiedEmail = false;
   public formSubmitAttempt = false;
-  public isSending = false;
 
   constructor(
     private activeModal: NgbActiveModal,
@@ -49,6 +48,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private authenticationService: AuthenticationService,
     private routeService: RouteService,
     private configService: ConfigService,
+    private dialogModalService: DialogModalService,
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document,
   ) { }
@@ -93,8 +93,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     this.formSubmitAttempt = true;
 
     if (form.valid) {
-
-      this.isSending = true;
       let copySessionId$: Observable<string>;
 
       if (this.session != null && this.attach === "yes") {
@@ -103,18 +101,20 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         copySessionId$ = of(null);
       }
 
-      copySessionId$.pipe(
+      const supportRequest$ = copySessionId$.pipe(
         mergeMap((sessionUrl: string) => {
           console.log("support session url", sessionUrl);
           return this.sessionWorkerResource.supportRequest(
             this.message, sessionUrl, this.email, this.routeService.getAppRouteCurrent());
         }),
-      ).subscribe(resp => {
-        this.activeModal.close();
-      }, err => {
-        this.isSending = false;
-        this.restErrorService.handleError(err);
-      });
+      );
+
+      this.activeModal.close();
+
+      this.dialogModalService.openSpinnerModal(
+        "Sending the support request",
+        supportRequest$
+      );
     }
   }
 

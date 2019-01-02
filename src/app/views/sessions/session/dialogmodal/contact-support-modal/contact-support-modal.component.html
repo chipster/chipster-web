@@ -61,7 +61,6 @@
 
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button *ngIf="!isSending" type="submit" class="btn btn-info pull right" 
+  <button type="submit" class="btn btn-info pull right" 
   (click)="save(contactSupportForm)" #submitButton>Send</button>
-  <small *ngIf="isSending">Sending, please wait...</small>
 </div>

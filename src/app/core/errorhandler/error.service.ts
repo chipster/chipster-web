@@ -12,6 +12,10 @@ export class ErrorService {
     this.errors$.next(new ErrorMessage(msg, dismissible, ErrorType.DEFAULT));
   }
 
+  headerErrorWithoutReload(msg?: string, dismissible: boolean = true, title = "") {
+    this.errors$.next(new ErrorMessage(msg, dismissible, ErrorType.DEFAULT, title));
+  }
+
   headerErrorForbidden(msg?: string, dismissable: boolean = true) {
     this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.FORBIDDEN));
   }

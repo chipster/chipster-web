@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { Router, NavigationStart } from "@angular/router";
 import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
-import { ToastrService, ActiveToast } from "ngx-toastr";
+import { ToastrService } from "ngx-toastr";
 @Component({
   selector: "ch-error",
   template: "",
@@ -29,7 +29,7 @@ export class ErrorComponent implements OnInit {
       if (error) {
         const dismissible = error.dismissible;
         const msg = error.msg || "Something went wrong";
-        let title = "";
+        let title = error.title || "";
         let buttonText = null;
 
         if (error.isForbidden()) {
@@ -41,6 +41,8 @@ export class ErrorComponent implements OnInit {
         } else if (error.isConnectionFailed()) {
           title = "Connection failed";
           buttonText = this.BTN_RELOAD;
+        } else if (error.isNoReload()) {
+          buttonText = null;
         } else {
           // reload will fix if something is in a bad state after the error
           buttonText = this.BTN_RELOAD;
@@ -50,12 +52,16 @@ export class ErrorComponent implements OnInit {
           closeButton: dismissible,
           disableTimeOut: true,
           tapToDismiss: dismissible && buttonText == null,
-          buttons: [
+          buttons: [],
+        };
+
+        if (buttonText != null) {
+          options.buttons = [
             {
               text: buttonText,
             },
-          ],
-        };
+          ];
+        }
 
         const toast = this.toastrService.warning(msg, title, options);
 

@@ -3,7 +3,8 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../../core/authentication/token.service";
-import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { ContactSupportModalComponent } from "../sessions/session/dialogmodal/contact-support-modal/contact-support-modal.component";
 
 @Component({
   selector: 'ch-contact',
@@ -19,7 +20,7 @@ export class ContactComponent implements OnInit {
     private configService: ConfigService,
     private routeService: RouteService,
     private tokenService: TokenService,
-    private dialogModalService: DialogModalService,
+    private modalService: NgbModal,
   ) {}
 
   ngOnInit() {
@@ -38,6 +39,8 @@ export class ContactComponent implements OnInit {
   }
 
   contactSupportModal() {
-    this.dialogModalService.openContactSupportModal();
+    this.modalService.open(ContactSupportModalComponent, {
+      size: "lg"
+    });
   }
 }
