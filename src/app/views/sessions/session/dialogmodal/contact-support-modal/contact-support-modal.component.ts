@@ -156,12 +156,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         rule.username = supportSessionOwner;
         return this.sessionResource.createRule(copySessionId, rule);
       }),
-      // find out the ruleId of user's own rule to delete it
-      mergeMap(() => this.sessionResource.getSession(copySessionId)),
-      mergeMap((session: Session) => {
-        const usersRule = session.rules.find(r => r.username === userId);
-        return this.sessionResource.deleteRule(copySessionId, usersRule.ruleId);
-      }),
       map(() => {
         // return the url of the new session
         const appRoute = this.routeService.getAppRouteCurrent();

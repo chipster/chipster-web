@@ -81,17 +81,20 @@ export class UserEventService {
   handleRuleEvent(event: any, sessionId: any, userEventData: UserEventData): Observable<WsEvent> {
     log.info('handleRuleEvent()', event);
     if (event.type === EventType.Create) {
-      // new session was shared to us
-      if (!userEventData.sessions.has(sessionId)) {
-        return this.sessionResource.getSession(sessionId)
+      // new session was shared to us or a rule was added to the session we already have
+      return this.sessionResource.getSession(sessionId)
+        .map((session: Session) => {
+          // get the session or latest rules
+          userEventData.sessions.set(session.sessionId, session);
+          return event;
+        });
+    } else if (event.type === EventType.Update) {
+      return this.sessionResource.getSession(sessionId)
           .map((session: Session) => {
-            log.info('session added', session.name, session.state);
+            log.info('rule updated', session.name);
             userEventData.sessions.set(session.sessionId, session);
             return event;
           });
-      } else {
-        return of(event);
-      }
     } else if (event.type === EventType.Delete) {
 
       const oldSession = userEventData.sessions.get(sessionId);

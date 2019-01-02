@@ -7,14 +7,14 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
-import { Session, Module, WsEvent } from "chipster-js-common";
+import { Session, Module, WsEvent, Rule } from "chipster-js-common";
 import { Observable, forkJoin } from "rxjs";
 import { SessionService } from "./session/session.service";
 import log from "loglevel";
 import { ToolsService } from "../../shared/services/tools.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { tap } from "rxjs/internal/operators/tap";
-import { mergeMap, takeUntil } from "rxjs/operators";
+import { mergeMap, takeUntil, map } from "rxjs/operators";
 import { UserEventService } from "./user-event.service";
 import { UserEventData } from "./user-event-data";
 import { SessionState } from "chipster-js-common/lib/model/session";
@@ -39,6 +39,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   public lightSelectedSession: Session;
   public sessionsByUserKeys: Array<string>;
   public sessionsByUser: Map<string, Array<Session>>;
+  public sessionShares: Session[] = [];
   public deletingSessions = new Set<Session>();
   public sessionData: SessionData;
   public modulesMap: Map<string, Module>;
@@ -68,8 +69,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private configService: ConfigService,
     private tokenService: TokenService,
-    private settingsService: SettingsService
-  ) {}
+    private settingsService: SettingsService,
+  ) { }
 
   ngOnInit() {
     // subscribe to mode change
@@ -83,12 +84,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
         tap(userId => (this.exampleSessionOwnerUserId = userId)),
-        mergeMap(() => this.sessionResource.getSessions()),
-        tap((sessions: Session[]) => {
-          const sessionMap = new Map<string, Session>();
-          sessions.forEach(s => sessionMap.set(s.sessionId, s));
-          this.userEventData.sessions = sessionMap;
-        }),
+        mergeMap(() => this.getSessionMap()),
+        tap(sessionMap => this.userEventData.sessions = sessionMap),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions())
       )
@@ -141,6 +138,54 @@ export class SessionListComponent implements OnInit, OnDestroy {
           );
         }
       );
+  }
+
+  /**
+   * Get all session that we have access to or have shared to others
+   *
+   * Server has separate methods for getting our sessions and getting our
+   * sent shares. Server returns only the relevant
+   * rule for each session, where our userId is in rule.username in case of our sessions
+   * and in rule.sharedBy in case of shares.
+   *
+   * Collect all these sessions to one map for easier updating based
+   * on the WebSocket events in UserEventService. When the same session is in both lists,
+   * we have to merge their rules.
+   */
+  getSessionMap() {
+
+    const sessionMap = new Map<string, Session>();
+
+    return this.sessionResource.getSessions().pipe(
+      tap((sessions: Session[]) => {
+        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+      }),
+      mergeMap(() => this.sessionResource.getShares()),
+      tap((sessions: Session[]) => {
+        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+      }),
+      map(() => sessionMap),
+    );
+  }
+
+  addOrMergeSession(sessionMap: Map<string, Session>, s: Session) {
+    if (sessionMap.has(s.sessionId)) {
+      // session exists, merge rules
+      const session = sessionMap.get(s.sessionId);
+      const ruleMap = this.ruleArrayToMap(session.rules);
+      s.rules.forEach((newRule: Rule) => {
+        ruleMap.set(newRule.ruleId, newRule);
+      });
+      session.rules = Array.from(ruleMap.values());
+    } else {
+      sessionMap.set(s.sessionId, s);
+    }
+  }
+
+  ruleArrayToMap(rules: Rule[]) {
+    const ruleMap = new Map<string, Rule>();
+    rules.forEach(r => ruleMap.set(r.ruleId, r));
+    return ruleMap;
   }
 
   subscribeToEvents(): void {
@@ -249,6 +294,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       );
     });
 
+    this.sessionShares = this.sessionDataService.getPendingShares(sessions);
     this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
     this.sessionsByUser = sessionsByUser;
   }
@@ -351,6 +397,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
     }
   }
 
+  isAcceptVisible(sharedByUsername) {
+    return sharedByUsername != null && sharedByUsername !== this.exampleSessionOwnerUserId;
+  }
+
   getSessionRowTitle() {
     switch (this.mode) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
@@ -365,6 +415,15 @@ export class SessionListComponent implements OnInit, OnDestroy {
   openSession(sessionId: string) {
     this.previewThrottleSubscription.unsubscribe();
     this.routeService.navigateToSession(sessionId);
+  }
+
+  acceptSession(session: Session) {
+    const rule = session.rules[0];
+    rule.sharedBy = null;
+    this.sessionResource.updateRule(session.sessionId, rule)
+    .subscribe(null, (error: any) => {
+      this.errorHandlerService.handleError(error, "Failed to accept the share");
+    });
   }
 
   sessionsUploaded(sessionIds: string[]) {
@@ -430,6 +489,17 @@ export class SessionListComponent implements OnInit, OnDestroy {
           // modal dismissed
         }
       );
+  }
+
+  deleteRule(session: Session, rule: Rule) {
+
+    this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
+      .subscribe(null, (error: any) => {
+        this.errorHandlerService.handleError(
+          error,
+          "Deleting the share failed"
+        );
+      });
   }
 
   isSessionSelected(session: Session) {

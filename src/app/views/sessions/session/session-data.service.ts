@@ -18,6 +18,7 @@ import { ToastrService } from "ngx-toastr";
 
 @Injectable()
 export class SessionDataService {
+
   private sessionId: string;
 
   constructor(
@@ -243,6 +244,32 @@ export class SessionDataService {
       (rule: Rule) =>
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
     );
+  }
+
+  /**
+   * Get pending shares for the UI
+   *
+   * A simple array of rules isn't enough, because the session name is
+   * useful in the UI. Create a copy of the session for each shared rule
+   * (there can be more than one for each session) and add only that particular
+   * rule to the session's rule array.
+   */
+  getPendingShares(sessions: Session[]): Session[] {
+    const username = this.tokenService.getUsername();
+
+    const sharedSessions = [];
+
+    sessions.forEach(session => {
+      session.rules.forEach(rule => {
+        if (rule.sharedBy === username) {
+          const sharedSession = _.clone(session);
+          sharedSession.rules = [rule];
+          sharedSessions.push(sharedSession);
+        }
+      });
+    });
+
+    return sharedSessions;
   }
 
   isMySession(session: Session): boolean {
