@@ -7,19 +7,19 @@ import {
   ChangeDetectorRef,
   Inject
 } from "@angular/core";
-import { Session, Rule, User, Role } from "chipster-js-common";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { SessionWorkerResource } from "../../../../../shared/resources/sessionworker.resource";
-import { UserService } from "../../../../../shared/services/user.service";
+import { Session, Rule, User } from "chipster-js-common";
 import { mergeMap, tap, map } from "rxjs/operators";
-import { SessionResource } from "../../../../../shared/resources/session.resource";
-import { AuthenticationService } from "../../../../../core/authentication/authentication-service";
 import { of, Observable } from "rxjs";
-import { SessionData } from "../../../../../model/session/session-data";
-import { ConfigService } from "../../../../../shared/services/config.service";
 import { DOCUMENT } from "@angular/platform-browser";
-import { RouteService } from "../../../../../shared/services/route.service";
-import { DialogModalService } from "../dialogmodal.service";
+import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
+import { UserService } from "../../../shared/services/user.service";
+import { AuthenticationService } from "../../../core/authentication/authentication-service";
+import { ConfigService } from "../../../shared/services/config.service";
+import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { RouteService } from "../../../shared/services/route.service";
+import { SessionData } from "../../../model/session/session-data";
 
 @Component({
   templateUrl: "./contact-support-modal.component.html",

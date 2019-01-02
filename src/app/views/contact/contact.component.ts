@@ -4,7 +4,7 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ContactSupportModalComponent } from "../sessions/session/dialogmodal/contact-support-modal/contact-support-modal.component";
+import { ContactSupportModalComponent } from "./contact-support-modal/contact-support-modal.component";
 
 @Component({
   selector: 'ch-contact',
@@ -40,7 +40,8 @@ export class ContactComponent implements OnInit {
 
   contactSupportModal() {
     this.modalService.open(ContactSupportModalComponent, {
-      size: "lg"
+      size: "lg",
+      backdrop: "static", // don't close on backdrop click
     });
   }
 }
