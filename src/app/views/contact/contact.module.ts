@@ -5,6 +5,7 @@ import { ContactComponent } from "./contact.component";
 import { ContactSupportModalComponent } from "./contact-support-modal/contact-support-modal.component";
 import { ManualModule } from "../manual/manual.module";
 import { FormsModule } from "@angular/forms";
+import { ContactSupportService } from "./contact-support.service";
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import { FormsModule } from "@angular/forms";
     ContactSupportModalComponent,
   ],
   providers: [
+    ContactSupportService,
   ],
   entryComponents: [
     ContactSupportModalComponent,

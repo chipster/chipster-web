@@ -5,7 +5,8 @@ import {
   ViewChild,
   OnInit,
   ChangeDetectorRef,
-  Inject
+  Inject,
+  Input
 } from "@angular/core";
 import { Session, Rule, User } from "chipster-js-common";
 import { mergeMap, tap, map } from "rxjs/operators";
@@ -26,6 +27,9 @@ import { SessionData } from "../../../model/session/session-data";
   styleUrls: ["./contact-support-modal.component.less"]
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
+
+  @Input()
+  log: string;
 
   @ViewChild("messageTextarea")
   messageTextarea;
@@ -105,7 +109,11 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         mergeMap((sessionUrl: string) => {
           console.log("support session url", sessionUrl);
           return this.sessionWorkerResource.supportRequest(
-            this.message, sessionUrl, this.email, this.routeService.getAppRouteCurrent());
+            this.message,
+            sessionUrl,
+            this.email,
+            this.routeService.getAppRouteCurrent(),
+            this.log);
         }),
       );
 
