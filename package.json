@@ -42,6 +42,7 @@
     "popper.js": "^1.14.3",
     "rxjs": "^6.0.0",
     "rxjs-compat": "^6.1.0",
+    "stacktrace-js": "^2.0.0",
     "yamljs": "^0.3.0",
     "zone.js": "^0.8.26"
   },

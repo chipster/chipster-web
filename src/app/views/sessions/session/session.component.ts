@@ -39,6 +39,7 @@ import { ToolsService } from "../../../shared/services/tools.service";
 import { forkJoin } from "rxjs";
 import { ConfigService } from "../../../shared/services/config.service";
 import { ToastrService } from "ngx-toastr";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -89,7 +90,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private toolsService: ToolsService,
     private configService: ConfigService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -154,7 +156,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.state = ComponentState.NOT_FOUND;
           } else {
             this.state = ComponentState.FAIL;
-            this.restErrorService.handleError(error, "Loading session failed");
+            this.restErrorService.showError("Loading session failed", error);
           }
         }
       );
@@ -174,7 +176,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.split2Size = 67;
           this.split3Size = 33;
         }
-      });
+      }, err => this.errorService.showError("tool panel error", err));
   }
 
   ngOnDestroy() {
@@ -296,7 +298,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             "new value:",
             newValue
           );
-        }        
+        }
 
         // if not cancelled
         if (newValue) {
@@ -323,7 +325,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.openErrorModal("Job error", newValue);
           }
         }
-      });
+      }, err => this.errorService.showError("session event error", err));
   }
 
   getJob(jobId: string): Job {
@@ -404,10 +406,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         () => {
           log.debug("delete session request done");
         },
-        error => {
-          // TODO add error handling
-        }
-      );
+        err => this.restErrorService.showError("delete session failed", err));
   }
 
   askKeepOrDiscardSession(): Observable<boolean> {

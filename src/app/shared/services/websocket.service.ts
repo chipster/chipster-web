@@ -10,6 +10,7 @@ import { Subject } from "rxjs/Subject";
 import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import log from "loglevel";
+import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
 
 @Injectable()
 export class WebSocketService {
@@ -85,10 +86,8 @@ export class WebSocketService {
         },
         err => {
           log.info("websocket error", err);
-          this.errorService.headerError(
-            "Connection lost, please reload the page.",
-            false
-          );
+          this.errorService.showErrorObject(new ErrorMessage(
+            null, "Connection lost, please reload the page.", false, [ErrorButton.Reload], [ErrorButton.ShowDetails], err));
         },
         () => {
           log.info("websocket closed");

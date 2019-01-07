@@ -9,6 +9,7 @@ import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-volcano-plot",
@@ -27,7 +28,8 @@ export class VolcanoPlotComponent extends PlotComponent
     private volcanoPlotService: VolcanoPlotService,
     fileResource: FileResource,
     sessionDataService: SessionDataService,
-    private plotService: PlotService
+    private plotService: PlotService,
+    private restErrorService2: RestErrorService,
   ) {
     super(fileResource, sessionDataService);
   }
@@ -256,6 +258,6 @@ export class VolcanoPlotComponent extends PlotComponent
         "Volcano Plot",
         data
       )
-      .subscribe();
+      .subscribe(null, err => this.restErrorService2.showError("create dataset failed", err));
   }
 }

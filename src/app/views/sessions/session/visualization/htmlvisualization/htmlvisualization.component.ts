@@ -25,7 +25,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
 
   constructor(
     private sessionDataService: SessionDataService,
-    private errorHandlerService: RestErrorService) { }
+    private restErrorService: RestErrorService) { }
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -42,7 +42,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
         this.state = new LoadState(State.Ready);
       }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading html file failed");
-        this.errorHandlerService.handleError(error, this.state.message);
+        this.restErrorService.showError(this.state.message, error);
       });
   }
 

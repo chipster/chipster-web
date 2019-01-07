@@ -29,7 +29,7 @@ export class ContactComponent implements OnInit {
         this.contactPath = this.routeService.dirname(path) + '/';
       }
     }, err => {
-      this.errorService.headerError('failed to get the contact page path', err);
+      this.errorService.showError('failed to get the contact page path', err);
     });
   }
 

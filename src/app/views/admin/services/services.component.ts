@@ -59,7 +59,7 @@ export class ServicesComponent implements OnInit {
           }));
         return Observable.forkJoin(requests);
       })
-      .subscribe(null, err => this.restErrorService.handleError(err, 'get services failed'));
+      .subscribe(null, err => this.restErrorService.showError('get services failed', err));
   }
 
   getStatusCount(service) {

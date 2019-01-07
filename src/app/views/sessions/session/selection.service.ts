@@ -6,6 +6,7 @@ import { Store } from "@ngrx/store";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 
 @Injectable()
 export class SelectionService implements OnDestroy {
@@ -18,7 +19,10 @@ export class SelectionService implements OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(private store: Store<any>) {
+  constructor(
+    private store: Store<any>,
+    private errorService: ErrorService,
+  ) {
     // Sync selected datasets from store
     this.selectedDatasets$ = this.store.select("selectedDatasets");
     this.store
@@ -26,8 +30,7 @@ export class SelectionService implements OnDestroy {
       .takeUntil(this.unsubscribe)
       .subscribe(
         (datasets: Array<Dataset>) => (this.selectedDatasets = datasets),
-        (error: any) =>
-          console.error("Error fetching datasets from store", error)
+        (error: any) => this.errorService.showError("Error fetching datasets from store", error)
       );
 
     // Sync selected jobs from store
@@ -37,7 +40,7 @@ export class SelectionService implements OnDestroy {
       .takeUntil(this.unsubscribe)
       .subscribe((jobs: Array<Job>) => {
         this.selectedJobs = jobs;
-      });
+      }, err => this.errorService.showError("Error fetching selected jobs from store", err));
   }
 
   isJobSelected(): boolean {

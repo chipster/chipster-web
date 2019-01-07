@@ -80,7 +80,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           this.isVerifiedEmail = true;
         }
       }),
-    ).subscribe(null, err => this.restErrorService.handleError(err));
+    ).subscribe(null, err => this.restErrorService.showError("support modal initialization failed", err));
   }
 
   ngAfterViewInit() {

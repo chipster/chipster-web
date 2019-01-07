@@ -1,38 +1,18 @@
-export enum ErrorType {
-  CONNECTION_FAILED = "Connection failed",
-  FORBIDDEN = "Authentication",
-  NOT_FOUND = "Not found",
-  NO_RELOAD = "Something went wrong",
-  DEFAULT = "Something went wrong",
+export enum ErrorButton {
+  Reload = "Reload",
+  LogIn = "Log in",
+  ContactSupport = "Contact support",
+  ShowDetails = "Show details",
 }
 
 export class ErrorMessage {
 
   constructor(
+    public title: string,
     public msg: string,
     public dismissible: boolean,
-    public type: ErrorType = ErrorType.DEFAULT,
-    public title = "",
+    public buttons: ErrorButton[],
+    public links: ErrorButton[],
+    public error: any,
   ) { }
-
-
-  isForbidden(): boolean {
-    return this.type === ErrorType.FORBIDDEN;
-  }
-
-  isNotFound(): boolean {
-    return this.type === ErrorType.NOT_FOUND;
-  }
-
-  isConnectionFailed(): boolean {
-    return this.type === ErrorType.CONNECTION_FAILED;
-  }
-
-  isNoReload(): boolean {
-    return this.type === ErrorType.NO_RELOAD;
-  }
-
-  isDefault(): boolean {
-    return this.type === ErrorType.DEFAULT;
-  }
 }

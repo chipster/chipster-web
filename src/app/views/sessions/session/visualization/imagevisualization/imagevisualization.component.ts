@@ -21,7 +21,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
 
 
   constructor(private sessionDataService: SessionDataService,
-              private errorHandlerService: RestErrorService) {
+              private restErrorService: RestErrorService) {
   }
 
   ngOnChanges() {
@@ -36,7 +36,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
         this.state = new LoadState(State.Ready);
       }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading image file failed");
-        this.errorHandlerService.handleError(error, this.state.message);
+        this.restErrorService.showError(this.state.message, error);
       });
   }
 

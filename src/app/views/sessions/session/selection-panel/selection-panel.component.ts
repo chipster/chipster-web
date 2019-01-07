@@ -9,6 +9,7 @@ import { Subject } from "rxjs/Subject";
 import { ToolSelection } from "../tools/ToolSelection";
 import { Job } from "chipster-js-common";
 import { SettingsService } from "../../../../shared/services/settings.service";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
 
 @Component({
   selector: "ch-selection-panel",
@@ -36,7 +37,8 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     public selectionService: SelectionService,
     public sessionDataService: SessionDataService,
     private toolSelectionService: ToolSelectionService,
-    public settingsService: SettingsService
+    public settingsService: SettingsService,
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -49,7 +51,7 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
           this.showFile = false;
           this.showJob = false;
         }
-      });
+      }, err => this.errorService.showError("tool selection failed", err));
 
     this.selectionService.selectedDatasets$
       .takeUntil(this.unsubscribe)
@@ -65,7 +67,7 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
             this.showTool = true;
           }
         }
-      });
+      }, err => this.errorService.showError("dataset selection failed", err));
 
     this.selectionService.selectedJobs$
       .takeUntil(this.unsubscribe)
@@ -78,7 +80,7 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
         } else {
           this.showJob = false;
         }
-      });
+      }, err => this.errorService.showError("job selection failed", err));
   }
 
   ngOnDestroy() {

@@ -23,6 +23,7 @@ import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.s
 import { ViewChild } from "@angular/core";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 
 @Component({
   selector: "ch-phenodata-visualization",
@@ -53,7 +54,8 @@ export class PhenodataVisualizationComponent
     private zone: NgZone,
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService
+    private nativeElementService: NativeElementService,
+    private errorService: ErrorService,
   ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
@@ -64,7 +66,7 @@ export class PhenodataVisualizationComponent
     // update view if someone else has edited the phenodata
     this.sessionEventService.getDatasetStream().subscribe(() => {
       this.updateViewLater();
-    });
+    }, err => this.errorService.showError("phenodata update failed", err));
   }
 
   ngAfterViewInit() {
@@ -229,7 +231,7 @@ export class PhenodataVisualizationComponent
             key: "group",
             value: null
           });
-        });
+        }, err => this.restErrorService.showError("file reading failed", err));
 
         dataset.metadata = metadata;
 
@@ -373,7 +375,7 @@ export class PhenodataVisualizationComponent
 
     Observable.forkJoin(updates).subscribe(
       () => log.info(updates.length + " datasets updated"),
-      err => this.restErrorService.handleError(err, "dataset updates failed")
+      err => this.restErrorService.showError("dataset updates failed", err)
     );
   }
 
@@ -493,7 +495,7 @@ export class PhenodataVisualizationComponent
         this.updateDatasets(false);
       })
       .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Add column failed")
+        this.restErrorService.showError("Add column failed", err)
       );
   }
 

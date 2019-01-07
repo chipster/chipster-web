@@ -63,7 +63,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     private visualizationModalService: VisualizationModalService,
     private typeTagService: TypeTagService,
     private zone: NgZone,
-    private errorHandlerService: RestErrorService,
+    private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService,
   ) {}
@@ -162,7 +162,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
         },
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
-          this.errorHandlerService.handleError(error, this.state.message);
+          this.restErrorService.showError(this.state.message, error);
         }
     );
   }

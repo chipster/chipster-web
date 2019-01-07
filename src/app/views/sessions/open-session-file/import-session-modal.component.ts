@@ -5,6 +5,7 @@ import { SessionResource } from "../../../shared/resources/session.resource";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
 import { SessionState } from "chipster-js-common/lib/model/session";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 
 @Component({
@@ -23,8 +24,9 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
                 private changeDetectorRef: ChangeDetectorRef,
                 private sessionResource: SessionResource,
                 private errorService: ErrorService,
-                public activeModal: NgbActiveModal) {
-    }
+        public activeModal: NgbActiveModal,
+        private restErrorService: RestErrorService,
+    ) {}
 
     ngOnInit() {
 
@@ -56,7 +58,7 @@ getFiles() {
 error(file: any, err) {
     this.fileStatus.set(file, err);
     this.finishedFiles.add(file);
-    this.errorService.headerError("Failed to open the session file");
+    this.errorService.showError("Failed to open the session file", err);
 }
 
 
@@ -66,7 +68,7 @@ cancel(file: any) {
     this.fileStatus.delete(file);
     this.sessionResource.deleteSession(file.chipsterSessionId).subscribe(() => {
       console.log('session deleted');
-    });
+    }, err => this.restErrorService.showError("session delete failed", err));
   }
 
   closeModal() {

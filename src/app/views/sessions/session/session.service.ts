@@ -38,7 +38,7 @@ export class SessionService {
         return this.updateSession(session);
       })
       .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Rename session failed")
+        this.restErrorService.showError("Rename session failed", err)
       );
   }
 
@@ -50,7 +50,7 @@ export class SessionService {
         return this.updateSession(session);
       })
       .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Failed to edit session notes")
+        this.restErrorService.showError("Failed to edit session notes", err)
       );
   }
 

@@ -52,7 +52,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
         this.state = new LoadState(State.Ready);
       }, (error: Response) => {
         this.state = new LoadState(State.Fail, "Loading data failed");
-        this.errorHandlerService.handleError(error, this.state.message);
+        this.errorHandlerService.showError(this.state.message, error);
       });
   }
 

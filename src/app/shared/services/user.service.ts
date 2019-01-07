@@ -52,7 +52,8 @@ export class UserService {
         () => {
           log.info("update latest session to sessionDb successful");
         },
-        err => {
+      err => {
+          // maybe log is enough
           log.warn("updating latest session to sessionDb failed");
         }
       );

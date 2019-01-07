@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Subject} from "rxjs/Subject";
-import {ErrorMessage, ErrorType} from "./errormessage";
+import {ErrorMessage, ErrorButton} from "./errormessage";
 
 @Injectable()
 export class ErrorService {
@@ -8,24 +8,16 @@ export class ErrorService {
   // handle the errors in component, because it can access the router
   private errors$ = new Subject();
 
-  headerError(msg?: string, dismissible: boolean = true) {
-    this.errors$.next(new ErrorMessage(msg, dismissible, ErrorType.DEFAULT));
+  showError(msg: string, err: Error) {
+    const errorMessage = new ErrorMessage(null, msg, true, [ErrorButton.Reload, ErrorButton.ContactSupport], [], err);
+    if (err) {
+      errorMessage.links = [ErrorButton.ShowDetails];
+    }
+    this.showErrorObject(errorMessage);
   }
 
-  headerErrorWithoutReload(msg?: string, dismissible: boolean = true, title = "") {
-    this.errors$.next(new ErrorMessage(msg, dismissible, ErrorType.DEFAULT, title));
-  }
-
-  headerErrorForbidden(msg?: string, dismissable: boolean = true) {
-    this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.FORBIDDEN));
-  }
-
-  headerErrorConnectionFailed(msg?: string, dismissable: boolean = true) {
-    this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.CONNECTION_FAILED));
-  }
-
-  headerErrorNotFound(msg?: string, dismissable: boolean = true) {
-    this.errors$.next(new ErrorMessage(msg, dismissable, ErrorType.NOT_FOUND));
+  showErrorObject(errorMessage: ErrorMessage) {
+    this.errors$.next(errorMessage);
   }
 
   getErrors() {

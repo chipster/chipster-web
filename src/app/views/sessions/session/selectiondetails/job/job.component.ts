@@ -8,6 +8,7 @@ import {Subject} from 'rxjs/Subject';
 import {SessionData} from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
 import {SelectionHandlerService} from '../../selection-handler.service';
+import { ErrorService } from '../../../../../core/errorhandler/error.service';
 
 @Component({
   selector: 'ch-job',
@@ -30,7 +31,9 @@ export class JobComponent implements OnInit, OnDestroy {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService ) {
+    private sessionEventService: SessionEventService,
+    private errorService: ErrorService,
+  ) {
 }
 
   ngOnInit() {
@@ -44,7 +47,7 @@ export class JobComponent implements OnInit, OnDestroy {
           jobId = selectedJobs[0].jobId;
         }
         this.update(jobId);
-      });
+      }, err => this.errorService.showError("updating selected jobs failed", err));
 
     // job modification events
     this.sessionEventService.getJobStream()
@@ -53,7 +56,7 @@ export class JobComponent implements OnInit, OnDestroy {
         if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
           this.update(this.job.jobId);
         }
-      });
+      }, err => this.errorService.showError("getting job events failed", err));
   }
 
   // get job from session data and update state fields

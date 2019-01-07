@@ -15,6 +15,7 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import log from "loglevel";
 import UtilsService from "../../../shared/utilities/utils";
 import { ToastrService } from "ngx-toastr";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Injectable()
 export class SessionDataService {
@@ -31,6 +32,7 @@ export class SessionDataService {
     private sessionEventService: SessionEventService,
     private selectionHandlerService: SelectionHandlerService,
     private toastrService: ToastrService,
+    private restErrorService: RestErrorService,
   ) {}
 
   getSessionId(): string {
@@ -114,7 +116,7 @@ export class SessionDataService {
     );
     Observable.merge(...deleteJobs$).subscribe(() => {
       log.info("Job deleted");
-    });
+    }, err => this.restErrorService.showError("delete jobs failed", err));
   }
 
   deleteDatasets(datasets: Dataset[]) {
@@ -122,8 +124,8 @@ export class SessionDataService {
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
     Observable.merge(...deleteDatasets$).subscribe(() => {
-      log.info("Job deleted");
-    });
+      log.info("Dataset deleted");
+    }, err => this.restErrorService.showError("delete datasets failed", err));
   }
 
   updateDataset(dataset: Dataset) {
@@ -205,10 +207,10 @@ export class SessionDataService {
             win.close();
           }, autoCloseDelay);
         }
-      });
+      }, err => this.restErrorService.showError("opening a new tab failed", err));
     } else {
       // Chrome allows only one download
-      this.errorService.headerError(popupErrorText, true);
+      this.errorService.showError(popupErrorText, null);
     }
   }
 
@@ -387,19 +389,15 @@ export class SessionDataService {
       .filter(text => text === BTN_UNDO)
       .subscribe(buttonText => {
         this.deleteDatasetsUndo(deletedDatasets);
-      this.toastrService.clear(toast.toastId);
-    }, err => {
-      log.error("toastr subscribe failed");
-    });
+        this.toastrService.clear(toast.toastId);
+      }, err => this.errorService.showError("error in dataset deletion", err));
 
     toast.onHidden.takeUntil(toast.onAction) // only if there was no action
       .merge(toast.onAction.filter(text => text === BTN_DELETE))
       .subscribe(() => {
         this.deleteDatasetsNow(deletedDatasets);
         this.toastrService.clear(toast.toastId);
-    }, err => {
-      log.error("toastr subscribe failed");
-    });
+      }, err => this.errorService.showError("error in dataset deletion", err));
   }
 
   getSessionSize(sessionData: SessionData): number {

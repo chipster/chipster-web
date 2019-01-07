@@ -60,7 +60,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
   constructor(
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
-    private errorHandlerService: RestErrorService,
     public sessionDataService: SessionDataService,
     private sessionService: SessionService,
     private routeService: RouteService,
@@ -90,7 +89,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         tap(() => this.updateSessions())
       )
       .subscribe(null, (error: any) => {
-        this.errorHandlerService.handleError(error, "Updating sessions failed");
+        this.restErrorService.showError("Updating sessions failed", error);
       });
 
     this.previewThrottleSubscription = this.previewThrottle$
@@ -132,9 +131,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
         () => {},
         (error: any) => {
           this.workflowPreviewFailed = true;
-          this.errorHandlerService.handleError(
-            error,
-            "Loading session preview failed"
+          this.restErrorService.showError(
+            "Loading session preview failed",
+            error
           );
         }
       );
@@ -219,7 +218,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           }
         },
         err => {
-          this.restErrorService.handleError(err, "Error in event handling");
+          this.restErrorService.showError("Error in event handling", err);
         }
       );
   }
@@ -251,9 +250,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
         this.openSession(sessionId);
       })
       .subscribe(null, (error: any) => {
-        this.errorHandlerService.handleError(
-          error,
-          "Creating a new session failed"
+        this.restErrorService.showError(
+          "Creating a new session failed",
+          error
         );
       });
   }
@@ -422,7 +421,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     rule.sharedBy = null;
     this.sessionResource.updateRule(session.sessionId, rule)
     .subscribe(null, (error: any) => {
-      this.errorHandlerService.handleError(error, "Failed to accept the share");
+      this.restErrorService.showError("Failed to accept the share", error);
     });
   }
 
@@ -479,9 +478,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
             .subscribe(null, (error: any) => {
               // FIXME close preview if open
               this.deletingSessions.delete(session);
-              this.errorHandlerService.handleError(
-                error,
-                "Deleting session failed"
+              this.restErrorService.showError(
+                "Deleting session failed",
+                error
               );
             });
         },
@@ -495,9 +494,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
     this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
       .subscribe(null, (error: any) => {
-        this.errorHandlerService.handleError(
-          error,
-          "Deleting the share failed"
+        this.restErrorService.showError(
+          "Deleting the share failed",
+          error
         );
       });
   }
@@ -553,7 +552,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe(null, err => {
-        this.restErrorService.handleError(err, "Get session failed");
+        this.restErrorService.showError("Get session failed", err);
       });
   }
 
@@ -598,7 +597,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.updateSessions();
         },
         err => {
-          this.restErrorService.handleError(err, "Duplicate session failed");
+          this.restErrorService.showError("Duplicate session failed", err);
         }
       );
   }

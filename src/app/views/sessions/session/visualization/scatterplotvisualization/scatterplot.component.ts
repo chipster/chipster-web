@@ -8,6 +8,7 @@ import { PlotService } from "../../../../../shared/visualization/plot.service";
 import { PlotData } from "../model/plotData";
 import { PlotComponent } from "../../../../../shared/visualization/plot.component";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-scatter-plot",
@@ -24,7 +25,8 @@ export class ScatterPlotComponent extends PlotComponent
     fileResource: FileResource,
     sessionDataService: SessionDataService,
     private plotService: PlotService,
-    private visualizationTSVService: VisualizationTSVService
+    private visualizationTSVService: VisualizationTSVService,
+    private restErrorService2: RestErrorService,
   ) {
     super(fileResource, sessionDataService);
   }
@@ -237,6 +239,6 @@ export class ScatterPlotComponent extends PlotComponent
         "Scatter Plot",
         data
       )
-      .subscribe();
+      .subscribe(null, err => this.restErrorService2.showError("create dataset failed", err));
   }
 }

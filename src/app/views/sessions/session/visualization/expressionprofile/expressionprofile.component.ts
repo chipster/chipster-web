@@ -40,7 +40,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
               private sessionDataService: SessionDataService,
               private visualizationTSVService: VisualizationTSVService,
               private fileResource: FileResource,
-              private errorHandlerService: RestErrorService) {
+              private restErrorService: RestErrorService) {
   }
 
   ngOnChanges() {
@@ -62,7 +62,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         }
       }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading data failed");
-        this.errorHandlerService.handleError(error, this.state.message);
+        this.restErrorService.showError(this.state.message, error);
       });
 
     this.selectedGeneExpressions = [];
@@ -296,7 +296,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const selectedGeneExpressionIds = this.getSelectionIds();
     const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
     const data = d3.tsvFormatRows(tsvData);
-    this.sessionDataService.createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data).subscribe();
+    this.sessionDataService.createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data)
+      .subscribe(null, );
   }
 
   getSelectionIds(): Array<string> {

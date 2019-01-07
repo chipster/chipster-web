@@ -8,6 +8,7 @@ import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { Observable } from "rxjs/Observable";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
 import { SessionEvent } from "chipster-js-common";
+import { PreModalComponent } from "./pre-modal/pre-modal.component";
 
 @Injectable()
 export class DialogModalService {
@@ -37,6 +38,15 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
     modalRef.componentInstance.placeHolder = "";
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+  }
+
+  openPreModal(title, text) {
+    const modalRef = this.modalService.open(PreModalComponent, {
+      size: "lg"
+    });
+    modalRef.componentInstance.text = text;
+    modalRef.componentInstance.title = title;
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

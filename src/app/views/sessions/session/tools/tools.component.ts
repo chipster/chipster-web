@@ -24,6 +24,7 @@ import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.
 import { DOCUMENT } from "@angular/common";
 import { HotkeysService, Hotkey } from "angular2-hotkeys";
 import { ToastrService } from "ngx-toastr";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -93,6 +94,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
+    private errorService: ErrorService,
     dropdownConfig: NgbDropdownConfig,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
@@ -127,7 +129,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           });
           this.toolSelectionService.selectTool(newToolSelection);
         }
-      });
+      }, err => this.errorService.showError("get selected dataset failed", err));
 
     // trigger parameter validation
     if (this.toolSelection) {
@@ -147,7 +149,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .takeUntil(this.unsubscribe)
       .subscribe(() => {
         this.updateJobs();
-      });
+      }, err => this.errorService.showError("failed to update jobs", err));
 
     // add search box hotkey
     this.searchBoxHotkey = this.hotkeysService.add(

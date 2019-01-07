@@ -21,7 +21,7 @@ export class SpinnerModalComponent implements AfterViewInit {
     this.observable.subscribe(() => {
       this.activeModal.close();
     }, err => {
-      this.restErrorService.handleError(err, this.message  + " failed");
+      this.restErrorService.showError(this.message  + " failed", err);
       this.activeModal.dismiss();
     });
   }

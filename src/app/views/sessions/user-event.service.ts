@@ -16,6 +16,7 @@ import { SessionDataService } from "./session/session-data.service";
 import { mergeMap } from "rxjs/operators";
 import { of } from "rxjs";
 import { SessionEventService } from "./session/session-event.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
 
 @Injectable()
 export class UserEventService {
@@ -31,6 +32,7 @@ export class UserEventService {
     private webSocketService: WebSocketService,
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
+    private errorService: ErrorService,
   ) { }
 
   unsubscribe() {
@@ -53,7 +55,7 @@ export class UserEventService {
 
     // update userEventData even if no one else subscribes
     this.ruleStream$
-      .subscribe();
+      .subscribe(null, err => this.errorService.showError("error in rule events", err));
   }
 
   getRuleStream() {

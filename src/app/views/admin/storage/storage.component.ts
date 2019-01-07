@@ -44,7 +44,7 @@ export class StorageComponent implements OnInit {
           return this.authHttpClient.getAuth(sessionDbUrl + '/users/' + encodeURIComponent(user) + '/quota');
       })
       .do((quota: any) => this.quotas.set(quota.username, quota))
-      .subscribe(null, err => this.restErrorService.handleError(err, 'get quotas failed'));
+      .subscribe(null, err => this.restErrorService.showError('get quotas failed', err));
   }
 
   selectUser(user: string) {
@@ -58,6 +58,6 @@ export class StorageComponent implements OnInit {
       .flatMap(url => this.authHttpClient.getAuth(url + '/users/' + user + '/sessions'))
       .subscribe((sessions: any[]) => {
         this.sessions = sessions;
-      }, err => this.restErrorService.handleError(err, 'get quotas failed'));
+      }, err => this.restErrorService.showError('get quotas failed', err));
   }
 }

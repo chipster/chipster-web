@@ -6,6 +6,7 @@ import {
 import {Observable} from "rxjs/Observable";
 import {HttpQueueService} from "../http-queue/http-queue.service";
 import {TokenService} from "../../authentication/token.service";
+import { throwError } from 'rxjs';
 
 @Injectable()
 export class RestService {
@@ -113,9 +114,9 @@ export class RestService {
       return resp;
     })
       // log errors
-      .catch((error: any) => {
-        console.error("http request error", error);
-          throw error;
+      .catch((resp: any) => {
+        console.error("http request error", resp);
+        return throwError(resp);
       })
       .finally( () => this.httpQueueu.decrement());
   }

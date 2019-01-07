@@ -29,6 +29,8 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 
 
 @Component({
@@ -72,7 +74,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService
+    private nativeElementService: NativeElementService,
+    private restErrorService: RestErrorService,
+    private errorService: ErrorService,
   ) { }
 
   // actually selected datasets
@@ -201,8 +205,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.sessionEventService.getDatasetStream().subscribe(() => {
           this.update();
           this.renderGraph();
-        })
-      );
+        }, err => this.errorService.showError("get dataset events failed", err)));
 
       this.subscriptions.push(
         this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
@@ -210,8 +213,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           this.selectionEnabled = true;
           this.update();
           this.renderGraph();
-        })
-      );
+        }, err => this.errorService.showError("get dataset selections failed", err)));
     }
 
     // show
@@ -446,7 +448,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => log.warn("dataset rename error", err));
+            .subscribe(null, err => this.restErrorService.showErro("dataset rename failed", err));
         },
         disabled: false // optional, defaults to false
       },
@@ -714,10 +716,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
           this.sessionDataService
             .updateDataset(datasetCopy)
-            .subscribe(
-              () => null,
-              err => log.warn("dataset update error", err)
-            );
+            .subscribe(null,
+              err => this.restErrorService.showError("dataset upate error", err));
         }
       });
 
