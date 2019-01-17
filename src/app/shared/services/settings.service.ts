@@ -23,5 +23,5 @@ export class SettingsService {
 
   public sessionListMode$: BehaviorSubject<
     SessionListMode
-  > = new BehaviorSubject(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW);
+  > = new BehaviorSubject(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN);
 }

@@ -68,8 +68,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private configService: ConfigService,
     private tokenService: TokenService,
-    private settingsService: SettingsService,
-  ) { }
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit() {
     // subscribe to mode change
@@ -84,7 +84,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .pipe(
         tap(userId => (this.exampleSessionOwnerUserId = userId)),
         mergeMap(() => this.getSessionMap()),
-        tap(sessionMap => this.userEventData.sessions = sessionMap),
+        tap(sessionMap => (this.userEventData.sessions = sessionMap)),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions())
       )
@@ -152,7 +152,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
    * we have to merge their rules.
    */
   getSessionMap() {
-
     const sessionMap = new Map<string, Session>();
 
     return this.sessionResource.getSessions().pipe(
@@ -163,7 +162,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       tap((sessions: Session[]) => {
         sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
       }),
-      map(() => sessionMap),
+      map(() => sessionMap)
     );
   }
 
@@ -250,10 +249,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         this.openSession(sessionId);
       })
       .subscribe(null, (error: any) => {
-        this.restErrorService.showError(
-          "Creating a new session failed",
-          error
-        );
+        this.restErrorService.showError("Creating a new session failed", error);
       });
   }
 
@@ -397,17 +393,20 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   isAcceptVisible(sharedByUsername) {
-    return sharedByUsername != null && sharedByUsername !== this.exampleSessionOwnerUserId;
+    return (
+      sharedByUsername != null &&
+      sharedByUsername !== this.exampleSessionOwnerUserId
+    );
   }
 
   getSessionRowTitle() {
     switch (this.mode) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
-        return "Open";
+        return "Click to open";
       case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
-        return "Open";
+        return "Click to open";
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
-        return "Preview";
+        return "Click to preview";
     }
   }
 
@@ -419,10 +418,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
   acceptSession(session: Session) {
     const rule = session.rules[0];
     rule.sharedBy = null;
-    this.sessionResource.updateRule(session.sessionId, rule)
-    .subscribe(null, (error: any) => {
-      this.restErrorService.showError("Failed to accept the share", error);
-    });
+    this.sessionResource
+      .updateRule(session.sessionId, rule)
+      .subscribe(null, (error: any) => {
+        this.restErrorService.showError("Failed to accept the share", error);
+      });
   }
 
   sessionsUploaded(sessionIds: string[]) {
@@ -478,10 +478,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
             .subscribe(null, (error: any) => {
               // FIXME close preview if open
               this.deletingSessions.delete(session);
-              this.restErrorService.showError(
-                "Deleting session failed",
-                error
-              );
+              this.restErrorService.showError("Deleting session failed", error);
             });
         },
         () => {
@@ -491,13 +488,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   deleteRule(session: Session, rule: Rule) {
-
-    this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
+    this.sessionResource
+      .deleteRule(session.sessionId, rule.ruleId)
       .subscribe(null, (error: any) => {
-        this.restErrorService.showError(
-          "Deleting the share failed",
-          error
-        );
+        this.restErrorService.showError("Deleting the share failed", error);
       });
   }
 

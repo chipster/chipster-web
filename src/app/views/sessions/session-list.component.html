@@ -78,10 +78,10 @@
 
                     <!-- accept button -->
                     <button *ngIf="isAcceptVisible(sharedByUsername)" (click)="$event.stopImmediatePropagation();acceptSession(session)"
-                    [ngClass]="{'visible-button': buttonsVisible(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                    class="btn btn-sm btn-secondary hidden float-right mr-3" title="Accept">
-                    <!-- <span class="fas fa-play"></span> -->
-                    Accept share
+                      [ngClass]="{'visible-button': buttonsVisible(session)}" [ngClass]="{'show-on-row-hover': !selectionDisabled}"
+                      class="btn btn-sm btn-secondary hidden float-right mr-3" title="Accept">
+                      <!-- <span class="fas fa-play"></span> -->
+                      Accept share
                     </button>
 
                     <!-- open button -->
@@ -107,7 +107,7 @@
             </tbody>
           </table>
           <br>
-        </div>    
+        </div>
       </div>
     </div>
 
@@ -115,7 +115,11 @@
     <div class="col">
 
       <div id="workflow-dataset-panel" class="lighter">
-        <p>To open a session, click on the session name.
+        <p *ngIf="mode !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">To open a session, click on the session
+          name.
+        </p>
+
+        <p *ngIf="mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">Click on the session name to see a preview.
         </p>
 
         <p>Sessions keep your analysis projects organized. They combine together your raw data files and analysis
@@ -194,62 +198,60 @@
   </div> <!-- row-->
   <div class="row">
     <div class="col">
-        <h5>Sent pending shares</h5>
-        <div class="mb-3">
-          <small>Sessions you have shared with others waiting for the recipient to accept.</small> 
-        </div>
-        <table *ngIf="sessionShares.length === 0" class="table table-sm">
-          <tbody>
-            <tr class="session-list-item">
-              <td style="font-size: smaller"><i>No pending shares.</i></td>
-            </tr>
-          </tbody>
-        </table>
+      <h5>Sent pending shares</h5>
+      <div class="mb-3">
+        <small>Sessions you have shared with others waiting for the recipient to accept.</small>
+      </div>
+      <table *ngIf="sessionShares.length === 0" class="table table-sm">
+        <tbody>
+          <tr class="session-list-item">
+            <td style="font-size: smaller"><i>No pending shares.</i></td>
+          </tr>
+        </tbody>
+      </table>
 
-        <!-- session rows -->
-        <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
-          <tbody>
-            <tr *ngIf="sessionShares.length > 0">
-              <th>Shared to</th>
-              <th>Session</th>
-              <th></th>
-              <th></th>
-            </tr>            
-            <tr *ngFor="let session of sessionShares" [ngClass]="{'highlight': rowHighlighted(session)}"
-              class="session-list-item">
-              <td>
-                  <span>{{session.rules[0].username}}</span>
-              </td>      
-              <td>
-                <!-- session name -->
-                <span class="text-muted">{{session.name}}</span>
-              </td>
-              <td>
-                  <span class="text-muted">{{session.rules[0].created | localDate}}</span>
-              </td>      
-              <td>
-                <!-- buttons -->
-                <span *ngIf="!this.deletingSessions.has(session)">
-                    <!-- delete button -->
-                    <button class="btn btn-sm btn-outline-dark btn-no-border hidden float-right visible-button"
-                      (click)="deleteRule(session, session.rules[0])"
-                      title="Revoke">
-                      <span class="fas fa-times "></span>
-                    </button>
-                  </span>
-                    
-                  <!-- deleting text instead of buttons for sessions which are being deleted -->
-                  <span *ngIf="deletingSessions.has(session)" class="float-right" style="font-size: smaller; font-style: italic">
-                    <!-- use hidden button to keep the row height static -->
-                    <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
-                      <span class="fas fa-times "></span>
-                    </button>
-                    Deleting&hellip;
-                  </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- session rows -->
+      <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
+        <tbody>
+          <tr *ngIf="sessionShares.length > 0">
+            <th>Shared to</th>
+            <th>Session</th>
+            <th></th>
+            <th></th>
+          </tr>
+          <tr *ngFor="let session of sessionShares" [ngClass]="{'highlight': rowHighlighted(session)}" class="session-list-item">
+            <td>
+              <span>{{session.rules[0].username}}</span>
+            </td>
+            <td>
+              <!-- session name -->
+              <span class="text-muted">{{session.name}}</span>
+            </td>
+            <td>
+              <span class="text-muted">{{session.rules[0].created | localDate}}</span>
+            </td>
+            <td>
+              <!-- buttons -->
+              <span *ngIf="!this.deletingSessions.has(session)">
+                <!-- delete button -->
+                <button class="btn btn-sm btn-outline-dark btn-no-border hidden float-right visible-button" (click)="deleteRule(session, session.rules[0])"
+                  title="Revoke">
+                  <span class="fas fa-times "></span>
+                </button>
+              </span>
+
+              <!-- deleting text instead of buttons for sessions which are being deleted -->
+              <span *ngIf="deletingSessions.has(session)" class="float-right" style="font-size: smaller; font-style: italic">
+                <!-- use hidden button to keep the row height static -->
+                <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
+                  <span class="fas fa-times "></span>
+                </button>
+                Deleting&hellip;
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div class="col-4">
       <!-- make the table little bit narrower -->
