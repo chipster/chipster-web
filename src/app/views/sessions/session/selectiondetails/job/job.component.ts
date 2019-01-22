@@ -25,7 +25,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
-  duration: string;
+  duration: string = "";
 
   private unsubscribe: Subject<any> = new Subject();
 

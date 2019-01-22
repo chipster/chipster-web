@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { Job } from 'chipster-js-common';
-import {NgbDropdown} from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { SelectionService } from '../../selection.service';
 import UtilsService from '../../../../../shared/utilities/utils';
 
@@ -37,16 +37,16 @@ export class JobListComponent implements OnChanges {
     this.dropDown.close();
   }
 
-  calculateDuration(startTime, endTime){
-    let duration ="";
-     if (startTime != null && endTime != null) {
-      let computingTime =UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
-      if( computingTime > 1000){
-       duration = UtilsService.convertMS(computingTime);
+  calculateDuration(startTime, endTime) {
+    let duration = "";
+    if (startTime != null && endTime != null) {
+      let computingTime = UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
+      if (computingTime > 1000) {
+        duration = UtilsService.convertMS(computingTime);
       } else duration = computingTime.toString() + "ms";
 
       return duration;
     }
   }
-  
+
 }
