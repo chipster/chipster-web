@@ -117,4 +117,36 @@ export default class UtilsService {
       return 0;
     }
   }
+
+  static  parseISOStringToDate(s : any) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+  }
+
+  static convertMS(milliseconds: any) {
+    let day, hour, minute, seconds;
+    seconds = Math.floor(milliseconds / 1000);
+    minute = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    hour = Math.floor(minute / 60);
+    minute = minute % 60;
+    day = Math.floor(hour / 24);
+    hour = hour % 24;
+    let duration = "";
+    if (day > 0) {
+      duration += day + "d :";
+    }
+    if (hour > 0) {
+      duration += hour + "h :";
+    }
+    if (minute > 0) {
+      duration += minute + "m :";
+    }
+    if (seconds > 0) {
+      duration += seconds + "s ";
+    }
+    return duration;
+
+  }
+
 }

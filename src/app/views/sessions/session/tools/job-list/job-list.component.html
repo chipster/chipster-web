@@ -8,13 +8,15 @@
   </div>
 </div>
 
-<table class="table table-hover table-sm">
+<table class="table table-hover table-sm text-sm">
   <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)" [class.bg-primary]="selectionService.isSelectedJobById(job.jobId)"
     [class.text-white]="selectionService.isSelectedJobById(job.jobId)">
     <td>{{job.toolName}}</td>
     <td class="text-sm" [ngClass]="(selectionService.isSelectedJobById(job.jobId)) ? 'text-light' : 'lighter'">{{job.created
       | localDate}} </td>
     <td>{{job.state}}</td>
+    <td>{{calculateDuration(job.startTime,job.endTime)}}</td>
+
   </tr>
 
 </table>

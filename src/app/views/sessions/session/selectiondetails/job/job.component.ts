@@ -1,13 +1,14 @@
-import {SelectionService} from '../../selection.service';
-import {SessionDataService} from '../../session-data.service';
-import {Component, Input, OnInit, OnDestroy} from '@angular/core';
-import { Job, SessionEvent} from 'chipster-js-common';
-import {JobService} from '../../job.service';
-import {SessionEventService} from '../../session-event.service';
-import {Subject} from 'rxjs/Subject';
-import {SessionData} from '../../../../../model/session/session-data';
+import { SelectionService } from '../../selection.service';
+import { SessionDataService } from '../../session-data.service';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Job, SessionEvent } from 'chipster-js-common';
+import { JobService } from '../../job.service';
+import { SessionEventService } from '../../session-event.service';
+import { Subject } from 'rxjs/Subject';
+import { SessionData } from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
-import {SelectionHandlerService} from '../../selection-handler.service';
+import { SelectionHandlerService } from '../../selection-handler.service';
+import UtilsService from '../../../../../shared/utilities/utils';
 
 @Component({
   selector: 'ch-job',
@@ -23,6 +24,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
+  duration: string;
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -30,8 +32,8 @@ export class JobComponent implements OnInit, OnDestroy {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService ) {
-}
+    private sessionEventService: SessionEventService) {
+  }
 
   ngOnInit() {
 
@@ -66,6 +68,13 @@ export class JobComponent implements OnInit, OnDestroy {
         this.failed = !JobService.isSuccessful(job);
         this.state = _.capitalize(job.state);
         this.screenOutput = job.screenOutput;
+        if (this.job.startTime != null && this.job.endTime != null) {
+          let computingTime =UtilsService.parseISOStringToDate(this.job.endTime).getTime() - UtilsService.parseISOStringToDate(this.job.startTime).getTime();
+          if( computingTime > 1000){
+            this.duration = UtilsService.convertMS(computingTime);
+          } else this.duration = computingTime.toString() + "ms";
+        }
+
         return;
       }
     }
@@ -89,7 +98,7 @@ export class JobComponent implements OnInit, OnDestroy {
 
   cancelJob() {
     this.sessionDataService.cancelJob(this.job);
-  }
+  }  
 
 }
 

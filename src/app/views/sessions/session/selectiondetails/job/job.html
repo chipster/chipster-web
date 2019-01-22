@@ -15,89 +15,70 @@
     <h6>
       {{job.toolCategory + " / " + job.toolName}}
     </h6>
-    <div>Status: {{state}}
-      <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
-      <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+
+
+    <div class="border p-3" style="background-color: white;">
+      <table class="table table-sm text-sm">
+        <tr>
+          <td class="lighter">Status: </td>
+          <td class="wide-max" >{{state}}</td>
+          <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
+          <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+        </tr>
+        <tr>
+          <td class="lighter">Created:</td>
+          <td class="wide-max" width="100%">{{job.created | localDate}}</td>
+        </tr>
+        <tr>
+          <td class="lighter">Started:</td>
+          <td class="wide-max" width="100%">{{job.startTime | localDate}}</td>
+        </tr>
+        <tr>
+          <td class="lighter">Ended:</td>
+          <td>{{job.endTime | localDate}}</td>
+        </tr>
+        <tr *ngIf = "duration.length > 0">
+          <td class="lighter">Duration:</td>
+          <td >{{duration}}</td>
+        </tr>
+        <tr *ngIf="failed">
+          <td class="lighter" style="white-space: nowrap">Error message:</td>
+          <td class="wide-max">
+            <span *ngIf="job.stateDetail">{{job.stateDetail}}</span>
+          </td>
+        </tr>
+        <tr *ngIf="job.parameters.length > 0">
+          <td><b>Parameters</b></td>
+        </tr>
+        <tr *ngFor="let param of job.parameters">
+          <td class= "lighter" style="white-space: nowrap">
+            <div *ngIf="param.displayName;then paramName; else ParamID"></div>
+            <ng-template #paramName>
+              <span>{{param.displayName}}</span>
+            </ng-template>
+            <ng-template #ParamID>
+              <span>{{param.parameterId}}</span>
+            </ng-template>
+          </td>
+          <td class="wide-max" width="100%">{{param.value}}</td>
+        </tr>
+        <tr *ngIf="job.inputs.length>0"><td><b>Inputs</b></td></tr>
+        <tr *ngFor="let input of job.inputs">
+          <td  class = "lighter" style="white-space: nowrap">{{input.inputId}}</td>
+          <td class="wide-max" width="100%">{{input.displayName}}</td>
+        </tr>
+      </table>
     </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        <table class="table table-sm text-sm">
-          <tr>
-            <td class="lighter">Created:</td>
-            <td width="100%">{{job.created | localDate}}</td>
-          </tr>
-          <tr>
-            <td class="lighter">Started:</td>
-            <td width="100%">{{job.startTime | localDate}}</td>
-          </tr>
-          <tr>
-            <td class="lighter">Ended:</td>
-            <td>{{job.endTime | localDate}}</td>
-          </tr>
-          <tr>
-            <td class="lighter">Duration:</td>
-            <td></td>
-          </tr>
-          <tr *ngIf="failed">
-            <td class="lighter" style="white-space: nowrap">Error message:</td>
-            <td>
-              <span *ngIf="job.stateDetail">{{job.stateDetail}}</span>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-12">
-        <div>Parameters</div>
-        <div>
-          <table class="table table-sm text-sm">
-            <tr *ngFor="let param of job.parameters">
-              <td style="white-space: nowrap">{{param.displayName}}</td>
-              <td width="100%">{{param.value}}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-12">
-        <div>Inputs</div>
-        <div>
-          <table class="table table-sm text-sm">
-            <tr *ngFor="let input of job.inputs">
-              <td style="white-space: nowrap">{{input.inputId}}</td>
-              <td width="100%">{{input.datasetId}}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <ngb-tabset>
-    <ngb-tab id="screenOutput">
-      <ng-template ngbTabTitle>Screen output</ng-template>
-      <ng-template ngbTabContent>
-        <div class="visualization-panel">
+    <div class= "card" style="width:100% ;margin-top: 30px">
+      <div class= "card-body">
+        <h6>Screen Output</h6>
+        <p class="card-text text-sm">
           <pre style="margin-bottom: 0em">{{screenOutput}}</pre>
           <i *ngIf="isRunning" class="fas fa-circle-o-notch fa-spin fa-fw"></i>
         </div>
-      </ng-template>
-    </ngb-tab>
+      </div>
 
-    <ngb-tab id="sourceCode">
-      <ng-template ngbTabTitle>
-        <span class="glyphicon glyphicon-font"></span> Source code</ng-template>
-      <ng-template ngbTabContent>
-        <div class="visualization-panel">
-          <pre>{{job.sourceCode}}</pre>
-        </div>
-      </ng-template>
-    </ngb-tab>
-  </ngb-tabset>
+  
 
-</div>
+  </div>
