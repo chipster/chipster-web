@@ -10,6 +10,7 @@ import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
+import { PreModalComponent } from "./pre-modal/pre-modal.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
@@ -19,7 +20,8 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     NotesModalComponent,
     SharingModalComponent,
     SpinnerModalComponent,
-    TempCopyModalComponent
+    TempCopyModalComponent,
+    PreModalComponent,
   ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],
@@ -29,7 +31,8 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     NotesModalComponent,
     SharingModalComponent,
     SpinnerModalComponent,
-    TempCopyModalComponent
+    TempCopyModalComponent,
+    PreModalComponent,
   ]
 })
 export class DialogModalModule {}

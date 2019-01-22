@@ -32,7 +32,7 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
   svgPadding = 50;
   protected fileResource: FileResource;
   protected sessionDataService: SessionDataService;
-  private errorHandlerService: RestErrorService;
+  private restErrorService: RestErrorService;
 
   protected unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -43,7 +43,7 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
   ) {
     this.fileResource = fileResource;
     this.sessionDataService = sessionDataService;
-    this.errorHandlerService = AppInjector.get(RestErrorService);
+    this.restErrorService = AppInjector.get(RestErrorService);
   }
 
   ngOnChanges() {
@@ -79,7 +79,7 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
         },
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
-          this.errorHandlerService.handleError(error, this.state.message);
+          this.restErrorService.showError(this.state.message, error);
         }
       );
   }

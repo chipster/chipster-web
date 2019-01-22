@@ -1,6 +1,10 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { SettingsService } from "../../services/settings.service";
+import {
+  SettingsService,
+  SessionListMode
+} from "../../services/settings.service";
 import { Subject } from "rxjs/Subject";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: "ch-settings",
@@ -8,19 +12,15 @@ import { Subject } from "rxjs/Subject";
   styleUrls: ["./settings.component.less"]
 })
 export class SettingsComponent implements OnInit, OnDestroy {
-  public showToolsPanel: boolean;
-
+  public SessionListMode = SessionListMode; // ref for using enum in template
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(public settingsService: SettingsService) {}
+  constructor(
+    public settingsService: SettingsService,
+    public activeModal: NgbActiveModal
+  ) {}
 
-  ngOnInit() {
-    this.settingsService.showToolsPanel$
-      .takeUntil(this.unsubscribe)
-      .subscribe((showTools: boolean) => {
-        this.showToolsPanel = showTools;
-      });
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
     this.unsubscribe.next();
@@ -43,5 +43,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.settingsService.compactToolList$.next(
       !this.settingsService.compactToolList$.getValue()
     );
+  }
+
+  setSessionListMode(mode: SessionListMode) {
+    this.settingsService.sessionListMode$.next(mode);
   }
 }

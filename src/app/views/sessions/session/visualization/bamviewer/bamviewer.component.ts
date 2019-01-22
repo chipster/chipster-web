@@ -90,7 +90,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         }
       }, (error: any) => {
         this.state = new LoadState(State.Fail, "Loading bam file failed");
-        this.errorHandlerService.handleError(error, this.state.message);
+        this.errorHandlerService.showError(this.state.message, error);
       });
 
     

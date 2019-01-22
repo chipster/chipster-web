@@ -5,6 +5,8 @@ import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { SettingsComponent } from "../../shared/components/settings/settings.component";
 
 @Component({
   selector: "ch-navigation",
@@ -28,7 +30,8 @@ export class NavigationComponent implements OnInit {
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private modalService: NgbModal
   ) {}
 
   ngOnInit() {
@@ -49,10 +52,7 @@ export class NavigationComponent implements OnInit {
       err => {
         // why error service doesn't show these reliably?
         log.error("failed to get the custom css path", err);
-        this.errorService.headerError(
-          "failed to get the custom css path: " + err,
-          true
-        );
+        this.errorService.showError("failed to get the custom css path", err);
       }
     );
 
@@ -72,10 +72,7 @@ export class NavigationComponent implements OnInit {
       err => {
         // why error service doesn't show these reliably?
         log.error("failed to get the favicon path", err);
-        this.errorService.headerError(
-          "failed to get the custom favicon path: " + err,
-          true
-        );
+        this.errorService.showError("failed to get the custom favicon path", err);
       }
     );
 
@@ -105,10 +102,7 @@ export class NavigationComponent implements OnInit {
       .do(url => (this.routerLinkAdmin = url))
       .subscribe(null, err => {
         log.info("failed to get the app route", err);
-        this.errorService.headerError(
-          "failed to get the app route: " + err,
-          true
-        );
+        this.errorService.showError("failed to get the app route", err);
       });
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
@@ -122,10 +116,7 @@ export class NavigationComponent implements OnInit {
       err => {
         // why error service doesn't show these reliably?
         log.error("failed to get the app name", err);
-        this.errorService.headerError(
-          "failed to get the app name: " + err,
-          true
-        );
+        this.errorService.showError("failed to get the app name", err);
       }
     );
   }
@@ -140,5 +131,9 @@ export class NavigationComponent implements OnInit {
 
   isAdmin() {
     return this.isLoggedIn() && this.tokenService.hasRole("admin");
+  }
+
+  openSettings() {
+    this.modalService.open(SettingsComponent);
   }
 }

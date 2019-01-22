@@ -15,9 +15,11 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import log from "loglevel";
 import UtilsService from "../../../shared/utilities/utils";
 import { ToastrService } from "ngx-toastr";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Injectable()
 export class SessionDataService {
+
   private sessionId: string;
 
   constructor(
@@ -30,6 +32,7 @@ export class SessionDataService {
     private sessionEventService: SessionEventService,
     private selectionHandlerService: SelectionHandlerService,
     private toastrService: ToastrService,
+    private restErrorService: RestErrorService,
   ) {}
 
   getSessionId(): string {
@@ -113,7 +116,7 @@ export class SessionDataService {
     );
     Observable.merge(...deleteJobs$).subscribe(() => {
       log.info("Job deleted");
-    });
+    }, err => this.restErrorService.showError("delete jobs failed", err));
   }
 
   deleteDatasets(datasets: Dataset[]) {
@@ -121,8 +124,8 @@ export class SessionDataService {
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
     Observable.merge(...deleteDatasets$).subscribe(() => {
-      log.info("Job deleted");
-    });
+      log.info("Dataset deleted");
+    }, err => this.restErrorService.showError("delete datasets failed", err));
   }
 
   updateDataset(dataset: Dataset) {
@@ -204,10 +207,10 @@ export class SessionDataService {
             win.close();
           }, autoCloseDelay);
         }
-      });
+      }, err => this.restErrorService.showError("opening a new tab failed", err));
     } else {
       // Chrome allows only one download
-      this.errorService.headerError(popupErrorText, true);
+      this.errorService.showError(popupErrorText, null);
     }
   }
 
@@ -243,6 +246,32 @@ export class SessionDataService {
       (rule: Rule) =>
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
     );
+  }
+
+  /**
+   * Get pending shares for the UI
+   *
+   * A simple array of rules isn't enough, because the session name is
+   * useful in the UI. Create a copy of the session for each shared rule
+   * (there can be more than one for each session) and add only that particular
+   * rule to the session's rule array.
+   */
+  getPendingShares(sessions: Session[]): Session[] {
+    const username = this.tokenService.getUsername();
+
+    const sharedSessions = [];
+
+    sessions.forEach(session => {
+      session.rules.forEach(rule => {
+        if (rule.sharedBy === username) {
+          const sharedSession = _.clone(session);
+          sharedSession.rules = [rule];
+          sharedSessions.push(sharedSession);
+        }
+      });
+    });
+
+    return sharedSessions;
   }
 
   isMySession(session: Session): boolean {
@@ -360,19 +389,15 @@ export class SessionDataService {
       .filter(text => text === BTN_UNDO)
       .subscribe(buttonText => {
         this.deleteDatasetsUndo(deletedDatasets);
-      this.toastrService.clear(toast.toastId);
-    }, err => {
-      log.error("toastr subscribe failed");
-    });
+        this.toastrService.clear(toast.toastId);
+      }, err => this.errorService.showError("error in dataset deletion", err));
 
     toast.onHidden.takeUntil(toast.onAction) // only if there was no action
       .merge(toast.onAction.filter(text => text === BTN_DELETE))
       .subscribe(() => {
         this.deleteDatasetsNow(deletedDatasets);
         this.toastrService.clear(toast.toastId);
-    }, err => {
-      log.error("toastr subscribe failed");
-    });
+      }, err => this.errorService.showError("error in dataset deletion", err));
   }
 
   getSessionSize(sessionData: SessionData): number {

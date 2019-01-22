@@ -12,3 +12,5 @@ favicon: assets/manual-mylly/app-mylly-favicon.png
 home-path: assets/manual-mylly/app-home.html
 home-header-path: assets/manual-mylly/app-home-header.html
 contact-path: assets/manual-mylly/app-contact.html
+
+support-session-owner-user-id: jaas/mylly_support_session_owner

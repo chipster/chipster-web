@@ -107,7 +107,7 @@ export class JobService {
 
     // runsys
     this.sessionDataService.createJob(job).subscribe(null, (error: any) => {
-      this.restErrorService.handleError(error, "Running a job failed");
+      this.restErrorService.showError("Running a job failed", error);
     });
   }
 }

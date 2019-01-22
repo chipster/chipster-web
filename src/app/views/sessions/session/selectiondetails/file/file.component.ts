@@ -7,6 +7,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetModalService } from "../datasetmodal.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import * as _ from "lodash";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-file",
@@ -29,7 +30,8 @@ export class FileComponent {
     public selectionService: SelectionService, // used in template
     private sessionDataService: SessionDataService,
     private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService
+    private dialogModalService: DialogModalService,
+    private restErrorService: RestErrorService,
   ) {}
 
   renameDataset() {
@@ -40,7 +42,7 @@ export class FileComponent {
         dataset.name = name;
         return this.sessionDataService.updateDataset(dataset);
       })
-      .subscribe(null, err => console.log("dataset rename error", err));
+      .subscribe(null, err => this.restErrorService.showError("dataset rename error", err));
   }
 
   deleteDatasets() {

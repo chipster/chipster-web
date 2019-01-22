@@ -4,6 +4,7 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { User } from "chipster-js-common";
 import { RouteService } from "../../shared/services/route.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
 
 @Component({
   selector: "ch-terms",
@@ -19,7 +20,7 @@ export class TermsComponent implements OnInit {
     private authenticationService: AuthenticationService,
     private restErrorService: RestErrorService,
     private configService: ConfigService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -28,9 +29,9 @@ export class TermsComponent implements OnInit {
         this.termsOfUse = path;
       },
       err =>
-        this.restErrorService.handleError(
-          err,
-          "failed to get the configuration"
+        this.restErrorService.showError(
+          "failed to get the configuration",
+          err
         )
     );
   }
@@ -54,9 +55,9 @@ export class TermsComponent implements OnInit {
           this.routeService.navigateAbsolute("/sessions");
         },
         err =>
-          this.restErrorService.handleError(
-            err,
-            "updating the user object failed"
+          this.restErrorService.showError(
+            "updating the user object failed",
+            err
           )
       );
   }

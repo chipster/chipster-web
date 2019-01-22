@@ -7,6 +7,8 @@
   <h5>Details</h5>
   <pre style="white-space: pre-wrap;">{{job.stateDetail}}</pre>
 
+  <button class="btn btn-secondary" (click)="contactSupport()">Contact support...</button>
+
   <div *ngIf="job.screenOutput">
     <h5>Screen output</h5>
     <pre style="white-space: pre-wrap;">{{job.screenOutput}}</pre>

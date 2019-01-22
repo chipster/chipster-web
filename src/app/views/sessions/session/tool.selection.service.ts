@@ -9,6 +9,8 @@ import { SessionData } from "../../../model/session/session-data";
 import { SelectionService } from "./selection.service";
 import { SET_TOOL_SELECTION } from "../../../state/selected-tool.reducer";
 import log from "loglevel";
+import { ErrorService } from "../../../core/errorhandler/error.service";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Injectable()
 export class ToolSelectionService implements OnDestroy {
@@ -25,7 +27,9 @@ export class ToolSelectionService implements OnDestroy {
   constructor(
     private store: Store<any>,
     private toolService: ToolService,
-    private selectionService: SelectionService
+    private selectionService: SelectionService,
+    private errorService: ErrorService,
+    private restErrorService: RestErrorService,
   ) {
     this.store
       .select("toolSelection")
@@ -48,7 +52,7 @@ export class ToolSelectionService implements OnDestroy {
 
           this.checkParameters(); // make sure this gets called also when no parameters
         }
-      });
+      }, err => this.errorService.showError("tool selection failed", err));
 
     this.toolSelection$ = this.store.select("toolSelection");
 
@@ -146,7 +150,7 @@ export class ToolSelectionService implements OnDestroy {
         ) {
           parameter.value = null;
         }
-      });
+      }, err => this.restErrorService.showError("getting parameter values failed", err));
     }
 
     if (

@@ -4,13 +4,9 @@ import {ErrorService} from "./error.service";
 @Injectable()
 export class AppErrorHandler implements ErrorHandler {
 
-  private errorService: ErrorService;
-
   constructor(
-    private injector: Injector) {
-    // workaround circular dependency error
-    this.errorService = injector.get(ErrorService);
-  }
+    private errorService: ErrorService,
+  ) { }
 
   handleError(error) {
 
@@ -27,10 +23,6 @@ export class AppErrorHandler implements ErrorHandler {
       msg = JSON.stringify(error);
     }
 
-    // printing the whole error object may provide useful information, because we can pass only a string
-    // to the error page
-    console.error('uncaught error', msg, typeof error, error);
-
-    this.errorService.headerError(msg, true);
+    this.errorService.showError(msg, error);
   }
 }

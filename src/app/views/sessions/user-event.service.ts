@@ -16,6 +16,7 @@ import { SessionDataService } from "./session/session-data.service";
 import { mergeMap } from "rxjs/operators";
 import { of } from "rxjs";
 import { SessionEventService } from "./session/session-event.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
 
 @Injectable()
 export class UserEventService {
@@ -31,6 +32,7 @@ export class UserEventService {
     private webSocketService: WebSocketService,
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
+    private errorService: ErrorService,
   ) { }
 
   unsubscribe() {
@@ -53,7 +55,7 @@ export class UserEventService {
 
     // update userEventData even if no one else subscribes
     this.ruleStream$
-      .subscribe();
+      .subscribe(null, err => this.errorService.showError("error in rule events", err));
   }
 
   getRuleStream() {
@@ -81,17 +83,20 @@ export class UserEventService {
   handleRuleEvent(event: any, sessionId: any, userEventData: UserEventData): Observable<WsEvent> {
     log.info('handleRuleEvent()', event);
     if (event.type === EventType.Create) {
-      // new session was shared to us
-      if (!userEventData.sessions.has(sessionId)) {
-        return this.sessionResource.getSession(sessionId)
+      // new session was shared to us or a rule was added to the session we already have
+      return this.sessionResource.getSession(sessionId)
+        .map((session: Session) => {
+          // get the session or latest rules
+          userEventData.sessions.set(session.sessionId, session);
+          return event;
+        });
+    } else if (event.type === EventType.Update) {
+      return this.sessionResource.getSession(sessionId)
           .map((session: Session) => {
-            log.info('session added', session.name, session.state);
+            log.info('rule updated', session.name);
             userEventData.sessions.set(session.sessionId, session);
             return event;
           });
-      } else {
-        return of(event);
-      }
     } else if (event.type === EventType.Delete) {
 
       const oldSession = userEventData.sessions.get(sessionId);

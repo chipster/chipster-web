@@ -37,7 +37,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   constructor(
     private sessionDataService: SessionDataService,
-    private errorHandlerService: RestErrorService
+    private restErrorService: RestErrorService
   ) {}
 
   ngOnChanges() {
@@ -64,7 +64,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         },
         (error: any) => {
           this.state = new LoadState(State.Loading, "Loading pdf file failed");
-          this.errorHandlerService.handleError(error, this.state.message);
+          this.restErrorService.showError(this.state.message, error);
         }
       );
   }

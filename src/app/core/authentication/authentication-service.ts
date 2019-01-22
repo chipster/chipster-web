@@ -211,7 +211,7 @@ export class AuthenticationService {
         return <Observable<User[]>>this.authHttpClient.getAuth(url);
       })
       .catch(err => {
-        this.restErrorService.handleError(err, "failed to get users");
+        this.restErrorService.showError("failed to get users", err);
         throw err;
       });
   }

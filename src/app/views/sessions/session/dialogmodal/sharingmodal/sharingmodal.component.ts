@@ -13,6 +13,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { Observable, Subject } from "rxjs";
 import log from "loglevel";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 
 @Component({
   templateUrl: "./sharingmodal.component.html"
@@ -38,6 +39,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     private tokenService: TokenService,
     private restErrorService: RestErrorService,
     private sessionResource: SessionResource,
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -46,7 +48,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       .takeUntil(this.unsubscribe)
       .subscribe(() => {
       this.rules = this.session.rules;
-    });
+    }, err => this.errorService.showError("getting rule events failed", err));
   }
 
   ngOnDestroy() {
@@ -80,7 +82,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
         log.info("rule created", resp);
         this.newRule = null;
       },
-      err => this.restErrorService.handleError(err, "failed to add a new rule")
+      err => this.restErrorService.showError("failed to add a new rule", err)
     );
   }
 
@@ -96,7 +98,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       .subscribe(
         resp => log.info("rule deleted"),
         err =>
-          this.restErrorService.handleError(err, "failed to delete the rule")
+          this.restErrorService.showError("failed to delete the rule", err)
       );
   }
 

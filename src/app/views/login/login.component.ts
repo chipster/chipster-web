@@ -9,6 +9,7 @@ import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
 import { Observable } from "rxjs/Observable";
+import { ErrorService } from "../../core/errorhandler/error.service";
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
@@ -37,7 +38,8 @@ export class LoginComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private routeService: RouteService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -63,9 +65,9 @@ export class LoginComponent implements OnInit {
           error => {
             log.warn("checking token failed", error);
             this.initFailed = true;
-            this.restErrorService.handleError(
-              error,
-              "Initializing login page failed"
+            this.restErrorService.showError(
+              "Initializing login page failed",
+              error
             );
           }
         );
@@ -73,7 +75,7 @@ export class LoginComponent implements OnInit {
         // no local token -> continue
         this.continueInit();
       }
-    });
+    }, err => this.errorService.showError("failed to get the return url", err));
   }
 
   private continueInit() {
@@ -131,7 +133,7 @@ export class LoginComponent implements OnInit {
         }, 0);
       },
       error => {
-        this.restErrorService.handleError(
+        this.restErrorService.showError(
           error,
           "Initializing login page failed"
         );

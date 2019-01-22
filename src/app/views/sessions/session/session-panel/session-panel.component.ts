@@ -86,7 +86,7 @@ export class SessionPanelComponent {
 
     Observable.forkJoin(updates).subscribe(
       () => console.log(updates.length + " datasets updated"),
-      err => this.restErrorService.handleError(err, "layout update failed")
+      err => this.restErrorService.showError("layout update failed", err)
     );
   }
 
