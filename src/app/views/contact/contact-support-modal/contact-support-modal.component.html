@@ -2,65 +2,69 @@
   <h4 class="modal-title">Contact support</h4>
 </div>
 <div class="modal-body">
-  <form #contactSupportForm="ngForm">
-    <div class="form-group" [ngClass]="{'was-validated': formSubmitAttempt && message === ''}">
+  <form [formGroup]="supportForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
       <label for="messageTextarea">Message</label>
-      <textarea class="form-control" id="messageTextarea" name="message" rows="3" 
-        [(ngModel)]="message" #messageTextarea="ngModel" required #messageTextarea></textarea>
-      <div *ngIf="message === '' && formSubmitAttempt" class="invalid-feedback">
-          Please describe what happened
+      <textarea rows="3" formControlName="message" required #messageTextarea id="messageTextarea" class="form-control"></textarea>
+      <div *ngIf="isValidationError(supportForm.controls.message)" class="invalid-feedback">
+          <div *ngIf="supportForm.controls.message.errors.required">
+            Please describe what happened
+          </div>
       </div>
     </div>
 
-    <div class="form-group mt-4" 
-      [ngClass]="{'was-validated': formSubmitAttempt && attachRadioNgModel.invalid}">
-      <label for="attachRadio">Attach session</label>      
-      
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="attach" id="attachRadio" 
-        value="yes" [(ngModel)]="attach" #attachRadioNgModel="ngModel" 
-        [required]="session != null" 
-        [disabled]="session == null">
-        <label class="form-check-label" for="attachRadio">
-          Attach a copy of your last session <em>{{session?.name || "(not available)"}}</em>
+    <div class="mt-4">
+      <label>Attach session</label>  
+      <div class="form-check">  
+        <input class="form-check-input" type="radio" value="yes" formControlName="attach"      
+        [required]="session != null" id="attachYesInput">
+        <label class="form-check-label" for="attachYesInput">
+          Attach a copy of your last session 
+          <em><b>{{session?.name || "(not available)"}}</b></em>
         </label>
       </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="doNotAttach" id="doNotAttachRadio" 
-        value="no" [(ngModel)]="attach"
-        [required]="session != null" 
-        [disabled]="session == null">
-        <label class="form-check-label" for="doNotAttachRadio">
+      <div class="form-check">        
+        <input class="form-check-input" type="radio" value="no" formControlName="attach"
+        [required]="session != null" id="attachNoInput">
+        <label class="form-check-label" for="attachNoInput">
           Don't attach the session
-        </label>
+        </label>      
       </div>
-
-      <div *ngIf="attachRadioNgModel.invalid && formSubmitAttempt" class="invalid-feedback">
+      <div *ngIf="isValidationError(supportForm.controls.attach)" class="invalid-feedback">
+        <div *ngIf="supportForm.controls.attach.errors.required">
           Please choose
+        </div>
       </div>
     </div>
-
-    <div class="form-group mt-4" [ngClass]="{'was-validated': formSubmitAttempt && emailInput.invalid}">
-      <label for="emailInput">Your email address</label>
-      <input type="email" class="form-control" id="emailInput" name="email" 
-        aria-describedby="emailHelp" placeholder="Enter email" [(ngModel)]="email" #emailInput="ngModel" required>
-      <div *ngIf="emailInput.invalid && formSubmitAttempt" class="invalid-feedback">
-          Please enter your email address
-      </div>
-      <small class="form-text text-muted">        
-      Support personnel will use this address to contact you.
+    
+    <div class="form-group mt-4">
+      <label for="emailInput" >Your email address</label>
+      <input type="email" placeholder="Enter email" formControlName="email" required
+      id="emailInput" aria-describedby="emailHelp" class="form-control">   
+      <small class="form-text text-muted" id="emailHelp">        
+        Support personnel will use this address to contact you.
       </small>
       <small class="form-text text-muted" *ngIf="isVerifiedEmail">        
           This email address was received from your login details. If it's not correct, 
           please contact the organization that provided your login credentials to update 
           it.
       </small>
+        
+      <div *ngIf="isValidationError(supportForm.controls.email)" class="invalid-feedback">
+        <div *ngIf="supportForm.controls.email.errors.required">
+          Please enter your email address
+        </div>
+        <div *ngIf="supportForm.controls.email.errors.email">
+          Please enter a valid email address
+        </div>
+      </div>
     </div>
   </form>
 </div>
 
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-  <button type="submit" class="btn btn-info pull right" 
-  (click)="save(contactSupportForm)" #submitButton>Send</button>
+  <button type="submit" class="btn btn-info pull right" [disabled]="!supportForm.valid" 
+  (click)="onSubmit()">
+    Send</button>
 </div>
