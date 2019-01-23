@@ -20,7 +20,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
 import { SessionData } from "../../../model/session/session-data";
-import { FormControl, FormBuilder, Validators } from "@angular/forms";
+import { FormBuilder, Validators, AbstractControl, FormControl } from "@angular/forms";
 
 @Component({
   templateUrl: "./contact-support-modal.component.html",
@@ -178,7 +178,19 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     this.activeModal.dismiss();
   }
 
-  isValidationError(control: FormControl) {
+  isValidationError(control: AbstractControl) {
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  get message() {
+    return this.supportForm.get('message') as FormControl;
+  }
+
+  get attach() {
+    return this.supportForm.get('attach') as FormControl;
+  }
+
+  get email() {
+    return this.supportForm.get('email') as FormControl;
   }
 }
