@@ -41,13 +41,10 @@ export class ToolService {
     );
   }
 
-    //noinspection JSMethodCanBeStatic
+  //noinspection JSMethodCanBeStatic
   isStringParameter(parameter: ToolParameter) {
-      return (
-        parameter.type === "STRING" ||
-        parameter.type === "UNCHECKED_STRING"
-      );
-    }
+    return parameter.type === "STRING" || parameter.type === "UNCHECKED_STRING";
+  }
 
   //noinspection JSMethodCanBeStatic
   /**
@@ -82,7 +79,10 @@ export class ToolService {
   }
 
   getDefaultValue(toolParameter: ToolParameter): number | string {
-    if (this.isNumberParameter(toolParameter)) {
+    if (
+      toolParameter.defaultValue != null &&
+      this.isNumberParameter(toolParameter)
+    ) {
       return Number(toolParameter.defaultValue);
     } else {
       return toolParameter.defaultValue;
@@ -97,7 +97,9 @@ export class ToolService {
     } else {
       if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
         // consider "0" and "0.0" equal
-        return parseFloat(value.toString()) === parseFloat(parameter.defaultValue);
+        return (
+          parseFloat(value.toString()) === parseFloat(parameter.defaultValue)
+        );
       } else {
         return parameter.defaultValue === value;
       }
