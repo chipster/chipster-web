@@ -13,6 +13,7 @@ import { SessionDataService } from "../session-data.service";
 import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
 import { ConfigService } from "../../../../shared/services/config.service";
+import log from "loglevel";
 
 @Injectable()
 export class ToolService {
@@ -119,19 +120,14 @@ export class ToolService {
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
 
-    // see OperationDefinition.bindInputs()
+    // sort inputs to determine binding order
+    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool);
 
-    const inputBindings: InputBinding[] = [];
+    // temp map
+    const bindingsMap = new Map<ToolInput, Dataset[]>();
 
-    // go through inputs, optional inputs last
-    for (const toolInput of tool.inputs
-      .filter(input => !input.optional)
-      .concat(tool.inputs.filter(input => input.optional))) {
-      // ignore phenodata input, it gets generated on server side TODO should we check that it exists?
-      if (toolInput.meta) {
-        continue;
-      }
-
+    // do the binding, one input at a time
+    for (const toolInput of inputs) {
       // get compatible datasets
       const compatibleDatasets = unboundDatasets.filter(dataset =>
         this.isCompatible(sessionData, dataset, toolInput.type.name)
@@ -146,30 +142,20 @@ export class ToolService {
           : compatibleDatasets.slice(0, 1);
       }
 
-      inputBindings.push({
-        toolInput: toolInput,
-        datasets: datasetsToBind
-      });
-
-      const toolId = toolInput.name.id
-        ? toolInput.name.id
-        : toolInput.name.prefix + toolInput.name.postfix;
-      console.log(
-        "binding",
-        toolId,
-        "->",
-        datasetsToBind
-          .reduce((a, b) => {
-            return a + b.name + " ";
-          }, "")
-          .trim()
-      );
+      // save binding
+      bindingsMap.set(toolInput, datasetsToBind);
 
       // remove bound datasets from unbound
       unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
     }
 
-    return inputBindings;
+    // return bindings in the same order as the original tool inputs
+    return tool.inputs.map((toolInput: ToolInput) => {
+      return {
+        toolInput: toolInput,
+        datasets: bindingsMap.get(toolInput)
+      };
+    });
   }
 
   //noinspection JSMethodCanBeStatic
@@ -280,5 +266,34 @@ export class ToolService {
       return obj.name.displayName;
     }
     return obj.name.id;
+  }
+
+  getInputsSortedForBinding(tool: Tool): ToolInput[] {
+    return (
+      tool.inputs
+        // start with mandatory not generic, ignore phenodata
+        .filter(
+          input =>
+            !input.optional && !(input.type.name === "GENERIC") && !input.meta
+        )
+        // add optional not generic
+        .concat(
+          tool.inputs.filter(
+            input => input.type.name !== "GENERIC" && input.optional
+          )
+        )
+        // add mandatory generic
+        .concat(
+          tool.inputs.filter(
+            input => input.type.name === "GENERIC" && !input.optional
+          )
+        )
+        // add optional generic
+        .concat(
+          tool.inputs.filter(
+            input => input.type.name === "GENERIC" && input.optional
+          )
+        )
+    );
   }
 }

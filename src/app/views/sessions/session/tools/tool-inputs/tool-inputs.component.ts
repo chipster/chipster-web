@@ -28,9 +28,7 @@ export class ToolInputsComponent implements OnChanges {
   localInputBindings: InputBinding[];
 
   //noinspection JSUnusedLocalSymbols
-  constructor(
-    private toolService: ToolService,
-  ) { }
+  constructor(private toolService: ToolService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["inputBindings"]) {
@@ -42,10 +40,8 @@ export class ToolInputsComponent implements OnChanges {
         datasets: b.datasets.slice()
       }));
 
-      log.info("input bindings", this.localInputBindings);
       log.info(
-        "updated bindings:",
-        this.getBindingsString(this.localInputBindings)
+        "new bindings:\n" + this.getBindingsString(this.localInputBindings)
       );
     }
   }
@@ -82,9 +78,8 @@ export class ToolInputsComponent implements OnChanges {
       return s;
     }
 
-    s += "-----\n";
-
     for (const binding of bindings) {
+      s += "\t";
       const datasetsString: string = binding.datasets.reduce(
         (a: string, b) => a + b.name + " ",
         ""
