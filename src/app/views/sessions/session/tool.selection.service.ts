@@ -139,11 +139,7 @@ export class ToolSelectionService implements OnDestroy {
     toolSelection: ToolSelection,
     sessionData: SessionData
   ) {
-    log.info(
-      "selecting tool: ",
-      toolSelection.tool.name.displayName,
-      toolSelection.tool
-    );
+    log.info("selecting tool: ", toolSelection.tool.name.displayName);
     toolSelection.inputBindings = this.toolService.bindInputs(
       sessionData,
       toolSelection.tool,
