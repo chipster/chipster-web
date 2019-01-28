@@ -56,6 +56,12 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
     const rowLimit = 5000;
     const datasetName = this.dataset.name;
 
+    // check for empty file
+    if (this.dataset.size < 1) {
+      this.state = new LoadState(State.EmptyFile);
+      return;
+    }
+
     // Get the file, this can be in a shared dataservice
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset)

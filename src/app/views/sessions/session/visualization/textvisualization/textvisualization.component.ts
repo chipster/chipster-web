@@ -1,25 +1,26 @@
-import {FileResource} from "../../../../../shared/resources/fileresource";
-import {SessionDataService} from "../../session-data.service";
+import { FileResource } from "../../../../../shared/resources/fileresource";
+import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
-import {Component, Input, OnChanges, OnDestroy} from "@angular/core";
-import {Response} from "@angular/http";
-import {VisualizationModalService} from "../visualizationmodal.service";
-import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
-import {Subject} from "rxjs/Subject";
-import {LoadState, State} from "../../../../../model/loadstate";
+import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Response } from "@angular/http";
+import { VisualizationModalService } from "../visualizationmodal.service";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { Subject } from "rxjs/Subject";
+import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
-  selector: 'ch-text-visualization',
-  templateUrl: './textvisualization.component.html',
-  styles: [`
-    pre {
-      background-color: white;
-    }
-  `],
-  styleUrls: ['./textvisualization.component.less'],
+  selector: "ch-text-visualization",
+  templateUrl: "./textvisualization.component.html",
+  styles: [
+    `
+      pre {
+        background-color: white;
+      }
+    `
+  ],
+  styleUrls: ["./textvisualization.component.less"]
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
-
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
   @Input() modalMode: boolean;
@@ -31,11 +32,12 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
 
   fileSizeLimit = 100 * 1024;
 
-  constructor(private fileResource: FileResource,
-              private sessionDataService: SessionDataService,
-              private visualizationModalService: VisualizationModalService,
-              private errorHandlerService: RestErrorService) {
-  }
+  constructor(
+    private fileResource: FileResource,
+    private sessionDataService: SessionDataService,
+    private visualizationModalService: VisualizationModalService,
+    private errorHandlerService: RestErrorService
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -43,17 +45,27 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading data...");
     this.data = null;
 
+    // check for empty file
+    if (this.dataset.size < 1) {
+      this.state = new LoadState(State.EmptyFile);
+      return;
+    }
+
     const maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
+    this.fileResource
+      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
-      .subscribe((response: any) => {
-        this.data = response;
-        this.state = new LoadState(State.Ready);
-      }, (error: Response) => {
-        this.state = new LoadState(State.Fail, "Loading data failed");
-        this.errorHandlerService.showError(this.state.message, error);
-      });
+      .subscribe(
+        (response: any) => {
+          this.data = response;
+          this.state = new LoadState(State.Ready);
+        },
+        (error: Response) => {
+          this.state = new LoadState(State.Fail, "Loading data failed");
+          this.errorHandlerService.showError(this.state.message, error);
+        }
+      );
   }
 
   ngOnDestroy() {
@@ -76,7 +88,6 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   showAll() {
-    this.visualizationModalService.openVisualizationModal(this.dataset, 'text');
+    this.visualizationModalService.openVisualizationModal(this.dataset, "text");
   }
-
 }

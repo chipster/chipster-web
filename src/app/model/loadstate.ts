@@ -1,6 +1,7 @@
 export enum State {
   Loading = "Loading...",
   Ready = "Ready",
+  EmptyFile = "File is empty",
   Fail = "Loading failed"
 }
 

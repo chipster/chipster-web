@@ -77,6 +77,12 @@ export class SpreadsheetVisualizationComponent
     // remove old table
     this.destroyHot();
 
+    // check for empty file
+    if (this.dataset.size < 1) {
+      this.state = new LoadState(State.EmptyFile);
+      return;
+    }
+
     const maxBytes = this.modalMode ? null : this.fileSizeLimit;
 
     this.fileResource
