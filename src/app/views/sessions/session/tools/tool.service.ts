@@ -34,6 +34,13 @@ export class ToolService {
   }
 
   //noinspection JSMethodCanBeStatic
+  isColumnSelectionParameter(parameter: ToolParameter) {
+    return (
+      parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL"
+    );
+  }
+
+  //noinspection JSMethodCanBeStatic
   isNumberParameter(parameter: ToolParameter) {
     return (
       parameter.type === "INTEGER" ||
@@ -92,18 +99,25 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   isDefaultValue(parameter: ToolParameter, value: number | string) {
+    // no default value
     if (parameter.defaultValue == null) {
       // if the default is not set, allow also null, undefined and empty string here
-      return value == null || value === "";
+      return value == null || String(value).trim() === "";
+    }
+
+    // default value, but no value
+    if (parameter.value == null || String(parameter.value).trim() === "") {
+      return false;
+    }
+
+    // value must match default value
+    if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
+      // consider "0" and "0.0" equal
+      return (
+        parseFloat(value.toString()) === parseFloat(parameter.defaultValue)
+      );
     } else {
-      if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
-        // consider "0" and "0.0" equal
-        return (
-          parseFloat(value.toString()) === parseFloat(parameter.defaultValue)
-        );
-      } else {
-        return parameter.defaultValue === value;
-      }
+      return parameter.defaultValue === String(value).trim();
     }
   }
 

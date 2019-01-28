@@ -11,16 +11,31 @@ import { SET_TOOL_SELECTION } from "../../../state/selected-tool.reducer";
 import log from "loglevel";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { forkJoin, of } from "rxjs";
+
+export interface ParameterValidationResult {
+  valid: boolean;
+  message?: string;
+}
+
+export interface ParametersValidationResult {
+  valid: boolean;
+  parameterResults?: Map<string, ParameterValidationResult>;
+}
 
 @Injectable()
 export class ToolSelectionService implements OnDestroy {
   toolSelection$: Observable<ToolSelection>;
   inputsValid$: Observable<boolean>;
   parametersValid$: Observable<boolean>;
+  parametersValidWithResults$: Observable<ParametersValidationResult>;
   runEnabled$: Observable<boolean>;
 
   private currentToolSelection: ToolSelection; // needed for parameter checking
-  private parameterChecker$: Subject<boolean> = new Subject();
+  private parameterChecker$: BehaviorSubject<
+    Map<string, ParameterValidationResult>
+  > = new BehaviorSubject(new Map<string, ParameterValidationResult>());
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -29,30 +44,51 @@ export class ToolSelectionService implements OnDestroy {
     private toolService: ToolService,
     private selectionService: SelectionService,
     private errorService: ErrorService,
-    private restErrorService: RestErrorService,
+    private restErrorService: RestErrorService
   ) {
+    // when tool selection changes, populate and check parameters
     this.store
       .select("toolSelection")
       .takeUntil(this.unsubscribe)
-      .subscribe((toolSelection: ToolSelection) => {
-        this.currentToolSelection = toolSelection;
+      .subscribe(
+        (toolSelection: ToolSelection) => {
+          this.currentToolSelection = toolSelection;
 
-        if (toolSelection) {
-          // get bound datasets for populating (dataset dependent) parameters
-          const boundDatasets = toolSelection.inputBindings.reduce(
-            (datasets: Array<Dataset>, inputBinding: InputBinding) => {
-              return datasets.concat(inputBinding.datasets);
-            },
-            []
-          );
+          if (toolSelection) {
+            // get bound datasets for populating (dataset dependent) parameters
+            const boundDatasets = toolSelection.inputBindings.reduce(
+              (datasets: Array<Dataset>, inputBinding: InputBinding) => {
+                return datasets.concat(inputBinding.datasets);
+              },
+              []
+            );
 
-          toolSelection.tool.parameters.forEach((parameter: ToolParameter) => {
-            this.populateParameterValues(parameter, boundDatasets);
-          });
+            // populating params is async as some selection options may require dataset contents
+            // if there are no params, forkJoin will get empty array and complete immediately
+            // this is important to get the param check run even if there are no params
+            // as no params means params are valid from the run enabled point of view
+            const populateParameterObservables = toolSelection.tool.parameters.map(
+              (parameter: ToolParameter) => {
+                return this.populateParameterValues(parameter, boundDatasets);
+              }
+            );
 
-          this.checkParameters(); // make sure this gets called also when no parameters
-        }
-      }, err => this.errorService.showError("tool selection failed", err));
+            // populate all the params and run parameters check when populating done
+            forkJoin(populateParameterObservables).subscribe({
+              complete: () => {
+                this.checkParameters();
+              },
+              error: err => {
+                this.restErrorService.showError(
+                  "getting parameter values failed",
+                  err
+                );
+              }
+            });
+          }
+        },
+        err => this.errorService.showError("tool selection failed", err)
+      );
 
     this.toolSelection$ = this.store.select("toolSelection");
 
@@ -68,10 +104,26 @@ export class ToolSelectionService implements OnDestroy {
       })
       .distinctUntilChanged();
 
-    this.parametersValid$ = this.parameterChecker$
+    this.parametersValidWithResults$ = this.parameterChecker$
       .asObservable()
+      .map((resultsMap: Map<string, ParameterValidationResult>) => {
+        return {
+          valid: Array.from(resultsMap.values()).every(
+            (result: ParameterValidationResult) => result.valid
+          ),
+          parameterResults: resultsMap
+        };
+      })
+      .startWith({ valid: true })
+      .shareReplay(1);
+
+    this.parametersValid$ = this.parametersValidWithResults$
+      .map(
+        (resultWithErrors: ParameterValidationResult) => resultWithErrors.valid
+      )
       .distinctUntilChanged()
-      .startWith(true);
+      .startWith(true)
+      .shareReplay(1);
 
     this.runEnabled$ = Observable.combineLatest(
       this.store.select("toolSelection"),
@@ -87,7 +139,11 @@ export class ToolSelectionService implements OnDestroy {
     toolSelection: ToolSelection,
     sessionData: SessionData
   ) {
-    log.info("selecting tool: ", toolSelection.tool.name.displayName);
+    log.info(
+      "selecting tool: ",
+      toolSelection.tool.name.displayName,
+      toolSelection.tool
+    );
     toolSelection.inputBindings = this.toolService.bindInputs(
       sessionData,
       toolSelection.tool,
@@ -105,75 +161,154 @@ export class ToolSelectionService implements OnDestroy {
     this.parameterChecker$.next(this.checkCurrentToolParameters());
   }
 
-  checkCurrentToolParameters(): boolean {
+  checkCurrentToolParameters(): Map<string, ParameterValidationResult> {
+    const resultsMap = new Map<string, ParameterValidationResult>();
     if (
-      !this.currentToolSelection ||
-      !this.currentToolSelection.tool.parameters ||
-      this.currentToolSelection.tool.parameters.length < 1
+      this.currentToolSelection &&
+      this.currentToolSelection.tool.parameters &&
+      this.currentToolSelection.tool.parameters.length > 0
     ) {
-      return true;
-    } else {
-      return this.currentToolSelection.tool.parameters.every(
+      this.currentToolSelection.tool.parameters.forEach(
         (parameter: ToolParameter) => {
-          return (
-            parameter.optional ||
-            // not null and not undefined and not an empty string, but 0 is fine
-            (parameter.value != null && parameter.value !== "")
-          );
+          resultsMap.set(parameter.name.id, this.checkParameter(parameter));
         }
       );
     }
+    return resultsMap;
   }
 
-  populateParameterValues(parameter: ToolParameter, datasets: Array<Dataset>) {
-    if (!parameter.value) {
-      parameter.value = this.toolService.getDefaultValue(parameter);
+  checkParameter(parameter: ToolParameter): ParameterValidationResult {
+    // required parameter must not be emtpy
+    if (!parameter.optional && !this.parameterHasValue(parameter)) {
+      return { valid: false, message: "Required parameter can not be empty" };
     }
 
-    if (datasets && datasets.length > 0 && parameter.type === "COLUMN_SEL") {
-      Observable.forkJoin(
-        this.toolService.getDatasetHeaders(datasets)
-      ).subscribe((datasetsHeaders: Array<Array<string>>) => {
-        const columns = _.uniq(_.flatten(datasetsHeaders));
-        parameter.selectionOptions = columns.map(function(column) {
-          return { id: column };
-        });
-
-        // reset value to empty if previous value is now invalid, unless it's the default
-        if (
-          parameter.value &&
-          parameter.value !== this.toolService.getDefaultValue(parameter) &&
-          !this.toolService.selectionOptionsContains(
-            parameter.selectionOptions,
-            parameter.value
-          )
-        ) {
-          parameter.value = null;
-        }
-      }, err => this.restErrorService.showError("getting parameter values failed", err));
-    }
-
+    // numbers
     if (
-      datasets &&
-      datasets.length > 0 &&
-      parameter.type === "METACOLUMN_SEL"
+      this.parameterHasValue(parameter) &&
+      this.toolService.isNumberParameter(parameter)
     ) {
-      parameter.selectionOptions = this.toolService
-        .getMetadataColumns(datasets)
-        .map(function(column) {
-          return { id: column };
-        });
-
-      // reset value to empty if previous value is now invalid, unless it's the default
+      // integer must be integer
       if (
-        parameter.value &&
-        parameter.value !== this.toolService.getDefaultValue(parameter) &&
-        !this.toolService.selectionOptionsContains(
+        parameter.type === "INTEGER" &&
+        !Number.isInteger(<number>parameter.value)
+      ) {
+        return {
+          valid: false,
+          message: "Value must be an integer"
+        };
+      }
+      // min limit
+      if (parameter.from && parameter.value < parameter.from) {
+        return {
+          valid: false,
+          message: "Value must be greater than or equal to " + parameter.from
+        };
+      }
+
+      // max limit
+      if (parameter.to && parameter.value > parameter.to) {
+        return {
+          valid: false,
+          message: "Value must be less than or equal to " + parameter.to
+        };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  parameterHasValue(parameter: ToolParameter) {
+    return (
+      parameter.value !== null &&
+      typeof parameter !== "undefined" &&
+      String(parameter.value).trim() !== ""
+    );
+  }
+
+  /**
+   * Always return an observable, which emits at least one value and then completes.
+   * This is needed because we use forkJoin for combining parameter populating and
+   * forkJoin completes immediately if one of the observables complete without
+   * emitting anything. Also if one of the observables doesn't complete, forkJoin
+   * won't complete.
+   */
+  populateParameterValues(
+    parameter: ToolParameter,
+    datasets: Array<Dataset>
+  ): Observable<any> {
+    // for other than column selection parameters, set to default if no value
+    if (
+      !this.toolService.isColumnSelectionParameter(parameter) &&
+      !parameter.value
+    ) {
+      parameter.value = this.toolService.getDefaultValue(parameter);
+      return of(true);
+    }
+
+    // column selection parameters
+    if (this.toolService.isColumnSelectionParameter(parameter)) {
+      // no datasets --> set to null
+      if (datasets && datasets.length < 1) {
+        parameter.selectionOptions = [];
+        parameter.value = null;
+        return of(true);
+      }
+
+      // COLUMN_SEL, getting headers is async
+      if (parameter.type === "COLUMN_SEL") {
+        return Observable.forkJoin(
+          this.toolService.getDatasetHeaders(datasets)
+        ).map((datasetsHeaders: Array<Array<string>>) => {
+          const columns = _.uniq(_.flatten(datasetsHeaders));
+
+          parameter.selectionOptions = columns.map(function(column) {
+            return { id: column };
+          });
+          this.setColumnSelectionParameterValueAfterPopulate(parameter);
+          return true;
+        });
+      } else if (parameter.type === "METACOLUMN_SEL") {
+        // METACOLUMN_SEL
+        parameter.selectionOptions = this.toolService
+          .getMetadataColumns(datasets)
+          .map(function(column) {
+            return { id: column };
+          });
+
+        this.setColumnSelectionParameterValueAfterPopulate(parameter);
+        return of(true);
+      }
+    }
+
+    return of(true); // always return
+  }
+
+  private setColumnSelectionParameterValueAfterPopulate(
+    parameter: ToolParameter
+  ) {
+    // set value to null if previous not an option
+    if (
+      parameter.value != null &&
+      !this.toolService.selectionOptionsContains(
+        parameter.selectionOptions,
+        parameter.value
+      )
+    ) {
+      parameter.value = null;
+    }
+
+    // set to default if null and default an option
+    // could be null because it was already null, or it was reset above because previous not an option
+    if (parameter.value == null) {
+      const defaultValue = this.toolService.getDefaultValue(parameter);
+      if (
+        this.toolService.selectionOptionsContains(
           parameter.selectionOptions,
-          parameter.value
+          defaultValue
         )
       ) {
-        parameter.value = null;
+        parameter.value = defaultValue;
       }
     }
   }

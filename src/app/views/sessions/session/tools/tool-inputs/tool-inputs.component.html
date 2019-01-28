@@ -1,56 +1,60 @@
 <div class="container">
-  <div class="row">
-    <div class="col">
-      <h3 class="h3-xs mt-3 mb-2">Input files</h3>
-    </div>
-  </div>
 
-  <div class="row">
-    <div class="col-md-7 no-padding-right">
-      <table *ngIf="localInputBindings.length > 0" class="table table-borderless table-condensed table-hover">
-        <tr *ngFor="let inputBinding of localInputBindings" (mouseover)="setInputDescription(inputBinding.toolInput.description)"
-          (mouseleave)="setInputDescription('')">
-          <!-- <tr *ngFor="let inputBinding of inputBindings" -->
-          <!--
+  <h3 class="h3-xs mt-3 mb-2">Input files</h3>
+
+  <!-- <form name="inputsForm" *ngIf="tool"> -->
+  <table class="table table-sm" *ngIf="localInputBindings.length > 0">
+    <tbody>
+      <tr *ngFor="let inputBinding of localInputBindings">
+        <!-- <tr *ngFor="let inputBinding of inputBindings" -->
+        <!--
             ngbPopover="{{inputBinding.toolInput.description || inputBinding.toolInput.name.displayName || inputBinding.toolInput.name.id}}" triggers="mouseenter:mouseleave"
           -->
-          <!-- placement="right"> -->
+        <!-- placement="right"> -->
 
-          <td>
-            {{ getDisplayName(inputBinding.toolInput) }}
-          </td>
+        <td style="width: 60%">
+          {{ getDisplayName(inputBinding.toolInput) }}
+          <span class="text-sm text-muted" *ngIf="inputBinding.toolInput.optional">
+            <i>(optional)</i>
+          </span>
+          <div class="text-sm text-muted">{{inputBinding.toolInput.description}}</div>
+        </td>
 
-          <td *ngIf="
+
+
+
+        <td *ngIf="
               (
                 selectedDatasets
                 | filterCompatibleDatasets: inputBinding.toolInput:sessionData
               ).length > 0
             ">
-            <select *ngIf="inputBinding.toolInput.name.spliced" multiple [(ngModel)]="inputBinding.datasets"
-              (ngModelChange)="inputSelected(inputBinding)">
-              <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
-            </select>
+          <select *ngIf="inputBinding.toolInput.name.spliced" class="w-100" multiple [(ngModel)]="inputBinding.datasets"
+            (ngModelChange)="inputSelected(inputBinding)">
+            <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
+          </select>
 
-            <select *ngIf="!inputBinding.toolInput.name.spliced" [(ngModel)]="inputBinding.datasets[0]" (ngModelChange)="inputSelected(inputBinding)">
-              <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
-            </select>
-          </td>
+          <select *ngIf="!inputBinding.toolInput.name.spliced" class="w-100" [(ngModel)]="inputBinding.datasets[0]"
+            (ngModelChange)="inputSelected(inputBinding)">
+            <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
+          </select>
+        </td>
 
-          <td style="font-style: italic; vertical-align: middle" class="text-smaller" *ngIf="
+        <td style="font-style: italic; vertical-align: middle" class="text-smaller w-100" *ngIf="
               (
                 selectedDatasets
                 | filterCompatibleDatasets: inputBinding.toolInput:sessionData
               ).length == 0
             ">
-            No compatible file selected
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- input description -->
-    <div class="col-md-5">
-      <p>{{ inputDescription }}</p>
-    </div>
-  </div>
+          No compatible file selected
+        </td>
+        <td>
+          <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-right">
+            <i class="fas fa-undo"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- </form> -->
 </div>
