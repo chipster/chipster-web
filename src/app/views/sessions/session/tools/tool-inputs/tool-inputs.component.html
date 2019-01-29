@@ -9,39 +9,44 @@
 
         <td style="width: 60%">
 
+          <!-- input name -->
           {{ getDisplayName(bindingModel.input) }}
 
+          <!-- input description -->
           <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
             <i>(optional)</i>
           </span>
           <div class="text-sm text-muted">{{bindingModel.input.description}}</div>
         </td>
 
-
-
-
+        <!-- file selction dropdown -->
         <td>
-          <select *ngIf="bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced" [disabled]="bindingModel.compatibleDatasets.length < 1"
-            class="w-100" multiple [(ngModel)]="bindingModel.boundDatasets" (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
-          </select>
-
+          <!-- single input -->
           <select *ngIf="bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced" class="w-100"
             [(ngModel)]="bindingModel.boundDatasets[0]" (ngModelChange)="inputSelected(bindingModel)">
             <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
           </select>
 
+          <!-- multi input -->
+          <select *ngIf="bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced" [disabled]="bindingModel.compatibleDatasets.length < 1"
+            class="w-100" multiple [(ngModel)]="bindingModel.boundDatasets" (ngModelChange)="inputSelected(bindingModel)">
+            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
+          </select>
+
+          <!-- no compatible inputs, show disabled dropdown -->
           <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
             <option *ngIf="selectedDatasets.length < 1" selected class="font-italic">No files</option>
             <option *ngIf="selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1" selected class="font-italic">No
               compatible files</option>
           </select>
 
+          <!-- validation message -->
           <div *ngIf="!bindingModel.input.optional && bindingModel.boundDatasets.length < 1 " class="text-sm text-warning">Input
             file required</div>
         </td>
 
-        <td>
+        <!-- align with parameters, which have the reset button -->
+        <td style="width: 1%">
           <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-right">
             <i class="fas fa-undo"></i>
           </button>
