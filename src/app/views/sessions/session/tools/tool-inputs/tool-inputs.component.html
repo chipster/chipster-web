@@ -1,6 +1,9 @@
 <div class="container">
 
   <h3 class="h3-xs mt-3 mb-2">Input files</h3>
+  <div *ngIf="tool.inputs.length === 0" class="font-italic text-smaller">
+    No Inputs
+  </div>
 
   <!-- <form name="inputsForm" *ngIf="tool"> -->
   <table class="table table-sm" *ngIf="bindingModels.length > 0">
@@ -46,7 +49,7 @@
         </td>
 
         <!-- align with parameters, which have the reset button -->
-        <td style="width: 1%">
+        <td>
           <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-right">
             <i class="fas fa-undo"></i>
           </button>
