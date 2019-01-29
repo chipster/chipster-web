@@ -4,7 +4,7 @@ import { SharedModule } from "../../shared/shared.module";
 import { ContactComponent } from "./contact.component";
 import { ContactSupportModalComponent } from "./contact-support-modal/contact-support-modal.component";
 import { ManualModule } from "../manual/manual.module";
-import { FormsModule } from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 import { ContactSupportService } from "./contact-support.service";
 
 @NgModule({
@@ -12,7 +12,7 @@ import { ContactSupportService } from "./contact-support.service";
     CommonModule,
     SharedModule,
     ManualModule,
-    FormsModule,
+    ReactiveFormsModule,
   ],
   declarations: [
     ContactComponent,

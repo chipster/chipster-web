@@ -1,13 +1,11 @@
-import {Injectable} from "@angular/core";
+import { Injectable } from "@angular/core";
 import { combineAll } from "rxjs/operators";
 
 @Injectable()
 export class SpreadsheetService {
+  constructor() {}
 
-   constructor() {
-   }
-
-   /**
+  /**
    * Calculate the approximate widht of the table
    *
    * We need the whole right side of the main view to scroll to fit in all the components.
@@ -26,8 +24,9 @@ export class SpreadsheetService {
   guessWidth(headers: string[], content: string[][]) {
     // create a new first row from headers
     const table = content.slice();
-    table.unshift(headers);
-
+    if (headers != null) {
+      table.unshift(headers);
+    }
     const tableMargin = 20;
     const colMargins = 10;
     let colWidthSum = 0;
@@ -37,9 +36,9 @@ export class SpreadsheetService {
 
     // iterate columns
     for (let colIndex = 0; colIndex < columnCount; colIndex++) {
-        const colWidth = table
+      const colWidth = table
 
-      // text from this column on each row
+        // text from this column on each row
         .map(row => row[colIndex])
 
         // width of the text
@@ -55,10 +54,9 @@ export class SpreadsheetService {
   }
 
   getTextMeasuringContext(fontSize = 18) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.font = fontSize + 'px Arial';
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.font = fontSize + "px Arial";
     return ctx;
   }
-
 }

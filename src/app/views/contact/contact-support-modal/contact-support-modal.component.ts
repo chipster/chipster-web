@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ViewChild,
   OnInit,
-  ChangeDetectorRef,
   Inject,
   Input
 } from "@angular/core";
@@ -21,6 +20,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { RouteService } from "../../../shared/services/route.service";
 import { SessionData } from "../../../model/session/session-data";
+import { FormBuilder, Validators, AbstractControl, FormControl } from "@angular/forms";
 
 @Component({
   templateUrl: "./contact-support-modal.component.html",
@@ -28,20 +28,21 @@ import { SessionData } from "../../../model/session/session-data";
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
+  public supportForm = this.fb.group({
+    message: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
+    attach: ['', [Validators.required]], // force user the the select
+  });
+
   @Input()
   log: string;
 
   @ViewChild("messageTextarea")
   messageTextarea;
 
-  public message = "";
-  public email = "";
-  public attach: string; // force user the the select
-
   public session: Session;
   public user: User;
   public isVerifiedEmail = false;
-  public formSubmitAttempt = false;
 
   constructor(
     private activeModal: NgbActiveModal,
@@ -53,7 +54,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private routeService: RouteService,
     private configService: ConfigService,
     private dialogModalService: DialogModalService,
-    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder,
     @Inject(DOCUMENT) private document,
   ) { }
 
@@ -69,14 +70,19 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
       tap(session => {
         this.session = session;
         if (this.session == null) {
-          this.attach = "no";
+          this.supportForm.patchValue({
+            attach: "no"
+          });
+          this.supportForm.controls.attach.disable();
         }
       }),
       mergeMap(() => this.authenticationService.getUser()),
       tap((user: User) => {
         this.user = user;
         if (user.mail != null) {
-          this.email = user.mail;
+          this.supportForm.patchValue({
+            email: user.mail
+          });
           this.isVerifiedEmail = true;
         }
       }),
@@ -87,19 +93,15 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     // setTimeout() to avoid scrolling in the current Bootstrap version
     setTimeout(() => {
       this.messageTextarea.nativeElement.focus();
-      // workaround because Angular template based forms
-      // don't like programmatic changes https://github.com/angular/angular/issues/22426
-      this.cdr.detectChanges();
     }, 0);
   }
 
-  save(form) {
-    this.formSubmitAttempt = true;
+  onSubmit() {
 
-    if (form.valid) {
+    if (this.supportForm.valid) {
       let copySessionId$: Observable<string>;
 
-      if (this.session != null && this.attach === "yes") {
+      if (this.session != null && this.supportForm.value.attach === "yes") {
         copySessionId$ = this.copyToSupportSessions(this.session.sessionId);
       } else {
         copySessionId$ = of(null);
@@ -109,9 +111,9 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         mergeMap((sessionUrl: string) => {
           console.log("support session url", sessionUrl);
           return this.sessionWorkerResource.supportRequest(
-            this.message,
+            this.supportForm.value.message,
             sessionUrl,
-            this.email,
+            this.supportForm.value.email,
             this.routeService.getAppRouteCurrent(),
             this.log);
         }),
@@ -128,7 +130,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
   getHostUrl() {
     // get the url of the app server
-    // the current url is correct also when using "ng serve"
+    // the current url is correct also when using "ng serve" (unlike the one from service-locator)
     let url = this.document.location.protocol + "//" + this.document.location.hostname;
     if (this.document.location.port != null) {
       url += ":" + this.document.location.port;
@@ -174,5 +176,21 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
   cancel() {
     this.activeModal.dismiss();
+  }
+
+  isValidationError(control: AbstractControl) {
+    return control.invalid && (control.dirty || control.touched);
+  }
+
+  get message() {
+    return this.supportForm.get('message') as FormControl;
+  }
+
+  get attach() {
+    return this.supportForm.get('attach') as FormControl;
+  }
+
+  get email() {
+    return this.supportForm.get('email') as FormControl;
   }
 }

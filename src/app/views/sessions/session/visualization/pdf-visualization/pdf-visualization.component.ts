@@ -54,6 +54,12 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.showAll = false;
     this.setShowAllButtonText();
 
+    // check for empty file
+    if (this.dataset.size < 1) {
+      this.state = new LoadState(State.EmptyFile);
+      return;
+    }
+
     this.sessionDataService
       .getDatasetUrl(this.dataset)
       .takeUntil(this.unsubscribe)

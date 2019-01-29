@@ -91,7 +91,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private configService: ConfigService,
     private toastrService: ToastrService,
-    private errorService: ErrorService,
+    private errorService: ErrorService
   ) {}
 
   ngOnInit() {
@@ -162,9 +162,8 @@ export class SessionComponent implements OnInit, OnDestroy {
       );
 
     // subscribe to view settings
-    this.settingsService.showToolsPanel$
-      .takeUntil(this.unsubscribe)
-      .subscribe((showToolsPanel: boolean) => {
+    this.settingsService.showToolsPanel$.takeUntil(this.unsubscribe).subscribe(
+      (showToolsPanel: boolean) => {
         if (showToolsPanel) {
           this.split3Visible = true;
           this.split1Size = 30;
@@ -176,7 +175,9 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.split2Size = 67;
           this.split3Size = 33;
         }
-      }, err => this.errorService.showError("tool panel error", err));
+      },
+      err => this.errorService.showError("tool panel error", err)
+    );
   }
 
   ngOnDestroy() {
@@ -282,50 +283,53 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.sessionEventService
       .getJobStream()
       .takeUntil(this.unsubscribe)
-      .subscribe(change => {
-        const event = change.event;
-        const oldValue = <Job>change.oldValue;
-        const newValue = <Job>change.newValue;
+      .subscribe(
+        change => {
+          const event = change.event;
+          const oldValue = <Job>change.oldValue;
+          const newValue = <Job>change.newValue;
 
-        // log to catch unexpected null oldvalue
-        if (event.type !== "CREATE" && !oldValue) {
-          log.warn(
-            "got job event with no old value when even type is other than CREATE, investigate further",
-            "event:",
-            event,
-            "old value:",
-            oldValue,
-            "new value:",
-            newValue
-          );
-        }
-
-        // if not cancelled
-        if (newValue) {
-          // if the job has just failed
-          if (
-            newValue.state === JobState.ExpiredWaiting &&
-            (oldValue == null || oldValue.state !== JobState.ExpiredWaiting)
-          ) {
-            this.openErrorModal("Job expired", newValue);
-          } else if (
-            newValue.state === JobState.Failed &&
-            (oldValue == null || oldValue.state !== JobState.Failed)
-          ) {
-            this.openErrorModal("Job failed", newValue);
-          } else if (
-            newValue.state === JobState.FailedUserError &&
-            (oldValue == null || oldValue.state !== JobState.FailedUserError)
-          ) {
-            this.openErrorModal("Job failed", newValue);
-          } else if (
-            newValue.state === JobState.Error &&
-            (oldValue == null || oldValue.state !== JobState.Error)
-          ) {
-            this.openErrorModal("Job error", newValue);
+          // log to catch unexpected null oldvalue
+          if (event.type !== "CREATE" && !oldValue) {
+            log.warn(
+              "got job event with no old value when even type is other than CREATE, investigate further",
+              "event:",
+              event,
+              "old value:",
+              oldValue,
+              "new value:",
+              newValue
+            );
           }
-        }
-      }, err => this.errorService.showError("session event error", err));
+
+          // if not cancelled
+          if (newValue) {
+            // if the job has just failed
+            if (
+              newValue.state === JobState.ExpiredWaiting &&
+              (oldValue == null || oldValue.state !== JobState.ExpiredWaiting)
+            ) {
+              this.openErrorModal("Job expired", newValue);
+            } else if (
+              newValue.state === JobState.Failed &&
+              (oldValue == null || oldValue.state !== JobState.Failed)
+            ) {
+              this.openErrorModal("Job failed", newValue);
+            } else if (
+              newValue.state === JobState.FailedUserError &&
+              (oldValue == null || oldValue.state !== JobState.FailedUserError)
+            ) {
+              this.openErrorModal("Job failed", newValue);
+            } else if (
+              newValue.state === JobState.Error &&
+              (oldValue == null || oldValue.state !== JobState.Error)
+            ) {
+              this.openErrorModal("Job error", newValue);
+            }
+          }
+        },
+        err => this.errorService.showError("session event error", err)
+      );
   }
 
   getJob(jobId: string): Job {
@@ -406,7 +410,8 @@ export class SessionComponent implements OnInit, OnDestroy {
         () => {
           log.debug("delete session request done");
         },
-        err => this.restErrorService.showError("delete session failed", err));
+        err => this.restErrorService.showError("delete session failed", err)
+      );
   }
 
   askKeepOrDiscardSession(): Observable<boolean> {
