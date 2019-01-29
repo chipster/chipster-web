@@ -276,6 +276,10 @@ export class ToolService {
   }
 
   getDisplayName(obj: ToolParameter | ToolInput | Tool) {
+    if (obj.name.spliced && obj.name.displayName == null) {
+      return obj.name.prefix + obj.name.postfix;
+    }
+
     if (obj.name.displayName != null) {
       return obj.name.displayName;
     }
