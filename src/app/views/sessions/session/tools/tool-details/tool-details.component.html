@@ -30,7 +30,8 @@
 
 
   <h4 class=h4-xs>Inputs
-    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseInputs" aria-expanded="false" aria-controls="collapseInputs">
+    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseInputs" aria-expanded="false"
+      aria-controls="collapseInputs">
       Show
     </button>
 
@@ -38,6 +39,6 @@
 
   <div class="collapse" id="collapseInputs">
     <ch-tool-inputs class="mb-2" [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool"
-      [selectedDatasets]="selectedDatasets" (updateBindings)="updateBindings($event)"></ch-tool-inputs>
+      [selectedDatasets]="selectedDatasets"></ch-tool-inputs>
   </div>
 </div>
