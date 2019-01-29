@@ -29,8 +29,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private samHeaderList: Array<string>;
 
   private bamRecordList: BamRecord[];
-  private observableBamRecordList: BehaviorSubject<BamRecord[]>;
-  private bamLis$: Observable<BamRecord[]>;
+  
 
   private chrName: string;
   private visibleBlockNumber = 2; // just a magic number,just showing records from first two blocks
@@ -50,7 +49,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     private sessionDataService: SessionDataService,
     private errorHandlerService: RestErrorService) {
     this.bamRecordList = new Array<BamRecord>();
-    this.observableBamRecordList = <BehaviorSubject<BamRecord[]>>new BehaviorSubject([]);
 
   }
 
@@ -201,6 +199,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   decodeBamRecord(unComperessedData: any) {
     this.plain = unComperessedData;
+    console.log(this.plain.length);
     const MAX_GZIP_BLOCK_SIZE = 65536;
     let offset = 0;
 
@@ -217,6 +216,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       }
     
       blockSize = this.readInt(this.plain, offset);
+      console.log(blockSize);
       if (blockSize > MAX_GZIP_BLOCK_SIZE) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
@@ -386,6 +386,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       if (this.bamRecordList.length > 200) {
         return;
       }
+
     }
   }
 

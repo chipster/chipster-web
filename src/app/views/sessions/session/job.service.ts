@@ -76,6 +76,9 @@ export class JobService {
     }
 
     // add bound inputs
+
+    console.log("chcek input binding "+ toolSelection.inputBindings.length);
+
     for (const inputBinding of toolSelection.inputBindings.filter(
       binding => binding.datasets.length > 0
     )) {
@@ -88,7 +91,7 @@ export class JobService {
           displayName: inputBinding.datasets[0].name
         });
       } else {
-        // multi input
+        // multi input single job
         let i = 0;
         for (const dataset of inputBinding.datasets) {
           job.inputs.push({
@@ -102,8 +105,11 @@ export class JobService {
           });
           i++;
         }
+        // here I need to do multi input and batch job
       }
     }
+
+    console.log("In job service" + job.inputs);
 
     // runsys
     this.sessionDataService.createJob(job).subscribe(null, (error: any) => {
