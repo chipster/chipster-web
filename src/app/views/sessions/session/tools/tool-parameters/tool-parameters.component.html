@@ -1,13 +1,10 @@
 <div *ngIf="ready" class="container">
 
-  <!-- warning title -->
   <div class="text-center">
-    <span *ngIf="showWarning">
-      <i class="fas fa-fw fa-exclamation-circle text-warning"></i>
-
-      <span class="text-warning" style="font-style: italic">{{
-        warningText
-        }}</span>
+    <!-- warning title -->
+    <span class="text-warning" [class.invisible]="!showWarning">
+      <i class="fas fa-fw fa-exclamation-circle"></i>
+      <span class="font-italic">{{warningText}}</span>
     </span>
 
     <!-- close button -->
