@@ -1,29 +1,26 @@
 <div *ngIf="ready" class="container">
-  <div class="row">
-    <div class="col text-center">
-      <span *ngIf="showWarning">
-        <i class="fas fa-fw fa-exclamation-circle text-warning"></i>
 
-        <span class="text-warning" style="font-style: italic">{{
-          warningText
-          }}</span>
-      </span>
+  <div class="text-center">
+    <!-- warning title -->
+    <span class="text-warning" [class.invisible]="!showWarning">
+      <i class="fas fa-fw fa-exclamation-circle"></i>
+      <span class="font-italic">{{warningText}}</span>
+    </span>
 
-      <!-- close button -->
-      <button class="btn btn-xs float-right p-0" (click)="closeDropDownDialog()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
+    <!-- close button -->
+    <button class="btn btn-xs float-right p-0" (click)="closeDropDownDialog()">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
-  <h3 class="h3-xs mt-1 mb-2">Parameters</h3>
+  <!-- parameters -->
+  <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
 
   <form name="paramForm" *ngIf="tool">
-    <!--
-      <div *ngIf="tool.parameters.length === 0" class="font-italic text-smaller">
-        No parameters.
-      </div>
-    -->
+    <div *ngIf="tool.parameters.length === 0" class="font-italic text-smaller">
+      No parameters
+    </div>
+
     <table class="table table-sm" *ngIf="tool.parameters.length > 0">
       <tbody>
         <tr *ngFor="let parameter of tool.parameters; let i = index">
@@ -64,9 +61,9 @@
 
           <!-- buttons -->
           <td>
-            <!-- reset to default, keep width minimal -->
-            <button style="width: 1%" type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right"
-              [class.invisible]="!resetVisible(parameter)" (click)="reset(parameter, $event)" title="Reset to default">
+            <!-- reset to default -->
+            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right" [class.invisible]="!resetVisible(parameter)"
+              (click)="reset(parameter, $event)" title="Reset to default">
               <i class="fas fa-undo"></i>
             </button>
           </td>

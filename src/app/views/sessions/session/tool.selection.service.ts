@@ -253,6 +253,14 @@ export class ToolSelectionService implements OnDestroy {
 
       // COLUMN_SEL, getting headers is async
       if (parameter.type === "COLUMN_SEL") {
+        // populate column_sel only for tsv files
+        // FIXME should check type tag instead of name, atm would need sessionData for that
+        if (!datasets[0].name.endsWith(".tsv")) {
+          parameter.selectionOptions = [];
+          parameter.value = null;
+          return of(true);
+        }
+
         return Observable.forkJoin(
           this.toolService.getDatasetHeaders(datasets)
         ).map((datasetsHeaders: Array<Array<string>>) => {

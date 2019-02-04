@@ -56,8 +56,9 @@ export class ToolParametersComponent implements OnInit, OnDestroy {
 
           this.updateWarning();
           this.ready =
-            validationResult.parameterResults !== null &&
-            validationResult.parameterResults.size > 0;
+            (validationResult.parameterResults !== null &&
+              validationResult.parameterResults.size > 0) ||
+            validationResult.parameterResults.size === 0;
         })
       )
       .subscribe();
