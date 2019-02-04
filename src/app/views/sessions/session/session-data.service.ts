@@ -55,6 +55,11 @@ export class SessionDataService {
     return jobs.get(jobId);
   }
 
+  createJobs(jobs: Job[]){
+    return this.sessionResource.createJobs(this.getSessionId(),jobs);
+
+  }
+
   /**
    * Create a dataset which is derived from some other datasets.
    *

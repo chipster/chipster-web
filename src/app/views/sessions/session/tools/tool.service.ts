@@ -151,9 +151,10 @@ export class ToolService {
       let datasetsToBind: Dataset[] = [];
       if (compatibleDatasets.length > 0) {
         // pick the first or all if multi input
-        datasetsToBind = this.isMultiInput(toolInput)
-          ? compatibleDatasets
-          : compatibleDatasets.slice(0, 1);
+        // datasetsToBind = this.isMultiInput(toolInput)
+        //   ? compatibleDatasets
+        //   : compatibleDatasets.slice(0, 1);
+        datasetsToBind = compatibleDatasets;
       }
 
       // save binding

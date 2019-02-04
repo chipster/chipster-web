@@ -161,7 +161,7 @@
                 <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
                   <span *ngIf="(toolSelectionService.runEnabled$ | async)" class="fas fa-play"></span>
                   <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fas fa-ban"></span>
-                  Run
+                  {{runSingleJob == true ? 'Run' : 'Run For Each'}}
                 </button>
               </div>
             </div>

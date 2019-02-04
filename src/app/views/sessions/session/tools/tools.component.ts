@@ -81,6 +81,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private searchBoxHotkey: Hotkey | Hotkey[];
 
   private lastJobStartedToastId: number;
+  private runSingleJob : boolean;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -107,11 +108,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.modules = _.cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
+    this.runSingleJob = true;
+
     // subscribe to tool selection
     this.toolSelectionService.toolSelection$
       .takeUntil(this.unsubscribe)
       .subscribe((toolSelection: ToolSelection) => {
         this.toolSelection = toolSelection;
+        if(this.toolSelection){
+         this.resetRunButtonText();
+        }
       });
 
     // subscribe to file selection
@@ -128,7 +134,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
             inputBindings: updatedInputBindings
           });
           this.toolSelectionService.selectTool(newToolSelection);
+          this.resetRunButtonText();
         }
+        
       }, err => this.errorService.showError("get selected dataset failed", err));
 
     // trigger parameter validation
@@ -215,6 +223,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   runJob() {
+    //this.jobService.runJob(this.toolSelection);
     this.jobService.runJob(this.toolSelection);
     // close the previous toastr not to cover the run button
     // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
@@ -224,6 +233,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.lastJobStartedToastId = this.toastrService.info("Job started", "", {
       timeOut: 1500,
     }).toastId;
+    this.runSingleJob = true;
   }
 
   setBindings(updatedBindings: InputBinding[]) {
@@ -324,5 +334,25 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   public searchBoxBlur(event) {
     this.searchBoxModel = null;
+  }
+
+  resetRunButtonText(){
+    console.log("chcek value of tool selection " + this.toolSelection.inputBindings);
+    try{
+      if(this.toolSelection.inputBindings!= null && this.toolSelection.inputBindings[0]!= null){
+        if(this.toolSelection.inputBindings[0].datasets != null && this.toolSelection.inputBindings[0].datasets.length > 1){
+          if(this.toolService.isMultiInput(this.toolSelection.inputBindings[0].toolInput)){
+            this.runSingleJob = true;
+          }else{
+            this.runSingleJob = false;
+          }
+        }else{
+          this.runSingleJob =true;
+        }
+      }
+    }catch(error){
+      console.log(error);
+    }
+   
   }
 }
