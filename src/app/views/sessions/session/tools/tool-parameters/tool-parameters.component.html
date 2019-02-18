@@ -56,7 +56,8 @@
               [(ngModel)]="parameter.value" required="{{!parameter.optional}}" (ngModelChange)="validate()" />
 
             <!-- validation message -->
-            <div *ngIf="!validationResults.get(parameter.name.id).valid" class="text-sm text-warning">{{validationResults.get(parameter.name.id).message}}</div>
+            <!-- FIXME both ? temp fix -->
+            <div *ngIf="!validationResults.get(parameter.name.id)?.valid" class="text-sm text-warning">{{validationResults.get(parameter.name.id)?.message}}</div>
           </td>
 
           <!-- buttons -->
