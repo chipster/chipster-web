@@ -337,7 +337,7 @@ export class SessionDataService {
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
   deleteDatasetsLater(datasets: Dataset[]) {
-
+    console.log("deleting datasets" + datasets);
     // make a copy so that further selection changes won't change the array
     const deletedDatasets = _.clone(datasets);
 
