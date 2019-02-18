@@ -32,8 +32,7 @@ export class JobService {
   runJob(toolSelection: ToolSelection) {
 
     let jobs: Job[] = new Array();
-    console.log(jobs);
-
+  
     for (const inputBinding of toolSelection.inputBindings.filter(
       binding => binding.datasets.length > 0
     )) {
@@ -108,7 +107,6 @@ export class JobService {
       }
 
     }
-
 
   }
 

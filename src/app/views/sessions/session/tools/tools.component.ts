@@ -233,7 +233,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.lastJobStartedToastId = this.toastrService.info("Job started", "", {
       timeOut: 1500,
     }).toastId;
-    this.runSingleJob = true;
+    // this.runSingleJob = true;
   }
 
   setBindings(updatedBindings: InputBinding[]) {
@@ -337,7 +337,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   resetRunButtonText(){
-    console.log("chcek value of tool selection " + this.toolSelection.inputBindings);
     try{
       if(this.toolSelection.inputBindings!= null && this.toolSelection.inputBindings[0]!= null){
         if(this.toolSelection.inputBindings[0].datasets != null && this.toolSelection.inputBindings[0].datasets.length > 1){
