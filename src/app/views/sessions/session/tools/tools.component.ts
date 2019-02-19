@@ -81,7 +81,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private searchBoxHotkey: Hotkey | Hotkey[];
 
   private lastJobStartedToastId: number;
-  private runSingleJob : boolean;
+  public runSingleJob : boolean;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
