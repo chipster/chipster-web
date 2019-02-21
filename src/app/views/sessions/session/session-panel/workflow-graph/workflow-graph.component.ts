@@ -31,6 +31,7 @@ import { NativeElementService } from "../../../../../shared/services/native-elem
 import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { SettingsService } from "../../../../../shared/services/settings.service";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -62,6 +63,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private zoom;
   private isContextMenuOpen = false;
+  private showDatasetSelectionTooltip = false;
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -75,7 +77,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private dialogModalService: DialogModalService,
     private nativeElementService: NativeElementService,
     private restErrorService: RestErrorService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private settingService: SettingsService
   ) { }
 
   // actually selected datasets
@@ -228,7 +231,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       );
     }
 
-    // show
+    // subscribe to data Selection tooltip show settings
+    this.settingService.showDatasetSelectionTooltip$.subscribe(
+      (res: boolean) => {
+        this.showDatasetSelectionTooltip = res;
+        console.log(this.showDatasetSelectionTooltip);
+        this.renderGraph();
+      }
+    );
+
+    //
     this.renderGraph();
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
@@ -546,7 +558,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               self.dragStarted = true;
               self.hideTooltip(0);
               self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
-            } 
+            }
           })
           .on("end", function (d) {
             // check the flag to differentiate between drag and click events
@@ -571,7 +583,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         self.hideToolTipById(d, i);
       }
     });
-  
+
     this.d3DatasetNodes.on("click", function (d, i) {
       if (self.enabled) {
         self.selectionHandlerService.clearJobSelection();
@@ -585,6 +597,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // renderGraph() seems to get called twice and for some reason the datasetToolTipArray
     // is not populated during the first run, thus checks for avoiding error
     if (
+      this.showDatasetSelectionTooltip &&
       this.selectionEnabled &&
       this.selectedDatasets.length > 0 &&
       this.datasetToolTipArray &&
@@ -593,7 +606,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.showToolTipByIdForSelection();
     }
 
-  
+
     this.d3DatasetNodes.exit().remove();
 
     // update the scroll limits if datasets were added or removedn
@@ -1090,7 +1103,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
 
-  
+
 
 
 
