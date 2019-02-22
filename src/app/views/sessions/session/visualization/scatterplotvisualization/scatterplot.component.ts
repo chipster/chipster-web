@@ -49,7 +49,6 @@ export class ScatterPlotComponent extends PlotComponent
           chipHeader = chipHeader.replace("chip.", "");
           self.chipHeaders.push(chipHeader);
         });
-      console.log(this.chipHeaders);
       if (this.chipHeaders.length >= 2) {
         this.selectedXAxisHeader = this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
@@ -58,7 +57,7 @@ export class ScatterPlotComponent extends PlotComponent
       } else {
         this.state = new LoadState(
           State.Fail,
-          "Datafile does not have enough columns to generate scatterplot."
+          "Dataset does not have enough columns to generate scatterplot."
         );
       }
     } else {
