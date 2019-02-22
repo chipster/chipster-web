@@ -34,7 +34,7 @@
           isn't enough space below it? -->
         <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true"
           [searchFn]="filterTool" [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found"
-          (blur)="searchBoxBlur($event)" [dropdownPosition]="'bottom'">
+          (blur)="searchBoxBlur()" [dropdownPosition]="'bottom'">
           <ng-template ng-option-tmp let-item="item">
             <div style="font-size: smaller">
               {{ item.moduleName }} - {{ item.category }}
