@@ -1,7 +1,6 @@
-<div class="container">
-
+<div *ngIf="ready" class="container">
   <h2 class="h2-xs mt-3 mb-2">Input files</h2>
-  <div *ngIf="tool.inputs.length === 0" class="font-italic text-smaller">
+  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">
     No Inputs
   </div>
 
@@ -38,8 +37,9 @@
 
           <!-- no compatible inputs, show disabled dropdown -->
           <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
-            <option *ngIf="selectedDatasets.length < 1" selected class="font-italic">No files</option>
-            <option *ngIf="selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1" selected class="font-italic">No
+            <option *ngIf="validatedTool.selectedDatasets.length < 1" selected class="font-italic">No files</option>
+            <option *ngIf="validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1"
+              selected class="font-italic">No
               compatible files</option>
           </select>
 

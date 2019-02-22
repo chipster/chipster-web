@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Job } from "chipster-js-common";
+import { Job, Dataset } from "chipster-js-common";
 import { ToolService } from "./tools/tool.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { ToolSelection } from "./tools/ToolSelection";
 import { SessionDataService } from "./session-data.service";
-import { bindingUpdated } from "@angular/core/src/render3/instructions";
+import { ValidatedTool } from "./tools/ToolSelection";
+import log from "loglevel";
 
 @Injectable()
 export class JobService {
@@ -12,7 +12,7 @@ export class JobService {
     private sessionDataService: SessionDataService,
     private toolService: ToolService,
     private restErrorService: RestErrorService
-  ) { }
+  ) {}
 
   static isRunning(job: Job): boolean {
     return (
@@ -28,102 +28,61 @@ export class JobService {
     );
   }
 
-
-  runJob(toolSelection: ToolSelection) {
-
-    let jobs: Job[] = new Array();
-  
-    for (const inputBinding of toolSelection.inputBindings.filter(
-      binding => binding.datasets.length > 0
-    )) {
-      if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
-        //create multiple jobs
-
-        for (let i = 0; i < inputBinding.datasets.length; i++) {
-
-          const job: Job = <Job>{
-            toolId: toolSelection.tool.name.id,
-            toolCategory: toolSelection.category.name,
-            module: toolSelection.module.moduleId,
-            toolName: toolSelection.tool.name.displayName,
-            toolDescription: toolSelection.tool.description,
-            state: "NEW"
-          };
-
-          // set inputs
-          job.inputs = [];
-          // TODO bindings done already?
-          if (!toolSelection.inputBindings) {
-            console.error(
-              "NO INPUT BINDINGS ON SELECT TOOL - THIS SHOULDNT BE SHOWN"
-            );
-            console.warn("no input bindings before running a job, binding now");
-            // this.inputBindings = this.toolService.bindInputs(toolSelection.tool, this.SelectionService.selectedDatasets);
-          }
-
-          // TODO report to user
-          if (!this.toolService.checkBindings(toolSelection.inputBindings)) {
-            console.error("refusing to run a job due to invalid bindings");
-            return;
-          }
-
-          // add bound inputs
-          job.inputs.push({
-            inputId: inputBinding.toolInput.name.id,
-            description: inputBinding.toolInput.description,
-            datasetId: inputBinding.datasets[i].datasetId,
-            displayName: inputBinding.datasets[i].name
-          });
-
-          // set parameters
-          job.parameters = [];
-          for (const toolParam of toolSelection.tool.parameters) {
-            let value = toolParam.value;
-            // the old client converts null values to empty strings, so let's keep the old behaviour for now
-            if (value == null) {
-              value = "";
-            }
-
-            job.parameters.push({
-              parameterId: toolParam.name.id,
-              displayName: toolParam.name.displayName,
-              description: toolParam.description,
-              type: toolParam.type,
-              value: value
-              // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
-            });
-          }
-          jobs.push(job);
-        }
-
-        console.log(jobs.length);
-        // Run multiple jobs 
-        this.sessionDataService.createJobs(jobs).subscribe(null, (error: any) => {
-          this.restErrorService.showError("Running a job failed", error);
-        });
-
-      } else {
-        this.runMultiInputJob(toolSelection);
-      }
-
+  runForEach(validatedTool: ValidatedTool) {
+    // sanity check
+    if (!validatedTool.runForEachValid) {
+      log.warn("requesting run for each, but run for each validation not ok");
+      return;
     }
 
+    // for each selected dataset, clone validatedTool and replace
+    // bindings with a single binding containing the selected dataset
+    const jobs: Job[] = validatedTool.selectedDatasets
+      .map((dataset: Dataset) => {
+        return Object.assign({}, validatedTool, {
+          inputBindings: [
+            {
+              toolInput: validatedTool.tool.inputs[0],
+              datasets: [dataset]
+            }
+          ]
+        });
+      })
+      .map((clonedTool: ValidatedTool) => {
+        return this.createJob(clonedTool);
+      });
+
+    // submit
+    this.sessionDataService.createJobs(jobs).subscribe(null, (error: any) => {
+      this.restErrorService.showError("Submitting jobs failed", error);
+    });
   }
 
-  runMultiInputJob(toolSelection: ToolSelection) {
+  // Method for submitting a job
+  runJob(validatedTool: ValidatedTool) {
+    // create
+    const job = this.createJob(validatedTool);
+
+    // submit
+    this.sessionDataService.createJob(job).subscribe(null, (error: any) => {
+      this.restErrorService.showError("Submitting job failed", error);
+    });
+  }
+
+  private createJob(validatedTool: ValidatedTool): Job {
     // create job
     const job: Job = <Job>{
-      toolId: toolSelection.tool.name.id,
-      toolCategory: toolSelection.category.name,
-      module: toolSelection.module.moduleId,
-      toolName: toolSelection.tool.name.displayName,
-      toolDescription: toolSelection.tool.description,
+      toolId: validatedTool.tool.name.id,
+      toolCategory: validatedTool.category.name,
+      module: validatedTool.module.moduleId,
+      toolName: validatedTool.tool.name.displayName,
+      toolDescription: validatedTool.tool.description,
       state: "NEW"
     };
 
     // set parameters
     job.parameters = [];
-    for (const toolParam of toolSelection.tool.parameters) {
+    for (const toolParam of validatedTool.tool.parameters) {
       let value = toolParam.value;
       // the old client converts null values to empty strings, so let's keep the old behaviour for now
       if (value == null) {
@@ -142,48 +101,36 @@ export class JobService {
 
     // set inputs
     job.inputs = [];
-    // TODO bindings done already?
-    if (!toolSelection.inputBindings) {
-      console.error(
-        "NO INPUT BINDINGS ON SELECT TOOL - THIS SHOULDNT BE SHOWN"
-      );
-      console.warn("no input bindings before running a job, binding now");
-      // this.inputBindings = this.toolService.bindInputs(toolSelection.tool, this.SelectionService.selectedDatasets);
-    }
-
-    // TODO report to user
-    if (!this.toolService.checkBindings(toolSelection.inputBindings)) {
-      console.error("refusing to run a job due to invalid bindings");
-      return;
-    }
 
     // add bound inputs
-
-    for (const inputBinding of toolSelection.inputBindings.filter(
+    for (const inputBinding of validatedTool.inputBindings.filter(
       binding => binding.datasets.length > 0
     )) {
-      // multi input single job
-      let i = 0;
-      for (const dataset of inputBinding.datasets) {
+      // single input
+      if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
         job.inputs.push({
-          inputId: this.toolService.getMultiInputId(
-            inputBinding.toolInput,
-            i
-          ),
+          inputId: inputBinding.toolInput.name.id,
           description: inputBinding.toolInput.description,
-          datasetId: dataset.datasetId,
-          displayName: dataset.name
+          datasetId: inputBinding.datasets[0].datasetId,
+          displayName: inputBinding.datasets[0].name
         });
-        i++;
+      } else {
+        // multi input
+        let i = 0;
+        for (const dataset of inputBinding.datasets) {
+          job.inputs.push({
+            inputId: this.toolService.getMultiInputId(
+              inputBinding.toolInput,
+              i
+            ),
+            description: inputBinding.toolInput.description,
+            datasetId: dataset.datasetId,
+            displayName: dataset.name
+          });
+          i++;
+        }
       }
-
     }
-    // runsys
-    this.sessionDataService.createJob(job).subscribe(null, (error: any) => {
-      this.restErrorService.showError("Running a job failed", error);
-    });
-
+    return job;
   }
-
-
 }

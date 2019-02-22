@@ -29,8 +29,8 @@
 
       <!-- search box -->
       <div class="col col-middle">
-        <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines, 
-          maybe if the machine is slower to render the content below and the ng-select thinks there 
+        <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines,
+          maybe if the machine is slower to render the content below and the ng-select thinks there
           isn't enough space below it? -->
         <ng-select #searchBox class="float-right" placeholder="Find tool" [items]="toolSearchList" [virtualScroll]="true"
           [searchFn]="filterTool" [(ngModel)]="searchBoxModel" (change)="searchBoxSelect($event)" notFoundText="No tools found"
@@ -73,19 +73,18 @@
       <!-- located here because needs full width parent to get size and position right, also here at the same height as the controlling button -->
       <div ngbDropdown #parametersDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="parametersDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
-          <ch-tool-parameters [tool]="toolSelection.tool"></ch-tool-parameters>
-          <ch-tool-inputs [sessionData]="sessionData" [inputBindings]="toolSelection.inputBindings" [tool]="toolSelection.tool"
-            [selectedDatasets]="selectionService.selectedDatasets" (updateBindings)="setBindings($event)"></ch-tool-inputs>
+        <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
+          <ch-tool-parameters [validatedTool]="validatedTool" (parametersChanged)="onParametersChanged()"></ch-tool-parameters>
+          <ch-tool-inputs [validatedTool]="validatedTool" [sessionData]="sessionData" (updateBindings)="setBindings($event)"></ch-tool-inputs>
         </div>
       </div>
 
       <!-- manual dropdown panel -->
       <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
+        <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
           <ch-manual [page]="
-              toolService.getManualPage(toolSelection.tool.name.id) | async
+              toolService.getManualPage(selectedTool.tool.name.id) | async
             "
             [showControls]="true"></ch-manual>
         </div>
@@ -109,7 +108,7 @@
         <div style="position: relative; height: 100%;">
           <div class="list-group-sm" *ngIf="selectedCategory" id="tool-list" style="position: absolute; height: 100%; width: 100%">
             <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{
-                active: tool.name.id === toolSelection?.tool.name.id,
+                active: tool.name.id === selectedTool?.tool.name.id,
                 compact: settingsService.compactToolList$.getValue()
               }"
               (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools" id="{{toolElementIdPrefix + tool.name.id}}">
@@ -128,7 +127,7 @@
                 <!-- manual -->
                 <!--
                   <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
-                    [disabled]="!toolSelection">
+                    [disabled]="!selectedTool">
                     <span class="fas fa-info" aria-hidden="true"></span>
                   </button>
                 -->
@@ -137,36 +136,28 @@
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
                     $event.stopPropagation(); parametersDropdown.toggle()
                   "
-                  title="Edit parameters and inputs" [disabled]="!toolSelection">
-                  <span *ngIf="
-                      !(toolSelectionService.parametersValid$ | async) ||
-                      !(toolSelectionService.inputsValid$ | async)
-                    "
-                    class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span>
+                  title="Edit parameters and inputs" [disabled]="!selectedTool">
+                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span>
                   <!-- suppress JSBitwiseOperatorUsage -->
 
-                  <span *ngIf="
-                      (toolSelectionService.parametersValid$ | async) &&
-                      (toolSelectionService.inputsValid$ | async)
-                    "
-                    class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
+                  <span *ngIf="runEnabled" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
 
                   Parameters
                 </button>
 
                 <!-- run -->
-                <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
-                  <span *ngIf="(toolSelectionService.runEnabled$ | async)" class="fas fa-play"></span>
-                  <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fas fa-ban"></span>
-                  {{runSingleJob == true ? 'Run' : 'Run For Each'}}
+                <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob(runForEachEnabled)"
+                  [disabled]="!runEnabled">
+                  <span class="fas fa-play"></span>
+                  {{runForEachEnabled === false ? 'Run' : 'Run For Each'}}
                 </button>
               </div>
             </div>
 
             <div class="row">
               <div class="col">
-                <div *ngIf="toolSelection">
-                  <span>{{ toolSelection.tool.description }} </span>
+                <div *ngIf="selectedTool">
+                  <span>{{ selectedTool.tool.description }} </span>
                   <span class="btn-link" (click)="openManualModal()">More&nbsp;info&hellip;</span>
                 </div>
               </div>
