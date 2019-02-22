@@ -17,6 +17,7 @@ import { Subject } from "rxjs/Subject";
 import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
 import log from "loglevel";
 import { WebSocketService } from "../../../shared/services/websocket.service";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 
 @Injectable()
 export class SessionEventService {
@@ -33,7 +34,8 @@ export class SessionEventService {
 
   constructor(
     private sessionResource: SessionResource,
-    private websocketService: WebSocketService
+    private websocketService: WebSocketService,
+    private errorService: ErrorService,
   ) {}
 
   unsubscribe() {
@@ -55,7 +57,7 @@ export class SessionEventService {
     // track any changes to session
     stream.subscribe(() => {
       this.sessionHasChanged = true;
-    });
+    }, err => this.errorService.showError("session change tracking failed", err));
 
     this.datasetStream$ = stream
       .filter(wsData => wsData.resourceType === Resource.Dataset)
@@ -90,10 +92,10 @@ export class SessionEventService {
       .refCount();
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe();
-    this.jobStream$.subscribe();
-    this.sessionStream$.subscribe();
-    this.ruleStream$.subscribe();
+    this.datasetStream$.subscribe(null, err => this.errorService.showError("dataset event error", err));
+    this.jobStream$.subscribe(null, err => this.errorService.showError("job event error", err));
+    this.sessionStream$.subscribe(null, err => this.errorService.showError("session event error", err));
+    this.ruleStream$.subscribe(null, err => this.errorService.showError("rule event error", err));
   }
 
   /**

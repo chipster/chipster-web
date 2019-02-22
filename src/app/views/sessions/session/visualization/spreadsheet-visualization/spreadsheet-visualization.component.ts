@@ -24,7 +24,8 @@ import { NativeElementService } from "../../../../../shared/services/native-elem
   templateUrl: "./spreadsheet-visualization.component.html",
   styleUrls: ["./spreadsheet-visualization.component.less"]
 })
-export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
+export class SpreadsheetVisualizationComponent
+  implements OnChanges, OnDestroy, AfterViewInit {
   @Input()
   dataset: Dataset;
   @Input()
@@ -34,7 +35,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   @Input()
   divWidth: any;
 
-  @ViewChild('horizontalScroll') horizontalScrollDiv;
+  @ViewChild("horizontalScroll") horizontalScrollDiv;
 
   // takes ~100 ms with ADSL
   private fileSizeLimit = 100 * 1024;
@@ -63,9 +64,9 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     private visualizationModalService: VisualizationModalService,
     private typeTagService: TypeTagService,
     private zone: NgZone,
-    private errorHandlerService: RestErrorService,
+    private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService,
+    private nativeElementService: NativeElementService
   ) {}
 
   ngOnChanges() {
@@ -76,13 +77,19 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     // remove old table
     this.destroyHot();
 
+    // check for empty file
+    if (this.dataset.size < 1) {
+      this.state = new LoadState(State.EmptyFile);
+      return;
+    }
+
     const maxBytes = this.modalMode ? null : this.fileSizeLimit;
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .takeUntil(this.unsubscribe)
       .subscribe(
-      (result: any) => {
+        (result: any) => {
           // parse all loaded data
           let parsedTSV = d3.tsvParseRows(result);
 
@@ -137,8 +144,26 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
             "file"
           );
 
-          let headers = normalizedTSV.getRawData()[0];
-          let content = normalizedTSV.getRawData().slice(1);
+          // whether the data contains a header row or not
+          let content: string[][];
+          let headers: string[];
+          if (
+            this.typeTagService.has(
+              this.sessionData,
+              this.dataset,
+              Tags.NO_TITLE_ROW
+            )
+          ) {
+            if (normalizedTSV.getRawData().length > 0) {
+              headers = new Array<string>(normalizedTSV.getRawData()[0].length);
+            } else {
+              headers = [];
+            }
+            content = normalizedTSV.getRawData();
+          } else {
+            headers = normalizedTSV.getRawData()[0];
+            content = normalizedTSV.getRawData().slice(1);
+          }
 
           // if there is only one line, show it as content, because Handsontable doesn't allow
           // headers to be shown alone
@@ -162,15 +187,17 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
         },
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
-          this.errorHandlerService.handleError(error, this.state.message);
+          this.restErrorService.showError(this.state.message, error);
         }
-    );
+      );
   }
 
   ngAfterViewInit() {
     // not created in modal
     if (this.horizontalScrollDiv) {
-      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
+      this.nativeElementService.disableGestures(
+        this.horizontalScrollDiv.nativeElement
+      );
     }
   }
 

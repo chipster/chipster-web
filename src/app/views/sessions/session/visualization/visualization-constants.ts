@@ -4,7 +4,18 @@ export default [
   {
     id: "spreadsheet",
     name: "Spreadsheet",
-    typeTags: [Tags.TSV, Tags.BED, Tags.GTF, Tags.FAI, Tags.VCF],
+    typeTags: [
+      Tags.TSV,
+      Tags.BED,
+      Tags.GTF,
+      Tags.FAI,
+      Tags.VCF,
+      Tags.MOTHUR_COUNT,
+      Tags.MOTHUR_GROUPS,
+      Tags.MOTHUR_NAMES,
+      Tags.MOTHUR_OLIGOS,
+      Tags.MOTHUR_STABILITY
+    ],
     supportAllTypes: false,
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]
@@ -12,7 +23,19 @@ export default [
   {
     id: "text",
     name: "Text",
-    typeTags: [Tags.TEXT, Tags.TSV, Tags.BED, Tags.GTF, Tags.FAI, Tags.VCF],
+    typeTags: [
+      Tags.TEXT,
+      Tags.TSV,
+      Tags.BED,
+      Tags.GTF,
+      Tags.FAI,
+      Tags.VCF,
+      Tags.MOTHUR_COUNT,
+      Tags.MOTHUR_GROUPS,
+      Tags.MOTHUR_NAMES,
+      Tags.MOTHUR_OLIGOS,
+      Tags.MOTHUR_STABILITY
+    ],
     supportAllTypes: false,
     anyInputCountSupported: false,
     supportedInputFileCounts: [1]

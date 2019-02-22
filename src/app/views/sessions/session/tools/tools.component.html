@@ -70,10 +70,7 @@
 
     <div class="row">
       <!-- parameters dropdown panel -->
-      <!--
-        located here because needs full width parent to get size and position right, also here at the same
-      -->
-      <!-- height as the controlling button -->
+      <!-- located here because needs full width parent to get size and position right, also here at the same height as the controlling button -->
       <div ngbDropdown #parametersDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="parametersDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="toolSelection" class="tools-panel-dropdown">
@@ -161,7 +158,7 @@
                 <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob()" [disabled]="!(toolSelectionService.runEnabled$ | async)">
                   <span *ngIf="(toolSelectionService.runEnabled$ | async)" class="fas fa-play"></span>
                   <span *ngIf="!(toolSelectionService.runEnabled$ | async)" class="fas fa-ban"></span>
-                  Run
+                  {{runSingleJob == true ? 'Run' : 'Run For Each'}}
                 </button>
               </div>
             </div>

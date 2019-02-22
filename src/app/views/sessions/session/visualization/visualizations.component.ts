@@ -9,6 +9,7 @@ import { Observable } from "rxjs/Observable";
 import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { VisualizationModalService } from "./visualizationmodal.service";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
 
 
 @Component({
@@ -41,7 +42,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     public selectionService: SelectionService, // used in template
     private store: Store<any>,
     private typeTagService: TypeTagService,
-    private visualizationModalService: VisualizationModalService
+    private visualizationModalService: VisualizationModalService,
+    private errorService: ErrorService,
 
   ) { }
 
@@ -81,8 +83,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
         // need to emit some event to session top so that the tool and visulazation div scrollTop changes to show some part of tool section
         this.scrollFix.emit();
 
-      }
-    );
+      }, err => this.errorService.showError("visualization change failed", err));
   }
 
   ngOnDestroy() {

@@ -37,7 +37,8 @@ export const Tags = {
   GENERIC: "GENERIC",
   PVALUE_AND_FOLD_CHANGE: "PVALUE_AND_FOLD_CHANGE",
   COLUMN_TITLES: "COLUMN_TITLES",
-  SKIP_LINES: "SKIP_LINES"
+  SKIP_LINES: "SKIP_LINES",
+  NO_TITLE_ROW: "NO_TITLE_ROW"
 };
 
 @Injectable()
@@ -65,5 +66,10 @@ export class TypeTagService {
       throw new Error("dataset " + dataset.name + " does not have type tags");
     }
     return typeTags.get(type);
+  }
+
+  // noinspection JSMethodCanBeStatic
+  has(sessionData: SessionData, dataset: Dataset, type: string): boolean {
+    return this.get(sessionData, dataset, type) != null;
   }
 }

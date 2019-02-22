@@ -37,7 +37,7 @@ export class VennDiagramComponent implements OnChanges {
     constructor(private tsvReader: TSVReader,
                 private venndiagramService: VennDiagramService,
                 private sessionDataService: SessionDataService,
-                private errorHandlerService: RestErrorService) {
+                private restErrorService: RestErrorService) {
     }
 
     ngOnChanges() {
@@ -65,7 +65,7 @@ export class VennDiagramComponent implements OnChanges {
             this.columnKey = this.identifierComparingEnabled ? 'identifier' : 'symbol';
             this.drawVennDiagram(this.files);
         }, (error: any) => {
-            this.errorHandlerService.handleError(error, 'Fetching TSV-files failed');
+            this.restErrorService.showError('Fetching TSV-files failed', error);
         });
     }
 
@@ -183,7 +183,8 @@ export class VennDiagramComponent implements OnChanges {
         const parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
         const data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
         const tsvData = d3.tsvFormatRows(data);
-        this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData).subscribe();
+        this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData)
+            .subscribe(null, err => this.restErrorService.showError("create dataset failed", err));
     }
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {

@@ -22,6 +22,8 @@ export class ConfigService {
   public static readonly KEY_CONTACT_PATH = "contact-path";
   public static readonly KEY_EXAMPLE_SESSION_OWNER_USER_ID =
     "example-session-owner-user-id";
+  public static readonly KEY_SUPPORT_SESSION_OWNER_USER_ID =
+    "support-session-owner-user-id";
 
   private conf$: Observable<any>;
   private chipsterConf$: Observable<any>;

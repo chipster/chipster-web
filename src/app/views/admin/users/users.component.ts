@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { ConfigService } from "../../../shared/services/config.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
 import { User } from "chipster-js-common";
 
@@ -15,9 +13,7 @@ export class UsersComponent implements OnInit {
   users: User[];
 
   constructor(
-    private configService: ConfigService,
     private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
     private authenticationService: AuthenticationService
   ) {}
 
@@ -28,7 +24,7 @@ export class UsersComponent implements OnInit {
       (users: User[]) => {
         this.users = users;
       },
-      err => this.restErrorService.handleError(err, "get users failed")
+      err => this.restErrorService.showError("get users failed", err)
     );
   }
 }

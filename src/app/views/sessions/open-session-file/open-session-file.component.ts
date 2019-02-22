@@ -15,6 +15,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ImportSessionModalComponent } from "./import-session-modal.component";
 import log from "loglevel";
 import { throwError } from "rxjs";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-open-session-file",
@@ -39,7 +40,8 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     private modalService: NgbModal,
     private uploadService: UploadService,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionResource: SessionResource
+    private sessionResource: SessionResource,
+    private restErrorService: RestErrorService,
   ) {}
 
   ngOnInit() {
@@ -112,7 +114,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         },
         err => {
           this.error(file, err);
-          this.sessionResource.deleteSession(sessionId).subscribe();
+          this.sessionResource.deleteSession(sessionId).subscribe(null, err2 => {
+            // original error reported to user already
+            log.error("failed to delete the session after another error", err2);
+          });
         }
       );
   }
@@ -120,7 +125,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   error(file: any, err) {
     this.fileStatus.set(file, err);
     this.finishedFiles.add(file);
-    this.errorService.headerError("Failed to open the session file");
+    this.errorService.showError("Failed to open the session file", err);
   }
 
   ngAfterViewInit() {

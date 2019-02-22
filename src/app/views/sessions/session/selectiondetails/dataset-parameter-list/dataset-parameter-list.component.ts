@@ -25,7 +25,7 @@ export class DatasetParameterListComponent implements OnChanges {
   parameterListForView: Array<JobParameter> = [];
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
-  constructor(private toolService: ToolService) {}
+  constructor(private toolService: ToolService) { }
 
   ngOnChanges(changes: any) {
     let parameters = null;
@@ -97,9 +97,9 @@ export class DatasetParameterListComponent implements OnChanges {
             } else {
               console.warn(
                 "job parameter value" +
-                  jobParameter.value +
-                  "not found from the current tool " +
-                  "paramater options, showing the id"
+                jobParameter.value +
+                "not found from the current tool " +
+                "paramater options, showing the id"
               );
             }
           }

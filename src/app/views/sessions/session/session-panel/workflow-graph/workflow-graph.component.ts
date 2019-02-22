@@ -9,7 +9,7 @@ import {
   OnDestroy,
   OnInit,
   SimpleChanges,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from "@angular/core";
 import { Dataset, Job, Module } from "chipster-js-common";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
@@ -29,7 +29,8 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { DatasetNodeToolTip } from "./data-node-tooltip";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
-
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -72,7 +73,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private store: Store<any>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService
+    private nativeElementService: NativeElementService,
+    private restErrorService: RestErrorService,
+    private errorService: ErrorService
   ) { }
 
   // actually selected datasets
@@ -149,11 +152,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     in the context menu onClose doesn't help also, because this was called earlier.
     */
     section.on("mousedown", () => {
-      if (d3.event.target.tagName.toUpperCase() === "SVG" && !this.isContextMenuOpen) {
+      if (
+        d3.event.target.tagName.toUpperCase() === "SVG" &&
+        !this.isContextMenuOpen
+      ) {
         this.selectionHandlerService.clearDatasetSelection();
         this.selectionHandlerService.clearJobSelection();
       }
     });
+
 
     // disable back and forward gestures in Safari
     this.nativeElementService.disableGestures(this.scrollerDiv.node());
@@ -198,19 +205,26 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.applyZoom(this.defaultScale);
     if (this.enabled) {
       this.subscriptions.push(
-        this.sessionEventService.getDatasetStream().subscribe(() => {
-          this.update();
-          this.renderGraph();
-        })
+        this.sessionEventService.getDatasetStream().subscribe(
+          () => {
+            this.update();
+            this.renderGraph();
+          },
+          err => this.errorService.showError("get dataset events failed", err)
+        )
       );
 
       this.subscriptions.push(
-        this.selectedDatasets$.subscribe((datasets: Array<Dataset>) => {
-          this.selectedDatasets = datasets;
-          this.selectionEnabled = true;
-          this.update();
-          this.renderGraph();
-        })
+        this.selectedDatasets$.subscribe(
+          (datasets: Array<Dataset>) => {
+            this.selectedDatasets = datasets;
+            this.selectionEnabled = true;
+            this.update();
+            this.renderGraph();
+          },
+          err =>
+            this.errorService.showError("get dataset selections failed", err)
+        )
       );
     }
 
@@ -446,14 +460,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               dataset.name = name;
               return self.sessionDataService.updateDataset(dataset);
             })
-            .subscribe(null, err => log.warn("dataset rename error", err));
+            .subscribe(null, err =>
+              this.restErrorService.showErro("dataset rename failed", err)
+            );
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "Delete",
         action: function (d, i) {
-          self.sessionDataService.deleteDatasetsLater([d.dataset]);
+          console.log(self.selectedDatasets);
+          self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
+
         }
       },
       {
@@ -488,6 +506,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("ry", this.nodeRadius)
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
+      .attr("pointer-events", "all")
       .style("fill", d => d.color)
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
@@ -495,14 +514,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         )
       )
       .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
-      .on("contextmenu", d3ContextMenu(menu, {
-        onOpen: () => {
-          this.isContextMenuOpen = true;
-        },
-        onClose: () => {
-          this.isContextMenuOpen = false;
-        }
-      }))
+      .on(
+        "contextmenu",
+        d3ContextMenu(menu, {
+          onOpen: () => {
+            this.isContextMenuOpen = true;
+          },
+          onClose: () => {
+            this.isContextMenuOpen = false;
+          }
+        })
+      )
       .on("mouseover", function (d) {
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", true);
@@ -524,7 +546,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               self.dragStarted = true;
               self.hideTooltip(0);
               self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
-            }
+            } 
           })
           .on("end", function (d) {
             // check the flag to differentiate between drag and click events
@@ -549,7 +571,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         self.hideToolTipById(d, i);
       }
     });
-
+  
     this.d3DatasetNodes.on("click", function (d, i) {
       if (self.enabled) {
         self.selectionHandlerService.clearJobSelection();
@@ -560,11 +582,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    if (this.selectionEnabled && this.selectedDatasets.length > 0) {
+    // renderGraph() seems to get called twice and for some reason the datasetToolTipArray
+    // is not populated during the first run, thus checks for avoiding error
+    if (
+      this.selectionEnabled &&
+      this.selectedDatasets.length > 0 &&
+      this.datasetToolTipArray &&
+      this.datasetToolTipArray.length > 0
+    ) {
       this.showToolTipByIdForSelection();
     }
 
-
+  
     this.d3DatasetNodes.exit().remove();
 
     // update the scroll limits if datasets were added or removedn
@@ -596,7 +625,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           return this.fontSize - 2 + "px";
         }
       })
-      .attr("fill", "black")
+      .attr("fill", "white")
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
@@ -714,9 +743,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
           this.sessionDataService
             .updateDataset(datasetCopy)
-            .subscribe(
-              () => null,
-              err => log.warn("dataset update error", err)
+            .subscribe(null, err =>
+              this.restErrorService.showError("dataset upate error", err)
             );
         }
       });
@@ -958,10 +986,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   showToolTipByIdForSelection() {
     for (let k = 0; k < this.selectedDatasets.length; k++) {
-      this.setCurrentToolTipName(this.datasetToolTipArray
-        .findIndex(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId));
+      this.setCurrentToolTipName(
+        this.datasetToolTipArray.findIndex(
+          datasetToolTip =>
+            datasetToolTip.datasetId === this.selectedDatasets[k].datasetId
+        )
+      );
       this.datasetToolTipArray
-        .find(datasetToolTip => datasetToolTip.datasetId === this.selectedDatasets[k].datasetId).dataNodeToolTip.style("opacity", 0.75);
+        .find(
+          datasetToolTip =>
+            datasetToolTip.datasetId === this.selectedDatasets[k].datasetId
+        )
+        .dataNodeToolTip.style("opacity", 0.75);
     }
   }
 
@@ -980,8 +1016,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
       .height;
     for (let i = 0; i < this.datasetToolTipArray.length; i++) {
-      const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[i].datasetId);
-      const isSelected = this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length > 0;
+      const isInSearch =
+        this.filter != null &&
+        this.filter.has(this.datasetToolTipArray[i].datasetId);
+      const isSelected =
+        this.selectedDatasets.filter(
+          dataset => dataset.datasetId === this.datasetToolTipArray[i].datasetId
+        ).length > 0;
       if (isInSearch || isSelected) {
         let datasetLeft, datasetTop;
         const element = document.getElementById(
@@ -1023,24 +1064,36 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // checking the name
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
-      const isNotSameDataset = this.datasetToolTipArray[id].datasetId !== this.datasetToolTipArray[k].datasetId;
-      const isInSearch = this.filter != null && this.filter.has(this.datasetToolTipArray[k].datasetId);
-      const isSelected = this.selectedDatasets.filter(dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId).length > 0;
-      if (isNotSameDataset && (isSelected || isInSearch)
-      ) {
+      const isNotSameDataset =
+        this.datasetToolTipArray[id].datasetId !==
+        this.datasetToolTipArray[k].datasetId;
+      const isInSearch =
+        this.filter != null &&
+        this.filter.has(this.datasetToolTipArray[k].datasetId);
+      const isSelected =
+        this.selectedDatasets.filter(
+          dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId
+        ).length > 0;
+      if (isNotSameDataset && (isSelected || isInSearch)) {
         const rectB = document
           .getElementById(this.datasetToolTipArray[k].datasetId)
           .getBoundingClientRect();
 
         if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
           this.datasetToolTipArray[id].dataNodeToolTip.html(
-            this.datasetToolTipArray[id].datasetName
-              .split(".")[0]
-              .slice(0, 5) + "..."
+            this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) +
+            "..."
           );
         }
       }
     }
-
   }
+
+
+  
+
+
+
+
 }
+

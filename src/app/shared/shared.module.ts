@@ -55,7 +55,7 @@ import { ActionToastComponent } from "./components/action-toast";
     SettingsComponent,
     ToolSourceComponent,
     DummyRouteComponent,
-    ActionToastComponent,
+    ActionToastComponent
   ],
   providers: [
     PipeService,
@@ -74,7 +74,7 @@ import { ActionToastComponent } from "./components/action-toast";
     UserService,
     ToolsService,
     NativeElementService,
-    WebSocketService,
+    WebSocketService
   ],
   exports: [
     BytesPipe,
@@ -89,10 +89,8 @@ import { ActionToastComponent } from "./components/action-toast";
     StatusComponent,
     SettingsComponent,
     ToolSourceComponent,
-    ActionToastComponent,
+    ActionToastComponent
   ],
-  entryComponents: [
-    ActionToastComponent,
-  ],
+  entryComponents: [ActionToastComponent, SettingsComponent]
 })
 export class SharedModule {}

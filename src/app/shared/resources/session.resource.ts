@@ -152,6 +152,13 @@ export class SessionResource {
     );
   }
 
+  getShares(): Observable<Array<Session>> {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap((url: string) =>
+      this.restService.get(`${url}/sessions/shares`, true)
+    );
+  }
+
   createSession(session: Session): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
     return apiUrl$
@@ -272,6 +279,17 @@ export class SessionResource {
       this.restService.put(
         `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
         dataset,
+        true
+      )
+    );
+  }
+
+  updateRule(sessionId: string, rule: Rule) {
+    const apiUrl$ = this.configService.getSessionDbUrl();
+    return apiUrl$.flatMap((url: string) =>
+      this.restService.put(
+        `${url}/sessions/${sessionId}/rules/${rule.ruleId}`,
+        rule,
         true
       )
     );

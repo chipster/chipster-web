@@ -32,4 +32,20 @@ export class SessionWorkerResource {
       )
     );
   }
+
+  supportRequest(message: string, sessionId: string, email: string, appRoute: string, log: string): Observable<any> {
+
+    const supportRequest = {
+      mail: email,
+      message: message,
+      session: sessionId,
+      app: appRoute,
+      log: log,
+    };
+
+    const apiUrl$ = this.configService.getSessionWorkerUrl();
+    return apiUrl$.flatMap((url: string) =>
+      this.restService.post(url + "/support/request", supportRequest, true)
+    );
+  }
 }

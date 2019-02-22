@@ -16,7 +16,6 @@ import { StoreModule } from "@ngrx/store";
 import { ErrorComponent } from "./views/error/error.component";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { ErrorService } from "./core/errorhandler/error.service";
-import { ContactComponent } from "./views/contact/contact.component";
 import { HttpClientModule } from "@angular/common/http";
 import { ManualModule } from "./views/manual/manual.module";
 import { setAppInjector } from "./app-injector";
@@ -33,6 +32,7 @@ import { RoutingModule } from "./core/routing/routing.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ToastrModule } from "ngx-toastr";
 import { ActionToastComponent } from "./shared/components/action-toast";
+import { ContactModule } from "./views/contact/contact.module";
 
 @NgModule({
   imports: [
@@ -41,6 +41,7 @@ import { ActionToastComponent } from "./shared/components/action-toast";
     HttpClientModule,
     FormsModule,
     CoreModule,
+    ContactModule,
     SessionModule,
     ManualModule,
     NgbModule.forRoot(),
@@ -66,7 +67,6 @@ import { ActionToastComponent } from "./shared/components/action-toast";
     HomeComponent,
     AppComponent,
     ErrorComponent,
-    ContactComponent,
     TermsComponent,
     NotFoundComponent,
   ],

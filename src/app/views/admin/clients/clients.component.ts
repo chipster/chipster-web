@@ -54,7 +54,7 @@ export class ClientsComponent implements OnInit {
             this.users.push(userCopy);
           });
         });
-      }, err => this.restErrorService.handleError(err, 'get clients failed'));
+      }, err => this.restErrorService.showError('get clients failed', err));
   }
 }
 

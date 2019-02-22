@@ -137,7 +137,7 @@ export class HistoryComponent implements OnInit {
           this.jobNumber = recordNumber;
           this.collectionSize =   Math.ceil(recordNumber / 500) * 10;
           this.getJobByParam();
-      }, err => this.errorHandlerService.handleError(err, 'get job numbers failed'));
+      }, err => this.errorHandlerService.showError('get job numbers failed', err));
   }
 
   getJobByParam() {
@@ -165,7 +165,7 @@ export class HistoryComponent implements OnInit {
         if (this.jobHistoryListWithParam.length < 1) {
           alert ("No results found");
         }
-      }, err => this.errorHandlerService.handleError(err, 'get clients failed'));
+      }, err => this.errorHandlerService.showError('get clients failed', err));
   }
 
   reload() {

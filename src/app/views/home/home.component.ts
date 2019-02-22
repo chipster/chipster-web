@@ -45,13 +45,7 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page", this.homePath, this.homeFile);
         }
       },
-      err => {
-        this.errorService.headerError(
-          "failed to get the path of the home page",
-          true
-        );
-      }
-    );
+      err => this.errorService.showError("failed to get the path of the home page", err));
 
     this.configService.get(ConfigService.KEY_HOME_HEADER_PATH).subscribe(
       path => {
@@ -65,13 +59,7 @@ export class HomeComponent implements OnInit {
           );
         }
       },
-      err => {
-        this.errorService.headerError(
-          "failed to get the path of the home page header",
-          true
-        );
-      }
-    );
+      err => this.errorService.showError("failed to get the path of the home page header", err));
 
     this.routerLinkSessions = this.routeService.getRouterLinkSessions();
     this.routerLinkLogin = this.routeService.getRouterLinkLogin();

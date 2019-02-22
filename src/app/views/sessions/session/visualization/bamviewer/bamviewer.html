@@ -3,6 +3,9 @@
     <pre>{{samHeader}}</pre>
   </div>
   <div *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
+  <div *ngIf="bamRecordList.length === 0">
+      <pre>Sorry, For Some reason, Loading Bam Records Failed.</pre>
+    </div>
   <div class="horizontal-scroll">
     <table class="table-bordered table-hover bamtable text-sm">
       <thead>
@@ -14,9 +17,8 @@
         </tr>
       </tbody>
     </table>
-
   </div>
-
+ 
 </div>
 
 

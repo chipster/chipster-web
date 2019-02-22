@@ -1,13 +1,15 @@
-import {SelectionService} from '../../selection.service';
-import {SessionDataService} from '../../session-data.service';
-import {Component, Input, OnInit, OnDestroy} from '@angular/core';
-import { Job, SessionEvent} from 'chipster-js-common';
-import {JobService} from '../../job.service';
-import {SessionEventService} from '../../session-event.service';
-import {Subject} from 'rxjs/Subject';
-import {SessionData} from '../../../../../model/session/session-data';
+import { SelectionService } from '../../selection.service';
+import { SessionDataService } from '../../session-data.service';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Job, SessionEvent } from 'chipster-js-common';
+import { JobService } from '../../job.service';
+import { SessionEventService } from '../../session-event.service';
+import { Subject } from 'rxjs/Subject';
+import { SessionData } from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
+import UtilsService from '../../../../../shared/utilities/utils';
 import {SelectionHandlerService} from '../../selection-handler.service';
+import { ErrorService } from '../../../../../core/errorhandler/error.service';
 
 @Component({
   selector: 'ch-job',
@@ -23,6 +25,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
+  duration: string = "";
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -30,7 +33,9 @@ export class JobComponent implements OnInit, OnDestroy {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService ) {
+    private sessionEventService: SessionEventService,
+    private errorService: ErrorService,
+  ) {
 }
 
   ngOnInit() {
@@ -44,7 +49,7 @@ export class JobComponent implements OnInit, OnDestroy {
           jobId = selectedJobs[0].jobId;
         }
         this.update(jobId);
-      });
+      }, err => this.errorService.showError("updating selected jobs failed", err));
 
     // job modification events
     this.sessionEventService.getJobStream()
@@ -53,7 +58,7 @@ export class JobComponent implements OnInit, OnDestroy {
         if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
           this.update(this.job.jobId);
         }
-      });
+      }, err => this.errorService.showError("getting job events failed", err));
   }
 
   // get job from session data and update state fields
@@ -66,6 +71,13 @@ export class JobComponent implements OnInit, OnDestroy {
         this.failed = !JobService.isSuccessful(job);
         this.state = _.capitalize(job.state);
         this.screenOutput = job.screenOutput;
+        if (this.job.startTime != null && this.job.endTime != null) {
+          let computingTime =UtilsService.parseISOStringToDate(this.job.endTime).getTime() - UtilsService.parseISOStringToDate(this.job.startTime).getTime();
+          if( computingTime > 1000){
+            this.duration = UtilsService.convertMS(computingTime);
+          } else this.duration = computingTime.toString() + "ms";
+        }
+
         return;
       }
     }
@@ -89,7 +101,7 @@ export class JobComponent implements OnInit, OnDestroy {
 
   cancelJob() {
     this.sessionDataService.cancelJob(this.job);
-  }
+  }  
 
 }
 

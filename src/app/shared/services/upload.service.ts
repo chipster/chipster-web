@@ -4,6 +4,7 @@ import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "./config.service";
 import { Observable } from "rxjs/Rx";
 import { Dataset } from "chipster-js-common";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 
 declare let Flow: any;
 
@@ -12,7 +13,8 @@ export class UploadService {
   constructor(
     private configService: ConfigService,
     private tokenService: TokenService,
-    private sessionResource: SessionResource
+    private sessionResource: SessionResource,
+    private restErrorService: RestErrorService,
   ) {}
 
   getFlow(
@@ -84,7 +86,7 @@ export class UploadService {
       file.chipsterSessionId = sessionId;
       file.chipsterDatasetId = dataset.datasetId;
       file.resume();
-    });
+    }, err => this.restErrorService.showError("upload failed", err));
   }
 
   private createDataset(sessionId: string, name: string): Observable<Dataset> {

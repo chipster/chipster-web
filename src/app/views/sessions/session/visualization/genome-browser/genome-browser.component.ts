@@ -159,7 +159,7 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
         },
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.handleError(error, this.state.message);
+          this.restErrorService.showError(this.state.message, error);
         }
       );
   }

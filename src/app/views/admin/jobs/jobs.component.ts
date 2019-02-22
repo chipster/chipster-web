@@ -45,6 +45,6 @@ export class JobsComponent implements OnInit {
       })
       .subscribe(jobs => {
         this.jobs = jobs;
-      }, err => this.restErrorService.handleError(err, 'get jobs failed'));
+      }, err => this.restErrorService.showError('get jobs failed', err));
   }
 }

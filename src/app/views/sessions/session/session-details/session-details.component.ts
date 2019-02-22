@@ -58,7 +58,7 @@ export class SessionDetailsComponent {
         );
       })
       .subscribe(null, err =>
-        this.restErrorService.handleError(err, "Duplicate session failed")
+        this.restErrorService.showError("Duplicate session failed", err)
       );
   }
 

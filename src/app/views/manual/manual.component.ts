@@ -22,6 +22,7 @@ import { ConfigService } from "../../shared/services/config.service";
 import { ManualPComponent } from "./manual-components/manual-p.component";
 import { Subject } from "rxjs/Subject";
 import { RouteService } from "../../shared/services/route.service";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 
 /**
  * Show HTML files in an Angular app
@@ -76,7 +77,8 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private componentFactoryResolver: ComponentFactoryResolver,
     private configService: ConfigService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private restErrorService: RestErrorService,
   ) {}
 
   /**
@@ -123,7 +125,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
       .map(htmlDoc => this.rewrite(htmlDoc, this.currentPage))
       // show
       .map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment))
-      .subscribe();
+      .subscribe(null, err => this.restErrorService.showError("page change failed", err));
   }
 
   ngOnDestroy() {
