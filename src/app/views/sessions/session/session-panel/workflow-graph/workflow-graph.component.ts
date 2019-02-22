@@ -638,7 +638,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           return this.fontSize - 2 + "px";
         }
       })
-      .attr("fill", "white")
+      .attr("fill", "black")
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
