@@ -38,7 +38,6 @@ export class ToolInputsComponent implements OnChanges {
       this.ready = true;
       // create copy of the datasets property of each InputBinding as it's used as the model of the select
       // element in the template (and thus get's modified)
-
       this.bindingModels = this.validatedTool.inputBindings.map(b => ({
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
@@ -75,7 +74,13 @@ export class ToolInputsComponent implements OnChanges {
         };
       }
     });
-    this.updateBindings.emit(updatedBindings);
+    this.updateBindings.emit({
+      tool: this.validatedTool.tool,
+      category: this.validatedTool.category,
+      module: this.validatedTool.module,
+      selectedDatasets: this.validatedTool.selectedDatasets,
+      inputBindings: updatedBindings
+    });
   }
 
   getDisplayName(obj) {

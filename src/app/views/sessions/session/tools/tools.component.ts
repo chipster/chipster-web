@@ -186,15 +186,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
   }
 
-  setBindings(updatedBindings: InputBinding[]) {
+  setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.store.dispatch({
       type: SET_SELECTED_TOOL_WITH_INPUTS,
-      payload: {
-        tool: this.selectedTool.tool,
-        category: this.selectedTool.category,
-        module: this.selectedTool.module,
-        inputBindings: updatedBindings
-      }
+      payload: toolWithInputs
     });
   }
 
