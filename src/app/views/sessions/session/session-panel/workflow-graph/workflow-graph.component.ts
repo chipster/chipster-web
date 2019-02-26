@@ -234,7 +234,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.settingService.showDatasetSelectionTooltip$.subscribe(
       (res: boolean) => {
         this.showDatasetSelectionTooltip = res;
-        console.log(this.showDatasetSelectionTooltip);
         this.renderGraph();
       }
     );
