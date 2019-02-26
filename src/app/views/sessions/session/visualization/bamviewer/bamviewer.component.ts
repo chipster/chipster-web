@@ -111,7 +111,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     if (this.samHeaderLen === 0 || this.samHeader.indexOf("@SQ") === -1) {
       // #ref sequence
       const nRef = this.readInt(header, this.samHeaderLen + 8);
-      const p = this.samHeaderLen + 12;
+      let p = this.samHeaderLen + 12;
 
       for (let i = 0; i < nRef; ++i) {
         // lName=length of the reference nameplus 1
@@ -151,7 +151,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   getBGZFBlocks(arrayBuffer: ArrayBuffer) {
     const fileLimit = arrayBuffer.byteLength - 18;
-    const totalSize = 0;
+    let totalSize = 0;
     const blockSizeList = [];
 
 
