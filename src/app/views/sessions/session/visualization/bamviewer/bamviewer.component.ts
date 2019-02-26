@@ -29,13 +29,13 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private samHeaderList: Array<string>;
 
   private bamRecordList: BamRecord[];
-  
+
 
   private chrName: string;
   private visibleBlockNumber = 2; // just a magic number,just showing records from first two blocks
   private maxBytes = 500000;
 
-  
+
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -83,7 +83,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
           // Read the record buffer
           this.getBGZFBlocks(recordBuffer);
           this.state = new LoadState(State.Ready, "Loading Bam file complete");
-        
+
 
         }
       }, (error: any) => {
@@ -91,7 +91,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         this.errorHandlerService.showError(this.state.message, error);
       });
 
-    
+
   }
 
 
@@ -110,7 +110,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     for (var i = 0; i < this.samHeaderLen; ++i) {
       this.samHeader += String.fromCharCode(header[i + 8]);
     }
-   
+
     // In cases where SAM header text section is missing or not containing seq information
     if (this.samHeaderLen === 0 || this.samHeader.indexOf("@SQ") === -1) {
       //#ref sequence
@@ -159,7 +159,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     let totalSize = 0;
     let blockSizeList = [];
-  
+
 
     while (this.filePos < fileLimit) {
       let blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
@@ -214,9 +214,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       if (offset >= this.plain.length) {
         return;
       }
-    
+
       blockSize = this.readInt(this.plain, offset);
-      console.log(blockSize);
       if (blockSize > MAX_GZIP_BLOCK_SIZE) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;

@@ -19,13 +19,11 @@ import { LoadState, State } from "../../../../../model/loadstate";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import igv from 'igv';
 
-declare var pileup: any;
-
 export class BamSourceEntry {
   type = "alignment";
   format: "bam";
-  url : string;
-  name : string;
+  url: string;
+  name: string;
 
 
 }
@@ -44,7 +42,7 @@ class BamSource {
 })
 
 
-export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
+export class GenomeBrowserComponent implements OnInit, OnDestroy {
   @ViewChild("iframe")
   iframe: ElementRef;
 
@@ -69,21 +67,30 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
 
   private selectedGenomeUrl = "http://www.biodalliance.org/datasets/hg38.2bit";
 
-
+  private igvBrowser;
   constructor(
     private visualizationModalService: VisualizationModalService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
     private typeTagService: TypeTagService,
     private restErrorService: RestErrorService
-  ) {}
+  ) { }
 
-  ngOnChanges() {
-    // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
-    this.state = new LoadState(State.Loading, "Loading data...");
+  loadTrack() {
+    const trackConfigs = [];
+    for (let i = 0; i < this.dataSourceList.length; i++) {
+      trackConfigs.push({
+        name: this.dataSourceList[i].bamDataset.name,
+        type: "alignmnet",
+        format: "bam",
+        url: this.dataSourceList[i].bamUrl,
+        indexURL: this.dataSourceList[i].baiUrl
+      });
+    }
 
-    this.getDatasetUrls();
+    if (trackConfigs.length > 0) {
+      this.igvBrowser.loadTrackList(trackConfigs);
+    }
   }
 
   ngOnDestroy() {
@@ -94,50 +101,43 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   setGenome(event) {
     this.selectedGenomeID = event;
     const self = this;
-  
+
     // change the data source and load new pileup instance
-  
+
   }
 
   getDatasetUrls() {
     const self = this;
     // if user have chosen one or more BAM files
-    this.selectedDatasets.forEach(function(dataset) {
+    this.selectedDatasets.forEach(function (dataset) {
       // check type of each file, put the Bam datasets in list
       if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
         const bamSource = new BamSource();
         bamSource.bamDataset = dataset;
-        self.sessionData.datasetsMap.forEach(function(dataset) {
+        self.sessionData.datasetsMap.forEach(function (dataset) {
           if (
             dataset.name.split(".").pop() === "bai" &&
             dataset.name.substr(0, dataset.name.indexOf(".")) ===
-              bamSource.bamDataset.name.substr(
-                0,
-                bamSource.bamDataset.name.indexOf(".")
-              )
+            bamSource.bamDataset.name.substr(
+              0,
+              bamSource.bamDataset.name.indexOf(".")
+            )
           ) {
             bamSource.baiDataset = dataset;
           }
         });
         self.dataSourceList.push(bamSource);
       } else {
-        self.state = new LoadState(
-          State.Fail,
-          "No corresponding BAI file found"
-        );
+        // Do nothing for the time being
       }
     });
 
-    // don't continue if already failing
-    if (this.state.state === State.Fail) {
-      return;
-    }
 
     let bam: Observable<any>;
     let bai: Observable<any>;
     const bamSources$: Array<any> = [];
 
-    this.dataSourceList.forEach(function(bamSource) {
+    this.dataSourceList.forEach(function (bamSource) {
       if (bamSource.bamDataset && bamSource.baiDataset) {
         bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
         bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
@@ -153,7 +153,6 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
             this.dataSourceList[i].bamUrl = res[i][0];
             this.dataSourceList[i].baiUrl = res[i][1];
           }
-       
           this.initializeDataSources();
           this.state = new LoadState(State.Ready);
         },
@@ -164,15 +163,10 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
       );
   }
 
- 
-  
-
   initializeDataSources() {
-    
-
     // console.log(this.sources);
     this.locus = "chr8:128,747,267-128,754,546";
-  
+
   }
 
   openGnomeModal() {
@@ -183,12 +177,22 @@ export class GenomeBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-   let igvDiv = document.getElementById("igv-div");
-   for( let i= 0;  i < this.dataSourceList.length ; i++){
-      let bamSourceEntry = new BamSourceEntry();
-      
-      
-   }
+    const igvDiv = document.getElementById("igv-div");
+    const options = {
+      genome: "hg19"
+    };
+    console.log(igv);
+    const self = this;
+    igv.createBrowser(igvDiv, options)
+
+      .then(function (browser) {
+        console.log("Created IGV browser");
+        self.getDatasetUrls();
+        self.igvBrowser = browser;
+        // self.loadTrack();
+      });
+
+
 
   }
 }
