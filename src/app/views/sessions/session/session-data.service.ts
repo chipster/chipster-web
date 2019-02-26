@@ -19,7 +19,6 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 
 @Injectable()
 export class SessionDataService {
-
   private sessionId: string;
 
   constructor(
@@ -32,7 +31,7 @@ export class SessionDataService {
     private sessionEventService: SessionEventService,
     private selectionHandlerService: SelectionHandlerService,
     private toastrService: ToastrService,
-    private restErrorService: RestErrorService,
+    private restErrorService: RestErrorService
   ) {}
 
   getSessionId(): string {
@@ -55,9 +54,8 @@ export class SessionDataService {
     return jobs.get(jobId);
   }
 
-  createJobs(jobs: Job[]){
-    return this.sessionResource.createJobs(this.getSessionId(),jobs);
-
+  createJobs(jobs: Job[]) {
+    return this.sessionResource.createJobs(this.getSessionId(), jobs);
   }
 
   /**
@@ -119,18 +117,24 @@ export class SessionDataService {
     const deleteJobs$ = jobs.map((job: Job) =>
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
-    Observable.merge(...deleteJobs$).subscribe(() => {
-      log.info("Job deleted");
-    }, err => this.restErrorService.showError("delete jobs failed", err));
+    Observable.merge(...deleteJobs$).subscribe(
+      () => {
+        log.info("Job deleted");
+      },
+      err => this.restErrorService.showError("delete jobs failed", err)
+    );
   }
 
   deleteDatasets(datasets: Dataset[]) {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
-    Observable.merge(...deleteDatasets$).subscribe(() => {
-      log.info("Dataset deleted");
-    }, err => this.restErrorService.showError("delete datasets failed", err));
+    Observable.merge(...deleteDatasets$).subscribe(
+      () => {
+        log.info("Dataset deleted");
+      },
+      err => this.restErrorService.showError("delete datasets failed", err)
+    );
   }
 
   updateDataset(dataset: Dataset) {
@@ -201,18 +205,21 @@ export class SessionDataService {
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
     const win: any = window.open("", "_blank");
     if (win) {
-      url$.subscribe(url => {
-        // but we can set it's location later asynchronously
-        win.location.href = url;
+      url$.subscribe(
+        url => {
+          // but we can set it's location later asynchronously
+          win.location.href = url;
 
-        // we can close the useless empty tab, but unfortunately only after a while, otherwise the
-        // download won't start
-        if (autoCloseDelay) {
-          setTimeout(() => {
-            win.close();
-          }, autoCloseDelay);
-        }
-      }, err => this.restErrorService.showError("opening a new tab failed", err));
+          // we can close the useless empty tab, but unfortunately only after a while, otherwise the
+          // download won't start
+          if (autoCloseDelay) {
+            setTimeout(() => {
+              win.close();
+            }, autoCloseDelay);
+          }
+        },
+        err => this.restErrorService.showError("opening a new tab failed", err)
+      );
     } else {
       // Chrome allows only one download
       this.errorService.showError(popupErrorText, null);
@@ -308,13 +315,11 @@ export class SessionDataService {
 
   // Added the delete dataset code here as two components are sharing the code
   deleteDatasetsNow(deletedDatasets: Dataset[]) {
-
     // delete from the server
     this.deleteDatasets(deletedDatasets);
   }
 
   deleteDatasetsUndo(deletedDatasets: Dataset[]) {
-
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
@@ -341,7 +346,7 @@ export class SessionDataService {
     // make a copy so that further selection changes won't change the array
     const deletedDatasets = _.clone(datasets);
 
-        // all selected datasets are going to be deleted
+    // all selected datasets are going to be deleted
     // clear selection to avoid problems in other parts of the UI
     this.selectionHandlerService.clearDatasetSelection();
 
@@ -369,7 +374,7 @@ export class SessionDataService {
     const BTN_UNDO = "Undo";
 
     const options = {
-      positionClass: 'toast-bottom-left',
+      positionClass: "toast-bottom-left",
       closeButton: true,
       tapToDismiss: false,
       timeOut: 5000,
@@ -378,31 +383,38 @@ export class SessionDataService {
         {
           text: BTN_DELETE,
           icon: "fas fa-times",
-          class: "btn-secondary",
+          class: "btn-secondary"
         },
         {
           text: BTN_UNDO,
           icon: "fas fa-undo",
-          class: "btn-info",
+          class: "btn-info"
         }
-      ],
+      ]
     };
 
     const toast = this.toastrService.info(msg, "", options);
 
     toast.onAction
       .filter(text => text === BTN_UNDO)
-      .subscribe(buttonText => {
-        this.deleteDatasetsUndo(deletedDatasets);
-        this.toastrService.clear(toast.toastId);
-      }, err => this.errorService.showError("error in dataset deletion", err));
+      .subscribe(
+        buttonText => {
+          this.deleteDatasetsUndo(deletedDatasets);
+          this.toastrService.clear(toast.toastId);
+        },
+        err => this.errorService.showError("error in dataset deletion", err)
+      );
 
-    toast.onHidden.takeUntil(toast.onAction) // only if there was no action
+    toast.onHidden
+      .takeUntil(toast.onAction) // only if there was no action
       .merge(toast.onAction.filter(text => text === BTN_DELETE))
-      .subscribe(() => {
-        this.deleteDatasetsNow(deletedDatasets);
-        this.toastrService.clear(toast.toastId);
-      }, err => this.errorService.showError("error in dataset deletion", err));
+      .subscribe(
+        () => {
+          this.deleteDatasetsNow(deletedDatasets);
+          this.toastrService.clear(toast.toastId);
+        },
+        err => this.errorService.showError("error in dataset deletion", err)
+      );
   }
 
   getSessionSize(sessionData: SessionData): number {
@@ -435,7 +447,9 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
+    return UtilsService.mapValues(
+      this.getCompleteDatasets(sessionData.datasetsMap)
+    );
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {

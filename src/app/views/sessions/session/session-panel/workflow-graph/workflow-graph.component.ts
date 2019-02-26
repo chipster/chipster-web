@@ -164,7 +164,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-
     // disable back and forward gestures in Safari
     this.nativeElementService.disableGestures(this.scrollerDiv.node());
 
@@ -483,7 +482,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         action: function (d, i) {
           console.log(self.selectedDatasets);
           self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
-
         }
       },
       {
@@ -605,7 +603,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     ) {
       this.showToolTipByIdForSelection();
     }
-
 
     this.d3DatasetNodes.exit().remove();
 
@@ -1101,12 +1098,4 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
   }
-
-
-
-
-
-
-
 }
-

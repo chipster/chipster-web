@@ -16,31 +16,33 @@
   <!-- parameters -->
   <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
 
-  <form name="paramForm" *ngIf="tool">
-    <div *ngIf="tool.parameters.length === 0" class="font-italic text-smaller">
+  <form name="paramForm" *ngIf="validatedTool.tool">
+    <div *ngIf="validatedTool.tool.parameters.length === 0" class="font-italic text-smaller">
       No parameters
     </div>
 
-    <table class="table table-sm" *ngIf="tool.parameters.length > 0">
+    <table class="table table-sm" *ngIf="validatedTool.tool.parameters.length > 0">
       <tbody>
-        <tr *ngFor="let parameter of tool.parameters; let i = index">
+        <tr *ngFor="let parameter of validatedTool.tool.parameters; let i = index">
 
           <td style="width: 60%">
             <!-- parameter name -->
             {{ getDisplayName(parameter) }}
-            <span class="text-sm text-muted" *ngIf="parameter.optional">
+            <!-- <span class="text-sm text-muted" *ngIf="parameter.optional">
               <i>(optional)</i>
-            </span>
+            </span> -->
 
             <!-- parameter description -->
             <div class="text-sm text-muted">{{parameter.description}}</div>
           </td>
 
           <!-- parameter value -->
+
           <td>
+
             <!-- selection parameter -->
             <select *ngIf="toolService.isSelectionParameter(parameter)" class="w-100" name="parameter_{{i}}"
-              [(ngModel)]="parameter.value" (ngModelChange)="validate()">
+              [(ngModel)]="parameter.value" (ngModelChange)="onParametersChanged()">
               <option *ngFor="let option of parameter.selectionOptions" value="{{option.id}}">
                 {{ option.displayName || option.id }}
               </option>
@@ -49,21 +51,20 @@
             <!-- number -->
             <input *ngIf="toolService.isNumberParameter(parameter)" class="w-100" type="number" [(ngModel)]="parameter.value"
               name="parameter_{{i}}" min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}"
-              required="{{!parameter.optional}}" (ngModelChange)="validate()" />
+              required="{{!parameter.optional}}" (ngModelChange)="onParametersChanged()" />
 
             <!-- string -->
             <input *ngIf="toolService.isStringParameter(parameter)" type="text" class="w-100" name="parameter_{{i}}"
-              [(ngModel)]="parameter.value" required="{{!parameter.optional}}" (ngModelChange)="validate()" />
+              [(ngModel)]="parameter.value" required="{{!parameter.optional}}" (ngModelChange)="onParametersChanged()" />
 
             <!-- validation message -->
-            <!-- FIXME both ? temp fix -->
-            <div *ngIf="!validationResults.get(parameter.name.id)?.valid" class="text-sm text-warning">{{validationResults.get(parameter.name.id)?.message}}</div>
+            <div *ngIf="!validatedTool.parameterResults.get(parameter.name.id).valid" class="text-sm text-warning">{{validatedTool.parameterResults.get(parameter.name.id).message}}</div>
           </td>
 
           <!-- buttons -->
           <td>
             <!-- reset to default -->
-            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right" [class.invisible]="!resetVisible(parameter)"
+            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right" [class.invisible]="!isResetVisible(parameter)"
               (click)="reset(parameter, $event)" title="Reset to default">
               <i class="fas fa-undo"></i>
             </button>

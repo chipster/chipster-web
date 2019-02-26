@@ -6,7 +6,6 @@ import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
 import { ToolSelectionService } from "../tool.selection.service";
 import { Subject } from "rxjs/Subject";
-import { ToolSelection } from "../tools/ToolSelection";
 import { Job } from "chipster-js-common";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -22,7 +21,8 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
   @Input()
   tools: Tool[];
 
-  public toolSelection: ToolSelection;
+  // FIXME after tool state refactoring
+  // public toolSelection: ToolSelection;
   public selectedDatasets: Array<Dataset>;
   public selectedJobs: Array<Job>;
 
@@ -38,40 +38,43 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     public sessionDataService: SessionDataService,
     private toolSelectionService: ToolSelectionService,
     public settingsService: SettingsService,
-    private errorService: ErrorService,
+    private errorService: ErrorService
   ) {}
 
   ngOnInit() {
-    this.toolSelectionService.toolSelection$
-      .takeUntil(this.unsubscribe)
-      .subscribe(toolSelection => {
-        this.toolSelection = toolSelection;
-        if (toolSelection) {
-          this.showTool = true;
-          this.showFile = false;
-          this.showJob = false;
-        }
-      }, err => this.errorService.showError("tool selection failed", err));
+    // FIXME after tool selection refactoring
+    // this.toolSelectionService.toolSelection$
+    //   .takeUntil(this.unsubscribe)
+    //   .subscribe(toolSelection => {
+    //     this.toolSelection = toolSelection;
+    //     if (toolSelection) {
+    //       this.showTool = true;
+    //       this.showFile = false;
+    //       this.showJob = false;
+    //     }
+    //   }, err => this.errorService.showError("tool selection failed", err));
 
-    this.selectionService.selectedDatasets$
-      .takeUntil(this.unsubscribe)
-      .subscribe((selectedDatasets: Array<Dataset>) => {
-        this.selectedDatasets = selectedDatasets;
-        if (this.selectedDatasets.length > 0) {
-          this.showFile = true;
-          this.showTool = false;
-          this.showJob = false;
-        } else {
-          this.showFile = false;
-          if (this.toolSelection) {
-            this.showTool = true;
-          }
-        }
-      }, err => this.errorService.showError("dataset selection failed", err));
+    // this.selectionService.selectedDatasets$
+    //   .takeUntil(this.unsubscribe)
+    //   .subscribe(
+    //     (selectedDatasets: Array<Dataset>) => {
+    //       this.selectedDatasets = selectedDatasets;
+    //       if (this.selectedDatasets.length > 0) {
+    //         this.showFile = true;
+    //         this.showTool = false;
+    //         this.showJob = false;
+    //       } else {
+    //         this.showFile = false;
+    //         if (this.toolSelection) {
+    //           this.showTool = true;
+    //         }
+    //       }
+    //     },
+    //     err => this.errorService.showError("dataset selection failed", err)
+    //   );
 
-    this.selectionService.selectedJobs$
-      .takeUntil(this.unsubscribe)
-      .subscribe((selectedJobs: Array<Job>) => {
+    this.selectionService.selectedJobs$.takeUntil(this.unsubscribe).subscribe(
+      (selectedJobs: Array<Job>) => {
         this.selectedJobs = selectedJobs;
         if (this.selectedJobs.length > 0) {
           this.showFile = false;
@@ -80,7 +83,9 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
         } else {
           this.showJob = false;
         }
-      }, err => this.errorService.showError("job selection failed", err));
+      },
+      err => this.errorService.showError("job selection failed", err)
+    );
   }
 
   ngOnDestroy() {

@@ -151,10 +151,9 @@ export class ToolService {
       let datasetsToBind: Dataset[] = [];
       if (compatibleDatasets.length > 0) {
         // pick the first or all if multi input
-        // datasetsToBind = this.isMultiInput(toolInput)
-        //   ? compatibleDatasets
-        //   : compatibleDatasets.slice(0, 1);
-        datasetsToBind = compatibleDatasets;
+        datasetsToBind = this.isMultiInput(toolInput)
+          ? compatibleDatasets
+          : compatibleDatasets.slice(0, 1);
       }
 
       // save binding
@@ -314,5 +313,29 @@ export class ToolService {
           )
         )
     );
+  }
+
+  // noinspection JSMethodCanBeStatic
+  getBindingsString(bindings: InputBinding[]) {
+    let s = "";
+    if (!bindings || bindings.length < 1) {
+      return s;
+    }
+
+    for (const binding of bindings) {
+      s += "\t";
+      const datasetsString: string = binding.datasets.reduce(
+        (a: string, b) => a + b.name + " ",
+        ""
+      );
+
+      s += binding.toolInput.name.id
+        ? binding.toolInput.name.id
+        : binding.toolInput.name.prefix;
+      s += " -> " + datasetsString;
+      s += "\n";
+    }
+
+    return s;
   }
 }

@@ -1,14 +1,8 @@
-import { SelectionService } from "../../selection.service";
-import { SessionDataService } from "../../session-data.service";
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import { Job, SessionEvent, Dataset } from "chipster-js-common";
-import { JobService } from "../../job.service";
-import { SessionEventService } from "../../session-event.service";
+import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs/Subject";
 import { SessionData } from "../../../../../model/session/session-data";
 import * as _ from "lodash";
-import { SelectionHandlerService } from "../../selection-handler.service";
-import { ToolSelection } from "../ToolSelection";
 
 @Component({
   selector: "ch-tool-details",
@@ -16,7 +10,8 @@ import { ToolSelection } from "../ToolSelection";
   styleUrls: ["./tool-details.component.less"]
 })
 export class ToolDetailsComponent implements OnInit, OnDestroy {
-  @Input() toolSelection: ToolSelection;
+  // FIXME after tool state refactoring
+  // @Input() toolSelection: ToolSelection;
   @Input() sessionData: SessionData;
   @Input() selectedDatasets: Array<Dataset>;
 

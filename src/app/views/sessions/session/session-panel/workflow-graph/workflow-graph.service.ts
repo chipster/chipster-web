@@ -1,7 +1,6 @@
 import Node from "./node";
 import { Injectable } from "@angular/core";
 
-
 /**
  * @desc Service functions needed to define the positions of the nodes and links
  *       in the workflowgraph graph
@@ -79,19 +78,29 @@ export class WorkflowGraphService {
     const rectBxMax = rectB.left + rectB.width;
     const rectByMax = rectB.top + rectB.height;
 
-    const x_overlap = Math.max(0, Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx));
-    const y_overlap = Math.max(0, Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy));
+    const x_overlap = Math.max(
+      0,
+      Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx)
+    );
+    const y_overlap = Math.max(
+      0,
+      Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy)
+    );
 
     const overlap = x_overlap * y_overlap;
-    if (overlap > 0) { return true; }
+    if (overlap > 0) {
+      return true;
+    }
 
     return false;
-
-
   }
 
-  isOverLappingWithCoord(topLeft: any, bottomRight: any, rectB: any, svgRect: any) {
-
+  isOverLappingWithCoord(
+    topLeft: any,
+    bottomRight: any,
+    rectB: any,
+    svgRect: any
+  ) {
     const rectAx = topLeft[0] + svgRect.left;
     const rectAy = topLeft[1] + svgRect.top;
     const rectAxMax = bottomRight[0] + svgRect.left;
@@ -102,17 +111,20 @@ export class WorkflowGraphService {
     const rectBxMax = rectB.left + rectB.width;
     const rectByMax = rectB.top + rectB.height;
 
-    const x_overlap = Math.max(0, Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx));
-    const y_overlap = Math.max(0, Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy));
+    const x_overlap = Math.max(
+      0,
+      Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx)
+    );
+    const y_overlap = Math.max(
+      0,
+      Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy)
+    );
 
     const overlap = x_overlap * y_overlap;
-    if (overlap > 0) { return true; }
+    if (overlap > 0) {
+      return true;
+    }
 
     return false;
-
   }
-
-
 }
-
-

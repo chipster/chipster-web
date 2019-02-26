@@ -3,14 +3,13 @@ import {
   Input,
   Output,
   EventEmitter,
-  OnChanges,
-  SimpleChanges
+  OnChanges
 } from "@angular/core";
-import { InputBinding, Tool, Dataset, ToolInput } from "chipster-js-common";
+import { Dataset, ToolInput } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ToolService } from "../tool.service";
+import { ValidatedTool } from "../ToolSelection";
 
 interface BindingModel {
   input: ToolInput;
@@ -25,42 +24,38 @@ interface BindingModel {
 })
 export class ToolInputsComponent implements OnChanges {
   @Input() sessionData: SessionData;
-  @Input() tool: Tool;
-  @Input() inputBindings: InputBinding[];
-  @Input() selectedDatasets: Dataset[];
+  @Input() validatedTool: ValidatedTool;
   @Output() updateBindings = new EventEmitter();
 
   bindingModels: BindingModel[];
+  ready = false;
 
   //noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService) {}
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes["inputBindings"]) {
+  ngOnChanges() {
+    if (this.validatedTool != null) {
+      this.ready = true;
       // create copy of the datasets property of each InputBinding as it's used as the model of the select
       // element in the template (and thus get's modified)
-
-      this.bindingModels = this.inputBindings.map(b => ({
+      this.bindingModels = this.validatedTool.inputBindings.map(b => ({
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
-        compatibleDatasets: this.selectedDatasets.filter((dataset: Dataset) =>
-          this.toolService.isCompatible(
-            this.sessionData,
-            dataset,
-            b.toolInput.type.name
-          )
+        compatibleDatasets: this.validatedTool.selectedDatasets.filter(
+          (dataset: Dataset) =>
+            this.toolService.isCompatible(
+              this.sessionData,
+              dataset,
+              b.toolInput.type.name
+            )
         )
       }));
-
-      log.info(
-        "new bindings:\n" +
-          this.getBindingsString(this.getBindingsArray(this.bindingModels))
-      );
+    } else {
+      this.ready = false;
     }
   }
 
   inputSelected(userEditedBinding: BindingModel) {
-    log.info("input selected");
     // generate new input bindings: remove from other bindings the datasets which are present in the binding
     // edited by the user
     const updatedBindings = this.bindingModels.map(bindingModel => {
@@ -79,44 +74,16 @@ export class ToolInputsComponent implements OnChanges {
         };
       }
     });
-
-    this.updateBindings.emit(updatedBindings);
-  }
-
-  private getBindingsArray(bindingModels: BindingModel[]) {
-    return bindingModels.map(bindingModel => {
-      return {
-        toolInput: bindingModel.input,
-        datasets: bindingModel.boundDatasets
-      };
+    this.updateBindings.emit({
+      tool: this.validatedTool.tool,
+      category: this.validatedTool.category,
+      module: this.validatedTool.module,
+      selectedDatasets: this.validatedTool.selectedDatasets,
+      inputBindings: updatedBindings
     });
   }
 
-  // noinspection JSMethodCanBeStatic
-  getBindingsString(bindings: InputBinding[]) {
-    let s = "";
-    if (!bindings || bindings.length < 1) {
-      return s;
-    }
-
-    for (const binding of bindings) {
-      s += "\t";
-      const datasetsString: string = binding.datasets.reduce(
-        (a: string, b) => a + b.name + " ",
-        ""
-      );
-
-      s += binding.toolInput.name.id
-        ? binding.toolInput.name.id
-        : binding.toolInput.name.prefix;
-      s += " -> " + datasetsString;
-      s += "\n";
-    }
-
-    return s;
-  }
-
-  public getDisplayName(obj) {
+  getDisplayName(obj) {
     return this.toolService.getDisplayName(obj);
   }
 }

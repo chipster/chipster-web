@@ -1,13 +1,18 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import {Store} from "@ngrx/store";
+import { Store } from "@ngrx/store";
 import {
-  TOGGLE_SELECTED_DATASET, CLEAR_DATASET_SELECTIONS,
+  TOGGLE_SELECTED_DATASET,
+  CLEAR_DATASET_SELECTIONS,
   SET_SELECTED_DATASETS
 } from "../../../state/selectedDatasets.reducer";
 import { Job } from "chipster-js-common";
-import {TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS} from "../../../state/selectedJobs.reducer";
-import {CLEAR_TOOL_SELECTION} from "../../../state/selected-tool.reducer";
+import {
+  TOGGLE_SELECTED_JOB,
+  CLEAR_JOB_SELECTIONS,
+  SET_SELECTED_JOBS
+} from "../../../state/selectedJobs.reducer";
+import { CLEAR_SELECTED_TOOL } from "../../../state/tool.reducer";
 
 /*
  * Functions for changing selection states. The state is stored in @ngrx/store.
@@ -15,9 +20,7 @@ import {CLEAR_TOOL_SELECTION} from "../../../state/selected-tool.reducer";
  */
 @Injectable()
 export class SelectionHandlerService {
-
-  constructor(private store: Store<any>) {
-  }
+  constructor(private store: Store<any>) {}
 
   /*
    * @description: clear dataset & job & tool selections from store
@@ -33,25 +36,25 @@ export class SelectionHandlerService {
    */
   setDatasetSelection(datasets: Array<Dataset>): void {
     this.clearJobSelection();
-    this.store.dispatch({type: SET_SELECTED_DATASETS, payload: datasets});
+    this.store.dispatch({ type: SET_SELECTED_DATASETS, payload: datasets });
   }
 
   /*
    * @description: for each dataset-item in datasets: add dataset to store if it's not there and otherwise remove it
    */
   toggleDatasetSelection(datasets: Array<Dataset>): void {
-    this.store.dispatch({type: TOGGLE_SELECTED_DATASET, payload: datasets});
+    this.store.dispatch({ type: TOGGLE_SELECTED_DATASET, payload: datasets });
   }
 
   clearDatasetSelection(): void {
-    this.store.dispatch({type: CLEAR_DATASET_SELECTIONS});
+    this.store.dispatch({ type: CLEAR_DATASET_SELECTIONS });
   }
 
   /*
    * @description: clear all selections and set new job selection to store
    */
   setJobSelection(jobs: Array<Job>): void {
-    this.store.dispatch({type: SET_SELECTED_JOBS, payload: jobs});
+    this.store.dispatch({ type: SET_SELECTED_JOBS, payload: jobs });
   }
 
   /*
@@ -59,15 +62,14 @@ export class SelectionHandlerService {
    */
   // noinspection JSUnusedGlobalSymbols
   toggleJobSelection(jobs: Array<Job>): void {
-    this.store.dispatch({type: TOGGLE_SELECTED_JOB, payload: jobs});
+    this.store.dispatch({ type: TOGGLE_SELECTED_JOB, payload: jobs });
   }
 
   clearJobSelection(): void {
-    this.store.dispatch({type: CLEAR_JOB_SELECTIONS});
+    this.store.dispatch({ type: CLEAR_JOB_SELECTIONS });
   }
 
   clearToolSelection() {
-    this.store.dispatch({type: CLEAR_TOOL_SELECTION});
+    this.store.dispatch({ type: CLEAR_SELECTED_TOOL });
   }
-
 }
