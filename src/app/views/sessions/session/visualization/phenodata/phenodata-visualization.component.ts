@@ -24,6 +24,7 @@ import { ViewChild } from "@angular/core";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { Subject } from "rxjs/Subject";
 
 @Component({
   selector: "ch-phenodata-visualization",
@@ -46,6 +47,8 @@ export class PhenodataVisualizationComponent
   deferredUpdatesTimerId: number | null = null;
   unremovableColumns = ["sample", "original_name", "dataset", "column"];
 
+  private unsubscribe: Subject<any> = new Subject();
+
   constructor(
     private sessionDataService: SessionDataService,
     private tsvReader: TSVReader,
@@ -55,7 +58,7 @@ export class PhenodataVisualizationComponent
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService,
-    private errorService: ErrorService,
+    private errorService: ErrorService
   ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
@@ -64,9 +67,15 @@ export class PhenodataVisualizationComponent
     this.updateView();
 
     // update view if someone else has edited the phenodata
-    this.sessionEventService.getDatasetStream().subscribe(() => {
-      this.updateViewLater();
-    }, err => this.errorService.showError("phenodata update failed", err));
+    this.sessionEventService
+      .getDatasetStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(
+        () => {
+          this.updateViewLater();
+        },
+        err => this.errorService.showError("phenodata update failed", err)
+      );
   }
 
   ngAfterViewInit() {
@@ -89,6 +98,9 @@ export class PhenodataVisualizationComponent
   }
 
   ngOnDestroy() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+
     if (this.hot) {
       this.zone.runOutsideAngular(() => {
         this.hot.destroy();
@@ -220,18 +232,21 @@ export class PhenodataVisualizationComponent
           return Utils.startsWith(header, "chip.");
         });
 
-        chipHeaders.forEach(fileHeader => {
-          metadata.push(<MetadataEntry>{
-            column: fileHeader,
-            key: "sample",
-            value: fileHeader.replace("chip.", "")
-          });
-          metadata.push(<MetadataEntry>{
-            column: fileHeader,
-            key: "group",
-            value: null
-          });
-        }, err => this.restErrorService.showError("file reading failed", err));
+        chipHeaders.forEach(
+          fileHeader => {
+            metadata.push(<MetadataEntry>{
+              column: fileHeader,
+              key: "sample",
+              value: fileHeader.replace("chip.", "")
+            });
+            metadata.push(<MetadataEntry>{
+              column: fileHeader,
+              key: "group",
+              value: null
+            });
+          },
+          err => this.restErrorService.showError("file reading failed", err)
+        );
 
         dataset.metadata = metadata;
 
