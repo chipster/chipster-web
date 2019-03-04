@@ -75,7 +75,7 @@ export class ToolSelectionService {
       this.parameterHasValue(parameter) &&
       parameter.type === "STRING"
     ) {
-      // this regex should be same than that on the server side
+      // this regex should be same as that on the server side
       // uglifyjs fails if using literal reg exp
       // unlike with the java version on the server side
       // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
