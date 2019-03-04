@@ -15,7 +15,7 @@ import {
   ParameterValidationResult,
   SelectedToolWithValidatedInputs
 } from "./ToolSelection";
-import { Job, Module, Tool, Category, InputBinding } from "chipster-js-common";
+import { Job, Module, Tool, Category } from "chipster-js-common";
 import { Subject } from "rxjs/Subject";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ToolSelectionService } from "../tool.selection.service";

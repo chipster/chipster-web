@@ -71,6 +71,17 @@ export class ToolSelectionService {
           message: "Value must be less than or equal to " + parameter.to
         };
       }
+    } else if (
+      this.parameterHasValue(parameter) &&
+      parameter.type === "STRING"
+    ) {
+      const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
+      return result === null
+        ? { valid: true }
+        : {
+            valid: false,
+            message: "Illegal character '" + result[0] + "'"
+          };
     }
 
     return { valid: true };
