@@ -75,6 +75,7 @@ export class ToolSelectionService {
       this.parameterHasValue(parameter) &&
       parameter.type === "STRING"
     ) {
+      // this regex should be same than that on the server side
       const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
       return result === null
         ? { valid: true }
