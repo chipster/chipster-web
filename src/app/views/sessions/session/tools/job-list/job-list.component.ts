@@ -21,6 +21,7 @@ export class JobListComponent implements OnChanges {
   }
 
   ngOnChanges() {
+    console.log("job has changed");
     this.jobsSorted = this.jobs.sort((a, b) => {
       const d1 = new Date(a.created).getTime();
       const d2 = new Date(b.created).getTime();
@@ -40,10 +41,13 @@ export class JobListComponent implements OnChanges {
   calculateDuration(startTime, endTime) {
     let duration = "";
     if (startTime != null && endTime != null) {
-      let computingTime = UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
+      const computingTime = UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
       if (computingTime > 1000) {
         duration = UtilsService.convertMS(computingTime);
-      } else duration = computingTime.toString() + "ms";
+      } else {
+        duration = computingTime.toString() + "ms";
+      }
+
 
       return duration;
     }

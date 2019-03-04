@@ -8,7 +8,7 @@ import { Subject } from 'rxjs/Subject';
 import { SessionData } from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
 import UtilsService from '../../../../../shared/utilities/utils';
-import {SelectionHandlerService} from '../../selection-handler.service';
+import { SelectionHandlerService } from '../../selection-handler.service';
 import { ErrorService } from '../../../../../core/errorhandler/error.service';
 
 @Component({
@@ -25,7 +25,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
-  duration: string = "";
+  duration = "";
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -36,7 +36,7 @@ export class JobComponent implements OnInit, OnDestroy {
     private sessionEventService: SessionEventService,
     private errorService: ErrorService,
   ) {
-}
+  }
 
   ngOnInit() {
 
@@ -72,10 +72,13 @@ export class JobComponent implements OnInit, OnDestroy {
         this.state = _.capitalize(job.state);
         this.screenOutput = job.screenOutput;
         if (this.job.startTime != null && this.job.endTime != null) {
-          let computingTime =UtilsService.parseISOStringToDate(this.job.endTime).getTime() - UtilsService.parseISOStringToDate(this.job.startTime).getTime();
-          if( computingTime > 1000){
+          const computingTime = UtilsService.parseISOStringToDate(this.job.endTime).getTime() -
+            UtilsService.parseISOStringToDate(this.job.startTime).getTime();
+          if (computingTime > 1000) {
             this.duration = UtilsService.convertMS(computingTime);
-          } else this.duration = computingTime.toString() + "ms";
+          } else {
+            this.duration = computingTime.toString() + "ms";
+          }
         }
 
         return;
@@ -101,7 +104,7 @@ export class JobComponent implements OnInit, OnDestroy {
 
   cancelJob() {
     this.sessionDataService.cancelJob(this.job);
-  }  
+  }
 
 }
 
