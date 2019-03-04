@@ -76,7 +76,12 @@ export class ToolSelectionService {
       parameter.type === "STRING"
     ) {
       // this regex should be same than that on the server side
-      const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
+      // uglifyjs fails if using literal reg exp
+      // unlike with the java version on the server side
+      // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
+      const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:\\.,*() -]", "u");
+      const result = regexp.exec(<string>parameter.value);
+
       return result === null
         ? { valid: true }
         : {
