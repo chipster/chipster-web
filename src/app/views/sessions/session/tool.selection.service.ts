@@ -14,7 +14,7 @@ import { SessionData } from "../../../model/session/session-data";
 
 @Injectable()
 export class ToolSelectionService {
-  constructor(private toolService: ToolService) {}
+  constructor(private toolService: ToolService) { }
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
@@ -75,13 +75,14 @@ export class ToolSelectionService {
       this.parameterHasValue(parameter) &&
       parameter.type === "STRING"
     ) {
-      const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
+      // const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
+      const result = "";
       return result === null
         ? { valid: true }
         : {
-            valid: false,
-            message: "Illegal character '" + result[0] + "'"
-          };
+          valid: false,
+          message: "Illegal character '" + result[0] + "'"
+        };
     }
 
     return { valid: true };
@@ -164,7 +165,7 @@ export class ToolSelectionService {
         ).map((datasetsHeaders: Array<Array<string>>) => {
           const columns = _.uniq(_.flatten(datasetsHeaders));
 
-          parameter.selectionOptions = columns.map(function(column) {
+          parameter.selectionOptions = columns.map(function (column) {
             return { id: column };
           });
           this.setColumnSelectionParameterValueAfterPopulate(parameter);
@@ -174,7 +175,7 @@ export class ToolSelectionService {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService
           .getMetadataColumns(datasets)
-          .map(function(column) {
+          .map(function (column) {
             return { id: column };
           });
 

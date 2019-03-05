@@ -1,14 +1,14 @@
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {ConfigService} from "../../../shared/services/config.service";
-import {JobHistory, Role} from "chipster-js-common";
-import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
-import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
-import {FormGroup, FormBuilder, FormControl, FormArray} from "@angular/forms";
-import {HttpParams} from "@angular/common/http";
-import {FilterParam} from "./FilterParam";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {JobOutputModalComponent} from "./joboutputmodal.component";
-import {TokenService} from "../../../core/authentication/token.service";
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ConfigService } from "../../../shared/services/config.service";
+import { JobHistory, Role } from "chipster-js-common";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
+import { FormGroup, FormBuilder, FormControl, FormArray } from "@angular/forms";
+import { HttpParams } from "@angular/common/http";
+import { FilterParam } from "./FilterParam";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { JobOutputModalComponent } from "./joboutputmodal.component";
+import { TokenService } from "../../../core/authentication/token.service";
 
 
 @Component({
@@ -34,11 +34,11 @@ export class HistoryComponent implements OnInit {
 
 
   constructor(private configService: ConfigService,
-              private errorHandlerService: RestErrorService,
-              private auhtHttpClient: AuthHttpClientService,
-              private formBuilder: FormBuilder,
-              private modalService: NgbModal,
-              private tokenService: TokenService) {
+    private errorHandlerService: RestErrorService,
+    private auhtHttpClient: AuthHttpClientService,
+    private formBuilder: FormBuilder,
+    private modalService: NgbModal,
+    private tokenService: TokenService) {
   }
 
   ngOnInit() {
@@ -64,12 +64,11 @@ export class HistoryComponent implements OnInit {
     this.selectedFilterAttribute = this.jobFilterAttributeSet[0];
 
     this.selectAttributeForm.valueChanges.subscribe(() => {
-      console.log(this.selectAttributeForm.value);
+      // console.log(this.selectAttributeForm.value);
     });
   }
 
   public OnSubmit(formValue: any) {
-    console.log("submit is called");
     this.filterAttributeSet = [];
     this.page = 1;
     this.jobNumber = 0;
@@ -82,8 +81,7 @@ export class HistoryComponent implements OnInit {
     const arrayControl = this.filteredSearchForm.get('items') as FormArray;
     for (let i = 0; i < arrayControl.length; i++) {
       const filterParam = new FilterParam();
-      console.log(this.checkIfValue (arrayControl.value[i].selectedAttribute));
-      if (this.checkIfValue (arrayControl.value[i].selectedAttribute)) {
+      if (this.checkIfValue(arrayControl.value[i].selectedAttribute)) {
         filterParam.name = arrayControl.value[i].selectedAttribute;
         if (arrayControl.value[i].value) {
           filterParam.value = arrayControl.value[i].value;
@@ -96,7 +94,6 @@ export class HistoryComponent implements OnInit {
     const startDateControl = this.startTimeInputForm.get('startDateInput');
     const startTimeControl = this.startTimeInputForm.get('startTimeInput');
 
-    console.log( startDateControl.value , startTimeControl.value);
     if (startDateControl.value && startTimeControl.value) {
       const filterParam = new FilterParam();
       filterParam.name = "startTime=gt";
@@ -121,10 +118,9 @@ export class HistoryComponent implements OnInit {
     let params = new HttpParams();
     // first set the page number for which getting the record
     params = params.append("page", this.page.toString());
-    console.log("fetching new set of records ");
     for (let i = 0; i < this.filterAttributeSet.length; i++) {
       if (this.filterAttributeSet[i].name !== "" && this.filterAttributeSet[i].name !== null
-      &&  this.filterAttributeSet[i].name !== undefined) {
+        && this.filterAttributeSet[i].name !== undefined) {
         params = params.append(this.filterAttributeSet[i].name, this.filterAttributeSet[i].value);
       }
     }
@@ -132,11 +128,10 @@ export class HistoryComponent implements OnInit {
       .flatMap(service => {
         return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory/rowcount', params);
       })
-      .subscribe((recordNumber ) => {
-          console.log( " total record num ", recordNumber);
-          this.jobNumber = recordNumber;
-          this.collectionSize =   Math.ceil(recordNumber / 500) * 10;
-          this.getJobByParam();
+      .subscribe((recordNumber) => {
+        this.jobNumber = recordNumber;
+        this.collectionSize = Math.ceil(recordNumber / 500) * 10;
+        this.getJobByParam();
       }, err => this.errorHandlerService.showError('get job numbers failed', err));
   }
 
@@ -144,11 +139,9 @@ export class HistoryComponent implements OnInit {
     let params = new HttpParams();
     // first set the page number for which getting the record
     params = params.append("page", this.page.toString());
-    console.log(this.filterAttributeSet);
     for (let i = 0; i < this.filterAttributeSet.length; i++) {
-      if (this.filterAttributeSet[i].name !== null &&  this.filterAttributeSet[i].name !== undefined
+      if (this.filterAttributeSet[i].name !== null && this.filterAttributeSet[i].name !== undefined
         && this.filterAttributeSet[i].name !== "") {
-        console.log(this.filterAttributeSet[i].name);
         params = params.append(this.filterAttributeSet[i].name, this.filterAttributeSet[i].value);
       }
     }
@@ -161,9 +154,8 @@ export class HistoryComponent implements OnInit {
         this.jobHistoryListWithParam = [];
         this.jobHistoryListWithParam = jobHistoryList;
         this.filterAttributeSet = [];
-        console.log ( this.jobHistoryListWithParam.length );
         if (this.jobHistoryListWithParam.length < 1) {
-          alert ("No results found");
+          alert("No results found");
         }
       }, err => this.errorHandlerService.showError('get clients failed', err));
   }
@@ -177,12 +169,11 @@ export class HistoryComponent implements OnInit {
   }
 
   openJobOutputModal(jobhistory: JobHistory) {
-    const modalRef = this.modalService.open(JobOutputModalComponent, {size: 'lg'});
+    const modalRef = this.modalService.open(JobOutputModalComponent, { size: 'lg' });
     modalRef.componentInstance.output = jobhistory.output;
   }
 
   onPageChange(page) {
-    console.log( " page has changed " + page);
     this.page = page;
     this.getFormControlValues();
     this.getJobByParam();
@@ -215,7 +206,7 @@ export class HistoryComponent implements OnInit {
 
   checkIfValue(x: any): boolean {
     console.log(x);
-    if ( x || x !== undefined || x != null || x !== '' ) {
+    if (x || x !== undefined || x != null || x !== '') {
       return true;
     } else {
       return false;

@@ -9,7 +9,7 @@
 </div>
 
 <table class="table table-hover table-sm text-sm">
-  <tr valign="center" *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)"
+  <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)"
     [class.bg-primary]="selectionService.isSelectedJobById(job.jobId)"
     [class.text-white]="selectionService.isSelectedJobById(job.jobId)">
     <td>{{job.toolName}}</td>
@@ -17,10 +17,14 @@
       | localDate}} </td>
     <td>{{job.state}}</td>
     <td>{{calculateDuration(job.startTime,job.endTime)}}</td>
-    <td class="text-sm" style="padding-left:10px">
-      <button class="btn-link btn-small" *ngIf="job.state ==='RUNNING'|| job.state ==='NEW'"
-        style="font-size:12px;padding-left:10px" (click)="cancelJob()">cancel</button>
+    <td valign="top" style="padding-left:10px" *ngIf="job.state ==='RUNNING'|| job.state ==='NEW';else blankTemplate">
+      <button class="btn btn-link" style="font-size:12px;padding-left:10px"
+        (click)="$event.stopImmediatePropagation();cancelJob(job)">cancel</button>
     </td>
   </tr>
+
+  <ng-template #blankTemplate>
+    <td style="padding-left:10px">&nbsp;</td>
+  </ng-template>
 
 </table>
