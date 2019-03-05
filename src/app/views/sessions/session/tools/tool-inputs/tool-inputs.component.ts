@@ -86,4 +86,10 @@ export class ToolInputsComponent implements OnChanges {
   getDisplayName(obj) {
     return this.toolService.getDisplayName(obj);
   }
+
+  getPhenodataInputs() {
+    return this.validatedTool.tool.inputs.filter(
+      (input: ToolInput) => input.meta
+    );
+  }
 }

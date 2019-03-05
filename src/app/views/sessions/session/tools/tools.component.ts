@@ -368,8 +368,18 @@ export class ToolsComponent implements OnInit, OnDestroy {
           toolWithInputs,
           this.sessionData
         );
+
+        // don't try to validate phenodata unless inputs are valid
+        const phenodataValid = inputsValid
+          ? this.toolSelectionService.validatePhenodata(toolWithInputs)
+          : false;
+
         return Object.assign(
-          { inputsValid: inputsValid, runForEachValid: runForEachValid },
+          {
+            inputsValid: inputsValid,
+            runForEachValid: runForEachValid,
+            phenodataValid: phenodataValid
+          },
           toolWithInputs
         );
       })
@@ -417,13 +427,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
         );
         const validationMessage = this.toolSelectionService.getValidationMessage(
           parametersValid,
-          toolWithParamsAndValidatedInputs.inputsValid
+          toolWithParamsAndValidatedInputs.inputsValid,
+          toolWithParamsAndValidatedInputs.phenodataValid
         );
 
         return Object.assign(
           {
             valid:
-              toolWithParamsAndValidatedInputs.inputsValid && parametersValid,
+              toolWithParamsAndValidatedInputs.inputsValid &&
+              toolWithParamsAndValidatedInputs.phenodataValid &&
+              parametersValid,
             parametersValid: parametersValid,
             message: validationMessage,
             parameterResults: parameterValidations

@@ -12,33 +12,20 @@ export interface SelectedTool {
   module: Module;
 }
 
-export interface SelectedToolWithInputs {
-  tool: Tool;
-  category: Category;
-  module: Module;
+export interface SelectedToolWithInputs extends SelectedTool {
   inputBindings: Array<InputBinding>;
   selectedDatasets: Array<Dataset>;
 }
 
-export interface SelectedToolWithValidatedInputs {
-  tool: Tool;
-  category: Category;
-  module: Module;
-  inputBindings: Array<InputBinding>;
-  selectedDatasets: Array<Dataset>;
+export interface SelectedToolWithValidatedInputs
+  extends SelectedToolWithInputs {
   inputsValid: boolean;
   runForEachValid: boolean;
+  phenodataValid: boolean;
 }
-export interface ValidatedTool {
-  tool: Tool;
-  category: Category;
-  module: Module;
-  inputBindings: Array<InputBinding>;
-  selectedDatasets: Array<Dataset>;
+export interface ValidatedTool extends SelectedToolWithValidatedInputs {
   valid: boolean;
   parametersValid: boolean;
-  inputsValid: boolean;
-  runForEachValid: boolean;
   message?: string;
   parameterResults?: Map<string, ParameterValidationResult>;
 }

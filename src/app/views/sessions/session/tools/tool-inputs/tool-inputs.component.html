@@ -58,4 +58,25 @@
     </tbody>
   </table>
   <!-- </form> -->
+
+  <h2 *ngIf="getPhenodataInputs().length > 0" class="h2-xs mt-3 mb-2">Phenodata</h2>
+  <table class="table table-sm" *ngIf="bindingModels.length > 0">
+    <tbody *ngIf="!validatedTool.phenodataValid">
+      <tr *ngIf="!validatedTool.inputsValid">
+        <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
+      </tr>
+
+      <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
+        <td class="text-sm text-warning">No phenodata for</td>
+        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="validatedTool.phenodataValid">
+      <tr *ngFor="let phenodataInput of getPhenodataInputs()">
+        <!-- <td>{{getDisplayName(phenodataInput)}}</td> -->
+        <td style="width: 60%">Using phenodata of</td>
+        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
