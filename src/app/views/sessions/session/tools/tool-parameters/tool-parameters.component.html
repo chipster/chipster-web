@@ -8,8 +8,8 @@
     </span>
 
     <!-- close button -->
-    <button class="btn btn-xs float-right p-0" (click)="closeDropDownDialog()">
-      <i class="fas fa-times"></i>
+    <button type="button" id="close-button" class="close" aria-label="Close" (click)="closeDropDownDialog()">
+      <span aria-hidden="true">&times;</span>
     </button>
   </div>
 
@@ -49,23 +49,27 @@
             </select>
 
             <!-- number -->
-            <input *ngIf="toolService.isNumberParameter(parameter)" class="w-100" type="number" [(ngModel)]="parameter.value"
-              name="parameter_{{i}}" min="{{parameter.from}}" max="{{parameter.to}}" step="{{toolService.getStepSize(parameter)}}"
-              required="{{!parameter.optional}}" (ngModelChange)="onParametersChanged()" />
+            <input *ngIf="toolService.isNumberParameter(parameter)" class="w-100" type="number"
+              [(ngModel)]="parameter.value" name="parameter_{{i}}" min="{{parameter.from}}" max="{{parameter.to}}"
+              step="{{toolService.getStepSize(parameter)}}" required="{{!parameter.optional}}"
+              (ngModelChange)="onParametersChanged()" />
 
             <!-- string -->
             <input *ngIf="toolService.isStringParameter(parameter)" type="text" class="w-100" name="parameter_{{i}}"
-              [(ngModel)]="parameter.value" required="{{!parameter.optional}}" (ngModelChange)="onParametersChanged()" />
+              [(ngModel)]="parameter.value" required="{{!parameter.optional}}"
+              (ngModelChange)="onParametersChanged()" />
 
             <!-- validation message -->
-            <div *ngIf="!validatedTool.parameterResults.get(parameter.name.id).valid" class="text-sm text-warning">{{validatedTool.parameterResults.get(parameter.name.id).message}}</div>
+            <div *ngIf="!validatedTool.parameterResults.get(parameter.name.id).valid" class="text-sm text-warning">
+              {{validatedTool.parameterResults.get(parameter.name.id).message}}</div>
           </td>
 
           <!-- buttons -->
           <td>
             <!-- reset to default -->
-            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right" [class.invisible]="!isResetVisible(parameter)"
-              (click)="reset(parameter, $event)" title="Reset to default">
+            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right"
+              [class.invisible]="!isResetVisible(parameter)" (click)="reset(parameter, $event)"
+              title="Reset to default">
               <i class="fas fa-undo"></i>
             </button>
           </td>

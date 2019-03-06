@@ -3,8 +3,9 @@
     <div class="text-sm" style="text-align: center"><i>Click on job for details</i></div>
   </div>
   <div class="col col-md-3">
-    <button class="btn btn-small" style="float: right" (click)="closeDropDown()">
-      <i class="fas fa-window-close"></i></button>
+    <button type="button" id="close-button" class="close" aria-label="Close" (click)="closeDropDown()">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
 </div>
 
