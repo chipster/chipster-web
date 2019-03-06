@@ -4,17 +4,25 @@ import {
   SelectedToolWithValidatedInputs,
   ParameterValidationResult
 } from "./tools/ToolSelection";
-import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
+import {
+  InputBinding,
+  ToolParameter,
+  Dataset,
+  ToolInput
+} from "chipster-js-common";
 import { Observable } from "rxjs";
 import { ToolService } from "./tools/tool.service";
 import * as _ from "lodash";
 import { forkJoin, of } from "rxjs";
-import log from "loglevel";
 import { SessionData } from "../../../model/session/session-data";
+import { DatasetService } from "./dataset.service";
 
 @Injectable()
 export class ToolSelectionService {
-  constructor(private toolService: ToolService) { }
+  constructor(
+    private toolService: ToolService,
+    private datasetService: DatasetService
+  ) { }
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
@@ -75,8 +83,13 @@ export class ToolSelectionService {
       this.parameterHasValue(parameter) &&
       parameter.type === "STRING"
     ) {
-      // const result = /[^\p{L}\p{N}\-+_:\.,*() ]/u.exec(<string>parameter.value);
-      const result = "";
+      // this regex should be same as that on the server side
+      // uglifyjs fails if using literal reg exp
+      // unlike with the java version on the server side
+      // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
+      const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:\\.,*() -]", "u");
+      const result = regexp.exec(<string>parameter.value);
+
       return result === null
         ? { valid: true }
         : {
@@ -191,10 +204,47 @@ export class ToolSelectionService {
     if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
       return true;
     } else {
+      // phenodata inputs are not included in the bindings, so no need to deal with them
       return toolWithInputs.inputBindings.every((binding: InputBinding) => {
         return binding.toolInput.optional || binding.datasets.length > 0;
       });
     }
+  }
+
+  validatePhenodata(toolWithInputs: SelectedToolWithInputs): boolean {
+    if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
+      return true;
+    }
+
+    // if no pheondata inputs, return true;
+    if (!toolWithInputs.tool.inputs.some((input: ToolInput) => input.meta)) {
+      return true;
+    }
+
+    // for now, the first bound dataset must have some metadata
+    return (
+      toolWithInputs.inputBindings[0].datasets.length > 0 &&
+      this.datasetService.hasPhenodata(
+        toolWithInputs.inputBindings[0].datasets[0]
+      )
+    );
+
+    // // get group 'column' values
+    // const groupEntries: Array<
+    //   MetadataEntry
+    // > = toolWithInputs.inputBindings[0].datasets[0].metadata.filter(
+    //   (entry: MetadataEntry) => entry.key === "group"
+    // );
+
+    // // check if group 'column' exists and that every row has value for it
+    // if (groupEntries.length < 1) {
+    //   return false;
+    // } else {
+    //   return groupEntries.every(
+    //     (entry: MetadataEntry) =>
+    //       entry.value != null && entry.value.trim().length > 0
+    //   );
+    // }
   }
 
   validateRunForEach(
@@ -217,13 +267,21 @@ export class ToolSelectionService {
     );
   }
 
-  getValidationMessage(parametersValid: boolean, inputsValid: boolean): string {
+  getValidationMessage(
+    parametersValid: boolean,
+    inputsValid: boolean,
+    phenodataValid: boolean
+  ): string {
     if (!parametersValid && !inputsValid) {
       return "Invalid parameters and missing input files";
+    } else if (!parametersValid && !phenodataValid) {
+      return "Invalid parameters and missing phenodata";
     } else if (!parametersValid) {
       return "Invalid parameters";
     } else if (!inputsValid) {
       return "Missing input files";
+    } else if (!phenodataValid) {
+      return "Missing phenodata";
     } else {
       return "";
     }

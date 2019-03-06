@@ -134,8 +134,10 @@ export class ToolService {
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
 
-    // sort inputs to determine binding order
-    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool);
+    // sort inputs to determine binding order, also filter out phenodata inputs
+    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool).filter(
+      (input: ToolInput) => !input.meta
+    );
 
     // temp map
     const bindingsMap = new Map<ToolInput, Dataset[]>();
@@ -163,13 +165,15 @@ export class ToolService {
       unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
     }
 
-    // return bindings in the same order as the original tool inputs
-    return tool.inputs.map((toolInput: ToolInput) => {
-      return {
-        toolInput: toolInput,
-        datasets: bindingsMap.get(toolInput)
-      };
-    });
+    // return bindings in the same order as the original tool input, skip phenodata
+    return tool.inputs
+      .filter((input: ToolInput) => !input.meta)
+      .map((toolInput: ToolInput) => {
+        return {
+          toolInput: toolInput,
+          datasets: bindingsMap.get(toolInput)
+        };
+      });
   }
 
   //noinspection JSMethodCanBeStatic

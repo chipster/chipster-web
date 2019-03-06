@@ -25,6 +25,7 @@ import { SessionService } from "./session.service";
 import { SessionDetailsComponent } from "./session-details/session-details.component";
 import { UserEventService } from "../user-event.service";
 import { RouterModule } from "@angular/router";
+import { DatasetService } from "./dataset.service";
 
 @NgModule({
   imports: [
@@ -57,7 +58,8 @@ import { RouterModule } from "@angular/router";
     ToolSelectionService,
     JobService,
     ModifiedSessionGuard,
-    UserEventService
+    UserEventService,
+    DatasetService
   ],
   entryComponents: [JobErrorModalComponent, ImportSessionModalComponent]
 })
