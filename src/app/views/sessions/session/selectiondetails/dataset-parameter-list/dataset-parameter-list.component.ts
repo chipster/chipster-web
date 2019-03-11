@@ -69,7 +69,11 @@ export class DatasetParameterListComponent implements OnChanges {
   }
 
   showWithTool(parameters: JobParameter[], tool: Tool) {
+
+    console.log(parameters, tool);
     this.isDefaultValueMap = new Map();
+
+    console.log("in parameter list");
 
     parameters.forEach(jobParameter => {
       const clone = _.clone(jobParameter);
@@ -111,6 +115,7 @@ export class DatasetParameterListComponent implements OnChanges {
         }
       }
       this.isDefaultValueMap.set(clone, isDefault);
+      console.log(this.isDefaultValueMap.set(clone, isDefault));
       this.parameterListForView.push(clone);
     });
 

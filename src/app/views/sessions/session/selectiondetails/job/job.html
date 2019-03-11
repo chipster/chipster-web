@@ -21,7 +21,7 @@
       <table class="table table-sm text-sm">
         <tr>
           <td class="lighter">Status: </td>
-          <td class="wide-max" >{{state}}</td>
+          <td class="wide-max">{{state}}</td>
           <span *ngIf="isRunning && job.stateDetail">({{job.stateDetail}})</span>
           <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
         </tr>
@@ -37,9 +37,9 @@
           <td class="lighter">Ended:</td>
           <td>{{job.endTime | localDate}}</td>
         </tr>
-        <tr *ngIf = "duration.length > 0">
+        <tr *ngIf="duration.length > 0">
           <td class="lighter">Duration:</td>
-          <td >{{duration}}</td>
+          <td>{{duration}}</td>
         </tr>
         <tr *ngIf="failed">
           <td class="lighter" style="white-space: nowrap">Error message:</td>
@@ -49,9 +49,8 @@
         </tr>
         <tr *ngIf="job.parameters.length > 0">
           <td><b>Parameters</b></td>
-        </tr>
         <tr *ngFor="let param of job.parameters">
-          <td class= "lighter" style="white-space: nowrap">
+          <td class="lighter" style="white-space: nowrap">
             <div *ngIf="param.displayName;then paramName; else ParamID"></div>
             <ng-template #paramName>
               <span>{{param.displayName}}</span>
@@ -60,25 +59,27 @@
               <span>{{param.parameterId}}</span>
             </ng-template>
           </td>
-          <td class="wide-max" width="100%">{{param.value}}</td>
+          <td class="wide-max" width="100%" style="color:steelblue">{{param.value}}</td>
         </tr>
-        <tr *ngIf="job.inputs.length>0"><td><b>Inputs</b></td></tr>
+        <tr *ngIf="job.inputs.length>0">
+          <td><b>Inputs</b></td>
+        </tr>
         <tr *ngFor="let input of job.inputs">
-          <td  class = "lighter" style="white-space: nowrap">{{input.inputId}}</td>
+          <td class="lighter" style="white-space: nowrap">{{input.inputId}}</td>
           <td class="wide-max" width="100%">{{input.displayName}}</td>
         </tr>
       </table>
     </div>
 
-    <div class= "card" style="width:100% ;margin-top: 30px">
-      <div class= "card-body">
+    <div class="card" style="width:100% ;margin-top: 30px">
+      <div class="card-body">
         <h6>Screen Output</h6>
         <p class="card-text text-sm">
           <pre style="margin-bottom: 0em">{{screenOutput}}</pre>
           <i *ngIf="isRunning" class="fas fa-circle-o-notch fa-spin fa-fw"></i>
-        </div>
       </div>
+    </div>
 
-  
+
 
   </div>

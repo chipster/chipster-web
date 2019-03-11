@@ -105,7 +105,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   nodeWidth: number = this.workflowGraphService.nodeWidth;
   nodeHeight: number = this.workflowGraphService.nodeHeight;
   fontSize = 14;
-  nodeRadius = 4;
+  nodeRadius = 12;
   width: number;
   height: number;
 
@@ -515,8 +515,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("ry", this.nodeRadius)
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
+      .attr('stroke', d => d.color)
+      .attr('stroke-width', '2')
       .attr("pointer-events", "all")
-      .style("fill", d => d.color)
+      .style("fill", "white")
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
           !this.filter || this.filter.has(d.datasetId)

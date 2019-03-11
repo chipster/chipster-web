@@ -1,12 +1,13 @@
 <table class="table table-sm text-sm">
-  <tr *ngFor="let param of parameterListForView; let i = index" [ngStyle]="{'color': isDefaultValueMap.get(param)? 'gray' : 'black'}">
+  <tr *ngFor="let param of parameterListForView; let i = index"
+    [ngStyle]="{'color': isDefaultValueMap.get(param)? 'Steel Blue' : 'black'}">
     <ng-template [ngIf]="i < limit">
       <td [ngClass]="{'no-top-border': i===0}">{{param.displayName}}</td>
       <td [ngClass]="{'no-top-border': i===0}">{{param.value}}</td>
     </ng-template>
   </tr>
   <tr *ngIf="!noLimit && parameterListForView.length > defaultLimit">
-    <td  colspan="2">
+    <td colspan="2">
       <ch-link-button (click)="toggleParameterList()">{{buttonText}}</ch-link-button>
     </td>
   </tr>
