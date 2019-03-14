@@ -14,6 +14,9 @@ import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
 import { ConfigService } from "../../../../shared/services/config.service";
 import log from "loglevel";
+import { SelectedToolWithInputs } from "./ToolSelection";
+import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
+import { GetSessionDataService } from "../get-session-data.service";
 
 @Injectable()
 export class ToolService {
@@ -21,7 +24,8 @@ export class ToolService {
     private typeTagService: TypeTagService,
     private sessionDataService: SessionDataService,
     private tsvReader: TSVReader,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private getSessionDataService: GetSessionDataService
   ) {}
 
   //noinspection JSMethodCanBeStatic
@@ -174,6 +178,45 @@ export class ToolService {
           datasets: bindingsMap.get(toolInput)
         };
       });
+  }
+
+  bindPhenodata(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
+    // if no phenodata inputs, return empty array
+    const phenodataInputs = toolWithInputs.tool.inputs.filter(
+      input => input.meta
+    );
+    if (phenodataInputs.length === 0) {
+      return [];
+    }
+
+    // for now, if tool has multiple phenodata inputs, don't try to bind anything
+    // i.e. return array with phenodata inputs but no bound datasets
+    if (phenodataInputs.length > 1) {
+      return phenodataInputs.map(input => {
+        return { toolInput: input, dataset: null };
+      });
+    }
+
+    // try to bind the first (and only, see above) phenodata input
+    const firstPhenodataInput = phenodataInputs[0];
+
+    // get all input datasets and see if phenodata can be found for any of them
+    const phenodataDataset = toolWithInputs.inputBindings
+      // get all inputs
+      .reduce((allInputs, binding) => allInputs.concat(binding.datasets), [])
+      // get phenodatas for the inputs
+      .map(inputDataset =>
+        this.getSessionDataService.getPhenodataDataset(inputDataset)
+      )
+      // pick first where phenodata found
+      .find(dataset => dataset != null);
+
+    return [
+      {
+        toolInput: firstPhenodataInput,
+        dataset: phenodataDataset
+      }
+    ];
   }
 
   //noinspection JSMethodCanBeStatic

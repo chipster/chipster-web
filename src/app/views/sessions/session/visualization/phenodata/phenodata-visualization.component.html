@@ -1,13 +1,27 @@
-<div class="phenodata-button-group">
-  <button class="btn btn-sm btn-success mr-1" (click)="addColumnModal()">
-    <span class="glyphicon glyphicon-asterisk"></span>
-    Add column
-  </button>
-  <button class="btn btn-sm btn-secondary pull-right" (click)="reset()">
-    <span class="glyphicon glyphicon-asterisk"></span>
-    Reset all
-  </button>
+<div *ngIf="ready">
+  <div [ngSwitch]="phenodataState">
+
+    <div *ngSwitchCase="PhenodataState.OWN_PHENODATA">
+      <div class="phenodata-button-group">
+        <button class="btn btn-sm btn-success mr-1" (click)="openAddColumnModal()">
+          <i class="fas fa-plus"></i> Add column
+        </button>
+        <button class="btn btn-sm btn-secondary float-right" (click)="reset()">
+          Reset all
+        </button>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="PhenodataState.INHERITED_PHENODATA">Using phenodata of <i>{{phenodataAncestor.name}}</i></div>
+
+    <div *ngSwitchCase="PhenodataState.NO_PHENODATA"><i>No phenodata available</i></div>
+
+    <div *ngSwitchCase="PhenodataState.DATASET_NULL"></div>
+  </div>
+
 </div>
+
+<!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
 <div class="scrolling-wrapper" #horizontalScroll>
   <div id="tableContainer"></div>
 </div>

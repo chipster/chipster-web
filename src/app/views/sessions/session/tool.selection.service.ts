@@ -4,27 +4,19 @@ import {
   SelectedToolWithValidatedInputs,
   ParameterValidationResult
 } from "./tools/ToolSelection";
-import {
-  InputBinding,
-  ToolParameter,
-  Dataset,
-  ToolInput
-} from "chipster-js-common";
+import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { ToolService } from "./tools/tool.service";
 import * as _ from "lodash";
 import { forkJoin, of } from "rxjs";
 import { SessionData } from "../../../model/session/session-data";
-import { DatasetService } from "./dataset.service";
 import log from "loglevel";
 
+import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 
 @Injectable()
 export class ToolSelectionService {
-  constructor(
-    private toolService: ToolService,
-    private datasetService: DatasetService
-  ) {}
+  constructor(private toolService: ToolService) {}
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
@@ -89,7 +81,7 @@ export class ToolSelectionService {
       // uglifyjs fails if using literal reg exp
       // unlike with the java version on the server side
       // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
-      
+
       // firefox doesn't support unicode property escapes yet so catch
       // the error, server side will validate it anyway and fail the job
       // const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
@@ -224,40 +216,19 @@ export class ToolSelectionService {
     }
   }
 
-  validatePhenodata(toolWithInputs: SelectedToolWithInputs): boolean {
-    if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
-      return true;
-    }
-
-    // if no pheondata inputs, return true;
-    if (!toolWithInputs.tool.inputs.some((input: ToolInput) => input.meta)) {
-      return true;
-    }
-
-    // for now, the first bound dataset must have some metadata
-    return (
-      toolWithInputs.inputBindings[0].datasets.length > 0 &&
-      this.datasetService.hasPhenodata(
-        toolWithInputs.inputBindings[0].datasets[0]
-      )
+  /**
+   * For now, don't worry about the content of the phenodata
+   *
+   * @param phenodataBindings
+   *
+   */
+  validatePhenodata(phenodataBindings: PhenodataBinding[]): boolean {
+    // every returns true for an empty array
+    return phenodataBindings.every(
+      binding =>
+        binding.toolInput.optional ||
+        (!binding.toolInput.optional && binding.dataset != null)
     );
-
-    // // get group 'column' values
-    // const groupEntries: Array<
-    //   MetadataEntry
-    // > = toolWithInputs.inputBindings[0].datasets[0].metadata.filter(
-    //   (entry: MetadataEntry) => entry.key === "group"
-    // );
-
-    // // check if group 'column' exists and that every row has value for it
-    // if (groupEntries.length < 1) {
-    //   return false;
-    // } else {
-    //   return groupEntries.every(
-    //     (entry: MetadataEntry) =>
-    //       entry.value != null && entry.value.trim().length > 0
-    //   );
-    // }
   }
 
   validateRunForEach(

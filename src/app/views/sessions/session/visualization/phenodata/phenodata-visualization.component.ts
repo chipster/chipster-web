@@ -1,5 +1,4 @@
-import Utils from "../../../../../shared/utilities/utils";
-import { Dataset, MetadataEntry } from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 import * as _ from "lodash";
 import {
@@ -13,18 +12,25 @@ import {
   OnInit,
   AfterViewInit
 } from "@angular/core";
-import { Row } from "./phenodatarow.interface";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
-import { TSVReader } from "../../../../../shared/services/TSVReader";
 import { SessionEventService } from "../../session-event.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Observable } from "rxjs/Observable";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 import { ViewChild } from "@angular/core";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { Subject } from "rxjs/Subject";
+import * as d3 from "d3";
+import { GetSessionDataService } from "../../get-session-data.service";
+import { DatasetService } from "../../dataset.service";
+
+export enum PhenodataState {
+  OWN_PHENODATA,
+  INHERITED_PHENODATA,
+  NO_PHENODATA,
+  DATASET_NULL
+}
 
 @Component({
   selector: "ch-phenodata-visualization",
@@ -36,29 +42,34 @@ import { Subject } from "rxjs/Subject";
 })
 export class PhenodataVisualizationComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input() private datasets: Array<Dataset>;
+  @Input() private dataset: Dataset;
   @Input() private datasetsMap: Map<string, Dataset>;
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
-  array: Row[];
+  rows: Array<Array<string>>;
   headers: string[];
   latestEdit: number;
   deferredUpdatesTimerId: number | null = null;
-  unremovableColumns = ["sample", "original_name", "dataset", "column"];
+  unremovableColumns = ["sample", "original_name"];
+  PhenodataState = PhenodataState; // for using the enum in template
+  phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
+  phenodataAncestor: Dataset;
+  ready = false;
 
   private unsubscribe: Subject<any> = new Subject();
 
   constructor(
     private sessionDataService: SessionDataService,
-    private tsvReader: TSVReader,
     private stringModalService: DialogModalService,
     private sessionEventService: SessionEventService,
     private zone: NgZone,
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private getSessionDataService: GetSessionDataService,
+    private datasetService: DatasetService
   ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
@@ -89,8 +100,8 @@ export class PhenodataVisualizationComponent
 
   ngOnChanges(changes: SimpleChanges) {
     for (const propName in changes) {
-      if (propName === "datasets") {
-        if (this.datasets.length > 0) {
+      if (propName === "dataset") {
+        if (this.dataset) {
           this.updateViewLater();
         }
       }
@@ -109,22 +120,22 @@ export class PhenodataVisualizationComponent
     }
   }
 
-  getWidth(array: string[][], headers: string[]) {
+  private getWidth(array: string[][], headers: string[]) {
     return this.spreadsheetService.guessWidth(headers, array) + 100;
   }
 
-  getHeight(array: string[][], headers: string[]) {
+  private getHeight(array: string[][]) {
     return array.length * 23 + 50; // extra for header-row and borders
   }
 
-  updateSize(array: string[][], headers: string[]) {
+  private updateSize(array: string[][], headers: string[]) {
     const container = document.getElementById("tableContainer");
 
     container.style.width = this.getWidth(array, headers) + "px";
-    container.style.height = this.getHeight(array, headers) + "px";
+    container.style.height = this.getHeight(array) + "px";
   }
 
-  getSettings(array: string[][], headers: string[]) {
+  private getSettings(array: string[][], headers: string[]) {
     return {
       data: array,
       colHeaders: headers,
@@ -136,7 +147,7 @@ export class PhenodataVisualizationComponent
       scrollCompatibilityMode: false,
       renderAllRows: false,
       width: this.getWidth(array, headers),
-      height: this.getHeight(array, headers),
+      height: this.getHeight(array),
 
       afterGetColHeader: (col: number, TH: any) => {
         if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
@@ -166,13 +177,13 @@ export class PhenodataVisualizationComponent
           source === "CopyPaste.paste"
         ) {
           this.latestEdit = new Date().getTime();
-          this.updateDatasets(false);
+          this.updateDataset();
         }
       }
     };
   }
 
-  createRemoveButton(col: number, TH: any) {
+  private createRemoveButton(col: number, TH: any) {
     const button = document.createElement("A");
     button.className = "pull-right";
     // use id instead of class to make it more specific than the 'color: inherit' rule in the bootstrap styles
@@ -198,260 +209,164 @@ export class PhenodataVisualizationComponent
       this.hot.alter("remove_col", index);
     });
 
-    this.updateDatasets(false);
+    this.updateDataset();
   }
 
+  /**
+   * FIXME Generates server update for each column to be removed, also possibly causes problems when
+   * receiving updates from server while removing rest of the columns
+   *
+   * Maybe refactor so that take unremovable columns and make new phenodata string out of them.
+   *
+   */
   reset() {
-    this.datasets.forEach((dataset: Dataset) => this.resetDataset(dataset));
-  }
+    // do something only if there are removable columns
+    if (
+      this.headers.some(
+        (columnHeader: string) =>
+          this.unremovableColumns.indexOf(columnHeader) === -1
+      )
+    ) {
+      // get indexes of removable columns
+      const removableColumnIndexces = this.headers
+        .map((columnHeader: string, index: number) => {
+          return this.unremovableColumns.indexOf(columnHeader) === -1
+            ? index
+            : -1;
+        })
+        .filter(index => index !== -1);
 
-  resetDataset(dataset: Dataset) {
-    if (Utils.getFileExtension(dataset.name) === "tsv") {
-      this.resetTsv(dataset);
-    } else {
-      this.resetGenericFile(dataset);
+      // remove columns in reverse order to avoid messing up
+      removableColumnIndexces
+        .reverse()
+        .forEach(index => this.removeColumn(index));
+
+      this.updateView();
+      this.updateDataset();
     }
   }
 
-  remove() {
-    this.datasets.forEach((dataset: Dataset) => {
-      dataset.metadata = null;
-    });
+  private updateDataset() {
+    const phenodataString: string = [this.headers]
+      .concat(this.rows)
+      .reduce((result: string, row: Array<string>) => {
+        return (result +=
+          row
+            .reduce((rowString: string, cellValue: string) => {
+              const cellString = cellValue != null ? cellValue : "";
+              return rowString + cellString + "\t";
+            }, "")
+            .slice(0, -1) + "\n");
+      }, "");
 
-    this.updateView();
-    this.updateDatasets(true);
-  }
-
-  resetTsv(dataset: Dataset) {
-    this.tsvReader
-      .getTSVFileHeaders(this.sessionDataService.getSessionId(), dataset)
-      .subscribe((fileHeaders: string[]) => {
-        const metadata: MetadataEntry[] = [];
-
-        const chipHeaders = fileHeaders.filter(function(header) {
-          return Utils.startsWith(header, "chip.");
-        });
-
-        chipHeaders.forEach(
-          fileHeader => {
-            metadata.push(<MetadataEntry>{
-              column: fileHeader,
-              key: "sample",
-              value: fileHeader.replace("chip.", "")
-            });
-            metadata.push(<MetadataEntry>{
-              column: fileHeader,
-              key: "group",
-              value: null
-            });
-          },
-          err => this.restErrorService.showError("file reading failed", err)
+    if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
+      this.dataset.metadataFiles = [
+        {
+          name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
+          content: phenodataString
+        }
+      ];
+      this.sessionDataService
+        .updateDataset(this.dataset)
+        .subscribe(
+          () => log.info("dataset phenodata updated"),
+          err =>
+            this.restErrorService.showError(
+              "dataset phenodata update failed",
+              err
+            )
         );
-
-        dataset.metadata = metadata;
-
-        this.updateView();
-        this.updateDatasets(true);
-      });
-  }
-
-  resetGenericFile(dataset: Dataset) {
-    /*
-    dataset.metadata = [{
-      column: null,
-      key: 'sample',
-      value: dataset.name
-    }];
-    */
-    dataset.metadata = [
-      {
-        column: null,
-        key: "group",
-        value: null
-      }
-    ];
-
-    this.updateView();
-    this.updateDatasets(true);
-  }
-
-  getHeaders(datasets: Dataset[]) {
-    // collect all headers
-    const headers = {
-      dataset: true,
-      column: true
-    };
-    datasets.forEach((dataset: Dataset) => {
-      if (dataset.metadata) {
-        dataset.metadata.forEach((entry: MetadataEntry) => {
-          headers[entry.key] = true;
-        });
-      }
-    });
-    return Object.keys(headers);
-  }
-
-  createRow(length: number, datasetId: string, columnName: string) {
-    // create a plain JS array, because Handsontable doesn't recognize typescript Array
-    // and doesn't allow columns to be added on object data source
-    const row = <Row>[];
-    for (let i = 0; i < length; i++) {
-      row.push(undefined);
     }
-    row.datasetId = datasetId;
-    row.columnName = columnName;
-
-    return row;
   }
 
-  // get the row of a specific dataset and column if it exists already
-  // or create a new row
-  getRow(dataset: Dataset, column: string, array: Row[], headers: string[]) {
-    // find the existing row
-    for (let i = 0; i < array.length; i++) {
-      if (
-        array[i].datasetId === dataset.datasetId &&
-        array[i].columnName === column
-      ) {
-        return array[i];
-      }
+  private updateView() {
+    this.ready = false;
+    this.phenodataAncestor = null;
+    this.headers = [];
+    this.rows = [];
+
+    // remove old table if this is an update
+    const container = document.getElementById("tableContainer");
+    if (!container) {
+      // timer or event triggered the update
+      log.info(
+        "cancelling the phenodata update, because the container has been removed already"
+      );
+      return;
+    }
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
     }
 
-    // create a new row
-    // fill the row with undefined values
-    const row = this.createRow(headers.length, dataset.datasetId, column);
-
-    row[0] = dataset.name;
-    row[1] = column;
-
-    return row;
-  }
-
-  getRows(datasets: Dataset[], headers: string[]) {
-    const array: Row[] = [];
-
-    datasets.forEach((dataset: Dataset) => {
-      if (dataset.metadata) {
-        if (dataset.metadata.length > 0) {
-          dataset.metadata.forEach((entry: MetadataEntry) => {
-            const row = this.getRow(dataset, entry.column, array, headers);
-            row[headers.indexOf(entry.key)] = entry.value;
-            if (array.indexOf(row) === -1) {
-              array.push(row);
-            }
-          });
-        } else {
-          const row = this.getRow(dataset, null, array, headers);
-          array.push(row);
-        }
-      }
-    });
-    return array;
-  }
-
-  updateDatasets(updateAll: boolean) {
-    const metadataMap = new Map<string, MetadataEntry[]>();
-    const array = this.array;
-    const headers = this.headers;
-
-    array.forEach((row: Row) => {
-      for (let i = 0; i < headers.length; i++) {
-        // dataset and column are only presented for the user
-        // the column information will be stored to entries
-        // and the dataset information is unnecessary, because each dataset has it's own metadata
-        if (headers[i] === "dataset" || headers[i] === "column") {
-          continue;
-        }
-
-        const entry = {
-          column: row.columnName,
-          key: headers[i],
-          value: row[i]
-        };
-
-        if (!metadataMap.has(row.datasetId)) {
-          metadataMap.set(row.datasetId, []);
-        }
-
-        metadataMap.get(row.datasetId).push(entry);
-      }
-    });
-
-    const updates: Observable<any>[] = [];
-
-    this.datasets.forEach((dataset: Dataset) => {
-      const newMetadata = metadataMap.get(dataset.datasetId);
-
-      if (updateAll || !_.isEqual(newMetadata, dataset.metadata)) {
-        dataset.metadata = newMetadata;
-        updates.push(this.sessionDataService.updateDataset(dataset));
-      }
-    });
-
-    Observable.forkJoin(updates).subscribe(
-      () => log.info(updates.length + " datasets updated"),
-      err => this.restErrorService.showError("dataset updates failed", err)
-    );
-  }
-
-  updateView() {
+    if (this.dataset == null) {
+      this.phenodataState = PhenodataState.DATASET_NULL;
+      this.ready = true;
+      return;
+    }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    this.datasets = this.datasets.map(dataset =>
-      this.datasetsMap.get(dataset.datasetId)
-    );
+    this.dataset = this.datasetsMap.get(this.dataset.datasetId);
+    if (this.dataset == null) {
+      this.phenodataState = PhenodataState.DATASET_NULL;
+      this.ready = true;
+      return;
+    }
 
-    // generate phenodata for all datasets that don't have it yet
-    this.datasets
-      .filter(d => !d.metadata || d.metadata.length === 0)
-      .map(d => this.resetDataset(d));
-
-    const headers = this.getHeaders(this.datasets);
-    const array = this.getRows(this.datasets, headers);
-
-    if (!_.isEqual(headers, this.headers)) {
-      this.hideColumnIfEmpty(headers, array);
-
-      this.headers = headers;
-
-      // remove old table if this is an update
-      const container = document.getElementById("tableContainer");
-
-      if (!container) {
-        // timer or event triggered the update
-        log.info(
-          "cancelling the phenodata update, because the container has been removed already"
+    // find phenodata for this dataset, could be own or inherited
+    let phenodataString;
+    if (this.datasetService.hasOwnPhenodata(this.dataset)) {
+      phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
+      this.phenodataState = PhenodataState.OWN_PHENODATA;
+    } else {
+      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(
+        this.dataset
+      );
+      if (ancestorsWithPhenodata.length > 0) {
+        phenodataString = this.datasetService.getOwnPhenodata(
+          ancestorsWithPhenodata[0]
         );
+        this.phenodataState = PhenodataState.INHERITED_PHENODATA;
+        this.phenodataAncestor = ancestorsWithPhenodata[0];
+      } else {
+        this.phenodataState = PhenodataState.NO_PHENODATA;
+        this.ready = true;
         return;
       }
+    }
 
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
+    // parse the phenodata string
+    if (phenodataString != null && phenodataString.length > 0) {
+      const allRows = d3.tsvParseRows(phenodataString);
+      this.headers = allRows[0];
+      this.rows = allRows.length > 1 ? allRows.slice(1) : [];
+    }
 
+    // for now, show the phenodata table only for own phenodata
+    if (this.phenodataState === PhenodataState.OWN_PHENODATA) {
       this.zone.runOutsideAngular(() => {
         this.hot = new Handsontable(
           container,
-          this.getSettings(array, this.headers)
+          this.getSettings(this.rows, this.headers)
         );
+      });
+
+      this.updateSize(this.rows, this.headers);
+
+      this.zone.runOutsideAngular(() => {
+        if (this.hot) {
+          this.hot.loadData(this.rows);
+        }
       });
     }
 
-    this.updateSize(array, headers);
-
-    this.array = array;
-    this.zone.runOutsideAngular(() => {
-      if (this.hot) {
-        this.hot.loadData(this.array);
-      }
-    });
+    this.ready = true;
   }
 
-  isEditingNow() {
+  private isEditingNow() {
     return new Date().getTime() - this.latestEdit < 1000;
   }
 
-  updateViewLater() {
+  private updateViewLater() {
     if (!this.isEditingNow()) {
       this.updateView();
     } else {
@@ -487,7 +402,7 @@ export class PhenodataVisualizationComponent
     }
   }
 
-  addColumnModal() {
+  openAddColumnModal() {
     this.stringModalService
       .openStringModal("Add new column", "Column name", "", "Add")
       .do(name => {
@@ -507,21 +422,10 @@ export class PhenodataVisualizationComponent
           );
         });
 
-        this.updateDatasets(false);
+        this.updateDataset();
       })
       .subscribe(null, err =>
         this.restErrorService.showError("Add column failed", err)
       );
-  }
-
-  private hideColumnIfEmpty(headers: string[], array: Row[]) {
-    // if the columnName is undefined on all rows (non-microarray phenodata)
-    if (array.filter(row => !!row.columnName).length === 0) {
-      const index = headers.indexOf("column");
-      // remove the column from the headers
-      headers.splice(index, 1);
-      // and from the array
-      array.forEach(row => row.splice(index, 1));
-    }
   }
 }

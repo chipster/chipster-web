@@ -116,7 +116,7 @@ export default [
     name: "Phenodata",
     supportAllTypes: false,
     typeTags: [Tags.GENE_EXPRS, Tags.BAM],
-    anyInputCountSupported: true
+    supportedInputFileCounts: [1]
   },
   {
     id: "details",

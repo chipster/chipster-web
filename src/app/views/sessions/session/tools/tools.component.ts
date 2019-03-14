@@ -369,16 +369,21 @@ export class ToolsComponent implements OnInit, OnDestroy {
           this.sessionData
         );
 
-        // don't try to validate phenodata unless inputs are valid
+        // don't try to bind and validate phenodata unless inputs are valid
+        const phenodataBindings = inputsValid
+          ? this.toolService.bindPhenodata(toolWithInputs)
+          : [];
+
         const phenodataValid = inputsValid
-          ? this.toolSelectionService.validatePhenodata(toolWithInputs)
+          ? this.toolSelectionService.validatePhenodata(phenodataBindings)
           : false;
 
         return Object.assign(
           {
             inputsValid: inputsValid,
             runForEachValid: runForEachValid,
-            phenodataValid: phenodataValid
+            phenodataValid: phenodataValid,
+            phenodataBindings: phenodataBindings
           },
           toolWithInputs
         );
