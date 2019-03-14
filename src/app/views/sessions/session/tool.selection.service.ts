@@ -87,7 +87,11 @@ export class ToolSelectionService {
       // uglifyjs fails if using literal reg exp
       // unlike with the java version on the server side
       // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
-      const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+      
+      // firefox doesn't support unicode property escapes yet
+      //const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+      const regexp: RegExp = new RegExp("[^\\w\\d+_:.,*() -]", "u");
+
       const result = regexp.exec(<string>parameter.value);
 
       return result === null
