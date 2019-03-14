@@ -16,6 +16,8 @@ import * as _ from "lodash";
 import { forkJoin, of } from "rxjs";
 import { SessionData } from "../../../model/session/session-data";
 import { DatasetService } from "./dataset.service";
+import log from "loglevel";
+
 
 @Injectable()
 export class ToolSelectionService {
@@ -88,12 +90,19 @@ export class ToolSelectionService {
       // unlike with the java version on the server side
       // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
       
-      // firefox doesn't support unicode property escapes yet
-      //const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
-      const regexp: RegExp = new RegExp("[^\\w\\d+_:.,*() -]", "u");
-
-      const result = regexp.exec(<string>parameter.value);
-
+      // firefox doesn't support unicode property escapes yet so catch
+      // the error, server side will validate it anyway and fail the job
+      // const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+      let result;
+      try {
+        const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+        result = regexp.exec(<string>parameter.value);
+      } catch (e) {
+        log.warn("validating string parameter failed");
+        return {
+          valid: true
+        };
+      }
       return result === null
         ? { valid: true }
         : {
