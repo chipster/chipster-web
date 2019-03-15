@@ -26,7 +26,20 @@ export class GetSessionDataService {
   }
 
   /**
-   * If given dataset has its own dataset, return given dataset.
+   * If given dataset has its own phenodata, return that phenodata.
+   * Otherwise search ancestors for a dataset which has phenodata and return phenodata
+   * of that ancestor if found.
+   *
+   * @param dataset
+   */
+  getPhenodata(dataset: Dataset): string {
+    return this.datasetService.getOwnPhenodata(
+      this.getPhenodataDataset(dataset)
+    );
+  }
+
+  /**
+   * If given dataset has its own phenodata, return given dataset.
    * Otherwise search ancestors for a dataset which has phenodata and return that
    * ancestor if found.
    *

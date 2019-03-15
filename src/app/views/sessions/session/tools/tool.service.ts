@@ -292,14 +292,16 @@ export class ToolService {
   }
 
   //noinspection JSMethodCanBeStatic
-  getMetadataColumns(datasets: Array<Dataset>) {
-    const keySet = new Set();
-    for (const dataset of datasets) {
-      for (const entry of dataset.metadata) {
-        keySet.add(entry.key);
-      }
-    }
-    return Array.from(keySet);
+  getMetadataColumns(phenodatas: Array<string>) {
+    const headers = phenodatas.reduce(
+      (allColumns: string[], phenodataString: string) => {
+        return allColumns.concat(this.tsvReader.getTSVHeaders(phenodataString));
+      },
+      []
+    );
+
+    // return unique headers
+    return Array.from(new Set(headers));
   }
 
   getManualPage(toolId: string) {

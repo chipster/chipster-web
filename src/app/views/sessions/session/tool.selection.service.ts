@@ -13,10 +13,16 @@ import { SessionData } from "../../../model/session/session-data";
 import log from "loglevel";
 
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
+import { GetSessionDataService } from "./get-session-data.service";
+import { DatasetService } from "./dataset.service";
 
 @Injectable()
 export class ToolSelectionService {
-  constructor(private toolService: ToolService) {}
+  constructor(
+    private toolService: ToolService,
+    private getSessionDataService: GetSessionDataService,
+    private datasetService: DatasetService
+  ) {}
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
@@ -126,10 +132,20 @@ export class ToolSelectionService {
         []
       );
 
+      // get bound phenodatas for populating (phenodata dependent) parameters
+      const boundPhenodatas = selectedToolWithInputs.phenodataBindings
+        .map((phenodataBinding: PhenodataBinding) => phenodataBinding.dataset)
+        .filter(dataset => dataset != null)
+        .map(dataset => this.getSessionDataService.getPhenodata(dataset));
+
       // populating params is async as some selection options may require dataset contents
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map(
         (parameter: ToolParameter) => {
-          return this.populateParameter(parameter, boundDatasets);
+          return this.populateParameter(
+            parameter,
+            boundDatasets,
+            boundPhenodatas
+          );
         }
       );
       return forkJoin(populateParameterObservables).map(() => {
@@ -148,7 +164,8 @@ export class ToolSelectionService {
    */
   populateParameter(
     parameter: ToolParameter,
-    datasets: Array<Dataset>
+    datasets: Array<Dataset>,
+    phenodatas: Array<string>
   ): Observable<ToolParameter> {
     // for other than column selection parameters, set to default if no value
     if (
@@ -192,8 +209,8 @@ export class ToolSelectionService {
       } else if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService
-          .getMetadataColumns(datasets)
-          .map(function(column) {
+          .getMetadataColumns(phenodatas)
+          .map(column => {
             return { id: column };
           });
 
