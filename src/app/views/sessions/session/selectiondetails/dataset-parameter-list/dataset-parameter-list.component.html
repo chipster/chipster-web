@@ -1,8 +1,8 @@
 <table class="table table-sm text-sm">
   <tr *ngFor="let param of parameterListForView; let i = index"
-    [ngStyle]="{'color': isDefaultValueMap.get(param)? 'Steel Blue' : 'black'}">
+    [ngStyle]="{'color': isDefaultValueMap.get(param)? 'black' : 'Steelblue'}">
     <ng-template [ngIf]="i < limit">
-      <td [ngClass]="{'no-top-border': i===0}">{{param.displayName}}</td>
+      <td class="lighter" [ngClass]="{'no-top-border': i===0}">{{param.displayName}}</td>
       <td [ngClass]="{'no-top-border': i===0}">{{param.value}}</td>
     </ng-template>
   </tr>

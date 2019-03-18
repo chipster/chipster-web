@@ -15,7 +15,7 @@ export class ToolsService {
   constructor(
     private toolResource: ToolResource,
     private configService: ConfigService
-  ) {}
+  ) { }
 
   getTools(): Observable<Tool[]> {
     if (!this.toolsCache$) {

@@ -22,7 +22,7 @@ export class ToolService {
     private sessionDataService: SessionDataService,
     private tsvReader: TSVReader,
     private configService: ConfigService
-  ) {}
+  ) { }
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
@@ -106,7 +106,10 @@ export class ToolService {
     }
 
     // default value, but no value
-    if (parameter.value == null || String(parameter.value).trim() === "") {
+
+    // Comment : the parameter.value is either null or undefined all the time, should we set it somewhere?
+    // for this condition parameter never changes color
+    if (value == null || String(value).trim() === "") {
       return false;
     }
 

@@ -47,9 +47,10 @@
             <span *ngIf="job.stateDetail">{{job.stateDetail}}</span>
           </td>
         </tr>
-        <tr *ngIf="job.parameters.length > 0">
+
+        <tr *ngIf="parameterListForView.length > 0">
           <td><b>Parameters</b></td>
-        <tr *ngFor="let param of job.parameters">
+        <tr *ngFor="let param of parameterListForView">
           <td class="lighter" style="white-space: nowrap">
             <div *ngIf="param.displayName;then paramName; else ParamID"></div>
             <ng-template #paramName>
@@ -59,7 +60,8 @@
               <span>{{param.parameterId}}</span>
             </ng-template>
           </td>
-          <td class="wide-max" width="100%" style="color:steelblue">{{param.value}}</td>
+          <td class="wide-max" width="100%" [ngStyle]="{'font-weight': isDefaultValueMap.get(param) ? 'normal':'bold'}">
+            {{param.value}}</td>
         </tr>
         <tr *ngIf="job.inputs.length>0">
           <td><b>Inputs</b></td>
