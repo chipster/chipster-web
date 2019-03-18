@@ -5,6 +5,7 @@ import {
   Module,
   Dataset
 } from "chipster-js-common";
+import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 
 export interface SelectedTool {
   tool: Tool;
@@ -22,6 +23,7 @@ export interface SelectedToolWithValidatedInputs
   inputsValid: boolean;
   runForEachValid: boolean;
   phenodataValid: boolean;
+  phenodataBindings: Array<PhenodataBinding>;
 }
 export interface ValidatedTool extends SelectedToolWithValidatedInputs {
   valid: boolean;

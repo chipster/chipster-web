@@ -5,13 +5,16 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { SessionDataService } from "./session-data.service";
 import { ValidatedTool } from "./tools/ToolSelection";
 import log from "loglevel";
+import { GetSessionDataService } from "./get-session-data.service";
+import { DatasetService } from "./dataset.service";
 
 @Injectable()
 export class JobService {
   constructor(
     private sessionDataService: SessionDataService,
     private toolService: ToolService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private datasetService: DatasetService
   ) {}
 
   static isRunning(job: Job): boolean {
@@ -131,6 +134,17 @@ export class JobService {
         }
       }
     }
+
+    // phenodata
+    job.metadataFiles = validatedTool.phenodataBindings
+      .filter(binding => binding.dataset != null)
+      .map(binding => {
+        return {
+          name: binding.toolInput.name.id,
+          content: this.datasetService.getOwnPhenodata(binding.dataset)
+        };
+      });
+
     return job;
   }
 }
