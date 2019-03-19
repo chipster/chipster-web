@@ -192,9 +192,7 @@ export class ToolService {
     // for now, if tool has multiple phenodata inputs, don't try to bind anything
     // i.e. return array with phenodata inputs but no bound datasets
     if (phenodataInputs.length > 1) {
-      return phenodataInputs.map(input => {
-        return { toolInput: input, dataset: null };
-      });
+      return this.getUnboundPhenodataBindings(toolWithInputs);
     }
 
     // try to bind the first (and only, see above) phenodata input
@@ -217,6 +215,17 @@ export class ToolService {
         dataset: phenodataDataset
       }
     ];
+  }
+
+  getUnboundPhenodataBindings(
+    toolWithInputs: SelectedToolWithInputs
+  ): PhenodataBinding[] {
+    // if no phenodata inputs, return empty array
+    return toolWithInputs.tool.inputs
+      .filter(input => input.meta)
+      .map(input => {
+        return { toolInput: input, dataset: null };
+      });
   }
 
   //noinspection JSMethodCanBeStatic
