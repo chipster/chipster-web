@@ -515,9 +515,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("ry", this.nodeRadius)
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
+      // stroke and stroke width added
       .attr('stroke', d => d.color)
       .attr('stroke-width', '2')
       .attr("pointer-events", "all")
+      //  .style("fill", d => d.color)
       .style("fill", "white")
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
