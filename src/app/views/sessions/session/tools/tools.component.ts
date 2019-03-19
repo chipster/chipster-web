@@ -372,7 +372,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         // don't try to bind and validate phenodata unless inputs are valid
         const phenodataBindings = inputsValid
           ? this.toolService.bindPhenodata(toolWithInputs)
-          : [];
+          : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
 
         const phenodataValid = inputsValid
           ? this.toolSelectionService.validatePhenodata(phenodataBindings)
