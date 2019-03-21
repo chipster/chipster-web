@@ -5,7 +5,6 @@
 // .tools-panel-dropdown {
 //   height: 100%;
 // }
-
 .col-left {
   padding-left: 0px;
   padding-right: 8px;
@@ -24,6 +23,11 @@
 .tool-list-item {
   padding-left: 0.8em;
   padding-right: 0.8em;
+}
+
+// added aino rikka style which can be removed if not needed
+.tool-list-item.active {
+  background-color: #0e5db8;
 }
 
 .compact {
@@ -60,4 +64,23 @@
 
 :host ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
   max-height: 43em;
+}
+
+// added aino rikka style which can be removed if not needed
+#moduleBtnGroup {
+  .btn-primary {
+    background-color: #0e5db8;
+    border-radius: 10px;
+    border: 0;
+  }
+  .btn-light {
+    border-radius: 10px;
+    border: 0;
+  }
+}
+
+#jobButton {
+  .btn-link {
+    color: #0e5db8;
+  }
 }
