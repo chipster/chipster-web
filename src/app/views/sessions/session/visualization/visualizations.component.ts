@@ -1,16 +1,24 @@
 import { SelectionService } from "../selection.service";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import visualizations from "./visualization-constants";
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Input,
+  Output,
+  EventEmitter
+} from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Observable } from "rxjs/Observable";
 import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
-import { VisualizationModalService } from "./visualizationmodal.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
-
+import { Subject } from "rxjs/Subject";
+import { VisualizationEventService } from "./visualization-event.service";
+import VisualizationConstants, {
+  Visualization
+} from "./visualization-constants";
 
 @Component({
   selector: "ch-visualizations",
@@ -18,7 +26,6 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
   styleUrls: ["./visualizations.component.less"]
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
-
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
   @Input()
   sessionData: SessionData;
@@ -29,65 +36,94 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   scrollFix = new EventEmitter();
 
   active: string; // id of the active vis tab
-  visualizations: Array<any> = visualizations;
+  visualizations: Array<Visualization> = VisualizationConstants.VISUALIZATIONS;
 
-  datasetSelectionSubscription;
-  selectedDatasets$: Observable<Array<Dataset>>;
   selectedDatasets: Array<Dataset>;
   private compatibleVisualizations = new Set<string>();
-  private tabChanged = false;
+  private userInitiatedTabChange = false;
 
+  private unsubscribe: Subject<any> = new Subject();
 
   constructor(
     public selectionService: SelectionService, // used in template
     private store: Store<any>,
     private typeTagService: TypeTagService,
-    private visualizationModalService: VisualizationModalService,
     private errorService: ErrorService,
-
-  ) { }
+    private visualizationEventService: VisualizationEventService
+  ) {}
 
   ngOnInit() {
-    this.selectedDatasets$ = this.store.select("selectedDatasets");
+    this.store
+      .select("selectedDatasets")
+      .takeUntil(this.unsubscribe)
+      .subscribe(
+        (datasets: Array<Dataset>) => {
+          this.selectedDatasets = datasets;
+          this.compatibleVisualizations = new Set(
+            this.getCompatibleVisualizations()
+          );
+          // check if the previous visualization is still compatible
+          const isPreviousCompatible =
+            Array.from(this.compatibleVisualizations)
+              .map(this.getTabId.bind(this))
+              .indexOf(this.active) !== -1;
 
-    this.datasetSelectionSubscription = this.selectedDatasets$.subscribe(
-      (datasets: Array<Dataset>) => {
-        this.selectedDatasets = datasets;
-        this.compatibleVisualizations = new Set(
-          this.getCompatibleVisualizations()
-        );
-        // check if the previous visualization is still compatible
-        const isActiveCompatible =
-          Array.from(this.compatibleVisualizations)
-            .map(this.getTabId.bind(this))
-            .indexOf(this.active) !== -1;
-
-
-        /*
+          /*
           We will get an empty selection in between when the selection is changed.
           Don't clear the active visualization because we want to try to show the
           same visualization for next selection too.
          */
-        const notCompatibleAndNotTabChnanged = !isActiveCompatible && this.selectedDatasets.length > 0 && !this.tabChanged;
-        const isCompatibleAndNotTabChanged = isActiveCompatible && this.selectedDatasets.length > 0 && !this.tabChanged;
-        const notCompatibleAndTabChanged = !isActiveCompatible && this.selectedDatasets.length > 0 && this.tabChanged;
+          const previousNotCompatibleAndNotUserInitiated =
+            !isPreviousCompatible &&
+            this.selectedDatasets.length > 0 &&
+            !this.userInitiatedTabChange;
+          const previousIsCompatibleAndNotUserInitiated =
+            isPreviousCompatible &&
+            this.selectedDatasets.length > 0 &&
+            !this.userInitiatedTabChange;
+          const previousNotCompatibleAndUserInitiated =
+            !isPreviousCompatible &&
+            this.selectedDatasets.length > 0 &&
+            this.userInitiatedTabChange;
 
-        // if the user changed the tab to details, then details will be shown, otherwise the first available visualization will be shown
+          const previousWasPhenodata =
+            this.selectedDatasets.length > 0 &&
+            this.active === this.getTabId(VisualizationConstants.PHENODATA_ID);
 
-        if (notCompatibleAndNotTabChnanged || isCompatibleAndNotTabChanged || notCompatibleAndTabChanged) {
-          this.active = this.getTabId(
-            _.first(Array.from(this.compatibleVisualizations))
-          );
-          this.tabChanged = false;
+          // if the user changed the tab to details, then details will be shown, otherwise the first available visualization will be shown
+          if (
+            previousWasPhenodata ||
+            previousNotCompatibleAndNotUserInitiated ||
+            previousIsCompatibleAndNotUserInitiated ||
+            previousNotCompatibleAndUserInitiated
+          ) {
+            this.active = this.getTabId(
+              _.first(Array.from(this.compatibleVisualizations))
+            );
+            this.userInitiatedTabChange = false;
+          }
+          // need to emit some event to session top so that the tool and visulazation div scrollTop
+          // changes to show some part of tool section
+          this.scrollFix.emit();
+        },
+        err => this.errorService.showError("visualization change failed", err)
+      );
+
+    this.visualizationEventService
+      .getPhenodataSelectedStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(phenodataSelected => {
+        if (phenodataSelected) {
+          this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);
+          this.userInitiatedTabChange = false;
+          this.scrollFix.emit();
         }
-        // need to emit some event to session top so that the tool and visulazation div scrollTop changes to show some part of tool section
-        this.scrollFix.emit();
-
-      }, err => this.errorService.showError("visualization change failed", err));
+      });
   }
 
   ngOnDestroy() {
-    this.datasetSelectionSubscription.unsubscribe();
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   isTabVisible(id: string) {
@@ -134,7 +170,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   tabChange(event: NgbTabChangeEvent) {
     this.active = event.nextId;
-    this.tabChanged = true;
+    this.userInitiatedTabChange = true;
   }
 
   //noinspection JSMethodCanBeStatic

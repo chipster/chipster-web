@@ -32,6 +32,8 @@ import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
+import { DatasetService } from "../../dataset.service";
+import { VisualizationEventService } from "../../visualization/visualization-event.service";
 
 @Component({
   selector: "ch-workflow-graph",
@@ -78,8 +80,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private nativeElementService: NativeElementService,
     private restErrorService: RestErrorService,
     private errorService: ErrorService,
-    private settingService: SettingsService
-  ) { }
+    private settingService: SettingsService,
+    private datasetService: DatasetService,
+    private visualizationEventService: VisualizationEventService
+  ) {}
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -93,6 +97,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   toolTipDiv: any;
 
   d3DatasetNodesGroup: any;
+  d3PhenodataNodesGroup: any;
   d3LinksGroup: any;
   d3LinksDefsGroup: any;
   d3LabelsGroup: any;
@@ -101,15 +106,20 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3Links: any;
   d3Labels: any;
   d3DatasetNodes: any;
+  d3PhenodataNodes: any;
 
   nodeWidth: number = this.workflowGraphService.nodeWidth;
   nodeHeight: number = this.workflowGraphService.nodeHeight;
+  phenodataRadius = this.workflowGraphService.phenodataRadius;
+  phenodataMargin = this.workflowGraphService.phenodataMargin;
+
   fontSize = 14;
   nodeRadius = 12;
   width: number;
   height: number;
 
   datasetNodes: Array<DatasetNode>;
+  phenodataNodes: Array<DatasetNode>;
   links: Array<Link>;
   filter: Map<string, Dataset>;
   datasetTooltip: any;
@@ -186,6 +196,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .append("g")
       .attr("class", "dataset node")
       .attr("id", "d3DatasetNodesGroup");
+    this.d3PhenodataNodesGroup = this.zoomGroup
+      .append("g")
+      .attr("class", "phenodata")
+      .attr("id", "d3PhenodataNodesGroup");
     this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
     this.datasetTooltip = d3
       .select("body")
@@ -379,6 +393,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   getContentSize() {
     // graph size in graph coordinates
+    // FIXME add phenodata?
     const width =
       Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
     const height =
@@ -388,7 +403,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const scaledWidth = width * this.zoomScale;
     const scaledHeight = height * this.zoomScale;
 
-    return { width: scaledWidth, height: scaledHeight };
+    return {
+      width: scaledWidth,
+      height: scaledHeight
+    };
   }
 
   getSvgSize() {
@@ -435,6 +453,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.doLayout(links, datasetNodes);
 
     this.datasetNodes = datasetNodes;
+    this.phenodataNodes = datasetNodes.filter(datasetNode =>
+      this.datasetService.hasOwnPhenodata(datasetNode.dataset)
+    );
     this.links = links;
   }
 
@@ -445,174 +466,68 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
-  renderDatasets() {
+  renderPhenodataNodes() {
     const self = this;
 
     // store the selection of all existing and new elements
-    this.d3DatasetNodes = this.d3DatasetNodesGroup
-      .selectAll("rect")
-      .data(this.datasetNodes, d => d.datasetId);
-
-    // context menu items
-    const menu = [
-      {
-        title: "Rename",
-        action: function (d, i) {
-          const dataset = _.clone(d.dataset);
-          self.dialogModalService
-            .openStringModal(
-              "Rename dataset",
-              "Dataset name",
-              dataset.name,
-              "Rename"
-            )
-            .flatMap(name => {
-              dataset.name = name;
-              return self.sessionDataService.updateDataset(dataset);
-            })
-            .subscribe(null, err =>
-              this.restErrorService.showErro("dataset rename failed", err)
-            );
-        },
-        disabled: false // optional, defaults to false
-      },
-      {
-        title: "Delete",
-        action: function (d, i) {
-          console.log(self.selectedDatasets);
-          self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
-        }
-      },
-      {
-        title: "Export",
-        action: function (d, i) {
-          log.info("The dataset is : " + d.dataset);
-          self.sessionDataService.exportDatasets([d.dataset]);
-        }
-      },
-      {
-        title: "History",
-        action: function (d, i) {
-          self.datasetModalService.openDatasetHistoryModal(
-            d.dataset,
-            self.sessionData
-          );
-        }
-      }
-    ];
+    this.d3PhenodataNodes = this.d3PhenodataNodesGroup
+      .selectAll("text")
+      .data(this.phenodataNodes, d => d.datasetId);
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
-    this.d3DatasetNodes
+    this.d3PhenodataNodes
       .enter()
-      .append("rect")
-      .merge(this.d3DatasetNodes)
-      .attr("x", d => d.x)
-      .attr("y", d => d.y)
-      .attr("id", function (d) {
-        return "node_" + d.datasetId;
+      .append("text")
+      .text((d: any) => "\uf069")
+      .attr("x", d => this.getPhenodataX(d))
+      .attr("y", d => this.getPhenodataY(d))
+      .attr("class", "fa")
+      .merge(this.d3PhenodataNodes)
+      .attr("id", function(d) {
+        return "phenodata_node_" + d.datasetId;
       })
-      .attr("rx", this.nodeRadius)
-      .attr("ry", this.nodeRadius)
-      .attr("width", this.nodeWidth)
-      .attr("height", this.nodeHeight)
-      // stroke and stroke width added
-      .attr('stroke', d => d.color)
-      .attr('stroke-width', '2')
+
+      .attr("stroke", "gray")
+      .attr("font-size", "16px")
+      .attr("stroke-width", "2")
       .attr("pointer-events", "all")
-      //  .style("fill", d => d.color)
       .style("fill", "white")
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
           !this.filter || this.filter.has(d.datasetId)
         )
       )
-      .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
-      .on(
-        "contextmenu",
-        d3ContextMenu(menu, {
-          onOpen: () => {
-            this.isContextMenuOpen = true;
-          },
-          onClose: () => {
-            this.isContextMenuOpen = false;
-          }
-        })
-      )
-      .on("mouseover", function (d) {
-        if (self.enabled) {
-          d3.select(this).classed("hovering-dataset", true);
-          self.showTooltip(this, d);
-        }
-      })
-      .on("mouseout", function () {
-        if (self.enabled) {
-          d3.select(this).classed("hovering-dataset", false);
-          self.hideTooltip();
-        }
-      })
-      .call(
-        d3
-          .drag()
-          .on("drag", function (d: DatasetNode) {
-            // don't allow datasets to be moved from the unselected dataset
-            if (self.isSelectedDataset(d.dataset)) {
-              self.dragStarted = true;
-              self.hideTooltip(0);
-              self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
-            }
-          })
-          .on("end", function (d) {
-            // check the flag to differentiate between drag and click events
-            if (self.dragStarted) {
-              self.dragStarted = false;
-              self.dragEnd();
-              self.showTooltip(this, d, 0);
-            }
-          })
-      );
-    this.datasetToolTipArray = [];
-    this.d3DatasetNodes.each(function (d, i) {
-      const selection = d3.select(this).node();
-      self.createTooltipById(selection, d, i);
-    });
+      // .on("mouseover", function(d) {
+      //   if (self.enabled) {
+      //     d3.select(this).classed("hovering-dataset", true);
+      //     self.showTooltip(this, d);
+      //   }
+      // })
+      // .on("mouseout", function() {
+      //   if (self.enabled) {
+      //     d3.select(this).classed("hovering-dataset", false);
+      //     self.hideTooltip();
+      //   }
+      // })
+      .classed("phenodata-node", true);
 
-    // Show search Tooltips
-    this.d3DatasetNodes.each(function (d, i) {
-      if (self.searchEnabled) {
-        self.showToolTipByIdForSearch(d, i);
-      } else {
-        self.hideToolTipById(d, i);
-      }
-    });
-
-    this.d3DatasetNodes.on("click", function (d, i) {
+    this.d3PhenodataNodes.on("click", (d: DatasetNode) => {
       if (self.enabled) {
         self.selectionHandlerService.clearJobSelection();
         if (!UtilsService.isCtrlKey(d3.event)) {
           self.selectionHandlerService.clearDatasetSelection();
+          self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+          self.visualizationEventService.phenodataSelected(true);
         }
-        self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
       }
     });
 
-    // renderGraph() seems to get called twice and for some reason the datasetToolTipArray
-    // is not populated during the first run, thus checks for avoiding error
-    if (
-      this.showDatasetSelectionTooltip &&
-      this.selectionEnabled &&
-      this.selectedDatasets.length > 0 &&
-      this.datasetToolTipArray &&
-      this.datasetToolTipArray.length > 0
-    ) {
-      this.showToolTipByIdForSelection();
-    }
+    this.d3PhenodataNodes.exit().remove();
 
-    this.d3DatasetNodes.exit().remove();
-
-    // update the scroll limits if datasets were added or removedn
+    // update the scroll limits if datasets were added or removed
     if (
-      !this.d3DatasetNodes.enter().empty() ||
-      !this.d3DatasetNodes.exit().empty()
+      !this.d3PhenodataNodes.enter().empty() ||
+      !this.d3PhenodataNodes.exit().empty()
     ) {
       this.updateSvgSize();
     }
@@ -650,6 +565,179 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3Labels.exit().remove();
   }
 
+  renderDatasets() {
+    const self = this;
+
+    // store the selection of all existing and new elements
+    this.d3DatasetNodes = this.d3DatasetNodesGroup
+      .selectAll("rect")
+      .data(this.datasetNodes, d => d.datasetId);
+
+    // context menu items
+    const menu = [
+      {
+        title: "Rename",
+        action: function(d, i) {
+          const dataset = _.clone(d.dataset);
+          self.dialogModalService
+            .openStringModal(
+              "Rename dataset",
+              "Dataset name",
+              dataset.name,
+              "Rename"
+            )
+            .flatMap(name => {
+              dataset.name = name;
+              return self.sessionDataService.updateDataset(dataset);
+            })
+            .subscribe(null, err =>
+              this.restErrorService.showErro("dataset rename failed", err)
+            );
+        },
+        disabled: false // optional, defaults to false
+      },
+      {
+        title: "Delete",
+        action: function(d, i) {
+          console.log(self.selectedDatasets);
+          self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
+        }
+      },
+      {
+        title: "Export",
+        action: function(d, i) {
+          log.info("The dataset is : " + d.dataset);
+          self.sessionDataService.exportDatasets([d.dataset]);
+        }
+      },
+      {
+        title: "History",
+        action: function(d, i) {
+          self.datasetModalService.openDatasetHistoryModal(
+            d.dataset,
+            self.sessionData
+          );
+        }
+      }
+    ];
+
+    // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
+    this.d3DatasetNodes
+      .enter()
+      .append("rect")
+      .merge(this.d3DatasetNodes)
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .attr("id", function(d) {
+        return "node_" + d.datasetId;
+      })
+      .attr("rx", this.nodeRadius)
+      .attr("ry", this.nodeRadius)
+      .attr("width", this.nodeWidth)
+      .attr("height", this.nodeHeight)
+      // stroke and stroke width added
+      .attr("stroke", d => d.color)
+      .attr("stroke-width", "2")
+      .attr("pointer-events", "all")
+      //  .style("fill", d => d.color)
+      .style("fill", "white")
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(
+          !this.filter || this.filter.has(d.datasetId)
+        )
+      )
+      .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
+      .on(
+        "contextmenu",
+        d3ContextMenu(menu, {
+          onOpen: () => {
+            this.isContextMenuOpen = true;
+          },
+          onClose: () => {
+            this.isContextMenuOpen = false;
+          }
+        })
+      )
+      .on("mouseover", function(d) {
+        if (self.enabled) {
+          d3.select(this).classed("hovering-dataset", true);
+          self.showTooltip(this, d);
+        }
+      })
+      .on("mouseout", function() {
+        if (self.enabled) {
+          d3.select(this).classed("hovering-dataset", false);
+          self.hideTooltip();
+        }
+      })
+      .call(
+        d3
+          .drag()
+          .on("drag", function(d: DatasetNode) {
+            // don't allow datasets to be moved from the unselected dataset
+            if (self.isSelectedDataset(d.dataset)) {
+              self.dragStarted = true;
+              self.hideTooltip(0);
+              self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
+            }
+          })
+          .on("end", function(d) {
+            // check the flag to differentiate between drag and click events
+            if (self.dragStarted) {
+              self.dragStarted = false;
+              self.dragEnd();
+              self.showTooltip(this, d, 0);
+            }
+          })
+      );
+    this.datasetToolTipArray = [];
+    this.d3DatasetNodes.each(function(d, i) {
+      const selection = d3.select(this).node();
+      self.createTooltipById(selection, d, i);
+    });
+
+    // Show search Tooltips
+    this.d3DatasetNodes.each(function(d, i) {
+      if (self.searchEnabled) {
+        self.showToolTipByIdForSearch(d, i);
+      } else {
+        self.hideToolTipById(d, i);
+      }
+    });
+
+    this.d3DatasetNodes.on("click", function(d, i) {
+      if (self.enabled) {
+        self.selectionHandlerService.clearJobSelection();
+        if (!UtilsService.isCtrlKey(d3.event)) {
+          self.selectionHandlerService.clearDatasetSelection();
+        }
+        self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
+      }
+    });
+
+    // renderGraph() seems to get called twice and for some reason the datasetToolTipArray
+    // is not populated during the first run, thus checks for avoiding error
+    if (
+      this.showDatasetSelectionTooltip &&
+      this.selectionEnabled &&
+      this.selectedDatasets.length > 0 &&
+      this.datasetToolTipArray &&
+      this.datasetToolTipArray.length > 0
+    ) {
+      this.showToolTipByIdForSelection();
+    }
+
+    this.d3DatasetNodes.exit().remove();
+
+    // update the scroll limits if datasets were added or removedn
+    if (
+      !this.d3DatasetNodes.enter().empty() ||
+      !this.d3DatasetNodes.exit().empty()
+    ) {
+      this.updateSvgSize();
+    }
+  }
+
   // Function to describe drag behavior
   // noinspection JSUnusedLocalSymbols
   dragNodes(x: number, dx: number, y: number, dy: number) {
@@ -667,6 +755,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", d => d.x + this.nodeWidth / 2)
       .attr("y", d => d.y + this.nodeHeight / 2 + this.fontSize / 4);
 
+    this.d3PhenodataNodes
+      .filter(d =>
+        this.selectionService.isSelectedDatasetById(d.dataset.datasetId)
+      )
+      .attr("x", d => this.getPhenodataX(d))
+      .attr("y", d => this.getPhenodataY(d));
+
     this.d3Links
       .filter(d =>
         this.selectionService.isSelectedDatasetById(d.source.dataset.datasetId)
@@ -678,8 +773,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .filter(d =>
         d.target.dataset
           ? this.selectionService.isSelectedDatasetById(
-            (<DatasetNode>d.target).dataset.datasetId
-          )
+              (<DatasetNode>d.target).dataset.datasetId
+            )
           : false
       )
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
@@ -724,15 +819,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         WorkflowGraphComponent.getOpacity(this.filter === null)
       )
 
-      .on("click", function (d) {
+      .on("click", function(d) {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
-      .on("mouseover", function () {
+      .on("mouseover", function() {
         if (this.enabled) {
           d3.select(this).classed("hovering-job", true);
         }
       })
-      .on("mouseout", function () {
+      .on("mouseout", function() {
         if (this.enabled) {
           d3.select(this).classed("hovering-job", false);
         }
@@ -771,6 +866,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.removeDatasetNodeToolTips();
     this.renderLinks();
     this.renderDatasets();
+    this.renderPhenodataNodes();
     this.renderLabels();
   }
 
@@ -842,7 +938,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (targetNode.sourceJob) {
         const sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
-        sourceJob.inputs.forEach(function (input) {
+        sourceJob.inputs.forEach(function(input) {
           const sourceNode = datasetNodesMap.get(input.datasetId);
           if (sourceNode && targetNode) {
             links.push(<Link>{
@@ -864,7 +960,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     return links;
   }
 
-  doLayout(links: Link[], nodes: Node[]) {
+  doLayout(links: Link[], nodes: DatasetNode[]) {
     // layout nodes that don't yet have a position
 
     // layout nodes with parents
@@ -921,7 +1017,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetTooltip
       .transition()
       .duration(delay)
-      .style("opacity", 1);
+      .style("opacity", 0.9);
 
     if (dataset) {
       this.datasetTooltip.html(dataset.name);
@@ -933,7 +1029,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetTooltipTriangle
       .transition()
       .duration(delay)
-      .style("opacity", 1);
+      .style("opacity", 0.9);
     this.datasetTooltipTriangle
       .html("\u25BC")
       .style("left", datasetLeft + datasetWidth / 2 - triangleWidth / 4 + "px")
@@ -982,10 +1078,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style(
         "top",
         datasetTop -
-        this.svg.node().getBoundingClientRect().top -
-        tooltipHeight +
-        2 +
-        "px"
+          this.svg.node().getBoundingClientRect().top -
+          tooltipHeight +
+          2 +
+          "px"
       );
   }
 
@@ -1048,17 +1144,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .style(
               "left",
               datasetLeft -
-              this.svg.node().getBoundingClientRect().left -
-              5 +
-              "px"
+                this.svg.node().getBoundingClientRect().left -
+                5 +
+                "px"
             )
             .style(
               "top",
               datasetTop -
-              this.svg.node().getBoundingClientRect().top -
-              tooltipHeight +
-              2 +
-              "px"
+                this.svg.node().getBoundingClientRect().top -
+                tooltipHeight +
+                2 +
+                "px"
             );
         }
         this.setCurrentToolTipName(i);
@@ -1095,10 +1191,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
           this.datasetToolTipArray[id].dataNodeToolTip.html(
             this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) +
-            "..."
+              "..."
           );
         }
       }
     }
+  }
+
+  private getPhenodataX(datasetNode: DatasetNode) {
+    return datasetNode.x + this.nodeWidth + this.phenodataRadius - 2;
+  }
+
+  private getPhenodataY(datasetNode: DatasetNode) {
+    return datasetNode.y + this.nodeHeight / 2 + this.fontSize / 4 + 3;
   }
 }
