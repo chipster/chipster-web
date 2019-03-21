@@ -1,10 +1,10 @@
 import { FileResource } from "../resources/fileresource";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Rx";
 import "../../rxjs-operators";
 import TSVFile from "../../model/tsv/TSVFile";
 import * as d3 from "d3";
 import { Dataset } from "chipster-js-common";
+import { Observable } from "rxjs/Observable";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 
@@ -24,7 +24,7 @@ export class TSVReader {
     return this.fileResource
       .getLimitedData(sessionId, dataset, maxBytes)
       .map((tsvData: any) => {
-        let parsedTSVData = d3.tsvParseRows(tsvData);
+        const parsedTSVData = d3.tsvParseRows(tsvData);
         return new TSVFile(parsedTSVData, dataset.datasetId, "dataset");
       });
   }
