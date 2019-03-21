@@ -1,15 +1,15 @@
-import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
-import { SharedModule } from "../../../../shared/shared.module";
-import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
-import { SessionPanelComponent } from "./session-panel.component";
+import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { UploadComponent } from "./upload/upload.component";
-import { UploadModalComponent } from "./upload/upload-modal.component";
-import { UploadService } from "../../../../shared/services/upload.service";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
+import { UploadService } from "../../../../shared/services/upload.service";
+import { SharedModule } from "../../../../shared/shared.module";
+import { SessionPanelComponent } from "./session-panel.component";
+import { UploadModalComponent } from "./upload/upload-modal.component";
+import { UploadComponent } from "./upload/upload.component";
+import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
+import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],

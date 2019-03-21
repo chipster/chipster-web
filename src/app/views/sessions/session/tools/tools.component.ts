@@ -1,50 +1,49 @@
-import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { SessionData } from "../../../../model/session/session-data";
-import {
-  OnInit,
-  OnDestroy,
-  Input,
-  ViewChild,
-  Component,
-  Inject
-} from "@angular/core";
-import {
-  SelectedTool,
-  SelectedToolWithInputs,
-  ValidatedTool,
-  ParameterValidationResult,
-  SelectedToolWithValidatedInputs
-} from "./ToolSelection";
-import { Job, Module, Tool, Category } from "chipster-js-common";
-import { Subject } from "rxjs/Subject";
-import { SettingsService } from "../../../../shared/services/settings.service";
-import { ToolSelectionService } from "../tool.selection.service";
-import { SelectionService } from "../selection.service";
-import { JobService } from "../job.service";
-import { SelectionHandlerService } from "../selection-handler.service";
-import { SessionEventService } from "../session-event.service";
-import { ToolService } from "./tool.service";
-import * as _ from "lodash";
-import UtilsService from "../../../../shared/utilities/utils";
-import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 import { DOCUMENT } from "@angular/common";
-import { HotkeysService, Hotkey } from "angular2-hotkeys";
-import { ToastrService } from "ngx-toastr";
-import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { combineLatest, of, BehaviorSubject } from "rxjs";
-import log from "loglevel";
-
-import { Store } from "@ngrx/store";
 import {
-  SET_SELECTED_TOOL_WITH_INPUTS,
-  SET_VALIDATED_TOOL,
-  SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
-  SET_SELECTED_TOOL,
+  Component,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from "@angular/core";
+import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Store } from "@ngrx/store";
+import { Hotkey, HotkeysService } from "angular2-hotkeys";
+import { Category, Job, Module, Tool } from "chipster-js-common";
+import * as _ from "lodash";
+import log from "loglevel";
+import { ToastrService } from "ngx-toastr";
+import { BehaviorSubject, combineLatest, of } from "rxjs";
+import { Subject } from "rxjs/Subject";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
+import { SessionData } from "../../../../model/session/session-data";
+import { SettingsService } from "../../../../shared/services/settings.service";
+import UtilsService from "../../../../shared/utilities/utils";
+import {
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
   CLEAR_VALIDATED_TOOL,
-  SET_SELECTED_TOOL_WITH_POPULATED_PARAMS
+  SET_SELECTED_TOOL,
+  SET_SELECTED_TOOL_WITH_INPUTS,
+  SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
+  SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+  SET_VALIDATED_TOOL
 } from "../../../../state/tool.reducer";
+import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
+import { JobService } from "../job.service";
+import { SelectionHandlerService } from "../selection-handler.service";
+import { SelectionService } from "../selection.service";
+import { SessionEventService } from "../session-event.service";
+import { ToolSelectionService } from "../tool.selection.service";
+import { ToolService } from "./tool.service";
+import {
+  ParameterValidationResult,
+  SelectedTool,
+  SelectedToolWithInputs,
+  SelectedToolWithValidatedInputs,
+  ValidatedTool
+} from "./ToolSelection";
 
 interface ToolSearchListItem {
   moduleName: string;

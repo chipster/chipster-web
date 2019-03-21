@@ -1,7 +1,6 @@
-import Node from "./node";
 import { Injectable } from "@angular/core";
-import { DatasetNode } from "./dataset-node";
 import { DatasetService } from "../../dataset.service";
+import { DatasetNode } from "./dataset-node";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links

@@ -1,7 +1,3 @@
-import { SelectionService } from "../../selection.service";
-import { DatasetNode } from "./dataset-node";
-import Node from "./node";
-import { Link } from "./link";
 import {
   Component,
   Input,
@@ -11,29 +7,33 @@ import {
   SimpleChanges,
   ViewEncapsulation
 } from "@angular/core";
-import { Dataset, Job, Module } from "chipster-js-common";
-import { PipeService } from "../../../../../shared/services/pipeservice.service";
-import { SessionDataService } from "../../session-data.service";
-import * as d3 from "d3";
-import { WorkflowGraphService } from "./workflow-graph.service";
-import { SessionEventService } from "../../session-event.service";
-import * as _ from "lodash";
-import { SelectionHandlerService } from "../../selection-handler.service";
 import { Store } from "@ngrx/store";
-import { Observable } from "rxjs/Observable";
-import UtilsService from "../../../../../shared/utilities/utils";
+import { Dataset, Job, Module } from "chipster-js-common";
+import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
-import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
-import { SessionData } from "../../../../../model/session/session-data";
-import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
-import { DatasetNodeToolTip } from "./data-node-tooltip";
-import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import * as _ from "lodash";
 import log from "loglevel";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { Observable } from "rxjs/Observable";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../../../model/session/session-data";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
+import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetService } from "../../dataset.service";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { SelectionHandlerService } from "../../selection-handler.service";
+import { SelectionService } from "../../selection.service";
+import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
+import { SessionDataService } from "../../session-data.service";
+import { SessionEventService } from "../../session-event.service";
 import { VisualizationEventService } from "../../visualization/visualization-event.service";
+import { DatasetNodeToolTip } from "./data-node-tooltip";
+import { DatasetNode } from "./dataset-node";
+import { Link } from "./link";
+import Node from "./node";
+import { WorkflowGraphService } from "./workflow-graph.service";
 
 @Component({
   selector: "ch-workflow-graph",
