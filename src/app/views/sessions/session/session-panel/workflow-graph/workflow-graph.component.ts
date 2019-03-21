@@ -599,14 +599,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Delete",
         action: function(d, i) {
-          console.log(self.selectedDatasets);
           self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
         }
       },
       {
         title: "Export",
         action: function(d, i) {
-          log.info("The dataset is : " + d.dataset);
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
