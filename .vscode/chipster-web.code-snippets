@@ -19,7 +19,7 @@
   "Import loglevel": {
     "scope": "javascript,typescript",
     "prefix": "loglevel",
-    "body": ["import log from \"loglevel\""],
+    "body": ["import log from \"loglevel\";"],
     "description": "Import log from loglevel"
   }
 }
