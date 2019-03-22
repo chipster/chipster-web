@@ -137,7 +137,7 @@
                 <!-- parameters -->
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
                     $event.stopPropagation(); parametersDropdown.toggle()
-                  " title="Edit parameters and inputs" [disabled]="!selectedTool">
+                  " title="Edit parameters and inputs" [disabled]="!selectedTool" style="border-radius: 8px">
                   <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
                     aria-hidden="true"></span>
                   <!-- suppress JSBitwiseOperatorUsage -->
@@ -149,7 +149,8 @@
 
                 <!-- run -->
                 <button class="btn btn-success run-button btn-sm button-wide flex-grow-1"
-                  (click)="runJob(runForEachEnabled)" [disabled]="!runEnabled">
+                  (click)="runJob(runForEachEnabled)" [disabled]="!runEnabled"
+                  style="border: 0; border-radius: 8px; background-color: #0E866C">
                   <span class="fas fa-play"></span>
                   {{runForEachEnabled === false ? 'Run' : 'Run For Each'}}
                 </button>
