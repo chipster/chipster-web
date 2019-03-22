@@ -1,22 +1,21 @@
+import { Injectable } from "@angular/core";
 import {
-  ToolParameter,
   Dataset,
   InputBinding,
   Tool,
-  ToolInput
+  ToolInput,
+  ToolParameter
 } from "chipster-js-common";
-import { Injectable } from "@angular/core";
-import { TypeTagService } from "../../../../shared/services/typetag.service";
-import { SessionData } from "../../../../model/session/session-data";
-import { Observable } from "rxjs";
-import { SessionDataService } from "../session-data.service";
-import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
-import { ConfigService } from "../../../../shared/services/config.service";
-import log from "loglevel";
-import { SelectedToolWithInputs } from "./ToolSelection";
+import { Observable } from "rxjs";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
+import { SessionData } from "../../../../model/session/session-data";
+import { ConfigService } from "../../../../shared/services/config.service";
+import { TSVReader } from "../../../../shared/services/TSVReader";
+import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
+import { SessionDataService } from "../session-data.service";
+import { SelectedToolWithInputs } from "./ToolSelection";
 
 @Injectable()
 export class ToolService {
@@ -26,7 +25,7 @@ export class ToolService {
     private tsvReader: TSVReader,
     private configService: ConfigService,
     private getSessionDataService: GetSessionDataService
-  ) { }
+  ) {}
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {

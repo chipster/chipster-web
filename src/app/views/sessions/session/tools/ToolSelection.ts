@@ -1,9 +1,9 @@
 import {
-  Tool,
-  InputBinding,
   Category,
+  Dataset,
+  InputBinding,
   Module,
-  Dataset
+  Tool
 } from "chipster-js-common";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 

@@ -23,6 +23,11 @@
   position: absolute;
 }
 
+.phenodata-node {
+  cursor: default; // user-select doesn't work in all the browsers, so changing cursors explicitly
+  user-select: none;
+}
+
 div.dataset-tooltip {
   position: absolute;
   text-align: center;
@@ -35,7 +40,6 @@ div.dataset-tooltip {
   border-radius: 8px;
   pointer-events: none;
 }
-
 
 div.dataset-tooltip-triangle {
   position: absolute;
@@ -66,7 +70,7 @@ div.dataset-tooltip-triangle {
   height: 100%;
   //flex-grow: 1;
   width: 100%;
-  position : relative;
+  position: relative;
 }
 
 .toolbar-div {
@@ -74,18 +78,16 @@ div.dataset-tooltip-triangle {
   bottom: 10px;
 }
 
-
-.dataset-tooltip-div{
-  position : absolute;
+.dataset-tooltip-div {
+  position: absolute;
 }
 
 svg {
   // default is inline adding extra margin and showing scrollbar(s) unnecessarily
   display: block;
-  position : absolute;
+  position: absolute;
   padding-top: 15px;
 }
-
 
 div.dataset-node-tooltip {
   text-align: center;
