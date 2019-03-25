@@ -31,6 +31,7 @@ import { GenomeBrowserComponent } from "./genome-browser/genome-browser.componen
 import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
 import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
 import { DatasetParameterListComponent } from "../selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
+import { VisualizationEventService } from "./visualization-event.service";
 
 @NgModule({
   imports: [
@@ -69,7 +70,8 @@ import { DatasetParameterListComponent } from "../selectiondetails/dataset-param
     VisualizationModalService,
     VisualizationTSVService,
     PlotService,
-    VolcanoPlotService
+    VolcanoPlotService,
+    VisualizationEventService
   ],
   exports: [VisualizationsComponent, SingleDatasetComponent],
   entryComponents: [VisualizationModalComponent]

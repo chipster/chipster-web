@@ -11,7 +11,6 @@ import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
-import { ToolSelection } from "../ToolSelection";
 import { Subject } from "rxjs/Subject";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
@@ -31,11 +30,13 @@ export class ToolListAccordionComponent implements OnInit {
   @Input()
   private modulesArray: Module[];
 
-  @Input()
-  private toolSelection: ToolSelection;
+  // FIXME after tool state refactoring
+  // @Input()
+  // private toolSelection: ToolSelection;
 
-  @Output()
-  private selectToolOutput = new EventEmitter<ToolSelection>();
+  // FIXME after tool state refactoring
+  // @Output()
+  // private selectToolOutput = new EventEmitter<ToolSelection>();
 
   @ViewChild("searchBox")
   private searchBox: SearchBoxComponent;
@@ -60,16 +61,19 @@ export class ToolListAccordionComponent implements OnInit {
     this.tools = _.cloneDeep(this.toolsArray);
     this.modules = _.cloneDeep(this.modulesArray);
 
+    // FIXME after tool state refactoring
     // trigger parameter validation
-    if (this.toolSelection) {
-      // make sure the module and category are selected even after changing the session
-      this.selectModule(this.toolSelection.module);
-      this.selectCategory(this.toolSelection.category);
-      this.selectTool(this.toolSelection.tool);
-    } else {
-      this.selectModule(this.modules[0]);
-      this.selectCategory(this.selectedModule.categories[0]);
-    }
+    //    if (this.toolSelection) {
+    //      // make sure the module and category are selected even after changing the session
+    //      this.selectModule(this.toolSelection.module);
+    //      this.selectCategory(this.toolSelection.category);
+    //      this.selectTool(this.toolSelection.tool);
+    //    } else {
+    //      this.selectModule(this.modules[0]);
+    //      this.selectCategory(
+    //        this.selectedModule.categories[0]
+    //      );
+    //    }
   }
 
   selectModule(module: Module) {
@@ -109,17 +113,17 @@ export class ToolListAccordionComponent implements OnInit {
   }
 
   selectTool(tool: Tool) {
-    const toolSelection: ToolSelection = {
-      tool: tool,
-      inputBindings: null,
-      category: this.selectedCategory,
-      module: this.selectedModule
-    };
-
-    this.toolSelectionService.selectToolAndBindInputs(
-      toolSelection,
-      this.sessionData
-    );
+    // FIXME after tool selection refactoring
+    // const toolSelection: ToolSelection = {
+    //   tool: tool,
+    //   inputBindings: null,
+    //   category: this.selectedCategory,
+    //   module: this.selectedModule
+    // };
+    // this.toolSelectionService.selectToolAndBindInputs(
+    //   toolSelection,
+    //   this.sessionData
+    // );
   }
 
   search(value: any) {

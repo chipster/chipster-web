@@ -1,30 +1,49 @@
-import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { SessionData } from "../../../../model/session/session-data";
+import { DOCUMENT } from "@angular/common";
 import {
-  OnInit,
-  OnDestroy,
-  Input,
-  ViewChild,
   Component,
-  Inject
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
 } from "@angular/core";
-import { ToolSelection } from "./ToolSelection";
-import { Job, Module, Tool, Category, InputBinding } from "chipster-js-common";
+import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Store } from "@ngrx/store";
+import { Hotkey, HotkeysService } from "angular2-hotkeys";
+import { Category, Job, Module, Tool } from "chipster-js-common";
+import * as _ from "lodash";
+import log from "loglevel";
+import { ToastrService } from "ngx-toastr";
+import { BehaviorSubject, combineLatest, of } from "rxjs";
 import { Subject } from "rxjs/Subject";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
+import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
-import { ToolSelectionService } from "../tool.selection.service";
-import { SelectionService } from "../selection.service";
+import UtilsService from "../../../../shared/utilities/utils";
+import {
+  CLEAR_SELECTED_TOOL_WITH_INPUTS,
+  CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+  CLEAR_VALIDATED_TOOL,
+  SET_SELECTED_TOOL,
+  SET_SELECTED_TOOL_WITH_INPUTS,
+  SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
+  SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+  SET_VALIDATED_TOOL
+} from "../../../../state/tool.reducer";
+import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
+import { SelectionService } from "../selection.service";
 import { SessionEventService } from "../session-event.service";
+import { ToolSelectionService } from "../tool.selection.service";
 import { ToolService } from "./tool.service";
-import * as _ from "lodash";
-import UtilsService from "../../../../shared/utilities/utils";
-import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
-import { DOCUMENT } from "@angular/common";
-import { HotkeysService, Hotkey } from "angular2-hotkeys";
-import { ToastrService } from "ngx-toastr";
-import { ErrorService } from "../../../../core/errorhandler/error.service";
+import {
+  ParameterValidationResult,
+  SelectedTool,
+  SelectedToolWithInputs,
+  SelectedToolWithValidatedInputs,
+  ValidatedTool
+} from "./ToolSelection";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -61,9 +80,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @ViewChild("searchBox")
   searchBox;
 
+  public selectedTool: SelectedTool;
+  public validatedTool: ValidatedTool;
+
   public toolSearchList: Array<ToolSearchListItem>;
 
-  public toolSelection: ToolSelection;
+  public runEnabled: boolean;
+  public runForEachEnabled: boolean;
   public runningJobs = 0;
   public jobList: Job[];
 
@@ -75,18 +98,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   compactToolList = true;
 
-  private unsubscribe: Subject<any> = new Subject();
-
   public searchBoxModel: ToolSearchListItem;
   private searchBoxHotkey: Hotkey | Hotkey[];
 
   private lastJobStartedToastId: number;
-  public runSingleJob : boolean;
+
+  // use to signal that parameters have been changed and need to be validated
+  private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(
+    null
+  );
+
+  private unsubscribe: Subject<any> = new Subject();
 
   constructor(
     @Inject(DOCUMENT) private document: any,
     public settingsService: SettingsService,
-    public toolSelectionService: ToolSelectionService,
+    private toolSelectionService: ToolSelectionService,
     public selectionService: SelectionService,
     private jobService: JobService,
     private selectionHandlerService: SelectionHandlerService,
@@ -96,7 +123,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
-    dropdownConfig: NgbDropdownConfig,
+    private store: Store<any>,
+    dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
@@ -108,69 +136,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.modules = _.cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
-    this.runSingleJob = true;
-
-    // subscribe to tool selection
-    this.toolSelectionService.toolSelection$
-      .takeUntil(this.unsubscribe)
-      .subscribe((toolSelection: ToolSelection) => {
-        this.toolSelection = toolSelection;
-        if(this.toolSelection){
-         this.resetRunButtonText();
-        }
-      });
-
-    // subscribe to file selection
-    this.selectionService.selectedDatasets$
-      .takeUntil(this.unsubscribe)
-      .subscribe(() => {
-        if (this.toolSelection) {
-          const updatedInputBindings = this.toolService.bindInputs(
-            this.sessionData,
-            this.toolSelection.tool,
-            this.selectionService.selectedDatasets
-          );
-          const newToolSelection = Object.assign({}, this.toolSelection, {
-            inputBindings: updatedInputBindings
-          });
-          this.toolSelectionService.selectTool(newToolSelection);
-          this.resetRunButtonText();
-        }
-        
-      }, err => this.errorService.showError("get selected dataset failed", err));
-
-    // trigger parameter validation
-    if (this.toolSelection) {
-      // make sure the module and category are selected even after changing the session
-      this.selectModule(this.toolSelection.module);
-      this.selectCategory(this.toolSelection.category);
-      this.selectTool(this.toolSelection.tool); // TODO is this really needed?
-    } else {
-      this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
-    }
+    this.subscribeToToolEvents();
 
     this.updateJobs();
 
-    // subscribe to job events
-    this.sessionEventService
-      .getJobStream()
-      .takeUntil(this.unsubscribe)
-      .subscribe(() => {
-        this.updateJobs();
-      }, err => this.errorService.showError("failed to update jobs", err));
+    this.subscribeToJobEvents();
 
-    // add search box hotkey
-    this.searchBoxHotkey = this.hotkeysService.add(
-      new Hotkey(
-        "t",
-        (): boolean => {
-          this.searchBox.focus();
-          return false;
-        },
-        undefined,
-        "Find tool"
-      )
-    );
+    this.addHotKeys();
+
+    this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
   }
 
   ngOnDestroy() {
@@ -203,17 +177,23 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(tool: Tool) {
-    const toolSelection: ToolSelection = {
+    const selectedTool: SelectedTool = {
       tool: tool,
-      inputBindings: null,
       category: this.selectedCategory,
       module: this.selectedModule
     };
+    this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
+  }
 
-    this.toolSelectionService.selectToolAndBindInputs(
-      toolSelection,
-      this.sessionData
-    );
+  setBindings(toolWithInputs: SelectedToolWithInputs) {
+    this.store.dispatch({
+      type: SET_SELECTED_TOOL_WITH_INPUTS,
+      payload: toolWithInputs
+    });
+  }
+
+  onParametersChanged() {
+    this.parametersChanged$.next(null);
   }
 
   openChange(isOpen) {
@@ -222,29 +202,25 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
   }
 
-  runJob() {
-    //this.jobService.runJob(this.toolSelection);
-    this.jobService.runJob(this.toolSelection);
+  runJob(runForEach: boolean) {
+    let notificationText;
+    if (runForEach) {
+      this.jobService.runForEach(this.validatedTool);
+      notificationText =
+        this.validatedTool.selectedDatasets.length + " jobs started";
+    } else {
+      this.jobService.runJob(this.validatedTool);
+      notificationText = "Job started";
+    }
+
     // close the previous toastr not to cover the run button
     // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
     if (this.lastJobStartedToastId != null) {
       this.toastrService.remove(this.lastJobStartedToastId);
     }
-    this.lastJobStartedToastId = this.toastrService.info("Job started", "", {
-      timeOut: 1500,
+    this.lastJobStartedToastId = this.toastrService.info(notificationText, "", {
+      timeOut: 1500
     }).toastId;
-    // this.runSingleJob = true;
-  }
-
-  setBindings(updatedBindings: InputBinding[]) {
-    const toolSelection: ToolSelection = {
-      tool: this.toolSelection.tool,
-      inputBindings: updatedBindings,
-      category: this.toolSelection.category,
-      module: this.toolSelection.module
-    };
-
-    this.toolSelectionService.selectTool(toolSelection);
   }
 
   getJobList(): Job[] {
@@ -270,7 +246,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(ManualModalComponent, {
       size: "lg"
     });
-    modalRef.componentInstance.tool = this.toolSelection.tool;
+    modalRef.componentInstance.tool = this.selectedTool.tool;
   }
 
   private createToolSearchList(): ToolSearchListItem[] {
@@ -323,7 +299,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.selectModule(module);
     this.selectCategory(module.categoriesMap.get(item.category));
     this.selectTool(item.tool);
-    const categoryElementId = this.categoryElementIdPrefix + item.category;
     const toolElementId = this.toolElementIdPrefix + item.toolId;
 
     setTimeout(() => {
@@ -332,26 +307,187 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
   }
 
-  public searchBoxBlur(event) {
+  public searchBoxBlur() {
     this.searchBoxModel = null;
   }
 
-  resetRunButtonText(){
-    try{
-      if(this.toolSelection.inputBindings!= null && this.toolSelection.inputBindings[0]!= null){
-        if(this.toolSelection.inputBindings[0].datasets != null && this.toolSelection.inputBindings[0].datasets.length > 1){
-          if(this.toolService.isMultiInput(this.toolSelection.inputBindings[0].toolInput)){
-            this.runSingleJob = true;
-          }else{
-            this.runSingleJob = false;
-          }
-        }else{
-          this.runSingleJob =true;
+  private subscribeToToolEvents() {
+    // subscribe to selected tool
+    this.store
+      .select("selectedTool")
+      .takeUntil(this.unsubscribe)
+      .subscribe((t: SelectedTool) => {
+        this.selectedTool = t;
+        this.runEnabled = false;
+        this.runForEachEnabled = false;
+      });
+
+    // bind inputs after tool selection or dataset selection changes
+    combineLatest(
+      this.store.select("selectedTool"),
+      this.store.select("selectedDatasets")
+    )
+      .takeUntil(this.unsubscribe)
+      .subscribe(([selectedTool, selectedDatasets]) => {
+        if (selectedTool) {
+          this.store.dispatch({
+            type: SET_SELECTED_TOOL_WITH_INPUTS,
+            payload: Object.assign(
+              {
+                inputBindings: this.toolService.bindInputs(
+                  this.sessionData,
+                  selectedTool.tool,
+                  selectedDatasets
+                ),
+                selectedDatasets: selectedDatasets
+              },
+              selectedTool
+            )
+          });
+        } else {
+          this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
+          this.store.dispatch({
+            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS
+          });
+          this.store.dispatch({
+            type: CLEAR_VALIDATED_TOOL
+          });
         }
-      }
-    }catch(error){
-      console.log(error);
-    }
-   
+      });
+
+    // validate inputs
+    this.store
+      .select("selectedToolWithInputs")
+      .filter(value => value !== null)
+      .map((toolWithInputs: SelectedToolWithInputs) => {
+        const inputsValid = this.toolSelectionService.validateInputs(
+          toolWithInputs
+        );
+        const runForEachValid = this.toolSelectionService.validateRunForEach(
+          toolWithInputs,
+          this.sessionData
+        );
+
+        // don't try to bind and validate phenodata unless inputs are valid
+        const phenodataBindings = inputsValid
+          ? this.toolService.bindPhenodata(toolWithInputs)
+          : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
+
+        const phenodataValid = inputsValid
+          ? this.toolSelectionService.validatePhenodata(phenodataBindings)
+          : false;
+
+        return Object.assign(
+          {
+            inputsValid: inputsValid,
+            runForEachValid: runForEachValid,
+            phenodataValid: phenodataValid,
+            phenodataBindings: phenodataBindings
+          },
+          toolWithInputs
+        );
+      })
+      .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
+        this.store.dispatch({
+          type: SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+          payload: toolWithValidatedInputs
+        });
+      });
+
+    // populate parameters after input bindings change (and have been validated)
+    this.store
+      .select("selectedToolWithValidatedInputs")
+      .filter(value => value !== null)
+      .mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
+        // populate params is async, and returns the same tool with params populated
+        // if there are no params, just return the same tool as observable
+        return toolWithInputs.tool.parameters.length > 0
+          ? this.toolSelectionService.populateParameters(toolWithInputs)
+          : of(toolWithInputs);
+      })
+      .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
+        this.store.dispatch({
+          type: SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
+          payload: toolWithPopulatedParams
+        });
+      });
+
+    // validate parameters after parameters changed (or populated)
+    combineLatest(
+      this.store
+        .select("selectedToolWithPopulatedParams")
+        .filter(value => value !== null),
+      this.parametersChanged$ // signals when user changes parameters
+    )
+      .map(([toolWithParamsAndValidatedInputs]) => {
+        const parameterValidations: Map<
+          string,
+          ParameterValidationResult
+        > = this.toolSelectionService.validateParameters(
+          toolWithParamsAndValidatedInputs
+        );
+        const parametersValid = Array.from(parameterValidations.values()).every(
+          (result: ParameterValidationResult) => result.valid
+        );
+        const validationMessage = this.toolSelectionService.getValidationMessage(
+          parametersValid,
+          toolWithParamsAndValidatedInputs.inputsValid,
+          toolWithParamsAndValidatedInputs.phenodataValid
+        );
+
+        return Object.assign(
+          {
+            valid:
+              toolWithParamsAndValidatedInputs.inputsValid &&
+              toolWithParamsAndValidatedInputs.phenodataValid &&
+              parametersValid,
+            parametersValid: parametersValid,
+            message: validationMessage,
+            parameterResults: parameterValidations
+          },
+          toolWithParamsAndValidatedInputs
+        );
+      })
+      .subscribe((validatedTool: ValidatedTool) => {
+        this.store.dispatch({
+          type: SET_VALIDATED_TOOL,
+          payload: validatedTool
+        });
+      });
+
+    // subscribe to validated tool
+    this.store.select("validatedTool").subscribe((tool: ValidatedTool) => {
+      log.debug("validated tool ready", tool);
+      this.validatedTool = tool;
+      this.runEnabled = tool && tool.valid;
+      this.runForEachEnabled = tool && tool.runForEachValid;
+    });
+  }
+
+  private subscribeToJobEvents() {
+    this.sessionEventService
+      .getJobStream()
+      .takeUntil(this.unsubscribe)
+      .subscribe(
+        () => {
+          this.updateJobs();
+        },
+        err => this.errorService.showError("failed to update jobs", err)
+      );
+  }
+
+  private addHotKeys() {
+    // add search box hotkey
+    this.searchBoxHotkey = this.hotkeysService.add(
+      new Hotkey(
+        "t",
+        (): boolean => {
+          this.searchBox.focus();
+          return false;
+        },
+        undefined,
+        "Find tool"
+      )
+    );
   }
 }

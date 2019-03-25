@@ -25,7 +25,13 @@ import { SharedModule } from "./shared/shared.module";
 import { HotkeyModule } from "angular2-hotkeys";
 import { selectedJobs } from "./state/selectedJobs.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
-import { toolSelection } from "./state/selected-tool.reducer";
+import {
+  validatedTool,
+  selectedTool,
+  selectedToolWithInputs,
+  selectedToolWithValidatedInputs,
+  selectedToolWithPopulatedParams
+} from "./state/tool.reducer";
 import { latestSession } from "./state/latest-session.reducer";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { RoutingModule } from "./core/routing/routing.module";
@@ -49,14 +55,18 @@ import { ContactModule } from "./views/contact/contact.module";
     StoreModule.forRoot({
       selectedDatasets,
       selectedJobs,
-      toolSelection,
+      selectedTool,
+      selectedToolWithInputs,
+      selectedToolWithValidatedInputs,
+      selectedToolWithPopulatedParams,
+      validatedTool,
       latestSession
     }),
     SharedModule,
     RoutingModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
-      toastComponent: ActionToastComponent,
+      toastComponent: ActionToastComponent
     }),
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule // must be last because a wildcard route is defined here
@@ -68,7 +78,7 @@ import { ContactModule } from "./views/contact/contact.module";
     AppComponent,
     ErrorComponent,
     TermsComponent,
-    NotFoundComponent,
+    NotFoundComponent
   ],
   providers: [
     SelectionService,

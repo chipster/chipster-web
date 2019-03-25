@@ -1,5 +1,4 @@
 <nav *ngIf="appNameReady" class="navbar navbar-expand-sm navbar-light bg-light">
-
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-expanded="false"
     aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -8,7 +7,8 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{appName}}</a>
+        <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}">{{appName}}</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" [routerLink]="routerLinkAnalyze" routerLinkActive="active">Analyze</a>
@@ -28,7 +28,7 @@
 
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active">
+        <a class="nav-link disabled">
           <i class="fas fa-exclamation-triangle"></i>
           Service in limited use!
         </a>
@@ -43,7 +43,8 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" (click)="openSettings()"><i class="fas fa-cog lighter"></i> Settings</a>
-          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()"><i class="fas fa-sign-out-alt lighter"></i>
+          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()"><i
+              class="fas fa-sign-out-alt lighter"></i>
             Logout</a>
         </div>
       </li>

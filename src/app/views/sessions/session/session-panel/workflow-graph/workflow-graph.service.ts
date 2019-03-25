@@ -1,6 +1,6 @@
-import Node from "./node";
 import { Injectable } from "@angular/core";
-
+import { DatasetService } from "../../dataset.service";
+import { DatasetNode } from "./dataset-node";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
@@ -8,13 +8,19 @@ import { Injectable } from "@angular/core";
  */
 @Injectable()
 export class WorkflowGraphService {
-  nodeHeight = 22;
-  nodeWidth = 36;
+  readonly nodeHeight = 22;
+  // nodeWidth = 36;
+  readonly nodeWidth = 42;
+
+  readonly phenodataRadius = this.nodeHeight / 2;
+  readonly phenodataMargin = this.phenodataRadius;
 
   xMargin = this.nodeWidth / 2;
   yMargin = this.nodeHeight;
 
-  newRootPosition(nodes: Node[]) {
+  constructor(private datasetService: DatasetService) {}
+
+  newRootPosition(nodes: DatasetNode[]) {
     return this.newPosition(
       nodes,
       null,
@@ -24,7 +30,7 @@ export class WorkflowGraphService {
   }
 
   newPosition(
-    nodes: Node[],
+    nodes: DatasetNode[],
     parentX: number,
     parentY: number,
     height = this.nodeHeight
@@ -49,17 +55,32 @@ export class WorkflowGraphService {
     };
   }
 
-  intersectsAny(nodes: Node[], x: number, y: number, w: number, h: number) {
-    return !nodes.every((node: Node) => {
-      return !this.intersectsNode(node, x, y, w, h);
+  intersectsAny(
+    nodes: DatasetNode[],
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  ) {
+    return nodes.some((node: DatasetNode) => {
+      return this.intersectsNode(node, x, y, w, h);
     });
   }
 
-  intersectsNode(node: Node, x: number, y: number, w: number, h: number) {
+  intersectsNode(
+    node: DatasetNode,
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  ) {
     if (node.x && node.y) {
+      const nodeWidth = this.datasetService.hasOwnPhenodata(node.dataset)
+        ? this.nodeWidth + this.xMargin + this.nodeWidth
+        : this.nodeWidth;
       return (
         x + w >= node.x &&
-        x < node.x + this.nodeWidth &&
+        x < node.x + nodeWidth &&
         y + h >= node.y &&
         y < node.y + this.nodeHeight
       );
@@ -79,19 +100,29 @@ export class WorkflowGraphService {
     const rectBxMax = rectB.left + rectB.width;
     const rectByMax = rectB.top + rectB.height;
 
-    const x_overlap = Math.max(0, Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx));
-    const y_overlap = Math.max(0, Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy));
+    const x_overlap = Math.max(
+      0,
+      Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx)
+    );
+    const y_overlap = Math.max(
+      0,
+      Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy)
+    );
 
     const overlap = x_overlap * y_overlap;
-    if (overlap > 0) { return true; }
+    if (overlap > 0) {
+      return true;
+    }
 
     return false;
-
-
   }
 
-  isOverLappingWithCoord(topLeft: any, bottomRight: any, rectB: any, svgRect: any) {
-
+  isOverLappingWithCoord(
+    topLeft: any,
+    bottomRight: any,
+    rectB: any,
+    svgRect: any
+  ) {
     const rectAx = topLeft[0] + svgRect.left;
     const rectAy = topLeft[1] + svgRect.top;
     const rectAxMax = bottomRight[0] + svgRect.left;
@@ -102,17 +133,20 @@ export class WorkflowGraphService {
     const rectBxMax = rectB.left + rectB.width;
     const rectByMax = rectB.top + rectB.height;
 
-    const x_overlap = Math.max(0, Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx));
-    const y_overlap = Math.max(0, Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy));
+    const x_overlap = Math.max(
+      0,
+      Math.min(rectAxMax, rectBxMax) - Math.max(rectAx, rectBx)
+    );
+    const y_overlap = Math.max(
+      0,
+      Math.min(rectAyMax, rectByMax) - Math.max(rectAy, rectBy)
+    );
 
     const overlap = x_overlap * y_overlap;
-    if (overlap > 0) { return true; }
+    if (overlap > 0) {
+      return true;
+    }
 
     return false;
-
   }
-
-
 }
-
-

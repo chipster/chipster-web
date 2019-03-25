@@ -18,9 +18,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   constructor(
     public settingsService: SettingsService,
     public activeModal: NgbActiveModal
-  ) {}
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngOnDestroy() {
     this.unsubscribe.next();
@@ -47,5 +47,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   setSessionListMode(mode: SessionListMode) {
     this.settingsService.sessionListMode$.next(mode);
+  }
+
+  showDataselectionTooltip() {
+    this.settingsService.showDatasetSelectionTooltip$.next(
+      !this.settingsService.showDatasetSelectionTooltip$.getValue()
+    );
   }
 }

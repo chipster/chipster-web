@@ -1,8 +1,38 @@
-import { Tool, InputBinding, Category, Module } from "chipster-js-common";
+import {
+  Category,
+  Dataset,
+  InputBinding,
+  Module,
+  Tool
+} from "chipster-js-common";
+import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 
-export interface ToolSelection {
+export interface SelectedTool {
   tool: Tool;
-  inputBindings: Array<InputBinding>;
   category: Category;
   module: Module;
+}
+
+export interface SelectedToolWithInputs extends SelectedTool {
+  inputBindings: Array<InputBinding>;
+  selectedDatasets: Array<Dataset>;
+}
+
+export interface SelectedToolWithValidatedInputs
+  extends SelectedToolWithInputs {
+  inputsValid: boolean;
+  runForEachValid: boolean;
+  phenodataValid: boolean;
+  phenodataBindings: Array<PhenodataBinding>;
+}
+export interface ValidatedTool extends SelectedToolWithValidatedInputs {
+  valid: boolean;
+  parametersValid: boolean;
+  message?: string;
+  parameterResults?: Map<string, ParameterValidationResult>;
+}
+
+export interface ParameterValidationResult {
+  valid: boolean;
+  message?: string;
 }

@@ -40,6 +40,7 @@ import { forkJoin } from "rxjs";
 import { ConfigService } from "../../../shared/services/config.service";
 import { ToastrService } from "ngx-toastr";
 import { ErrorService } from "../../../core/errorhandler/error.service";
+import { GetSessionDataService } from "./get-session-data.service";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -91,7 +92,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private configService: ConfigService,
     private toastrService: ToastrService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private getSessionDataService: GetSessionDataService
   ) {}
 
   ngOnInit() {
@@ -246,6 +248,8 @@ export class SessionComponent implements OnInit, OnDestroy {
   subscribeToEvents() {
     // Services don't have access to ActivatedRoute, so we have to set it
     this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
+
+    this.getSessionDataService.setSessionData(this.sessionData);
 
     // start listening for remote changes
     // in theory we may miss an update between the loadSession() and this subscribe(), but

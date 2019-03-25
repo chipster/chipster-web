@@ -24,4 +24,6 @@ export class SettingsService {
   public sessionListMode$: BehaviorSubject<
     SessionListMode
   > = new BehaviorSubject(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN);
+
+  public showDatasetSelectionTooltip$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 }

@@ -1,7 +1,6 @@
-<div class="container">
-
+<div *ngIf="ready" class="container">
   <h2 class="h2-xs mt-3 mb-2">Input files</h2>
-  <div *ngIf="tool.inputs.length === 0" class="font-italic text-smaller">
+  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">
     No Inputs
   </div>
 
@@ -16,9 +15,9 @@
           {{ getDisplayName(bindingModel.input) }}
 
           <!-- input description -->
-          <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
+          <!-- <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
             <i>(optional)</i>
-          </span>
+          </span> -->
           <div class="text-sm text-muted">{{bindingModel.input.description}}</div>
         </td>
 
@@ -38,8 +37,9 @@
 
           <!-- no compatible inputs, show disabled dropdown -->
           <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
-            <option *ngIf="selectedDatasets.length < 1" selected class="font-italic">No files</option>
-            <option *ngIf="selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1" selected class="font-italic">No
+            <option *ngIf="validatedTool.selectedDatasets.length < 1" selected class="font-italic">No files</option>
+            <option *ngIf="validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1"
+              selected class="font-italic">No
               compatible files</option>
           </select>
 
@@ -58,4 +58,48 @@
     </tbody>
   </table>
   <!-- </form> -->
+
+  <div *ngIf="validatedTool.phenodataBindings.length > 0">
+    <h2 class="h2-xs mt-3 mb-2">Phenodata</h2>
+    <table class="table table-sm" *ngIf="bindingModels.length > 0">
+      <tbody *ngIf="!validatedTool.phenodataValid">
+        <tr *ngIf="!validatedTool.inputsValid">
+          <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
+        </tr>
+
+        <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
+          <td class="text-sm text-warning">No phenodata for</td>
+          <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+        </tr>
+      </tbody>
+      <tbody *ngIf="validatedTool.phenodataValid">
+        <tr *ngFor="let phenodataBinding of validatedTool.phenodataBindings">
+          <!-- <td>{{getDisplayName(phenodataInput)}}</td> -->
+          <td style="width: 60%">{{getDisplayName(phenodataBinding.toolInput)}}</td>
+          <td>{{phenodataBinding.dataset.name}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- <h2 *ngIf="getPhenodataInputs().length > 0" class="h2-xs mt-3 mb-2">Phenodata</h2>
+  <table class="table table-sm" *ngIf="bindingModels.length > 0">
+    <tbody *ngIf="!validatedTool.phenodataValid">
+      <tr *ngIf="!validatedTool.inputsValid">
+        <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
+      </tr>
+
+      <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
+        <td class="text-sm text-warning">No phenodata for</td>
+        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="validatedTool.phenodataValid">
+      <tr *ngFor="let phenodataInput of getPhenodataInputs()">
+        <td style="width: 60%">Using phenodata of</td>
+        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+      </tr>
+    </tbody>
+  </table> -->
+
+
 </div>

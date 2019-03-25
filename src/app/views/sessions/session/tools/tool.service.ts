@@ -1,19 +1,21 @@
+import { Injectable } from "@angular/core";
 import {
-  ToolParameter,
   Dataset,
   InputBinding,
   Tool,
-  ToolInput
+  ToolInput,
+  ToolParameter
 } from "chipster-js-common";
-import { Injectable } from "@angular/core";
-import { TypeTagService } from "../../../../shared/services/typetag.service";
-import { SessionData } from "../../../../model/session/session-data";
-import { Observable } from "rxjs";
-import { SessionDataService } from "../session-data.service";
-import { TSVReader } from "../../../../shared/services/TSVReader";
 import * as _ from "lodash";
+import { Observable } from "rxjs";
+import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
+import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";
-import log from "loglevel";
+import { TSVReader } from "../../../../shared/services/TSVReader";
+import { TypeTagService } from "../../../../shared/services/typetag.service";
+import { GetSessionDataService } from "../get-session-data.service";
+import { SessionDataService } from "../session-data.service";
+import { SelectedToolWithInputs } from "./ToolSelection";
 
 @Injectable()
 export class ToolService {
@@ -21,7 +23,8 @@ export class ToolService {
     private typeTagService: TypeTagService,
     private sessionDataService: SessionDataService,
     private tsvReader: TSVReader,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private getSessionDataService: GetSessionDataService
   ) {}
 
   //noinspection JSMethodCanBeStatic
@@ -106,7 +109,10 @@ export class ToolService {
     }
 
     // default value, but no value
-    if (parameter.value == null || String(parameter.value).trim() === "") {
+
+    // Comment : the parameter.value is either null or undefined all the time, should we set it somewhere?
+    // for this condition parameter never changes color
+    if (value == null || String(value).trim() === "") {
       return false;
     }
 
@@ -134,8 +140,10 @@ export class ToolService {
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
 
-    // sort inputs to determine binding order
-    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool);
+    // sort inputs to determine binding order, also filter out phenodata inputs
+    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool).filter(
+      (input: ToolInput) => !input.meta
+    );
 
     // temp map
     const bindingsMap = new Map<ToolInput, Dataset[]>();
@@ -151,10 +159,9 @@ export class ToolService {
       let datasetsToBind: Dataset[] = [];
       if (compatibleDatasets.length > 0) {
         // pick the first or all if multi input
-        // datasetsToBind = this.isMultiInput(toolInput)
-        //   ? compatibleDatasets
-        //   : compatibleDatasets.slice(0, 1);
-        datasetsToBind = compatibleDatasets;
+        datasetsToBind = this.isMultiInput(toolInput)
+          ? compatibleDatasets
+          : compatibleDatasets.slice(0, 1);
       }
 
       // save binding
@@ -164,13 +171,63 @@ export class ToolService {
       unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
     }
 
-    // return bindings in the same order as the original tool inputs
-    return tool.inputs.map((toolInput: ToolInput) => {
-      return {
-        toolInput: toolInput,
-        datasets: bindingsMap.get(toolInput)
-      };
-    });
+    // return bindings in the same order as the original tool input, skip phenodata
+    return tool.inputs
+      .filter((input: ToolInput) => !input.meta)
+      .map((toolInput: ToolInput) => {
+        return {
+          toolInput: toolInput,
+          datasets: bindingsMap.get(toolInput)
+        };
+      });
+  }
+
+  bindPhenodata(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
+    // if no phenodata inputs, return empty array
+    const phenodataInputs = toolWithInputs.tool.inputs.filter(
+      input => input.meta
+    );
+    if (phenodataInputs.length === 0) {
+      return [];
+    }
+
+    // for now, if tool has multiple phenodata inputs, don't try to bind anything
+    // i.e. return array with phenodata inputs but no bound datasets
+    if (phenodataInputs.length > 1) {
+      return this.getUnboundPhenodataBindings(toolWithInputs);
+    }
+
+    // try to bind the first (and only, see above) phenodata input
+    const firstPhenodataInput = phenodataInputs[0];
+
+    // get all input datasets and see if phenodata can be found for any of them
+    const phenodataDataset = toolWithInputs.inputBindings
+      // get all inputs
+      .reduce((allInputs, binding) => allInputs.concat(binding.datasets), [])
+      // get phenodatas for the inputs
+      .map(inputDataset =>
+        this.getSessionDataService.getPhenodataDataset(inputDataset)
+      )
+      // pick first where phenodata found
+      .find(dataset => dataset != null);
+
+    return [
+      {
+        toolInput: firstPhenodataInput,
+        dataset: phenodataDataset
+      }
+    ];
+  }
+
+  getUnboundPhenodataBindings(
+    toolWithInputs: SelectedToolWithInputs
+  ): PhenodataBinding[] {
+    // if no phenodata inputs, return empty array
+    return toolWithInputs.tool.inputs
+      .filter(input => input.meta)
+      .map(input => {
+        return { toolInput: input, dataset: null };
+      });
   }
 
   //noinspection JSMethodCanBeStatic
@@ -246,14 +303,16 @@ export class ToolService {
   }
 
   //noinspection JSMethodCanBeStatic
-  getMetadataColumns(datasets: Array<Dataset>) {
-    const keySet = new Set();
-    for (const dataset of datasets) {
-      for (const entry of dataset.metadata) {
-        keySet.add(entry.key);
-      }
-    }
-    return Array.from(keySet);
+  getMetadataColumns(phenodatas: Array<string>) {
+    const headers = phenodatas.reduce(
+      (allColumns: string[], phenodataString: string) => {
+        return allColumns.concat(this.tsvReader.getTSVHeaders(phenodataString));
+      },
+      []
+    );
+
+    // return unique headers
+    return Array.from(new Set(headers));
   }
 
   getManualPage(toolId: string) {
@@ -314,5 +373,29 @@ export class ToolService {
           )
         )
     );
+  }
+
+  // noinspection JSMethodCanBeStatic
+  getBindingsString(bindings: InputBinding[]) {
+    let s = "";
+    if (!bindings || bindings.length < 1) {
+      return s;
+    }
+
+    for (const binding of bindings) {
+      s += "\t";
+      const datasetsString: string = binding.datasets.reduce(
+        (a: string, b) => a + b.name + " ",
+        ""
+      );
+
+      s += binding.toolInput.name.id
+        ? binding.toolInput.name.id
+        : binding.toolInput.name.prefix;
+      s += " -> " + datasetsString;
+      s += "\n";
+    }
+
+    return s;
   }
 }

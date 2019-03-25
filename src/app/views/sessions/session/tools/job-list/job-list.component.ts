@@ -3,6 +3,7 @@ import { Job } from 'chipster-js-common';
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { SelectionService } from '../../selection.service';
 import UtilsService from '../../../../../shared/utilities/utils';
+import { SessionDataService } from '../../session-data.service';
 
 @Component({
   selector: 'ch-job-list',
@@ -17,7 +18,8 @@ export class JobListComponent implements OnChanges {
 
   constructor(
     private dropDown: NgbDropdown,
-    private selectionService: SelectionService) {
+    private selectionService: SelectionService,
+    private sessionDataService: SessionDataService) {
   }
 
   ngOnChanges() {
@@ -40,13 +42,23 @@ export class JobListComponent implements OnChanges {
   calculateDuration(startTime, endTime) {
     let duration = "";
     if (startTime != null && endTime != null) {
-      let computingTime = UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
+      const computingTime = UtilsService.parseISOStringToDate(endTime).getTime() - UtilsService.parseISOStringToDate(startTime).getTime();
       if (computingTime > 1000) {
         duration = UtilsService.convertMS(computingTime);
-      } else duration = computingTime.toString() + "ms";
+      } else {
+        duration = computingTime.toString() + "ms";
+      }
+
 
       return duration;
     }
+  }
+
+  cancelJob(job: Job) {
+    this.sessionDataService.cancelJob(job);
+  }
+  testClick() {
+    console.log("test click");
   }
 
 }

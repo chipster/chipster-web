@@ -10,21 +10,24 @@
 
   <form class="px-2">
     <div class="form-check">
-      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW)"
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1"
+        (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW)"
         [checked]="settingsService.sessionListMode$.getValue() === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW">
       <label class="form-check-label" for="exampleRadios1">
         {{SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW}}
       </label>
     </div>
     <div class="form-check">
-      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2" (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW)"
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2"
+        (click)="setSessionListMode(SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW)"
         [checked]="settingsService.sessionListMode$.getValue() === SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW">
       <label class="form-check-label" for="exampleRadios2">
         {{SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW}}
       </label>
     </div>
     <div class="form-check disabled">
-      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" (click)="setSessionListMode(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN)"
+      <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3"
+        (click)="setSessionListMode(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN)"
         [checked]="settingsService.sessionListMode$.getValue() === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">
       <label class="form-check-label" for="exampleRadios3">
         {{SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN}}
@@ -32,6 +35,14 @@
     </div>
   </form>
 </div>
+
+<form class="px-2" style="margin: 5px; margin-top: 10px">
+  <span class="switch switch-sm">
+    <input type="checkbox" class="switch" id="switch-sm" (click)="showDataselectionTooltip()"
+      [checked]="settingsService.showDatasetSelectionTooltip$.getValue()">
+    <label for="switch-sm" class=" h4-xs" style="margin-left: 8px">Show dataset selection tooltip</label>
+  </span>
+</form>
 
 <div class="modal-footer mt-3">
   <div class="col px-0">

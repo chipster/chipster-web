@@ -1,14 +1,14 @@
-import { SessionDataService } from "../session-data.service";
+import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
-import UtilsService from "../../../../shared/utilities/utils";
-import { SessionData } from "../../../../model/session/session-data";
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
-import { SelectionHandlerService } from "../selection-handler.service";
-import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
 import { Observable } from "rxjs/Observable";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../../model/session/session-data";
+import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
+import UtilsService from "../../../../shared/utilities/utils";
+import { SelectionHandlerService } from "../selection-handler.service";
+import { SelectionService } from "../selection.service";
+import { SessionDataService } from "../session-data.service";
 
 @Component({
   selector: "ch-session-panel",

@@ -70,7 +70,6 @@ export class DatasetParameterListComponent implements OnChanges {
 
   showWithTool(parameters: JobParameter[], tool: Tool) {
     this.isDefaultValueMap = new Map();
-
     parameters.forEach(jobParameter => {
       const clone = _.clone(jobParameter);
       let isDefault = false;

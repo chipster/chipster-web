@@ -1,75 +1,56 @@
-import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import { Tool, ToolParameter } from "chipster-js-common";
-import { ToolService } from "../tool.service";
 import {
-  ToolSelectionService,
-  ParametersValidationResult,
-  ParameterValidationResult
-} from "../../tool.selection.service";
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  EventEmitter,
+  Output
+} from "@angular/core";
+import { ToolParameter } from "chipster-js-common";
+import { ToolService } from "../tool.service";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Subject } from "rxjs/Subject";
-import { takeUntil, tap } from "rxjs/operators";
+import { ValidatedTool } from "../ToolSelection";
 
 @Component({
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"]
 })
-export class ToolParametersComponent implements OnInit, OnDestroy {
-  @Input() tool: Tool;
+export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() validatedTool: ValidatedTool;
+  @Output() parametersChanged: EventEmitter<any> = new EventEmitter();
 
   ready = false;
-  parametersValid: boolean;
-  validationResults: Map<string, ParameterValidationResult>;
-  inputsValid: boolean;
   showWarning: boolean;
   warningText: string;
 
-  private validateThrottle = new Subject<any>();
+  private parametersChangedThrottle = new Subject<any>();
 
   private unsubscribe: Subject<any> = new Subject();
 
   // noinspection JSUnusedLocalSymbols
-  constructor(
-    public toolService: ToolService,
-    public toolSelectionService: ToolSelectionService,
-    private dropDown: NgbDropdown
-  ) {}
+  constructor(public toolService: ToolService, private dropDown: NgbDropdown) {}
 
   ngOnInit() {
-    this.toolSelectionService.inputsValid$
-      .pipe(
-        takeUntil(this.unsubscribe),
-        tap(inputsOk => {
-          this.inputsValid = inputsOk;
-          this.updateWarning();
-        })
-      )
-      .subscribe();
-
-    this.toolSelectionService.parametersValidWithResults$
-      .pipe(
-        takeUntil(this.unsubscribe),
-        tap((validationResult: ParametersValidationResult) => {
-          this.parametersValid = validationResult.valid;
-          this.validationResults = validationResult.parameterResults;
-
-          this.updateWarning();
-          this.ready =
-            (validationResult.parameterResults !== null &&
-              validationResult.parameterResults.size > 0) ||
-            validationResult.parameterResults.size === 0;
-        })
-      )
-      .subscribe();
-
-    this.validateThrottle
+    this.parametersChangedThrottle
       .asObservable()
       .debounceTime(500)
       .takeUntil(this.unsubscribe)
       .subscribe(() => {
-        this.toolSelectionService.checkParameters();
+        this.parametersChanged.emit();
       });
+  }
+
+  ngOnChanges() {
+    if (this.validatedTool != null) {
+      this.ready = true;
+      this.showWarning = !this.validatedTool.valid;
+      this.warningText = this.validatedTool.message;
+    } else {
+      this.ready = false;
+    }
   }
 
   ngOnDestroy() {
@@ -81,27 +62,15 @@ export class ToolParametersComponent implements OnInit, OnDestroy {
     this.dropDown.close();
   }
 
-  validate() {
-    this.validateThrottle.next();
+  onParametersChanged() {
+    this.parametersChangedThrottle.next();
   }
 
-  private updateWarning() {
-    this.showWarning = !this.parametersValid || !this.inputsValid;
-
-    if (!this.parametersValid && !this.inputsValid) {
-      this.warningText = "Invalid parameters and missing input files";
-    } else if (!this.parametersValid) {
-      this.warningText = "Invalid parameters";
-    } else if (!this.inputsValid) {
-      this.warningText = "Missing input files";
-    } else {
-      this.warningText = "";
-    }
-  }
-
-  reset(parameter: ToolParameter, $event: Event) {
+  reset(parameter: ToolParameter, $event?: Event) {
     // don't close the dropdown
-    $event.stopPropagation();
+    if ($event) {
+      $event.stopPropagation();
+    }
 
     // if selection options doesn't contain default, set value to null
     const defaultValue = this.toolService.getDefaultValue(parameter);
@@ -116,14 +85,14 @@ export class ToolParametersComponent implements OnInit, OnDestroy {
     } else {
       parameter.value = defaultValue;
     }
-    this.toolSelectionService.checkParameters();
+    this.parametersChanged.emit();
   }
 
-  public getDisplayName(obj) {
+  getDisplayName(obj) {
     return this.toolService.getDisplayName(obj);
   }
 
-  resetVisible(parameter: ToolParameter): boolean {
+  isResetVisible(parameter: ToolParameter): boolean {
     if (
       this.toolService.isSelectionParameter(parameter) &&
       !this.toolService.isDefaultValue(parameter, parameter.value) &&

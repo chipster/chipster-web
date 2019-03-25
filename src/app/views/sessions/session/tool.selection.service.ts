@@ -1,179 +1,49 @@
-import { Injectable, OnDestroy } from "@angular/core";
-import { Store } from "@ngrx/store";
-import { ToolSelection } from "./tools/ToolSelection";
+import { Injectable } from "@angular/core";
+import {
+  SelectedToolWithInputs,
+  SelectedToolWithValidatedInputs,
+  ParameterValidationResult
+} from "./tools/ToolSelection";
 import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
-import { Observable, Subject } from "rxjs";
+import { Observable } from "rxjs";
 import { ToolService } from "./tools/tool.service";
 import * as _ from "lodash";
-import { SessionData } from "../../../model/session/session-data";
-import { SelectionService } from "./selection.service";
-import { SET_TOOL_SELECTION } from "../../../state/selected-tool.reducer";
-import log from "loglevel";
-import { ErrorService } from "../../../core/errorhandler/error.service";
-import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { forkJoin, of } from "rxjs";
+import { SessionData } from "../../../model/session/session-data";
+import log from "loglevel";
 
-export interface ParameterValidationResult {
-  valid: boolean;
-  message?: string;
-}
-
-export interface ParametersValidationResult {
-  valid: boolean;
-  parameterResults?: Map<string, ParameterValidationResult>;
-}
+import { PhenodataBinding } from "../../../model/session/phenodata-binding";
+import { GetSessionDataService } from "./get-session-data.service";
+import { DatasetService } from "./dataset.service";
 
 @Injectable()
-export class ToolSelectionService implements OnDestroy {
-  toolSelection$: Observable<ToolSelection>;
-  inputsValid$: Observable<boolean>;
-  parametersValid$: Observable<boolean>;
-  parametersValidWithResults$: Observable<ParametersValidationResult>;
-  runEnabled$: Observable<boolean>;
-
-  private currentToolSelection: ToolSelection; // needed for parameter checking
-  private parameterChecker$: BehaviorSubject<
-    Map<string, ParameterValidationResult>
-  > = new BehaviorSubject(new Map<string, ParameterValidationResult>());
-
-  private unsubscribe: Subject<any> = new Subject();
-
+export class ToolSelectionService {
   constructor(
-    private store: Store<any>,
     private toolService: ToolService,
-    private selectionService: SelectionService,
-    private errorService: ErrorService,
-    private restErrorService: RestErrorService
+    private getSessionDataService: GetSessionDataService,
+    private datasetService: DatasetService
+  ) { }
+
+  validateParameters(
+    selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
   ) {
-    // when tool selection changes, populate and check parameters
-    this.store
-      .select("toolSelection")
-      .takeUntil(this.unsubscribe)
-      .subscribe(
-        (toolSelection: ToolSelection) => {
-          this.currentToolSelection = toolSelection;
-
-          if (toolSelection) {
-            // get bound datasets for populating (dataset dependent) parameters
-            const boundDatasets = toolSelection.inputBindings.reduce(
-              (datasets: Array<Dataset>, inputBinding: InputBinding) => {
-                return datasets.concat(inputBinding.datasets);
-              },
-              []
-            );
-
-            // populating params is async as some selection options may require dataset contents
-            // if there are no params, forkJoin will get empty array and complete immediately
-            // this is important to get the param check run even if there are no params
-            // as no params means params are valid from the run enabled point of view
-            const populateParameterObservables = toolSelection.tool.parameters.map(
-              (parameter: ToolParameter) => {
-                return this.populateParameterValues(parameter, boundDatasets);
-              }
-            );
-
-            // populate all the params and run parameters check when populating done
-            forkJoin(populateParameterObservables).subscribe({
-              complete: () => {
-                this.checkParameters();
-              },
-              error: err => {
-                this.restErrorService.showError(
-                  "getting parameter values failed",
-                  err
-                );
-              }
-            });
-          }
-        },
-        err => this.errorService.showError("tool selection failed", err)
-      );
-
-    this.toolSelection$ = this.store.select("toolSelection");
-
-    this.inputsValid$ = this.store
-      .select("toolSelection")
-      .map((toolSelection: ToolSelection) => {
-        if (!toolSelection || toolSelection.tool.inputs.length < 1) {
-          return true;
-        }
-        return toolSelection.inputBindings.every((binding: InputBinding) => {
-          return binding.toolInput.optional || binding.datasets.length > 0;
-        });
-      })
-      .distinctUntilChanged();
-
-    this.parametersValidWithResults$ = this.parameterChecker$
-      .asObservable()
-      .map((resultsMap: Map<string, ParameterValidationResult>) => {
-        return {
-          valid: Array.from(resultsMap.values()).every(
-            (result: ParameterValidationResult) => result.valid
-          ),
-          parameterResults: resultsMap
-        };
-      })
-      .startWith({ valid: true })
-      .shareReplay(1);
-
-    this.parametersValid$ = this.parametersValidWithResults$
-      .map(
-        (resultWithErrors: ParameterValidationResult) => resultWithErrors.valid
-      )
-      .distinctUntilChanged()
-      .startWith(true)
-      .shareReplay(1);
-
-    this.runEnabled$ = Observable.combineLatest(
-      this.store.select("toolSelection"),
-      this.inputsValid$,
-      this.parametersValid$,
-      (toolSelection: ToolSelection, inputsValid, parametersValid) => {
-        return toolSelection && inputsValid && parametersValid;
-      }
-    ).distinctUntilChanged();
-  }
-
-  selectToolAndBindInputs(
-    toolSelection: ToolSelection,
-    sessionData: SessionData
-  ) {
-    log.info("selecting tool: ", toolSelection.tool.name.displayName);
-    toolSelection.inputBindings = this.toolService.bindInputs(
-      sessionData,
-      toolSelection.tool,
-      this.selectionService.selectedDatasets
-    );
-
-    this.store.dispatch({ type: SET_TOOL_SELECTION, payload: toolSelection });
-  }
-
-  selectTool(toolSelection: ToolSelection) {
-    this.store.dispatch({ type: SET_TOOL_SELECTION, payload: toolSelection });
-  }
-
-  checkParameters() {
-    this.parameterChecker$.next(this.checkCurrentToolParameters());
-  }
-
-  checkCurrentToolParameters(): Map<string, ParameterValidationResult> {
     const resultsMap = new Map<string, ParameterValidationResult>();
     if (
-      this.currentToolSelection &&
-      this.currentToolSelection.tool.parameters &&
-      this.currentToolSelection.tool.parameters.length > 0
+      selectedToolWithValidatedInputs &&
+      selectedToolWithValidatedInputs.tool &&
+      selectedToolWithValidatedInputs.tool.parameters &&
+      selectedToolWithValidatedInputs.tool.parameters.length > 0
     ) {
-      this.currentToolSelection.tool.parameters.forEach(
+      selectedToolWithValidatedInputs.tool.parameters.forEach(
         (parameter: ToolParameter) => {
-          resultsMap.set(parameter.name.id, this.checkParameter(parameter));
+          resultsMap.set(parameter.name.id, this.validateParameter(parameter));
         }
       );
     }
     return resultsMap;
   }
 
-  checkParameter(parameter: ToolParameter): ParameterValidationResult {
+  validateParameter(parameter: ToolParameter): ParameterValidationResult {
     // required parameter must not be emtpy
     if (!parameter.optional && !this.parameterHasValue(parameter)) {
       return { valid: false, message: "Required parameter can not be empty" };
@@ -209,6 +79,34 @@ export class ToolSelectionService implements OnDestroy {
           message: "Value must be less than or equal to " + parameter.to
         };
       }
+    } else if (
+      this.parameterHasValue(parameter) &&
+      parameter.type === "STRING"
+    ) {
+      // this regex should be same as that on the server side
+      // uglifyjs fails if using literal reg exp
+      // unlike with the java version on the server side
+      // '-' doesn't seem to work in the middle, escaped or not, --> it's now last
+
+      // firefox doesn't support unicode property escapes yet so catch
+      // the error, server side will validate it anyway and fail the job
+      // const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+      let result;
+      try {
+        const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+        result = regexp.exec(<string>parameter.value);
+      } catch (e) {
+        log.warn("validating string parameter failed");
+        return {
+          valid: true
+        };
+      }
+      return result === null
+        ? { valid: true }
+        : {
+          valid: false,
+          message: "Illegal character '" + result[0] + "'"
+        };
     }
 
     return { valid: true };
@@ -222,6 +120,41 @@ export class ToolSelectionService implements OnDestroy {
     );
   }
 
+  populateParameters(
+    selectedToolWithInputs: SelectedToolWithValidatedInputs
+  ): Observable<SelectedToolWithValidatedInputs> {
+    if (selectedToolWithInputs.tool) {
+      // get bound datasets for populating (dataset dependent) parameters
+      const boundDatasets = selectedToolWithInputs.inputBindings.reduce(
+        (datasets: Array<Dataset>, inputBinding: InputBinding) => {
+          return datasets.concat(inputBinding.datasets);
+        },
+        []
+      );
+
+      // get bound phenodatas for populating (phenodata dependent) parameters
+      const boundPhenodatas = selectedToolWithInputs.phenodataBindings
+        .map((phenodataBinding: PhenodataBinding) => phenodataBinding.dataset)
+        .filter(dataset => dataset != null)
+        .map(dataset => this.getSessionDataService.getPhenodata(dataset));
+
+      // populating params is async as some selection options may require dataset contents
+      const populateParameterObservables = selectedToolWithInputs.tool.parameters.map(
+        (parameter: ToolParameter) => {
+          return this.populateParameter(
+            parameter,
+            boundDatasets,
+            boundPhenodatas
+          );
+        }
+      );
+      return forkJoin(populateParameterObservables).map(() => {
+        return selectedToolWithInputs;
+      });
+    }
+    return of(selectedToolWithInputs);
+  }
+
   /**
    * Always return an observable, which emits at least one value and then completes.
    * This is needed because we use forkJoin for combining parameter populating and
@@ -229,17 +162,18 @@ export class ToolSelectionService implements OnDestroy {
    * emitting anything. Also if one of the observables doesn't complete, forkJoin
    * won't complete.
    */
-  populateParameterValues(
+  populateParameter(
     parameter: ToolParameter,
-    datasets: Array<Dataset>
-  ): Observable<any> {
+    datasets: Array<Dataset>,
+    phenodatas: Array<string>
+  ): Observable<ToolParameter> {
     // for other than column selection parameters, set to default if no value
     if (
       !this.toolService.isColumnSelectionParameter(parameter) &&
       !parameter.value
     ) {
       parameter.value = this.toolService.getDefaultValue(parameter);
-      return of(true);
+      return of(parameter);
     }
 
     // column selection parameters
@@ -248,7 +182,7 @@ export class ToolSelectionService implements OnDestroy {
       if (datasets && datasets.length < 1) {
         parameter.selectionOptions = [];
         parameter.value = null;
-        return of(true);
+        return of(parameter);
       }
 
       // COLUMN_SEL, getting headers is async
@@ -258,7 +192,7 @@ export class ToolSelectionService implements OnDestroy {
         if (!datasets[0].name.endsWith(".tsv")) {
           parameter.selectionOptions = [];
           parameter.value = null;
-          return of(true);
+          return of(parameter);
         }
 
         return Observable.forkJoin(
@@ -266,26 +200,92 @@ export class ToolSelectionService implements OnDestroy {
         ).map((datasetsHeaders: Array<Array<string>>) => {
           const columns = _.uniq(_.flatten(datasetsHeaders));
 
-          parameter.selectionOptions = columns.map(function(column) {
+          parameter.selectionOptions = columns.map(function (column) {
             return { id: column };
           });
           this.setColumnSelectionParameterValueAfterPopulate(parameter);
-          return true;
+          return parameter;
         });
       } else if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService
-          .getMetadataColumns(datasets)
-          .map(function(column) {
+          .getMetadataColumns(phenodatas)
+          .map(column => {
             return { id: column };
           });
 
         this.setColumnSelectionParameterValueAfterPopulate(parameter);
-        return of(true);
+        return of(parameter);
       }
     }
 
-    return of(true); // always return
+    return of(parameter); // always return, even if nothing gets done
+  }
+
+  validateInputs(toolWithInputs: SelectedToolWithInputs): boolean {
+    if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
+      return true;
+    } else {
+      // phenodata inputs are not included in the bindings, so no need to deal with them
+      return toolWithInputs.inputBindings.every((binding: InputBinding) => {
+        return binding.toolInput.optional || binding.datasets.length > 0;
+      });
+    }
+  }
+
+  /**
+   * For now, don't worry about the content of the phenodata
+   *
+   * @param phenodataBindings
+   *
+   */
+  validatePhenodata(phenodataBindings: PhenodataBinding[]): boolean {
+    // every returns true for an empty array
+    return phenodataBindings.every(
+      binding =>
+        binding.toolInput.optional ||
+        (!binding.toolInput.optional && binding.dataset != null)
+    );
+  }
+
+  validateRunForEach(
+    toolWithInputs: SelectedToolWithInputs,
+    sessionData: SessionData
+  ): boolean {
+    return (
+      toolWithInputs.tool &&
+      toolWithInputs.tool.inputs.length === 1 &&
+      !this.toolService.isMultiInput(toolWithInputs.tool.inputs[0]) &&
+      toolWithInputs.selectedDatasets &&
+      toolWithInputs.selectedDatasets.length > 1 &&
+      toolWithInputs.selectedDatasets.every((dataset: Dataset) =>
+        this.toolService.isCompatible(
+          sessionData,
+          dataset,
+          toolWithInputs.tool.inputs[0].type.name
+        )
+      )
+    );
+  }
+
+  getValidationMessage(
+    parametersValid: boolean,
+    inputsValid: boolean,
+    phenodataValid: boolean
+  ): string {
+    if (!parametersValid && !inputsValid) {
+      return "Invalid parameters and missing input files";
+    } else if (!parametersValid && !phenodataValid) {
+      return "Invalid parameters and missing phenodata";
+    } else if (!parametersValid) {
+      return "Invalid parameters";
+    } else if (!inputsValid) {
+      return "Missing input files";
+    } else if (!phenodataValid) {
+      return "Missing phenodata";
+    } else {
+      return "";
+    }
   }
 
   private setColumnSelectionParameterValueAfterPopulate(
@@ -315,10 +315,5 @@ export class ToolSelectionService implements OnDestroy {
         parameter.value = defaultValue;
       }
     }
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next();
-    this.unsubscribe.complete();
   }
 }

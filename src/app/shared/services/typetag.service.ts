@@ -60,16 +60,19 @@ export class TypeTagService {
 
   // noinspection JSMethodCanBeStatic
   get(sessionData: SessionData, dataset: Dataset, type: string) {
-    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
-
-    if (!typeTags) {
-      throw new Error("dataset " + dataset.name + " does not have type tags");
-    }
-    return typeTags.get(type);
+    return this.getTags(sessionData, dataset).get(type);
   }
 
   // noinspection JSMethodCanBeStatic
   has(sessionData: SessionData, dataset: Dataset, type: string): boolean {
-    return this.get(sessionData, dataset, type) != null;
+    return this.getTags(sessionData, dataset).has(type);
+  }
+
+  getTags(sessionData: SessionData, dataset: Dataset): Map<string, string> {
+    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+    if (!typeTags) {
+      throw new Error("dataset " + dataset.name + " does not have type tags");
+    }
+    return typeTags;
   }
 }
