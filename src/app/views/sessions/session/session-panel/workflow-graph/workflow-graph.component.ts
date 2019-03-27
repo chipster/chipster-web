@@ -137,14 +137,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   dragStarted: boolean;
 
-  searchEnabled: boolean;
+  searchEnabled = false;
   selectionEnabled = false;
 
   subscriptions: Array<any> = [];
 
   static getOpacity(isVisible: boolean) {
     if (isVisible) {
-      return 1.0;
+      return 0.9;
     } else {
       return 0.25;
     }
@@ -922,7 +922,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("d", "M 0,0 m -7,-7 L 7,0 L -7,7 Z")
       .style("fill", "#555")
       .style("opacity", d =>
-        WorkflowGraphComponent.getOpacity(this.filter === null)
+        WorkflowGraphComponent.getOpacity(!this.searchEnabled)
       );
 
     // Define the xy positions of the link
@@ -937,7 +937,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
       .attr("y2", d => d.target.y)
       .style("opacity", d =>
-        WorkflowGraphComponent.getOpacity(this.filter === null)
+        WorkflowGraphComponent.getOpacity(!this.searchEnabled)
       )
 
       .on("click", function(d) {
@@ -975,7 +975,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x2", d => this.getPhenodataLinkTargetX(d))
       .attr("y2", d => this.getPhenodataLinkY(d))
       .style("opacity", d =>
-        WorkflowGraphComponent.getOpacity(this.filter === null)
+        WorkflowGraphComponent.getOpacity(!this.searchEnabled)
       )
       .style("stroke-dasharray", "3, 3");
 
