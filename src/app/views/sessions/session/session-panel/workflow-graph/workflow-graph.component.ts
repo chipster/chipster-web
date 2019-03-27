@@ -101,10 +101,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3LinksGroup: any;
   d3LinksDefsGroup: any;
   d3LabelsGroup: any;
+  d3PhenodataLabelsGroup: any;
+  d3PhenodataWarningsGroup: any;
+  d3PhenodataLinksGroup: any;
+
   background: any;
 
   d3Links: any;
+  d3PhenodataLinks: any;
   d3Labels: any;
+  d3PhenodataLabels: any;
+  d3PhenodataWarnings: any;
   d3DatasetNodes: any;
   d3PhenodataNodes: any;
 
@@ -112,6 +119,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   nodeHeight: number = this.workflowGraphService.nodeHeight;
   phenodataRadius = this.workflowGraphService.phenodataRadius;
   phenodataMargin = this.workflowGraphService.phenodataMargin;
+  xMargin = this.workflowGraphService.xMargin;
 
   fontSize = 14;
   nodeRadius = 12;
@@ -191,6 +199,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .append("g")
       .attr("class", "link")
       .attr("id", "d3LinksGroup");
+    this.d3PhenodataLinksGroup = this.zoomGroup
+      .append("g")
+      .attr("class", "phenodata link")
+      .attr("id", "d3PhenodataLinksGroup");
     this.d3LinksDefsGroup = this.d3LinksGroup.append("defs");
     this.d3DatasetNodesGroup = this.zoomGroup
       .append("g")
@@ -201,6 +213,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("class", "phenodata")
       .attr("id", "d3PhenodataNodesGroup");
     this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
+    this.d3PhenodataLabelsGroup = this.zoomGroup
+      .append("g")
+      .attr("class", "phenodataLabel");
+    this.d3PhenodataWarningsGroup = this.zoomGroup
+      .append("g")
+      .attr("class", "phenodataWarning");
     this.datasetTooltip = d3
       .select("body")
       .append("div")
@@ -471,45 +489,68 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // store the selection of all existing and new elements
     this.d3PhenodataNodes = this.d3PhenodataNodesGroup
-      .selectAll("text")
+      .selectAll("rect")
       .data(this.phenodataNodes, d => d.datasetId);
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
     this.d3PhenodataNodes
       .enter()
-      .append("text")
-      .text((d: any) => "\uf069")
+      .append("rect")
+      .merge(this.d3PhenodataNodes)
       .attr("x", d => this.getPhenodataX(d))
       .attr("y", d => this.getPhenodataY(d))
-      .attr("class", "fa")
-      .merge(this.d3PhenodataNodes)
       .attr("id", function(d) {
-        return "phenodata_node_" + d.datasetId;
+        return "node_" + d.datasetId;
       })
-
-      .attr("stroke", "gray")
-      .attr("font-size", "16px")
+      // .attr("rx", this.nodeRadius)
+      // .attr("ry", this.nodeRadius)
+      .attr("width", this.nodeHeight)
+      .attr("height", this.nodeHeight)
+      // stroke and stroke width added
+      .attr("stroke", d => d.color)
       .attr("stroke-width", "2")
       .attr("pointer-events", "all")
+      //  .style("fill", d => d.color)
       .style("fill", "white")
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
           !this.filter || this.filter.has(d.datasetId)
         )
       )
-      // .on("mouseover", function(d) {
-      //   if (self.enabled) {
-      //     d3.select(this).classed("hovering-dataset", true);
-      //     self.showTooltip(this, d);
-      //   }
-      // })
-      // .on("mouseout", function() {
-      //   if (self.enabled) {
-      //     d3.select(this).classed("hovering-dataset", false);
-      //     self.hideTooltip();
-      //   }
-      // })
       .classed("phenodata-node", true);
+    // .classed("selected-dataset", d => this.isSelectedDataset(d.dataset));
+
+    // // store the selection of all existing and new elements
+    // this.d3PhenodataNodes = this.d3PhenodataNodesGroup
+    //   .selectAll("text")
+    //   .data(this.phenodataNodes, d => d.datasetId);
+
+    // // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
+    // this.d3PhenodataNodes
+    //   .enter()
+    //   .append("text")
+    //   .text((d: any) => "\uf069")
+    //   .attr("x", d => this.getPhenodataX(d))
+    //   .attr("y", d => this.getPhenodataY(d))
+    //   .attr("class", "fa")
+    //   .merge(this.d3PhenodataNodes)
+    //   .attr("id", function(d) {
+    //     return "phenodata_node_" + d.datasetId;
+    //   })
+
+    //   .attr("stroke", d =>
+    //     this.datasetService.isPhenodataFilled(d.dataset) ? "gray" : "#ffc107"
+    //   )
+    //   .attr("font-size", "16px")
+    //   .attr("stroke-width", "2")
+    //   .attr("pointer-events", "all")
+    //   .style("fill", "white")
+    //   .style("opacity", d =>
+    //     WorkflowGraphComponent.getOpacity(
+    //       !this.filter || this.filter.has(d.datasetId)
+    //     )
+    //   )
+    //   .classed("phenodata-node", true);
 
     this.d3PhenodataNodes.on("click", (d: DatasetNode) => {
       if (self.enabled) {
@@ -563,6 +604,65 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       );
 
     this.d3Labels.exit().remove();
+  }
+
+  renderPhenodataLabels() {
+    this.d3PhenodataLabels = this.d3PhenodataLabelsGroup
+      .selectAll("text")
+      .data(this.phenodataNodes, d => d.datasetId);
+
+    this.d3PhenodataLabels
+      .enter()
+      .append("text")
+      .merge(this.d3PhenodataLabels)
+      .text("P")
+      .attr("x", d => this.getPhenodataLabelX(d))
+      .attr("y", d => this.getPhenodataLabelY(d))
+      .attr("font-size", this.fontSize + "px")
+      .attr("fill", "black")
+      .attr("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(
+          !this.filter || this.filter.has(d.datasetId)
+        )
+      );
+
+    this.d3PhenodataLabels.exit().remove();
+  }
+
+  renderPhenodataWarnings() {
+    this.d3PhenodataWarnings = this.d3PhenodataWarningsGroup
+      .selectAll("text")
+      .data(this.phenodataNodes, d => d.datasetId);
+
+    this.d3PhenodataWarnings
+      .enter()
+      .append("text")
+      .merge(this.d3PhenodataWarnings)
+
+      // .text((d: any) => "\uf071")
+      .text((d: any) => "\uf06a")
+
+      .attr("x", d => this.getPhenodataLabelX(d) + 14)
+      .attr("y", d => this.getPhenodataLabelY(d) + 10)
+      .attr("class", "fa")
+      .attr("font-size", this.fontSize + 4 + "px")
+      .attr("fill", "#ffc107")
+      .attr("stroke", "#ffc107")
+      .attr("stroke-width", "0")
+      .attr("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(
+          !this.filter || this.filter.has(d.datasetId)
+        )
+      )
+      .classed("invisible", d =>
+        this.datasetService.isPhenodataFilled(d.dataset)
+      );
+
+    this.d3PhenodataWarnings.exit().remove();
   }
 
   renderDatasets() {
@@ -760,6 +860,29 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", d => this.getPhenodataX(d))
       .attr("y", d => this.getPhenodataY(d));
 
+    this.d3PhenodataLabels
+      .filter(d =>
+        this.selectionService.isSelectedDatasetById(d.dataset.datasetId)
+      )
+      .attr("x", d => this.getPhenodataLabelX(d))
+      .attr("y", d => this.getPhenodataLabelY(d));
+
+    this.d3PhenodataWarnings
+      .filter(d =>
+        this.selectionService.isSelectedDatasetById(d.dataset.datasetId)
+      )
+      .attr("x", d => this.getPhenodataWarningX(d))
+      .attr("y", d => this.getPhenodataWarningY(d));
+
+    this.d3PhenodataLinks
+      .filter(d =>
+        this.selectionService.isSelectedDatasetById(d.dataset.datasetId)
+      )
+      .attr("x1", d => this.getPhenodataLinkSourceX(d))
+      .attr("y1", d => this.getPhenodataLinkY(d))
+      .attr("x2", d => this.getPhenodataLinkTargetX(d))
+      .attr("y2", d => this.getPhenodataLinkY(d));
+
     this.d3Links
       .filter(d =>
         this.selectionService.isSelectedDatasetById(d.source.dataset.datasetId)
@@ -835,6 +958,30 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3Links.exit().remove();
   }
 
+  renderPhenodataLinks() {
+    const self = this;
+
+    // Define the xy positions of the link
+    this.d3PhenodataLinks = this.d3PhenodataLinksGroup
+      .selectAll("line")
+      .data(this.phenodataNodes);
+
+    this.d3PhenodataLinks
+      .enter()
+      .append("line")
+      .merge(this.d3PhenodataLinks)
+      .attr("x1", d => this.getPhenodataLinkSourceX(d))
+      .attr("y1", d => this.getPhenodataLinkY(d))
+      .attr("x2", d => this.getPhenodataLinkTargetX(d))
+      .attr("y2", d => this.getPhenodataLinkY(d))
+      .style("opacity", d =>
+        WorkflowGraphComponent.getOpacity(this.filter === null)
+      )
+      .style("stroke-dasharray", "3, 3");
+
+    this.d3Links.exit().remove();
+  }
+
   dragEnd() {
     // update positions of all selected datasets to the server
     this.d3DatasetNodes
@@ -865,6 +1012,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.renderLinks();
     this.renderDatasets();
     this.renderPhenodataNodes();
+    this.renderPhenodataLabels();
+    this.renderPhenodataLinks();
+    this.renderPhenodataWarnings();
     this.renderLabels();
   }
 
@@ -1197,10 +1347,51 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private getPhenodataX(datasetNode: DatasetNode) {
-    return datasetNode.x + this.nodeWidth + this.phenodataRadius - 2;
+    return (
+      datasetNode.x +
+      this.nodeWidth +
+      this.xMargin +
+      (this.nodeWidth - this.nodeHeight) / 2
+    );
+
+    // for icon
+    // return datasetNode.x + this.nodeWidth + this.phenodataRadius - 2;
   }
 
   private getPhenodataY(datasetNode: DatasetNode) {
-    return datasetNode.y + this.nodeHeight / 2 + this.fontSize / 4 + 3;
+    return datasetNode.y;
+
+    // for icon
+    // return datasetNode.y + this.nodeHeight / 2 + this.fontSize / 4 + 3;
+  }
+
+  private getPhenodataLabelX(datasetNode: DatasetNode) {
+    return this.getPhenodataX(datasetNode) + this.nodeHeight / 2;
+  }
+
+  private getPhenodataLabelY(datasetNode: DatasetNode) {
+    return (
+      this.getPhenodataY(datasetNode) + this.nodeHeight / 2 + this.fontSize / 4
+    );
+  }
+
+  private getPhenodataLinkSourceX(datasetNode: DatasetNode): number {
+    return datasetNode.x + this.nodeWidth;
+  }
+
+  private getPhenodataLinkTargetX(datasetNode: DatasetNode): number {
+    return this.getPhenodataX(datasetNode);
+  }
+
+  private getPhenodataLinkY(datasetNode: DatasetNode): number {
+    return this.getPhenodataY(datasetNode) + this.nodeHeight / 2;
+  }
+
+  private getPhenodataWarningX(datasetNode: DatasetNode): number {
+    return this.getPhenodataLabelX(datasetNode) + 14;
+  }
+
+  private getPhenodataWarningY(datasetNode: DatasetNode): number {
+    return this.getPhenodataLabelY(datasetNode) + 10;
   }
 }

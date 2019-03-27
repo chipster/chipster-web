@@ -2,13 +2,18 @@
   <div [ngSwitch]="phenodataState">
 
     <div *ngSwitchCase="PhenodataState.OWN_PHENODATA">
-      <div class="phenodata-button-group">
+      <div class="phenodata-button-group mb-1">
         <button class="btn btn-sm btn-success mr-1" (click)="openAddColumnModal()">
           <i class="fas fa-plus"></i> Add column
         </button>
         <button class="btn btn-sm btn-secondary float-right" (click)="reset()">
           Reset all
         </button>
+      </div>
+
+      <div [class.invisible]="phenodataFilled" class="text-warning mb-1">
+        <i class="fas fa-fw fa-exclamation-circle"></i>
+        <span class="font-italic">Group column should not contain empty values</span>
       </div>
     </div>
 
