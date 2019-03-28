@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
 import * as _ from "lodash";
+import log from "loglevel";
 import { Observable } from "rxjs/Observable";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
@@ -50,7 +51,6 @@ export class SessionPanelComponent {
   toggleDatasetSelection($event: any, dataset: Dataset): void {
     if (UtilsService.isCtrlKey($event)) {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
-      console.log([dataset]);
     } else if (UtilsService.isShiftKey($event)) {
       //  datasets and their ids in the order of the dataset list
       const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(
@@ -85,7 +85,7 @@ export class SessionPanelComponent {
     });
 
     Observable.forkJoin(updates).subscribe(
-      () => console.log(updates.length + " datasets updated"),
+      () => log.info(updates.length + " datasets updated"),
       err => this.restErrorService.showError("layout update failed", err)
     );
   }
