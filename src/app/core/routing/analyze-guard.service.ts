@@ -1,12 +1,10 @@
 import { Injectable } from "@angular/core";
-import { CanActivate } from "@angular/router";
-import { RouteService } from "../../shared/services/route.service";
-import { ActivatedRouteSnapshot } from "@angular/router";
-import { RouterStateSnapshot } from "@angular/router";
-import { Observable } from "rxjs/Observable";
-import { SessionResource } from "../../shared/resources/session.resource";
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
+import { Observable } from "rxjs/Observable";
+import { SessionResource } from "../../shared/resources/session.resource";
+import { RouteService } from "../../shared/services/route.service";
 import { UserService } from "../../shared/services/user.service";
 
 /**
@@ -18,7 +16,7 @@ export class AnalyzeGuard implements CanActivate {
     private routeService: RouteService,
     private sessionResource: SessionResource,
     private userService: UserService
-  ) {}
+  ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,

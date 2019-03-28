@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {RestService} from "./restservice/rest.service";
-import {HttpQueueService} from "./http-queue/http-queue.service";
-import {AuthenticationModule} from "../authentication/authentication.module";
+import { NgModule } from '@angular/core';
+import { HttpQueueService } from "./http-queue/http-queue.service";
+import { RestService } from "./restservice/rest.service";
 
 @NgModule({
   imports: [
