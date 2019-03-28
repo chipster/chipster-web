@@ -144,7 +144,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   static getOpacity(isVisible: boolean) {
     if (isVisible) {
-      return 0.9;
+      return 1.0;
     } else {
       return 0.25;
     }
@@ -594,7 +594,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           return this.fontSize - 2 + "px";
         }
       })
-      .attr("fill", "black")
+      // .attr("stroke", d => (this.isSelectedDataset(d.dataset) ? "2.0" : "1"))
+      .attr("fill", d =>
+        this.isSelectedDataset(d.dataset) ? "white" : "black"
+      )
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
@@ -647,7 +650,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", d => this.getPhenodataLabelX(d) + 14)
       .attr("y", d => this.getPhenodataLabelY(d) + 10)
       .attr("class", "fa")
-      .attr("font-size", this.fontSize + 4 + "px")
+      .attr("font-size", this.fontSize + 2 + "px")
       .attr("fill", "#ffc107")
       .attr("stroke", "#ffc107")
       .attr("stroke-width", "0")
@@ -734,17 +737,24 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
       // stroke and stroke width added
-      .attr("stroke", d => d.color)
-      .attr("stroke-width", "2")
+      .attr(
+        "stroke",
+        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : d.color)
+        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : d.color) // bootstrap default active
+      )
+      .attr("stroke-width", "3")
       .attr("pointer-events", "all")
-      //  .style("fill", d => d.color)
-      .style("fill", "white")
+      .style(
+        "fill",
+        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : "white")
+        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : "white") // bootstrap default active
+      )
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
-          !this.filter || this.filter.has(d.datasetId)
+          !this.searchEnabled || (this.filter && this.filter.has(d.datasetId))
         )
       )
-      .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
+      // .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
       .on(
         "contextmenu",
         d3ContextMenu(menu, {

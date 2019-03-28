@@ -10,12 +10,12 @@ import { DatasetNode } from "./dataset-node";
 export class WorkflowGraphService {
   readonly nodeHeight = 22;
   // nodeWidth = 36;
-  readonly nodeWidth = 42;
+  readonly nodeWidth = 48;
 
   readonly phenodataRadius = this.nodeHeight / 2;
   readonly phenodataMargin = this.phenodataRadius;
 
-  xMargin = this.nodeWidth / 2;
+  xMargin = this.nodeWidth / 4;
   yMargin = this.nodeHeight;
 
   constructor(private datasetService: DatasetService) {}
