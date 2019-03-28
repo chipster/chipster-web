@@ -598,6 +598,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("fill", d =>
         this.isSelectedDataset(d.dataset) ? "white" : "black"
       )
+      .attr("font-weight", d =>
+        this.isSelectedDataset(d.dataset) ? "600" : "400"
+      )
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
