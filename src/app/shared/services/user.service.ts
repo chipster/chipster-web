@@ -1,3 +1,7 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
+
+import {map, mergeMap, tap, take} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
 import {
@@ -7,7 +11,6 @@ import {
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { User } from "chipster-js-common";
 import log from "loglevel";
-import { Observable } from "rxjs/Observable";
 import { SessionResource } from "../resources/session.resource";
 
 @Injectable()
@@ -43,11 +46,11 @@ export class UserService {
   private updateLatestSessionToSessionDb(sessionId: string) {
     // FIXME only update if changed?
     this.authenticationService
-      .getUser()
-      .mergeMap((user: User) => {
+      .getUser().pipe(
+      mergeMap((user: User) => {
         user.latestSession = sessionId;
         return this.authenticationService.updateUser(user);
-      })
+      }))
       .subscribe(
         () => {
           log.info("update latest session to sessionDb successful");
@@ -62,10 +65,10 @@ export class UserService {
   getLatestSession(): Observable<string> {
     let sessions;
     return this.sessionResource
-      .getSessions() // sessions are needed to check if possibly found latest session still exists
-      .do(s => (sessions = s))
-      .mergeMap(() => {
-        return this.getLatestSessionFromStore().mergeMap(
+      .getSessions().pipe( // sessions are needed to check if possibly found latest session still exists
+      tap(s => (sessions = s)),
+      mergeMap(() => {
+        return this.getLatestSessionFromStore().pipe(mergeMap(
           (latestSession: LatestSession) => {
             // valid id from store?
             const idFromStore = latestSession.sessionId;
@@ -74,7 +77,7 @@ export class UserService {
               sessions.some(session => session.sessionId === idFromStore)
             ) {
               log.info("found valid latest session id from store", idFromStore);
-              return Observable.of(idFromStore);
+              return observableOf(idFromStore);
             } else {
               // valid source session id from store?
               const sourceSessionIdFromStore = latestSession.sourceSessionId;
@@ -88,10 +91,10 @@ export class UserService {
                   "found valid source session id from store",
                   sourceSessionIdFromStore
                 );
-                return Observable.of(sourceSessionIdFromStore);
+                return observableOf(sourceSessionIdFromStore);
               } else {
                 // valid id from session db?
-                return this.getLatestSessionFromSessionDb().mergeMap(
+                return this.getLatestSessionFromSessionDb().pipe(mergeMap(
                   (idFromSessionDb: string) => {
                     if (
                       idFromSessionDb !== null &&
@@ -103,27 +106,27 @@ export class UserService {
                         "found valid latest session id from sessionDb",
                         idFromSessionDb
                       );
-                      return Observable.of(idFromSessionDb);
+                      return observableOf(idFromSessionDb);
                     } else {
                       log.info("no valid latest session id in sessionDb");
-                      return Observable.of(null);
+                      return observableOf(null);
                     }
                   }
-                );
+                ));
               }
             }
           }
-        );
-      });
+        ));
+      }),);
   }
 
   getLatestSessionFromStore(): Observable<LatestSession> {
-    return this.store.select("latestSession").take(1);
+    return this.store.select("latestSession").pipe(take(1));
   }
 
   getLatestSessionFromSessionDb(): Observable<string> {
-    return this.authenticationService.getUser().map((user: User) => {
+    return this.authenticationService.getUser().pipe(map((user: User) => {
       return user.latestSession;
-    });
+    }));
   }
 }

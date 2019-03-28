@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 import * as _ from "lodash";
 

@@ -1,3 +1,5 @@
+
+import {takeUntil, debounceTime} from 'rxjs/operators';
 import {
   Component,
   Input,
@@ -10,7 +12,7 @@ import {
 import { ToolParameter } from "chipster-js-common";
 import { ToolService } from "../tool.service";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { ValidatedTool } from "../ToolSelection";
 
 @Component({
@@ -35,9 +37,9 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit() {
     this.parametersChangedThrottle
-      .asObservable()
-      .debounceTime(500)
-      .takeUntil(this.unsubscribe)
+      .asObservable().pipe(
+      debounceTime(500),
+      takeUntil(this.unsubscribe),)
       .subscribe(() => {
         this.parametersChanged.emit();
       });

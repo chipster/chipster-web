@@ -1,6 +1,9 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
+
+import {mergeMap} from 'rxjs/operators';
 import { ConfigService } from "../services/config.service";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
 import { RestService } from "../../core/rest-services/restservice/rest.service";
 import { ResponseContentType, Headers } from "@angular/http";
 import { Dataset } from "chipster-js-common";
@@ -38,21 +41,21 @@ export class FileResource {
     const apiUrl$ = this.configService.getFileBrokerUrl();
     if (isReqArrayBuffer) {
       // For Bam Viewer, we need array buffer as reponse
-      return apiUrl$.flatMap((url: string) =>
+      return apiUrl$.pipe(mergeMap((url: string) =>
         this.restService.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
           true,
           { responseType: ResponseContentType.ArrayBuffer }
         )
-      );
+      ));
     } else {
-      return apiUrl$.flatMap((url: string) =>
+      return apiUrl$.pipe(mergeMap((url: string) =>
         this.restService.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
           true,
           { responseType: ResponseContentType.Text }
         )
-      );
+      ));
     }
   }
 
@@ -67,13 +70,13 @@ export class FileResource {
 
       if (maxBytes === 0) {
         // 0-0 range would produce 416 - Requested range not satisfiable
-        return Observable.of("");
+        return observableOf("");
       }
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
     if (isReqArrayBuffer) {
-      return apiUrl$.flatMap((url: string) =>
+      return apiUrl$.pipe(mergeMap((url: string) =>
         this.restService.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
           true,
@@ -82,9 +85,9 @@ export class FileResource {
             responseType: ResponseContentType.ArrayBuffer
           }
         )
-      );
+      ));
     } else {
-      return apiUrl$.flatMap((url: string) =>
+      return apiUrl$.pipe(mergeMap((url: string) =>
         this.restService.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
           true,
@@ -93,7 +96,7 @@ export class FileResource {
             responseType: ResponseContentType.Text
           }
         )
-      );
+      ));
     }
   }
 
@@ -103,7 +106,7 @@ export class FileResource {
     data: string
   ): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    return apiUrl$.flatMap((url: string) =>
+    return apiUrl$.pipe(mergeMap((url: string) =>
       this.restService.put(
         `${url}/sessions/${sessionId}/datasets/${datasetId}`,
         data,
@@ -111,6 +114,6 @@ export class FileResource {
         {},
         false
       )
-    );
+    ));
   }
 }

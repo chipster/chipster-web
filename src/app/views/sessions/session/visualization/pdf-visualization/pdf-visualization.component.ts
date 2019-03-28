@@ -1,8 +1,10 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { Component, OnChanges, Input, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
@@ -61,8 +63,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     }
 
     this.sessionDataService
-      .getDatasetUrl(this.dataset)
-      .takeUntil(this.unsubscribe)
+      .getDatasetUrl(this.dataset).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         url => {
           this.src = url;

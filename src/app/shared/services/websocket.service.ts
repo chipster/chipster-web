@@ -1,3 +1,7 @@
+
+import { throwError as observableThrowError, empty as observableEmpty, Observable, Subject, EMPTY } from 'rxjs';
+
+import { catchError, mergeMap } from 'rxjs/operators';
 import { ConfigService } from "./config.service";
 import {
   WsEvent,
@@ -5,9 +9,8 @@ import {
 } from "chipster-js-common";
 import { Injectable } from "@angular/core";
 import { TokenService } from "../../core/authentication/token.service";
-import { Observable } from "rxjs/Observable";
-import { Subject } from "rxjs/Subject";
-import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+// import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { ErrorService } from "../../core/errorhandler/error.service";
 import log from "loglevel";
 import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
@@ -27,7 +30,7 @@ export class WebSocketService {
     private configService: ConfigService,
     private tokenService: TokenService,
     private errorService: ErrorService
-  ) {}
+  ) { }
 
   unsubscribe() {
     // can be null when session loading fails (e.g. expired token)
@@ -53,32 +56,33 @@ export class WebSocketService {
 
     // get the url of the websocket server
     this.configService
-      .getSessionDbEventsUrl()
-      .flatMap((eventsUrl: string) => {
-        const encodedTopic = encodeURIComponent(this.topic);
-        const wsUrl = `${eventsUrl}/events/${encodedTopic}?token=${this.tokenService.getToken()}`;
-        log.debug("event URL", wsUrl);
+      .getSessionDbEventsUrl().pipe(
+        mergeMap((eventsUrl: string) => {
+          const encodedTopic = encodeURIComponent(this.topic);
+          const wsUrl = `${eventsUrl}/events/${encodedTopic}?token=${this.tokenService.getToken()}`;
+          log.debug("event URL", wsUrl);
 
-        // convert websocket to observable
-        this.wsSubject$ = Observable.webSocket({
-          url: wsUrl,
-          openObserver: {
-            next: x => {
-              log.info("websocket open", x);
+          // convert websocket to observable
+          // Need to check whether this new webSocket works!!!!!!
+          this.wsSubject$ = webSocket({
+            url: wsUrl,
+            openObserver: {
+              next: x => {
+                log.info("websocket open", x);
+              }
             }
-          }
-        });
+          });
 
-        return this.wsSubject$;
-      })
-      // convert unclean idle timeouts to clean (about 20% of them for unknown reason)
-      .catch(err => {
-        if (err.code === 1001 && err.reason === "Idle Timeout") {
-          return Observable.empty();
-        } else {
-          return Observable.throw(err);
-        }
-      })
+          return this.wsSubject$;
+        }),
+        // convert unclean idle timeouts to clean (about 20% of them for unknown reason)
+        catchError(err => {
+          if (err.code === 1001 && err.reason === "Idle Timeout") {
+            return EMPTY;
+          } else {
+            return observableThrowError(err);
+          }
+        }))
       .subscribe(
         data => {
           log.info("websocket event", data);

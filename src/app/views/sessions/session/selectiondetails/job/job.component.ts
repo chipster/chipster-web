@@ -1,10 +1,12 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { SelectionService } from '../../selection.service';
 import { SessionDataService } from '../../session-data.service';
 import { Component, Input, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import { Job, SessionEvent, JobParameter, Tool } from 'chipster-js-common';
 import { JobService } from '../../job.service';
 import { SessionEventService } from '../../session-event.service';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 import { SessionData } from '../../../../../model/session/session-data';
 import * as _ from 'lodash';
 import UtilsService from '../../../../../shared/utilities/utils';
@@ -49,8 +51,8 @@ export class JobComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     // job selection events, get's current selection upon subscription
-    this.selectionService.selectedJobs$
-      .takeUntil(this.unsubscribe)
+    this.selectionService.selectedJobs$.pipe(
+      takeUntil(this.unsubscribe))
       .subscribe((selectedJobs: Array<Job>) => {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
@@ -75,8 +77,8 @@ export class JobComponent implements OnInit, OnDestroy {
       }, err => this.errorService.showError("updating selected jobs failed", err));
 
     // job modification events
-    this.sessionEventService.getJobStream()
-      .takeUntil(this.unsubscribe)
+    this.sessionEventService.getJobStream().pipe(
+      takeUntil(this.unsubscribe))
       .subscribe((sessionEvent: SessionEvent) => {
         if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
           this.update(this.job.jobId);

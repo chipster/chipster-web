@@ -1,3 +1,5 @@
+
+import {mergeMap} from 'rxjs/operators';
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { SessionDataService } from "../../session-data.service";
 import { SelectionService } from "../../selection.service";
@@ -37,11 +39,11 @@ export class FileComponent {
   renameDataset() {
     const dataset = _.clone(this.dataset);
     this.dialogModalService
-      .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename")
-      .flatMap(name => {
+      .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename").pipe(
+      mergeMap(name => {
         dataset.name = name;
         return this.sessionDataService.updateDataset(dataset);
-      })
+      }))
       .subscribe(null, err => this.restErrorService.showError("dataset rename error", err));
   }
 

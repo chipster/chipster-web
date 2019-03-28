@@ -1,9 +1,10 @@
+
+import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 import {Component, Input, OnChanges} from '@angular/core';
 import {TSVReader} from "../../../../../shared/services/TSVReader";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
-import {Observable} from "rxjs/Observable";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import Point from "../model/point";
 import {VennDiagramService} from "./venndiagram.service";
@@ -52,7 +53,7 @@ export class VennDiagramComponent implements OnChanges {
         const tsvObservables = datasetIds
             .map((dataset: Dataset) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), dataset));
 
-        Observable.forkJoin(tsvObservables).subscribe((resultTSVs: Array<any>) => {
+        observableForkJoin(tsvObservables).subscribe((resultTSVs: Array<any>) => {
             this.files = _.chain(resultTSVs)
                 .map((tsv: any) => d3.tsvParseRows(tsv))
                 .map((tsv: Array<Array<string>>, index: number) => {

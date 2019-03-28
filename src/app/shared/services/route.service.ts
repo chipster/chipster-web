@@ -1,8 +1,10 @@
+
+import {shareReplay, filter, map, take} from 'rxjs/operators';
 import { Router, ActivatedRoute } from "@angular/router";
 import { Injectable } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { NavigationEnd } from "@angular/router";
-import { Observable } from "rxjs/Observable";
+import { Observable } from "rxjs";
 import log from "loglevel";
 
 @Injectable()
@@ -100,10 +102,10 @@ export class RouteService {
    */
   getRouterLink$(appUrl: string): Observable<string> {
     return (
-      this.getAppRoute$()
-        .map(appRoute => this.buildRouterLink(appRoute, appUrl))
+      this.getAppRoute$().pipe(
+        map(appRoute => this.buildRouterLink(appRoute, appUrl)),
         // complete after the first result to allow use in forkJoin
-        .take(1)
+        take(1),)
     );
   }
 
@@ -172,12 +174,12 @@ export class RouteService {
    */
   getAppRoute$(): Observable<string> {
     if (!this.appRoute$) {
-      this.appRoute$ = this.router.events
-        .filter(e => e instanceof NavigationEnd)
-        .filter((e: NavigationEnd) => !!e.urlAfterRedirects)
-        .filter((e: NavigationEnd) => e.urlAfterRedirects !== "")
-        .map((e: NavigationEnd) => this.getAppRouteOfUrl(e.urlAfterRedirects))
-        .shareReplay(1); // send the last value even without the route change
+      this.appRoute$ = this.router.events.pipe(
+        filter(e => e instanceof NavigationEnd),
+        filter((e: NavigationEnd) => !!e.urlAfterRedirects),
+        filter((e: NavigationEnd) => e.urlAfterRedirects !== ""),
+        map((e: NavigationEnd) => this.getAppRouteOfUrl(e.urlAfterRedirects)),
+        shareReplay(1),); // send the last value even without the route change
     }
     return this.appRoute$;
   }

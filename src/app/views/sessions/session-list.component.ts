@@ -2,19 +2,18 @@ import { SessionResource } from "../../shared/resources/session.resource";
 import { SessionData } from "../../model/session/session-data";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
-import { Subject } from "rxjs/Subject";
+import { Subject, Observable, forkJoin, pipe, of } from "rxjs";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionDataService } from "./session/session-data.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { RouteService } from "../../shared/services/route.service";
 import { Session, Module, WsEvent, Rule } from "chipster-js-common";
-import { Observable, forkJoin } from "rxjs";
 import { SessionService } from "./session/session.service";
 import log from "loglevel";
 import { ToolsService } from "../../shared/services/tools.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { tap } from "rxjs/internal/operators/tap";
-import { mergeMap, takeUntil, map } from "rxjs/operators";
+import { mergeMap, takeUntil, map, debounceTime, filter, finalize } from "rxjs/operators";
 import { UserEventService } from "./user-event.service";
 import { UserEventData } from "./user-event-data";
 import { SessionState } from "chipster-js-common/lib/model/session";
@@ -69,7 +68,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private tokenService: TokenService,
     private settingsService: SettingsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // subscribe to mode change
@@ -92,43 +91,44 @@ export class SessionListComponent implements OnInit, OnDestroy {
         this.restErrorService.showError("Updating sessions failed", error);
       });
 
+    // Need to check this part very carefully!!!!!!!
     this.previewThrottleSubscription = this.previewThrottle$
-      .asObservable()
+      .asObservable().
       // hide the loading indicator of the old session immediately
-      .do(() => {
+      pipe(tap(() => {
         this.workflowPreviewFailed = false;
         this.workflowPreviewLoading = true;
-      })
-      // wait a while to see if the user is really interested about this session
-      .debounceTime(500)
-      .filter(() => this.selectedSession !== null)
-      .flatMap(session => {
-        return forkJoin(
-          this.sessionResource.loadSession(session.sessionId, true),
-          this.toolsService.getModulesMap()
-        );
-      })
-      .do(results => {
-        const sData = results[0];
-        this.modulesMap = results[1];
-
-        this.workflowPreviewLoading = false;
-        // don't show if the selection has already changed
-        if (
-          this.selectedSession &&
-          sData.session &&
-          this.selectedSession.sessionId === sData.session.sessionId
-        ) {
-          this.sessionData = sData;
-          this.sessionSize = this.sessionDataService.getSessionSize(
-            this.sessionData
+      }),
+        // wait a while to see if the user is really interested about this session
+        debounceTime(500),
+        filter(() => this.selectedSession !== null),
+        mergeMap(session => {
+          return forkJoin(
+            this.sessionResource.loadSession(session.sessionId, true),
+            this.toolsService.getModulesMap()
           );
-        }
-      })
-      // hide the spinner when unsubscribed (when the user has opened a session)
-      .finally(() => (this.workflowPreviewLoading = false))
+        }),
+        tap(results => {
+          const sData = results[0];
+          this.modulesMap = results[1];
+
+          this.workflowPreviewLoading = false;
+          // don't show if the selection has already changed
+          if (
+            this.selectedSession &&
+            sData.session &&
+            this.selectedSession.sessionId === sData.session.sessionId
+          ) {
+            this.sessionData = sData;
+            this.sessionSize = this.sessionDataService.getSessionSize(
+              this.sessionData
+            );
+          }
+        }),
+        // hide the spinner when unsubscribed (when the user has opened a session)
+        finalize(() => (this.workflowPreviewLoading = false)))
       .subscribe(
-        () => {},
+        () => { },
         (error: any) => {
           this.workflowPreviewFailed = true;
           this.restErrorService.showError(
@@ -243,11 +243,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
         session = new Session(name);
         session.state = SessionState.Ready;
         return this.sessionResource.createSession(session);
-      })
-      .do((sessionId: string) => {
+      }).
+      pipe(tap((sessionId: string) => {
         session.sessionId = sessionId;
         this.openSession(sessionId);
-      })
+      }))
       .subscribe(null, (error: any) => {
         this.restErrorService.showError("Creating a new session failed", error);
       });
@@ -566,7 +566,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.sessionData.session.sessionId === session.sessionId
         ) {
           log.info("using session data from preview for duplicate");
-          return Observable.of(this.sessionData);
+          return of(this.sessionData);
         } else {
           log.info(
             "no session data from preview available, getting from server"

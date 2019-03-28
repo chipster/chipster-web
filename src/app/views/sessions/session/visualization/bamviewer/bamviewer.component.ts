@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { Component, Input, OnChanges, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { Service, Dataset } from "chipster-js-common";
 import { FileResource } from "../../../../../shared/resources/fileresource";
@@ -5,7 +7,7 @@ import { SessionDataService } from "../../session-data.service";
 import * as pako from "pako";
 import BamRecord from "./bamRecord";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { LoadState, State } from "../../../../../model/loadstate";
 
 
@@ -58,8 +60,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading bam file...");
 
-    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
-      .takeUntil(this.unsubscribe)
+    this.fileResource.getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe((result: any) => {
 
         const arrayBuffer = result;

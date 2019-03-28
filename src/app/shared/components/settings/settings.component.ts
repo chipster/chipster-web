@@ -3,7 +3,7 @@ import {
   SettingsService,
   SessionListMode
 } from "../../services/settings.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({

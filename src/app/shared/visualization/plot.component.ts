@@ -1,5 +1,7 @@
 // Super class for scatterplot and volcanoplot
 
+
+import {takeUntil} from 'rxjs/operators';
 import { OnChanges, Input, HostListener, OnDestroy } from "@angular/core";
 import { FileResource } from "../resources/fileresource";
 import { SessionDataService } from "../../views/sessions/session/session-data.service";
@@ -11,7 +13,7 @@ import Point from "../../views/sessions/session/visualization/model/point";
 import TSVRow from "../../model/tsv/TSVRow";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { AppInjector } from "../../app-injector";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { LoadState, State } from "../../model/loadstate";
 
 export abstract class PlotComponent implements OnChanges, OnDestroy {
@@ -64,8 +66,8 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
 
     // Get the file, this can be in a shared dataservice
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
-      .takeUntil(this.unsubscribe)
+      .getData(this.sessionDataService.getSessionId(), this.dataset).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);

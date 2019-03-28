@@ -1,7 +1,9 @@
+
+import {map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import '../../rxjs-operators';
 import {RestService} from '../../core/rest-services/restservice/rest.service';
-import {Observable} from 'rxjs/Observable';
+import {Observable} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Role, Service } from 'chipster-js-common';
 import { TokenService } from '../../core/authentication/token.service';
@@ -19,8 +21,8 @@ export class ConfigurationResource {
 
   getConfiguration(file: string): Observable<any> {
 
-    return this.httpClient.get('/assets/conf/' + file, { responseType: 'text' })
-      .map(conf => YAML.parse(conf));
+    return this.httpClient.get('/assets/conf/' + file, { responseType: 'text' }).pipe(
+      map(conf => YAML.parse(conf)));
   }
 
   getPublicServices(conf: any): Observable<Service[]> {

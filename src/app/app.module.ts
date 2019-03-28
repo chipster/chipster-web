@@ -16,7 +16,7 @@ import { StoreModule } from "@ngrx/store";
 import { ErrorComponent } from "./views/error/error.component";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { ErrorService } from "./core/errorhandler/error.service";
-import { HttpClientModule } from "@angular/common/http";
+import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { ManualModule } from "./views/manual/manual.module";
 import { setAppInjector } from "./app-injector";
 import { AdminModule } from "./views/admin/admin.module";
@@ -43,14 +43,14 @@ import { ContactModule } from "./views/contact/contact.module";
 @NgModule({
   imports: [
     BrowserModule,
-    HttpModule,
+    HttpClient,
     HttpClientModule,
     FormsModule,
     CoreModule,
     ContactModule,
     SessionModule,
     ManualModule,
-    NgbModule.forRoot(),
+    NgbModule,
     AdminModule,
     StoreModule.forRoot({
       selectedDatasets,

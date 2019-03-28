@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { SelectionService } from "../selection.service";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
@@ -14,7 +16,7 @@ import { Store } from "@ngrx/store";
 import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { VisualizationEventService } from "./visualization-event.service";
 import VisualizationConstants, {
   Visualization
@@ -54,8 +56,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store
-      .select("selectedDatasets")
-      .takeUntil(this.unsubscribe)
+      .select("selectedDatasets").pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
@@ -110,8 +112,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       );
 
     this.visualizationEventService
-      .getPhenodataSelectedStream()
-      .takeUntil(this.unsubscribe)
+      .getPhenodataSelectedStream().pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(phenodataSelected => {
         if (phenodataSelected) {
           this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);

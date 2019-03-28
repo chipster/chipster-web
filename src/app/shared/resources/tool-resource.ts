@@ -1,3 +1,5 @@
+
+import {mergeMap} from 'rxjs/operators';
 import { ConfigService } from "../services/config.service";
 import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
@@ -14,24 +16,24 @@ export class ToolResource {
 
   getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
       this.restService.get(`${apiUrl}/modules`)
-    );
+    ));
   }
 
   getTools(): Observable<Tool[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
       this.restService.get(`${apiUrl}/tools`)
-    );
+    ));
   }
 
   getSourceCode(toolId: string): Observable<string> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
       this.restService.get(`${apiUrl}/tools/${toolId}/source`, false, {
         responseType: ResponseContentType.Text
       })
-    );
+    ));
   }
 }

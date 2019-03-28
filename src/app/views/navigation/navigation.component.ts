@@ -1,3 +1,5 @@
+
+import {tap, mergeMap} from 'rxjs/operators';
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
 import { Component, OnInit } from "@angular/core";
@@ -79,27 +81,27 @@ export class NavigationComponent implements OnInit {
     // Navigation component has to use the async version. When the page is loaded without any path, this
     // component is shown before the router redirects because this is outside of the router outlet.
     this.routeService
-      .getAppRoute$()
-      .flatMap(() =>
+      .getAppRoute$().pipe(
+      mergeMap(() =>
         this.routeService.getRouterLink$(RouteService.PATH_SESSIONS)
-      )
-      .do(url => (this.routerLinkSessions = url))
-      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_HOME))
-      .do(url => (this.routerLinkHome = url))
-      .flatMap(() =>
+      ),
+      tap(url => (this.routerLinkSessions = url)),
+      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_HOME)),
+      tap(url => (this.routerLinkHome = url)),
+      mergeMap(() =>
         this.routeService.getRouterLink$(RouteService.PATH_CONTACT)
-      )
-      .do(url => (this.routerLinkContact = url))
-      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_MANUAL))
-      .do(url => (this.routerLinkManual = url))
-      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_LOGIN))
-      .do(url => (this.routerLinkLogin = url))
-      .flatMap(() =>
+      ),
+      tap(url => (this.routerLinkContact = url)),
+      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_MANUAL)),
+      tap(url => (this.routerLinkManual = url)),
+      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_LOGIN)),
+      tap(url => (this.routerLinkLogin = url)),
+      mergeMap(() =>
         this.routeService.getRouterLink$(RouteService.PATH_ANALYZE)
-      )
-      .do(url => (this.routerLinkAnalyze = url))
-      .flatMap(() => this.routeService.getRouterLink$(RouteService.PATH_ADMIN))
-      .do(url => (this.routerLinkAdmin = url))
+      ),
+      tap(url => (this.routerLinkAnalyze = url)),
+      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_ADMIN)),
+      tap(url => (this.routerLinkAdmin = url)),)
       .subscribe(null, err => {
         log.info("failed to get the app route", err);
         this.errorService.showError("failed to get the app route", err);

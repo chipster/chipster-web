@@ -6,15 +6,13 @@ import {
   EventType
 } from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
-import { Subject } from "rxjs/Subject";
+import { Observable, Subject, of } from "rxjs";
 import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
 import log from "loglevel";
 import { WebSocketService } from "../../shared/services/websocket.service";
 import { UserEventData } from "./user-event-data";
 import { SessionDataService } from "./session/session-data.service";
-import { mergeMap } from "rxjs/operators";
-import { of } from "rxjs";
+import { mergeMap, publish, refCount, filter, map } from "rxjs/operators";
 import { SessionEventService } from "./session/session-event.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 
@@ -43,15 +41,15 @@ export class UserEventService {
     this.topic = topic;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.publish().refCount();
+    const stream = this.localSubject$.pipe(publish(), refCount());
 
     this.webSocketService.connect(this.localSubject$, topic);
 
-    this.ruleStream$ = stream
-      .filter(wsData => wsData.resourceType === Resource.Rule)
-      .flatMap(data => this.handleRuleEvent(data, data.sessionId, userEventData))
-      .publish()
-      .refCount();
+    this.ruleStream$ = stream.pipe(
+      filter(wsData => wsData.resourceType === Resource.Rule),
+      mergeMap(data => this.handleRuleEvent(data, data.sessionId, userEventData)),
+      publish(),
+      refCount());
 
     // update userEventData even if no one else subscribes
     this.ruleStream$
@@ -85,18 +83,18 @@ export class UserEventService {
     if (event.type === EventType.Create) {
       // new session was shared to us or a rule was added to the session we already have
       return this.sessionResource.getSession(sessionId)
-        .map((session: Session) => {
+        .pipe(map((session: Session) => {
           // get the session or latest rules
           userEventData.sessions.set(session.sessionId, session);
           return event;
-        });
+        }));
     } else if (event.type === EventType.Update) {
       return this.sessionResource.getSession(sessionId)
-          .map((session: Session) => {
-            log.info('rule updated', session.name);
-            userEventData.sessions.set(session.sessionId, session);
-            return event;
-          });
+        .pipe(map((session: Session) => {
+          log.info('rule updated', session.name);
+          userEventData.sessions.set(session.sessionId, session);
+          return event;
+        }));
     } else if (event.type === EventType.Delete) {
 
       const oldSession = userEventData.sessions.get(sessionId);

@@ -1,12 +1,14 @@
+
+import {forkJoin as observableForkJoin,  Observable ,  BehaviorSubject } from 'rxjs';
+
+import {distinctUntilChanged, map, take, shareReplay, publishReplay, refCount, mergeMap} from 'rxjs/operators';
 import { ConfigurationResource } from "../resources/configurationresource";
 import { Injectable } from "@angular/core";
 import * as _ from "lodash";
 import { CoreServices } from "../../core/core-services";
-import { Observable } from "rxjs/Observable";
 import { Service, Role } from "chipster-js-common";
 import { Router, NavigationEnd } from "@angular/router";
 import { RouteService } from "./route.service";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import log from "loglevel";
 
 @Injectable()
@@ -38,9 +40,9 @@ export class ConfigService {
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {
       this.chipsterConf$ = this.configurationResource
-        .getConfiguration("chipster.yaml")
-        .publishReplay(1)
-        .refCount();
+        .getConfiguration("chipster.yaml").pipe(
+        publishReplay(1),
+        refCount(),);
     }
     return this.chipsterConf$;
   }
@@ -48,9 +50,9 @@ export class ConfigService {
   getConfiguration(): Observable<any> {
     if (!this.conf$) {
       this.conf$ = this.routeService
-        .getAppRoute$()
-        .distinctUntilChanged()
-        .flatMap((appRoute: string) => {
+        .getAppRoute$().pipe(
+        distinctUntilChanged(),
+        mergeMap((appRoute: string) => {
           if (appRoute === "" || appRoute === "chipster") {
             return this.getChipsterConfiguration();
           }
@@ -61,43 +63,43 @@ export class ConfigService {
             );
           }
 
-          return Observable.forkJoin([
+          return observableForkJoin([
             this.getChipsterConfiguration(),
             this.configurationResource.getConfiguration(appRoute + ".yaml")
-          ]).map(confs => {
+          ]).pipe(map(confs => {
             // get all properties from the chipster.yaml and override with the appRoute file
             return Object.assign(confs[0], confs[1]);
-          });
-        })
-        .shareReplay(1)
-        .take(1);
+          }));
+        }),
+        shareReplay(1),
+        take(1),);
     }
     return this.conf$;
   }
 
   getPublicServices(): Observable<any> {
     if (!this.publicServices$) {
-      this.publicServices$ = this.getChipsterConfiguration()
-        .flatMap(conf => this.configurationResource.getPublicServices(conf))
-        .publishReplay(1)
-        .refCount();
+      this.publicServices$ = this.getChipsterConfiguration().pipe(
+        mergeMap(conf => this.configurationResource.getPublicServices(conf)),
+        publishReplay(1),
+        refCount(),);
     }
     return this.publicServices$;
   }
 
   getInternalServices(token: string): Observable<Service[]> {
-    return this.getConfiguration()
-      .flatMap(conf =>
+    return this.getConfiguration().pipe(
+      mergeMap(conf =>
         this.configurationResource.getInternalServices(conf, token)
-      )
-      .publishReplay(1)
-      .refCount();
+      ),
+      publishReplay(1),
+      refCount(),);
   }
 
   getInternalService(role: string, token: string): Observable<Service> {
-    return this.getInternalServices(token).map(services =>
+    return this.getInternalServices(token).pipe(map(services =>
       this.getFirstByRole(role, services)
-    );
+    ));
   }
 
   getAuthUrl(): any {
@@ -129,28 +131,28 @@ export class ConfigService {
   }
 
   getModules(): Observable<string[]> {
-    return this.getConfiguration().map(conf => conf["modules"]);
+    return this.getConfiguration().pipe(map(conf => conf["modules"]));
   }
 
   getManualPath(): Observable<string> {
-    return this.getConfiguration().map(conf => conf["manual-path"]);
+    return this.getConfiguration().pipe(map(conf => conf["manual-path"]));
   }
 
   getManualToolPostfix(): Observable<string> {
-    return this.getConfiguration().map(conf => conf["manual-tool-postfix"]);
+    return this.getConfiguration().pipe(map(conf => conf["manual-tool-postfix"]));
   }
 
   getManualRouterPath(): Observable<string> {
-    return this.getConfiguration().map(conf => conf["manual-router-path"]);
+    return this.getConfiguration().pipe(map(conf => conf["manual-router-path"]));
   }
 
   get(key: string): Observable<string> {
-    return this.getConfiguration()
-      .take(1) // otherwise we would have to unsubscribe
-      .map(conf => {
+    return this.getConfiguration().pipe(
+      take(1), // otherwise we would have to unsubscribe
+      map(conf => {
         log.debug("get conf key", key, conf);
         return conf[key];
-      });
+      }),);
   }
 
   getFirstByRole(role: string, services: Service[]): Service {
@@ -158,8 +160,8 @@ export class ConfigService {
   }
 
   getPublicUri(role: string) {
-    return this.getPublicServices()
-      .map(services => this.getFirstByRole(role, services))
-      .map(s => s.publicUri);
+    return this.getPublicServices().pipe(
+      map(services => this.getFirstByRole(role, services)),
+      map(s => s.publicUri),);
   }
 }

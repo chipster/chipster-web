@@ -2,9 +2,10 @@ import { Injectable, ChangeDetectorRef } from "@angular/core";
 import { SessionResource } from "../resources/session.resource";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "./config.service";
-import { Observable } from "rxjs/Rx";
+import { Observable, forkJoin, timer } from "rxjs";
 import { Dataset } from "chipster-js-common";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { map, catchError } from "rxjs/operators";
 
 declare let Flow: any;
 
@@ -15,7 +16,7 @@ export class UploadService {
     private tokenService: TokenService,
     private sessionResource: SessionResource,
     private restErrorService: RestErrorService,
-  ) {}
+  ) { }
 
   getFlow(
     fileAdded: (file: any, event: any, flow: any) => any,
@@ -66,7 +67,7 @@ export class UploadService {
   // noinspection JSMethodCanBeStatic
   private flowFileAdded(file: any, event: any, flow: any) {
     // each file has a unique target url
-    flow.opts.target = function(file2: any) {
+    flow.opts.target = function (file2: any) {
       return file2.chipsterTarget;
     };
 
@@ -74,7 +75,7 @@ export class UploadService {
   }
 
   startUpload(sessionId: string, file: any) {
-    Observable.forkJoin(
+    forkJoin(
       this.configService.getFileBrokerUrl(),
       this.createDataset(sessionId, file.name)
     ).subscribe((value: [string, Dataset]) => {
@@ -82,7 +83,7 @@ export class UploadService {
       const dataset = value[1];
       file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
         dataset.datasetId
-      }?token=${this.tokenService.getToken()}`;
+        }?token=${this.tokenService.getToken()}`;
       file.chipsterSessionId = sessionId;
       file.chipsterDatasetId = dataset.datasetId;
       file.resume();
@@ -93,11 +94,11 @@ export class UploadService {
     const d = new Dataset(name);
     return this.sessionResource
       .createDataset(sessionId, d)
-      .map((datasetId: string) => {
+      .pipe(map((datasetId: string) => {
         d.datasetId = datasetId;
         this.sessionResource.updateDataset(sessionId, d);
         return d;
-      });
+      }));
   }
 
   /**
@@ -107,7 +108,7 @@ export class UploadService {
    */
   scheduleViewUpdate(changeDetectorRef: ChangeDetectorRef, flow: any) {
     console.log("scheduling view update");
-    Observable.timer(1000).subscribe(() => {
+    timer(1000).subscribe(() => {
       // TODO check if view not destroyed
       changeDetectorRef.detectChanges();
 

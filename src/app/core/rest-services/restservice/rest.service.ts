@@ -1,12 +1,13 @@
+
+import {finalize, catchError, map} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {
   Headers, RequestOptionsArgs, RequestMethod, Request, RequestOptions, Http, Response,
   ResponseContentType
 } from "@angular/http";
-import {Observable} from "rxjs/Observable";
+import {Observable,  throwError } from "rxjs";
 import {HttpQueueService} from "../http-queue/http-queue.service";
 import {TokenService} from "../../authentication/token.service";
-import { throwError } from 'rxjs';
 
 @Injectable()
 export class RestService {
@@ -88,7 +89,7 @@ export class RestService {
   private doRequest(request: Request): Observable<any> {
     this.httpQueueu.increment();
 
-    return this.http.request(request).map( (response: Response) => {
+    return this.http.request(request).pipe(map( (response: Response) => {
         let resp: any;
         // handle response by expected responsetype
         switch (request.responseType) {
@@ -112,13 +113,13 @@ export class RestService {
           console.log("why are we here?");
         }
       return resp;
-    })
+    }),
       // log errors
-      .catch((resp: any) => {
+      catchError((resp: any) => {
         console.error("http request error", resp);
         return throwError(resp);
-      })
-      .finally( () => this.httpQueueu.decrement());
+      }),
+      finalize( () => this.httpQueueu.decrement()),);
   }
 
 }

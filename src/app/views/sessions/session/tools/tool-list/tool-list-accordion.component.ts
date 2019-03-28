@@ -11,7 +11,7 @@ import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
 import * as _ from "lodash";

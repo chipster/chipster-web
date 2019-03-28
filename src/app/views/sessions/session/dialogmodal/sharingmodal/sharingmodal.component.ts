@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import {
   Component,
@@ -44,8 +46,8 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.ruleStream$
-      .takeUntil(this.unsubscribe)
+    this.ruleStream$.pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(() => {
       this.rules = this.session.rules;
     }, err => this.errorService.showError("getting rule events failed", err));

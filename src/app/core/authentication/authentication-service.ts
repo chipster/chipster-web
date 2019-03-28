@@ -1,13 +1,15 @@
+
+import {of as observableOf,  Observable ,  BehaviorSubject } from 'rxjs';
+
+import {catchError, map, mergeMap} from 'rxjs/operators';
 import { ConfigService } from "../../shared/services/config.service";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
 import { TokenService } from "./token.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Token } from "chipster-js-common";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
 import { User } from "chipster-js-common";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import log from "loglevel";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
@@ -47,10 +49,10 @@ export class AuthenticationService {
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
     this.tokenService.setAuthToken(null, null, null, null, null);
-    return this.requestToken(username, password).map((response: Token) => {
+    return this.requestToken(username, password).pipe(map((response: Token) => {
       this.saveToken(response);
       this.scheduleTokenRefresh();
-    });
+    }));
   }
 
   logout(): void {
@@ -131,7 +133,7 @@ export class AuthenticationService {
   checkToken(): Observable<boolean> {
     if (!this.tokenService.getToken()) {
       log.warn("no token to check");
-      return Observable.of(false);
+      return observableOf(false);
     }
 
     return this.configService.getAuthUrl().flatMap(authUrl => {
@@ -148,21 +150,21 @@ export class AuthenticationService {
               `Basic ${encodedString}`
             )
           }
-        )
-        .map((response: Token) => {
+        ).pipe(
+        map((response: Token) => {
           this.saveToken(response);
-          return Observable.of(true);
-        })
-        .catch(error => {
+          return observableOf(true);
+        }),
+        catchError(error => {
           if (error.status === 403) {
             // token is invalid
             log.info("check token got 403 -> token invalid");
-            return Observable.of(false);
+            return observableOf(false);
           } else {
             // for now, throw others
             throw error;
           }
-        });
+        }),);
     });
   }
 
@@ -190,16 +192,16 @@ export class AuthenticationService {
 
   getUsersDisplayName$() {
     return this.tokenService
-      .getUsername$()
-      .flatMap(userId => {
-        return this.getUser().catch(err => {
+      .getUsername$().pipe(
+      mergeMap(userId => {
+        return this.getUser().pipe(catchError(err => {
           log.info("failed to get the user details", err);
           // An error message from this request would be confusing, because the user didn't ask for it.
           // Most likely the authentication has expired, but the user will notice it soon anyway.
-          return Observable.of({ name: userId });
-        });
-      })
-      .map(user => user.name);
+          return observableOf({ name: userId });
+        }));
+      }),
+      map(user => user.name),);
   }
 
   getUsers(): Observable<User[]> {

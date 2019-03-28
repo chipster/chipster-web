@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { ExpressionProfileService } from "./expressionprofile.service";
 import Point from "../model/point";
 import Rectangle from "./rectangle";
@@ -22,7 +24,7 @@ import { Dataset } from "chipster-js-common";
 import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 
 @Component({
   selector: "ch-expression-profile",
@@ -62,8 +64,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       return;
     }
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
-      .takeUntil(this.unsubscribe)
+      .getData(this.sessionDataService.getSessionId(), this.dataset).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);

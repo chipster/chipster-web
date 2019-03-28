@@ -1,3 +1,7 @@
+
+import {forkJoin as observableForkJoin,  Observable ,  Subject } from 'rxjs';
+
+import {takeUntil} from 'rxjs/operators';
 import {
   Component,
   OnInit,
@@ -12,9 +16,7 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { TypeTagService } from "../../../../../shared/services/typetag.service";
-import { Observable } from "rxjs/Observable";
 import { Dataset } from "chipster-js-common";
-import { Subject } from "rxjs/Subject";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import igv from 'igv';
@@ -141,12 +143,12 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
       if (bamSource.bamDataset && bamSource.baiDataset) {
         bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
         bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
-        bamSources$.push(Observable.forkJoin(bam, bai));
+        bamSources$.push(observableForkJoin(bam, bai));
       }
     });
 
-    Observable.forkJoin(bamSources$)
-      .takeUntil(this.unsubscribe)
+    observableForkJoin(bamSources$).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         res => {
           for (let i = 0; i < res.length; i++) {

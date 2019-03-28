@@ -15,7 +15,7 @@ export class SessionService {
     private restErrorService: RestErrorService,
     private sessionDataService: SessionDataService,
     private sessionWorkerResource: SessionWorkerResource
-  ) {}
+  ) { }
 
   updateSession(session: Session) {
     return this.sessionResource.updateSession(session);

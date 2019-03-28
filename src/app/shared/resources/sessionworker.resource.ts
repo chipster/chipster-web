@@ -1,3 +1,5 @@
+
+import {map, mergeMap} from 'rxjs/operators';
 import { ConfigService } from "../services/config.service";
 import { Injectable } from "@angular/core";
 import { RestService } from "../../core/rest-services/restservice/rest.service";
@@ -16,21 +18,21 @@ export class SessionWorkerResource {
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.map(
+    return apiUrl$.pipe(map(
       (url: string) =>
         `${url}/sessions/${sessionId}?token=${this.tokenService.getToken()}`
-    );
+    ));
   }
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.flatMap((url: string) =>
+    return apiUrl$.pipe(mergeMap((url: string) =>
       this.restService.post(
         `${url}/sessions/${sessionId}/datasets/${zipDatasetId}`,
         {},
         true
       )
-    );
+    ));
   }
 
   supportRequest(message: string, sessionId: string, email: string, appRoute: string, log: string): Observable<any> {
@@ -44,8 +46,8 @@ export class SessionWorkerResource {
     };
 
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.flatMap((url: string) =>
+    return apiUrl$.pipe(mergeMap((url: string) =>
       this.restService.post(url + "/support/request", supportRequest, true)
-    );
+    ));
   }
 }

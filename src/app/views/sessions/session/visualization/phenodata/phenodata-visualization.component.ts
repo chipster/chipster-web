@@ -1,3 +1,5 @@
+
+import {tap, takeUntil} from 'rxjs/operators';
 import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 import * as _ from "lodash";
@@ -20,7 +22,7 @@ import { ViewChild } from "@angular/core";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import log from "loglevel";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as d3 from "d3";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { DatasetService } from "../../dataset.service";
@@ -79,8 +81,8 @@ export class PhenodataVisualizationComponent
 
     // update view if someone else has edited the phenodata
     this.sessionEventService
-      .getDatasetStream()
-      .takeUntil(this.unsubscribe)
+      .getDatasetStream().pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateViewLater();
@@ -404,8 +406,8 @@ export class PhenodataVisualizationComponent
 
   openAddColumnModal() {
     this.stringModalService
-      .openStringModal("Add new column", "Column name", "", "Add")
-      .do(name => {
+      .openStringModal("Add new column", "Column name", "", "Add").pipe(
+      tap(name => {
         this.zone.runOutsideAngular(() => {
           const colHeaders = <Array<string>>(
             (<ht.Options>this.hot.getSettings()).colHeaders
@@ -423,7 +425,7 @@ export class PhenodataVisualizationComponent
         });
 
         this.updateDataset();
-      })
+      }))
       .subscribe(null, err =>
         this.restErrorService.showError("Add column failed", err)
       );

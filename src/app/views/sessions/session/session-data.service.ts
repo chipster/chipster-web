@@ -1,10 +1,13 @@
+
+import {from as observableFrom, forkJoin as observableForkJoin, merge as observableMerge,  Observable } from 'rxjs';
+
+import {concatMap, filter, catchError, merge, takeUntil, mergeMap, map} from 'rxjs/operators';
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
 import { Dataset, JobState, Resource, EventType } from "chipster-js-common";
 import { Job, JobInput, Session, Rule, WsEvent } from "chipster-js-common";
 import { FileResource } from "../../../shared/resources/fileresource";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestService } from "../../../core/rest-services/restservice/rest.service";
@@ -87,23 +90,23 @@ export class SessionDataService {
       return input;
     });
 
-    return this.createJob(job)
-      .flatMap((jobId: string) => {
+    return this.createJob(job).pipe(
+      mergeMap((jobId: string) => {
         const d = new Dataset(name);
         d.sourceJob = jobId;
         return this.createDataset(d);
-      })
-      .flatMap((datasetId: string) => {
+      }),
+      mergeMap((datasetId: string) => {
         return this.fileResource.uploadData(
           this.getSessionId(),
           datasetId,
           content
         );
-      })
-      .catch(err => {
+      }),
+      catchError(err => {
         log.info("create derived dataset failed", err);
         throw err;
-      });
+      }),);
   }
 
   cancelJob(job: Job) {
@@ -117,7 +120,7 @@ export class SessionDataService {
     const deleteJobs$ = jobs.map((job: Job) =>
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
-    Observable.merge(...deleteJobs$).subscribe(
+    observableMerge(...deleteJobs$).subscribe(
       () => {
         log.info("Job deleted");
       },
@@ -129,7 +132,7 @@ export class SessionDataService {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
-    Observable.merge(...deleteDatasets$).subscribe(
+    observableMerge(...deleteDatasets$).subscribe(
       () => {
         log.info("Dataset deleted");
       },
@@ -147,8 +150,8 @@ export class SessionDataService {
 
   getDatasetUrl(dataset: Dataset): Observable<string> {
     const datasetToken$ = this.configService
-      .getSessionDbUrl()
-      .flatMap((sessionDbUrl: string) =>
+      .getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl: string) =>
         this.restService.post(
           sessionDbUrl +
             "/datasettokens/sessions/" +
@@ -158,29 +161,29 @@ export class SessionDataService {
           null,
           true
         )
-      )
-      .map((datasetToken: any) => datasetToken.tokenKey);
+      ),
+      map((datasetToken: any) => datasetToken.tokenKey),);
 
-    return Observable.forkJoin(
+    return observableForkJoin(
       datasetToken$,
       this.configService.getFileBrokerUrl()
-    ).map(results => {
+    ).pipe(map(results => {
       const [datasetToken, url] = results;
       return `${url}/sessions/${this.getSessionId()}/datasets/${
         dataset.datasetId
       }?token=${datasetToken}`;
-    });
+    }));
   }
 
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
-      this.download(this.getDatasetUrl(d).map(url => url + "&download"));
+      this.download(this.getDatasetUrl(d).pipe(map(url => url + "&download")));
     }
   }
 
   openNewTab(dataset: Dataset) {
     this.newTab(
-      this.getDatasetUrl(dataset).map(url => url),
+      this.getDatasetUrl(dataset).pipe(map(url => url)),
       null,
       "Browser's pop-up blocker prevented opening a new tab"
     );
@@ -254,10 +257,10 @@ export class SessionDataService {
   }
 
   deletePersonalRules(session: Session) {
-    return Observable.from(this.getPersonalRules(session.rules)).concatMap(
+    return observableFrom(this.getPersonalRules(session.rules)).pipe(concatMap(
       (rule: Rule) =>
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
-    );
+    ));
   }
 
   /**
@@ -395,8 +398,8 @@ export class SessionDataService {
 
     const toast = this.toastrService.info(msg, "", options);
 
-    toast.onAction
-      .filter(text => text === BTN_UNDO)
+    toast.onAction.pipe(
+      filter(text => text === BTN_UNDO))
       .subscribe(
         buttonText => {
           this.deleteDatasetsUndo(deletedDatasets);
@@ -405,9 +408,9 @@ export class SessionDataService {
         err => this.errorService.showError("error in dataset deletion", err)
       );
 
-    toast.onHidden
-      .takeUntil(toast.onAction) // only if there was no action
-      .merge(toast.onAction.filter(text => text === BTN_DELETE))
+    toast.onHidden.pipe(
+      takeUntil(toast.onAction), // only if there was no action
+      merge(toast.onAction.pipe(filter(text => text === BTN_DELETE))),)
       .subscribe(
         () => {
           this.deleteDatasetsNow(deletedDatasets);

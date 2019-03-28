@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { SessionDataService } from "../../session-data.service";
 import * as d3 from "d3";
 import { Input, Component, NgZone, OnDestroy, OnChanges } from "@angular/core";
@@ -13,7 +15,7 @@ import {
 } from "../../../../../shared/services/typetag.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 import { ViewChild } from "@angular/core";
 import { AfterViewInit } from "@angular/core";
@@ -86,8 +88,8 @@ export class SpreadsheetVisualizationComponent
     const maxBytes = this.modalMode ? null : this.fileSizeLimit;
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
-      .takeUntil(this.unsubscribe)
+      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           // parse all loaded data
