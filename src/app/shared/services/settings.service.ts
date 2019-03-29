@@ -1,5 +1,5 @@
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 export enum SessionListMode {
   CLICK_TO_OPEN_HOVER_TO_PREVIEW = "Click to open, hover to preview",
@@ -23,7 +23,9 @@ export class SettingsService {
 
   public sessionListMode$: BehaviorSubject<
     SessionListMode
-  > = new BehaviorSubject(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN);
+  > = new BehaviorSubject(SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW);
 
-  public showDatasetSelectionTooltip$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public showDatasetSelectionTooltip$: BehaviorSubject<
+    boolean
+  > = new BehaviorSubject(false);
 }
