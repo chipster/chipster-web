@@ -411,9 +411,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   getContentSize() {
     // graph size in graph coordinates
-    // FIXME add phenodata?
     const width =
-      Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
+      Math.max(
+        ...this.datasetNodes.map(d =>
+          this.datasetService.hasOwnPhenodata(d.dataset)
+            ? d.x + this.nodeWidth + this.xMargin
+            : d.x
+        )
+      ) +
+      this.nodeWidth +
+      15;
     const height =
       Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
 
