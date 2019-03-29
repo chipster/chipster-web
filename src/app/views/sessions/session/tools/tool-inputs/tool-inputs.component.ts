@@ -1,9 +1,9 @@
 import {
   Component,
-  Input,
-  Output,
   EventEmitter,
-  OnChanges
+  Input,
+  OnChanges,
+  Output
 } from "@angular/core";
 import { Dataset, ToolInput } from "chipster-js-common";
 import * as _ from "lodash";

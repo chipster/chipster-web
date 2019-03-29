@@ -1,6 +1,9 @@
 <div *ngIf="ready" class="container">
   <h2 class="h2-xs mt-3 mb-2">Input files</h2>
-  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">
+  <div
+    *ngIf="validatedTool.tool.inputs.length === 0"
+    class="font-italic text-smaller"
+  >
     No Inputs
   </div>
 
@@ -8,9 +11,7 @@
   <table class="table table-sm" *ngIf="bindingModels.length > 0">
     <tbody>
       <tr *ngFor="let bindingModel of bindingModels">
-
         <td style="width: 60%">
-
           <!-- input name -->
           {{ getDisplayName(bindingModel.input) }}
 
@@ -18,39 +19,90 @@
           <!-- <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
             <i>(optional)</i>
           </span> -->
-          <div class="text-sm text-muted">{{bindingModel.input.description}}</div>
+          <div class="text-sm text-muted">
+            {{ bindingModel.input.description }}
+          </div>
         </td>
 
         <!-- file selction dropdown -->
         <td>
           <!-- single input -->
-          <select *ngIf="bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced" class="w-100"
-            [(ngModel)]="bindingModel.boundDatasets[0]" (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
+          <select
+            *ngIf="
+              bindingModel.compatibleDatasets.length > 0 &&
+              !bindingModel.input.name.spliced
+            "
+            class="w-100"
+            [(ngModel)]="bindingModel.boundDatasets[0]"
+            (ngModelChange)="inputSelected(bindingModel)"
+          >
+            <option
+              *ngFor="let dataset of bindingModel.compatibleDatasets"
+              [ngValue]="dataset"
+              >{{ dataset.name }}
+            </option>
           </select>
 
           <!-- multi input -->
-          <select *ngIf="bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced" [disabled]="bindingModel.compatibleDatasets.length < 1"
-            class="w-100" multiple [(ngModel)]="bindingModel.boundDatasets" (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}</option>
+          <select
+            *ngIf="
+              bindingModel.compatibleDatasets.length > 0 &&
+              bindingModel.input.name.spliced
+            "
+            [disabled]="bindingModel.compatibleDatasets.length < 1"
+            class="w-100"
+            multiple
+            [(ngModel)]="bindingModel.boundDatasets"
+            (ngModelChange)="inputSelected(bindingModel)"
+          >
+            <option
+              *ngFor="let dataset of bindingModel.compatibleDatasets"
+              [ngValue]="dataset"
+              >{{ dataset.name }}
+            </option>
           </select>
 
           <!-- no compatible inputs, show disabled dropdown -->
-          <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
-            <option *ngIf="validatedTool.selectedDatasets.length < 1" selected class="font-italic">No files</option>
-            <option *ngIf="validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1"
-              selected class="font-italic">No
-              compatible files</option>
+          <select
+            *ngIf="bindingModel.compatibleDatasets.length < 1"
+            disabled
+            class="w-100"
+          >
+            <option
+              *ngIf="validatedTool.selectedDatasets.length < 1"
+              selected
+              class="font-italic"
+              >No files</option
+            >
+            <option
+              *ngIf="
+                validatedTool.selectedDatasets.length > 0 &&
+                bindingModel.compatibleDatasets.length < 1
+              "
+              selected
+              class="font-italic"
+              >No compatible files</option
+            >
           </select>
 
           <!-- validation message -->
-          <div *ngIf="!bindingModel.input.optional && bindingModel.boundDatasets.length < 1 " class="text-sm text-warning">Input
-            file required</div>
+          <div
+            *ngIf="
+              !bindingModel.input.optional &&
+              bindingModel.boundDatasets.length < 1
+            "
+            class="text-sm alert alert-warning p-1 mt-1 mb-0"
+          >
+            Input file required
+          </div>
         </td>
 
         <!-- align with parameters, which have the reset button -->
         <td>
-          <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-right">
+          <button
+            type="button"
+            class="invisible btn btn-sm btn-outline-dark btn-no-border float-right"
+          >
             <i class="fas fa-undo"></i>
           </button>
         </td>
@@ -62,21 +114,35 @@
   <div *ngIf="validatedTool.phenodataBindings.length > 0">
     <h2 class="h2-xs mt-3 mb-2">Phenodata</h2>
     <table class="table table-sm" *ngIf="bindingModels.length > 0">
+      <!-- phenodata not valid -->
       <tbody *ngIf="!validatedTool.phenodataValid">
         <tr *ngIf="!validatedTool.inputsValid">
-          <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
+          <td>
+            <div class="alert alert-warning text-sm p-1 mb-0">
+              Inputs need to be valid to determine phenodata
+            </div>
+          </td>
         </tr>
 
         <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
-          <td class="text-sm text-warning">No phenodata for</td>
-          <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+          <td>
+            <div class="alert alert-warning text-sm p-1 mb-0">
+              No phenodata available for
+              <i>{{ (bindingModels[0]?.boundDatasets)[0]?.name }}</i>
+            </div>
+          </td>
         </tr>
       </tbody>
+
+      <!-- phenodata valid -->
+      <!-- for now phenodata can only be valid when the tool has only one phenodata input -->
       <tbody *ngIf="validatedTool.phenodataValid">
-        <tr *ngFor="let phenodataBinding of validatedTool.phenodataBindings">
+        <tr>
           <!-- <td>{{getDisplayName(phenodataInput)}}</td> -->
-          <td style="width: 60%">{{getDisplayName(phenodataBinding.toolInput)}}</td>
-          <td>{{phenodataBinding.dataset.name}}</td>
+          <td>
+            Using phenodata of
+            <i>{{ validatedTool.phenodataBindings[0].dataset.name }}</i>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -100,6 +166,4 @@
       </tr>
     </tbody>
   </table> -->
-
-
 </div>
