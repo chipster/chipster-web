@@ -25,6 +25,7 @@ export class WorkflowGraphService {
       nodes,
       null,
       null,
+      this.nodeWidth,
       this.nodeHeight * 2 + this.yMargin
     );
   }
@@ -33,6 +34,7 @@ export class WorkflowGraphService {
     nodes: DatasetNode[],
     parentX: number,
     parentY: number,
+    width = this.nodeWidth,
     height = this.nodeHeight
   ) {
     let x = 10;
@@ -45,7 +47,7 @@ export class WorkflowGraphService {
       y = parentY + this.nodeHeight + this.yMargin;
     }
 
-    while (this.intersectsAny(nodes, x, y, this.nodeWidth, height)) {
+    while (this.intersectsAny(nodes, x, y, width, height)) {
       x += this.nodeWidth + this.xMargin;
     }
 

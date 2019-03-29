@@ -1149,10 +1149,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             link.source.x = newRootPos.x;
             link.source.y = newRootPos.y;
           }
+
+          const nodeWidth =
+            this.isDatasetNode(link.target) &&
+            this.datasetService.hasOwnPhenodata(link.target.dataset)
+              ? this.nodeWidth * 2 + this.xMargin
+              : this.nodeWidth;
+
           const pos = this.workflowGraphService.newPosition(
             nodes,
             link.source.x,
-            link.source.y
+            link.source.y,
+            nodeWidth
           );
           link.target.x = pos.x;
           link.target.y = pos.y;
@@ -1413,5 +1421,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private getPhenodataWarningY(datasetNode: DatasetNode): number {
     return this.getPhenodataLabelY(datasetNode) + 10;
+  }
+
+  private isDatasetNode(object: any): object is DatasetNode {
+    return "dataset" in object;
   }
 }
