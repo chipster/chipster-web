@@ -114,34 +114,21 @@
   <div *ngIf="validatedTool.phenodataBindings.length > 0">
     <h2 class="h2-xs mt-3 mb-2">Phenodata</h2>
     <table class="table table-sm" *ngIf="bindingModels.length > 0">
-      <!-- phenodata not valid -->
-      <tbody *ngIf="!validatedTool.phenodataValid">
-        <tr *ngIf="!validatedTool.inputsValid">
-          <td>
-            <div class="alert alert-warning text-sm p-1 mb-0">
-              Inputs need to be valid to determine phenodata
-            </div>
-          </td>
-        </tr>
-
-        <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
-          <td>
-            <div class="alert alert-warning text-sm p-1 mb-0">
-              No phenodata available for
-              <i>{{ (bindingModels[0]?.boundDatasets)[0]?.name }}</i>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-
-      <!-- phenodata valid -->
-      <!-- for now phenodata can only be valid when the tool has only one phenodata input -->
-      <tbody *ngIf="validatedTool.phenodataValid">
-        <tr>
-          <!-- <td>{{getDisplayName(phenodataInput)}}</td> -->
+      <tbody>
+        <!-- phenodata valid -->
+        <tr *ngIf="validatedTool.phenodataValid">
           <td>
             Using phenodata of
             <i>{{ validatedTool.phenodataBindings[0].dataset.name }}</i>
+          </td>
+        </tr>
+
+        <!-- phenodata not valid -->
+        <tr *ngIf="!validatedTool.phenodataValid">
+          <td>
+            <div class="alert alert-warning text-sm p-1 mb-0">
+              {{ validatedTool.phenodataMessage }}
+            </div>
           </td>
         </tr>
       </tbody>
