@@ -999,7 +999,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       )
       .style("stroke-dasharray", "3, 3");
 
-    this.d3Links.exit().remove();
+    this.d3PhenodataLinks.exit().remove();
   }
 
   dragEnd() {
