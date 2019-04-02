@@ -67,7 +67,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private isContextMenuOpen = false;
   private showDatasetSelectionTooltip = false;
 
-  private readonly primaryColor = "#007bff";
+  // private readonly primaryColor = "#007bff"; // bootstap primary
+  private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
 
   constructor(
     private sessionDataService: SessionDataService,
