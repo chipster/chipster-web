@@ -1,14 +1,17 @@
-// $theme-colors: (
-//   "primary": #0e5db8
-// );
+// see
+// https://getbootstrap.com/docs/4.1/getting-started/theming/
+// ./node_modules/bootstrap/scss/_variables.scss
+
+$theme-colors: (
+  "primary": darken(#007bff, 5%),
+  "success": darken(#28a745, 5%),
+  //"primary": #0e5db8,
+  //"success": #0e866c
+);
 
 // bootstrap import needs to be after the customizations
+// for now simply importing everything, could also pick what's needed
 @import "../node_modules/bootstrap/scss/bootstrap";
-
-// needed by toastr.scss
-// @import "~bootstrap/scss/functions";
-// @import "~bootstrap/scss/variables";
-// @import "~bootstrap/scss/mixins";
 
 // This is herebecause when having directly in the angular.json
 // the bootstrap stuff didn't seem to get loaded before ngx-toaster --> errors.

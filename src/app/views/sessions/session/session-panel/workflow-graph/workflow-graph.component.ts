@@ -67,6 +67,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private isContextMenuOpen = false;
   private showDatasetSelectionTooltip = false;
 
+  private readonly primaryColor = "#007bff";
+
   constructor(
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
@@ -747,17 +749,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
       // stroke and stroke width added
-      .attr(
-        "stroke",
-        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : d.color)
-        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : d.color) // bootstrap default active
+      .attr("stroke", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : d.color
       )
       .attr("stroke-width", "3")
       .attr("pointer-events", "all")
-      .style(
-        "fill",
-        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : "white")
-        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : "white") // bootstrap default active
+      .style("fill", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : "white"
       )
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
