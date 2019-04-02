@@ -1,10 +1,158 @@
-// These are here because when having directly in the angular.json
-// the bootstrap stuff didn't seem to get loaded before ngx-toaster --> errors.
-// https://github.com/scttcper/ngx-toastr/issues/318
+/* You can add global styles to this file, and also import other style files */
 
-// needed by toastr.scss
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
+// allow absolute positioning inside the search field
+.tab-form-container {
+  position: relative;
+}
 
-@import "~ngx-toastr/toastr-bs4-alert.scss";
+.tab-form {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.scrollable {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.chipster-highlight {
+  padding: 12px;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.thin-list-group-item {
+  /*height: 2em;*/
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.lighter {
+  color: grey;
+}
+
+.text-sm {
+  font-size: small;
+}
+
+.text-smaller {
+  font-size: smaller;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// extra large modal for visualizations
+.modal-xl > .modal-dialog {
+  max-width: none;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+// specify the button to make this more specific than other button styles
+button.dropdown-menu-button {
+  border: 0;
+  padding: 0 6px 0 6px;
+  // otherwise the this will be higher than the header
+  line-height: 1;
+}
+
+#selectedGeneList {
+  margin-top: 10px;
+}
+
+.list-group-sm button {
+  padding: 0.25rem 1.25rem;
+}
+
+.visualization-panel {
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #e1e1e8;
+  border-top: 0;
+
+  /*
+  Keep the scroll position when changing visualizations
+
+  During initialization, visualizations may show only one status text line if anything. This would make the page
+  shorter and forces the browser to scroll it upwards. This min-height makes sure that the page is always long enough
+  to keep its scroll position. Value of 100vh should be always enough, because if the user would have scrolled more than
+  that, the tabs wouldn't be visible anymore and it wouldn't be possible to change the visualization.
+   */
+  min-height: 100vh;
+}
+
+button.btn-no-border {
+  border: 0;
+}
+
+.h1-xs {
+  font-size: 1.2rem;
+}
+
+.h2-xs {
+  font-size: 1.1rem;
+}
+
+.h3-xs {
+  font-size: 1rem;
+}
+
+.h4-xs {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.h5-xs {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.h6-xs {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.panel-title {
+  font-size: 1rem;
+  color: grey;
+}
+
+.button-wide {
+  width: 9em;
+}
+
+.w-4 {
+  width: 4em;
+}
+
+.w-5 {
+  width: 5em;
+}
+
+.w-6 {
+  width: 6em;
+}
+
+.w-7 {
+  width: 6em;
+}
+
+.w-8 {
+  width: 8em;
+}
+
+.w-9 {
+  width: 9em;
+}
+
+#close-button {
+  float: right;
+  margin-right: 10px;
+  font-size: 15px;
+}
