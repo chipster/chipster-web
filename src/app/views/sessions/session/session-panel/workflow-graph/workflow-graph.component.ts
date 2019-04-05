@@ -521,7 +521,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("stroke-width", "2")
       .attr("pointer-events", "all")
       //  .style("fill", d => d.color)
-      .style("fill", "white")
+      .style("fill", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : "white"
+      )
+      .attr("stroke", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : d.color
+      )
+
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
           !this.filter || this.filter.has(d.datasetId)
@@ -635,7 +641,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", d => this.getPhenodataLabelX(d))
       .attr("y", d => this.getPhenodataLabelY(d))
       .attr("font-size", this.fontSize + "px")
-      .attr("fill", "black")
+      .attr("fill", d =>
+        this.isSelectedDataset(d.dataset) ? "white" : "black"
+      )
+      .attr("font-weight", d =>
+        this.isSelectedDataset(d.dataset) ? "600" : "400"
+      )
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
