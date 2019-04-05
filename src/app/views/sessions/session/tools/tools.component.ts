@@ -284,7 +284,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
         (item.description &&
           item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
-        item.moduleName.toLowerCase().indexOf(termToken) !== -1
+        item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
+        item.toolId.toLowerCase().indexOf(termToken) !== -1
       );
     });
   }
