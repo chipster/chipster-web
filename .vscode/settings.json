@@ -1,2 +1,7 @@
 {
+    "git.autofetch": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    }
 }

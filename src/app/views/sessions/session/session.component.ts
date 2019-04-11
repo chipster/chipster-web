@@ -1,48 +1,32 @@
-import { Component, OnDestroy, OnInit, HostListener } from "@angular/core";
-import {
-  ActivatedRoute,
-  Params,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot
-} from "@angular/router";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, ActivatedRouteSnapshot, Params, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import * as _ from "lodash";
-import { Observable, Subject, forkJoin, of, EMPTY, NEVER } from "rxjs";
+import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
+import log from "loglevel";
+import { ToastrService } from "ngx-toastr";
+import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
+import 'rxjs/add/operator/mergeMap';
+import { fromPromise } from "rxjs/internal/observable/fromPromise";
+// New imports for rxjs v6
+import { catchError, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import {
-  Dataset,
-  Job,
-  Rule,
-  Tool,
-  Module,
-  Session,
-  EventType,
-  JobState,
-  SessionState
-} from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
+import { ConfigService } from "../../../shared/services/config.service";
 import { RouteService } from "../../../shared/services/route.service";
+import { SettingsService } from "../../../shared/services/settings.service";
+import { ToolsService } from "../../../shared/services/tools.service";
+import { UserService } from "../../../shared/services/user.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
+import { GetSessionDataService } from "./get-session-data.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
-import log from "loglevel";
-import { SettingsService } from "../../../shared/services/settings.service";
-import { UserService } from "../../../shared/services/user.service";
 import { SessionService } from "./session.service";
-import { ToolsService } from "../../../shared/services/tools.service";
-import { ConfigService } from "../../../shared/services/config.service";
-import { ToastrService } from "ngx-toastr";
-import { ErrorService } from "../../../core/errorhandler/error.service";
-import { GetSessionDataService } from "./get-session-data.service";
-// New imports for rxjs v6
-import { mergeMap, catchError, map, takeUntil } from "rxjs/operators";
-import { fromPromise } from "rxjs/internal/observable/fromPromise";
-import 'rxjs/add/operator/mergeMap';
 
 
 export enum ComponentState {

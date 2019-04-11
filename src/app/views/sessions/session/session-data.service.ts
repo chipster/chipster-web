@@ -1,24 +1,23 @@
 
-import {from as observableFrom, forkJoin as observableForkJoin, merge as observableMerge,  Observable } from 'rxjs';
-
-import {concatMap, filter, catchError, merge, takeUntil, mergeMap, map} from 'rxjs/operators';
-import { SessionResource } from "../../../shared/resources/session.resource";
-import { ConfigService } from "../../../shared/services/config.service";
-import { Dataset, JobState, Resource, EventType } from "chipster-js-common";
-import { Job, JobInput, Session, Rule, WsEvent } from "chipster-js-common";
-import { FileResource } from "../../../shared/resources/fileresource";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { Dataset, EventType, Job, JobInput, JobState, Resource, Rule, Session, WsEvent } from "chipster-js-common";
+import * as _ from "lodash";
+import log from "loglevel";
+import { ToastrService } from "ngx-toastr";
+import { forkJoin as observableForkJoin, from as observableFrom, merge as observableMerge, Observable } from 'rxjs';
+import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from 'rxjs/operators';
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
-import { RestService } from "../../../core/rest-services/restservice/rest.service";
-import { SessionData } from "../../../model/session/session-data";
-import { SessionEventService } from "./session-event.service";
-import * as _ from "lodash";
-import { SelectionHandlerService } from "./selection-handler.service";
-import log from "loglevel";
-import UtilsService from "../../../shared/utilities/utils";
-import { ToastrService } from "ngx-toastr";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../model/session/session-data";
+import { FileResource } from "../../../shared/resources/fileresource";
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { ConfigService } from "../../../shared/services/config.service";
+import UtilsService from "../../../shared/utilities/utils";
+import { SelectionHandlerService } from "./selection-handler.service";
+import { SessionEventService } from "./session-event.service";
+
 
 @Injectable()
 export class SessionDataService {
@@ -29,13 +28,13 @@ export class SessionDataService {
     private configService: ConfigService,
     private fileResource: FileResource,
     private errorService: ErrorService,
-    private restService: RestService,
     private tokenService: TokenService,
     private sessionEventService: SessionEventService,
     private selectionHandlerService: SelectionHandlerService,
     private toastrService: ToastrService,
-    private restErrorService: RestErrorService
-  ) {}
+    private restErrorService: RestErrorService,
+    private http: HttpClient
+  ) { }
 
   getSessionId(): string {
     return this.sessionId;
@@ -106,7 +105,7 @@ export class SessionDataService {
       catchError(err => {
         log.info("create derived dataset failed", err);
         throw err;
-      }),);
+      }));
   }
 
   cancelJob(job: Job) {
@@ -148,21 +147,20 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
+  // need to change the post function
   getDatasetUrl(dataset: Dataset): Observable<string> {
     const datasetToken$ = this.configService
       .getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl: string) =>
-        this.restService.post(
-          sessionDbUrl +
+        mergeMap((sessionDbUrl: string) =>
+          this.http.post(
+            sessionDbUrl +
             "/datasettokens/sessions/" +
             this.getSessionId() +
             "/datasets/" +
-            dataset.datasetId,
-          null,
-          true
-        )
-      ),
-      map((datasetToken: any) => datasetToken.tokenKey),);
+            dataset.datasetId, { withCredentials: true }
+          )
+        ),
+        map((datasetToken: any) => datasetToken.tokenKey));
 
     return observableForkJoin(
       datasetToken$,
@@ -171,7 +169,7 @@ export class SessionDataService {
       const [datasetToken, url] = results;
       return `${url}/sessions/${this.getSessionId()}/datasets/${
         dataset.datasetId
-      }?token=${datasetToken}`;
+        }?token=${datasetToken}`;
     }));
   }
 
@@ -194,8 +192,8 @@ export class SessionDataService {
       url$,
       3000,
       "Browser's pop-up blocker prevented some exports. " +
-        "Please disable the pop-up blocker for this site or " +
-        "export the files one by one."
+      "Please disable the pop-up blocker for this site or " +
+      "export the files one by one."
     );
   }
 
@@ -410,7 +408,7 @@ export class SessionDataService {
 
     toast.onHidden.pipe(
       takeUntil(toast.onAction), // only if there was no action
-      merge(toast.onAction.pipe(filter(text => text === BTN_DELETE))),)
+      merge(toast.onAction.pipe(filter(text => text === BTN_DELETE))))
       .subscribe(
         () => {
           this.deleteDatasetsNow(deletedDatasets);

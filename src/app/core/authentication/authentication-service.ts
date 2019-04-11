@@ -1,7 +1,7 @@
 
-import {of as observableOf,  Observable ,  BehaviorSubject } from 'rxjs';
+import { of as observableOf, Observable, BehaviorSubject } from 'rxjs';
 
-import {catchError, map, mergeMap} from 'rxjs/operators';
+import { catchError, map, mergeMap, tap, publishReplay, refCount } from 'rxjs/operators';
 import { ConfigService } from "../../shared/services/config.service";
 import { Injectable } from "@angular/core";
 import { TokenService } from "./token.service";
@@ -31,18 +31,19 @@ export class AuthenticationService {
   }
 
   init() {
+    // Need to check after code change
     this.user$ = this.configService
-      .getAuthUrl()
-      .do(x => log.debug("auth url", x))
-      .flatMap(authUrl => {
-        const userId = encodeURIComponent(this.tokenService.getUsername());
-        const url = `${authUrl}/users/${userId}`;
+      .getAuthUrl().pipe(
+        tap(x => log.debug("auth url", x)),
+        mergeMap(authUrl => {
+          const userId = encodeURIComponent(this.tokenService.getUsername());
+          const url = `${authUrl}/users/${userId}`;
 
-        return <Observable<User>>this.authHttpClient.getAuth(url);
-      })
-      .do(x => log.debug("user", x))
-      .publishReplay(1)
-      .refCount();
+          return <Observable<User>>this.authHttpClient.getAuth(url);
+        }),
+        tap(x => log.debug("user", x)),
+        publishReplay(1),
+        refCount());
   }
 
   // Do the authentication here based on userid and password
@@ -63,23 +64,23 @@ export class AuthenticationService {
   requestToken(username: string, password: string): Observable<any> {
     log.info("request token");
     return this.configService
-      .getAuthUrl()
-      .do(url => log.info("url", url))
-      .flatMap(authUrl => {
-        const url = `${authUrl}/tokens`;
-        const encodedString = btoa(`${username}:${password}`); // base64 encoding
+      .getAuthUrl().pipe(
+        tap(url => log.info("url", url)),
+        mergeMap(authUrl => {
+          const url = `${authUrl}/tokens`;
+          const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-        return this.httpClient.post<Token>(
-          url,
-          {},
-          {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
-          }
-        );
-      });
+          return this.httpClient.post<Token>(
+            url,
+            {},
+            {
+              headers: new HttpHeaders().set(
+                "Authorization",
+                `Basic ${encodedString}`
+              )
+            }
+          );
+        }));
   }
 
   refreshToken() {
@@ -151,20 +152,20 @@ export class AuthenticationService {
             )
           }
         ).pipe(
-        map((response: Token) => {
-          this.saveToken(response);
-          return observableOf(true);
-        }),
-        catchError(error => {
-          if (error.status === 403) {
-            // token is invalid
-            log.info("check token got 403 -> token invalid");
-            return observableOf(false);
-          } else {
-            // for now, throw others
-            throw error;
-          }
-        }),);
+          map((response: Token) => {
+            this.saveToken(response);
+            return observableOf(true);
+          }),
+          catchError(error => {
+            if (error.status === 403) {
+              // token is invalid
+              log.info("check token got 403 -> token invalid");
+              return observableOf(false);
+            } else {
+              // for now, throw others
+              throw error;
+            }
+          }));
     });
   }
 
@@ -193,15 +194,15 @@ export class AuthenticationService {
   getUsersDisplayName$() {
     return this.tokenService
       .getUsername$().pipe(
-      mergeMap(userId => {
-        return this.getUser().pipe(catchError(err => {
-          log.info("failed to get the user details", err);
-          // An error message from this request would be confusing, because the user didn't ask for it.
-          // Most likely the authentication has expired, but the user will notice it soon anyway.
-          return observableOf({ name: userId });
-        }));
-      }),
-      map(user => user.name),);
+        mergeMap(userId => {
+          return this.getUser().pipe(catchError(err => {
+            log.info("failed to get the user details", err);
+            // An error message from this request would be confusing, because the user didn't ask for it.
+            // Most likely the authentication has expired, but the user will notice it soon anyway.
+            return observableOf({ name: userId });
+          }));
+        }),
+        map(user => user.name));
   }
 
   getUsers(): Observable<User[]> {
