@@ -1,31 +1,17 @@
-
-import {tap, takeUntil} from 'rxjs/operators';
+import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import { SessionDataService } from "../../session-data.service";
-import * as _ from "lodash";
-import {
-  Component,
-  Input,
-  SimpleChanges,
-  ViewEncapsulation,
-  NgZone,
-  OnDestroy,
-  OnChanges,
-  OnInit,
-  AfterViewInit
-} from "@angular/core";
-import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
-import { SessionEventService } from "../../session-event.service";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
-import { ViewChild } from "@angular/core";
-import { NativeElementService } from "../../../../../shared/services/native-element.service";
-import log from "loglevel";
-import { ErrorService } from "../../../../../core/errorhandler/error.service";
-import { Subject } from "rxjs";
 import * as d3 from "d3";
-import { GetSessionDataService } from "../../get-session-data.service";
+import log from "loglevel";
+import { Subject } from "rxjs/Subject";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 import { DatasetService } from "../../dataset.service";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { GetSessionDataService } from "../../get-session-data.service";
+import { SessionDataService } from "../../session-data.service";
+import { SessionEventService } from "../../session-event.service";
 
 export enum PhenodataState {
   OWN_PHENODATA,
@@ -57,6 +43,7 @@ export class PhenodataVisualizationComponent
   PhenodataState = PhenodataState; // for using the enum in template
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
   phenodataAncestor: Dataset;
+  phenodataFilled = false;
   ready = false;
 
   private unsubscribe: Subject<any> = new Subject();
@@ -72,7 +59,7 @@ export class PhenodataVisualizationComponent
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService
-  ) {}
+  ) { }
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
@@ -82,7 +69,7 @@ export class PhenodataVisualizationComponent
     // update view if someone else has edited the phenodata
     this.sessionEventService
       .getDatasetStream().pipe(
-      takeUntil(this.unsubscribe))
+        takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateViewLater();
@@ -283,6 +270,7 @@ export class PhenodataVisualizationComponent
 
   private updateView() {
     this.ready = false;
+    this.phenodataFilled = false;
     this.phenodataAncestor = null;
     this.headers = [];
     this.rows = [];
@@ -319,6 +307,9 @@ export class PhenodataVisualizationComponent
     if (this.datasetService.hasOwnPhenodata(this.dataset)) {
       phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
       this.phenodataState = PhenodataState.OWN_PHENODATA;
+      this.phenodataFilled = this.datasetService.isPhenodataFilled(
+        this.dataset
+      );
     } else {
       const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(
         this.dataset
@@ -407,25 +398,25 @@ export class PhenodataVisualizationComponent
   openAddColumnModal() {
     this.stringModalService
       .openStringModal("Add new column", "Column name", "", "Add").pipe(
-      tap(name => {
-        this.zone.runOutsideAngular(() => {
-          const colHeaders = <Array<string>>(
-            (<ht.Options>this.hot.getSettings()).colHeaders
-          );
-          this.hot.alter("insert_col", colHeaders.length);
-          // remove undefined column header
-          colHeaders.pop();
-          colHeaders.push(name);
-          this.hot.updateSettings(
-            {
-              colHeaders: colHeaders
-            },
-            false
-          );
-        });
+        tap(name => {
+          this.zone.runOutsideAngular(() => {
+            const colHeaders = <Array<string>>(
+              (<ht.Options>this.hot.getSettings()).colHeaders
+            );
+            this.hot.alter("insert_col", colHeaders.length);
+            // remove undefined column header
+            colHeaders.pop();
+            colHeaders.push(name);
+            this.hot.updateSettings(
+              {
+                colHeaders: colHeaders
+              },
+              false
+            );
+          });
 
-        this.updateDataset();
-      }))
+          this.updateDataset();
+        }))
       .subscribe(null, err =>
         this.restErrorService.showError("Add column failed", err)
       );

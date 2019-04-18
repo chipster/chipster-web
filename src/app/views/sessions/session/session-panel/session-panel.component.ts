@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
 import * as _ from "lodash";
-import { Observable, forkJoin } from "rxjs";
+import { forkJoin, Observable } from "rxjs";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
@@ -50,7 +50,6 @@ export class SessionPanelComponent {
   toggleDatasetSelection($event: any, dataset: Dataset): void {
     if (UtilsService.isCtrlKey($event)) {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
-      console.log([dataset]);
     } else if (UtilsService.isShiftKey($event)) {
       //  datasets and their ids in the order of the dataset list
       const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(

@@ -1,26 +1,16 @@
-
-import {takeUntil} from 'rxjs/operators';
-import { SelectionService } from "../selection.service";
-import { Dataset, Tool } from "chipster-js-common";
-import * as _ from "lodash";
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
+import { Dataset, Tool } from "chipster-js-common";
+import * as _ from "lodash";
+import { Subject } from "rxjs/Subject";
+import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
-import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { Subject } from "rxjs";
+import { DatasetService } from "../dataset.service";
+import { SelectionService } from "../selection.service";
+import VisualizationConstants, { Visualization } from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
-import VisualizationConstants, {
-  Visualization
-} from "./visualization-constants";
 
 @Component({
   selector: "ch-visualizations",
@@ -51,13 +41,14 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     private typeTagService: TypeTagService,
     private errorService: ErrorService,
-    private visualizationEventService: VisualizationEventService
-  ) {}
+    private visualizationEventService: VisualizationEventService,
+    private datasetService: DatasetService
+  ) { }
 
   ngOnInit() {
     this.store
       .select("selectedDatasets").pipe(
-      takeUntil(this.unsubscribe))
+        takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
@@ -113,7 +104,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
     this.visualizationEventService
       .getPhenodataSelectedStream().pipe(
-      takeUntil(this.unsubscribe))
+        takeUntil(this.unsubscribe))
       .subscribe(phenodataSelected => {
         if (phenodataSelected) {
           this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);
@@ -138,14 +129,24 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       visualization2 => visualization2.id === id
     );
     const datasetSelectionCount = this.selectedDatasets.length;
+
+    const typeIsCompatible =
+      visualization.supportAllTypes ||
+      this.containsTypeTags(visualization.typeTags);
+
+    const inputCountIsCompatible =
+      visualization.anyInputCountSupported ||
+      _.includes(visualization.supportedInputFileCounts, datasetSelectionCount);
+
+    // here for now, to enable phenodata visualization for files which have their own
+    // phenodata but which are not GENE_EXPR or BAM
+    const phenodataSpecialCompatible =
+      visualization.id === VisualizationConstants.PHENODATA_ID &&
+      datasetSelectionCount === 1 &&
+      this.datasetService.hasOwnPhenodata(this.selectedDatasets[0]);
+
     return (
-      (visualization.supportAllTypes ||
-        this.containsTypeTags(visualization.typeTags)) &&
-      (visualization.anyInputCountSupported ||
-        _.includes(
-          visualization.supportedInputFileCounts,
-          datasetSelectionCount
-        ))
+      (typeIsCompatible && inputCountIsCompatible) || phenodataSpecialCompatible
     );
   }
 
