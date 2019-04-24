@@ -139,6 +139,7 @@ export class SessionResource {
     const headers = new HttpHeaders({
       'Authorization': this.tokenService.getTokenHeader().Authorization
     });
+    console.log(headers);
     return this.configService
       .getTypeService().pipe(
         mergeMap(typeServiceUrl => {

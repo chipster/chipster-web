@@ -2,6 +2,7 @@ import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, OnInit, 
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
+import { takeUntil, tap } from "rxjs/operators";
 import { Subject } from "rxjs/Subject";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";

@@ -3,6 +3,7 @@ import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import { takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs/Subject";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
