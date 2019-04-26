@@ -22,29 +22,30 @@ export class MaintenanceComponent implements OnInit {
 
   ngOnInit() {}
 
-  backupNowDb() {
-    this.backup("session-db");
-    this.backup("auth");
-    this.backup("job-history");
+  backupNow(role: string) {
+    if (role === "file-broker") {
+      // storage backups are made directly at file-broker
+      this.backup("file-broker", "/admin/backup");
+    } else {
+      // the backup service takes care of db backups
+      this.backup("backup", "/admin/backup/" + role);
+    }
   }
 
-  backupNowStorage() {
-    this.backup("file-broker");
-  }
-
-  backup(role: string) {
+  backup(backupService: string, path: string) {
     this.configService
       .getInternalServices(this.tokenService.getToken())
       .pipe(
         map((services: Service[]) => {
-          return services.filter(s => s.role === role)[0];
+          services = services.filter(s => s.role === backupService);
+          return services[0];
         }),
-        mergeMap((service: Service) =>
-          this.auhtHttpClient.postAuth(service.adminUri + "/admin/backup", null)
-        )
+        mergeMap((service: Service) => {
+          return this.auhtHttpClient.postAuth(service.adminUri + path, null);
+        })
       )
       .subscribe(null, err =>
-        this.restErrorService.showError("get services failed", err)
+        this.restErrorService.showError("backup start failed", err)
       );
   }
 }

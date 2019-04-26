@@ -1,24 +1,24 @@
 <div class="scrollable">
   <h4>auth</h4>
-  <button class="btn btn-secondary" (click)="backup('auth')">
+  <button class="btn btn-secondary" (click)="backupNow('auth')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>file-broker</h4>
-  <button class="btn btn-secondary" (click)="backupNowStorage()">
+  <button class="btn btn-secondary" (click)="backupNow('file-broker')">
     Start storage backup
   </button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>job-history</h4>
-  <button class="btn btn-secondary" (click)="backup('job-history')">
+  <button class="btn btn-secondary" (click)="backupNow('job-history')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>session-db</h4>
-  <button class="btn btn-secondary" (click)="backup('session-db')">
+  <button class="btn btn-secondary" (click)="backupNow('session-db')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
