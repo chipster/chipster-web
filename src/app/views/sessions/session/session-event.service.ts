@@ -1,25 +1,15 @@
 
-import {never as observableNever, of as observableOf,  Observable ,  Subject } from 'rxjs';
-
-import {mergeMap, filter, map, publish, refCount} from 'rxjs/operators';
-import { SessionResource } from "../../../shared/resources/session.resource";
-import {
-  Session,
-  Dataset,
-  Job,
-  Rule,
-  WsEvent,
-  SessionEvent,
-  SessionState,
-  EventType,
-  Resource,
-} from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { SessionData } from "../../../model/session/session-data";
-import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+import { Dataset, EventType, Job, Resource, Rule, Session, SessionEvent, SessionState, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import { WebSocketService } from "../../../shared/services/websocket.service";
+import { never as observableNever, Observable, of as observableOf, Subject } from 'rxjs';
+import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+import { filter, map, mergeMap, publish, refCount } from 'rxjs/operators';
 import { ErrorService } from "../../../core/errorhandler/error.service";
+import { SessionData } from "../../../model/session/session-data";
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { WebSocketService } from "../../../shared/services/websocket.service";
+
 
 @Injectable()
 export class SessionEventService {
@@ -38,7 +28,7 @@ export class SessionEventService {
     private sessionResource: SessionResource,
     private websocketService: WebSocketService,
     private errorService: ErrorService,
-  ) {}
+  ) { }
 
   unsubscribe() {
     this.websocketService.unsubscribe();
@@ -49,7 +39,7 @@ export class SessionEventService {
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(publish(),refCount(),);
+    const stream = this.localSubject$.pipe(publish(), refCount());
 
     this.websocketService.connect(
       this.localSubject$,
@@ -71,13 +61,13 @@ export class SessionEventService {
         this.updateTypeTags(this.sessionId, sessionEvent, sessionData)
       ),
       publish(),
-      refCount(),);
+      refCount());
 
     this.jobStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Job),
       mergeMap(data => this.handleJobEvent(data, this.sessionId, sessionData)),
       publish(),
-      refCount(),);
+      refCount());
 
     this.sessionStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Session),
@@ -85,13 +75,13 @@ export class SessionEventService {
         this.handleSessionEvent(data, this.sessionId, sessionData)
       ),
       publish(),
-      refCount(),);
+      refCount());
 
     this.ruleStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Rule),
       mergeMap(data => this.handleRuleEvent(data, sessionData.session)),
       publish(),
-      refCount(),);
+      refCount());
 
     // update sessionData even if no one else subscribes
     this.datasetStream$.subscribe(null, err => this.errorService.showError("dataset event error", err));
@@ -127,10 +117,10 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource
         .getRule(session.sessionId, event.resourceId).pipe(
-        mergeMap((rule: Rule) => {
-          session.rules.push(rule);
-          return this.createEvent(event, null, rule);
-        }));
+          mergeMap((rule: Rule) => {
+            session.rules.push(rule);
+            return this.createEvent(event, null, rule);
+          }));
     } else if (event.type === "DELETE") {
       const rule = session.rules.find(r => r.ruleId === event.resourceId);
       session.rules = session.rules.filter(r => r.ruleId !== event.resourceId);
@@ -149,15 +139,15 @@ export class SessionEventService {
       if (event.state !== SessionState.Delete) {
         return this.sessionResource
           .getSession(sessionId).pipe(
-          mergeMap((remote: Session) => {
-            const local = sessionData.session;
-            sessionData.session = remote;
-            log.info('session updated', remote.name, remote.state);
-            return this.createEvent(event, local, remote);
-          }));
+            mergeMap((remote: Session) => {
+              const local = sessionData.session;
+              sessionData.session = remote;
+              log.info('session updated', remote.name, remote.state);
+              return this.createEvent(event, local, remote);
+            }));
       } else {
         // nothing to do, the client reacts when the Rule is deleted
-      return observableNever();
+        return observableNever();
       }
     } else if (event.type === EventType.Delete) {
       // nothing to do, the client reacts when the Rule is deleted
@@ -175,18 +165,18 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource
         .getDataset(sessionId, event.resourceId).pipe(
-        mergeMap((remote: Dataset) => {
-          sessionData.datasetsMap.set(event.resourceId, remote);
-          return this.createEvent(event, null, remote);
-        }));
+          mergeMap((remote: Dataset) => {
+            sessionData.datasetsMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          }));
     } else if (event.type === EventType.Update) {
       return this.sessionResource
         .getDataset(sessionId, event.resourceId).pipe(
-        mergeMap((remote: Dataset) => {
-          const local = sessionData.datasetsMap.get(event.resourceId);
-          sessionData.datasetsMap.set(event.resourceId, remote);
-          return this.createEvent(event, local, remote);
-        }));
+          mergeMap((remote: Dataset) => {
+            const local = sessionData.datasetsMap.get(event.resourceId);
+            sessionData.datasetsMap.set(event.resourceId, remote);
+            return this.createEvent(event, local, remote);
+          }));
     } else if (event.type === EventType.Delete) {
       const localCopy = sessionData.datasetsMap.get(event.resourceId);
       sessionData.datasetsMap.delete(event.resourceId);
@@ -210,10 +200,10 @@ export class SessionEventService {
       // dataset created or updated, update type tags too
       return this.sessionResource
         .getTypeTagsForDataset(sessionId, newValue).pipe(
-        map(typeTags => {
-          sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
-          return sessionEvent;
-        }));
+          map(typeTags => {
+            sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
+            return sessionEvent;
+          }));
     } else {
       // dataset deleted, type tags can be removed
       sessionData.datasetTypeTags.delete(sessionEvent.resourceId);
@@ -229,18 +219,18 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource
         .getJob(sessionId, event.resourceId).pipe(
-        mergeMap((remote: Job) => {
-          sessionData.jobsMap.set(event.resourceId, remote);
-          return this.createEvent(event, null, remote);
-        }));
+          mergeMap((remote: Job) => {
+            sessionData.jobsMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          }));
     } else if (event.type === EventType.Update) {
       return this.sessionResource
         .getJob(sessionId, event.resourceId).pipe(
-        mergeMap((remote: Job) => {
-          const local = sessionData.jobsMap.get(event.resourceId);
-          sessionData.jobsMap.set(event.resourceId, remote);
-          return this.createEvent(event, local, remote);
-        }));
+          mergeMap((remote: Job) => {
+            const local = sessionData.jobsMap.get(event.resourceId);
+            sessionData.jobsMap.set(event.resourceId, remote);
+            return this.createEvent(event, local, remote);
+          }));
     } else if (event.type === EventType.Delete) {
       const localCopy = sessionData.jobsMap.get(event.resourceId);
       sessionData.jobsMap.delete(event.resourceId);

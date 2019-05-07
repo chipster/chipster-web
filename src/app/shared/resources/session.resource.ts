@@ -5,7 +5,7 @@ import { Dataset, Job, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import * as _ from "lodash";
 import log from "loglevel";
-import { forkJoin as observableForkJoin, Observable, of as observableOf } from 'rxjs';
+import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { catchError, defaultIfEmpty, map, mergeMap, tap } from 'rxjs/operators';
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
@@ -101,9 +101,8 @@ export class SessionResource {
         return observableOf(null);
       }))
     );
-    return observableForkJoin(catchedObservables).pipe(map(res => {
+    return forkJoin(catchedObservables).pipe(map(res => {
       if (errors.length > 0) {
-        console.log("error happned", errors);
         log.warn("session loading failed", errors);
         // just report the first error, this is what the forkJoin would have done by default anyway
         throw errors[0];
@@ -139,7 +138,6 @@ export class SessionResource {
     const headers = new HttpHeaders({
       'Authorization': this.tokenService.getTokenHeader().Authorization
     });
-    console.log(headers);
     return this.configService
       .getTypeService().pipe(
         mergeMap(typeServiceUrl => {
@@ -154,7 +152,6 @@ export class SessionResource {
           for (const datasetId of Object.keys(typesObj)) {
             typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
           }
-          console.log(typesMap);
           return typesMap;
         }));
   }
@@ -489,7 +486,7 @@ export class SessionResource {
 
         // emit an empty array if the forkJoin completes without emitting anything
         // otherwise this won't continue to the next flatMap() when the session is empty
-        return observableForkJoin(...createRequests).pipe(defaultIfEmpty([]));
+        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
       }),
       mergeMap(() => {
         const createRequests: Array<Observable<any>> = [];
@@ -506,7 +503,7 @@ export class SessionResource {
         createRequests.push(request);
 
         // see the comment of the forkJoin above
-        return observableForkJoin(...createRequests).pipe(defaultIfEmpty([]));
+        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
       }),
       mergeMap(() => this.getSession(createdSessionId)),
       mergeMap(session => {

@@ -40,19 +40,22 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     if (isReqArrayBuffer) {
       // For Bam Viewer, we need array buffer as reponse
       return apiUrl$.pipe(mergeMap((url: string) =>
         this.http.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-          { responseType: 'arraybuffer' }
+          { headers: headers, withCredentials: true, responseType: 'arraybuffer' }
         )
       ));
     } else {
       return apiUrl$.pipe(mergeMap((url: string) =>
         this.http.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-          { responseType: 'text' }
+          { headers: headers, withCredentials: true, responseType: 'text' }
         )
       ));
     }
@@ -74,12 +77,15 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const rangeHeader = new HttpHeaders({ range: `bytes=0-${maxBytes}` });
+    const rangeHeader = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization,
+      'range': `bytes=0-${maxBytes}`
+    });
     if (isReqArrayBuffer) {
       return apiUrl$.pipe(mergeMap((url: string) =>
         this.http.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: rangeHeader,
+            headers: rangeHeader, withCredentials: true,
             responseType: "arraybuffer", reportProgress: true
           })
 
@@ -88,7 +94,7 @@ export class FileResource {
       return apiUrl$.pipe(mergeMap((url: string) =>
         this.http.get(
           `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: rangeHeader,
+            headers: rangeHeader, withCredentials: true,
             responseType: "text", reportProgress: true
           })
       ));
@@ -103,7 +109,10 @@ export class FileResource {
     });
     return apiUrl$.pipe(mergeMap((url: string) =>
       this.http.put(
-        `${url}/sessions/${sessionId}/datasets/${datasetId}`, { observe: data, reportProgress: true, withCredentials: true }
+        `${url}/sessions/${sessionId}/datasets/${datasetId}`, {
+          observe: data, headers: headers, withCredentials: true,
+          reportProgress: true,
+        }
       )
     ));
   }
