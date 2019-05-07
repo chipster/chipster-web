@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
-import { map, mergeMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
@@ -34,18 +34,46 @@ export class MaintenanceComponent implements OnInit {
 
   backup(backupService: string, path: string) {
     this.configService
-      .getInternalServices(this.tokenService.getToken())
+      .getInternalService(backupService, this.tokenService.getToken())
       .pipe(
-        map((services: Service[]) => {
-          services = services.filter(s => s.role === backupService);
-          return services[0];
-        }),
         mergeMap((service: Service) => {
           return this.auhtHttpClient.postAuth(service.adminUri + path, null);
         })
       )
       .subscribe(null, err =>
         this.restErrorService.showError("backup start failed", err)
+      );
+  }
+
+  deleteOldOrphanFiles() {
+    this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.auhtHttpClient.postAuth(
+            service.adminUri + "/admin/delete-orphans",
+            null
+          );
+        })
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("delete orphans failed", err)
+      );
+  }
+
+  storageCheck() {
+    this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.auhtHttpClient.postAuth(
+            service.adminUri + "/admin/check",
+            null
+          );
+        })
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("storage check failed", err)
       );
   }
 }

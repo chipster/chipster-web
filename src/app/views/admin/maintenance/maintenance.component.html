@@ -10,6 +10,13 @@
     Start storage backup
   </button>
   <p>Follow server logs to see the backup progress</p>
+  <button class="btn btn-secondary" (click)="storageCheck()">
+    Start storage check
+  </button>
+  <button class="btn btn-secondary ml-3" (click)="deleteOldOrphanFiles()">
+    Delete old orphan files
+  </button>
+  <p>See file-broker logs to see the storage check results</p>
 
   <h4>job-history</h4>
   <button class="btn btn-secondary" (click)="backupNow('job-history')">
