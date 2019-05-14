@@ -1,14 +1,15 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
-import { AdminComponent } from "./admin.component";
-import { ServicesComponent } from "./services/services.component";
-import { ClientsComponent } from "./clients/clients.component";
-import { StorageComponent } from "./storage/storage.component";
-import { JobsComponent } from "./jobs/jobs.component";
-import { HistoryComponent } from "./history/history.component";
-import { StatisticsComponent } from "./statistics/statistics.component";
-import { UsersComponent } from "./users/users.component";
 import { AuthGuard } from "../../core/routing/auth-guard.service";
+import { AdminComponent } from "./admin.component";
+import { ClientsComponent } from "./clients/clients.component";
+import { HistoryComponent } from "./history/history.component";
+import { JobsComponent } from "./jobs/jobs.component";
+import { MaintenanceComponent } from "./maintenance/maintenance.component";
+import { ServicesComponent } from "./services/services.component";
+import { StatisticsComponent } from "./statistics/statistics.component";
+import { StorageComponent } from "./storage/storage.component";
+import { UsersComponent } from "./users/users.component";
 
 const routes: Routes = [
   {
@@ -24,6 +25,7 @@ const routes: Routes = [
       { path: "jobs", component: JobsComponent },
       { path: "history", component: HistoryComponent },
       { path: "statistics", component: StatisticsComponent },
+      { path: "maintenance", component: MaintenanceComponent },
       { path: "**", redirectTo: "services" }
     ]
   }

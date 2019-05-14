@@ -1,0 +1,32 @@
+<div class="scrollable">
+  <h4>auth</h4>
+  <button class="btn btn-secondary" (click)="backupNow('auth')">
+    Start database backup
+  </button>
+  <p>Follow server logs to see the backup progress</p>
+
+  <h4>file-broker</h4>
+  <button class="btn btn-secondary" (click)="backupNow('file-broker')">
+    Start storage backup
+  </button>
+  <p>Follow server logs to see the backup progress</p>
+  <button class="btn btn-secondary" (click)="storageCheck()">
+    Start storage check
+  </button>
+  <button class="btn btn-secondary ml-3" (click)="deleteOldOrphanFiles()">
+    Delete old orphan files
+  </button>
+  <p>See file-broker logs to see the storage check results</p>
+
+  <h4>job-history</h4>
+  <button class="btn btn-secondary" (click)="backupNow('job-history')">
+    Start database backup
+  </button>
+  <p>Follow server logs to see the backup progress</p>
+
+  <h4>session-db</h4>
+  <button class="btn btn-secondary" (click)="backupNow('session-db')">
+    Start database backup
+  </button>
+  <p>Follow server logs to see the backup progress</p>
+</div>
