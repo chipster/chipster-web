@@ -126,7 +126,7 @@ export class SessionResource {
             sessionId +
             "/datasets/" +
             dataset.datasetId,
-            { headers: headers, withCredentials: true }
+            { headers: headers }
           );
         }),
         map(typesObj => {
@@ -143,7 +143,7 @@ export class SessionResource {
         mergeMap(typeServiceUrl => {
           return this.http.get(
             typeServiceUrl + "/sessions/" + sessionId,
-            { headers: headers, withCredentials: true }
+            { headers: headers }
           );
         }),
         map(typesObj => {
