@@ -23,6 +23,7 @@ export interface SelectedToolWithValidatedInputs
   inputsValid: boolean;
   runForEachValid: boolean;
   phenodataValid: boolean;
+  phenodataMessage?: string;
   phenodataBindings: Array<PhenodataBinding>;
 }
 export interface ValidatedTool extends SelectedToolWithValidatedInputs {

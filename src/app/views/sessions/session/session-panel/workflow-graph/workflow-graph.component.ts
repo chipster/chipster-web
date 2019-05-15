@@ -67,6 +67,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private isContextMenuOpen = false;
   private showDatasetSelectionTooltip = false;
 
+  // private readonly primaryColor = "#007bff"; // bootstap primary
+  private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
+
   constructor(
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
@@ -411,9 +414,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   getContentSize() {
     // graph size in graph coordinates
-    // FIXME add phenodata?
     const width =
-      Math.max(...this.datasetNodes.map(d => d.x)) + this.nodeWidth + 15;
+      Math.max(
+        ...this.datasetNodes.map(d =>
+          this.datasetService.hasOwnPhenodata(d.dataset)
+            ? d.x + this.nodeWidth + this.xMargin
+            : d.x
+        )
+      ) +
+      this.nodeWidth +
+      15;
     const height =
       Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
 
@@ -511,7 +521,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("stroke-width", "2")
       .attr("pointer-events", "all")
       //  .style("fill", d => d.color)
-      .style("fill", "white")
+      .style("fill", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : "white"
+      )
+      .attr("stroke", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : d.color
+      )
+
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
           !this.filter || this.filter.has(d.datasetId)
@@ -625,7 +641,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", d => this.getPhenodataLabelX(d))
       .attr("y", d => this.getPhenodataLabelY(d))
       .attr("font-size", this.fontSize + "px")
-      .attr("fill", "black")
+      .attr("fill", d =>
+        this.isSelectedDataset(d.dataset) ? "white" : "black"
+      )
+      .attr("font-weight", d =>
+        this.isSelectedDataset(d.dataset) ? "600" : "400"
+      )
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
       .style("opacity", d =>
@@ -740,17 +761,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
       // stroke and stroke width added
-      .attr(
-        "stroke",
-        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : d.color)
-        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : d.color) // bootstrap default active
+      .attr("stroke", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : d.color
       )
       .attr("stroke-width", "3")
       .attr("pointer-events", "all")
-      .style(
-        "fill",
-        d => (this.isSelectedDataset(d.dataset) ? "#0e5db8" : "white")
-        // d => (this.isSelectedDataset(d.dataset) ? "#007bff" : "white") // bootstrap default active
+      .style("fill", d =>
+        this.isSelectedDataset(d.dataset) ? this.primaryColor : "white"
       )
       .style("opacity", d =>
         WorkflowGraphComponent.getOpacity(
@@ -992,7 +1009,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       )
       .style("stroke-dasharray", "3, 3");
 
-    this.d3Links.exit().remove();
+    this.d3PhenodataLinks.exit().remove();
   }
 
   dragEnd() {
@@ -1142,10 +1159,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             link.source.x = newRootPos.x;
             link.source.y = newRootPos.y;
           }
+
+          const nodeWidth =
+            this.isDatasetNode(link.target) &&
+            this.datasetService.hasOwnPhenodata(link.target.dataset)
+              ? this.nodeWidth * 2 + this.xMargin
+              : this.nodeWidth;
+
           const pos = this.workflowGraphService.newPosition(
             nodes,
             link.source.x,
-            link.source.y
+            link.source.y,
+            nodeWidth
           );
           link.target.x = pos.x;
           link.target.y = pos.y;
@@ -1406,5 +1431,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private getPhenodataWarningY(datasetNode: DatasetNode): number {
     return this.getPhenodataLabelY(datasetNode) + 10;
+  }
+
+  private isDatasetNode(object: any): object is DatasetNode {
+    return "dataset" in object;
   }
 }

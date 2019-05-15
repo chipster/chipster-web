@@ -18,9 +18,8 @@
             "polyfills": "src/polyfills.ts",
             "assets": ["src/assets"],
             "styles": [
-              "src/styles.less",
               "src/styles.scss",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/bootstrap-custom.scss",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/assets/lib/handsontable/handsontable.full.css",
               "node_modules/d3-context-menu/css/d3-context-menu.css",
@@ -137,7 +136,7 @@
       "viewEncapsulation": "Emulated",
       "changeDetection": "Default",
       "prefix": "ch",
-      "styleext": "less"
+      "styleext": "scss"
     },
     "@schematics/angular:directive": {
       "prefix": "ch"

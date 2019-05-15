@@ -284,7 +284,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
         (item.description &&
           item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
-        item.moduleName.toLowerCase().indexOf(termToken) !== -1
+        item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
+        item.toolId.toLowerCase().indexOf(termToken) !== -1
       );
     });
   }
@@ -377,11 +378,27 @@ export class ToolsComponent implements OnInit, OnDestroy {
           ? this.toolSelectionService.validatePhenodata(phenodataBindings)
           : false;
 
+        // phenodata validation message, here for now
+        let phenodataMessage = "";
+        if (!phenodataValid) {
+          if (!inputsValid) {
+            phenodataMessage = "Inputs need to be valid to determine phenodata";
+          } else if (phenodataBindings.length > 1) {
+            phenodataMessage =
+              "Tool with multiple phenodata inputs not supported yet";
+          } else {
+            phenodataMessage =
+              "No phenodata available for " +
+              toolWithInputs.inputBindings[0].datasets[0].name;
+          }
+        }
+
         return Object.assign(
           {
             inputsValid: inputsValid,
             runForEachValid: runForEachValid,
             phenodataValid: phenodataValid,
+            phenodataMessage: phenodataMessage,
             phenodataBindings: phenodataBindings
           },
           toolWithInputs
