@@ -1,74 +1,86 @@
-import { ConfigService } from "../services/config.service";
-import { ToolResource } from "./tool-resource";
-import { Session, Dataset, Job, Rule } from "chipster-js-common";
-import * as _ from "lodash";
-import UtilsService from "../utilities/utils";
+
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { SessionData } from "../../model/session/session-data";
-import { RestService } from "../../core/rest-services/restservice/rest.service";
-import { Observable } from "rxjs/Observable";
-import log from "loglevel";
+import { Dataset, Job, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
+import * as _ from "lodash";
+import log from "loglevel";
+import { forkJoin, Observable, of as observableOf } from 'rxjs';
+import { catchError, defaultIfEmpty, map, mergeMap, tap } from 'rxjs/operators';
+import { TokenService } from "../../core/authentication/token.service";
+import { SessionData } from "../../model/session/session-data";
+import { ConfigService } from "../services/config.service";
+import UtilsService from "../utilities/utils";
+
+
 
 @Injectable()
 export class SessionResource {
   constructor(
     private configService: ConfigService,
-    private toolResource: ToolResource,
-    private restService: RestService
-  ) {}
+    private http: HttpClient,
+    private tokenService: TokenService
+  ) { }
+
+
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService
-      .getSessionDbUrl()
-      .flatMap((url: string) => {
-        let sessionUrl = `${url}/sessions/${sessionId}`;
-        let types$;
+      .getSessionDbUrl().pipe(
+        mergeMap((url: string) => {
+          let sessionUrl = `${url}/sessions/${sessionId}`;
+          let types$;
 
-        if (preview) {
-          sessionUrl += "?preview";
-          types$ = Observable.of(null);
-        } else {
-          // types are not needed in the preview
-          types$ = this.getTypeTagsForSession(sessionId).do((x: any) =>
-            log.debug("types", x)
-          );
-        }
+          if (preview) {
+            sessionUrl += "?preview";
+            types$ = observableOf(null);
+          } else {
+            // types are not needed in the preview
+            types$ = this.getTypeTagsForSession(sessionId).pipe(tap((x: any) =>
+              log.debug("types", x)
+            ));
+          }
 
-        const session$ = this.restService
-          .get(sessionUrl, true)
-          .do((x: any) => log.debug("session", x));
-        const sessionDatasets$ = this.restService
-          .get(`${url}/sessions/${sessionId}/datasets`, true)
-          .do((x: any) => log.debug("sessionDatasets", x));
-        const sessionJobs$ = this.restService
-          .get(`${url}/sessions/${sessionId}/jobs`, true)
-          .do((x: any) => log.debug("sessionJobs", x));
+          // May be can be doable without res
 
-        // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
-        return this.forkJoinWithoutCancel([
-          session$,
-          sessionDatasets$,
-          sessionJobs$,
-          types$
-        ]);
-      })
-      .map((param: any) => {
-        const session: Session = param[0];
-        const datasets: Dataset[] = param[1];
-        const jobs: Job[] = param[2];
-        const types = param[3];
+          const headers = new HttpHeaders({
+            'Authorization': this.tokenService.getTokenHeader().Authorization
+          });
 
-        const data = new SessionData();
+          const session$ = this.http
+            .get(sessionUrl, { headers: headers, withCredentials: true, }).pipe(
+              tap((x: any) => log.debug("session", x)));
+          const sessionDatasets$ = this.http
+            .get(`${url}/sessions/${sessionId}/datasets`, { headers: headers, withCredentials: true }).pipe(
+              tap((x: any) => log.debug("sessionDatasets", x)));
+          const sessionJobs$ = this.http
+            .get(`${url}/sessions/${sessionId}/jobs`, { headers: headers, withCredentials: true }).pipe(
+              tap((x: any) => log.debug("sessionJobs", x)));
 
-        data.session = session;
-        data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
-        data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
+          // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
+          return this.forkJoinWithoutCancel([
+            session$,
+            sessionDatasets$,
+            sessionJobs$,
+            types$
+          ]);
+        }),
+        map((param: any) => {
+          const session: Session = param[0];
+          const datasets: Dataset[] = param[1];
+          const jobs: Job[] = param[2];
+          const types = param[3];
 
-        data.datasetTypeTags = types;
+          const data = new SessionData();
 
-        return data;
-      });
+          data.session = session;
+          data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
+          data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
+
+          data.datasetTypeTags = types;
+
+          return data;
+        }));
   }
 
   /**
@@ -84,12 +96,12 @@ export class SessionResource {
   forkJoinWithoutCancel(observables) {
     const errors = [];
     const catchedObservables = observables.map(o =>
-      o.catch(err => {
+      o.pipe(catchError(err => {
         errors.push(err);
-        return Observable.of(null);
-      })
+        return observableOf(null);
+      }))
     );
-    return Observable.forkJoin(catchedObservables).map(res => {
+    return forkJoin(catchedObservables).pipe(map(res => {
       if (errors.length > 0) {
         log.warn("session loading failed", errors);
         // just report the first error, this is what the forkJoin would have done by default anyway
@@ -97,44 +109,51 @@ export class SessionResource {
       } else {
         return res;
       }
-    });
+    }));
   }
 
   getTypeTagsForDataset(sessionId: string, dataset: Dataset) {
+
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     return this.configService
-      .getTypeService()
-      .flatMap(typeServiceUrl => {
-        return this.restService.get(
-          typeServiceUrl +
+      .getTypeService().pipe(
+        mergeMap(typeServiceUrl => {
+          return this.http.get(
+            typeServiceUrl +
             "/sessions/" +
             sessionId +
             "/datasets/" +
             dataset.datasetId,
-          true
-        );
-      })
-      .map(typesObj => {
-        return this.objectToMap(typesObj[dataset.datasetId]);
-      });
+            { headers: headers }
+          );
+        }),
+        map(typesObj => {
+          return this.objectToMap(typesObj[dataset.datasetId]);
+        }));
   }
 
   getTypeTagsForSession(sessionId: string) {
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     return this.configService
-      .getTypeService()
-      .flatMap(typeServiceUrl => {
-        return this.restService.get(
-          typeServiceUrl + "/sessions/" + sessionId,
-          true
-        );
-      })
-      .map(typesObj => {
-        // convert js objects to es6 Maps
-        const typesMap = new Map();
-        for (const datasetId of Object.keys(typesObj)) {
-          typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
-        }
-        return typesMap;
-      });
+      .getTypeService().pipe(
+        mergeMap(typeServiceUrl => {
+          return this.http.get(
+            typeServiceUrl + "/sessions/" + sessionId,
+            { headers: headers }
+          );
+        }),
+        map(typesObj => {
+          // convert js objects to es6 Maps
+          const typesMap = new Map();
+          for (const datasetId of Object.keys(typesObj)) {
+            typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
+          }
+          return typesMap;
+        }));
   }
 
   objectToMap(obj) {
@@ -147,38 +166,50 @@ export class SessionResource {
 
   getSessions(): Observable<Array<Session>> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.get(`${url}/sessions`, true)
-    );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.get<Session[]>(`${url}/sessions`, { headers: headers, withCredentials: true })
+    ));
   }
 
   getShares(): Observable<Array<Session>> {
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.get(`${url}/sessions/shares`, true)
-    );
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.get<Session[]>(`${url}/sessions/shares`, { headers: headers, withCredentials: true })
+    ));
   }
 
   createSession(session: Session): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(`${url}/sessions/`, session, true)
-      )
-      .map((response: any) => response.sessionId);
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/`, session, { headers: headers, withCredentials: true })
+      ),
+      map((response: any) => response.sessionId));
   }
 
   createDataset(sessionId: string, dataset: Dataset): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(
           `${url}/sessions/${sessionId}/datasets`,
           dataset,
-          true
+          { headers: headers, withCredentials: true }
         )
-      )
-      .map((response: any) => response.datasetId);
+      ),
+      map((response: any) => response.datasetId));
   }
 
   createDatasets(
@@ -186,172 +217,235 @@ export class SessionResource {
     datasets: Dataset[]
   ): Observable<Dataset[]> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(
           `${url}/sessions/${sessionId}/datasets/array`,
           datasets,
-          true
+          { headers: headers, withCredentials: true }
         )
-      )
-      .map((response: any) => response.datasets);
+      ),
+      map((response: any) => response.datasets));
   }
 
   createJob(sessionId: string, job: Job): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(`${url}/sessions/${sessionId}/jobs`, job, true)
-      )
-      .map((response: any) => response.jobId);
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/jobs`, job, { headers: headers, withCredentials: true })
+      ),
+      map((response: any) => response.jobId));
   }
 
   createJobs(sessionId: string, jobs: Job[]): Observable<Job[]> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(
           `${url}/sessions/${sessionId}/jobs/array`,
-          jobs,
-          true
+          jobs, { headers: headers, withCredentials: true }
         )
-      )
-      .map((response: any) => response.jobs);
+      ),
+      map((response: any) => response.jobs));
   }
 
   createRule(sessionId: string, rule: Rule): Observable<string> {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$
-      .flatMap((url: string) =>
-        this.restService.post(`${url}/sessions/${sessionId}/rules`, rule, true)
-      )
-      .map((response: any) => response.ruleId);
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/rules`, rule, { headers: headers, withCredentials: true })
+      ),
+      map((response: any) => response.ruleId));
   }
 
+
   getSession(sessionId: string): Observable<Session> {
+    console.log("trying to get the session");
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.get(`${url}/sessions/${sessionId}`, true)
-    );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.get<Session>(`${url}/sessions/${sessionId}`, { headers: headers, withCredentials: true })
+    ));
   }
 
   getDataset(sessionId: string, datasetId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.get(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.get(
         `${url}/sessions/${sessionId}/datasets/${datasetId}`,
-        true
+        { headers: headers, withCredentials: true }
       )
-    );
+    ));
   }
 
   getJob(sessionId: string, jobId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.get(`${url}/sessions/${sessionId}/jobs/${jobId}`, true)
-    );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.get(`${url}/sessions/${sessionId}/jobs/${jobId}`, { headers: headers, withCredentials: true })
+    ));
   }
 
   getRule(sessionId: string, ruleId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) => {
-      return this.restService.get(
-        `${url}/sessions/${sessionId}/rules/${ruleId}`,
-        true
-      );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
     });
+    return apiUrl$.pipe(mergeMap((url: string) => {
+      return this.http.get(
+        `${url}/sessions/${sessionId}/rules/${ruleId}`,
+        { headers: headers, withCredentials: true }
+      );
+    }));
   }
 
   updateSession(session: Session) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.put(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.put(
         `${url}/sessions/${session.sessionId}`,
         session,
-        true
+        { headers: headers }
       )
-    );
+    ));
   }
 
   updateDataset(sessionId: string, dataset: Dataset) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.put(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.put(
         `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
         dataset,
-        true
+        { headers: headers }
       )
-    );
+    ));
   }
 
   updateRule(sessionId: string, rule: Rule) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.put(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.put(
         `${url}/sessions/${sessionId}/rules/${rule.ruleId}`,
         rule,
-        true
+        { headers: headers }
       )
-    );
+    ));
   }
 
   updateDatasets(sessionId: string, datasets: Dataset[]) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.put(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.put(
         `${url}/sessions/${sessionId}/datasets/array`,
         datasets,
-        true
+        { headers: headers, withCredentials: true }
+
       )
-    );
+    ));
   }
 
   updateJob(sessionId: string, job: Job) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.put(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.put(
         `${url}/sessions/${sessionId}/jobs/${job.jobId}`,
-        job,
-        true
+        job, {
+          headers: headers, withCredentials: true
+        }
       )
-    );
+    ));
   }
 
   deleteSession(sessionId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.delete(`${url}/sessions/${sessionId}`, true)
-    );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.delete(`${url}/sessions/${sessionId}`, {
+        headers: headers
+      })
+    ));
   }
 
   deleteRule(sessionId: string, ruleId: string) {
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.delete(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.delete(
         `${url}/sessions/${sessionId}/rules/${ruleId}`,
-        true
+        {
+          headers: headers
+        }
       )
-    );
+    ));
   }
 
   deleteDataset(sessionId: string, datasetId: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.delete(
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.delete(
         `${url}/sessions/${sessionId}/datasets/${datasetId}`,
-        true
+        {
+          headers: headers
+        }
       )
-    );
+    ));
   }
 
   deleteJob(sessionId: string, jobId: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
     const apiUrl$ = this.configService.getSessionDbUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.delete(
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.delete(
         `${url}/sessions/${sessionId}/jobs/${jobId}`,
-        true
+        {
+          headers: headers, withCredentials: true
+        }
       )
-    );
+    ));
   }
 
   copySession(
@@ -373,8 +467,8 @@ export class SessionResource {
     // create session
     const createSession$ = this.createSession(newSession);
 
-    return createSession$
-      .flatMap((sessionId: string) => {
+    return createSession$.pipe(
+      mergeMap((sessionId: string) => {
         createdSessionId = sessionId;
 
         const createRequests: Array<Observable<any>> = [];
@@ -392,9 +486,9 @@ export class SessionResource {
 
         // emit an empty array if the forkJoin completes without emitting anything
         // otherwise this won't continue to the next flatMap() when the session is empty
-        return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
-      })
-      .flatMap(() => {
+        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
+      }),
+      mergeMap(() => {
         const createRequests: Array<Observable<any>> = [];
 
         // create jobs
@@ -409,10 +503,10 @@ export class SessionResource {
         createRequests.push(request);
 
         // see the comment of the forkJoin above
-        return Observable.forkJoin(...createRequests).defaultIfEmpty([]);
-      })
-      .flatMap(() => this.getSession(createdSessionId))
-      .flatMap(session => {
+        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
+      }),
+      mergeMap(() => this.getSession(createdSessionId)),
+      mergeMap(session => {
         log.info("session copied, current state", session.state, temporary);
         if (temporary) {
           session.state = SessionState.TemporaryUnmodified;
@@ -421,7 +515,7 @@ export class SessionResource {
         }
         log.info("set to", session.state);
         return this.updateSession(session);
-      })
-      .map(() => createdSessionId);
+      }),
+      map(() => createdSessionId));
   }
 }

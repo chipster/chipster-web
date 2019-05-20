@@ -1,37 +1,38 @@
-import { ConfigService } from "../services/config.service";
-import { Observable } from "rxjs";
+
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { RestService } from "../../core/rest-services/restservice/rest.service";
-import { ResponseContentType } from "@angular/http";
-import { Tool, Module } from "chipster-js-common";
+import { Module, Tool } from "chipster-js-common";
+import { Observable } from "rxjs";
+import { mergeMap } from 'rxjs/operators';
+import { ConfigService } from "../services/config.service";
 
 @Injectable()
 export class ToolResource {
   constructor(
     private configService: ConfigService,
-    private restService: RestService
-  ) {}
+    private http: HttpClient
+  ) { }
 
   getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
-      this.restService.get(`${apiUrl}/modules`)
-    );
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
+      this.http.get<Module[]>(`${apiUrl}/modules`)
+    ));
   }
 
   getTools(): Observable<Tool[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
-      this.restService.get(`${apiUrl}/tools`)
-    );
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
+      this.http.get<Tool[]>(`${apiUrl}/tools`)
+    ));
   }
 
   getSourceCode(toolId: string): Observable<string> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.flatMap((apiUrl: string) =>
-      this.restService.get(`${apiUrl}/tools/${toolId}/source`, false, {
-        responseType: ResponseContentType.Text
+    return apiUrl$.pipe(mergeMap((apiUrl: string) =>
+      this.http.get(`${apiUrl}/tools/${toolId}/source`, {
+        responseType: "text"
       })
-    );
+    ));
   }
 }

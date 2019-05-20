@@ -8,7 +8,7 @@ import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { ContactSupportService } from "../contact/contact-support.service";
 import * as StackTrace from 'stacktrace-js';
-import { of, from, Observable, empty } from "rxjs";
+import { of, from, Observable, empty, EMPTY } from "rxjs";
 import { tap, filter, mergeMap, catchError, map } from "rxjs/operators";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 @Component({
@@ -26,13 +26,13 @@ export class ErrorComponent implements OnInit {
     private toastrService: ToastrService,
     private contactSupportService: ContactSupportService,
     private dialogModalService: DialogModalService,
-  ) {}
+  ) { }
 
   ngOnInit() {
 
     // clear errors when navigating to a new url
-    this.router.events
-      .filter(event => event instanceof NavigationStart)
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationStart))
       .subscribe(event => {
         this.toastIds.forEach(t => this.toastrService.remove(t));
         this.toastIds = [];
@@ -90,7 +90,7 @@ export class ErrorComponent implements OnInit {
             } else {
               log.error("unknown action", buttonText);
             }
-            return empty();
+            return EMPTY;
           }),
         );
       }),
@@ -138,7 +138,7 @@ export class ErrorComponent implements OnInit {
       info += "causd by";
       if (error.constructor) {
         // e.g. "Error"
-        info += " " + error.constructor.name ;
+        info += " " + error.constructor.name;
       }
       info += ": ";
 

@@ -1,3 +1,7 @@
+
+import {empty as observableEmpty, from as observableFrom,  Observable } from 'rxjs';
+
+import {catchError} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { StringModalComponent } from "./stringmodal/stringmodal.component";
@@ -5,7 +9,6 @@ import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
-import { Observable } from "rxjs/Observable";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
 import { SessionEvent } from "chipster-js-common";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
@@ -16,15 +19,15 @@ export class DialogModalService {
   constructor(private modalService: NgbModal) { }
 
   static observableFromPromiseWithDismissHandling(result: Promise<any>) {
-    return Observable.fromPromise(result).catch(err => {
+    return observableFrom(result).pipe(catchError(err => {
       // dialog dismissed, cancel -> undefined, backdrop -> 0, esc -> 1
       if (err === undefined || err === 0 || err === 1) {
-        return Observable.empty();
+        return observableEmpty();
       } else {
         // real error
         throw err;
       }
-    });
+    }));
   }
 
   openSessionNameModal(title, name, buttonText = "Save"): Observable<string> {
@@ -60,7 +63,7 @@ export class DialogModalService {
     modalRef.componentInstance.button2Text = button2Text;
     modalRef.componentInstance.placeHolder = "";
 
-    return Observable.fromPromise(modalRef.result);
+    return observableFrom(modalRef.result);
   }
 
   openBooleanModal(title, message, okButtonText, cancelButtonText) {

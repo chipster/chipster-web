@@ -1,24 +1,16 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import { takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs/Subject";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
-import VisualizationConstants, {
-  Visualization
-} from "./visualization-constants";
+import VisualizationConstants, { Visualization } from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
 
 @Component({
@@ -52,12 +44,12 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     private errorService: ErrorService,
     private visualizationEventService: VisualizationEventService,
     private datasetService: DatasetService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.store
-      .select("selectedDatasets")
-      .takeUntil(this.unsubscribe)
+      .select("selectedDatasets").pipe(
+        takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
@@ -112,8 +104,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       );
 
     this.visualizationEventService
-      .getPhenodataSelectedStream()
-      .takeUntil(this.unsubscribe)
+      .getPhenodataSelectedStream().pipe(
+        takeUntil(this.unsubscribe))
       .subscribe(phenodataSelected => {
         if (phenodataSelected) {
           this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);

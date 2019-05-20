@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import {ConfigService} from "../../../shared/services/config.service";
-import {RestErrorService} from "../../../core/errorhandler/rest-error.service";
-import {AuthHttpClientService} from "../../../shared/services/auth-http-client.service";
-import {Observable} from "rxjs/Observable";
+import { ConfigService } from "../../../shared/services/config.service";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
+import { Observable, forkJoin } from "rxjs";
 import { Job } from "chipster-js-common";
-import {IdPair} from "../../../model/id-pair";
+import { IdPair } from "../../../model/id-pair";
+import { tap } from "rxjs/operators";
 
 @Component({
   selector: 'ch-jobs',
@@ -28,20 +29,21 @@ export class JobsComponent implements OnInit {
 
     let sessionDbUrl;
 
-    this.configService.getSessionDbUrl()
-      .do(url => sessionDbUrl = url)
+    // do is replaced with tap in rxjs v6, check jobList
+    this.configService.getSessionDbUrl().pipe(tap(url => sessionDbUrl = url))
       .flatMap(url => {
-        let newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=NEW');
-        let runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=RUNNING');
-        return Observable.forkJoin(newJobs$, runningJobs$);
+        const newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=NEW');
+        const runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=RUNNING');
+        return forkJoin(newJobs$, runningJobs$);
       })
       .flatMap(newAndRunningJobs => {
-        let newJobs = newAndRunningJobs[0];
-        let runningJobs = newAndRunningJobs[1];
-        let jobIds = newJobs.concat(runningJobs);
-        let jobs$: Observable<Job>[] = jobIds.map(idPair => <any>this.authHttpClient.getAuth(
+        const newJobs = newAndRunningJobs[0];
+
+        const runningJobs = newAndRunningJobs[1];
+        const jobIds = newJobs.concat(runningJobs);
+        const jobs$: Observable<Job>[] = jobIds.map(idPair => <any>this.authHttpClient.getAuth(
           sessionDbUrl + '/sessions/' + idPair.sessionId + '/jobs/' + idPair.jobId));
-        return Observable.forkJoin(jobs$);
+        return forkJoin(jobs$);
       })
       .subscribe(jobs => {
         this.jobs = jobs;

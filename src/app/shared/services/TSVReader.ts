@@ -1,10 +1,12 @@
+
+import {map} from 'rxjs/operators';
 import { FileResource } from "../resources/fileresource";
 import { Injectable } from "@angular/core";
 import "../../rxjs-operators";
 import TSVFile from "../../model/tsv/TSVFile";
 import * as d3 from "d3";
 import { Dataset } from "chipster-js-common";
-import { Observable } from "rxjs/Observable";
+import { Observable } from "rxjs";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 
@@ -22,20 +24,20 @@ export class TSVReader {
     maxBytes?: number
   ): Observable<TSVFile> {
     return this.fileResource
-      .getLimitedData(sessionId, dataset, maxBytes)
-      .map((tsvData: any) => {
+      .getLimitedData(sessionId, dataset, maxBytes).pipe(
+      map((tsvData: any) => {
         const parsedTSVData = d3.tsvParseRows(tsvData);
         return new TSVFile(parsedTSVData, dataset.datasetId, "dataset");
-      });
+      }));
   }
 
   getTSVFileHeaders(
     sessionId: string,
     dataset: Dataset
   ): Observable<Array<string>> {
-    return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).map(
+    return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).pipe(map(
       (tsvFile: TSVFile) => tsvFile.headers.headers
-    );
+    ));
   }
 
   getTSVHeaders(tsv: string): string[] {

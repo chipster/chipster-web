@@ -1,18 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  NgZone,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-  ViewChild,
-  ViewEncapsulation
-} from "@angular/core";
+import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
+import { takeUntil, tap } from "rxjs/operators";
 import { Subject } from "rxjs/Subject";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -70,7 +60,7 @@ export class PhenodataVisualizationComponent
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService
-  ) {}
+  ) { }
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
@@ -79,8 +69,8 @@ export class PhenodataVisualizationComponent
 
     // update view if someone else has edited the phenodata
     this.sessionEventService
-      .getDatasetStream()
-      .takeUntil(this.unsubscribe)
+      .getDatasetStream().pipe(
+        takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateViewLater();
@@ -408,26 +398,26 @@ export class PhenodataVisualizationComponent
 
   openAddColumnModal() {
     this.stringModalService
-      .openStringModal("Add new column", "Column name", "", "Add")
-      .do(name => {
-        this.zone.runOutsideAngular(() => {
-          const colHeaders = <Array<string>>(
-            (<ht.Options>this.hot.getSettings()).colHeaders
-          );
-          this.hot.alter("insert_col", colHeaders.length);
-          // remove undefined column header
-          colHeaders.pop();
-          colHeaders.push(name);
-          this.hot.updateSettings(
-            {
-              colHeaders: colHeaders
-            },
-            false
-          );
-        });
+      .openStringModal("Add new column", "Column name", "", "Add").pipe(
+        tap(name => {
+          this.zone.runOutsideAngular(() => {
+            const colHeaders = <Array<string>>(
+              (<ht.Options>this.hot.getSettings()).colHeaders
+            );
+            this.hot.alter("insert_col", colHeaders.length);
+            // remove undefined column header
+            colHeaders.pop();
+            colHeaders.push(name);
+            this.hot.updateSettings(
+              {
+                colHeaders: colHeaders
+              },
+              false
+            );
+          });
 
-        this.updateDataset();
-      })
+          this.updateDataset();
+        }))
       .subscribe(null, err =>
         this.restErrorService.showError("Add column failed", err)
       );

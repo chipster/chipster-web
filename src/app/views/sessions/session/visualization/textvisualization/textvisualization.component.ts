@@ -1,3 +1,5 @@
+
+import {takeUntil} from 'rxjs/operators';
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
@@ -5,7 +7,7 @@ import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Response } from "@angular/http";
 import { VisualizationModalService } from "../visualizationmodal.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
@@ -54,8 +56,8 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     const maxBytes = this.showFullData ? null : this.fileSizeLimit;
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
-      .takeUntil(this.unsubscribe)
+      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         (response: any) => {
           this.data = response;

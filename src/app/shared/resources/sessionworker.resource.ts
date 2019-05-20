@@ -1,8 +1,11 @@
-import { ConfigService } from "../services/config.service";
+
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { RestService } from "../../core/rest-services/restservice/rest.service";
 import { Observable } from "rxjs";
+import { map, mergeMap } from 'rxjs/operators';
 import { TokenService } from "../../core/authentication/token.service";
+import { ConfigService } from "../services/config.service";
+
 
 @Injectable()
 export class SessionWorkerResource {
@@ -11,26 +14,29 @@ export class SessionWorkerResource {
   constructor(
     private tokenService: TokenService,
     private configService: ConfigService,
-    private restService: RestService
-  ) {}
+    private http: HttpClient
+  ) { }
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.map(
+    return apiUrl$.pipe(map(
       (url: string) =>
         `${url}/sessions/${sessionId}?token=${this.tokenService.getToken()}`
-    );
+    ));
   }
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.post(
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.post(
         `${url}/sessions/${sessionId}/datasets/${zipDatasetId}`,
         {},
-        true
+        { headers: headers, withCredentials: true }
       )
-    );
+    ));
   }
 
   supportRequest(message: string, sessionId: string, email: string, appRoute: string, log: string): Observable<any> {
@@ -44,8 +50,11 @@ export class SessionWorkerResource {
     };
 
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.flatMap((url: string) =>
-      this.restService.post(url + "/support/request", supportRequest, true)
-    );
+    const headers = new HttpHeaders({
+      'Authorization': this.tokenService.getTokenHeader().Authorization
+    });
+    return apiUrl$.pipe(mergeMap((url: string) =>
+      this.http.post(url + "/support/request", supportRequest, { headers: headers, withCredentials: true })
+    ));
   }
 }

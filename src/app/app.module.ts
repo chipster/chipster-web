@@ -1,7 +1,6 @@
 import { HttpClientModule } from "@angular/common/http";
 import { ErrorHandler, Injector, NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { HttpModule } from "@angular/http";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
@@ -21,13 +20,7 @@ import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
-import {
-  selectedTool,
-  selectedToolWithInputs,
-  selectedToolWithPopulatedParams,
-  selectedToolWithValidatedInputs,
-  validatedTool
-} from "./state/tool.reducer";
+import { selectedTool, selectedToolWithInputs, selectedToolWithPopulatedParams, selectedToolWithValidatedInputs, validatedTool } from "./state/tool.reducer";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
@@ -43,14 +36,13 @@ import { TermsComponent } from "./views/terms/terms.component";
 @NgModule({
   imports: [
     BrowserModule,
-    HttpModule,
     HttpClientModule,
     FormsModule,
     CoreModule,
     ContactModule,
     SessionModule,
     ManualModule,
-    NgbModule.forRoot(),
+    NgbModule,
     AdminModule,
     StoreModule.forRoot({
       selectedDatasets,
