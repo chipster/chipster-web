@@ -54,7 +54,7 @@
     "@angular/compiler-cli": "^7.2.15",
     "@angular/language-service": "^7.2.15",
     "@types/d3": "^5.7.2",
-    "@types/flowjs": "0.0.31",
+    "@types/flowjs": "^0.0.31",
     "@types/handsontable": "^0.24.20",
     "@types/jasmine": "^3.3.12",
     "@types/jasminewd2": "^2.0.6",
