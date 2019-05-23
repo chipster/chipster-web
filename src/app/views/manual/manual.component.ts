@@ -1,3 +1,7 @@
+
+import {of as observableOf,  Observable ,  Subject } from 'rxjs';
+
+import {catchError, takeUntil, mergeMap, tap, map} from 'rxjs/operators';
 import {
   AfterViewInit,
   Component,
@@ -10,7 +14,6 @@ import {
 } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
-import { Observable } from "rxjs/Observable";
 import { ManualAComponent } from "./manual-components/manual-a.component";
 import { ManualLiComponent } from "./manual-components/manual-li.component";
 import { ManualUlComponent } from "./manual-components/manual-ul.component";
@@ -20,7 +23,6 @@ import { ManualSpanComponent } from "./manual-components/manual-span.component";
 import { ManualUtils } from "./manual-utils";
 import { ConfigService } from "../../shared/services/config.service";
 import { ManualPComponent } from "./manual-components/manual-p.component";
-import { Subject } from "rxjs/Subject";
 import { RouteService } from "../../shared/services/route.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 
@@ -91,17 +93,17 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
       this.routerPath = this.routeService.getAppRouteCurrent() + "/manual/";
     }
 
-    this.activatedRoute.url
-      .takeUntil(this.unsubscribe)
+    this.activatedRoute.url.pipe(
+      takeUntil(this.unsubscribe),
       // get configs
-      .flatMap(() => {
+      mergeMap(() => {
         if (this.assetsPath) {
-          return Observable.of(this.assetsPath);
+          return observableOf(this.assetsPath);
         }
         return this.configService.getManualPath();
-      })
-      .do(path => (this.assetsPath = path))
-      .flatMap(() => {
+      }),
+      tap(path => (this.assetsPath = path)),
+      mergeMap(() => {
         console.debug(
           "route changed",
           this.activatedRoute.snapshot.url,
@@ -116,15 +118,15 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
         // get the html file
         return this.getPage(this.assetsPath + this.currentPage);
-      })
+      }),
       // parse the html
-      .map(htmlString =>
+      map(htmlString =>
         new DOMParser().parseFromString(htmlString, "text/html")
-      )
+      ),
       // fix the links and image source addresses
-      .map(htmlDoc => this.rewrite(htmlDoc, this.currentPage))
+      map(htmlDoc => this.rewrite(htmlDoc, this.currentPage)),
       // show
-      .map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment))
+      map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment)),)
       .subscribe(null, err => this.restErrorService.showError("page change failed", err));
   }
 
@@ -335,15 +337,15 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
     return (
       this.http
-        .get(path, { responseType: "text" })
+        .get(path, { responseType: "text" }).pipe(
         // replace missing pages with nicer message
-        .catch(err => {
+        catchError(err => {
           if (err.status === 404) {
-            return Observable.of("<html><body>Page not found</body></html>");
+            return observableOf("<html><body>Page not found</body></html>");
           } else {
             throw err;
           }
-        })
+        }))
     );
   }
 

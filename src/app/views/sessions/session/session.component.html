@@ -1,36 +1,45 @@
-<div *ngIf="state !== ComponentState.READY && state !== ComponentState.NOT_FOUND" class="container-fluid">
-  {{state}}
+<div
+  *ngIf="state !== ComponentState.READY && state !== ComponentState.NOT_FOUND"
+  class="container-fluid"
+>
+  {{ state }}
 </div>
 
 <div *ngIf="state === ComponentState.NOT_FOUND" class="container-fluid">
   <h3 class="h3-xs">Session not found</h3>
-  <p>Go to <a [routerLink]="routeService.getRouterLinkSessions()">Sessions</a> to open an existing
-    session or to create a new one.</p>
+  <p>
+    Go to <a [routerLink]="routeService.getRouterLinkSessions()">Sessions</a> to
+    open an existing session or to create a new one.
+  </p>
 </div>
 
-
-<div *ngIf="state === ComponentState.READY" class="session-view container-fluid">
-
-  <split>
-
+<div
+  *ngIf="state === ComponentState.READY"
+  class="session-view container-fluid"
+>
+  <as-split>
     <!-- split 1 -->
-    <split-area [size]="split1Size" class="split-1 d-flex flex-column">
-
+    <as-split-area [size]="split1Size" class="split-1 d-flex flex-column">
       <!-- workflow and files -->
-      <ch-session-panel [sessionData]="sessionData" [modulesMap]="modulesMap" class="d-flex flex-column flex-grow-1">
+      <ch-session-panel
+        [sessionData]="sessionData"
+        [modulesMap]="modulesMap"
+        class="d-flex flex-column flex-grow-1"
+      >
       </ch-session-panel>
-
-    </split-area>
-
+    </as-split-area>
 
     <!-- split 2-->
-    <split-area id="myDiv" [size]="split2Size" class="split-2 scrollable">
+    <as-split-area id="myDiv" [size]="split2Size" class="split-2 scrollable">
       <div *ngIf="!split3Visible; else selectionPanel">
-
         <div class="row">
           <div class="col">
-            <ch-tools [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules"
-              [modulesMap]="modulesMap"></ch-tools>
+            <ch-tools
+              [sessionData]="sessionData"
+              [toolsArray]="tools"
+              [modulesArray]="modules"
+              [modulesMap]="modulesMap"
+            ></ch-tools>
           </div>
         </div>
 
@@ -38,37 +47,63 @@
           <div class="col">
             <!-- TODO refactor logic choosing whether to show job or file or session info -->
 
-            <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData" [tools]="tools">
+            <ch-job
+              *ngIf="selectionService.selectedJobs.length > 0"
+              [sessionData]="sessionData"
+              [tools]="tools"
+            >
             </ch-job>
 
             <ch-session-details
-              *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)"
-              [session]="sessionData.session" [sessionData]="sessionData" (deleteSession)="onDeleteSession($event)">
+              *ngIf="
+                selectionService.selectedDatasets.length < 1 &&
+                !(selectionService.selectedJobs.length > 0)
+              "
+              [session]="sessionData.session"
+              [sessionData]="sessionData"
+              (deleteSession)="onDeleteSession($event)"
+            >
             </ch-session-details>
 
-            <ch-file *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)"
-              [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap" [sessionData]="sessionData"
-              [tools]="tools" (doScrollFix)="doScrollFix()"></ch-file>
+            <ch-file
+              *ngIf="
+                selectionService.selectedDatasets.length > 0 &&
+                !(selectionService.selectedJobs.length > 0)
+              "
+              [dataset]="selectionService.selectedDatasets[0]"
+              [jobs]="sessionData.jobsMap"
+              [sessionData]="sessionData"
+              [tools]="tools"
+              (doScrollFix)="doScrollFix()"
+            ></ch-file>
           </div>
         </div>
       </div>
 
       <ng-template #selectionPanel>
-        <ch-selection-panel [sessionData]="sessionData" [tools]="tools"></ch-selection-panel>
+        <ch-selection-panel
+          [sessionData]="sessionData"
+          [tools]="tools"
+        ></ch-selection-panel>
       </ng-template>
-
-    </split-area>
-
+    </as-split-area>
 
     <!-- split 3-->
-    <split-area *ngIf="split3Visible" [size]="split3Size" class="split-3 scrollable">
+    <as-split-area
+      *ngIf="split3Visible"
+      [size]="split3Size"
+      class="split-3 scrollable"
+    >
       <div class="row">
         <div class="col">
-          <ch-tool-list-accordion [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules">
+          <ch-tool-list-accordion
+            [sessionData]="sessionData"
+            [toolsArray]="tools"
+            [modulesArray]="modules"
+          >
           </ch-tool-list-accordion>
         </div>
       </div>
-    </split-area>
-
-  </split>
+    </as-split-area>
+  </as-split>
 </div>

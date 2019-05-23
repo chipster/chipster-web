@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import {
   Dataset,
@@ -316,7 +318,7 @@ export class ToolService {
   }
 
   getManualPage(toolId: string) {
-    return this.configService.getManualToolPostfix().map(manualPostfix => {
+    return this.configService.getManualToolPostfix().pipe(map(manualPostfix => {
       if (toolId.endsWith(".java")) {
         // remove the java package name
         const splitted = toolId.split(".");
@@ -332,7 +334,7 @@ export class ToolService {
         }
       }
       return toolId;
-    });
+    }));
   }
 
   getDisplayName(obj: ToolParameter | ToolInput | Tool) {

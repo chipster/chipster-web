@@ -1,3 +1,5 @@
+
+import {filter, takeUntil, mergeMap, map} from 'rxjs/operators';
 import { DOCUMENT } from "@angular/common";
 import {
   Component,
@@ -14,8 +16,7 @@ import { Category, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject, combineLatest, of } from "rxjs";
-import { Subject } from "rxjs/Subject";
+import { BehaviorSubject, combineLatest, of ,  Subject } from "rxjs";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -315,8 +316,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private subscribeToToolEvents() {
     // subscribe to selected tool
     this.store
-      .select("selectedTool")
-      .takeUntil(this.unsubscribe)
+      .select("selectedTool").pipe(
+      takeUntil(this.unsubscribe))
       .subscribe((t: SelectedTool) => {
         this.selectedTool = t;
         this.runEnabled = false;
@@ -327,8 +328,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     combineLatest(
       this.store.select("selectedTool"),
       this.store.select("selectedDatasets")
-    )
-      .takeUntil(this.unsubscribe)
+    ).pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           this.store.dispatch({
@@ -358,9 +359,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // validate inputs
     this.store
-      .select("selectedToolWithInputs")
-      .filter(value => value !== null)
-      .map((toolWithInputs: SelectedToolWithInputs) => {
+      .select("selectedToolWithInputs").pipe(
+      filter(value => value !== null),
+      map((toolWithInputs: SelectedToolWithInputs) => {
         const inputsValid = this.toolSelectionService.validateInputs(
           toolWithInputs
         );
@@ -403,7 +404,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           },
           toolWithInputs
         );
-      })
+      }),)
       .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
@@ -413,15 +414,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // populate parameters after input bindings change (and have been validated)
     this.store
-      .select("selectedToolWithValidatedInputs")
-      .filter(value => value !== null)
-      .mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
+      .select("selectedToolWithValidatedInputs").pipe(
+      filter(value => value !== null),
+      mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
         // populate params is async, and returns the same tool with params populated
         // if there are no params, just return the same tool as observable
         return toolWithInputs.tool.parameters.length > 0
           ? this.toolSelectionService.populateParameters(toolWithInputs)
           : of(toolWithInputs);
-      })
+      }),)
       .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
@@ -432,11 +433,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // validate parameters after parameters changed (or populated)
     combineLatest(
       this.store
-        .select("selectedToolWithPopulatedParams")
-        .filter(value => value !== null),
+        .select("selectedToolWithPopulatedParams").pipe(
+        filter(value => value !== null)),
       this.parametersChanged$ // signals when user changes parameters
-    )
-      .map(([toolWithParamsAndValidatedInputs]) => {
+    ).pipe(
+      map(([toolWithParamsAndValidatedInputs]) => {
         const parameterValidations: Map<
           string,
           ParameterValidationResult
@@ -464,7 +465,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           },
           toolWithParamsAndValidatedInputs
         );
-      })
+      }))
       .subscribe((validatedTool: ValidatedTool) => {
         this.store.dispatch({
           type: SET_VALIDATED_TOOL,
@@ -483,8 +484,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private subscribeToJobEvents() {
     this.sessionEventService
-      .getJobStream()
-      .takeUntil(this.unsubscribe)
+      .getJobStream().pipe(
+      takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateJobs();

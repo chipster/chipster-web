@@ -1,3 +1,7 @@
+
+import {forkJoin as observableForkJoin,  Observable ,  forkJoin, of } from 'rxjs';
+
+import {map} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import {
   SelectedToolWithInputs,
@@ -5,10 +9,8 @@ import {
   ParameterValidationResult
 } from "./tools/ToolSelection";
 import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
-import { Observable } from "rxjs";
 import { ToolService } from "./tools/tool.service";
 import * as _ from "lodash";
-import { forkJoin, of } from "rxjs";
 import { SessionData } from "../../../model/session/session-data";
 import log from "loglevel";
 
@@ -148,9 +150,9 @@ export class ToolSelectionService {
           );
         }
       );
-      return forkJoin(populateParameterObservables).map(() => {
+      return forkJoin(populateParameterObservables).pipe(map(() => {
         return selectedToolWithInputs;
-      });
+      }));
     }
     return of(selectedToolWithInputs);
   }
@@ -195,9 +197,9 @@ export class ToolSelectionService {
           return of(parameter);
         }
 
-        return Observable.forkJoin(
+        return observableForkJoin(
           this.toolService.getDatasetHeaders(datasets)
-        ).map((datasetsHeaders: Array<Array<string>>) => {
+        ).pipe(map((datasetsHeaders: Array<Array<string>>) => {
           const columns = _.uniq(_.flatten(datasetsHeaders));
 
           parameter.selectionOptions = columns.map(function (column) {
@@ -205,7 +207,7 @@ export class ToolSelectionService {
           });
           this.setColumnSelectionParameterValueAfterPopulate(parameter);
           return parameter;
-        });
+        }));
       } else if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService

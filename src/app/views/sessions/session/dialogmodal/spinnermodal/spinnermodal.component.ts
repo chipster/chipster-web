@@ -1,7 +1,7 @@
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Component, Input, AfterViewInit, ViewChild} from "@angular/core";
 import {ErrorService} from "../../../../../core/errorhandler/error.service";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({

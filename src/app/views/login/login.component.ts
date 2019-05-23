@@ -1,3 +1,7 @@
+
+import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
+
+import {map, take} from 'rxjs/operators';
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormGroup } from "@angular/forms";
@@ -8,7 +12,6 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
-import { Observable } from "rxjs/Observable";
 import { ErrorService } from "../../core/errorhandler/error.service";
 @Component({
   selector: "ch-login",
@@ -80,10 +83,10 @@ export class LoginComponent implements OnInit {
 
   private continueInit() {
     // fetch everything that's needed
-    Observable.forkJoin(
+    observableForkJoin(
       this.configService.getPublicServices(),
-      this.routeService.getAppRoute$().take(1),
-      this.configService.get(ConfigService.KEY_APP_NAME).take(1)
+      this.routeService.getAppRoute$().pipe(take(1)),
+      this.configService.get(ConfigService.KEY_APP_NAME).pipe(take(1))
     ).subscribe(
       res => {
         const conf = res[0];
@@ -144,9 +147,9 @@ export class LoginComponent implements OnInit {
   }
 
   private getReturnUrl$() {
-    return this.route.queryParams.map(
+    return this.route.queryParams.pipe(map(
       params => params["returnUrl"] || "/sessions"
-    );
+    ));
   }
 
   private redirect() {

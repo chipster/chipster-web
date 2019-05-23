@@ -1,13 +1,15 @@
 import { Injectable } from "@angular/core";
 import { CanActivate, Router } from "@angular/router";
 import { AuthenticationService } from "../authentication/authentication-service";
-import { Observable } from "rxjs/Observable";
+import { Observable, forkJoin, of } from "rxjs";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { ActivatedRouteSnapshot } from "@angular/router";
 import { RouterStateSnapshot } from "@angular/router";
 import { TokenService } from "../authentication/token.service";
 import log from "loglevel";
+import { map, catchError } from "rxjs/operators";
+
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,7 +19,7 @@ export class AuthGuard implements CanActivate {
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private routeService: RouteService
-  ) {}
+  ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -31,14 +33,14 @@ export class AuthGuard implements CanActivate {
         this.authenticationService.getUser(),
         this.configService
           .getChipsterConfiguration()
-          .map(c => c[ConfigService.KEY_TERMS_OF_USE_AUTHS]),
+          .pipe(map(c => c[ConfigService.KEY_TERMS_OF_USE_AUTHS])),
         this.configService
           .getChipsterConfiguration()
-          .map(c => c[ConfigService.KEY_TERMS_OF_USE_VERSION])
+          .pipe(map(c => c[ConfigService.KEY_TERMS_OF_USE_VERSION]))
       ];
 
-      return Observable.forkJoin(observables)
-        .map(res => {
+      return forkJoin(observables)
+        .pipe(map(res => {
           const user = res[0];
           const askForAuths = res[1];
           const latestVersion = res[2];
@@ -69,22 +71,22 @@ export class AuthGuard implements CanActivate {
             this.routeService.navigateAbsolute("/terms");
             return false;
           }
-        })
-        .catch(e => {
-          if (e.status === 403) {
-            log.info("auth guard got 403, redirecting to login");
-          } else {
-            log.warn("error in auth guard, redirecting to login");
-          }
-          this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(
-            state.url
-          );
-          return Observable.of(false);
-        });
+        }),
+          catchError(e => {
+            if (e.status === 403) {
+              log.info("auth guard got 403, redirecting to login");
+            } else {
+              log.warn("error in auth guard, redirecting to login");
+            }
+            this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(
+              state.url
+            );
+            return of(false);
+          }));
     } else {
       this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
 
-      return Observable.of(false);
+      return of(false);
     }
   }
 }

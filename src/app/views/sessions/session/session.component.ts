@@ -1,46 +1,33 @@
-import { Component, OnDestroy, OnInit, HostListener } from "@angular/core";
-import {
-  ActivatedRoute,
-  Params,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot
-} from "@angular/router";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, ActivatedRouteSnapshot, Params, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import * as _ from "lodash";
-import { Observable } from "rxjs/Observable";
+import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
+import log from "loglevel";
+import { ToastrService } from "ngx-toastr";
+import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
+import 'rxjs/add/operator/mergeMap';
+import { fromPromise } from "rxjs/internal/observable/fromPromise";
+// New imports for rxjs v6
+import { catchError, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import {
-  Dataset,
-  Job,
-  Rule,
-  Tool,
-  Module,
-  Session,
-  EventType,
-  JobState,
-  SessionState
-} from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
+import { ConfigService } from "../../../shared/services/config.service";
 import { RouteService } from "../../../shared/services/route.service";
+import { SettingsService } from "../../../shared/services/settings.service";
+import { ToolsService } from "../../../shared/services/tools.service";
+import { UserService } from "../../../shared/services/user.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
+import { GetSessionDataService } from "./get-session-data.service";
 import { JobErrorModalComponent } from "./joberrormodal/joberrormodal.component";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
-import { Subject } from "rxjs/Subject";
-import log from "loglevel";
-import { SettingsService } from "../../../shared/services/settings.service";
-import { UserService } from "../../../shared/services/user.service";
 import { SessionService } from "./session.service";
-import { ToolsService } from "../../../shared/services/tools.service";
-import { forkJoin } from "rxjs";
-import { ConfigService } from "../../../shared/services/config.service";
-import { ToastrService } from "ngx-toastr";
-import { ErrorService } from "../../../core/errorhandler/error.service";
-import { GetSessionDataService } from "./get-session-data.service";
+
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -94,48 +81,48 @@ export class SessionComponent implements OnInit, OnDestroy {
     private toastrService: ToastrService,
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService
-  ) {}
+  ) { }
 
   ngOnInit() {
-    this.route.params
-      .mergeMap(params => {
+    this.route.params.pipe(
+      mergeMap(params => {
         /*
-	  Load session after every route change, not just once
-
-	  Also this component can be reused, e.g. when a user creates her own copy
-	  of an example session, she is directed to the new session.
-	   */
+    Load session after every route change, not just once
+    Also this component can be reused, e.g. when a user creates her own copy
+    of an example session, she is directed to the new session.
+     */
         this.state = ComponentState.LOADING_SESSION;
         this.selectionHandlerService.clearSelections();
         this.sessionData = null;
 
         const sessionId = params["sessionId"];
         return this.sessionResource
-          .getSession(sessionId)
-          .catch(err => {
-            // if session not found but sourceSession url param exists, go there
-            return this.trySourceSessionIfSessionNotFound(err); // either navigate and return empty observable or rethrow err
-          })
-          .mergeMap((session: Session) => {
-            this.removeSourceSessionParamIfRegularSession(session); // may redirecto to session url without the query param
+          .getSession(sessionId).pipe(
+            catchError(err => {
+              // if session not found but sourceSession url param exists, go there
+              return this.trySourceSessionIfSessionNotFound(err); // either navigate and return empty observable or rethrow err
+            }),
+            mergeMap((session: Session) => {
+              this.removeSourceSessionParamIfRegularSession(session); // may redirecto to session url without the query param
 
-            const sessionData$ = this.getSessionData(session.sessionId);
-            const tools$ = this.toolsService.getTools();
-            const modules$ = this.toolsService.getModules();
-            const modulesMap$ = this.toolsService.getModulesMap();
-            const exampleSessionOwner$ = this.configService.get(
-              ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID
-            );
+              const sessionData$ = this.getSessionData(session.sessionId);
+              const tools$ = this.toolsService.getTools();
+              const modules$ = this.toolsService.getModules();
+              const modulesMap$ = this.toolsService.getModulesMap();
+              const exampleSessionOwner$ = this.configService.get(
+                ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID
+              );
 
-            return forkJoin(
-              sessionData$,
-              tools$,
-              modules$,
-              modulesMap$,
-              exampleSessionOwner$
-            );
-          });
-      })
+              return forkJoin(
+                sessionData$,
+                tools$,
+                modules$,
+                modulesMap$,
+                exampleSessionOwner$
+              );
+            }),
+          );
+      }))
       .subscribe(
         results => {
           // save loaded stuff
@@ -164,7 +151,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       );
 
     // subscribe to view settings
-    this.settingsService.showToolsPanel$.takeUntil(this.unsubscribe).subscribe(
+    this.settingsService.showToolsPanel$.pipe(takeUntil(this.unsubscribe)).subscribe(
       (showToolsPanel: boolean) => {
         if (showToolsPanel) {
           this.split3Visible = true;
@@ -205,7 +192,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       nextState.url &&
       nextState.url === this.routeService.getRouterLinkAnalyze()
     ) {
-      return Observable.of(false);
+      return of(false);
     }
 
     /*
@@ -215,12 +202,12 @@ export class SessionComponent implements OnInit, OnDestroy {
     event about the deleted rule and deletes that rule from the sessionData.
     */
     if (this.state === ComponentState.DELETING_SESSION) {
-      return Observable.of(true);
+      return of(true);
     }
 
     // session has been deleted already, also avoid null problems in later checks
     if (!this.sessionData) {
-      return Observable.of(true);
+      return of(true);
     }
 
     // no access anymore
@@ -228,7 +215,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       this.sessionDataService.getApplicableRules(this.sessionData.session.rules)
         .length < 1
     ) {
-      return Observable.of(true);
+      return of(true);
     }
 
     // temp session, no changes --> delete
@@ -242,7 +229,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     }
 
     // normal case, no actions needed
-    return Observable.of(true);
+    return of(true);
   }
 
   subscribeToEvents() {
@@ -265,8 +252,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     // rule stream
     this.sessionEventService
-      .getRuleStream()
-      .takeUntil(this.unsubscribe)
+      .getRuleStream().pipe(takeUntil(this.unsubscribe))
       .subscribe(change => {
         const rule: Rule = <Rule>change.oldValue;
 
@@ -285,8 +271,8 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     // job stream
     this.sessionEventService
-      .getJobStream()
-      .takeUntil(this.unsubscribe)
+      .getJobStream().pipe(takeUntil(this.unsubscribe))
+
       .subscribe(
         change => {
           const event = change.event;
@@ -367,7 +353,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   private getSessionData(sessionId: string) {
     return this.sessionResource.loadSession(sessionId).flatMap(sessionData => {
       if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
-        return Observable.of(sessionData);
+        return of(sessionData);
       } else {
         log.info("read-only sesssion, create copy");
         return this.sessionResource
@@ -375,13 +361,13 @@ export class SessionComponent implements OnInit, OnDestroy {
           .flatMap(id => {
             const queryParams = {};
             queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
-            return Observable.fromPromise(
+            return fromPromise(
               this.routeService.navigateAbsolute("/analyze/" + id, {
                 queryParams: queryParams
               })
             );
           })
-          .flatMap(() => Observable.never());
+          .flatMap(() => NEVER);
       }
     });
   }
@@ -395,8 +381,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     // the user doesn't need to be notified that the session is deleted
     this.sessionEventService.unsubscribe();
     return this.sessionDataService
-      .deletePersonalRules(this.sessionData.session)
-      .map(() => true);
+      .deletePersonalRules(this.sessionData.session).pipe(map(() => true));
   }
 
   /**
@@ -426,31 +411,32 @@ export class SessionComponent implements OnInit, OnDestroy {
       .openTempCopyModal(
         "Save changes?",
         "<p>" +
-          this.getKeepDialogFirstParagraph() +
-          "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
+        this.getKeepDialogFirstParagraph() +
+        "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
         this.sessionData.session.name,
         keepButton,
         deleteButton
       )
-      .flatMap(dialogResult => {
-        if (dialogResult.button === keepButton) {
-          this.sessionData.session.name = dialogResult.value;
-          this.sessionData.session.state = SessionState.Ready;
-          return this.sessionService
-            .updateSession(this.sessionData.session)
-            .map(() => true);
-        } else if (dialogResult.button === deleteButton) {
-          return this.deleteTempSession();
-        }
-      })
-      .catch(err => {
-        if (err === undefined || err === 0 || err === 1) {
-          // dialog cancel, backdrop click or esc
-          return Observable.of(false);
-        } else {
-          throw err;
-        }
-      });
+      .pipe(
+        mergeMap(dialogResult => {
+          if (dialogResult.button === keepButton) {
+            this.sessionData.session.name = dialogResult.value;
+            this.sessionData.session.state = SessionState.Ready;
+            return this.sessionService
+              .updateSession(this.sessionData.session).pipe(map(() => true));
+          } else if (dialogResult.button === deleteButton) {
+            return this.deleteTempSession();
+          }
+        }),
+        catchError(err => {
+          if (err === undefined || err === 0 || err === 1) {
+            // dialog cancel, backdrop click or esc
+            return of(false);
+          } else {
+            throw err;
+          }
+        })
+      );
   }
 
   private getKeepDialogFirstParagraph(): string {
@@ -483,7 +469,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       if (sourceSessionId) {
         log.info("session not found, going to source session", sourceSessionId);
         this.routeService.navigateAbsolute("/analyze/" + sourceSessionId);
-        return Observable.empty();
+        return EMPTY;
       }
     }
     throw error;

@@ -1,8 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
-import { Observable } from "rxjs/Observable";
+import { forkJoin, Observable } from "rxjs";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
@@ -31,7 +30,7 @@ export class SessionPanelComponent {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private restErrorService: RestErrorService
-  ) {} // used by template
+  ) { } // used by template
 
   search(value: any) {
     this.datasetSearch = value;
@@ -84,8 +83,8 @@ export class SessionPanelComponent {
       }
     });
 
-    Observable.forkJoin(updates).subscribe(
-      () => log.info(updates.length + " datasets updated"),
+    forkJoin(updates).subscribe(
+      () => console.log(updates.length + " datasets updated"),
       err => this.restErrorService.showError("layout update failed", err)
     );
   }

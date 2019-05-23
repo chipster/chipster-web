@@ -1,18 +1,1 @@
-<div *ngIf="!state.isReady(); then statusTemplate"></div>
-
-<div>
-  <div *ngIf="state.isReady()" class="row" id="genome-setting">
-    <label for="selectGenome" class="sm-text">Select Genome</label>
-    <select class="form-control" id="selectGenome" [(ngModel)]="selectedGenomeID" (ngModelChange)="setGenome($event)">
-      <option *ngFor="let genome of genomeList" [ngValue]="genome.genomeID">{{genome.genomeID}}</option>
-    </select>
-  </div>
-
-  <div class="row">
-    <iframe #iframe style="width: 100%; height: 900px;margin: 15px;"></iframe>
-  </div>
-</div>
-
-<ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
-</ng-template>
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
