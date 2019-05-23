@@ -1,21 +1,12 @@
 import { Injectable } from "@angular/core";
-<<<<<<< HEAD
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
-=======
-import { CanActivate } from "@angular/router";
-import { RouteService } from "../../shared/services/route.service";
-import { ActivatedRouteSnapshot } from "@angular/router";
-import { RouterStateSnapshot } from "@angular/router";
-import { Observable, of } from "rxjs";
-import { SessionResource } from "../../shared/resources/session.resource";
->>>>>>> 6797bde6db4f4965db655a441a90a8706d6a6995
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
-import { Observable } from "rxjs/Observable";
+import { Observable, of } from "rxjs";
+import { map } from "rxjs/operators";
 import { SessionResource } from "../../shared/resources/session.resource";
 import { RouteService } from "../../shared/services/route.service";
 import { UserService } from "../../shared/services/user.service";
-import { map } from "rxjs/operators";
 
 /**
  * Redirect to latest session or new session if no latest found.
