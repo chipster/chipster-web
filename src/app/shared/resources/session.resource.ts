@@ -17,7 +17,7 @@ export class SessionResource {
     private configService: ConfigService,
     private http: HttpClient,
     private tokenService: TokenService
-  ) {}
+  ) { }
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
@@ -125,13 +125,11 @@ export class SessionResource {
       mergeMap(typeServiceUrl => {
         return this.http.get(
           typeServiceUrl +
-            "/sessions/" +
-            sessionId +
-            "/datasets/" +
-            dataset.datasetId,
-          // { headers: headers, withCredentials: true }
-
-          { headers: headers }
+          "/sessions/" +
+          sessionId +
+          "/datasets/" +
+          dataset.datasetId,
+          { headers: headers, withCredentials: true }
         );
       }),
       map(typesObj => {
@@ -148,8 +146,7 @@ export class SessionResource {
       mergeMap(typeServiceUrl => {
         return this.http.get(
           typeServiceUrl + "/sessions/" + sessionId,
-          // { headers: headers, withCredentials: true }
-          { headers: headers }
+          { headers: headers, withCredentials: true }
         );
       }),
       map(typesObj => {
