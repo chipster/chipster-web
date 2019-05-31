@@ -1,18 +1,19 @@
-
-import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
-
-import {map, take} from 'rxjs/operators';
-import { AuthenticationService } from "../../core/authentication/authentication-service";
-import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { HttpErrorResponse } from "@angular/common/http";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { HttpErrorResponse } from "@angular/common/http";
-import { ConfigService } from "../../shared/services/config.service";
-import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
+import { forkJoin as observableForkJoin } from "rxjs";
+import { map, take } from "rxjs/operators";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
+import { OidcService } from "../../core/authentication/oidc.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { ConfigService } from "../../shared/services/config.service";
+import { RouteService } from "../../shared/services/route.service";
+import { OidcConfig } from "./oidc-config";
+
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
 
   @ViewChild("usernameInput")
   private usernameInput: ElementRef;
+  oidcConfigs: OidcConfig[];
 
   constructor(
     private route: ActivatedRoute,
@@ -43,42 +45,46 @@ export class LoginComponent implements OnInit {
     private routeService: RouteService,
     private tokenService: TokenService,
     private errorService: ErrorService,
+    private oidcService: OidcService
   ) {}
 
   ngOnInit() {
     // return url is needed in all cases, so start with it
-    this.getReturnUrl$().subscribe(url => {
-      this.returnUrl = url;
+    this.getReturnUrl$().subscribe(
+      url => {
+        this.returnUrl = url;
 
-      // if already logged in -> redirect
-      if (this.tokenService.isLoggedIn()) {
-        // check also from server that token is actually valid
-        this.authenticationService.checkToken().subscribe(
-          (tokenValid: boolean) => {
-            if (tokenValid) {
-              // existing token is valid, continue
-              this.redirect();
-            } else {
-              // local token exists, but server says it is not valid, clear and continue
-              log.info("auth says token is invalid, clearing local token");
-              this.tokenService.clear();
-              this.continueInit();
+        // if already logged in -> redirect
+        if (this.tokenService.isLoggedIn()) {
+          // check also from server that token is actually valid
+          this.authenticationService.checkToken().subscribe(
+            (tokenValid: boolean) => {
+              if (tokenValid) {
+                // existing token is valid, continue
+                this.redirect();
+              } else {
+                // local token exists, but server says it is not valid, clear and continue
+                log.info("auth says token is invalid, clearing local token");
+                this.tokenService.clear();
+                this.continueInit();
+              }
+            },
+            error => {
+              log.warn("checking token failed", error);
+              this.initFailed = true;
+              this.restErrorService.showError(
+                "Initializing login page failed",
+                error
+              );
             }
-          },
-          error => {
-            log.warn("checking token failed", error);
-            this.initFailed = true;
-            this.restErrorService.showError(
-              "Initializing login page failed",
-              error
-            );
-          }
-        );
-      } else {
-        // no local token -> continue
-        this.continueInit();
-      }
-    }, err => this.errorService.showError("failed to get the return url", err));
+          );
+        } else {
+          // no local token -> continue
+          this.continueInit();
+        }
+      },
+      err => this.errorService.showError("failed to get the return url", err)
+    );
   }
 
   private continueInit() {
@@ -128,12 +134,19 @@ export class LoginComponent implements OnInit {
               encodeURIComponent(afterIdpUrl);
           });
 
-        // everything ready, show login
-        this.show = true;
-        // allow Angular to create the element first
-        setTimeout(() => {
-          this.usernameInput.nativeElement.focus();
-        }, 0);
+        this.oidcService.getOidcConfigs$().subscribe(
+          configs => {
+            this.oidcConfigs = configs;
+
+            // everything ready, show login
+            this.show = true;
+            // allow Angular to create the element first
+            setTimeout(() => {
+              this.usernameInput.nativeElement.focus();
+            }, 0);
+          },
+          err => this.restErrorService.showError("oidc config error", err)
+        );
       },
       error => {
         this.restErrorService.showError(
@@ -147,9 +160,9 @@ export class LoginComponent implements OnInit {
   }
 
   private getReturnUrl$() {
-    return this.route.queryParams.pipe(map(
-      params => params["returnUrl"] || "/sessions"
-    ));
+    return this.route.queryParams.pipe(
+      map(params => params["returnUrl"] || "/sessions")
+    );
   }
 
   private redirect() {
@@ -189,5 +202,13 @@ export class LoginComponent implements OnInit {
         this.error = "Please enter password";
       }
     }
+  }
+
+  getOidcConfigs() {
+    return this.oidcConfigs;
+  }
+
+  oidcLogin(oidc: OidcConfig) {
+    this.oidcService.startAuthentication(this.returnUrl, oidc);
   }
 }

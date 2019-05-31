@@ -1,35 +1,74 @@
 <div *ngIf="!show && !initFailed">Initializing login...</div>
 
 <div class="col-md-4 offset-md-4 margin-top" id="login" *ngIf="show">
+  <h1 class="text-center h1-xs">Log in to {{ appName }}</h1>
+
+  <br />
+  <div *ngFor="let oidc of getOidcConfigs()">
+    <a href="{{ ssoLoginUrl }}"> </a>
+    <button class="btn btn-light btn-oidc" (click)="oidcLogin(oidc)">
+      <img
+        *ngIf="oidc.logo"
+        src="{{ oidc.logo }}"
+        width="300"
+        alt="{{ oidc.oidcName }} login"
+      />
+      <span *ngIf="!oidc.logo"> Sign in with {{ oidc.oidcName }} </span>
+    </button>
+    <br />
+    <br />
+  </div>
+
+  <br />
 
   <div class="alert alert-warning" *ngIf="error">
     <strong>Login failed</strong>
-    <p>{{error}}</p>
+    <p>{{ error }}</p>
   </div>
-
-  <h4 class="text-center">Log in to {{appName}}</h4>
 
   <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
     <div class="form-group">
-      <label for="username">Username</label>
-      <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput/>
+      <label for="username">Chipster username</label>
+      <input
+        class="form-control"
+        id="username"
+        required
+        ngModel
+        name="username"
+        #name="ngModel"
+        #usernameInput
+      />
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input id="password" type="password" class="form-control" ngModel name="password" #name="ngModel" required />
+      <input
+        id="password"
+        type="password"
+        class="form-control"
+        ngModel
+        name="password"
+        #name="ngModel"
+        required
+      />
     </div>
     <div class="form-actions text-center margin-top">
-      <button class="btn btn-primary" type="button" (click)="login()" [disabled]="myForm.invalid">Log In</button>
+      <button
+        class="btn btn-primary btn-login"
+        type="button"
+        (click)="login()"
+        [disabled]="myForm.invalid"
+      >
+        Log In
+      </button>
     </div>
   </form>
 
   <div *ngIf="ssoLoginUrl">
-    <br>
-    <br>
-    <br>
-    <a href="{{ssoLoginUrl}}">
-      <img src="/assets/Haka_login_vaaka.jpg" width="350" alt="[Haka Login]">
+    <br />
+    <br />
+    <br />
+    <a href="{{ ssoLoginUrl }}">
+      <img src="/assets/Haka_login_vaaka.jpg" width="350" alt="[Haka Login]" />
     </a>
   </div>
-
 </div>

@@ -20,13 +20,20 @@ import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
-import { selectedTool, selectedToolWithInputs, selectedToolWithPopulatedParams, selectedToolWithValidatedInputs, validatedTool } from "./state/tool.reducer";
+import {
+  selectedTool,
+  selectedToolWithInputs,
+  selectedToolWithPopulatedParams,
+  selectedToolWithValidatedInputs,
+  validatedTool
+} from "./state/tool.reducer";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { HomeComponent } from "./views/home/home.component";
 import { LoginComponent } from "./views/login/login.component";
+import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
 import { ManualModule } from "./views/manual/manual.module";
 import { NavigationComponent } from "./views/navigation/navigation.component";
 import { SelectionService } from "./views/sessions/session/selection.service";
@@ -66,6 +73,7 @@ import { TermsComponent } from "./views/terms/terms.component";
   declarations: [
     NavigationComponent,
     LoginComponent,
+    OidcCallbackComponent,
     HomeComponent,
     AppComponent,
     ErrorComponent,
