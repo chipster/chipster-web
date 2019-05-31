@@ -1,16 +1,20 @@
-
-import { of as observableOf, Observable, BehaviorSubject } from 'rxjs';
-
-import { catchError, map, mergeMap, tap, publishReplay, refCount } from 'rxjs/operators';
-import { ConfigService } from "../../shared/services/config.service";
-import { Injectable } from "@angular/core";
-import { TokenService } from "./token.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Token } from "chipster-js-common";
-import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
-import { RestErrorService } from "../errorhandler/rest-error.service";
-import { User } from "chipster-js-common";
+import { Injectable } from "@angular/core";
+import { Token, User } from "chipster-js-common";
 import log from "loglevel";
+import { Observable, of as observableOf } from "rxjs";
+import {
+  catchError,
+  map,
+  mergeMap,
+  publishReplay,
+  refCount,
+  tap
+} from "rxjs/operators";
+import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
+import { ConfigService } from "../../shared/services/config.service";
+import { RestErrorService } from "../errorhandler/rest-error.service";
+import { TokenService } from "./token.service";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
@@ -18,7 +22,7 @@ const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 export class AuthenticationService {
   private tokenRefreshSchedulerId: number;
 
-  private user$: BehaviorSubject<any>;
+  private user$: Observable<User>;
 
   constructor(
     private configService: ConfigService,
@@ -32,28 +36,22 @@ export class AuthenticationService {
 
   init() {
     // Need to check after code change
-    this.user$ = this.configService
-      .getAuthUrl().pipe(
-        tap(x => log.debug("auth url", x)),
-        mergeMap(authUrl => {
-          const userId = encodeURIComponent(this.tokenService.getUsername());
-          const url = `${authUrl}/users/${userId}`;
-
-          return <Observable<User>>this.authHttpClient.getAuth(url);
-        }),
-        tap(x => log.debug("user", x)),
-        publishReplay(1),
-        refCount());
+    this.user$ = this.getUser().pipe(
+      publishReplay(1),
+      refCount()
+    );
   }
 
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
     this.tokenService.setAuthToken(null, null, null, null, null);
-    return this.requestToken(username, password).pipe(map((response: Token) => {
-      this.saveToken(response);
-      this.scheduleTokenRefresh();
-    }));
+    return this.requestToken(username, password).pipe(
+      map((response: Token) => {
+        this.saveToken(response);
+        this.scheduleTokenRefresh();
+      })
+    );
   }
 
   logout(): void {
@@ -63,24 +61,24 @@ export class AuthenticationService {
 
   requestToken(username: string, password: string): Observable<any> {
     log.info("request token");
-    return this.configService
-      .getAuthUrl().pipe(
-        tap(url => log.info("url", url)),
-        mergeMap(authUrl => {
-          const url = `${authUrl}/tokens`;
-          const encodedString = btoa(`${username}:${password}`); // base64 encoding
+    return this.configService.getAuthUrl().pipe(
+      tap(url => log.info("url", url)),
+      mergeMap(authUrl => {
+        const url = `${authUrl}/tokens`;
+        const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-          return this.httpClient.post<Token>(
-            url,
-            {},
-            {
-              headers: new HttpHeaders().set(
-                "Authorization",
-                `Basic ${encodedString}`
-              )
-            }
-          );
-        }));
+        return this.httpClient.post<Token>(
+          url,
+          {},
+          {
+            headers: new HttpHeaders().set(
+              "Authorization",
+              `Basic ${encodedString}`
+            )
+          }
+        );
+      })
+    );
   }
 
   refreshToken() {
@@ -151,7 +149,8 @@ export class AuthenticationService {
               `Basic ${encodedString}`
             )
           }
-        ).pipe(
+        )
+        .pipe(
           map((response: Token) => {
             this.saveToken(response);
             return observableOf(true);
@@ -165,7 +164,8 @@ export class AuthenticationService {
               // for now, throw others
               throw error;
             }
-          }));
+          })
+        );
     });
   }
 
@@ -180,43 +180,45 @@ export class AuthenticationService {
     window.clearInterval(this.tokenRefreshSchedulerId);
   }
 
-  // Not very sure, is it the right way..
   getUser(): Observable<User> {
-    this.user$ = this.configService.getAuthUrl().flatMap(authUrl => {
-      const userId = encodeURIComponent(this.tokenService.getUsername());
-      const url = `${authUrl}/users/${userId}`;
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => {
+        const userId = encodeURIComponent(this.tokenService.getUsername());
+        const url = `${authUrl}/users/${userId}`;
 
-      return <Observable<User>>this.authHttpClient.getAuth(url);
-    });
-    return this.user$;
+        return <Observable<User>>this.authHttpClient.getAuth(url);
+      })
+    );
   }
 
   getUsersDisplayName$() {
-    return this.tokenService
-      .getUsername$().pipe(
-        mergeMap(userId => {
-          return this.getUser().pipe(catchError(err => {
+    return this.tokenService.getUsername$().pipe(
+      mergeMap(userId => {
+        return this.getUser().pipe(
+          catchError(err => {
             log.info("failed to get the user details", err);
             // An error message from this request would be confusing, because the user didn't ask for it.
             // Most likely the authentication has expired, but the user will notice it soon anyway.
             return observableOf({ name: userId });
-          }));
-        }),
-        map(user => user.name));
+          })
+        );
+      }),
+      map(user => user.name)
+    );
   }
 
   getUsers(): Observable<User[]> {
-    return this.configService
-      .getAuthUrl()
-      .flatMap(authUrl => {
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => {
         const url = `${authUrl}/users`;
 
         return <Observable<User[]>>this.authHttpClient.getAuth(url);
-      })
-      .catch(err => {
+      }),
+      catchError(err => {
         this.restErrorService.showError("failed to get users", err);
         throw err;
-      });
+      })
+    );
   }
 
   updateUser(user: User): Observable<any> {
@@ -228,7 +230,7 @@ export class AuthenticationService {
     });
   }
 
-  private saveToken(token: Token) {
+  saveToken(token: Token) {
     const roles = JSON.parse(token.rolesJson);
     this.tokenService.setAuthToken(
       token.tokenKey,
