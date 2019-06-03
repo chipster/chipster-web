@@ -1,16 +1,24 @@
-
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
-import { forkJoin as observableForkJoin, Observable } from 'rxjs';
-import { distinctUntilChanged, map, mergeMap, publishReplay, refCount, shareReplay, take } from 'rxjs/operators';
+import { forkJoin as observableForkJoin, Observable } from "rxjs";
+import {
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  publishReplay,
+  refCount,
+  shareReplay,
+  take
+} from "rxjs/operators";
 import { ConfigurationResource } from "../resources/configurationresource";
 import { RouteService } from "./route.service";
 
-
 @Injectable()
 export class ConfigService {
+  public static readonly OIDC_CALLBACK_APP_ROUTE = "auth";
+
   public static readonly KEY_CUSTOM_CSS = "custom-css";
   public static readonly KEY_FAVICON = "favicon";
   public static readonly KEY_APP_NAME = "app-name";
@@ -33,44 +41,49 @@ export class ConfigService {
     private configurationResource: ConfigurationResource,
     private router: Router,
     private routeService: RouteService
-  ) { }
+  ) {}
 
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {
       this.chipsterConf$ = this.configurationResource
-        .getConfiguration("chipster.yaml").pipe(
+        .getConfiguration("chipster.yaml")
+        .pipe(
           publishReplay(1),
-          refCount());
+          refCount()
+        );
     }
     return this.chipsterConf$;
   }
 
   getConfiguration(): Observable<any> {
     if (!this.conf$) {
-      this.conf$ = this.routeService
-        .getAppRoute$().pipe(
-          distinctUntilChanged(),
-          mergeMap((appRoute: string) => {
-            if (appRoute === "" || appRoute === "chipster") {
-              return this.getChipsterConfiguration();
-            }
-            // don't allow relative paths or anything else weird
-            if (!RegExp("^\\w+$").test(appRoute) || appRoute.length > 16) {
-              throw Error(
-                "illegal app route (max 16 alphanumerics allowed): " + appRoute
-              );
-            }
+      this.conf$ = this.routeService.getAppRoute$().pipe(
+        distinctUntilChanged(),
+        mergeMap((appRoute: string) => {
+          // "auth" for oidc callbacks, it will fix the appRoute soon
+          if (appRoute === "" || appRoute === "chipster") {
+            return this.getChipsterConfiguration();
+          }
+          // don't allow relative paths or anything else weird
+          if (!RegExp("^\\w+$").test(appRoute) || appRoute.length > 16) {
+            throw Error(
+              "illegal app route (max 16 alphanumerics allowed): " + appRoute
+            );
+          }
 
-            return observableForkJoin([
-              this.getChipsterConfiguration(),
-              this.configurationResource.getConfiguration(appRoute + ".yaml")
-            ]).pipe(map(confs => {
+          return observableForkJoin([
+            this.getChipsterConfiguration(),
+            this.configurationResource.getConfiguration(appRoute + ".yaml")
+          ]).pipe(
+            map(confs => {
               // get all properties from the chipster.yaml and override with the appRoute file
               return Object.assign(confs[0], confs[1]);
-            }));
-          }),
-          shareReplay(1),
-          take(1));
+            })
+          );
+        }),
+        shareReplay(1),
+        take(1)
+      );
     }
     return this.conf$;
   }
@@ -80,7 +93,8 @@ export class ConfigService {
       this.publicServices$ = this.getChipsterConfiguration().pipe(
         mergeMap(conf => this.configurationResource.getPublicServices(conf)),
         publishReplay(1),
-        refCount());
+        refCount()
+      );
     }
     return this.publicServices$;
   }
@@ -91,13 +105,14 @@ export class ConfigService {
         this.configurationResource.getInternalServices(conf, token)
       ),
       publishReplay(1),
-      refCount());
+      refCount()
+    );
   }
 
   getInternalService(role: string, token: string): Observable<Service> {
-    return this.getInternalServices(token).pipe(map(services =>
-      this.getFirstByRole(role, services)
-    ));
+    return this.getInternalServices(token).pipe(
+      map(services => this.getFirstByRole(role, services))
+    );
   }
 
   getAuthUrl(): any {
@@ -137,11 +152,15 @@ export class ConfigService {
   }
 
   getManualToolPostfix(): Observable<string> {
-    return this.getConfiguration().pipe(map(conf => conf["manual-tool-postfix"]));
+    return this.getConfiguration().pipe(
+      map(conf => conf["manual-tool-postfix"])
+    );
   }
 
   getManualRouterPath(): Observable<string> {
-    return this.getConfiguration().pipe(map(conf => conf["manual-router-path"]));
+    return this.getConfiguration().pipe(
+      map(conf => conf["manual-router-path"])
+    );
   }
 
   get(key: string): Observable<string> {
@@ -150,7 +169,8 @@ export class ConfigService {
       map(conf => {
         log.debug("get conf key", key, conf);
         return conf[key];
-      }));
+      })
+    );
   }
 
   getFirstByRole(role: string, services: Service[]): Service {
@@ -160,6 +180,7 @@ export class ConfigService {
   getPublicUri(role: string) {
     return this.getPublicServices().pipe(
       map(services => this.getFirstByRole(role, services)),
-      map(s => s.publicUri));
+      map(s => s.publicUri)
+    );
   }
 }

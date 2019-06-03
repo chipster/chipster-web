@@ -1,11 +1,11 @@
-
-import {shareReplay, filter, map, take} from 'rxjs/operators';
-import { Router, ActivatedRoute } from "@angular/router";
 import { Injectable } from "@angular/core";
-import { ErrorService } from "../../core/errorhandler/error.service";
-import { NavigationEnd } from "@angular/router";
-import { Observable } from "rxjs";
+import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import log from "loglevel";
+import { Observable } from "rxjs";
+import { filter, map, shareReplay, take } from "rxjs/operators";
+import { OidcService } from "../../core/authentication/oidc.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
+import { ConfigService } from "./config.service";
 
 @Injectable()
 export class RouteService {
@@ -101,11 +101,10 @@ export class RouteService {
    * Convert app url to host url asynchronously using the first non-empty app route
    */
   getRouterLink$(appUrl: string): Observable<string> {
-    return (
-      this.getAppRoute$().pipe(
-        map(appRoute => this.buildRouterLink(appRoute, appUrl)),
-        // complete after the first result to allow use in forkJoin
-        take(1),)
+    return this.getAppRoute$().pipe(
+      map(appRoute => this.buildRouterLink(appRoute, appUrl)),
+      // complete after the first result to allow use in forkJoin
+      take(1)
     );
   }
 
@@ -148,6 +147,9 @@ export class RouteService {
   getAppRouteOfUrl(url: string): string {
     // get the app name fron the current route
     let appRoute = url.split("/")[1];
+    if (appRoute === ConfigService.OIDC_CALLBACK_APP_ROUTE) {
+      return localStorage.getItem(OidcService.keyAppRoute);
+    }
     if (appRoute == null) {
       if (this.backupAppName) {
         appRoute = this.backupAppName;
@@ -179,7 +181,8 @@ export class RouteService {
         filter((e: NavigationEnd) => !!e.urlAfterRedirects),
         filter((e: NavigationEnd) => e.urlAfterRedirects !== ""),
         map((e: NavigationEnd) => this.getAppRouteOfUrl(e.urlAfterRedirects)),
-        shareReplay(1),); // send the last value even without the route change
+        shareReplay(1)
+      ); // send the last value even without the route change
     }
     return this.appRoute$;
   }
