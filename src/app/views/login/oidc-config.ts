@@ -2,7 +2,8 @@ export class OidcConfig {
   oidcName: string;
   issuer: string;
   clientId: string;
-  redirectUri: string;
+  redirectPath: string;
   responseType: string;
   logo: string;
+  text: string;
 }
