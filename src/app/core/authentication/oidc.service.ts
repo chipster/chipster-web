@@ -5,6 +5,7 @@ import log from "loglevel";
 import { UserManager } from "oidc-client";
 import { from, Observable } from "rxjs";
 import { mergeMap, share, tap } from "rxjs/operators";
+import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "../../views/login/oidc-config";
 import { RestErrorService } from "../errorhandler/rest-error.service";
@@ -12,8 +13,6 @@ import { AuthenticationService } from "./authentication-service";
 
 @Injectable()
 export class OidcService {
-  static readonly keyAppRoute = "oidcAppRoute";
-
   readonly keyReturnUrl = "oidcReturnUrl";
   readonly keyOidcName = "oidcName";
 
@@ -24,31 +23,31 @@ export class OidcService {
     private authenticationService: AuthenticationService,
     private httpClient: HttpClient,
     private restErrorService: RestErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private configService: ConfigService
   ) {
     this.init();
   }
 
   init() {
-    this.oidcConfigs$ = this.httpClient
-      .get("http://localhost:8002/oidc/configs")
-      .pipe(
-        tap((configs: OidcConfig[]) => {
-          configs.forEach(oidc => {
-            const manager = new UserManager({
-              authority: oidc.issuer,
-              client_id: oidc.clientId,
-              redirect_uri: oidc.redirectUri,
-              response_type: oidc.responseType,
-              scope: "openid profile email",
-              filterProtocolClaims: true,
-              loadUserInfo: false
-            });
-            this.managers.set(oidc.oidcName, manager);
+    this.oidcConfigs$ = this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => this.httpClient.get(authUrl + "/oidc/configs")),
+      tap((configs: OidcConfig[]) => {
+        configs.forEach(oidc => {
+          const manager = new UserManager({
+            authority: oidc.issuer,
+            client_id: oidc.clientId,
+            redirect_uri: window.location.origin + oidc.redirectPath,
+            response_type: oidc.responseType,
+            scope: "openid profile email",
+            filterProtocolClaims: true,
+            loadUserInfo: false
           });
-        }),
-        share()
-      );
+          this.managers.set(oidc.oidcName, manager);
+        });
+      }),
+      share()
+    );
   }
 
   startAuthentication(returnUrl: string, oidcConfig: OidcConfig) {
@@ -65,7 +64,7 @@ export class OidcService {
     localStorage.setItem(this.keyReturnUrl, returnUrl);
     localStorage.setItem(this.keyOidcName, oidcConfig.oidcName);
     localStorage.setItem(
-      OidcService.keyAppRoute,
+      RouteService.keyAppRoute,
       this.routeService.getAppRouteCurrent()
     );
 
@@ -82,10 +81,10 @@ export class OidcService {
   completeAuthentication() {
     const returnUrl = localStorage.getItem(this.keyReturnUrl);
     const oidcName = localStorage.getItem(this.keyOidcName);
-    const appRoute = localStorage.getItem(OidcService.keyAppRoute);
+    const appRoute = localStorage.getItem(RouteService.keyAppRoute);
     localStorage.removeItem(this.keyReturnUrl);
     localStorage.removeItem(this.keyOidcName);
-    localStorage.removeItem(OidcService.keyAppRoute);
+    localStorage.removeItem(RouteService.keyAppRoute);
 
     log.info(
       "complete oidc login: returnUrl:",
@@ -117,16 +116,17 @@ export class OidcService {
   }
 
   getAndSaveToken(user, returnUrl: string) {
-    return this.httpClient
-      .post("http://localhost:8002/oidc", {
-        idToken: user.id_token
-      })
-      .pipe(
-        tap((token: Token) => {
-          this.authenticationService.saveToken(token);
-          this.authenticationService.scheduleTokenRefresh();
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl =>
+        this.httpClient.post(authUrl + "/oidc", {
+          idToken: user.id_token
         })
-      );
+      ),
+      tap((token: Token) => {
+        this.authenticationService.saveToken(token);
+        this.authenticationService.scheduleTokenRefresh();
+      })
+    );
   }
 
   getOidcConfigs$() {

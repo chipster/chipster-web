@@ -17,8 +17,6 @@ import { RouteService } from "./route.service";
 
 @Injectable()
 export class ConfigService {
-  public static readonly OIDC_CALLBACK_APP_ROUTE = "auth";
-
   public static readonly KEY_CUSTOM_CSS = "custom-css";
   public static readonly KEY_FAVICON = "favicon";
   public static readonly KEY_APP_NAME = "app-name";
@@ -60,7 +58,6 @@ export class ConfigService {
       this.conf$ = this.routeService.getAppRoute$().pipe(
         distinctUntilChanged(),
         mergeMap((appRoute: string) => {
-          // "auth" for oidc callbacks, it will fix the appRoute soon
           if (appRoute === "" || appRoute === "chipster") {
             return this.getChipsterConfiguration();
           }

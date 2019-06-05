@@ -3,12 +3,13 @@ import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import log from "loglevel";
 import { Observable } from "rxjs";
 import { filter, map, shareReplay, take } from "rxjs/operators";
-import { OidcService } from "../../core/authentication/oidc.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import { ConfigService } from "./config.service";
 
 @Injectable()
 export class RouteService {
+  public static readonly OIDC_CALLBACK_APP_ROUTE = "auth";
+  public static readonly keyAppRoute = "oidcAppRoute";
+
   static readonly PATH_HOME = "/home";
   static readonly PATH_SESSIONS = "/sessions";
   static readonly PATH_ANALYZE = "/analyze";
@@ -147,8 +148,8 @@ export class RouteService {
   getAppRouteOfUrl(url: string): string {
     // get the app name fron the current route
     let appRoute = url.split("/")[1];
-    if (appRoute === ConfigService.OIDC_CALLBACK_APP_ROUTE) {
-      return localStorage.getItem(OidcService.keyAppRoute);
+    if (appRoute === RouteService.OIDC_CALLBACK_APP_ROUTE) {
+      return localStorage.getItem(RouteService.keyAppRoute);
     }
     if (appRoute == null) {
       if (this.backupAppName) {

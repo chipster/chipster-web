@@ -1,7 +1,11 @@
 import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot
+} from "@angular/router";
 import log from "loglevel";
-import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 /**
@@ -19,7 +23,7 @@ export class AppNameGuard implements CanActivate {
     if (
       appName === "chipster" ||
       appName === "mylly" ||
-      appName === ConfigService.OIDC_CALLBACK_APP_ROUTE
+      appName === RouteService.OIDC_CALLBACK_APP_ROUTE
     ) {
       this.routeService.setBackupAppName(appName);
       return true;

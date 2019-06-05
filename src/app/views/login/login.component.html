@@ -1,19 +1,30 @@
-<div *ngIf="!show && !initFailed">Initializing login...</div>
+<div *ngIf="!show && !initFailed">&nbsp;Initializing login...</div>
 
 <div class="col-md-4 offset-md-4 margin-top" id="login" *ngIf="show">
   <h1 class="text-center h1-xs">Log in to {{ appName }}</h1>
 
   <br />
   <div *ngFor="let oidc of getOidcConfigs()">
-    <a href="{{ ssoLoginUrl }}"> </a>
-    <button class="btn btn-light btn-oidc" (click)="oidcLogin(oidc)">
-      <img
-        *ngIf="oidc.logo"
-        src="{{ oidc.logo }}"
-        width="300"
-        alt="{{ oidc.oidcName }} login"
-      />
-      <span *ngIf="!oidc.logo"> Sign in with {{ oidc.oidcName }} </span>
+    <button
+      *ngIf="oidc.logo"
+      class="btn btn-light btn-oidc btn-oidc-logo"
+      (click)="oidcLogin(oidc)"
+    >
+      <img src="{{ oidc.logo }}" alt="{{ oidc.oidcName }} login" />
+    </button>
+    <button
+      *ngIf="!oidc.logo && oidc.text"
+      class="btn btn-info btn-oidc"
+      (click)="oidcLogin(oidc)"
+    >
+      {{ oidc.text }}
+    </button>
+    <button
+      *ngIf="!oidc.logo && !oidc.text"
+      class="btn btn-info btn-oidc"
+      (click)="oidcLogin(oidc)"
+    >
+      Sign in with {{ oidc.oidcName }}
     </button>
     <br />
     <br />
