@@ -1,5 +1,5 @@
 <div class="container">
-
+  <!--
   <div class="alert alert-warning" role="alert">
     <h4>Not ready yet</h4>
     <p>
@@ -15,37 +15,59 @@
       <li>jobs and data are sometimes deleted due to version updates, maintenance or bugs</li>
     </ul>
   </div>
+-->
 
   <div *ngIf="homeHeaderPath">
-    <ch-manual [assetsPath]="homeHeaderPath" [page]="homeHeaderFile" [showControls]=false [addContainer]=false [routerPath]="homeRouterPath"
-      [manualStyles]=false></ch-manual>
+    <ch-manual
+      [assetsPath]="homeHeaderPath"
+      [page]="homeHeaderFile"
+      [showControls]="false"
+      [addContainer]="false"
+      [routerPath]="homeRouterPath"
+      [manualStyles]="false"
+    ></ch-manual>
   </div>
 
   <div class="row" id="getstarted">
     <div class="col">
-      <div class="panel panel-default">
+      <div class="panel panel-default mb-3">
         <div class="panel-heading">
-          <h3 class="panel-title">Get started</h3>
+          <h3>Get started</h3>
         </div>
 
         <div class="panel-body">
-          <p *ngIf="tokenHasExpired()"><i>Login expired, please log in again.</i></p>
-          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-primary" [routerLink]="routerLinkLogin">Log
-            In
+          <p *ngIf="tokenHasExpired()">
+            <i>Login expired, please log in again.</i>
+          </p>
+
+          <button
+            *ngIf="!isLoggedIn(); else alreadyLoggedIn"
+            class="btn btn-sm btn-primary"
+            [routerLink]="routerLinkLogin"
+          >
+            Log In
           </button>
         </div>
 
         <ng-template #alreadyLoggedIn>
-          <p>You are logged in as <strong>{{username$ | async}}</strong>. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a>
-            or <a [routerLink]="routerLinkSessions">Sessions</a> to continue.</p>
+          <p>
+            You are logged in as <strong>{{ username$ | async }}</strong
+            >. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a> or
+            <a [routerLink]="routerLinkSessions">Sessions</a> to continue.
+          </p>
         </ng-template>
-
       </div>
     </div>
   </div>
 
   <div *ngIf="homePath && homeFile && homeRouterPath">
-    <ch-manual [assetsPath]="homePath" [page]="homeFile" [showControls]=false [addContainer]=false [routerPath]="homeRouterPath"
-      [manualStyles]=false></ch-manual>
+    <ch-manual
+      [assetsPath]="homePath"
+      [page]="homeFile"
+      [showControls]="false"
+      [addContainer]="false"
+      [routerPath]="homeRouterPath"
+      [manualStyles]="false"
+    ></ch-manual>
   </div>
 </div>
