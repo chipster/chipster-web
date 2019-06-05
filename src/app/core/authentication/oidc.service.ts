@@ -71,8 +71,16 @@ export class OidcService {
     // wait until managers are created
     this.oidcConfigs$.subscribe(
       () => {
+        const extraQueryParams = {};
+        if (oidcConfig.parameter) {
+          const split = oidcConfig.parameter.split("=");
+          const key = split[0];
+          const value = split[1];
+          extraQueryParams[key] = value;
+        }
+
         const manager = this.managers.get(oidcConfig.oidcName);
-        manager.signinRedirect();
+        manager.signinRedirect({ extraQueryParams: extraQueryParams });
       },
       err => this.restErrorService.showError("oidc config error", err)
     );

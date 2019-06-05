@@ -10,7 +10,11 @@
       class="btn btn-light btn-oidc btn-oidc-logo"
       (click)="oidcLogin(oidc)"
     >
-      <img src="{{ oidc.logo }}" alt="{{ oidc.oidcName }} login" />
+      <img
+        src="{{ oidc.logo }}"
+        alt="{{ oidc.oidcName }} login"
+        [style.width]="oidc.logoWidth"
+      />
     </button>
     <button
       *ngIf="!oidc.logo && oidc.text"
