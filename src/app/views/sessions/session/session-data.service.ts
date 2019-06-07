@@ -1,5 +1,5 @@
 
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Dataset, EventType, Job, JobInput, JobState, Resource, Rule, Session, WsEvent } from "chipster-js-common";
 import * as _ from "lodash";
@@ -147,8 +147,12 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
-  // need to change the post function
+  // need to change the post function, why we have post here? 
   getDatasetUrl(dataset: Dataset): Observable<string> {
+    const headers = new HttpHeaders({
+      Authorization: this.tokenService.getTokenHeader().Authorization
+    });
+
     const datasetToken$ = this.configService
       .getSessionDbUrl().pipe(
         mergeMap((sessionDbUrl: string) =>
@@ -157,7 +161,7 @@ export class SessionDataService {
             "/datasettokens/sessions/" +
             this.getSessionId() +
             "/datasets/" +
-            dataset.datasetId, { withCredentials: true }
+            dataset.datasetId, null, { headers: headers, withCredentials: true }
           )
         ),
         map((datasetToken: any) => datasetToken.tokenKey));
@@ -431,7 +435,7 @@ export class SessionDataService {
 
   /*
     Filter out uploading datasets
-
+  
     Datasets are created when comp starts to upload them, but there are no type tags until the
     upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that

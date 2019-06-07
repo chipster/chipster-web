@@ -12,7 +12,6 @@ import { Dataset, Job, Module } from "chipster-js-common";
 import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
 import * as _ from "lodash";
-import log from "loglevel";
 import { Observable } from "rxjs";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -1124,7 +1123,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               target: targetNode
             });
           } else {
-            log.info("node is its own parent", sourceNode);
+            // log.info("source node not found", sourceNode);
           }
         });
         if (sourceJob.inputs.length === 0) {
