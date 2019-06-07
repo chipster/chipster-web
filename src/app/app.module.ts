@@ -30,6 +30,7 @@ import {
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
+import { MyllyHasMovedComponent } from "./views/error/mylly.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { HomeComponent } from "./views/home/home.component";
 import { LoginComponent } from "./views/login/login.component";
@@ -78,7 +79,8 @@ import { TermsComponent } from "./views/terms/terms.component";
     AppComponent,
     ErrorComponent,
     TermsComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    MyllyHasMovedComponent
   ],
   providers: [
     SelectionService,
