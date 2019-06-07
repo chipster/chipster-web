@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
-import { CanActivate } from "@angular/router";
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  RouterStateSnapshot
+} from "@angular/router";
 import { RouteService } from "../../shared/services/route.service";
-import { ActivatedRouteSnapshot } from "@angular/router";
-import { RouterStateSnapshot } from "@angular/router";
 import { TokenService } from "../authentication/token.service";
 
 /**
@@ -19,10 +21,6 @@ export class LandGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
-    // hack for making router service aware of appName when it's not available in url yet
-    const appName = route.url[0].path;
-    this.routeService.setBackupAppName(appName);
-
     if (this.tokenService.isTokenValid()) {
       this.routeService.navigateToAnalyze();
     } else {

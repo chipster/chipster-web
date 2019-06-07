@@ -2,9 +2,8 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
-import { forkJoin as observableForkJoin, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import {
-  distinctUntilChanged,
   map,
   mergeMap,
   publishReplay,
@@ -20,6 +19,7 @@ export class ConfigService {
   public static readonly KEY_CUSTOM_CSS = "custom-css";
   public static readonly KEY_FAVICON = "favicon";
   public static readonly KEY_APP_NAME = "app-name";
+  public static readonly KEY_APP_ID = "app-id";
   public static readonly KEY_TERMS_OF_USE_AUTHS = "terms-of-use-auths";
   public static readonly KEY_TERMS_OF_USE_VERSION = "terms-of-use-version";
   public static readonly KEY_TERMS_OF_USE_PATH = "terms-of-use-path";
@@ -55,29 +55,7 @@ export class ConfigService {
 
   getConfiguration(): Observable<any> {
     if (!this.conf$) {
-      this.conf$ = this.routeService.getAppRoute$().pipe(
-        distinctUntilChanged(),
-        mergeMap((appRoute: string) => {
-          if (appRoute === "" || appRoute === "chipster") {
-            return this.getChipsterConfiguration();
-          }
-          // don't allow relative paths or anything else weird
-          if (!RegExp("^\\w+$").test(appRoute) || appRoute.length > 16) {
-            throw Error(
-              "illegal app route (max 16 alphanumerics allowed): " + appRoute
-            );
-          }
-
-          return observableForkJoin([
-            this.getChipsterConfiguration(),
-            this.configurationResource.getConfiguration(appRoute + ".yaml")
-          ]).pipe(
-            map(confs => {
-              // get all properties from the chipster.yaml and override with the appRoute file
-              return Object.assign(confs[0], confs[1]);
-            })
-          );
-        }),
+      this.conf$ = this.getChipsterConfiguration().pipe(
         shareReplay(1),
         take(1)
       );

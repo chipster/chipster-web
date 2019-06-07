@@ -1,11 +1,11 @@
 import { Component, OnInit } from "@angular/core";
-import { Observable } from "rxjs";
-import { TokenService } from "../../core/authentication/token.service";
-import { AuthenticationService } from "../../core/authentication/authentication-service";
-import { ConfigService } from "../../shared/services/config.service";
-import { ErrorService } from "../../core/errorhandler/error.service";
-import { RouteService } from "../../shared/services/route.service";
 import log from "loglevel";
+import { Observable } from "rxjs";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
+import { TokenService } from "../../core/authentication/token.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
+import { ConfigService } from "../../shared/services/config.service";
+import { RouteService } from "../../shared/services/route.service";
 
 @Component({
   selector: "ch-home",
@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
     this.username$ = this.authenticationService.getUsersDisplayName$();
 
-    this.homeRouterPath = this.routeService.getAppRouteCurrent() + "/";
+    this.homeRouterPath = RouteService.PATH_HOME;
 
     this.configService.get(ConfigService.KEY_HOME_PATH).subscribe(
       path => {
@@ -45,7 +45,12 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page", this.homePath, this.homeFile);
         }
       },
-      err => this.errorService.showError("failed to get the path of the home page", err));
+      err =>
+        this.errorService.showError(
+          "failed to get the path of the home page",
+          err
+        )
+    );
 
     this.configService.get(ConfigService.KEY_HOME_HEADER_PATH).subscribe(
       path => {
@@ -59,7 +64,12 @@ export class HomeComponent implements OnInit {
           );
         }
       },
-      err => this.errorService.showError("failed to get the path of the home page header", err));
+      err =>
+        this.errorService.showError(
+          "failed to get the path of the home page header",
+          err
+        )
+    );
 
     this.routerLinkSessions = this.routeService.getRouterLinkSessions();
     this.routerLinkLogin = this.routeService.getRouterLinkLogin();

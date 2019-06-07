@@ -13,7 +13,7 @@ import { UsersComponent } from "./users/users.component";
 
 const routes: Routes = [
   {
-    path: ":appName/admin",
+    path: "admin",
     component: AdminComponent,
     canActivate: [AuthGuard],
     children: [

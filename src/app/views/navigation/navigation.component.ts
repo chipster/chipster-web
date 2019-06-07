@@ -1,14 +1,12 @@
-
-import {tap, mergeMap} from 'rxjs/operators';
+import { Component, OnInit } from "@angular/core";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import log from "loglevel";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
-import { Component, OnInit } from "@angular/core";
-import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import { RouteService } from "../../shared/services/route.service";
-import log from "loglevel";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
+import { ConfigService } from "../../shared/services/config.service";
+import { RouteService } from "../../shared/services/route.service";
 
 @Component({
   selector: "ch-navigation",
@@ -16,16 +14,15 @@ import { SettingsComponent } from "../../shared/components/settings/settings.com
   styleUrls: ["./navigation.component.less"]
 })
 export class NavigationComponent implements OnInit {
-  routerLinkAdmin: string;
-  routerLinkLogin: string;
-  routerLinkManual: string;
-  routerLinkContact: string;
-  routerLinkHome: string;
-  routerLinkSessions: string;
-  routerLinkAnalyze: string;
+  routerLinkAdmin = RouteService.PATH_ADMIN;
+  routerLinkLogin = RouteService.PATH_LOGIN;
+  routerLinkManual = RouteService.PATH_MANUAL;
+  routerLinkContact = RouteService.PATH_CONTACT;
+  routerLinkHome = RouteService.PATH_HOME;
+  routerLinkSessions = RouteService.PATH_SESSIONS;
+  routerLinkAnalyze = RouteService.PATH_ANALYZE;
   appName = "";
   appNameReady = false;
-  appRoute: string;
 
   constructor(
     public tokenService: TokenService, // used in template
@@ -74,38 +71,12 @@ export class NavigationComponent implements OnInit {
       err => {
         // why error service doesn't show these reliably?
         log.error("failed to get the favicon path", err);
-        this.errorService.showError("failed to get the custom favicon path", err);
+        this.errorService.showError(
+          "failed to get the custom favicon path",
+          err
+        );
       }
     );
-
-    // Navigation component has to use the async version. When the page is loaded without any path, this
-    // component is shown before the router redirects because this is outside of the router outlet.
-    this.routeService
-      .getAppRoute$().pipe(
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_SESSIONS)
-      ),
-      tap(url => (this.routerLinkSessions = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_HOME)),
-      tap(url => (this.routerLinkHome = url)),
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_CONTACT)
-      ),
-      tap(url => (this.routerLinkContact = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_MANUAL)),
-      tap(url => (this.routerLinkManual = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_LOGIN)),
-      tap(url => (this.routerLinkLogin = url)),
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_ANALYZE)
-      ),
-      tap(url => (this.routerLinkAnalyze = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_ADMIN)),
-      tap(url => (this.routerLinkAdmin = url)),)
-      .subscribe(null, err => {
-        log.info("failed to get the app route", err);
-        this.errorService.showError("failed to get the app route", err);
-      });
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
       name => {

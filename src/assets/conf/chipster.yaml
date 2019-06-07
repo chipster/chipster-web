@@ -1,6 +1,6 @@
-terms-of-use-auths: ['haka']
+terms-of-use-auths: ["haka"]
 terms-of-use-path: assets/csc-terms-of-use-v1.html
-terms-of-use-version: 1
+terms-of-use-version: 2
 service-locator: http://localhost:8003
 #service-locator: https://service-locator-chipster.rahti-int-app.csc.fi
 
@@ -9,10 +9,11 @@ home-header-path: assets/manual/app-home-header.html
 contact-path: assets/manual/app-contact.html
 
 # Bio modules and manual
-modules: ['NGS', 'Microarray', 'Misc']
+modules: ["NGS", "Microarray", "Misc"]
 manual-path: assets/manual/
 manual-tool-postfix: .html
 app-name: Chipster
+app-id: chipster
 favicon: assets/manual/app-chipster-icon.png
 
 example-session-owner-user-id: jaas/example_session_owner

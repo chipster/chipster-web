@@ -1,6 +1,9 @@
 app-name: Mylly
+# app ID for the support requests
+app-id: mylly
+
 # Kielipankki modules and manual
-modules: ['Kielipankki']
+modules: ["Kielipankki"]
 # Link Kielipankki manuals here on the dev machine to be able to switch between manuals simply in
 # this configuration. Restart ng serve after creating this link.
 manual-path: assets/manual-mylly/
