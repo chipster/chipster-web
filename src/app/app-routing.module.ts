@@ -5,6 +5,7 @@ import { AuthGuard } from "./core/routing/auth-guard.service";
 import { LandGuard } from "./core/routing/land-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
 import { ContactComponent } from "./views/contact/contact.component";
+import { MyllyHasMovedComponent } from "./views/error/mylly.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { HomeComponent } from "./views/home/home.component";
 import { LoginComponent } from "./views/login/login.component";
@@ -18,6 +19,10 @@ import { TermsComponent } from "./views/terms/terms.component";
 const routes: Routes = [
   { path: "home", component: HomeComponent },
   { path: "login", component: LoginComponent },
+  {
+    path: "mylly",
+    children: [{ path: "**", component: MyllyHasMovedComponent }]
+  },
   { path: "oidc/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/google/callback", component: OidcCallbackComponent },
