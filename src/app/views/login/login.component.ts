@@ -3,7 +3,6 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
-import { forkJoin as observableForkJoin } from "rxjs";
 import { map, take } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { OidcService } from "../../core/authentication/oidc.service";
@@ -88,75 +87,36 @@ export class LoginComponent implements OnInit {
   }
 
   private continueInit() {
-    // fetch everything that's needed
-    observableForkJoin(
-      this.configService.getPublicServices(),
-      this.routeService.getAppRoute$().pipe(take(1)),
-      this.configService.get(ConfigService.KEY_APP_NAME).pipe(take(1))
-    ).subscribe(
-      res => {
-        const conf = res[0];
-        const appRoute = res[1];
-        this.appName = res[2];
+    this.configService
+      .get(ConfigService.KEY_APP_NAME)
+      .pipe(take(1))
+      .subscribe(
+        res => {
+          this.appName = res[0];
 
-        conf
-          .filter(s => s.role === "haka")
-          .forEach(s => {
-            /* There will be many navigations and redirections
+          this.oidcService.getOidcConfigs$().subscribe(
+            configs => {
+              this.oidcConfigs = configs;
 
-            We have to pass appRoute through this chaing to be able to return to the
-            correct appRoute after the login. Likewise with returnUrl, when the user's
-            token has expired.
-
-            1. user navigates to Shibboleth.sso/Login (determined by the link address)
-            2. discovery service
-            3. IDP
-            4. ShibbolethServlet (determined by the target parameter given in step 1)
-            5. back in this app (determined by the appRoute and returnUrl query parameters given in the step 4)
-            */
-            // url for the ShibbolethServlet in step 4, including the parameters
-            // for constructing the url to step 5
-            const afterIdpUrl =
-              s.publicUri +
-              "/secure?" +
-              "appRoute=" +
-              encodeURIComponent(appRoute) +
-              "&" +
-              "returnUrl=" +
-              encodeURIComponent(this.returnUrl);
-
-            // url for the Shibboleth login step 1, including the above url for the step 4
-            // (which in turn includes the parameters for the step 5)
-            this.ssoLoginUrl =
-              s.publicUri +
-              "/Shibboleth.sso/Login?" +
-              "target=" +
-              encodeURIComponent(afterIdpUrl);
-          });
-
-        this.oidcService.getOidcConfigs$().subscribe(
-          configs => {
-            this.oidcConfigs = configs;
-
-            // everything ready, show login
-            this.show = true;
-            // allow Angular to create the element first
-            setTimeout(() => {
-              this.usernameInput.nativeElement.focus();
-            }, 0);
-          },
-          err => this.restErrorService.showError("oidc config error", err)
-        );
-      },
-      error => {
-        this.restErrorService.showError(
-          error,
-          "Initializing login page failed"
-        );
-        log.warn("get configuration failed", error);
-        this.initFailed = true;
-      }
-    );
+              // everything ready, show login
+              this.show = true;
+              // allow Angular to create the element first
+              setTimeout(() => {
+                this.usernameInput.nativeElement.focus();
+              }, 0);
+            },
+            err => this.restErrorService.showError("oidc config error", err)
+          );
+        },
+        error => {
+          this.restErrorService.showError(
+            error,
+            "Initializing login page failed"
+          );
+          log.warn("get configuration failed", error);
+          this.initFailed = true;
+        }
+      );
   }
 
   private getReturnUrl$() {

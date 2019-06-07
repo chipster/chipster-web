@@ -55,18 +55,12 @@ export class OidcService {
       "start oidc login: returnUrl:",
       returnUrl,
       ", oidcName: ",
-      oidcConfig.oidcName +
-        ", appRoute: " +
-        this.routeService.getAppRouteCurrent()
+      oidcConfig.oidcName
     );
-    // put teh return url, oidc name and app route to local storage,
+    // put teh return url and oidc name to local storage,
     // because the OIDC login will redirect to a new page
     localStorage.setItem(this.keyReturnUrl, returnUrl);
     localStorage.setItem(this.keyOidcName, oidcConfig.oidcName);
-    localStorage.setItem(
-      RouteService.keyAppRoute,
-      this.routeService.getAppRouteCurrent()
-    );
 
     // wait until managers are created
     this.oidcConfigs$.subscribe(
@@ -89,17 +83,10 @@ export class OidcService {
   completeAuthentication() {
     const returnUrl = localStorage.getItem(this.keyReturnUrl);
     const oidcName = localStorage.getItem(this.keyOidcName);
-    const appRoute = localStorage.getItem(RouteService.keyAppRoute);
     localStorage.removeItem(this.keyReturnUrl);
     localStorage.removeItem(this.keyOidcName);
-    localStorage.removeItem(RouteService.keyAppRoute);
 
-    log.info(
-      "complete oidc login: returnUrl:",
-      returnUrl,
-      ", oidcName: ",
-      oidcName + ", appRoute: " + appRoute
-    );
+    log.info("complete oidc login: returnUrl:", returnUrl, ", oidcName: ");
 
     // wait until managers are created
     this.oidcConfigs$
@@ -112,12 +99,7 @@ export class OidcService {
       )
       .subscribe(
         () => {
-          // appRoute was lost from the url, becasue all app routes use the same callback url
-          // let's put it back
-          this.routeService.navigateAbsoluteWithCustomCurrentUrl(
-            returnUrl,
-            "/" + appRoute
-          );
+          this.routeService.navigateAbsolute(returnUrl);
         },
         err => this.restErrorService.showError("oidc error", err)
       );

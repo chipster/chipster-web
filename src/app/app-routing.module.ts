@@ -1,7 +1,6 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AnalyzeGuard } from "./core/routing/analyze-guard.service";
-import { AppNameGuard } from "./core/routing/app-name-guard.service";
 import { AuthGuard } from "./core/routing/auth-guard.service";
 import { LandGuard } from "./core/routing/land-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
@@ -17,46 +16,45 @@ import { SessionComponent } from "./views/sessions/session/session.component";
 import { TermsComponent } from "./views/terms/terms.component";
 
 const routes: Routes = [
-  { path: ":appName/home", component: HomeComponent },
-  { path: ":appName/login", component: LoginComponent },
-  { path: ":appName/oidc/callback", component: OidcCallbackComponent },
+  { path: "home", component: HomeComponent },
+  { path: "login", component: LoginComponent },
+  { path: "oidc/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/google/callback", component: OidcCallbackComponent },
-  { path: ":appName/terms", component: TermsComponent },
-  { path: ":appName/contact", component: ContactComponent },
+  { path: "terms", component: TermsComponent },
+  { path: "contact", component: ContactComponent },
   {
-    path: ":appName/manual",
+    path: "manual",
     // route all sub-paths here
     children: [{ path: "**", component: ManualComponent }]
   },
 
   {
-    path: ":appName/analyze/:sessionId",
+    path: "analyze/:sessionId",
     component: SessionComponent,
-    canActivate: [AppNameGuard, AuthGuard],
+    canActivate: [AuthGuard],
     canDeactivate: [ModifiedSessionGuard]
   },
 
   {
-    path: ":appName/analyze",
+    path: "analyze",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [AppNameGuard, AuthGuard, AnalyzeGuard]
+    canActivate: [AuthGuard, AnalyzeGuard]
   },
   {
-    path: ":appName/sessions",
+    path: "sessions",
     component: SessionListComponent,
-    canActivate: [AppNameGuard, AuthGuard]
+    canActivate: [AuthGuard]
   },
 
   { path: "notfound", component: NotFoundComponent, pathMatch: "full" },
 
   {
-    path: ":appName",
+    path: "",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [AppNameGuard, LandGuard]
+    canActivate: [LandGuard],
+    pathMatch: "full"
   },
-
-  { path: "", redirectTo: "chipster", pathMatch: "full" },
   { path: "**", component: NotFoundComponent }
 ];
 

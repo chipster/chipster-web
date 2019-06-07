@@ -1,30 +1,27 @@
-
-import {of as observableOf,  Observable ,  Subject } from 'rxjs';
-
-import {catchError, takeUntil, mergeMap, tap, map} from 'rxjs/operators';
+import { HttpClient } from "@angular/common/http";
 import {
   AfterViewInit,
   Component,
   ComponentFactoryResolver,
   Input,
+  OnDestroy,
   ViewChild,
-  ViewContainerRef,
-  OnInit,
-  OnDestroy
+  ViewContainerRef
 } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
-import { ManualAComponent } from "./manual-components/manual-a.component";
-import { ManualLiComponent } from "./manual-components/manual-li.component";
-import { ManualUlComponent } from "./manual-components/manual-ul.component";
-import { ManualOlComponent } from "./manual-components/manual-ol.component";
-import { ManualDivComponent } from "./manual-components/manual-div.component";
-import { ManualSpanComponent } from "./manual-components/manual-span.component";
-import { ManualUtils } from "./manual-utils";
-import { ConfigService } from "../../shared/services/config.service";
-import { ManualPComponent } from "./manual-components/manual-p.component";
-import { RouteService } from "../../shared/services/route.service";
+import log from "loglevel";
+import { Observable, of as observableOf, Subject } from "rxjs";
+import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { ConfigService } from "../../shared/services/config.service";
+import { ManualAComponent } from "./manual-components/manual-a.component";
+import { ManualDivComponent } from "./manual-components/manual-div.component";
+import { ManualLiComponent } from "./manual-components/manual-li.component";
+import { ManualOlComponent } from "./manual-components/manual-ol.component";
+import { ManualPComponent } from "./manual-components/manual-p.component";
+import { ManualSpanComponent } from "./manual-components/manual-span.component";
+import { ManualUlComponent } from "./manual-components/manual-ul.component";
+import { ManualUtils } from "./manual-utils";
 
 /**
  * Show HTML files in an Angular app
@@ -59,17 +56,15 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
   @Input()
   showControls = false;
   @Input()
-  assetsPath? = null;
+  assetsPath = null;
   @Input()
-  addContainer? = true;
+  addContainer = true;
   @Input()
-  routerPath?: string = null;
+  routerPath: string = null;
   @Input()
-  manualStyles? = true;
+  manualStyles = true;
 
   private currentPage;
-
-  private toolPostfix: string;
 
   @ViewChild("container", { read: ViewContainerRef })
   viewContainerReference;
@@ -79,8 +74,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private componentFactoryResolver: ComponentFactoryResolver,
     private configService: ConfigService,
-    private routeService: RouteService,
-    private restErrorService: RestErrorService,
+    private restErrorService: RestErrorService
   ) {}
 
   /**
@@ -90,44 +84,48 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    */
   ngAfterViewInit() {
     if (!this.routerPath) {
-      this.routerPath = this.routeService.getAppRouteCurrent() + "/manual/";
+      this.routerPath = "/manual/";
     }
 
-    this.activatedRoute.url.pipe(
-      takeUntil(this.unsubscribe),
-      // get configs
-      mergeMap(() => {
-        if (this.assetsPath) {
-          return observableOf(this.assetsPath);
-        }
-        return this.configService.getManualPath();
-      }),
-      tap(path => (this.assetsPath = path)),
-      mergeMap(() => {
-        console.debug(
-          "route changed",
-          this.activatedRoute.snapshot.url,
-          this.page
-        );
-        if (this.page) {
-          this.currentPage = this.page;
-        } else {
-          // get the current route path
-          this.currentPage = this.activatedRoute.snapshot.url.join("/");
-        }
+    this.activatedRoute.url
+      .pipe(
+        takeUntil(this.unsubscribe),
+        // get configs
+        mergeMap(() => {
+          if (this.assetsPath) {
+            return observableOf(this.assetsPath);
+          }
+          return this.configService.getManualPath();
+        }),
+        tap(path => (this.assetsPath = path)),
+        mergeMap(() => {
+          log.debug(
+            "route changed",
+            this.activatedRoute.snapshot.url,
+            this.page
+          );
+          if (this.page) {
+            this.currentPage = this.page;
+          } else {
+            // get the current route path
+            this.currentPage = this.activatedRoute.snapshot.url.join("/");
+          }
 
-        // get the html file
-        return this.getPage(this.assetsPath + this.currentPage);
-      }),
-      // parse the html
-      map(htmlString =>
-        new DOMParser().parseFromString(htmlString, "text/html")
-      ),
-      // fix the links and image source addresses
-      map(htmlDoc => this.rewrite(htmlDoc, this.currentPage)),
-      // show
-      map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment)),)
-      .subscribe(null, err => this.restErrorService.showError("page change failed", err));
+          // get the html file
+          return this.getPage(this.assetsPath + this.currentPage);
+        }),
+        // parse the html
+        map(htmlString =>
+          new DOMParser().parseFromString(htmlString, "text/html")
+        ),
+        // fix the links and image source addresses
+        map(htmlDoc => this.rewrite(htmlDoc, this.currentPage)),
+        // show
+        map(html => this.viewPage(html, this.activatedRoute.snapshot.fragment))
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("page change failed", err)
+      );
   }
 
   ngOnDestroy() {
@@ -171,7 +169,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     const byId = document.getElementById(fragment);
     const byName = document.getElementsByName(fragment);
 
-    console.debug("scroll to", fragment, byId, byName);
+    log.debug("scroll to", fragment, byId, byName);
 
     if (!fragment) {
       // show new pages from the start
@@ -181,10 +179,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     } else if (byName.length > 0) {
       byName[0].scrollIntoView();
     } else {
-      console.log(
-        "unable to scroll, element not found by id or name",
-        fragment
-      );
+      log.info("unable to scroll, element not found by id or name", fragment);
     }
   }
 
@@ -281,7 +276,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
         this.addElement(element, targetComponentRef);
       } else {
         // somenthing else
-        console.log("unknown element", nodeName, element);
+        log.info("unknown element", nodeName, element);
         // try to replace the component with div
         const componentRef = this.addComponent(
           ManualDivComponent,
@@ -333,19 +328,17 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
    * @returns {Observable<HTMLDocument>}
    */
   getPage(path): Observable<string> {
-    console.log("GET", path);
+    log.info("GET", path);
 
-    return (
-      this.http
-        .get(path, { responseType: "text" }).pipe(
-        // replace missing pages with nicer message
-        catchError(err => {
-          if (err.status === 404) {
-            return observableOf("<html><body>Page not found</body></html>");
-          } else {
-            throw err;
-          }
-        }))
+    return this.http.get(path, { responseType: "text" }).pipe(
+      // replace missing pages with nicer message
+      catchError(err => {
+        if (err.status === 404) {
+          return observableOf("<html><body>Page not found</body></html>");
+        } else {
+          throw err;
+        }
+      })
     );
   }
 
