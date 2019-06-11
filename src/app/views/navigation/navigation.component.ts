@@ -1,14 +1,13 @@
-
-import {tap, mergeMap} from 'rxjs/operators';
+import { Component, OnInit } from "@angular/core";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import log from "loglevel";
+import { mergeMap, tap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
-import { Component, OnInit } from "@angular/core";
-import { ConfigService } from "../../shared/services/config.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import { RouteService } from "../../shared/services/route.service";
-import log from "loglevel";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
+import { ConfigService } from "../../shared/services/config.service";
+import { RouteService } from "../../shared/services/route.service";
 
 @Component({
   selector: "ch-navigation",
@@ -40,8 +39,8 @@ export class NavigationComponent implements OnInit {
     // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(
       path => {
-        log.info("load custom css from", path);
         if (path) {
+          log.info("load custom css from", path);
           const link = document.createElement("link");
           link.href = path;
           link.type = "text/css";
@@ -74,34 +73,47 @@ export class NavigationComponent implements OnInit {
       err => {
         // why error service doesn't show these reliably?
         log.error("failed to get the favicon path", err);
-        this.errorService.showError("failed to get the custom favicon path", err);
+        this.errorService.showError(
+          "failed to get the custom favicon path",
+          err
+        );
       }
     );
 
     // Navigation component has to use the async version. When the page is loaded without any path, this
     // component is shown before the router redirects because this is outside of the router outlet.
     this.routeService
-      .getAppRoute$().pipe(
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_SESSIONS)
-      ),
-      tap(url => (this.routerLinkSessions = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_HOME)),
-      tap(url => (this.routerLinkHome = url)),
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_CONTACT)
-      ),
-      tap(url => (this.routerLinkContact = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_MANUAL)),
-      tap(url => (this.routerLinkManual = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_LOGIN)),
-      tap(url => (this.routerLinkLogin = url)),
-      mergeMap(() =>
-        this.routeService.getRouterLink$(RouteService.PATH_ANALYZE)
-      ),
-      tap(url => (this.routerLinkAnalyze = url)),
-      mergeMap(() => this.routeService.getRouterLink$(RouteService.PATH_ADMIN)),
-      tap(url => (this.routerLinkAdmin = url)),)
+      .getAppRoute$()
+      .pipe(
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_SESSIONS)
+        ),
+        tap(url => (this.routerLinkSessions = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_HOME)
+        ),
+        tap(url => (this.routerLinkHome = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_CONTACT)
+        ),
+        tap(url => (this.routerLinkContact = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_MANUAL)
+        ),
+        tap(url => (this.routerLinkManual = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_LOGIN)
+        ),
+        tap(url => (this.routerLinkLogin = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_ANALYZE)
+        ),
+        tap(url => (this.routerLinkAnalyze = url)),
+        mergeMap(() =>
+          this.routeService.getRouterLink$(RouteService.PATH_ADMIN)
+        ),
+        tap(url => (this.routerLinkAdmin = url))
+      )
       .subscribe(null, err => {
         log.info("failed to get the app route", err);
         this.errorService.showError("failed to get the app route", err);
