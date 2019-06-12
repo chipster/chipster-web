@@ -1,16 +1,27 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from "@angular/core";
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import { takeUntil } from "rxjs/operators";
+import { log } from "loglevel";
+import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { Subject } from "rxjs/Subject";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
+import { ConfigService } from "../../../../shared/services/config.service";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
-import VisualizationConstants, { Visualization } from "./visualization-constants";
+import VisualizationConstants, {
+  Visualization
+} from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
 
 @Component({
@@ -36,6 +47,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   private userInitiatedTabChange = false;
 
   private unsubscribe: Subject<any> = new Subject();
+  private visualizationBlacklist: Array<string>;
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -43,13 +55,21 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     private typeTagService: TypeTagService,
     private errorService: ErrorService,
     private visualizationEventService: VisualizationEventService,
-    private datasetService: DatasetService
-  ) { }
+    private datasetService: DatasetService,
+    private configService: ConfigService
+  ) {}
 
   ngOnInit() {
-    this.store
-      .select("selectedDatasets").pipe(
-        takeUntil(this.unsubscribe))
+    this.configService
+      .get("visualization-blacklist")
+      .pipe(
+        tap(
+          blacklist =>
+            (this.visualizationBlacklist = <string[]>(<unknown>blacklist))
+        ),
+        mergeMap(() => this.store.select("selectedDatasets")),
+        takeUntil(this.unsubscribe)
+      )
       .subscribe(
         (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
@@ -104,8 +124,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       );
 
     this.visualizationEventService
-      .getPhenodataSelectedStream().pipe(
-        takeUntil(this.unsubscribe))
+      .getPhenodataSelectedStream()
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(phenodataSelected => {
         if (phenodataSelected) {
           this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);
@@ -125,6 +145,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   isCompatibleVisualization(id: string): boolean {
+    const isBlacklisted = this.visualizationBlacklist.indexOf(id) !== -1;
+
     const visualization = _.find(
       this.visualizations,
       visualization2 => visualization2.id === id
@@ -146,9 +168,14 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       datasetSelectionCount === 1 &&
       this.datasetService.hasOwnPhenodata(this.selectedDatasets[0]);
 
-    return (
-      (typeIsCompatible && inputCountIsCompatible) || phenodataSpecialCompatible
-    );
+    if (isBlacklisted) {
+      return false;
+    } else {
+      return (
+        (typeIsCompatible && inputCountIsCompatible) ||
+        phenodataSpecialCompatible
+      );
+    }
   }
 
   containsTypeTags(tags: Array<string>) {
@@ -188,7 +215,10 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   openGenomeBrowser() {
-    console.log(this.selectedDatasets);
+    log.info(
+      "genome browser disabled for now, selected datasets:",
+      this.selectedDatasets
+    );
     // this.visualizationModalService.openVisualizationModal(this.selectionService.selectedDatasets[0], 'genomebrowser');
     // window.open('genomebrowser');
   }

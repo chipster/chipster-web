@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
-import { map, take } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { OidcService } from "../../core/authentication/oidc.service";
 import { TokenService } from "../../core/authentication/token.service";
@@ -87,36 +87,33 @@ export class LoginComponent implements OnInit {
   }
 
   private continueInit() {
-    this.configService
-      .get(ConfigService.KEY_APP_NAME)
-      .pipe(take(1))
-      .subscribe(
-        res => {
-          this.appName = res[0];
+    this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
+      appName => {
+        this.appName = appName;
 
-          this.oidcService.getOidcConfigs$().subscribe(
-            configs => {
-              this.oidcConfigs = configs;
+        this.oidcService.getOidcConfigs$().subscribe(
+          configs => {
+            this.oidcConfigs = configs;
 
-              // everything ready, show login
-              this.show = true;
-              // allow Angular to create the element first
-              setTimeout(() => {
-                this.usernameInput.nativeElement.focus();
-              }, 0);
-            },
-            err => this.restErrorService.showError("oidc config error", err)
-          );
-        },
-        error => {
-          this.restErrorService.showError(
-            error,
-            "Initializing login page failed"
-          );
-          log.warn("get configuration failed", error);
-          this.initFailed = true;
-        }
-      );
+            // everything ready, show login
+            this.show = true;
+            // allow Angular to create the element first
+            setTimeout(() => {
+              this.usernameInput.nativeElement.focus();
+            }, 0);
+          },
+          err => this.restErrorService.showError("oidc config error", err)
+        );
+      },
+      error => {
+        this.restErrorService.showError(
+          error,
+          "Initializing login page failed"
+        );
+        log.warn("get configuration failed", error);
+        this.initFailed = true;
+      }
+    );
   }
 
   private getReturnUrl$() {
