@@ -18,3 +18,5 @@ favicon: assets/manual/app-chipster-icon.png
 
 example-session-owner-user-id: jaas/example_session_owner
 support-session-owner-user-id: jaas/support_session_owner
+
+visualization-blacklist: []
