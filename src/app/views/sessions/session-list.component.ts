@@ -1,26 +1,23 @@
-import { SessionResource } from "../../shared/resources/session.resource";
-import { SessionData } from "../../model/session/session-data";
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
-import { Subject, Observable, forkJoin, pipe, of } from "rxjs";
-import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { SessionDataService } from "./session/session-data.service";
-import { TokenService } from "../../core/authentication/token.service";
-import { RouteService } from "../../shared/services/route.service";
-import { Session, Module, WsEvent, Rule } from "chipster-js-common";
-import { SessionService } from "./session/session.service";
-import log from "loglevel";
-import { ToolsService } from "../../shared/services/tools.service";
-import { ConfigService } from "../../shared/services/config.service";
-import { tap } from "rxjs/internal/operators/tap";
-import { mergeMap, takeUntil, map, debounceTime, filter, finalize } from "rxjs/operators";
-import { UserEventService } from "./user-event.service";
-import { UserEventData } from "./user-event-data";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
-import {
-  SettingsService,
-  SessionListMode
-} from "../../shared/services/settings.service";
+import log from "loglevel";
+import { forkJoin, of, Subject } from "rxjs";
+import { tap } from "rxjs/internal/operators/tap";
+import { debounceTime, filter, finalize, map, mergeMap, takeUntil } from "rxjs/operators";
+import { TokenService } from "../../core/authentication/token.service";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../model/session/session-data";
+import { SessionResource } from "../../shared/resources/session.resource";
+import { ConfigService } from "../../shared/services/config.service";
+import { RouteService } from "../../shared/services/route.service";
+import { SessionListMode, SettingsService } from "../../shared/services/settings.service";
+import { ToolsService } from "../../shared/services/tools.service";
+import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
+import { SessionDataService } from "./session/session-data.service";
+import { SessionService } from "./session/session.service";
+import { UserEventData } from "./user-event-data";
+import { UserEventService } from "./user-event.service";
 
 @Component({
   selector: "ch-session-list",
@@ -155,6 +152,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
     const sessionMap = new Map<string, Session>();
 
     return this.sessionResource.getSessions().pipe(
+      tap((sessions: Session[]) => {
+        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+      }),
+      mergeMap(() => this.sessionResource.getExampleSessions()),
       tap((sessions: Session[]) => {
         sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
       }),

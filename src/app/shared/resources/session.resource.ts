@@ -17,7 +17,7 @@ export class SessionResource {
     private configService: ConfigService,
     private http: HttpClient,
     private tokenService: TokenService
-  ) { }
+  ) {}
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
@@ -125,10 +125,10 @@ export class SessionResource {
       mergeMap(typeServiceUrl => {
         return this.http.get(
           typeServiceUrl +
-          "/sessions/" +
-          sessionId +
-          "/datasets/" +
-          dataset.datasetId,
+            "/sessions/" +
+            sessionId +
+            "/datasets/" +
+            dataset.datasetId,
           { headers: headers, withCredentials: true }
         );
       }),
@@ -144,10 +144,10 @@ export class SessionResource {
     });
     return this.configService.getTypeService().pipe(
       mergeMap(typeServiceUrl => {
-        return this.http.get(
-          typeServiceUrl + "/sessions/" + sessionId,
-          { headers: headers, withCredentials: true }
-        );
+        return this.http.get(typeServiceUrl + "/sessions/" + sessionId, {
+          headers: headers,
+          withCredentials: true
+        });
       }),
       map(typesObj => {
         // convert js objects to es6 Maps
@@ -176,6 +176,23 @@ export class SessionResource {
     return apiUrl$.pipe(
       mergeMap((url: string) =>
         this.http.get<Session[]>(`${url}/sessions`, {
+          headers: headers,
+          withCredentials: true
+        })
+      )
+    );
+  }
+
+  getExampleSessions(): Observable<Array<Session>> {
+    const headers = new HttpHeaders({
+      Authorization: this.tokenService.getTokenHeader().Authorization
+    });
+    let appId: string;
+    return this.configService.get(ConfigService.KEY_APP_ID).pipe(
+      tap(id => (appId = id)),
+      mergeMap(() => this.configService.getSessionDbUrl()),
+      mergeMap((url: string) =>
+        this.http.get<Session[]>(`${url}/sessions?appId=${appId}`, {
           headers: headers,
           withCredentials: true
         })

@@ -1,16 +1,14 @@
-
-import {of as observableOf,  Observable } from 'rxjs';
-
-import {map, mergeMap, tap, take} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
-import {
-  SET_LATEST_SESSION,
-  LatestSession
-} from "../../state/latest-session.reducer";
-import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { User } from "chipster-js-common";
 import log from "loglevel";
+import { Observable, of as observableOf } from "rxjs";
+import { map, mergeMap, take, tap } from "rxjs/operators";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
+import {
+  LatestSession,
+  SET_LATEST_SESSION
+} from "../../state/latest-session.reducer";
 import { SessionResource } from "../resources/session.resource";
 
 @Injectable()
@@ -46,16 +44,18 @@ export class UserService {
   private updateLatestSessionToSessionDb(sessionId: string) {
     // FIXME only update if changed?
     this.authenticationService
-      .getUser().pipe(
-      mergeMap((user: User) => {
-        user.latestSession = sessionId;
-        return this.authenticationService.updateUser(user);
-      }))
+      .getUser()
+      .pipe(
+        mergeMap((user: User) => {
+          user.latestSession = sessionId;
+          return this.authenticationService.updateUser(user);
+        })
+      )
       .subscribe(
         () => {
           log.info("update latest session to sessionDb successful");
         },
-      err => {
+        err => {
           // maybe log is enough
           log.warn("updating latest session to sessionDb failed");
         }
@@ -64,12 +64,16 @@ export class UserService {
 
   getLatestSession(): Observable<string> {
     let sessions;
-    return this.sessionResource
-      .getSessions().pipe( // sessions are needed to check if possibly found latest session still exists
+    return this.sessionResource.getSessions().pipe(
+      // sessions are needed to check if possibly found latest session still exists
       tap(s => (sessions = s)),
+      mergeMap(() => this.sessionResource.getExampleSessions()),
+      tap(exampleSessions => {
+        sessions = sessions.concat(exampleSessions);
+      }),
       mergeMap(() => {
-        return this.getLatestSessionFromStore().pipe(mergeMap(
-          (latestSession: LatestSession) => {
+        return this.getLatestSessionFromStore().pipe(
+          mergeMap((latestSession: LatestSession) => {
             // valid id from store?
             const idFromStore = latestSession.sessionId;
             if (
@@ -94,8 +98,8 @@ export class UserService {
                 return observableOf(sourceSessionIdFromStore);
               } else {
                 // valid id from session db?
-                return this.getLatestSessionFromSessionDb().pipe(mergeMap(
-                  (idFromSessionDb: string) => {
+                return this.getLatestSessionFromSessionDb().pipe(
+                  mergeMap((idFromSessionDb: string) => {
                     if (
                       idFromSessionDb !== null &&
                       sessions.some(
@@ -111,13 +115,14 @@ export class UserService {
                       log.info("no valid latest session id in sessionDb");
                       return observableOf(null);
                     }
-                  }
-                ));
+                  })
+                );
               }
             }
-          }
-        ));
-      }),);
+          })
+        );
+      })
+    );
   }
 
   getLatestSessionFromStore(): Observable<LatestSession> {
@@ -125,8 +130,10 @@ export class UserService {
   }
 
   getLatestSessionFromSessionDb(): Observable<string> {
-    return this.authenticationService.getUser().pipe(map((user: User) => {
-      return user.latestSession;
-    }));
+    return this.authenticationService.getUser().pipe(
+      map((user: User) => {
+        return user.latestSession;
+      })
+    );
   }
 }
