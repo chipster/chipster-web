@@ -24,6 +24,7 @@ const routes: Routes = [
     children: [{ path: "**", component: MyllyHasMovedComponent }]
   },
   { path: "oidc/callback", component: OidcCallbackComponent },
+  { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
   { path: "terms", component: TermsComponent },
   { path: "contact", component: ContactComponent },
   {
