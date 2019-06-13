@@ -30,21 +30,28 @@ export class OidcService {
   }
 
   init() {
-    this.oidcConfigs$ = this.configService.getAuthUrl().pipe(
+    let appId;
+
+    this.oidcConfigs$ = this.configService.get(ConfigService.KEY_APP_ID).pipe(
+      tap(id => (appId = id)),
+      mergeMap(() => this.configService.getAuthUrl()),
       mergeMap(authUrl => this.httpClient.get(authUrl + "/oidc/configs")),
       tap((configs: OidcConfig[]) => {
-        configs.forEach(oidc => {
-          const manager = new UserManager({
-            authority: oidc.issuer,
-            client_id: oidc.clientId,
-            redirect_uri: window.location.origin + oidc.redirectPath,
-            response_type: oidc.responseType,
-            scope: "openid profile email",
-            filterProtocolClaims: true,
-            loadUserInfo: false
+        configs
+          // allow separate oidc configs for different apps
+          .filter(oidc => oidc.appId === appId)
+          .forEach(oidc => {
+            const manager = new UserManager({
+              authority: oidc.issuer,
+              client_id: oidc.clientId,
+              redirect_uri: window.location.origin + oidc.redirectPath,
+              response_type: oidc.responseType,
+              scope: "openid profile email",
+              filterProtocolClaims: true,
+              loadUserInfo: false
+            });
+            this.managers.set(oidc.oidcName, manager);
           });
-          this.managers.set(oidc.oidcName, manager);
-        });
       }),
       share()
     );

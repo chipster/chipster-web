@@ -8,4 +8,5 @@ export class OidcConfig {
   logoWidth: string;
   text: string;
   parameter: string;
+  appId: string;
 }
