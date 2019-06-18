@@ -5,10 +5,9 @@ import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState,
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
-import 'rxjs/add/operator/mergeMap';
 import { fromPromise } from "rxjs/internal/observable/fromPromise";
 // New imports for rxjs v6
-import { catchError, map, mergeMap, takeUntil } from "rxjs/operators";
+import { catchError, flatMap, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -27,6 +26,8 @@ import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
+
+
 
 
 export enum ComponentState {
@@ -351,14 +352,14 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   private getSessionData(sessionId: string) {
-    return this.sessionResource.loadSession(sessionId).flatMap(sessionData => {
+    return this.sessionResource.loadSession(sessionId).pipe(flatMap(sessionData => {
       if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
         return of(sessionData);
       } else {
         log.info("read-only sesssion, create copy");
         return this.sessionResource
           .copySession(sessionData, sessionData.session.name, true)
-          .flatMap(id => {
+          .pipe(flatMap(id => {
             const queryParams = {};
             queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
             return fromPromise(
@@ -366,10 +367,9 @@ export class SessionComponent implements OnInit, OnDestroy {
                 queryParams: queryParams
               })
             );
-          })
-          .flatMap(() => NEVER);
+          }), (flatMap(() => NEVER)));
       }
-    });
+    }));
   }
 
   /**

@@ -1,10 +1,10 @@
-import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { Component, OnInit } from "@angular/core";
+import { User } from "chipster-js-common";
+import { flatMap } from "rxjs/operators";
+import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
-import { User } from "chipster-js-common";
 import { RouteService } from "../../shared/services/route.service";
-import { ErrorService } from "../../core/errorhandler/error.service";
 
 @Component({
   selector: "ch-terms",
@@ -21,7 +21,7 @@ export class TermsComponent implements OnInit {
     private restErrorService: RestErrorService,
     private configService: ConfigService,
     private routeService: RouteService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe(
@@ -41,15 +41,15 @@ export class TermsComponent implements OnInit {
 
     this.configService
       .get(ConfigService.KEY_TERMS_OF_USE_VERSION)
-      .flatMap(v => {
+      .pipe(flatMap(v => {
         latestVersion = v;
         return this.authenticationService.getUser();
-      })
-      .flatMap((user: User) => {
-        user.termsVersion = latestVersion;
-        user.termsAccepted = new Date().toISOString();
-        return this.authenticationService.updateUser(user);
-      })
+      }),
+        flatMap((user: User) => {
+          user.termsVersion = latestVersion;
+          user.termsAccepted = new Date().toISOString();
+          return this.authenticationService.updateUser(user);
+        }))
       .subscribe(
         () => {
           this.routeService.navigateAbsolute("/sessions");

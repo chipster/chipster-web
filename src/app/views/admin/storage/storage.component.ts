@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { ConfigService } from "../../../shared/services/config.service";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { from } from "rxjs";
+import { flatMap, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
-import { Observable, from } from "rxjs";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-// new import statements for rxjs v6
-import { tap, mergeMap, catchError } from "rxjs/operators";
+import { ConfigService } from "../../../shared/services/config.service";
 
 @Component({
   selector: 'ch-storage',
@@ -57,7 +56,7 @@ export class StorageComponent implements OnInit {
     this.sessions = [];
 
     this.configService.getSessionDbUrl()
-      .flatMap(url => this.authHttpClient.getAuth(url + '/users/' + user + '/sessions'))
+      .pipe(flatMap(url => this.authHttpClient.getAuth(url + '/users/' + user + '/sessions')))
       .subscribe((sessions: any[]) => {
         this.sessions = sessions;
       }, err => this.restErrorService.showError('get quotas failed', err));

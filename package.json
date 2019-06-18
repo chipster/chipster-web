@@ -43,7 +43,7 @@
     "pileup": "^0.6.11",
     "popper.js": "^1.15.0",
     "rxjs": "^6.5.2",
-    "rxjs-compat": "^6.5.2",
+    "rxjs-tslint": "^0.1.7",
     "stacktrace-js": "^2.0.0",
     "typescript": "3.2.4",
     "yamljs": "^0.3.0",

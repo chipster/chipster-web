@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import {ConfigService} from '../../../shared/services/config.service';
-import {RestErrorService} from '../../../core/errorhandler/rest-error.service';
-import {AuthHttpClientService} from '../../../shared/services/auth-http-client.service';
-import * as _ from 'lodash';
 import { Role } from 'chipster-js-common';
+import * as _ from 'lodash';
+import { flatMap } from 'rxjs/operators';
 import { TokenService } from '../../../core/authentication/token.service';
+import { RestErrorService } from '../../../core/errorhandler/rest-error.service';
+import { AuthHttpClientService } from '../../../shared/services/auth-http-client.service';
+import { ConfigService } from '../../../shared/services/config.service';
 
 @Component({
   selector: 'ch-clients',
@@ -25,9 +26,9 @@ export class ClientsComponent implements OnInit {
 
   ngOnInit() {
     this.configService.getInternalService(Role.SESSION_DB, this.tokenService.getToken())
-      .flatMap(service => {
+      .pipe(flatMap(service => {
         return this.auhtHttpClient.getAuth(service.adminUri + '/admin/topics');
-      })
+      }))
       .subscribe((topics: any[]) => {
 
         this.users = [];
@@ -35,7 +36,7 @@ export class ClientsComponent implements OnInit {
         // filter out server topics and get values as an array
         const sessionIds = Object.keys(topics)
           .filter(topicName => topicName !== 'jobs' && topicName !== 'files');
-          const sessionTopics = sessionIds.map(id => topics[id]);
+        const sessionTopics = sessionIds.map(id => topics[id]);
 
         sessionTopics.forEach(topic => {
           topic.forEach(user => {

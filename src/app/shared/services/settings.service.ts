@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 
 export enum SessionListMode {
   CLICK_TO_OPEN_HOVER_TO_PREVIEW = "Click to open, hover to preview",

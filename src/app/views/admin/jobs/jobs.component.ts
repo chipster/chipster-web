@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ConfigService } from "../../../shared/services/config.service";
-import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
-import { Observable, forkJoin } from "rxjs";
 import { Job } from "chipster-js-common";
+import { forkJoin, Observable } from "rxjs";
+import { flatMap, tap } from "rxjs/operators";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { IdPair } from "../../../model/id-pair";
-import { tap } from "rxjs/operators";
+import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
+import { ConfigService } from "../../../shared/services/config.service";
 
 @Component({
   selector: 'ch-jobs',
@@ -31,12 +31,12 @@ export class JobsComponent implements OnInit {
 
     // do is replaced with tap in rxjs v6, check jobList
     this.configService.getSessionDbUrl().pipe(tap(url => sessionDbUrl = url))
-      .flatMap(url => {
+      .pipe(flatMap(url => {
         const newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=NEW');
         const runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + '/jobs?state=RUNNING');
         return forkJoin(newJobs$, runningJobs$);
-      })
-      .flatMap(newAndRunningJobs => {
+      }))
+      .pipe(flatMap(newAndRunningJobs => {
         const newJobs = newAndRunningJobs[0];
 
         const runningJobs = newAndRunningJobs[1];
@@ -44,7 +44,7 @@ export class JobsComponent implements OnInit {
         const jobs$: Observable<Job>[] = jobIds.map(idPair => <any>this.authHttpClient.getAuth(
           sessionDbUrl + '/sessions/' + idPair.sessionId + '/jobs/' + idPair.jobId));
         return forkJoin(jobs$);
-      })
+      }))
       .subscribe(jobs => {
         this.jobs = jobs;
       }, err => this.restErrorService.showError('get jobs failed', err));

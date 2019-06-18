@@ -1,19 +1,15 @@
 
-import { throwError as observableThrowError, empty as observableEmpty, Observable, Subject, EMPTY } from 'rxjs';
-
-import { catchError, mergeMap } from 'rxjs/operators';
-import { ConfigService } from "./config.service";
-import {
-  WsEvent,
-  SessionEvent
-} from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { TokenService } from "../../core/authentication/token.service";
-// import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
-import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { ErrorService } from "../../core/errorhandler/error.service";
+import { SessionEvent, WsEvent } from "chipster-js-common";
 import log from "loglevel";
+import { EMPTY, Observable, Subject, throwError as observableThrowError } from 'rxjs';
+import { catchError, mergeMap } from 'rxjs/operators';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { TokenService } from "../../core/authentication/token.service";
+import { ErrorService } from "../../core/errorhandler/error.service";
 import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
+import { ConfigService } from "./config.service";
+
 
 @Injectable()
 export class WebSocketService {

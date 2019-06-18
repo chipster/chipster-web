@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angul
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, mergeMap } from "rxjs/operators";
 import { SessionResource } from "../../shared/resources/session.resource";
 import { RouteService } from "../../shared/services/route.service";
 import { UserService } from "../../shared/services/user.service";
@@ -24,27 +24,27 @@ export class AnalyzeGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> {
     return this.userService
-      .getLatestSession()
-      .mergeMap((latestSessionId: string) => {
-        if (latestSessionId !== null) {
-          log.info("navigating to valid latest session", latestSessionId);
-          this.routeService.navigateToSession(latestSessionId);
-          return of(false); // doesn't really matter if it's true or false, since navigating before?
-        } else {
-          log.info("no valid latest session, creating new session");
-          return this.createNewTempSession().pipe(map((newSessionId: string) => {
-            if (newSessionId !== null) {
-              log.info("created new session", newSessionId);
-              this.routeService.navigateToSession(newSessionId);
-              return false;
-            } else {
-              log.warn("creating new session failed, going to sessions list");
-              this.routeService.navigateToSessions();
-              return false;
-            }
-          }));
-        }
-      });
+      .getLatestSession().pipe(
+        mergeMap((latestSessionId: string) => {
+          if (latestSessionId !== null) {
+            log.info("navigating to valid latest session", latestSessionId);
+            this.routeService.navigateToSession(latestSessionId);
+            return of(false); // doesn't really matter if it's true or false, since navigating before?
+          } else {
+            log.info("no valid latest session, creating new session");
+            return this.createNewTempSession().pipe(map((newSessionId: string) => {
+              if (newSessionId !== null) {
+                log.info("created new session", newSessionId);
+                this.routeService.navigateToSession(newSessionId);
+                return false;
+              } else {
+                log.warn("creating new session failed, going to sessions list");
+                this.routeService.navigateToSessions();
+                return false;
+              }
+            }));
+          }
+        }));
   }
 
   private createNewTempSession(): Observable<string> {

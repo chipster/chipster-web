@@ -1,21 +1,14 @@
-import {
-  Component,
-  ChangeDetectorRef,
-  ViewChild,
-  Output,
-  EventEmitter,
-  AfterViewInit,
-  OnInit
-} from "@angular/core";
-import { UploadService } from "../../../shared/services/upload.service";
-import { SessionResource } from "../../../shared/resources/session.resource";
-import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
-import { ErrorService } from "../../../core/errorhandler/error.service";
+import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ImportSessionModalComponent } from "./import-session-modal.component";
 import log from "loglevel";
 import { throwError } from "rxjs";
+import { flatMap } from 'rxjs/operators';
+import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
+import { UploadService } from "../../../shared/services/upload.service";
+import { ImportSessionModalComponent } from "./import-session-modal.component";
 
 @Component({
   selector: "ch-open-session-file",
@@ -42,7 +35,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     private sessionWorkerResource: SessionWorkerResource,
     private sessionResource: SessionResource,
     private restErrorService: RestErrorService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(
@@ -86,14 +79,14 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     this.fileStatus.set(file, "Extracting session");
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
-      .flatMap(response => {
+      .pipe(flatMap(response => {
         if (response.errors.length > 0) {
           return throwError(response.errors);
         }
         log.log("extracted, warnings: ", response.warnings, response);
         this.fileStatus.set(file, "Deleting temporary copy");
         return this.sessionResource.deleteDataset(sessionId, datasetId);
-      })
+      }))
       .subscribe(
         () => {
           this.fileStatus.set(file, undefined);

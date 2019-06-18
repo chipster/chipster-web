@@ -1,11 +1,11 @@
-import { SessionResource } from "../../../shared/resources/session.resource";
-import { Session, SessionState } from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { DialogModalService } from "./dialogmodal/dialogmodal.service";
-import * as _ from "lodash";
+import { Session, SessionState } from "chipster-js-common";
+import { flatMap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { SessionDataService } from "./session-data.service";
+import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
+import { DialogModalService } from "./dialogmodal/dialogmodal.service";
+import { SessionDataService } from "./session-data.service";
 
 @Injectable()
 export class SessionService {
@@ -24,7 +24,7 @@ export class SessionService {
   openRenameModalAndUpdate(session: Session) {
     this.dialogModalService
       .openSessionNameModal("Rename session", session.name)
-      .flatMap((name: string) => {
+      .pipe(flatMap((name: string) => {
         session.name = name;
 
         // 'save' temp session when renaming it
@@ -36,7 +36,7 @@ export class SessionService {
         }
 
         return this.updateSession(session);
-      })
+      }))
       .subscribe(null, err =>
         this.restErrorService.showError("Rename session failed", err)
       );
@@ -45,10 +45,10 @@ export class SessionService {
   openNotesModalAndUpdate(session: Session) {
     this.dialogModalService
       .openNotesModal(session)
-      .flatMap((notes: string) => {
+      .pipe(flatMap((notes: string) => {
         session.notes = notes;
         return this.updateSession(session);
-      })
+      }))
       .subscribe(null, err =>
         this.restErrorService.showError("Failed to edit session notes", err)
       );

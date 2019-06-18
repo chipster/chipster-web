@@ -4,7 +4,7 @@ import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
 import { forkJoin, of, Subject } from "rxjs";
 import { tap } from "rxjs/internal/operators/tap";
-import { debounceTime, filter, finalize, map, mergeMap, takeUntil } from "rxjs/operators";
+import { debounceTime, filter, finalize, flatMap, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../model/session/session-data";
@@ -236,7 +236,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
     this.dialogModalService
       .openSessionNameModal("New session", defaultName, "Create")
-      .flatMap(name => {
+      .pipe(flatMap(name => {
         if (!name) {
           name = defaultName;
         }
@@ -244,11 +244,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
         session = new Session(name);
         session.state = SessionState.Ready;
         return this.sessionResource.createSession(session);
-      }).
-      pipe(tap((sessionId: string) => {
-        session.sessionId = sessionId;
-        this.openSession(sessionId);
-      }))
+      }),
+        (tap((sessionId: string) => {
+          session.sessionId = sessionId;
+          this.openSession(sessionId);
+        })))
       .subscribe(null, (error: any) => {
         this.restErrorService.showError("Creating a new session failed", error);
       });
@@ -559,7 +559,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         session.name + "_copy",
         "Duplicate"
       )
-      .flatMap(name => {
+      .pipe(flatMap(name => {
         duplicateName = name;
         // use sessionData from preview if available
         if (
@@ -574,18 +574,18 @@ export class SessionListComponent implements OnInit, OnDestroy {
           );
           return this.sessionResource.loadSession(session.sessionId);
         }
-      })
-      .flatMap((sessionData: SessionData) => {
-        const copySessionObservable = this.sessionResource.copySession(
-          sessionData,
-          duplicateName,
-          false
-        );
-        return this.dialogModalService.openSpinnerModal(
-          "Duplicate session",
-          copySessionObservable
-        );
-      })
+      }),
+        flatMap((sessionData: SessionData) => {
+          const copySessionObservable = this.sessionResource.copySession(
+            sessionData,
+            duplicateName,
+            false
+          );
+          return this.dialogModalService.openSpinnerModal(
+            "Duplicate session",
+            copySessionObservable
+          );
+        }))
       .subscribe(
         () => {
           log.info("updating sessions after duplicate");

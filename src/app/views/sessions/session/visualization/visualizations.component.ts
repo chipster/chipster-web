@@ -12,7 +12,7 @@ import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { log } from "loglevel";
 import { mergeMap, takeUntil, tap } from "rxjs/operators";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";

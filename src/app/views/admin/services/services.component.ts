@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ConfigService } from '../../../shared/services/config.service';
-import { Observable, from, EMPTY, forkJoin } from 'rxjs';
-import { tap, catchError, filter } from 'rxjs/operators';
+import { Service } from 'chipster-js-common';
+import { EMPTY, forkJoin, from } from 'rxjs';
+import { catchError, filter, flatMap, tap } from 'rxjs/operators';
+import { TokenService } from '../../../core/authentication/token.service';
 import { RestErrorService } from '../../../core/errorhandler/rest-error.service';
 import { AuthHttpClientService } from '../../../shared/services/auth-http-client.service';
-import { Service } from 'chipster-js-common';
-import { TokenService } from '../../../core/authentication/token.service';
+import { ConfigService } from '../../../shared/services/config.service';
+
 
 @Component({
   selector: 'ch-services',
@@ -31,35 +32,37 @@ export class ServicesComponent implements OnInit {
     this.aliveMap = new Map();
     this.statusMap = new Map();
 
-    this.configService.getInternalServices(this.tokenService.getToken())
-      .flatMap(conf => {
+    this.configService.getInternalServices(this.tokenService.getToken()).pipe(
+      flatMap(conf => {
         // sort by role
         this.services = conf.sort((a, b) => a.role.localeCompare(b.role));
+        console.log(this.services);
         return from(this.services);
-      })
+      }))
       // skip services without adminUri
-      .pipe(filter(service => service.adminUri != null))
-      .flatMap(service => {
-        const requests = [];
-        requests.push(this.auhtHttpClient.get(service.adminUri + '/admin/alive').pipe(
-          tap(() => this.aliveMap.set(service.serviceId, 'OK'))),
-          catchError(err => {
-            console.log('alive check error', service.role, err);
-            this.aliveMap.set(service.role, err.status);
-            return EMPTY;
-          }));
-
-        requests.push(this.auhtHttpClient.getAuth(service.adminUri + '/admin/status')
-          .pipe(tap(stats => {
-            this.statusMap.set(service.role, stats);
-          }),
+      .pipe
+      (filter(service => service.adminUri != null),
+        (flatMap(service => {
+          const requests = [];
+          requests.push(this.auhtHttpClient.get(service.adminUri + '/admin/alive').pipe(
+            tap(() => this.aliveMap.set(service.serviceId, 'OK'))),
             catchError(err => {
-              console.log('get status error', service.role, err, err.status);
-              this.statusMap.set(service.role, err.status);
+              console.log('alive check error', service.role, err);
+              this.aliveMap.set(service.role, err.status);
               return EMPTY;
-            })));
-        return forkJoin(requests);
-      })
+            }));
+
+          requests.push(this.auhtHttpClient.getAuth(service.adminUri + '/admin/status')
+            .pipe(tap(stats => {
+              this.statusMap.set(service.role, stats);
+            }),
+              catchError(err => {
+                console.log('get status error', service.role, err, err.status);
+                this.statusMap.set(service.role, err.status);
+                return EMPTY;
+              })));
+          return forkJoin(requests);
+        })))
       .subscribe(null, err => this.restErrorService.showError('get services failed', err));
   }
 

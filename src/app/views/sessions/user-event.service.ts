@@ -1,20 +1,15 @@
-import { SessionResource } from "../../shared/resources/session.resource";
-import {
-  WsEvent,
-  Session,
-  Resource,
-  EventType
-} from "chipster-js-common";
 import { Injectable } from "@angular/core";
-import { Observable, Subject, of } from "rxjs";
-import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import { WebSocketService } from "../../shared/services/websocket.service";
-import { UserEventData } from "./user-event-data";
-import { SessionDataService } from "./session/session-data.service";
-import { mergeMap, publish, refCount, filter, map } from "rxjs/operators";
-import { SessionEventService } from "./session/session-event.service";
+import { Observable, of, Subject } from "rxjs";
+import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
+import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../core/errorhandler/error.service";
+import { SessionResource } from "../../shared/resources/session.resource";
+import { WebSocketService } from "../../shared/services/websocket.service";
+import { SessionDataService } from "./session/session-data.service";
+import { SessionEventService } from "./session/session-event.service";
+import { UserEventData } from "./user-event-data";
 
 @Injectable()
 export class UserEventService {

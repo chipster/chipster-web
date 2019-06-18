@@ -1,14 +1,15 @@
+import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ConfigService } from "../../../shared/services/config.service";
+import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
+import { flatMap } from 'rxjs/operators';
+import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
-import { FormGroup, FormBuilder, FormControl, FormArray } from "@angular/forms";
-import { HttpParams } from "@angular/common/http";
+import { ConfigService } from "../../../shared/services/config.service";
 import { FilterParam } from "./FilterParam";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
-import { TokenService } from "../../../core/authentication/token.service";
 
 
 @Component({
@@ -125,9 +126,9 @@ export class HistoryComponent implements OnInit {
       }
     }
     this.configService.getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
-      .flatMap(service => {
+      .pipe(flatMap(service => {
         return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory/rowcount', params);
-      })
+      }))
       .subscribe((recordNumber) => {
         this.jobNumber = recordNumber;
         this.collectionSize = Math.ceil(recordNumber / 500) * 10;
@@ -146,9 +147,9 @@ export class HistoryComponent implements OnInit {
       }
     }
     this.configService.getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
-      .flatMap(service => {
+      .pipe(flatMap(service => {
         return this.auhtHttpClient.getAuthWithParams(service.adminUri + '/admin/jobhistory', params);
-      })
+      }))
       .subscribe((jobHistoryList: JobHistory[]) => {
         this.jobListLoading = false;
         this.jobHistoryListWithParam = [];

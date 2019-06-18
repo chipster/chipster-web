@@ -1,12 +1,13 @@
-import { Component, Input, EventEmitter, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Session } from "chipster-js-common";
-import { SessionDataService } from "../session-data.service";
-import { SessionService } from "../session.service";
+import { flatMap } from 'rxjs/operators';
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
-import { DialogModalService } from "../dialogmodal/dialogmodal.service";
-import { SessionResource } from "../../../../shared/resources/session.resource";
 import { SessionData } from "../../../../model/session/session-data";
+import { SessionResource } from "../../../../shared/resources/session.resource";
+import { DialogModalService } from "../dialogmodal/dialogmodal.service";
+import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
+import { SessionService } from "../session.service";
 
 @Component({
   selector: "ch-session-details",
@@ -29,7 +30,7 @@ export class SessionDetailsComponent {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private sessionResource: SessionResource
-  ) {}
+  ) { }
 
   renameSessionModal() {
     this.sessionService.openRenameModalAndUpdate(this.session);
@@ -46,7 +47,7 @@ export class SessionDetailsComponent {
   duplicateModal() {
     this.dialogModalService
       .openSessionNameModal("Duplicate session", this.session.name + "_copy")
-      .flatMap(name => {
+      .pipe(flatMap(name => {
         const copySessionObservable = this.sessionResource.copySession(
           this.sessionData,
           name,
@@ -56,7 +57,7 @@ export class SessionDetailsComponent {
           "Duplicate session",
           copySessionObservable
         );
-      })
+      }))
       .subscribe(null, err =>
         this.restErrorService.showError("Duplicate session failed", err)
       );
