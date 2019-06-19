@@ -36,7 +36,6 @@ export class ServicesComponent implements OnInit {
       flatMap(conf => {
         // sort by role
         this.services = conf.sort((a, b) => a.role.localeCompare(b.role));
-        console.log(this.services);
         return from(this.services);
       }))
       // skip services without adminUri
