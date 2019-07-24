@@ -1,13 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import {
-  AfterViewInit,
-  Component,
-  ComponentFactoryResolver,
-  Input,
-  OnDestroy,
-  ViewChild,
-  ViewContainerRef
-} from "@angular/core";
+import { AfterViewInit, Component, ComponentFactoryResolver, Input, OnDestroy, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
 import { Observable, of as observableOf, Subject } from "rxjs";
@@ -267,7 +259,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
         }
 
         if (nodeName === "TABLE") {
-          // bootstap table syle
+          // bootsrtap table syle
           element.classList.add("table");
           element.classList.add("table-striped");
         }

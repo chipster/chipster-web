@@ -1,5 +1,3 @@
-
-import {filter, takeUntil, mergeMap, map} from 'rxjs/operators';
 import { DOCUMENT } from "@angular/common";
 import {
   Component,
@@ -16,7 +14,8 @@ import { Category, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject, combineLatest, of ,  Subject } from "rxjs";
+import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
+import { filter, map, mergeMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -110,6 +109,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   );
 
   private unsubscribe: Subject<any> = new Subject();
+  manualModalRef: any;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -152,6 +152,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.unsubscribe.next();
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
+
+    if (this.manualModalRef != null) {
+      this.manualModalRef.close();
+    }
   }
 
   selectModule(module: Module) {
@@ -244,10 +248,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   openManualModal() {
-    const modalRef = this.modalService.open(ManualModalComponent, {
+    this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg"
     });
-    modalRef.componentInstance.tool = this.selectedTool.tool;
+    this.manualModalRef.componentInstance.tool = this.selectedTool.tool;
   }
 
   private createToolSearchList(): ToolSearchListItem[] {
@@ -316,8 +320,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private subscribeToToolEvents() {
     // subscribe to selected tool
     this.store
-      .select("selectedTool").pipe(
-      takeUntil(this.unsubscribe))
+      .select("selectedTool")
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedTool) => {
         this.selectedTool = t;
         this.runEnabled = false;
@@ -328,8 +332,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     combineLatest(
       this.store.select("selectedTool"),
       this.store.select("selectedDatasets")
-    ).pipe(
-      takeUntil(this.unsubscribe))
+    )
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           this.store.dispatch({
@@ -359,52 +363,55 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // validate inputs
     this.store
-      .select("selectedToolWithInputs").pipe(
-      filter(value => value !== null),
-      map((toolWithInputs: SelectedToolWithInputs) => {
-        const inputsValid = this.toolSelectionService.validateInputs(
-          toolWithInputs
-        );
-        const runForEachValid = this.toolSelectionService.validateRunForEach(
-          toolWithInputs,
-          this.sessionData
-        );
+      .select("selectedToolWithInputs")
+      .pipe(
+        filter(value => value !== null),
+        map((toolWithInputs: SelectedToolWithInputs) => {
+          const inputsValid = this.toolSelectionService.validateInputs(
+            toolWithInputs
+          );
+          const runForEachValid = this.toolSelectionService.validateRunForEach(
+            toolWithInputs,
+            this.sessionData
+          );
 
-        // don't try to bind and validate phenodata unless inputs are valid
-        const phenodataBindings = inputsValid
-          ? this.toolService.bindPhenodata(toolWithInputs)
-          : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
+          // don't try to bind and validate phenodata unless inputs are valid
+          const phenodataBindings = inputsValid
+            ? this.toolService.bindPhenodata(toolWithInputs)
+            : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
 
-        const phenodataValid = inputsValid
-          ? this.toolSelectionService.validatePhenodata(phenodataBindings)
-          : false;
+          const phenodataValid = inputsValid
+            ? this.toolSelectionService.validatePhenodata(phenodataBindings)
+            : false;
 
-        // phenodata validation message, here for now
-        let phenodataMessage = "";
-        if (!phenodataValid) {
-          if (!inputsValid) {
-            phenodataMessage = "Inputs need to be valid to determine phenodata";
-          } else if (phenodataBindings.length > 1) {
-            phenodataMessage =
-              "Tool with multiple phenodata inputs not supported yet";
-          } else {
-            phenodataMessage =
-              "No phenodata available for " +
-              toolWithInputs.inputBindings[0].datasets[0].name;
+          // phenodata validation message, here for now
+          let phenodataMessage = "";
+          if (!phenodataValid) {
+            if (!inputsValid) {
+              phenodataMessage =
+                "Inputs need to be valid to determine phenodata";
+            } else if (phenodataBindings.length > 1) {
+              phenodataMessage =
+                "Tool with multiple phenodata inputs not supported yet";
+            } else {
+              phenodataMessage =
+                "No phenodata available for " +
+                toolWithInputs.inputBindings[0].datasets[0].name;
+            }
           }
-        }
 
-        return Object.assign(
-          {
-            inputsValid: inputsValid,
-            runForEachValid: runForEachValid,
-            phenodataValid: phenodataValid,
-            phenodataMessage: phenodataMessage,
-            phenodataBindings: phenodataBindings
-          },
-          toolWithInputs
-        );
-      }),)
+          return Object.assign(
+            {
+              inputsValid: inputsValid,
+              runForEachValid: runForEachValid,
+              phenodataValid: phenodataValid,
+              phenodataMessage: phenodataMessage,
+              phenodataBindings: phenodataBindings
+            },
+            toolWithInputs
+          );
+        })
+      )
       .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
@@ -414,15 +421,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // populate parameters after input bindings change (and have been validated)
     this.store
-      .select("selectedToolWithValidatedInputs").pipe(
-      filter(value => value !== null),
-      mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
-        // populate params is async, and returns the same tool with params populated
-        // if there are no params, just return the same tool as observable
-        return toolWithInputs.tool.parameters.length > 0
-          ? this.toolSelectionService.populateParameters(toolWithInputs)
-          : of(toolWithInputs);
-      }),)
+      .select("selectedToolWithValidatedInputs")
+      .pipe(
+        filter(value => value !== null),
+        mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
+          // populate params is async, and returns the same tool with params populated
+          // if there are no params, just return the same tool as observable
+          return toolWithInputs.tool.parameters.length > 0
+            ? this.toolSelectionService.populateParameters(toolWithInputs)
+            : of(toolWithInputs);
+        })
+      )
       .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
@@ -433,39 +442,41 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // validate parameters after parameters changed (or populated)
     combineLatest(
       this.store
-        .select("selectedToolWithPopulatedParams").pipe(
-        filter(value => value !== null)),
+        .select("selectedToolWithPopulatedParams")
+        .pipe(filter(value => value !== null)),
       this.parametersChanged$ // signals when user changes parameters
-    ).pipe(
-      map(([toolWithParamsAndValidatedInputs]) => {
-        const parameterValidations: Map<
-          string,
-          ParameterValidationResult
-        > = this.toolSelectionService.validateParameters(
-          toolWithParamsAndValidatedInputs
-        );
-        const parametersValid = Array.from(parameterValidations.values()).every(
-          (result: ParameterValidationResult) => result.valid
-        );
-        const validationMessage = this.toolSelectionService.getValidationMessage(
-          parametersValid,
-          toolWithParamsAndValidatedInputs.inputsValid,
-          toolWithParamsAndValidatedInputs.phenodataValid
-        );
+    )
+      .pipe(
+        map(([toolWithParamsAndValidatedInputs]) => {
+          const parameterValidations: Map<
+            string,
+            ParameterValidationResult
+          > = this.toolSelectionService.validateParameters(
+            toolWithParamsAndValidatedInputs
+          );
+          const parametersValid = Array.from(
+            parameterValidations.values()
+          ).every((result: ParameterValidationResult) => result.valid);
+          const validationMessage = this.toolSelectionService.getValidationMessage(
+            parametersValid,
+            toolWithParamsAndValidatedInputs.inputsValid,
+            toolWithParamsAndValidatedInputs.phenodataValid
+          );
 
-        return Object.assign(
-          {
-            valid:
-              toolWithParamsAndValidatedInputs.inputsValid &&
-              toolWithParamsAndValidatedInputs.phenodataValid &&
-              parametersValid,
-            parametersValid: parametersValid,
-            message: validationMessage,
-            parameterResults: parameterValidations
-          },
-          toolWithParamsAndValidatedInputs
-        );
-      }))
+          return Object.assign(
+            {
+              valid:
+                toolWithParamsAndValidatedInputs.inputsValid &&
+                toolWithParamsAndValidatedInputs.phenodataValid &&
+                parametersValid,
+              parametersValid: parametersValid,
+              message: validationMessage,
+              parameterResults: parameterValidations
+            },
+            toolWithParamsAndValidatedInputs
+          );
+        })
+      )
       .subscribe((validatedTool: ValidatedTool) => {
         this.store.dispatch({
           type: SET_VALIDATED_TOOL,
@@ -484,8 +495,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private subscribeToJobEvents() {
     this.sessionEventService
-      .getJobStream().pipe(
-      takeUntil(this.unsubscribe))
+      .getJobStream()
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateJobs();
