@@ -525,6 +525,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           !this.filter || this.filter.has(d.datasetId)
         )
       )
+      .on("mouseover", function (d) {
+        self.showTooltip(this, d, true);
+      })
+      .on("mouseout", function () {
+        self.hideTooltip();
+      })
       .classed("phenodata-node", true);
     // .classed("selected-dataset", d => this.isSelectedDataset(d.dataset));
 
@@ -781,7 +787,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .on("mouseover", function (d) {
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", true);
-          self.showTooltip(this, d);
+          self.showTooltip(this, d, false);
         }
       })
       .on("mouseout", function () {
@@ -806,7 +812,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             if (self.dragStarted) {
               self.dragStarted = false;
               self.dragEnd();
-              self.showTooltip(this, d, 0);
+              self.showTooltip(this, d, false, 0);
             }
           })
       );
@@ -1179,7 +1185,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  showTooltip(element: any, dataset: any, delay = 200) {
+  showTooltip(element: any, dataset: any, isPhenodatanode: boolean, delay = 200) {
     const datasetLeft = element.getBoundingClientRect().left;
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
@@ -1197,8 +1203,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .duration(delay)
       .style("opacity", 0.9);
 
-    if (dataset) {
+    if (dataset && !isPhenodatanode) {
       this.datasetTooltip.html(dataset.name);
+    }
+
+    if (isPhenodatanode) {
+      this.datasetTooltip.html("phenodata" + "-" + dataset.name);
     }
     this.datasetTooltip
       .style("left", datasetLeft - 5 + "px")
