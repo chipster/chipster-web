@@ -526,9 +526,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         )
       )
       .on("mouseover", function (d) {
+        d3.select(this).style("fill", "#e9ecef");
         self.showTooltip(this, d, true);
       })
       .on("mouseout", function () {
+        d3.select(this).style("fill", "white");
         self.hideTooltip();
       })
       .classed("phenodata-node", true);
@@ -785,12 +787,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         })
       )
       .on("mouseover", function (d) {
+        d3.select(this).style("fill", "#e9ecef");
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", true);
           self.showTooltip(this, d, false);
         }
       })
       .on("mouseout", function () {
+        d3.select(this).style("fill", "white");
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", false);
           self.hideTooltip();
