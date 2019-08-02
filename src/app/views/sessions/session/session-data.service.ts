@@ -1,12 +1,34 @@
-
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, EventType, Job, JobInput, JobState, Resource, Rule, Session, WsEvent } from "chipster-js-common";
+import {
+  Dataset,
+  EventType,
+  Job,
+  JobInput,
+  JobState,
+  Resource,
+  Rule,
+  Session,
+  WsEvent
+} from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { forkJoin as observableForkJoin, from as observableFrom, merge as observableMerge, Observable } from 'rxjs';
-import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from 'rxjs/operators';
+import {
+  forkJoin as observableForkJoin,
+  from as observableFrom,
+  merge as observableMerge,
+  Observable
+} from "rxjs";
+import {
+  catchError,
+  concatMap,
+  filter,
+  map,
+  merge,
+  mergeMap,
+  takeUntil
+} from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -17,7 +39,6 @@ import { ConfigService } from "../../../shared/services/config.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SessionEventService } from "./session-event.service";
-
 
 @Injectable()
 export class SessionDataService {
@@ -34,7 +55,7 @@ export class SessionDataService {
     private toastrService: ToastrService,
     private restErrorService: RestErrorService,
     private http: HttpClient
-  ) { }
+  ) {}
 
   getSessionId(): string {
     return this.sessionId;
@@ -105,7 +126,8 @@ export class SessionDataService {
       catchError(err => {
         log.info("create derived dataset failed", err);
         throw err;
-      }));
+      })
+    );
   }
 
   cancelJob(job: Job) {
@@ -147,34 +169,82 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
-  // need to change the post function, why we have post here? 
-  getDatasetUrl(dataset: Dataset): Observable<string> {
+  /**
+   * Get a limited token for session
+   *
+   * The token is valid only for this one session, only for read-only operations and only for
+   * a limited time, 24 hours by default.
+   */
+  getTokenForSession(sessionId: string): Observable<string> {
     const headers = new HttpHeaders({
       Authorization: this.tokenService.getTokenHeader().Authorization
     });
 
-    const datasetToken$ = this.configService
-      .getSessionDbUrl().pipe(
-        mergeMap((sessionDbUrl: string) =>
-          this.http.post(
-            sessionDbUrl +
-            "/datasettokens/sessions/" +
-            this.getSessionId() +
-            "/datasets/" +
-            dataset.datasetId, null, { headers: headers, withCredentials: true }
-          )
-        ),
-        map((datasetToken: any) => datasetToken.tokenKey));
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl: string) =>
+        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, {
+          headers: headers,
+          withCredentials: true
+        })
+      ),
+      map((datasetToken: any) => datasetToken.tokenKey)
+    );
+  }
 
+  /**
+   * Get a limited token for dataset
+   *
+   * The token is valid only for this one dataset, only for read-only operations and only for
+   * a limited time, 1 minute by default.
+   */
+  getTokenForDataset(sessionId: string, datasetId: string): Observable<string> {
+    const headers = new HttpHeaders({
+      Authorization: this.tokenService.getTokenHeader().Authorization
+    });
+
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl: string) =>
+        this.http.post(
+          sessionDbUrl +
+            "/tokens/sessions/" +
+            sessionId +
+            "/datasets/" +
+            datasetId,
+          null,
+          { headers: headers, withCredentials: true }
+        )
+      ),
+      map((datasetToken: any) => datasetToken.tokenKey)
+    );
+  }
+
+  /**
+   * Get an pre-authenticated url of the dataset file
+   *
+   * When the url is used for something that can't set the Authorization header
+   * (e.g. browser WebSocket client, file downloads and external visualization libraries)
+   * we must include the authentiation information in the URL where it's more visible to
+   * the user and in server logs.
+   *
+   * If we would use the user's own token in the URL, the user might share
+   * this dataset URL without realising that the token gives access to all
+   * session of the user.
+   *
+   * Use limited token instead, which is valid only for this one dataset on only for a limited
+   * time.
+   */
+  getDatasetUrl(dataset: Dataset): Observable<string> {
     return observableForkJoin(
-      datasetToken$,
+      this.getTokenForDataset(this.getSessionId(), dataset.datasetId),
       this.configService.getFileBrokerUrl()
-    ).pipe(map(results => {
-      const [datasetToken, url] = results;
-      return `${url}/sessions/${this.getSessionId()}/datasets/${
-        dataset.datasetId
+    ).pipe(
+      map(results => {
+        const [datasetToken, url] = results;
+        return `${url}/sessions/${this.getSessionId()}/datasets/${
+          dataset.datasetId
         }?token=${datasetToken}`;
-    }));
+      })
+    );
   }
 
   exportDatasets(datasets: Dataset[]) {
@@ -196,8 +266,8 @@ export class SessionDataService {
       url$,
       3000,
       "Browser's pop-up blocker prevented some exports. " +
-      "Please disable the pop-up blocker for this site or " +
-      "export the files one by one."
+        "Please disable the pop-up blocker for this site or " +
+        "export the files one by one."
     );
   }
 
@@ -259,10 +329,11 @@ export class SessionDataService {
   }
 
   deletePersonalRules(session: Session) {
-    return observableFrom(this.getPersonalRules(session.rules)).pipe(concatMap(
-      (rule: Rule) =>
+    return observableFrom(this.getPersonalRules(session.rules)).pipe(
+      concatMap((rule: Rule) =>
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
-    ));
+      )
+    );
   }
 
   /**
@@ -400,19 +471,19 @@ export class SessionDataService {
 
     const toast = this.toastrService.info(msg, "", options);
 
-    toast.onAction.pipe(
-      filter(text => text === BTN_UNDO))
-      .subscribe(
-        buttonText => {
-          this.deleteDatasetsUndo(deletedDatasets);
-          this.toastrService.clear(toast.toastId);
-        },
-        err => this.errorService.showError("error in dataset deletion", err)
-      );
+    toast.onAction.pipe(filter(text => text === BTN_UNDO)).subscribe(
+      buttonText => {
+        this.deleteDatasetsUndo(deletedDatasets);
+        this.toastrService.clear(toast.toastId);
+      },
+      err => this.errorService.showError("error in dataset deletion", err)
+    );
 
-    toast.onHidden.pipe(
-      takeUntil(toast.onAction), // only if there was no action
-      merge(toast.onAction.pipe(filter(text => text === BTN_DELETE))))
+    toast.onHidden
+      .pipe(
+        takeUntil(toast.onAction), // only if there was no action
+        merge(toast.onAction.pipe(filter(text => text === BTN_DELETE)))
+      )
       .subscribe(
         () => {
           this.deleteDatasetsNow(deletedDatasets);

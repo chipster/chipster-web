@@ -231,13 +231,12 @@ export class AuthenticationService {
   }
 
   saveToken(token: Token) {
-    const roles = JSON.parse(token.rolesJson);
     this.tokenService.setAuthToken(
       token.tokenKey,
       token.username,
       token.name,
       token.validUntil,
-      roles
+      token.roles
     );
   }
 }

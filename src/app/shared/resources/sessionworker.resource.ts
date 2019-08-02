@@ -17,12 +17,7 @@ export class SessionWorkerResource {
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.pipe(
-      map(
-        (url: string) =>
-          `${url}/sessions/${sessionId}?token=${this.tokenService.getToken()}`
-      )
-    );
+    return apiUrl$.pipe(map((url: string) => `${url}/sessions/${sessionId}`));
   }
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
