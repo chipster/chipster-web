@@ -1,25 +1,20 @@
 
-import {takeUntil} from 'rxjs/operators';
-import { SessionDataService } from "../../session-data.service";
-import * as d3 from "d3";
-import { Input, Component, NgZone, OnDestroy, OnChanges } from "@angular/core";
-import TSVFile from "../../../../../model/tsv/TSVFile";
-import { FileResource } from "../../../../../shared/resources/fileresource";
+import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, ViewChild } from "@angular/core";
 import { Response } from "@angular/http";
 import { Dataset } from "chipster-js-common";
-import { VisualizationModalService } from "../visualizationmodal.service";
-import { SessionData } from "../../../../../model/session/session-data";
-import {
-  Tags,
-  TypeTagService
-} from "../../../../../shared/services/typetag.service";
+import * as d3 from "d3";
+import { Subject } from "rxjs";
+import { takeUntil } from 'rxjs/operators';
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { Subject } from "rxjs";
-import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
-import { ViewChild } from "@angular/core";
-import { AfterViewInit } from "@angular/core";
+import { SessionData } from "../../../../../model/session/session-data";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import { FileResource } from "../../../../../shared/resources/fileresource";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
+import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { Tags, TypeTagService } from "../../../../../shared/services/typetag.service";
+import { SessionDataService } from "../../session-data.service";
+import { VisualizationModalService } from "../visualizationmodal.service";
 
 @Component({
   selector: "ch-spreadsheet-visualization",
@@ -69,7 +64,7 @@ export class SpreadsheetVisualizationComponent
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService
-  ) {}
+  ) { }
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -89,21 +84,24 @@ export class SpreadsheetVisualizationComponent
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
-      takeUntil(this.unsubscribe))
+        takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           // parse all loaded data
           let parsedTSV = d3.tsvParseRows(result);
 
-          // limit the number of rows to show
-          if (parsedTSV.length > this.maxRowsimit + 1) {
-            parsedTSV = parsedTSV.slice(0, this.maxRowsimit + 1);
-          }
+          // if its a modal, show the entire file otherwise limit the rows
+          if (!this.modalMode) {
+            // limit the number of rows to show
+            if (parsedTSV.length > this.maxRowsimit + 1 && !this.modalMode) {
+              parsedTSV = parsedTSV.slice(0, this.maxRowsimit + 1);
+            }
 
-          // limit the number of cells to show
-          const columns = parsedTSV[0].length;
-          if (parsedTSV.length * columns > this.maxCellsLimit) {
-            parsedTSV = parsedTSV.slice(0, this.maxCellsLimit / columns);
+            // limit the number of cells to show
+            const columns = parsedTSV[0].length;
+            if (parsedTSV.length * columns > this.maxCellsLimit) {
+              parsedTSV = parsedTSV.slice(0, this.maxCellsLimit / columns);
+            }
           }
 
           // skip comment lines, e.g. lines starting with ## in a VCF file
