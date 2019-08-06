@@ -1,6 +1,7 @@
 import { HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import jwt_decode from "jwt-decode";
+import log from "loglevel";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable()
@@ -17,7 +18,16 @@ export class TokenService {
   private roles: string[] = [];
 
   constructor() {
-    this.setAuthToken(this.getToken());
+    let token = this.getToken();
+    if (token != null && token.indexOf(".") === -1) {
+      // probably old UUID token, clear everything from local storage
+      log.info(
+        "found a token from the local storage, but it's not a JWS token. Clearing local storage..."
+      );
+      localStorage.clear();
+      token = null;
+    }
+    this.setAuthToken(token);
   }
 
   static getUsernameFromUserId(userId: string) {
