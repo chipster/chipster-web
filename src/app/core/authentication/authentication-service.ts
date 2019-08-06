@@ -1,6 +1,6 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Token, User } from "chipster-js-common";
+import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
 import {
@@ -45,10 +45,10 @@ export class AuthenticationService {
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
-    this.tokenService.setAuthToken(null, null, null, null, null);
+    this.tokenService.setAuthToken(null);
     return this.requestToken(username, password).pipe(
-      map((response: Token) => {
-        this.saveToken(response);
+      map((token: string) => {
+        this.saveToken(token);
         this.scheduleTokenRefresh();
       })
     );
@@ -59,22 +59,19 @@ export class AuthenticationService {
     this.tokenService.clear();
   }
 
-  requestToken(username: string, password: string): Observable<any> {
+  requestToken(username: string, password: string): Observable<string> {
     log.info("request token");
     return this.configService.getAuthUrl().pipe(
       tap(url => log.info("url", url)),
       mergeMap(authUrl => {
         const url = `${authUrl}/tokens`;
-        const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-        return this.httpClient.post<Token>(
+        return this.httpClient.post(
           url,
           {},
           {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
+            headers: this.tokenService.getHttpBasicHeader(username, password),
+            responseType: "text"
           }
         );
       })
@@ -92,29 +89,19 @@ export class AuthenticationService {
       .getAuthUrl()
       .flatMap(authUrl => {
         const url = `${authUrl}/tokens/refresh`;
-        const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
 
-        return this.httpClient.post<Token>(
+        return this.httpClient.post(
           url,
           {},
           {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
+            headers: this.tokenService.getTokenHeader(),
+            responseType: "text"
           }
         );
       })
       .subscribe(
-        (response: Token) => {
-          const roles = JSON.parse(response.rolesJson);
-          this.tokenService.setAuthToken(
-            response.tokenKey,
-            response.username,
-            response.name,
-            response.validUntil,
-            roles
-          );
+        (response: string) => {
+          this.tokenService.setAuthToken(response);
         },
         (error: any) => {
           if (error.status === 403) {
@@ -135,38 +122,30 @@ export class AuthenticationService {
       return observableOf(false);
     }
 
-    return this.configService.getAuthUrl().flatMap(authUrl => {
-      const url = `${authUrl}/tokens/check`;
-      const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => {
+        const url = `${authUrl}/tokens/check`;
 
-      return this.httpClient
-        .post<Token>(
-          url,
-          {},
-          {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
-          }
-        )
-        .pipe(
-          map((response: Token) => {
-            this.saveToken(response);
-            return observableOf(true);
-          }),
-          catchError(error => {
-            if (error.status === 403) {
-              // token is invalid
-              log.info("check token got 403 -> token invalid");
-              return observableOf(false);
-            } else {
-              // for now, throw others
-              throw error;
-            }
-          })
-        );
-    });
+        return this.httpClient
+          .get<any>(url, this.tokenService.getTokenParams(false))
+          .pipe(
+            map((response: any) => {
+              log.info("token is valid");
+              return true;
+            }),
+            catchError(error => {
+              if (error.status === 403) {
+                // token is invalid
+                log.info("check token got 403 -> token invalid");
+                return observableOf(false);
+              } else {
+                // for now, throw others
+                throw error;
+              }
+            })
+          );
+      })
+    );
   }
 
   scheduleTokenRefresh() {
@@ -230,13 +209,7 @@ export class AuthenticationService {
     });
   }
 
-  saveToken(token: Token) {
-    this.tokenService.setAuthToken(
-      token.tokenKey,
-      token.username,
-      token.name,
-      token.validUntil,
-      token.roles
-    );
+  saveToken(token: string) {
+    this.tokenService.setAuthToken(token);
   }
 }

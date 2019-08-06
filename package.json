@@ -35,6 +35,7 @@
     "d3-context-menu": "^1.1.1",
     "igv": "^2.2.10",
     "jquery": "^3.4.1",
+    "jwt-decode": "^2.2.0",
     "lodash": "^4.17.11",
     "loglevel": "^1.6.1",
     "ng2-pdf-viewer": "^5.2.4",

@@ -1,6 +1,5 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Token } from "chipster-js-common";
 import log from "loglevel";
 import { UserManager } from "oidc-client";
 import { from, Observable } from "rxjs";
@@ -119,7 +118,7 @@ export class OidcService {
           idToken: user.id_token
         })
       ),
-      tap((token: Token) => {
+      tap((token: string) => {
         this.authenticationService.saveToken(token);
         this.authenticationService.scheduleTokenRefresh();
       })

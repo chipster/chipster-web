@@ -1,34 +1,11 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import {
-  Dataset,
-  EventType,
-  Job,
-  JobInput,
-  JobState,
-  Resource,
-  Rule,
-  Session,
-  WsEvent
-} from "chipster-js-common";
+import { Dataset, EventType, Job, JobInput, JobState, Resource, Rule, Session, WsEvent } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import {
-  forkJoin as observableForkJoin,
-  from as observableFrom,
-  merge as observableMerge,
-  Observable
-} from "rxjs";
-import {
-  catchError,
-  concatMap,
-  filter,
-  map,
-  merge,
-  mergeMap,
-  takeUntil
-} from "rxjs/operators";
+import { forkJoin as observableForkJoin, from as observableFrom, merge as observableMerge, Observable } from "rxjs";
+import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -176,16 +153,9 @@ export class SessionDataService {
    * a limited time, 24 hours by default.
    */
   getTokenForSession(sessionId: string): Observable<string> {
-    const headers = new HttpHeaders({
-      Authorization: this.tokenService.getTokenHeader().Authorization
-    });
-
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) =>
-        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, {
-          headers: headers,
-          withCredentials: true
-        })
+        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, this.tokenService.getTokenParams(true))
       ),
       map((datasetToken: any) => datasetToken.tokenKey)
     );
@@ -198,10 +168,6 @@ export class SessionDataService {
    * a limited time, 1 minute by default.
    */
   getTokenForDataset(sessionId: string, datasetId: string): Observable<string> {
-    const headers = new HttpHeaders({
-      Authorization: this.tokenService.getTokenHeader().Authorization
-    });
-
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) =>
         this.http.post(
@@ -211,7 +177,7 @@ export class SessionDataService {
             "/datasets/" +
             datasetId,
           null,
-          { headers: headers, withCredentials: true }
+          this.tokenService.getTokenParams(true)
         )
       ),
       map((datasetToken: any) => datasetToken.tokenKey)
@@ -418,7 +384,7 @@ export class SessionDataService {
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
   deleteDatasetsLater(datasets: Dataset[]) {
-    console.log("deleting datasets" + datasets);
+    log.info("deleting datasets" + datasets);
     // make a copy so that further selection changes won't change the array
     const deletedDatasets = _.clone(datasets);
 
@@ -506,7 +472,7 @@ export class SessionDataService {
 
   /*
     Filter out uploading datasets
-  
+
     Datasets are created when comp starts to upload them, but there are no type tags until the
     upload is finished. Hide these uploading datasets from the workflow, file list and dataset search.
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that

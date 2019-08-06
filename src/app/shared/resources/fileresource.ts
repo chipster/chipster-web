@@ -1,12 +1,10 @@
-
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import { Observable, of as observableOf } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { Observable, of as observableOf } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "../services/config.service";
-
 
 @Injectable()
 export class FileResource {
@@ -14,7 +12,7 @@ export class FileResource {
     private configService: ConfigService,
     private http: HttpClient,
     private tokenService: TokenService
-  ) { }
+  ) {}
 
   /**
    *
@@ -40,24 +38,34 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const headers = new HttpHeaders({
-      'Authorization': this.tokenService.getTokenHeader().Authorization
-    });
+
     if (isReqArrayBuffer) {
       // For Bam Viewer, we need array buffer as reponse
-      return apiUrl$.pipe(mergeMap((url: string) =>
-        this.http.get(
-          `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-          { headers: headers, withCredentials: true, responseType: 'arraybuffer' }
+      return apiUrl$.pipe(
+        mergeMap((url: string) =>
+          this.http.get(
+            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
+            {
+              headers: this.tokenService.getTokenHeader(),
+              withCredentials: true,
+              responseType: "arraybuffer"
+            }
+          )
         )
-      ));
+      );
     } else {
-      return apiUrl$.pipe(mergeMap((url: string) =>
-        this.http.get(
-          `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-          { headers: headers, withCredentials: true, responseType: 'text' }
+      return apiUrl$.pipe(
+        mergeMap((url: string) =>
+          this.http.get(
+            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
+            {
+              headers: this.tokenService.getTokenHeader(),
+              withCredentials: true,
+              responseType: "text"
+            }
+          )
         )
-      ));
+      );
     }
   }
 
@@ -77,43 +85,54 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const rangeHeader = new HttpHeaders({
-      'Authorization': this.tokenService.getTokenHeader().Authorization,
-      'range': `bytes=0-${maxBytes}`
-    });
+    const headers = this.tokenService.getTokenHeader();
+    headers.set("range", `bytes=0-${maxBytes}`);
     if (isReqArrayBuffer) {
-      return apiUrl$.pipe(mergeMap((url: string) =>
-        this.http.get(
-          `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: rangeHeader, withCredentials: true,
-            responseType: "arraybuffer", reportProgress: true
-          })
-
-      ));
+      return apiUrl$.pipe(
+        mergeMap((url: string) =>
+          this.http.get(
+            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
+            {
+              headers: headers,
+              withCredentials: true,
+              responseType: "arraybuffer",
+              reportProgress: true
+            }
+          )
+        )
+      );
     } else {
-      return apiUrl$.pipe(mergeMap((url: string) =>
-        this.http.get(
-          `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: rangeHeader, withCredentials: true,
-            responseType: "text", reportProgress: true
-          })
-      ));
+      return apiUrl$.pipe(
+        mergeMap((url: string) =>
+          this.http.get(
+            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
+            {
+              headers: headers,
+              withCredentials: true,
+              responseType: "text",
+              reportProgress: true
+            }
+          )
+        )
+      );
     }
   }
 
-
-  uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
+  uploadData(
+    sessionId: string,
+    datasetId: string,
+    data: string
+  ): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const headers = new HttpHeaders({
-      'Authorization': this.tokenService.getTokenHeader().Authorization
-    });
-    return apiUrl$.pipe(mergeMap((url: string) =>
-      this.http.put(
-        `${url}/sessions/${sessionId}/datasets/${datasetId}`, {
-          observe: data, headers: headers, withCredentials: true,
-          reportProgress: true,
-        }
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.put(`${url}/sessions/${sessionId}/datasets/${datasetId}`, {
+          observe: data,
+          headers: this.tokenService.getTokenHeader(),
+          withCredentials: true,
+          reportProgress: true
+        })
       )
-    ));
+    );
   }
 }
