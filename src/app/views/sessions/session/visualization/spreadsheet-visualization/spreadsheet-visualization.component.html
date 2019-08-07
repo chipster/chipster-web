@@ -6,7 +6,7 @@
       style=" font-style: italic">View
       in <span class="btn-link" (click)="showAll()">full screen
       </span> to see all the rows. </span></label>
-  <label style="font-size: smaller;" *ngIf="fullFileVisible ">{{lineCount}} rows</label>
+  <label style="font-size: smaller;" *ngIf="fullFileVisible && !showingTruncated">{{lineCount}} rows</label>
   <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
 
 </div>

@@ -36,7 +36,7 @@ export class SpreadsheetVisualizationComponent
 
   // takes ~100 ms with ADSL
   private fileSizeLimit = 100 * 1024;
-  private modalFileSizeLimit = 35 * 1024 * 1024;
+  private modalFileSizeLimit = 20 * 1024 * 1024;
   // nice round number for tables with reasonable number of columns
   private maxRowsimit = 100;
   // limit the number of rows even further if there are hundreds or thousands
@@ -88,6 +88,8 @@ export class SpreadsheetVisualizationComponent
     // limiting the full screen downloaded stream size also as it freezes the view
     const modalfileSizeLimit = this.dataset.size < this.modalFileSizeLimit ? null : this.modalFileSizeLimit;
     const maxBytes = this.modalMode ? modalfileSizeLimit : this.fileSizeLimit;
+
+    console.log(maxBytes);
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
