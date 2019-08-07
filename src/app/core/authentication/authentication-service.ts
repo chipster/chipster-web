@@ -35,7 +35,17 @@ export class AuthenticationService {
   }
 
   init() {
-    // Need to check after code change
+    let token = this.tokenService.getToken();
+    if (token != null && token.indexOf(".") === -1) {
+      // probably old UUID token, clear everything from local storage
+      log.info(
+        "found a token from the local storage, but it's not a JWS token. Clearing local storage..."
+      );
+      localStorage.clear();
+      token = null;
+    }
+    this.saveToken(token);
+
     this.user$ = this.getUser().pipe(
       publishReplay(1),
       refCount()
@@ -49,7 +59,6 @@ export class AuthenticationService {
     return this.requestToken(username, password).pipe(
       map((token: string) => {
         this.saveToken(token);
-        this.scheduleTokenRefresh();
       })
     );
   }
@@ -87,18 +96,20 @@ export class AuthenticationService {
 
     this.configService
       .getAuthUrl()
-      .flatMap(authUrl => {
-        const url = `${authUrl}/tokens/refresh`;
+      .pipe(
+        mergeMap(authUrl => {
+          const url = `${authUrl}/tokens/refresh`;
 
-        return this.httpClient.post(
-          url,
-          {},
-          {
-            headers: this.tokenService.getTokenHeader(),
-            responseType: "text"
-          }
-        );
-      })
+          return this.httpClient.post(
+            url,
+            {},
+            {
+              headers: this.tokenService.getTokenHeader(),
+              responseType: "text"
+            }
+          );
+        })
+      )
       .subscribe(
         (response: string) => {
           this.tokenService.setAuthToken(response);
@@ -156,7 +167,9 @@ export class AuthenticationService {
   }
 
   stopTokenRefresh() {
-    window.clearInterval(this.tokenRefreshSchedulerId);
+    if (this.tokenRefreshSchedulerId != null) {
+      window.clearInterval(this.tokenRefreshSchedulerId);
+    }
   }
 
   getUser(): Observable<User> {
@@ -211,5 +224,10 @@ export class AuthenticationService {
 
   saveToken(token: string) {
     this.tokenService.setAuthToken(token);
+    this.stopTokenRefresh();
+
+    if (token != null) {
+      this.scheduleTokenRefresh();
+    }
   }
 }

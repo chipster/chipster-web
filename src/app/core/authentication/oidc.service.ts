@@ -120,7 +120,6 @@ export class OidcService {
       ),
       tap((token: string) => {
         this.authenticationService.saveToken(token);
-        this.authenticationService.scheduleTokenRefresh();
       })
     );
   }
