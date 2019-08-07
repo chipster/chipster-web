@@ -1,6 +1,6 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Token, User } from "chipster-js-common";
+import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
 import {
@@ -35,7 +35,17 @@ export class AuthenticationService {
   }
 
   init() {
-    // Need to check after code change
+    let token = this.tokenService.getToken();
+    if (token != null && token.indexOf(".") === -1) {
+      // probably old UUID token, clear everything from local storage
+      log.info(
+        "found a token from the local storage, but it's not a JWS token. Clearing local storage..."
+      );
+      localStorage.clear();
+      token = null;
+    }
+    this.saveToken(token);
+
     this.user$ = this.getUser().pipe(
       publishReplay(1),
       refCount()
@@ -45,11 +55,10 @@ export class AuthenticationService {
   // Do the authentication here based on userid and password
   login(username: string, password: string): Observable<any> {
     // clear any old tokens
-    this.tokenService.setAuthToken(null, null, null, null, null);
+    this.tokenService.setAuthToken(null);
     return this.requestToken(username, password).pipe(
-      map((response: Token) => {
-        this.saveToken(response);
-        this.scheduleTokenRefresh();
+      map((token: string) => {
+        this.saveToken(token);
       })
     );
   }
@@ -59,22 +68,19 @@ export class AuthenticationService {
     this.tokenService.clear();
   }
 
-  requestToken(username: string, password: string): Observable<any> {
+  requestToken(username: string, password: string): Observable<string> {
     log.info("request token");
     return this.configService.getAuthUrl().pipe(
       tap(url => log.info("url", url)),
       mergeMap(authUrl => {
         const url = `${authUrl}/tokens`;
-        const encodedString = btoa(`${username}:${password}`); // base64 encoding
 
-        return this.httpClient.post<Token>(
+        return this.httpClient.post(
           url,
           {},
           {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
+            headers: this.tokenService.getHttpBasicHeader(username, password),
+            responseType: "text"
           }
         );
       })
@@ -90,31 +96,23 @@ export class AuthenticationService {
 
     this.configService
       .getAuthUrl()
-      .flatMap(authUrl => {
-        const url = `${authUrl}/tokens/refresh`;
-        const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
+      .pipe(
+        mergeMap(authUrl => {
+          const url = `${authUrl}/tokens/refresh`;
 
-        return this.httpClient.post<Token>(
-          url,
-          {},
-          {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
-          }
-        );
-      })
-      .subscribe(
-        (response: Token) => {
-          const roles = JSON.parse(response.rolesJson);
-          this.tokenService.setAuthToken(
-            response.tokenKey,
-            response.username,
-            response.name,
-            response.validUntil,
-            roles
+          return this.httpClient.post(
+            url,
+            {},
+            {
+              headers: this.tokenService.getTokenHeader(),
+              responseType: "text"
+            }
           );
+        })
+      )
+      .subscribe(
+        (response: string) => {
+          this.tokenService.setAuthToken(response);
         },
         (error: any) => {
           if (error.status === 403) {
@@ -135,38 +133,30 @@ export class AuthenticationService {
       return observableOf(false);
     }
 
-    return this.configService.getAuthUrl().flatMap(authUrl => {
-      const url = `${authUrl}/tokens/check`;
-      const encodedString = btoa(`token:${this.tokenService.getToken()}`); // base64 encoding
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => {
+        const url = `${authUrl}/tokens/check`;
 
-      return this.httpClient
-        .post<Token>(
-          url,
-          {},
-          {
-            headers: new HttpHeaders().set(
-              "Authorization",
-              `Basic ${encodedString}`
-            )
-          }
-        )
-        .pipe(
-          map((response: Token) => {
-            this.saveToken(response);
-            return observableOf(true);
-          }),
-          catchError(error => {
-            if (error.status === 403) {
-              // token is invalid
-              log.info("check token got 403 -> token invalid");
-              return observableOf(false);
-            } else {
-              // for now, throw others
-              throw error;
-            }
-          })
-        );
-    });
+        return this.httpClient
+          .get<any>(url, this.tokenService.getTokenParams(false))
+          .pipe(
+            map((response: any) => {
+              log.info("token is valid");
+              return true;
+            }),
+            catchError(error => {
+              if (error.status === 403) {
+                // token is invalid
+                log.info("check token got 403 -> token invalid");
+                return observableOf(false);
+              } else {
+                // for now, throw others
+                throw error;
+              }
+            })
+          );
+      })
+    );
   }
 
   scheduleTokenRefresh() {
@@ -177,7 +167,9 @@ export class AuthenticationService {
   }
 
   stopTokenRefresh() {
-    window.clearInterval(this.tokenRefreshSchedulerId);
+    if (this.tokenRefreshSchedulerId != null) {
+      window.clearInterval(this.tokenRefreshSchedulerId);
+    }
   }
 
   getUser(): Observable<User> {
@@ -230,14 +222,12 @@ export class AuthenticationService {
     });
   }
 
-  saveToken(token: Token) {
-    const roles = JSON.parse(token.rolesJson);
-    this.tokenService.setAuthToken(
-      token.tokenKey,
-      token.username,
-      token.name,
-      token.validUntil,
-      roles
-    );
+  saveToken(token: string) {
+    this.tokenService.setAuthToken(token);
+    this.stopTokenRefresh();
+
+    if (token != null) {
+      this.scheduleTokenRefresh();
+    }
   }
 }

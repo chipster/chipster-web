@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
@@ -17,25 +17,17 @@ export class SessionWorkerResource {
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.pipe(
-      map(
-        (url: string) =>
-          `${url}/sessions/${sessionId}?token=${this.tokenService.getToken()}`
-      )
-    );
+    return apiUrl$.pipe(map((url: string) => `${url}/sessions/${sessionId}`));
   }
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    const headers = new HttpHeaders({
-      Authorization: this.tokenService.getTokenHeader().Authorization
-    });
     return apiUrl$.pipe(
       mergeMap((url: string) =>
         this.http.post(
           `${url}/sessions/${sessionId}/datasets/${zipDatasetId}`,
           {},
-          { headers: headers, withCredentials: true }
+          this.tokenService.getTokenParams(true)
         )
       )
     );
@@ -57,15 +49,13 @@ export class SessionWorkerResource {
     };
 
     const apiUrl$ = this.configService.getSessionWorkerUrl();
-    const headers = new HttpHeaders({
-      Authorization: this.tokenService.getTokenHeader().Authorization
-    });
     return apiUrl$.pipe(
       mergeMap((url: string) =>
-        this.http.post(url + "/support/request", supportRequest, {
-          headers: headers,
-          withCredentials: true
-        })
+        this.http.post(
+          url + "/support/request",
+          supportRequest,
+          this.tokenService.getTokenParams(true)
+        )
       )
     );
   }
