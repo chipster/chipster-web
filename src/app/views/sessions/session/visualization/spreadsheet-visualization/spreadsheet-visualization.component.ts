@@ -36,6 +36,7 @@ export class SpreadsheetVisualizationComponent
 
   // takes ~100 ms with ADSL
   private fileSizeLimit = 100 * 1024;
+  private modalFileSizeLimit = 35 * 1024 * 1024;
   // nice round number for tables with reasonable number of columns
   private maxRowsimit = 100;
   // limit the number of rows even further if there are hundreds or thousands
@@ -43,6 +44,7 @@ export class SpreadsheetVisualizationComponent
   private maxCellsLimit = 10 * 1000;
   public lineCount: number;
   public fullFileVisible;
+  public showingTruncated;
   readonly tableContainerId: string =
     "tableContainer-" +
     Math.random()
@@ -80,7 +82,12 @@ export class SpreadsheetVisualizationComponent
       return;
     }
 
-    const maxBytes = this.modalMode ? null : this.fileSizeLimit;
+    if (this.dataset.size > this.modalFileSizeLimit && this.modalMode) {
+      this.showingTruncated = true;
+    }
+    // limiting the full screen downloaded stream size also as it freezes the view
+    const modalfileSizeLimit = this.dataset.size < this.modalFileSizeLimit ? null : this.modalFileSizeLimit;
+    const maxBytes = this.modalMode ? modalfileSizeLimit : this.fileSizeLimit;
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
@@ -89,11 +96,12 @@ export class SpreadsheetVisualizationComponent
         (result: any) => {
           // parse all loaded data
           let parsedTSV = d3.tsvParseRows(result);
+          const totalRowCount = parsedTSV.length;
 
           // if its a modal, show the entire file otherwise limit the rows
           if (!this.modalMode) {
             // limit the number of rows to show
-            if (parsedTSV.length > this.maxRowsimit + 1 && !this.modalMode) {
+            if (parsedTSV.length > this.maxRowsimit + 1) {
               parsedTSV = parsedTSV.slice(0, this.maxRowsimit + 1);
             }
 
@@ -121,8 +129,13 @@ export class SpreadsheetVisualizationComponent
             this.fullFileVisible = false;
             parsedTSV.pop();
           } else {
-            this.fullFileVisible = true;
+            if (totalRowCount > parsedTSV.length) {
+              this.fullFileVisible = false;
+            } else {
+              this.fullFileVisible = true;
+            }
           }
+
 
           this.lineCount = parsedTSV.length;
 
