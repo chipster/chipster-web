@@ -526,9 +526,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         )
       )
       .on("mouseover", function (d) {
+        if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
+          d3.select(this).style("fill", "#e9ecef");
+        }
         self.showTooltip(this, d, true);
       })
       .on("mouseout", function () {
+        const selection = d3.select(this).node();
+        if (!self.selectionService.isSelectedDatasetById(selection.id.split("_")[1])) {
+          d3.select(this).style("fill", "white");
+        }
         self.hideTooltip();
       })
       .classed("phenodata-node", true);
@@ -785,12 +792,20 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         })
       )
       .on("mouseover", function (d) {
+        if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
+          d3.select(this).style("fill", "#e9ecef");
+        }
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", true);
           self.showTooltip(this, d, false);
         }
       })
       .on("mouseout", function () {
+        const selection = d3.select(this).node();
+        if (!self.selectionService.isSelectedDatasetById(selection.id.split("_")[1])) {
+          d3.select(this).style("fill", "white");
+        }
+
         if (self.enabled) {
           d3.select(this).classed("hovering-dataset", false);
           self.hideTooltip();
