@@ -1,20 +1,21 @@
-import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Component, Input} from '@angular/core';
-import { Job } from 'chipster-js-common';
-import { ContactSupportService } from '../../../contact/contact-support.service';
+import { Component, Input } from "@angular/core";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Job, JobState } from "chipster-js-common";
+import { ContactSupportService } from "../../../contact/contact-support.service";
 
 @Component({
-  templateUrl: './joberrormodal.component.html'
+  templateUrl: "./job-error-modal.component.html"
 })
 export class JobErrorModalComponent {
-
   @Input() title: string;
   @Input() job: Job;
 
+  JobState = JobState; // for using the enum in template
+
   constructor(
     private activeModal: NgbActiveModal,
-    private contactSupportService: ContactSupportService,
-  ) { }
+    private contactSupportService: ContactSupportService
+  ) {}
 
   close() {
     this.activeModal.close();
@@ -32,7 +33,14 @@ export class JobErrorModalComponent {
   jobToLog(job: Job) {
     let log = "";
     log += "Job error\n";
-    log += "Tool:         " + job.module + " / " + job.toolCategory + " / " + job.toolId + "\n";
+    log +=
+      "Tool:         " +
+      job.module +
+      " / " +
+      job.toolCategory +
+      " / " +
+      job.toolId +
+      "\n";
     log += "State:        " + job.state + " (" + job.stateDetail + ")\n";
     log += "Created:      " + job.created + "\n";
     log += "Started:      " + job.startTime + "\n";
@@ -48,7 +56,14 @@ export class JobErrorModalComponent {
 
     log += "Inputs: \n";
     for (const input of job.inputs) {
-      log += "- " + input.inputId + ": " + input.displayName + " (" + input.datasetId + ")";
+      log +=
+        "- " +
+        input.inputId +
+        ": " +
+        input.displayName +
+        " (" +
+        input.datasetId +
+        ")";
     }
     log += "\n";
 

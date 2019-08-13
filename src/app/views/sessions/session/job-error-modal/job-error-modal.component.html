@@ -1,0 +1,18 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ title }}</h4>
+  <button class="close" (click)="close()">&times;</button>
+</div>
+
+<div class="modal-body">
+  <h5>Details</h5>
+  <pre style="white-space: pre-wrap;">{{ job.stateDetail }}</pre>
+
+  <button class="btn btn-sm btn-secondary" (click)="contactSupport()">
+    Contact support
+  </button>
+
+  <div *ngIf="job.state !== JobState.FailedUserError && job.screenOutput" class="mt-3">
+    <h5>Screen output</h5>
+    <pre style="white-space: pre-wrap;">{{ job.screenOutput }}</pre>
+  </div>
+</div>
