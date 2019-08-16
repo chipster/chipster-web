@@ -89,8 +89,6 @@ export class SpreadsheetVisualizationComponent
     const modalfileSizeLimit = this.dataset.size < this.modalFileSizeLimit ? null : this.modalFileSizeLimit;
     const maxBytes = this.modalMode ? modalfileSizeLimit : this.fileSizeLimit;
 
-    console.log(maxBytes);
-
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
         takeUntil(this.unsubscribe))

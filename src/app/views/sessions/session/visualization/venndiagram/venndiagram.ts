@@ -1,21 +1,21 @@
 
-import {forkJoin as observableForkJoin, Observable} from 'rxjs';
-import {Component, Input, OnChanges} from '@angular/core';
-import {TSVReader} from "../../../../../shared/services/TSVReader";
+import { Component, Input, OnChanges } from '@angular/core';
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
+import { forkJoin as observableForkJoin } from 'rxjs';
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import Point from "../model/point";
-import {VennDiagramService} from "./venndiagram.service";
-import VennDiagramUtils from "./venndiagramutils";
+import { TSVReader } from "../../../../../shared/services/TSVReader";
 import UtilsService from "../../../../../shared/utilities/utils";
+import { SessionDataService } from "../../session-data.service";
+import Circle from "../model/circle";
+import Point from "../model/point";
 import VennCircle from "./venncircle";
-import {SessionDataService} from "../../session-data.service";
+import { VennDiagramService } from "./venndiagram.service";
 import VennDiagramSelection from "./venndiagramselection";
 import VennDiagramText from "./venndiagramtext";
-import Circle from "../model/circle";
-import {RestErrorService} from "../../../../../core/errorhandler/rest-error.service";
+import VennDiagramUtils from "./venndiagramutils";
 
 @Component({
     selector: 'ch-venn-diagram',
@@ -36,9 +36,9 @@ export class VennDiagramComponent implements OnChanges {
     isEnabled = false;
 
     constructor(private tsvReader: TSVReader,
-                private venndiagramService: VennDiagramService,
-                private sessionDataService: SessionDataService,
-                private restErrorService: RestErrorService) {
+        private venndiagramService: VennDiagramService,
+        private sessionDataService: SessionDataService,
+        private restErrorService: RestErrorService) {
     }
 
     ngOnChanges() {
@@ -49,7 +49,7 @@ export class VennDiagramComponent implements OnChanges {
 
 
     init() {
-        const datasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset);
+        const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
         const tsvObservables = datasetIds
             .map((dataset: Dataset) => this.tsvReader.getTSV(this.sessionDataService.getSessionId(), dataset));
 
@@ -78,7 +78,7 @@ export class VennDiagramComponent implements OnChanges {
     drawVennDiagram(files: Array<TSVFile>) {
         const visualizationWidth = document.getElementById('visualization').offsetWidth;
         const circleRadius = 125;
-        const size = { width: visualizationWidth, height: 400 };
+        const size = { width: visualizationWidth, height: 500 };
         const visualizationArea = {
             width: size.width,
             height: size.height,
@@ -106,10 +106,10 @@ export class VennDiagramComponent implements OnChanges {
             .data(this.vennCircles)
             .enter()
             .append('ellipse')
-            .attr('rx', (d: VennCircle, i: number) => d.circle.radius )
-            .attr('ry', (d: VennCircle, i: number) => d.circle.radius )
-            .attr('cx', (d: VennCircle, i: number) => d.circle.center.x )
-            .attr('cy', (d: VennCircle, i: number) => d.circle.center.y )
+            .attr('rx', (d: VennCircle, i: number) => d.circle.radius)
+            .attr('ry', (d: VennCircle, i: number) => d.circle.radius)
+            .attr('cx', (d: VennCircle, i: number) => d.circle.center.x)
+            .attr('cy', (d: VennCircle, i: number) => d.circle.center.y)
             .attr('opacity', 0.4)
             .attr('fill', (d: VennCircle, i: number) => colors(i.toString()));
 
@@ -126,7 +126,7 @@ export class VennDiagramComponent implements OnChanges {
             .append('text')
             .attr('x', (d) => d.position.x)
             .attr('y', (d) => d.position.y)
-            .text( (d) => d.text);
+            .text((d) => d.text);
 
         // selection group
         const selectionGroup = svg.append('g').attr('id', 'vennselections');
@@ -154,7 +154,7 @@ export class VennDiagramComponent implements OnChanges {
                     .attr('stroke-width', 1);
 
                 const values = this.venndiagramService.getDataIntersection(selectionVennCircles, this.vennCircles, this.columnKey);
-                const datasetIds = selectionVennCircles.map( (vennCircle: VennCircle) => vennCircle.datasetId);
+                const datasetIds = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.datasetId);
                 if (!isShift) {
                     this.diagramSelection.clearSelection();
                 }
@@ -171,8 +171,8 @@ export class VennDiagramComponent implements OnChanges {
     }
 
     getSelectionDescriptor(allVennCircles: Array<VennCircle>, selectionVennCircles: Array<VennCircle>, circleRadius, visualizationArea) {
-        const selectionCircles = selectionVennCircles.map( (vennCircle: VennCircle) => vennCircle.circle);
-        const circles = allVennCircles.map( (vennCircle: VennCircle) => vennCircle.circle );
+        const selectionCircles = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
+        const circles = allVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
         return this.venndiagramService.getSelectionDescriptor(circles, selectionCircles, circleRadius, visualizationArea.center);
     }
 
@@ -181,7 +181,7 @@ export class VennDiagramComponent implements OnChanges {
     }
 
     createNewDataset(): void {
-        const parentDatasetIds = this.selectedDatasets.map( (dataset: Dataset) => dataset.datasetId );
+        const parentDatasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset.datasetId);
         const data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
         const tsvData = d3.tsvFormatRows(data);
         this.sessionDataService.createDerivedDataset("dataset.tsv", parentDatasetIds, "Venn-Diagram", tsvData)
@@ -190,14 +190,14 @@ export class VennDiagramComponent implements OnChanges {
 
     createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
         const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
-        return files.map( (file: TSVFile, index: number) => new VennCircle(file.datasetId,
+        return files.map((file: TSVFile, index: number) => new VennCircle(file.datasetId,
             file.filename,
             file.getColumnDataByHeaderKeys(['symbol', 'identifier']),
-            new Circle( circleCenters[index], radius)));
+            new Circle(circleCenters[index], radius)));
     }
 
     enableComparing(key: string): boolean {
-        return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key) );
+        return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key));
     }
 
     compareIntersectionBy(str: string): void {
