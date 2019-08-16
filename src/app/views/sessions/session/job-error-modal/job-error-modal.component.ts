@@ -7,8 +7,16 @@ import { ContactSupportService } from "../../../contact/contact-support.service"
   templateUrl: "./job-error-modal.component.html"
 })
 export class JobErrorModalComponent {
+  private readonly showText = "Show screen output";
+  private readonly hideText = "Hide screen output";
+
   @Input() title: string;
   @Input() job: Job;
+
+  screenOutputVisible = false;
+  screenOutputButtonText = this.screenOutputVisible
+    ? this.hideText
+    : this.showText;
 
   JobState = JobState; // for using the enum in template
 
@@ -28,6 +36,13 @@ export class JobErrorModalComponent {
   contactSupport() {
     this.activeModal.close();
     this.contactSupportService.openContactSupportModal(this.jobToLog(this.job));
+  }
+
+  toggleScreenOutput() {
+    this.screenOutputVisible = !this.screenOutputVisible;
+    this.screenOutputButtonText = this.screenOutputVisible
+      ? this.hideText
+      : this.showText;
   }
 
   jobToLog(job: Job) {

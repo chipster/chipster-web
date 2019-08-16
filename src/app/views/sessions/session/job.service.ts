@@ -1,12 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Job, Dataset } from "chipster-js-common";
-import { ToolService } from "./tools/tool.service";
-import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
-import { SessionDataService } from "./session-data.service";
-import { ValidatedTool } from "./tools/ToolSelection";
+import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
-import { GetSessionDataService } from "./get-session-data.service";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { DatasetService } from "./dataset.service";
+import { SessionDataService } from "./session-data.service";
+import { ToolService } from "./tools/tool.service";
+import { ValidatedTool } from "./tools/ToolSelection";
 
 @Injectable()
 export class JobService {
@@ -88,10 +87,20 @@ export class JobService {
     for (const toolParam of validatedTool.tool.parameters) {
       let value = toolParam.value;
       // the old client converts null values to empty strings, so let's keep the old behaviour for now
+      // also, to keep old behaviour replace null with EMPTY or empty if selection or string parameter
+      // has EMTPY or empty as default
       if (value == null) {
-        value = "";
+        if (
+          toolParam.defaultValue &&
+          toolParam.defaultValue.toLowerCase() === "empty" &&
+          (this.toolService.isColumnSelectionParameter(toolParam) ||
+            this.toolService.isStringParameter(toolParam))
+        ) {
+          value = toolParam.defaultValue;
+        } else {
+          value = "";
+        }
       }
-
       job.parameters.push({
         parameterId: toolParam.name.id,
         displayName: toolParam.name.displayName,

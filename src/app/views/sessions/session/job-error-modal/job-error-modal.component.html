@@ -7,11 +7,15 @@
   <h5>Details</h5>
   <pre style="white-space: pre-wrap;">{{ job.stateDetail }}</pre>
 
+  <button class="btn btn-sm btn-secondary mr-2" style="width: 11em" (click)="toggleScreenOutput()">
+    {{screenOutputButtonText}}
+  </button>
+
   <button class="btn btn-sm btn-secondary" (click)="contactSupport()">
     Contact support
   </button>
 
-  <div *ngIf="job.state !== JobState.FailedUserError && job.screenOutput" class="mt-3">
+  <div *ngIf="screenOutputVisible" class="mt-3">
     <h5>Screen output</h5>
     <pre style="white-space: pre-wrap;">{{ job.screenOutput }}</pre>
   </div>
