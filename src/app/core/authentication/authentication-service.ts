@@ -214,12 +214,13 @@ export class AuthenticationService {
   }
 
   updateUser(user: User): Observable<any> {
-    return this.configService.getAuthUrl().flatMap(authUrl => {
-      const userId = encodeURIComponent(this.tokenService.getUsername());
-      const url = `${authUrl}/users/${userId}`;
-
-      return <Observable<User>>this.authHttpClient.putAuth(url, user);
-    });
+    return this.configService.getAuthUrl().pipe(
+      mergeMap(authUrl => {
+        const userId = encodeURIComponent(this.tokenService.getUsername());
+        const url = `${authUrl}/users/${userId}`;
+        return <Observable<User>>this.authHttpClient.putAuth(url, user);
+      })
+    );
   }
 
   saveToken(token: string) {

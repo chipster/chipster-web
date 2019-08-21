@@ -57,7 +57,7 @@ export class UserService {
         },
         err => {
           // maybe log is enough
-          log.warn("updating latest session to sessionDb failed");
+          log.warn("updating latest session to sessionDb failed", err);
         }
       );
   }
