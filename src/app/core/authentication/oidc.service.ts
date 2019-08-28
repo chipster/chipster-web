@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import log from "loglevel";
 import { UserManager } from "oidc-client";
 import { from, Observable } from "rxjs";
-import { mergeMap, share, tap } from "rxjs/operators";
+import { map, mergeMap, share, tap } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "../../views/login/oidc-config";
@@ -35,22 +35,26 @@ export class OidcService {
       tap(id => (appId = id)),
       mergeMap(() => this.configService.getAuthUrl()),
       mergeMap(authUrl => this.httpClient.get(authUrl + "/oidc/configs")),
+      map((configs: OidcConfig[]) => {
+        return (
+          configs
+            // allow separate oidc configs for different apps
+            .filter(oidc => oidc.appId === appId)
+        );
+      }),
       tap((configs: OidcConfig[]) => {
-        configs
-          // allow separate oidc configs for different apps
-          .filter(oidc => oidc.appId === appId)
-          .forEach(oidc => {
-            const manager = new UserManager({
-              authority: oidc.issuer,
-              client_id: oidc.clientId,
-              redirect_uri: window.location.origin + oidc.redirectPath,
-              response_type: oidc.responseType,
-              scope: "openid profile email",
-              filterProtocolClaims: true,
-              loadUserInfo: false
-            });
-            this.managers.set(oidc.oidcName, manager);
+        configs.forEach(oidc => {
+          const manager = new UserManager({
+            authority: oidc.issuer,
+            client_id: oidc.clientId,
+            redirect_uri: window.location.origin + oidc.redirectPath,
+            response_type: oidc.responseType,
+            scope: "openid profile email",
+            filterProtocolClaims: true,
+            loadUserInfo: false
           });
+          this.managers.set(oidc.oidcName, manager);
+        });
       }),
       share()
     );
@@ -73,10 +77,13 @@ export class OidcService {
       () => {
         const extraQueryParams = {};
         if (oidcConfig.parameter) {
-          const split = oidcConfig.parameter.split("=");
-          const key = split[0];
-          const value = split[1];
-          extraQueryParams[key] = value;
+          const keyValues = oidcConfig.parameter.split(" ");
+          keyValues.forEach(keyValue => {
+            const split = keyValue.split("=");
+            const key = split[0];
+            const value = split[1];
+            extraQueryParams[key] = value;
+          });
         }
 
         const manager = this.managers.get(oidcConfig.oidcName);
@@ -114,9 +121,15 @@ export class OidcService {
   getAndSaveToken(user, returnUrl: string) {
     return this.configService.getAuthUrl().pipe(
       mergeMap(authUrl =>
-        this.httpClient.post(authUrl + "/oidc", {
-          idToken: user.id_token
-        })
+        this.httpClient.post(
+          authUrl + "/oidc",
+          {
+            idToken: user.id_token
+          },
+          {
+            responseType: "text"
+          }
+        )
       ),
       tap((token: string) => {
         this.authenticationService.saveToken(token);

@@ -90,7 +90,7 @@ export class ConfigService {
     );
   }
 
-  getAuthUrl(): any {
+  getAuthUrl(): Observable<string> {
     return this.getPublicUri(Role.AUTH);
   }
 
@@ -152,7 +152,7 @@ export class ConfigService {
     return services.filter(service => service.role === role)[0];
   }
 
-  getPublicUri(role: string) {
+  getPublicUri(role: string): Observable<string> {
     return this.getPublicServices().pipe(
       map(services => this.getFirstByRole(role, services)),
       map(s => s.publicUri)
