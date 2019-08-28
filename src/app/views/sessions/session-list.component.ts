@@ -29,7 +29,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   public mode = SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN;
   private exampleSessionOwnerUserId: string;
-
+  private trainingSessionOwnerUserId = "training";
   public selectedSession: Session;
   public previousSession: Session;
   public lightSelectedSession: Session;
@@ -74,7 +74,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
         this.mode = newMode;
       }
     );
-
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
@@ -150,6 +149,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
    */
   getSessionMap() {
     const sessionMap = new Map<string, Session>();
+    const self = this;
 
     return this.sessionResource.getSessions().pipe(
       tap((sessions: Session[]) => {
@@ -257,11 +257,20 @@ export class SessionListComponent implements OnInit, OnDestroy {
   updateSessions() {
     const sessions = Array.from(this.userEventData.sessions.values());
 
+    // Assigning a separate key for training sessions
+    sessions.forEach(s => {
+      this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
+        if (rule.sharedBy === this.exampleSessionOwnerUserId && s.name.startsWith("course")) {
+          rule.sharedBy = this.trainingSessionOwnerUserId;
+        }
+      });
+    });
+
     const sessionsByUser = new Map<string, Array<Session>>();
 
+    // may be change the list beforehand
     // show user's own sessions first
     sessionsByUser.set(null, []);
-
     sessions.forEach(s => {
       this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
         if (!sessionsByUser.has(rule.sharedBy)) {
@@ -293,6 +302,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionShares = this.sessionDataService.getPendingShares(sessions);
     this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
     this.sessionsByUser = sessionsByUser;
+
   }
 
   onSessionClick(session: Session) {
@@ -396,7 +406,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
   isAcceptVisible(sharedByUsername) {
     return (
       sharedByUsername != null &&
-      sharedByUsername !== this.exampleSessionOwnerUserId
+      sharedByUsername !== this.exampleSessionOwnerUserId &&
+      sharedByUsername !== this.trainingSessionOwnerUserId
     );
   }
 
@@ -508,14 +519,16 @@ export class SessionListComponent implements OnInit, OnDestroy {
     if (!userId) {
       return "Your sessions";
     } else if (userId === this.exampleSessionOwnerUserId) {
-      return "Example sessions";
+      return "Example session";
+    } else if (userId === this.trainingSessionOwnerUserId) {
+      return "Training Session";
     } else {
       return "Shared to you by ";
     }
   }
 
   getSharedByUsernamePart(userId: string): string {
-    if (!userId || userId === this.exampleSessionOwnerUserId) {
+    if (!userId || userId === this.exampleSessionOwnerUserId || userId === this.trainingSessionOwnerUserId) {
       return "";
     } else {
       return TokenService.getUsernameFromUserId(userId);
