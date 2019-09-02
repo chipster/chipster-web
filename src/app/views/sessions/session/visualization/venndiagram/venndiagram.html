@@ -4,31 +4,30 @@
         <button class="btn btn-secondary" (click)="enable()">Draw</button>
     </div>
     <div class="row" *ngIf="isEnabled">
-        
+
         <div class="col-md-8">
             <div id="visualization"></div>
         </div>
 
-        <div class="col-md-4" >
+        <div class="col-md-4">
 
             <h6>Common denominator</h6>
 
-            <button (click)="compareIntersectionBy('identifier')"
-                    [disabled]="columnKey === 'identifier'"
-                    class="btn btn-secondary"
-                    *ngIf="identifierComparingEnabled">Identifier</button>
+            <button (click)="compareIntersectionBy('identifier')" [disabled]="columnKey === 'identifier'"
+                class="btn btn-secondary" *ngIf="identifierComparingEnabled">Identifier</button>
 
-            <button (click)="compareIntersectionBy('symbol')"
-                    [disabled]="columnKey === 'symbol'"
-                    class="btn btn-secondary"
-                    *ngIf="symbolComparingEnabled">Symbol</button>
+            <button (click)="compareIntersectionBy('symbol')" [disabled]="columnKey === 'symbol'"
+                class="btn btn-secondary" *ngIf="symbolComparingEnabled">Symbol</button>
 
-            <div *ngIf="diagramSelection.values.length > 0">
-                <button class="btn btn-secondary" (click)="createNewDataset()">Create new dataset</button>
+            <div *ngIf="diagramSelection.values.length > 0" style="margin: 2px;">
+                <button class="btn btn-success" (click)="createNewDataset()">Create new dataset</button>
                 <h6>Selections: {{diagramSelection.values.length}}</h6>
                 <table class="table-condensed">
                     <thead>
-                        <tr><td>Symbol</td><td>Identifier</td></tr>
+                        <tr>
+                            <td>Symbol</td>
+                            <td>Identifier</td>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of diagramSelection.values">

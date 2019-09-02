@@ -12,7 +12,7 @@ export class FileResource {
     private configService: ConfigService,
     private http: HttpClient,
     private tokenService: TokenService
-  ) {}
+  ) { }
 
   /**
    *
@@ -126,12 +126,9 @@ export class FileResource {
     const apiUrl$ = this.configService.getFileBrokerUrl();
     return apiUrl$.pipe(
       mergeMap((url: string) =>
-        this.http.put(`${url}/sessions/${sessionId}/datasets/${datasetId}`, {
-          observe: data,
-          headers: this.tokenService.getTokenHeader(),
-          withCredentials: true,
-          reportProgress: true
-        })
+        this.http.put(`${url}/sessions/${sessionId}/datasets/${datasetId}`, data,
+          this.tokenService.getTokenParams(true)
+        )
       )
     );
   }
