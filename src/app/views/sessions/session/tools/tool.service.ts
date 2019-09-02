@@ -1,5 +1,3 @@
-
-import {map} from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import {
   Dataset,
@@ -10,6 +8,7 @@ import {
 } from "chipster-js-common";
 import * as _ from "lodash";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";
@@ -274,7 +273,7 @@ export class ToolService {
     }
 
     // pad with zeros to three digits
-    let digits: string = "" + index;
+    let digits: string = "" + (index + 1);
     if (digits.length < 3) {
       while (digits.length < 3) {
         digits = "0" + digits;
@@ -318,23 +317,25 @@ export class ToolService {
   }
 
   getManualPage(toolId: string) {
-    return this.configService.getManualToolPostfix().pipe(map(manualPostfix => {
-      if (toolId.endsWith(".java")) {
-        // remove the java package name
-        const splitted = toolId.split(".");
-        if (splitted.length > 2) {
-          // java class name
-          return splitted[splitted.length - 2] + manualPostfix;
-        }
-      } else {
-        for (const ext of [".R", ".py"]) {
-          if (toolId.endsWith(ext)) {
-            return toolId.slice(0, -1 * ext.length) + manualPostfix;
+    return this.configService.getManualToolPostfix().pipe(
+      map(manualPostfix => {
+        if (toolId.endsWith(".java")) {
+          // remove the java package name
+          const splitted = toolId.split(".");
+          if (splitted.length > 2) {
+            // java class name
+            return splitted[splitted.length - 2] + manualPostfix;
+          }
+        } else {
+          for (const ext of [".R", ".py"]) {
+            if (toolId.endsWith(ext)) {
+              return toolId.slice(0, -1 * ext.length) + manualPostfix;
+            }
           }
         }
-      }
-      return toolId;
-    }));
+        return toolId;
+      })
+    );
   }
 
   getDisplayName(obj: ToolParameter | ToolInput | Tool) {
