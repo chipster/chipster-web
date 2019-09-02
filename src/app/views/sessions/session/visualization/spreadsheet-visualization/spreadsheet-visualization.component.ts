@@ -45,6 +45,7 @@ export class SpreadsheetVisualizationComponent
   public lineCount: number;
   public fullFileVisible;
   public showingTruncated;
+  public totalRowCount;
   readonly tableContainerId: string =
     "tableContainer-" +
     Math.random()
@@ -96,7 +97,7 @@ export class SpreadsheetVisualizationComponent
         (result: any) => {
           // parse all loaded data
           let parsedTSV = d3.tsvParseRows(result);
-          const totalRowCount = parsedTSV.length;
+          this.totalRowCount = parsedTSV.length;
 
           // if its a modal, show the entire file otherwise limit the rows
           if (!this.modalMode) {
@@ -129,7 +130,7 @@ export class SpreadsheetVisualizationComponent
             this.fullFileVisible = false;
             parsedTSV.pop();
           } else {
-            if (totalRowCount > parsedTSV.length) {
+            if (this.totalRowCount > parsedTSV.length) {
               this.fullFileVisible = false;
             } else {
               this.fullFileVisible = true;

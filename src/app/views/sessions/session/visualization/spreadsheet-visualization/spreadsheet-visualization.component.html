@@ -1,12 +1,14 @@
 <div *ngIf="state.isReady(); else statusTemplate">
 
-  <label style="font-size: smaller;" *ngIf="showingTruncated">The file is too big to load, showing first {{lineCount}}
+  <label style="font-size: smaller;" *ngIf="showingTruncated">The full file is too big to load, showing first
+    {{lineCount}}
     rows </label>
-  <label style="font-size: smaller;" *ngIf="!fullFileVisible && !showingTruncated ">First {{lineCount}} rows. <span
-      style=" font-style: italic">View
+  <label style="font-size: smaller;" *ngIf="!fullFileVisible && !showingTruncated ">First {{lineCount}} rows of
+    {{totalRowCount}} <span style=" font-style: italic">View
       in <span class="btn-link" (click)="showAll()">full screen
       </span> to see all the rows. </span></label>
-  <label style="font-size: smaller;" *ngIf="fullFileVisible && !showingTruncated">{{lineCount}} rows</label>
+  <label style="font-size: smaller;" *ngIf="fullFileVisible && !showingTruncated">showing {{lineCount}} rows of
+    {{totalRowCount}} rows</label>
   <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
 
 </div>
