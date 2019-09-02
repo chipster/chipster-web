@@ -139,8 +139,8 @@ export class SessionComponent implements OnInit, OnDestroy {
           // hack for forcing Safari to draw workflow labels
           // this is not needed for other browsers, but reliable browser detection would make this unnecessarily complicated
           setTimeout(() => {
-            this.split1Size--;
-            this.split2Size++;
+            this.split1Size -= 0.01;
+            this.split2Size += 0.01;
           }, 0);
 
           // ready to go
