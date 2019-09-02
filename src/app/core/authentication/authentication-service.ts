@@ -92,7 +92,6 @@ export class AuthenticationService {
       log.info("no token to refresh");
       return;
     }
-    log.info("refreshing token", this.tokenService.getToken(), new Date());
 
     this.configService
       .getAuthUrl()
