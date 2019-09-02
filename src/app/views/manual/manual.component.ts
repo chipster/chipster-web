@@ -1,5 +1,13 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, ComponentFactoryResolver, Input, OnDestroy, ViewChild, ViewContainerRef } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ComponentFactoryResolver,
+  Input,
+  OnDestroy,
+  ViewChild,
+  ViewContainerRef
+} from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
 import { Observable, of as observableOf, Subject } from "rxjs";
@@ -217,7 +225,8 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
       "TD",
       "TH",
       "FOOTER",
-      "IFRAME"
+      "IFRAME",
+      "SUP"
     ]);
 
     // replace the original tag with a Angular component to be able to listen for link clicks
