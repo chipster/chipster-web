@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import log from "loglevel";
-import { Observable } from "rxjs";
-import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -16,7 +14,6 @@ export class HomeComponent implements OnInit {
   routerLinkLogin: string;
   routerLinkSessions: string;
   routerLinkAnalyze: string;
-  username$: Observable<string>;
   homePath: string;
   homeFile: string;
 
@@ -26,15 +23,12 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private tokenService: TokenService,
-    private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
     private routeService: RouteService
   ) {}
 
   ngOnInit() {
-    this.username$ = this.authenticationService.getUsersDisplayName$();
-
     this.homeRouterPath = RouteService.PATH_HOME;
 
     this.configService.get(ConfigService.KEY_HOME_PATH).subscribe(
@@ -82,5 +76,9 @@ export class HomeComponent implements OnInit {
 
   tokenHasExpired() {
     return this.tokenService.tokenHasExpired();
+  }
+
+  getAccountName() {
+    return this.tokenService.getAccountName();
   }
 }

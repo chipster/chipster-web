@@ -1,22 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  Params,
-  RouterStateSnapshot
-} from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, Params, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import {
-  Dataset,
-  EventType,
-  Job,
-  JobState,
-  Module,
-  Rule,
-  Session,
-  SessionState,
-  Tool
-} from "chipster-js-common";
+import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
@@ -150,6 +135,13 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.saveLatestSession();
 
           this.subscribeToEvents();
+
+          // hack for forcing Safari to draw workflow labels
+          // this is not needed for other browsers, but reliable browser detection would make this unnecessarily complicated
+          setTimeout(() => {
+            this.split1Size--;
+            this.split2Size++;
+          }, 0);
 
           // ready to go
           this.state = ComponentState.READY;

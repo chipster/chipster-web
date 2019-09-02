@@ -92,7 +92,6 @@ export class AuthenticationService {
       log.info("no token to refresh");
       return;
     }
-    log.info("refreshing token", this.tokenService.getToken(), new Date());
 
     this.configService
       .getAuthUrl()
@@ -180,22 +179,6 @@ export class AuthenticationService {
 
         return <Observable<User>>this.authHttpClient.getAuth(url);
       })
-    );
-  }
-
-  getUsersDisplayName$() {
-    return this.tokenService.getUsername$().pipe(
-      mergeMap(userId => {
-        return this.getUser().pipe(
-          catchError(err => {
-            log.info("failed to get the user details", err);
-            // An error message from this request would be confusing, because the user didn't ask for it.
-            // Most likely the authentication has expired, but the user will notice it soon anyway.
-            return observableOf({ name: userId });
-          })
-        );
-      }),
-      map(user => user.name)
     );
   }
 
