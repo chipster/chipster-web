@@ -37,10 +37,12 @@
           <td class="lighter">Ended:</td>
           <td>{{job.endTime | localDate}}</td>
         </tr>
+        <!--
         <tr *ngIf="duration.length > 0">
           <td class="lighter">Duration:</td>
           <td>{{duration}}</td>
         </tr>
+        -->
         <tr *ngIf="failed">
           <td class="lighter" style="white-space: nowrap">Error message:</td>
           <td class="wide-max">

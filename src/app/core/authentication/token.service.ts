@@ -70,6 +70,14 @@ export class TokenService {
     return this.username$.value;
   }
 
+  /**
+   * Temporary fix until username / userid terminology gets sorted
+   *
+   */
+  getAccountName(): string {
+    return TokenService.getUsernameFromUserId(this.getUsername());
+  }
+
   getName(): string {
     return this.name;
   }

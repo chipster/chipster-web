@@ -5,45 +5,27 @@
     </div>
   </div>
   <div class="col col-md-3">
-    <button
-      type="button"
-      id="close-button"
-      class="close"
-      aria-label="Close"
-      (click)="closeDropDown()"
-    >
+    <button type="button" id="close-button" class="close" aria-label="Close" (click)="closeDropDown()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
 </div>
 
 <table class="table table-hover table-sm text-sm">
-  <tr
-    *ngFor="let job of jobsSorted"
-    class="cursor-pointer"
-    (click)="selectJob(job)"
-    [class.bg-primary]="isSelectedJobById(job.jobId)"
-    [class.text-white]="isSelectedJobById(job.jobId)"
-  >
+  <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)"
+    [class.bg-primary]="isSelectedJobById(job.jobId)" [class.text-white]="isSelectedJobById(job.jobId)">
     <td>{{ job.toolName }}</td>
-    <td
-      class="text-sm"
-      [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'"
-    >
+    <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
       {{ job.created | localDate }}
     </td>
     <td>{{ job.state }}</td>
+    <!--
     <td>{{ calculateDuration(job.startTime, job.endTime) }}</td>
-    <td
-      valign="top"
-      style="padding-left:10px"
-      *ngIf="job.state === 'RUNNING' || job.state === 'NEW'; else blankTemplate"
-    >
-      <button
-        class="btn btn-link"
-        style="font-size:12px;padding-left:10px"
-        (click)="$event.stopImmediatePropagation(); cancelJob(job)"
-      >
+    -->
+    <td valign="top" style="padding-left:10px"
+      *ngIf="job.state === 'RUNNING' || job.state === 'NEW'; else blankTemplate">
+      <button class="btn btn-link" style="font-size:12px;padding-left:10px"
+        (click)="$event.stopImmediatePropagation(); cancelJob(job)">
         cancel
       </button>
     </td>
