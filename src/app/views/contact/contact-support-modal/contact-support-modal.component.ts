@@ -98,12 +98,14 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         ),
         tap(appId => (this.appId = appId))
       )
-      .subscribe(null, err =>
-        this.restErrorService.showError(
-          "support modal initialization failed",
-          err
-        )
-      );
+      .subscribe({
+        error: err => {
+          this.restErrorService.showError(
+            "support modal initialization failed",
+            err
+          );
+        }
+      });
   }
 
   ngAfterViewInit() {
