@@ -1,14 +1,17 @@
-import { Dataset } from "chipster-js-common";
 import {
+  AfterViewInit,
   Component,
   Input,
-  ViewChild,
   OnInit,
-  AfterViewInit
+  ViewChild
 } from "@angular/core";
-import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { UploadModalComponent } from "./upload-modal.component";
+import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Dataset } from "chipster-js-common";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { UploadService } from "../../../../../shared/services/upload.service";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { JobService } from "../../job.service";
+import { UploadModalComponent } from "./upload-modal.component";
 
 @Component({
   selector: "ch-add-dataset-modal",
@@ -28,6 +31,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
   constructor(
     private modalService: NgbModal,
     private uploadService: UploadService,
+    private dialogModalService: DialogModalService,
+    private errorService: ErrorService,
+    private jobService: JobService,
     private activeModal: NgbActiveModal
   ) {}
 
@@ -72,5 +78,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     this.flow.assignBrowse(this.uploadFilesButton);
     this.flow.assignBrowse(this.uploadFolderButton, true);
+  }
+
+  downloadFromUrl() {
+    this.uploadService.openDialogAndDowloadFromUrl();
   }
 }

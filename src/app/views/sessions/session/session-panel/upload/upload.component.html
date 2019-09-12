@@ -1,16 +1,10 @@
-<button
-  class="btn btn-sm btn-success dropdown-toggle"
-  type="button"
-  id="dropdownMenuButton"
-  data-toggle="dropdown"
-  aria-haspopup="true"
-  aria-expanded="false"
->
+<button class="btn btn-sm btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+  aria-haspopup="true" aria-expanded="false">
   <i class="fas fa-upload" aria-hidden="true"></i> Add file
 </button>
 <div class="dropdown-menu dropdown-menu-right">
   <a #uploadFilesButton class="dropdown-item">Upload file(s)</a>
   <a #uploadFolderButton class="dropdown-item">Upload folder</a>
   <div class="dropdown-divider"></div>
-  <a class="dropdown-item">Upload from url</a>
+  <a class="dropdown-item" (click)="downloadFromUrl()">Download from URL</a>
 </div>

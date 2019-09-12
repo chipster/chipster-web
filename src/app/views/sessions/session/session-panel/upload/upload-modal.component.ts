@@ -1,17 +1,15 @@
-import { Dataset } from "chipster-js-common";
 import {
+  AfterViewInit,
   Component,
   Input,
-  ChangeDetectorRef,
-  ViewChild,
-  AfterViewInit,
+  OnDestroy,
   OnInit,
-  OnDestroy
+  ViewChild
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { UploadService } from "../../../../../shared/services/upload.service";
-import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { SessionResource } from "../../../../../shared/resources/session.resource";
+import { UploadService } from "../../../../../shared/services/upload.service";
 
 @Component({
   selector: "ch-add-dataset-modal-content",
@@ -41,7 +39,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
     public activeModal: NgbActiveModal,
     private uploadService: UploadService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService,
+    private errorService: ErrorService
   ) {}
 
   ngOnInit() {
@@ -72,6 +70,10 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
     file.cancel();
     this.sessionResource
       .deleteDataset(file.chipsterSessionId, file.chipsterDatasetId)
-      .subscribe(null, err => this.errorService.showError("cancel failed", err));
+      .subscribe({
+        error: err => {
+          this.errorService.showError("cancel failed", err);
+        }
+      });
   }
 }
