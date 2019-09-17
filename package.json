@@ -8,7 +8,9 @@
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --prod --build-optimizer",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "prettier": "node_modules/.bin/prettier --check \"src/app/**/*.{ts,js}\"",
+    "prettier-write": "node_modules/.bin/prettier --write \"src/app/**/*.{ts,js}\""
   },
   "private": true,
   "dependencies": {
@@ -73,10 +75,11 @@
     "karma-coverage-istanbul-reporter": "^2.0.5",
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
+    "prettier": "1.18.2",
     "protractor": "^5.4.2",
+    "rxjs-tslint": "^0.1.7",
     "ts-node": "~5.0.1",
     "tslint": "^5.16.0",
-    "webpack": "4.29.6",
-    "rxjs-tslint": "^0.1.7"
+    "webpack": "4.29.6"
   }
 }
