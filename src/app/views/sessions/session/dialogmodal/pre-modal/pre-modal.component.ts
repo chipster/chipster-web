@@ -14,16 +14,13 @@ import { SessionDataService } from "../../session-data.service";
   styleUrls: ["./pre-modal.component.less"]
 })
 export class PreModalComponent {
-
   @Input()
   title: string;
 
   @Input()
   text: string;
 
-  constructor(
-    private activeModal: NgbActiveModal,
-  ) {}
+  constructor(private activeModal: NgbActiveModal) {}
 
   cancel() {
     this.activeModal.dismiss();

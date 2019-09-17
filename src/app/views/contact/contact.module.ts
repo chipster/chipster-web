@@ -8,21 +8,9 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { ContactSupportService } from "./contact-support.service";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SharedModule,
-    ManualModule,
-    ReactiveFormsModule,
-  ],
-  declarations: [
-    ContactComponent,
-    ContactSupportModalComponent,
-  ],
-  providers: [
-    ContactSupportService,
-  ],
-  entryComponents: [
-    ContactSupportModalComponent,
-  ]
+  imports: [CommonModule, SharedModule, ManualModule, ReactiveFormsModule],
+  declarations: [ContactComponent, ContactSupportModalComponent],
+  providers: [ContactSupportService],
+  entryComponents: [ContactSupportModalComponent]
 })
 export class ContactModule {}

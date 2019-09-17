@@ -1,5 +1,4 @@
-
-import {takeUntil, debounceTime} from 'rxjs/operators';
+import { takeUntil, debounceTime } from "rxjs/operators";
 import {
   Component,
   Input,
@@ -37,9 +36,11 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit() {
     this.parametersChangedThrottle
-      .asObservable().pipe(
-      debounceTime(500),
-      takeUntil(this.unsubscribe),)
+      .asObservable()
+      .pipe(
+        debounceTime(500),
+        takeUntil(this.unsubscribe)
+      )
       .subscribe(() => {
         this.parametersChanged.emit();
       });

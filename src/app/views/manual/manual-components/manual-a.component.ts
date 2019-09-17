@@ -1,20 +1,22 @@
-import { Component } from '@angular/core';
-import {Router} from "@angular/router";
-import {ManualUtils} from "../manual-utils";
-import {ManualBaseComponent} from "./manual-base.component";
+import { Component } from "@angular/core";
+import { Router } from "@angular/router";
+import { ManualUtils } from "../manual-utils";
+import { ManualBaseComponent } from "./manual-base.component";
 
 @Component({
-  selector: 'ch-manual-a-component',
-  template: '<a #element (click)="click()"><ng-template #container></ng-template></a>'
+  selector: "ch-manual-a-component",
+  template:
+    '<a #element (click)="click()"><ng-template #container></ng-template></a>'
 })
 export class ManualAComponent extends ManualBaseComponent {
-
-  constructor (private router: Router) {
+  constructor(private router: Router) {
     super();
   }
 
   getHref() {
-    return this.elementViewContainerRef.element.nativeElement.getAttribute('href');
+    return this.elementViewContainerRef.element.nativeElement.getAttribute(
+      "href"
+    );
   }
 
   click() {
@@ -23,9 +25,7 @@ export class ManualAComponent extends ManualBaseComponent {
     if (ManualUtils.isAbsoluteUrl(this.getHref())) {
       // let the link navigate normally
       return true;
-
     } else {
-
       this.router.navigateByUrl(this.getHref());
       // prevent the page reload
       return false;

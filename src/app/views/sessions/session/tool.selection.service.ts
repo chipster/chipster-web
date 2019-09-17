@@ -1,7 +1,6 @@
+import { forkJoin as observableForkJoin, Observable, forkJoin, of } from "rxjs";
 
-import {forkJoin as observableForkJoin,  Observable ,  forkJoin, of } from 'rxjs';
-
-import {map} from 'rxjs/operators';
+import { map } from "rxjs/operators";
 import { Injectable } from "@angular/core";
 import {
   SelectedToolWithInputs,
@@ -24,7 +23,7 @@ export class ToolSelectionService {
     private toolService: ToolService,
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService
-  ) { }
+  ) {}
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
@@ -106,9 +105,9 @@ export class ToolSelectionService {
       return result === null
         ? { valid: true }
         : {
-          valid: false,
-          message: "Illegal character '" + result[0] + "'"
-        };
+            valid: false,
+            message: "Illegal character '" + result[0] + "'"
+          };
     }
 
     return { valid: true };
@@ -150,9 +149,11 @@ export class ToolSelectionService {
           );
         }
       );
-      return forkJoin(populateParameterObservables).pipe(map(() => {
-        return selectedToolWithInputs;
-      }));
+      return forkJoin(populateParameterObservables).pipe(
+        map(() => {
+          return selectedToolWithInputs;
+        })
+      );
     }
     return of(selectedToolWithInputs);
   }
@@ -199,15 +200,17 @@ export class ToolSelectionService {
 
         return observableForkJoin(
           this.toolService.getDatasetHeaders(datasets)
-        ).pipe(map((datasetsHeaders: Array<Array<string>>) => {
-          const columns = _.uniq(_.flatten(datasetsHeaders));
+        ).pipe(
+          map((datasetsHeaders: Array<Array<string>>) => {
+            const columns = _.uniq(_.flatten(datasetsHeaders));
 
-          parameter.selectionOptions = columns.map(function (column) {
-            return { id: column };
-          });
-          this.setColumnSelectionParameterValueAfterPopulate(parameter);
-          return parameter;
-        }));
+            parameter.selectionOptions = columns.map(function(column) {
+              return { id: column };
+            });
+            this.setColumnSelectionParameterValueAfterPopulate(parameter);
+            return parameter;
+          })
+        );
       } else if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService

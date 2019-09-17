@@ -1,10 +1,17 @@
-
-import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  ViewChild
+} from "@angular/core";
 import { Response } from "@angular/http";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -12,7 +19,10 @@ import TSVFile from "../../../../../model/tsv/TSVFile";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
-import { Tags, TypeTagService } from "../../../../../shared/services/typetag.service";
+import {
+  Tags,
+  TypeTagService
+} from "../../../../../shared/services/typetag.service";
 import { SessionDataService } from "../../session-data.service";
 import { VisualizationModalService } from "../visualizationmodal.service";
 
@@ -67,7 +77,7 @@ export class SpreadsheetVisualizationComponent
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService
-  ) { }
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -87,12 +97,15 @@ export class SpreadsheetVisualizationComponent
       this.showingTruncated = true;
     }
     // limiting the full screen downloaded stream size also as it freezes the view
-    const modalfileSizeLimit = this.dataset.size < this.modalFileSizeLimit ? null : this.modalFileSizeLimit;
+    const modalfileSizeLimit =
+      this.dataset.size < this.modalFileSizeLimit
+        ? null
+        : this.modalFileSizeLimit;
     const maxBytes = this.modalMode ? modalfileSizeLimit : this.fileSizeLimit;
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes).pipe(
-        takeUntil(this.unsubscribe))
+      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           // parse all loaded data
@@ -136,7 +149,6 @@ export class SpreadsheetVisualizationComponent
               this.fullFileVisible = true;
             }
           }
-
 
           this.lineCount = parsedTSV.length;
 

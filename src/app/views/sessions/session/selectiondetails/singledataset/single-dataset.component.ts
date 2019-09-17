@@ -35,7 +35,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   constructor(
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.sourceJob = this.getSourceJob(this.dataset);

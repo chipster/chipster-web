@@ -1,5 +1,4 @@
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
@@ -37,8 +36,8 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
     }
 
     this.sessionDataService
-      .getDatasetUrl(this.dataset).pipe(
-      takeUntil(this.unsubscribe))
+      .getDatasetUrl(this.dataset)
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         url => {
           this.src = url;

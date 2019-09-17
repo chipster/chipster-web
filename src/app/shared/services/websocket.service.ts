@@ -1,15 +1,21 @@
-
 import { Injectable } from "@angular/core";
 import { SessionEvent, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import { EMPTY, Observable, Subject, throwError as observableThrowError } from 'rxjs';
-import { catchError, mergeMap } from 'rxjs/operators';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import {
+  EMPTY,
+  Observable,
+  Subject,
+  throwError as observableThrowError
+} from "rxjs";
+import { catchError, mergeMap } from "rxjs/operators";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
+import {
+  ErrorButton,
+  ErrorMessage
+} from "../../core/errorhandler/errormessage";
 import { ConfigService } from "./config.service";
-
 
 @Injectable()
 export class WebSocketService {
@@ -26,7 +32,7 @@ export class WebSocketService {
     private configService: ConfigService,
     private tokenService: TokenService,
     private errorService: ErrorService
-  ) { }
+  ) {}
 
   unsubscribe() {
     // can be null when session loading fails (e.g. expired token)
@@ -47,12 +53,12 @@ export class WebSocketService {
    * idle timeout, we can simply create a new websocket Subject, without loosing the current subscriptions.
    */
   connect(listener, topic: string) {
-
     this.topic = topic;
 
     // get the url of the websocket server
     this.configService
-      .getSessionDbEventsUrl().pipe(
+      .getSessionDbEventsUrl()
+      .pipe(
         mergeMap((eventsUrl: string) => {
           const encodedTopic = encodeURIComponent(this.topic);
           const wsUrl = `${eventsUrl}/events/${encodedTopic}?token=${this.tokenService.getToken()}`;
@@ -78,7 +84,8 @@ export class WebSocketService {
           } else {
             return observableThrowError(err);
           }
-        }))
+        })
+      )
       .subscribe(
         data => {
           log.info("websocket event", data);
@@ -86,8 +93,16 @@ export class WebSocketService {
         },
         err => {
           log.info("websocket error", err);
-          this.errorService.showErrorObject(new ErrorMessage(
-            null, "Connection lost, please reload the page.", false, [ErrorButton.Reload], [ErrorButton.ShowDetails], err));
+          this.errorService.showErrorObject(
+            new ErrorMessage(
+              null,
+              "Connection lost, please reload the page.",
+              false,
+              [ErrorButton.Reload],
+              [ErrorButton.ShowDetails],
+              err
+            )
+          );
         },
         () => {
           log.info("websocket closed");

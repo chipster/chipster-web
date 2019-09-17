@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output
+} from "@angular/core";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Job } from "chipster-js-common";
 import UtilsService from "../../../../../shared/utilities/utils";
@@ -19,7 +25,7 @@ export class JobListComponent implements OnChanges {
     private dropDown: NgbDropdown,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService
-  ) { }
+  ) {}
 
   ngOnChanges() {
     this.jobsSorted = this.jobs.sort((a, b) => {

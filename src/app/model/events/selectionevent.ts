@@ -7,9 +7,5 @@ export enum Action {
 }
 
 export default class SelectionEvent {
-
-    constructor(
-      public action: Action,
-      public value: Dataset | Job) {
-    }
+  constructor(public action: Action, public value: Dataset | Job) {}
 }

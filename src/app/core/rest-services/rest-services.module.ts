@@ -1,11 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
 import { HttpQueueService } from "./http-queue/http-queue.service";
 
 @NgModule({
-  imports: [
-    CommonModule
-  ],
+  imports: [CommonModule],
   providers: [HttpQueueService]
 })
-export class RestServicesModule { }
+export class RestServicesModule {}

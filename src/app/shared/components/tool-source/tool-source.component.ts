@@ -15,14 +15,15 @@ export class ToolSourceComponent implements OnInit {
 
   constructor(
     private toolResource: ToolResource,
-    private restErrorService: RestErrorService,
-  ) { }
+    private restErrorService: RestErrorService
+  ) {}
 
   ngOnInit() {
-    this.toolResource
-      .getSourceCode(this.selectedTool.name.id)
-      .subscribe(sourceCode => {
+    this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe(
+      sourceCode => {
         this.source = sourceCode;
-      }, err => this.restErrorService.showError("get source code failed", err));
+      },
+      err => this.restErrorService.showError("get source code failed", err)
+    );
   }
 }

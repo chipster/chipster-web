@@ -1,5 +1,4 @@
 export default class VolcanoPlotDataRow {
-
   id: string;
   values: Array<number>;
 
@@ -7,5 +6,4 @@ export default class VolcanoPlotDataRow {
     this.id = id;
     this.values = values;
   }
-
 }

@@ -1,7 +1,4 @@
-import {
-  Component, HostListener, ViewChild
-} from '@angular/core';
-
+import { Component, HostListener, ViewChild } from "@angular/core";
 
 /**
  * Scroller component that prevents the parent component from scrolling
@@ -9,15 +6,13 @@ import {
  * Affects the scrolling performance considerably, so use only when really needed.
  */
 @Component({
-  selector: 'ch-scroller',
-  templateUrl: './scroller.component.html'
+  selector: "ch-scroller",
+  templateUrl: "./scroller.component.html"
 })
 export class ScrollerComponent {
+  @ViewChild("scroll") scrollElement;
 
-  @ViewChild('scroll') scrollElement;
-
-  @HostListener('wheel', ['$event']) onMousewheel(event) {
-
+  @HostListener("wheel", ["$event"]) onMousewheel(event) {
     let element = this.scrollElement.nativeElement;
     let scrollTop = element.scrollTop;
     let maxScrollTop = element.scrollHeight - element.clientHeight;

@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewEncapsulation
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Job, Module } from "chipster-js-common";
 import * as d3 from "d3";

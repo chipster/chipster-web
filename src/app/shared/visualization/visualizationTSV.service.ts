@@ -13,8 +13,6 @@ import { PlotData } from "../../views/sessions/session/visualization/model/plotD
 
 @Injectable()
 export class VisualizationTSVService {
-
-
   /*
    * @description: does tsv-file contain .chip-headers
    */
@@ -27,7 +25,9 @@ export class VisualizationTSVService {
    */
   public getGeneExpressions(tsv: TSVFile): Array<GeneExpression> {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    return _.map(tsv.body.rows, (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
+    return _.map(tsv.body.rows, (row: TSVRow) =>
+      this.getGeneExpressionsByIndex(row, chipIndexes)
+    );
   }
 
   /*
@@ -35,8 +35,12 @@ export class VisualizationTSVService {
    */
   public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    const values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
-    const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
+    const values = _.map(tsv.body.rows, (row: TSVRow) =>
+      row.getCellsByIndexes(chipIndexes)
+    );
+    const flatValues = _.map(_.flatten(values), (value: string) =>
+      parseFloat(value)
+    );
     const min = _.min(flatValues);
     const max = _.max(flatValues);
     return new DomainBoundaries(min, max);
@@ -47,7 +51,9 @@ export class VisualizationTSVService {
    */
   public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
     return _.chain(tsvHeaders.headers)
-      .map((cell: string, index: number) => _.startsWith(cell, 'chip.') ? index : -1)
+      .map((cell: string, index: number) =>
+        _.startsWith(cell, "chip.") ? index : -1
+      )
       .filter((cell: number) => cell !== -1)
       .value();
   }
@@ -64,7 +70,10 @@ export class VisualizationTSVService {
   /*
    * Return a single GeneExpression based on id for the TSVRow and the values in indexes of row
    */
-  getGeneExpressionsByIndex(row: TSVRow, indexes: Array<number>): GeneExpression {
+  getGeneExpressionsByIndex(
+    row: TSVRow,
+    indexes: Array<number>
+  ): GeneExpression {
     const values = row.getCellsByIndexes(indexes);
     const numberValues = _.map(values, (value: string) => parseFloat(value));
     return new GeneExpression(row.id, numberValues);
@@ -73,8 +82,12 @@ export class VisualizationTSVService {
   /*
    * Order body by first chip-value in each row
    */
-  public orderBodyByFirstValue(geneExpressions: Array<GeneExpression>): Array<GeneExpression> {
-    return _.orderBy(geneExpressions, [(geneExpression: GeneExpression) => _.first(geneExpression.values)]);
+  public orderBodyByFirstValue(
+    geneExpressions: Array<GeneExpression>
+  ): Array<GeneExpression> {
+    return _.orderBy(geneExpressions, [
+      (geneExpression: GeneExpression) => _.first(geneExpression.values)
+    ]);
   }
 
   /*
@@ -85,23 +98,29 @@ export class VisualizationTSVService {
     return tsv.headers.getItemsByIndexes(chipHeaderIndexes);
   }
 
-
   public getMinY(plotData: Array<PlotData>): number {
-    return plotData.reduce((min, p) => p.plotPoint.y < min ? p.plotPoint.y : min, plotData[0].plotPoint.y);
-
+    return plotData.reduce(
+      (min, p) => (p.plotPoint.y < min ? p.plotPoint.y : min),
+      plotData[0].plotPoint.y
+    );
   }
   public getMaxY(plotData: Array<PlotData>): number {
-    return plotData.reduce((max, p) => p.plotPoint.y > max ? p.plotPoint.y : max, plotData[0].plotPoint.y);
-
+    return plotData.reduce(
+      (max, p) => (p.plotPoint.y > max ? p.plotPoint.y : max),
+      plotData[0].plotPoint.y
+    );
   }
 
   public getMinX(plotData: Array<PlotData>): number {
-    return plotData.reduce((min, p) => p.plotPoint.x < min ? p.plotPoint.x : min, plotData[0].plotPoint.x);
-
+    return plotData.reduce(
+      (min, p) => (p.plotPoint.x < min ? p.plotPoint.x : min),
+      plotData[0].plotPoint.x
+    );
   }
   public getMaxX(plotData: Array<PlotData>): number {
-    return plotData.reduce((max, p) => p.plotPoint.x > max ? p.plotPoint.x : max, plotData[0].plotPoint.x);
-
+    return plotData.reduce(
+      (max, p) => (p.plotPoint.x > max ? p.plotPoint.x : max),
+      plotData[0].plotPoint.x
+    );
   }
-
 }

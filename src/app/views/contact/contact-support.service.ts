@@ -4,14 +4,12 @@ import { ContactSupportModalComponent } from "./contact-support-modal/contact-su
 
 @Injectable()
 export class ContactSupportService {
-    constructor(
-        private modalService: NgbModal,
-    ) { }
+  constructor(private modalService: NgbModal) {}
 
-    openContactSupportModal(log = null) {
+  openContactSupportModal(log = null) {
     const modalRef = this.modalService.open(ContactSupportModalComponent, {
-        size: "lg",
-        backdrop: "static", // don't close on backdrop click
+      size: "lg",
+      backdrop: "static" // don't close on backdrop click
     });
     modalRef.componentInstance.log = log;
   }

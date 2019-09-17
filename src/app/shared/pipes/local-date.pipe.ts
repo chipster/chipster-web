@@ -1,10 +1,9 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
-  name: 'localDate'
+  name: "localDate"
 })
 export class LocalDatePipe implements PipeTransform {
-
   transform(date: any): string {
     if (date === null || date === undefined) {
       return "";
@@ -19,7 +18,6 @@ export class LocalDatePipe implements PipeTransform {
         return "";
       }
     }
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+    return d.toLocaleDateString() + " " + d.toLocaleTimeString();
   }
-
 }

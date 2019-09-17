@@ -1,8 +1,15 @@
-import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild
+} from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { throwError } from "rxjs";
-import { flatMap } from 'rxjs/operators';
+import { flatMap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -34,8 +41,8 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     private uploadService: UploadService,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionResource: SessionResource,
-    private restErrorService: RestErrorService,
-  ) { }
+    private restErrorService: RestErrorService
+  ) {}
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(
@@ -79,14 +86,16 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     this.fileStatus.set(file, "Extracting session");
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
-      .pipe(flatMap(response => {
-        if (response.errors.length > 0) {
-          return throwError(response.errors);
-        }
-        log.log("extracted, warnings: ", response.warnings, response);
-        this.fileStatus.set(file, "Deleting temporary copy");
-        return this.sessionResource.deleteDataset(sessionId, datasetId);
-      }))
+      .pipe(
+        flatMap(response => {
+          if (response.errors.length > 0) {
+            return throwError(response.errors);
+          }
+          log.log("extracted, warnings: ", response.warnings, response);
+          this.fileStatus.set(file, "Deleting temporary copy");
+          return this.sessionResource.deleteDataset(sessionId, datasetId);
+        })
+      )
       .subscribe(
         () => {
           this.fileStatus.set(file, undefined);
@@ -107,10 +116,15 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         },
         err => {
           this.error(file, err);
-          this.sessionResource.deleteSession(sessionId).subscribe(null, err2 => {
-            // original error reported to user already
-            log.error("failed to delete the session after another error", err2);
-          });
+          this.sessionResource
+            .deleteSession(sessionId)
+            .subscribe(null, err2 => {
+              // original error reported to user already
+              log.error(
+                "failed to delete the session after another error",
+                err2
+              );
+            });
         }
       );
   }

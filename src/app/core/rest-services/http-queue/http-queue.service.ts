@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable()
 export class HttpQueueService {
   queueSize: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   increment() {
     this.queueSize++;
@@ -13,5 +13,4 @@ export class HttpQueueService {
   decrement() {
     this.queueSize--;
   }
-
 }

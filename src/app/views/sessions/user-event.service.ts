@@ -25,8 +25,8 @@ export class UserEventService {
     private webSocketService: WebSocketService,
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
-    private errorService: ErrorService,
-  ) { }
+    private errorService: ErrorService
+  ) {}
 
   unsubscribe() {
     this.webSocketService.unsubscribe();
@@ -36,25 +36,31 @@ export class UserEventService {
     this.topic = topic;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(publish(), refCount());
+    const stream = this.localSubject$.pipe(
+      publish(),
+      refCount()
+    );
 
     this.webSocketService.connect(this.localSubject$, topic);
 
     this.ruleStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Rule),
-      mergeMap(data => this.handleRuleEvent(data, data.sessionId, userEventData)),
+      mergeMap(data =>
+        this.handleRuleEvent(data, data.sessionId, userEventData)
+      ),
       publish(),
-      refCount());
+      refCount()
+    );
 
     // update userEventData even if no one else subscribes
-    this.ruleStream$
-      .subscribe(null, err => this.errorService.showError("error in rule events", err));
+    this.ruleStream$.subscribe(null, err =>
+      this.errorService.showError("error in rule events", err)
+    );
   }
 
   getRuleStream() {
     return this.ruleStream$;
   }
-
 
   /**
    * Apply rule change events in this session and return an observable that sends an event on changes
@@ -64,7 +70,7 @@ export class UserEventService {
       mergeMap(wsEvent => {
         // sessionEventService can update individual sessions, let's reuse that
         return this.sessionEventService.handleRuleEvent(wsEvent, session);
-      }),
+      })
     );
   }
 
@@ -73,30 +79,43 @@ export class UserEventService {
    *
    * THe original event is sent when the updates are done.
    */
-  handleRuleEvent(event: any, sessionId: any, userEventData: UserEventData): Observable<WsEvent> {
-    log.info('handleRuleEvent()', event);
+  handleRuleEvent(
+    event: any,
+    sessionId: any,
+    userEventData: UserEventData
+  ): Observable<WsEvent> {
+    log.info("handleRuleEvent()", event);
     if (event.type === EventType.Create) {
       // new session was shared to us or a rule was added to the session we already have
-      return this.sessionResource.getSession(sessionId)
-        .pipe(map((session: Session) => {
+      return this.sessionResource.getSession(sessionId).pipe(
+        map((session: Session) => {
           // get the session or latest rules
           userEventData.sessions.set(session.sessionId, session);
           return event;
-        }));
+        })
+      );
     } else if (event.type === EventType.Update) {
-      return this.sessionResource.getSession(sessionId)
-        .pipe(map((session: Session) => {
-          log.info('rule updated', session.name);
+      return this.sessionResource.getSession(sessionId).pipe(
+        map((session: Session) => {
+          log.info("rule updated", session.name);
           userEventData.sessions.set(session.sessionId, session);
           return event;
-        }));
+        })
+      );
     } else if (event.type === EventType.Delete) {
-
       const oldSession = userEventData.sessions.get(sessionId);
       const rule = oldSession.rules.find(r => r.ruleId === event.resourceId);
-      const newRules = oldSession.rules.filter(r => r.ruleId !== event.resourceId);
+      const newRules = oldSession.rules.filter(
+        r => r.ruleId !== event.resourceId
+      );
 
-      log.info("rule deleted", oldSession, rule, newRules, this.sessionDataService.getApplicableRules(newRules));
+      log.info(
+        "rule deleted",
+        oldSession,
+        rule,
+        newRules,
+        this.sessionDataService.getApplicableRules(newRules)
+      );
 
       // check if we should still see this session
       if (this.sessionDataService.getApplicableRules(newRules).length > 0) {
@@ -107,7 +126,6 @@ export class UserEventService {
         userEventData.sessions.delete(sessionId);
       }
       return of(event);
-
     } else {
       console.warn("unknown event type", event);
       return of(event);

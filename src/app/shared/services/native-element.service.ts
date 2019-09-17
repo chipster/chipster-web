@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class NativeElementService {
-
   /**
    * Disable back and forward gestures in Safari
    *
@@ -11,11 +10,9 @@ export class NativeElementService {
    * @param nativeElement a div which has overflow attribute set in CSS
    */
   disableGestures(nativeElement) {
-
     // we should use Renderer2.listen(), but we can't inject Render2 here in the service
     // and this relies on the details of the native element anyway
-    nativeElement.addEventListener('mousewheel', (event) => {
-
+    nativeElement.addEventListener("mousewheel", event => {
       // We don't want to scroll below zero or above the width
       const maxX = nativeElement.scrollWidth - nativeElement.offsetWidth;
 

@@ -1,11 +1,10 @@
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { Dataset } from "chipster-js-common";
 import { Job } from "chipster-js-common";
 import * as _ from "lodash";
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { BehaviorSubject ,  Observable ,  Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 
 @Injectable()
@@ -19,28 +18,36 @@ export class SelectionService implements OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(
-    private store: Store<any>,
-    private errorService: ErrorService,
-  ) {
+  constructor(private store: Store<any>, private errorService: ErrorService) {
     // Sync selected datasets from store
     this.selectedDatasets$ = this.store.select("selectedDatasets");
     this.store
-      .select("selectedDatasets").pipe(
-      takeUntil(this.unsubscribe))
+      .select("selectedDatasets")
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => (this.selectedDatasets = datasets),
-        (error: any) => this.errorService.showError("Error fetching datasets from store", error)
+        (error: any) =>
+          this.errorService.showError(
+            "Error fetching datasets from store",
+            error
+          )
       );
 
     // Sync selected jobs from store
     this.selectedJobs$ = this.store.select("selectedJobs");
     this.store
-      .select("selectedJobs").pipe(
-      takeUntil(this.unsubscribe))
-      .subscribe((jobs: Array<Job>) => {
-        this.selectedJobs = jobs;
-      }, err => this.errorService.showError("Error fetching selected jobs from store", err));
+      .select("selectedJobs")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        (jobs: Array<Job>) => {
+          this.selectedJobs = jobs;
+        },
+        err =>
+          this.errorService.showError(
+            "Error fetching selected jobs from store",
+            err
+          )
+      );
   }
 
   isJobSelected(): boolean {
@@ -48,15 +55,15 @@ export class SelectionService implements OnDestroy {
   }
 
   /*
-     * @description: search by dataset object if given dataset is currently selected
-     */
+   * @description: search by dataset object if given dataset is currently selected
+   */
   isSelectedDataset(dataset: Dataset): boolean {
     return this.isSelectedDatasetById(dataset.datasetId);
   }
 
   /*
-     * @description: search by id if given dataset is currently selected
-     */
+   * @description: search by id if given dataset is currently selected
+   */
   isSelectedDatasetById(datasetId: string): boolean {
     return _.some(
       this.selectedDatasets,

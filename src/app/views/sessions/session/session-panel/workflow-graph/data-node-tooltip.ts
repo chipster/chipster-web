@@ -1,4 +1,3 @@
-
 export class DatasetNodeToolTip {
   datasetId: string;
   datasetName: string;

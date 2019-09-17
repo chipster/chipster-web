@@ -2,9 +2,8 @@ import { Dataset } from "chipster-js-common";
 import * as _ from "lodash";
 
 export default class UtilsService {
-
   static getFileExtension(name: string) {
-    return name.split('.').pop();
+    return name.split(".").pop();
   }
 
   static startsWith(data: string, start: string) {
@@ -13,7 +12,7 @@ export default class UtilsService {
 
   static mapValues(map: Map<any, any>) {
     let array: any[] = [];
-    map.forEach(function (value: any) {
+    map.forEach(function(value: any) {
       array.push(value);
     });
     return array;
@@ -35,8 +34,12 @@ export default class UtilsService {
     return event.shiftKey;
   }
 
-  static toggleSelection(event: any, item: any, allItems: any[], selectedItems: any[]) {
-
+  static toggleSelection(
+    event: any,
+    item: any,
+    allItems: any[],
+    selectedItems: any[]
+  ) {
     function isSelectionEmpty() {
       return selectedItems.length === 0;
     }
@@ -69,7 +72,6 @@ export default class UtilsService {
       }
     } else if (this.isShiftKey(event)) {
       if (!isSelectionEmpty()) {
-
         let lastSelectedItem = selectedItems[selectedItems.length - 1];
         let indexOfLastSelection = allItems.indexOf(lastSelectedItem);
         let indexOfNewSelection = allItems.indexOf(item);
@@ -85,11 +87,9 @@ export default class UtilsService {
         for (let i = from; i < to; i++) {
           addToSelection(allItems[i]);
         }
-
       } else {
         setSelection(item);
       }
-
     } else {
       setSelection(item);
     }
@@ -103,8 +103,8 @@ export default class UtilsService {
    * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
    */
   static equalStringArrays(first: Array<String>, second: Array<String>) {
-    return _.every(first, (item) => {
-      return _.includes(second, item)
+    return _.every(first, item => {
+      return _.includes(second, item);
     });
   }
 
@@ -118,7 +118,7 @@ export default class UtilsService {
     }
   }
 
-  static  parseISOStringToDate(s : any) {
+  static parseISOStringToDate(s: any) {
     var b = s.split(/\D+/);
     return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
   }
@@ -146,7 +146,5 @@ export default class UtilsService {
       duration += seconds + "s ";
     }
     return duration;
-
   }
-
 }
