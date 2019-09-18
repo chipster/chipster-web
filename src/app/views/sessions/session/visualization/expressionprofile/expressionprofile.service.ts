@@ -111,16 +111,16 @@ export class ExpressionProfileService {
     const m = (line.end.y - line.start.y) / (line.end.x - line.start.x);
 
     let y = m * (rectangle.topleft.x - line.start.x) + line.start.y;
-    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) return true;
+    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) { return true; }
 
     y = m * (rectangle.bottomright.x - line.start.x) + line.start.y;
-    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) return true;
+    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) { return true; }
 
     let x = (rectangle.topleft.y - line.start.y) / m + line.start.x;
-    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) return true;
+    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) { return true; }
 
     x = (rectangle.bottomright.y - line.start.y) / m + line.start.x;
-    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) return true;
+    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) { return true; }
 
     return false;
   }

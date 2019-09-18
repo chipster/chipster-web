@@ -53,8 +53,8 @@ export class TwoCircleVennDiagramService {
       selectionCircle.center
     );
 
-    return `M ${firstDrawPoint.x} ${firstDrawPoint.y} 
-        A ${radius} ${radius} 0 1 1 ${secondDrawPoint.x} ${secondDrawPoint.y} 
+    return `M ${firstDrawPoint.x} ${firstDrawPoint.y}
+        A ${radius} ${radius} 0 1 1 ${secondDrawPoint.x} ${secondDrawPoint.y}
         A ${radius} ${radius} 0 0 0 ${firstDrawPoint.x} ${firstDrawPoint.y}`;
   }
 
@@ -67,8 +67,8 @@ export class TwoCircleVennDiagramService {
       circles[1]
     );
 
-    return `M ${intersections.point1.x},${intersections.point1.y} 
-        A ${radius},${radius} 0 0,1 ${intersections.point2.x},${intersections.point2.y} 
+    return `M ${intersections.point1.x},${intersections.point1.y}
+        A ${radius},${radius} 0 0,1 ${intersections.point2.x},${intersections.point2.y}
         A ${radius},${radius} 0 0,1 ${intersections.point1.x},${intersections.point1.y}`;
   }
 }

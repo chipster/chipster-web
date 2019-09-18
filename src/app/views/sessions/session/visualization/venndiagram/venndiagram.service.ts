@@ -285,7 +285,7 @@ export class VennDiagramService {
         ? circles[0]
         : circles[1];
 
-    //intersection
+    // intersection
     const intersectionCount = this.getSelectionData(
       circles,
       [],

@@ -168,7 +168,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       );
       const ba = new Uint8Array(blockHeader);
       const blockSize = (ba[17] << 8) | (ba[16] + 1);
-      if (blockSize < 28) break;
+      if (blockSize < 28) { break; }
 
       blockSizeList.push(blockSize);
 
@@ -335,8 +335,9 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
           opLtr === "D" ||
           opLtr === "N" ||
           opLtr === "="
-        )
+        ) {
           lengthOnRef += opLen;
+        }
         cigar = cigar + opLen + opLtr;
         p += 4;
         cigarArray.push({ len: opLen, ltr: opLtr });

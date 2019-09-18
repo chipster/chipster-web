@@ -7,7 +7,7 @@ import { PlotData } from "../../views/sessions/session/visualization/model/plotD
 export class PlotService {
   constructor(private visualizationTSVService: VisualizationTSVService) {}
 
-  //Get the points inside the selection Rectangle
+  // Get the points inside the selection Rectangle
   getSelectedDataPoints(
     dragStartPoint: Point,
     dragEndPoint: Point,
