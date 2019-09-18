@@ -51,6 +51,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   public sessionData: SessionData;
   public modulesMap: Map<string, Module>;
   public sessionSize: number;
+  public sessionListLoading = false;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
 
@@ -85,12 +86,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
         this.mode = newMode;
       }
     );
+    this.sessionListLoading = true;
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
         tap(userId => (this.exampleSessionOwnerUserId = userId)),
         mergeMap(() => this.getSessionMap()),
         tap(sessionMap => (this.userEventData.sessions = sessionMap)),
+        tap(() => this.sessionListLoading = false),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions())
       )
