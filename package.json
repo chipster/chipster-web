@@ -7,10 +7,11 @@
     "start": "ng serve",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --prod --build-optimizer",
     "test": "ng test",
-    "lint": "ng lint",
     "e2e": "ng e2e",
     "prettier": "node_modules/.bin/prettier --check \"src/app/**/*.{ts,js}\"",
-    "prettier-write": "node_modules/.bin/prettier --write \"src/app/**/*.{ts,js}\""
+    "prettier-write": "node_modules/.bin/prettier --write \"src/app/**/*.{ts,js}\"",
+    "lint": "./node_modules/.bin/eslint --ext .ts,.js src/app/",
+    "lint-fix": "./node_modules/.bin/eslint --fix --ext .ts,.js src/app/"
   },
   "private": true,
   "dependencies": {
@@ -66,7 +67,11 @@
     "@types/node": "^11.13.11",
     "@types/pako": "^1.0.1",
     "@types/pdf": "0.0.31",
+    "@typescript-eslint/eslint-plugin": "^2.3.0",
+    "@typescript-eslint/parser": "^2.3.0",
     "codelyzer": "^5.0.1",
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
     "jasmine-core": "^3.4.0",
     "jasmine-spec-reporter": "^4.2.1",
     "karma": "^4.1.0",
