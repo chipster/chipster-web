@@ -10,7 +10,7 @@ export class DownloadFromUrlModalComponent {
 
   constructor(private activeModal: NgbActiveModal) {}
 
-  save($event) {
+  save($event): void {
     this.activeModal.close(this.value);
     if ($event) {
       // otherwise the event may open the dialog again, when the original button
@@ -19,7 +19,7 @@ export class DownloadFromUrlModalComponent {
     }
   }
 
-  cancel() {
+  cancel(): void {
     this.activeModal.dismiss();
   }
 }
