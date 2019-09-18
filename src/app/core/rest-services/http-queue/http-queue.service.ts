@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class HttpQueueService {
-  queueSize: number = 0;
+  queueSize = 0;
 
   constructor() {}
 

@@ -57,15 +57,15 @@ export class ExpressionProfileService {
   ): Array<Line> {
     return _.map(tsv.body.rows, (tsvRow: TSVRow) => {
       // get indexes for finding raw data value for lines start and end points
-      let chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(
+      const chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(
         tsv.headers
       );
-      let chipLineStartDataIndex = chipIndexes[chipIndex];
-      let chipLineEndDataIndex = chipIndexes[chipIndex + 1];
+      const chipLineStartDataIndex = chipIndexes[chipIndex];
+      const chipLineEndDataIndex = chipIndexes[chipIndex + 1];
 
       // get raw data for lines start and end points
-      let lineStartValue = tsvRow.row[chipLineStartDataIndex];
-      let lineEndValue = tsvRow.row[chipLineEndDataIndex];
+      const lineStartValue = tsvRow.row[chipLineStartDataIndex];
+      const lineEndValue = tsvRow.row[chipLineEndDataIndex];
 
       return this.createLine(
         tsvRow.id,
@@ -87,8 +87,8 @@ export class ExpressionProfileService {
     yScale: any
   ): Line {
     // get pixel values for lines start and end positions
-    let [x1, y1] = [linearXScale(chipValueIndex), yScale(lineStartValue)];
-    let [x2, y2] = [linearXScale(chipValueIndex + 1), yScale(lineEndValue)];
+    const [x1, y1] = [linearXScale(chipValueIndex), yScale(lineStartValue)];
+    const [x2, y2] = [linearXScale(chipValueIndex + 1), yScale(lineEndValue)];
     return new Line(lineId, x1, y1, x2, y2);
   }
 
@@ -108,7 +108,7 @@ export class ExpressionProfileService {
       return false;
     }
 
-    let m = (line.end.y - line.start.y) / (line.end.x - line.start.x);
+    const m = (line.end.y - line.start.y) / (line.end.x - line.start.x);
 
     let y = m * (rectangle.topleft.x - line.start.x) + line.start.y;
     if (y > rectangle.topleft.y && y < rectangle.bottomright.y) return true;

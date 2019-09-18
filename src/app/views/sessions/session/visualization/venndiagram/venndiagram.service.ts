@@ -111,14 +111,14 @@ export class VennDiagramService {
     values: Array<Array<Array<string>>>,
     compareByIndex: number
   ): Array<Array<string>> {
-    let result = [];
+    const result = [];
 
-    let arraysToCompare = _.tail(values).map((array: Array<Array<string>>) =>
+    const arraysToCompare = _.tail(values).map((array: Array<Array<string>>) =>
       array.map((row: Array<string>) => row[compareByIndex])
     );
 
     _.forEach(_.head(values), (pair: Array<string>) => {
-      let comparator = pair[compareByIndex];
+      const comparator = pair[compareByIndex];
       if (
         _.every(arraysToCompare, (array: Array<string>) =>
           _.includes(array, comparator)
@@ -145,7 +145,7 @@ export class VennDiagramService {
       .map((file: TSVFile) => file.headers.headers)
       .flatten()
       .uniq()
-      .value() as Array<string>;
+      .value();
 
     let body = [];
     _.forEach(selection.datasetIds, (datasetId: string) => {
@@ -160,13 +160,13 @@ export class VennDiagramService {
       );
       const keyColumnIndex = file.getColumnIndex(columnKey); // index where the values are collected
       _.forEach(files, (file: TSVFile) => {
-        let rows = this.getTSVRowsContainingValues(
+        const rows = this.getTSVRowsContainingValues(
           file,
           values,
           keyColumnIndex
         );
-        let sortedIndexMapping = this.getSortedIndexMapping(file, headers);
-        let sortedRows = this.rearrangeCells(rows, sortedIndexMapping);
+        const sortedIndexMapping = this.getSortedIndexMapping(file, headers);
+        const sortedRows = this.rearrangeCells(rows, sortedIndexMapping);
         body = body.concat(sortedRows);
       });
     });
@@ -181,7 +181,7 @@ export class VennDiagramService {
     sortingMap: Map<number, number>
   ): Array<Array<string>> {
     return tsvRows.map((tsvRow: TSVRow) => {
-      let sortedRow = [];
+      const sortedRow = [];
 
       sortingMap.forEach((key: number, index: number) => {
         sortedRow[index] = tsvRow.getCellByIndex(key);
@@ -213,7 +213,7 @@ export class VennDiagramService {
     file: TSVFile,
     headers: Array<string>
   ): Map<number, number> {
-    let mapping = new Map();
+    const mapping = new Map();
     headers.forEach((header: string, index: number) => {
       mapping.set(index, file.getColumnIndex(header));
     });
@@ -274,7 +274,7 @@ export class VennDiagramService {
     visualizationAreaCenter: Point,
     columnKey: string
   ): Array<VennDiagramText> {
-    let result = [];
+    const result = [];
 
     const leftCircle =
       circles[0].circle.center.x < visualizationAreaCenter.x
@@ -330,10 +330,10 @@ export class VennDiagramService {
     visualizationAreaCenter: Point,
     columnKey: string
   ): Array<VennDiagramText> {
-    let result = [];
+    const result = [];
     const radius = circles[0].circle.radius;
 
-    let circlesSortedByXAxis = _.sortBy(
+    const circlesSortedByXAxis = _.sortBy(
       circles,
       (circle: VennCircle) => circle.circle.center.x
     );

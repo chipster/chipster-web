@@ -11,9 +11,9 @@ export class TwoCircleVennDiagramService {
    * @description: Get centerpoints for two ellipses
    */
   getCenterPoints(center: Point, ellipseRadius: number): Array<Point> {
-    let halfRadius = ellipseRadius / 2;
-    let point1 = new Point(center.x - halfRadius, center.y);
-    let point2 = new Point(center.x + halfRadius, center.y);
+    const halfRadius = ellipseRadius / 2;
+    const point1 = new Point(center.x - halfRadius, center.y);
+    const point2 = new Point(center.x + halfRadius, center.y);
     return [point1, point2];
   }
 
@@ -38,16 +38,16 @@ export class TwoCircleVennDiagramService {
     selectionCircle: Circle,
     radius: number
   ) {
-    let intersections = VennDiagramUtils.getIntersections(
+    const intersections = VennDiagramUtils.getIntersections(
       circles[0],
       circles[1]
     );
-    let firstDrawPoint = VennDiagramUtils.getRightMostPoint(
+    const firstDrawPoint = VennDiagramUtils.getRightMostPoint(
       intersections.point1,
       intersections.point2,
       selectionCircle.center
     );
-    let secondDrawPoint = VennDiagramUtils.getLeftMostPoint(
+    const secondDrawPoint = VennDiagramUtils.getLeftMostPoint(
       intersections.point1,
       intersections.point2,
       selectionCircle.center
@@ -62,7 +62,7 @@ export class TwoCircleVennDiagramService {
    * @description: get path descriptor for when two circles are selected
    */
   twoSelectedCirclesDescriptor(circles: Array<Circle>, radius: number) {
-    let intersections = VennDiagramUtils.getIntersections(
+    const intersections = VennDiagramUtils.getIntersections(
       circles[0],
       circles[1]
     );

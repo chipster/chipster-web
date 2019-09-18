@@ -80,7 +80,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           const isPreviousCompatible =
             Array.from(this.compatibleVisualizations)
               .map(this.getTabId.bind(this))
-              .indexOf(this.active) !== -1;
+              .includes(this.active);
 
           /*
           We will get an empty selection in between when the selection is changed.
@@ -145,7 +145,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   isCompatibleVisualization(id: string): boolean {
-    const isBlacklisted = this.visualizationBlacklist.indexOf(id) !== -1;
+    const isBlacklisted = this.visualizationBlacklist.includes(id);
 
     const visualization = _.find(
       this.visualizations,

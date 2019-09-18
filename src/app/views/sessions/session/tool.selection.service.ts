@@ -94,7 +94,7 @@ export class ToolSelectionService {
       // const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
       let result;
       try {
-        const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+        const regexp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
         result = regexp.exec(<string>parameter.value);
       } catch (e) {
         log.warn("validating string parameter failed");

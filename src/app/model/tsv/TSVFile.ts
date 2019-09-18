@@ -44,7 +44,7 @@ export default class TSVFile {
    * @description: Get values from TSVbody column by given header-key
    */
   public getColumnDataByHeaderKey(key: string): Array<string> {
-    let columnIndex = this.getColumnIndex(key);
+    const columnIndex = this.getColumnIndex(key);
     return this.body.rows.map((tsvRow: TSVRow) => tsvRow.row[columnIndex]);
   }
 
@@ -72,7 +72,7 @@ export default class TSVFile {
    */
   private getNormalizeHeaders(tsv: Array<Array<string>>) {
     const isMissingHeader = this.isMissingHeader(tsv);
-    let headers = tsv[0];
+    const headers = tsv[0];
 
     if (!headers) {
       return [];
@@ -83,7 +83,7 @@ export default class TSVFile {
       return headers;
     }
 
-    if (headers.indexOf(" ") !== -1) {
+    if (headers.includes(" ")) {
       headers[headers.indexOf(" ")] = "identifier";
       return headers;
     }

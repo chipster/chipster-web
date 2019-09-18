@@ -12,7 +12,7 @@ export class PipeService {
           (tool: Tool) =>
             tool.name.displayName
               .toLowerCase()
-              .indexOf(searchWord.toLowerCase()) !== -1
+              .includes(searchWord.toLowerCase())
         )
       : tools;
   }
@@ -21,7 +21,7 @@ export class PipeService {
     return searchWord
       ? datasets.filter(
           (item: Dataset) =>
-            item.name.toLowerCase().indexOf(searchWord.toLowerCase()) !== -1
+            item.name.toLowerCase().includes(searchWord.toLowerCase())
         )
       : datasets;
   }
@@ -34,7 +34,7 @@ export class PipeService {
     return _.some(
       tools,
       (tool: Tool) =>
-        tool.name.displayName.toLowerCase().indexOf(lowerCaseSearchWord) >= 0
+        tool.name.displayName.toLowerCase().includes(lowerCaseSearchWord)
     );
   }
 

@@ -16,7 +16,7 @@ import { ConfigService } from "../../../shared/services/config.service";
 export class ServicesComponent implements OnInit {
   services: Service[];
   aliveMap: Map<string, string>;
-  private statusMap: Map<string, Object>;
+  private statusMap: Map<string, Record<string, any>>;
 
   constructor(
     private configService: ConfigService,

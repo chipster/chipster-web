@@ -167,7 +167,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         this.BLOCK_HEADER_LENGTH + this.filePos
       );
       const ba = new Uint8Array(blockHeader);
-      let blockSize = (ba[17] << 8) | (ba[16] + 1);
+      const blockSize = (ba[17] << 8) | (ba[16] + 1);
       if (blockSize < 28) break;
 
       blockSizeList.push(blockSize);
@@ -203,7 +203,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     let offset = 0;
 
     while (offset < MAX_GZIP_BLOCK_SIZE) {
-      let bamRecord = new BamRecord();
+      const bamRecord = new BamRecord();
       let blockSize,
         blockEnd,
         refID,
@@ -358,7 +358,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       p += seqBytes;
 
       // Decoding the base Quality
-      let self = this;
+      const self = this;
       let qual = "";
 
       if (lseq === 1 && String.fromCharCode(this.plain[p + j] + 33) === "*") {

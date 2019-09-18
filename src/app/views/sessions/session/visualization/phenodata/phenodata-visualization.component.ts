@@ -151,7 +151,7 @@ export class PhenodataVisualizationComponent
       height: this.getHeight(array),
 
       afterGetColHeader: (col: number, TH: any) => {
-        if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
+        if (this.unremovableColumns.includes(headers[col])) {
           // removal not allowed
           return;
         }
@@ -225,13 +225,13 @@ export class PhenodataVisualizationComponent
     if (
       this.headers.some(
         (columnHeader: string) =>
-          this.unremovableColumns.indexOf(columnHeader) === -1
+          !this.unremovableColumns.includes(columnHeader)
       )
     ) {
       // get indexes of removable columns
       const removableColumnIndexces = this.headers
         .map((columnHeader: string, index: number) => {
-          return this.unremovableColumns.indexOf(columnHeader) === -1
+          return !this.unremovableColumns.includes(columnHeader)
             ? index
             : -1;
         })

@@ -13,8 +13,8 @@ export default class PointPair {
    * @description: get the point of this pointpair which is closer to the point given as parameter
    */
   closerPoint(other: Point): Point {
-    let distance1 = Point.distance(other, this.point1);
-    let distance2 = Point.distance(other, this.point2);
+    const distance1 = Point.distance(other, this.point1);
+    const distance2 = Point.distance(other, this.point2);
     return distance1 <= distance2 ? this.point1 : this.point2;
   }
 
@@ -22,8 +22,8 @@ export default class PointPair {
    * @description: get the point of this pointpair which is further away from the point given as parameter
    */
   moreDistantPoint(other: Point): Point {
-    let distance1 = Point.distance(other, this.point1);
-    let distance2 = Point.distance(other, this.point2);
+    const distance1 = Point.distance(other, this.point1);
+    const distance2 = Point.distance(other, this.point2);
     return distance1 > distance2 ? this.point1 : this.point2;
   }
 

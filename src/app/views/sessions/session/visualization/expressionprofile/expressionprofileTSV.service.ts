@@ -19,7 +19,7 @@ export class ExpressionProfileTSVService {
    * Get chipvalues from raw data
    */
   public getGeneExpressions(tsv: TSVFile): Array<GeneExpression> {
-    let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
+    const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
     return _.map(tsv.body.rows, (row: TSVRow) =>
       this.getGeneExpressionsByIndex(row, chipIndexes)
     );
@@ -29,15 +29,15 @@ export class ExpressionProfileTSVService {
    * max & min value from two-dimensional array
    */
   public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
-    let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    let values = _.map(tsv.body.rows, (row: TSVRow) =>
+    const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
+    const values = _.map(tsv.body.rows, (row: TSVRow) =>
       row.getCellsByIndexes(chipIndexes)
     );
-    let flatValues = _.map(_.flatten(values), (value: string) =>
+    const flatValues = _.map(_.flatten(values), (value: string) =>
       parseFloat(value)
     );
-    let min = _.min(flatValues);
-    let max = _.max(flatValues);
+    const min = _.min(flatValues);
+    const max = _.max(flatValues);
     return new DomainBoundaries(min, max);
   }
 
@@ -57,8 +57,8 @@ export class ExpressionProfileTSVService {
    * create new GeneExpression from data with given id
    */
   public getGeneExpression(tsv: TSVFile, id: string): GeneExpression {
-    let chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    let tsvRow = tsv.body.getTSVRow(id);
+    const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
+    const tsvRow = tsv.body.getTSVRow(id);
     return this.getGeneExpressionsByIndex(tsvRow, chipIndexes);
   }
 
@@ -69,8 +69,8 @@ export class ExpressionProfileTSVService {
     row: TSVRow,
     indexes: Array<number>
   ): GeneExpression {
-    let values = row.getCellsByIndexes(indexes);
-    let numberValues = _.map(values, (value: string) => parseFloat(value));
+    const values = row.getCellsByIndexes(indexes);
+    const numberValues = _.map(values, (value: string) => parseFloat(value));
     return new GeneExpression(row.id, numberValues);
   }
 
@@ -89,7 +89,7 @@ export class ExpressionProfileTSVService {
    * Get chip-value headers
    */
   public getChipHeaders(tsv: TSVFile): Array<string> {
-    let chipHeaderIndexes = this.getChipHeaderIndexes(tsv.headers);
+    const chipHeaderIndexes = this.getChipHeaderIndexes(tsv.headers);
     return tsv.headers.getItemsByIndexes(chipHeaderIndexes);
   }
 }

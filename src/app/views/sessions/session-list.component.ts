@@ -293,10 +293,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
         }
         // show each session only once in each list, otherwise example_session_owner will see duplicates
         if (
-          sessionsByUser
+          !sessionsByUser
             .get(rule.sharedBy)
             .map(s2 => s2.sessionId)
-            .indexOf(s.sessionId) === -1
+            .includes(s.sessionId)
         ) {
           sessionsByUser.get(rule.sharedBy).push(s);
         }

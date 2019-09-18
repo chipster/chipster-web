@@ -30,7 +30,7 @@ export class HistoryComponent implements OnInit {
   selectAttributeForm: FormGroup;
   startTimeInputForm: FormGroup;
   endTimeInputForm: FormGroup;
-  jobListLoading: Boolean = false;
+  jobListLoading = false;
   filterAttributeSet: Array<FilterParam> = [];
   page = 1;
   collectionSize = 70;

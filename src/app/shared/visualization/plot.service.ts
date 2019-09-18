@@ -16,13 +16,13 @@ export class PlotService {
     plotData: Array<PlotData>
   ): Array<string> {
     console.log(linearXScale);
-    let startXValue = linearXScale.invert(dragStartPoint.x);
-    let endXValue = linearXScale.invert(dragEndPoint.x);
+    const startXValue = linearXScale.invert(dragStartPoint.x);
+    const endXValue = linearXScale.invert(dragEndPoint.x);
 
-    let startYValue = linearYScale.invert(dragStartPoint.y);
-    let endYValue = linearYScale.invert(dragEndPoint.y);
+    const startYValue = linearYScale.invert(dragStartPoint.y);
+    const endYValue = linearYScale.invert(dragEndPoint.y);
 
-    let selectedDataPoints: Array<string> = [];
+    const selectedDataPoints: Array<string> = [];
 
     console.log(startXValue);
     console.log(startYValue);

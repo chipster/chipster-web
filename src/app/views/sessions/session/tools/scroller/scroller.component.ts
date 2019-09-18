@@ -13,9 +13,9 @@ export class ScrollerComponent {
   @ViewChild("scroll") scrollElement;
 
   @HostListener("wheel", ["$event"]) onMousewheel(event) {
-    let element = this.scrollElement.nativeElement;
-    let scrollTop = element.scrollTop;
-    let maxScrollTop = element.scrollHeight - element.clientHeight;
+    const element = this.scrollElement.nativeElement;
+    const scrollTop = element.scrollTop;
+    const maxScrollTop = element.scrollHeight - element.clientHeight;
 
     if (event.deltaY > 0) {
       // scrolling down
