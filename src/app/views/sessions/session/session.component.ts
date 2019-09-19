@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import {
   ActivatedRoute,
   ActivatedRouteSnapshot,
-  Params,
   RouterStateSnapshot
 } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -59,7 +58,6 @@ export class SessionComponent implements OnInit, OnDestroy {
   tools: Tool[];
   modules: Module[];
   modulesMap: Map<string, Module>;
-  deletedDatasetsTimeout: any;
 
   ComponentState = ComponentState; // for using the enum in template
   state = ComponentState.LOADING_SESSION;
@@ -72,7 +70,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   private exampleSessionOwnerUserId: string;
   private PARAM_SOURCE_SESSION = "sourceSession";
 
-  private unsubscribe: Subject<any> = new Subject();
+  private unsubscribe: Subject<null> = new Subject();
 
   constructor(
     private sessionEventService: SessionEventService,
@@ -96,7 +94,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private getSessionDataService: GetSessionDataService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.route.params
       .pipe(
         mergeMap(params => {
@@ -151,17 +149,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 
           this.subscribeToEvents();
 
-          // hack for forcing Safari to draw workflow labels
-          // this is not needed for other browsers, but reliable browser detection would make this unnecessarily complicated
-          setTimeout(() => {
-            this.split1Size -= 0.01;
-            this.split2Size += 0.01;
-          }, 0);
-
           // ready to go
           this.state = ComponentState.READY;
         },
-        (error: any) => {
+        (error: Error) => {
           if (RestErrorService.isNotFound(error)) {
             this.state = ComponentState.NOT_FOUND;
           } else {
@@ -192,7 +183,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.sessionEventService.unsubscribe();
 
     this.unsubscribe.next();
@@ -255,7 +246,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     return of(true);
   }
 
-  subscribeToEvents() {
+  subscribeToEvents(): void {
     // Services don't have access to ActivatedRoute, so we have to set it
     this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
 
@@ -278,7 +269,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       .getRuleStream()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(change => {
-        const rule: Rule = <Rule>change.oldValue;
+        const rule: Rule = change.oldValue as Rule;
 
         if (
           change.event.type === EventType.Delete &&
@@ -301,8 +292,8 @@ export class SessionComponent implements OnInit, OnDestroy {
       .subscribe(
         change => {
           const event = change.event;
-          const oldValue = <Job>change.oldValue;
-          const newValue = <Job>change.newValue;
+          const oldValue = change.oldValue as Job;
+          const newValue = change.newValue as Job;
 
           // log to catch unexpected null oldvalue
           if (event.type !== "CREATE" && !oldValue) {
@@ -351,23 +342,11 @@ export class SessionComponent implements OnInit, OnDestroy {
     return this.sessionData.jobsMap.get(jobId);
   }
 
-  exportDatasets(datasets: Dataset[]) {
+  exportDatasets(datasets: Dataset[]): void {
     this.sessionDataService.exportDatasets(datasets);
   }
 
-  // noinspection JSMethodCanBeStatic
-  parseQueryparametersArray(queryParams: Params, key: string): Array<string> {
-    switch (typeof queryParams[key]) {
-      case "string":
-        return [queryParams[key]];
-      case "object":
-        return queryParams[key];
-      default:
-        return [];
-    }
-  }
-
-  openErrorModal(title: string, job: Job) {
+  openErrorModal(title: string, job: Job): void {
     const modalRef = this.modalService.open(JobErrorModalComponent, {
       size: "lg"
     });
@@ -375,7 +354,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     modalRef.componentInstance.job = job;
   }
 
-  private getSessionData(sessionId: string) {
+  private getSessionData(sessionId: string): Observable<SessionData> {
     return this.sessionResource.loadSession(sessionId).pipe(
       flatMap(sessionData => {
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
@@ -420,7 +399,7 @@ export class SessionComponent implements OnInit, OnDestroy {
    *
    * @param session
    */
-  public onDeleteSession(session: Session) {
+  public onDeleteSession(): void {
     this.state = ComponentState.DELETING_SESSION;
 
     this.sessionDataService
@@ -482,7 +461,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     }
   }
 
-  doScrollFix() {
+  doScrollFix(): void {
     const scrollToTop = setInterval(() => {
       const div = document.getElementById("myDiv");
       const visRect = document.getElementById("visTab").getBoundingClientRect();
@@ -494,7 +473,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     }, 16);
   }
 
-  private trySourceSessionIfSessionNotFound(error): Observable<any> {
+  private trySourceSessionIfSessionNotFound(error): Observable<never> {
     if (RestErrorService.isNotFound(error)) {
       const sourceSessionId = this.getSourceSessionId();
       if (sourceSessionId) {
@@ -510,7 +489,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     return this.route.snapshot.queryParamMap.get(this.PARAM_SOURCE_SESSION);
   }
 
-  private saveLatestSession() {
+  private saveLatestSession(): void {
     const sourceSession = this.getSourceSessionId();
     if (sourceSession) {
       this.userService.updateLatestSession(
@@ -528,7 +507,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     );
   }
 
-  private removeSourceSessionParamIfRegularSession(session: Session) {
+  private removeSourceSessionParamIfRegularSession(session: Session): void {
     if (session.state === SessionState.Ready && this.getSourceSessionId()) {
       log.info(
         "opening session with state: ready, but source url param exists, redirect to id without parameters"
