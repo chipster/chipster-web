@@ -1,12 +1,6 @@
+import { animate, state, style, transition, trigger } from "@angular/animations";
 import { Component } from "@angular/core";
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger
-} from "@angular/animations";
-import { ToastrService, ToastPackage, Toast } from "ngx-toastr";
+import { Toast, ToastPackage, ToastrService } from "ngx-toastr";
 
 /*
 Component definition copied from the Toast source code, because this is how it done in the ngx-toastr example too
@@ -35,6 +29,9 @@ Added:
     </button>
     <div *ngIf="title" [class]="options.titleClass" [attr.aria-label]="title">
       {{ title }}
+      <ng-container *ngIf="duplicatesCount"
+        >[{{ duplicatesCount + 1 }}]</ng-container
+      >
     </div>
     <div
       *ngIf="message && options.enableHtml"
@@ -84,14 +81,8 @@ Added:
   `,
   animations: [
     trigger("flyInOut", [
-      state(
-        "inactive",
-        style({
-          display: "none",
-          opacity: 0
-        })
-      ),
-      state("active", style({})),
+      state("inactive", style({ opacity: 0 })),
+      state("active", style({ opacity: 1 })),
       state("removed", style({ opacity: 0 })),
       transition(
         "inactive => active",
@@ -111,7 +102,7 @@ export class ActionToastComponent extends Toast {
     super(toastrService, toastPackage);
   }
 
-  action(buttonText: string, event: Event) {
+  action(buttonText: string, event: Event): boolean {
     event.stopPropagation();
     this.toastPackage.triggerAction(buttonText);
     return false;
