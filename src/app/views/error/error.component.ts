@@ -13,6 +13,7 @@ import {
 import { RouteService } from "../../shared/services/route.service";
 import { ContactSupportService } from "../contact/contact-support.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
+
 @Component({
   selector: "ch-error",
   template: ""
@@ -171,9 +172,9 @@ export class ErrorComponent implements OnInit {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
-  getCircularReplacer(): (key: string, value: unknown) => {} | string {
+  getCircularReplacer(): (key: string, value: unknown) => unknown {
     const seen = new WeakSet();
-    return (key, value): {} | string => {
+    return (key, value): unknown => {
       if (typeof value === "object" && value !== null) {
         if (seen.has(value)) {
           return "(circular reference removed)";
@@ -184,7 +185,10 @@ export class ErrorComponent implements OnInit {
     };
   }
 
-  stackframesToString(stackframes: unknown[], maxCount = 20): string {
+  stackframesToString(
+    stackframes: Record<string, unknown>[],
+    maxCount = 20
+  ): string {
     return stackframes
       .splice(0, maxCount)
       .map(sf => sf.toString())
