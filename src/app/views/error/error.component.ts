@@ -29,12 +29,12 @@ export class ErrorComponent implements OnInit {
     private dialogModalService: DialogModalService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     // clear errors when navigating to a new url
     this.router.events
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe(
-        event => {
+        () => {
           this.toastIds.forEach(t => this.toastrService.remove(t));
           this.toastIds = [];
         },
@@ -99,15 +99,15 @@ export class ErrorComponent implements OnInit {
       });
   }
 
-  reload() {
+  reload(): void {
     window.location.reload();
   }
 
-  redirect() {
+  redirect(): void {
     this.routeService.redirectToLoginAndBack();
   }
 
-  contactSupport(errorMessage: ErrorMessage) {
+  contactSupport(errorMessage: ErrorMessage): Promise<{}> {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
       tap(logString => {
         this.contactSupportService.openContactSupportModal(logString);
@@ -120,7 +120,7 @@ export class ErrorComponent implements OnInit {
     );
   }
 
-  showDetails(title: string, errorMessage: ErrorMessage) {
+  showDetails(title: string, errorMessage: ErrorMessage): Promise<{}> {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
       tap(logString => {
         this.dialogModalService.openPreModal(title, logString);
@@ -152,14 +152,14 @@ export class ErrorComponent implements OnInit {
       }
 
       // print the whole object if it's something else
-      const errorAsJson = JSON.stringify(errorMessage.error, null, 2);
+      const errorAsJson = JSON.stringify(error, this.getCircularReplacer(), 2);
       if (errorAsJson !== "{}") {
         info += "\n" + errorAsJson + "\n";
       }
 
       // try to get the source mapped stacktrace
-      return from(StackTrace.fromError(errorMessage.error)).pipe(
-        map((sf: any[]) => this.stackframesToString(sf)),
+      return from(StackTrace.fromError(error)).pipe(
+        map((sf: []) => this.stackframesToString(sf)),
         map(stack => info + "stack: \n" + stack + "\n"),
         catchError(stackErr =>
           of(info + "stack: (failed to get the stack: " + stackErr + ")\n")
@@ -170,7 +170,21 @@ export class ErrorComponent implements OnInit {
     }
   }
 
-  stackframesToString(stackframes: any[], maxCount = 20) {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
+  getCircularReplacer(): (key: string, value: unknown) => {} | string {
+    const seen = new WeakSet();
+    return (key, value): {} | string => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "(circular reference removed)";
+        }
+        seen.add(value);
+      }
+      return value;
+    };
+  }
+
+  stackframesToString(stackframes: unknown[], maxCount = 20): string {
     return stackframes
       .splice(0, maxCount)
       .map(sf => sf.toString())
