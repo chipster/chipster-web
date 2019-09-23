@@ -104,7 +104,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3PhenodataLinks: d3.Selection<SVGLineElement, DatasetNode, SVGGElement, {}>;
   d3Labels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataLabels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
-  d3PhenodataWarnings: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
+  d3PhenodataWarnings: d3.Selection<
+    SVGTextElement,
+    DatasetNode,
+    SVGGElement,
+    {}
+  >;
   d3DatasetNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
 
@@ -842,32 +847,27 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             }
           })
       );
+
     this.datasetToolTipArray = [];
-    this.d3DatasetNodes.each(function(d, i) {
-      const selection = d3.select(this).node();
-      self.createTooltipById(selection, d, i);
-    });
+
+    if (self.searchEnabled) {
+      const datasetClientRects = this.getDatasetClientRects();
+      const svgClientRect = this.svg.node().getBoundingClientRect();
+
+      this.d3DatasetNodes.each(function(d, i) {
+        const selection = d3.select(this).node();
+        self.createTooltipById(selection, d, i, datasetClientRects, svgClientRect);
+      });
+    }
+
+    const toolTipClientRects = this.getToolTipBoundingClientRects();
 
     // Show search Tooltips
     this.d3DatasetNodes.each(function(d, i) {
       if (self.searchEnabled) {
-        self.showToolTipByIdForSearch(d, i);
-      } else {
-        self.hideToolTipById(d, i);
+        self.showToolTipByIdForSearch(d, i, toolTipClientRects);
       }
     });
-
-    // renderGraph() seems to get called twice and for some reason the datasetToolTipArray
-    // is not populated during the first run, thus checks for avoiding error
-    if (
-      this.showDatasetSelectionTooltip &&
-      this.selectionEnabled &&
-      this.selectedDatasets.length > 0 &&
-      this.datasetToolTipArray &&
-      this.datasetToolTipArray.length > 0
-    ) {
-      this.showToolTipByIdForSelection();
-    }
 
     this.d3DatasetNodes.exit().remove();
 
@@ -971,7 +971,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       );
 
     // Define the xy positions of the link
-    this.d3Links = this.d3LinksGroup.selectAll<SVGLineElement, {}>("line").data(this.links);
+    this.d3Links = this.d3LinksGroup
+      .selectAll<SVGLineElement, {}>("line")
+      .data(this.links);
 
     this.d3Links
       .enter()
@@ -1256,7 +1258,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // creating tooltip for every node which will be hidden and when search is enabled, it will be shown
-  createTooltipById(element, dataset, id): void {
+  createTooltipById(element, dataset: DatasetNode, id, datasetClientRects: Map<string, ClientRect>, svgClientRect: ClientRect): void {
     const tooltip = new DatasetNodeToolTip();
     this.datasetToolTipArray[id] = tooltip;
     this.datasetToolTipArray[id].datasetId = dataset.datasetId;
@@ -1270,44 +1272,42 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("opacity", 0)
       .html("tooltip");
 
-    const datasetLeft = element.getBoundingClientRect().left;
-    const datasetTop = element.getBoundingClientRect().top;
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
-      .height;
+    const datasetLeft = datasetClientRects.get(dataset.datasetId).left;
+    const datasetTop = datasetClientRects.get(dataset.datasetId).top;
+
+    const tooltipHeight = 24;
 
     if (dataset) {
       this.datasetToolTipArray[id].dataNodeToolTip.html(dataset.name);
     }
+
     this.datasetToolTipArray[id].dataNodeToolTip
-      .style(
-        "left",
-        datasetLeft - this.svg.node().getBoundingClientRect().left - 5 + "px"
-      )
-      .style(
-        "top",
-        datasetTop -
-          this.svg.node().getBoundingClientRect().top -
-          tooltipHeight +
-          2 +
-          "px"
-      );
+      .style("left", datasetLeft - svgClientRect.left - 5 + "px")
+      .style("top", datasetTop - svgClientRect.top - tooltipHeight + 2 + "px");
   }
 
-  showToolTipByIdForSearch(d, i): void {
+  showToolTipByIdForSearch(
+    d,
+    i,
+    toolTipClientRects: Map<string, ClientRect>
+  ): void {
     //  Before showing the tooltip, we need to adjust the width so that in case of multiple tooltip in one row it nor get cluttere
-    this.setCurrentToolTipName(i);
+    this.setCurrentToolTipName(i, toolTipClientRects);
     this.datasetToolTipArray[i].dataNodeToolTip.style("opacity", () =>
       WorkflowGraphComponent.getToolTipOpacity(this.filter.has(d.datasetId))
     );
   }
 
-  showToolTipByIdForSelection(): void {
+  showToolTipByIdForSelection(
+    toolTipClientRects: Map<string, ClientRect>
+  ): void {
     for (let k = 0; k < this.selectedDatasets.length; k++) {
       this.setCurrentToolTipName(
         this.datasetToolTipArray.findIndex(
           datasetToolTip =>
             datasetToolTip.datasetId === this.selectedDatasets[k].datasetId
-        )
+        ),
+        toolTipClientRects
       );
       this.datasetToolTipArray
         .find(
@@ -1332,6 +1332,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   onZoomInandOut(): void {
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
       .height;
+
+    const toolTipClientRects = this.getToolTipBoundingClientRects();
+
     for (let i = 0; i < this.datasetToolTipArray.length; i++) {
       const isInSearch =
         this.filter != null &&
@@ -1365,19 +1368,49 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
                 "px"
             );
         }
-        this.setCurrentToolTipName(i);
+        this.setCurrentToolTipName(i, toolTipClientRects);
       }
     }
   }
 
-  setCurrentToolTipName(id: number): void {
+  getDatasetClientRects(): Map<string, ClientRect> {
+    const datasetClientRects = new Map<string, ClientRect>();
+    this.d3DatasetNodes.each(function(d) {
+      const selection = d3.select(this).node();
+      datasetClientRects.set(d.datasetId, selection.getBoundingClientRect());
+    });
+    return datasetClientRects;
+  }
+
+  /**
+   * Get all rects in one go to avoid extra reflows
+   */
+  getToolTipBoundingClientRects(): Map<string, ClientRect> {
+    const boundingClientRects = new Map<string, ClientRect>();
+    this.datasetToolTipArray.forEach(datasetNode => {
+
+      const element = document.getElementById(datasetNode.datasetId);
+      if (element != null) {
+        const rect = element.getBoundingClientRect();
+
+        boundingClientRects.set(datasetNode.datasetId, rect);
+      }
+    });
+    return boundingClientRects;
+  }
+
+  setCurrentToolTipName(
+    id: number,
+    boundingClientRects: Map<string, ClientRect>
+  ): void {
     // First set the full name again
     this.datasetToolTipArray[id].dataNodeToolTip.html(
       this.datasetToolTipArray[id].datasetName
     );
-    const curRect = document
-      .getElementById(this.datasetToolTipArray[id].datasetId)
-      .getBoundingClientRect();
+
+    const curRect = boundingClientRects.get(
+      this.datasetToolTipArray[id].datasetId
+    );
 
     // checking the name
     for (let k = 0; k < this.datasetToolTipArray.length; k++) {
@@ -1392,9 +1425,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           dataset => dataset.datasetId === this.datasetToolTipArray[k].datasetId
         ).length > 0;
       if (isNotSameDataset && (isSelected || isInSearch)) {
-        const rectB = document
-          .getElementById(this.datasetToolTipArray[k].datasetId)
-          .getBoundingClientRect();
+        const rectB = boundingClientRects.get(
+          this.datasetToolTipArray[k].datasetId
+        );
 
         if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
           this.datasetToolTipArray[id].dataNodeToolTip.html(
