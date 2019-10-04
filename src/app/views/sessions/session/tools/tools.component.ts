@@ -7,16 +7,30 @@ import {
   OnInit,
   ViewChild
 } from "@angular/core";
-import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdownConfig,
+  NgbModal,
+  NgbModalRef
+} from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
-import { Category, Job, Module, Tool } from "chipster-js-common";
+import {
+  Category,
+  Job,
+  JobState,
+  Module,
+  Tool,
+  WorkflowJobPlan,
+  WorkflowPlan,
+  WorkflowRun
+} from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
 import { filter, map, mergeMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
+import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import UtilsService from "../../../../shared/utilities/utils";
@@ -31,9 +45,11 @@ import {
   SET_VALIDATED_TOOL
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
+import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
+import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { ToolService } from "./tool.service";
@@ -104,15 +120,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private lastJobStartedToastId: number;
 
   // use to signal that parameters have been changed and need to be validated
-  private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(
+  private parametersChanged$: BehaviorSubject<null> = new BehaviorSubject<null>(
     null
   );
 
-  private unsubscribe: Subject<any> = new Subject();
-  manualModalRef: any;
+  isWorkflowTabVisible = false;
+  selectedDatasets = [];
+  workflowPlans: Array<WorkflowPlan>;
+  workflowRuns: Array<WorkflowRun>;
+  selectedWorkflowPlan: WorkflowPlan;
+
+  private unsubscribe: Subject<null> = new Subject();
+  manualModalRef: NgbModalRef;
+  selectedWorkflowRun: WorkflowRun;
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
+    @Inject(DOCUMENT) private document: Document,
     public settingsService: SettingsService,
     private toolSelectionService: ToolSelectionService,
     public selectionService: SelectionService,
@@ -124,14 +147,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
-    private store: Store<any>,
+    private store: Store<{}>,
+    private dialogModalService: DialogModalService,
+    private sessionDataService: SessionDataService,
+    private restErrorService: RestErrorService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     // TODO why the copies?
     this.tools = _.cloneDeep(this.toolsArray);
     this.modules = _.cloneDeep(this.modulesArray);
@@ -148,7 +174,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.unsubscribe.next();
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
@@ -158,22 +184,23 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectModule(module: Module) {
+  selectModule(module: Module): void {
     this.selectedModule = module;
   }
 
-  selectModuleAndFirstCategoryAndFirstTool(module: Module) {
+  selectModuleAndFirstCategoryAndFirstTool(module: Module): void {
+    this.showWorkflowTab(false);
     this.selectedModule = module;
     if (module.categories.length > 0) {
       this.selectCategoryAndFirstTool(module.categories[0]);
     }
   }
 
-  selectCategory(category: Category) {
+  selectCategory(category: Category): void {
     this.selectedCategory = category;
   }
 
-  selectCategoryAndFirstTool(category: Category) {
+  selectCategoryAndFirstTool(category: Category): void {
     this.selectedCategory = category;
 
     if (category.tools.length > 0) {
@@ -181,7 +208,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectTool(tool: Tool) {
+  selectTool(tool: Tool): void {
     const selectedTool: SelectedTool = {
       tool: tool,
       category: this.selectedCategory,
@@ -190,24 +217,24 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
   }
 
-  setBindings(toolWithInputs: SelectedToolWithInputs) {
+  setBindings(toolWithInputs: SelectedToolWithInputs): void {
     this.store.dispatch({
       type: SET_SELECTED_TOOL_WITH_INPUTS,
       payload: toolWithInputs
     });
   }
 
-  onParametersChanged() {
+  onParametersChanged(): void {
     this.parametersChanged$.next(null);
   }
 
-  openChange(isOpen) {
+  openChange(isOpen): void {
     if (isOpen) {
       this.searchBox.focus();
     }
   }
 
-  runJob(runForEach: boolean) {
+  runJob(runForEach: boolean): void {
     let notificationText;
     if (runForEach) {
       this.jobService.runForEach(this.validatedTool);
@@ -232,7 +259,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     return UtilsService.mapValues(this.sessionData.jobsMap);
   }
 
-  updateJobs() {
+  updateJobs(): void {
     this.jobList = this.getJobList();
     this.runningJobs = this.jobList.reduce((runningCount, job) => {
       if (job.state === "RUNNING" || job.state === "NEW") {
@@ -243,11 +270,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  onJobSelection(job: Job) {
+  onJobSelection(job: Job): void {
     this.selectionHandlerService.setJobSelection([job]);
   }
 
-  openManualModal() {
+  openManualModal(): void {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg"
     });
@@ -276,7 +303,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     return list;
   }
 
-  public filterTool(term: string, item: any): boolean {
+  public filterTool(term: string, item: ToolSearchListItem): boolean {
     const termTokens = term
       .trim()
       .toLowerCase()
@@ -285,17 +312,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     return termTokens.every((termToken: string) => {
       return (
-        item.toolName.toLowerCase().indexOf(termToken) !== -1 ||
+        !item.toolName.toLowerCase().includes(termToken) ||
         (item.description &&
-          item.description.toLowerCase().indexOf(termToken) !== -1) ||
-        item.category.toLowerCase().indexOf(termToken) !== -1 ||
-        item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
-        item.toolId.toLowerCase().indexOf(termToken) !== -1
+          !item.description.toLowerCase().includes(termToken)) ||
+        !item.category.toLowerCase().includes(termToken) ||
+        !item.moduleName.toLowerCase().includes(termToken) ||
+        !item.toolId.toLowerCase().includes(termToken)
       );
     });
   }
 
-  public searchBoxSelect(item) {
+  public searchBoxSelect(item): void {
     // at least clicking clear text after selecting an item results as change(undefined)
     if (!item) {
       return;
@@ -313,11 +340,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
   }
 
-  public searchBoxBlur() {
+  public searchBoxBlur(): void {
     this.searchBoxModel = null;
   }
 
-  private subscribeToToolEvents() {
+  private subscribeToToolEvents(): void {
     // subscribe to selected tool
     this.store
       .select("selectedTool")
@@ -493,7 +520,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private subscribeToJobEvents() {
+  private subscribeToJobEvents(): void {
     this.sessionEventService
       .getJobStream()
       .pipe(takeUntil(this.unsubscribe))
@@ -505,7 +532,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       );
   }
 
-  private addHotKeys() {
+  private addHotKeys(): void {
     // add search box hotkey
     this.searchBoxHotkey = this.hotkeysService.add(
       new Hotkey(
@@ -518,5 +545,110 @@ export class ToolsComponent implements OnInit, OnDestroy {
         "Find tool"
       )
     );
+  }
+
+  showWorkflowTab(show: boolean): void {
+    this.isWorkflowTabVisible = show;
+
+    this.workflowPlans = Array.from(this.sessionData.workflowPlansMap.values());
+    this.workflowRuns = Array.from(this.sessionData.workflowRunsMap.values());
+
+    this.store
+      .select("selectedDatasets")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        datasets => {
+          this.selectedDatasets = datasets;
+        },
+        err => {
+          this.errorService.showError("workflow error", err);
+        }
+      );
+
+    this.sessionEventService.getWorkflowPlanStream().subscribe(
+      () => {
+        this.workflowPlans = Array.from(
+          this.sessionData.workflowPlansMap.values()
+        );
+      },
+      err => this.errorService.showError("workflow plan event error", err)
+    );
+
+    this.sessionEventService.getWorkflowRunStream().subscribe(
+      () => {
+        this.workflowRuns = Array.from(
+          this.sessionData.workflowRunsMap.values()
+        );
+      },
+      err => this.errorService.showError("workflow run event error", err)
+    );
+  }
+
+  selectWorkflowPlan(plan: WorkflowPlan): void {
+    this.selectedWorkflowPlan = plan;
+  }
+
+  selectWorkflowRun(run: WorkflowRun): void {
+    this.selectedWorkflowRun = run;
+  }
+
+  runWorkflowPlan(): void {
+    const run = new WorkflowRun();
+    run.state = JobState.New;
+    run.workflowPlanId = this.selectedWorkflowPlan.workflowPlanId;
+    this.sessionDataService
+      .createWorkflowRun(run)
+      .subscribe(null, err =>
+        this.restErrorService.showError("run workflow error", err)
+      );
+  }
+
+  deleteWorkflowPlan(plan: WorkflowPlan): void {
+    this.sessionDataService
+      .deleteWorkflowPlan(plan)
+      .subscribe(null, err =>
+        this.restErrorService.showError("delete workflow plan error", err)
+      );
+  }
+
+  deleteWorkflowRun(run: WorkflowRun): void {
+    this.sessionDataService
+      .deleteWorkflowRun(run)
+      .subscribe(null, err =>
+        this.restErrorService.showError("delete workflow run error", err)
+      );
+  }
+
+  saveWorkflow(): void {
+    this.dialogModalService
+      .openStringModal(
+        "Save workflow",
+        "Save workflow from the selected datasets",
+        "New workflow",
+        "Save"
+      )
+      .pipe(
+        mergeMap(name => {
+          const plan = new WorkflowPlan();
+          plan.name = name;
+          plan.workflowJobPlans = [];
+          this.selectedDatasets.forEach(d => {
+            const sourceJob = this.sessionData.jobsMap.get(d.sourceJob);
+            const job = new WorkflowJobPlan();
+            job.toolId = sourceJob.toolId;
+            job.toolCategory = sourceJob.toolCategory;
+            job.module = sourceJob.module;
+            job.toolName = sourceJob.toolName;
+            // job.parameters = Object.assign({}, sourceJob.parameters);
+            // job.inputs = Object.assign({}, sourceJob.inputs);
+            // job.metadataFiles = Object.assign({}, sourceJob.metadataFiles);
+            plan.workflowJobPlans.push(job);
+          });
+          return this.sessionDataService.createWorkflowPlan(plan);
+        })
+      )
+      .subscribe(null, err =>
+        this.errorService.showError("workflow save error", err)
+      );
   }
 }

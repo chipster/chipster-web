@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, Job, Rule, Session } from "chipster-js-common";
+import { Dataset, Job, Rule, Session, WorkflowPlan, WorkflowRun } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import * as _ from "lodash";
 import log from "loglevel";
@@ -20,56 +20,47 @@ export class SessionResource {
   ) {}
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
-    return this.configService.getSessionDbUrl().pipe(
-      mergeMap((url: string) => {
-        let sessionUrl = `${url}/sessions/${sessionId}`;
-        let types$;
+    let types$;
 
-        if (preview) {
-          sessionUrl += "?preview";
-          types$ = observableOf(null);
-        } else {
-          // types are not needed in the preview
-          types$ = this.getTypeTagsForSession(sessionId).pipe(
-            tap(x => log.debug("types", x))
-          );
-        }
+    if (preview) {
+      types$ = observableOf(null);
+    } else {
+      // types are not needed in the preview
+      types$ = this.getTypeTagsForSession(sessionId).pipe(
+        tap(x => log.debug("types", x))
+      );
+    }
 
-        const session$ = this.http
-          .get(sessionUrl, this.tokenService.getTokenParams(true))
-          .pipe(tap(x => log.debug("session", x)));
-        const sessionDatasets$ = this.http
-          .get(
-            `${url}/sessions/${sessionId}/datasets`,
-            this.tokenService.getTokenParams(true)
-          )
-          .pipe(tap(x => log.debug("sessionDatasets", x)));
-        const sessionJobs$ = this.http
-          .get(
-            `${url}/sessions/${sessionId}/jobs`,
-            this.tokenService.getTokenParams(true)
-          )
-          .pipe(tap(x => log.debug("sessionJobs", x)));
-
-        // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
-        return this.forkJoinWithoutCancel([
-          session$,
-          sessionDatasets$,
-          sessionJobs$,
-          types$
-        ]);
-      }),
+    // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
+    return this.forkJoinWithoutCancel([
+      this.getSession(sessionId, preview),
+      this.getDatasets(sessionId),
+      this.getJobs(sessionId),
+      types$,
+      this.getWorkflowPlans(sessionId),
+      this.getWorkflowRuns(sessionId)
+    ]).pipe(
       map((param: Array<{}>) => {
         const session: Session = param[0] as Session;
         const datasets: Dataset[] = param[1] as Dataset[];
         const jobs: Job[] = param[2] as Job[];
         const types = param[3] as Map<string, Map<string, string>>;
+        const workflowPlans = param[4] as WorkflowPlan[];
+        const workflowRuns = param[5] as WorkflowRun[];
 
         const data = new SessionData();
 
         data.session = session;
         data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
+        data.workflowPlansMap = UtilsService.arrayToMap(
+          workflowPlans,
+          "workflowPlanId"
+        );
+        data.workflowRunsMap = UtilsService.arrayToMap(
+          workflowRuns,
+          "workflowRunId"
+        );
 
         data.datasetTypeTags = types;
 
@@ -282,18 +273,48 @@ export class SessionResource {
     );
   }
 
-  getSession(sessionId: string): Observable<Session> {
-    log.info("trying to get the session");
-    return this.configService
-      .getSessionDbUrl()
-      .pipe(
-        mergeMap((url: string) =>
-          this.http.get<Session>(
-            `${url}/sessions/${sessionId}`,
-            this.tokenService.getTokenParams(true)
-          )
+  createWorkflowRun(sessionId: string, run: WorkflowRun): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(
+          `${url}/sessions/${sessionId}/workflows/runs`,
+          run,
+          this.tokenService.getTokenParams(true)
         )
-      );
+      ),
+      map((response: WorkflowRun) => response.workflowRunId)
+    );
+  }
+  createWorkflowPlan(
+    sessionId: string,
+    plan: WorkflowPlan
+  ): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(
+          `${url}/sessions/${sessionId}/workflows/plans`,
+          plan,
+          this.tokenService.getTokenParams(true)
+        )
+      ),
+      map((response: WorkflowPlan) => response.workflowPlanId)
+    );
+  }
+
+  getSession(sessionId: string, preview = false): Observable<Session> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) => {
+        let sessionUrl = url + "/sessions/" + sessionId;
+        if (preview) {
+          sessionUrl += "?preview";
+        }
+
+        return this.http.get<Session>(
+          sessionUrl,
+          this.tokenService.getTokenParams(true)
+        );
+      })
+    );
   }
 
   getDataset(sessionId: string, datasetId: string): Observable<Dataset> {
@@ -310,6 +331,20 @@ export class SessionResource {
       );
   }
 
+  getDatasets(sessionId: string): Observable<Dataset[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/datasets`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<Dataset[]>
+        )
+      );
+  }
+
   getJob(sessionId: string, jobId: string): Observable<Job> {
     return this.configService
       .getSessionDbUrl()
@@ -320,6 +355,75 @@ export class SessionResource {
               `${url}/sessions/${sessionId}/jobs/${jobId}`,
               this.tokenService.getTokenParams(true)
             ) as Observable<Job>
+        )
+      );
+  }
+
+  getJobs(sessionId: string): Observable<Job[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/jobs`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<Job[]>
+        )
+      );
+  }
+
+  getWorkflowRun(sessionId: string, runId: string): Observable<WorkflowRun> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/workflows/runs/${runId}`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<WorkflowRun>
+        )
+      );
+  }
+  getWorkflowPlan(sessionId: string, planId: string): Observable<WorkflowPlan> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/workflows/plans/${planId}`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<WorkflowPlan>
+        )
+      );
+  }
+
+  getWorkflowPlans(sessionId: string): Observable<WorkflowPlan[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/workflows/plans`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<WorkflowPlan[]>
+        )
+      );
+  }
+
+  getWorkflowRuns(sessionId: string): Observable<WorkflowRun[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/workflows/runs`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<WorkflowRun[]>
         )
       );
   }
@@ -460,6 +564,36 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}/jobs/${jobId}`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<null>
+        )
+      );
+  }
+
+  deleteWorkflowRun(sessionId: string, workflowRunId: string): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.delete(
+              `${url}/sessions/${sessionId}/workflows/runs/${workflowRunId}`,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<null>
+        )
+      );
+  }
+  deleteWorkflowPlan(
+    sessionId: string,
+    workflowPlanId: string
+  ): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.delete(
+              `${url}/sessions/${sessionId}/workflows/plans/${workflowPlanId}`,
               this.tokenService.getTokenParams(true)
             ) as Observable<null>
         )

@@ -9,6 +9,9 @@ import {
   Resource,
   Rule,
   Session,
+  Token,
+  WorkflowPlan,
+  WorkflowRun,
   WsEvent
 } from "chipster-js-common";
 import * as _ from "lodash";
@@ -61,7 +64,7 @@ export class SessionDataService {
     return this.sessionId;
   }
 
-  setSessionId(id: string) {
+  setSessionId(id: string): void {
     this.sessionId = id;
   }
 
@@ -69,15 +72,23 @@ export class SessionDataService {
     return this.sessionResource.createDataset(this.getSessionId(), dataset);
   }
 
-  createJob(job: Job) {
+  createJob(job: Job): Observable<string> {
     return this.sessionResource.createJob(this.getSessionId(), job);
   }
 
-  getJobById(jobId: string, jobs: Map<string, Job>) {
+  createWorkflowPlan(plan: WorkflowPlan): Observable<string> {
+    return this.sessionResource.createWorkflowPlan(this.getSessionId(), plan);
+  }
+
+  createWorkflowRun(run: WorkflowRun): Observable<string> {
+    return this.sessionResource.createWorkflowRun(this.getSessionId(), run);
+  }
+
+  getJobById(jobId: string, jobs: Map<string, Job>): Job {
     return jobs.get(jobId);
   }
 
-  createJobs(jobs: Job[]) {
+  createJobs(jobs: Job[]): Observable<Job[]> {
     return this.sessionResource.createJobs(this.getSessionId(), jobs);
   }
 
@@ -98,7 +109,7 @@ export class SessionDataService {
     sourceDatasetIds: string[],
     toolName: string,
     content: string
-  ) {
+  ): Observable<null> {
     const job = new Job();
     job.state = JobState.Completed;
     job.toolCategory = "Interactive visualizations";
@@ -130,14 +141,14 @@ export class SessionDataService {
     );
   }
 
-  cancelJob(job: Job) {
+  cancelJob(job: Job): void {
     job.state = JobState.Cancelled;
     job.stateDetail = "";
 
     this.updateJob(job);
   }
 
-  deleteJobs(jobs: Job[]) {
+  deleteJobs(jobs: Job[]): void {
     const deleteJobs$ = jobs.map((job: Job) =>
       this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
     );
@@ -149,7 +160,7 @@ export class SessionDataService {
     );
   }
 
-  deleteDatasets(datasets: Dataset[]) {
+  deleteDatasets(datasets: Dataset[]): void {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
     );
@@ -161,11 +172,25 @@ export class SessionDataService {
     );
   }
 
-  updateDataset(dataset: Dataset) {
+  deleteWorkflowPlan(plan: WorkflowPlan): Observable<null> {
+    return this.sessionResource.deleteWorkflowPlan(
+      this.sessionId,
+      plan.workflowPlanId
+    );
+  }
+
+  deleteWorkflowRun(run: WorkflowRun): Observable<null> {
+    return this.sessionResource.deleteWorkflowRun(
+      this.sessionId,
+      run.workflowRunId
+    );
+  }
+
+  updateDataset(dataset: Dataset): Observable<null> {
     return this.sessionResource.updateDataset(this.sessionId, dataset);
   }
 
-  updateJob(job: Job) {
+  updateJob(job: Job): Promise<null> {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
@@ -184,7 +209,7 @@ export class SessionDataService {
           this.tokenService.getTokenParams(true)
         )
       ),
-      map((datasetToken: any) => datasetToken.tokenKey)
+      map((datasetToken: Token) => datasetToken.tokenKey)
     );
   }
 
@@ -207,7 +232,7 @@ export class SessionDataService {
           this.tokenService.getTokenParams(true)
         )
       ),
-      map((datasetToken: any) => datasetToken.tokenKey)
+      map((datasetToken: Token) => datasetToken.tokenKey)
     );
   }
 
@@ -240,13 +265,13 @@ export class SessionDataService {
     );
   }
 
-  exportDatasets(datasets: Dataset[]) {
+  exportDatasets(datasets: Dataset[]): void {
     for (const d of datasets) {
       this.download(this.getDatasetUrl(d).pipe(map(url => url + "&download")));
     }
   }
 
-  openNewTab(dataset: Dataset) {
+  openNewTab(dataset: Dataset): void {
     this.newTab(
       this.getDatasetUrl(dataset).pipe(map(url => url)),
       null,
@@ -254,7 +279,7 @@ export class SessionDataService {
     );
   }
 
-  download(url$: Observable<string>) {
+  download(url$: Observable<string>): void {
     this.newTab(
       url$,
       3000,
@@ -268,10 +293,10 @@ export class SessionDataService {
     url$: Observable<string>,
     autoCloseDelay: number,
     popupErrorText: string
-  ) {
+  ): void {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
-    const win: any = window.open("", "_blank");
+    const win: Window = window.open("", "_blank");
     if (win) {
       url$.subscribe(
         url => {
@@ -294,7 +319,7 @@ export class SessionDataService {
     }
   }
 
-  hasReadWriteAccess(sessionData: SessionData) {
+  hasReadWriteAccess(sessionData: SessionData): boolean {
     const rules = this.getApplicableRules(sessionData.session.rules);
 
     for (const rule of rules) {
@@ -305,23 +330,23 @@ export class SessionDataService {
     return false;
   }
 
-  hasPersonalRule(rules: Array<Rule>) {
+  hasPersonalRule(rules: Array<Rule>): boolean {
     return this.getPersonalRules(rules).length > 0;
   }
 
-  getPersonalRules(rules: Array<Rule>) {
+  getPersonalRules(rules: Array<Rule>): Rule[] {
     return rules.filter(r => r.username === this.tokenService.getUsername());
   }
 
-  getPublicRules(rules: Array<Rule>) {
+  getPublicRules(rules: Array<Rule>): Rule[] {
     return rules.filter(r => r.username === "everyone");
   }
 
-  getApplicableRules(rules: Array<Rule>) {
+  getApplicableRules(rules: Array<Rule>): Rule[] {
     return this.getPersonalRules(rules).concat(this.getPublicRules(rules));
   }
 
-  deletePersonalRules(session: Session) {
+  deletePersonalRules(session: Session): Observable<null> {
     return observableFrom(this.getPersonalRules(session.rules)).pipe(
       concatMap((rule: Rule) =>
         this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
@@ -378,17 +403,17 @@ export class SessionDataService {
     });
   }
 
-  isReadOnlySession(session: Session) {
+  isReadOnlySession(session: Session): boolean {
     return !this.getApplicableRules(session.rules).some(rule => rule.readWrite);
   }
 
   // Added the delete dataset code here as two components are sharing the code
-  deleteDatasetsNow(deletedDatasets: Dataset[]) {
+  deleteDatasetsNow(deletedDatasets: Dataset[]): void {
     // delete from the server
     this.deleteDatasets(deletedDatasets);
   }
 
-  deleteDatasetsUndo(deletedDatasets: Dataset[]) {
+  deleteDatasetsUndo(deletedDatasets: Dataset[]): void {
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(
@@ -410,7 +435,7 @@ export class SessionDataService {
    * cancel the timer and make the datasets visible again. Session copying and sharing
    * should filter out these hidden datasets or we need a proper server side support for this.
    */
-  deleteDatasetsLater(datasets: Dataset[]) {
+  deleteDatasetsLater(datasets: Dataset[]): void {
     log.info("deleting datasets" + datasets);
     // make a copy so that further selection changes won't change the array
     const deletedDatasets = _.clone(datasets);
@@ -465,7 +490,7 @@ export class SessionDataService {
     const toast = this.toastrService.info(msg, "", options);
 
     toast.onAction.pipe(filter(text => text === BTN_UNDO)).subscribe(
-      buttonText => {
+      () => {
         this.deleteDatasetsUndo(deletedDatasets);
         this.toastrService.clear(toast.toastId);
       },

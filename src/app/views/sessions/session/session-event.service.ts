@@ -5,9 +5,12 @@ import {
   Job,
   Resource,
   Rule,
+  ServerSessionEvent,
   Session,
   SessionEvent,
   SessionState,
+  WorkflowPlan,
+  WorkflowRun,
   WsEvent
 } from "chipster-js-common";
 import log from "loglevel";
@@ -32,6 +35,8 @@ export class SessionEventService {
   jobStream$: Observable<SessionEvent>;
   sessionStream$: Observable<SessionEvent>;
   ruleStream$: Observable<SessionEvent>;
+  workflowPlanStream$: Observable<SessionEvent>;
+  workflowRunStream$: Observable<SessionEvent>;
   wsSubject$: WebSocketSubject<WsEvent>;
   localSubject$: Subject<WsEvent>;
 
@@ -43,11 +48,11 @@ export class SessionEventService {
     private errorService: ErrorService
   ) {}
 
-  unsubscribe() {
+  unsubscribe(): void {
     this.websocketService.unsubscribe();
   }
 
-  setSessionData(sessionId: string, sessionData: SessionData) {
+  setSessionData(sessionId: string, sessionData: SessionData): void {
     this.sessionHasChanged = false;
     this.sessionId = sessionId;
 
@@ -83,6 +88,24 @@ export class SessionEventService {
     this.jobStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Job),
       mergeMap(data => this.handleJobEvent(data, this.sessionId, sessionData)),
+      publish(),
+      refCount()
+    );
+
+    this.workflowPlanStream$ = stream.pipe(
+      filter(wsData => wsData.resourceType === Resource.WorkflowPlan),
+      mergeMap(data =>
+        this.handleWorkflowPlanEvent(data, this.sessionId, sessionData)
+      ),
+      publish(),
+      refCount()
+    );
+
+    this.workflowRunStream$ = stream.pipe(
+      filter(wsData => wsData.resourceType === Resource.WorkflowRun),
+      mergeMap(data =>
+        this.handleWorkflowRunEvent(data, this.sessionId, sessionData)
+      ),
       publish(),
       refCount()
     );
@@ -124,23 +147,34 @@ export class SessionEventService {
    *
    * @returns {Observable<SessionEvent>}
    */
-  getDatasetStream() {
+  getDatasetStream(): Observable<SessionEvent> {
     return this.datasetStream$;
   }
 
-  getJobStream() {
+  getJobStream(): Observable<SessionEvent> {
     return this.jobStream$;
   }
 
-  getRuleStream() {
+  getRuleStream(): Observable<SessionEvent> {
     return this.ruleStream$;
   }
 
-  createEvent(event, oldValue, newValue) {
+  getWorkflowRunStream(): Observable<SessionEvent> {
+    return this.workflowRunStream$;
+  }
+
+  getWorkflowPlanStream(): Observable<SessionEvent> {
+    return this.workflowPlanStream$;
+  }
+
+  createEvent(event, oldValue, newValue): Observable<SessionEvent> {
     return observableOf(new SessionEvent(event, oldValue, newValue));
   }
 
-  handleRuleEvent(event: any, session: Session): Observable<SessionEvent> {
+  handleRuleEvent(
+    event: ServerSessionEvent,
+    session: Session
+  ): Observable<SessionEvent> {
     log.info("handle rule event", event, session);
     if (event.type === EventType.Create) {
       return this.sessionResource
@@ -161,8 +195,8 @@ export class SessionEventService {
   }
 
   handleSessionEvent(
-    event: any,
-    sessionId: any,
+    event: ServerSessionEvent,
+    sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
     if (event.type === EventType.Update) {
@@ -188,7 +222,7 @@ export class SessionEventService {
   }
 
   handleDatasetEvent(
-    event: any,
+    event: ServerSessionEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
@@ -216,9 +250,13 @@ export class SessionEventService {
     }
   }
 
-  updateTypeTags(sessionId, sessionEvent, sessionData) {
+  updateTypeTags(
+    sessionId,
+    sessionEvent,
+    sessionData
+  ): Observable<SessionEvent> {
     // update type tags before
-    const newValue = <Dataset>sessionEvent.newValue;
+    const newValue = sessionEvent.newValue as Dataset;
 
     if (newValue) {
       if (!newValue.fileId) {
@@ -244,8 +282,8 @@ export class SessionEventService {
   }
 
   handleJobEvent(
-    event: any,
-    sessionId: any,
+    event: ServerSessionEvent,
+    sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
     if (event.type === EventType.Create) {
@@ -272,6 +310,72 @@ export class SessionEventService {
     }
   }
 
+  handleWorkflowPlanEvent(
+    event: ServerSessionEvent,
+    sessionId: string,
+    sessionData: SessionData
+  ): Observable<SessionEvent> {
+    if (event.type === EventType.Create) {
+      return this.sessionResource
+        .getWorkflowPlan(sessionId, event.resourceId)
+        .pipe(
+          mergeMap((remote: WorkflowPlan) => {
+            sessionData.workflowPlansMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          })
+        );
+    } else if (event.type === EventType.Update) {
+      return this.sessionResource
+        .getWorkflowPlan(sessionId, event.resourceId)
+        .pipe(
+          mergeMap((remote: WorkflowPlan) => {
+            const local = sessionData.workflowPlansMap.get(event.resourceId);
+            sessionData.workflowPlansMap.set(event.resourceId, remote);
+            return this.createEvent(event, local, remote);
+          })
+        );
+    } else if (event.type === EventType.Delete) {
+      const localCopy = sessionData.workflowPlansMap.get(event.resourceId);
+      sessionData.workflowPlansMap.delete(event.resourceId);
+      return this.createEvent(event, localCopy, null);
+    } else {
+      log.warn("unknown event type", event.type, event);
+    }
+  }
+
+  handleWorkflowRunEvent(
+    event: ServerSessionEvent,
+    sessionId: string,
+    sessionData: SessionData
+  ): Observable<SessionEvent> {
+    if (event.type === EventType.Create) {
+      return this.sessionResource
+        .getWorkflowRun(sessionId, event.resourceId)
+        .pipe(
+          mergeMap((remote: WorkflowRun) => {
+            sessionData.workflowRunsMap.set(event.resourceId, remote);
+            return this.createEvent(event, null, remote);
+          })
+        );
+    } else if (event.type === EventType.Update) {
+      return this.sessionResource
+        .getWorkflowRun(sessionId, event.resourceId)
+        .pipe(
+          mergeMap((remote: WorkflowRun) => {
+            const local = sessionData.workflowRunsMap.get(event.resourceId);
+            sessionData.workflowRunsMap.set(event.resourceId, remote);
+            return this.createEvent(event, local, remote);
+          })
+        );
+    } else if (event.type === EventType.Delete) {
+      const localCopy = sessionData.workflowRunsMap.get(event.resourceId);
+      sessionData.workflowRunsMap.delete(event.resourceId);
+      return this.createEvent(event, localCopy, null);
+    } else {
+      log.warn("unknown event type", event.type, event);
+    }
+  }
+
   /**
    * Handle a locally generated event just like the real events coming from the websocket.
    *
@@ -280,7 +384,7 @@ export class SessionEventService {
    *
    * @param event
    */
-  generateLocalEvent(event: WsEvent) {
+  generateLocalEvent(event: WsEvent): void {
     // incorrect typing? it really is an object, but the compiler wants a string
     this.localSubject$.next(event);
   }
