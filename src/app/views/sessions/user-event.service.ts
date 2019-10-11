@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
+import { EventType, Resource, Session, WsEvent, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of, Subject } from "rxjs";
 import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
@@ -65,7 +65,7 @@ export class UserEventService {
   /**
    * Apply rule change events in this session and return an observable that sends an event on changes
    */
-  applyRuleStreamOfSession(session: Session) {
+  applyRuleStreamOfSession(session: Session): Observable<SessionEvent> {
     return this.getRuleStream().pipe(
       mergeMap(wsEvent => {
         // sessionEventService can update individual sessions, let's reuse that

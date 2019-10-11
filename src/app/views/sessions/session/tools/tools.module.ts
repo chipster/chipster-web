@@ -16,6 +16,7 @@ import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item
 import { ToolParametersComponent } from "./tool-parameters/tool-parameters.component";
 import { ToolService } from "./tool.service";
 import { ToolsComponent } from "./tools.component";
+import { WorkflowsComponent } from "./workflows/workflows.component";
 
 @NgModule({
   imports: [
@@ -36,7 +37,8 @@ import { ToolsComponent } from "./tools.component";
     JobListComponent,
     ToolListAccordionComponent,
     ToolDetailsComponent,
-    CounterSpinnerComponent
+    CounterSpinnerComponent,
+    WorkflowsComponent
   ],
   providers: [ToolService],
   exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent]

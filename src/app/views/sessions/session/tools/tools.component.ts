@@ -14,23 +14,13 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
-import {
-  Category,
-  Job,
-  JobState,
-  Module,
-  Tool,
-  WorkflowJobPlan,
-  WorkflowPlan,
-  WorkflowRun
-} from "chipster-js-common";
+import { Category, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
 import { filter, map, mergeMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import UtilsService from "../../../../shared/utilities/utils";
@@ -45,11 +35,9 @@ import {
   SET_VALIDATED_TOOL
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
-import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
-import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { ToolService } from "./tool.service";
@@ -125,14 +113,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   );
 
   isWorkflowTabVisible = false;
-  selectedDatasets = [];
-  workflowPlans: Array<WorkflowPlan>;
-  workflowRuns: Array<WorkflowRun>;
-  selectedWorkflowPlan: WorkflowPlan;
 
   private unsubscribe: Subject<null> = new Subject();
   manualModalRef: NgbModalRef;
-  selectedWorkflowRun: WorkflowRun;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -148,9 +131,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private toastrService: ToastrService,
     private errorService: ErrorService,
     private store: Store<{}>,
-    private dialogModalService: DialogModalService,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
     dropdownConfig: NgbDropdownConfig
   ) {
     // prevent dropdowns from closing on click inside the dropdown
@@ -549,106 +529,5 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   showWorkflowTab(show: boolean): void {
     this.isWorkflowTabVisible = show;
-
-    this.workflowPlans = Array.from(this.sessionData.workflowPlansMap.values());
-    this.workflowRuns = Array.from(this.sessionData.workflowRunsMap.values());
-
-    this.store
-      .select("selectedDatasets")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        datasets => {
-          this.selectedDatasets = datasets;
-        },
-        err => {
-          this.errorService.showError("workflow error", err);
-        }
-      );
-
-    this.sessionEventService.getWorkflowPlanStream().subscribe(
-      () => {
-        this.workflowPlans = Array.from(
-          this.sessionData.workflowPlansMap.values()
-        );
-      },
-      err => this.errorService.showError("workflow plan event error", err)
-    );
-
-    this.sessionEventService.getWorkflowRunStream().subscribe(
-      () => {
-        this.workflowRuns = Array.from(
-          this.sessionData.workflowRunsMap.values()
-        );
-      },
-      err => this.errorService.showError("workflow run event error", err)
-    );
-  }
-
-  selectWorkflowPlan(plan: WorkflowPlan): void {
-    this.selectedWorkflowPlan = plan;
-  }
-
-  selectWorkflowRun(run: WorkflowRun): void {
-    this.selectedWorkflowRun = run;
-  }
-
-  runWorkflowPlan(): void {
-    const run = new WorkflowRun();
-    run.state = JobState.New;
-    run.workflowPlanId = this.selectedWorkflowPlan.workflowPlanId;
-    this.sessionDataService
-      .createWorkflowRun(run)
-      .subscribe(null, err =>
-        this.restErrorService.showError("run workflow error", err)
-      );
-  }
-
-  deleteWorkflowPlan(plan: WorkflowPlan): void {
-    this.sessionDataService
-      .deleteWorkflowPlan(plan)
-      .subscribe(null, err =>
-        this.restErrorService.showError("delete workflow plan error", err)
-      );
-  }
-
-  deleteWorkflowRun(run: WorkflowRun): void {
-    this.sessionDataService
-      .deleteWorkflowRun(run)
-      .subscribe(null, err =>
-        this.restErrorService.showError("delete workflow run error", err)
-      );
-  }
-
-  saveWorkflow(): void {
-    this.dialogModalService
-      .openStringModal(
-        "Save workflow",
-        "Save workflow from the selected datasets",
-        "New workflow",
-        "Save"
-      )
-      .pipe(
-        mergeMap(name => {
-          const plan = new WorkflowPlan();
-          plan.name = name;
-          plan.workflowJobPlans = [];
-          this.selectedDatasets.forEach(d => {
-            const sourceJob = this.sessionData.jobsMap.get(d.sourceJob);
-            const job = new WorkflowJobPlan();
-            job.toolId = sourceJob.toolId;
-            job.toolCategory = sourceJob.toolCategory;
-            job.module = sourceJob.module;
-            job.toolName = sourceJob.toolName;
-            // job.parameters = Object.assign({}, sourceJob.parameters);
-            // job.inputs = Object.assign({}, sourceJob.inputs);
-            // job.metadataFiles = Object.assign({}, sourceJob.metadataFiles);
-            plan.workflowJobPlans.push(job);
-          });
-          return this.sessionDataService.createWorkflowPlan(plan);
-        })
-      )
-      .subscribe(null, err =>
-        this.errorService.showError("workflow save error", err)
-      );
   }
 }

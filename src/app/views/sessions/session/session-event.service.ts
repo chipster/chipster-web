@@ -5,7 +5,6 @@ import {
   Job,
   Resource,
   Rule,
-  ServerSessionEvent,
   Session,
   SessionEvent,
   SessionState,
@@ -171,10 +170,7 @@ export class SessionEventService {
     return observableOf(new SessionEvent(event, oldValue, newValue));
   }
 
-  handleRuleEvent(
-    event: ServerSessionEvent,
-    session: Session
-  ): Observable<SessionEvent> {
+  handleRuleEvent(event: WsEvent, session: Session): Observable<SessionEvent> {
     log.info("handle rule event", event, session);
     if (event.type === EventType.Create) {
       return this.sessionResource
@@ -195,7 +191,7 @@ export class SessionEventService {
   }
 
   handleSessionEvent(
-    event: ServerSessionEvent,
+    event: WsEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
@@ -222,7 +218,7 @@ export class SessionEventService {
   }
 
   handleDatasetEvent(
-    event: ServerSessionEvent,
+    event: WsEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
@@ -282,7 +278,7 @@ export class SessionEventService {
   }
 
   handleJobEvent(
-    event: ServerSessionEvent,
+    event: WsEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
@@ -311,7 +307,7 @@ export class SessionEventService {
   }
 
   handleWorkflowPlanEvent(
-    event: ServerSessionEvent,
+    event: WsEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
@@ -344,7 +340,7 @@ export class SessionEventService {
   }
 
   handleWorkflowRunEvent(
-    event: ServerSessionEvent,
+    event: WsEvent,
     sessionId: string,
     sessionData: SessionData
   ): Observable<SessionEvent> {
