@@ -1,5 +1,4 @@
-
-import {map} from 'rxjs/operators';
+import { map } from "rxjs/operators";
 import { FileResource } from "../resources/fileresource";
 import { Injectable } from "@angular/core";
 import "../../rxjs-operators";
@@ -23,21 +22,21 @@ export class TSVReader {
     dataset: Dataset,
     maxBytes?: number
   ): Observable<TSVFile> {
-    return this.fileResource
-      .getLimitedData(sessionId, dataset, maxBytes).pipe(
+    return this.fileResource.getLimitedData(sessionId, dataset, maxBytes).pipe(
       map((tsvData: any) => {
         const parsedTSVData = d3.tsvParseRows(tsvData);
         return new TSVFile(parsedTSVData, dataset.datasetId, "dataset");
-      }));
+      })
+    );
   }
 
   getTSVFileHeaders(
     sessionId: string,
     dataset: Dataset
   ): Observable<Array<string>> {
-    return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).pipe(map(
-      (tsvFile: TSVFile) => tsvFile.headers.headers
-    ));
+    return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).pipe(
+      map((tsvFile: TSVFile) => tsvFile.headers.headers)
+    );
   }
 
   getTSVHeaders(tsv: string): string[] {

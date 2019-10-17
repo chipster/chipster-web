@@ -36,7 +36,7 @@ export class AuthenticationService {
 
   init() {
     let token = this.tokenService.getToken();
-    if (token != null && token.indexOf(".") === -1) {
+    if (token != null && !token.includes(".")) {
       // probably old UUID token, clear everything from local storage
       log.info(
         "found a token from the local storage, but it's not a JWS token. Clearing local storage..."

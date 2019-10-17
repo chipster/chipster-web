@@ -26,7 +26,7 @@ export class ScatterPlotComponent extends PlotComponent
     sessionDataService: SessionDataService,
     private plotService: PlotService,
     private visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService,
+    private restErrorService2: RestErrorService
   ) {
     super(fileResource, sessionDataService);
   }
@@ -45,7 +45,7 @@ export class ScatterPlotComponent extends PlotComponent
       // Extracting header name without chip prefix
       this.visualizationTSVService
         .getChipHeaders(this.tsv)
-        .forEach(function (chipHeader) {
+        .forEach(function(chipHeader) {
           chipHeader = chipHeader.replace("chip.", "");
           self.chipHeaders.push(chipHeader);
         });
@@ -78,7 +78,7 @@ export class ScatterPlotComponent extends PlotComponent
     );
 
     // Creating points for scatter plot combining two chip columns
-    orderedGenesValues.forEach(function (geneRow) {
+    orderedGenesValues.forEach(function(geneRow) {
       const curPlotData = new PlotData();
       curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(
@@ -178,15 +178,15 @@ export class ScatterPlotComponent extends PlotComponent
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", function (d) {
+      .attr("cx", function(d) {
         return self.xScale(d.plotPoint.x);
       })
-      .attr("cy", function (d) {
+      .attr("cy", function(d) {
         return self.yScale(d.plotPoint.y);
       })
       .attr("fill", "red")
-      .on("mouseover", (d: any) => { })
-      .on("mouseout", (d: any) => { })
+      .on("mouseover", (d: any) => {})
+      .on("mouseout", (d: any) => {})
       .on("click", (d: PlotData) => {
         // Need to store the datapoints what the user has clicked
       });
@@ -205,7 +205,7 @@ export class ScatterPlotComponent extends PlotComponent
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
 
-    this.selectedDataPointIds.forEach(function (selectedId) {
+    this.selectedDataPointIds.forEach(function(selectedId) {
       self.setSelectionStyle(selectedId);
     });
   }
@@ -242,6 +242,8 @@ export class ScatterPlotComponent extends PlotComponent
         "Scatter Plot",
         data
       )
-      .subscribe(null, err => this.restErrorService2.showError("create dataset failed", err));
+      .subscribe(null, err =>
+        this.restErrorService2.showError("create dataset failed", err)
+      );
   }
 }

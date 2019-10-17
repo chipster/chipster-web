@@ -29,7 +29,7 @@ export class VolcanoPlotComponent extends PlotComponent
     fileResource: FileResource,
     sessionDataService: SessionDataService,
     private plotService: PlotService,
-    private restErrorService2: RestErrorService,
+    private restErrorService2: RestErrorService
   ) {
     super(fileResource, sessionDataService);
   }
@@ -258,6 +258,8 @@ export class VolcanoPlotComponent extends PlotComponent
         "Volcano Plot",
         data
       )
-      .subscribe(null, err => this.restErrorService2.showError("create dataset failed", err));
+      .subscribe(null, err =>
+        this.restErrorService2.showError("create dataset failed", err)
+      );
   }
 }

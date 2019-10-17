@@ -1,11 +1,34 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, EventType, Job, JobInput, JobState, Resource, Rule, Session, WsEvent } from "chipster-js-common";
+import {
+  Dataset,
+  EventType,
+  Job,
+  JobInput,
+  JobState,
+  Resource,
+  Rule,
+  Session,
+  WsEvent
+} from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { forkJoin as observableForkJoin, from as observableFrom, merge as observableMerge, Observable } from "rxjs";
-import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from "rxjs/operators";
+import {
+  forkJoin as observableForkJoin,
+  from as observableFrom,
+  merge as observableMerge,
+  Observable
+} from "rxjs";
+import {
+  catchError,
+  concatMap,
+  filter,
+  map,
+  merge,
+  mergeMap,
+  takeUntil
+} from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -155,7 +178,11 @@ export class SessionDataService {
   getTokenForSession(sessionId: string): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) =>
-        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, this.tokenService.getTokenParams(true))
+        this.http.post(
+          sessionDbUrl + "/tokens/sessions/" + sessionId,
+          null,
+          this.tokenService.getTokenParams(true)
+        )
       ),
       map((datasetToken: any) => datasetToken.tokenKey)
     );

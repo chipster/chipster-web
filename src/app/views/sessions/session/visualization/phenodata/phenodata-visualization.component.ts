@@ -1,4 +1,15 @@
-import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
@@ -60,7 +71,7 @@ export class PhenodataVisualizationComponent
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService
-  ) { }
+  ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
@@ -69,8 +80,8 @@ export class PhenodataVisualizationComponent
 
     // update view if someone else has edited the phenodata
     this.sessionEventService
-      .getDatasetStream().pipe(
-        takeUntil(this.unsubscribe))
+      .getDatasetStream()
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         () => {
           this.updateViewLater();
@@ -140,7 +151,7 @@ export class PhenodataVisualizationComponent
       height: this.getHeight(array),
 
       afterGetColHeader: (col: number, TH: any) => {
-        if (this.unremovableColumns.indexOf(headers[col]) !== -1) {
+        if (this.unremovableColumns.includes(headers[col])) {
           // removal not allowed
           return;
         }
@@ -214,13 +225,13 @@ export class PhenodataVisualizationComponent
     if (
       this.headers.some(
         (columnHeader: string) =>
-          this.unremovableColumns.indexOf(columnHeader) === -1
+          !this.unremovableColumns.includes(columnHeader)
       )
     ) {
       // get indexes of removable columns
       const removableColumnIndexces = this.headers
         .map((columnHeader: string, index: number) => {
-          return this.unremovableColumns.indexOf(columnHeader) === -1
+          return !this.unremovableColumns.includes(columnHeader)
             ? index
             : -1;
         })
@@ -398,7 +409,8 @@ export class PhenodataVisualizationComponent
 
   openAddColumnModal() {
     this.stringModalService
-      .openStringModal("Add new column", "Column name", "", "Add").pipe(
+      .openStringModal("Add new column", "Column name", "", "Add")
+      .pipe(
         tap(name => {
           this.zone.runOutsideAngular(() => {
             const colHeaders = <Array<string>>(
@@ -417,7 +429,8 @@ export class PhenodataVisualizationComponent
           });
 
           this.updateDataset();
-        }))
+        })
+      )
       .subscribe(null, err =>
         this.restErrorService.showError("Add column failed", err)
       );

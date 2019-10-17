@@ -1,18 +1,19 @@
-import {Component, Input} from "@angular/core";
-import {LoadState} from "../../model/loadstate";
+import { Component, Input } from "@angular/core";
+import { LoadState } from "../../model/loadstate";
 
 @Component({
-  selector: 'ch-status',
+  selector: "ch-status",
   template: `
-    <div>{{state.message}}</div>
+    <div>{{ state.message }}</div>
   `,
-  styles: [`
-    div {
-      font-style:italic;
-    }
-  `]
+  styles: [
+    `
+      div {
+        font-style: italic;
+      }
+    `
+  ]
 })
-
 export class StatusComponent {
   @Input() state: LoadState;
 }

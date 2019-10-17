@@ -1,16 +1,17 @@
-import { NgModule } from "@angular/core";
-import { NgbModule, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { StringModalComponent } from "./stringmodal/stringmodal.component";
-import { DialogModalService } from "./dialogmodal.service";
 import { CommonModule } from "@angular/common";
-import { SharedModule } from "../../../../shared/shared.module";
+import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { NgbActiveModal, NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { SharedModule } from "../../../../shared/shared.module";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
+import { DialogModalService } from "./dialogmodal.service";
+import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
+import { PreModalComponent } from "./pre-modal/pre-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
+import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
-import { PreModalComponent } from "./pre-modal/pre-modal.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
@@ -22,6 +23,7 @@ import { PreModalComponent } from "./pre-modal/pre-modal.component";
     SpinnerModalComponent,
     TempCopyModalComponent,
     PreModalComponent,
+    DownloadFromUrlModalComponent
   ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],
@@ -33,6 +35,7 @@ import { PreModalComponent } from "./pre-modal/pre-modal.component";
     SpinnerModalComponent,
     TempCopyModalComponent,
     PreModalComponent,
+    DownloadFromUrlModalComponent
   ]
 })
 export class DialogModalModule {}

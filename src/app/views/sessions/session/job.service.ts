@@ -55,8 +55,10 @@ export class JobService {
       });
 
     // submit
-    this.sessionDataService.createJobs(jobs).subscribe(null, (error: any) => {
-      this.restErrorService.showError("Submitting jobs failed", error);
+    this.sessionDataService.createJobs(jobs).subscribe({
+      error: (error: any) => {
+        this.restErrorService.showError("Submitting jobs failed", error);
+      }
     });
   }
 
@@ -66,8 +68,14 @@ export class JobService {
     const job = this.createJob(validatedTool);
 
     // submit
-    this.sessionDataService.createJob(job).subscribe(null, (error: any) => {
-      this.restErrorService.showError("Submitting job failed", error);
+    this.runJobDirect(job);
+  }
+
+  runJobDirect(job: Job) {
+    this.sessionDataService.createJob(job).subscribe({
+      error: (error: any) => {
+        this.restErrorService.showError("Submitting job failed", error);
+      }
     });
   }
 

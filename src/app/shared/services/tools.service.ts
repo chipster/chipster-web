@@ -15,7 +15,7 @@ export class ToolsService {
   constructor(
     private toolResource: ToolResource,
     private configService: ConfigService
-  ) { }
+  ) {}
 
   getTools(): Observable<Tool[]> {
     if (!this.toolsCache$) {
@@ -35,7 +35,7 @@ export class ToolsService {
           const allModules: Module[] = results[1];
           return allModules
             .filter(
-              (module: Module) => enabledModules.indexOf(module.name) >= 0
+              (module: Module) => enabledModules.includes(module.name)
             )
             .map((module: Module) => {
               // set moduleId

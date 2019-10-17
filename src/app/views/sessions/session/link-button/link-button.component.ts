@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 /**
  * Link that looks like a link, but doesn't navigate
@@ -8,10 +8,9 @@ import { Component } from '@angular/core';
  * but it leaves ugly focus border after being clicked (at least on Chrome).
  */
 @Component({
-  selector: 'ch-link-button',
+  selector: "ch-link-button",
   template: '<a href="javascript:void(0)" #anchor><ng-content></ng-content></a>'
 })
 export class LinkButtonComponent {
-
-  constructor() { }
+  constructor() {}
 }

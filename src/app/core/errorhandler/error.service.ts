@@ -1,14 +1,16 @@
-import { Injectable } from "@angular/core";
-import { Subject } from "rxjs";
-import { ErrorMessage, ErrorButton } from "./errormessage";
+import { Injectable, NgZone } from "@angular/core";
 import log from "loglevel";
+import { Observable, Subject } from "rxjs";
+import { ErrorButton, ErrorMessage } from "./errormessage";
 
 @Injectable()
 export class ErrorService {
   // handle the errors in component, because it can access the router
-  private errors$ = new Subject();
+  private errors$ = new Subject<ErrorMessage>();
 
-  showError(msg: string, err: Error) {
+  constructor(private ngZone: NgZone) {}
+
+  showError(msg: string, err: Error): void {
     const errorMessage = new ErrorMessage(
       null,
       msg,
@@ -23,12 +25,17 @@ export class ErrorService {
     this.showErrorObject(errorMessage);
   }
 
-  showErrorObject(errorMessage: ErrorMessage) {
+  showErrorObject(errorMessage: ErrorMessage): void {
     log.error(errorMessage);
-    this.errors$.next(errorMessage);
+    /* Make sure the error messages are shown in angular zone even if it was initated outside of it
+    otherwise those would be shown only after next user interaction
+    */
+    this.ngZone.runTask(() => {
+      this.errors$.next(errorMessage);
+    });
   }
 
-  getErrors() {
+  getErrors(): Observable<ErrorMessage> {
     return this.errors$;
   }
 }

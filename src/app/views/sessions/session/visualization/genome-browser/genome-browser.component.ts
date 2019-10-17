@@ -1,7 +1,6 @@
+import { forkJoin as observableForkJoin, Observable, Subject } from "rxjs";
 
-import {forkJoin as observableForkJoin,  Observable ,  Subject } from 'rxjs';
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import {
   Component,
   OnInit,
@@ -19,15 +18,13 @@ import { TypeTagService } from "../../../../../shared/services/typetag.service";
 import { Dataset } from "chipster-js-common";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import igv from 'igv';
+import igv from "igv";
 
 export class BamSourceEntry {
   type = "alignment";
   format: "bam";
   url: string;
   name: string;
-
-
 }
 
 class BamSource {
@@ -42,8 +39,6 @@ class BamSource {
   templateUrl: "genome-browser.component.html",
   styleUrls: ["./genome-browser.component.less"]
 })
-
-
 export class GenomeBrowserComponent implements OnInit, OnDestroy {
   @ViewChild("iframe")
   iframe: ElementRef;
@@ -76,7 +71,7 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
     private sessionDataService: SessionDataService,
     private typeTagService: TypeTagService,
     private restErrorService: RestErrorService
-  ) { }
+  ) {}
 
   loadTrack() {
     const trackConfigs = [];
@@ -105,25 +100,24 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
     const self = this;
 
     // change the data source and load new pileup instance
-
   }
 
   getDatasetUrls() {
     const self = this;
     // if user have chosen one or more BAM files
-    this.selectedDatasets.forEach(function (dataset) {
+    this.selectedDatasets.forEach(function(dataset) {
       // check type of each file, put the Bam datasets in list
       if (self.typeTagService.isCompatible(self.sessionData, dataset, "BAM")) {
         const bamSource = new BamSource();
         bamSource.bamDataset = dataset;
-        self.sessionData.datasetsMap.forEach(function (dataset) {
+        self.sessionData.datasetsMap.forEach(function(dataset) {
           if (
             dataset.name.split(".").pop() === "bai" &&
             dataset.name.substr(0, dataset.name.indexOf(".")) ===
-            bamSource.bamDataset.name.substr(
-              0,
-              bamSource.bamDataset.name.indexOf(".")
-            )
+              bamSource.bamDataset.name.substr(
+                0,
+                bamSource.bamDataset.name.indexOf(".")
+              )
           ) {
             bamSource.baiDataset = dataset;
           }
@@ -134,12 +128,11 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
       }
     });
 
-
     let bam: Observable<any>;
     let bai: Observable<any>;
     const bamSources$: Array<any> = [];
 
-    this.dataSourceList.forEach(function (bamSource) {
+    this.dataSourceList.forEach(function(bamSource) {
       if (bamSource.bamDataset && bamSource.baiDataset) {
         bam = self.sessionDataService.getDatasetUrl(bamSource.bamDataset);
         bai = self.sessionDataService.getDatasetUrl(bamSource.baiDataset);
@@ -147,8 +140,8 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
       }
     });
 
-    observableForkJoin(bamSources$).pipe(
-      takeUntil(this.unsubscribe))
+    observableForkJoin(bamSources$)
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         res => {
           for (let i = 0; i < res.length; i++) {
@@ -168,7 +161,6 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
   initializeDataSources() {
     // console.log(this.sources);
     this.locus = "chr8:128,747,267-128,754,546";
-
   }
 
   openGnomeModal() {
@@ -185,18 +177,14 @@ export class GenomeBrowserComponent implements OnInit, OnDestroy {
     };
     console.log(igv);
     const self = this;
-    igv.createBrowser(igvDiv, options)
+    igv
+      .createBrowser(igvDiv, options)
 
-      .then(function (browser) {
+      .then(function(browser) {
         console.log("Created IGV browser");
         self.getDatasetUrls();
         self.igvBrowser = browser;
         // self.loadTrack();
       });
-
-
-
   }
 }
-
-

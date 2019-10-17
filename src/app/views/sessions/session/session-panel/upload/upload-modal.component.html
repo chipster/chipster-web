@@ -21,7 +21,8 @@
           {{file.relativePath}}
         </td>
         <td>
-          <ngb-progressbar *ngIf="!(file.error || file.isComplete())" [value]="file.progress() * 100" [max]="100"></ngb-progressbar>
+          <ngb-progressbar *ngIf="!(file.error || file.isComplete())" [value]="file.progress() * 100" [max]="100">
+          </ngb-progressbar>
           <span *ngIf="file.isComplete() && !file.error">
             <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
           </span>
@@ -35,14 +36,16 @@
         </td>
         <td>
           <div>
-            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.pause()" *ngIf="file.progress() != 0 && !file.paused && !file.isComplete()">
+            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.pause()"
+              *ngIf="file.progress() != 0 && !file.paused && !file.isComplete()">
               <i class="fas fa-pause" aria-hidden="true"></i>
             </button>
-            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.resume()" *ngIf="file.paused && !file.isComplete()">
+            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.resume()"
+              *ngIf="file.paused && !file.isComplete()">
               <i class="fas fa-play" aria-hidden="true"></i>
             </button>
-            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm pull-right" (click)="cancelUpload(file)"
-              *ngIf="!file.isComplete()">
+            <button type="button" class="btn btn-outline-dark btn-no-border btn-sm pull-right"
+              (click)="cancelUpload(file)" *ngIf="!file.isComplete()">
               <i class="fas fa-times" aria-hidden="true"></i>
             </button>
           </div>
@@ -58,8 +61,8 @@
         <i>Time remaining: {{flow.timeRemaining() | secondspipe}}</i>
       </span>
 
-      <div class="float-right">
-        <button class="btn btn-outline-secondary btn-sm controlButton ml-1" (click)="flow.cancel()">
+      <div class="float-right text-nowrap">
+        <button class=" btn btn-outline-secondary btn-sm controlButton ml-1" (click)="flow.cancel()">
           <i class="fas fa-times" aria-hidden="true"></i>
           Cancel all
         </button>
@@ -80,15 +83,17 @@
 <div class="modal-footer">
   <div class="col px-0">
     <div class="float-left">
-      <button class="btn btn-sm btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-        aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-sm btn-success dropdown-toggle" type="button" id="dropdownMenuButton"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-upload" aria-hidden="true"></i> Add more files
       </button>
       <div class="dropdown-menu dropdown-menu-right">
         <a #uploadFilesButton class="dropdown-item">Upload file(s)</a>
         <a #uploadFolderButton class="dropdown-item">Upload folder</a>
+        <!--
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item">Upload from url</a>
+        <a class="dropdown-item" (click)="downloadFromUrl()">Download from URL</a>
+        -->
       </div>
     </div>
 

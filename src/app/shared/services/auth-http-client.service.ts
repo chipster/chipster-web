@@ -1,13 +1,13 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {TokenService} from '../../core/authentication/token.service';
-import { Observable } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { TokenService } from "../../core/authentication/token.service";
+import { Observable } from "rxjs";
 
 @Injectable()
 export class AuthHttpClientService {
   constructor(
     private httpClient: HttpClient,
-    private tokenService: TokenService,
+    private tokenService: TokenService
   ) {}
 
   /**
@@ -31,7 +31,10 @@ export class AuthHttpClientService {
 
   getAuthHeader() {
     let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Basic ' + btoa('token:' + this.tokenService.getToken()));
+    headers = headers.append(
+      "Authorization",
+      "Basic " + btoa("token:" + this.tokenService.getToken())
+    );
     return { headers: headers };
   }
 
@@ -58,9 +61,11 @@ export class AuthHttpClientService {
   getAuthWithParams(url, params?): Observable<any> {
     console.log(params);
     let headers = new HttpHeaders();
-    headers = headers.append('Authorization', 'Basic ' + btoa('token:' + this.tokenService.getToken()));
+    headers = headers.append(
+      "Authorization",
+      "Basic " + btoa("token:" + this.tokenService.getToken())
+    );
 
-    return this.httpClient.get(url, {headers: headers, params: params});
-
+    return this.httpClient.get(url, { headers: headers, params: params });
   }
 }

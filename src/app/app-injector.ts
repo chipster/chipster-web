@@ -1,4 +1,4 @@
-import {Injector} from '@angular/core';
+import { Injector } from "@angular/core";
 
 /**
  * Needed for getting around circular dependency with subclasses such as scatterplot.component.ts
@@ -17,9 +17,8 @@ export let AppInjector: Injector;
 export function setAppInjector(injector: Injector) {
   if (AppInjector) {
     // Should not happen
-    console.error('Programming error: AppInjector was already set');
-  }
-  else {
+    console.error("Programming error: AppInjector was already set");
+  } else {
     AppInjector = injector;
   }
 }

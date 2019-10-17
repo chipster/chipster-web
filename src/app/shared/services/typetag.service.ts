@@ -46,7 +46,7 @@ export class TypeTagService {
   // noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
     const alwaysCompatible = [Tags.GENERIC, Tags.PHENODATA];
-    if (alwaysCompatible.indexOf(type) !== -1) {
+    if (alwaysCompatible.includes(type)) {
       return true;
     }
 

@@ -18,9 +18,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   constructor(
     public settingsService: SettingsService,
     public activeModal: NgbActiveModal
-  ) { }
+  ) {}
 
-  ngOnInit() { }
+  ngOnInit() {}
 
   ngOnDestroy() {
     this.unsubscribe.next();

@@ -1,5 +1,4 @@
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import {
   Component,
@@ -41,16 +40,17 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     private tokenService: TokenService,
     private restErrorService: RestErrorService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService,
+    private errorService: ErrorService
   ) {}
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.ruleStream$.pipe(
-      takeUntil(this.unsubscribe))
-      .subscribe(() => {
-      this.rules = this.session.rules;
-    }, err => this.errorService.showError("getting rule events failed", err));
+    this.ruleStream$.pipe(takeUntil(this.unsubscribe)).subscribe(
+      () => {
+        this.rules = this.session.rules;
+      },
+      err => this.errorService.showError("getting rule events failed", err)
+    );
   }
 
   ngOnDestroy() {
@@ -79,13 +79,15 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   saveRule() {
-    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
-      resp => {
-        log.info("rule created", resp);
-        this.newRule = null;
-      },
-      err => this.restErrorService.showError("failed to add a new rule", err)
-    );
+    this.sessionResource
+      .createRule(this.session.sessionId, this.newRule)
+      .subscribe(
+        resp => {
+          log.info("rule created", resp);
+          this.newRule = null;
+        },
+        err => this.restErrorService.showError("failed to add a new rule", err)
+      );
   }
 
   addNewRule() {
@@ -96,11 +98,11 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   deleteRule(ruleId: string) {
-    this.sessionResource.deleteRule(this.session.sessionId, ruleId)
+    this.sessionResource
+      .deleteRule(this.session.sessionId, ruleId)
       .subscribe(
         resp => log.info("rule deleted"),
-        err =>
-          this.restErrorService.showError("failed to delete the rule", err)
+        err => this.restErrorService.showError("failed to delete the rule", err)
       );
   }
 

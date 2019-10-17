@@ -1,5 +1,4 @@
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { timeout } from "d3-timer";
 import { SessionDataService } from "../../session-data.service";
@@ -40,8 +39,8 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
     }
 
     this.sessionDataService
-      .getDatasetUrl(this.dataset).pipe(
-      takeUntil(this.unsubscribe))
+      .getDatasetUrl(this.dataset)
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         url => {
           this.linkSrc = url;

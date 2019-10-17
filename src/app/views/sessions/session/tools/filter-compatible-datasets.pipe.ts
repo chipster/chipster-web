@@ -1,20 +1,23 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import {ToolService} from "./tool.service";
+import { Pipe, PipeTransform } from "@angular/core";
+import { ToolService } from "./tool.service";
 import { Dataset, ToolInput } from "chipster-js-common";
-import {SessionData} from "../../../../model/session/session-data";
-
+import { SessionData } from "../../../../model/session/session-data";
 
 @Pipe({
-  name: 'filterCompatibleDatasets'
+  name: "filterCompatibleDatasets"
 })
 export class FilterCompatibleDatasetsPipe implements PipeTransform {
+  constructor(private toolService: ToolService) {}
 
-  constructor(private toolService: ToolService) { }
-
-  transform(datasets: Dataset[], toolInput: ToolInput, sessionData: SessionData): Dataset[] {
-
+  transform(
+    datasets: Dataset[],
+    toolInput: ToolInput,
+    sessionData: SessionData
+  ): Dataset[] {
     if (datasets) {
-      return datasets.filter(dataset => this.toolService.isCompatible(sessionData, dataset, toolInput.type.name));
+      return datasets.filter(dataset =>
+        this.toolService.isCompatible(sessionData, dataset, toolInput.type.name)
+      );
     } else {
       console.warn("datasets is falsy");
       return [];

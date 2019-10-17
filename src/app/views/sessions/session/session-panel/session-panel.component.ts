@@ -30,7 +30,7 @@ export class SessionPanelComponent {
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private restErrorService: RestErrorService
-  ) { } // used by template
+  ) {} // used by template
 
   search(value: any) {
     this.datasetSearch = value;

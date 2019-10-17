@@ -1,5 +1,9 @@
 import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  RouterStateSnapshot
+} from "@angular/router";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
@@ -17,22 +21,22 @@ export class AnalyzeGuard implements CanActivate {
     private routeService: RouteService,
     private sessionResource: SessionResource,
     private userService: UserService
-  ) { }
+  ) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    return this.userService
-      .getLatestSession().pipe(
-        mergeMap((latestSessionId: string) => {
-          if (latestSessionId !== null) {
-            log.info("navigating to valid latest session", latestSessionId);
-            this.routeService.navigateToSession(latestSessionId);
-            return of(false); // doesn't really matter if it's true or false, since navigating before?
-          } else {
-            log.info("no valid latest session, creating new session");
-            return this.createNewTempSession().pipe(map((newSessionId: string) => {
+    return this.userService.getLatestSession().pipe(
+      mergeMap((latestSessionId: string) => {
+        if (latestSessionId !== null) {
+          log.info("navigating to valid latest session", latestSessionId);
+          this.routeService.navigateToSession(latestSessionId);
+          return of(false); // doesn't really matter if it's true or false, since navigating before?
+        } else {
+          log.info("no valid latest session, creating new session");
+          return this.createNewTempSession().pipe(
+            map((newSessionId: string) => {
               if (newSessionId !== null) {
                 log.info("created new session", newSessionId);
                 this.routeService.navigateToSession(newSessionId);
@@ -42,9 +46,11 @@ export class AnalyzeGuard implements CanActivate {
                 this.routeService.navigateToSessions();
                 return false;
               }
-            }));
-          }
-        }));
+            })
+          );
+        }
+      })
+    );
   }
 
   private createNewTempSession(): Observable<string> {

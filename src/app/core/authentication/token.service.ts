@@ -63,7 +63,7 @@ export class TokenService {
   }
 
   hasRole(role: string) {
-    return this.roles.indexOf(role) !== -1;
+    return this.roles.includes(role);
   }
 
   getUsername(): string {

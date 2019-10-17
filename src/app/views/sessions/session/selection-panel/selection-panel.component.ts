@@ -9,7 +9,7 @@ import { Subject } from "rxjs";
 import { Job } from "chipster-js-common";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "ch-selection-panel",
@@ -40,7 +40,7 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     private toolSelectionService: ToolSelectionService,
     public settingsService: SettingsService,
     private errorService: ErrorService
-  ) { }
+  ) {}
 
   ngOnInit() {
     // FIXME after tool selection refactoring
@@ -74,19 +74,21 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     //     err => this.errorService.showError("dataset selection failed", err)
     //   );
 
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      (selectedJobs: Array<Job>) => {
-        this.selectedJobs = selectedJobs;
-        if (this.selectedJobs.length > 0) {
-          this.showFile = false;
-          this.showTool = false;
-          this.showJob = true;
-        } else {
-          this.showJob = false;
-        }
-      },
-      err => this.errorService.showError("job selection failed", err)
-    );
+    this.selectionService.selectedJobs$
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        (selectedJobs: Array<Job>) => {
+          this.selectedJobs = selectedJobs;
+          if (this.selectedJobs.length > 0) {
+            this.showFile = false;
+            this.showTool = false;
+            this.showJob = true;
+          } else {
+            this.showJob = false;
+          }
+        },
+        err => this.errorService.showError("job selection failed", err)
+      );
   }
 
   ngOnDestroy() {

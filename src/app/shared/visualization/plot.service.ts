@@ -1,26 +1,28 @@
-import {Injectable} from "@angular/core";
+import { Injectable } from "@angular/core";
 import Point from "../../views/sessions/session/visualization/model/point";
-import {VisualizationTSVService} from "./visualizationTSV.service";
-import {PlotData} from "../../views/sessions/session/visualization/model/plotData";
+import { VisualizationTSVService } from "./visualizationTSV.service";
+import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 
 @Injectable()
 export class PlotService {
+  constructor(private visualizationTSVService: VisualizationTSVService) {}
 
-  constructor(private visualizationTSVService: VisualizationTSVService) {
-
-  }
-
-  //Get the points inside the selection Rectangle
-  getSelectedDataPoints(dragStartPoint: Point, dragEndPoint: Point, linearXScale: any, linearYScale: any, plotData: Array<PlotData>): Array<string> {
-
+  // Get the points inside the selection Rectangle
+  getSelectedDataPoints(
+    dragStartPoint: Point,
+    dragEndPoint: Point,
+    linearXScale: any,
+    linearYScale: any,
+    plotData: Array<PlotData>
+  ): Array<string> {
     console.log(linearXScale);
-    let startXValue = linearXScale.invert(dragStartPoint.x);
-    let endXValue = linearXScale.invert(dragEndPoint.x);
+    const startXValue = linearXScale.invert(dragStartPoint.x);
+    const endXValue = linearXScale.invert(dragEndPoint.x);
 
-    let startYValue = linearYScale.invert(dragStartPoint.y);
-    let endYValue = linearYScale.invert(dragEndPoint.y);
+    const startYValue = linearYScale.invert(dragStartPoint.y);
+    const endYValue = linearYScale.invert(dragEndPoint.y);
 
-    let selectedDataPoints: Array<string> = [];
+    const selectedDataPoints: Array<string> = [];
 
     console.log(startXValue);
     console.log(startYValue);
@@ -29,42 +31,55 @@ export class PlotService {
 
     // get the chip values which are in this range
 
-    plotData.forEach(function (val) {
-
+    plotData.forEach(function(val) {
       if (startXValue < endXValue) {
         if (startYValue < endYValue) {
-          if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
+          if (
+            val.plotPoint.x <= endXValue &&
+            val.plotPoint.x >= startXValue &&
+            val.plotPoint.y <= endYValue &&
+            val.plotPoint.y >= startYValue
+          ) {
             selectedDataPoints.push(val.id);
             console.log(val.plotPoint);
           }
         } else if (startYValue > endYValue) {
-          if (val.plotPoint.x <= endXValue && val.plotPoint.x >= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
+          if (
+            val.plotPoint.x <= endXValue &&
+            val.plotPoint.x >= startXValue &&
+            val.plotPoint.y >= endYValue &&
+            val.plotPoint.y <= startYValue
+          ) {
             selectedDataPoints.push(val.id);
             console.log(val.plotPoint);
           }
         }
       } else if (startXValue > endXValue) {
         if (startYValue < endYValue) {
-          if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y <= endYValue && val.plotPoint.y >= startYValue) {
+          if (
+            val.plotPoint.x >= endXValue &&
+            val.plotPoint.x <= startXValue &&
+            val.plotPoint.y <= endYValue &&
+            val.plotPoint.y >= startYValue
+          ) {
             selectedDataPoints.push(val.id);
             console.log(val.plotPoint);
           }
         } else if (startYValue > endYValue) {
-          if (val.plotPoint.x >= endXValue && val.plotPoint.x <= startXValue && val.plotPoint.y >= endYValue && val.plotPoint.y <= startYValue) {
+          if (
+            val.plotPoint.x >= endXValue &&
+            val.plotPoint.x <= startXValue &&
+            val.plotPoint.y >= endYValue &&
+            val.plotPoint.y <= startYValue
+          ) {
             selectedDataPoints.push(val.id);
             console.log(val.plotPoint);
           }
         }
       }
-
     });
 
-  console.log(selectedDataPoints);
+    console.log(selectedDataPoints);
     return selectedDataPoints;
-
-
   }
-
-
-
 }

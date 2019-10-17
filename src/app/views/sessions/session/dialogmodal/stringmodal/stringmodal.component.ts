@@ -1,5 +1,5 @@
+import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, AfterViewInit, ViewChild } from "@angular/core";
 
 @Component({
   templateUrl: "./stringmodal.component.html"
@@ -35,7 +35,8 @@ export class StringModalComponent implements AfterViewInit {
   save($event) {
     this.activeModal.close(this.value);
     if ($event) {
-      // otherwise the event may open the dialog again, when the original button gets it (New session button in session list in Chrome with an enter key event)
+      // otherwise the event may open the dialog again, when the original button
+      // gets it(New session button in session list in Chrome with an enter key event)
       $event.preventDefault();
     }
   }

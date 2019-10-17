@@ -1,13 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Response} from "@angular/http";
-import {HttpErrorResponse} from "@angular/common/http";
-import {ErrorService} from "./error.service";
-import { ErrorButton, ErrorMessage } from './errormessage';
+import { Injectable } from "@angular/core";
+import { Response } from "@angular/http";
+import { HttpErrorResponse } from "@angular/common/http";
+import { ErrorService } from "./error.service";
+import { ErrorButton, ErrorMessage } from "./errormessage";
 import log from "loglevel";
 
 @Injectable()
-export class RestErrorService  {
-
+export class RestErrorService {
   static isForbidden(error: HttpErrorResponse | any) {
     return RestErrorService.isHttpError(error, 403);
   }
@@ -21,20 +20,21 @@ export class RestErrorService  {
   }
 
   static isHttpError(error: HttpErrorResponse | any, status: number) {
-    return (error instanceof HttpErrorResponse || error instanceof Response) && error.status === status;
+    return (
+      (error instanceof HttpErrorResponse || error instanceof Response) &&
+      error.status === status
+    );
   }
 
   static isClientOrConnectionError(error: HttpErrorResponse) {
     return error.status === 0;
   }
 
-  static isServerSideError(error: HttpErrorResponse ) {
+  static isServerSideError(error: HttpErrorResponse) {
     return !RestErrorService.isClientOrConnectionError(error);
   }
 
-  constructor(
-    private errorService: ErrorService,
-  ) { }
+  constructor(private errorService: ErrorService) {}
 
   /**
    * Show an error with sensible actions based on the HTTP response
@@ -43,7 +43,6 @@ export class RestErrorService  {
    * @param resp
    */
   showError(message: string, resp: Response | any) {
-
     /* Catch the current stacktrace
 
     Creating and Error object saves to current stacktrace. If this handleError()
@@ -53,9 +52,13 @@ export class RestErrorService  {
     const error = new Error(resp);
 
     const errorMessage = new ErrorMessage(
-      null, message, true,
+      null,
+      message,
+      true,
       [ErrorButton.Reload, ErrorButton.ContactSupport],
-      [], error);
+      [],
+      error
+    );
 
     if (error) {
       errorMessage.links = [ErrorButton.ShowDetails];
@@ -63,23 +66,16 @@ export class RestErrorService  {
 
     // show alert
     if (RestErrorService.isForbidden(resp)) {
-
       errorMessage.title = "Authentication failed";
       errorMessage.buttons = [ErrorButton.LogIn, ErrorButton.ContactSupport];
-
     } else if (RestErrorService.isNotFound(resp)) {
-
       errorMessage.title = "Not found";
-
     } else if (RestErrorService.isClientOrConnectionError(resp)) {
-
       errorMessage.title = "Connection failed";
-
     } else if (RestErrorService.isTooManyRequests(resp)) {
       errorMessage.title = message;
       errorMessage.msg = this.getTooManyRequestsMessage(resp);
       errorMessage.buttons = [ErrorButton.ContactSupport];
-
     }
 
     this.errorService.showErrorObject(errorMessage);

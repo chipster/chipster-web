@@ -30,4 +30,4 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
   providers: [DatasetModalService],
   entryComponents: [DatasetHistorymodalComponent]
 })
-export class DatasetModule { }
+export class DatasetModule {}

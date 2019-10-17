@@ -1,11 +1,15 @@
-import { Injectable, ChangeDetectorRef } from "@angular/core";
-import { SessionResource } from "../resources/session.resource";
+import { ChangeDetectorRef, Injectable } from "@angular/core";
+import { Dataset, Job } from "chipster-js-common";
+import log from "loglevel";
+import { forkJoin, Observable, timer } from "rxjs";
+import { map } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
-import { ConfigService } from "./config.service";
-import { Observable, forkJoin, timer } from "rxjs";
-import { Dataset } from "chipster-js-common";
+import { ErrorService } from "../../core/errorhandler/error.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { map, catchError } from "rxjs/operators";
+import { DialogModalService } from "../../views/sessions/session/dialogmodal/dialogmodal.service";
+import { JobService } from "../../views/sessions/session/job.service";
+import { SessionResource } from "../resources/session.resource";
+import { ConfigService } from "./config.service";
 
 declare let Flow: any;
 
@@ -16,7 +20,10 @@ export class UploadService {
     private tokenService: TokenService,
     private sessionResource: SessionResource,
     private restErrorService: RestErrorService,
-  ) { }
+    private dialogModalService: DialogModalService,
+    private jobService: JobService,
+    private errorService: ErrorService
+  ) {}
 
   getFlow(
     fileAdded: (file: any, event: any, flow: any) => any,
@@ -58,7 +65,7 @@ export class UploadService {
       fileSuccess(file);
     });
     flow.on("fileError", (file, message) => {
-      console.log(file, message);
+      log.error(file, message);
     });
 
     return flow;
@@ -67,7 +74,7 @@ export class UploadService {
   // noinspection JSMethodCanBeStatic
   private flowFileAdded(file: any, event: any, flow: any) {
     // each file has a unique target url
-    flow.opts.target = function (file2: any) {
+    flow.opts.target = function(file2: any) {
       return file2.chipsterTarget;
     };
 
@@ -75,30 +82,33 @@ export class UploadService {
   }
 
   startUpload(sessionId: string, file: any) {
-    forkJoin(
+    forkJoin([
       this.configService.getFileBrokerUrl(),
       this.createDataset(sessionId, file.name)
-    ).subscribe((value: [string, Dataset]) => {
-      const url = value[0];
-      const dataset = value[1];
-      file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
-        dataset.datasetId
+    ]).subscribe(
+      (value: [string, Dataset]) => {
+        const url = value[0];
+        const dataset = value[1];
+        file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
+          dataset.datasetId
         }?token=${this.tokenService.getToken()}`;
-      file.chipsterSessionId = sessionId;
-      file.chipsterDatasetId = dataset.datasetId;
-      file.resume();
-    }, err => this.restErrorService.showError("upload failed", err));
+        file.chipsterSessionId = sessionId;
+        file.chipsterDatasetId = dataset.datasetId;
+        file.resume();
+      },
+      err => this.restErrorService.showError("upload failed", err)
+    );
   }
 
   private createDataset(sessionId: string, name: string): Observable<Dataset> {
     const d = new Dataset(name);
-    return this.sessionResource
-      .createDataset(sessionId, d)
-      .pipe(map((datasetId: string) => {
+    return this.sessionResource.createDataset(sessionId, d).pipe(
+      map((datasetId: string) => {
         d.datasetId = datasetId;
         this.sessionResource.updateDataset(sessionId, d);
         return d;
-      }));
+      })
+    );
   }
 
   /**
@@ -107,13 +117,61 @@ export class UploadService {
    * Schedule a next view update after a second as long as flow.js has files.
    */
   scheduleViewUpdate(changeDetectorRef: ChangeDetectorRef, flow: any) {
-    console.log("scheduling view update");
+    log.info("scheduling view update");
     timer(1000).subscribe(() => {
       // TODO check if view not destroyed
       changeDetectorRef.detectChanges();
 
       if (flow.files.length > 0) {
         this.scheduleViewUpdate(changeDetectorRef, flow);
+      }
+    });
+  }
+
+  openDialogAndDowloadFromUrl() {
+    this.dialogModalService.downloadFromUrlModal().subscribe({
+      next: (url: string) => {
+        const parameters = [];
+        parameters.push({
+          parameterId: "paramUrl",
+          displayName: "",
+          description: "",
+          type: "UNCHECKED_STRING",
+          value: url
+        });
+
+        parameters.push({
+          parameterId: "paramFileExtension",
+          displayName: "",
+          description: "",
+          type: "ENUM",
+          value: "current"
+        });
+
+        parameters.push({
+          parameterId: "paramCheckCerts",
+          displayName: "",
+          description: "",
+          type: "ENUM",
+          value: "yes"
+        });
+
+        const job: Job = <Job>{
+          toolId: "fi.csc.chipster.tools.common.DownloadFile.java",
+          toolCategory: "Data retrieval",
+          module: "Misc",
+          toolName: "Download file from URL directly to server",
+          toolDescription: "",
+          state: "NEW",
+          inputs: [],
+          parameters: parameters,
+          metadataFiles: []
+        };
+
+        this.jobService.runJobDirect(job);
+      },
+      error: err => {
+        this.errorService.showError("Failed to download", err);
       }
     });
   }

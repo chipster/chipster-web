@@ -1,16 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { GenomeBrowserComponent } from './genome-browser.component';
+import { GenomeBrowserComponent } from "./genome-browser.component";
 
-describe('GenomeBrowserComponent', () => {
+describe("GenomeBrowserComponent", () => {
   let component: GenomeBrowserComponent;
   let fixture: ComponentFixture<GenomeBrowserComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GenomeBrowserComponent ]
-    })
-    .compileComponents();
+      declarations: [GenomeBrowserComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('GenomeBrowserComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

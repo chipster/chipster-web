@@ -1,5 +1,4 @@
-
-import {takeUntil} from 'rxjs/operators';
+import { takeUntil } from "rxjs/operators";
 import { ExpressionProfileService } from "./expressionprofile.service";
 import Point from "../model/point";
 import Rectangle from "./rectangle";
@@ -64,8 +63,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       return;
     }
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset).pipe(
-      takeUntil(this.unsubscribe))
+      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);

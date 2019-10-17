@@ -2,25 +2,24 @@ import { Dataset } from "chipster-js-common";
 import * as _ from "lodash";
 
 export default class UtilsService {
-
   static getFileExtension(name: string) {
-    return name.split('.').pop();
+    return name.split(".").pop();
   }
 
   static startsWith(data: string, start: string) {
-    return data.substring(0, start.length) === start;
+    return data.startsWith(start);
   }
 
   static mapValues(map: Map<any, any>) {
-    let array: any[] = [];
-    map.forEach(function (value: any) {
+    const array: any[] = [];
+    map.forEach(function(value: any) {
       array.push(value);
     });
     return array;
   }
 
   static arrayToMap<T>(array: T[], key: string) {
-    let map = new Map<string, T>();
+    const map = new Map<string, T>();
     for (let i = 0; i < array.length; i++) {
       map.set(array[i][key], array[i]);
     }
@@ -35,18 +34,22 @@ export default class UtilsService {
     return event.shiftKey;
   }
 
-  static toggleSelection(event: any, item: any, allItems: any[], selectedItems: any[]) {
-
+  static toggleSelection(
+    event: any,
+    item: any,
+    allItems: any[],
+    selectedItems: any[]
+  ) {
     function isSelectionEmpty() {
       return selectedItems.length === 0;
     }
 
     function selectionContains(item: any) {
-      return selectedItems.indexOf(item) !== -1;
+      return selectedItems.includes(item);
     }
 
     function removeFromSelection(item: any) {
-      let index = selectedItems.indexOf(item);
+      const index = selectedItems.indexOf(item);
       selectedItems.splice(index, 1);
     }
 
@@ -69,10 +72,9 @@ export default class UtilsService {
       }
     } else if (this.isShiftKey(event)) {
       if (!isSelectionEmpty()) {
-
-        let lastSelectedItem = selectedItems[selectedItems.length - 1];
-        let indexOfLastSelection = allItems.indexOf(lastSelectedItem);
-        let indexOfNewSelection = allItems.indexOf(item);
+        const lastSelectedItem = selectedItems[selectedItems.length - 1];
+        const indexOfLastSelection = allItems.indexOf(lastSelectedItem);
+        const indexOfNewSelection = allItems.indexOf(item);
         let from: number, to: number;
         if (indexOfLastSelection < indexOfNewSelection) {
           from = indexOfLastSelection + 1;
@@ -85,26 +87,24 @@ export default class UtilsService {
         for (let i = from; i < to; i++) {
           addToSelection(allItems[i]);
         }
-
       } else {
         setSelection(item);
       }
-
     } else {
       setSelection(item);
     }
   }
 
-  static getDatasetIds(datasets: Array<Dataset>): Array<String> {
+  static getDatasetIds(datasets: Array<Dataset>): Array<string> {
     return datasets.map((dataset: Dataset) => dataset.datasetId);
   }
 
   /**
    * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
    */
-  static equalStringArrays(first: Array<String>, second: Array<String>) {
-    return _.every(first, (item) => {
-      return _.includes(second, item)
+  static equalStringArrays(first: Array<string>, second: Array<string>) {
+    return _.every(first, item => {
+      return _.includes(second, item);
     });
   }
 
@@ -118,8 +118,8 @@ export default class UtilsService {
     }
   }
 
-  static  parseISOStringToDate(s : any) {
-    var b = s.split(/\D+/);
+  static parseISOStringToDate(s: any) {
+    const b = s.split(/\D+/);
     return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
   }
 
@@ -146,7 +146,5 @@ export default class UtilsService {
       duration += seconds + "s ";
     }
     return duration;
-
   }
-
 }

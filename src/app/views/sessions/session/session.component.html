@@ -19,7 +19,7 @@
 >
   <as-split>
     <!-- split 1 -->
-    <as-split-area [size]="split1Size" class="split-1 d-flex flex-column">
+    <as-split-area [size]="split1Size" class="d-flex flex-column">
       <!-- workflow and files -->
       <ch-session-panel
         [sessionData]="sessionData"
@@ -30,7 +30,7 @@
     </as-split-area>
 
     <!-- split 2-->
-    <as-split-area id="myDiv" [size]="split2Size" class="split-2 scrollable">
+    <as-split-area id="myDiv" [size]="split2Size" class="scrollable">
       <div *ngIf="!split3Visible; else selectionPanel">
         <div class="row">
           <div class="col">

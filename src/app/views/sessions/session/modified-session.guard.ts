@@ -19,10 +19,12 @@ export class ModifiedSessionGuard implements CanDeactivate<SessionComponent> {
   ) {
     return sessionComponent
       .canDeactivate(sessionComponent, currentRoute, currentState, nextState)
-      .pipe(catchError(err => {
-        log.error("route deactivation error", err);
-        // allow route change even in case of errors
-        return of(true);
-      }));
+      .pipe(
+        catchError(err => {
+          log.error("route deactivation error", err);
+          // allow route change even in case of errors
+          return of(true);
+        })
+      );
   }
 }

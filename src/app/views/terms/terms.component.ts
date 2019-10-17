@@ -20,8 +20,8 @@ export class TermsComponent implements OnInit {
     private authenticationService: AuthenticationService,
     private restErrorService: RestErrorService,
     private configService: ConfigService,
-    private routeService: RouteService,
-  ) { }
+    private routeService: RouteService
+  ) {}
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe(
@@ -29,10 +29,7 @@ export class TermsComponent implements OnInit {
         this.termsOfUse = path;
       },
       err =>
-        this.restErrorService.showError(
-          "failed to get the configuration",
-          err
-        )
+        this.restErrorService.showError("failed to get the configuration", err)
     );
   }
 
@@ -41,15 +38,17 @@ export class TermsComponent implements OnInit {
 
     this.configService
       .get(ConfigService.KEY_TERMS_OF_USE_VERSION)
-      .pipe(flatMap(v => {
-        latestVersion = v;
-        return this.authenticationService.getUser();
-      }),
+      .pipe(
+        flatMap(v => {
+          latestVersion = v;
+          return this.authenticationService.getUser();
+        }),
         flatMap((user: User) => {
           user.termsVersion = latestVersion;
           user.termsAccepted = new Date().toISOString();
           return this.authenticationService.updateUser(user);
-        }))
+        })
+      )
       .subscribe(
         () => {
           this.routeService.navigateAbsolute("/sessions");

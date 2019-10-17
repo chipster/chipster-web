@@ -93,7 +93,7 @@ export class ToolListAccordionComponent implements OnInit {
     );
     if (
       filteredModules &&
-      filteredModules.indexOf(this.selectedModule) < 0 &&
+      !filteredModules.includes(this.selectedModule) &&
       filteredModules[0]
     ) {
       this.selectModule(filteredModules[0]);
