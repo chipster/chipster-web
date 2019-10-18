@@ -13,7 +13,7 @@
   <div class="col col-left">
     <button
       class="btn btn-sm btn-outline-secondary"
-      (click)="saveWorkflow()"
+      (click)="saveWorkflowDialog()"
       title="Save workflow"
       [disabled]="selectedDatasets.length === 0"
     >
@@ -24,7 +24,7 @@
       class="btn btn-sm btn-success"
       (click)="runWorkflowPlan()"
       title="Run workflow"
-      [disabled]="selectedDatasets.length === 0 || selectedWorkflowPlan == null"
+      [disabled]="!isRunnable"
     >
       Run
     </button>
@@ -88,17 +88,11 @@
             </td>
           </tr>
           <tr>
-            <td class="lighter">Original duration:</td>
-            <td width="100%">
-              {{ selectedWorkflowPlan.originalDuration }}
-            </td>
-          </tr>
-          <tr>
             <td class="lighter">Tools:</td>
           </tr>
-          <tr *ngFor="let job of selectedWorkflowPlan.workflowJobPlans">
+          <tr *ngFor="let workflowJob of selectedWorkflowPlan.workflowJobs">
             <td class="lighter"></td>
-            <td class="lighter">{{ job.toolName }}</td>
+            <td class="lighter">{{ workflowJob.toolName }}</td>
             <td width="100%"></td>
           </tr>
           <!-- <tr>
@@ -116,6 +110,7 @@
     <div *ngIf="selectedWorkflowRun != null">
       <h3 class="panel-title">
         {{ selectedWorkflowRun.name }} {{ selectedWorkflowRun.state }}
+        <span *ngIf="selectedWorkflowRun.stateDetail">({{ selectedWorkflowRun.stateDetail }})</span>
       </h3>
       <div class="border p-3" style="background-color: white;">
         <table class="table table-sm text-sm">
@@ -137,9 +132,9 @@
               {{ selectedWorkflowRun.createdBy }}
             </td>
           </tr>
-          <tr *ngFor="let job of selectedWorkflowRunJobs">
-            <td class="lighter">{{ job.toolName }}</td>
-            <td width="100%">{{ job.state }}</td>
+          <tr *ngFor="let workflowJob of selectedWorkflowRun.workflowJobs">
+            <td class="lighter">{{ workflowJob.toolName }}</td>
+            <td width="100%">{{ getJob(workflowJob.jobId).state }}</td>
           </tr>
         </table>
       </div>
