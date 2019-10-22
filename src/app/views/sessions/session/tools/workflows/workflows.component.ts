@@ -361,10 +361,17 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       return workflowInput;
     }
 
-    // the input is produce by some other job in this workflow
+    // the input is produced by some other job in this workflow
     workflowInput.sourceWorkflowJobId = inputWokrflowJobId;
-    //TODO store dataset sourceOutputId and use it here to make this work when the dataset is rename, either by the tool or user
-    workflowInput.sourceJobOutputId = dataset.name;
+
+    if (dataset.sourceJobOutputId == null) {
+      throw new Error(
+        "Workflow cannot be saved from dataset " +
+          dataset.name +
+          ". The dataset was created by a Chipster version which is too old. Please run the tool that produced this file again."
+      );
+    }
+    workflowInput.sourceJobOutputId = dataset.sourceJobOutputId;
 
     log.info(
       "the input comes from tool " +
