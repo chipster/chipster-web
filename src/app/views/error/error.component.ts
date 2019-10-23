@@ -8,7 +8,8 @@ import * as StackTrace from "stacktrace-js";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import {
   ErrorButton,
-  ErrorMessage
+  ErrorMessage,
+  Level
 } from "../../core/errorhandler/errormessage";
 import { RouteService } from "../../shared/services/route.service";
 import { ContactSupportService } from "../contact/contact-support.service";
@@ -71,7 +72,19 @@ export class ErrorComponent implements OnInit {
             };
           });
 
-          const toast = this.toastrService.warning(msg, title, options);
+          let toast;
+
+          switch (error.level) {
+            case Level.Error:
+              toast = this.toastrService.error(msg, title, options);
+              break;
+            case Level.Info:
+              toast = this.toastrService.info(msg, title, options);
+              break;
+            case Level.Warning:
+              toast = this.toastrService.warning(msg, title, options);
+              break;
+          }
 
           this.toastIds.push(toast.toastId);
           return toast.onAction.pipe(

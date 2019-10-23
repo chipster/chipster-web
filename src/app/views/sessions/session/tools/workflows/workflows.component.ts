@@ -11,10 +11,14 @@ import {
   WorkflowRun
 } from "chipster-js-common";
 import log from "loglevel";
-import { Subject } from "rxjs";
+import { combineLatest, Observable, Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import uuidv4 from "uuid/v4";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import {
+  ErrorMessage,
+  Level
+} from "../../../../../core/errorhandler/errormessage";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SettingsService } from "../../../../../shared/services/settings.service";
@@ -37,9 +41,12 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   selectedDatasets: Dataset[] = [];
   workflowPlans: Array<WorkflowPlan>;
   workflowRuns: Array<WorkflowRun>;
+  selectedWorkflowPlan$ = new Subject<WorkflowPlan>();
+  selectedWorkflowRun$ = new Subject<WorkflowRun>();
   selectedWorkflowPlan: WorkflowPlan;
   selectedWorkflowRun: WorkflowRun;
   isRunnable = false;
+  jobsOfSelectedWorkflowRun: Job[];
 
   finishedStates = new Set<JobState>([
     JobState.Cancelled,
@@ -52,6 +59,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   ]);
 
   private unsubscribe: Subject<null> = new Subject();
+  countsOfSelectedWorkflowRun: string;
 
   constructor(
     public settingsService: SettingsService,
@@ -79,23 +87,83 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
         }
       );
 
-    this.sessionEventService.getWorkflowPlanStream().subscribe(
-      () => {
-        this.workflowPlans = Array.from(
-          this.sessionData.workflowPlansMap.values()
-        );
+    this.sessionEventService
+      .getJobStream()
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        () => {
+          this.updateWorkflowRunJobs();
+        },
+        err => this.errorService.showError("failed to update jobs", err)
+      );
+
+    this.sessionEventService
+      .getWorkflowPlanStream()
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        () => {
+          this.workflowPlans = Array.from(
+            this.sessionData.workflowPlansMap.values()
+          );
+          if (this.selectedWorkflowPlan != null) {
+            this.selectedWorkflowPlan = this.sessionData.workflowPlansMap.get(
+              this.selectedWorkflowPlan.workflowPlanId
+            );
+          }
+        },
+        err => this.errorService.showError("workflow plan event error", err)
+      );
+
+    this.sessionEventService
+      .getWorkflowRunStream()
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        () => {
+          this.workflowRuns = Array.from(
+            this.sessionData.workflowRunsMap.values()
+          );
+          if (this.selectedWorkflowRun != null) {
+            this.selectedWorkflowRun = this.sessionData.workflowRunsMap.get(
+              this.selectedWorkflowRun.workflowRunId
+            );
+          }
+        },
+        err => this.errorService.showError("workflow run event error", err)
+      );
+
+    this.selectedWorkflowRun$.pipe(takeUntil(this.unsubscribe)).subscribe(
+      run => {
+        this.selectedWorkflowRun = run;
+        this.updateWorkflowRunJobs();
       },
-      err => this.errorService.showError("workflow plan event error", err)
+      err => this.errorService.showError("workflow run selection error", err)
     );
 
-    this.sessionEventService.getWorkflowRunStream().subscribe(
-      () => {
-        this.workflowRuns = Array.from(
-          this.sessionData.workflowRunsMap.values()
-        );
+    this.selectedWorkflowPlan$.pipe(takeUntil(this.unsubscribe)).subscribe(
+      plan => {
+        this.selectedWorkflowPlan = plan;
       },
-      err => this.errorService.showError("workflow run event error", err)
+      err => this.errorService.showError("workflow plan selection error", err)
     );
+
+    combineLatest(
+      this.store.select("selectedDatasets"),
+      this.selectedWorkflowPlan$
+    )
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+        ([selectedDatasets, selectedWorkflowPlan]) => {
+          this.isRunnable = this.bindInputs(
+            selectedWorkflowPlan,
+            selectedDatasets
+          );
+        },
+        err =>
+          this.errorService.showError(
+            "binding selected datasets to selected workflow plan failed",
+            err
+          )
+      );
   }
 
   ngOnDestroy(): void {
@@ -104,13 +172,20 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   }
 
   selectWorkflowPlan(plan: WorkflowPlan): void {
-    this.selectedWorkflowRun = null;
-    this.selectedWorkflowPlan = plan;
-
-    this.isRunnable = this.bindInputs(plan, this.selectedDatasets);
+    this.selectedWorkflowRun$.next(null);
+    this.selectedWorkflowPlan$.next(plan);
   }
 
-  bindInputs(plan: WorkflowPlan, datasets: Dataset[]) {
+  selectWorkflowRun(run: WorkflowRun): void {
+    this.selectedWorkflowRun$.next(run);
+    this.selectedWorkflowPlan$.next(null);
+  }
+
+  bindInputs(plan: WorkflowPlan, datasets: Dataset[]): boolean {
+    if (plan == null) {
+      return false;
+    }
+
     const looseInputs = [];
     log.info("bind selected dataset to inputs of the selected workflow plan");
     plan.workflowJobs.forEach(job => {
@@ -130,20 +205,40 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       });
     });
 
-    if (datasets.length === 0 && looseInputs.length === 0) {
+    // many loose inputs can use the same dataset
+    const uniqueLooseWorkflowDatasetIds = new Set<string>();
+    looseInputs.forEach(i => uniqueLooseWorkflowDatasetIds.add(i.datasetId));
+
+    log.info("loose inputs", looseInputs);
+    log.info("unique", uniqueLooseWorkflowDatasetIds);
+
+    if (datasets.length === 0 && uniqueLooseWorkflowDatasetIds.size === 0) {
       return true;
-    } else if (datasets.length === 1 && looseInputs.length === 1) {
+    } else if (
+      datasets.length === 1 &&
+      uniqueLooseWorkflowDatasetIds.size === 1
+    ) {
       // bind the dataset
-      looseInputs[0].datasetId = datasets[0].datasetId;
-      looseInputs[0].displayName = datasets[0].name;
+      // many loose inputs can use the same dataset
+      const uniqueWorkflowDatasetId = uniqueLooseWorkflowDatasetIds
+        .values()
+        .next().value;
+
+      log.info("bind dataset", uniqueWorkflowDatasetId, looseInputs);
+      looseInputs
+        .filter(i => i.datasetId === uniqueWorkflowDatasetId)
+        .forEach(i => {
+          i.datasetId = datasets[0].datasetId;
+          i.displayName = datasets[0].name;
+        });
       return true;
-    } else if (looseInputs.length > 1) {
+    } else if (uniqueLooseWorkflowDatasetIds.size > 1) {
       log.info("workflow with multiple inputs isn't supported");
       return false;
     }
   }
 
-  getJob(jobId: string): Job {
+  getJobForView(jobId: string): Job {
     let job = this.sessionData.jobsMap.get(jobId);
     if (!job) {
       job = new Job();
@@ -157,9 +252,21 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     return job;
   }
 
-  selectWorkflowRun(run: WorkflowRun): void {
-    this.selectedWorkflowPlan = null;
-    this.selectedWorkflowRun = run;
+  updateWorkflowRunJobs(): void {
+    if (this.selectedWorkflowRun == null) {
+      this.jobsOfSelectedWorkflowRun = [];
+    } else {
+      this.jobsOfSelectedWorkflowRun = this.selectedWorkflowRun.workflowJobs.map(
+        j => this.getJobForView(j.jobId)
+      );
+
+      const completedCount = this.jobsOfSelectedWorkflowRun.filter(
+        j => j.state === JobState.Completed
+      ).length;
+      const totalCount = this.jobsOfSelectedWorkflowRun.length;
+
+      this.countsOfSelectedWorkflowRun = completedCount + "/" + totalCount;
+    }
   }
 
   runWorkflowPlan(): void {
@@ -198,16 +305,40 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   }
 
   saveWorkflowDialog(): void {
+    const names = new Set(
+      Array.from(this.sessionData.workflowPlansMap.values()).map(p => p.name)
+    );
+    const nameBase = "New workflow";
+    let defaultName = nameBase;
+    for (let i = 2; names.has(defaultName); i++) {
+      defaultName = nameBase + " " + i;
+    }
+
+    const sourceJobs = this.getJobsToSave(this.selectedDatasets);
+
+    if (sourceJobs.size === 0) {
+      const errorMessage = new ErrorMessage(
+        "No jobs found",
+        "Please select both an input and output dataset of each jobs to save.",
+        true,
+        [],
+        [],
+        null
+      );
+      errorMessage.level = Level.Info;
+      this.errorService.showErrorObject(errorMessage);
+      return;
+    }
+
     this.dialogModalService
       .openStringModal(
         "Save workflow",
         "Save workflow from the selected datasets",
-        "New workflow",
+        defaultName,
         "Save"
       )
       .pipe(
         mergeMap(name => {
-          const sourceJobs = this.getJobsToSave(this.selectedDatasets);
           log.info(
             "save workflow of " +
               this.selectedDatasets.length +
@@ -237,7 +368,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
    *
    * @param datasets
    */
-  getJobsToSave(datasets: Dataset[]) {
+  getJobsToSave(datasets: Dataset[]): Set<string> {
     const datasetIds = new Set(datasets.map(d => d.datasetId));
 
     const sourceJobIdSet = new Set<string>();
@@ -279,19 +410,26 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     return sourceJobIdSet;
   }
 
-  saveWorkflow(sourceJobIdSet: Set<string>, name: string) {
+  saveWorkflow(sourceJobIdSet: Set<string>, name: string): Observable<string> {
     log.info("save workflow");
 
     const plan = new WorkflowPlan();
     plan.name = name;
     plan.workflowJobs = [];
 
-    const sessionJobIdToWorkflowJobIdMap = new Map<string, string>();
+    const jobIdToWorkflowJobIdMap = new Map<string, string>();
+    const datasetIdToWorkflowDatasetIdMap = new Map<string, string>();
 
     sourceJobIdSet.forEach(jobId => {
-      // generate id for the workflow job
-      sessionJobIdToWorkflowJobIdMap.set(jobId, uuidv4());
+      // generate ids for workflow jobs
+      jobIdToWorkflowJobIdMap.set(jobId, uuidv4());
     });
+
+    for (const datasetId of Array.from(this.sessionData.datasetsMap.keys())) {
+      // generate ids for workflow datasets
+      // these are used only to know when multiple jobs used the same dataset for input
+      datasetIdToWorkflowDatasetIdMap.set(datasetId, uuidv4());
+    }
 
     sourceJobIdSet.forEach(jobId => {
       const sourceJob = this.sessionData.jobsMap.get(jobId);
@@ -299,21 +437,22 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
 
       const job = new WorkflowJob();
 
-      job.workflowJobId = sessionJobIdToWorkflowJobIdMap.get(jobId);
+      job.workflowJobId = jobIdToWorkflowJobIdMap.get(jobId);
       job.toolId = sourceJob.toolId;
       job.toolCategory = sourceJob.toolCategory;
       job.module = sourceJob.module;
       job.toolName = sourceJob.toolName;
-      // job.parameters = Object.assign({}, sourceJob.parameters);
-      // job.inputs = [...sourceJob.inputs];
-      // job.metadataFiles = Object.assign({}, sourceJob.metadataFiles);
+      job.parameters = [...sourceJob.parameters];
+      //TODO should the phenodata be saved with the workflow or come from the session where it's run?
+      job.metadataFiles = [...sourceJob.metadataFiles];
 
       job.inputs = [];
 
       sourceJob.inputs.forEach(sourceJobInput => {
         const workflowInput = this.getWorkflowInput(
           sourceJobInput,
-          sessionJobIdToWorkflowJobIdMap
+          jobIdToWorkflowJobIdMap,
+          datasetIdToWorkflowDatasetIdMap
         );
         job.inputs.push(workflowInput);
       });
@@ -326,7 +465,11 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     return this.sessionDataService.createWorkflowPlan(plan);
   }
 
-  getWorkflowInput(sourceJobInput, sessionJobIdToWorkflowJobIdMap) {
+  getWorkflowInput(
+    sourceJobInput,
+    sessionJobIdToWorkflowJobIdMap,
+    sessionDatasetIdToWorkflowDatasetIdMap
+  ): WorkflowInput {
     log.info("save input " + sourceJobInput.inputId);
 
     const workflowInput = new WorkflowInput();
@@ -335,14 +478,27 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     const dataset = this.sessionData.datasetsMap.get(sourceJobInput.datasetId);
     if (!dataset) {
       log.info("source dataset not found");
-      // has to be given when the workflow is run
-      return workflowInput;
+      // can these happen, when missing datasets cannot be selected for the workflow saving?
+      // If it can, we could generate new workflow ids also missing datasets, just like we done for the session datasets.
+      throw new Error(
+        "input '" +
+          sourceJobInput.inputId +
+          "' came from dataset " +
+          sourceJobInput.datasetId +
+          " but it's not anymore in the session"
+      );
+      // return workflowInput;
     }
     const inputSourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
 
+    // a real dataset has to be given when the workflow is run
+    // but add a fake "workflow dataset" id to know when multiple jobs use the same dataset
+    workflowInput.datasetId = sessionDatasetIdToWorkflowDatasetIdMap.get(
+      sourceJobInput.datasetId
+    );
+
     if (!inputSourceJob) {
       log.info("the input source job not found");
-      // has to be given when the workflow is run
       return workflowInput;
     }
 
@@ -363,6 +519,8 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
 
     // the input is produced by some other job in this workflow
     workflowInput.sourceWorkflowJobId = inputWokrflowJobId;
+    // the input is bound to job output, clear this
+    workflowInput.datasetId = null;
 
     if (dataset.sourceJobOutputId == null) {
       throw new Error(

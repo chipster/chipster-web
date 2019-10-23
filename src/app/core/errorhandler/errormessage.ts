@@ -5,7 +5,15 @@ export enum ErrorButton {
   ShowDetails = "Show details"
 }
 
+export enum Level {
+  Info = "INFO",
+  Warning = "WARNING",
+  Error = "ERROR"
+}
+
 export class ErrorMessage {
+  level = Level.Warning;
+
   constructor(
     public title: string,
     public msg: string,

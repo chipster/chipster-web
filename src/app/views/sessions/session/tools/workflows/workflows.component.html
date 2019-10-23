@@ -8,28 +8,10 @@
   </div>
   <div class="col col-right"></div>
 </div>
+
 <div class="row">
   <!-- saved workflows list -->
   <div class="col col-left">
-    <button
-      class="btn btn-sm btn-outline-secondary"
-      (click)="saveWorkflowDialog()"
-      title="Save workflow"
-      [disabled]="selectedDatasets.length === 0"
-    >
-      Save from selected files
-    </button>
-    &nbsp;
-    <button
-      class="btn btn-sm btn-success"
-      (click)="runWorkflowPlan()"
-      title="Run workflow"
-      [disabled]="!isRunnable"
-    >
-      Run
-    </button>
-    <br />
-    <br />
     <div class="list-group-sm">
       <button
         type="button"
@@ -70,6 +52,27 @@
     </div>
   </div>
   <div class="col col-right">
+    <button
+      class="btn btn-sm btn-outline-secondary"
+      (click)="saveWorkflowDialog()"
+      title="Save workflow"
+      [disabled]="selectedDatasets.length === 0"
+    >
+      Save from selected files
+    </button>
+    &nbsp;
+    <button
+      class="btn btn-sm btn-success"
+      (click)="runWorkflowPlan()"
+      title="Run workflow"
+      [disabled]="!isRunnable"
+    >
+      Run workflow
+    </button>
+
+    <br />
+    <br />
+
     <!-- workflow plan details -->
     <div *ngIf="selectedWorkflowPlan != null">
       <h3 class="panel-title">{{ selectedWorkflowPlan.name }}</h3>
@@ -95,22 +98,14 @@
             <td class="lighter">{{ workflowJob.toolName }}</td>
             <td width="100%"></td>
           </tr>
-          <!-- <tr>
-          <td class="lighter">Notes:</td>
-          <td width="100%">
-            <p class="mb-1" *ngFor="let line of session.notes?.split( '\n') ">
-              {{line}}
-            </p>
-          </td>
-        </tr> -->
         </table>
       </div>
     </div>
     <!-- workflow run details -->
     <div *ngIf="selectedWorkflowRun != null">
       <h3 class="panel-title">
-        {{ selectedWorkflowRun.name }} {{ selectedWorkflowRun.state }}
-        <span *ngIf="selectedWorkflowRun.stateDetail">({{ selectedWorkflowRun.stateDetail }})</span>
+        {{ selectedWorkflowRun.name }} ({{ countsOfSelectedWorkflowRun }} jobs
+        completed)
       </h3>
       <div class="border p-3" style="background-color: white;">
         <table class="table table-sm text-sm">
@@ -132,9 +127,9 @@
               {{ selectedWorkflowRun.createdBy }}
             </td>
           </tr>
-          <tr *ngFor="let workflowJob of selectedWorkflowRun.workflowJobs">
+          <tr *ngFor="let workflowJob of jobsOfSelectedWorkflowRun">
             <td class="lighter">{{ workflowJob.toolName }}</td>
-            <td width="100%">{{ getJob(workflowJob.jobId).state }}</td>
+            <td width="100%">{{ workflowJob.state }}</td>
           </tr>
         </table>
       </div>

@@ -364,6 +364,8 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
       if (link.name) {
         // link target, nothing to do
+      } else if (href == null) {
+        // no href
       } else if (ManualUtils.isAbsoluteUrl(href)) {
         // open absolute links in a new tab
         link.target = "_blank";
