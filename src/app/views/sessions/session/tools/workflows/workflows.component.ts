@@ -10,6 +10,7 @@ import {
   WorkflowPlan,
   WorkflowRun
 } from "chipster-js-common";
+import * as _ from "lodash";
 import log from "loglevel";
 import { combineLatest, Observable, Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
@@ -47,6 +48,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   selectedWorkflowRun: WorkflowRun;
   isRunnable = false;
   jobsOfSelectedWorkflowRun: Job[];
+  countsOfSelectedWorkflowRun: string;
 
   finishedStates = new Set<JobState>([
     JobState.Cancelled,
@@ -59,7 +61,6 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   ]);
 
   private unsubscribe: Subject<null> = new Subject();
-  countsOfSelectedWorkflowRun: string;
 
   constructor(
     public settingsService: SettingsService,
@@ -72,8 +73,8 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.workflowPlans = Array.from(this.sessionData.workflowPlansMap.values());
-    this.workflowRuns = Array.from(this.sessionData.workflowRunsMap.values());
+    this.updateWorkflowPlans();
+    this.updateWorkflowRuns();
 
     this.store
       .select("selectedDatasets")
@@ -102,14 +103,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         () => {
-          this.workflowPlans = Array.from(
-            this.sessionData.workflowPlansMap.values()
-          );
-          if (this.selectedWorkflowPlan != null) {
-            this.selectedWorkflowPlan = this.sessionData.workflowPlansMap.get(
-              this.selectedWorkflowPlan.workflowPlanId
-            );
-          }
+          this.updateWorkflowPlans();
         },
         err => this.errorService.showError("workflow plan event error", err)
       );
@@ -119,14 +113,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         () => {
-          this.workflowRuns = Array.from(
-            this.sessionData.workflowRunsMap.values()
-          );
-          if (this.selectedWorkflowRun != null) {
-            this.selectedWorkflowRun = this.sessionData.workflowRunsMap.get(
-              this.selectedWorkflowRun.workflowRunId
-            );
-          }
+          this.updateWorkflowRuns();
         },
         err => this.errorService.showError("workflow run event error", err)
       );
@@ -172,13 +159,16 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   }
 
   selectWorkflowPlan(plan: WorkflowPlan): void {
-    this.selectedWorkflowRun$.next(null);
     this.selectedWorkflowPlan$.next(plan);
   }
 
   selectWorkflowRun(run: WorkflowRun): void {
-    this.selectedWorkflowRun$.next(run);
-    this.selectedWorkflowPlan$.next(null);
+    // the list behaves like an accordion component: first click opens the details, second closes
+    if (this.selectedWorkflowRun === run) {
+      this.selectedWorkflowRun$.next(null);
+    } else {
+      this.selectedWorkflowRun$.next(run);
+    }
   }
 
   bindInputs(plan: WorkflowPlan, datasets: Dataset[]): boolean {
@@ -238,26 +228,27 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     }
   }
 
-  getJobForView(jobId: string): Job {
-    let job = this.sessionData.jobsMap.get(jobId);
-    if (!job) {
-      job = new Job();
-
-      if (this.finishedStates.has(this.selectedWorkflowRun.state)) {
-        job.state = JobState.Cancelled;
-      } else {
-        job.state = JobState.Waiting;
-      }
-    }
-    return job;
-  }
-
   updateWorkflowRunJobs(): void {
     if (this.selectedWorkflowRun == null) {
       this.jobsOfSelectedWorkflowRun = [];
     } else {
       this.jobsOfSelectedWorkflowRun = this.selectedWorkflowRun.workflowJobs.map(
-        j => this.getJobForView(j.jobId)
+        workflowJob => {
+          if (workflowJob.jobId) {
+            return this.sessionData.jobsMap.get(workflowJob.jobId);
+          } else {
+            // this workflow job isn't started yet, create fake job to represent it
+            const job = new Job();
+            job.toolName = workflowJob.toolName;
+
+            if (this.finishedStates.has(this.selectedWorkflowRun.state)) {
+              job.state = JobState.Cancelled;
+            } else {
+              job.state = JobState.Waiting;
+            }
+            return job;
+          }
+        }
       );
 
       const completedCount = this.jobsOfSelectedWorkflowRun.filter(
@@ -266,6 +257,32 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       const totalCount = this.jobsOfSelectedWorkflowRun.length;
 
       this.countsOfSelectedWorkflowRun = completedCount + "/" + totalCount;
+    }
+  }
+
+  updateWorkflowPlans(): void {
+    this.workflowPlans = _.sortBy(
+      Array.from(this.sessionData.workflowPlansMap.values()),
+      "created"
+    );
+
+    if (this.selectedWorkflowPlan != null) {
+      this.selectedWorkflowPlan = this.sessionData.workflowPlansMap.get(
+        this.selectedWorkflowPlan.workflowPlanId
+      );
+    }
+  }
+
+  updateWorkflowRuns(): void {
+    this.workflowRuns = _.sortBy(
+      Array.from(this.sessionData.workflowRunsMap.values()),
+      "created"
+    );
+
+    if (this.selectedWorkflowRun != null) {
+      this.selectedWorkflowRun = this.sessionData.workflowRunsMap.get(
+        this.selectedWorkflowRun.workflowRunId
+      );
     }
   }
 
@@ -281,7 +298,10 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       );
   }
 
-  deleteWorkflowPlan(plan: WorkflowPlan): void {
+  deleteWorkflowPlan(plan: WorkflowPlan, event: MouseEvent): void {
+    // dont't select
+    event.stopImmediatePropagation();
+
     if (this.selectedWorkflowPlan === plan) {
       this.selectedWorkflowPlan = null;
     }
@@ -292,7 +312,10 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       );
   }
 
-  deleteWorkflowRun(run: WorkflowRun): void {
+  deleteWorkflowRun(run: WorkflowRun, event: MouseEvent): void {
+    // dont't select
+    event.stopImmediatePropagation();
+
     if (this.selectedWorkflowRun === run) {
       this.selectedWorkflowRun = null;
     }

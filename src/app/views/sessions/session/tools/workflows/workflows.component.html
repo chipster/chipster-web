@@ -1,10 +1,13 @@
 <!-- Workflow tab -->
 <div class="row">
+  <!-- saved workflows list -->
   <div class="col col-left">
     <h4 class="h4-xs lighter">Saved workflows</h4>
   </div>
   <div class="col col-middle">
-    <h4 class="h4-xs lighter">Running workflows</h4>
+    <h4 *ngIf="selectedWorkflowPlan != null" class="h4-xs lighter">
+      {{ selectedWorkflowPlan.name }}
+    </h4>
   </div>
   <div class="col col-right"></div>
 </div>
@@ -12,126 +15,164 @@
 <div class="row">
   <!-- saved workflows list -->
   <div class="col col-left">
-    <div class="list-group-sm">
-      <button
-        type="button"
-        class="list-group-item list-group-item-action tool-list-item"
-        [ngClass]="{
-          active: plan === selectedWorkflowPlan,
-          compact: settingsService.compactToolList$.getValue()
-        }"
-        (click)="selectWorkflowPlan(plan)"
-        *ngFor="let plan of workflowPlans"
-      >
-        <ch-tool-list-item [categoryname]="plan.name"> </ch-tool-list-item>
-        <span class="" (click)="deleteWorkflowPlan(plan)">
-          &times;
-        </span>
-      </button>
+    <div class="row">
+      <div class="col plan-scroll-viewport scroll-viewport">
+        <div class="list-group-sm scroll-content">
+          <button
+            type="button"
+            class="list-group-item list-group-item-action tool-list-item"
+            [ngClass]="{
+              active: plan === selectedWorkflowPlan,
+              compact: settingsService.compactToolList$.getValue()
+            }"
+            (click)="selectWorkflowPlan(plan)"
+            *ngFor="let plan of workflowPlans"
+          >
+            <ch-tool-list-item [categoryname]="plan.name"> </ch-tool-list-item>
+            <span
+              class="list-item-delete"
+              (click)="deleteWorkflowPlan(plan, $event)"
+            >
+              &times;
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <button
+          class="btn btn-sm btn-outline-secondary save-button mt-3"
+          (click)="saveWorkflowDialog()"
+          title="Save workflow"
+          [disabled]="selectedDatasets.length === 0"
+        >
+          Save from selected files
+        </button>
+      </div>
     </div>
   </div>
+  <!-- workflow plan details -->
   <div class="col col-middle">
-    <div class="list-group-sm">
-      <button
-        type="button"
-        class="list-group-item list-group-item-action tool-list-item"
-        [ngClass]="{
-          active: run === selectedWorkflowRun,
-          compact: settingsService.compactToolList$.getValue()
-        }"
-        (click)="selectWorkflowRun(run)"
-        *ngFor="let run of workflowRuns"
-      >
-        <ch-tool-list-item
-          [categoryname]="run.name + ' ' + run.state"
-        ></ch-tool-list-item>
-        <span class="" (click)="deleteWorkflowRun(run)">
-          &times;
-        </span>
-      </button>
+    <div class="row">
+      <div class="col plan-details-viewport scroll-viewport">
+        <div
+          *ngIf="selectedWorkflowPlan != null"
+          class="border p-3 plan-details scroll-content"
+        >
+          <table class="table table-sm text-sm">
+            <tr>
+              <td class="lighter">Created:</td>
+              <td width="100%">
+                {{ selectedWorkflowPlan.created | localDate }}
+              </td>
+            </tr>
+            <!-- <tr>
+              <td class="lighter">Original duration:</td>
+              <td width="100%">
+                {{ selectedWorkflowPlan.originalDuration }}
+              </td>
+            </tr> -->
+            <tr *ngFor="let workflowJob of selectedWorkflowPlan.workflowJobs">
+              <td colspan="2" class="lighter">{{ workflowJob.toolName }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
   <div class="col col-right">
-    <button
-      class="btn btn-sm btn-outline-secondary"
-      (click)="saveWorkflowDialog()"
-      title="Save workflow"
-      [disabled]="selectedDatasets.length === 0"
-    >
-      Save from selected files
-    </button>
-    &nbsp;
-    <button
-      class="btn btn-sm btn-success"
-      (click)="runWorkflowPlan()"
-      title="Run workflow"
-      [disabled]="!isRunnable"
-    >
-      Run workflow
-    </button>
-
-    <br />
-    <br />
-
-    <!-- workflow plan details -->
-    <div *ngIf="selectedWorkflowPlan != null">
-      <h3 class="panel-title">{{ selectedWorkflowPlan.name }}</h3>
-      <div class="border p-3" style="background-color: white;">
-        <table class="table table-sm text-sm">
-          <tr>
-            <td class="lighter">Created:</td>
-            <td width="100%">
-              {{ selectedWorkflowPlan.created | localDate }}
-            </td>
-          </tr>
-          <tr>
-            <td class="lighter">Original duration:</td>
-            <td width="100%">
-              {{ selectedWorkflowPlan.originalDuration }}
-            </td>
-          </tr>
-          <tr>
-            <td class="lighter">Tools:</td>
-          </tr>
-          <tr *ngFor="let workflowJob of selectedWorkflowPlan.workflowJobs">
-            <td class="lighter"></td>
-            <td class="lighter">{{ workflowJob.toolName }}</td>
-            <td width="100%"></td>
-          </tr>
-        </table>
+    <div class="row">
+      <div class="col">
+        <button
+          class="btn btn-sm btn-success run-button"
+          (click)="runWorkflowPlan()"
+          title="Run workflow"
+          [disabled]="!isRunnable"
+        >
+          Run workflow
+        </button>
       </div>
     </div>
-    <!-- workflow run details -->
-    <div *ngIf="selectedWorkflowRun != null">
-      <h3 class="panel-title">
-        {{ selectedWorkflowRun.name }} ({{ countsOfSelectedWorkflowRun }} jobs
-        completed)
-      </h3>
-      <div class="border p-3" style="background-color: white;">
-        <table class="table table-sm text-sm">
-          <tr>
-            <td class="lighter">Start time:</td>
-            <td width="100%">
-              {{ selectedWorkflowRun.created | localDate }}
-            </td>
-          </tr>
-          <tr>
-            <td class="lighter">End time:</td>
-            <td width="100%">
-              {{ selectedWorkflowRun.endTime | localDate }}
-            </td>
-          </tr>
-          <tr>
-            <td class="lighter">Username:</td>
-            <td width="100%">
-              {{ selectedWorkflowRun.createdBy }}
-            </td>
-          </tr>
-          <tr *ngFor="let workflowJob of jobsOfSelectedWorkflowRun">
-            <td class="lighter">{{ workflowJob.toolName }}</td>
-            <td width="100%">{{ workflowJob.state }}</td>
-          </tr>
-        </table>
+    <div class="row">
+      <div class="col run-list-viewport scroll-viewport mt-3">
+        <!-- running worklfows -->
+        <div class="list-group-sm scroll-content">
+          <div
+            *ngFor="let run of workflowRuns"
+            class="list-group-item run-list-div"
+          >
+            <button
+              type="button"
+              class="list-group-item-action tool-list-item run-list-button"
+              [ngClass]="{
+                active: run === selectedWorkflowRun,
+                compact: settingsService.compactToolList$.getValue()
+              }"
+              (click)="selectWorkflowRun(run)"
+            >
+              <i
+                *ngIf="
+                  selectedWorkflowRun != null && selectedWorkflowRun === run
+                "
+                class="fas fa-caret-down accordion-caret"
+              ></i>
+              <i
+                *ngIf="
+                  !(selectedWorkflowRun != null && selectedWorkflowRun === run)
+                "
+                class="fas fa-caret-right accordion-caret"
+              ></i>
+              <ch-tool-list-item
+                [categoryname]="run.name + ' ' + run.state"
+              ></ch-tool-list-item>
+              <span
+                class="list-item-delete"
+                (click)="deleteWorkflowRun(run, $event)"
+              >
+                &times;
+              </span>
+            </button>
+            <!-- workflow run details -->
+            <div
+              *ngIf="selectedWorkflowRun != null && selectedWorkflowRun === run"
+            >
+              <div class="border p-3" style="background-color: white;">
+                <table class="table table-sm text-sm">
+                  <tr>
+                    <td class="lighter">Jobs completed:</td>
+                    <td>
+                      {{ countsOfSelectedWorkflowRun }}
+                    </td>
+                  </tr>
+                  <tr></tr>
+                  <tr>
+                    <td class="lighter">Start time:</td>
+                    <td>
+                      {{ selectedWorkflowRun.created | localDate }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lighter">End time:</td>
+                    <td>
+                      {{ selectedWorkflowRun.endTime | localDate }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lighter">Username:</td>
+                    <td>
+                      {{ selectedWorkflowRun.createdBy }}
+                    </td>
+                  </tr>
+                  <tr *ngFor="let workflowJob of jobsOfSelectedWorkflowRun">
+                    <td class="lighter">{{ workflowJob.toolName }}</td>
+                    <td>{{ workflowJob.state }}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
