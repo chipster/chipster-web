@@ -12,11 +12,11 @@
     <tbody>
       <tr *ngFor="let service of services">
         <th scope="row">{{service.role}}</th>
-        <td>{{this.aliveMap.get(service.role)}}</td>
+        <td>{{this.aliveMap.get(service)}}</td>
         <td>
-          <span *ngIf="getStatusString(service).length > 10" placement="right"
-                  ngbPopover="{{getStatusString(service)}}" popoverTitle="{{service.role}}" triggers="mouseenter:mouseleave">
-            {{getStatusCount(service)}} values
+          <span *ngIf="getStatusString(service).length > 10" placement="right" ngbPopover="{{getStatusString(service)}}"
+            popoverTitle="{{service.role}}" triggers="mouseenter:mouseleave">
+            {{getStatusValuesCount(service)}} values
           </span>
           <!-- show http error codes directly -->
           <span *ngIf="getStatusString(service).length <= 10">
