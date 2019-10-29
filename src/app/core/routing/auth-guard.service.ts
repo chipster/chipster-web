@@ -27,6 +27,13 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
+    log.info("aut guard", this.tokenService.getAccountName());
+
+    if (this.tokenService.getAccountName() !== "demo") {
+      this.routeService.navigateAbsolute("/home");
+      return of(false);
+    }
+
     if (this.tokenService.isTokenValid()) {
       // All these must come from the primary configuration (chipster.yaml) so that
       // the route change can continue. We can't use the final configuraton here, because
