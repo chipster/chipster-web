@@ -36,6 +36,16 @@
         </div>
 
         <div class="panel-body">
+          <p>
+            The service is temporarily unavailable due to storage maintenance.
+          </p>
+        </div>
+
+        <!-- <div class="panel-body">
+
+          <p>
+            The service is temporarily unavailable due to storage maintenance.
+          </p>
           <p *ngIf="tokenHasExpired()">
             <i>Login expired, please log in again.</i>
           </p>
@@ -50,15 +60,13 @@
         </div>
 
         <ng-template #alreadyLoggedIn>
+
           <p>
-            The service is temporarily unavailable due to storage maintenance.
-          </p>
-          <!-- <p>
             You are logged in as <strong>{{ getAccountName() }}</strong>. Go to <a
               [routerLink]="routerLinkAnalyze">Analyze</a> or
             <a [routerLink]="routerLinkSessions">Sessions</a> to continue.
-          </p> -->
-        </ng-template>
+          </p>
+        </ng-template> -->
       </div>
     </div>
   </div>
