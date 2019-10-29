@@ -29,7 +29,10 @@ export class AuthGuard implements CanActivate {
   ): Observable<boolean> {
     log.info("aut guard", this.tokenService.getAccountName());
 
-    if (this.tokenService.getAccountName() !== "demo") {
+    if (
+      this.tokenService.getAccountName() !== "demo" &&
+      this.tokenService.getAccountName() !== "admin"
+    ) {
       this.routeService.navigateAbsolute("/home");
       return of(false);
     }
