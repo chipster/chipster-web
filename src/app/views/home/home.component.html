@@ -35,14 +35,14 @@
           <h3>Get started</h3>
         </div>
 
-        <div class="panel-body">
+        <!-- Service break noticification (see also a redirection in AuthGuard) -->
+        <!-- <div class="panel-body">
           <p>
             The service is temporarily unavailable due to storage maintenance.
           </p>
-        </div>
+        </div> -->
 
-        <!-- <div class="panel-body">
-
+        <div class="panel-body">
           <p>
             The service is temporarily unavailable due to storage maintenance.
           </p>
@@ -60,13 +60,12 @@
         </div>
 
         <ng-template #alreadyLoggedIn>
-
           <p>
-            You are logged in as <strong>{{ getAccountName() }}</strong>. Go to <a
-              [routerLink]="routerLinkAnalyze">Analyze</a> or
+            You are logged in as <strong>{{ getAccountName() }}</strong
+            >. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a> or
             <a [routerLink]="routerLinkSessions">Sessions</a> to continue.
           </p>
-        </ng-template> -->
+        </ng-template>
       </div>
     </div>
   </div>
