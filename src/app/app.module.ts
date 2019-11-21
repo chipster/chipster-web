@@ -20,13 +20,7 @@ import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
-import {
-  selectedTool,
-  selectedToolWithInputs,
-  selectedToolWithPopulatedParams,
-  selectedToolWithValidatedInputs,
-  validatedTool
-} from "./state/tool.reducer";
+import { selectedTool, selectedToolWithInputs, selectedToolWithPopulatedParams, selectedToolWithValidatedInputs, validatedTool } from "./state/tool.reducer";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";

@@ -1,7 +1,7 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
-import { Tool, JobParameter } from "chipster-js-common";
-import { ToolService } from "../../tools/tool.service";
+import { Component, Input, OnChanges } from "@angular/core";
+import { JobParameter, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import { ToolService } from "../../tools/tool.service";
 
 @Component({
   selector: "ch-dataset-parameter-list",
@@ -25,7 +25,7 @@ export class DatasetParameterListComponent implements OnChanges {
   parameterListForView: Array<JobParameter> = [];
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
-  constructor(private toolService: ToolService) {}
+  constructor(private toolService: ToolService) { }
 
   ngOnChanges(changes: any) {
     let parameters = null;
@@ -68,7 +68,7 @@ export class DatasetParameterListComponent implements OnChanges {
     this.udpateLimits();
   }
 
-  showWithTool(parameters: JobParameter[], tool: Tool) {
+  showWithTool(parameters: JobParameter[], tool: Tool): void {
     this.isDefaultValueMap = new Map();
     parameters.forEach(jobParameter => {
       const clone = _.clone(jobParameter);
@@ -96,9 +96,9 @@ export class DatasetParameterListComponent implements OnChanges {
             } else {
               console.warn(
                 "job parameter value" +
-                  jobParameter.value +
-                  "not found from the current tool " +
-                  "paramater options, showing the id"
+                jobParameter.value +
+                "not found from the current tool " +
+                "paramater options, showing the id"
               );
             }
           }

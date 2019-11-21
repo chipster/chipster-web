@@ -9,10 +9,16 @@
       </span> to see all the rows. </span></label>
   <label style="font-size: smaller;" *ngIf="fullFileVisible && !showingTruncated">showing {{lineCount}} rows of
     {{totalRowCount}} rows</label>
-  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
+  <button class="btn-link" *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</button>
 
 </div>
-
+<div>
+  <select id="selectOption" style="width: auto; margin-top: 16px;">
+    <option>Single selection</option>
+    <option>Range selection</option>
+    <option selected="selected">Multiple selection</option>
+  </select>
+</div>
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
 
 <!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->

@@ -15595,6 +15595,7 @@ function Core(rootElement, userSettings) {
         }
 
         if (selectionChanged) {
+          console.log("the selction mode has changed");
           instance.selectCell(fromRow, fromCol, toRow, toCol);
         }
       }
@@ -16016,7 +16017,7 @@ function Core(rootElement, userSettings) {
       var isMultiple = !(priv.selRange.to.col === priv.selRange.from.col && priv.selRange.to.row === priv.selRange.from.row),
           modifier = instance.runHooks('afterIsMultipleSelection', isMultiple);
 
-      if (isMultiple) {
+      if (isMultiple) 
         return modifier;
       }
     },

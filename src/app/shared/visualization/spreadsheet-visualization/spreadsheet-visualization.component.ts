@@ -1,30 +1,19 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  NgZone,
-  OnChanges,
-  OnDestroy,
-  ViewChild
-} from "@angular/core";
+import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, ViewChild } from "@angular/core";
 import { Response } from "@angular/http";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { LoadState, State } from "../../../../../model/loadstate";
-import { SessionData } from "../../../../../model/session/session-data";
-import TSVFile from "../../../../../model/tsv/TSVFile";
-import { FileResource } from "../../../../../shared/resources/fileresource";
-import { NativeElementService } from "../../../../../shared/services/native-element.service";
-import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
-import {
-  Tags,
-  TypeTagService
-} from "../../../../../shared/services/typetag.service";
-import { SessionDataService } from "../../session-data.service";
-import { VisualizationModalService } from "../visualizationmodal.service";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../model/loadstate";
+import { SessionData } from "../../../model/session/session-data";
+import TSVFile from "../../../model/tsv/TSVFile";
+import { FileResource } from "../../../shared/resources/fileresource";
+import { SpreadsheetService } from "../../../shared/services/spreadsheet.service";
+import { Tags, TypeTagService } from "../../../shared/services/typetag.service";
+import { SessionDataService } from "../../../views/sessions/session/session-data.service";
+import { VisualizationModalService } from "../../../views/sessions/session/visualization/visualizationmodal.service";
+import { NativeElementService } from "../../services/native-element.service";
 
 @Component({
   selector: "ch-spreadsheet-visualization",
@@ -64,6 +53,7 @@ export class SpreadsheetVisualizationComponent
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
+  public selectOption;
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
@@ -77,7 +67,7 @@ export class SpreadsheetVisualizationComponent
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService
-  ) {}
+  ) { }
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -199,6 +189,7 @@ export class SpreadsheetVisualizationComponent
           }
 
           const container = document.getElementById(this.tableContainerId);
+          this.selectOption = document.getElementById('selectOption');
 
           this.zone.runOutsideAngular(() => {
             // if the visualization isn't removed already
@@ -207,15 +198,32 @@ export class SpreadsheetVisualizationComponent
                 container,
                 this.getSettings(headers, content, container)
               );
+              console.log(this.hot);
+              this.selectOption.addEventListener('change', function (event) {
+                const value = event.target.value;
+                const first = value.split(' ')[0].toLowerCase();
+                console.log("selection changed");
+                if (this.hot) {
+                  this.hot.updateSettings({
+                    selectionMode: first
+                  });
+                }
+              });
             }
+
+
           });
           this.state = new LoadState(State.Ready);
+
+
         },
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
         }
       );
+
+
   }
 
   ngAfterViewInit() {
@@ -272,7 +280,8 @@ export class SpreadsheetVisualizationComponent
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
       width: tableWidth,
-      wordWrap: false
+      wordWrap: false,
+      selectionMode: 'multiple',
     };
   }
 }

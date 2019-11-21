@@ -1,13 +1,14 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Dataset, Job, JobParameter } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
-import { Job, JobParameter, Dataset } from "chipster-js-common";
 
 @Component({
   selector: "ch-datasethistorymodal",
   templateUrl: "./datasethistorymodal.component.html",
   styleUrls: ["./datasethistorymodal.component.less"]
 })
+
 export class DatasetHistorymodalComponent implements OnInit {
   @Input("dataset") dataset: Dataset;
   @Input("sessionData") sessionData: SessionData;
@@ -34,7 +35,7 @@ export class DatasetHistorymodalComponent implements OnInit {
   stepCount: number;
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
 
-  constructor(public activeModal: NgbActiveModal) {}
+  constructor(public activeModal: NgbActiveModal) { }
 
   ngOnInit(): void {
     this.stepCount = 0;
@@ -100,3 +101,5 @@ export class DatasetHistoryStep {
   inputFileName: string;
   sourceCode: string;
 }
+
+
