@@ -75,8 +75,8 @@ export class TokenService {
    *
    */
   getAccountName(): string {
-    return this.name;
-    // return TokenService.getUsernameFromUserId(this.getUsername());
+    // return this.name;
+    return TokenService.getUsernameFromUserId(this.getUsername());
   }
 
   getName(): string {
@@ -94,7 +94,6 @@ export class TokenService {
   setAuthToken(token: string): void {
     if (token != null) {
       const parsedToken = jwt_decode(token);
-      console.log(parsedToken);
       const expString = parsedToken.exp;
       const expSeconds = parseInt(expString, 10);
       const exp = new Date(expSeconds * 1000);
