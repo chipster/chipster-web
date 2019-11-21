@@ -4,25 +4,14 @@ import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
 import { forkJoin, of, Subject } from "rxjs";
 import { tap } from "rxjs/internal/operators/tap";
-import {
-  debounceTime,
-  filter,
-  finalize,
-  flatMap,
-  map,
-  mergeMap,
-  takeUntil
-} from "rxjs/operators";
+import { debounceTime, filter, finalize, flatMap, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../model/session/session-data";
 import { SessionResource } from "../../shared/resources/session.resource";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
-import {
-  SessionListMode,
-  SettingsService
-} from "../../shared/services/settings.service";
+import { SessionListMode, SettingsService } from "../../shared/services/settings.service";
 import { ToolsService } from "../../shared/services/tools.service";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session/session-data.service";
@@ -77,7 +66,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private tokenService: TokenService,
     private settingsService: SettingsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // subscribe to mode change
@@ -140,7 +129,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         finalize(() => (this.workflowPreviewLoading = false))
       )
       .subscribe(
-        () => {},
+        () => { },
         (error: any) => {
           this.workflowPreviewFailed = true;
           this.restErrorService.showError(
@@ -536,9 +525,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
     if (!userId) {
       return "Your sessions";
     } else if (userId === this.exampleSessionOwnerUserId) {
-      return "Example session";
+      return "Example sessions";
     } else if (userId === this.trainingSessionOwnerUserId) {
-      return "Training Session";
+      return "Training Sessions";
     } else {
       return "Shared to you by ";
     }
