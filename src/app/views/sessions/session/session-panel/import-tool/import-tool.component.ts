@@ -24,8 +24,8 @@ export class ImportToolComponent implements OnInit {
   ngOnInit() {
     // need to get this from header row of the tsv file
     this.dropdownList = [
-      {"id" : 1, "itemName": "identifier"},
-      {"id": 2, "itemName": "sample"}
+      { "id": 1, "itemName": "identifier" },
+      { "id": 2, "itemName": "sample" }
     ];
 
     this.selectedItems = [];
