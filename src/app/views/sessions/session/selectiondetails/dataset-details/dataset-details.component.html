@@ -1,0 +1,5 @@
+<div ng-if="SelectionService.selectedDatasets.length > 0">
+  <span class="h6" *ngFor="let dataset of selectionService.selectedDatasets">
+    {{dataset.name}}
+  </span>
+</div>

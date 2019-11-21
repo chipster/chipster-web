@@ -1,10 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  Router,
-  RouterStateSnapshot
-} from "@angular/router";
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -27,6 +22,17 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
+    log.info("aut guard", this.tokenService.getAccountName());
+
+    // redirect to home during service breaks
+    // if (
+    //   this.tokenService.getAccountName() !== "demo" &&
+    //   this.tokenService.getAccountName() !== "admin"
+    // ) {
+    //   this.routeService.navigateAbsolute("/home");
+    //   return of(false);
+    // }
+
     if (this.tokenService.isTokenValid()) {
       // All these must come from the primary configuration (chipster.yaml) so that
       // the route change can continue. We can't use the final configuraton here, because
