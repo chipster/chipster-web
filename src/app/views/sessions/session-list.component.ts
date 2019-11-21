@@ -527,7 +527,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     } else if (userId === this.exampleSessionOwnerUserId) {
       return "Example sessions";
     } else if (userId === this.trainingSessionOwnerUserId) {
-      return "Training Sessions";
+      return "Training sessions";
     } else {
       return "Shared to you by ";
     }
