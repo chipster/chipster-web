@@ -301,6 +301,19 @@ export class SessionResource {
     );
   }
 
+  createWorkflowPlans(sessionId: string, plans: WorkflowPlan[]): Observable<WorkflowPlan[]> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(
+          `${url}/sessions/${sessionId}/workflows/plans/array`,
+          plans,
+          this.tokenService.getTokenParams(true)
+        )
+      ),
+      map((response: {}) => response["plans"])
+    );
+  }
+
   getSession(sessionId: string, preview = false): Observable<Session> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) => {
@@ -514,6 +527,21 @@ export class SessionResource {
       );
   }
 
+  updateWorkflowRun(sessionId: string, run: WorkflowRun): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.put(
+              `${url}/sessions/${sessionId}/workflows/runs/${run.workflowRunId}`,
+              run,
+              this.tokenService.getTokenParams(true)
+            ) as Observable<null>
+        )
+      );
+  }
+
   deleteSession(sessionId: string): Observable<null> {
     return this.configService
       .getSessionDbUrl()
@@ -583,6 +611,7 @@ export class SessionResource {
         )
       );
   }
+
   deleteWorkflowPlan(
     sessionId: string,
     workflowPlanId: string
@@ -657,6 +686,23 @@ export class SessionResource {
         // see the comment of the forkJoin above
         return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
       }),
+      mergeMap(() => {
+        const createRequests: Array<Observable<{}>> = [];
+
+        // create jobs
+        const oldPlans = Array.from(sessionData.workflowPlansMap.values());
+        const copies = oldPlans.map((old: WorkflowPlan) => {
+          const copy = _.clone(old);
+          copy.sessionId = null;
+          return copy;
+        });
+
+        const request = this.createWorkflowPlans(createdSessionId, copies);
+        createRequests.push(request);
+
+        // see the comment of the forkJoin above
+        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
+      }),      
       mergeMap(() => this.getSession(createdSessionId)),
       mergeMap(session => {
         log.info("session copied, current state", session.state, temporary);

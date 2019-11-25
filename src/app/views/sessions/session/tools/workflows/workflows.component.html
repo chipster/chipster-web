@@ -128,7 +128,7 @@
               ></ch-tool-list-item>
               <span
                 class="list-item-delete"
-                (click)="deleteWorkflowRun(run, $event)"
+                (click)="cancelWorkflowRun(run, $event)"
               >
                 &times;
               </span>
@@ -140,12 +140,17 @@
               <div class="border p-3" style="background-color: white;">
                 <table class="table table-sm text-sm">
                   <tr>
+                    <td class="lighter">{{selectedWorkflowRun.state}}:</td>
+                    <td>
+                      {{selectedWorkflowRun.stateDetail}}
+                    </td>
+                  </tr>
+                  <tr>
                     <td class="lighter">Jobs completed:</td>
                     <td>
                       {{ countsOfSelectedWorkflowRun }}
                     </td>
                   </tr>
-                  <tr></tr>
                   <tr>
                     <td class="lighter">Start time:</td>
                     <td>

@@ -26,6 +26,8 @@ import { SettingsService } from "../../../../../shared/services/settings.service
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
+import { WorkflowState } from "chipster-js-common/lib/model/workflow-run";
+import { TokenService } from "../../../../../core/authentication/token.service";
 
 @Component({
   selector: "ch-workflows",
@@ -50,14 +52,11 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
   jobsOfSelectedWorkflowRun: Job[];
   countsOfSelectedWorkflowRun: string;
 
-  finishedStates = new Set<JobState>([
-    JobState.Cancelled,
-    JobState.Completed,
-    JobState.Error,
-    JobState.ExpiredWaiting,
-    JobState.Failed,
-    JobState.FailedUserError,
-    JobState.Timeout
+  finishedStates = new Set<WorkflowState>([
+    WorkflowState.Cancelled,
+    WorkflowState.Completed,
+    WorkflowState.Error,
+    WorkflowState.Failed,
   ]);
 
   private unsubscribe: Subject<null> = new Subject();
@@ -69,7 +68,8 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
     private store: Store<{}>,
     private dialogModalService: DialogModalService,
     private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit(): void {
@@ -288,7 +288,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
 
   runWorkflowPlan(): void {
     const run = new WorkflowRun();
-    run.state = JobState.New;
+    run.state = WorkflowState.New;
     run.name = this.selectedWorkflowPlan.name;
     run.workflowJobs = this.selectedWorkflowPlan.workflowJobs;
     this.sessionDataService
@@ -312,7 +312,7 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       );
   }
 
-  deleteWorkflowRun(run: WorkflowRun, event: MouseEvent): void {
+  cancelWorkflowRun(run: WorkflowRun, event: MouseEvent): void {
     // dont't select
     event.stopImmediatePropagation();
 
@@ -320,11 +320,22 @@ export class WorkflowsComponent implements OnInit, OnDestroy {
       this.selectedWorkflowRun = null;
     }
 
-    this.sessionDataService
-      .deleteWorkflowRun(run)
-      .subscribe(null, err =>
-        this.restErrorService.showError("delete workflow run error", err)
-      );
+    if (this.finishedStates.has(run.state) || run.state === WorkflowState.Cancelling) {
+      this.sessionDataService
+        .deleteWorkflowRun(run)
+        .subscribe(null, err =>
+          this.restErrorService.showError("delete workflow run error", err)
+        );
+    } else {
+      const runCopy = Object.assign({}, run);
+      runCopy.state = WorkflowState.Cancelling;
+      runCopy.stateDetail = "cancelled by " + this.tokenService.getAccountName();
+      this.sessionDataService
+        .updateWorkflowRun(runCopy)
+        .subscribe(null, err =>
+          this.restErrorService.showError("cancel workflow run error", err)
+        );      
+    }
   }
 
   saveWorkflowDialog(): void {

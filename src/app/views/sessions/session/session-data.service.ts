@@ -194,6 +194,10 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
+  updateWorkflowRun(run: WorkflowRun): Observable<null> {
+    return this.sessionResource.updateWorkflowRun(this.getSessionId(), run);
+  }
+
   /**
    * Get a limited token for session
    *
