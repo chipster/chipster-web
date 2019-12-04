@@ -10,7 +10,14 @@
     "target": "es5",
     "downlevelIteration": true,
     "importHelpers": true,
-    "typeRoots": ["node_modules/@types"],
-    "lib": ["es2017", "dom", "es2015.collection", "es2015.iterable"]
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom",
+      "es2015.collection",
+      "es2015.iterable"
+    ],
   }
 }

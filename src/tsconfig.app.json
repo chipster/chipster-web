@@ -8,7 +8,12 @@
       "d3",
       "handsontable",
       "flowjs"
-    ]
+    ],
+    "paths": {
+      "jszip": [
+        "../node_modules/jszip/dist/jszip.min.js"
+      ]
+    }
   },
   "exclude": [
     "test.ts",

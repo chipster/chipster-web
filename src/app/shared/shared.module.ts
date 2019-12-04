@@ -34,6 +34,7 @@ import { TSVReader } from "./services/TSVReader";
 import { TypeTagService } from "./services/typetag.service";
 import { UserService } from "./services/user.service";
 import { WebSocketService } from "./services/websocket.service";
+import { SlickgridVisualizationComponent } from './visualization/slickgrid-visualization/slickgrid-visualization.component';
 import { SpreadsheetVisualizationComponent } from './visualization/spreadsheet-visualization/spreadsheet-visualization.component';
 
 /*
@@ -57,7 +58,8 @@ import { SpreadsheetVisualizationComponent } from './visualization/spreadsheet-v
     ToolSourceComponent,
     DummyRouteComponent,
     ActionToastComponent,
-    SpreadsheetVisualizationComponent
+    SpreadsheetVisualizationComponent,
+    SlickgridVisualizationComponent
   ],
   providers: [
     PipeService,
@@ -92,7 +94,8 @@ import { SpreadsheetVisualizationComponent } from './visualization/spreadsheet-v
     SettingsComponent,
     ToolSourceComponent,
     ActionToastComponent,
-    SpreadsheetVisualizationComponent
+    SpreadsheetVisualizationComponent,
+    SlickgridVisualizationComponent
   ],
   entryComponents: [ActionToastComponent, SettingsComponent]
 })
