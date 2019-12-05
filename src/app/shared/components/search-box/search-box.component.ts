@@ -29,7 +29,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   @Output()
   enterKey = new EventEmitter<void>();
 
-  @ViewChild("searchInput")
+  @ViewChild("searchInput", { static: true })
   searchInput;
 
   searchTerm: string;

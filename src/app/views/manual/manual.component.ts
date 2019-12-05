@@ -66,7 +66,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
 
   private currentPage;
 
-  @ViewChild("container", { read: ViewContainerRef })
+  @ViewChild("container", { read: ViewContainerRef, static: true })
   viewContainerReference;
 
   constructor(

@@ -14,7 +14,7 @@ export class BooleanModalComponent implements AfterViewInit {
   @Input()
   title: string;
 
-  @ViewChild("submitButton")
+  @ViewChild("submitButton", { static: true })
   submitButton;
 
   constructor(private activeModal: NgbActiveModal) {}

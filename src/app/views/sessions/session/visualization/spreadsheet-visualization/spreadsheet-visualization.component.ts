@@ -42,7 +42,7 @@ export class SpreadsheetVisualizationComponent
   @Input()
   divWidth: any;
 
-  @ViewChild("horizontalScroll") horizontalScrollDiv;
+  @ViewChild("horizontalScroll", { static: false }) horizontalScrollDiv;
 
   // takes ~100 ms with ADSL
   private fileSizeLimit = 100 * 1024;

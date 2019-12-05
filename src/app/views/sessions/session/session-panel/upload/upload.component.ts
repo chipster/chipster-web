@@ -21,8 +21,8 @@ export class UploadComponent implements AfterViewInit, OnInit {
   @Input() datasetsMap: Map<string, Dataset>;
   @Input() sessionId: string;
 
-  @ViewChild("uploadFilesButton") uploadFilesButton;
-  @ViewChild("uploadFolderButton") uploadFolderButton;
+  @ViewChild("uploadFilesButton", { static: true }) uploadFilesButton;
+  @ViewChild("uploadFolderButton", { static: true }) uploadFolderButton;
 
   private flow: any;
   private modalOpen = false;

@@ -29,10 +29,10 @@ export class LoginComponent implements OnInit {
   private returnUrl: string;
   public ssoLoginUrl: string;
 
-  @ViewChild("myForm")
+  @ViewChild("myForm", { static: false })
   private myForm: FormGroup;
 
-  @ViewChild("usernameInput")
+  @ViewChild("usernameInput", { static: false })
   private usernameInput: ElementRef;
   oidcConfigs: OidcConfig[];
 

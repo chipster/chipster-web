@@ -16,7 +16,7 @@ export class StringModalComponent implements AfterViewInit {
   @Input()
   placeHolder: string;
 
-  @ViewChild("valueInput")
+  @ViewChild("valueInput", { static: true })
   valueInput;
 
   constructor(private activeModal: NgbActiveModal) {}
