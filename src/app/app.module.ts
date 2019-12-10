@@ -5,6 +5,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { StoreModule } from "@ngrx/store";
+import { AngularSlickgridModule } from 'angular-slickgrid';
 import { HotkeyModule } from "angular2-hotkeys";
 import { ToastrModule } from "ngx-toastr";
 import { setAppInjector } from "./app-injector";
@@ -20,13 +21,7 @@ import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
-import {
-  selectedTool,
-  selectedToolWithInputs,
-  selectedToolWithPopulatedParams,
-  selectedToolWithValidatedInputs,
-  validatedTool
-} from "./state/tool.reducer";
+import { selectedTool, selectedToolWithInputs, selectedToolWithPopulatedParams, selectedToolWithValidatedInputs, validatedTool } from "./state/tool.reducer";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
@@ -69,6 +64,7 @@ import { TermsComponent } from "./views/terms/terms.component";
       toastComponent: ActionToastComponent
     }),
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
+    AngularSlickgridModule.forRoot(),
     AppRoutingModule // must be last because a wildcard route is defined here
   ],
   declarations: [

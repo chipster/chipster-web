@@ -1,0 +1,9 @@
+<p>
+  slickgrid-visualization works!
+</p>
+<angular-slickgrid gridId="grid2" [columnDefinitions]="columnDefinitions" [gridOptions]="gridOptions"
+  [dataset]="dataset" (onAngularGridCreated)="angularGridReady($event)"
+  (sgOnCellChange)="onCellChanged($event.detail.eventData, $event.detail.args)"
+  (sgOnClick)="onCellClicked($event.detail.eventData, $event.detail.args)"
+  (sgOnHeaderClick)="onHeaderClicked($event.detail.eventData, $event.detail.args)">
+</angular-slickgrid>
