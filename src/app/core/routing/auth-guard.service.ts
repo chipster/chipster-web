@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    log.info("aut guard", this.tokenService.getAccountName());
+    log.info("auth guard", this.tokenService.getAccountName());
 
     // redirect to home during service breaks
     // if (

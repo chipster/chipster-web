@@ -53,6 +53,7 @@ export class OidcService {
             filterProtocolClaims: true,
             loadUserInfo: false
           });
+          log.info("register oidc authentication " + oidc.oidcName);
           this.managers.set(oidc.oidcName, manager);
         });
       }),
@@ -78,16 +79,32 @@ export class OidcService {
         const extraQueryParams = {};
         if (oidcConfig.parameter) {
           const keyValues = oidcConfig.parameter.split(" ");
+          log.info("parse " + keyValues.length + " oidc parameters")
           keyValues.forEach(keyValue => {
+            if (keyValue == null) {
+              log.warn("cannot parse null parameter: " + keyValue);
+              return;
+            }
             const split = keyValue.split("=");
+            if (split.length != 2) {
+              log.warn("oidc parameter parsing failed: " + keyValue);
+              return;
+            }
             const key = split[0];
             const value = split[1];
             extraQueryParams[key] = value;
           });
+        } else {
+          log.info("no oidc parameter");
         }
 
         const manager = this.managers.get(oidcConfig.oidcName);
-        manager.signinRedirect({ extraQueryParams: extraQueryParams });
+        if (manager) {
+          manager.signinRedirect({ extraQueryParams: extraQueryParams });
+        } else {
+          log.error("oidc provider not found: " + oidcConfig.oidcName);
+          this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
+        }
       },
       err => this.restErrorService.showError("oidc config error", err)
     );
@@ -99,7 +116,7 @@ export class OidcService {
     localStorage.removeItem(this.keyReturnUrl);
     localStorage.removeItem(this.keyOidcName);
 
-    log.info("complete oidc login: returnUrl:", returnUrl, ", oidcName: ");
+    log.info("complete oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcName);
 
     // wait until managers are created
     this.oidcConfigs$
