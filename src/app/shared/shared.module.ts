@@ -2,6 +2,7 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { AngularSlickgridModule } from 'angular-slickgrid';
 import { CoreModule } from "../core/core.module";
 import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
@@ -41,7 +42,8 @@ import { SlickgridVisualizationComponent } from './visualization/slickgrid-visua
  */
 
 @NgModule({
-  imports: [CommonModule, CoreModule, FormsModule],
+  imports: [CommonModule, CoreModule, FormsModule,
+    AngularSlickgridModule],
   declarations: [
     BytesPipe,
     TrustedResourcePipe,
