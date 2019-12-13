@@ -94,13 +94,18 @@
               "node_modules/pileup/dist/pileup.js",
               "src/assets/lib/handsontable/handsontable.full.js",
               "node_modules/yamljs/dist/yaml.min.js",
-              "node_modules/d3-context-menu/js/d3-context-menu.js"
+              "node_modules/d3-context-menu/js/d3-context-menu.js",
+              "node_modules/jquery-ui-dist/jquery-ui.min.js",
+              "node_modules/slickgrid/lib/jquery.event.drag-2.3.0.js",
             ],
             "styles": [
-              "src/styles.less",
+              "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
-              "src/assets/lib/handsontable/handsontable.full.css"
+              "src/assets/lib/handsontable/handsontable.full.css",
+              "src/slickgrid-styles.scss",
+              "node_modules/flatpickr/dist/flatpickr.css",
+              "node_modules/angular-slickgrid/lib/multiple-select/multiple-select.css"
             ],
             "assets": [
               "src/assets"

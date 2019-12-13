@@ -43,7 +43,7 @@ import { SlickgridVisualizationComponent } from './visualization/slickgrid-visua
 
 @NgModule({
   imports: [CommonModule, CoreModule, FormsModule,
-    AngularSlickgridModule],
+    AngularSlickgridModule.forRoot()],
   declarations: [
     BytesPipe,
     TrustedResourcePipe,
