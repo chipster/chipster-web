@@ -755,7 +755,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       {
         title: "Processing Tool",
         action: function (d): void {
-          self.datasetModalService.openDatasetHistoryModal(
+          self.datasetModalService.openImportToolModal(
             d.dataset,
             self.sessionData
           );
