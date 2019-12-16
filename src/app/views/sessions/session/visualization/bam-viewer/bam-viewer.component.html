@@ -1,11 +1,13 @@
-<div *ngIf="state.isReady(); else statusTemplate">
+<div><i>BAM Viewer is disabled for now due to problems with the library the BAM Viewer depends on</i></div>
+
+<!-- <div *ngIf="state.isReady(); else statusTemplate">
   <div class="text-sm">
     <pre>{{samHeader}}</pre>
   </div>
   <div *ngIf="errorMessage"><i>{{errorMessage}}</i></div>
   <div *ngIf="bamRecordList.length === 0">
-    <pre>Sorry, For Some reason, Loading Bam Records Failed.</pre>
-  </div>
+      <pre>Sorry, For Some reason, Loading Bam Records Failed.</pre>
+    </div>
   <div class="horizontal-scroll">
     <table class="table-bordered table-hover bamtable text-sm">
       <thead>
@@ -24,4 +26,4 @@
 
 <ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>
-</ng-template>
+</ng-template> -->

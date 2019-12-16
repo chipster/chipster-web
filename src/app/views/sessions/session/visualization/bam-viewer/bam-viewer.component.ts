@@ -37,6 +37,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   private filePos;
   private blockList;
 
+  private disabled = false;
+
   constructor(
     private fileResource: FileResource,
     private sessionDataService: SessionDataService,
@@ -46,6 +48,9 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
+    if (this.disabled) {
+      return;
+    }
     this.samHeaderList = [];
     this.filePos = 0;
     this.blockList = [];
