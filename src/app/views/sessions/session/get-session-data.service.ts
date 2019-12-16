@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
+import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
-import { Dataset, Job } from "chipster-js-common";
+import { Tags, TypeTagService } from "../../../shared/services/typetag.service";
 import { DatasetService } from "./dataset.service";
-import { TypeTagService, Tags } from "../../../shared/services/typetag.service";
 
 @Injectable()
 export class GetSessionDataService {
@@ -17,7 +17,7 @@ export class GetSessionDataService {
    * Only use this in session component when loading a new session.
    * @param sessionData
    */
-  setSessionData(sessionData: SessionData) {
+  setSessionData(sessionData: SessionData): void {
     this.sessionData = sessionData;
   }
 
@@ -105,8 +105,8 @@ export class GetSessionDataService {
   getParentDatasets(dataset: Dataset): Dataset[] {
     // if source job exists and has inputs, return those that still exist on this session
     const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
-    return sourceJob != null ||
-      sourceJob.inputs != null ||
+    return sourceJob != null &&
+      sourceJob.inputs != null &&
       sourceJob.inputs.length > 1
       ? sourceJob.inputs
           .map(jobInput => this.sessionData.datasetsMap.get(jobInput.datasetId))
