@@ -126,7 +126,7 @@ export default class VisualizationConstants {
       id: VisualizationConstants.PHENODATA_ID,
       name: "Phenodata",
       supportAllTypes: false,
-      typeTags: [Tags.GENE_EXPRS, Tags.BAM],
+      typeTags: [Tags.GENE_EXPRS],
       supportedInputFileCounts: [1]
     },
     {
