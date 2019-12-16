@@ -1,25 +1,18 @@
+import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Dataset } from "chipster-js-common";
+import * as pako from "pako";
+import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  ChangeDetectorRef,
-  ChangeDetectionStrategy
-} from "@angular/core";
-import { Service, Dataset } from "chipster-js-common";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
-import * as pako from "pako";
 import BamRecord from "./bamRecord";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs";
-import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
   selector: "ch-bam-viewer",
-  templateUrl: "bamviewer.html",
-  styleUrls: ["./bamviewer.component.less"]
+  templateUrl: "bam-viewer.component.html",
+  styleUrls: ["./bam-viewer.component.less"]
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
   @Input()
@@ -168,7 +161,9 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       );
       const ba = new Uint8Array(blockHeader);
       const blockSize = (ba[17] << 8) | (ba[16] + 1);
-      if (blockSize < 28) { break; }
+      if (blockSize < 28) {
+        break;
+      }
 
       blockSizeList.push(blockSize);
 

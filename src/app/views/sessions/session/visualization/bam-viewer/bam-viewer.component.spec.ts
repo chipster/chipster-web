@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from "@angular/core/testing";
-
-import { BamViewerComponent } from "./bamviewer.component";
+import { BamViewerComponent } from "./bam-viewer.component";
 
 describe("BamviewerComponent", () => {
   let component: BamViewerComponent;
