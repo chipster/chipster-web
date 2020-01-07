@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
 import * as _ from "lodash";
+import log from "loglevel";
 import { forkJoin, Observable } from "rxjs";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
@@ -32,11 +33,11 @@ export class SessionPanelComponent {
     private restErrorService: RestErrorService
   ) {} // used by template
 
-  search(value: any) {
+  search(value: any): void {
     this.datasetSearch = value;
   }
 
-  searchEnter() {
+  searchEnter(): void {
     // select highlighted datasets when the enter key is pressed
     const allDatasets = this.sessionDataService.getDatasetList(
       this.sessionData
@@ -55,25 +56,33 @@ export class SessionPanelComponent {
       const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(
         this.sessionData
       );
-      const allIds = allDatasets.map(d => d.datasetId);
+
+      // only apply to those filtered by dataset search
+      const searchDatasets = this.datasetsearchPipe.transform(
+        allDatasets,
+        this.datasetSearch
+      );
+      const searchIds = searchDatasets.map(d => d.datasetId);
 
       // indexes of the old selection in the dataset list
       const selectedIndexes = this.selectionService.selectedDatasets.map(d =>
-        allIds.indexOf(d.datasetId)
+        searchIds.indexOf(d.datasetId)
       );
-      const clickIndex = allIds.indexOf(dataset.datasetId);
+      const clickIndex = searchIds.indexOf(dataset.datasetId);
       const newMin = Math.min(clickIndex, ...selectedIndexes);
       const newMax = Math.max(clickIndex, ...selectedIndexes);
 
       // datasets within the index range
-      const newSelection = _.range(newMin, newMax + 1).map(i => allDatasets[i]);
+      const newSelection = _.range(newMin, newMax + 1).map(
+        i => searchDatasets[i]
+      );
       this.selectionHandlerService.setDatasetSelection(newSelection);
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
     }
   }
 
-  autoLayout() {
+  autoLayout(): void {
     const updates: Observable<any>[] = [];
     this.sessionData.datasetsMap.forEach(d => {
       if (d.x || d.y) {
@@ -84,12 +93,12 @@ export class SessionPanelComponent {
     });
 
     forkJoin(updates).subscribe(
-      () => console.log(updates.length + " datasets updated"),
+      () => log.debug(updates.length + " datasets updated"),
       err => this.restErrorService.showError("layout update failed", err)
     );
   }
 
-  getDatasetListSorted() {
+  getDatasetListSorted(): Dataset[] {
     return this.sessionDataService.getDatasetListSortedByCreated(
       this.sessionData
     );
