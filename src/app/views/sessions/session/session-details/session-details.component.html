@@ -1,42 +1,42 @@
 <h3 class="panel-title">Session Info</h3>
 
 <div class="chipster-highlight">
-    <div class="mb-2">
-        <span class="h6">{{session.name}}</span>
-        <span class="dropdown">
-            <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
-                <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
-                <a class="dropdown-item" (click)="renameSessionModal()">Rename&hellip;</a>
-                <a class="dropdown-item" (click)="notesModal()">Edit notes&hellip;</a>
-                <a class="dropdown-item" (click)="sharingModal()">Share&hellip;</a>
-                <a class="dropdown-item" (click)="duplicateModal()">Duplicate&hellip;</a>
-                <a class="dropdown-item" (click)="downloadSession()">Download</a>
-                <a class="dropdown-item" (click)="removeSessionModal()">Delete&hellip;</a>
-            </div>
-        </span>
-    </div>
+  <div class="mb-2">
+    <span class="h6">{{session.name}}</span>
+    <span class="dropdown">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="sessionDropdownMenuButton"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+        <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
+        <a class="dropdown-item" (click)="renameSessionModal()">Rename&hellip;</a>
+        <a class="dropdown-item" (click)="notesModal()">Edit notes&hellip;</a>
+        <a class="dropdown-item" (click)="sharingModal()">Share&hellip;</a>
+        <a class="dropdown-item" (click)="duplicateModal()">Save a copy&hellip;</a>
+        <a class="dropdown-item" (click)="downloadSession()">Download</a>
+        <a class="dropdown-item" (click)="removeSessionModal()">Delete&hellip;</a>
+      </div>
+    </span>
+  </div>
 
-    <div class="border p-3" style="background-color: white;">
-        <table class="table table-sm text-sm">
-            <tr>
-                <td class="lighter">Created:</td>
-                <td width="100%">{{session.created | localDate}}</td>
-            </tr>
-            <tr>
-                <td class="lighter">Size:</td>
-                <td width="100%">{{getSessionSize() | bytes: 0}}</td>
-            </tr>
-            <tr>
-                <td class="lighter">Notes:</td>
-                <td width="100%">
-                    <p class="mb-1" *ngFor="let line of session.notes?.split( '\n') ">
-                        {{line}}
-                    </p>
-                </td>
-            </tr>
-        </table>
-    </div>
+  <div class="border p-3" style="background-color: white;">
+    <table class="table table-sm text-sm">
+      <tr>
+        <td class="lighter">Created:</td>
+        <td width="100%">{{session.created | localDate}}</td>
+      </tr>
+      <tr>
+        <td class="lighter">Size:</td>
+        <td width="100%">{{getSessionSize() | bytes: 0}}</td>
+      </tr>
+      <tr>
+        <td class="lighter">Notes:</td>
+        <td width="100%">
+          <p class="mb-1" *ngFor="let line of session.notes?.split( '\n') ">
+            {{line}}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>

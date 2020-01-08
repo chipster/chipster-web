@@ -4,14 +4,25 @@ import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
 import { forkJoin, of, Subject } from "rxjs";
 import { tap } from "rxjs/internal/operators/tap";
-import { debounceTime, filter, finalize, flatMap, map, mergeMap, takeUntil } from "rxjs/operators";
+import {
+  debounceTime,
+  filter,
+  finalize,
+  flatMap,
+  map,
+  mergeMap,
+  takeUntil
+} from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../model/session/session-data";
 import { SessionResource } from "../../shared/resources/session.resource";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
-import { SessionListMode, SettingsService } from "../../shared/services/settings.service";
+import {
+  SessionListMode,
+  SettingsService
+} from "../../shared/services/settings.service";
 import { ToolsService } from "../../shared/services/tools.service";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session/session-data.service";
@@ -66,7 +77,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private tokenService: TokenService,
     private settingsService: SettingsService
-  ) { }
+  ) {}
 
   ngOnInit() {
     // subscribe to mode change
@@ -82,7 +93,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         tap(userId => (this.exampleSessionOwnerUserId = userId)),
         mergeMap(() => this.getSessionMap()),
         tap(sessionMap => (this.userEventData.sessions = sessionMap)),
-        tap(() => this.sessionListLoading = false),
+        tap(() => (this.sessionListLoading = false)),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions())
       )
@@ -129,7 +140,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         finalize(() => (this.workflowPreviewLoading = false))
       )
       .subscribe(
-        () => { },
+        () => {},
         (error: any) => {
           this.workflowPreviewFailed = true;
           this.restErrorService.showError(
@@ -577,11 +588,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   duplicate(session: Session) {
     let duplicateName; // ugly
     this.dialogModalService
-      .openSessionNameModal(
-        "Duplicate session",
-        session.name + "_copy",
-        "Duplicate"
-      )
+      .openSessionNameModal("Copy session", session.name + "_copy", "Copy")
       .pipe(
         flatMap(name => {
           duplicateName = name;
@@ -606,7 +613,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
             false
           );
           return this.dialogModalService.openSpinnerModal(
-            "Duplicate session",
+            "Copy session",
             copySessionObservable
           );
         })
@@ -617,7 +624,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.updateSessions();
         },
         err => {
-          this.restErrorService.showError("Duplicate session failed", err);
+          this.restErrorService.showError("Copy session failed", err);
         }
       );
   }

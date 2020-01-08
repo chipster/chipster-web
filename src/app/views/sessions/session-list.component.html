@@ -73,7 +73,8 @@
                           <button class="dropdown-item"
                             (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
                           <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();duplicate(session)">Duplicate&hellip;</button>
+                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();duplicate(session)">Save
+                            a copy&hellip;</button>
                           <button class="dropdown-item"
                             (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();share(session)"
                             [disabled]="sessionDataService.isReadOnlySession(session)">Share&hellip;</button>

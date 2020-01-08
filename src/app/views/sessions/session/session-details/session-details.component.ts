@@ -49,7 +49,7 @@ export class SessionDetailsComponent {
 
   duplicateModal() {
     this.dialogModalService
-      .openSessionNameModal("Duplicate session", this.session.name + "_copy")
+      .openSessionNameModal("Copy session", this.session.name + "_copy", "Copy")
       .pipe(
         flatMap(name => {
           const copySessionObservable = this.sessionResource.copySession(
@@ -58,13 +58,13 @@ export class SessionDetailsComponent {
             false
           );
           return this.dialogModalService.openSpinnerModal(
-            "Duplicate session",
+            "Copy session",
             copySessionObservable
           );
         })
       )
       .subscribe(null, err =>
-        this.restErrorService.showError("Duplicate session failed", err)
+        this.restErrorService.showError("Copy session failed", err)
       );
   }
 
