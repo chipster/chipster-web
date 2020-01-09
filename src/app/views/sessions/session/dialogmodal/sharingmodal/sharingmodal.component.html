@@ -30,7 +30,8 @@
         <td><span *ngIf="rule.sharedBy">{{rule.sharedBy}}</span></td>
         <td><span *ngIf="!rule.sharedBy">owner</span></td>
         <td>
-          <button *ngIf="isDeleteEnabled(rule)" class="btn btn-outline-dark btn-no-border" (click)="deleteRule(rule.ruleId)">
+          <button *ngIf="isDeleteEnabled(rule)" class="btn btn-outline-dark btn-no-border"
+            (click)="deleteRule(rule.ruleId)">
             <span class="fas fa-times"></span>
           </button>
         </td>
@@ -51,12 +52,12 @@
     </tbody>
   </table>
 
-  <button class="btn btn-primary" *ngIf="!newRule" (click)="addNewRule()">
+  <button class="btn btn-sm btn-primary" *ngIf="!newRule" (click)="addNewRule()">
     Add rule</button>
 
   <div *ngIf="newRule">
-    <button class="btn btn-secondary" (click)="newRule = null">Cancel</button>
-    <button class="btn btn-success" (click)="saveRule()">Save</button>
+    <button class="btn btn-sm btn-secondary mr-1" (click)="newRule = null">Cancel</button>
+    <button class="btn btn-sm btn-success" (click)="saveRule()">Save</button>
   </div>
 
   <br>
