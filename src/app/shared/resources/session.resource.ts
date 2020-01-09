@@ -511,11 +511,13 @@ export class SessionResource {
 
         // create jobs
         const oldJobs = Array.from(sessionData.jobsMap.values());
-        const jobCopies = oldJobs.map((oldJob: Job) => {
-          const jobCopy = _.clone(oldJob);
-          jobCopy.sessionId = null;
-          return jobCopy;
-        });
+        const jobCopies = oldJobs
+          .filter(oldJob => !this.isRunning(oldJob))
+          .map((oldJob: Job) => {
+            const jobCopy = _.clone(oldJob);
+            jobCopy.sessionId = null;
+            return jobCopy;
+          });
 
         const request = this.createJobs(createdSessionId, jobCopies);
         createRequests.push(request);
@@ -535,6 +537,17 @@ export class SessionResource {
         return this.updateSession(session);
       }),
       map(() => createdSessionId)
+    );
+  }
+
+  /**
+   * FIXME Replicated here from job.service to avoic circular reference.
+   * Refactor this or something else to a separate service
+   * @param job
+   */
+  private isRunning(job: Job): boolean {
+    return (
+      job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING"
     );
   }
 }

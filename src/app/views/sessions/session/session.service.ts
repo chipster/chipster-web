@@ -72,4 +72,11 @@ export class SessionService {
     );
     this.sessionDataService.download(authenticatedUrl$);
   }
+
+  isTemporary(session: Session): boolean {
+    return (
+      session.state === SessionState.TemporaryModified ||
+      session.state === SessionState.TemporaryUnmodified
+    );
+  }
 }

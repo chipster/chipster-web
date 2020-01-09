@@ -21,7 +21,14 @@ import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
 import { fromPromise } from "rxjs/internal/observable/fromPromise";
 // New imports for rxjs v6
-import { catchError, flatMap, map, mergeMap, takeUntil } from "rxjs/operators";
+import {
+  catchError,
+  flatMap,
+  map,
+  mergeMap,
+  takeUntil,
+  tap
+} from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -219,6 +226,17 @@ export class SessionComponent implements OnInit, OnDestroy {
       return of(true);
     }
 
+    // temporary session with changes is only case where we might possibly remain
+    // on the page and therefore possible want to continue receiving session events
+    if (
+      !(
+        this.sessionData &&
+        this.sessionData.session.state === SessionState.TemporaryModified
+      )
+    ) {
+      this.sessionEventService.unsubscribe();
+    }
+
     // session has been deleted already, also avoid null problems in later checks
     if (!this.sessionData) {
       return of(true);
@@ -239,7 +257,15 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     // temporary session with changes, ask what to do
     if (this.sessionData.session.state === SessionState.TemporaryModified) {
-      return this.askKeepOrDiscardSession();
+      const leavePage$ = this.askKeepOrDiscardSession().pipe(
+        tap(leave => {
+          if (leave) {
+            this.sessionEventService.unsubscribe();
+          }
+        })
+      );
+
+      return leavePage$;
     }
 
     // normal case, no actions needed
