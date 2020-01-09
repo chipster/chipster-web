@@ -4,7 +4,7 @@ import { Dataset, Job, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import * as _ from "lodash";
 import log from "loglevel";
-import { forkJoin, Observable, of as observableOf } from "rxjs";
+import { forkJoin, Observable, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
@@ -471,7 +471,13 @@ export class SessionResource {
     name: string,
     temporary: boolean
   ): Observable<string> {
-    log.info("copySession()", sessionData, name, temporary);
+    log.info(
+      "copying session, original has:",
+      sessionData.datasetsMap.size,
+      "datasets,",
+      sessionData.jobsMap.size,
+      "jobs"
+    );
     if (!name) {
       name = "unnamed session";
     }
@@ -489,8 +495,6 @@ export class SessionResource {
       mergeMap((sessionId: string) => {
         createdSessionId = sessionId;
 
-        const createRequests: Array<Observable<{}>> = [];
-
         // create datasets
         const oldDatasets = Array.from(sessionData.datasetsMap.values());
         const clones = oldDatasets.map((dataset: Dataset) => {
@@ -499,15 +503,26 @@ export class SessionResource {
           return clone;
         });
 
-        const request = this.createDatasets(createdSessionId, clones);
-        createRequests.push(request);
+        const createDatasetsRequest =
+          clones.length > 0
+            ? this.createDatasets(createdSessionId, clones)
+            : of([]);
 
-        // emit an empty array if the forkJoin completes without emitting anything
-        // otherwise this won't continue to the next flatMap() when the session is empty
-        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
+        // emit an empty array in case request completes without emitting anything
+        // (don't know if this ever happends) otherwise this won't continue to the
+        //  next mergeMap() when the session is empty
+        return createDatasetsRequest.pipe(defaultIfEmpty([]));
       }),
-      mergeMap(() => {
-        const createRequests: Array<Observable<{}>> = [];
+      mergeMap((createdDatasets: Dataset[]) => {
+        log.info("created", createdDatasets.length, "datasets");
+        // create dataset map for checking inputs later
+        const newDatasetsMap: Map<string, Dataset> = createdDatasets.reduce(
+          (tempMap, dataset) => {
+            tempMap.set(dataset.datasetId, dataset);
+            return tempMap;
+          },
+          new Map()
+        );
 
         // create jobs
         const oldJobs = Array.from(sessionData.jobsMap.values());
@@ -516,16 +531,22 @@ export class SessionResource {
           .map((oldJob: Job) => {
             const jobCopy = _.clone(oldJob);
             jobCopy.sessionId = null;
+            this.nullifyMissingInputs(jobCopy, newDatasetsMap);
             return jobCopy;
           });
 
-        const request = this.createJobs(createdSessionId, jobCopies);
-        createRequests.push(request);
+        const createJobsRequest =
+          jobCopies.length > 0
+            ? this.createJobs(createdSessionId, jobCopies)
+            : of([]);
 
         // see the comment of the forkJoin above
-        return forkJoin(...createRequests).pipe(defaultIfEmpty([]));
+        return createJobsRequest.pipe(defaultIfEmpty([]));
       }),
-      mergeMap(() => this.getSession(createdSessionId)),
+      mergeMap((createdJobs: Job[]) => {
+        log.info("created", createdJobs.length, "jobs");
+        return this.getSession(createdSessionId);
+      }),
       mergeMap(session => {
         log.info("session copied, current state", session.state, temporary);
         if (temporary) {
@@ -549,5 +570,23 @@ export class SessionResource {
     return (
       job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING"
     );
+  }
+
+  private nullifyMissingInputs(
+    job: Job,
+    datasetsMap: Map<string, Dataset>
+  ): void {
+    if (job.inputs != null) {
+      job.inputs = job.inputs.filter(input => {
+        if (!datasetsMap.has(input.datasetId)) {
+          log.info(
+            "missing dataset, nullifying input dataset",
+            job.toolName,
+            input.inputId
+          );
+        }
+        return datasetsMap.has(input.datasetId);
+      });
+    }
   }
 }
