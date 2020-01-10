@@ -92,7 +92,6 @@ export class TokenService {
   }
 
   setAuthToken(token: string): void {
-    console.log(token);
     if (token != null) {
       const parsedToken = jwt_decode(token);
       const expString = parsedToken.exp;

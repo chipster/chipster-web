@@ -1,5 +1,18 @@
 <div>
-  <angular-slickgrid gridId="grid2" [columnDefinitions]="columnDefinitions" [gridOptions]="gridOptions"
-    [dataset]="dataset">
-  </angular-slickgrid>
+  <div class=row>
+    <span>
+      <button class="btn-sm" (click)="selectIdentifierColumn()">Select Identifier</button>
+      <button class="btn-sm" (click)="selectSampleColumn()">Select Sample
+      </button>
+    </span>
+  </div>
+  <div class=row>
+    <angular-slickgrid gridId="grid2" [columnDefinitions]="columnDefinitions" [gridOptions]="gridOptions"
+      [dataset]="slickDataset" (onAngularGridCreated)="angularGridReady($event)"
+      (sgOnCellChange)="onCellChanged($event.detail.eventData, $event.detail.args)"
+      (sgOnClick)="onCellClicked($event.detail.eventData, $event.detail.args)"
+      (sgOnHeaderClick)="onHeaderClicked($event.detail.eventData, $event.detail.args)"
+      (sgOnSelectedRowsChanged)="onSelectedRowsChanged($event.detail.eventData, $event.detail.args)">
+    </angular-slickgrid>
+  </div>
 </div>

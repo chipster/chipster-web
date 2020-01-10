@@ -1,9 +1,18 @@
 <div class="modal-header">
-  <h4 class="modal-title">{{dataset.name}}</h4>
-  <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<ch-slickgrid-visualization>
+  <h5 class="modal-title">{{dataset.name}}</h5>
 
-</ch-slickgrid-visualization>
+</div>
+<div class="modal-body" style="margin:5px">
+  <div class=row>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <ch-slickgrid-visualization [headers]="headers" [content]="content">
+
+  </ch-slickgrid-visualization>
+</div>
+<div class="modal-footer" style="margin: 5px">
+
+
+</div>

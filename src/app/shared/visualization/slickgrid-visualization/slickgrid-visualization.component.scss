@@ -1,0 +1,23 @@
+.slick-cell {
+    overflow-wrap: break-word;
+}
+
+.modal-dialog {
+    position: fixed;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+}
+
+.modal-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 2px;
+    border: 2px solid #3c7dcf;
+    border-radius: 0;
+    box-shadow: none;
+}
