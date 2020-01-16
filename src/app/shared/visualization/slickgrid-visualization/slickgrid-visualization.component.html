@@ -1,10 +1,28 @@
 <div>
   <div class=row>
     <span>
-      <button class="btn-sm" (click)="selectIdentifierColumn()">Select Identifier</button>
-      <button class="btn-sm" (click)="selectSampleColumn()">Select Sample
+      <button class="btn-sm menu-btn" (click)="selectIdentifierColumn()">Select Identifier</button>
+      <button class="btn-sm menu-btn" (click)="selectSampleColumn()">Select Sample
+      </button>
+      <button class="btn-sm menu-btn" (click)="resetSelection()">Reset
+      </button>
+      <button class="btn-sm menu-btn" (click)="createNewDatasetFile()">Next
       </button>
     </span>
+  </div>
+  <div class=row>
+    <h6>Selected Identifier colums are</h6>
+    <ul>
+      <li *ngFor="let item of identifierSelectionMap | keyvalue">
+        {{item.key}} --> {{item.value}}
+      </li>
+    </ul>
+    <h6>Selected sample colums are</h6>
+    <ul>
+      <li *ngFor="let item of sampleSelectionMap| keyvalue">
+        {{item.key}} --> {{item.value}}
+      </li>
+    </ul>
   </div>
   <div class=row>
     <angular-slickgrid gridId="grid2" [columnDefinitions]="columnDefinitions" [gridOptions]="gridOptions"
@@ -15,4 +33,5 @@
       (sgOnSelectedRowsChanged)="onSelectedRowsChanged($event.detail.eventData, $event.detail.args)">
     </angular-slickgrid>
   </div>
+
 </div>
