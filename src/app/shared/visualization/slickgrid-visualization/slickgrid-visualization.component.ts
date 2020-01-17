@@ -164,32 +164,26 @@ export class SlickgridVisualizationComponent implements OnInit {
     let j = 0;
     for (const id of this.identifierSelectionMap.keys()) {
       const selectedValues = _.map(this.slickDataset, this.columnDefinitions[id].id);
-      console.log(selectedValues);
       for (let i = 0; i < selectedValues.length; i++) {
         dataTable[i][j] = selectedValues[i];
-        console.log(j);
       }
       j++;
     }
-    console.log(dataTable);
-
     const data = d3.tsvFormatRows(dataTable);
-    console.log(data);
-    /*this.sessionDataService
+    this.sessionDataService
       .createDerivedDataset(
-        "dataset.tsv",
+        "import_tool_dataset.tsv",
         [this.datasetId],
         "Import Tool",
         data
       )
-      .subscribe(null);*/
+      .subscribe(null);
   }
-
-
-
 
   resetSelection(): void {
     // reset all selected columns
+    this.identifierSelectionMap.clear();
+    this.sampleSelectionMap.clear();
   }
 
 }
