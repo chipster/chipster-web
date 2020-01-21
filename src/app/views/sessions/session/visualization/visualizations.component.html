@@ -9,8 +9,8 @@
         <span class="glyphicon glyphicon-th"></span> Spreadsheet</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
-          <ch-spreadsheet-visualization *ngIf="active === getTabId('spreadsheet')" [dataset]="selectionService.selectedDatasets[0]"
-            [sessionData]="sessionData">
+          <ch-spreadsheet-visualization *ngIf="active === getTabId('spreadsheet')"
+            [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
           </ch-spreadsheet-visualization>
         </div>
       </ng-template>
@@ -32,7 +32,8 @@
       <ng-template ngbTabTitle>Expression Profile</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
-          <ch-expression-profile *ngIf="active === getTabId('expressionprofile')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-expression-profile *ngIf="active === getTabId('expressionprofile')"
+            [dataset]="selectionService.selectedDatasets[0]">
           </ch-expression-profile>
         </div>
       </ng-template>
@@ -102,7 +103,8 @@
       </ng-template>
     </ngb-tab>
 
-    <ngb-tab id="{{getTabId('bamviewer')}}" *ngIf="isTabVisible('bamviewer')">
+    <!-- Disabling bam viewer for now-->
+    <!-- <ngb-tab id="{{getTabId('bamviewer')}}" *ngIf="isTabVisible('bamviewer')">
       <ng-template ngbTabTitle>BAM Viewer</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
@@ -110,7 +112,7 @@
           </ch-bam-viewer>
         </div>
       </ng-template>
-    </ngb-tab>
+    </ngb-tab> -->
 
     <!-- Disabling genome browser for the time being-->
     <!--
@@ -130,8 +132,8 @@
         <span class="glyphicon glyphicon-edit"></span> Phenodata</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
-          <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')" [dataset]="selectionService.selectedDatasets[0]"
-            [datasetsMap]="sessionData.datasetsMap">
+          <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')"
+            [dataset]="selectionService.selectedDatasets[0]" [datasetsMap]="sessionData.datasetsMap">
           </ch-phenodata-visualization>
         </div>
       </ng-template>
@@ -142,8 +144,8 @@
         <span class="glyphicon glyphicon-th"></span> Details</ng-template>
       <ng-template ngbTabContent>
         <div class="visualization-panel">
-          <ch-details-visualization *ngIf="active === getTabId('details')" [dataset]="selectionService.selectedDatasets[0]"
-            [sessionData]="sessionData" [tools]="tools">
+          <ch-details-visualization *ngIf="active === getTabId('details')"
+            [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData" [tools]="tools">
           </ch-details-visualization>
         </div>
       </ng-template>

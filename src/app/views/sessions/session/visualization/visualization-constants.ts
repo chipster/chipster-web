@@ -107,21 +107,21 @@ export default class VisualizationConstants {
       anyInputCountSupported: false,
       supportedInputFileCounts: [1]
     },
-    {
-      id: "bamviewer",
-      name: "BAM viewer",
-      typeTags: [Tags.BAM],
-      supportAllTypes: false,
-      anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
-    },
-    {
-      id: "genomebrowser",
-      name: "Genome Browser",
-      supportAllTypes: false,
-      typeTags: [Tags.BAM, Tags.BAI],
-      anyInputCountSupported: true
-    },
+    // {
+    //   id: "bamviewer",
+    //   name: "BAM viewer",
+    //   typeTags: [Tags.BAM],
+    //   supportAllTypes: false,
+    //   anyInputCountSupported: false,
+    //   supportedInputFileCounts: [1]
+    // },
+    // {
+    //   id: "genomebrowser",
+    //   name: "Genome Browser",
+    //   supportAllTypes: false,
+    //   typeTags: [Tags.BAM, Tags.BAI],
+    //   anyInputCountSupported: true
+    // },
     {
       id: VisualizationConstants.PHENODATA_ID,
       name: "Phenodata",
