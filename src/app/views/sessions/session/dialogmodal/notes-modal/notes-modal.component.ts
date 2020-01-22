@@ -1,11 +1,11 @@
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import {
+  AfterViewInit,
   Component,
   Input,
-  AfterViewInit,
-  ViewChild,
-  OnInit
+  OnInit,
+  ViewChild
 } from "@angular/core";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
@@ -66,5 +66,9 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
     return this.readOnly
       ? "You don't have permissions to add notes to this session"
       : "Add notes here";
+  }
+
+  getTitle(): string {
+    return this.readOnly ? "View session notes" : "Edit session notes";
   }
 }

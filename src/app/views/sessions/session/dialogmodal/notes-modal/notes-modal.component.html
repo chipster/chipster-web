@@ -1,11 +1,18 @@
 <div class="modal-header">
-  <h4 class="modal-title">{{session.name}}</h4>
+  <h4 class="modal-title">{{ getTitle() }}</h4>
 </div>
 <div class="modal-body">
-
   <div class="row">
     <div class="col">
-      <textarea class="mb-1" #notesArea id="session-notes" [readonly]="readOnly" rows="15" [placeholder]="getPlaceHolder()" [(ngModel)]="notes">
+      <textarea
+        class="mb-1"
+        #notesArea
+        id="session-notes"
+        [readonly]="readOnly"
+        rows="15"
+        [placeholder]="getPlaceHolder()"
+        [(ngModel)]="notes"
+      >
       </textarea>
     </div>
   </div>
@@ -13,15 +20,37 @@
   <table class="table table-sm text-sm">
     <tr>
       <td class="lighter">Created:</td>
-      <td>{{session.created | localDate}}</td>
+      <td>{{ session.created | localDate }}</td>
       <td class="lighter">Last opened:</td>
-      <td>{{session.accessed | localDate}}</td>
+      <td>{{ session.accessed | localDate }}</td>
     </tr>
   </table>
-
 </div>
 <div class="modal-footer">
-  <button *ngIf="!readOnly" type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
-  <button *ngIf="!readOnly" type="submit" class="btn btn-info" (click)="save()" #submitButton>Save</button>
-  <button *ngIf="readOnly" type="submit" class="btn btn-info" (click)="cancel()" #submitButton>Close</button>
+  <button
+    *ngIf="!readOnly"
+    type="button"
+    class="btn btn-secondary pull-right"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+  <button
+    *ngIf="!readOnly"
+    type="submit"
+    class="btn btn-info"
+    (click)="save()"
+    #submitButton
+  >
+    Save
+  </button>
+  <button
+    *ngIf="readOnly"
+    type="submit"
+    class="btn btn-info"
+    (click)="cancel()"
+    #submitButton
+  >
+    Close
+  </button>
 </div>
