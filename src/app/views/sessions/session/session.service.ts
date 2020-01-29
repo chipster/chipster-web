@@ -70,7 +70,7 @@ export class SessionService {
         return url + "?token=" + token;
       })
     );
-    this.sessionDataService.download(authenticatedUrl$);
+    this.sessionDataService.download(authenticatedUrl$, 15);
   }
 
   isTemporary(session: Session): boolean {

@@ -242,7 +242,7 @@ export class SessionDataService {
 
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
-      this.download(this.getDatasetUrl(d).pipe(map(url => url + "&download")));
+      this.download(this.getDatasetUrl(d).pipe(map(url => url + "&download")), 3);
     }
   }
 
@@ -250,14 +250,18 @@ export class SessionDataService {
     this.newTab(
       this.getDatasetUrl(dataset).pipe(map(url => url)),
       null,
+      null,
       "Browser's pop-up blocker prevented opening a new tab"
     );
   }
 
-  download(url$: Observable<string>) {
+  download(url$: Observable<string>, autoCloseDelay: number) {
     this.newTab(
       url$,
-      3000,
+      autoCloseDelay * 1000,
+      "<p>Please wait until the download starts. Then you can close " + 
+      "this tab. It will close automatically after " + autoCloseDelay + " seconds.</p>",
+
       "Browser's pop-up blocker prevented some exports. " +
         "Please disable the pop-up blocker for this site or " +
         "export the files one by one."
@@ -267,12 +271,16 @@ export class SessionDataService {
   newTab(
     url$: Observable<string>,
     autoCloseDelay: number,
+    text: string, 
     popupErrorText: string
   ) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
     const win: any = window.open("", "_blank");
     if (win) {
+      if (text) {
+        win.document.write(text);
+      }
       url$.subscribe(
         url => {
           // but we can set it's location later asynchronously
