@@ -1,21 +1,24 @@
-import { forkJoin as observableForkJoin, Observable, forkJoin, of } from "rxjs";
-
-import { map } from "rxjs/operators";
 import { Injectable } from "@angular/core";
-import {
-  SelectedToolWithInputs,
-  SelectedToolWithValidatedInputs,
-  ParameterValidationResult
-} from "./tools/ToolSelection";
-import { InputBinding, ToolParameter, Dataset } from "chipster-js-common";
-import { ToolService } from "./tools/tool.service";
+import { Dataset, InputBinding, ToolParameter } from "chipster-js-common";
 import * as _ from "lodash";
-import { SessionData } from "../../../model/session/session-data";
 import log from "loglevel";
-
+import { forkJoin, forkJoin as observableForkJoin, Observable, of } from "rxjs";
+import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
-import { GetSessionDataService } from "./get-session-data.service";
+import { SessionData } from "../../../model/session/session-data";
 import { DatasetService } from "./dataset.service";
+import { GetSessionDataService } from "./get-session-data.service";
+import { ToolService } from "./tools/tool.service";
+import {
+  ParameterValidationResult,
+  SelectedToolWithInputs,
+  SelectedToolWithValidatedInputs
+} from "./tools/ToolSelection";
+
+export interface SelectionOption {
+  id: string;
+  displayName: string;
+}
 
 @Injectable()
 export class ToolSelectionService {
@@ -58,7 +61,7 @@ export class ToolSelectionService {
       // integer must be integer
       if (
         parameter.type === "INTEGER" &&
-        !Number.isInteger(<number>parameter.value)
+        !Number.isInteger(parameter.value as number)
       ) {
         return {
           valid: false,
@@ -113,16 +116,19 @@ export class ToolSelectionService {
     return { valid: true };
   }
 
-  parameterHasValue(parameter: ToolParameter) {
-    return (
-      parameter.value !== null &&
-      typeof parameter !== "undefined" &&
-      String(parameter.value).trim() !== ""
-    );
+  parameterHasValue(parameter: ToolParameter): boolean {
+    if (parameter.value == null) {
+      return false;
+    }
+
+    return this.toolService.isColumnSelectionParameter(parameter)
+      ? true
+      : String(parameter.value).trim() !== "";
   }
 
   populateParameters(
-    selectedToolWithInputs: SelectedToolWithValidatedInputs
+    selectedToolWithInputs: SelectedToolWithValidatedInputs,
+    sessionData: SessionData
   ): Observable<SelectedToolWithValidatedInputs> {
     if (selectedToolWithInputs.tool) {
       // get bound datasets for populating (dataset dependent) parameters
@@ -145,7 +151,8 @@ export class ToolSelectionService {
           return this.populateParameter(
             parameter,
             boundDatasets,
-            boundPhenodatas
+            boundPhenodatas,
+            sessionData
           );
         }
       );
@@ -168,7 +175,8 @@ export class ToolSelectionService {
   populateParameter(
     parameter: ToolParameter,
     datasets: Array<Dataset>,
-    phenodatas: Array<string>
+    phenodatas: Array<string>,
+    sessionData: SessionData
   ): Observable<ToolParameter> {
     // for other than column selection parameters, set to default if no value
     if (
@@ -192,6 +200,7 @@ export class ToolSelectionService {
       if (parameter.type === "COLUMN_SEL") {
         // populate column_sel only for tsv files
         // FIXME should check type tag instead of name, atm would need sessionData for that
+        // FIXME we have session data here these days
         if (!datasets[0].name.endsWith(".tsv")) {
           parameter.selectionOptions = [];
           parameter.value = null;
@@ -199,14 +208,13 @@ export class ToolSelectionService {
         }
 
         return observableForkJoin(
-          this.toolService.getDatasetHeaders(datasets)
+          this.toolService.getDatasetHeadersForParameter(datasets, sessionData)
         ).pipe(
-          map((datasetsHeaders: Array<Array<string>>) => {
-            const columns = _.uniq(_.flatten(datasetsHeaders));
-
-            parameter.selectionOptions = columns.map(function(column) {
-              return { id: column };
-            });
+          map((headersForAllDatasets: Array<Array<SelectionOption>>) => {
+            // FIXME make options unique in case several datasets selected
+            // for now headers come only from the first datasets
+            const selectionOptions = _.flatten(headersForAllDatasets);
+            parameter.selectionOptions = selectionOptions;
             this.setColumnSelectionParameterValueAfterPopulate(parameter);
             return parameter;
           })

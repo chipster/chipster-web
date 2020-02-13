@@ -12,10 +12,11 @@ import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";
-import { TSVReader } from "../../../../shared/services/TSVReader";
+import { TsvService } from "../../../../shared/services/tsv.service";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
 import { SessionDataService } from "../session-data.service";
+import { SelectionOption } from "../tool.selection.service";
 import { SelectedToolWithInputs } from "./ToolSelection";
 
 @Injectable()
@@ -23,7 +24,7 @@ export class ToolService {
   constructor(
     private typeTagService: TypeTagService,
     private sessionDataService: SessionDataService,
-    private tsvReader: TSVReader,
+    private tsvService: TsvService,
     private configService: ConfigService,
     private getSessionDataService: GetSessionDataService
   ) {}
@@ -74,10 +75,7 @@ export class ToolService {
       return 0.01;
     } else if (parameter.type === "DECIMAL") {
       // the same number of decimal places than the default value has
-      if (
-        parameter.defaultValue &&
-        parameter.defaultValue.includes(".")
-      ) {
+      if (parameter.defaultValue && parameter.defaultValue.includes(".")) {
         const decimalPlaces = parameter.defaultValue.split(".")[1].length;
         return Math.pow(0.1, decimalPlaces);
       } else {
@@ -106,7 +104,9 @@ export class ToolService {
     // no default value
     if (parameter.defaultValue == null) {
       // if the default is not set, allow also null, undefined and empty string here
-      return value == null || String(value).trim() === "";
+      return this.isColumnSelectionParameter(parameter)
+        ? value == null
+        : value == null || String(value).trim() === "";
     }
 
     // default value, but no value
@@ -294,12 +294,12 @@ export class ToolService {
   }
 
   //noinspection JSMethodCanBeStatic
-  getDatasetHeaders(datasets: Array<Dataset>): Observable<Array<string>>[] {
+  getDatasetHeadersForParameter(
+    datasets: Array<Dataset>,
+    sessionData: SessionData
+  ): Array<Observable<Array<SelectionOption>>> {
     return datasets.map((dataset: Dataset) =>
-      this.tsvReader.getTSVFileHeaders(
-        this.sessionDataService.getSessionId(),
-        dataset
-      )
+      this.tsvService.getTSV2FileHeaders(dataset, sessionData)
     );
   }
 
@@ -307,7 +307,9 @@ export class ToolService {
   getMetadataColumns(phenodatas: Array<string>) {
     const headers = phenodatas.reduce(
       (allColumns: string[], phenodataString: string) => {
-        return allColumns.concat(this.tsvReader.getTSVHeaders(phenodataString));
+        return allColumns.concat(
+          this.tsvService.getTSVHeaders(phenodataString)
+        );
       },
       []
     );

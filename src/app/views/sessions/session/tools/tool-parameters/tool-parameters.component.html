@@ -2,20 +2,12 @@
   <!-- close button disappears without this -->
   <span class="invisible">empty</span>
 
-  <button
-    type="button"
-    class="close"
-    aria-label="Close"
-    (click)="closeDropDownDialog()"
-  >
+  <button type="button" class="close" aria-label="Close" (click)="closeDropDownDialog()">
     <span aria-hidden="true">&times;</span>
   </button>
 
   <!-- warning title -->
-  <div
-    class="alert alert-warning text-center p-1 mb-0"
-    [class.invisible]="!showWarning"
-  >
+  <div class="alert alert-warning text-center p-1 mb-0" [class.invisible]="!showWarning">
     <i class="fas fa-fw fa-exclamation-circle"></i> {{ warningText }}
   </div>
 
@@ -23,21 +15,13 @@
   <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
 
   <form name="paramForm" *ngIf="validatedTool.tool">
-    <div
-      *ngIf="validatedTool.tool.parameters.length === 0"
-      class="font-italic text-smaller"
-    >
+    <div *ngIf="validatedTool.tool.parameters.length === 0" class="font-italic text-smaller">
       No parameters
     </div>
 
-    <table
-      class="table table-sm"
-      *ngIf="validatedTool.tool.parameters.length > 0"
-    >
+    <table class="table table-sm" *ngIf="validatedTool.tool.parameters.length > 0">
       <tbody>
-        <tr
-          *ngFor="let parameter of validatedTool.tool.parameters; let i = index"
-        >
+        <tr *ngFor="let parameter of validatedTool.tool.parameters; let i = index">
           <td style="width: 60%">
             <!-- parameter name -->
             {{ getDisplayName(parameter) }}
@@ -53,53 +37,28 @@
 
           <td>
             <!-- selection parameter -->
-            <select
-              *ngIf="toolService.isSelectionParameter(parameter)"
-              class="w-100"
-              name="parameter_{{ i }}"
-              [(ngModel)]="parameter.value"
-              (ngModelChange)="onParametersChanged()"
-            >
-              <option
-                *ngFor="let option of parameter.selectionOptions"
-                value="{{ option.id }}"
-              >
+            <select *ngIf="toolService.isSelectionParameter(parameter)" class="w-100" name="parameter_{{ i }}"
+              [(ngModel)]="parameter.value" (ngModelChange)="onParametersChanged()">
+              <option *ngFor="let option of parameter.selectionOptions" value="{{ option.id }}">
                 {{ option.displayName || option.id }}
               </option>
             </select>
 
             <!-- number -->
-            <input
-              *ngIf="toolService.isNumberParameter(parameter)"
-              class="w-100"
-              type="number"
-              [(ngModel)]="parameter.value"
-              name="parameter_{{ i }}"
-              min="{{ parameter.from }}"
-              max="{{ parameter.to }}"
-              step="{{ toolService.getStepSize(parameter) }}"
-              required="{{ !parameter.optional }}"
-              (ngModelChange)="onParametersChanged()"
-            />
+            <input *ngIf="toolService.isNumberParameter(parameter)" class="w-100" type="number"
+              [(ngModel)]="parameter.value" name="parameter_{{ i }}" min="{{ parameter.from }}" max="{{ parameter.to }}"
+              step="{{ toolService.getStepSize(parameter) }}" required="{{ !parameter.optional }}"
+              (ngModelChange)="onParametersChanged()" />
 
             <!-- string -->
-            <input
-              *ngIf="toolService.isStringParameter(parameter)"
-              type="text"
-              class="w-100"
-              name="parameter_{{ i }}"
-              [(ngModel)]="parameter.value"
-              required="{{ !parameter.optional }}"
-              (ngModelChange)="onParametersChanged()"
-            />
+            <input *ngIf="toolService.isStringParameter(parameter)" type="text" class="w-100" name="parameter_{{ i }}"
+              [(ngModel)]="parameter.value" required="{{ !parameter.optional }}"
+              (ngModelChange)="onParametersChanged()" />
 
             <!-- validation message -->
-            <div
-              *ngIf="
+            <div *ngIf="
                 !validatedTool.parameterResults.get(parameter.name.id).valid
-              "
-              class="alert alert-warning p-1 mb-0 mt-1 text-sm"
-            >
+              " class="alert alert-warning p-1 mb-0 mt-1 text-sm">
               {{
                 validatedTool.parameterResults.get(parameter.name.id).message
               }}
@@ -109,13 +68,9 @@
           <!-- buttons -->
           <td>
             <!-- reset to default -->
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-dark btn-no-border float-right"
-              [class.invisible]="!isResetVisible(parameter)"
-              (click)="reset(parameter, $event)"
-              title="Reset to default"
-            >
+            <button type="button" class="btn btn-sm btn-outline-dark btn-no-border float-right"
+              [class.invisible]="!isResetVisible(parameter)" (click)="reset(parameter, $event)"
+              title="Reset to default">
               <i class="fas fa-undo"></i>
             </button>
           </td>

@@ -1,17 +1,17 @@
-import { takeUntil, debounceTime } from "rxjs/operators";
 import {
   Component,
-  Input,
-  OnInit,
-  OnDestroy,
-  OnChanges,
   EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
   Output
 } from "@angular/core";
-import { ToolParameter } from "chipster-js-common";
-import { ToolService } from "../tool.service";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
+import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
+import { debounceTime, takeUntil } from "rxjs/operators";
+import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 
 @Component({

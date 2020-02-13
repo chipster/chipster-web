@@ -15,10 +15,10 @@ import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionData } from "../../../../../model/session/session-data";
-import TSVFile from "../../../../../model/tsv/TSVFile";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { TsvService } from "../../../../../shared/services/tsv.service";
 import {
   Tags,
   TypeTagService
@@ -76,7 +76,8 @@ export class SpreadsheetVisualizationComponent
     private zone: NgZone,
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService
+    private nativeElementService: NativeElementService,
+    private tsvService: TsvService
   ) {}
 
   ngOnChanges() {
@@ -149,52 +150,23 @@ export class SpreadsheetVisualizationComponent
               this.fullFileVisible = true;
             }
           }
-
+          // FIXME maybe make it more clear whether header is included in the line count or not
+          // TSV2File has fields for figuring this out
           this.lineCount = parsedTSV.length;
 
-          // type-service gives the column titles for some file types
-          const typeTitles = this.typeTagService.get(
-            this.sessionData,
+          const tsv2File = this.tsvService.getTSV2FileFromArray(
             this.dataset,
-            Tags.COLUMN_TITLES
+            this.sessionData,
+            parsedTSV
           );
 
-          if (typeTitles) {
-            // create a new first row from the column titles
-            parsedTSV.unshift(typeTitles.split("\t"));
-          }
-
-          const normalizedTSV = new TSVFile(
-            parsedTSV,
-            this.dataset.datasetId,
-            "file"
-          );
-
-          // whether the data contains a header row or not
-          let content: string[][];
-          let headers: string[];
-          if (
-            this.typeTagService.has(
-              this.sessionData,
-              this.dataset,
-              Tags.NO_TITLE_ROW
-            )
-          ) {
-            if (normalizedTSV.getRawData().length > 0) {
-              headers = new Array<string>(normalizedTSV.getRawData()[0].length);
-            } else {
-              headers = [];
-            }
-            content = normalizedTSV.getRawData();
-          } else {
-            headers = normalizedTSV.getRawData()[0];
-            content = normalizedTSV.getRawData().slice(1);
-          }
+          let headers = tsv2File.getHeadersForSpreadSheet();
+          let body = tsv2File.getBody();
 
           // if there is only one line, show it as content, because Handsontable doesn't allow
           // headers to be shown alone
-          if (content.length === 0) {
-            content = [headers];
+          if (body.length === 0) {
+            body = [headers];
             headers = null;
           }
 
@@ -205,7 +177,7 @@ export class SpreadsheetVisualizationComponent
             if (container != null) {
               this.hot = new Handsontable(
                 container,
-                this.getSettings(headers, content, container)
+                this.getSettings(headers, body, container)
               );
             }
           });

@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { forkJoin as observableForkJoin } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import { TSVReader } from "../../../../../shared/services/TSVReader";
+import { TsvService } from "../../../../../shared/services/tsv.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { SessionDataService } from "../../session-data.service";
 import Circle from "../model/circle";
@@ -34,7 +34,7 @@ export class VennDiagramComponent implements OnChanges {
   isEnabled = false;
 
   constructor(
-    private tsvReader: TSVReader,
+    private tsvService: TsvService,
     private venndiagramService: VennDiagramService,
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService
@@ -49,7 +49,7 @@ export class VennDiagramComponent implements OnChanges {
   init() {
     const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
     const tsvObservables = datasetIds.map((dataset: Dataset) =>
-      this.tsvReader.getTSV(this.sessionDataService.getSessionId(), dataset)
+      this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset)
     );
 
     observableForkJoin(tsvObservables).subscribe(

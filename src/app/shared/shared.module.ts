@@ -1,39 +1,39 @@
 ///<reference path="pipes/secondspipe.pipe.ts"/>
-import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { CoreModule } from "../core/core.module";
+import { ActionToastComponent } from "./components/action-toast";
+import { DummyRouteComponent } from "./components/dummy-route.component";
+import { SearchBoxComponent } from "./components/search-box/search-box.component";
+import { SettingsComponent } from "./components/settings/settings.component";
+import { StatusComponent } from "./components/status.component";
+import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
 import { BytesPipe } from "./pipes/bytes.pipe";
-import { TrustedResourcePipe } from "./pipes/trustedresource.pipe";
-import { LocalDatePipe } from "./pipes/local-date.pipe";
+import { CategoryPipe } from "./pipes/categorypipe.pipe";
 import { DatasetsearchPipe } from "./pipes/datasetsearch.pipe";
-import { ToolPipe } from "./pipes/toolpipe.pipe";
-import { PipeService } from "./services/pipeservice.service";
+import { LocalDatePipe } from "./pipes/local-date.pipe";
 import { ModulePipe } from "./pipes/modulepipe.pipe";
 import { SecondsPipe } from "./pipes/secondspipe.pipe";
-import { CategoryPipe } from "./pipes/categorypipe.pipe";
-import { TSVReader } from "./services/TSVReader";
+import { ToolPipe } from "./pipes/toolpipe.pipe";
+import { TrustedResourcePipe } from "./pipes/trustedresource.pipe";
 import { ConfigurationResource } from "./resources/configurationresource";
-import { CoreModule } from "../core/core.module";
-import { ToolResource } from "./resources/tool-resource";
-import { SessionWorkerResource } from "./resources/sessionworker.resource";
 import { FileResource } from "./resources/fileresource";
 import { SessionResource } from "./resources/session.resource";
-import { ConfigService } from "./services/config.service";
-import { TypeTagService } from "./services/typetag.service";
-import { SearchBoxComponent } from "./components/search-box/search-box.component";
-import { FormsModule } from "@angular/forms";
-import { RouteService } from "./services/route.service";
-import { StatusComponent } from "./components/status.component";
+import { SessionWorkerResource } from "./resources/sessionworker.resource";
+import { ToolResource } from "./resources/tool-resource";
 import { AuthHttpClientService } from "./services/auth-http-client.service";
-import { SpreadsheetService } from "./services/spreadsheet.service";
-import { SettingsComponent } from "./components/settings/settings.component";
-import { SettingsService } from "./services/settings.service";
-import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
-import { DummyRouteComponent } from "./components/dummy-route.component";
-import { UserService } from "./services/user.service";
-import { ToolsService } from "./services/tools.service";
+import { ConfigService } from "./services/config.service";
 import { NativeElementService } from "./services/native-element.service";
+import { PipeService } from "./services/pipeservice.service";
+import { RouteService } from "./services/route.service";
+import { SettingsService } from "./services/settings.service";
+import { SpreadsheetService } from "./services/spreadsheet.service";
+import { ToolsService } from "./services/tools.service";
+import { TsvService } from "./services/tsv.service";
+import { TypeTagService } from "./services/typetag.service";
+import { UserService } from "./services/user.service";
 import { WebSocketService } from "./services/websocket.service";
-import { ActionToastComponent } from "./components/action-toast";
 
 /*
  * @description: Shared module should contain application global resources
@@ -59,7 +59,7 @@ import { ActionToastComponent } from "./components/action-toast";
   ],
   providers: [
     PipeService,
-    TSVReader,
+    TsvService,
     ConfigurationResource,
     ToolResource,
     SessionWorkerResource,

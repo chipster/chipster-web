@@ -428,7 +428,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // populate params is async, and returns the same tool with params populated
           // if there are no params, just return the same tool as observable
           return toolWithInputs.tool.parameters.length > 0
-            ? this.toolSelectionService.populateParameters(toolWithInputs)
+            ? this.toolSelectionService.populateParameters(
+                toolWithInputs,
+                this.sessionData
+              )
             : of(toolWithInputs);
         })
       )
