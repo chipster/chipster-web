@@ -22,10 +22,10 @@ import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualiza
 import { ScatterPlotComponent } from "./scatterplotvisualization/scatterplot.component";
 import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
 import { TextVisualizationComponent } from "./textvisualization/textvisualization.component";
-import { ThreeCircleVennDiagramService } from "./venndiagram/threecirclevenndiagram.service";
-import { TwoCircleVennDiagramService } from "./venndiagram/twocirclevenndiagram.service";
-import { VennDiagramComponent } from "./venndiagram/venndiagram";
-import { VennDiagramService } from "./venndiagram/venndiagram.service";
+import { ThreeCircleVennDiagramService } from "./venn-diagram/three-circle-venn-diagram.service";
+import { TwoCircleVennDiagramService } from "./venn-diagram/two-circle-venn-diagram.service";
+import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
+import { VennDiagramService } from "./venn-diagram/venn-diagram.service";
 import { VisualizationEventService } from "./visualization-event.service";
 import { VisualizationModalComponent } from "./visualizationmodal.component";
 import { VisualizationModalService } from "./visualizationmodal.service";

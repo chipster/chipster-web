@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
-import Point from "../model/point";
-import Circle from "../model/circle";
-import { TwoCircleVennDiagramService } from "./twocirclevenndiagram.service";
-import { ThreeCircleVennDiagramService } from "./threecirclevenndiagram.service";
-import VennCircle from "./venncircle";
-import TSVFile from "../../../../../model/tsv/TSVFile";
-import VennDiagramSelection from "./venndiagramselection";
-import TSVRow from "../../../../../model/tsv/TSVRow";
-import VennDiagramText from "./venndiagramtext";
 import * as _ from "lodash";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVRow from "../../../../../model/tsv/TSVRow";
+import Circle from "../model/circle";
+import Point from "../model/point";
+import { ThreeCircleVennDiagramService } from "./three-circle-venn-diagram.service";
+import { TwoCircleVennDiagramService } from "./two-circle-venn-diagram.service";
+import VennCircle from "./venn-circle";
+import VennDiagramSelection from "./venn-diagram-selection";
+import VennDiagramText from "./venn-diagram-text";
 
 @Injectable()
 export class VennDiagramService {

@@ -1,9 +1,7 @@
 import { Injectable } from "@angular/core";
-import Point from "../model/point";
 import Circle from "../model/circle";
-import VennDiagramUtils from "./venndiagramutils";
-import VennCircle from "./venncircle";
-import VennDiagramText from "./venndiagramtext";
+import Point from "../model/point";
+import VennDiagramUtils from "./venn-diagram-utils";
 
 @Injectable()
 export class TwoCircleVennDiagramService {

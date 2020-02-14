@@ -10,15 +10,15 @@ import UtilsService from "../../../../../shared/utilities/utils";
 import { SessionDataService } from "../../session-data.service";
 import Circle from "../model/circle";
 import Point from "../model/point";
-import VennCircle from "./venncircle";
-import { VennDiagramService } from "./venndiagram.service";
-import VennDiagramSelection from "./venndiagramselection";
-import VennDiagramText from "./venndiagramtext";
-import VennDiagramUtils from "./venndiagramutils";
+import VennCircle from "./venn-circle";
+import VennDiagramSelection from "./venn-diagram-selection";
+import VennDiagramText from "./venn-diagram-text";
+import VennDiagramUtils from "./venn-diagram-utils";
+import { VennDiagramService } from "./venn-diagram.service";
 
 @Component({
   selector: "ch-venn-diagram",
-  templateUrl: "./venndiagram.html"
+  templateUrl: "./venn-diagram.component.html"
 })
 export class VennDiagramComponent implements OnChanges {
   @Input()
