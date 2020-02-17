@@ -169,9 +169,7 @@ export default class TSV2File {
     let sourceHeaders;
 
     // order matters here
-    console.log("HERE");
     if (this.hasHeadersHardcodedByType || !this.isFirstDataRowHeader) {
-      console.log("BODY", this.getBody());
       if (this.getBody().length > 0) {
         sourceHeaders = this.getBody()[0];
       } else {
