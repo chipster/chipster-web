@@ -18,11 +18,12 @@ import { VennDiagramService } from "./venn-diagram.service";
 
 @Component({
   selector: "ch-venn-diagram",
-  templateUrl: "./venn-diagram.component.html"
+  templateUrl: "./venn-diagram.component.html",
+  styleUrls: ["./venn-diagram.component.less"]
 })
 export class VennDiagramComponent implements OnChanges {
   @Input()
-  selectedDatasets: Array<any>;
+  selectedDatasets: Array<Dataset>;
 
   files: Array<TSVFile> = [];
   vennCircles: Array<VennCircle>;
@@ -241,11 +242,13 @@ export class VennDiagramComponent implements OnChanges {
     const parentDatasetIds = this.selectedDatasets.map(
       (dataset: Dataset) => dataset.datasetId
     );
+
     const data = this.venndiagramService.generateNewDatasetTSV(
       this.files,
       this.diagramSelection,
       this.columnKey
     );
+
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
       .createDerivedDataset(
@@ -255,7 +258,7 @@ export class VennDiagramComponent implements OnChanges {
         tsvData
       )
       .subscribe(null, err =>
-        this.restErrorService.showError("create dataset failed", err)
+        this.restErrorService.showError("Create file failed", err)
       );
   }
 

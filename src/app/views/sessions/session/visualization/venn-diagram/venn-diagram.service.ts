@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import * as _ from "lodash";
 import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import Circle from "../model/circle";
 import Point from "../model/point";
@@ -98,14 +99,18 @@ export class VennDiagramService {
     );
 
     // intersecting values from selected circles minus values in difference circles
-    return _.differenceBy(intersection, ...differenceValues, <any>(
-      compareByIndex
-    ));
+    return _.differenceBy(
+      intersection,
+      ...differenceValues,
+      compareByIndex as any
+    );
   }
 
   /*
-   * @description: return the subarrays (arrays with two values) that are found in each array
-   * since wanted values should reside in each array we can compare only values in the first array to all the rest arrays and see if a value is found in each of them.
+   * @description: return the subarrays (arrays with two values) that are
+   * found in each array since wanted values should reside in each array
+   * we can compare only values in the first array to all the rest arrays
+   * and see if a value is found in each of them.
    */
   intersectionBySubarrayIndex(
     values: Array<Array<Array<string>>>,
@@ -136,43 +141,74 @@ export class VennDiagramService {
   generateNewDatasetTSV(
     files: Array<TSVFile>,
     selection: VennDiagramSelection,
-    columnKey: string
+    keyColumn: string
   ): Array<Array<string>> {
-    const columnKeyIndex = columnKey === "symbol" ? 0 : 1;
+    // the order here is different from normal tsv files
+    // this is the order identifier and symbol are shown in the venn diagram side panel
+    const selectionKeyColumnIndex = keyColumn === "symbol" ? 0 : 1;
 
-    // all headers from given files
-    const headers = _.chain(files)
-      .map((file: TSVFile) => file.headers.headers)
-      .flatten()
-      .uniq()
-      .value();
+    // get tsvFiles for the selected files
+    const tsvFiles = files.filter((tsvFile: TSVFile) =>
+      selection.datasetIds.includes(tsvFile.datasetId)
+    );
 
-    let body = [];
-    _.forEach(selection.datasetIds, (datasetId: string) => {
-      const file = _.find(
-        files,
-        (file: TSVFile) => file.datasetId === datasetId
-      );
-      const values = _.flatMap(
-        selection.values,
-        (valueTuple: [string | undefined, string | undefined]) =>
-          valueTuple[columnKeyIndex]
-      );
-      const keyColumnIndex = file.getColumnIndex(columnKey); // index where the values are collected
-      _.forEach(files, (file: TSVFile) => {
-        const rows = this.getTSVRowsContainingValues(
-          file,
-          values,
-          keyColumnIndex
-        );
-        const sortedIndexMapping = this.getSortedIndexMapping(file, headers);
-        const sortedRows = this.rearrangeCells(rows, sortedIndexMapping);
-        body = body.concat(sortedRows);
-      });
+    // put all rows from tsvFiles to maps, use columnKey as the key
+    const tsvMaps = tsvFiles.map((tsvFile: TSVFile) => {
+      return this.tsvFileToMap(tsvFile, keyColumn);
     });
-    return [headers, ...body];
+
+    // get headers of the tsvFiles
+    const tsvHeaders = tsvFiles.map((tsvFile: TSVFile) => {
+      return tsvFile.headers;
+    });
+
+    // go through selection, pick rows from all selected files
+    const newRowsAsMaps = selection.values.map(
+      (selectionRow: Array<string>) => {
+        const keyValue = selectionRow[selectionKeyColumnIndex];
+        const newRowMap = new Map<string, string>();
+        tsvMaps.forEach((tsvMap, i) => {
+          const row = tsvMap.get(keyValue);
+          tsvHeaders[i].headers.forEach((header, j) => {
+            if (!newRowMap.has(header)) {
+              newRowMap.set(header, row[j]);
+            } else if (newRowMap.get(header) !== row[j]) {
+              // TODO use proper dialog
+              throw new Error(
+                "Inequal value for key " +
+                  keyValue +
+                  ", column " +
+                  header +
+                  ", file " +
+                  tsvFiles[i].filename +
+                  " has " +
+                  row[j] +
+                  ", previous file had " +
+                  newRowMap.get(header)
+              );
+            }
+          });
+        });
+        return newRowMap;
+      }
+    );
+
+    const uniqueHeadersArray = this.getUniqueHeaders(tsvHeaders);
+
+    // turn maps to rows
+    const body = newRowsAsMaps.map(rowMap => {
+      return uniqueHeadersArray.map(header => rowMap.get(header));
+    });
+
+    return [uniqueHeadersArray, ...body];
   }
 
+  /*
+   * @description: Create new TSVFile based on selected values
+   */
+  /*
+   * @description: map given tsv bodyrows items to new indexes in
+   */
   /*
    * @description: map given tsv bodyrows items to new indexes in
    */
@@ -438,5 +474,36 @@ export class VennDiagramService {
     );
 
     return result;
+  }
+
+  private getUniqueHeaders(tsvHeaders: Array<TSVHeaders>): Array<string> {
+    return Array.from(
+      tsvHeaders
+        .map(tsvHeader => tsvHeader.headers)
+        .reduce(
+          (uniqueHeadersSet: Set<string>, headersArray: Array<string>) => {
+            headersArray.forEach((header: string) => {
+              uniqueHeadersSet.add(header);
+            });
+            return uniqueHeadersSet;
+          },
+          new Set<string>()
+        )
+    );
+  }
+
+  private tsvFileToMap(
+    tsvFile: TSVFile,
+    keyColumn
+  ): Map<string, Array<string>> {
+    const keyColumnIndex = tsvFile.headers.getColumnIndexByKey(keyColumn);
+    return new Map(
+      tsvFile.body
+        .getRawDataRows()
+        .map(
+          (row: Array<string>) =>
+            [row[keyColumnIndex], row] as [string, Array<string>]
+        )
+    );
   }
 }
