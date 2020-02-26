@@ -107,7 +107,7 @@ export class GetSessionDataService {
     const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
     return sourceJob != null &&
       sourceJob.inputs != null &&
-      sourceJob.inputs.length > 1
+      sourceJob.inputs.length > 0
       ? sourceJob.inputs
           .map(jobInput => this.sessionData.datasetsMap.get(jobInput.datasetId))
           .filter(parentDataset => parentDataset != null)
