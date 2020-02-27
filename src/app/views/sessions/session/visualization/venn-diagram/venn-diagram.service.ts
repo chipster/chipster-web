@@ -173,21 +173,13 @@ export class VennDiagramService {
             if (!newRowMap.has(header)) {
               newRowMap.set(header, row[j]);
             } else if (newRowMap.get(header) !== row[j]) {
-              const message =
-                `<p>Inequal value for row key <i>${keyValue}</i>, column <i>${header}</i>.</div><div>File <i>${
-                  tsvFiles[i].filename
-                }</i> has ${row[j]}, other file has ${newRowMap.get(
-                  header
-                )}.</p>` +
-                `<p>This happends if two or more source files have common column header other
-                the one used as the common denominator and if for the same row key in these
-                files the value of such column is not equal.</p><p>For example, two files could
-                both have <i>pValue</i> column and for a row with the row key <i>DPEP1</i> this
-                column could have different values <i>0.0001</i> and <i>0.0002</i> in the two
-                files. In such a case it's unclear what would be the correct value for this row/column
-                in the file to be created.</p><p>For now, to avoid unwanted surprises creating the
-                new file fails in this situation. In the future it may be possible to choose how to
-                 proceed in a situation like this.</p>`;
+              const message = this.getUnequalErrorMessage(
+                tsvFiles,
+                tsvMaps,
+                tsvHeaders,
+                keyValue,
+                header
+              );
               throw new Error(message);
             }
           });
@@ -508,5 +500,39 @@ export class VennDiagramService {
             [row[keyColumnIndex], row] as [string, Array<string>]
         )
     );
+  }
+
+  private getUnequalErrorMessage(
+    tsvFiles: Array<TSVFile>,
+    tsvMaps: Array<Map<string, Array<string>>>,
+    tsvHeaders: Array<TSVHeaders>,
+    key: string,
+    header: string
+  ): string {
+    const filesAndValues = tsvFiles
+      .map((tsvFile, i) => {
+        const columnIndex = tsvHeaders[i].getColumnIndexByKey(header);
+        if (columnIndex !== -1) {
+          return [tsvFile.filename, tsvMaps[i].get(key)[columnIndex]];
+        } else {
+          return null;
+        }
+      })
+      .filter(fileAndValue => fileAndValue != null)
+      .reduce((s: string, fileAndValue: Array<string>) => {
+        return s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>";
+      }, "");
+
+    const message =
+      `<p>Unequal value for row <i>${key}</i>, column <i>${header}</i>.</p>` +
+      `<p><ul>${filesAndValues}</ul></p>` +
+      `<p>This happens if two or more inputs have a common column header and the value in that column is the same.</p>
+      <p>For example, the files could have a <i>pValue</i> column and for a row <i>DPEP1</i> this
+      column could have different values <i>0.0001</i> and <i>0.0002</i>. In this case it's unclear
+      what would be the correct value for this cell in the file to be created.</p><p>For now,
+      <i>Create file</i> fails in this situation. In the future it may be possible to choose how to
+       proceed in a situation like this.</p>`;
+
+    return message;
   }
 }
