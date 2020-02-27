@@ -7,6 +7,7 @@ import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DialogModalService } from "./dialogmodal.service";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
+import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
@@ -23,7 +24,8 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     SpinnerModalComponent,
     TempCopyModalComponent,
     PreModalComponent,
-    DownloadFromUrlModalComponent
+    DownloadFromUrlModalComponent,
+    NotificationModalComponent
   ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],
@@ -35,7 +37,8 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     SpinnerModalComponent,
     TempCopyModalComponent,
     PreModalComponent,
-    DownloadFromUrlModalComponent
+    DownloadFromUrlModalComponent,
+    NotificationModalComponent
   ]
 })
 export class DialogModalModule {}

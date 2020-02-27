@@ -6,6 +6,7 @@ import { catchError } from "rxjs/operators";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
+import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
 import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
@@ -41,6 +42,15 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
     modalRef.componentInstance.placeHolder = "";
+    return DialogModalService.observableFromPromiseWithDismissHandling(
+      modalRef.result
+    );
+  }
+
+  openNotificationModal(title, message) {
+    const modalRef = this.modalService.open(NotificationModalComponent);
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
     return DialogModalService.observableFromPromiseWithDismissHandling(
       modalRef.result
     );
