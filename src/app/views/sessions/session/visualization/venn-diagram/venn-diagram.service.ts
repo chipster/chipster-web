@@ -173,19 +173,22 @@ export class VennDiagramService {
             if (!newRowMap.has(header)) {
               newRowMap.set(header, row[j]);
             } else if (newRowMap.get(header) !== row[j]) {
-              // TODO use proper dialog
-              throw new Error(
-                "Inequal value for key " +
-                  keyValue +
-                  ", column " +
-                  header +
-                  ", file " +
-                  tsvFiles[i].filename +
-                  " has " +
-                  row[j] +
-                  ", previous file had " +
-                  newRowMap.get(header)
-              );
+              const message =
+                `<p>Inequal value for row key <i>${keyValue}</i>, column <i>${header}</i>.</div><div>File <i>${
+                  tsvFiles[i].filename
+                }</i> has ${row[j]}, other file has ${newRowMap.get(
+                  header
+                )}.</p>` +
+                `<p>This happends if two or more source files have common column header other
+                the one used as the common denominator and if for the same row key in these
+                files the value of such column is not equal.</p><p>For example, two files could
+                both have <i>pValue</i> column and for a row with the row key <i>DPEP1</i> this
+                column could have different values <i>0.0001</i> and <i>0.0002</i> in the two
+                files. In such a case it's unclear what would be the correct value for this row/column
+                in the file to be created.</p><p>For now, to avoid unwanted surprises creating the
+                new file fails in this situation. In the future it may be possible to choose how to
+                 proceed in a situation like this.</p>`;
+              throw new Error(message);
             }
           });
         });

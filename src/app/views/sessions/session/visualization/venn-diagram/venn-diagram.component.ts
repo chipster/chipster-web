@@ -7,6 +7,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import { TsvService } from "../../../../../shared/services/tsv.service";
 import UtilsService from "../../../../../shared/utilities/utils";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { SessionDataService } from "../../session-data.service";
 import Circle from "../model/circle";
 import Point from "../model/point";
@@ -38,7 +39,8 @@ export class VennDiagramComponent implements OnChanges {
     private tsvService: TsvService,
     private venndiagramService: VennDiagramService,
     private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private dialogModalService: DialogModalService
   ) {}
 
   ngOnChanges() {
@@ -243,16 +245,24 @@ export class VennDiagramComponent implements OnChanges {
       (dataset: Dataset) => dataset.datasetId
     );
 
-    const data = this.venndiagramService.generateNewDatasetTSV(
-      this.files,
-      this.diagramSelection,
-      this.columnKey
-    );
-
+    let data;
+    try {
+      data = this.venndiagramService.generateNewDatasetTSV(
+        this.files,
+        this.diagramSelection,
+        this.columnKey
+      );
+    } catch (error) {
+      this.dialogModalService.openNotificationModal(
+        "Create file failed",
+        error.message
+      );
+      return;
+    }
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
       .createDerivedDataset(
-        "dataset.tsv",
+        "venn.tsv",
         parentDatasetIds,
         "Venn-Diagram",
         tsvData
