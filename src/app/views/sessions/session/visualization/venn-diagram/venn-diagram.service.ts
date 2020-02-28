@@ -170,18 +170,20 @@ export class VennDiagramService {
         tsvMaps.forEach((tsvMap, i) => {
           const row = tsvMap.get(keyValue);
           tsvHeaders[i].headers.forEach((header, j) => {
+            // TODO for now use the selection order of the inputs
             if (!newRowMap.has(header)) {
               newRowMap.set(header, row[j]);
-            } else if (newRowMap.get(header) !== row[j]) {
-              const message = this.getUnequalErrorMessage(
-                tsvFiles,
-                tsvMaps,
-                tsvHeaders,
-                keyValue,
-                header
-              );
-              throw new Error(message);
             }
+            // else if (newRowMap.get(header) !== row[j]) {
+            //   const message = this.getUnequalErrorMessage(
+            //     tsvFiles,
+            //     tsvMaps,
+            //     tsvHeaders,
+            //     keyValue,
+            //     header
+            //   );
+            //   throw new Error(message);
+            // }
           });
         });
         return newRowMap;
