@@ -1,16 +1,28 @@
 <div *ngIf="state.isReady(); else statusTemplate">
 
-  <label style="font-size: smaller;" *ngIf="showingTruncated">The full file is too big to load, showing first
-    {{lineCount}}
-    rows </label>
-  <label style="font-size: smaller;" *ngIf="!fullFileVisible && !showingTruncated ">First {{lineCount}} rows of
-    {{totalRowCount}} <span style=" font-style: italic">View
-      in <span class="btn-link" (click)="showAll()">full screen
-      </span> to see all the rows. </span></label>
-  <label style="font-size: smaller;" *ngIf="fullFileVisible && !showingTruncated">showing {{lineCount}} rows of
-    {{totalRowCount}} rows</label>
-  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
+  <!-- preview and modal full file -->
+  <span style="font-size: smaller;" *ngIf="gotFullFile && !limitRows && rowCount > 0">Showing all
+    {{rowCount}} rows. </span>
+  <span style="font-size: smaller;" *ngIf="gotFullFile && !limitRows && rowCount === 0">No data rows.</span>
 
+
+  <!-- preview, full file, but preview limiting visible rows -->
+  <span style="font-size: smaller;" *ngIf="!modalMode && gotFullFile && limitRows">Showing the first {{rowCount}} of
+    {{rowCountBeforeLimit}} rows.</span>
+
+  <!-- preview, line count maybe available in full screen-->
+  <span style="font-size: smaller;" *ngIf="!modalMode && !gotFullFile">Showing the first
+    {{rowCount}} rows.</span>
+
+  <!-- modal, total count not available -->
+  <span style="font-size: smaller;" *ngIf="modalMode && !gotFullFile">Showing the first
+    {{rowCount}} rows. File is too big for total row count.</span>
+
+  <!-- full screen text and link for preview-->
+  <span *ngIf="!modalMode && (!gotFullFile || limitRows)" style="font-size: smaller;"> View in <span class="btn-link"
+      (click)="showAll()">full
+      screen</span> {{goToFullScreenText}}.</span>
+  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
 </div>
 
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->

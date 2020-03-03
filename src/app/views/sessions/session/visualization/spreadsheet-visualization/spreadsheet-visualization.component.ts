@@ -10,6 +10,7 @@ import {
 import { Response } from "@angular/http";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
+import log from "loglevel";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -45,17 +46,18 @@ export class SpreadsheetVisualizationComponent
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
   // takes ~100 ms with ADSL
-  private fileSizeLimit = 100 * 1024;
-  private modalFileSizeLimit = 20 * 1024 * 1024;
+  private readonly fileSizeLimit = 1 * 1024 * 1024;
+  private readonly modalFileSizeLimit = 10 * 1024 * 1024;
   // nice round number for tables with reasonable number of columns
-  private maxRowsimit = 100;
-  // limit the number of rows even further if there are hundreds or thousands
-  // of columns to keep the page somewhat responsive
-  private maxCellsLimit = 10 * 1000;
-  public lineCount: number;
-  public fullFileVisible;
-  public showingTruncated;
-  public totalRowCount;
+  private readonly maxRowsLimit = 100;
+  public gotFullFile: boolean;
+  public limitRows: boolean;
+  public getTruncatedFile: boolean;
+  public modalWillHaveFullFile: boolean;
+  public goToFullScreenText: string;
+  private parsedTsvTotalRowCount: number;
+  public rowCount: number;
+  public rowCountBeforeLimit: number;
   readonly tableContainerId: string =
     "tableContainer-" +
     Math.random()
@@ -94,65 +96,57 @@ export class SpreadsheetVisualizationComponent
       return;
     }
 
-    if (this.dataset.size > this.modalFileSizeLimit && this.modalMode) {
-      this.showingTruncated = true;
-    }
-    // limiting the full screen downloaded stream size also as it freezes the view
-    const modalfileSizeLimit =
-      this.dataset.size < this.modalFileSizeLimit
-        ? null
-        : this.modalFileSizeLimit;
-    const maxBytes = this.modalMode ? modalfileSizeLimit : this.fileSizeLimit;
+    // needed also in the preview text
+    this.modalWillHaveFullFile = this.dataset.size <= this.modalFileSizeLimit;
+
+    // modal mode could be undefined, we want explicit true or false
+    this.getTruncatedFile =
+      (!this.modalMode && this.dataset.size > this.fileSizeLimit) ||
+      (this.modalMode && this.dataset.size > this.modalFileSizeLimit)
+        ? true
+        : false;
+
+    // limit the full screen downloaded stream size also as it freezes the view
+    const maxLimit = this.modalMode
+      ? this.modalFileSizeLimit
+      : this.fileSizeLimit;
+    const maxBytes = this.getTruncatedFile ? maxLimit : null;
 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
-          // parse all loaded data
-          let parsedTSV = d3.tsvParseRows(result);
-          this.totalRowCount = parsedTSV.length;
+          this.gotFullFile = result.length === this.dataset.size;
 
-          // if its a modal, show the entire file otherwise limit the rows
-          if (!this.modalMode) {
-            // limit the number of rows to show
-            if (parsedTSV.length > this.maxRowsimit + 1) {
-              parsedTSV = parsedTSV.slice(0, this.maxRowsimit + 1);
-            }
-
-            // limit the number of cells to show
-            const columns = parsedTSV[0].length;
-            if (parsedTSV.length * columns > this.maxCellsLimit) {
-              parsedTSV = parsedTSV.slice(0, this.maxCellsLimit / columns);
-            }
+          if (!this.getTruncatedFile && !this.gotFullFile) {
+            log.warn(
+              `should have gotten full file, but result size is ${result.length} while dataset size is ${this.dataset.size}`
+            );
           }
 
-          // skip comment lines, e.g. lines starting with ## in a VCF file
-          const skipLines = this.typeTagService.get(
+          // parse all loaded data
+          let parsedTSV = d3.tsvParseRows(result);
+          this.parsedTsvTotalRowCount = parsedTSV.length;
+
+          // if not full file, remove the last, possibly incomplete line
+          // could be the only line, will then show first 0 lines instead of a truncated first line
+
+          if (!this.gotFullFile) {
+            parsedTSV.pop();
+          }
+
+          // filter out comment lines, e.g. lines starting with ## in a VCF file
+          const skipLinesPrefix = this.typeTagService.get(
             this.sessionData,
             this.dataset,
             Tags.SKIP_LINES
           );
-
-          if (skipLines) {
-            parsedTSV = parsedTSV.filter(row => !row[0].startsWith(skipLines));
+          if (skipLinesPrefix) {
+            parsedTSV = parsedTSV.filter(
+              row => !row[0].startsWith(skipLinesPrefix)
+            );
           }
-
-          // if not full file, remove the last, possibly incomplete line
-          // could be the only line, will then show first 0 lines instead of a truncated first line
-          if (result.length < this.dataset.size) {
-            this.fullFileVisible = false;
-            parsedTSV.pop();
-          } else {
-            if (this.totalRowCount > parsedTSV.length) {
-              this.fullFileVisible = false;
-            } else {
-              this.fullFileVisible = true;
-            }
-          }
-          // FIXME maybe make it more clear whether header is included in the line count or not
-          // TSV2File has fields for figuring this out
-          this.lineCount = parsedTSV.length;
 
           const tsv2File = this.tsvService.getTSV2FileFromArray(
             this.dataset,
@@ -163,11 +157,34 @@ export class SpreadsheetVisualizationComponent
           let headers = tsv2File.getHeadersForSpreadSheet();
           let body = tsv2File.getBody();
 
+          // if not in modal, limit the rows if needed
+          this.limitRows = !this.modalMode && body.length > this.maxRowsLimit;
+          this.rowCountBeforeLimit = body.length;
+          if (this.limitRows) {
+            body = body.slice(0, this.maxRowsLimit);
+          }
+          this.rowCount = body.length;
+
           // if there is only one line, show it as content, because Handsontable doesn't allow
           // headers to be shown alone
           if (body.length === 0) {
             body = [headers];
             headers = null;
+            this.rowCount = 0;
+          }
+
+          // set the text after full screen link
+          if (!this.modalMode) {
+            if (this.gotFullFile && !this.limitRows) {
+              this.goToFullScreenText = "";
+            } else if (this.gotFullFile && this.limitRows) {
+              this.goToFullScreenText = " to see all rows";
+            } else if (!this.gotFullFile && this.modalWillHaveFullFile) {
+              this.goToFullScreenText = " to see all rows and total row count";
+            } else if (!this.gotFullFile && !this.modalWillHaveFullFile) {
+              this.goToFullScreenText =
+                " to see more rows. File is too big the total row count";
+            }
           }
 
           const container = document.getElementById(this.tableContainerId);

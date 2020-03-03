@@ -85,8 +85,11 @@ export class FileResource {
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
-    const headers = this.tokenService.getTokenHeader();
-    headers.set("range", `bytes=0-${maxBytes}`);
+    let headers = this.tokenService.getTokenHeader();
+    if (maxBytes) {
+      headers = headers.set("range", `bytes=0-${maxBytes}`);
+    }
+
     if (isReqArrayBuffer) {
       return apiUrl$.pipe(
         mergeMap((url: string) =>
