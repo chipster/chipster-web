@@ -33,8 +33,8 @@ export class DatasetHistorymodalComponent implements OnInit {
     { id: "parameters", name: "Parameters", enabled: true },
     { id: "resultFileName", name: "Result file", enabled: true },
     { id: "date", name: "Date", enabled: true },
-    { id: "stepTitle", name: "Step title", enabled: true }
-    // { id: "sourceCode", name: "Source code", enabled: false }
+    { id: "stepTitle", name: "Step title", enabled: true },
+    { id: "sourceCode", name: "Source code", enabled: false }
   ];
 
   public historyOptionsMap: Map<string, HistoryOption>;

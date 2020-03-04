@@ -11,7 +11,7 @@
   <div class="form-group">
     <div class="row">
       <div *ngFor="let option of historyOptions;let i=index" class="col-sm">
-        <label>
+        <label class="no-break">
           <input type="checkbox" name="{{option.id}}" value="{{option.enabled}}" [checked]="option.enabled"
             (change)="updateOption(option)" /> {{option.name}}
         </label>
@@ -32,17 +32,17 @@
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
-        <td class="lighter">{{historyOptionsMap.get('sourceJobName').name}}:</td>
+        <td class="lighter no-break">{{historyOptionsMap.get('sourceJobName').name}}:</td>
         <td class="width-max">{{item.sourceJob.toolCategory}} / {{item.sourceJob.toolName}}</td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
-        <td class="lighter">{{historyOptionsMap.get('inputFileNames').name}}:</td>
+        <td class="lighter no-break">{{historyOptionsMap.get('inputFileNames').name}}:</td>
         <td class="width-max">{{item.inputFileNamesString}} </td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('parameters').enabled">
-        <td class="lighter">{{historyOptionsMap.get('parameters').name}}:</td>
+        <td class="lighter no-break">{{historyOptionsMap.get('parameters').name}}:</td>
         <td class="width-max" id="parameters-container">
           <ch-dataset-parameter-list *ngIf="item.sourceJob && item.sourceJob.parameters.length > 0"
             [parameters]="item.sourceJob.parameters" [parametersLimit]="-1" [tool]="null" [historyMode]="true">
@@ -51,7 +51,7 @@
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('date').enabled">
-        <td class="lighter">{{historyOptionsMap.get('date').name}}:</td>
+        <td class="lighter no-break">{{historyOptionsMap.get('date').name}}:</td>
         <td class="width-max">{{item.creationDate| localDate}}</td>
       </tr>
 
@@ -59,6 +59,16 @@
         <td class="lighter">{{historyOptionsMap.get('resultFileName').name}}:</td>
         <td class="width-max">{{item.datasetName}} </td>
       </tr>
+
+      <tr *ngIf="historyOptionsMap.get('sourceCode').enabled">
+        <td class="lighter no-break">Source code:</td>
+        <td class="width-max">
+          <pre *ngIf="item.sourceCode != null && item.sourceCode.length > 0"
+            style="overflow: auto; width: 600px"><code>{{item.sourceCode}}</code></pre>
+        </td>
+      </tr>
+
+
     </div>
   </table>
 </div>
