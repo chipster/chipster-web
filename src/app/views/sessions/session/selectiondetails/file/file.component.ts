@@ -1,14 +1,13 @@
-import { mergeMap } from "rxjs/operators";
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { SessionDataService } from "../../session-data.service";
-import { SelectionService } from "../../selection.service";
-import { Dataset, Tool } from "chipster-js-common";
-import { Job } from "chipster-js-common";
-import { SessionData } from "../../../../../model/session/session-data";
-import { DatasetModalService } from "../datasetmodal.service";
-import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { Dataset, Job, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import { mergeMap } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../../../model/session/session-data";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { SelectionService } from "../../selection.service";
+import { SessionDataService } from "../../session-data.service";
+import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
   selector: "ch-file",
@@ -38,7 +37,7 @@ export class FileComponent {
   renameDataset() {
     const dataset = _.clone(this.dataset);
     this.dialogModalService
-      .openStringModal("Rename dataset", "Dataset name", dataset.name, "Rename")
+      .openStringModal("Rename file", "File name", dataset.name, "Rename")
       .pipe(
         mergeMap(name => {
           dataset.name = name;
@@ -46,7 +45,7 @@ export class FileComponent {
         })
       )
       .subscribe(null, err =>
-        this.restErrorService.showError("dataset rename error", err)
+        this.restErrorService.showError("Rename file failed", err)
       );
   }
 

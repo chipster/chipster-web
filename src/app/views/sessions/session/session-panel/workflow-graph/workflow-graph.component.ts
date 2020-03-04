@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewEncapsulation
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Job, Module } from "chipster-js-common";
 import * as d3 from "d3";
@@ -713,12 +721,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         action: function(d): void {
           const dataset = _.clone(d.dataset);
           self.dialogModalService
-            .openStringModal(
-              "Rename dataset",
-              "Dataset name",
-              dataset.name,
-              "Rename"
-            )
+            .openStringModal("Rename file", "File name", dataset.name, "Rename")
             .pipe(
               flatMap(name => {
                 dataset.name = name;
@@ -726,7 +729,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               })
             )
             .subscribe(null, err =>
-              this.restErrorService.showErro("dataset rename failed", err)
+              this.restErrorService.showErro("Rename file failed", err)
             );
         },
         disabled: false // optional, defaults to false
@@ -856,7 +859,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
       this.d3DatasetNodes.each(function(d, i) {
         const selection = d3.select(this).node();
-        self.createTooltipById(selection, d, i, datasetClientRects, svgClientRect);
+        self.createTooltipById(
+          selection,
+          d,
+          i,
+          datasetClientRects,
+          svgClientRect
+        );
       });
     }
 
@@ -1258,7 +1267,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // creating tooltip for every node which will be hidden and when search is enabled, it will be shown
-  createTooltipById(element, dataset: DatasetNode, id, datasetClientRects: Map<string, ClientRect>, svgClientRect: ClientRect): void {
+  createTooltipById(
+    element,
+    dataset: DatasetNode,
+    id,
+    datasetClientRects: Map<string, ClientRect>,
+    svgClientRect: ClientRect
+  ): void {
     const tooltip = new DatasetNodeToolTip();
     this.datasetToolTipArray[id] = tooltip;
     this.datasetToolTipArray[id].datasetId = dataset.datasetId;
@@ -1388,7 +1403,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   getToolTipBoundingClientRects(): Map<string, ClientRect> {
     const boundingClientRects = new Map<string, ClientRect>();
     this.datasetToolTipArray.forEach(datasetNode => {
-
       const element = document.getElementById(datasetNode.datasetId);
       if (element != null) {
         const rect = element.getBoundingClientRect();
