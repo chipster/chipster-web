@@ -6,7 +6,7 @@ import { SharedModule } from "../../../../shared/shared.module";
 import { LinkButtonModule } from "../link-button/link-button.module";
 import { VisualizationsModule } from "../visualization/visualizations.module";
 import { DatasetDetailsComponent } from "./dataset-details/dataset-details.component";
-import { DatasetHistorymodalComponent } from "./datasethistorymodal/datasethistorymodal.component";
+import { DatasetHistorymodalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { DatasetModalService } from "./datasetmodal.service";
 import { FileComponent } from "./file/file.component";
 import { JobComponent } from "./job/job.component";

@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
-import { DatasetHistorymodalComponent } from "./datasethistorymodal/datasethistorymodal.component";
+import { DatasetHistorymodalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 
 @Injectable()
 export class DatasetModalService {
