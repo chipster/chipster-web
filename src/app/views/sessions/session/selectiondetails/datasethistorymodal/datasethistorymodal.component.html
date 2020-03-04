@@ -1,43 +1,68 @@
 <div class="modal-header">
-  <h4 class="modal-title">{{dataset.name}}</h4>
+  <h4 class="modal-title">History of {{dataset.name}}</h4>
   <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div class="modal-body">
+
+  <!-- options -->
+  <h2 class="h2-xs">Fields</h2>
   <div class="form-group">
-    <div *ngFor="let option of historyFilterOptions;let i=index" class="row">
-      <label>
-        <input type="checkbox"
-               name="historyFilterOptions"
-               value="{{option}}"
-               [checked]="historyFilterOptions.indexOf(option)>=0"
-               (change)="updateCheckedOptions(option,$event)"/> {{option}}
-      </label>
+    <div class="row">
+      <div *ngFor="let option of historyOptions;let i=index" class="col-sm">
+        <label>
+          <input type="checkbox" name="{{option.id}}" value="{{option.enabled}}" [checked]="option.enabled"
+            (change)="updateOption(option)" /> {{option.name}}
+        </label>
+      </div>
     </div>
   </div>
 
+  <!-- history steps -->
+  <h2 class="h2-xs">History</h2>
+  <table class="table table-sm text-sm table-condensed">
 
-  <div class="row" *ngFor="let item of datasetHistorySteps;let i=index">
-    <h6 *ngIf="getCheckedOptionStatus(0)">Step {{i+1}}</h6>
-    <br>
-    <table class="table-sm text-sm">
-      <tr *ngIf="getCheckedOptionStatus(1)">Dataset Name: {{item.datasetName}}</tr>
-      <tr *ngIf="getCheckedOptionStatus(2)">Created: {{item.creationDate| localDate}}</tr>
-      <tr *ngIf="getCheckedOptionStatus(3)">Created with operation: {{item.sourceJobName}}</tr>
-      <tr>Input file Name: {{item.inputFileName}}</tr>
-      <div *ngIf="getCheckedOptionStatus(4)">
-        <h6>Parameters</h6>
-        <table class="table-sm text-sm" *ngFor="let parameter of item.parameterList">
-          <tr>{{parameter.displayName}}:{{parameter.value}}</tr>
-        </table>
-      </div>
-      <tr *ngIf="getCheckedOptionStatus(5)"> Operation Source Code:{{item.sourceCode}}</tr>
-    </table>
-  </div>
+    <div class="step" *ngFor="let item of datasetHistorySteps;let i=index">
 
+      <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
+        <td class="" colspan="2">
+          <h4 class="h4-xs step-header">Step {{i+1}}</h4>
+        </td>
+      </tr>
 
+      <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
+        <td class="lighter">{{historyOptionsMap.get('sourceJobName').name}}:</td>
+        <td class="width-max">{{item.sourceJob.toolCategory}} / {{item.sourceJob.toolName}}</td>
+      </tr>
+
+      <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
+        <td class="lighter">{{historyOptionsMap.get('inputFileNames').name}}:</td>
+        <td class="width-max">{{item.inputFileNamesString}} </td>
+      </tr>
+
+      <tr *ngIf="historyOptionsMap.get('parameters').enabled">
+        <td class="lighter">{{historyOptionsMap.get('parameters').name}}:</td>
+        <td class="width-max" id="parameters-container">
+          <ch-dataset-parameter-list *ngIf="item.sourceJob && item.sourceJob.parameters.length > 0"
+            [parameters]="item.sourceJob.parameters" [parametersLimit]="-1" [tool]="null" [historyMode]="true">
+          </ch-dataset-parameter-list>
+        </td>
+      </tr>
+
+      <tr *ngIf="historyOptionsMap.get('date').enabled">
+        <td class="lighter">{{historyOptionsMap.get('date').name}}:</td>
+        <td class="width-max">{{item.creationDate| localDate}}</td>
+      </tr>
+
+      <tr *ngIf="historyOptionsMap.get('resultFileName').enabled">
+        <td class="lighter">{{historyOptionsMap.get('resultFileName').name}}:</td>
+        <td class="width-max">{{item.datasetName}} </td>
+      </tr>
+    </div>
+  </table>
 </div>
+
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
 </div>

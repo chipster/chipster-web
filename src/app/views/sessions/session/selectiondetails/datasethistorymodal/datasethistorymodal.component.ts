@@ -1,35 +1,43 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Dataset, Job, JobInput, JobParameter } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
-import { Job, JobParameter, Dataset } from "chipster-js-common";
 
+export class DatasetHistoryStep {
+  datasetName: string;
+  creationDate: string;
+  sourceJobName: string;
+  sourceJob: Job;
+  parameterList: JobParameter[];
+  inputFileNamesString: string;
+  sourceCode: string;
+}
+
+interface HistoryOption {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
 @Component({
   selector: "ch-datasethistorymodal",
   templateUrl: "./datasethistorymodal.component.html",
   styleUrls: ["./datasethistorymodal.component.less"]
 })
 export class DatasetHistorymodalComponent implements OnInit {
-  @Input("dataset") dataset: Dataset;
-  @Input("sessionData") sessionData: SessionData;
+  @Input() dataset: Dataset;
+  @Input() sessionData: SessionData;
 
-  // manipulating the checkboxes for history options
-  historyFilterOptions = [
-    "StepTitle",
-    "DatasetName",
-    "CreationDate",
-    "AppliedTool",
-    "Parameter",
-    "SourceCode"
+  public historyOptions: Array<HistoryOption> = [
+    { id: "sourceJobName", name: "Tool", enabled: true },
+    { id: "inputFileNames", name: "Input files", enabled: true },
+    { id: "parameters", name: "Parameters", enabled: true },
+    { id: "resultFileName", name: "Result file", enabled: true },
+    { id: "date", name: "Date", enabled: true },
+    { id: "stepTitle", name: "Step title", enabled: true }
+    // { id: "sourceCode", name: "Source code", enabled: false }
   ];
-  historyOptionMap = {
-    StepTitle: false,
-    DatasetName: false,
-    CreationDate: false,
-    AppliedTool: false,
-    Parameter: false,
-    SourceCode: false
-  };
-  historyOptionChecked = [];
+
+  public historyOptionsMap: Map<string, HistoryOption>;
 
   stepCount: number;
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
@@ -37,26 +45,22 @@ export class DatasetHistorymodalComponent implements OnInit {
   constructor(public activeModal: NgbActiveModal) {}
 
   ngOnInit(): void {
+    this.historyOptionsMap = new Map();
+    this.historyOptions.forEach(option =>
+      this.historyOptionsMap.set(option.id, option)
+    );
+
     this.stepCount = 0;
     this.getHistoryData();
-    this.initHistoryOptionMap();
   }
 
-  initHistoryOptionMap() {
-    for (let x = 0; x < this.historyFilterOptions.length; x++) {
-      this.historyOptionMap[this.historyFilterOptions[x]] = true;
-    }
+  updateOption(option: HistoryOption): void {
+    option.enabled = !option.enabled;
   }
 
-  updateCheckedOptions(option, event) {
-    this.historyOptionMap[option] = event.target.checked;
-  }
+  getHistoryData(): void {
+    // TODO refactor
 
-  getCheckedOptionStatus(index: number) {
-    return this.historyOptionMap[this.historyFilterOptions[index]];
-  }
-
-  getHistoryData() {
     let sourceJobId: string = this.dataset.sourceJob;
     let datasetId: string = this.dataset.datasetId;
     let curSourceJob: Job;
@@ -76,9 +80,12 @@ export class DatasetHistorymodalComponent implements OnInit {
         datasetId
       ).name;
       curStepDetail.creationDate = this.sessionData.session.created;
+      curStepDetail.sourceJob = curSourceJob;
       curStepDetail.sourceJobName = curSourceJob.toolName;
       curStepDetail.parameterList = curSourceJob.parameters;
-      curStepDetail.inputFileName = curSourceJob.inputs[0].displayName;
+      curStepDetail.inputFileNamesString = curSourceJob.inputs
+        .map((jobInput: JobInput) => jobInput.displayName)
+        .join(" ");
       curStepDetail.sourceCode = curSourceJob.sourceCode;
       this.datasetHistorySteps[this.stepCount] = curStepDetail;
       this.stepCount++;
@@ -90,13 +97,4 @@ export class DatasetHistorymodalComponent implements OnInit {
     // Reverse the order of steps so that it shows analysis history from root to leaf
     this.datasetHistorySteps.reverse();
   }
-}
-
-export class DatasetHistoryStep {
-  datasetName: string;
-  creationDate: string;
-  sourceJobName: string;
-  parameterList: JobParameter[];
-  inputFileName: string;
-  sourceCode: string;
 }

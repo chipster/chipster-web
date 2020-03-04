@@ -1,8 +1,10 @@
+import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
-import { SessionDataService } from "../../session-data.service";
-import { Component, Input, ViewChild, OnChanges, OnInit } from "@angular/core";
-import { SessionData } from "../../../../../model/session/session-data";
+import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../../../model/session/session-data";
+import { SessionDataService } from "../../session-data.service";
+import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
   selector: "ch-single-dataset",
@@ -34,7 +36,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   constructor(
     private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private datasetModalService: DatasetModalService
   ) {}
 
   ngOnInit() {
@@ -75,10 +78,17 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
       this.tool = this.tools.find(t => t.name.id === this.sourceJob.toolId);
 
       if (!this.tool) {
-        console.log("No Tool found with this ID", this.sourceJob.toolId);
+        log.info("No Tool found with this ID", this.sourceJob.toolId);
       }
     } else {
-      console.log("source job is null");
+      log.info("source job is null");
     }
+  }
+
+  showHistory(): void {
+    this.datasetModalService.openDatasetHistoryModal(
+      this.dataset,
+      this.sessionData
+    );
   }
 }

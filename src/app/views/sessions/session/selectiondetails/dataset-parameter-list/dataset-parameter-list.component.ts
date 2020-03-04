@@ -1,7 +1,7 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
-import { Tool, JobParameter } from "chipster-js-common";
-import { ToolService } from "../../tools/tool.service";
+import { Component, Input, OnChanges } from "@angular/core";
+import { JobParameter, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import { ToolService } from "../../tools/tool.service";
 
 @Component({
   selector: "ch-dataset-parameter-list",
@@ -9,9 +9,10 @@ import * as _ from "lodash";
   styleUrls: ["./dataset-parameter-list.component.less"]
 })
 export class DatasetParameterListComponent implements OnChanges {
-  @Input() private tool: Tool;
-  @Input() private parameters: Array<JobParameter>;
-  @Input() private parametersLimit: number;
+  @Input() tool: Tool;
+  @Input() parameters: Array<JobParameter>;
+  @Input() parametersLimit: number;
+  @Input() historyMode = false;
 
   noLimit = false;
   showAll = false;
