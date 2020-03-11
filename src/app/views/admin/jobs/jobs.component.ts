@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { Job } from "chipster-js-common";
-import { forkJoin, Observable } from "rxjs";
-import { flatMap, tap } from "rxjs/operators";
+import { Job, JobState } from "chipster-js-common";
+import { forkJoin, Observable, of } from "rxjs";
+import { flatMap, tap, catchError } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { IdPair } from "../../../model/id-pair";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-jobs",
@@ -57,6 +58,14 @@ export class JobsComponent implements OnInit {
                     idPair.sessionId +
                     "/jobs/" +
                     idPair.jobId
+                ).pipe(
+                  catchError(err => {
+                    log.error("failed to get a job", err);
+                    let job = new Job();
+                    job.state = JobState.Error;
+                    job.stateDetail = "Admin view error, see console";
+                    return of(job);
+                  }),
                 )
               )
           );
