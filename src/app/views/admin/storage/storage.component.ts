@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { from } from "rxjs";
-import { flatMap, mergeMap, tap } from "rxjs/operators";
+import { from, of, empty } from "rxjs";
+import { flatMap, mergeMap, tap, catchError } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import log from "loglevel";
 
 @Component({
   selector: "ch-storage",
@@ -44,9 +45,15 @@ export class StorageComponent implements OnInit {
         mergeMap(user => {
           return this.authHttpClient.getAuth(
             sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota"
-          );
-        }),
-        tap((quota: any) => this.quotas.set(quota.username, quota))
+          ).pipe(
+            catchError(err => {              
+              log.error("quota request error", err);
+              // don't cancel other requests even if one of them fails
+              return empty();
+            }),
+          )
+        }),        
+        tap((quota: any) => this.quotas.set(quota.username, quota)),
       )
       .subscribe(null, err =>
         this.restErrorService.showError("get quotas failed", err)
