@@ -23,7 +23,7 @@
   <h2 class="h2-xs">History</h2>
   <table class="table table-sm text-sm table-condensed">
 
-    <div class="step" *ngFor="let item of datasetHistorySteps;let i=index">
+    <div class="step" *ngFor="let step of datasetHistorySteps;let i=index">
 
       <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
         <td class="" colspan="2">
@@ -33,41 +33,41 @@
 
       <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
         <td class="lighter no-break">{{historyOptionsMap.get('sourceJobName').name}}:</td>
-        <td class="width-max">{{item.sourceJob.toolCategory}} / {{item.sourceJob.toolName}}</td>
+        <td class="width-max">{{step.sourceJobName}}</td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
         <td class="lighter no-break">{{historyOptionsMap.get('inputFileNames').name}}:</td>
-        <td class="width-max">{{item.inputFileNamesString}} </td>
+        <td class="width-max">{{step.inputFileNamesString}} </td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('parameters').enabled">
         <td class="lighter no-break">{{historyOptionsMap.get('parameters').name}}:</td>
         <td class="width-max" id="parameters-container">
-          <ch-dataset-parameter-list *ngIf="item.sourceJob && item.sourceJob.parameters.length > 0"
-            [parameters]="item.sourceJob.parameters" [parametersLimit]="-1" [tool]="null" [historyMode]="true">
+          <ch-dataset-parameter-list *ngIf="step.sourceJob && step.sourceJob.parameters.length > 0"
+            [parameters]="step.sourceJob.parameters" [parametersLimit]="-1" [tool]="null" [historyMode]="true">
           </ch-dataset-parameter-list>
         </td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('date').enabled">
         <td class="lighter no-break">{{historyOptionsMap.get('date').name}}:</td>
-        <td class="width-max">{{item.creationDate| localDate}}</td>
+        <td class="width-max">{{step.date| localDate}}</td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('resultFileName').enabled">
         <td class="lighter">{{historyOptionsMap.get('resultFileName').name}}:</td>
-        <td class="width-max">{{item.datasetName}} </td>
+        <td class="width-max">{{step.datasetName}} </td>
       </tr>
 
       <tr *ngIf="historyOptionsMap.get('sourceCode').enabled">
         <td class="lighter no-break">Source code:</td>
         <td class="width-max">
-          <pre *ngIf="item.sourceCode != null && item.sourceCode.length > 0"
-            style="overflow: auto; width: 600px"><code>{{item.sourceCode}}</code></pre>
+          <pre *ngIf="step.sourceCode != null && step.sourceCode.length > 0"
+            style="overflow: auto; width: 600px"><code>{{step.sourceCode}}</code></pre>
+          <div *ngIf="step.sourceCode == null || step.sourceCode.length < 1">not available</div>
         </td>
       </tr>
-
 
     </div>
   </table>
