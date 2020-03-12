@@ -64,10 +64,13 @@ export class DatasetHistorymodalComponent implements OnInit, OnChanges {
   }
 
   private getHistoryData(): Array<DatasetHistoryStep> {
-    const historySteps: Array<
-      DatasetHistoryStep
-    > = this.querySessionDataService
-      .getAncestorDatasetsBottomUpBreadthFirst(this.sessionData, this.dataset)
+    const historySteps: Array<DatasetHistoryStep> = [this.dataset]
+      .concat(
+        this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(
+          this.sessionData,
+          this.dataset
+        )
+      )
       .map(dataset => {
         const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
 
