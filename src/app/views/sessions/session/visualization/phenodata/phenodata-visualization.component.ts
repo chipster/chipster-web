@@ -13,8 +13,8 @@ import {
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
-import { takeUntil, tap } from "rxjs/operators";
 import { Subject } from "rxjs";
+import { takeUntil, tap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
@@ -231,9 +231,7 @@ export class PhenodataVisualizationComponent
       // get indexes of removable columns
       const removableColumnIndexces = this.headers
         .map((columnHeader: string, index: number) => {
-          return !this.unremovableColumns.includes(columnHeader)
-            ? index
-            : -1;
+          return !this.unremovableColumns.includes(columnHeader) ? index : -1;
         })
         .filter(index => index !== -1);
 

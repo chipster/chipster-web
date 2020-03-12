@@ -15,6 +15,7 @@ import { GetSessionDataService } from "./get-session-data.service";
 import { JobErrorModalComponent } from "./job-error-modal/job-error-modal.component";
 import { JobService } from "./job.service";
 import { ModifiedSessionGuard } from "./modified-session.guard";
+import { QuerySessionDataService } from "./query-session-data.service";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
 import { DatasetModule } from "./selectiondetails/dataset.module";
@@ -54,6 +55,7 @@ import { VisualizationsModule } from "./visualization/visualizations.module";
     SessionEventService,
     SessionDataService,
     GetSessionDataService,
+    QuerySessionDataService,
     SessionService,
     UploadService,
     SelectionHandlerService,
