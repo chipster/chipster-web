@@ -8,7 +8,7 @@ import { DownloadFromUrlModalComponent } from "./download-from-url-modal/downloa
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
-import { SharingModalComponent } from "./sharingmodal/sharingmodal.component";
+import { SharingModalComponent } from "./share-session-modal/share-session-modal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";

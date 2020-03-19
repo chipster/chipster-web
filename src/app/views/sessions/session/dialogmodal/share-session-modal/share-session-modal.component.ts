@@ -1,23 +1,23 @@
-import { takeUntil } from "rxjs/operators";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import {
+  AfterViewInit,
   Component,
   Input,
-  AfterViewInit,
-  ViewChild,
+  OnDestroy,
   OnInit,
-  OnDestroy
+  ViewChild
 } from "@angular/core";
-import { Session, Rule, SessionEvent } from "chipster-js-common";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Rule, Session, SessionEvent } from "chipster-js-common";
+import log from "loglevel";
+import { Observable, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../../../core/authentication/token.service";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
-import { Observable, Subject } from "rxjs";
-import log from "loglevel";
-import { ErrorService } from "../../../../../core/errorhandler/error.service";
 
 @Component({
-  templateUrl: "./sharingmodal.component.html"
+  templateUrl: "./share-session-modal.component.html"
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()
