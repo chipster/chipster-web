@@ -1,32 +1,115 @@
 <div class="scrollable">
   <h4>auth</h4>
-  <button class="btn btn-secondary" (click)="backupNow('auth')">
+  <button class="btn btn-outline-primary" (click)="backupDb('auth')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
 
-  <h4>file-broker</h4>
-  <button class="btn btn-secondary" (click)="backupNow('file-broker')">
-    Start storage backup
-  </button>
-  <p>Follow server logs to see the backup progress</p>
-  <button class="btn btn-secondary" (click)="storageCheck()">
-    Start storage check
-  </button>
-  <button class="btn btn-secondary ml-3" (click)="deleteOldOrphanFiles()">
-    Delete old orphan files
-  </button>
-  <p>See file-broker logs to see the storage check results</p>
-
   <h4>job-history</h4>
-  <button class="btn btn-secondary" (click)="backupNow('job-history')">
+  <button class="btn btn-outline-primary" (click)="backupDb('job-history')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>session-db</h4>
-  <button class="btn btn-secondary" (click)="backupNow('session-db')">
+  <button class="btn btn-outline-primary" (click)="backupDb('session-db')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
+
+  <h4>file-broker</h4>
+
+
+
+  <div class="row">
+
+    
+    <div class="col">
+      Copy files between file-storages
+    </div>
+
+    <div class="col">
+      <div ngbDropdown class="d-inline-block">
+        <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>{{ copySource ? copySource : "Source" }}</button>
+        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+          <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="copySource = storageId">{{ storageId }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div ngbDropdown class="d-inline-block">
+        <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>{{ copyTarget ? copyTarget : "Target"}}</button>
+        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+          <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="setCopyTarget(storageId)">{{ storageId }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="md-form">
+      <input mdbInput type="text" name="text" [(ngModel)]="copyMaxSize" id="copyMaxBytesForm" class="form-control">
+      <label for="copyMaxBytesForm" class="">Max total size</label>
+    </div>
+
+    <div class="col">
+      <button class="btn btn-outline-primary" (click)="copy(copySource, copyTarget)">
+        Start copy
+      </button>      
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p>Follow file-broker logs to see the copy progress</p>
+    </div>
+  </div>
+
+  <h4>file-storage</h4>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Id in file-storage</th>
+      <th scope="col">Url</th>
+      <th scope="col">DB files count</th>
+      <th scope="col">DB files size</th>
+      <th scope="col">Storage files count</th>
+      <th scope="col">Storage files size</th>
+      <th scope="col">Storage total</th>
+      <th scope="col">Storage free</th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let storageId of storageIds">
+      <th scope="row">{{storageId}}</th>
+      <td>{{idOnStorage.get(storageId)}}</td>
+      <td>{{fileBrokerStorages.get(storageId)?.uri}}</td>
+      <td>{{sessionDbFileStats.get(storageId)?.fileCount}}</td>
+      <td>{{sessionDbFileStats.get(storageId)?.fileBytes | bytes}}</td>
+      <td>{{fileStorageFileStats.get(storageId)?.fileCount}}</td>
+      <td>{{fileStorageFileStats.get(storageId)?.fileBytes | bytes}}</td>
+      <td>{{total.get(storageId) | bytes}}</td>
+      <td>{{free.get(storageId) | bytes}}</td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="backupStorage(storageId)">
+          Start storage backup
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="storageCheck(storageId)" [disabled]="!isOrphanCheckAllowed(storageId)">
+          Start storage check
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="deleteOldOrphanFiles(storageId)" [disabled]="!isOrphanCheckAllowed(storageId)">
+          Delete old orphan files
+        </button>
+      </td>
+    </tr>
+    </tbody>
+    <p>See file-storage logs to see the progress and results</p>
+  </table>
 </div>
