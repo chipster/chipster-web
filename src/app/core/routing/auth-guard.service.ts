@@ -30,14 +30,14 @@ export class AuthGuard implements CanActivate {
     log.info("auth guard", this.tokenService.getAccountName());
 
     // redirect to home during service breaks
-    this.tokenService.getAccountName();
-    if (
-      this.tokenService.getAccountName() !== "demo" &&
-      this.tokenService.getAccountName() !== "admin"
-    ) {
-      this.routeService.navigateAbsolute("/home");
-      return of(false);
-    }
+    // this.tokenService.getAccountName();
+    // if (
+    //   this.tokenService.getAccountName() !== "demo" &&
+    //   this.tokenService.getAccountName() !== "admin"
+    // ) {
+    //   this.routeService.navigateAbsolute("/home");
+    //   return of(false);
+    // }
 
     if (this.tokenService.isTokenValid()) {
       // All these must come from the primary configuration (chipster.yaml) so that
