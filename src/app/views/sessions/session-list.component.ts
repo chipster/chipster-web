@@ -317,6 +317,22 @@ export class SessionListComponent implements OnInit, OnDestroy {
       );
     });
 
+    // FIXME quick hack for ordering example and training sessions, needs refactor
+    const exampleIndex = this.sessionsByUserKeys.indexOf(
+      this.exampleSessionOwnerUserId
+    );
+    const trainingIndex = this.sessionsByUserKeys.indexOf(
+      this.trainingSessionOwnerUserId
+    );
+    if (
+      exampleIndex >= 0 &&
+      trainingIndex >= 0 &&
+      trainingIndex < exampleIndex
+    ) {
+      this.sessionsByUserKeys[exampleIndex] = this.trainingSessionOwnerUserId;
+      this.sessionsByUserKeys[trainingIndex] = this.exampleSessionOwnerUserId;
+    }
+
     this.sessionShares = this.sessionDataService.getPendingShares(sessions);
     this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
     this.sessionsByUser = sessionsByUser;
