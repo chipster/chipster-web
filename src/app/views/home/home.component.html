@@ -18,14 +18,8 @@
 -->
 
   <div *ngIf="homeHeaderPath">
-    <ch-manual
-      [assetsPath]="homeHeaderPath"
-      [page]="homeHeaderFile"
-      [showControls]="false"
-      [addContainer]="false"
-      [routerPath]="homeRouterPath"
-      [manualStyles]="false"
-    ></ch-manual>
+    <ch-manual [assetsPath]="homeHeaderPath" [page]="homeHeaderFile" [showControls]="false" [addContainer]="false"
+      [routerPath]="homeRouterPath" [manualStyles]="false"></ch-manual>
   </div>
 
   <div class="row" id="getstarted">
@@ -36,30 +30,27 @@
         </div>
 
         <!-- Service break noticification (see also a redirection in AuthGuard) -->
-        <!-- <div class="panel-body">
+        <div class="alert alert-warning">
           <p>
-            The service is temporarily unavailable due to storage maintenance.
+            <b>The service is temporarily unavailable due to storage maintenance.</b>
           </p>
-        </div> -->
+        </div>
 
         <div class="panel-body">
           <p *ngIf="tokenHasExpired()">
             <i>Login expired, please log in again.</i>
           </p>
 
-          <button
-            *ngIf="!isLoggedIn(); else alreadyLoggedIn"
-            class="btn btn-sm btn-primary"
-            [routerLink]="routerLinkLogin"
-          >
+          <button *ngIf="!isLoggedIn(); else alreadyLoggedIn" class="btn btn-sm btn-primary"
+            [routerLink]="routerLinkLogin">
             Log In
           </button>
         </div>
 
         <ng-template #alreadyLoggedIn>
           <p>
-            You are logged in as <strong>{{ getAccountName() }}</strong
-            >. Go to <a [routerLink]="routerLinkAnalyze">Analyze</a> or
+            You are logged in as <strong>{{ getAccountName() }}</strong>. Go to <a
+              [routerLink]="routerLinkAnalyze">Analyze</a> or
             <a [routerLink]="routerLinkSessions">Sessions</a> to continue.
           </p>
         </ng-template>
@@ -68,13 +59,7 @@
   </div>
 
   <div *ngIf="homePath && homeFile && homeRouterPath">
-    <ch-manual
-      [assetsPath]="homePath"
-      [page]="homeFile"
-      [showControls]="false"
-      [addContainer]="false"
-      [routerPath]="homeRouterPath"
-      [manualStyles]="false"
-    ></ch-manual>
+    <ch-manual [assetsPath]="homePath" [page]="homeFile" [showControls]="false" [addContainer]="false"
+      [routerPath]="homeRouterPath" [manualStyles]="false"></ch-manual>
   </div>
 </div>
