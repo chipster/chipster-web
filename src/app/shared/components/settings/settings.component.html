@@ -1,11 +1,11 @@
-<div class="modal-header mb-3">
+<div class="modal-header">
   <h4 class="modal-title">Settings</h4>
   <button type="button" class="close" (click)="activeModal.close()">
     <span>&times;</span>
   </button>
 </div>
 
-<div class="container">
+<div class="modal-body">
   <h4 class="h4-xs">Session list mode</h4>
 
   <form class="px-2">
@@ -34,18 +34,16 @@
       </label>
     </div>
   </form>
+
+  <!-- <form class="px-2" style="margin: 5px; margin-top: 10px">
+    <span class="switch switch-sm">
+      <input type="checkbox" class="switch" id="switch-sm" (click)="showDataselectionTooltip()"
+        [checked]="settingsService.showDatasetSelectionTooltip$.getValue()">
+      <label for="switch-sm" class="h4-xs" style="margin-left: 8px">Show dataset selection tooltip</label>
+    </span>
+  </form> -->
 </div>
 
-<form class="px-2" style="margin: 5px; margin-top: 10px">
-  <span class="switch switch-sm">
-    <input type="checkbox" class="switch" id="switch-sm" (click)="showDataselectionTooltip()"
-      [checked]="settingsService.showDatasetSelectionTooltip$.getValue()">
-    <label for="switch-sm" class=" h4-xs" style="margin-left: 8px">Show dataset selection tooltip</label>
-  </span>
-</form>
-
-<div class="modal-footer mt-3">
-  <div class="col px-0">
-    <button type="button" class="btn btn-sm btn-secondary float-right" (click)="activeModal.close()">Close</button>
-  </div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary float-right" (click)="activeModal.close()">Close</button>
 </div>

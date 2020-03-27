@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { CoreModule } from "../core/core.module";
+import { AccountComponent } from "./components/account/account.component";
 import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
 import { SearchBoxComponent } from "./components/search-box/search-box.component";
@@ -53,6 +54,7 @@ import { WebSocketService } from "./services/websocket.service";
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,
+    AccountComponent,
     ToolSourceComponent,
     DummyRouteComponent,
     ActionToastComponent
@@ -88,9 +90,10 @@ import { WebSocketService } from "./services/websocket.service";
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,
+    AccountComponent,
     ToolSourceComponent,
     ActionToastComponent
   ],
-  entryComponents: [ActionToastComponent, SettingsComponent]
+  entryComponents: [ActionToastComponent, SettingsComponent, AccountComponent]
 })
 export class SharedModule {}

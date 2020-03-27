@@ -4,6 +4,7 @@ import log from "loglevel";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
+import { AccountComponent } from "../../shared/components/account/account.component";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -25,7 +26,7 @@ export class NavigationComponent implements OnInit {
   appNameReady = false;
 
   constructor(
-    public tokenService: TokenService, // used in template
+    private tokenService: TokenService,
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
@@ -94,19 +95,31 @@ export class NavigationComponent implements OnInit {
     );
   }
 
-  logout() {
+  logout(): void {
     this.authenticationService.logout();
   }
 
-  isLoggedIn() {
+  isLoggedIn(): boolean {
     return this.tokenService.isLoggedIn();
   }
 
-  isAdmin() {
+  isAdmin(): boolean {
     return this.isLoggedIn() && this.tokenService.hasRole("admin");
   }
 
-  openSettings() {
+  openAccount(): void {
+    this.modalService.open(AccountComponent);
+  }
+
+  openSettings(): void {
     this.modalService.open(SettingsComponent);
+  }
+
+  getAccountName(): string {
+    return this.tokenService.getAccountName();
+  }
+
+  getUserId(): string {
+    return this.tokenService.getUsername();
   }
 }

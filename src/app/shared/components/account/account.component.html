@@ -1,0 +1,27 @@
+<div class="modal-header">
+  <h4 class="modal-title">Account</h4>
+  <button type="button" class="close" (click)="close()">
+    <span>&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <table>
+    <tr>
+      <td class="title">Username
+        <p class="text-smaller text-muted">Use this when logging in.</p>
+      </td>
+      <td class="value">{{getAccountName()}}</td>
+    </tr>
+    <tr>
+      <td class="title">UserId<p class="text-smaller text-muted">Give this to someone who wants to share a session to
+          you.</p>
+      </td>
+      <td class="value">{{getUserId()}}</td>
+    </tr>
+  </table>
+</div>
+
+<div class=" modal-footer">
+  <button type="button" class="btn btn-secondary float-right" (click)="close()">Close</button>
+</div>
