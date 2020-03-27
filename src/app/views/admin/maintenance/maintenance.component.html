@@ -1,6 +1,6 @@
-<div class="scrollable">
-  <h4>auth</h4>
-  <button class="btn btn-outline-primary" (click)="backupDb('auth')">
+<h4>auth</h4>
+  <div class="scrollable">
+<button class="btn btn-outline-primary" (click)="backupDb('auth')">
     Start database backup
   </button>
   <p>Follow server logs to see the backup progress</p>
@@ -12,11 +12,26 @@
   <p>Follow server logs to see the backup progress</p>
 
   <h4>session-db</h4>
-  <button class="btn btn-outline-primary" (click)="backupDb('session-db')">
-    Start database backup
-  </button>
-  <p>Follow server logs to see the backup progress</p>
-
+  
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-outline-primary" (click)="backupDb('session-db')">
+      Start database backup
+      </button>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" (click)="sessionDbCheckOrphans()">
+        Start orphan check
+      </button>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" (click)="sessionDbDeleteOrphans()">
+        Start orphan deletion
+      </button>
+    </div>
+  </div>
+  <p>Follow server logs to see the progress</p>
+    
   <h4>file-broker</h4>
 
 

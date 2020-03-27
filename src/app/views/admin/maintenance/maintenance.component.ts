@@ -263,6 +263,38 @@ export class MaintenanceComponent implements OnInit {
         this.restErrorService.showError("copy failed", err)
       );
   }
+
+  sessionDbCheckOrphans() {
+    this.configService
+      .getInternalService("session-db", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.authHttpClient.postAuth(
+            service.adminUri + "/admin/check-orphans",
+            null
+          );
+        })
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("check orphans failed", err)
+      );
+  }
+
+  sessionDbDeleteOrphans() {
+    this.configService
+      .getInternalService("session-db", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.authHttpClient.postAuth(
+            service.adminUri + "/admin/delete-orphans",
+            null
+          );
+        })
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("delete orphans failed", err)
+      );
+  }
 }
 export class FileStats {
   storageId: string;
