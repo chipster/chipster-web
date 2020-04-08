@@ -12,6 +12,10 @@ export class WorkflowGraphService {
   // nodeWidth = 36;
   readonly nodeWidth = 48;
 
+  // leave some space for the node border
+  readonly nodeMinX = 2;
+  readonly nodeMinY = 2;
+
   readonly phenodataRadius = this.nodeHeight / 2;
   readonly phenodataMargin = this.phenodataRadius;
 
@@ -37,8 +41,8 @@ export class WorkflowGraphService {
     width = this.nodeWidth,
     height = this.nodeHeight
   ) {
-    let x = 10;
-    let y = 10;
+    let x = this.nodeMinX;
+    let y = this.nodeMinY;
 
     if (parentX) {
       x = parentX;

@@ -892,10 +892,28 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // Function to describe drag behavior
   // noinspection JSUnusedLocalSymbols
   dragNodes(x: number, dx: number, y: number, dy: number): void {
-    this.d3DatasetNodes
+
+    let selectedDatasets = this.d3DatasetNodes
       .filter((d: DatasetNode) =>
         this.selectionService.isSelectedDatasetById(d.dataset.datasetId)
-      )
+      );
+
+    // make sure the datasets aren't moved to negative coordinates
+    let datasetArray = [];
+    selectedDatasets.each(d => datasetArray.push(d));
+
+    let minX = d3.min(datasetArray, d => d.x);
+    let minY = d3.min(datasetArray, d => d.y);
+
+    if (minX + dx < this.workflowGraphService.nodeMinX) {
+      dx = - (minX - this.workflowGraphService.nodeMinX);
+    }
+
+    if (minY + dy < this.workflowGraphService.nodeMinY) {
+      dy = - (minY - this.workflowGraphService.nodeMinY);
+    }
+
+    selectedDatasets
       .attr("x", d => (d.x += dx))
       .attr("y", d => (d.y += dy));
 
@@ -1046,7 +1064,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (d.dataset) {
           const datasetCopy = _.cloneDeep(d.dataset);
           datasetCopy.x = d.x;
-          datasetCopy.y = d.y;
+          datasetCopy.y = d.y;          
 
           this.sessionDataService
             .updateDataset(datasetCopy)
@@ -1175,8 +1193,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         );
       })
       .forEach(link => {
-        if (!link.target.x || !link.target.y) {
-          if (!link.source.x || !link.source.y) {
+        if (link.target.x == null || link.target.y == null) {
+          if (link.source.x == null || link.source.y == null) {
             // we have found an unpositioned parent
             // it must be a root node, because otherwise this loop would have positioned it already
             const newRootPos = this.workflowGraphService.newRootPosition(nodes);
@@ -1203,12 +1221,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // layout orphan nodes
     nodes.forEach(node => {
-      if (!node.x || !node.y) {
+      if (node.x == null || node.y == null) {
         const pos = this.workflowGraphService.newRootPosition(nodes);
         node.x = pos.x;
         node.y = pos.y;
       }
-    });
+    });    
   }
 
   showTooltip(
