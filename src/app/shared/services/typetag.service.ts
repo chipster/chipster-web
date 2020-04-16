@@ -23,6 +23,7 @@ export const Tags = {
   VCF: "VCF",
   BAM: "BAM",
   BAI: "BAI",
+  SAM: "SAM",
   QUAL: "QUAL",
   MOTHUR_OLIGOS: "MOTHUR_OLIGOS",
   MOTHUR_NAMES: "MOTHUR_NAMES",

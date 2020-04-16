@@ -21,6 +21,7 @@ export default class VisualizationConstants {
         Tags.GTF,
         Tags.FAI,
         Tags.VCF,
+        Tags.SAM,
         Tags.MOTHUR_COUNT,
         Tags.MOTHUR_GROUPS,
         Tags.MOTHUR_NAMES,
