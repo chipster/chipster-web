@@ -11,12 +11,15 @@ import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { log } from "loglevel";
-import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { Subject } from "rxjs";
+import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";
-import { TypeTagService } from "../../../../shared/services/typetag.service";
+import {
+  Tags,
+  TypeTagService
+} from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
 import VisualizationConstants, {
@@ -77,10 +80,9 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
             this.getCompatibleVisualizations()
           );
           // check if the previous visualization is still compatible
-          const isPreviousCompatible =
-            Array.from(this.compatibleVisualizations)
-              .map(this.getTabId.bind(this))
-              .includes(this.active);
+          const isPreviousCompatible = Array.from(this.compatibleVisualizations)
+            .map(this.getTabId.bind(this))
+            .includes(this.active);
 
           /*
           We will get an empty selection in between when the selection is changed.
@@ -146,6 +148,16 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   isCompatibleVisualization(id: string): boolean {
     const isBlacklisted = this.visualizationBlacklist.includes(id);
+
+    // for now, only details supports gzipped files
+    if (
+      id !== VisualizationConstants.DETAILS_ID &&
+      this.selectedDatasets.some(dataset =>
+        this.sessionData.datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP)
+      )
+    ) {
+      return false;
+    }
 
     const visualization = _.find(
       this.visualizations,

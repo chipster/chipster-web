@@ -10,6 +10,7 @@ export interface Visualization {
 }
 export default class VisualizationConstants {
   static readonly PHENODATA_ID = "phenodata";
+  static readonly DETAILS_ID = "details";
 
   static readonly VISUALIZATIONS: Array<Visualization> = [
     {
@@ -131,7 +132,7 @@ export default class VisualizationConstants {
       supportedInputFileCounts: [1]
     },
     {
-      id: "details",
+      id: VisualizationConstants.DETAILS_ID,
       name: "Details",
       typeTags: [],
       supportAllTypes: true,
