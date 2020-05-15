@@ -22,7 +22,6 @@ export default class VisualizationConstants {
         Tags.GTF,
         Tags.FAI,
         Tags.VCF,
-        Tags.SAM,
         Tags.MOTHUR_COUNT,
         Tags.MOTHUR_GROUPS,
         Tags.MOTHUR_NAMES,
@@ -36,19 +35,7 @@ export default class VisualizationConstants {
     {
       id: "text",
       name: "Text",
-      typeTags: [
-        Tags.TEXT,
-        Tags.TSV,
-        Tags.BED,
-        Tags.GTF,
-        Tags.FAI,
-        Tags.VCF,
-        Tags.MOTHUR_COUNT,
-        Tags.MOTHUR_GROUPS,
-        Tags.MOTHUR_NAMES,
-        Tags.MOTHUR_OLIGOS,
-        Tags.MOTHUR_STABILITY
-      ],
+      typeTags: [Tags.TEXT],
       supportAllTypes: false,
       anyInputCountSupported: false,
       supportedInputFileCounts: [1]
