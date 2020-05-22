@@ -120,7 +120,11 @@ export class DialogModalService {
   }
 
   openSpinnerModal(message, observable) {
-    const modalRef = this.modalService.open(SpinnerModalComponent);
+    // don't allow user to close this
+    const modalRef = this.modalService.open(SpinnerModalComponent, {
+      backdrop: "static",
+      keyboard: false,
+    });
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.observable = observable;
     return modalRef.result;
