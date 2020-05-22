@@ -9,4 +9,5 @@ export class OidcConfig {
   text: string;
   parameter: string;
   appId: string;
+  description: string;
 }

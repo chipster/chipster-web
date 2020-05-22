@@ -4,32 +4,41 @@
   <h1 class="text-center h1-xs">Log in to {{ appName }}</h1>
 
   <br />
-  <div *ngFor="let oidc of getOidcConfigs()">
-    <button
-      *ngIf="oidc.logo"
-      class="btn btn-light btn-oidc btn-oidc-logo"
-      (click)="oidcLogin(oidc)"
-    >
-      <img
-        src="{{ oidc.logo }}"
-        alt="{{ oidc.oidcName }} login"
-        [style.width]="oidc.logoWidth"
-      />
-    </button>
-    <button
-      *ngIf="!oidc.logo && oidc.text"
-      class="btn btn-info btn-oidc"
-      (click)="oidcLogin(oidc)"
-    >
-      {{ oidc.text }}
-    </button>
-    <button
-      *ngIf="!oidc.logo && !oidc.text"
-      class="btn btn-info btn-oidc"
-      (click)="oidcLogin(oidc)"
-    >
-      Sign in with {{ oidc.oidcName }}
-    </button>
+  
+  <div 
+    *ngFor="let oidc of getOidcConfigs()" 
+    placement="right" 
+    [ngbPopover]="popoverContent" 
+    triggers="mouseenter:mouseleave"
+    [disablePopover]="oidc.description == null || oidc.description.length == 0">
+
+    <!-- the html is trusted -->
+    <ng-template #popoverContent ><div [innerHtml]="oidc.description"></div></ng-template>
+      <button
+        *ngIf="oidc.logo"
+        class="btn btn-light btn-oidc btn-oidc-logo"
+        (click)="oidcLogin(oidc)"
+      >
+        <img
+          src="{{ oidc.logo }}"
+          alt="{{ oidc.oidcName }} login"
+          [style.width]="oidc.logoWidth"
+        />
+      </button>
+      <button
+        *ngIf="!oidc.logo && oidc.text"
+        class="btn btn-info btn-oidc"
+        (click)="oidcLogin(oidc)"
+      >
+        {{ oidc.text }}
+      </button>
+      <button
+        *ngIf="!oidc.logo && !oidc.text"
+        class="btn btn-info btn-oidc"
+        (click)="oidcLogin(oidc)"
+      >
+        Sign in with {{ oidc.oidcName }}
+      </button>
     <br />
     <br />
   </div>
