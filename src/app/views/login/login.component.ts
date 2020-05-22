@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
-import { map } from "rxjs/operators";
+import { map, tap, mergeMap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { OidcService } from "../../core/authentication/oidc.service";
 import { TokenService } from "../../core/authentication/token.service";
@@ -36,6 +36,9 @@ export class LoginComponent implements OnInit {
   private usernameInput: ElementRef;
   oidcConfigs: OidcConfig[];
 
+  jaasDescription: string;
+  static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";
+
   constructor(
     private route: ActivatedRoute,
     private authenticationService: AuthenticationService,
@@ -47,7 +50,8 @@ export class LoginComponent implements OnInit {
     private oidcService: OidcService
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {    
+
     // return url is needed in all cases, so start with it
     this.getReturnUrl$().subscribe(
       url => {
@@ -87,12 +91,12 @@ export class LoginComponent implements OnInit {
   }
 
   private continueInit() {
-    this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
-      appName => {
-        this.appName = appName;
-
-        this.oidcService.getOidcConfigs$().subscribe(
-          configs => {
+    this.configService.get(ConfigService.KEY_APP_NAME).pipe(
+      tap(appName => this.appName = appName),
+      mergeMap(() => this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)),
+      tap(desc => this.jaasDescription = desc),
+      mergeMap(() => this.oidcService.getOidcConfigs$()),
+      tap((configs: OidcConfig[]) => {
             this.oidcConfigs = configs;
 
             // everything ready, show login
@@ -101,19 +105,16 @@ export class LoginComponent implements OnInit {
             setTimeout(() => {
               this.usernameInput.nativeElement.focus();
             }, 0);
-          },
-          err => this.restErrorService.showError("oidc config error", err)
-        );
-      },
-      error => {
-        this.restErrorService.showError(
-          error,
-          "Initializing login page failed"
-        );
-        log.warn("get configuration failed", error);
-        this.initFailed = true;
-      }
-    );
+          }),
+      ).subscribe(null, 
+        error => {
+          this.restErrorService.showError(
+            error,
+            "Initializing login page failed"
+          );
+          log.warn("get configuration failed", error);
+          this.initFailed = true;
+        });
   }
 
   private getReturnUrl$() {

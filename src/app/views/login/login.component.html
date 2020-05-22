@@ -51,7 +51,16 @@
   </div>
 
   <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
-    <div class="form-group">
+
+    <div class="form-group"    
+    placement="right" 
+    [ngbPopover]="popoverContent" 
+    triggers="mouseenter:mouseleave"
+    [disablePopover]="jaasDescription == null || jaasDescription.length == 0">
+
+    <!-- the html is trusted -->
+    <ng-template #popoverContent ><div [innerHtml]="jaasDescription"></div></ng-template>
+
       <label for="username">Chipster username</label>
       <input
         class="form-control"
