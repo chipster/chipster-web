@@ -49,7 +49,7 @@ export class OidcService {
             client_id: oidc.clientId,
             redirect_uri: window.location.origin + oidc.redirectPath,
             response_type: oidc.responseType,
-            scope: "openid profile email",
+            scope: oidc.scope,
             filterProtocolClaims: true,
             loadUserInfo: false
           });

@@ -10,4 +10,5 @@ export class OidcConfig {
   parameter: string;
   appId: string;
   description: string;
+  scope: string;
 }
