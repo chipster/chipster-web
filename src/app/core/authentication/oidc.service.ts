@@ -54,6 +54,7 @@ export class OidcService {
             loadUserInfo: false
           });
           log.info("register oidc authentication " + oidc.oidcName);
+          log.info("oidc settings: " + JSON.stringify(oidc));
           this.managers.set(oidc.oidcName, manager);
         });
       }),
