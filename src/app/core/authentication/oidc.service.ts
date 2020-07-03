@@ -132,7 +132,14 @@ export class OidcService {
         () => {
           this.routeService.navigateAbsolute(returnUrl);
         },
-        err => this.restErrorService.showError("oidc error", err)
+        err => {
+          let message = "oidc error";
+          // at least OIDC login with missing userinfo claims sends a sensible message
+          if (err.error && err.error.length > 0) {
+            message = err.error;
+          }
+          this.restErrorService.showError(message, err);
+        }
       );
   }
 
@@ -142,7 +149,8 @@ export class OidcService {
         this.httpClient.post(
           authUrl + "/oidc",
           {
-            idToken: user.id_token
+            idToken: user.id_token,
+            accessToken: user.access_token
           },
           {
             responseType: "text"
