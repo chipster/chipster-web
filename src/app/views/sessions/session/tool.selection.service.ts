@@ -30,7 +30,7 @@ export class ToolSelectionService {
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
-  ) {
+  ): Map<string, ParameterValidationResult> {
     const resultsMap = new Map<string, ParameterValidationResult>();
     if (
       selectedToolWithValidatedInputs &&
@@ -94,17 +94,27 @@ export class ToolSelectionService {
 
       // firefox doesn't support unicode property escapes yet so catch
       // the error, server side will validate it anyway and fail the job
-      // const regexp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
-      let result;
+      // const regExp: RegExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
+
+      // creating the RegExp fails in firefox
+      let regExp: RegExp;
       try {
-        const regexp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
-        result = regexp.exec(<string>parameter.value);
+        regExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
       } catch (e) {
+        log.warn("failed to create RegExp, parameter validation failed", e);
+        return {
+          valid: true
+        };
+      }
+
+      if (!this.testRegExpSupport(regExp)) {
         log.warn("validating string parameter failed");
         return {
           valid: true
         };
       }
+
+      const result = regExp.exec(parameter.value as string);
       return result === null
         ? { valid: true }
         : {
@@ -114,6 +124,29 @@ export class ToolSelectionService {
     }
 
     return { valid: true };
+  }
+
+  private testRegExpSupport(regExp: RegExp): boolean {
+    const testString = "a";
+    let result: RegExpExecArray;
+
+    try {
+      result = regExp.exec(testString);
+    } catch (e) {
+      // shouldn't happen, firefox fails at RegExp creation, which happens earlier
+      log.warn("RegExp test failed with exception", e);
+      return false;
+    }
+
+    // check for RegExp support in Edge
+    // null result means string is valid, as it should be for the test strinng
+    // if not null, RegExp not supported properly
+    if (result !== null) {
+      log.warn("RegExp not supported properly");
+      return false;
+    } else {
+      return true;
+    }
   }
 
   parameterHasValue(parameter: ToolParameter): boolean {
@@ -303,7 +336,7 @@ export class ToolSelectionService {
 
   private setColumnSelectionParameterValueAfterPopulate(
     parameter: ToolParameter
-  ) {
+  ): void {
     // set value to null if previous not an option
     if (
       parameter.value != null &&
