@@ -60,9 +60,9 @@
   </div>
 </div>
 
-<div *ngIf="!jobListLoading" class="row">
+<div *ngIf="jobListLoading" class="row">
   <div class="col">
-      <i class="fas fa-circle-o-notch fa-spin" style="font-size:22px"></i> Loading job list..
+      <i class="fas fa-circle-notch fa-spin" style="font-size:22px"></i> Loading job list..
   </div>
 </div>
 <table class="table" *ngIf="!jobListLoading">
@@ -75,6 +75,7 @@
       <th scope="col"></th>
       <th scope="col">Status</th>
       <th scope="col">Memory usage</th>
+      <th scope="col">Comp</th>
     </tr>
   </thead>
   <tbody>
@@ -86,6 +87,7 @@
       <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
       <td>{{jobhistory.jobStatus}}<span *ngIf="jobhistory.jobStatusDetail">({{jobhistory.jobStatusDetail}})</span></td>
       <td><span *ngIf="jobhistory.memoryUsage !== 0">{{jobhistory.memoryUsage | bytes}}</span></td>
+      <td>{{jobhistory.compName}}</td>
     </tr>
   </tbody>
 </table>

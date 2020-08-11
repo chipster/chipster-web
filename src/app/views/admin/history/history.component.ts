@@ -22,8 +22,9 @@ export class HistoryComponent implements OnInit {
   jobHistoryListWithParam: Array<JobHistory> = [];
   jobFilterAttributeSet: Array<string> = [
     "userName",
-    "toolName",
-    "jobStatus"
+    "toolId",
+    "jobStatus",
+    "compName"
   ];
   selectedFilterAttribute: string;
   filteredSearchForm: FormGroup;
