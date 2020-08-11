@@ -10,6 +10,7 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import { FilterParam } from "./FilterParam";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
+import UtilsService from '../../../shared/utilities/utils';
 
 @Component({
   selector: "ch-history",
@@ -22,7 +23,6 @@ export class HistoryComponent implements OnInit {
   jobFilterAttributeSet: Array<string> = [
     "userName",
     "toolName",
-    "timeDuration",
     "jobStatus"
   ];
   selectedFilterAttribute: string;
@@ -201,6 +201,18 @@ export class HistoryComponent implements OnInit {
     this.page = 1;
     this.jobNumber = 0;
     this.getTotalJobCount();
+  }
+
+  getDuration(jobHistory: JobHistory) {
+    
+    if (jobHistory && jobHistory.startTime && jobHistory.endTime) {
+      let startDate = UtilsService.parseISOStringToDate(jobHistory.startTime);
+      let endDate = UtilsService.parseISOStringToDate(jobHistory.endTime);
+
+      let millis = UtilsService.millisecondsBetweenDates(startDate, endDate);
+      return UtilsService.millisecondsToHumanFriendly(millis);
+    }
+    return null;
   }
 
   openJobOutputModal(jobhistory: JobHistory) {
