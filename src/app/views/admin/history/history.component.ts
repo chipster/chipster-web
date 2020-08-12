@@ -8,7 +8,6 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
-import { FilterParam } from "./FilterParam";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
 import UtilsService from '../../../shared/utilities/utils';
 
@@ -19,20 +18,29 @@ import UtilsService from '../../../shared/utilities/utils';
   encapsulation: ViewEncapsulation.Emulated
 })
 export class HistoryComponent implements OnInit {
-  jobHistoryListWithParam: Array<JobHistory> = [];
+
+  readonly comparisonIs = "is";
+  readonly comparisonIsNot = "is not";
+  readonly attributeUserName = "userName";
+
+  jobs: Array<JobHistory> = [];
   jobFilterAttributeSet: Array<string> = [
-    "userName",
+    this.attributeUserName,
     "toolId",
     "jobStatus",
     "compName"
   ];
-  selectedFilterAttribute: string;
-  filteredSearchForm: FormGroup;
-  selectAttributeForm: FormGroup;
-  startTimeInputForm: FormGroup;
-  endTimeInputForm: FormGroup;
+  jobFilterComparisonSet: Array<string> = [
+    this.comparisonIs,
+    this.comparisonIsNot,
+  ];
+
+  stringFiltersForm: FormGroup;
+  startDateTimeFilterForm: FormGroup;
+  endDateTimeFilterForm: FormGroup;
+  stringFiltersFormArray: FormArray;
+
   jobListLoading = false;
-  filterAttributeSet: Array<FilterParam> = [];
   page = 1;
   collectionSize = 70;
   jobNumber = 0;
@@ -47,102 +55,85 @@ export class HistoryComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.filteredSearchForm = this.formBuilder.group({
-      items: this.formBuilder.array([this.createItem()])
+
+    this.stringFiltersFormArray = this.formBuilder.array([]);
+
+    this.stringFiltersForm = this.formBuilder.group({
+      items: this.stringFiltersFormArray
     });
 
-    this.selectAttributeForm = this.formBuilder.group({
-      selectedAttribute: ""
-    });
+    this.startDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
+    this.endDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
 
-    this.startTimeInputForm = this.formBuilder.group({
-      startDateInput: "",
-      startTimeInput: ""
-    });
+    this.resetForm();
 
-    this.endTimeInputForm = this.formBuilder.group({
-      endDateInput: "",
-      endTimeInput: ""
-    });
-    this.getTotalJobCount();
-    this.selectedFilterAttribute = this.jobFilterAttributeSet[0];
-
-    this.selectAttributeForm.valueChanges.subscribe(() => {
-      // console.log(this.selectAttributeForm.value);
-    });
+    this.updateJobCountAndJobs();
   }
 
-  public OnSubmit(formValue: any) {
-    this.filterAttributeSet = [];
+  public onSubmit() {
     this.page = 1;
     this.jobNumber = 0;
-    this.getFormControlValues();
-    this.getTotalJobCount();
+    this.updateJobCountAndJobs();
   }
 
-  getFormControlValues() {
-    const arrayControl = this.filteredSearchForm.get("items") as FormArray;
-    for (let i = 0; i < arrayControl.length; i++) {
-      const filterParam = new FilterParam();
-      if (this.checkIfValue(arrayControl.value[i].selectedAttribute)) {
-        filterParam.name = arrayControl.value[i].selectedAttribute;
-        if (arrayControl.value[i].value) {
-          filterParam.value = arrayControl.value[i].value;
-        }
-        this.filterAttributeSet.push(filterParam);
-      }
-    }
+  getFilterParams() {
 
-    // Manipulating time input
-    const startDateControl = this.startTimeInputForm.get("startDateInput");
-    const startTimeControl = this.startTimeInputForm.get("startTimeInput");
-
-    if (startDateControl.value && startTimeControl.value) {
-      const filterParam = new FilterParam();
-      filterParam.name = "startTime=gt";
-      // console.log(typeof startTimeControl, typeof startTimeControl.value, startTimeControl.value);
-      filterParam.value = new Date(
-        startDateControl.value + "T" + startTimeControl.value
-      ).toISOString();
-      this.filterAttributeSet.push(filterParam);
-    }
-    const endDateControl = this.endTimeInputForm.get("endDateInput");
-    const endTimeControl = this.endTimeInputForm.get("endTimeInput");
-
-    if (endDateControl.value && endTimeControl.value) {
-      const filterParam = new FilterParam();
-      filterParam.name = "endTime=lt";
-      filterParam.value = new Date(
-        endDateControl.value + "T" + endTimeControl.value
-      ).toISOString();
-      this.filterAttributeSet.push(filterParam);
-    }
-  }
-
-  getTotalJobCount() {
-    this.jobListLoading = true;
     let params = new HttpParams();
-    // first set the page number for which getting the record
-    params = params.append("page", this.page.toString());
-    for (let i = 0; i < this.filterAttributeSet.length; i++) {
-      if (
-        this.filterAttributeSet[i].name !== "" &&
-        this.filterAttributeSet[i].name !== null &&
-        this.filterAttributeSet[i].name !== undefined
-      ) {
-        params = params.append(
-          this.filterAttributeSet[i].name,
-          this.filterAttributeSet[i].value
-        );
-      }
+
+    for (let i = 0; i < this.stringFiltersFormArray.length; i++) {
+      let filter = this.stringFiltersFormArray.value[i];  
+      params = this.appendStringParam(params, filter.selectedAttribute, filter.value, filter.selectedComparison);      
     }
+
+    const startDateControl = this.startDateTimeFilterForm.get("dateInput");
+    const startTimeControl = this.startDateTimeFilterForm.get("timeInput");
+
+    params = this.appendDateTimeParam(params, startDateControl.value, startTimeControl.value, ">");
+    
+    const endDateControl = this.endDateTimeFilterForm.get("dateInput");
+    const endTimeControl = this.endDateTimeFilterForm.get("timeInput");
+
+    params = this.appendDateTimeParam(params, endDateControl.value, endTimeControl.value, "<");
+
+    return params;
+  }
+
+  appendStringParam(params, attribute, value, comparison) {
+
+    if (attribute != null && attribute.length > 0 
+      && value != null && value.length > 0) {
+        
+      if (comparison === this.comparisonIsNot) {
+        value = "!" + value;
+      }
+
+      params = params.append(attribute, value);
+    }
+    return params;
+  }
+
+  appendDateTimeParam(params, date, time, comparison) {
+    if (date && time) {
+      let name = "created";
+      let value = new Date(date + "T" + time).toISOString();
+
+      params = params.append(name, comparison + value);
+    }
+    return params;
+  }
+
+  updateJobCountAndJobs() {
+
+    this.jobListLoading = true;
+    let filterParams = this.getFilterParams();
+
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap(service => {
           return this.auhtHttpClient.getAuthWithParams(
             service.adminUri + "/admin/jobhistory/rowcount",
-            params
+            filterParams
           );
         })
       )
@@ -150,58 +141,41 @@ export class HistoryComponent implements OnInit {
         recordNumber => {
           this.jobNumber = recordNumber;
           this.collectionSize = Math.ceil(recordNumber / 500) * 10;
-          this.getJobByParam();
+          this.updateJobs(filterParams);
         },
         err => this.errorHandlerService.showError("get job numbers failed", err)
       );
   }
 
-  getJobByParam() {
-    let params = new HttpParams();
-    // first set the page number for which getting the record
-    params = params.append("page", this.page.toString());
-    for (let i = 0; i < this.filterAttributeSet.length; i++) {
-      if (
-        this.filterAttributeSet[i].name !== null &&
-        this.filterAttributeSet[i].name !== undefined &&
-        this.filterAttributeSet[i].name !== ""
-      ) {
-        params = params.append(
-          this.filterAttributeSet[i].name,
-          this.filterAttributeSet[i].value
-        );
-      }
-    }
+  updateJobs(filterParams) {
+
+    // set the page number for which getting the record
+    filterParams = filterParams.append("page", this.page.toString());
+    
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap(service => {
           return this.auhtHttpClient.getAuthWithParams(
             service.adminUri + "/admin/jobhistory",
-            params
+            filterParams
           );
         })
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {
           this.jobListLoading = false;
-          this.jobHistoryListWithParam = [];
-          this.jobHistoryListWithParam = jobHistoryList;
-          this.filterAttributeSet = [];
-          if (this.jobHistoryListWithParam.length < 1) {
-            alert("No results found");
-          }
+          this.jobs = jobHistoryList;
         },
-        err => this.errorHandlerService.showError("get clients failed", err)
+        err => this.errorHandlerService.showError("failed to get jobs", err)
       );
   }
 
-  reload() {
+  reset() {
     this.resetForm();
-    this.filterAttributeSet = [];
     this.page = 1;
     this.jobNumber = 0;
-    this.getTotalJobCount();
+    this.updateJobCountAndJobs();
   }
 
   getDuration(jobHistory: JobHistory) {
@@ -224,41 +198,52 @@ export class HistoryComponent implements OnInit {
   }
 
   onPageChange(page) {
-    this.page = page;
-    this.getFormControlValues();
-    this.getJobByParam();
+    this.page = page;    
+    this.updateJobs(this.getFilterParams());
   }
 
   resetForm() {
-    this.filteredSearchForm.reset({
-      selectedAttribute: "",
-      value: ""
-    });
-    this.startTimeInputForm.reset();
-    this.endTimeInputForm.reset();
+
+    for (let i = this.stringFiltersFormArray.length - 1; i >= 0; i--) {
+      this.stringFiltersFormArray.removeAt(i)
+    }
+
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getDefaultStringFilter()));
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
+
+    this.startDateTimeFilterForm.reset(this.getEmptyTimeFilter());
+    this.endDateTimeFilterForm.reset(this.getEmptyTimeFilter());
   }
 
-  createItem(): FormGroup {
-    return this.formBuilder.group({
-      selectedAttribute: "",
-      value: ""
-    });
+  deleteFilter(index) {
+    this.stringFiltersFormArray.removeAt(index);
+    this.updateJobCountAndJobs();
   }
 
-  get items(): FormArray {
-    return this.filteredSearchForm.get("items") as FormArray;
+  getDefaultStringFilter() {
+    return {
+      selectedAttribute: this.attributeUserName,
+      selectedComparison: this.comparisonIsNot,
+      value: "jaas/replay_test"
+    }
+  }
+
+  getEmptyStringFilter() {
+    return {
+      selectedAttribute: "",
+      selectedComparison: this.comparisonIs,
+      value: ""
+    };
+  }
+
+  getEmptyTimeFilter() {
+    return {
+      dateInput: "",
+      timeInput: "00:00"
+    };
   }
 
   addItem(): void {
-    this.items.push(this.createItem());
-  }
-
-  checkIfValue(x: any): boolean {
-    console.log(x);
-    if (x || x !== undefined || x != null || x !== "") {
-      return true;
-    } else {
-      return false;
-    }
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
   }
 }
