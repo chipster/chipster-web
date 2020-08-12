@@ -81,6 +81,7 @@
   <thead>
     <tr>
       <th scope="col">Username</th>
+      <th scope="col">Module</th>
       <th scope="col">Tool</th>
       <th scope="col">Created</th>
       <th scope="col">Duration</th>
@@ -92,14 +93,15 @@
   </thead>
   <tbody>
     <tr *ngFor="let jobhistory of jobs" class="text-sm">
-      <td>{{jobhistory.userName}}</td>
+      <td>{{jobhistory.createdBy}}</td>
+      <td>{{jobhistory.module}}</td>
       <td>{{jobhistory.toolId}}</td>
-      <td>{{jobhistory.created|date:'short'}}</td>
+      <td>{{jobhistory.created | date:'short'}}</td>
       <td>{{getDuration(jobhistory)}}</td>
       <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
-      <td>{{jobhistory.jobStatus}}<span *ngIf="jobhistory.jobStatusDetail">({{jobhistory.jobStatusDetail}})</span></td>
+      <td>{{jobhistory.state}}<span *ngIf="jobhistory.jobStatusDetail">({{jobhistory.stateDetail}})</span></td>
       <td><span *ngIf="jobhistory.memoryUsage !== 0">{{jobhistory.memoryUsage | bytes}}</span></td>
-      <td>{{jobhistory.compName}}</td>
+      <td>{{jobhistory.comp}}</td>
     </tr>
   </tbody>
 </table>

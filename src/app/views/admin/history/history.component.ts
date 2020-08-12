@@ -21,14 +21,15 @@ export class HistoryComponent implements OnInit {
 
   readonly comparisonIs = "is";
   readonly comparisonIsNot = "is not";
-  readonly attributeUserName = "userName";
+  readonly attributeUserName = "createdBy";
 
   jobs: Array<JobHistory> = [];
   jobFilterAttributeSet: Array<string> = [
     this.attributeUserName,
     "toolId",
-    "jobStatus",
-    "compName"
+    "state",
+    "comp",
+    "module",    
   ];
   jobFilterComparisonSet: Array<string> = [
     this.comparisonIs,
@@ -44,6 +45,7 @@ export class HistoryComponent implements OnInit {
   page = 1;
   collectionSize = 70;
   jobNumber = 0;
+  updateTime = null;
 
   constructor(
     private configService: ConfigService,
@@ -166,6 +168,7 @@ export class HistoryComponent implements OnInit {
         (jobHistoryList: JobHistory[]) => {
           this.jobListLoading = false;
           this.jobs = jobHistoryList;
+          this.updateTime = new Date();
         },
         err => this.errorHandlerService.showError("failed to get jobs", err)
       );
@@ -180,9 +183,20 @@ export class HistoryComponent implements OnInit {
 
   getDuration(jobHistory: JobHistory) {
     
-    if (jobHistory && jobHistory.startTime && jobHistory.endTime) {
+    if (jobHistory && jobHistory.startTime) {
       let startDate = UtilsService.parseISOStringToDate(jobHistory.startTime);
-      let endDate = UtilsService.parseISOStringToDate(jobHistory.endTime);
+
+      let endDate = null;
+      if (jobHistory.endTime) {
+        endDate = UtilsService.parseISOStringToDate(jobHistory.endTime);
+      } else {
+        /* Show a fixed age of running jobs
+
+        It would be easy to update the age constantly like we do for the end user, but
+        that would give a false sense of live updates, which we don't have here.
+        */
+        endDate = this.updateTime;
+      }
 
       let millis = UtilsService.millisecondsBetweenDates(startDate, endDate);
       return UtilsService.millisecondsToHumanFriendly(millis);
