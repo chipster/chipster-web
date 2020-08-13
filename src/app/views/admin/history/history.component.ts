@@ -10,6 +10,7 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
 import UtilsService from '../../../shared/utilities/utils';
+import { DatasetService } from '../../sessions/session/dataset.service';
 
 @Component({
   selector: "ch-history",
@@ -90,14 +91,36 @@ export class HistoryComponent implements OnInit {
     const startDateControl = this.startDateTimeFilterForm.get("dateInput");
     const startTimeControl = this.startDateTimeFilterForm.get("timeInput");
 
-    params = this.appendDateTimeParam(params, startDateControl.value, startTimeControl.value, ">");
+    const startDate = this.ngbDateStructToString(startDateControl.value);
+
+    params = this.appendDateTimeParam(params, startDate, startTimeControl.value, ">");
     
     const endDateControl = this.endDateTimeFilterForm.get("dateInput");
     const endTimeControl = this.endDateTimeFilterForm.get("timeInput");
 
-    params = this.appendDateTimeParam(params, endDateControl.value, endTimeControl.value, "<");
+    const endDate = this.ngbDateStructToString(endDateControl.value);
+
+    params = this.appendDateTimeParam(params, endDate, endTimeControl.value, "<");
 
     return params;
+  }
+
+  ngbDateStructToString(ngbDate) {
+    if (ngbDate) {
+      // can't set directly in the constructor new Date(year, month, day), because that would 
+      // in local time. We don't set the time, which would be 00:00 and the time zone here is -2.
+      // This would result to the previous day.
+      let date = new Date();      
+      date.setUTCFullYear(ngbDate.year);
+      date.setUTCMonth(ngbDate.month - 1);
+      date.setUTCDate(ngbDate.day);
+      let isoDate = date
+        .toISOString()
+        .slice(0, 10);
+
+        return isoDate;        
+    }
+    return null;
   }
 
   appendStringParam(params, attribute, value, comparison) {
@@ -117,7 +140,8 @@ export class HistoryComponent implements OnInit {
   appendDateTimeParam(params, date, time, comparison) {
     if (date && time) {
       let name = "created";
-      let value = new Date(date + "T" + time).toISOString();
+      // can't use new Date(date + "T" + time), because that would assume it to be local time)
+      let value = date + "T" + time + ":00.000Z";
 
       params = params.append(name, comparison + value);
     }
@@ -208,7 +232,7 @@ export class HistoryComponent implements OnInit {
     const modalRef = this.modalService.open(JobOutputModalComponent, {
       size: "lg"
     });
-    modalRef.componentInstance.output = jobhistory.output;
+    modalRef.componentInstance.output = jobhistory.screenOutput;
   }
 
   onPageChange(page) {
@@ -258,6 +282,15 @@ export class HistoryComponent implements OnInit {
   }
 
   addItem(): void {
-    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));  
+  }
+
+  toShortDateTime(isoDateString) {
+    if (isoDateString) {
+      let date = isoDateString.slice(0, 10);
+      let time = isoDateString.slice(11, 16);
+      return date + " " + time;
+    }
+    return null;
   }
 }

@@ -20,7 +20,8 @@
         <input type="text" formControlName="value" placeholder="" class="form-control form-control-sm"/>
       </div>
       <div class="col-sm-1">
-        <button class="btn btn-sm btn-outline-dark btn-no-border"
+        <!-- without type="button" the enter key in the input fields triggers this button -->
+        <button type="button" class="btn btn-sm btn-outline-dark btn-no-border"
             (click)="deleteFilter(i)"
             title="Delete filter">
             <span class="fas fa-times "></span>
@@ -32,7 +33,7 @@
   <div [formGroup]="startDateTimeFilterForm" class="form-group form-row">
     <label class="col-sm-2 col-form-label">Created after</label>
     <div class=col-sm-2>
-      <input type="date" formControlName="dateInput" class="form-control form-control-sm">
+      <input type="text" formControlName="dateInput" ngbDatepicker #sd="ngbDatepicker" (focus)="sd.open()" placeholder="yyyy-mm-dd" class="form-control form-control-sm"/>
     </div>
     <div class=col-sm-2>
       <input type="time" formControlName="timeInput" class="form-control form-control-sm">
@@ -42,7 +43,8 @@
   <div [formGroup]="endDateTimeFilterForm" class="form-group form-row">
     <label class="col-sm-2 col-form-label">Created before</label>
     <div class=col-sm-2>
-      <input type="date" formControlName="dateInput" class="form-control form-control-sm">
+      <!-- <input type="date" formControlName="dateInput" class="form-control form-control-sm"> -->
+      <input type="text" formControlName="dateInput" ngbDatepicker #ed="ngbDatepicker" (focus)="ed.open()" placeholder="yyyy-mm-dd" class="form-control form-control-sm"/>
     </div>
     <div class=col-sm-2>
       <input type="time" formControlName="timeInput" class="form-control form-control-sm">
@@ -96,9 +98,11 @@
       <td>{{jobhistory.createdBy}}</td>
       <td>{{jobhistory.module}}</td>
       <td>{{jobhistory.toolId}}</td>
-      <td>{{jobhistory.created | date:'short'}}</td>
+      <td>{{toShortDateTime(jobhistory.created)}}</td>
       <td>{{getDuration(jobhistory)}}</td>
-      <td><button class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button></td>
+      <td>
+        <button *ngIf="jobhistory.screenOutput" class="btn btn-sm btn-outline-info" (click)="openJobOutputModal(jobhistory)">Output</button>
+      </td>
       <td>{{jobhistory.state}}<span *ngIf="jobhistory.jobStatusDetail">({{jobhistory.stateDetail}})</span></td>
       <td><span *ngIf="jobhistory.memoryUsage !== 0">{{jobhistory.memoryUsage | bytes}}</span></td>
       <td>{{jobhistory.comp}}</td>
