@@ -36,7 +36,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public supportForm = this.fb.group({
     message: ["", [Validators.required]],
     email: ["", [Validators.required, Validators.email]],
-    attach: ["", [Validators.required]] // force user the the select
+    attach: ["", [Validators.required]] // force user to select
   });
 
   @Input()

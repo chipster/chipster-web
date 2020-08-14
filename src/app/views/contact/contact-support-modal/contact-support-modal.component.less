@@ -1,3 +1,12 @@
 .invalid-feedback {
     display: block;
 }
+
+.hidden {
+    /* Reserve space for error messages to keep the cancel button in place
+
+    Otherwise click on the cancel button takes the focus from the first input field, 
+    starts validation and shows the error message, which moves the button away from the mouse.
+    */
+    visibility: hidden;
+}
