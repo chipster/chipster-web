@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Dataset } from "chipster-js-common";
+import { Dataset, PhenodataUtils } from "chipster-js-common";
 import MetadataFile from "chipster-js-common/lib/model/metadata-file";
 import * as d3 from "d3";
 
@@ -10,20 +10,15 @@ export class DatasetService {
   readonly GROUP_COLOMN = "group";
 
   hasOwnPhenodata(dataset: Dataset): boolean {
-    return this.getOwnPhenodata(dataset) != null;
+    return PhenodataUtils.hasOwnPhenodata(dataset);
   }
 
   getOwnPhenodata(dataset: Dataset): string {
-    const phenodataFile = this.getOwnPhenodataFile(dataset);
-    return phenodataFile != null ? phenodataFile.content : null;
+    return PhenodataUtils.getOwnPhenodata(dataset);
   }
 
   getOwnPhenodataFile(dataset: Dataset): MetadataFile {
-    return dataset.metadataFiles != null
-      ? dataset.metadataFiles.find(metadataFile =>
-          metadataFile.name.startsWith(this.PHENODATA_PREFIX)
-        )
-      : null;
+    return PhenodataUtils.getOwnPhenodataFile(dataset);
   }
 
   isPhenodataFilled(dataset: Dataset): boolean {
