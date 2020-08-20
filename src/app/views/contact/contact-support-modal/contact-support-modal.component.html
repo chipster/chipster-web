@@ -7,8 +7,8 @@
       <label for="messageTextarea">Message</label>
       <textarea rows="3" formControlName="message" required #messageTextarea id="messageTextarea"
         class="form-control"></textarea>
-      <div [ngClass]="isValidationError(message) ? null : 'hidden'" class="invalid-feedback">
-        <div *ngIf="message.errors['required']">
+      <div [class.hidden]="!isValidationError(message)" class="invalid-feedback">
+        <div *ngIf="message.errors && message.errors['required']">
           Please describe what happened
         </div>
       </div>
@@ -25,14 +25,13 @@
         </label>
       </div>
       <div class="form-check">
-        <input class="form-check-input" type="radio" value="no" formControlName="attach" [required]="session != null"
-          id="attachNoInput">
+        <input class="form-check-input" type="radio" value="no" formControlName="attach" [required]="session != null" id="attachNoInput">
         <label class="form-check-label" for="attachNoInput">
           Don't attach the session
         </label>
       </div>
-      <div [ngClass]="isValidationError(attach) ? null : 'hidden'" class="invalid-feedback">
-        <div *ngIf="attach.errors['required']">
+      <div [class.hidden]="!isValidationError(attach)" class="invalid-feedback">
+        <div *ngIf="attach.errors && attach.errors['required']">
           Please choose
         </div>
       </div>
@@ -51,11 +50,11 @@
         it.
       </small>
 
-      <div [ngClass]="isValidationError(email) ? null : 'hidden'" class="invalid-feedback">
-        <div *ngIf="email.errors['required']">
+      <div [class.hidden]="!isValidationError(email)" class="invalid-feedback">
+        <div *ngIf="email.errors && email.errors['required']">
           Please enter your email address
         </div>
-        <div *ngIf="email.errors['email']">
+        <div *ngIf="email.errors && email.errors['email']">
           Please enter a valid email address
         </div>
       </div>
