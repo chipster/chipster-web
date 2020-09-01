@@ -101,7 +101,7 @@ export class ToolSelectionService {
       try {
         regExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
       } catch (e) {
-        log.warn("failed to create RegExp, parameter validation failed", e);
+        log.warn("failed to create RegExp, parameter validation failed");
         return {
           valid: true
         };

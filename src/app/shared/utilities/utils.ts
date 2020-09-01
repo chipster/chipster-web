@@ -1,5 +1,6 @@
 import { Dataset } from "chipster-js-common";
 import * as _ from "lodash";
+import log from "loglevel";
 
 export default class UtilsService {
   static getFileExtension(name: string) {
@@ -119,32 +120,74 @@ export default class UtilsService {
   }
 
   static parseISOStringToDate(s: any) {
-    const b = s.split(/\D+/);
-    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+    if (s != null) {
+      return new Date(Date.parse(s));    
+    }
+    return null;
   }
 
-  static convertMS(milliseconds: any) {
-    let day, hour, minute, seconds;
-    seconds = Math.floor(milliseconds / 1000);
-    minute = Math.floor(seconds / 60);
-    seconds = seconds % 60;
-    hour = Math.floor(minute / 60);
-    minute = minute % 60;
-    day = Math.floor(hour / 24);
-    hour = hour % 24;
-    let duration = "";
-    if (day > 0) {
-      duration += day + "d :";
+  static millisecondsBetweenDates(start: Date, end: Date) {
+    return end.getTime() - start.getTime();
+  }
+
+  static millisecondsToHumanFriendly(milliseconds: number, zero = "0", lessThanSecond = "less than second"): string {
+
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    let days = Math.floor(hours / 24);
+    
+    // Remainders. For example, when the "minutes" is 74, the "minute" is "14"). 
+    // Now we show only the most significant unit (e.g. "1 hour") where the both values are equal. 
+    // Let's keep these anyway, in case we want to show more precision at some point, 
+    // e.g. "1 hour 14 minutes".
+
+    let millisecond = milliseconds % 1000;
+    let second = seconds % 60;
+    let minute = minutes % 60;
+    let hour = hours % 24;
+
+    if (days == 1) {
+      return "a day";
     }
-    if (hour > 0) {
-      duration += hour + "h :";
+
+    if (days > 1) {
+      return days + " days"
     }
-    if (minute > 0) {
-      duration += minute + "m :";
+
+    if (hour == 1) {
+      return "an hour";
     }
-    if (seconds > 0) {
-      duration += seconds + "s ";
+    
+    if (hour > 1) {
+      return hour + " hours";
     }
-    return duration;
+
+    if (minute == 1) {
+      return "a minute";
+    }
+
+    if (minute > 1) {
+      return minute + " minutes";
+    }
+
+    if (second == 1) {
+      return "a second"
+    }
+
+    if (second > 0) {
+      return seconds + " seconds"
+    }
+
+    if (millisecond > 0) {
+      return lessThanSecond;
+    }
+
+    if (millisecond == 0) {
+      return zero;;
+    }
+
+    log.warn("unknown millisecond time " + milliseconds);
+    return "" + milliseconds;
   }
 }

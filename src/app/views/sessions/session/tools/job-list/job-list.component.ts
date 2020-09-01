@@ -7,17 +7,22 @@ import {
 } from "@angular/core";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Job } from "chipster-js-common";
-import UtilsService from "../../../../../shared/utilities/utils";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
+import { JobService } from '../../job.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: "ch-job-list",
-  templateUrl: "./job-list.component.html"
+  templateUrl: "./job-list.component.html",
+  styleUrls: ["./job-list.component.less"]
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];
   jobsSorted: Job[];
+
+  durationMap = new Map<string, Observable<string>>();
 
   @Output() private jobSelected = new EventEmitter<Job>();
 
@@ -33,6 +38,15 @@ export class JobListComponent implements OnChanges {
       const d2 = new Date(b.created).getTime();
       return d2 - d1;
     });
+
+    this.durationMap = new Map();
+    this.jobsSorted.forEach(job => {
+      this.durationMap.set(job.jobId, this.createDurationObservable(job));
+    });
+  }
+
+  getDurationObservable(job) {
+    return this.durationMap.get(job.jobId);
   }
 
   selectJob(job: Job) {
@@ -44,23 +58,17 @@ export class JobListComponent implements OnChanges {
     this.dropDown.close();
   }
 
-  calculateDuration(startTime, endTime) {
-    let duration = "";
-    if (startTime != null && endTime != null) {
-      const computingTime =
-        UtilsService.parseISOStringToDate(endTime).getTime() -
-        UtilsService.parseISOStringToDate(startTime).getTime();
-      if (computingTime > 0) {
-        if (computingTime > 1000) {
-          duration = UtilsService.convertMS(computingTime);
-        } else {
-          duration = computingTime.toString() + "ms";
-        }
+  createDurationObservable(job: Job): Observable<string> {
 
+    return JobService.getDuration(job).pipe(
+      map(duration => {
+        if (duration === "0") {
+          // incorrect information in the old sessions, no need to show
+          return null;
+        }
         return duration;
-      }
-      return duration;
-    }
+      }),
+    );
   }
 
   cancelJob(job: Job) {

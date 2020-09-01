@@ -6,6 +6,9 @@ import { DatasetService } from "./dataset.service";
 import { SessionDataService } from "./session-data.service";
 import { ToolService } from "./tools/tool.service";
 import { ValidatedTool } from "./tools/ToolSelection";
+import UtilsService from '../../../shared/utilities/utils';
+import { Observable, of, interval } from 'rxjs';
+import { startWith, map, distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable()
 export class JobService {
@@ -20,6 +23,35 @@ export class JobService {
     return (
       job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING"
     );
+  }
+
+  static getDuration(job: Job): Observable<string> {
+
+    if (job.startTime == null) {
+      return of(null);
+    }
+
+    let startDate = UtilsService.parseISOStringToDate(job.startTime);
+    let endDate = UtilsService.parseISOStringToDate(job.endTime);
+
+    if (!this.isRunning(job)) {
+      if (job.endTime == null) {
+        return of(null);
+      }
+      let duration = UtilsService.millisecondsBetweenDates(startDate, endDate);
+      return of(UtilsService.millisecondsToHumanFriendly(duration));
+
+    } else {
+      return interval(1000).pipe(
+        startWith(0),
+        map(() => {
+            let millis = UtilsService.millisecondsBetweenDates(startDate, new Date());
+            return UtilsService.millisecondsToHumanFriendly(
+                millis, "now", "now");
+        },
+        distinctUntilChanged()
+     ));
+    }
   }
 
   static isSuccessful(job: Job): boolean {

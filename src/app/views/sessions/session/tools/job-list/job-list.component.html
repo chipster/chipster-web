@@ -19,12 +19,14 @@
       {{ job.created | localDate }}
     </td>
     <td>{{ job.state }}</td>
-    <!--
-    <td>{{ calculateDuration(job.startTime, job.endTime) }}</td>
-    -->
+    
+    <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
+        {{ getDurationObservable(job) | async }}
+    </td>
+   
     <td valign="top" style="padding-left:10px"
       *ngIf="job.state === 'RUNNING' || job.state === 'NEW'; else blankTemplate">
-      <button class="btn btn-link" style="font-size:12px;padding-left:10px"
+      <button class="btn btn-link cancel-button"
         (click)="$event.stopImmediatePropagation(); cancelJob(job)">
         cancel
       </button>

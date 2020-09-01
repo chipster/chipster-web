@@ -24,7 +24,6 @@ import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 import { ConfigService } from "../../../shared/services/config.service";
-import { RouteService } from "../../../shared/services/route.service";
 import { UserService } from "../../../shared/services/user.service";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 
@@ -36,7 +35,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public supportForm = this.fb.group({
     message: ["", [Validators.required]],
     email: ["", [Validators.required, Validators.email]],
-    attach: ["", [Validators.required]] // force user the the select
+    attach: ["", [Validators.required]] // force user to select
   });
 
   @Input()
@@ -57,7 +56,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private userService: UserService,
     private sessionResource: SessionResource,
     private authenticationService: AuthenticationService,
-    private routeService: RouteService,
     private configService: ConfigService,
     private dialogModalService: DialogModalService,
     private fb: FormBuilder,
