@@ -1,9 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { Observable, of, never } from "rxjs";
+import { map, mergeMap, tap, catchError } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "../services/config.service";
+import { RestErrorService } from '../../core/errorhandler/rest-error.service';
 
 @Injectable()
 export class SessionWorkerResource {
@@ -12,6 +13,7 @@ export class SessionWorkerResource {
   constructor(
     private tokenService: TokenService,
     private configService: ConfigService,
+    private restErrorService: RestErrorService,
     private http: HttpClient
   ) {}
 
@@ -29,7 +31,12 @@ export class SessionWorkerResource {
           {},
           this.tokenService.getTokenParams(true)
         )
-      )
+      ),
+      tap(x => console.log("extractSession()", x)),
+      catchError(e => {
+        this.restErrorService.showError("extract session failed", e);
+        throw never();
+      }),
     );
   }
 
