@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Dataset, PhenodataUtils } from "chipster-js-common";
+import { Dataset, PhenodataUtils, Job } from "chipster-js-common";
 import * as _ from "lodash";
 import { SessionData } from "../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../shared/services/typetag.service";
@@ -75,4 +75,34 @@ export class QuerySessionDataService {
     return this.typeTagService.has(sessionData, dataset, Tags.GENE_EXPRS) 
       || this.typeTagService.has(sessionData, dataset, Tags.BAM);
   }
+
+  getChildren(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>) {    
+
+    let allChildren = [];
+
+    let allDatasets = Array.from(datasetsMap.values());
+
+    Array.from(datasets).forEach(dataset => {
+
+      let ownChildren = [];
+      allDatasets.forEach(d => {
+        if (d.sourceJob != null) {
+          let sourceJob = jobsMap.get(d.sourceJob);
+          if (sourceJob != null) {
+            sourceJob.inputs.forEach(i => {
+              if (i.datasetId === dataset.datasetId) {
+                ownChildren.push(d);
+              }
+            })
+          }
+        }
+      });
+
+      allChildren.push(...ownChildren);
+      allChildren.push(...this.getChildren(ownChildren, datasetsMap, jobsMap));
+    });
+
+    return allChildren;
+  }
+
 }

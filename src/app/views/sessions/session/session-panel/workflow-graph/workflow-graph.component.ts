@@ -1035,7 +1035,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragEnd(): void {
     // update positions of all selected datasets to the server
 
-    let datasets = [];
+    let datasetNodes = [];
 
     this.d3DatasetNodes
       .filter(d => {
@@ -1043,18 +1043,30 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       })
       .each(d => {
         if (d.dataset) {
-          const datasetCopy = _.cloneDeep(d.dataset);
-          datasetCopy.x = d.x;
-          datasetCopy.y = d.y;
-          datasets.push(datasetCopy);
+          datasetNodes.push(d);
         }
-      });
+      });    
+
+    let originalDatasets = datasetNodes.map(d => _.cloneDeep(d.dataset));
+
+    // this are SessionData instances. Update those immediately to avoid datasets jumping back and forth 
+    // when moving many datasets at the same time
+    let movedDatasets = datasetNodes.map(d => {
+          d.dataset.x = d.x;
+          d.dataset.y = d.y;
+          return d.dataset;
+        });
 
     this.sessionDataService
-      .updateDatasets(datasets)
-      .subscribe(null, err =>
-        this.restErrorService.showError("dataset upate error", err)
-      );
+      .updateDatasets(movedDatasets)
+      .subscribe(null, err => {
+        this.restErrorService.showError("dataset upate error", err);
+
+        // update failed. Restore the original positions
+        originalDatasets.forEach(d => this.sessionData.datasetsMap.set(d.datasetId, d));
+        this.update();
+        this.renderGraph();
+      });
 
     // update scroll limits if datasets were moved
     this.updateSvgSize();

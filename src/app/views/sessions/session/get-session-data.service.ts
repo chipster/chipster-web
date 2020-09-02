@@ -51,4 +51,8 @@ export class GetSessionDataService {
       this.sessionData,
       dataset);
   }
+
+  getChildren(datasets: Dataset[]) {    
+    return this.querySessionDataService.getChildren(datasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
+  }
 }

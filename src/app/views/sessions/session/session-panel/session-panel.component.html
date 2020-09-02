@@ -51,6 +51,9 @@
                 <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()"
                   >Reset file positions of selected</a
                 >
+                <a class="dropdown-item" (click)="selectChildren()" [class.disabled]="!isDatasetsSelected()"
+                  >Select descendants</a
+                >
               </div>
             </span>
 

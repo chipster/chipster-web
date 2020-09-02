@@ -71,8 +71,6 @@ export class WorkflowGraphService {
       log.debug("dataset " + d.name + " sources ", sources);
 
       if (sources.length === 0) {
-        // we have found an unpositioned parent
-        // it must be a root node, because otherwise this loop would have positioned it already
         const newRootPos = this.newRootPosition(datasets);
         d.x = newRootPos.x;
         d.y = newRootPos.y;

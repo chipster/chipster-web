@@ -11,6 +11,7 @@ import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
 import { WorkflowGraphService } from './workflow-graph/workflow-graph.service';
+import { GetSessionDataService } from '../get-session-data.service';
 
 @Component({
   selector: "ch-session-panel",
@@ -28,6 +29,7 @@ export class SessionPanelComponent {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public sessionDataService: SessionDataService, // used by template
+    public getSessionDataService: GetSessionDataService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
@@ -118,6 +120,11 @@ export class SessionPanelComponent {
     this.workflowGraphService.doLayoutAndSave(datasetsMapCopy, this.sessionData.jobsMap);
   }
 
+  selectChildren() { 
+    let children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets)
+    this.selectionHandlerService.setDatasetSelection(children);
+  }
+  
   getDatasetListSorted(): Dataset[] {
     return this.sessionDataService.getDatasetListSortedByCreated(
       this.sessionData
