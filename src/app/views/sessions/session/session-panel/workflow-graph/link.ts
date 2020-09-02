@@ -3,5 +3,5 @@ import Node from "./node";
 
 export interface Link {
   source: DatasetNode;
-  target: Node;
+  target: DatasetNode;
 }

@@ -45,8 +45,11 @@
                   (click)="workflowGraph.resetZoomAndScroll()"
                   >Reset view</a
                 >
-                <a class="dropdown-item" (click)="autoLayout()"
+                <a class="dropdown-item" (click)="autoLayoutAll()"
                   >Reset file positions</a
+                >
+                <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()"
+                  >Reset file positions of selected</a
                 >
               </div>
             </span>

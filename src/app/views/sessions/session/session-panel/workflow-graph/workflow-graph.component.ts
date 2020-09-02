@@ -12,7 +12,7 @@ import { Dataset, Job, Module } from "chipster-js-common";
 import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
 import * as _ from "lodash";
-import { Observable, Subscription } from "rxjs";
+import { Observable, Subscription, forkJoin } from "rxjs";
 import { flatMap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -165,6 +165,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
+
     this.selectedDatasets$ = this.store.select("selectedDatasets");
 
     const section = d3.select("#workflowvisualization");
@@ -243,6 +244,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.update();
 
     this.applyZoom(this.defaultScale);
+
     if (this.enabled) {
       this.subscriptions.push(
         this.sessionEventService.getDatasetStream().subscribe(
@@ -463,6 +465,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   update(): void {
+
+    // layout new datasets or anything from the CLI client
+    if (this.enabled) {
+      this.workflowGraphService.doLayoutAndSave(this.datasetsMap, this.jobsMap);
+    } else {      
+      // preview shouldn't update the data on server
+      let layoutedDatasets = this.workflowGraphService.doLayout(this.datasetsMap, this.jobsMap);
+      // update our copy of datasets
+      layoutedDatasets.forEach(d => this.datasetsMap.set(d.datasetId, d));
+    }
+
     const datasetNodes = this.getDatasetNodes(
       this.sessionDataService.getCompleteDatasets(this.datasetsMap),
       this.jobsMap,
@@ -470,8 +483,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     const links = this.getLinks(datasetNodes);
-
-    this.doLayout(links, datasetNodes);
 
     this.datasetNodes = datasetNodes;
     this.phenodataNodes = datasetNodes.filter(datasetNode =>
@@ -545,39 +556,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         self.hideTooltip();
       })
       .classed("phenodata-node", true);
-    // .classed("selected-dataset", d => this.isSelectedDataset(d.dataset));
-
-    // // store the selection of all existing and new elements
-    // this.d3PhenodataNodes = this.d3PhenodataNodesGroup
-    //   .selectAll("text")
-    //   .data(this.phenodataNodes, d => d.datasetId);
-
-    // // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
-    // this.d3PhenodataNodes
-    //   .enter()
-    //   .append("text")
-    //   .text((d: any) => "\uf069")
-    //   .attr("x", d => this.getPhenodataX(d))
-    //   .attr("y", d => this.getPhenodataY(d))
-    //   .attr("class", "fa")
-    //   .merge(this.d3PhenodataNodes)
-    //   .attr("id", function(d) {
-    //     return "phenodata_node_" + d.datasetId;
-    //   })
-
-    //   .attr("stroke", d =>
-    //     this.datasetService.isPhenodataFilled(d.dataset) ? "gray" : "#ffc107"
-    //   )
-    //   .attr("font-size", "16px")
-    //   .attr("stroke-width", "2")
-    //   .attr("pointer-events", "all")
-    //   .style("fill", "white")
-    //   .style("opacity", d =>
-    //     WorkflowGraphComponent.getOpacity(
-    //       !this.filter || this.filter.has(d.datasetId)
-    //     )
-    //   )
-    //   .classed("phenodata-node", true);
 
     this.d3PhenodataNodes.on("click", (d: DatasetNode) => {
       if (self.enabled) {
@@ -1056,6 +1034,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   dragEnd(): void {
     // update positions of all selected datasets to the server
+
+    let datasets = [];
+
     this.d3DatasetNodes
       .filter(d => {
         return this.selectionService.isSelectedDatasetById(d.dataset.datasetId);
@@ -1064,15 +1045,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (d.dataset) {
           const datasetCopy = _.cloneDeep(d.dataset);
           datasetCopy.x = d.x;
-          datasetCopy.y = d.y;          
-
-          this.sessionDataService
-            .updateDataset(datasetCopy)
-            .subscribe(null, err =>
-              this.restErrorService.showError("dataset upate error", err)
-            );
+          datasetCopy.y = d.y;
+          datasets.push(datasetCopy);
         }
       });
+
+    this.sessionDataService
+      .updateDatasets(datasets)
+      .subscribe(null, err =>
+        this.restErrorService.showError("dataset upate error", err)
+      );
 
     // update scroll limits if datasets were moved
     this.updateSvgSize();
@@ -1178,55 +1160,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     return links;
-  }
-
-  doLayout(links: Link[], nodes: DatasetNode[]): void {
-    // layout nodes that don't yet have a position
-
-    // layout nodes with parents
-    // sort by the creation date to make parents precede their children in the array
-    links
-      .sort((a, b) => {
-        return UtilsService.compareStringNullSafe(
-          a.target.created,
-          b.target.created
-        );
-      })
-      .forEach(link => {
-        if (link.target.x == null || link.target.y == null) {
-          if (link.source.x == null || link.source.y == null) {
-            // we have found an unpositioned parent
-            // it must be a root node, because otherwise this loop would have positioned it already
-            const newRootPos = this.workflowGraphService.newRootPosition(nodes);
-            link.source.x = newRootPos.x;
-            link.source.y = newRootPos.y;
-          }
-
-          const nodeWidth =
-            this.isDatasetNode(link.target) &&
-            this.datasetService.hasOwnPhenodata(link.target.dataset)
-              ? this.nodeWidth * 2 + this.xMargin
-              : this.nodeWidth;
-
-          const pos = this.workflowGraphService.newPosition(
-            nodes,
-            link.source.x,
-            link.source.y,
-            nodeWidth
-          );
-          link.target.x = pos.x;
-          link.target.y = pos.y;
-        }
-      });
-
-    // layout orphan nodes
-    nodes.forEach(node => {
-      if (node.x == null || node.y == null) {
-        const pos = this.workflowGraphService.newRootPosition(nodes);
-        node.x = pos.x;
-        node.y = pos.y;
-      }
-    });    
   }
 
   showTooltip(

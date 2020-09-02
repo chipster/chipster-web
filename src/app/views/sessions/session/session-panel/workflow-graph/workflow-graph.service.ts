@@ -1,6 +1,10 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Input } from "@angular/core";
 import { DatasetService } from "../../dataset.service";
-import { DatasetNode } from "./dataset-node";
+import { Dataset, Job } from 'chipster-js-common';
+import UtilsService from '../../../../../shared/utilities/utils';
+import log from "loglevel";
+import { SessionDataService } from '../../session-data.service';
+import { RestErrorService } from '../../../../../core/errorhandler/rest-error.service';
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
@@ -22,11 +26,123 @@ export class WorkflowGraphService {
   xMargin = this.nodeWidth / 4;
   yMargin = this.nodeHeight;
 
-  constructor(private datasetService: DatasetService) {}
+  constructor(
+    private datasetService: DatasetService,
+    private sessionDataService: SessionDataService,
+    private restErrorService: RestErrorService,
+) {}
 
-  newRootPosition(nodes: DatasetNode[]) {
+  doLayoutAndSave(datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): void {
+    let datasetsToUpdate = this.doLayout(datasetMap, jobMap);
+
+    // update new dataset positions to server
+    if (datasetsToUpdate.length > 0) {
+      log.info("update " + datasetsToUpdate.length + " new dataset positions to server");
+
+      this.sessionDataService.updateDatasets(datasetsToUpdate)
+        .subscribe(null, err => this.restErrorService.showError("updating dataset position failed", err));
+    }
+  }
+
+
+  doLayout(datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+
+    let datasetsToUpdate = [];
+    // layout nodes that don't yet have a position
+
+    // layout nodes with parents
+    // sort by the creation date to make parents precede their children in the array
+    let datasets = Array.from(datasetMap.values())
+      .sort((a, b) => {
+        return UtilsService.compareStringNullSafe(
+          a.created,
+          b.created
+        );
+      })
+
+    datasets.forEach(d => {
+
+      if (d.x != null && d.y != null) {
+        return;
+      }
+
+      let sources = this.getSourceDatasets(d, datasetMap, jobMap);
+
+      log.debug("dataset " + d.name + " sources ", sources);
+
+      if (sources.length === 0) {
+        // we have found an unpositioned parent
+        // it must be a root node, because otherwise this loop would have positioned it already
+        const newRootPos = this.newRootPosition(datasets);
+        d.x = newRootPos.x;
+        d.y = newRootPos.y;
+        
+        datasetsToUpdate.push(d);
+      } else {
+        let firstSource = sources[0];
+
+        if (firstSource.x == null || firstSource.y == null) {
+          log.info("source dataset " + firstSource.name + " should have positions already. Incorrect timestamps?");
+        } else {
+
+
+          const nodeWidth =
+          this.datasetService.hasOwnPhenodata(d)
+            ? this.nodeWidth * 2 + this.xMargin
+            : this.nodeWidth;
+
+          const pos = this.newPosition(
+            datasets,
+            firstSource.x,
+            firstSource.y,
+            nodeWidth
+          );
+          d.x = pos.x;
+          d.y = pos.y;
+          
+          datasetsToUpdate.push(d);
+        }
+      }
+    });
+
+    log.debug(datasetsToUpdate.length + "/" + datasets.length + " datasets layouted");
+
+    return datasetsToUpdate;
+  }
+
+  getSourceDatasets(dataset: Dataset, datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+
+    if (dataset.sourceJob == null) {
+      log.info("dataset's " + dataset.name + " source job is null");
+      return [];
+    }
+
+    let sourceJob = jobMap.get(dataset.sourceJob);
+
+    if (sourceJob == null) {
+      log.info("dataset's " + dataset.name + " source job not found");
+      return [];      
+    }
+
+    let sources = [];
+    
+    // iterate over the inputs of the source job
+    sourceJob.inputs
+      .forEach(input => {
+        let source = datasetMap.get(input.datasetId);
+        if (source != null) {
+          sources.push(source);
+        } else {
+          log.info("job's " + sourceJob.toolId + " input dataset for input '" + input.inputId + "' not found");
+        }
+      });
+
+    return sources;
+  }
+
+  newRootPosition(datasets: Dataset[]) {
     return this.newPosition(
-      nodes,
+      datasets,
       null,
       null,
       this.nodeWidth,
@@ -35,7 +151,7 @@ export class WorkflowGraphService {
   }
 
   newPosition(
-    nodes: DatasetNode[],
+    datasets: Dataset[],
     parentX: number,
     parentY: number,
     width = this.nodeWidth,
@@ -51,7 +167,7 @@ export class WorkflowGraphService {
       y = parentY + this.nodeHeight + this.yMargin;
     }
 
-    while (this.intersectsAny(nodes, x, y, width, height)) {
+    while (this.intersectsAny(datasets, x, y, width, height)) {
       x += this.nodeWidth + this.xMargin;
     }
 
@@ -62,33 +178,33 @@ export class WorkflowGraphService {
   }
 
   intersectsAny(
-    nodes: DatasetNode[],
+    datasets: Dataset[],
     x: number,
     y: number,
     w: number,
     h: number
   ) {
-    return nodes.some((node: DatasetNode) => {
+    return datasets.some((node: Dataset) => {
       return this.intersectsNode(node, x, y, w, h);
     });
   }
 
   intersectsNode(
-    node: DatasetNode,
+    dataset: Dataset,
     x: number,
     y: number,
     w: number,
     h: number
   ) {
-    if (node.x && node.y) {
-      const nodeWidth = this.datasetService.hasOwnPhenodata(node.dataset)
+    if (dataset.x && dataset.y) {
+      const nodeWidth = this.datasetService.hasOwnPhenodata(dataset)
         ? this.nodeWidth + this.xMargin + this.nodeWidth
         : this.nodeWidth;
       return (
-        x + w >= node.x &&
-        x < node.x + nodeWidth &&
-        y + h >= node.y &&
-        y < node.y + this.nodeHeight
+        x + w >= dataset.x &&
+        x < dataset.x + nodeWidth &&
+        y + h >= dataset.y &&
+        y < dataset.y + this.nodeHeight
       );
     } else {
       return false;
