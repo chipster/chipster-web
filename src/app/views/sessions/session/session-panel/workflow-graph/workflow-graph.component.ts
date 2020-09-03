@@ -246,6 +246,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           () => {
             this.update();
             this.renderGraph();
+            // dataset may have been moved outside of the svg area
+            this.updateSvgSize();
           },
           err => this.errorService.showError("get dataset events failed", err)
         )
@@ -415,7 +417,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.nodeWidth +
       15;
     const height =
-      Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 15;
+      Math.max(...this.datasetNodes.map(d => d.y)) + this.nodeHeight + 30;
 
     // graph size in pixels after the zoom
     const scaledWidth = width * this.zoomScale;
