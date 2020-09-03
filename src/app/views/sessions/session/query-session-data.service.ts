@@ -78,7 +78,8 @@ export class QuerySessionDataService {
 
   getChildren(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>) {    
 
-    let allChildren = [];
+    // map takes care of duplicates
+    let allChildren = new Map<string, Dataset>();
 
     let allDatasets = Array.from(datasetsMap.values());
 
@@ -97,12 +98,14 @@ export class QuerySessionDataService {
           }
         }
       });
-
-      allChildren.push(...ownChildren);
-      allChildren.push(...this.getChildren(ownChildren, datasetsMap, jobsMap));
+      
+      const children = this.getChildren(ownChildren, datasetsMap, jobsMap)
+      
+      ownChildren.forEach(d => allChildren.set(d.datasetId, d));
+      children.forEach(d => allChildren.set(d.datasetId, d));      
     });
 
-    return allChildren;
+    return Array.from(allChildren.values());
   }
 
 }
