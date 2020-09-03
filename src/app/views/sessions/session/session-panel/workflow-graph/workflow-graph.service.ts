@@ -5,6 +5,7 @@ import UtilsService from '../../../../../shared/utilities/utils';
 import log from "loglevel";
 import { SessionDataService } from '../../session-data.service';
 import { RestErrorService } from '../../../../../core/errorhandler/rest-error.service';
+import * as _ from 'lodash';
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
@@ -32,8 +33,39 @@ export class WorkflowGraphService {
     private restErrorService: RestErrorService,
 ) {}
 
-  doLayoutAndSave(datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): void {
-    let datasetsToUpdate = this.doLayout(datasetMap, jobMap);
+  resetDoAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>): void {
+
+    // create a copy of the datasets to wait for the websocket updates
+    let datasetsMapCopy = new Map();
+
+    datasetsMap.forEach(d => {
+      datasetsMapCopy.set(d.datasetId, _.cloneDeep(d));
+    });
+
+    // create a set of datasetIds for efficient search
+    let datasetIdsToLayout = new Set();
+    datasets.forEach(d => {
+      datasetIdsToLayout.add(d.datasetId);
+    });
+    
+    let resetedDatasets: Dataset[] = [];
+
+    // clear the coordinates of the Dataset instances in the map and create a list of cleared
+    // datasets that have to be layouted
+    Array.from(datasetsMapCopy.values())
+      .filter(d => datasetIdsToLayout.has(d.datasetId))
+      .forEach(d => {    
+        d.x = null;
+        d.y = null;
+        resetedDatasets.push(d);
+      });
+
+    this.doAndSaveLayout(resetedDatasets, datasetsMapCopy, jobsMap);
+  }
+
+  doAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobMap: Map<string, Job>): void {
+
+    let datasetsToUpdate = this.doLayout(datasets, datasetsMap, jobMap);
 
     // update new dataset positions to server
     if (datasetsToUpdate.length > 0) {
@@ -45,66 +77,89 @@ export class WorkflowGraphService {
   }
 
 
-  doLayout(datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
-
-    let datasetsToUpdate = [];
-    // layout nodes that don't yet have a position
-
+  /**
+   * Layout datasets
+   * 
+   * Layout all datasets in the datasets array and their unpositioned parents. Only the datasetId is 
+   * taken from the array, all other information is taken from the datasetMap, including the 
+   * position. The parameter type is an array of Datasets instead of an array of datasetIds just to
+   * make it easier to call this method.
+   * 
+   * @param datasets 
+   * @param datasetMap 
+   * @param jobMap 
+   */
+  doLayout(datasets: Dataset[], datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
     // layout nodes with parents
-    // sort by the creation date to make parents precede their children in the array
-    let datasets = Array.from(datasetMap.values())
+    // sort by the creation date to make parents precede their children in the array and to make this
+    // more deterministic
+    datasets = datasets
       .sort((a, b) => {
         return UtilsService.compareStringNullSafe(
           a.created,
           b.created
         );
       })
+      .filter(d => d.x == null && d.y == null);
+
+    let datasetsToUpdate = [];
 
     datasets.forEach(d => {
-
-      if (d.x != null && d.y != null) {
-        return;
-      }
-
-      let sources = this.getSourceDatasets(d, datasetMap, jobMap);
-
-      log.debug("dataset " + d.name + " sources ", sources);
-
-      if (sources.length === 0) {
-        const newRootPos = this.newRootPosition(datasets);
-        d.x = newRootPos.x;
-        d.y = newRootPos.y;
-        
-        datasetsToUpdate.push(d);
-      } else {
-        let firstSource = sources[0];
-
-        if (firstSource.x == null || firstSource.y == null) {
-          log.info("source dataset " + firstSource.name + " should have positions already. Incorrect timestamps?");
-        } else {
-
-
-          const nodeWidth =
-          this.datasetService.hasOwnPhenodata(d)
-            ? this.nodeWidth * 2 + this.xMargin
-            : this.nodeWidth;
-
-          const pos = this.newPosition(
-            datasets,
-            firstSource.x,
-            firstSource.y,
-            nodeWidth
-          );
-          d.x = pos.x;
-          d.y = pos.y;
-          
-          datasetsToUpdate.push(d);
-        }
-      }
+      datasetsToUpdate.push(...this.doLayoutRecursive(d.datasetId, datasetMap, jobMap))
     });
 
-    log.debug(datasetsToUpdate.length + "/" + datasets.length + " datasets layouted");
+    return datasetsToUpdate;
+  }
 
+  doLayoutRecursive(datasetId: string, datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+
+    let dataset = datasetMap.get(datasetId);
+
+    // check if this dataset has a position already
+    if (dataset.x != null && dataset.y != null) {
+      return [];
+    }
+
+    let datasetsToUpdate = [];
+
+    // find parents
+    let sources = this.getSourceDatasets(dataset, datasetMap, jobMap);
+
+    // check if this is a root
+    if (sources.length === 0) {
+      const newRootPos = this.newRootPosition(Array.from(datasetMap.values()));
+      dataset.x = newRootPos.x;
+      dataset.y = newRootPos.y;
+      
+      datasetsToUpdate.push(dataset);
+
+    } else {
+      let firstSource = sources[0];
+
+      // check if parent has a position
+      if (firstSource.x == null || firstSource.y == null) {        
+        // layout parent first
+        datasetsToUpdate.push(...this.doLayoutRecursive(firstSource.datasetId, datasetMap, jobMap));
+      }
+
+      // now the parent(s) have position, let's calculate ours
+      const nodeWidth =
+      this.datasetService.hasOwnPhenodata(dataset)
+        ? this.nodeWidth * 2 + this.xMargin
+        : this.nodeWidth;
+
+      const pos = this.newPosition(
+        Array.from(datasetMap.values()),
+        firstSource.x,
+        firstSource.y,
+        nodeWidth
+      );
+      dataset.x = pos.x;
+      dataset.y = pos.y;
+      
+      datasetsToUpdate.push(dataset);
+    }
+    
     return datasetsToUpdate;
   }
 

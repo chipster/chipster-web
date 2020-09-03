@@ -499,10 +499,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // layout new datasets or anything from the CLI client
     if (this.enabled) {
-      this.workflowGraphService.doLayoutAndSave(this.datasetsMap, this.jobsMap);
+      this.workflowGraphService.doAndSaveLayout(Array.from(this.datasetsMap.values()), this.datasetsMap, this.jobsMap);
     } else {
       // preview shouldn't update the data on server
-      let layoutedDatasets = this.workflowGraphService.doLayout(this.datasetsMap, this.jobsMap);
+      let layoutedDatasets = this.workflowGraphService.doLayout(Array.from(this.datasetsMap.values()), this.datasetsMap, this.jobsMap);
       // update our copy of datasets
       layoutedDatasets.forEach(d => this.datasetsMap.set(d.datasetId, d));
     }

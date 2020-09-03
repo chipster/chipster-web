@@ -87,44 +87,24 @@ export class SessionPanelComponent {
   }
 
   autoLayoutAll(): void {
-    this.autoLayout(Array.from(this.sessionData.datasetsMap.values()));
+    let allDatasets = Array.from(this.sessionData.datasetsMap.values());
+    this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
   }
   
   autoLayoutSelected(): void {
-    console.log(this.selectionService.selectedDatasets.length + " selected datasets");
-    this.autoLayout(this.selectionService.selectedDatasets);
-  }
-
-  autoLayout(datasets: Dataset[]): void {
-    
-    let datasetsMapCopy = new Map();
-    this.sessionData.datasetsMap.forEach(d => {
-      datasetsMapCopy.set(d.datasetId, _.cloneDeep(d));
-    });
-
-    // create a set of datasetIds for efficient search
-    let datasetIdsToLayout = new Set();
-    datasets.forEach(d => {
-      datasetIdsToLayout.add(d.datasetId);
-    });
-
-    // clear the coordinates of the Dataset instancens in the map, so that it doesn't matter 
-    // if the dataset object that we got as a parameter is a copy and not the same instance
-    Array.from(datasetsMapCopy.values())
-      .filter(d => datasetIdsToLayout.has(d.datasetId))
-      .forEach(d => {    
-        d.x = null;
-        d.y = null;
-      });
-
-    this.workflowGraphService.doLayoutAndSave(datasetsMapCopy, this.sessionData.jobsMap);
+    this.workflowGraphService.resetDoAndSaveLayout(this.selectionService.selectedDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
   }
 
   selectChildren() { 
     let children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets)
     this.selectionHandlerService.setDatasetSelection(children);
   }
-  
+
+  selectAll() { 
+    let all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
+    this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
+  }
+
   getDatasetListSorted(): Dataset[] {
     return this.sessionDataService.getDatasetListSortedByCreated(
       this.sessionData
