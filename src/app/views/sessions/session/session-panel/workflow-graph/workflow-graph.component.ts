@@ -482,20 +482,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("height", height)
       .attr("stroke", "none")
       .attr("fill-opacity", 0)
-      .on("mousedown", () => {
-        /*
-Listen for background clicks
-
-Don't do anything if the context menu is open, because then the user clicked just to close
-it. Listen for mousedown events like the context menu. This listener seems to be fired before the
-contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
-in the context menu onClose doesn't help also, because this was called earlier.
-*/
-        if (!this.isContextMenuOpen) {
-          this.selectionHandlerService.clearDatasetSelection();
-          this.selectionHandlerService.clearJobSelection();
-        }
-      })
       .call(
         d3
           .drag()
@@ -503,7 +489,7 @@ in the context menu onClose doesn't help also, because this was called earlier.
             this.dragBackground(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
           })
           .on("end", () => {
-            this.dragBackgroundEnd();
+            this.dragBackgroundEnd(d3.event);
           }));
   }
 
@@ -946,7 +932,7 @@ in the context menu onClose doesn't help also, because this was called earlier.
       .attr("stroke-dasharray", "4");
   }
 
-  dragBackgroundEnd() {
+  dragBackgroundEnd(event) {
 
     // if not a simple click event
     if (this.selectionRect) {
@@ -954,19 +940,37 @@ in the context menu onClose doesn't help also, because this was called earlier.
         .select("#selection-rect")
         .remove();
 
-      this.workflowGraphService.intersectsAny
-      let selection = this.datasetNodes
+      let selection = [];
+
+      if (UtilsService.isCtrlKey(event.sourceEvent)) {
+        selection.push(...this.selectionService.selectedDatasets);
+      }
+      
+      selection.push(...this.datasetNodes
         .filter(n => this.workflowGraphService.intersectsNode(
           n.dataset,
           this.selectionRect.minX,
           this.selectionRect.minY,
           this.selectionRect.width,
           this.selectionRect.height))
-        .map(n => n.dataset);
+        .map(n => n.dataset));
 
       this.selectionHandlerService.setDatasetSelection(selection);
 
       this.selectionRect = null;
+    } else {
+      /*
+      Listen for background clicks
+
+      Don't do anything if the context menu is open, because then the user clicked just to close
+      it. Listen for mousedown events like the context menu. This listener seems to be fired before the
+      contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
+      in the context menu onClose doesn't help also, because this was called earlier.
+      */
+      if (!this.isContextMenuOpen) {
+        this.selectionHandlerService.clearDatasetSelection();
+        this.selectionHandlerService.clearJobSelection();
+      }
     }
   }
 
