@@ -86,7 +86,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private settingService: SettingsService,
     private datasetService: DatasetService,
     private visualizationEventService: VisualizationEventService
-  ) {}
+  ) { }
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -107,6 +107,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3PhenodataLabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataWarningsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataLinksGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3SelectionRectGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3ZoomBackgroundGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
 
   d3Links: d3.Selection<SVGLineElement, Link, SVGGElement, {}>;
   d3PhenodataLinks: d3.Selection<SVGLineElement, DatasetNode, SVGGElement, {}>;
@@ -146,6 +148,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   searchEnabled = false;
   selectionEnabled = false;
 
+  selectionRect: any;
+
   subscriptions: Array<Subscription> = [];
 
   static getOpacity(isVisible: boolean): number {
@@ -171,29 +175,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const section = d3.select("#workflowvisualization");
     this.scrollerDiv = section.append("div").classed("scroller-div", true);
 
-    /*
-    Listen for background clicks
-
-    Don't do anything if the context menu is open, because then the user clicked just to close
-    it. Listen for mousedown events like the context menu. This listener seems to be fired before the
-    contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
-    in the context menu onClose doesn't help also, because this was called earlier.
-    */
-    section.on("mousedown", () => {
-      if (
-        d3.event.target.tagName.toUpperCase() === "SVG" &&
-        !this.isContextMenuOpen
-      ) {
-        this.selectionHandlerService.clearDatasetSelection();
-        this.selectionHandlerService.clearJobSelection();
-      }
-    });
-
     // disable back and forward gestures in Safari
     this.nativeElementService.disableGestures(this.scrollerDiv.node());
 
     this.svg = this.scrollerDiv.append("svg");
     this.zoomGroup = this.svg.append("g");
+
+    // background for listening background click and drags in dataset coordinates
+    this.d3ZoomBackgroundGroup = this.zoomGroup
+      .append("g")
+      .classed("zoom-background", true);
 
     // adding the tooltip div
     this.toolTipDiv = this.scrollerDiv
@@ -238,6 +229,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("class", "dataset-tooltip-triangle")
       .style("opacity", 0)
       .html("\u25BC");
+      
+    this.d3SelectionRectGroup = this.zoomGroup
+      .append("g")
+      .classed("selection-rect", true);
 
     // needs to be before applyZoom if enabled is true
     // otherwise datasets is null when calculating scroll stuff
@@ -462,6 +457,54 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.svg.attr("width", size.width);
     this.svg.attr("height", size.height);
+
+    this.updateZoomBackgroundSize(size.width / this.zoomScale, size.height / this.zoomScale);
+  }
+
+  /**
+   * 
+   * @param width width of the whole view in dataset coordinates
+   * @param height height of the whole view in dataset coordinates
+   */
+  updateZoomBackgroundSize(width, height) {
+
+    this.d3ZoomBackgroundGroup
+      .selectAll("rect")
+      .remove()
+
+    // add an invisible rect for listening background events    
+    this.d3ZoomBackgroundGroup
+      .append("rect")
+      .attr("id", "background-listener")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("stroke", "none")
+      .attr("fill-opacity", 0)
+      .on("mousedown", () => {
+        /*
+Listen for background clicks
+
+Don't do anything if the context menu is open, because then the user clicked just to close
+it. Listen for mousedown events like the context menu. This listener seems to be fired before the
+contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
+in the context menu onClose doesn't help also, because this was called earlier.
+*/
+        if (!this.isContextMenuOpen) {
+          this.selectionHandlerService.clearDatasetSelection();
+          this.selectionHandlerService.clearJobSelection();
+        }
+      })
+      .call(
+        d3
+          .drag()
+          .on("drag", () => {
+            this.dragBackground(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
+          })
+          .on("end", () => {
+            this.dragBackgroundEnd();
+          }));
   }
 
   update(): void {
@@ -469,7 +512,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // layout new datasets or anything from the CLI client
     if (this.enabled) {
       this.workflowGraphService.doLayoutAndSave(this.datasetsMap, this.jobsMap);
-    } else {      
+    } else {
       // preview shouldn't update the data on server
       let layoutedDatasets = this.workflowGraphService.doLayout(this.datasetsMap, this.jobsMap);
       // update our copy of datasets
@@ -514,7 +557,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .merge(this.d3PhenodataNodes)
       .attr("x", d => this.getPhenodataX(d))
       .attr("y", d => this.getPhenodataY(d))
-      .attr("id", function(d) {
+      .attr("id", function (d) {
         return "node_" + d.datasetId;
       })
       // .attr("rx", this.nodeRadius)
@@ -538,13 +581,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           !this.filter || this.filter.has(d.datasetId)
         )
       )
-      .on("mouseover", function(d) {
+      .on("mouseover", function (d) {
         if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
           d3.select(this).style("fill", "#e9ecef");
         }
         self.showTooltip(this, d, true);
       })
-      .on("mouseout", function() {
+      .on("mouseout", function () {
         const selection = d3.select(this).node();
         if (
           !self.selectionService.isSelectedDatasetById(
@@ -696,7 +739,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const menu = [
       {
         title: "Rename",
-        action: function(d): void {
+        action: function (d): void {
           const dataset = _.clone(d.dataset);
           self.dialogModalService
             .openStringModal("Rename file", "File name", dataset.name, "Rename")
@@ -714,19 +757,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       },
       {
         title: "Delete",
-        action: function(): void {
+        action: function (): void {
           self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
         }
       },
       {
         title: "Export",
-        action: function(d): void {
+        action: function (d): void {
           self.sessionDataService.exportDatasets([d.dataset]);
         }
       },
       {
         title: "History",
-        action: function(d): void {
+        action: function (d): void {
           self.datasetModalService.openDatasetHistoryModal(
             d.dataset,
             self.sessionData
@@ -742,7 +785,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .merge(this.d3DatasetNodes)
       .attr("x", d => d.x)
       .attr("y", d => d.y)
-      .attr("id", function(d) {
+      .attr("id", function (d) {
         return "node_" + d.datasetId;
       })
       .attr("rx", this.nodeRadius)
@@ -775,7 +818,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           }
         })
       )
-      .on("mouseover", function(d) {
+      .on("mouseover", function (d) {
         if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
           d3.select(this).style("fill", "#e9ecef");
         }
@@ -784,7 +827,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.showTooltip(this, d, false);
         }
       })
-      .on("mouseout", function() {
+      .on("mouseout", function () {
         const selection = d3.select(this).node();
         if (
           !self.selectionService.isSelectedDatasetById(
@@ -799,7 +842,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.hideTooltip();
         }
       })
-      .on("click", function(d) {
+      .on("click", function (d) {
         if (self.enabled) {
           self.selectionHandlerService.clearJobSelection();
           if (!UtilsService.isCtrlKey(d3.event)) {
@@ -811,7 +854,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
-          .on("drag", function(d: DatasetNode) {
+          .on("drag", function (d: DatasetNode) {
             // don't allow datasets to be moved from the unselected dataset
             if (self.isSelectedDataset(d.dataset)) {
               self.dragStarted = true;
@@ -819,7 +862,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
             }
           })
-          .on("end", function(d: DatasetNode) {
+          .on("end", function (d: DatasetNode) {
             // check the flag to differentiate between drag and click events
             if (self.dragStarted) {
               self.dragStarted = false;
@@ -835,7 +878,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const datasetClientRects = this.getDatasetClientRects();
       const svgClientRect = this.svg.node().getBoundingClientRect();
 
-      this.d3DatasetNodes.each(function(d, i) {
+      this.d3DatasetNodes.each(function (d, i) {
         const selection = d3.select(this).node();
         self.createTooltipById(
           selection,
@@ -850,7 +893,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const toolTipClientRects = this.getToolTipBoundingClientRects();
 
     // Show search Tooltips
-    this.d3DatasetNodes.each(function(d, i) {
+    this.d3DatasetNodes.each(function (d, i) {
       if (self.searchEnabled) {
         self.showToolTipByIdForSearch(d, i, toolTipClientRects);
       }
@@ -864,6 +907,66 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       !this.d3DatasetNodes.exit().empty()
     ) {
       this.updateSvgSize();
+    }
+  }
+
+  dragBackground(x: number, dx: number, y: number, dy: number): void {
+
+    if (this.selectionRect == null) {
+      this.selectionRect = {
+        startX: x - dx,
+        startY: y - dy,
+      };
+    }
+
+    let currentX = x;
+    let currentY = y;
+
+    this.selectionRect.minX = Math.min(this.selectionRect.startX, currentX);
+    let maxX = Math.max(this.selectionRect.startX, currentX);
+    this.selectionRect.width = maxX - this.selectionRect.minX;
+    this.selectionRect.minY = Math.min(this.selectionRect.startY, currentY);
+    let maxY = Math.max(this.selectionRect.startY, currentY);
+    this.selectionRect.height = maxY - this.selectionRect.minY;
+
+    this.d3SelectionRectGroup
+      .select("#selection-rect")
+      .remove();
+
+    this.d3SelectionRectGroup
+      .append("rect")
+      .attr("id", "selection-rect")
+      .attr("x", this.selectionRect.minX)
+      .attr("y", this.selectionRect.minY)
+      .attr("width", this.selectionRect.width)
+      .attr("height", this.selectionRect.height)
+      .attr("stroke", "black")
+      .attr("stroke-width", "1")
+      .attr("fill", "none")
+      .attr("stroke-dasharray", "4");
+  }
+
+  dragBackgroundEnd() {
+
+    // if not a simple click event
+    if (this.selectionRect) {
+      this.d3SelectionRectGroup
+        .select("#selection-rect")
+        .remove();
+
+      this.workflowGraphService.intersectsAny
+      let selection = this.datasetNodes
+        .filter(n => this.workflowGraphService.intersectsNode(
+          n.dataset,
+          this.selectionRect.minX,
+          this.selectionRect.minY,
+          this.selectionRect.width,
+          this.selectionRect.height))
+        .map(n => n.dataset);
+
+      this.selectionHandlerService.setDatasetSelection(selection);
+
+      this.selectionRect = null;
     }
   }
 
@@ -943,8 +1046,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .filter((d: Link) =>
         this.isDatasetNode(d.target)
           ? this.selectionService.isSelectedDatasetById(
-              d.target.dataset.datasetId
-            )
+            d.target.dataset.datasetId
+          )
           : false
       )
       .attr("x2", d => d.target.x + this.nodeWidth / 2)
@@ -992,15 +1095,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         WorkflowGraphComponent.getOpacity(!this.searchEnabled)
       )
 
-      .on("click", function(d) {
+      .on("click", function (d) {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
-      .on("mouseover", function() {
+      .on("mouseover", function () {
         if (self.enabled) {
           d3.select(this).classed("hovering-job", true);
         }
       })
-      .on("mouseout", function() {
+      .on("mouseout", function () {
         if (self.enabled) {
           d3.select(this).classed("hovering-job", false);
         }
@@ -1045,17 +1148,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (d.dataset) {
           datasetNodes.push(d);
         }
-      });    
+      });
 
     let originalDatasets = datasetNodes.map(d => _.cloneDeep(d.dataset));
 
     // this are SessionData instances. Update those immediately to avoid datasets jumping back and forth 
     // when moving many datasets at the same time
     let movedDatasets = datasetNodes.map(d => {
-          d.dataset.x = d.x;
-          d.dataset.y = d.y;
-          return d.dataset;
-        });
+      d.dataset.x = d.x;
+      d.dataset.y = d.y;
+      return d.dataset;
+    });
 
     this.sessionDataService
       .updateDatasets(movedDatasets)
@@ -1152,7 +1255,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (targetNode.sourceJob) {
         const sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
-        sourceJob.inputs.forEach(function(input) {
+        sourceJob.inputs.forEach(function (input) {
           const sourceNode = datasetNodesMap.get(input.datasetId);
           if (sourceNode && targetNode) {
             links.push({
@@ -1333,17 +1436,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             .style(
               "left",
               datasetLeft -
-                this.svg.node().getBoundingClientRect().left -
-                5 +
-                "px"
+              this.svg.node().getBoundingClientRect().left -
+              5 +
+              "px"
             )
             .style(
               "top",
               datasetTop -
-                this.svg.node().getBoundingClientRect().top -
-                tooltipHeight +
-                2 +
-                "px"
+              this.svg.node().getBoundingClientRect().top -
+              tooltipHeight +
+              2 +
+              "px"
             );
         }
         this.setCurrentToolTipName(i, toolTipClientRects);
@@ -1353,7 +1456,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   getDatasetClientRects(): Map<string, ClientRect> {
     const datasetClientRects = new Map<string, ClientRect>();
-    this.d3DatasetNodes.each(function(d) {
+    this.d3DatasetNodes.each(function (d) {
       const selection = d3.select(this).node();
       datasetClientRects.set(d.datasetId, selection.getBoundingClientRect());
     });
@@ -1409,7 +1512,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
           this.datasetToolTipArray[id].dataNodeToolTip.html(
             this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) +
-              "..."
+            "..."
           );
         }
       }
