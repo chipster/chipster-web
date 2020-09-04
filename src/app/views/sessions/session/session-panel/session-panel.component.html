@@ -40,23 +40,21 @@
                 class="dropdown-menu"
                 aria-labelledby="workflowDropdownMenuButton"
               >
-                <a
-                  class="dropdown-item"
-                  (click)="workflowGraph.resetZoomAndScroll()"
-                  >Reset view</a
-                >
-                <a class="dropdown-item" (click)="autoLayoutAll()"
-                  >Reset file positions</a
-                >
-                <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()"
-                  >Reset file positions of selected</a
-                >
-                <a class="dropdown-item" (click)="selectChildren()" [class.disabled]="!isDatasetsSelected()"
-                  >Select descendants</a
-                >
-                <a class="dropdown-item" (click)="selectAll()"
-                  >Select all</a
-                >
+                <a class="dropdown-item" (click)="selectAll()">Select all files</a>
+                <a class="dropdown-item" (click)="selectChildren()" [class.disabled]="!isDatasetsSelected()">
+                  Select descendants of a file
+                </a>
+                <a class="dropdown-item" (click)="autoLayoutAll()">
+                  Reset positions
+                </a>
+                
+                <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()">
+                  Reset positions of selected files
+                </a>
+
+                <a class="dropdown-item" (click)="workflowGraph.resetZoomAndScroll()">
+                  Reset view
+                </a>
               </div>
             </span>
 
