@@ -2,10 +2,14 @@ import { Injectable } from "@angular/core";
 import { Dataset, PhenodataUtils } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { QuerySessionDataService } from "./query-session-data.service";
+import { SessionDataService } from './session-data.service';
 
 @Injectable()
 export class GetSessionDataService {
-  constructor(private querySessionDataService: QuerySessionDataService) {}
+  constructor(
+    private querySessionDataService: QuerySessionDataService,
+    private sessionDataService: SessionDataService) {}
+
   private sessionData: SessionData;
 
   /**
@@ -50,5 +54,12 @@ export class GetSessionDataService {
     return this.querySessionDataService.getAncestorDatasetsWithPhenodata(
       this.sessionData,
       dataset);
+  }
+
+  getChildren(datasets: Dataset[]) {    
+    return this.querySessionDataService.getChildren(
+      datasets, 
+      this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap), 
+      this.sessionData.jobsMap);
   }
 }

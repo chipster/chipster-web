@@ -165,6 +165,10 @@ export class SessionDataService {
     return this.sessionResource.updateDataset(this.sessionId, dataset);
   }
 
+  updateDatasets(datasets: Dataset[]) {
+    return this.sessionResource.updateDatasets(this.sessionId, datasets);
+  }
+
   updateJob(job: Job) {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }

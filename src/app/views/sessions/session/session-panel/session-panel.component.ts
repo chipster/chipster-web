@@ -10,6 +10,8 @@ import UtilsService from "../../../../shared/utilities/utils";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
+import { WorkflowGraphService } from './workflow-graph/workflow-graph.service';
+import { GetSessionDataService } from '../get-session-data.service';
 
 @Component({
   selector: "ch-session-panel",
@@ -27,10 +29,12 @@ export class SessionPanelComponent {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public sessionDataService: SessionDataService, // used by template
+    public getSessionDataService: GetSessionDataService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
+    private workflowGraphService: WorkflowGraphService,
   ) {} // used by template
 
   search(value: any): void {
@@ -82,25 +86,32 @@ export class SessionPanelComponent {
     }
   }
 
-  autoLayout(): void {
-    const updates: Observable<any>[] = [];
-    this.sessionData.datasetsMap.forEach(d => {
-      if (d.x || d.y) {
-        d.x = null;
-        d.y = null;
-        updates.push(this.sessionDataService.updateDataset(d));
-      }
-    });
+  autoLayoutAll(): void {
+    let allDatasets = Array.from(this.sessionData.datasetsMap.values());
+    this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
+  }
+  
+  autoLayoutSelected(): void {
+    this.workflowGraphService.resetDoAndSaveLayout(this.selectionService.selectedDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
+  }
 
-    forkJoin(updates).subscribe(
-      () => log.debug(updates.length + " datasets updated"),
-      err => this.restErrorService.showError("layout update failed", err)
-    );
+  selectChildren() { 
+    let children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets)
+    this.selectionHandlerService.setDatasetSelection(children);
+  }
+
+  selectAll() { 
+    let all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
+    this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 
   getDatasetListSorted(): Dataset[] {
     return this.sessionDataService.getDatasetListSortedByCreated(
       this.sessionData
     );
+  }
+
+  isDatasetsSelected() {
+    return this.selectionService.selectedDatasets.length > 0;
   }
 }
