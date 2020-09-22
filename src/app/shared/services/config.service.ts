@@ -25,6 +25,7 @@ export class ConfigService {
   public static readonly KEY_TERMS_OF_USE_PATH = "terms-of-use-path";
   public static readonly KEY_HOME_PATH = "home-path";
   public static readonly KEY_HOME_HEADER_PATH = "home-header-path";
+  public static readonly KEY_ACCESSIBILITY_PATH = "accessibility-path";
   public static readonly KEY_CONTACT_PATH = "contact-path";
   public static readonly KEY_EXAMPLE_SESSION_OWNER_USER_ID =
     "example-session-owner-user-id";

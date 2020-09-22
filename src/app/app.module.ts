@@ -27,6 +27,7 @@ import {
   selectedToolWithValidatedInputs,
   validatedTool
 } from "./state/tool.reducer";
+import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
@@ -80,7 +81,8 @@ import { TermsComponent } from "./views/terms/terms.component";
     ErrorComponent,
     TermsComponent,
     NotFoundComponent,
-    MyllyHasMovedComponent
+    MyllyHasMovedComponent,
+    AccessibilityComponent
   ],
   providers: [
     SelectionService,

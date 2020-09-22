@@ -64,6 +64,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
   @Input()
   manualStyles = true;
 
+  private readonly ABSOLUTE_PREFIX = "ABSOLUTE";
   private currentPage;
 
   @ViewChild("container", { read: ViewContainerRef })
@@ -361,12 +362,14 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
     Array.from(links).forEach(link => {
       // use getAttribute(), because link.href converts the url to absolute
       const href = link.getAttribute("href");
-
       if (link.name) {
         // link target, nothing to do
       } else if (ManualUtils.isAbsoluteUrl(href)) {
         // open absolute links in a new tab
         link.target = "_blank";
+      } else if (href.startsWith(this.ABSOLUTE_PREFIX)) {
+        // hack for for example accessibility routing
+        link.href = href.substring(this.ABSOLUTE_PREFIX.length);
       } else if (href.startsWith("#")) {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page

@@ -1,0 +1,11 @@
+<div *ngIf="accessibilityPath && accessibilityFile && accessibilityRouterPath">
+
+  <ch-manual
+    [assetsPath]="accessibilityPath"
+    [page]="accessibilityFile"
+    [showControls]="false"
+    [addContainer]="true"
+    [routerPath]="accessibilityRouterPath"
+    [manualStyles]=false
+  ></ch-manual>
+</div>
