@@ -6,6 +6,7 @@ service-locator: http://localhost:8003
 
 home-path: assets/manual/app-home.html
 home-header-path: assets/manual/app-home-header.html
+accessibility-path: assets/manual/accessibility.html
 contact-path: assets/manual/app-contact.html
 
 # Bio modules and manual

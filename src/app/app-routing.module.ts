@@ -4,6 +4,7 @@ import { AnalyzeGuard } from "./core/routing/analyze-guard.service";
 import { AuthGuard } from "./core/routing/auth-guard.service";
 import { LandGuard } from "./core/routing/land-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
+import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
 import { ContactComponent } from "./views/contact/contact.component";
 import { MyllyHasMovedComponent } from "./views/error/mylly.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
   { path: "terms", component: TermsComponent },
   { path: "contact", component: ContactComponent },
+  { path: "accessibility", component: AccessibilityComponent },
   {
     path: "manual",
     // route all sub-paths here
@@ -70,7 +72,7 @@ const routes: Routes = [
   //   })
   // ],
   imports: [
-    RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled" })
+    RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled", enableTracing: true })
   ],
   exports: [RouterModule]
 })
