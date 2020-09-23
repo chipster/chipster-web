@@ -23,7 +23,7 @@ export class AccessibilityComponent implements OnInit {
   ngOnInit() {
     this.configService.get(ConfigService.KEY_ACCESSIBILITY_PATH).subscribe(
       path => {
-        if (path) {
+        if (path || false) {
           this.accessibilityFile = this.routeService.basename(path);
           this.accessibilityPath = this.routeService.dirname(path) + "/";
           log.info(
@@ -31,6 +31,9 @@ export class AccessibilityComponent implements OnInit {
             this.accessibilityPath,
             this.accessibilityFile
           );
+        } else {
+          this.accessibilityFile = "accessibility.html";
+          this.accessibilityPath = "assets/manual/";
         }
       },
       err =>
