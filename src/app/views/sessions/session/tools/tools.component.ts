@@ -376,6 +376,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
           );
 
           // don't try to bind and validate phenodata unless inputs are valid
+          // NOTE: input could be valid if they are all optional, and no data selected
+          // now bindPhenodata results as empty binding -> phenodata will be invalid
+          // which maybe is correct?
           const phenodataBindings = inputsValid
             ? this.toolService.bindPhenodata(toolWithInputs)
             : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
@@ -394,9 +397,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
               phenodataMessage =
                 "Tool with multiple phenodata inputs not supported yet";
             } else {
-              phenodataMessage =
-                "No phenodata available for " +
-                toolWithInputs.inputBindings[0].datasets[0].name;
+              phenodataMessage = "No phenodata available";
             }
           }
 
