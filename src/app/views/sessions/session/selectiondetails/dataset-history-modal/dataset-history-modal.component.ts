@@ -24,7 +24,7 @@ interface HistoryOption {
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"]
 })
-export class DatasetHistorymodalComponent implements OnInit, OnChanges {
+export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
 
