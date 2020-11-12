@@ -73,7 +73,8 @@ export class QuerySessionDataService {
 
   isPhenodataType(sessionData: SessionData, dataset: Dataset) {
     return this.typeTagService.has(sessionData, dataset, Tags.GENE_EXPRS) 
-      || this.typeTagService.has(sessionData, dataset, Tags.BAM);
+      || this.typeTagService.has(sessionData, dataset, Tags.BAM)
+      || this.typeTagService.has(sessionData, dataset, Tags.PHYLOSEQ_SHARED);
   }
 
   getChildren(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>) {    
