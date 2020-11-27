@@ -8,6 +8,7 @@ home-path: assets/manual/app-home.html
 home-header-path: assets/manual/app-home-header.html
 accessibility-path: assets/manual/accessibility.html
 contact-path: assets/manual/app-contact.html
+access-path: assets/manual/access.html
 
 # Bio modules and manual
 modules: ["NGS", "Microarray", "Misc"]

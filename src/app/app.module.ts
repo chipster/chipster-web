@@ -27,6 +27,7 @@ import {
   selectedToolWithValidatedInputs,
   validatedTool
 } from "./state/tool.reducer";
+import { AccessModule } from './views/access/access.module';
 import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
 import { AdminModule } from "./views/admin/admin.module";
 import { ContactModule } from "./views/contact/contact.module";
@@ -51,6 +52,7 @@ import { TermsComponent } from "./views/terms/terms.component";
     ContactModule,
     SessionModule,
     ManualModule,
+    AccessModule,
     NgbModule,
     AdminModule,
     StoreModule.forRoot({
