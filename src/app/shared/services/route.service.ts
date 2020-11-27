@@ -7,6 +7,7 @@ export class RouteService {
   static readonly PATH_SESSIONS = "/sessions";
   static readonly PATH_ANALYZE = "/analyze";
   static readonly PATH_MANUAL = "/manual";
+  static readonly PATH_ACCESS = "/access";
   static readonly PATH_CONTACT = "/contact";
   static readonly PATH_LOGIN = "/login";
   static readonly PATH_ADMIN = "/admin";

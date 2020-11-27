@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h3>Getting access</h3>
+      <p>
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div *ngIf="manualPath">
+        <ch-manual assetsPath="{{manualPath}}" page="{{file}}" [showControls]=false [addContainer]=false
+          [manualStyles]=false></ch-manual>
+      </div>
+    </div>
+  </div>
+</div>

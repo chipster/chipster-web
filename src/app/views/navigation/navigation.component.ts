@@ -18,6 +18,7 @@ export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;
   routerLinkLogin = RouteService.PATH_LOGIN;
   routerLinkManual = RouteService.PATH_MANUAL;
+  routerLinkAccess = RouteService.PATH_ACCESS;
   routerLinkContact = RouteService.PATH_CONTACT;
   routerLinkHome = RouteService.PATH_HOME;
   routerLinkSessions = RouteService.PATH_SESSIONS;
