@@ -41,6 +41,7 @@ export const Tags = {
   SKIP_LINES: "SKIP_LINES",
   NO_TITLE_ROW: "NO_TITLE_ROW",
   PHYLOSEQ_SHARED: "PHYLOSEQ_SHARED",
+  R_RDA: "R_RDA",
 };
 
 @Injectable()
