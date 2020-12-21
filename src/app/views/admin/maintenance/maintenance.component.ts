@@ -22,6 +22,7 @@ export class MaintenanceComponent implements OnInit {
   free = new Map();
   total = new Map();
   idOnStorage = new Map();
+  schedule = new Map();
 
   fileBrokerStorages = new Map();
   fileStorageFileStats = new Map();
@@ -146,23 +147,66 @@ export class MaintenanceComponent implements OnInit {
 
   backupDb(role: string) {
     // the backup service takes care of db backups
-    this.backup("backup", "/admin/backup/" + role);
+    this.backup("backup", "/admin/backup/" + role)
+    .subscribe(null, err =>
+      this.restErrorService.showError("backup start failed", err)
+    );
   }
 
   backupStorage(storageId: string) {
-      this.backup("file-broker", "/admin/storages/" + storageId + "/backup");    
+      this.backup("file-broker", "/admin/storages/" + storageId + "/backup").pipe(
+        mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
+      )
+      .subscribe(null, err =>
+        this.restErrorService.showError("backup start failed", err)
+      );
   }
 
   backup(backupService: string, path: string) {
-    this.configService
+    return this.configService
       .getInternalService(backupService, this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
           return this.authHttpClient.postAuth(service.adminUri + path, null);
         })
+      );      
+  }
+
+  updateFileStorageFileStatsOfOne(storageId: string) {
+    let fileBroker = null;
+    return this.configService.getInternalService("file-broker", this.tokenService.getToken()).pipe(
+      tap((service: Service) => {
+        fileBroker = service;
+      }),
+      mergeMap(() => this.updateFileStorageFileStats(storageId, fileBroker)),    
+    )
+  }
+
+  disableBackups(storageId: string) {
+    this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.authHttpClient.deleteAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule");
+        }),
+        mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
+      )      
+      .subscribe(null, err =>
+        this.restErrorService.showError("disable backup failed", err)
+      );
+  }
+
+  enableBackups(storageId: string) {
+    this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule", null);
+        }),
+        mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
       .subscribe(null, err =>
-        this.restErrorService.showError("backup start failed", err)
+        this.restErrorService.showError("disable backup failed", err)
       );
   }
 
@@ -300,4 +344,5 @@ export class FileStats {
   storageId: string;
   fileCount: number;
   fileBytes: number;
+  status: string;
 }

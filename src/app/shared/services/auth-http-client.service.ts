@@ -58,6 +58,15 @@ export class AuthHttpClientService {
     return this.httpClient.put(url, obj, this.getAuthHeader());
   }
 
+  /**
+   * Make authenticated DELETE request
+   *
+   * @param url
+   */
+  deleteAuth(url): Observable<any> {
+    return this.httpClient.delete(url, this.getAuthHeader());
+  }
+
   getAuthWithParams(url, params?): Observable<any> {
     console.log(params);
     let headers = new HttpHeaders();

@@ -92,6 +92,7 @@
       <th scope="col">Storage files size</th>
       <th scope="col">Storage total</th>
       <th scope="col">Storage free</th>
+      <th scope="col">Backup</th>
       <th scope="col"></th>
       <th scope="col"></th>
       <th scope="col"></th>
@@ -108,9 +109,20 @@
       <td>{{fileStorageFileStats.get(storageId)?.fileBytes | bytes}}</td>
       <td>{{total.get(storageId) | bytes}}</td>
       <td>{{free.get(storageId) | bytes}}</td>
+      <td>{{fileStorageFileStats.get(storageId)?.status}}</td>
       <td>
         <button class="btn btn-outline-primary" (click)="backupStorage(storageId)">
-          Start storage backup
+          Start backup
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="disableBackups(storageId)" [disabled]="!fileStorageFileStats.get(storageId)?.status">
+          Disable backups
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="enableBackups(storageId)" [disabled]="fileStorageFileStats.get(storageId)?.status">
+          Enable backups
         </button>
       </td>
       <td>
