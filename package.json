@@ -39,7 +39,7 @@
     "igv": "^2.2.10",
     "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "loglevel": "^1.6.1",
     "ng2-pdf-viewer": "^5.2.4",
     "ngx-toastr": "^10.2.0",
