@@ -172,21 +172,22 @@ export class WrangleModalComponent implements OnInit {
   }
 
   getCellClass(params) {
-    if (
-      this.sampleColumns.some(
-        (columnItem: ColumnItem) =>
-          parseInt(params.colDef.field) === columnItem.index
-      )
-    ) {
-      return "sample";
-    } else if (
-      this.identifierColumn != null &&
-      parseInt(params.colDef.field) === this.identifierColumn.index
-    ) {
-      return "identifier";
-    } else {
-      return "other";
-    }
+    // if (
+    //   this.sampleColumns.some(
+    //     (columnItem: ColumnItem) =>
+    //       parseInt(params.colDef.field) === columnItem.index
+    //   )
+    // ) {
+    //   return "sample";
+    // } else if (
+    //   this.identifierColumn != null &&
+    //   parseInt(params.colDef.field) === this.identifierColumn.index
+    // ) {
+    //   return "identifier";
+    // } else {
+    //   return "other";
+    // }
+    return "other";
   }
 
   public getSampleColumnNames(): Array<string> {
