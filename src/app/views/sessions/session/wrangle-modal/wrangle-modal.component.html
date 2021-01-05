@@ -1,0 +1,57 @@
+<div class="modal-header">
+  <h4 class="modal-title">Convert to Chipster format {{dataset.name}}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+
+  <div *ngIf="state.isReady(); else statusTemplate">
+
+    <div>Convert a file to a new Chipster compatible format.</div>
+
+    <h3 class="h3-xs">Source file preview</h3>
+
+    <div class="scrolling-wrapper" #horizontalScroll>
+
+      <ag-grid-angular #agGrid style="width: 100%; height: 26ex;" class="ag-theme-alpine mt-2"
+        [rowData]="previewRowData" [columnDefs]="columnDefs">
+      </ag-grid-angular>
+    </div>
+
+    <h3 class="h3-xs">Identifier column</h3>
+    <ng-select [items]="identifierItems" [multiple]="false" placeholder="Select column" bindLabel="name"
+      [closeOnSelect]="true" [(ngModel)]="identifierColumn" (change)="onIdentifierChange($event)">
+
+      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected" /> {{item.name}}
+      </ng-template>
+    </ng-select>
+
+    <h3 class="h3-xs">Sample columns</h3>
+    <ng-select #sampleDropdown [items]="sampleItems" [multiple]="true" placeholder="Select columns" bindLabel="name"
+      [closeOnSelect]="false" [(ngModel)]="sampleColumns" (change)="onSampleChange($event)"
+      (search)="onSampleSearch($event)" (keyDown.enter)="onSampleKeyDownEnter($event)" (open)="onSampleOpen($event)">
+
+      <ng-template ng-header-tmp>
+        <button (click)="onSampleSelectAll()" class="btn btn-sm btn-outline-secondary">{{selectAllButtonText}}</button>
+      </ng-template>
+
+      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected" /> {{item.name}}
+      </ng-template>
+    </ng-select>
+  </div>
+
+  <ng-template #statusTemplate>
+    <ch-status [state]="state"></ch-status>
+  </ng-template>
+
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.close()">Close</button>
+  <button type="button" class="btn btn-sm btn-success" [disabled]="identifierColumn == null || sampleColumns.length < 1"
+    (click)="runWrangle()">Convert</button>
+</div>

@@ -65,4 +65,8 @@ export class FileComponent {
       this.sessionData
     );
   }
+
+  wrangleDataset() {
+    this.datasetModalService.openWrangleModal(this.dataset, this.sessionData);
+  }
 }

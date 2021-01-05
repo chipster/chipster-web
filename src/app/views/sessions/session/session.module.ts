@@ -1,7 +1,10 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { NgSelectModule } from "@ng-select/ng-select";
+import { AgGridModule } from "ag-grid-angular";
 import { AngularSplitModule } from "angular-split";
 import { UploadService } from "../../../shared/services/upload.service";
 import { SharedModule } from "../../../shared/shared.module";
@@ -28,6 +31,7 @@ import { SessionService } from "./session.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ToolsModule } from "./tools/tools.module";
 import { VisualizationsModule } from "./visualization/visualizations.module";
+import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
 
 @NgModule({
   imports: [
@@ -40,7 +44,10 @@ import { VisualizationsModule } from "./visualization/visualizations.module";
     NgbModule,
     DialogModalModule,
     AngularSplitModule,
-    RouterModule
+    RouterModule,
+    AgGridModule,
+    FormsModule,
+    NgSelectModule
   ],
   declarations: [
     SessionComponent,
@@ -49,7 +56,8 @@ import { VisualizationsModule } from "./visualization/visualizations.module";
     JobErrorModalComponent,
     SelectionPanelComponent,
     ImportSessionModalComponent,
-    SessionDetailsComponent
+    SessionDetailsComponent,
+    WrangleModalComponent
   ],
   providers: [
     SessionEventService,
@@ -65,6 +73,10 @@ import { VisualizationsModule } from "./visualization/visualizations.module";
     UserEventService,
     DatasetService
   ],
-  entryComponents: [JobErrorModalComponent, ImportSessionModalComponent]
+  entryComponents: [
+    JobErrorModalComponent,
+    ImportSessionModalComponent,
+    WrangleModalComponent
+  ]
 })
 export class SessionModule {}

@@ -1,13 +1,13 @@
 import { Injectable } from "@angular/core";
 import {
-  CanDeactivate,
   ActivatedRouteSnapshot,
+  CanDeactivate,
   RouterStateSnapshot
 } from "@angular/router";
-import { SessionComponent } from "./session.component";
-import { Observable, of } from "rxjs";
 import log from "loglevel";
+import { of } from "rxjs";
 import { catchError } from "rxjs/operators";
+import { SessionComponent } from "./session.component";
 
 @Injectable()
 export class ModifiedSessionGuard implements CanDeactivate<SessionComponent> {

@@ -25,8 +25,8 @@
     <span class="">Files ({{selectionService.selectedDatasets.length}})</span>
 
     <span class="dropdown">
-      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
-        aria-haspopup="true" aria-expanded="false" title="Actions">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
         <!--<i class="fas fa-caret-down" aria-hidden="true"></i>-->
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
@@ -43,19 +43,21 @@
   <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
     <span class="h6">{{selectionService.selectedDatasets[0].name}}</span>
     <span class="dropdown">
-      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
-        aria-haspopup="true" aria-expanded="false" title="Actions">
+      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
       <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
         <a class="dropdown-item" (click)="renameDataset()">Rename...</a>
+        <a class="dropdown-item" (click)="wrangleDataset()">Convert to Chipster format...</a>
         <a class="dropdown-item" (click)="deleteDatasets()">Delete...</a>
         <a class="dropdown-item" (click)="exportDatasets()">Export</a>
         <a class="dropdown-item" (click)="showHistory()">History...</a>
       </div>
     </span>
   </div>
-  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="deleteDatasets()"></ch-dataset-details>
+  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="deleteDatasets()">
+  </ch-dataset-details>
   <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" (scrollFix)="doScrollFix.emit()"
     [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
 </div>

@@ -15,10 +15,12 @@ import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import {
+  forkJoin,
   forkJoin as observableForkJoin,
   from as observableFrom,
   merge as observableMerge,
-  Observable
+  Observable,
+  of
 } from "rxjs";
 import {
   catchError,
@@ -69,6 +71,10 @@ export class SessionDataService {
     return this.sessionResource.createDataset(this.getSessionId(), dataset);
   }
 
+  getDataset(datasetId: string): Observable<Dataset> {
+    return this.sessionResource.getDataset(this.getSessionId(), datasetId);
+  }
+
   createJob(job: Job) {
     return this.sessionResource.createJob(this.getSessionId(), job);
   }
@@ -91,17 +97,19 @@ export class SessionDataService {
    * @param sourceDatasetIds Array of datasetIds shown as inputs for the new dataset
    * @param toolName e.g. name of the visualization that created this dataset
    * @param content File content, the actual data
-   * @returns Promise which resolves when all this is done
+   * @returns Observable providing datasetId of the created dataset
    */
   createDerivedDataset(
     name: string,
     sourceDatasetIds: string[],
     toolName: string,
-    content: string
-  ) {
+    content: string,
+    toolCategory = "Interactive visualizations"
+  ): Observable<string> {
     const job = new Job();
     job.state = JobState.Completed;
-    job.toolCategory = "Interactive visualizations";
+    // FIXME don't hardcore category
+    job.toolCategory = toolCategory;
     job.toolName = toolName;
 
     job.inputs = sourceDatasetIds.map(id => {
@@ -117,11 +125,13 @@ export class SessionDataService {
         return this.createDataset(d);
       }),
       mergeMap((datasetId: string) => {
-        return this.fileResource.uploadData(
-          this.getSessionId(),
-          datasetId,
-          content
-        );
+        return forkJoin([
+          of(datasetId),
+          this.fileResource.uploadData(this.getSessionId(), datasetId, content)
+        ]);
+      }),
+      mergeMap(result => {
+        return of(result[0]);
       }),
       catchError(err => {
         log.info("create derived dataset failed", err);
@@ -246,7 +256,10 @@ export class SessionDataService {
 
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
-      this.download(this.getDatasetUrl(d).pipe(map(url => url + "&download")), 3);
+      this.download(
+        this.getDatasetUrl(d).pipe(map(url => url + "&download")),
+        3
+      );
     }
   }
 
@@ -263,8 +276,10 @@ export class SessionDataService {
     this.newTab(
       url$,
       autoCloseDelay * 1000,
-      "<p>Please wait until the download starts. Then you can close " + 
-      "this tab. It will close automatically after " + autoCloseDelay + " seconds.</p>",
+      "<p>Please wait until the download starts. Then you can close " +
+        "this tab. It will close automatically after " +
+        autoCloseDelay +
+        " seconds.</p>",
 
       "Browser's pop-up blocker prevented some exports. " +
         "Please disable the pop-up blocker for this site or " +
@@ -275,7 +290,7 @@ export class SessionDataService {
   newTab(
     url$: Observable<string>,
     autoCloseDelay: number,
-    text: string, 
+    text: string,
     popupErrorText: string
   ) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
