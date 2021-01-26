@@ -41,7 +41,11 @@ export class UserEventService {
       refCount()
     );
 
-    this.webSocketService.connect(this.localSubject$, topic);
+    // encode the user event topic twice (the second round is done in WebsocketService) to pass
+    // the Jetty WebSocketUpgradeFilter when there is a slash in the topic name
+    let encodedTopic = encodeURIComponent(topic);
+
+    this.webSocketService.connect(this.localSubject$, encodedTopic);
 
     this.ruleStream$ = stream.pipe(
       filter(wsData => wsData.resourceType === Resource.Rule),
