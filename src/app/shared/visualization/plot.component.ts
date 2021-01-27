@@ -175,7 +175,8 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
         this.startPoint.y !== -1 &&
         (this.startPoint.x !== endPoint.x && this.startPoint.y !== endPoint.y)
       ) {
-        // this.resetSelections();
+        this.resetSelections();
+
         // define the points that are within the drag boundary
         this.dragEndPoint = new Point(endPoint.x, endPoint.y);
         this.dragStartPoint = new Point(this.startPoint.x, this.startPoint.y);
@@ -200,8 +201,10 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
   removeSelectionStyle(id: string) {}
 
   resetSelections(): void {
-    for (const id of this.selectedDataPointIds) {
-      this.removeSelectionStyle(id);
+    if (this.selectedDataPointIds) {
+      for (const id of this.selectedDataPointIds) {
+        this.removeSelectionStyle(id);
+      }
     }
     this.selectedDataRows = [];
   }
