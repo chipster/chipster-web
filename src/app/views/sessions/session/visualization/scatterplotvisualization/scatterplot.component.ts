@@ -35,6 +35,10 @@ export class ScatterPlotComponent extends PlotComponent
     super.ngOnChanges();
   }
 
+  showAnyway() {
+    super.show(true);
+  }
+
   ngOnDestroy() {
     super.ngOnDestroy();
   }

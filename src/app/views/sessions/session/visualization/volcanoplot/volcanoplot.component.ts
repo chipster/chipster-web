@@ -38,6 +38,10 @@ export class VolcanoPlotComponent extends PlotComponent
     super.ngOnChanges();
   }
 
+  showAnyway() {
+    super.show(true);
+  }
+
   ngOnDestroy() {
     super.ngOnDestroy();
   }
@@ -227,7 +231,7 @@ export class VolcanoPlotComponent extends PlotComponent
   setSelectionStyle(id: string) {
     d3.select("#dot" + id)
       .classed("selected", true)
-      .style("stroke", "black")
+      .style("stroke", "blue")
       .style("stroke-width", 3)
       .attr("r", 2);
   }

@@ -36,5 +36,5 @@
 </div>
 
 <ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state" (buttonEvent)="showAnyway()"></ch-status>
 </ng-template>

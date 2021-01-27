@@ -29,7 +29,7 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
   dragEndPoint: Point;
   selectedDataPointIds: Array<string>;
   selectedDataRows: Array<TSVRow> = [];
-  startPoint: Point;
+
   svgPadding = 50;
   protected fileResource: FileResource;
   protected sessionDataService: SessionDataService;
@@ -48,13 +48,21 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
+    this.show(false);
+  }
+
+  show(showMore: boolean) {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
 
     this.clearPlot();
 
-    const rowLimit = 5000;
+    let rowLimit = 5000;
+    if (showMore) {
+      rowLimit = 50000; 
+    }
+
     const datasetName = this.dataset.name;
 
     // check for empty file
@@ -76,10 +84,18 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
             datasetName
           );
           if (this.tsv.body.size() > rowLimit) {
-            this.state = new LoadState(
-              State.Fail,
-              "Plot Visualization is not allowed for TSV files with more than 5000 data points"
-            );
+            if (showMore) {
+              this.state = new LoadState(
+                State.Fail,
+                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+              );
+            } else {
+              this.state = new LoadState(
+                State.TooLarge,
+                "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
+                "Show anyway",
+              );              
+            }
           } else {
             this.checkTSVHeaders(); // will set this.state
           }
@@ -124,70 +140,53 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
       .style("stroke", "blue")
       .style("stroke-width", 1);
 
-    const bandPos = [-1, -1];
-    this.startPoint = new Point(-1, -1);
+    let startPoint = null;
 
     // Register for drag handlers
+
+    drag.on("start", () => {
+      // Set new position of band
+      const pos = d3.mouse(document.getElementById("dragGroup"));
+      startPoint = new Point(pos[0], pos[1]);
+    });
+
     drag.on("drag", () => {
       this.dataSelectionModeEnable = true; // change the tab for showing selected gene
+
       const pos = d3.mouse(document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
-      if (endPoint.x < this.startPoint.x) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + endPoint.x + "," + this.startPoint.y + ")"
-        );
-      }
-      if (endPoint.y < this.startPoint.y) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + endPoint.x + "," + this.startPoint.y + ")"
-        );
-      }
-      if (endPoint.y < this.startPoint.y && endPoint.x > this.startPoint.x) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + this.startPoint.x + "," + endPoint.y + ")"
-        );
-      }
 
-      // Set new position of band
-      if (this.startPoint.x === -1) {
-        this.startPoint = new Point(endPoint.x, endPoint.y);
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + this.startPoint.x + "," + this.startPoint.y + ")"
-        );
-      }
+      const minX = Math.min(startPoint.x, endPoint.x);
+      const minY = Math.min(startPoint.y, endPoint.y);
+
+      const width = Math.abs(endPoint.x - startPoint.x);
+      const height = Math.abs(endPoint.y - startPoint.y);
+
+      d3.select(".band").attr(
+        "transform",
+        "translate(" + minX + "," + minY + ")"
+      );
+      
       d3.select(".band")
-        .transition()
-        .duration(1)
-        .attr("width", Math.abs(this.startPoint.x - endPoint.x))
-        .attr("height", Math.abs(this.startPoint.y - endPoint.y));
+        .attr("width", width)
+        .attr("height", height);
     });
 
     drag.on("end", () => {
       const pos = d3.mouse(document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
       // need to get the points that included in the band
-      if (
-        this.startPoint.x !== -1 &&
-        this.startPoint.y !== -1 &&
-        (this.startPoint.x !== endPoint.x && this.startPoint.y !== endPoint.y)
-      ) {
-        this.resetSelections();
+      this.resetSelections();
 
-        // define the points that are within the drag boundary
-        this.dragEndPoint = new Point(endPoint.x, endPoint.y);
-        this.dragStartPoint = new Point(this.startPoint.x, this.startPoint.y);
-        this.getSelectedDataSet();
-        this.resetSelectionRectangle();
-      }
+      // define the points that are within the drag boundary
+      this.dragEndPoint = new Point(endPoint.x, endPoint.y);
+      this.dragStartPoint = new Point(startPoint.x, startPoint.y);
+      this.getSelectedDataSet();
+      this.resetSelectionRectangle();
     });
   }
 
   resetSelectionRectangle() {
-    this.startPoint = new Point(-1, -1);
     d3.select(".band")
       .attr("width", 0)
       .attr("height", 0)
