@@ -9,7 +9,7 @@ export enum State {
 export class LoadState {
   public state: State;
   private _message: string;
-  private buttonText;
+  public buttonText;
 
   constructor(state: State, message?: string, buttonText?: string) {
     this.state = state;
