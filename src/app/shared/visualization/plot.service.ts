@@ -15,71 +15,28 @@ export class PlotService {
     linearYScale: any,
     plotData: Array<PlotData>
   ): Array<string> {
-    console.log(linearXScale);
     const startXValue = linearXScale.invert(dragStartPoint.x);
     const endXValue = linearXScale.invert(dragEndPoint.x);
 
     const startYValue = linearYScale.invert(dragStartPoint.y);
     const endYValue = linearYScale.invert(dragEndPoint.y);
 
-    const selectedDataPoints: Array<string> = [];
-
-    console.log(startXValue);
-    console.log(startYValue);
-    console.log(endXValue);
-    console.log(endYValue);
-
     // get the chip values which are in this range
 
-    plotData.forEach(function(val) {
-      if (startXValue < endXValue) {
-        if (startYValue < endYValue) {
-          if (
-            val.plotPoint.x <= endXValue &&
-            val.plotPoint.x >= startXValue &&
-            val.plotPoint.y <= endYValue &&
-            val.plotPoint.y >= startYValue
-          ) {
-            selectedDataPoints.push(val.id);
-            console.log(val.plotPoint);
-          }
-        } else if (startYValue > endYValue) {
-          if (
-            val.plotPoint.x <= endXValue &&
-            val.plotPoint.x >= startXValue &&
-            val.plotPoint.y >= endYValue &&
-            val.plotPoint.y <= startYValue
-          ) {
-            selectedDataPoints.push(val.id);
-            console.log(val.plotPoint);
-          }
-        }
-      } else if (startXValue > endXValue) {
-        if (startYValue < endYValue) {
-          if (
-            val.plotPoint.x >= endXValue &&
-            val.plotPoint.x <= startXValue &&
-            val.plotPoint.y <= endYValue &&
-            val.plotPoint.y >= startYValue
-          ) {
-            selectedDataPoints.push(val.id);
-            console.log(val.plotPoint);
-          }
-        } else if (startYValue > endYValue) {
-          if (
-            val.plotPoint.x >= endXValue &&
-            val.plotPoint.x <= startXValue &&
-            val.plotPoint.y >= endYValue &&
-            val.plotPoint.y <= startYValue
-          ) {
-            selectedDataPoints.push(val.id);
-            console.log(val.plotPoint);
-          }
-        }
-      }
-    });
+    const minX = Math.min(startXValue, endXValue);
+    const maxX = Math.max(startXValue, endXValue);
+    const minY = Math.min(startYValue, endYValue);
+    const maxY = Math.max(startYValue, endYValue);
 
-    console.log(selectedDataPoints);
+    const selectedDataPoints = plotData
+      .filter(
+        val => 
+          val.plotPoint.x <= maxX &&
+          val.plotPoint.x >= minX &&
+          val.plotPoint.y <= maxY &&
+          val.plotPoint.y >= minY)
+      .map(val => val.id);
+
     return selectedDataPoints;
   }
 }
