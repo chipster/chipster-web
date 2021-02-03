@@ -23,6 +23,7 @@ export class VolcanoPlotComponent extends PlotComponent
   private volcanoPlotPHeaders: Array<string>;
   private xScale: any;
   private yScale: any;
+  showZeroWarning: boolean;
 
   constructor(
     private volcanoPlotService: VolcanoPlotService,
@@ -89,8 +90,9 @@ export class VolcanoPlotComponent extends PlotComponent
       curPlotData.id = dataRow.id;
       /* y scale in volcanoplot is -log10(y)
 
-      zeros in data are converted to Infinite value. Keep them in the plotData
-      e.g. to color them differently and clamp them down later when necessary
+      Zeros in data are converted to Infinite value. Keep them in the plotData 
+      (in case we would want some special handling for those when drawing them 
+      for example) and clamp them down later when necessary (e.g. in selection).
       */
       curPlotData.plotPoint = new Point(
         dataRow.values[0],
@@ -132,6 +134,8 @@ export class VolcanoPlotComponent extends PlotComponent
 
     const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
     const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
+
+    self.showZeroWarning = this.plotData.find(d => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
     this.svg
@@ -223,10 +227,7 @@ export class VolcanoPlotComponent extends PlotComponent
         return self.yScale(self.clampY(d.plotPoint.y));
       })
       .attr("fill", function(d) {
-        if (d.plotPoint.y === Infinity) {
-          // cannot calculate -log(0)
-          return "gray";
-        } else if (
+        if (
           d.plotPoint.y >= -Math.log10(0.05) &&
           Math.abs(d.plotPoint.x) >= 1
         ) {
