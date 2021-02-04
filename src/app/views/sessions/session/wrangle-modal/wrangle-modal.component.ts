@@ -292,6 +292,9 @@ export class WrangleModalComponent implements OnInit {
     });
 
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
+
+    // careful, new headers are created here but not passed on
+    // take note as phenodata is created using the originals
     const newHeaders = sampleColumnIndexes
       .map((index: number) => tsvHeaders[index])
       // add prefix if missing
@@ -313,16 +316,23 @@ export class WrangleModalComponent implements OnInit {
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
     const phenodataRowsString = this.getSampleColumnIndexes().reduce(
-      (phenodataRows: string, index) =>
-        phenodataRows +
-        tsvHeaders[index].substring(this.SAMPLE_PREFIX.length) +
-        "\t" +
-        this.dataset.name +
-        "\t" +
-        "not applicaple" +
-        "\t" +
-        "" +
-        "\n",
+      (phenodataRows: string, index) => {
+        const sampleHeader = tsvHeaders[index]; // this is the original, could have chip.
+        const fixedSampleHeader = sampleHeader.startsWith(this.SAMPLE_PREFIX)
+          ? sampleHeader.substring(this.SAMPLE_PREFIX.length)
+          : sampleHeader;
+        return (
+          phenodataRows +
+          fixedSampleHeader +
+          "\t" +
+          this.dataset.name +
+          "\t" +
+          "not applicaple" +
+          "\t" +
+          "" +
+          "\n"
+        );
+      },
       ""
     );
 
