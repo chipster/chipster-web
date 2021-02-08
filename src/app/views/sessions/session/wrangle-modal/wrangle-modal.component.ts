@@ -327,7 +327,7 @@ export class WrangleModalComponent implements OnInit {
           "\t" +
           this.dataset.name +
           "\t" +
-          "not applicaple" +
+          "not applicable" +
           "\t" +
           "" +
           "\n"
