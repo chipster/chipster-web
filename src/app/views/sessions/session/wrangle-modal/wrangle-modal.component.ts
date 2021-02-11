@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -16,7 +17,6 @@ import {
   TypeTagService
 } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
-import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionDataService } from "../session-data.service";
 
 enum ColumnType {
@@ -24,7 +24,7 @@ enum ColumnType {
   Sample
 }
 
-interface ColumnItem {
+export interface ColumnItem {
   index: number;
   name: string;
 }
@@ -42,38 +42,38 @@ export class WrangleModalComponent implements OnInit {
     private typeTagService: TypeTagService,
     private restErrorService: RestErrorService,
     private tsvService: TsvService,
-    private datasetService: DatasetService,
-    private dialogModalService: DialogModalService
+    private datasetService: DatasetService
   ) {}
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
 
   @ViewChild("agGrid") agGrid;
-  @ViewChild("identifierButton") identifierButton;
-  @ViewChild("sampleButton") sampleButton;
-
-  @ViewChild("sampleDropdown") sampleDropdown;
 
   private readonly SAMPLE_PREFIX = "chip.";
-  private readonly selectAllString = "Select all";
-  private readonly selectAllFilteredString = "Select all filtered";
+  private readonly INCLUDE = "included";
+  private readonly EXCLUDE = "excluded";
 
   public static FILE_SIZE_LIMIT = 100 * 1024 * 1024;
   private readonly previewRowCount = 3;
 
-  identifierItems: ColumnItem[];
-  identifierColumn: ColumnItem;
+  allItems: ColumnItem[];
 
+  identifierItems: ColumnItem[];
+  selectedIdentifiers: ColumnItem[] = []; // this is an array to make things similar with other selection, the length should always be <= 1
   sampleItems: ColumnItem[];
-  sampleColumns: ColumnItem[] = [];
-  filteredSampleItems: ColumnItem[] = [];
+  selectedSamples: ColumnItem[] = [];
+
+  otherItems: ColumnItem[];
+  selectedOthers: ColumnItem[] = [];
 
   columnDefs = [];
   tsv2File: TSV2File;
   previewRowData = [];
   columnTypes: Array<ColumnType> = [];
 
-  selectAllButtonText = this.selectAllString;
+  includeExcludeOptions = [this.INCLUDE, this.EXCLUDE];
+  includeExclude = new FormControl(this.INCLUDE);
+  includeExcludeForm = new FormGroup({ includeExclude: this.includeExclude });
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -134,18 +134,18 @@ export class WrangleModalComponent implements OnInit {
           const headers = this.tsv2File.getHeadersForSpreadSheet();
 
           // create column selection dropdown items
-          this.identifierItems = headers.map(
-            (headerName: string, index: number) => {
-              return index === 0 && headerName === ""
-                ? {
-                    index: index,
-                    name: "R rownames column"
-                  }
-                : { index: index, name: headerName };
-            }
-          );
-          this.sampleItems = [...this.identifierItems];
-          this.filteredSampleItems = [...this.identifierItems];
+          this.allItems = headers.map((headerName: string, index: number) => {
+            return index === 0 && headerName === ""
+              ? {
+                  index: index,
+                  name: "R rownames column"
+                }
+              : { index: index, name: headerName };
+          });
+
+          this.identifierItems = [...this.allItems];
+          this.sampleItems = [...this.allItems];
+          this.otherItems = [...this.allItems];
 
           // create column definitions, use numbers as column fields
           this.columnDefs = headers.map((header: string, i: number) => ({
@@ -171,72 +171,97 @@ export class WrangleModalComponent implements OnInit {
       );
   }
 
-  getCellClass(params) {
-    // if (
-    //   this.sampleColumns.some(
-    //     (columnItem: ColumnItem) =>
-    //       parseInt(params.colDef.field) === columnItem.index
-    //   )
-    // ) {
-    //   return "sample";
-    // } else if (
-    //   this.identifierColumn != null &&
-    //   parseInt(params.colDef.field) === this.identifierColumn.index
-    // ) {
-    //   return "identifier";
-    // } else {
-    //   return "other";
-    // }
-    return "other";
+  getCellClass(params): string {
+    if (
+      this.selectedIdentifiers.some(
+        (columnItem: ColumnItem) =>
+          parseInt(params.colDef.field) === columnItem.index
+      )
+    ) {
+      return "identifier";
+    } else if (
+      this.selectedSamples.some(
+        (columnItem: ColumnItem) =>
+          parseInt(params.colDef.field) === columnItem.index
+      )
+    ) {
+      return "sample";
+    } else {
+      const columnInOthers = this.selectedOthers.some(
+        (columnItem: ColumnItem) =>
+          parseInt(params.colDef.field) === columnItem.index
+      );
+      if (
+        (this.includeOthers() && columnInOthers) ||
+        (!this.includeOthers() && !columnInOthers)
+      ) {
+        return "include";
+      } else {
+        return "exclude";
+      }
+    }
+  }
+
+  public onIncludeExcludeChange(): void {
+    this.updatePreviewStyles();
   }
 
   public getSampleColumnNames(): Array<string> {
-    return this.sampleColumns.map((columnItem: ColumnItem) => columnItem.name);
-  }
-
-  onSampleSearch(event) {
-    this.filteredSampleItems = event.items;
-    this.selectAllButtonText =
-      event.term.length > 0
-        ? this.selectAllFilteredString
-        : this.selectAllString;
-  }
-
-  onSampleKeyDownEnter(event) {
-    event.stopImmediatePropagation();
-    this.addFilteredToSampleColumns();
-    this.sampleDropdown.close();
-  }
-
-  onSampleChange(event) {
-    // seems to be needed for applying changed styles
-    this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
-  }
-
-  onSampleOpen(event) {
-    this.selectAllButtonText = this.selectAllString;
-    this.filteredSampleItems = this.sampleItems;
-  }
-
-  onIdentifierChange(event) {
-    this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
-  }
-
-  onSampleSelectAll(): void {
-    this.addFilteredToSampleColumns();
-    this.sampleDropdown.close();
-  }
-
-  private addFilteredToSampleColumns(): void {
-    this.sampleColumns = this.sampleColumns.concat(
-      this.filteredSampleItems.filter(
-        sampleItem => !this.sampleColumns.includes(sampleItem)
-      )
+    return this.selectedSamples.map(
+      (columnItem: ColumnItem) => columnItem.name
     );
   }
 
   public getSampleColumnNamesString(): string {
     return this.getSampleColumnNames().join(" ");
+  }
+
+  /**
+   * Multiple = false for the dropdown -> event is not an array
+   * @param event
+   *
+   */
+  public onIdentifierSelectionChange(event): void {
+    this.selectedIdentifiers = event;
+    this.sampleItems = this.allItems.filter(
+      item =>
+        !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+    );
+
+    this.otherItems = this.allItems.filter(
+      item =>
+        !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+    );
+
+    this.updatePreviewStyles();
+  }
+
+  public onSampleSelectionChange(event): void {
+    this.selectedSamples = event;
+    this.identifierItems = this.allItems.filter(
+      item => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+    );
+
+    this.otherItems = this.allItems.filter(
+      item =>
+        !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+    );
+
+    this.updatePreviewStyles();
+  }
+
+  public onOtherSelectionChange(event): void {
+    this.selectedOthers = event;
+    this.identifierItems = this.allItems.filter(
+      item => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+    );
+
+    this.sampleItems = this.allItems.filter(
+      item =>
+        !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+    );
+
+    this.updatePreviewStyles();
   }
 
   /**
@@ -276,18 +301,33 @@ export class WrangleModalComponent implements OnInit {
       );
     this.activeModal.close(wrangle$);
   }
-  private getSampleColumnIndexes(): number[] {
-    return this.sampleColumns
+
+  private getColumnIndexes(columnItems: ColumnItem[]): number[] {
+    return columnItems
       .map((columnItem: ColumnItem) => columnItem.index)
-      .sort((a, b) => a - b); // sort them just in case selection order or something messes the order
+      .sort((a, b) => a - b); // sort them just in case selection order or something messes the order;
   }
 
   private getWrangledFileString(): string {
-    const sampleColumnIndexes = this.getSampleColumnIndexes();
+    const sampleColumnIndexes = this.getColumnIndexes(this.selectedSamples);
+    const otherColumnIdexes = this.getColumnIndexes(this.selectedOthers); // these could be included or excluded
+    const otherColumnsToIncludeIndexes = this.includeOthers()
+      ? otherColumnIdexes
+      : this.getColumnIndexes(this.allItems).filter(
+          item =>
+            !this.getColumnIndexes(this.selectedIdentifiers)
+              .concat(sampleColumnIndexes, otherColumnIdexes)
+              .includes(item)
+        );
 
+    // identifier not included here as it will be set as the first column
+    // sort to retain the original order
+    const columnsToIncludeIndexes = sampleColumnIndexes
+      .concat(otherColumnsToIncludeIndexes)
+      .sort((a, b) => a - b);
     const newRows = this.tsv2File.getBody().map((tsvRow: Array<string>) => {
-      return [tsvRow[this.identifierColumn.index]].concat(
-        sampleColumnIndexes.map((index: number) => tsvRow[index])
+      return [tsvRow[this.selectedIdentifiers[0].index]].concat(
+        columnsToIncludeIndexes.map((index: number) => tsvRow[index])
       );
     });
 
@@ -295,14 +335,17 @@ export class WrangleModalComponent implements OnInit {
 
     // careful, new headers are created here but not passed on
     // take note as phenodata is created using the originals
-    const newHeaders = sampleColumnIndexes
-      .map((index: number) => tsvHeaders[index])
-      // add prefix if missing
-      .map(headerName =>
-        headerName.startsWith(this.SAMPLE_PREFIX)
+    const newHeaders = columnsToIncludeIndexes.map((index: number) => {
+      const headerName = tsvHeaders[index];
+      // add prefix for samples if missing
+      if (sampleColumnIndexes.includes(index)) {
+        return headerName.startsWith(this.SAMPLE_PREFIX)
           ? headerName
-          : this.SAMPLE_PREFIX + headerName
-      );
+          : this.SAMPLE_PREFIX + headerName;
+      } else {
+        return headerName;
+      }
+    });
 
     // arrays to strings
     const newHeadersString = d3.tsvFormatRows([newHeaders]);
@@ -315,75 +358,34 @@ export class WrangleModalComponent implements OnInit {
     const phenodataHeaderString = "sample\toriginal_name\tchiptype\tgroup\n";
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
-    const phenodataRowsString = this.getSampleColumnIndexes().reduce(
-      (phenodataRows: string, index) => {
-        const sampleHeader = tsvHeaders[index]; // this is the original, could have chip.
-        const fixedSampleHeader = sampleHeader.startsWith(this.SAMPLE_PREFIX)
-          ? sampleHeader.substring(this.SAMPLE_PREFIX.length)
-          : sampleHeader;
-        return (
-          phenodataRows +
-          fixedSampleHeader +
-          "\t" +
-          this.dataset.name +
-          "\t" +
-          "not applicable" +
-          "\t" +
-          "" +
-          "\n"
-        );
-      },
-      ""
-    );
+    const phenodataRowsString = this.getColumnIndexes(
+      this.selectedSamples
+    ).reduce((phenodataRows: string, index) => {
+      const sampleHeader = tsvHeaders[index]; // this is the original, could have chip.
+      const fixedSampleHeader = sampleHeader.startsWith(this.SAMPLE_PREFIX)
+        ? sampleHeader.substring(this.SAMPLE_PREFIX.length)
+        : sampleHeader;
+      return (
+        phenodataRows +
+        fixedSampleHeader +
+        "\t" +
+        this.dataset.name +
+        "\t" +
+        "not applicable" +
+        "\t" +
+        "" +
+        "\n"
+      );
+    }, "");
 
     return phenodataHeaderString + phenodataRowsString;
   }
 
-  // onCellClicked(params): void {
-  //   console.log("SAMPLES", this.sampleColumns);
+  private includeOthers(): boolean {
+    return this.includeExclude.value == this.INCLUDE;
+  }
 
-  //   const colField = params.colDef.field;
-  //   console.log("CLICKED ON COL", colField);
-
-  //   if (this.identifierButtonState) {
-  //     if (this.identifierColumn !== colField) {
-  //       this.identifierColumn = colField;
-  //       if (this.sampleColumns.has(colField)) {
-  //         this.sampleColumns.delete(colField);
-  //       }
-  //     } else {
-  //       this.identifierColumn = null;
-  //     }
-  //   } else if (this.sampleButtonState) {
-  //     if (!this.sampleColumns.has(colField)) {
-  //       this.sampleColumns.add(colField);
-  //       if (this.identifierColumn === colField) {
-  //         this.identifierColumn = null;
-  //       }
-  //     } else {
-  //       this.sampleColumns.delete(colField);
-  //     }
-  //   }
-
-  //   // if (!this.sampleColumns.has(colField)) {
-  //   //   this.sampleColumns.add(colField);
-  //   // } else {
-  //   //   this.sampleColumns.delete(colField);
-  //   // }
-  //   // this.sampleColumns.delete(colField);
-  //   // this.agGrid.api.refreshCells();
-  //   this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
-  //   console.log("AG GRID", this.agGrid);
-  // }
-
-  // onIdentifierButtonClick() {
-  //   this.identifierButtonState = true;
-  //   this.sampleButtonState = false;
-  // }
-
-  // onSampleButtonClick() {
-  //   this.sampleButtonState = true;
-  //   this.identifierButtonState = false;
-  //   // console.log("BUTTON", this.identifierButton);
-  // }
+  private updatePreviewStyles(): void {
+    this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
+  }
 }

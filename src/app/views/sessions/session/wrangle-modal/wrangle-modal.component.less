@@ -1,5 +1,13 @@
 h3 {
-  margin-top: 2ex;
+  margin-top: 3ex;
+}
+
+.legend-text {
+  margin-right: 1em;
+}
+
+.legend-icon {
+  margin-right: 0.5em;
 }
 
 ::ng-deep .identifier {
@@ -10,25 +18,14 @@ h3 {
   background-color: lightgreen;
 }
 
-::ng-deep .other {
-  // background-color: pink;
+::ng-deep .include {
+  background-color: lightgray;
 }
 
-// #identifierButton {
-//   color: #6c757d;
-// }
-
-// #sampleButton {
-//   color: black;
-// }
-
-#identifierButton:hover {
-  background-color: lightblue;
-  // filter: brightness(90%);
-  color: #6c757d;
+::ng-deep .exclude {
+  // background-color: white;
 }
 
-#sampleButton:hover {
-  background-color: lightgreen;
-  color: #6c757d;
+ng-dropdown-panel {
+  width: auto !important;
 }
