@@ -30,7 +30,8 @@
     </div>
 
     <!-- identifier column -->
-    <h3 class="h3-xs">Identifier column</h3>
+    <h3 class="h3-xs">Identifier column <span *ngIf="selectedIdentifiers.length < 1"
+        class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
     <ch-multi-dropdown [items]="identifierItems" [multiple]="false"
       (selectionChanged)="onIdentifierSelectionChange($event)">
     </ch-multi-dropdown>
@@ -38,11 +39,11 @@
 
 
     <!-- sample columns-->
-    <h3 class="h3-xs">Sample columns</h3>
+    <h3 class="h3-xs">Sample columns <span *ngIf="selectedSamples.length < 1"
+        class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
     <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
     </ch-multi-dropdown>
     <!-- {{selectedSamples |json}} -->
-
 
     <!-- other columns -->
     <h3 class="h3-xs">Other columns</h3>
