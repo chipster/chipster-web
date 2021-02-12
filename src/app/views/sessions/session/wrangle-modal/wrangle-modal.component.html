@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h4 class="modal-title">Convert to Chipster format {{dataset.name}}</h4>
+  <h4 class="modal-title">Convert to Chipster format</h4>
   <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -9,9 +9,9 @@
 
   <div *ngIf="state.isReady(); else statusTemplate">
 
-    <div>Convert a file to a new Chipster compatible format.</div>
-
-    <h3 class="h3-xs">Source file preview</h3>
+    <h3 id="preview-header" class="h3-xs">Source file preview <span
+        class="float-right font-weight-light">{{dataset.name}}</span>
+    </h3>
 
     <div class="scrolling-wrapper" #horizontalScroll>
 
@@ -41,9 +41,23 @@
     <!-- sample columns-->
     <h3 class="h3-xs">Sample columns <span *ngIf="selectedSamples.length < 1"
         class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
-    <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
-    </ch-multi-dropdown>
-    <!-- {{selectedSamples |json}} -->
+
+    <div class="row">
+      <div class="col">
+        <h4 class="h4-xs">Group 1</h4>
+        <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
+        </ch-multi-dropdown>
+      </div>
+
+      <div class="col">
+        <h4 class="h4-xs">Group 2</h4>
+        <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
+        </ch-multi-dropdown>
+      </div>
+
+
+      <!-- {{selectedSamples |json}} -->
+    </div>
 
     <!-- other columns -->
     <h3 class="h3-xs">Other columns</h3>
