@@ -1,6 +1,6 @@
 <ng-select #dropdown [items]="items" [multiple]="multiple" [placeholder]="placeholder" bindLabel="name"
-  [closeOnSelect]="!multiple" [(ngModel)]="selectedItems" (change)="onSelectionChange($event)"
-  (search)="onSearch($event)" (keyDown.enter)="onKeyDownEnter($event)" (open)="onOpen($event)">
+  [closeOnSelect]="!multiple" [(ngModel)]="selectedItems" (change)="onSelectionChange()" (search)="onSearch($event)"
+  (keyDown.enter)="onKeyDownEnter($event)" (open)="onOpen()">
 
   <ng-template *ngIf="multiple" ng-header-tmp>
     <button (click)="onSelectAll()" class="btn btn-sm btn-outline-secondary">{{selectAllButtonText}}</button>
