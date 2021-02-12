@@ -41,23 +41,9 @@
     <!-- sample columns-->
     <h3 class="h3-xs">Sample columns <span *ngIf="selectedSamples.length < 1"
         class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
-
-    <div class="row">
-      <div class="col">
-        <h4 class="h4-xs">Group 1</h4>
-        <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
-        </ch-multi-dropdown>
-      </div>
-
-      <div class="col">
-        <h4 class="h4-xs">Group 2</h4>
-        <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
-        </ch-multi-dropdown>
-      </div>
-
-
-      <!-- {{selectedSamples |json}} -->
-    </div>
+    <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
+    </ch-multi-dropdown>
+    <!-- {{selectedSamples |json}} -->
 
     <!-- other columns -->
     <h3 class="h3-xs">Other columns</h3>
