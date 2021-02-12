@@ -106,6 +106,10 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
     this.dropdown.close();
   }
 
+  onDone(): void {
+    this.dropdown.close();
+  }
+
   private addFilteredToSelectedItems(): void {
     this.selectedItems = this.selectedItems.concat(
       this.filteredItems.filter(
