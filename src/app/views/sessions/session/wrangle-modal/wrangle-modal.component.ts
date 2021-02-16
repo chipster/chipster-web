@@ -75,6 +75,9 @@ export class WrangleModalComponent implements OnInit {
   includeExclude = new FormControl(this.INCLUDE);
   includeExcludeForm = new FormGroup({ includeExclude: this.includeExclude });
 
+  nonUniqueIdentifiers = new Set<string>();
+  nonUniqueIncludedColumns = new Set<string>();
+
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
   next: () => {};
@@ -203,7 +206,7 @@ export class WrangleModalComponent implements OnInit {
   }
 
   public onIncludeExcludeChange(): void {
-    this.updatePreviewStyles();
+    this.onSelectionChange();
   }
 
   public getSampleColumnNames(): Array<string> {
@@ -216,13 +219,11 @@ export class WrangleModalComponent implements OnInit {
     return this.getSampleColumnNames().join(" ");
   }
 
-  /**
-   * Multiple = false for the dropdown -> event is not an array
-   * @param event
-   *
-   */
   public onIdentifierSelectionChange(event): void {
     this.selectedIdentifiers = event;
+
+    this.checkIdentifiersUnique(this.selectedIdentifiers);
+
     this.sampleItems = this.allItems.filter(
       item =>
         !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
@@ -232,8 +233,7 @@ export class WrangleModalComponent implements OnInit {
       item =>
         !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
-
-    this.updatePreviewStyles();
+    this.onSelectionChange();
   }
 
   public onSampleSelectionChange(event): void {
@@ -247,7 +247,7 @@ export class WrangleModalComponent implements OnInit {
         !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
 
-    this.updatePreviewStyles();
+    this.onSelectionChange();
   }
 
   public onOtherSelectionChange(event): void {
@@ -261,9 +261,68 @@ export class WrangleModalComponent implements OnInit {
         !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
     );
 
-    this.updatePreviewStyles();
+    this.onSelectionChange();
   }
 
+  private onSelectionChange(): void {
+    this.updatePreviewStyles();
+    this.checkIncludedColumnsUnique();
+  }
+
+  private checkIncludedColumnsUnique(): void {
+    this.nonUniqueIncludedColumns.clear();
+
+    const othersToInclude = this.includeOthers()
+      ? this.selectedOthers
+      : this.otherItems.filter(item => !this.selectedOthers.includes(item));
+    const allIncluded = this.selectedIdentifiers.concat(
+      this.selectedSamples,
+      othersToInclude
+    );
+
+    const names = new Set<string>();
+    allIncluded
+      .map(columnItem => columnItem.name)
+      .forEach(name => {
+        if (!names.has(name)) {
+          names.add(name);
+        } else {
+          this.nonUniqueIncludedColumns.add(name);
+        }
+      });
+  }
+
+  private checkIdentifiersUnique(identifierColumns: ColumnItem[]): void {
+    if (identifierColumns == null || identifierColumns.length < 1) {
+      this.nonUniqueIdentifiers.clear();
+      return;
+    }
+
+    this.nonUniqueIdentifiers.clear();
+    const identifiers = new Set<string>();
+
+    this.tsv2File
+      .getBody()
+      .map((tsvRow: Array<string>) => tsvRow[identifierColumns[0].index])
+      .forEach(identifier => {
+        if (!identifiers.has(identifier)) {
+          identifiers.add(identifier);
+        } else {
+          this.nonUniqueIdentifiers.add(identifier);
+        }
+      });
+  }
+
+  public getNonUniquesString(nonUniquesSet: Set<string>): string {
+    if (nonUniquesSet.size < 1) {
+      return "";
+    }
+
+    return Array.from(nonUniquesSet)
+      .slice(0, 5)
+      .reduce((all, identifier) => (all += identifier + " "), "")
+      .slice(0, -1);
+  }
   /**
    * Creates the observable that performs the wrangle operation,
    * closes the modal and returns the observable when closing the modal.
