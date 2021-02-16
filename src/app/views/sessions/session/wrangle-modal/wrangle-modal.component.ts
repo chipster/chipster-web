@@ -4,7 +4,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
-import { Subject } from "rxjs";
+import { defer, of, Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../model/loadstate";
@@ -329,25 +329,28 @@ export class WrangleModalComponent implements OnInit {
    *
    */
   public runWrangle(): void {
-    // get the contents of the new file as a string
-    const wrangledFileString = this.getWrangledFileString();
+    // create the observable that does all the work
+    const wrangle$ =
+      // get the contents of the new file as a string
+      defer(() => of(this.getWrangledFileString())).pipe(
+        // create the new (derived) dataset
+        mergeMap(wrangledFileString => {
+          return this.sessionDataService.createDerivedDataset(
+            this.dataset.name + "-converted.tsv",
+            [this.dataset.datasetId],
+            "Convert to Chipster format",
+            wrangledFileString,
+            "Import"
+          );
+        }),
 
-    // create the new (derived) dataset
-    const wrangle$ = this.sessionDataService
-      .createDerivedDataset(
-        this.dataset.name + "-converted.tsv",
-        [this.dataset.datasetId],
-        "Convert to Chipster format",
-        wrangledFileString,
-        "Import"
-      )
-      .pipe(
+        // get newly created dataset (from the server, might not be available locally yet)
         mergeMap(newDatasetId => {
-          // get newly created dataset (from the server, might not be available locally yet)
           return this.sessionDataService.getDataset(newDatasetId);
         }),
+
+        // create phenodata and update it to server
         mergeMap((newDataset: Dataset) => {
-          // create phenodata and update it to server
           const phenodataString = this.getPhenodataString();
           newDataset.metadataFiles = [
             {
