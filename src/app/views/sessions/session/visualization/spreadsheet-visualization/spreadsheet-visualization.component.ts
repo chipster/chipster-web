@@ -183,7 +183,7 @@ export class SpreadsheetVisualizationComponent
               this.goToFullScreenText = " to see all rows and total row count";
             } else if (!this.gotFullFile && !this.modalWillHaveFullFile) {
               this.goToFullScreenText =
-                " to see more rows. File is too big the total row count";
+                " to see more rows. File is too big for total row count";
             }
           }
 

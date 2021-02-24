@@ -46,7 +46,7 @@ export class PhenodataVisualizationComponent
   @Input() private datasetsMap: Map<string, Dataset>;
 
   // MUST be handled outside Angular zone to prevent a change detection loop
-  hot: ht.Methods;
+  hot;
   rows: Array<Array<string>>;
   headers: string[];
   latestEdit: number;
@@ -57,6 +57,9 @@ export class PhenodataVisualizationComponent
   phenodataAncestor: Dataset;
   phenodataFilled = false;
   ready = false;
+  sortColumn: number;
+  sortOrder: boolean;
+  sortingEnabled: boolean;
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -137,10 +140,18 @@ export class PhenodataVisualizationComponent
   }
 
   private getSettings(array: string[][], headers: string[]) {
+    const columnSorting = this.sortingEnabled
+      ? {
+          column: this.sortColumn,
+          sortOrder: this.sortOrder,
+          sortEmptyCells: true
+        }
+      : { columnSorting: true };
+
     return {
       data: array,
       colHeaders: headers,
-      columnSorting: true,
+      columnSorting: columnSorting,
       manualColumnResize: true,
       sortIndicator: true,
       rowHeights: 23,
@@ -285,6 +296,19 @@ export class PhenodataVisualizationComponent
     this.headers = [];
     this.rows = [];
 
+    // store sorting state
+    if (this.hot) {
+      if (this.hot.sortingEnabled) {
+        this.sortingEnabled = true;
+        this.sortColumn = this.hot.sortColumn;
+        this.sortOrder = this.hot.sortOrder;
+      } else {
+        this.sortingEnabled = false;
+        this.sortColumn = null;
+        this.sortOrder = null;
+      }
+    }
+
     // remove old table if this is an update
     const container = document.getElementById("tableContainer");
     if (!container) {
@@ -345,12 +369,10 @@ export class PhenodataVisualizationComponent
     }
 
     // for now, show the phenodata table only for own phenodata
+    const settings = this.getSettings(this.rows, this.headers);
     if (this.phenodataState === PhenodataState.OWN_PHENODATA) {
       this.zone.runOutsideAngular(() => {
-        this.hot = new Handsontable(
-          container,
-          this.getSettings(this.rows, this.headers)
-        );
+        this.hot = new Handsontable(container, settings);
       });
 
       this.updateSize(this.rows, this.headers);
@@ -411,9 +433,8 @@ export class PhenodataVisualizationComponent
       .pipe(
         tap(name => {
           this.zone.runOutsideAngular(() => {
-            const colHeaders = <Array<string>>(
-              (<ht.Options>this.hot.getSettings()).colHeaders
-            );
+            const colHeaders = (this.hot.getSettings() as ht.Options)
+              .colHeaders as Array<string>;
             this.hot.alter("insert_col", colHeaders.length);
             // remove undefined column header
             colHeaders.pop();

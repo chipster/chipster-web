@@ -5,6 +5,10 @@ import { EMPTY } from "rxjs";
 import { map } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
+import {
+  Tags,
+  TypeTagService
+} from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
@@ -14,7 +18,8 @@ export class DatasetModalService {
   constructor(
     private ngbModal: NgbModal,
     private dialogModalService: DialogModalService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private typeTagService: TypeTagService
   ) {}
 
   public openDatasetHistoryModal(
@@ -33,6 +38,19 @@ export class DatasetModalService {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
         "The file is too big to be converted. The size limit is 100 MB at the moment but it will be removed in the future."
+      );
+      return;
+    }
+
+    if (
+      !(
+        this.typeTagService.has(sessionData, dataset, Tags.TEXT) ||
+        this.typeTagService.has(sessionData, dataset, Tags.TSV)
+      )
+    ) {
+      this.dialogModalService.openNotificationModal(
+        "Converting file not possible",
+        "Convert only works for tab delimeted text files."
       );
       return;
     }

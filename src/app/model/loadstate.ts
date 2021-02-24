@@ -7,6 +7,11 @@ export enum State {
 }
 
 export class LoadState {
+  static Ready = new LoadState(State.Ready);
+  static Loading = new LoadState(State.Loading);
+  static EmptyFile = new LoadState(State.EmptyFile);
+  static Fail = new LoadState(State.Fail);
+
   public state: State;
   private _message: string;
   public buttonText;
@@ -17,7 +22,7 @@ export class LoadState {
     this.buttonText = buttonText;
   }
 
-  get message() {
+  get message(): string {
     return this._message ? this._message : this.state;
   }
 
