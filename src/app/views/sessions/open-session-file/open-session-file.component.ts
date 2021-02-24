@@ -127,12 +127,13 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
               let msg = "";
               this.warnings.forEach((warnings, file: any) => {
                 if (warnings.length > 0) {
-                  msg += "Session file " + file.name + " warnings: \n";
+                  msg += "Warnings were found from the session file " + file.name + ". \n"
+                  msg += "Please check that your session was imported correctly. \n";
                   warnings.forEach(warning => {
                     msg += "- " + warning + "\n";
                   });
                 } else {
-                  msg += "No warnings in session file " + file.name + ".\n";
+                  msg += "There were no warnings about the session file " + file.name + ".\n";
                 }
               });
               return this.dialogModalService.openPreModal("Session import warnings", msg);
