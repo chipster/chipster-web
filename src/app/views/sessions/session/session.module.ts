@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { NgSelectModule } from "@ng-select/ng-select";
@@ -31,6 +31,7 @@ import { SessionService } from "./session.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ToolsModule } from "./tools/tools.module";
 import { VisualizationsModule } from "./visualization/visualizations.module";
+import { MultiDropdownComponent } from "./wrangle-modal/multi-dropdown.component";
 import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
 
 @NgModule({
@@ -47,7 +48,8 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     RouterModule,
     AgGridModule,
     FormsModule,
-    NgSelectModule
+    NgSelectModule,
+    ReactiveFormsModule
   ],
   declarations: [
     SessionComponent,
@@ -57,7 +59,8 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     SelectionPanelComponent,
     ImportSessionModalComponent,
     SessionDetailsComponent,
-    WrangleModalComponent
+    WrangleModalComponent,
+    MultiDropdownComponent
   ],
   providers: [
     SessionEventService,

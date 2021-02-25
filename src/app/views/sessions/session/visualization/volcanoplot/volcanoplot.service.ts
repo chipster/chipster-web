@@ -69,7 +69,7 @@ export class VolcanoPlotService {
     volcanoDataIndexes.push(
       tsv.headers.getColumnIndexByKey(selectedPValHeader)
     );
-    console.log(volcanoDataIndexes);
+
     return _.map(tsv.body.rows, (row: TSVRow) =>
       this.getVolcanoPlotDataRowByIndex(row, volcanoDataIndexes)
     );
@@ -116,7 +116,7 @@ export class VolcanoPlotService {
     );
     const min = _.min(flatValues);
     const max = _.max(flatValues);
-    console.log(new DomainBoundaries(min, max));
+
     return new DomainBoundaries(min, max);
   }
 
@@ -128,14 +128,17 @@ export class VolcanoPlotService {
     const values = _.map(tsv.body.rows, (row: TSVRow) =>
       row.getCellsByIndexes(PValueIndexes)
     );
-    const flatValues = _.map(_.flatten(values), (value: string) =>
+    const flatValues = _.map(_.flatten(values), (value: string) => 
       parseFloat(value)
     );
 
     const logValues = [];
     flatValues.forEach(function(yval) {
       const curYval = -Math.log10(yval);
-      logValues.push(curYval);
+      // log(0) would be Infinity
+      if (yval != 0) {
+        logValues.push(curYval);
+      }
     });
     const min = _.min(logValues);
     const max = _.max(logValues);

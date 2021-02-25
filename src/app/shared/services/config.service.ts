@@ -32,6 +32,8 @@ export class ConfigService {
     "example-session-owner-user-id";
   public static readonly KEY_SUPPORT_SESSION_OWNER_USER_ID =
     "support-session-owner-user-id";
+  public static readonly KEY_STATISTICS_IGNORE_USERS =
+    "statistics-ignore-users";
 
   private conf$: Observable<any>;
   private chipsterConf$: Observable<any>;

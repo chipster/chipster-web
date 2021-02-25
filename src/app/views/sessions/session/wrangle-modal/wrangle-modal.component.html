@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h4 class="modal-title">Convert to Chipster format {{dataset.name}}</h4>
+  <h4 class="modal-title">Convert to Chipster format</h4>
   <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -9,39 +9,73 @@
 
   <div *ngIf="state.isReady(); else statusTemplate">
 
-    <div>Convert a file to a new Chipster compatible format.</div>
-
-    <h3 class="h3-xs">Source file preview</h3>
+    <h3 id="preview-header" class="h3-xs">Source file preview <span
+        class="float-right font-weight-light">{{dataset.name}}</span>
+    </h3>
 
     <div class="scrolling-wrapper" #horizontalScroll>
 
       <ag-grid-angular #agGrid style="width: 100%; height: 26ex;" class="ag-theme-alpine mt-2"
         [rowData]="previewRowData" [columnDefs]="columnDefs">
       </ag-grid-angular>
+      <!-- row col here to prevent alert from going on top of legends -->
+      <div class="row">
+        <div class="col">
+          <span class="float-right text-sm">
+            <i class="legend-icon far fa-square identifier" aria-hidden="true"></i><span
+              class="legend-text">Identifier</span>
+            <i class="legend-icon far fa-square sample" aria-hidden="true"></i><span class="legend-text">Sample</span>
+            <i class="legend-icon far fa-square mr-1 include" aria-hidden="true"></i><span
+              class="legend-text">Include</span>
+            <i class="legend-icon far fa-square exclude" aria-hidden="true"></i><span class="legend-text">Exclude</span>
+          </span>
+        </div>
+      </div>
     </div>
 
-    <h3 class="h3-xs">Identifier column</h3>
-    <ng-select [items]="identifierItems" [multiple]="false" placeholder="Select column" bindLabel="name"
-      [closeOnSelect]="true" [(ngModel)]="identifierColumn" (change)="onIdentifierChange($event)">
+    <div *ngIf="nonUniqueIncludedColumns.size > 0" class="alert alert-warning p-1 mb-0 mt-2 text-sm">
+      <span>Selected columns have {{nonUniqueIncludedColumns.size}} non-unique names
+        including </span><span class="font-italic">{{getNonUniquesString(nonUniqueIncludedColumns)}}</span>
+    </div>
 
-      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected" /> {{item.name}}
-      </ng-template>
-    </ng-select>
 
-    <h3 class="h3-xs">Sample columns</h3>
-    <ng-select #sampleDropdown [items]="sampleItems" [multiple]="true" placeholder="Select columns" bindLabel="name"
-      [closeOnSelect]="false" [(ngModel)]="sampleColumns" (change)="onSampleChange($event)"
-      (search)="onSampleSearch($event)" (keyDown.enter)="onSampleKeyDownEnter($event)" (open)="onSampleOpen($event)">
+    <!-- identifier column -->
+    <h3 class="h3-xs">Identifier column <span *ngIf="selectedIdentifiers.length < 1"
+        class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
+    <ch-multi-dropdown [items]="identifierItems" [multiple]="false"
+      (selectionChanged)="onIdentifierSelectionChange($event)">
+    </ch-multi-dropdown>
+    <div *ngIf="nonUniqueIdentifiers.size > 0" class="alert alert-warning p-1 mb-0 mt-2 text-sm">
+      <span>Identifier column contains {{nonUniqueIdentifiers.size}} non-unique identifiers
+        including </span><span class="font-italic">{{getNonUniquesString(nonUniqueIdentifiers)}}</span>
+    </div>
 
-      <ng-template ng-header-tmp>
-        <button (click)="onSampleSelectAll()" class="btn btn-sm btn-outline-secondary">{{selectAllButtonText}}</button>
-      </ng-template>
 
-      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected" /> {{item.name}}
-      </ng-template>
-    </ng-select>
+    <!-- {{selectedIdentifiers | json}} -->
+
+
+    <!-- sample columns-->
+    <h3 class="h3-xs">Sample columns <span *ngIf="selectedSamples.length < 1"
+        class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span></h3>
+    <ch-multi-dropdown [items]="sampleItems" [multiple]="true" (selectionChanged)="onSampleSelectionChange($event)">
+    </ch-multi-dropdown>
+    <!-- {{selectedSamples |json}} -->
+
+    <!-- other columns -->
+    <h3 class="h3-xs">Other columns</h3>
+    <div class="mb-2" [formGroup]="includeExcludeForm">
+      Selected columns will be
+      <select formControlName="includeExclude" class="form-select" (change)="onIncludeExcludeChange($event)">
+        <option *ngFor="let item of includeExcludeOptions" [value]="item">
+          {{item}}
+        </option>
+      </select>
+    </div>
+
+    <ch-multi-dropdown [items]="otherItems" [multiple]="true" (selectionChanged)="onOtherSelectionChange($event)">
+    </ch-multi-dropdown>
+    <!-- {{selectedOthers |json}} -->
+
   </div>
 
   <ng-template #statusTemplate>
@@ -52,6 +86,6 @@
 
 <div class="modal-footer">
   <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.close()">Close</button>
-  <button type="button" class="btn btn-sm btn-success" [disabled]="identifierColumn == null || sampleColumns.length < 1"
-    (click)="runWrangle()">Convert</button>
+  <button type="button" class="btn btn-sm btn-success"
+    [disabled]="selectedIdentifiers.length < 1 || selectedSamples.length < 1" (click)="runWrangle()">Convert</button>
 </div>

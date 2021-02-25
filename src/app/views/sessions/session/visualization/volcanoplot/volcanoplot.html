@@ -17,6 +17,10 @@
       <option *ngFor="let pheader of volcanoPlotPHeaders">{{pheader}}</option>
     </select>
 
+    <div class="alert alert-primary mt-3" role="alert" *ngIf="showZeroWarning">
+      -log(p) values displayed at the upper y axis limit correspond to genes with padj values rounded to zero by edgeR / DESeq2
+    </div>
+
     <div id="selectedGeneList" *ngIf="selectedDataRows && selectedDataRows.length>0">
       <p class="text-sm-center">{{selectedDataRows.length}} Genes Selected</p>
       <div class="table table-sm">
@@ -36,5 +40,5 @@
 </div>
 
 <ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state" (buttonEvent)="showAnyway()"></ch-status>
 </ng-template>

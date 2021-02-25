@@ -23,6 +23,7 @@ export class VolcanoPlotComponent extends PlotComponent
   private volcanoPlotPHeaders: Array<string>;
   private xScale: any;
   private yScale: any;
+  showZeroWarning: boolean;
 
   constructor(
     private volcanoPlotService: VolcanoPlotService,
@@ -36,6 +37,10 @@ export class VolcanoPlotComponent extends PlotComponent
 
   ngOnChanges() {
     super.ngOnChanges();
+  }
+
+  showAnyway() {
+    super.show(true);
   }
 
   ngOnDestroy() {
@@ -83,7 +88,12 @@ export class VolcanoPlotComponent extends PlotComponent
     this.volcanoPlotDataRows.forEach(function(dataRow) {
       const curPlotData = new PlotData();
       curPlotData.id = dataRow.id;
-      // Need to do some Manipulation for the Y-Values about the Rounding Limit stuff
+      /* y scale in volcanoplot is -log10(y)
+
+      Zeros in data are converted to Infinite value. Keep them in the plotData 
+      (in case we would want some special handling for those when drawing them 
+      for example) and clamp them down later when necessary (e.g. in selection).
+      */
       curPlotData.plotPoint = new Point(
         dataRow.values[0],
         -Math.log10(dataRow.values[1])
@@ -91,6 +101,25 @@ export class VolcanoPlotComponent extends PlotComponent
       self.plotData.push(curPlotData);
     });
     this.drawPlot();
+  }
+
+  /**
+   * Clamp down y to the max scale value
+   * 
+   * There is yScale.clamp(true) which should do this, but it uses the max domain 
+   * and range values, whereas the "padding" used in the drawPlot() seems to make 
+   * our plot to extend a bit farther.
+   * 
+   * @param y 
+   */
+  clampY(y) {
+    // if the original p value was 0, -log(p) is Infinity. Show as scale max value
+    if (y === Infinity) {
+      // get the max y value      
+      return this.yScale.invert(0);
+    } else {
+      return y;
+    }
   }
 
   drawPlot() {
@@ -103,6 +132,11 @@ export class VolcanoPlotComponent extends PlotComponent
     };
     const padding = 50;
 
+    const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
+    const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
+
+    self.showZeroWarning = this.plotData.find(d => d.plotPoint.y === Infinity) != null;
+
     // Define the SVG
     this.svg
       .attr("width", size.width)
@@ -114,8 +148,8 @@ export class VolcanoPlotComponent extends PlotComponent
       .scaleLinear()
       .range([padding, size.width - padding])
       .domain([
-        this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv).min,
-        this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv).max
+        xBoundary.min,
+        xBoundary.max
       ])
       .nice();
 
@@ -137,15 +171,17 @@ export class VolcanoPlotComponent extends PlotComponent
       .range([size.height - padding, padding])
       .domain([
         0,
-        this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv).max
+        yBoundary.max
       ])
       .nice();
+
     const yAxis = d3
       .axisLeft(this.yScale)
       .ticks(10)
       .tickSize(-size.width)
       .tickSizeOuter(0)
       .tickPadding(5);
+
     this.svg
       .append("g")
       .attr("class", "axis")
@@ -188,7 +224,7 @@ export class VolcanoPlotComponent extends PlotComponent
         return self.xScale(d.plotPoint.x);
       })
       .attr("cy", function(d) {
-        return self.yScale(d.plotPoint.y);
+        return self.yScale(self.clampY(d.plotPoint.y));
       })
       .attr("fill", function(d) {
         if (
@@ -207,13 +243,23 @@ export class VolcanoPlotComponent extends PlotComponent
   }
 
   getSelectedDataSet() {
+
     const self = this;
+
+    // convert infinity values to scale maximum so that those can be selected
+    const limitedPlotData = this.plotData.map((val: PlotData) => {
+      const limited = new PlotData();
+      limited.id = val.id;
+      limited.plotPoint = new Point(val.plotPoint.x, this.clampY(val.plotPoint.y));
+      return limited;
+    })
+
     this.selectedDataPointIds = this.plotService.getSelectedDataPoints(
       this.dragStartPoint,
       this.dragEndPoint,
       this.xScale,
       this.yScale,
-      this.plotData
+      limitedPlotData
     );
     // Populate the selected Data Rows
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
@@ -227,7 +273,7 @@ export class VolcanoPlotComponent extends PlotComponent
   setSelectionStyle(id: string) {
     d3.select("#dot" + id)
       .classed("selected", true)
-      .style("stroke", "black")
+      .style("stroke", "blue")
       .style("stroke-width", 3)
       .attr("r", 2);
   }

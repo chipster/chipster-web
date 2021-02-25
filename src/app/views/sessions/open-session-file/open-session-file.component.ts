@@ -8,13 +8,13 @@ import {
 } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
-import { throwError } from "rxjs";
-import { flatMap } from "rxjs/operators";
+import { of, throwError } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
-import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 import { UploadService } from "../../../shared/services/upload.service";
+import { DialogModalService } from "../session/dialogmodal/dialogmodal.service";
 import { ImportSessionModalComponent } from "./import-session-modal.component";
 
 @Component({
@@ -35,13 +35,16 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
 
+  // store warnings here, because fileSuccess() is called for each file and we want to show all of them at once
+  warnings = new Map<string, string[]>();
+
   constructor(
     private errorService: ErrorService,
     private modalService: NgbModal,
     private uploadService: UploadService,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionResource: SessionResource,
-    private restErrorService: RestErrorService
+    private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit() {
@@ -52,7 +55,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   }
 
   fileAdded(file: any) {
-    // open modal if not already open
+    // open modal if not already open    
     if (!this.modalOpen) {
       this.modalRef = this.modalService.open(ImportSessionModalComponent, {
         size: "lg"
@@ -72,13 +75,16 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         }
       );
     }
+
+    this.warnings = new Map();
+
     // notify the modal that file was added
     this.modalRef.componentInstance.fileAdded(file);
   }
 
   fileSuccess(file: any) {
     const sessionId = file.chipsterSessionId;
-    const datasetId = file.chipsterDatasetId;
+    const datasetId = file.chipsterDatasetId;    
 
     // remove from the list
     file.cancel();
@@ -87,17 +93,18 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
       .pipe(
-        flatMap(response => {
+        mergeMap(response => {
           if (response.errors.length > 0) {
             return throwError(response.errors);
-          }
-          log.log("extracted, warnings: ", response.warnings, response);
+          }          
+          
+          log.log("extracted, warnings: ", response.warnings, response, file);
+          this.warnings.set(file, response.warnings);
+
           this.fileStatus.set(file, "Deleting temporary copy");
           return this.sessionResource.deleteDataset(sessionId, datasetId);
-        })
-      )
-      .subscribe(
-        () => {
+        }),
+        mergeMap(() => {
           this.fileStatus.set(file, undefined);
           this.finishedFiles.add(file);
 
@@ -112,21 +119,46 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             if (this.modalOpen) {
               this.modalRef.componentInstance.closeModal();
             }
+
+            // if there were warnings
+            if (Array.from(this.warnings.values()).some(fileWarnings => fileWarnings.length > 0)) {
+
+              // collect warnings of all sessions to one message
+              let msg = "";
+              this.warnings.forEach((warnings, file: any) => {
+                if (warnings.length > 0) {
+                  msg += "Warnings were found from the session file " + file.name + ". \n"
+                  msg += "Please check that your session was imported correctly. \n";
+                  warnings.forEach(warning => {
+                    msg += "- " + warning + "\n";
+                  });
+                } else {
+                  msg += "There were no warnings about the session file " + file.name + ".\n";
+                }
+              });
+              return this.dialogModalService.openPreModal("Session import warnings", msg);
+            }
           }
-        },
-        err => {
+          
+          return of(null);
+        }),
+      )
+      .subscribe({
+        error: err => {
           this.error(file, err);
           this.sessionResource
-            .deleteSession(sessionId)
-            .subscribe(null, err2 => {
-              // original error reported to user already
-              log.error(
-                "failed to delete the session after another error",
-                err2
+          .deleteSession(sessionId)
+          .subscribe({
+            error: err2 => {
+            // original error reported to user already
+            log.error(
+              "failed to delete the session after another error",
+              err2
               );
-            });
-        }
-      );
+            }
+          });
+          }
+        });
   }
 
   error(file: any, err) {
