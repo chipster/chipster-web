@@ -37,7 +37,9 @@ export class DatasetModalService {
     if (dataset.size > WrangleModalComponent.FILE_SIZE_LIMIT) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
-        "The file is too big to be converted. The size limit is 100 MB at the moment but it will be removed in the future."
+        "The file is too big to be converted. The size limit is " +
+          WrangleModalComponent.FILE_SIZE_LIMIT +
+          " MB at the moment but it will be removed in the future."
       );
       return;
     }
