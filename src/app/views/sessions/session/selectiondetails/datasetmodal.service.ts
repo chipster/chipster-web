@@ -34,7 +34,7 @@ export class DatasetModalService {
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
-    if (dataset.size > WrangleModalComponent.FILE_SIZE_LIMIT) {
+    if (dataset.size > WrangleModalComponent.FILE_SIZE_LIMIT * 1024 * 1024) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
         "The file is too big to be converted. The size limit is " +
