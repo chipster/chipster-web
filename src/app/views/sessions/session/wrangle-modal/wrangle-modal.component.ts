@@ -53,7 +53,7 @@ export class WrangleModalComponent implements OnInit {
   private readonly INCLUDE = "included";
   private readonly EXCLUDE = "excluded";
 
-  public static FILE_SIZE_LIMIT = 100 * 1024 * 1024;
+  public static FILE_SIZE_LIMIT = 200 * 1024 * 1024;
   private readonly previewRowCount = 3;
 
   allItems: ColumnItem[];
