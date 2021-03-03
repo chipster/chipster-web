@@ -25,9 +25,9 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()
   ruleStream$: Observable<SessionEvent>;
 
-  @ViewChild("submitButton")
+  @ViewChild("submitButton", { static: false })
   submitButton;
-  @ViewChild("usernameInput")
+  @ViewChild("usernameInput", { static: false })
   usernameInput;
 
   public rules: Rule[];

@@ -30,7 +30,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
 
   @Output() private selectionChanged = new EventEmitter<ColumnItem[]>();
 
-  @ViewChild("dropdown") dropdown;
+  @ViewChild("dropdown", { static: false }) dropdown;
 
   private readonly selectAllString = "Select all";
   private readonly selectAllFilteredString = "Select all filtered";

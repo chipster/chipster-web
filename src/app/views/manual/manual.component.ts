@@ -67,7 +67,7 @@ export class ManualComponent implements AfterViewInit, OnDestroy {
   private readonly ABSOLUTE_PREFIX = "ABSOLUTE";
   private currentPage;
 
-  @ViewChild("container", { read: ViewContainerRef })
+  @ViewChild("container", { static: false, read: ViewContainerRef })
   viewContainerReference;
 
   constructor(

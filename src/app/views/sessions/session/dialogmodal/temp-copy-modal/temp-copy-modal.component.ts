@@ -1,5 +1,5 @@
+import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, AfterViewInit, ViewChild } from "@angular/core";
 
 @Component({
   templateUrl: "./temp-copy-modal.component.html"
@@ -20,7 +20,7 @@ export class TempCopyModalComponent implements AfterViewInit {
   @Input()
   placeHolder: string;
 
-  @ViewChild("valueInput")
+  @ViewChild("valueInput", { static: false })
   valueInput;
 
   constructor(private activeModal: NgbActiveModal) {}

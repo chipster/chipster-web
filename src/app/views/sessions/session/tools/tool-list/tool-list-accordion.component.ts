@@ -1,20 +1,13 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  ViewChild,
-  OnInit
-} from "@angular/core";
-import { Tool, Module, Category, InputBinding } from "chipster-js-common";
-import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
-import { PipeService } from "../../../../../shared/services/pipeservice.service";
-import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
-import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
+import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Category, Module, Tool } from "chipster-js-common";
+import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
-import * as _ from "lodash";
+import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
+import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
+import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
+import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ToolSelectionService } from "../../tool.selection.service";
 
 @Component({
@@ -38,7 +31,7 @@ export class ToolListAccordionComponent implements OnInit {
   // @Output()
   // private selectToolOutput = new EventEmitter<ToolSelection>();
 
-  @ViewChild("searchBox")
+  @ViewChild("searchBox", { static: false })
   private searchBox: SearchBoxComponent;
 
   modules: Array<Module> = [];

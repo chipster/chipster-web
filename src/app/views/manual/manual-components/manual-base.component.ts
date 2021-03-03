@@ -1,17 +1,17 @@
 import {
+  AfterViewInit,
   Input,
   ViewChild,
-  ViewContainerRef,
-  AfterViewInit
+  ViewContainerRef
 } from "@angular/core";
 
 export class ManualBaseComponent implements AfterViewInit {
   // Angular component, like <ch-manual-a-component>
-  @ViewChild("container", { read: ViewContainerRef })
+  @ViewChild("container", { static: false, read: ViewContainerRef })
   public viewContainerRef: ViewContainerRef;
 
   // the actual element, like <a>
-  @ViewChild("element", { read: ViewContainerRef })
+  @ViewChild("element", { static: false, read: ViewContainerRef })
   public elementViewContainerRef: ViewContainerRef;
 
   // attributes of the original element to be copied for this replacement, like the "href" address of the <a>

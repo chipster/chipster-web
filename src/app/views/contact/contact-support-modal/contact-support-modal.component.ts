@@ -1,3 +1,4 @@
+import { DOCUMENT } from "@angular/common";
 import {
   AfterViewInit,
   Component,
@@ -12,7 +13,6 @@ import {
   FormControl,
   Validators
 } from "@angular/forms";
-import { DOCUMENT } from "@angular/common";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
 import log from "loglevel";
@@ -41,7 +41,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   @Input()
   log: string;
 
-  @ViewChild("messageTextarea")
+  @ViewChild("messageTextarea", { static: false })
   messageTextarea;
 
   public session: Session;

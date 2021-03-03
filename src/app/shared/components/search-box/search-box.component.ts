@@ -2,12 +2,12 @@ import {
   Component,
   EventEmitter,
   Input,
-  Output,
-  ViewChild,
+  OnDestroy,
   OnInit,
-  OnDestroy
+  Output,
+  ViewChild
 } from "@angular/core";
-import { HotkeysService, Hotkey } from "angular2-hotkeys";
+import { Hotkey, HotkeysService } from "angular2-hotkeys";
 
 @Component({
   selector: "ch-search-box",
@@ -29,8 +29,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   @Output()
   enterKey = new EventEmitter<void>();
 
-  @ViewChild("searchInput")
-  searchInput;
+  @ViewChild("searchInput", { static: false }) searchInput;
 
   searchTerm: string;
 

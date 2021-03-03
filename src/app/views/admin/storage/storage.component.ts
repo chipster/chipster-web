@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { from, of, empty } from "rxjs";
-import { flatMap, mergeMap, tap, catchError } from "rxjs/operators";
+import log from "loglevel";
+import { empty, from } from "rxjs";
+import { catchError, flatMap, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
-import log from "loglevel";
 
 @Component({
   selector: "ch-storage",
@@ -20,7 +20,7 @@ export class StorageComponent implements OnInit {
   selectedUser: string;
   sessions: any[];
 
-  @ViewChild("modalContent") modalContent: any;
+  @ViewChild("modalContent", { static: false }) modalContent: any;
 
   constructor(
     private configService: ConfigService,
@@ -43,17 +43,19 @@ export class StorageComponent implements OnInit {
         tap((users: string[]) => (this.users = users)),
         mergeMap((users: string[]) => from(users)),
         mergeMap(user => {
-          return this.authHttpClient.getAuth(
-            sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota"
-          ).pipe(
-            catchError(err => {              
-              log.error("quota request error", err);
-              // don't cancel other requests even if one of them fails
-              return empty();
-            }),
-          )
-        }),        
-        tap((quota: any) => this.quotas.set(quota.username, quota)),
+          return this.authHttpClient
+            .getAuth(
+              sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota"
+            )
+            .pipe(
+              catchError(err => {
+                log.error("quota request error", err);
+                // don't cancel other requests even if one of them fails
+                return empty();
+              })
+            );
+        }),
+        tap((quota: any) => this.quotas.set(quota.username, quota))
       )
       .subscribe(null, err =>
         this.restErrorService.showError("get quotas failed", err)

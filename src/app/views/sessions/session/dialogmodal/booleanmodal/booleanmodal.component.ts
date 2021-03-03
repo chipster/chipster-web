@@ -1,5 +1,5 @@
+import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, AfterViewInit, ViewChild } from "@angular/core";
 
 @Component({
   templateUrl: "./booleanmodal.component.html"
@@ -14,7 +14,7 @@ export class BooleanModalComponent implements AfterViewInit {
   @Input()
   title: string;
 
-  @ViewChild("submitButton")
+  @ViewChild("submitButton", { static: false })
   submitButton;
 
   constructor(private activeModal: NgbActiveModal) {}

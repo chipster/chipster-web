@@ -23,7 +23,7 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   styleUrls: ["./open-session-file.component.less"]
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
-  @ViewChild("browseFilesButton")
+  @ViewChild("browseFilesButton", { static: false })
   browseFilesButton;
 
   private flow;
@@ -44,7 +44,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     private uploadService: UploadService,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
+    private dialogModalService: DialogModalService
   ) {}
 
   ngOnInit() {
@@ -55,7 +55,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   }
 
   fileAdded(file: any) {
-    // open modal if not already open    
+    // open modal if not already open
     if (!this.modalOpen) {
       this.modalRef = this.modalService.open(ImportSessionModalComponent, {
         size: "lg"
@@ -84,7 +84,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
   fileSuccess(file: any) {
     const sessionId = file.chipsterSessionId;
-    const datasetId = file.chipsterDatasetId;    
+    const datasetId = file.chipsterDatasetId;
 
     // remove from the list
     file.cancel();
@@ -96,8 +96,8 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         mergeMap(response => {
           if (response.errors.length > 0) {
             return throwError(response.errors);
-          }          
-          
+          }
+
           log.log("extracted, warnings: ", response.warnings, response, file);
           this.warnings.set(file, response.warnings);
 
@@ -121,44 +121,55 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             }
 
             // if there were warnings
-            if (Array.from(this.warnings.values()).some(fileWarnings => fileWarnings.length > 0)) {
-
+            if (
+              Array.from(this.warnings.values()).some(
+                fileWarnings => fileWarnings.length > 0
+              )
+            ) {
               // collect warnings of all sessions to one message
               let msg = "";
               this.warnings.forEach((warnings, file: any) => {
                 if (warnings.length > 0) {
-                  msg += "Warnings were found from the session file " + file.name + ". \n"
-                  msg += "Please check that your session was imported correctly. \n";
+                  msg +=
+                    "Warnings were found from the session file " +
+                    file.name +
+                    ". \n";
+                  msg +=
+                    "Please check that your session was imported correctly. \n";
                   warnings.forEach(warning => {
                     msg += "- " + warning + "\n";
                   });
                 } else {
-                  msg += "There were no warnings about the session file " + file.name + ".\n";
+                  msg +=
+                    "There were no warnings about the session file " +
+                    file.name +
+                    ".\n";
                 }
               });
-              return this.dialogModalService.openPreModal("Session import warnings", msg);
+              return this.dialogModalService.openPreModal(
+                "Session import warnings",
+                msg
+              );
             }
           }
-          
+
           return of(null);
-        }),
+        })
       )
       .subscribe({
         error: err => {
           this.error(file, err);
-          this.sessionResource
-          .deleteSession(sessionId)
-          .subscribe({
+          this.sessionResource.deleteSession(sessionId).subscribe({
             error: err2 => {
-            // original error reported to user already
-            log.error(
-              "failed to delete the session after another error",
-              err2
+              // original error reported to user already
+              log.error(
+                "failed to delete the session after another error",
+                err2
               );
             }
           });
-          }
-        });
+        }
+      });
   }
 
   error(file: any, err) {

@@ -77,7 +77,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @Input()
   private modulesMap: Map<string, Module>;
 
-  @ViewChild("searchBox")
+  @ViewChild("searchBox", { static: false })
   searchBox;
 
   public selectedTool: SelectedTool;
