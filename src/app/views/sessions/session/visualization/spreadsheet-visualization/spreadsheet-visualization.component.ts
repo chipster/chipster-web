@@ -7,7 +7,6 @@ import {
   OnDestroy,
   ViewChild
 } from "@angular/core";
-import { Response } from "@angular/http";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";

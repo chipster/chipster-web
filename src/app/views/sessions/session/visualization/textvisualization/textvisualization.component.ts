@@ -1,13 +1,12 @@
+import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Dataset } from "chipster-js-common";
+import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
-import { Dataset } from "chipster-js-common";
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
-import { Response } from "@angular/http";
 import { VisualizationModalService } from "../visualizationmodal.service";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Subject } from "rxjs";
-import { LoadState, State } from "../../../../../model/loadstate";
 
 @Component({
   selector: "ch-text-visualization",
