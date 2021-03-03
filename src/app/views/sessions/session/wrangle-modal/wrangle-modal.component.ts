@@ -47,7 +47,7 @@ export class WrangleModalComponent implements OnInit {
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
 
-  @ViewChild("agGrid", { static: false }) agGrid;
+  @ViewChild("agGrid") agGrid;
 
   private readonly SAMPLE_PREFIX = "chip.";
   private readonly INCLUDE = "included";

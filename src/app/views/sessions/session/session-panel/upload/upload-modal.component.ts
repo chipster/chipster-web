@@ -20,8 +20,8 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() sessionId: string;
   @Input() flow: any;
 
-  @ViewChild("uploadFilesButton", { static: false }) uploadFilesButton;
-  @ViewChild("uploadFolderButton", { static: false }) uploadFolderButton;
+  @ViewChild("uploadFilesButton") uploadFilesButton;
+  @ViewChild("uploadFolderButton") uploadFolderButton;
 
   files = [];
 

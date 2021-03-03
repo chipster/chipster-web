@@ -41,7 +41,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   @Input()
   log: string;
 
-  @ViewChild("messageTextarea", { static: false })
+  @ViewChild("messageTextarea")
   messageTextarea;
 
   public session: Session;

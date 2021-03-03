@@ -23,7 +23,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()
   parametersLimit: number;
 
-  @ViewChild("notesInput", { static: false })
+  @ViewChild("notesInput")
   notesArea;
 
   sourceJob: Job;

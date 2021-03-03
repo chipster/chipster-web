@@ -20,7 +20,7 @@ export class TempCopyModalComponent implements AfterViewInit {
   @Input()
   placeHolder: string;
 
-  @ViewChild("valueInput", { static: false })
+  @ViewChild("valueInput")
   valueInput;
 
   constructor(private activeModal: NgbActiveModal) {}

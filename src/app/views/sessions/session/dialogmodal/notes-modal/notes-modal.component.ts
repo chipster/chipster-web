@@ -17,9 +17,9 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   @Input()
   session: Session;
 
-  @ViewChild("submitButton", { static: false })
+  @ViewChild("submitButton")
   submitButton;
-  @ViewChild("notesArea", { static: false })
+  @ViewChild("notesArea")
   notesArea;
 
   public notes: string;

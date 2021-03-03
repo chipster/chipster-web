@@ -20,7 +20,7 @@ export class StorageComponent implements OnInit {
   selectedUser: string;
   sessions: any[];
 
-  @ViewChild("modalContent", { static: false }) modalContent: any;
+  @ViewChild("modalContent") modalContent: any;
 
   constructor(
     private configService: ConfigService,

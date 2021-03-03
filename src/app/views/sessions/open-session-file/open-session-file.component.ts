@@ -23,7 +23,7 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   styleUrls: ["./open-session-file.component.less"]
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
-  @ViewChild("browseFilesButton", { static: false })
+  @ViewChild("browseFilesButton")
   browseFilesButton;
 
   private flow;

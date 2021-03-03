@@ -76,7 +76,7 @@ export class PhenodataVisualizationComponent
     private datasetService: DatasetService
   ) {}
 
-  @ViewChild("horizontalScroll", { static: false }) horizontalScrollDiv;
+  @ViewChild("horizontalScroll") horizontalScrollDiv;
 
   ngOnInit() {
     this.updateView();

@@ -10,7 +10,7 @@ import { Component, HostListener, ViewChild } from "@angular/core";
   templateUrl: "./scroller.component.html"
 })
 export class ScrollerComponent {
-  @ViewChild("scroll", { static: false }) scrollElement;
+  @ViewChild("scroll") scrollElement;
 
   @HostListener("wheel", ["$event"]) onMousewheel(event) {
     const element = this.scrollElement.nativeElement;

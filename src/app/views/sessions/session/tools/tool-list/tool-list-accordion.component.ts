@@ -31,7 +31,7 @@ export class ToolListAccordionComponent implements OnInit {
   // @Output()
   // private selectToolOutput = new EventEmitter<ToolSelection>();
 
-  @ViewChild("searchBox", { static: false })
+  @ViewChild("searchBox")
   private searchBox: SearchBoxComponent;
 
   modules: Array<Module> = [];

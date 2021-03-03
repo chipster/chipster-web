@@ -38,7 +38,7 @@ class BamSource {
   styleUrls: ["./genome-browser.component.less"]
 })
 export class GenomeBrowserComponent implements OnInit, OnDestroy {
-  @ViewChild("iframe", { static: false })
+  @ViewChild("iframe")
   iframe: ElementRef;
 
   @Input()
