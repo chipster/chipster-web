@@ -20,7 +20,6 @@ import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
     UploadComponent
   ],
   providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
-  exports: [SessionPanelComponent, WorkflowGraphComponent],
-  entryComponents: [UploadModalComponent]
+  exports: [SessionPanelComponent, WorkflowGraphComponent]
 })
 export class SessionPanelModule {}

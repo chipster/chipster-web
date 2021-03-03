@@ -27,7 +27,6 @@ import { JobComponent } from "./job/job.component";
     DatasetHistoryModalComponent
   ],
   exports: [JobComponent, FileComponent, DatasetDetailsComponent],
-  providers: [DatasetModalService],
-  entryComponents: [DatasetHistoryModalComponent]
+  providers: [DatasetModalService]
 })
 export class DatasetModule {}

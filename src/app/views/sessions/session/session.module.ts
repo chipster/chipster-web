@@ -75,11 +75,6 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     ModifiedSessionGuard,
     UserEventService,
     DatasetService
-  ],
-  entryComponents: [
-    JobErrorModalComponent,
-    ImportSessionModalComponent,
-    WrangleModalComponent
   ]
 })
 export class SessionModule {}
