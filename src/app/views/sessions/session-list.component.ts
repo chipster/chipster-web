@@ -3,15 +3,14 @@ import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
 import { forkJoin, of, Subject } from "rxjs";
-import { tap } from "rxjs/internal/operators/tap";
 import {
   debounceTime,
   filter,
   finalize,
-  flatMap,
   map,
   mergeMap,
-  takeUntil
+  takeUntil,
+  tap
 } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
@@ -250,7 +249,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.dialogModalService
       .openSessionNameModal("New session", defaultName, "Create")
       .pipe(
-        flatMap(name => {
+        mergeMap(name => {
           if (!name) {
             name = defaultName;
           }
@@ -606,7 +605,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.dialogModalService
       .openSessionNameModal("Copy session", session.name + "_copy", "Copy")
       .pipe(
-        flatMap(name => {
+        mergeMap(name => {
           duplicateName = name;
           // use sessionData from preview if available
           if (
@@ -622,7 +621,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
             return this.sessionResource.loadSession(session.sessionId);
           }
         }),
-        flatMap((sessionData: SessionData) => {
+        mergeMap((sessionData: SessionData) => {
           const copySessionObservable = this.sessionResource.copySession(
             sessionData,
             duplicateName,
