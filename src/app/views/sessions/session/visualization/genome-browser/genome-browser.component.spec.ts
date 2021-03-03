@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
 
 import { GenomeBrowserComponent } from "./genome-browser.component";
 
@@ -6,7 +6,7 @@ describe("GenomeBrowserComponent", () => {
   let component: GenomeBrowserComponent;
   let fixture: ComponentFixture<GenomeBrowserComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [GenomeBrowserComponent]
     }).compileComponents();

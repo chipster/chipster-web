@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
 import { BamViewerComponent } from "./bam-viewer.component";
 
 describe("BamviewerComponent", () => {
   let component: BamViewerComponent;
   let fixture: ComponentFixture<BamViewerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BamViewerComponent]
     }).compileComponents();
