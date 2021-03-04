@@ -18,17 +18,9 @@ import {
 } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { EMPTY, forkJoin, NEVER, Observable, of, Subject } from "rxjs";
-import { fromPromise } from "rxjs/internal/observable/fromPromise";
+import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
 // New imports for rxjs v6
-import {
-  catchError,
-  flatMap,
-  map,
-  mergeMap,
-  takeUntil,
-  tap
-} from "rxjs/operators";
+import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -382,7 +374,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   private getSessionData(sessionId: string): Observable<SessionData> {
     return this.sessionResource.loadSession(sessionId).pipe(
-      flatMap(sessionData => {
+      mergeMap(sessionData => {
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
           return of(sessionData);
         } else {
@@ -390,16 +382,16 @@ export class SessionComponent implements OnInit, OnDestroy {
           return this.sessionResource
             .copySession(sessionData, sessionData.session.name, true)
             .pipe(
-              flatMap(id => {
+              mergeMap(id => {
                 const queryParams = {};
                 queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
-                return fromPromise(
+                return from(
                   this.routeService.navigateAbsolute("/analyze/" + id, {
                     queryParams: queryParams
                   })
                 );
               }),
-              flatMap(() => NEVER)
+              mergeMap(() => NEVER)
             );
         }
       })
