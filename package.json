@@ -44,7 +44,7 @@
     "lodash": "^4.17.15",
     "loglevel": "^1.6.1",
     "ng2-pdf-viewer": "^5.2.4",
-    "ngx-toastr": "^10.2.0",
+    "ngx-toastr": "^13.2.0",
     "oidc-client": "^1.7.1",
     "pileup": "^0.6.11",
     "popper.js": "^1.15.0",
