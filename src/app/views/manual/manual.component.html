@@ -5,8 +5,7 @@
         <button class="btn btn-secondary btn-sm pull-right" (click)="openNewWindow()">Open in new tab</button>
       </div>
 
-      <ng-template #container></ng-template>
-
+      <ch-static-html *ngIf="html" [html]="html"></ch-static-html>
     </div>
   </div>
 </div>
