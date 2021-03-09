@@ -9,7 +9,7 @@ import {
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import { log } from "loglevel";
+import log from "loglevel";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
