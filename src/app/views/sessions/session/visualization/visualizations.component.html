@@ -6,7 +6,7 @@
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" (navChange)="onNavChange($event)" class="nav-tabs">
 
     <li [ngbNavItem]="getTabId('spreadsheet')" *ngIf="isTabVisible('spreadsheet')">
-      <a ngbNavLink><i class="fas fa-table"></i> Spreadsheet</a>
+      <a ngbNavLink>Spreadsheet</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-spreadsheet-visualization *ngIf="active === getTabId('spreadsheet')"
