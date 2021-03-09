@@ -17,7 +17,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('text')" *ngIf="isTabVisible('text')">
-      <a ngbNavLink><span class="glyphicon glyphicon-font"></span> Text</a>
+      <a ngbNavLink>Text</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-text-visualization *ngIf="active === getTabId('text')" [dataset]="selectionService.selectedDatasets[0]"
@@ -39,7 +39,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('image')" *ngIf="isTabVisible('image')">
-      <a ngbNavLink><span class="glyphicon glyphicon-picture"></span> Image</a>
+      <a ngbNavLink>Image</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-image-visualization *ngIf="active === getTabId('image')" [dataset]="selectionService.selectedDatasets[0]">
@@ -59,7 +59,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('html')" *ngIf="isTabVisible('html')">
-      <a ngbNavLink><i class="far fa-file-code"></i> HTML</a>
+      <a ngbNavLink>HTML</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-htmlvisualization *ngIf="active === getTabId('html')" [dataset]="selectionService.selectedDatasets[0]">
@@ -99,7 +99,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('phenodata')" *ngIf="isTabVisible('phenodata')">
-      <a ngbNavLink><span class="glyphicon glyphicon-edit"></span> Phenodata</a>
+      <a ngbNavLink>Phenodata</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')"
@@ -110,7 +110,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('details')" *ngIf="isTabVisible('details')">
-      <a ngbNavLink><span class="glyphicon glyphicon-th"></span> Details</a>
+      <a ngbNavLink>Details</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-details-visualization *ngIf="active === getTabId('details')"
