@@ -13,7 +13,7 @@
   <nav ngbNav #nav="ngbNav" class="nav-tabs">
     <!-- Info tab-->
     <ng-container ngbNavItem>
-      <a ngbNavLink><i class="fas fa-info-circle" aria-hidden="true"></i> Info</a>
+      <a ngbNavLink>Info</a>
 
       <ng-template ngbNavContent class="mt-4">
         <ch-manual [page]="toolService.getManualPage(tool.name.id) | async" [showControls]=true [addContainer]=false>
@@ -23,7 +23,7 @@
 
     <!-- Source code tab-->
     <ng-container ngbNavItem>
-      <a ngbNavLink><i class="fas fa-code" aria-hidden="true"></i> Source code</a>
+      <a ngbNavLink>Source code</a>
 
       <ng-template ngbNavContent>
         <ch-tool-source [selectedTool]="tool"></ch-tool-source>
