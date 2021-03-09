@@ -6,7 +6,7 @@
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" (navChange)="onNavChange($event)" class="nav-tabs">
 
     <li [ngbNavItem]="getTabId('spreadsheet')" *ngIf="isTabVisible('spreadsheet')">
-      <a ngbNavLink><span class="glyphicon glyphicon-th"></span> Spreadsheet</a>
+      <a ngbNavLink><i class="fas fa-table"></i> Spreadsheet</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-spreadsheet-visualization *ngIf="active === getTabId('spreadsheet')"
@@ -49,7 +49,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('pdf')" *ngIf="isTabVisible('pdf')">
-      <a ngbNavLink><span class="glyphicon glyphicon-book"></span> PDF</a>
+      <a ngbNavLink><i class="far fa-file-pdf"></i> PDF</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-pdf-visualization *ngIf="active === getTabId('pdf')" [dataset]="selectionService.selectedDatasets[0]">
@@ -59,7 +59,7 @@
     </li>
 
     <li [ngbNavItem]="getTabId('html')" *ngIf="isTabVisible('html')">
-      <a ngbNavLink><span class="glyphicon glyphicon-globe"></span> HTML</a>
+      <a ngbNavLink><i class="far fa-file-code"></i> HTML</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-htmlvisualization *ngIf="active === getTabId('html')" [dataset]="selectionService.selectedDatasets[0]">
