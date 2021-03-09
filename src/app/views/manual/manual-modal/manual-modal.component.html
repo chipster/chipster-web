@@ -10,24 +10,28 @@
     <span>&times;</span>
   </button>
 
-  <ngb-tabset id="tool-info-tabs">
-    <ngb-tab>
-      <ng-template ngbTabTitle>
-        <i class="fas fa-info-circle" aria-hidden="true"></i> Info
-      </ng-template>
+  <nav ngbNav #nav="ngbNav" class="nav-tabs">
+    <!-- Info tab-->
+    <ng-container ngbNavItem>
+      <a ngbNavLink><i class="fas fa-info-circle" aria-hidden="true"></i> Info</a>
 
-      <ng-template ngbTabContent class="mt-4">
-        <ch-manual [page]="toolService.getManualPage(tool.name.id) | async" [showControls]=true [addContainer]=false></ch-manual>
+      <ng-template ngbNavContent class="mt-4">
+        <ch-manual [page]="toolService.getManualPage(tool.name.id) | async" [showControls]=true [addContainer]=false>
+        </ch-manual>
       </ng-template>
-    </ngb-tab>
-    <ngb-tab>
-      <ng-template ngbTabTitle>
-        <i class="fas fa-code" aria-hidden="true"></i> Source code</ng-template>
-      <ng-template ngbTabContent>
+    </ng-container>
+
+    <!-- Source code tab-->
+    <ng-container ngbNavItem>
+      <a ngbNavLink><i class="fas fa-code" aria-hidden="true"></i> Source code</a>
+
+      <ng-template ngbNavContent>
         <ch-tool-source [selectedTool]="tool"></ch-tool-source>
       </ng-template>
-    </ngb-tab>
-  </ngb-tabset>
+    </ng-container>
+  </nav>
+
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
 
 </div>
 
