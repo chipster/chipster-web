@@ -14,7 +14,6 @@ import { DetailsVisualizationComponent } from "./details-visualization/details-v
 import { ExpressionProfileComponent } from "./expressionprofile/expressionprofile.component";
 import { ExpressionProfileService } from "./expressionprofile/expressionprofile.service";
 import { ExpressionProfileTSVService } from "./expressionprofile/expressionprofileTSV.service";
-import { GenomeBrowserComponent } from "./genome-browser/genome-browser.component";
 import { HtmlvisualizationComponent } from "./htmlvisualization/htmlvisualization.component";
 import { ImageVisualizationComponent } from "./imagevisualization/imagevisualization.component";
 import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
@@ -56,7 +55,6 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
     ScatterPlotComponent,
     VolcanoPlotComponent,
     BamViewerComponent,
-    GenomeBrowserComponent,
     DetailsVisualizationComponent,
     SingleDatasetComponent,
     DatasetParameterListComponent
