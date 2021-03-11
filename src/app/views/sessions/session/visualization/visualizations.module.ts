@@ -77,7 +77,6 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
     VisualizationsComponent,
     SingleDatasetComponent,
     DatasetParameterListComponent
-  ],
-  entryComponents: [VisualizationModalComponent]
+  ]
 })
 export class VisualizationsModule {}

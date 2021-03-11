@@ -1,9 +1,8 @@
-import { Injectable } from "@angular/core";
-import { Response } from "@angular/http";
 import { HttpErrorResponse } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import log from "loglevel";
 import { ErrorService } from "./error.service";
 import { ErrorButton, ErrorMessage } from "./errormessage";
-import log from "loglevel";
 
 @Injectable()
 export class RestErrorService {

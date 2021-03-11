@@ -1,24 +1,22 @@
-import { forkJoin as observableForkJoin, Observable, Subject } from "rxjs";
-
-import { takeUntil } from "rxjs/operators";
 import {
   Component,
-  OnInit,
-  Input,
-  ViewChild,
   ElementRef,
-  OnChanges,
-  OnDestroy
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
 } from "@angular/core";
-import { VisualizationModalService } from "../visualizationmodal.service";
-import { SelectionService } from "../../selection.service";
-import { SessionDataService } from "../../session-data.service";
+import { Dataset } from "chipster-js-common";
+import igv from "igv";
+import { forkJoin as observableForkJoin, Observable, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionData } from "../../../../../model/session/session-data";
 import { TypeTagService } from "../../../../../shared/services/typetag.service";
-import { Dataset } from "chipster-js-common";
-import { LoadState, State } from "../../../../../model/loadstate";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import igv from "igv";
+import { SelectionService } from "../../selection.service";
+import { SessionDataService } from "../../session-data.service";
+import { VisualizationModalService } from "../visualizationmodal.service";
 
 export class BamSourceEntry {
   type = "alignment";

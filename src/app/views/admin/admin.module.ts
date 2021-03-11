@@ -35,7 +35,6 @@ import { UsersComponent } from "./users/users.component";
     UsersComponent,
     JobOutputModalComponent,
     MaintenanceComponent
-  ],
-  entryComponents: [JobOutputModalComponent]
+  ]
 })
 export class AdminModule {}

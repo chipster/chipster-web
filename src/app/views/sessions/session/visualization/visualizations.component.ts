@@ -6,11 +6,10 @@ import {
   OnInit,
   Output
 } from "@angular/core";
-import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import { log } from "loglevel";
+import log from "loglevel";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -68,7 +67,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .pipe(
         tap(
           blacklist =>
-            (this.visualizationBlacklist = <string[]>(<unknown>blacklist))
+            (this.visualizationBlacklist = (blacklist as unknown) as string[])
         ),
         mergeMap(() => this.store.select("selectedDatasets")),
         takeUntil(this.unsubscribe)
@@ -211,7 +210,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .map(vis => vis.id);
   }
 
-  tabChange(event: NgbTabChangeEvent) {
+  onNavChange(event) {
     this.active = event.nextId;
     this.userInitiatedTabChange = true;
   }

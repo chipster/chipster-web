@@ -55,16 +55,25 @@ import { TermsComponent } from "./views/terms/terms.component";
     AccessModule,
     NgbModule,
     AdminModule,
-    StoreModule.forRoot({
-      selectedDatasets,
-      selectedJobs,
-      selectedTool,
-      selectedToolWithInputs,
-      selectedToolWithValidatedInputs,
-      selectedToolWithPopulatedParams,
-      validatedTool,
-      latestSession
-    }),
+    StoreModule.forRoot(
+      {
+        selectedDatasets,
+        selectedJobs,
+        selectedTool,
+        selectedToolWithInputs,
+        selectedToolWithValidatedInputs,
+        selectedToolWithPopulatedParams,
+        validatedTool,
+        latestSession
+      },
+      {
+        runtimeChecks: {
+          strictStateImmutability: false, // TODO refactor store usage so that these can be removed
+          strictActionImmutability: false // for example parameter.value is currently mutated
+        }
+      }
+    ),
+
     SharedModule,
     RoutingModule,
     BrowserAnimationsModule,

@@ -28,17 +28,6 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     NotificationModalComponent
   ],
   providers: [NgbActiveModal, DialogModalService],
-  exports: [],
-  entryComponents: [
-    StringModalComponent,
-    BooleanModalComponent,
-    NotesModalComponent,
-    SharingModalComponent,
-    SpinnerModalComponent,
-    TempCopyModalComponent,
-    PreModalComponent,
-    DownloadFromUrlModalComponent,
-    NotificationModalComponent
-  ]
+  exports: []
 })
 export class DialogModalModule {}

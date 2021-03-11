@@ -13,7 +13,7 @@ import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
 import * as _ from "lodash";
 import { Observable, Subscription } from "rxjs";
-import { flatMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -77,7 +77,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private pipeService: PipeService,
     private workflowGraphService: WorkflowGraphService,
     private selectionHandlerService: SelectionHandlerService,
-    private store: Store<Dataset[]>,
+    private store: Store<any>,
+    // private store: Store<Dataset[]>,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
     private nativeElementService: NativeElementService,
@@ -744,7 +745,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.dialogModalService
             .openStringModal("Rename file", "File name", dataset.name, "Rename")
             .pipe(
-              flatMap(name => {
+              mergeMap(name => {
                 dataset.name = name;
                 return self.sessionDataService.updateDataset(dataset);
               })

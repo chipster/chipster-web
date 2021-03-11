@@ -93,7 +93,6 @@ import { WebSocketService } from "./services/websocket.service";
     AccountComponent,
     ToolSourceComponent,
     ActionToastComponent
-  ],
-  entryComponents: [ActionToastComponent, SettingsComponent, AccountComponent]
+  ]
 })
 export class SharedModule {}
