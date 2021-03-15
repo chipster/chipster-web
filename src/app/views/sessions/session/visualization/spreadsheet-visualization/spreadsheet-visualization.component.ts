@@ -86,6 +86,21 @@ export class SpreadsheetVisualizationComponent
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
 
+    // Hack hack fix. There seems to be some timing issue when creating handsontable the first time.
+    // Without the delay, only first column is rendered (and even that with incorrect width).
+    // It seems to work correctly on later changes. Whether that is because this.destroyHot(),
+    // takes more time then or for some other reason it's unknown.
+    // The delay could be used in all cases, but it adds unnecessary visible lag.
+    // For this laptop 50 is too little 100 is enough. With 70 it sometimes draws only
+    // the first column at first but then quickly shows all the columns correctly.
+
+    if (this.hot) {
+      this.updateTable();
+    } else {
+      setTimeout(() => this.updateTable(), 100);
+    }
+  }
+  updateTable() {
     // remove old table
     this.destroyHot();
 
@@ -186,6 +201,7 @@ export class SpreadsheetVisualizationComponent
             }
           }
 
+          // could be replaced with ViewChild of type ElementRef and ref.nativeElement
           const container = document.getElementById(this.tableContainerId);
 
           this.zone.runOutsideAngular(() => {
