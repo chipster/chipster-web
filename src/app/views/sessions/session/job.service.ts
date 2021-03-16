@@ -26,16 +26,12 @@ export class JobService {
   }
 
   static getDuration(job: Job): Observable<string> {
-    log.info("getDuration, job", job);
     if (job.startTime == null) {
       return of(null);
     }
 
     const startDate = UtilsService.parseISOStringToDate(job.startTime);
     const endDate = UtilsService.parseISOStringToDate(job.endTime);
-
-    log.info("getDuration startDate", startDate);
-    log.info("getDuration endDate", endDate);
 
     if (!this.isRunning(job)) {
       if (job.endTime == null) {
@@ -45,15 +41,21 @@ export class JobService {
         startDate,
         endDate
       );
-      log.info("getDuration duration", duration);
       return of(UtilsService.millisecondsToHumanFriendly(duration));
     } else {
       return interval(1000).pipe(
         startWith(0),
         map(() => {
-          const now = new Date();
+          let now = new Date();
+          if (now.getTime() < startDate.getTime()) {
+            log.warn(
+              "now was " +
+                (startDate.getTime() - now.getTime()) +
+                " ms earlier than start time"
+            );
+            now = startDate;
+          }
           const millis = UtilsService.millisecondsBetweenDates(startDate, now);
-          console.info("getDuration interval", startDate, now, millis);
           return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
         }, distinctUntilChanged())
       );
