@@ -1,20 +1,20 @@
-import { takeUntil } from "rxjs/operators";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
-import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { SessionDataService } from "../../session-data.service";
 
 @Component({
   selector: "ch-image-visualization",
-  templateUrl: "./imagevisualization.component.html"
+  templateUrl: "./imagevisualization.component.html",
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   @Input()
   private dataset: Dataset;
 
-  private src: string;
+  public src: string;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -39,7 +39,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
-        url => {
+        (url) => {
           this.src = url;
           this.state = new LoadState(State.Ready);
         },

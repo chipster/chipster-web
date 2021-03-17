@@ -1,16 +1,13 @@
-import { PipeTransform, Pipe } from "@angular/core";
+import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({ name: "bytes" })
 export class BytesPipe implements PipeTransform {
-  transform(bytes: string | number, precision: number) {
+  transform(bytes: string | number, precision: number = 1) {
     if (isNaN(parseFloat(<string>bytes)) || !isFinite(<number>bytes)) {
       return "-";
     }
     if (bytes === 0) {
       return "0 bytes";
-    }
-    if (typeof precision === "undefined") {
-      precision = 1;
     }
     if (<number>bytes < 0) {
       // log not defined for negative values

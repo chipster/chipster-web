@@ -1,35 +1,35 @@
-import { takeUntil } from "rxjs/operators";
-import { ExpressionProfileService } from "./expressionprofile.service";
-import Point from "../model/point";
-import Rectangle from "./rectangle";
-import Interval from "./interval";
-import { SessionDataService } from "../../session-data.service";
-import UtilsService from "../../../../../shared/utilities/utils";
-import TSVFile from "../../../../../model/tsv/TSVFile";
-import GeneExpression from "./geneexpression";
-import TSVRow from "../../../../../model/tsv/TSVRow";
-import * as d3 from "d3";
-import * as _ from "lodash";
 import {
   Component,
   Input,
   OnChanges,
   OnDestroy,
-  ViewEncapsulation
+  ViewEncapsulation,
 } from "@angular/core";
-import Line from "./line";
-import { FileResource } from "../../../../../shared/resources/fileresource";
 import { Dataset } from "chipster-js-common";
-import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
+import * as d3 from "d3";
+import * as _ from "lodash";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { Subject } from "rxjs";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVRow from "../../../../../model/tsv/TSVRow";
+import { FileResource } from "../../../../../shared/resources/fileresource";
+import UtilsService from "../../../../../shared/utilities/utils";
+import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
+import { SessionDataService } from "../../session-data.service";
+import Point from "../model/point";
+import { ExpressionProfileService } from "./expressionprofile.service";
+import GeneExpression from "./geneexpression";
+import Interval from "./interval";
+import Line from "./line";
+import Rectangle from "./rectangle";
 
 @Component({
   selector: "ch-expression-profile",
   templateUrl: "./expressionprofile.html",
   styleUrls: ["./expressionprofile.less"],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   @Input()
@@ -37,7 +37,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   private tsv: TSVFile;
   selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
-  private viewSelectionList: Array<any>;
+  public viewSelectionList: Array<any>;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -106,7 +106,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const size = { width: expressionprofileWidth, height: 600 };
     const graphArea = {
       width: size.width,
-      height: size.height - margin.top - margin.bottom
+      height: size.height - margin.top - margin.bottom,
     };
 
     // SVG-element
@@ -136,7 +136,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     // Change default headers to values defined in phenodata if description value has been defined
     const headers = _.map(
       this.visualizationTSVService.getChipHeaders(tsv),
-      header => {
+      (header) => {
         // find if there is a phenodata description matching header and containing a value
         const phenodataHeader: any = _.find(
           phenodataDescriptions,
@@ -154,10 +154,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       headers,
       (item, index) => (graphArea.width / headers.length) * index
     );
-    const xScale = d3
-      .scaleOrdinal()
-      .range(chipRange)
-      .domain(headers);
+    const xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
     // compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not
     // assignable to parameter of type 'AxisScale<string>'.
     const xAxis = d3.axisBottom(<any>xScale).ticks(headers.length);
@@ -185,7 +182,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .range([graphArea.height, 0])
       .domain([
         this.visualizationTSVService.getDomainBoundaries(tsv).min,
-        this.visualizationTSVService.getDomainBoundaries(tsv).max
+        this.visualizationTSVService.getDomainBoundaries(tsv).max,
       ]);
     const yAxis = d3.axisLeft(yScale).ticks(5);
     svg
@@ -327,7 +324,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       if (
         startPoint.x !== -1 &&
         startPoint.y !== -1 &&
-        (startPoint.x !== endPoint.x && startPoint.y !== endPoint.y)
+        startPoint.x !== endPoint.x &&
+        startPoint.y !== endPoint.y
       ) {
         this.resetSelections();
         d3.selectAll(".path").attr("stroke-width", 1);
@@ -430,9 +428,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     const selectedGeneIds = _.filter(
       this.getSelectionIds(),
-      selectionId => !_.includes(ids, selectionId)
+      (selectionId) => !_.includes(ids, selectionId)
     );
-    this.selectedGeneExpressions = _.map(selectedGeneIds, id =>
+    this.selectedGeneExpressions = _.map(selectedGeneIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id)
     );
   }
@@ -440,13 +438,13 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   addSelections(ids: Array<string>) {
     const selectionIds = this.getSelectionIds();
     const missingSelectionIds = _.difference(ids, selectionIds);
-    const missingGeneExpressions = _.map(missingSelectionIds, id =>
+    const missingGeneExpressions = _.map(missingSelectionIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id)
     );
     this.selectedGeneExpressions = this.selectedGeneExpressions.concat(
       missingGeneExpressions
     );
-    missingSelectionIds.forEach(id => {
+    missingSelectionIds.forEach((id) => {
       this.setSelectionStyle(id);
     });
     this.setViewSelectionList();
@@ -486,7 +484,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     this.viewSelectionList = rawTSVRows.map((row: TSVRow) => {
       return {
         symbol: row.row[tsvSymbolIndex],
-        identifier: row.row[tsvIdentifierIndex]
+        identifier: row.row[tsvIdentifierIndex],
       };
     });
   }

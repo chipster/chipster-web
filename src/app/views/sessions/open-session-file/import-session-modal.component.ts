@@ -1,26 +1,18 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  ChangeDetectorRef,
-  EventEmitter,
-  Output
-} from "@angular/core";
-import { UploadService } from "../../../shared/services/upload.service";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { Session } from "chipster-js-common";
-import { SessionResource } from "../../../shared/resources/session.resource";
-import { ErrorService } from "../../../core/errorhandler/error.service";
-import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
 import { SessionState } from "chipster-js-common/lib/model/session";
+import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionResource } from "../../../shared/resources/session.resource";
+import { UploadService } from "../../../shared/services/upload.service";
 
 @Component({
   selector: "ch-import-session-modal",
-  templateUrl: "./import-session-modal.component.html"
+  templateUrl: "./import-session-modal.component.html",
 })
 export class ImportSessionModalComponent implements OnInit, OnDestroy {
-  private flow: any;
+  public flow: any;
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
   files = [];
@@ -46,12 +38,12 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
     this.fileStatus.set(file, "Creating session");
 
     this.sessionResource.createSession(session).subscribe(
-      sessionId => {
+      (sessionId) => {
         // progress bar is enough for the upload status
         this.fileStatus.set(file, undefined);
         this.uploadService.startUpload(sessionId, file);
       },
-      err => {
+      (err) => {
         this.error(file, err);
       }
     );
@@ -74,7 +66,7 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
       () => {
         console.log("session deleted");
       },
-      err => this.restErrorService.showError("session delete failed", err)
+      (err) => this.restErrorService.showError("session delete failed", err)
     );
   }
 

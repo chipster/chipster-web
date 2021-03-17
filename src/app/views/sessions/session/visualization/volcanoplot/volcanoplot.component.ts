@@ -1,26 +1,27 @@
 import { Component, OnChanges, OnDestroy } from "@angular/core";
 import * as d3 from "d3";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../../../model/loadstate";
+import { FileResource } from "../../../../../shared/resources/fileresource";
+import { PlotComponent } from "../../../../../shared/visualization/plot.component";
+import { PlotService } from "../../../../../shared/visualization/plot.service";
+import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
+import Point from "../model/point";
 import { VolcanoPlotService } from "./volcanoplot.service";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
-import Point from "../model/point";
-import { PlotComponent } from "../../../../../shared/visualization/plot.component";
-import { FileResource } from "../../../../../shared/resources/fileresource";
-import { SessionDataService } from "../../session-data.service";
-import { PlotService } from "../../../../../shared/visualization/plot.service";
-import { LoadState, State } from "../../../../../model/loadstate";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-volcano-plot",
   templateUrl: "./volcanoplot.html",
-  styleUrls: ["./volcanoplot.less"]
+  styleUrls: ["./volcanoplot.less"],
 })
-export class VolcanoPlotComponent extends PlotComponent
+export class VolcanoPlotComponent
+  extends PlotComponent
   implements OnChanges, OnDestroy {
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];
-  private volcanoPlotFCHeaders: Array<string>;
-  private volcanoPlotPHeaders: Array<string>;
+  public volcanoPlotFCHeaders: Array<string>;
+  public volcanoPlotPHeaders: Array<string>;
   private xScale: any;
   private yScale: any;
   showZeroWarning: boolean;
@@ -85,13 +86,13 @@ export class VolcanoPlotComponent extends PlotComponent
       this.selectedXAxisHeader,
       this.selectedYAxisHeader
     );
-    this.volcanoPlotDataRows.forEach(function(dataRow) {
+    this.volcanoPlotDataRows.forEach(function (dataRow) {
       const curPlotData = new PlotData();
       curPlotData.id = dataRow.id;
       /* y scale in volcanoplot is -log10(y)
 
-      Zeros in data are converted to Infinite value. Keep them in the plotData 
-      (in case we would want some special handling for those when drawing them 
+      Zeros in data are converted to Infinite value. Keep them in the plotData
+      (in case we would want some special handling for those when drawing them
       for example) and clamp them down later when necessary (e.g. in selection).
       */
       curPlotData.plotPoint = new Point(
@@ -105,17 +106,17 @@ export class VolcanoPlotComponent extends PlotComponent
 
   /**
    * Clamp down y to the max scale value
-   * 
-   * There is yScale.clamp(true) which should do this, but it uses the max domain 
-   * and range values, whereas the "padding" used in the drawPlot() seems to make 
+   *
+   * There is yScale.clamp(true) which should do this, but it uses the max domain
+   * and range values, whereas the "padding" used in the drawPlot() seems to make
    * our plot to extend a bit farther.
-   * 
-   * @param y 
+   *
+   * @param y
    */
   clampY(y) {
     // if the original p value was 0, -log(p) is Infinity. Show as scale max value
     if (y === Infinity) {
-      // get the max y value      
+      // get the max y value
       return this.yScale.invert(0);
     } else {
       return y;
@@ -128,14 +129,19 @@ export class VolcanoPlotComponent extends PlotComponent
     const self = this;
     const size = {
       width: document.getElementById("volcanoplot").offsetWidth,
-      height: 600
+      height: 600,
     };
     const padding = 50;
 
-    const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
-    const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
+    const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(
+      this.tsv
+    );
+    const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(
+      this.tsv
+    );
 
-    self.showZeroWarning = this.plotData.find(d => d.plotPoint.y === Infinity) != null;
+    self.showZeroWarning =
+      this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
     this.svg
@@ -147,10 +153,7 @@ export class VolcanoPlotComponent extends PlotComponent
     this.xScale = d3
       .scaleLinear()
       .range([padding, size.width - padding])
-      .domain([
-        xBoundary.min,
-        xBoundary.max
-      ])
+      .domain([xBoundary.min, xBoundary.max])
       .nice();
 
     const xAxis = d3
@@ -169,10 +172,7 @@ export class VolcanoPlotComponent extends PlotComponent
     this.yScale = d3
       .scaleLinear()
       .range([size.height - padding, padding])
-      .domain([
-        0,
-        yBoundary.max
-      ])
+      .domain([0, yBoundary.max])
       .nice();
 
     const yAxis = d3
@@ -220,13 +220,13 @@ export class VolcanoPlotComponent extends PlotComponent
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", function(d) {
+      .attr("cx", function (d) {
         return self.xScale(d.plotPoint.x);
       })
-      .attr("cy", function(d) {
+      .attr("cy", function (d) {
         return self.yScale(self.clampY(d.plotPoint.y));
       })
-      .attr("fill", function(d) {
+      .attr("fill", function (d) {
         if (
           d.plotPoint.y >= -Math.log10(0.05) &&
           Math.abs(d.plotPoint.x) >= 1
@@ -243,16 +243,18 @@ export class VolcanoPlotComponent extends PlotComponent
   }
 
   getSelectedDataSet() {
-
     const self = this;
 
     // convert infinity values to scale maximum so that those can be selected
     const limitedPlotData = this.plotData.map((val: PlotData) => {
       const limited = new PlotData();
       limited.id = val.id;
-      limited.plotPoint = new Point(val.plotPoint.x, this.clampY(val.plotPoint.y));
+      limited.plotPoint = new Point(
+        val.plotPoint.x,
+        this.clampY(val.plotPoint.y)
+      );
       return limited;
-    })
+    });
 
     this.selectedDataPointIds = this.plotService.getSelectedDataPoints(
       this.dragStartPoint,
@@ -265,7 +267,7 @@ export class VolcanoPlotComponent extends PlotComponent
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
     // change the color of the selected data points
-    this.selectedDataPointIds.forEach(function(selectedId) {
+    this.selectedDataPointIds.forEach(function (selectedId) {
       self.setSelectionStyle(selectedId);
     });
   }
@@ -304,7 +306,7 @@ export class VolcanoPlotComponent extends PlotComponent
         "Volcano Plot",
         data
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService2.showError("create dataset failed", err)
       );
   }
