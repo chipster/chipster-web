@@ -16,9 +16,11 @@ import { OidcConfig } from "./oidc-config";
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.less"]
+  styleUrls: ["./login.component.less"],
 })
 export class LoginComponent implements OnInit {
+  static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";
+
   // hide this login page initially to avoid flash of it when returning from the SSO and
   // redirecting immediately
   show = false;
@@ -37,7 +39,6 @@ export class LoginComponent implements OnInit {
   oidcConfigs: OidcConfig[];
 
   jaasDescription: string;
-  static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";
 
   constructor(
     private route: ActivatedRoute,
@@ -53,7 +54,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // return url is needed in all cases, so start with it
     this.getReturnUrl$().subscribe(
-      url => {
+      (url) => {
         this.returnUrl = url;
 
         // if already logged in -> redirect
@@ -71,7 +72,7 @@ export class LoginComponent implements OnInit {
                 this.continueInit();
               }
             },
-            error => {
+            (error) => {
               log.warn("checking token failed", error);
               this.initFailed = true;
               this.restErrorService.showError(
@@ -85,7 +86,7 @@ export class LoginComponent implements OnInit {
           this.continueInit();
         }
       },
-      err => this.errorService.showError("failed to get the return url", err)
+      (err) => this.errorService.showError("failed to get the return url", err)
     );
   }
 
@@ -93,11 +94,11 @@ export class LoginComponent implements OnInit {
     this.configService
       .get(ConfigService.KEY_APP_NAME)
       .pipe(
-        tap(appName => (this.appName = appName)),
+        tap((appName) => (this.appName = appName)),
         mergeMap(() =>
           this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)
         ),
-        tap(desc => (this.jaasDescription = desc)),
+        tap((desc) => (this.jaasDescription = desc)),
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
           this.oidcConfigs = configs;
@@ -110,7 +111,7 @@ export class LoginComponent implements OnInit {
           }, 0);
         })
       )
-      .subscribe(null, error => {
+      .subscribe(null, (error) => {
         this.restErrorService.showError(
           error,
           "Initializing login page failed"
@@ -122,7 +123,7 @@ export class LoginComponent implements OnInit {
 
   private getReturnUrl$() {
     return this.route.queryParams.pipe(
-      map(params => params["returnUrl"] || "/sessions")
+      map((params) => params["returnUrl"] || "/sessions")
     );
   }
 

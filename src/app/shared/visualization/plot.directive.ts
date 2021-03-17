@@ -1,22 +1,28 @@
 // Super class for scatterplot and volcanoplot
 
-import { takeUntil } from "rxjs/operators";
-import { OnChanges, Input, HostListener, OnDestroy, Directive } from "@angular/core";
-import { FileResource } from "../resources/fileresource";
-import { SessionDataService } from "../../views/sessions/session/session-data.service";
+import {
+  Directive,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import TSVFile from "../../model/tsv/TSVFile";
-import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 import * as d3 from "d3";
-import Point from "../../views/sessions/session/visualization/model/point";
-import TSVRow from "../../model/tsv/TSVRow";
-import { RestErrorService } from "../../core/errorhandler/rest-error.service";
-import { AppInjector } from "../../app-injector";
 import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { AppInjector } from "../../app-injector";
+import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../model/loadstate";
+import TSVFile from "../../model/tsv/TSVFile";
+import TSVRow from "../../model/tsv/TSVRow";
+import { SessionDataService } from "../../views/sessions/session/session-data.service";
+import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
+import Point from "../../views/sessions/session/visualization/model/point";
+import { FileResource } from "../resources/fileresource";
 
 @Directive()
-export abstract class PlotComponent implements OnChanges, OnDestroy {
+export abstract class PlotDirective implements OnChanges, OnDestroy {
   @Input()
   dataset: Dataset;
   tsv: TSVFile;
@@ -61,7 +67,7 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
 
     let rowLimit = 5000;
     if (showMore) {
-      rowLimit = 50000; 
+      rowLimit = 50000;
     }
 
     const datasetName = this.dataset.name;
@@ -88,14 +94,18 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
             if (showMore) {
               this.state = new LoadState(
                 State.Fail,
-                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+                "Plot visualization is not allowed for TSV files with more than " +
+                  rowLimit +
+                  " data points"
               );
             } else {
               this.state = new LoadState(
                 State.TooLarge,
-                "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
-                "Show anyway",
-              );              
+                "Plot visualization may be slow for TSV files with more than " +
+                  rowLimit +
+                  " data points",
+                "Show anyway"
+              );
             }
           } else {
             this.checkTSVHeaders(); // will set this.state
@@ -167,10 +177,8 @@ export abstract class PlotComponent implements OnChanges, OnDestroy {
         "transform",
         "translate(" + minX + "," + minY + ")"
       );
-      
-      d3.select(".band")
-        .attr("width", width)
-        .attr("height", height);
+
+      d3.select(".band").attr("width", width).attr("height", height);
     });
 
     drag.on("end", () => {

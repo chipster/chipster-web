@@ -56,7 +56,7 @@
       </div>
     </span>
   </div>
-  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (onDelete)="deleteDatasets()">
+  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (delete)="deleteDatasets()">
   </ch-dataset-details>
   <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" (scrollFix)="doScrollFix.emit()"
     [sessionData]="sessionData" [tools]="tools"></ch-visualizations>

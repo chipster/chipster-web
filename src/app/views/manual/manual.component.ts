@@ -1,9 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import {
-  Component,
-  Input,
-  OnDestroy,
-} from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -26,9 +22,9 @@ import { ManualUtils } from "./manual-utils";
 @Component({
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
-  styleUrls: ["./manual.component.less"]
+  styleUrls: ["./manual.component.less"],
 })
-export class ManualComponent implements OnDestroy {
+export class ManualComponent implements OnDestroy, AfterViewInit {
   private unsubscribe: Subject<any> = new Subject();
 
   @Input()
@@ -76,7 +72,7 @@ export class ManualComponent implements OnDestroy {
           }
           return this.configService.getManualPath();
         }),
-        tap(path => (this.assetsPath = path)),
+        tap((path) => (this.assetsPath = path)),
         mergeMap(() => {
           log.debug(
             "route changed",
@@ -98,19 +94,21 @@ export class ManualComponent implements OnDestroy {
           return this.getPage(this.assetsPath + this.currentPage);
         }),
         // parse the html
-        map(htmlString =>
+        map((htmlString) =>
           new DOMParser().parseFromString(htmlString, "text/html")
         ),
         // fix the links and image source addresses
-        map(htmlDoc => this.rewrite(htmlDoc, this.currentPage)),
+        map((htmlDoc) => this.rewrite(htmlDoc, this.currentPage)),
         // show
-        map(html => {
-          this.html = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html));
-        }),
+        map((html) => {
+          this.html = this.sanitizer.bypassSecurityTrustHtml(
+            new XMLSerializer().serializeToString(html)
+          );
+        })
       )
       .subscribe({
-        error: err =>
-        this.restErrorService.showError("page change failed", err)
+        error: (err) =>
+          this.restErrorService.showError("page change failed", err),
       });
   }
 
@@ -130,7 +128,7 @@ export class ManualComponent implements OnDestroy {
 
     return this.http.get(path, { responseType: "text" }).pipe(
       // replace missing pages with nicer message
-      catchError(err => {
+      catchError((err) => {
         if (err.status === 404) {
           return observableOf("<html><body>Page not found</body></html>");
         } else {
@@ -155,7 +153,7 @@ export class ManualComponent implements OnDestroy {
    */
   rewrite(htmlDoc: HTMLDocument, path: string) {
     const links = htmlDoc.getElementsByTagName("a");
-    Array.from(links).forEach(link => {
+    Array.from(links).forEach((link) => {
       // use getAttribute(), because link.href converts the url to absolute
       const href = link.getAttribute("href");
       if (link.name) {
@@ -177,7 +175,7 @@ export class ManualComponent implements OnDestroy {
     });
 
     const imgs = htmlDoc.getElementsByTagName("img");
-    Array.from(imgs).forEach(img => {
+    Array.from(imgs).forEach((img) => {
       const src = img.getAttribute("src");
       if (src && !ManualUtils.isAbsoluteUrl(src)) {
         img.src = this.assetsPath + src;
@@ -186,7 +184,7 @@ export class ManualComponent implements OnDestroy {
 
     for (let i = 1; i <= 6; i++) {
       const headers = htmlDoc.getElementsByTagName("h" + i);
-      Array.from(headers).forEach(element => {
+      Array.from(headers).forEach((element) => {
         if (element.classList && this.manualStyles) {
           element.classList.add("ch-html-component");
         }

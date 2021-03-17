@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
-import { PlotComponent } from "../../../../../shared/visualization/plot.component";
+import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { SessionDataService } from "../../session-data.service";
@@ -16,7 +16,7 @@ import Point from "../model/point";
   styleUrls: ["./scatterplot.less"],
 })
 export class ScatterPlotComponent
-  extends PlotComponent
+  extends PlotDirective
   implements OnChanges, OnDestroy {
   public chipHeaders: Array<string> = [];
   private xScale: any;

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { NgbActiveModal } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap";
@@ -11,7 +11,7 @@ import { UploadService } from "../../../shared/services/upload.service";
   selector: "ch-import-session-modal",
   templateUrl: "./import-session-modal.component.html",
 })
-export class ImportSessionModalComponent implements OnInit, OnDestroy {
+export class ImportSessionModalComponent {
   public flow: any;
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
@@ -25,10 +25,6 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
     public activeModal: NgbActiveModal,
     private restErrorService: RestErrorService
   ) {}
-
-  ngOnInit() {}
-
-  ngOnDestroy() {}
 
   fileAdded(file: any) {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);

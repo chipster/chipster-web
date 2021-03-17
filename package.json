@@ -64,7 +64,6 @@
     "@angular-eslint/eslint-plugin-template": "2.0.2",
     "@angular-eslint/schematics": "2.0.2",
     "@angular-eslint/template-parser": "2.0.2",
-
     "@types/d3": "^5.7.2",
     "@types/flowjs": "^2.13.0",
     "@types/handsontable": "^0.24.20",
@@ -96,6 +95,5 @@
     "protractor": "~7.0.0",
     "ts-node": "^9.1.1",
     "webpack": "^4.46.0"
-
   }
 }

@@ -8,10 +8,10 @@ import { SessionDataService } from "../../session-data.service";
 @Component({
   selector: "ch-dataset-details",
   templateUrl: "./dataset-details.component.html",
-  styleUrls: ["./dataset-details.component.less"]
+  styleUrls: ["./dataset-details.component.less"],
 })
 export class DatasetDetailsComponent implements OnInit {
-  @Output() onDelete: EventEmitter<any> = new EventEmitter();
+  @Output() delete: EventEmitter<any> = new EventEmitter();
 
   datasets: Array<Dataset>;
 
@@ -28,7 +28,7 @@ export class DatasetDetailsComponent implements OnInit {
       (datasets: Array<Dataset>) => {
         this.datasets = datasets;
       },
-      err =>
+      (err) =>
         this.errorService.showError(
           "failed to get the selected datasets from store",
           err
@@ -37,7 +37,7 @@ export class DatasetDetailsComponent implements OnInit {
   }
 
   deleteDatasets() {
-    this.onDelete.emit();
+    this.delete.emit();
   }
 
   exportDatasets() {

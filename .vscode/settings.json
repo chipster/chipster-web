@@ -6,6 +6,15 @@
     "source.organizeImports": true
   },
 
-  "eslint.validate": ["javascript", "typescript"],
+  "eslint.options": {
+    "extensions": [".ts", ".html"]
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "html"
+  ],
   "prettier.disableLanguages": ["html"]
 }

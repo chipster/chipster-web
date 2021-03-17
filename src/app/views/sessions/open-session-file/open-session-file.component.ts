@@ -4,7 +4,7 @@ import {
   EventEmitter,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
@@ -20,7 +20,7 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
 @Component({
   selector: "ch-open-session-file",
   templateUrl: "./open-session-file.component.html",
-  styleUrls: ["./open-session-file.component.less"]
+  styleUrls: ["./open-session-file.component.less"],
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   @ViewChild("browseFilesButton")
@@ -29,8 +29,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   private flow;
   private modalOpen = false;
   private modalRef: any;
-  @Output("done")
-  done = new EventEmitter();
+  @Output() done = new EventEmitter();
 
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
@@ -58,7 +57,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     // open modal if not already open
     if (!this.modalOpen) {
       this.modalRef = this.modalService.open(ImportSessionModalComponent, {
-        size: "lg"
+        size: "lg",
       });
 
       this.modalRef.componentInstance.flow = this.flow;
@@ -67,10 +66,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
       this.modalOpen = true;
 
       this.modalRef.result.then(
-        result => {
+        (result) => {
           this.modalOpen = false;
         },
-        reason => {
+        (reason) => {
           this.modalOpen = false;
         }
       );
@@ -93,7 +92,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
       .pipe(
-        mergeMap(response => {
+        mergeMap((response) => {
           if (response.errors.length > 0) {
             return throwError(response.errors);
           }
@@ -111,7 +110,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
           // let the caller know if this was the last one
           if (this.fileStatus.size === this.finishedFiles.size) {
             const sessionIds = Array.from(this.finishedFiles).map(
-              f => file.chipsterSessionId
+              (f) => file.chipsterSessionId
             );
             this.fileStatus.clear();
             this.finishedFiles.clear();
@@ -123,7 +122,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             // if there were warnings
             if (
               Array.from(this.warnings.values()).some(
-                fileWarnings => fileWarnings.length > 0
+                (fileWarnings) => fileWarnings.length > 0
               )
             ) {
               // collect warnings of all sessions to one message
@@ -136,7 +135,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
                     ". \n";
                   msg +=
                     "Please check that your session was imported correctly. \n";
-                  warnings.forEach(warning => {
+                  warnings.forEach((warning) => {
                     msg += "- " + warning + "\n";
                   });
                 } else {
@@ -157,18 +156,18 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         })
       )
       .subscribe({
-        error: err => {
+        error: (err) => {
           this.error(file, err);
           this.sessionResource.deleteSession(sessionId).subscribe({
-            error: err2 => {
+            error: (err2) => {
               // original error reported to user already
               log.error(
                 "failed to delete the session after another error",
                 err2
               );
-            }
+            },
           });
-        }
+        },
       });
   }
 

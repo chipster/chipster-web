@@ -1,13 +1,11 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 
 @Component({
   selector: "ch-admin",
   templateUrl: "./admin.component.html",
   styleUrls: ["./admin.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
-export class AdminComponent implements OnInit {
+export class AdminComponent {
   constructor() {}
-
-  ngOnInit() {}
 }
