@@ -8,7 +8,7 @@ import { SessionDataService } from "../../session-data.service";
 
 @Component({
   selector: "ch-image-visualization",
-  templateUrl: "./imagevisualization.component.html",
+  templateUrl: "./image-visualization.component.html",
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   @Input()

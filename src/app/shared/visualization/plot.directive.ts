@@ -55,13 +55,13 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
-    this.show(false);
+    this.state = new LoadState(State.Loading, "Loading data...");
+    setTimeout(() => this.show(false), 100);
   }
 
   show(showMore: boolean) {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
-    this.state = new LoadState(State.Loading, "Loading data...");
 
     this.clearPlot();
 

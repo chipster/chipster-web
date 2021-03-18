@@ -3,12 +3,12 @@
  are used by other visualization components also
  */
 import { Injectable } from "@angular/core";
-import GeneExpression from "../../views/sessions/session/visualization/expressionprofile/geneexpression";
-import TSVRow from "../../model/tsv/TSVRow";
-import DomainBoundaries from "../../views/sessions/session/visualization/expressionprofile/domainboundaries";
-import TSVHeaders from "../../model/tsv/TSVHeaders";
-import TSVFile from "../../model/tsv/TSVFile";
 import * as _ from "lodash";
+import TSVFile from "../../model/tsv/TSVFile";
+import TSVHeaders from "../../model/tsv/TSVHeaders";
+import TSVRow from "../../model/tsv/TSVRow";
+import DomainBoundaries from "../../views/sessions/session/visualization/expression-profile/domainboundaries";
+import GeneExpression from "../../views/sessions/session/visualization/expression-profile/geneexpression";
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 
 @Injectable()
@@ -86,7 +86,7 @@ export class VisualizationTSVService {
     geneExpressions: Array<GeneExpression>
   ): Array<GeneExpression> {
     return _.orderBy(geneExpressions, [
-      (geneExpression: GeneExpression) => _.first(geneExpression.values)
+      (geneExpression: GeneExpression) => _.first(geneExpression.values),
     ]);
   }
 

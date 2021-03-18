@@ -10,15 +10,15 @@ import { VisualizationModalService } from "../visualizationmodal.service";
 
 @Component({
   selector: "ch-text-visualization",
-  templateUrl: "./textvisualization.component.html",
+  templateUrl: "./text-visualization.component.html",
   styles: [
     `
       pre {
         background-color: white;
       }
-    `
+    `,
   ],
-  styleUrls: ["./textvisualization.component.less"]
+  styleUrls: ["./text-visualization.component.less"],
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() dataset: Dataset;

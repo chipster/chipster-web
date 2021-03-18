@@ -19,7 +19,7 @@ import UtilsService from "../../../../../shared/utilities/utils";
 import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { SessionDataService } from "../../session-data.service";
 import Point from "../model/point";
-import { ExpressionProfileService } from "./expressionprofile.service";
+import { ExpressionProfileService } from "./expression-profile.service";
 import GeneExpression from "./geneexpression";
 import Interval from "./interval";
 import Line from "./line";
@@ -27,8 +27,8 @@ import Rectangle from "./rectangle";
 
 @Component({
   selector: "ch-expression-profile",
-  templateUrl: "./expressionprofile.html",
-  styleUrls: ["./expressionprofile.less"],
+  templateUrl: "./expression-profile.component.html",
+  styleUrls: ["./expression-profile.component.less"],
   encapsulation: ViewEncapsulation.None,
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
@@ -54,7 +54,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
+    setTimeout(() => this.update(), 100);
+  }
 
+  update() {
     const datasetName = this.dataset.name;
 
     // check for empty file

@@ -1,16 +1,16 @@
-import { takeUntil } from "rxjs/operators";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
-import { timeout } from "d3-timer";
-import { SessionDataService } from "../../session-data.service";
 import { Dataset } from "chipster-js-common";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { timeout } from "d3-timer";
 import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { SessionDataService } from "../../session-data.service";
 
 @Component({
   selector: "ch-htmlvisualization",
-  templateUrl: "./htmlvisualization.component.html",
-  styleUrls: ["./htmlvisualization.component.less"]
+  templateUrl: "./html-visualization.component.html",
+  styleUrls: ["./html-visualization.component.less"],
 })
 export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   @Input()
@@ -42,7 +42,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
-        url => {
+        (url) => {
           this.linkSrc = url;
           // we have to encode the url to get in one piece to the other side, because it contains
           // a query parameter itself
