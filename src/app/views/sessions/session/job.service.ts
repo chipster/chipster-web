@@ -48,11 +48,7 @@ export class JobService {
         map(() => {
           let now = new Date();
           if (now.getTime() < startDate.getTime()) {
-            log.warn(
-              "now was " +
-                (startDate.getTime() - now.getTime()) +
-                " ms earlier than start time"
-            );
+            // happens if your own computer time is lagging behind
             now = startDate;
           }
           const millis = UtilsService.millisecondsBetweenDates(startDate, now);
