@@ -9,8 +9,7 @@
       <a ngbNavLink>Spreadsheet</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-spreadsheet-visualization *ngIf="active === getTabId('spreadsheet')"
-            [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
+          <ch-spreadsheet-visualization [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
           </ch-spreadsheet-visualization>
         </div>
       </ng-template>
@@ -20,8 +19,7 @@
       <a ngbNavLink>Text</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-text-visualization *ngIf="active === getTabId('text')" [dataset]="selectionService.selectedDatasets[0]"
-            [modalMode]=false>
+          <ch-text-visualization [dataset]="selectionService.selectedDatasets[0]" [modalMode]=false>
           </ch-text-visualization>
         </div>
       </ng-template>
@@ -31,8 +29,7 @@
       <a ngbNavLink>Expression Profile</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-expression-profile *ngIf="active === getTabId('expressionprofile')"
-            [dataset]="selectionService.selectedDatasets[0]">
+          <ch-expression-profile [dataset]="selectionService.selectedDatasets[0]">
           </ch-expression-profile>
         </div>
       </ng-template>
@@ -42,7 +39,7 @@
       <a ngbNavLink>Image</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-image-visualization *ngIf="active === getTabId('image')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-image-visualization [dataset]="selectionService.selectedDatasets[0]">
           </ch-image-visualization>
         </div>
       </ng-template>
@@ -52,7 +49,7 @@
       <a ngbNavLink><i class="far fa-file-pdf"></i> PDF</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-pdf-visualization *ngIf="active === getTabId('pdf')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-pdf-visualization [dataset]="selectionService.selectedDatasets[0]">
           </ch-pdf-visualization>
         </div>
       </ng-template>
@@ -62,7 +59,7 @@
       <a ngbNavLink>HTML</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-htmlvisualization *ngIf="active === getTabId('html')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-htmlvisualization [dataset]="selectionService.selectedDatasets[0]">
           </ch-htmlvisualization>
         </div>
       </ng-template>
@@ -72,7 +69,7 @@
       <a ngbNavLink>Venn Diagram</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-venn-diagram *ngIf="active === getTabId('venn')" [selectedDatasets]="selectionService.selectedDatasets">
+          <ch-venn-diagram [selectedDatasets]="selectionService.selectedDatasets">
           </ch-venn-diagram>
         </div>
       </ng-template>
@@ -82,7 +79,7 @@
       <a ngbNavLink>Scatter Plot</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-scatter-plot *ngIf="active === getTabId('scatterplot')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-scatter-plot [dataset]="selectionService.selectedDatasets[0]">
           </ch-scatter-plot>
         </div>
       </ng-template>
@@ -92,7 +89,7 @@
       <a ngbNavLink>Volcano Plot</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-volcano-plot *ngIf="active === getTabId('volcanoplot')" [dataset]="selectionService.selectedDatasets[0]">
+          <ch-volcano-plot [dataset]="selectionService.selectedDatasets[0]">
           </ch-volcano-plot>
         </div>
       </ng-template>
@@ -102,8 +99,8 @@
       <a ngbNavLink>Phenodata</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-phenodata-visualization *ngIf="active === getTabId('phenodata')"
-            [dataset]="selectionService.selectedDatasets[0]" [datasetsMap]="sessionData.datasetsMap">
+          <ch-phenodata-visualization [dataset]="selectionService.selectedDatasets[0]"
+            [datasetsMap]="sessionData.datasetsMap">
           </ch-phenodata-visualization>
         </div>
       </ng-template>
@@ -113,8 +110,8 @@
       <a ngbNavLink>Details</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-details-visualization *ngIf="active === getTabId('details')"
-            [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData" [tools]="tools">
+          <ch-details-visualization [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData"
+            [tools]="tools">
           </ch-details-visualization>
         </div>
       </ng-template>
