@@ -31,8 +31,8 @@
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
       <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
-        <a class="dropdown-item" (click)="deleteDatasets()">Delete all...</a>
-        <a class="dropdown-item" (click)="exportDatasets()">Export all</a>
+        <a class="dropdown-item" (click)="deleteDatasets()">Delete {{selectionService.selectedDatasets.length}}
+          files</a>
       </div>
     </span>
   </div>
