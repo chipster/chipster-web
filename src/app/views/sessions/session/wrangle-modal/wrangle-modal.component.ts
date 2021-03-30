@@ -419,7 +419,8 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private getPhenodataString(): string {
-    const phenodataHeaderString = "sample\toriginal_name\tchiptype\tgroup\n";
+    const phenodataHeaderString =
+      "sample\toriginal_name\tchiptype\tgroup\tdescription\n";
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
     const phenodataRowsString = this.getColumnIndexes(
@@ -438,6 +439,8 @@ export class WrangleModalComponent implements OnInit {
         "not applicable" +
         "\t" +
         "" +
+        "\t" +
+        fixedSampleHeader +
         "\n"
       );
     }, "");
