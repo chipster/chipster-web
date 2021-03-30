@@ -288,7 +288,7 @@ export class PhenodataVisualizationComponent
   }
 
   private updateViewAfterDelay() {
-    setTimeout(() => this.updateView(), 100);
+    setTimeout(() => this.updateView(), 200);
   }
 
   private updateView() {
