@@ -8,7 +8,7 @@ import {
   OnInit,
   SimpleChanges,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -29,7 +29,7 @@ export enum PhenodataState {
   OWN_PHENODATA,
   INHERITED_PHENODATA,
   NO_PHENODATA,
-  DATASET_NULL
+  DATASET_NULL,
 }
 
 @Component({
@@ -38,7 +38,7 @@ export enum PhenodataState {
   styleUrls: ["./phenodata-visualization.component.less"],
   // disable ViewEncapsulation.Emulated, because we want dynamically add a style to the
   // remove column button, but an emulated view encapsulation would mess up style names
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class PhenodataVisualizationComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewInit {
@@ -79,7 +79,7 @@ export class PhenodataVisualizationComponent
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
   ngOnInit() {
-    this.updateView();
+    this.updateViewAfterDelay();
 
     // update view if someone else has edited the phenodata
     this.sessionEventService
@@ -89,7 +89,7 @@ export class PhenodataVisualizationComponent
         () => {
           this.updateViewLater();
         },
-        err => this.errorService.showError("phenodata update failed", err)
+        (err) => this.errorService.showError("phenodata update failed", err)
       );
   }
 
@@ -144,7 +144,7 @@ export class PhenodataVisualizationComponent
       ? {
           column: this.sortColumn,
           sortOrder: this.sortOrder,
-          sortEmptyCells: true
+          sortEmptyCells: true,
         }
       : { columnSorting: true };
 
@@ -191,7 +191,7 @@ export class PhenodataVisualizationComponent
           this.latestEdit = new Date().getTime();
           this.updateDataset();
         }
-      }
+      },
     };
   }
 
@@ -244,14 +244,14 @@ export class PhenodataVisualizationComponent
         .map((columnHeader: string, index: number) => {
           return !this.unremovableColumns.includes(columnHeader) ? index : -1;
         })
-        .filter(index => index !== -1);
+        .filter((index) => index !== -1);
 
       // remove columns in reverse order to avoid messing up
       removableColumnIndexces
         .reverse()
-        .forEach(index => this.removeColumn(index));
+        .forEach((index) => this.removeColumn(index));
 
-      this.updateView();
+      this.updateViewAfterDelay();
       this.updateDataset();
     }
   }
@@ -273,20 +273,22 @@ export class PhenodataVisualizationComponent
       this.dataset.metadataFiles = [
         {
           name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
-          content: phenodataString
-        }
+          content: phenodataString,
+        },
       ];
-      this.sessionDataService
-        .updateDataset(this.dataset)
-        .subscribe(
-          () => log.info("dataset phenodata updated"),
-          err =>
-            this.restErrorService.showError(
-              "dataset phenodata update failed",
-              err
-            )
-        );
+      this.sessionDataService.updateDataset(this.dataset).subscribe(
+        () => log.info("dataset phenodata updated"),
+        (err) =>
+          this.restErrorService.showError(
+            "dataset phenodata update failed",
+            err
+          )
+      );
     }
+  }
+
+  private updateViewAfterDelay() {
+    setTimeout(() => this.updateView(), 100);
   }
 
   private updateView() {
@@ -393,7 +395,7 @@ export class PhenodataVisualizationComponent
 
   private updateViewLater() {
     if (!this.isEditingNow()) {
-      this.updateView();
+      this.updateViewAfterDelay();
     } else {
       /*
        Defer updates when the table is being edited
@@ -420,7 +422,7 @@ export class PhenodataVisualizationComponent
           if (!this.isEditingNow()) {
             window.clearInterval(this.deferredUpdatesTimerId);
             this.deferredUpdatesTimerId = null;
-            this.updateView();
+            this.updateViewAfterDelay();
           }
         }, 100);
       }
@@ -431,7 +433,7 @@ export class PhenodataVisualizationComponent
     this.stringModalService
       .openStringModal("Add new column", "Column name", "", "Add")
       .pipe(
-        tap(name => {
+        tap((name) => {
           this.zone.runOutsideAngular(() => {
             const colHeaders = (this.hot.getSettings() as ht.Options)
               .colHeaders as Array<string>;
@@ -441,7 +443,7 @@ export class PhenodataVisualizationComponent
             colHeaders.push(name);
             this.hot.updateSettings(
               {
-                colHeaders: colHeaders
+                colHeaders: colHeaders,
               },
               false
             );
@@ -450,7 +452,7 @@ export class PhenodataVisualizationComponent
           this.updateDataset();
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("Add column failed", err)
       );
   }
