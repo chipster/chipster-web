@@ -10,12 +10,21 @@ import {
 import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
-import { Category, Job, Module, Tool } from "chipster-js-common";
+import {
+  Category,
+  Dataset,
+  EventType,
+  Job,
+  Module,
+  Resource,
+  SessionEvent,
+  Tool,
+} from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
-import { filter, map, mergeMap, takeUntil } from "rxjs/operators";
+import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -328,14 +337,39 @@ export class ToolsComponent implements OnInit, OnDestroy {
         this.runForEachEnabled = false;
       });
 
-    // bind inputs after tool selection or dataset selection changes
-    combineLatest(
+    const selectedDatasetsContentsUpdated$ = this.sessionEventService
+      .getDatasetStream()
+      .pipe(
+        // startWith needed as combineLatest doesn't emit until all have emitted something
+        // as SessionEvent to avoid deprecation notice
+        startWith(null as SessionEvent),
+        filter(
+          (sessionEvent) =>
+            sessionEvent != null &&
+            sessionEvent.event.type === EventType.Update &&
+            sessionEvent.event.resourceType === Resource.Dataset &&
+            this.selectionService.selectedDatasets.some(
+              (selectedDataset) =>
+                selectedDataset.datasetId ===
+                (sessionEvent.newValue as Dataset).datasetId
+            )
+        ),
+        map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId)
+      );
+
+    combineLatest([
       this.store.select("selectedTool"),
-      this.store.select("selectedDatasets")
-    )
+      this.store.select("selectedDatasets"),
+      selectedDatasetsContentsUpdated$, // triggers but data not
+    ])
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
+          const uptodateDatasets = selectedDatasets.map(
+            (dataset): Dataset =>
+              this.sessionData.datasetsMap.get(dataset.datasetId)
+          );
+
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: Object.assign(
@@ -343,7 +377,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
                 inputBindings: this.toolService.bindInputs(
                   this.sessionData,
                   selectedTool.tool,
-                  selectedDatasets
+                  uptodateDatasets
                 ),
                 selectedDatasets: selectedDatasets,
               },
