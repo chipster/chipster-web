@@ -8,14 +8,14 @@ import {
   Session,
   SessionEvent,
   SessionState,
-  WsEvent
+  WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
 import {
   never as observableNever,
   Observable,
   of as observableOf,
-  Subject
+  Subject,
 } from "rxjs";
 import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
@@ -52,10 +52,7 @@ export class SessionEventService {
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(
-      publish(),
-      refCount()
-    );
+    const stream = this.localSubject$.pipe(publish(), refCount());
 
     this.websocketService.connect(this.localSubject$, sessionId);
 
@@ -64,16 +61,17 @@ export class SessionEventService {
       () => {
         this.sessionHasChanged = true;
       },
-      err => this.errorService.showError("session change tracking failed", err)
+      (err) =>
+        this.errorService.showError("session change tracking failed", err)
     );
 
     this.datasetStream$ = stream.pipe(
-      filter(wsData => wsData.resourceType === Resource.Dataset),
-      mergeMap(data =>
+      filter((wsData) => wsData.resourceType === Resource.Dataset),
+      mergeMap((data) =>
         this.handleDatasetEvent(data, this.sessionId, sessionData)
       ),
       // update type tags before letting other parts of the client know about this change
-      mergeMap(sessionEvent =>
+      mergeMap((sessionEvent) =>
         this.updateTypeTags(this.sessionId, sessionEvent, sessionData)
       ),
       publish(),
@@ -81,15 +79,17 @@ export class SessionEventService {
     );
 
     this.jobStream$ = stream.pipe(
-      filter(wsData => wsData.resourceType === Resource.Job),
-      mergeMap(data => this.handleJobEvent(data, this.sessionId, sessionData)),
+      filter((wsData) => wsData.resourceType === Resource.Job),
+      mergeMap((data) =>
+        this.handleJobEvent(data, this.sessionId, sessionData)
+      ),
       publish(),
       refCount()
     );
 
     this.sessionStream$ = stream.pipe(
-      filter(wsData => wsData.resourceType === Resource.Session),
-      mergeMap(data =>
+      filter((wsData) => wsData.resourceType === Resource.Session),
+      mergeMap((data) =>
         this.handleSessionEvent(data, this.sessionId, sessionData)
       ),
       publish(),
@@ -97,23 +97,23 @@ export class SessionEventService {
     );
 
     this.ruleStream$ = stream.pipe(
-      filter(wsData => wsData.resourceType === Resource.Rule),
-      mergeMap(data => this.handleRuleEvent(data, sessionData.session)),
+      filter((wsData) => wsData.resourceType === Resource.Rule),
+      mergeMap((data) => this.handleRuleEvent(data, sessionData.session)),
       publish(),
       refCount()
     );
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe(null, err =>
+    this.datasetStream$.subscribe(null, (err) =>
       this.errorService.showError("dataset event error", err)
     );
-    this.jobStream$.subscribe(null, err =>
+    this.jobStream$.subscribe(null, (err) =>
       this.errorService.showError("job event error", err)
     );
-    this.sessionStream$.subscribe(null, err =>
+    this.sessionStream$.subscribe(null, (err) =>
       this.errorService.showError("session event error", err)
     );
-    this.ruleStream$.subscribe(null, err =>
+    this.ruleStream$.subscribe(null, (err) =>
       this.errorService.showError("rule event error", err)
     );
   }
@@ -151,9 +151,11 @@ export class SessionEventService {
             return this.createEvent(event, null, rule);
           })
         );
-    } else if (event.type === "DELETE") {
-      const rule = session.rules.find(r => r.ruleId === event.resourceId);
-      session.rules = session.rules.filter(r => r.ruleId !== event.resourceId);
+    } else if (event.type === EventType.Delete) {
+      const rule = session.rules.find((r) => r.ruleId === event.resourceId);
+      session.rules = session.rules.filter(
+        (r) => r.ruleId !== event.resourceId
+      );
       return this.createEvent(event, rule, null);
     } else {
       log.warn("unknown event type", event);
@@ -231,7 +233,7 @@ export class SessionEventService {
       return this.sessionResource
         .getTypeTagsForDataset(sessionId, newValue)
         .pipe(
-          map(typeTags => {
+          map((typeTags) => {
             sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
             return sessionEvent;
           })
