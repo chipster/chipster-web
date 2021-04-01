@@ -338,8 +338,14 @@ export class WrangleModalComponent implements OnInit {
         // create the new (derived) dataset
         mergeMap((wrangledFileString) => {
           log.info("Creating converted dataset");
+
+          const newFileName =
+            this.dataset.name.endsWith(".txt") ||
+            this.dataset.name.endsWith(".tsv")
+              ? this.dataset.name.slice(0, -4) + "-converted.tsv"
+              : this.dataset.name + "-converted.tsv";
           return this.sessionDataService.createDerivedDataset(
-            this.dataset.name + "-converted.tsv",
+            newFileName,
             [this.dataset.datasetId],
             "Convert to Chipster format",
             wrangledFileString,
