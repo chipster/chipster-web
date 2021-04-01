@@ -129,7 +129,7 @@ export class NavigationComponent implements OnInit {
   public note() {
     this.dialogModalService.openNotificationModal(
       "Note",
-      "There is an issue with phenodata changes sometimes not being saved. This is being investigated and will be fixed as soon as possible."
+      "The issue of phenodata not being always saved has been solved. However, in some cases phenodata doesn't get generated after Convert to Chipster format. This will be fixed as soon as possible. There was also an issue with parameters sometimes not being visible, but it has also been solved."
     );
   }
 }
