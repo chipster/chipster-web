@@ -337,6 +337,7 @@ export class WrangleModalComponent implements OnInit {
       defer(() => of(this.getWrangledFileString())).pipe(
         // create the new (derived) dataset
         mergeMap((wrangledFileString) => {
+          log.info("Creating converted dataset");
           return this.sessionDataService.createDerivedDataset(
             this.dataset.name + "-converted.tsv",
             [this.dataset.datasetId],
@@ -348,18 +349,26 @@ export class WrangleModalComponent implements OnInit {
 
         // get newly created dataset (from the server, might not be available locally yet)
         mergeMap((newDatasetId) => {
+          log.info("Converted dataset created ", newDatasetId);
+          log.info("Get newly created dataset");
           return this.sessionDataService.getDataset(newDatasetId);
         }),
 
         // create phenodata and update it to server
         mergeMap((newDataset: Dataset) => {
+          log.info("Got newly created dataset", newDataset);
           const phenodataString = this.getPhenodataString();
+          log.info(
+            "Phenodata for converted dataset, first 1000 characters",
+            phenodataString.substring(0, 1000)
+          );
           newDataset.metadataFiles = [
             {
               name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
               content: phenodataString,
             },
           ];
+          log.info("New dataset after metadata being set", newDataset);
           return this.sessionDataService.updateDataset(newDataset);
         })
       );
