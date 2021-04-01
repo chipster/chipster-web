@@ -82,7 +82,7 @@ export class AuthGuard implements CanActivate {
               ", accepted timestamp:",
               user.termsAccepted
             );
-            this.routeService.navigateAbsolute("/terms");
+            this.routeService.navigateAbsolute("/terms", { queryParams: { showAccept: 'true' } });
             return false;
           }
         }),

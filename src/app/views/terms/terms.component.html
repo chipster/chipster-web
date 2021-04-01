@@ -4,7 +4,7 @@
     <ch-manual assetsPath="/" page="{{termsOfUse}}" [showControls]=false></ch-manual>
   </div>
 
-  <div class="text-center margin-top margin-bottom" >
+  <div *ngIf="showAccept" class="text-center margin-top margin-bottom" >
     <button class="btn btn-primary" type="button" (click)="accept()">Accept</button>
   </div>
 

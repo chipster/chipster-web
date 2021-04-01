@@ -13,6 +13,7 @@ import { HomeComponent } from "./views/home/home.component";
 import { LoginComponent } from "./views/login/login.component";
 import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
 import { ManualComponent } from "./views/manual/manual.component";
+import { PrivacyNoticeComponent } from "./views/privacy-notice/privacy-notice.component";
 import { SessionListComponent } from "./views/sessions/session-list.component";
 import { ModifiedSessionGuard } from "./views/sessions/session/modified-session.guard";
 import { SessionComponent } from "./views/sessions/session/session.component";
@@ -27,10 +28,11 @@ const routes: Routes = [
   },
   { path: "oidc/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
-  { path: "terms", component: TermsComponent },
   { path: "contact", component: ContactComponent },
+  { path: "terms", component: TermsComponent },
   { path: "access", component: AccessComponent },
   { path: "accessibility", component: AccessibilityComponent },
+  { path: "privacy-notice", component: PrivacyNoticeComponent },
   {
     path: "manual",
     // route all sub-paths here

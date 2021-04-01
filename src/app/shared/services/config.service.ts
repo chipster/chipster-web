@@ -28,6 +28,7 @@ export class ConfigService {
   public static readonly KEY_ACCESSIBILITY_PATH = "accessibility-path";
   public static readonly KEY_CONTACT_PATH = "contact-path";
   public static readonly KEY_ACCESS_PATH = "access-path";
+  public static readonly KEY_PRIVACE_NOTICE_PATH = "privacy-notice-path";
   public static readonly KEY_EXAMPLE_SESSION_OWNER_USER_ID =
     "example-session-owner-user-id";
   public static readonly KEY_SUPPORT_SESSION_OWNER_USER_ID =

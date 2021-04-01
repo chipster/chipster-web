@@ -1,0 +1,11 @@
+<div *ngIf="htmlPath && htmlFile && routerPath">
+
+  <ch-manual
+    [assetsPath]="htmlPath"
+    [page]="htmlFile"
+    [showControls]="false"
+    [addContainer]="true"
+    [routerPath]="routerPath"
+    [manualStyles]=false
+  ></ch-manual>
+</div>

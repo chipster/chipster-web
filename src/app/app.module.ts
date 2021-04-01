@@ -39,6 +39,7 @@ import { LoginComponent } from "./views/login/login.component";
 import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
 import { ManualModule } from "./views/manual/manual.module";
 import { NavigationComponent } from "./views/navigation/navigation.component";
+import { PrivacyNoticeComponent } from "./views/privacy-notice/privacy-notice.component";
 import { SelectionService } from "./views/sessions/session/selection.service";
 import { SessionModule } from "./views/sessions/session/session.module";
 import { TermsComponent } from "./views/terms/terms.component";
@@ -84,7 +85,8 @@ import { TermsComponent } from "./views/terms/terms.component";
     TermsComponent,
     NotFoundComponent,
     MyllyHasMovedComponent,
-    AccessibilityComponent
+    AccessibilityComponent,
+    PrivacyNoticeComponent
   ],
   providers: [
     SelectionService,

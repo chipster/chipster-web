@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
-import { flatMap } from "rxjs/operators";
+import { filter, flatMap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -14,13 +15,15 @@ import { RouteService } from "../../shared/services/route.service";
 export class TermsComponent implements OnInit {
   // increase by one to force everyone to accept again
   static latestTermsVersion = 1;
-  public termsOfUse: string;
+  termsOfUse: string;
+  showAccept = false;
 
   constructor(
     private authenticationService: AuthenticationService,
     private restErrorService: RestErrorService,
     private configService: ConfigService,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -31,6 +34,18 @@ export class TermsComponent implements OnInit {
       err =>
         this.restErrorService.showError("failed to get the configuration", err)
     );
+
+    this.route.queryParams.pipe(
+      filter(params => {
+        console.log(params);
+        return params["showAccept"];
+      }),
+    )
+    .subscribe(params => {
+      this.showAccept = !!params.showAccept;
+      console.log(this.showAccept);
+    }
+  );
   }
 
   accept() {
