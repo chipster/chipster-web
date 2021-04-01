@@ -340,9 +340,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
       .getDatasetStream()
       .pipe(
-        // startWith needed as combineLatest doesn't emit until all have emitted something
-        // as SessionEvent to avoid deprecation notice
-        startWith(null as SessionEvent),
         filter(
           (sessionEvent) =>
             sessionEvent != null &&
@@ -354,7 +351,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
                 (sessionEvent.newValue as Dataset).datasetId
             )
         ),
-        map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId)
+        map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId),
+        startWith(null as SessionEvent)
       );
 
     combineLatest([
