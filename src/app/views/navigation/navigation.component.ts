@@ -8,11 +8,12 @@ import { AccountComponent } from "../../shared/components/account/account.compon
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 
 @Component({
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
-  styleUrls: ["./navigation.component.less"]
+  styleUrls: ["./navigation.component.less"],
 })
 export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;
@@ -32,13 +33,14 @@ export class NavigationComponent implements OnInit {
     private configService: ConfigService,
     private errorService: ErrorService,
     private routeService: RouteService,
+    private dialogModalService: DialogModalService,
     private modalService: NgbModal
   ) {}
 
   ngOnInit() {
     // apply configurable styles
     this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(
-      path => {
+      (path) => {
         if (path) {
           log.info("load custom css from", path);
           const link = document.createElement("link");
@@ -50,7 +52,7 @@ export class NavigationComponent implements OnInit {
           document.getElementsByTagName("head")[0].appendChild(link);
         }
       },
-      err => {
+      (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the custom css path", err);
         this.errorService.showError("failed to get the custom css path", err);
@@ -58,7 +60,7 @@ export class NavigationComponent implements OnInit {
     );
 
     this.configService.get(ConfigService.KEY_FAVICON).subscribe(
-      path => {
+      (path) => {
         log.info("load custom favicon from", path);
         if (path) {
           const link: HTMLLinkElement =
@@ -70,7 +72,7 @@ export class NavigationComponent implements OnInit {
           document.getElementsByTagName("head")[0].appendChild(link);
         }
       },
-      err => {
+      (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the favicon path", err);
         this.errorService.showError(
@@ -81,14 +83,14 @@ export class NavigationComponent implements OnInit {
     );
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
-      name => {
+      (name) => {
         if (name) {
           this.appName = name;
           document.title = name;
           this.appNameReady = true;
         }
       },
-      err => {
+      (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the app name", err);
         this.errorService.showError("failed to get the app name", err);
@@ -122,5 +124,12 @@ export class NavigationComponent implements OnInit {
 
   getUserId(): string {
     return this.tokenService.getUsername();
+  }
+
+  public note() {
+    this.dialogModalService.openNotificationModal(
+      "Note",
+      "The issue of phenodata not being always saved has been solved. However, in some cases phenodata doesn't get generated after Convert to Chipster format. This will be fixed as soon as possible. There was also an issue with parameters sometimes not being visible, but it has also been solved."
+    );
   }
 }

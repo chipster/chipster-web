@@ -1,11 +1,11 @@
+import { Injectable } from "@angular/core";
 import * as _ from "lodash";
 import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVRow from "../../../../../model/tsv/TSVRow";
+import Point from "../model/point";
+import { ExpressionProfileTSVService } from "./expression-profile-TSV.service";
 import Line from "./line";
 import Rectangle from "./rectangle";
-import Point from "../model/point";
-import TSVRow from "../../../../../model/tsv/TSVRow";
-import { ExpressionProfileTSVService } from "./expressionprofileTSV.service";
-import { Injectable } from "@angular/core";
 
 @Injectable()
 export class ExpressionProfileService {
@@ -37,7 +37,7 @@ export class ExpressionProfileService {
 
     return {
       start: startIndex,
-      end: endIndex
+      end: endIndex,
     };
   }
 
@@ -111,16 +111,24 @@ export class ExpressionProfileService {
     const m = (line.end.y - line.start.y) / (line.end.x - line.start.x);
 
     let y = m * (rectangle.topleft.x - line.start.x) + line.start.y;
-    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) { return true; }
+    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) {
+      return true;
+    }
 
     y = m * (rectangle.bottomright.x - line.start.x) + line.start.y;
-    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) { return true; }
+    if (y > rectangle.topleft.y && y < rectangle.bottomright.y) {
+      return true;
+    }
 
     let x = (rectangle.topleft.y - line.start.y) / m + line.start.x;
-    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) { return true; }
+    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) {
+      return true;
+    }
 
     x = (rectangle.bottomright.y - line.start.y) / m + line.start.x;
-    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) { return true; }
+    if (x > rectangle.topleft.x && x < rectangle.bottomright.x) {
+      return true;
+    }
 
     return false;
   }

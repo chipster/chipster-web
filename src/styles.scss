@@ -48,7 +48,7 @@
 }
 
 // extra large modal for visualizations
-.modal-xl>.modal-dialog {
+.modal-xl > .modal-dialog {
   max-width: none;
   margin-left: 30px;
   margin-right: 30px;
@@ -159,7 +159,7 @@ button.btn-no-border {
   font-size: 15px;
 }
 
-//Global nav bar style for all the nav items
+// Global nav bar style for all the nav items OLD NG-BOOTSTRAP TABS
 .nav-item a.nav-link.active {
   border-radius: 0px;
   border-width: 0px 0px 3px 0px;
@@ -169,7 +169,21 @@ button.btn-no-border {
   background-color: transparent;
   border-top-width: white;
 }
+.nav-tabs .navbar-light .navbar-nav a.nav-link.disabled {
+  color: rgba(0, 0, 0, 1);
+  border-width: 0px 0px 0px 0px;
+}
 
+// Global nav bar style for all the nav items NEW NG-BOOTSTRAP NAVS
+.nav-tabs a.nav-link.active {
+  border-radius: 0px;
+  border-width: 0px 0px 3px 0px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--primary);
+  color: #000;
+  background-color: transparent;
+  border-top-width: white;
+}
 .nav-item .navbar-light .navbar-nav a.nav-link.disabled {
   color: rgba(0, 0, 0, 1);
   border-width: 0px 0px 0px 0px;

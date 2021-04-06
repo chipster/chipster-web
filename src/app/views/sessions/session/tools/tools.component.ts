@@ -5,17 +5,26 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
 } from "@angular/core";
 import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
-import { Category, Job, Module, Tool } from "chipster-js-common";
+import {
+  Category,
+  Dataset,
+  EventType,
+  Job,
+  Module,
+  Resource,
+  SessionEvent,
+  Tool,
+} from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
-import { filter, map, mergeMap, takeUntil } from "rxjs/operators";
+import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -28,7 +37,7 @@ import {
   SET_SELECTED_TOOL_WITH_INPUTS,
   SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
-  SET_VALIDATED_TOOL
+  SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
 import { JobService } from "../job.service";
@@ -42,7 +51,7 @@ import {
   SelectedTool,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
-  ValidatedTool
+  ValidatedTool,
 } from "./ToolSelection";
 
 interface ToolSearchListItem {
@@ -59,7 +68,7 @@ interface ToolSearchListItem {
   selector: "ch-tools",
   templateUrl: "./tools.component.html",
   styleUrls: ["./tools.component.less"],
-  providers: [NgbDropdownConfig]
+  providers: [NgbDropdownConfig],
 })
 export class ToolsComponent implements OnInit, OnDestroy {
   public readonly categoryElementIdPrefix = "category-button-";
@@ -185,7 +194,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     const selectedTool: SelectedTool = {
       tool: tool,
       category: this.selectedCategory,
-      module: this.selectedModule
+      module: this.selectedModule,
     };
     this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
   }
@@ -193,7 +202,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.store.dispatch({
       type: SET_SELECTED_TOOL_WITH_INPUTS,
-      payload: toolWithInputs
+      payload: toolWithInputs,
     });
   }
 
@@ -224,7 +233,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.toastrService.remove(this.lastJobStartedToastId);
     }
     this.lastJobStartedToastId = this.toastrService.info(notificationText, "", {
-      timeOut: 1500
+      timeOut: 1500,
     }).toastId;
   }
 
@@ -249,7 +258,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   openManualModal() {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     this.manualModalRef.componentInstance.tool = this.selectedTool.tool;
   }
@@ -267,7 +276,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             tool: tool,
             toolName: tool.name.displayName,
             toolId: tool.name.id,
-            description: tool.description
+            description: tool.description,
           });
         });
       });
@@ -328,14 +337,37 @@ export class ToolsComponent implements OnInit, OnDestroy {
         this.runForEachEnabled = false;
       });
 
-    // bind inputs after tool selection or dataset selection changes
-    combineLatest(
+    const selectedDatasetsContentsUpdated$ = this.sessionEventService
+      .getDatasetStream()
+      .pipe(
+        filter(
+          (sessionEvent) =>
+            sessionEvent != null &&
+            sessionEvent.event.type === EventType.Update &&
+            sessionEvent.event.resourceType === Resource.Dataset &&
+            this.selectionService.selectedDatasets.some(
+              (selectedDataset) =>
+                selectedDataset.datasetId ===
+                (sessionEvent.newValue as Dataset).datasetId
+            )
+        ),
+        map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId),
+        startWith(null as SessionEvent)
+      );
+
+    combineLatest([
       this.store.select("selectedTool"),
-      this.store.select("selectedDatasets")
-    )
+      this.store.select("selectedDatasets"),
+      selectedDatasetsContentsUpdated$, // triggers but data not
+    ])
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
+          const uptodateDatasets = selectedDatasets.map(
+            (dataset): Dataset =>
+              this.sessionData.datasetsMap.get(dataset.datasetId)
+          );
+
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: Object.assign(
@@ -343,20 +375,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
                 inputBindings: this.toolService.bindInputs(
                   this.sessionData,
                   selectedTool.tool,
-                  selectedDatasets
+                  uptodateDatasets
                 ),
-                selectedDatasets: selectedDatasets
+                selectedDatasets: selectedDatasets,
               },
               selectedTool
-            )
+            ),
           });
         } else {
           this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
           this.store.dispatch({
-            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS
+            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
           });
           this.store.dispatch({
-            type: CLEAR_VALIDATED_TOOL
+            type: CLEAR_VALIDATED_TOOL,
           });
         }
       });
@@ -365,7 +397,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store
       .select("selectedToolWithInputs")
       .pipe(
-        filter(value => value !== null),
+        filter((value) => value !== null),
         map((toolWithInputs: SelectedToolWithInputs) => {
           const inputsValid = this.toolSelectionService.validateInputs(
             toolWithInputs
@@ -407,7 +439,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
               runForEachValid: runForEachValid,
               phenodataValid: phenodataValid,
               phenodataMessage: phenodataMessage,
-              phenodataBindings: phenodataBindings
+              phenodataBindings: phenodataBindings,
             },
             toolWithInputs
           );
@@ -416,7 +448,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
-          payload: toolWithValidatedInputs
+          payload: toolWithValidatedInputs,
         });
       });
 
@@ -424,7 +456,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store
       .select("selectedToolWithValidatedInputs")
       .pipe(
-        filter(value => value !== null),
+        filter((value) => value !== null),
         mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
           // populate params is async, and returns the same tool with params populated
           // if there are no params, just return the same tool as observable
@@ -439,7 +471,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
           type: SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
-          payload: toolWithPopulatedParams
+          payload: toolWithPopulatedParams,
         });
       });
 
@@ -447,7 +479,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     combineLatest(
       this.store
         .select("selectedToolWithPopulatedParams")
-        .pipe(filter(value => value !== null)),
+        .pipe(filter((value) => value !== null)),
       this.parametersChanged$ // signals when user changes parameters
     )
       .pipe(
@@ -475,7 +507,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
                 parametersValid,
               parametersValid: parametersValid,
               message: validationMessage,
-              parameterResults: parameterValidations
+              parameterResults: parameterValidations,
             },
             toolWithParamsAndValidatedInputs
           );
@@ -484,7 +516,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe((validatedTool: ValidatedTool) => {
         this.store.dispatch({
           type: SET_VALIDATED_TOOL,
-          payload: validatedTool
+          payload: validatedTool,
         });
       });
 
@@ -505,7 +537,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         () => {
           this.updateJobs();
         },
-        err => this.errorService.showError("failed to update jobs", err)
+        (err) => this.errorService.showError("failed to update jobs", err)
       );
   }
 

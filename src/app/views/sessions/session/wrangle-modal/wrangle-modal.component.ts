@@ -14,14 +14,14 @@ import { FileResource } from "../../../../shared/resources/fileresource";
 import { TsvService } from "../../../../shared/services/tsv.service";
 import {
   Tags,
-  TypeTagService
+  TypeTagService,
 } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
 
 enum ColumnType {
   Identifier,
-  Sample
+  Sample,
 }
 
 export interface ColumnItem {
@@ -32,7 +32,7 @@ export interface ColumnItem {
 @Component({
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
-  styleUrls: ["./wrangle-modal.component.less"]
+  styleUrls: ["./wrangle-modal.component.less"],
 })
 export class WrangleModalComponent implements OnInit {
   constructor(
@@ -44,6 +44,9 @@ export class WrangleModalComponent implements OnInit {
     private tsvService: TsvService,
     private datasetService: DatasetService
   ) {}
+
+  public static FILE_SIZE_LIMIT = 200; // MB
+
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
 
@@ -53,7 +56,6 @@ export class WrangleModalComponent implements OnInit {
   private readonly INCLUDE = "included";
   private readonly EXCLUDE = "excluded";
 
-  public static FILE_SIZE_LIMIT = 200; // MB
   private readonly previewRowCount = 3;
 
   allItems: ColumnItem[];
@@ -124,7 +126,7 @@ export class WrangleModalComponent implements OnInit {
           );
           if (skipLinesPrefix) {
             parsedTSV = parsedTSV.filter(
-              row => !row[0].startsWith(skipLinesPrefix)
+              (row) => !row[0].startsWith(skipLinesPrefix)
             );
           }
 
@@ -141,7 +143,7 @@ export class WrangleModalComponent implements OnInit {
             return index === 0 && headerName === ""
               ? {
                   index: index,
-                  name: "R rownames column"
+                  name: "R rownames column",
                 }
               : { index: index, name: headerName };
           });
@@ -155,7 +157,7 @@ export class WrangleModalComponent implements OnInit {
             headerName: header,
             field: "" + i,
             // onCellClicked: this.onCellClicked.bind(this),
-            cellClass: this.getCellClass.bind(this)
+            cellClass: this.getCellClass.bind(this),
             // editable: true
           }));
 
@@ -225,12 +227,12 @@ export class WrangleModalComponent implements OnInit {
     this.checkIdentifiersUnique(this.selectedIdentifiers);
 
     this.sampleItems = this.allItems.filter(
-      item =>
+      (item) =>
         !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
     );
 
     this.otherItems = this.allItems.filter(
-      item =>
+      (item) =>
         !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
     this.onSelectionChange();
@@ -239,11 +241,11 @@ export class WrangleModalComponent implements OnInit {
   public onSampleSelectionChange(event): void {
     this.selectedSamples = event;
     this.identifierItems = this.allItems.filter(
-      item => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item)
     );
 
     this.otherItems = this.allItems.filter(
-      item =>
+      (item) =>
         !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
 
@@ -253,11 +255,11 @@ export class WrangleModalComponent implements OnInit {
   public onOtherSelectionChange(event): void {
     this.selectedOthers = event;
     this.identifierItems = this.allItems.filter(
-      item => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item)
     );
 
     this.sampleItems = this.allItems.filter(
-      item =>
+      (item) =>
         !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
     );
 
@@ -274,7 +276,7 @@ export class WrangleModalComponent implements OnInit {
 
     const othersToInclude = this.includeOthers()
       ? this.selectedOthers
-      : this.otherItems.filter(item => !this.selectedOthers.includes(item));
+      : this.otherItems.filter((item) => !this.selectedOthers.includes(item));
     const allIncluded = this.selectedIdentifiers.concat(
       this.selectedSamples,
       othersToInclude
@@ -282,8 +284,8 @@ export class WrangleModalComponent implements OnInit {
 
     const names = new Set<string>();
     allIncluded
-      .map(columnItem => columnItem.name)
-      .forEach(name => {
+      .map((columnItem) => columnItem.name)
+      .forEach((name) => {
         if (!names.has(name)) {
           names.add(name);
         } else {
@@ -304,7 +306,7 @@ export class WrangleModalComponent implements OnInit {
     this.tsv2File
       .getBody()
       .map((tsvRow: Array<string>) => tsvRow[identifierColumns[0].index])
-      .forEach(identifier => {
+      .forEach((identifier) => {
         if (!identifiers.has(identifier)) {
           identifiers.add(identifier);
         } else {
@@ -334,9 +336,16 @@ export class WrangleModalComponent implements OnInit {
       // get the contents of the new file as a string
       defer(() => of(this.getWrangledFileString())).pipe(
         // create the new (derived) dataset
-        mergeMap(wrangledFileString => {
+        mergeMap((wrangledFileString) => {
+          log.info("Creating converted dataset");
+
+          const newFileName =
+            this.dataset.name.endsWith(".txt") ||
+            this.dataset.name.endsWith(".tsv")
+              ? this.dataset.name.slice(0, -4) + "-converted.tsv"
+              : this.dataset.name + "-converted.tsv";
           return this.sessionDataService.createDerivedDataset(
-            this.dataset.name + "-converted.tsv",
+            newFileName,
             [this.dataset.datasetId],
             "Convert to Chipster format",
             wrangledFileString,
@@ -345,19 +354,27 @@ export class WrangleModalComponent implements OnInit {
         }),
 
         // get newly created dataset (from the server, might not be available locally yet)
-        mergeMap(newDatasetId => {
+        mergeMap((newDatasetId) => {
+          log.info("Converted dataset created ", newDatasetId);
+          log.info("Get newly created dataset");
           return this.sessionDataService.getDataset(newDatasetId);
         }),
 
         // create phenodata and update it to server
         mergeMap((newDataset: Dataset) => {
+          log.info("Got newly created dataset", newDataset);
           const phenodataString = this.getPhenodataString();
+          log.info(
+            "Phenodata for converted dataset, first 1000 characters",
+            phenodataString.substring(0, 1000)
+          );
           newDataset.metadataFiles = [
             {
               name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
-              content: phenodataString
-            }
+              content: phenodataString,
+            },
           ];
+          log.info("New dataset after metadata being set", newDataset);
           return this.sessionDataService.updateDataset(newDataset);
         })
       );
@@ -376,7 +393,7 @@ export class WrangleModalComponent implements OnInit {
     const otherColumnsToIncludeIndexes = this.includeOthers()
       ? otherColumnIdexes
       : this.getColumnIndexes(this.allItems).filter(
-          item =>
+          (item) =>
             !this.getColumnIndexes(this.selectedIdentifiers)
               .concat(sampleColumnIndexes, otherColumnIdexes)
               .includes(item)
@@ -417,7 +434,8 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private getPhenodataString(): string {
-    const phenodataHeaderString = "sample\toriginal_name\tchiptype\tgroup\n";
+    const phenodataHeaderString =
+      "sample\toriginal_name\tchiptype\tgroup\tdescription\n";
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
     const phenodataRowsString = this.getColumnIndexes(
@@ -436,6 +454,8 @@ export class WrangleModalComponent implements OnInit {
         "not applicable" +
         "\t" +
         "" +
+        "\t" +
+        fixedSampleHeader +
         "\n"
       );
     }, "");

@@ -1,22 +1,20 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
-import { forkJoin, Observable } from "rxjs";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import UtilsService from "../../../../shared/utilities/utils";
+import { GetSessionDataService } from "../get-session-data.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
-import { WorkflowGraphService } from './workflow-graph/workflow-graph.service';
-import { GetSessionDataService } from '../get-session-data.service';
+import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
 
 @Component({
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
-  styleUrls: ["./session-panel.component.less"]
+  styleUrls: ["./session-panel.component.less"],
 })
 export class SessionPanelComponent {
   @Input()
@@ -32,9 +30,9 @@ export class SessionPanelComponent {
     public getSessionDataService: GetSessionDataService,
     private datasetsearchPipe: DatasetsearchPipe,
     private selectionHandlerService: SelectionHandlerService,
-    private selectionService: SelectionService,
+    public selectionService: SelectionService,
     private restErrorService: RestErrorService,
-    private workflowGraphService: WorkflowGraphService,
+    private workflowGraphService: WorkflowGraphService
   ) {} // used by template
 
   search(value: any): void {
@@ -66,10 +64,10 @@ export class SessionPanelComponent {
         allDatasets,
         this.datasetSearch
       );
-      const searchIds = searchDatasets.map(d => d.datasetId);
+      const searchIds = searchDatasets.map((d) => d.datasetId);
 
       // indexes of the old selection in the dataset list
-      const selectedIndexes = this.selectionService.selectedDatasets.map(d =>
+      const selectedIndexes = this.selectionService.selectedDatasets.map((d) =>
         searchIds.indexOf(d.datasetId)
       );
       const clickIndex = searchIds.indexOf(dataset.datasetId);
@@ -78,7 +76,7 @@ export class SessionPanelComponent {
 
       // datasets within the index range
       const newSelection = _.range(newMin, newMax + 1).map(
-        i => searchDatasets[i]
+        (i) => searchDatasets[i]
       );
       this.selectionHandlerService.setDatasetSelection(newSelection);
     } else {
@@ -88,20 +86,32 @@ export class SessionPanelComponent {
 
   autoLayoutAll(): void {
     let allDatasets = Array.from(this.sessionData.datasetsMap.values());
-    this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
-  }
-  
-  autoLayoutSelected(): void {
-    this.workflowGraphService.resetDoAndSaveLayout(this.selectionService.selectedDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
+    this.workflowGraphService.resetDoAndSaveLayout(
+      allDatasets,
+      this.sessionData.datasetsMap,
+      this.sessionData.jobsMap
+    );
   }
 
-  selectChildren() { 
-    let children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets)
+  autoLayoutSelected(): void {
+    this.workflowGraphService.resetDoAndSaveLayout(
+      this.selectionService.selectedDatasets,
+      this.sessionData.datasetsMap,
+      this.sessionData.jobsMap
+    );
+  }
+
+  selectChildren() {
+    let children = this.getSessionDataService.getChildren(
+      this.selectionService.selectedDatasets
+    );
     this.selectionHandlerService.setDatasetSelection(children);
   }
 
-  selectAll() { 
-    let all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
+  selectAll() {
+    let all = this.sessionDataService.getCompleteDatasets(
+      this.sessionData.datasetsMap
+    );
     this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 

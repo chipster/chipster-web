@@ -1,11 +1,11 @@
-import { Component, OnInit, Input, OnChanges } from "@angular/core";
+import { Component, Input, OnChanges } from "@angular/core";
 
 @Component({
   selector: "ch-counter-spinner",
   templateUrl: "./counter-spinner.component.html",
-  styleUrls: ["./counter-spinner.component.less"]
+  styleUrls: ["./counter-spinner.component.less"],
 })
-export class CounterSpinnerComponent implements OnInit, OnChanges {
+export class CounterSpinnerComponent implements OnChanges {
   @Input() count: number;
 
   offsetRight = 12;
@@ -13,8 +13,6 @@ export class CounterSpinnerComponent implements OnInit, OnChanges {
   fontSize = 17;
 
   constructor() {}
-
-  ngOnInit() {}
 
   ngOnChanges() {
     if (this.count.toString().length === 2) {

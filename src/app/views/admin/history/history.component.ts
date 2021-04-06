@@ -8,18 +8,16 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import UtilsService from "../../../shared/utilities/utils";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
-import UtilsService from '../../../shared/utilities/utils';
-import { DatasetService } from '../../sessions/session/dataset.service';
 
 @Component({
   selector: "ch-history",
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class HistoryComponent implements OnInit {
-
   readonly comparisonIs = "is";
   readonly comparisonIsNot = "is not";
   readonly attributeUserName = "createdBy";
@@ -30,7 +28,7 @@ export class HistoryComponent implements OnInit {
     "toolId",
     "state",
     "comp",
-    "module",    
+    "module",
   ];
   jobFilterComparisonSet: Array<string> = [
     this.comparisonIs,
@@ -58,15 +56,18 @@ export class HistoryComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-
     this.stringFiltersFormArray = this.formBuilder.array([]);
 
     this.stringFiltersForm = this.formBuilder.group({
-      items: this.stringFiltersFormArray
+      items: this.stringFiltersFormArray,
     });
 
-    this.startDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
-    this.endDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
+    this.startDateTimeFilterForm = this.formBuilder.group(
+      this.getEmptyTimeFilter()
+    );
+    this.endDateTimeFilterForm = this.formBuilder.group(
+      this.getEmptyTimeFilter()
+    );
 
     this.resetForm();
 
@@ -80,12 +81,16 @@ export class HistoryComponent implements OnInit {
   }
 
   getFilterParams() {
-
     let params = new HttpParams();
 
     for (let i = 0; i < this.stringFiltersFormArray.length; i++) {
-      let filter = this.stringFiltersFormArray.value[i];  
-      params = this.appendStringParam(params, filter.selectedAttribute, filter.value, filter.selectedComparison);      
+      let filter = this.stringFiltersFormArray.value[i];
+      params = this.appendStringParam(
+        params,
+        filter.selectedAttribute,
+        filter.value,
+        filter.selectedComparison
+      );
     }
 
     const startDateControl = this.startDateTimeFilterForm.get("dateInput");
@@ -93,41 +98,51 @@ export class HistoryComponent implements OnInit {
 
     const startDate = this.ngbDateStructToString(startDateControl.value);
 
-    params = this.appendDateTimeParam(params, startDate, startTimeControl.value, ">");
-    
+    params = this.appendDateTimeParam(
+      params,
+      startDate,
+      startTimeControl.value,
+      ">"
+    );
+
     const endDateControl = this.endDateTimeFilterForm.get("dateInput");
     const endTimeControl = this.endDateTimeFilterForm.get("timeInput");
 
     const endDate = this.ngbDateStructToString(endDateControl.value);
 
-    params = this.appendDateTimeParam(params, endDate, endTimeControl.value, "<");
+    params = this.appendDateTimeParam(
+      params,
+      endDate,
+      endTimeControl.value,
+      "<"
+    );
 
     return params;
   }
 
   ngbDateStructToString(ngbDate) {
     if (ngbDate) {
-      // can't set directly in the constructor new Date(year, month, day), because that would 
+      // can't set directly in the constructor new Date(year, month, day), because that would
       // in local time. We don't set the time, which would be 00:00 and the time zone here is -2.
       // This would result to the previous day.
-      let date = new Date();      
+      let date = new Date();
       date.setUTCFullYear(ngbDate.year);
       date.setUTCMonth(ngbDate.month - 1);
       date.setUTCDate(ngbDate.day);
-      let isoDate = date
-        .toISOString()
-        .slice(0, 10);
+      let isoDate = date.toISOString().slice(0, 10);
 
-        return isoDate;        
+      return isoDate;
     }
     return null;
   }
 
   appendStringParam(params, attribute, value, comparison) {
-
-    if (attribute != null && attribute.length > 0 
-      && value != null && value.length > 0) {
-        
+    if (
+      attribute != null &&
+      attribute.length > 0 &&
+      value != null &&
+      value.length > 0
+    ) {
       if (comparison === this.comparisonIsNot) {
         value = "!" + value;
       }
@@ -149,14 +164,13 @@ export class HistoryComponent implements OnInit {
   }
 
   updateJobCountAndJobs() {
-
     this.jobListLoading = true;
     let filterParams = this.getFilterParams();
 
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap(service => {
+        flatMap((service) => {
           return this.auhtHttpClient.getAuthWithParams(
             service.adminUri + "/admin/jobhistory/rowcount",
             filterParams
@@ -164,24 +178,24 @@ export class HistoryComponent implements OnInit {
         })
       )
       .subscribe(
-        recordNumber => {
+        (recordNumber) => {
           this.jobNumber = recordNumber;
           this.collectionSize = Math.ceil(recordNumber / 500) * 10;
           this.updateJobs(filterParams);
         },
-        err => this.errorHandlerService.showError("get job numbers failed", err)
+        (err) =>
+          this.errorHandlerService.showError("get job numbers failed", err)
       );
   }
 
   updateJobs(filterParams) {
-
     // set the page number for which getting the record
     filterParams = filterParams.append("page", this.page.toString());
-    
+
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap(service => {
+        flatMap((service) => {
           return this.auhtHttpClient.getAuthWithParams(
             service.adminUri + "/admin/jobhistory",
             filterParams
@@ -194,7 +208,7 @@ export class HistoryComponent implements OnInit {
           this.jobs = jobHistoryList;
           this.updateTime = new Date();
         },
-        err => this.errorHandlerService.showError("failed to get jobs", err)
+        (err) => this.errorHandlerService.showError("failed to get jobs", err)
       );
   }
 
@@ -206,7 +220,6 @@ export class HistoryComponent implements OnInit {
   }
 
   getDuration(jobHistory: JobHistory) {
-    
     if (jobHistory && jobHistory.startTime) {
       let startDate = UtilsService.parseISOStringToDate(jobHistory.startTime);
 
@@ -230,24 +243,27 @@ export class HistoryComponent implements OnInit {
 
   openJobOutputModal(jobhistory: JobHistory) {
     const modalRef = this.modalService.open(JobOutputModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.output = jobhistory.screenOutput;
   }
 
   onPageChange(page) {
-    this.page = page;    
+    this.page = page;
     this.updateJobs(this.getFilterParams());
   }
 
   resetForm() {
-
     for (let i = this.stringFiltersFormArray.length - 1; i >= 0; i--) {
-      this.stringFiltersFormArray.removeAt(i)
+      this.stringFiltersFormArray.removeAt(i);
     }
 
-    this.stringFiltersFormArray.push(this.formBuilder.group(this.getDefaultStringFilter()));
-    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
+    this.stringFiltersFormArray.push(
+      this.formBuilder.group(this.getDefaultStringFilter())
+    );
+    this.stringFiltersFormArray.push(
+      this.formBuilder.group(this.getEmptyStringFilter())
+    );
 
     this.startDateTimeFilterForm.reset(this.getEmptyTimeFilter());
     this.endDateTimeFilterForm.reset(this.getEmptyTimeFilter());
@@ -262,27 +278,29 @@ export class HistoryComponent implements OnInit {
     return {
       selectedAttribute: this.attributeUserName,
       selectedComparison: this.comparisonIsNot,
-      value: "jaas/replay_test"
-    }
+      value: "jaas/replay_test",
+    };
   }
 
   getEmptyStringFilter() {
     return {
       selectedAttribute: "",
       selectedComparison: this.comparisonIs,
-      value: ""
+      value: "",
     };
   }
 
   getEmptyTimeFilter() {
     return {
       dateInput: "",
-      timeInput: "00:00"
+      timeInput: "00:00",
     };
   }
 
   addItem(): void {
-    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));  
+    this.stringFiltersFormArray.push(
+      this.formBuilder.group(this.getEmptyStringFilter())
+    );
   }
 
   toShortDateTime(isoDateString) {

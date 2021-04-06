@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
+import { interval, Observable, of } from "rxjs";
+import { distinctUntilChanged, map, startWith } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import UtilsService from "../../../shared/utilities/utils";
 import { DatasetService } from "./dataset.service";
 import { SessionDataService } from "./session-data.service";
 import { ToolService } from "./tools/tool.service";
 import { ValidatedTool } from "./tools/ToolSelection";
-import UtilsService from '../../../shared/utilities/utils';
-import { Observable, of, interval } from 'rxjs';
-import { startWith, map, distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable()
 export class JobService {
@@ -26,31 +26,35 @@ export class JobService {
   }
 
   static getDuration(job: Job): Observable<string> {
-
     if (job.startTime == null) {
       return of(null);
     }
 
-    let startDate = UtilsService.parseISOStringToDate(job.startTime);
-    let endDate = UtilsService.parseISOStringToDate(job.endTime);
+    const startDate = UtilsService.parseISOStringToDate(job.startTime);
+    const endDate = UtilsService.parseISOStringToDate(job.endTime);
 
     if (!this.isRunning(job)) {
       if (job.endTime == null) {
         return of(null);
       }
-      let duration = UtilsService.millisecondsBetweenDates(startDate, endDate);
+      const duration = UtilsService.millisecondsBetweenDates(
+        startDate,
+        endDate
+      );
       return of(UtilsService.millisecondsToHumanFriendly(duration));
-
     } else {
       return interval(1000).pipe(
         startWith(0),
         map(() => {
-            let millis = UtilsService.millisecondsBetweenDates(startDate, new Date());
-            return UtilsService.millisecondsToHumanFriendly(
-                millis, "now", "now");
-        },
-        distinctUntilChanged()
-     ));
+          let now = new Date();
+          if (now.getTime() < startDate.getTime()) {
+            // happens if your own computer time is lagging behind
+            now = startDate;
+          }
+          const millis = UtilsService.millisecondsBetweenDates(startDate, now);
+          return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
+        }, distinctUntilChanged())
+      );
     }
   }
 
@@ -77,9 +81,9 @@ export class JobService {
           inputBindings: [
             {
               toolInput: validatedTool.tool.inputs[0],
-              datasets: [dataset]
-            }
-          ]
+              datasets: [dataset],
+            },
+          ],
         });
       })
       .map((clonedTool: ValidatedTool) => {
@@ -90,7 +94,7 @@ export class JobService {
     this.sessionDataService.createJobs(jobs).subscribe({
       error: (error: any) => {
         this.restErrorService.showError("Submitting jobs failed", error);
-      }
+      },
     });
   }
 
@@ -107,7 +111,7 @@ export class JobService {
     this.sessionDataService.createJob(job).subscribe({
       error: (error: any) => {
         this.restErrorService.showError("Submitting job failed", error);
-      }
+      },
     });
   }
 
@@ -119,7 +123,7 @@ export class JobService {
       module: validatedTool.module.moduleId,
       toolName: validatedTool.tool.name.displayName,
       toolDescription: validatedTool.tool.description,
-      state: "NEW"
+      state: "NEW",
     };
 
     // set parameters
@@ -146,7 +150,7 @@ export class JobService {
         displayName: toolParam.name.displayName,
         description: toolParam.description,
         type: toolParam.type,
-        value: value
+        value: value,
         // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
       });
     }
@@ -156,7 +160,7 @@ export class JobService {
 
     // add bound inputs
     for (const inputBinding of validatedTool.inputBindings.filter(
-      binding => binding.datasets.length > 0
+      (binding) => binding.datasets.length > 0
     )) {
       // single input
       if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
@@ -164,7 +168,7 @@ export class JobService {
           inputId: inputBinding.toolInput.name.id,
           description: inputBinding.toolInput.description,
           datasetId: inputBinding.datasets[0].datasetId,
-          displayName: inputBinding.datasets[0].name
+          displayName: inputBinding.datasets[0].name,
         });
       } else {
         // multi input
@@ -177,7 +181,7 @@ export class JobService {
             ),
             description: inputBinding.toolInput.description,
             datasetId: dataset.datasetId,
-            displayName: dataset.name
+            displayName: dataset.name,
           });
           i++;
         }
@@ -186,11 +190,11 @@ export class JobService {
 
     // phenodata
     job.metadataFiles = validatedTool.phenodataBindings
-      .filter(binding => binding.dataset != null)
-      .map(binding => {
+      .filter((binding) => binding.dataset != null)
+      .map((binding) => {
         return {
           name: binding.toolInput.name.id,
-          content: this.datasetService.getOwnPhenodata(binding.dataset)
+          content: this.datasetService.getOwnPhenodata(binding.dataset),
         };
       });
 

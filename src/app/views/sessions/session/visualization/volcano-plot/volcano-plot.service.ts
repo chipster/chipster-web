@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
-import TSVFile from "../../../../../model/tsv/TSVFile";
-import VolcanoPlotDataRow from "./volcanoPlotDataRow";
-import TSVRow from "../../../../../model/tsv/TSVRow";
-import DomainBoundaries from "../expressionprofile/domainboundaries";
 import * as _ from "lodash";
+import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
+import TSVRow from "../../../../../model/tsv/TSVRow";
+import DomainBoundaries from "../expression-profile/domainboundaries";
+import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 
 @Injectable()
 export class VolcanoPlotService {
@@ -128,12 +128,12 @@ export class VolcanoPlotService {
     const values = _.map(tsv.body.rows, (row: TSVRow) =>
       row.getCellsByIndexes(PValueIndexes)
     );
-    const flatValues = _.map(_.flatten(values), (value: string) => 
+    const flatValues = _.map(_.flatten(values), (value: string) =>
       parseFloat(value)
     );
 
     const logValues = [];
-    flatValues.forEach(function(yval) {
+    flatValues.forEach(function (yval) {
       const curYval = -Math.log10(yval);
       // log(0) would be Infinity
       if (yval != 0) {

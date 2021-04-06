@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
+import * as log from "loglevel";
 import { EMPTY } from "rxjs";
 import { map } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import {
   Tags,
-  TypeTagService
+  TypeTagService,
 } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
@@ -27,7 +28,7 @@ export class DatasetModalService {
     sessionData: SessionData
   ): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
@@ -58,7 +59,7 @@ export class DatasetModalService {
     }
 
     const modalRef = this.ngbModal.open(WrangleModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
@@ -67,7 +68,7 @@ export class DatasetModalService {
     // block with the spinner while waiting for that observable to complete
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
-        map(runWrangle$ => {
+        map((runWrangle$) => {
           return runWrangle$ != null
             ? this.dialogModalService.openSpinnerModal(
                 "Convert to Chipster format",
@@ -77,12 +78,14 @@ export class DatasetModalService {
         })
       )
       .subscribe({
-        next: () => {},
-        error: error =>
+        next: () => {
+          log.info("Convert done");
+        },
+        error: (error) =>
           this.errorService.showError(
             "Convert to Chipster format failed",
             error
-          )
+          ),
       });
   }
 }

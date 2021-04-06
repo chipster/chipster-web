@@ -3,20 +3,20 @@ import {
   EventEmitter,
   Input,
   OnChanges,
-  Output
+  Output,
 } from "@angular/core";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Job } from "chipster-js-common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
-import { JobService } from '../../job.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
-  styleUrls: ["./job-list.component.less"]
+  styleUrls: ["./job-list.component.less"],
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];
@@ -40,7 +40,7 @@ export class JobListComponent implements OnChanges {
     });
 
     this.durationMap = new Map();
-    this.jobsSorted.forEach(job => {
+    this.jobsSorted.forEach((job) => {
       this.durationMap.set(job.jobId, this.createDurationObservable(job));
     });
   }
@@ -59,15 +59,14 @@ export class JobListComponent implements OnChanges {
   }
 
   createDurationObservable(job: Job): Observable<string> {
-
     return JobService.getDuration(job).pipe(
-      map(duration => {
+      map((duration) => {
         if (duration === "0") {
           // incorrect information in the old sessions, no need to show
           return null;
         }
         return duration;
-      }),
+      })
     );
   }
 
@@ -75,7 +74,7 @@ export class JobListComponent implements OnChanges {
     this.sessionDataService.cancelJob(job);
   }
 
-  isSelectedJobById(jobId: string) {
-    this.selectionService.isSelectedJobById(jobId);
+  isSelectedJobById(jobId: string): boolean {
+    return this.selectionService.isSelectedJobById(jobId);
   }
 }

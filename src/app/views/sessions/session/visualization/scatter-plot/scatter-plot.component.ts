@@ -1,23 +1,24 @@
 import { Component, OnChanges, OnDestroy } from "@angular/core";
 import * as d3 from "d3";
-import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
-import { FileResource } from "../../../../../shared/resources/fileresource";
-import { SessionDataService } from "../../session-data.service";
-import Point from "../model/point";
-import { PlotService } from "../../../../../shared/visualization/plot.service";
-import { PlotData } from "../model/plotData";
-import { PlotComponent } from "../../../../../shared/visualization/plot.component";
-import { LoadState, State } from "../../../../../model/loadstate";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../../../model/loadstate";
+import { FileResource } from "../../../../../shared/resources/fileresource";
+import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
+import { PlotService } from "../../../../../shared/visualization/plot.service";
+import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
+import { SessionDataService } from "../../session-data.service";
+import { PlotData } from "../model/plotData";
+import Point from "../model/point";
 
 @Component({
   selector: "ch-scatter-plot",
-  templateUrl: "./scatterplot.html",
-  styleUrls: ["./scatterplot.less"]
+  templateUrl: "./scatter-plot.component.html",
+  styleUrls: ["./scatter-plot.component.less"],
 })
-export class ScatterPlotComponent extends PlotComponent
+export class ScatterPlotComponent
+  extends PlotDirective
   implements OnChanges, OnDestroy {
-  private chipHeaders: Array<string> = [];
+  public chipHeaders: Array<string> = [];
   private xScale: any;
   private yScale: any;
 
@@ -49,7 +50,7 @@ export class ScatterPlotComponent extends PlotComponent
       // Extracting header name without chip prefix
       this.visualizationTSVService
         .getChipHeaders(this.tsv)
-        .forEach(function(chipHeader) {
+        .forEach(function (chipHeader) {
           chipHeader = chipHeader.replace("chip.", "");
           self.chipHeaders.push(chipHeader);
         });
@@ -82,7 +83,7 @@ export class ScatterPlotComponent extends PlotComponent
     );
 
     // Creating points for scatter plot combining two chip columns
-    orderedGenesValues.forEach(function(geneRow) {
+    orderedGenesValues.forEach(function (geneRow) {
       const curPlotData = new PlotData();
       curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(
@@ -99,7 +100,7 @@ export class ScatterPlotComponent extends PlotComponent
     const self = this;
     const size = {
       width: document.getElementById("scatterplot").offsetWidth,
-      height: 600
+      height: 600,
     };
     const padding = 50;
 
@@ -114,7 +115,7 @@ export class ScatterPlotComponent extends PlotComponent
       .range([padding, size.width - padding])
       .domain([
         this.visualizationTSVService.getMinX(self.plotData),
-        this.visualizationTSVService.getMaxX(self.plotData)
+        this.visualizationTSVService.getMaxX(self.plotData),
       ])
       .nice();
     const xAxis = d3
@@ -135,7 +136,7 @@ export class ScatterPlotComponent extends PlotComponent
       .range([size.height - padding, padding])
       .domain([
         this.visualizationTSVService.getMinY(self.plotData),
-        this.visualizationTSVService.getMaxY(self.plotData)
+        this.visualizationTSVService.getMaxY(self.plotData),
       ])
       .nice();
     const yAxis = d3
@@ -182,10 +183,10 @@ export class ScatterPlotComponent extends PlotComponent
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", function(d) {
+      .attr("cx", function (d) {
         return self.xScale(d.plotPoint.x);
       })
-      .attr("cy", function(d) {
+      .attr("cy", function (d) {
         return self.yScale(d.plotPoint.y);
       })
       .attr("fill", "red")
@@ -209,7 +210,7 @@ export class ScatterPlotComponent extends PlotComponent
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
 
-    this.selectedDataPointIds.forEach(function(selectedId) {
+    this.selectedDataPointIds.forEach(function (selectedId) {
       self.setSelectionStyle(selectedId);
     });
   }
@@ -246,7 +247,7 @@ export class ScatterPlotComponent extends PlotComponent
         "Scatter Plot",
         data
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService2.showError("create dataset failed", err)
       );
   }

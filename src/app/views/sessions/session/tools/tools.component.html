@@ -82,14 +82,14 @@
       </div>
 
       <!-- manual dropdown panel -->
-      <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
+      <!-- <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
         <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
           <ch-manual [page]="
               toolService.getManualPage(selectedTool.tool.name.id) | async
             " [showControls]="true"></ch-manual>
         </div>
-      </div>
+      </div> -->
 
       <!-- category list -->
       <div class="col col-left">

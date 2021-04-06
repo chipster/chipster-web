@@ -11,17 +11,16 @@ import { DatasetParameterListComponent } from "../selectiondetails/dataset-param
 import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
 import { BamViewerComponent } from "./bam-viewer/bam-viewer.component";
 import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
-import { ExpressionProfileComponent } from "./expressionprofile/expressionprofile.component";
-import { ExpressionProfileService } from "./expressionprofile/expressionprofile.service";
-import { ExpressionProfileTSVService } from "./expressionprofile/expressionprofileTSV.service";
-import { GenomeBrowserComponent } from "./genome-browser/genome-browser.component";
-import { HtmlvisualizationComponent } from "./htmlvisualization/htmlvisualization.component";
-import { ImageVisualizationComponent } from "./imagevisualization/imagevisualization.component";
+import { ExpressionProfileTSVService } from "./expression-profile/expression-profile-TSV.service";
+import { ExpressionProfileComponent } from "./expression-profile/expression-profile.component";
+import { ExpressionProfileService } from "./expression-profile/expression-profile.service";
+import { HtmlvisualizationComponent } from "./html-visualization/html-visualization.component";
+import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
 import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
 import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
-import { ScatterPlotComponent } from "./scatterplotvisualization/scatterplot.component";
+import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
 import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
-import { TextVisualizationComponent } from "./textvisualization/textvisualization.component";
+import { TextVisualizationComponent } from "./text-visualization/text-visualization.component";
 import { ThreeCircleVennDiagramService } from "./venn-diagram/three-circle-venn-diagram.service";
 import { TwoCircleVennDiagramService } from "./venn-diagram/two-circle-venn-diagram.service";
 import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
@@ -30,8 +29,8 @@ import { VisualizationEventService } from "./visualization-event.service";
 import { VisualizationModalComponent } from "./visualizationmodal.component";
 import { VisualizationModalService } from "./visualizationmodal.service";
 import { VisualizationsComponent } from "./visualizations.component";
-import { VolcanoPlotComponent } from "./volcanoplot/volcanoplot.component";
-import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
+import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
+import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
   imports: [
@@ -40,7 +39,7 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
     NgbModule,
     SharedModule,
     LinkButtonModule,
-    PdfViewerModule
+    PdfViewerModule,
   ],
   declarations: [
     VisualizationsComponent,
@@ -56,10 +55,9 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
     ScatterPlotComponent,
     VolcanoPlotComponent,
     BamViewerComponent,
-    GenomeBrowserComponent,
     DetailsVisualizationComponent,
     SingleDatasetComponent,
-    DatasetParameterListComponent
+    DatasetParameterListComponent,
   ],
   providers: [
     ExpressionProfileTSVService,
@@ -71,13 +69,12 @@ import { VolcanoPlotService } from "./volcanoplot/volcanoplot.service";
     VisualizationTSVService,
     PlotService,
     VolcanoPlotService,
-    VisualizationEventService
+    VisualizationEventService,
   ],
   exports: [
     VisualizationsComponent,
     SingleDatasetComponent,
-    DatasetParameterListComponent
+    DatasetParameterListComponent,
   ],
-  entryComponents: [VisualizationModalComponent]
 })
 export class VisualizationsModule {}

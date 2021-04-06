@@ -1,17 +1,17 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import {
-  SettingsService,
-  SessionListMode
-} from "../../services/settings.service";
-import { Subject } from "rxjs";
+import { Component, OnDestroy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Subject } from "rxjs";
+import {
+  SessionListMode,
+  SettingsService,
+} from "../../services/settings.service";
 
 @Component({
   selector: "ch-settings",
   templateUrl: "./settings.component.html",
-  styleUrls: ["./settings.component.less"]
+  styleUrls: ["./settings.component.less"],
 })
-export class SettingsComponent implements OnInit, OnDestroy {
+export class SettingsComponent implements OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template
   private unsubscribe: Subject<any> = new Subject();
 
@@ -19,8 +19,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     public settingsService: SettingsService,
     public activeModal: NgbActiveModal
   ) {}
-
-  ngOnInit() {}
 
   ngOnDestroy() {
     this.unsubscribe.next();

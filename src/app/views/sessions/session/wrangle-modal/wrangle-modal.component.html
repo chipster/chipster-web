@@ -65,7 +65,7 @@
     <h3 class="h3-xs">Other columns</h3>
     <div class="mb-2" [formGroup]="includeExcludeForm">
       Selected columns will be
-      <select formControlName="includeExclude" class="form-select" (change)="onIncludeExcludeChange($event)">
+      <select formControlName="includeExclude" class="form-select" (change)="onIncludeExcludeChange()">
         <option *ngFor="let item of includeExcludeOptions" [value]="item">
           {{item}}
         </option>
