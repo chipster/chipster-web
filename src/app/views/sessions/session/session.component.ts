@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import {
   ActivatedRoute,
   ActivatedRouteSnapshot,
-  RouterStateSnapshot
+  RouterStateSnapshot,
 } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import {
@@ -14,7 +14,7 @@ import {
   Rule,
   Session,
   SessionState,
-  Tool
+  Tool,
 } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
@@ -45,12 +45,12 @@ export enum ComponentState {
   DELETING_SESSION = "Deleting session...",
   READY = "Session ready",
   NOT_FOUND = "Session not found",
-  FAIL = "" // empty to avoid duplicate error messages
+  FAIL = "", // empty to avoid duplicate error messages
 }
 @Component({
   selector: "ch-session",
   templateUrl: "./session.component.html",
-  styleUrls: ["./session.component.less"]
+  styleUrls: ["./session.component.less"],
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;
@@ -96,7 +96,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params
       .pipe(
-        mergeMap(params => {
+        mergeMap((params) => {
           /*
     Load session after every route change, not just once
     Also this component can be reused, e.g. when a user creates her own copy
@@ -108,7 +108,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
           const sessionId = params["sessionId"];
           return this.sessionResource.getSession(sessionId).pipe(
-            catchError(err => {
+            catchError((err) => {
               // if session not found but sourceSession url param exists, go there
               return this.trySourceSessionIfSessionNotFound(err); // either navigate and return empty observable or rethrow err
             }),
@@ -135,7 +135,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(
-        results => {
+        (results) => {
           // save loaded stuff
           this.sessionData = results[0];
           this.tools = results[1];
@@ -178,7 +178,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.split3Size = 33;
           }
         },
-        err => this.errorService.showError("tool panel error", err)
+        (err) => this.errorService.showError("tool panel error", err)
       );
   }
 
@@ -250,7 +250,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     // temporary session with changes, ask what to do
     if (this.sessionData.session.state === SessionState.TemporaryModified) {
       const leavePage$ = this.askKeepOrDiscardSession().pipe(
-        tap(leave => {
+        tap((leave) => {
           if (leave) {
             this.sessionEventService.unsubscribe();
           }
@@ -286,7 +286,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.sessionEventService
       .getRuleStream()
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(change => {
+      .subscribe((change) => {
         const rule: Rule = change.oldValue as Rule;
 
         if (
@@ -308,7 +308,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
 
       .subscribe(
-        change => {
+        (change) => {
           const event = change.event;
           const oldValue = change.oldValue as Job;
           const newValue = change.newValue as Job;
@@ -352,7 +352,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             }
           }
         },
-        err => this.errorService.showError("session event error", err)
+        (err) => this.errorService.showError("session event error", err)
       );
   }
 
@@ -366,7 +366,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   openErrorModal(title: string, job: Job): void {
     const modalRef = this.modalService.open(JobErrorModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.job = job;
@@ -374,7 +374,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   private getSessionData(sessionId: string): Observable<SessionData> {
     return this.sessionResource.loadSession(sessionId).pipe(
-      mergeMap(sessionData => {
+      mergeMap((sessionData) => {
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
           return of(sessionData);
         } else {
@@ -382,12 +382,12 @@ export class SessionComponent implements OnInit, OnDestroy {
           return this.sessionResource
             .copySession(sessionData, sessionData.session.name, true)
             .pipe(
-              mergeMap(id => {
+              mergeMap((id) => {
                 const queryParams = {};
                 queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
                 return from(
                   this.routeService.navigateAbsolute("/analyze/" + id, {
-                    queryParams: queryParams
+                    queryParams: queryParams,
                   })
                 );
               }),
@@ -426,7 +426,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         () => {
           log.debug("delete session request done");
         },
-        err => this.restErrorService.showError("delete session failed", err)
+        (err) => this.restErrorService.showError("delete session failed", err)
       );
   }
 
@@ -445,7 +445,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         deleteButton
       )
       .pipe(
-        mergeMap(dialogResult => {
+        mergeMap((dialogResult) => {
           if (dialogResult.button === keepButton) {
             this.sessionData.session.name = dialogResult.value;
             this.sessionData.session.state = SessionState.Ready;
@@ -456,7 +456,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             return this.deleteTempSession();
           }
         }),
-        catchError(err => {
+        catchError((err) => {
           if (err === undefined || err === 0 || err === 1) {
             // dialog cancel, backdrop click or esc
             return of(false);
@@ -531,7 +531,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         "opening session with state: ready, but source url param exists, redirect to id without parameters"
       );
       this.routeService.navigateAbsolute("/analyze/" + session.sessionId, {
-        replaceUrl: true
+        replaceUrl: true,
       });
     }
   }

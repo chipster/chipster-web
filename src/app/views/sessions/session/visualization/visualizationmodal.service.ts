@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { VisualizationModalComponent } from "./visualizationmodal.component";
 import { Dataset } from "chipster-js-common";
+import { VisualizationModalComponent } from "./visualizationmodal.component";
 
 @Injectable()
 export class VisualizationModalService {
@@ -13,8 +13,7 @@ export class VisualizationModalService {
     sessionData?
   ) {
     const modalRef = this.ngbModal.open(VisualizationModalComponent, {
-      size: "lg",
-      windowClass: "modal-xl"
+      size: "xl",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.visualizationId = visualizationId;

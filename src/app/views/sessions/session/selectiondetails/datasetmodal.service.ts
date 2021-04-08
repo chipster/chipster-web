@@ -3,7 +3,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
-import { map } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import {
@@ -28,7 +28,7 @@ export class DatasetModalService {
     sessionData: SessionData
   ): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
-      size: "lg",
+      size: "xl",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
@@ -59,7 +59,7 @@ export class DatasetModalService {
     }
 
     const modalRef = this.ngbModal.open(WrangleModalComponent, {
-      size: "lg",
+      size: "xl",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
@@ -68,7 +68,7 @@ export class DatasetModalService {
     // block with the spinner while waiting for that observable to complete
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
-        map((runWrangle$) => {
+        mergeMap((runWrangle$) => {
           return runWrangle$ != null
             ? this.dialogModalService.openSpinnerModal(
                 "Convert to Chipster format",
@@ -78,8 +78,8 @@ export class DatasetModalService {
         })
       )
       .subscribe({
-        next: () => {
-          log.info("Convert done");
+        next: (result) => {
+          log.info("Convert done", result);
         },
         error: (error) =>
           this.errorService.showError(
