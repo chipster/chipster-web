@@ -47,13 +47,6 @@
   cursor: pointer;
 }
 
-// extra large modal for visualizations
-.modal-xl > .modal-dialog {
-  max-width: none;
-  margin-left: 30px;
-  margin-right: 30px;
-}
-
 // specify the button to make this more specific than other button styles
 button.dropdown-menu-button {
   border: 0;

@@ -243,7 +243,7 @@ export class HistoryComponent implements OnInit {
 
   openJobOutputModal(jobhistory: JobHistory) {
     const modalRef = this.modalService.open(JobOutputModalComponent, {
-      size: "lg",
+      size: "xl",
     });
     modalRef.componentInstance.output = jobhistory.screenOutput;
   }

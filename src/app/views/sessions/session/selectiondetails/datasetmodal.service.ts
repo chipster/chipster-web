@@ -28,7 +28,7 @@ export class DatasetModalService {
     sessionData: SessionData
   ): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
-      size: "lg",
+      size: "xl",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
