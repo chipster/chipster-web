@@ -150,6 +150,7 @@
 },
   "defaultProject": "chipster-web",
     "cli": {
+      "analytics": false,
     "defaultCollection": "@angular-eslint/schematics"
   }
 
