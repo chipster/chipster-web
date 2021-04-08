@@ -8,7 +8,7 @@ import * as StackTrace from "stacktrace-js";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import {
   ErrorButton,
-  ErrorMessage
+  ErrorMessage,
 } from "../../core/errorhandler/errormessage";
 import { RouteService } from "../../shared/services/route.service";
 import { ContactSupportService } from "../contact/contact-support.service";
@@ -16,7 +16,7 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
 
 @Component({
   selector: "ch-error",
-  template: ""
+  template: "",
 })
 export class ErrorComponent implements OnInit {
   toastIds: number[] = [];
@@ -33,13 +33,14 @@ export class ErrorComponent implements OnInit {
   ngOnInit(): void {
     // clear errors when navigating to a new url
     this.router.events
-      .pipe(filter(event => event instanceof NavigationStart))
+      .pipe(filter((event) => event instanceof NavigationStart))
       .subscribe(
         () => {
-          this.toastIds.forEach(t => this.toastrService.remove(t));
+          this.toastIds.forEach((t) => this.toastrService.remove(t));
           this.toastIds = [];
         },
-        err => this.errorService.showError("getting router events failed", err)
+        (err) =>
+          this.errorService.showError("getting router events failed", err)
       );
 
     this.errorService
@@ -56,18 +57,18 @@ export class ErrorComponent implements OnInit {
             disableTimeOut: true,
             tapToDismiss: dismissible && error.buttons.length === 0,
             buttons: [],
-            links: []
+            links: [],
           };
 
-          options.buttons = error.buttons.map(button => {
+          options.buttons = error.buttons.map((button) => {
             return {
-              text: button
+              text: button,
             };
           });
 
-          options.links = error.links.map(link => {
+          options.links = error.links.map((link) => {
             return {
-              text: link
+              text: link,
             };
           });
 
@@ -75,7 +76,7 @@ export class ErrorComponent implements OnInit {
 
           this.toastIds.push(toast.toastId);
           return toast.onAction.pipe(
-            mergeMap(buttonText => {
+            mergeMap((buttonText) => {
               if (buttonText === ErrorButton.LogIn) {
                 this.redirect();
               } else if (buttonText === ErrorButton.Reload) {
@@ -94,9 +95,11 @@ export class ErrorComponent implements OnInit {
           );
         })
       )
-      .subscribe(null, err => {
-        // just log when the error dialog fails
-        log.error("error from toastr", err);
+      .subscribe({
+        error: (err) => {
+          // just log when the error dialog fails
+          log.error("error from toastr", err);
+        },
       });
   }
 
@@ -108,9 +111,9 @@ export class ErrorComponent implements OnInit {
     this.routeService.redirectToLoginAndBack();
   }
 
-  contactSupport(errorMessage: ErrorMessage): Promise<{}> {
+  contactSupport(errorMessage: ErrorMessage): Observable<any> {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
-      tap(logString => {
+      tap((logString) => {
         this.contactSupportService.openContactSupportModal(logString);
       })
     );
@@ -121,9 +124,9 @@ export class ErrorComponent implements OnInit {
     );
   }
 
-  showDetails(title: string, errorMessage: ErrorMessage): Promise<{}> {
+  showDetails(title: string, errorMessage: ErrorMessage): Observable<any> {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
-      tap(logString => {
+      tap((logString) => {
         this.dialogModalService.openPreModal(title, logString);
       })
     );
@@ -161,8 +164,8 @@ export class ErrorComponent implements OnInit {
       // try to get the source mapped stacktrace
       return from(StackTrace.fromError(error)).pipe(
         map((sf: []) => this.stackframesToString(sf)),
-        map(stack => info + "stack: \n" + stack + "\n"),
-        catchError(stackErr =>
+        map((stack) => info + "stack: \n" + stack + "\n"),
+        catchError((stackErr) =>
           of(info + "stack: (failed to get the stack: " + stackErr + ")\n")
         )
       );
@@ -191,7 +194,7 @@ export class ErrorComponent implements OnInit {
   ): string {
     return stackframes
       .splice(0, maxCount)
-      .map(sf => sf.toString())
+      .map((sf) => sf.toString())
       .join("\n");
   }
 }

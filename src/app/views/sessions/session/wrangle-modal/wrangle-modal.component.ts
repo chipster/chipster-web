@@ -344,38 +344,24 @@ export class WrangleModalComponent implements OnInit {
             this.dataset.name.endsWith(".tsv")
               ? this.dataset.name.slice(0, -4) + "-converted.tsv"
               : this.dataset.name + "-converted.tsv";
-          return this.sessionDataService.createDerivedDataset(
-            newFileName,
-            [this.dataset.datasetId],
-            "Convert to Chipster format",
-            wrangledFileString,
-            "Import"
-          );
-        }),
 
-        // get newly created dataset (from the server, might not be available locally yet)
-        mergeMap((newDatasetId) => {
-          log.info("Converted dataset created ", newDatasetId);
-          log.info("Get newly created dataset");
-          return this.sessionDataService.getDataset(newDatasetId);
-        }),
-
-        // create phenodata and update it to server
-        mergeMap((newDataset: Dataset) => {
-          log.info("Got newly created dataset", newDataset);
+          // phenodata
           const phenodataString = this.getPhenodataString();
-          log.info(
-            "Phenodata for converted dataset, first 1000 characters",
-            phenodataString.substring(0, 1000)
-          );
-          newDataset.metadataFiles = [
+          const metadataFiles = [
             {
               name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
               content: phenodataString,
             },
           ];
-          log.info("New dataset after metadata being set", newDataset);
-          return this.sessionDataService.updateDataset(newDataset);
+
+          return this.sessionDataService.createDerivedDataset(
+            newFileName,
+            [this.dataset.datasetId],
+            "Convert to Chipster format",
+            wrangledFileString,
+            "Import",
+            metadataFiles
+          );
         })
       );
     this.activeModal.close(wrangle$);

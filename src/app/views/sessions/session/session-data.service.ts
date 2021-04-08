@@ -6,10 +6,11 @@ import {
   Job,
   JobInput,
   JobState,
+  MetadataFile,
   Resource,
   Rule,
   Session,
-  WsEvent
+  WsEvent,
 } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
@@ -20,7 +21,7 @@ import {
   from as observableFrom,
   merge as observableMerge,
   Observable,
-  of
+  of,
 } from "rxjs";
 import {
   catchError,
@@ -29,7 +30,7 @@ import {
   map,
   merge,
   mergeMap,
-  takeUntil
+  takeUntil,
 } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -104,15 +105,16 @@ export class SessionDataService {
     sourceDatasetIds: string[],
     toolName: string,
     content: string,
-    toolCategory = "Interactive visualizations"
+    toolCategory = "Interactive visualizations",
+    metadataFiles: MetadataFile[] = null
   ): Observable<string> {
     const job = new Job();
     job.state = JobState.Completed;
-    // FIXME don't hardcore category
+    // FIXME don't hardcode category
     job.toolCategory = toolCategory;
     job.toolName = toolName;
 
-    job.inputs = sourceDatasetIds.map(id => {
+    job.inputs = sourceDatasetIds.map((id) => {
       const input = new JobInput();
       input.datasetId = id;
       return input;
@@ -122,18 +124,21 @@ export class SessionDataService {
       mergeMap((jobId: string) => {
         const d = new Dataset(name);
         d.sourceJob = jobId;
+        if (metadataFiles != null) {
+          d.metadataFiles = metadataFiles;
+        }
         return this.createDataset(d);
       }),
       mergeMap((datasetId: string) => {
         return forkJoin([
           of(datasetId),
-          this.fileResource.uploadData(this.getSessionId(), datasetId, content)
+          this.fileResource.uploadData(this.getSessionId(), datasetId, content),
         ]);
       }),
-      mergeMap(result => {
+      mergeMap((result) => {
         return of(result[0]);
       }),
-      catchError(err => {
+      catchError((err) => {
         log.info("create derived dataset failed", err);
         throw err;
       })
@@ -155,7 +160,7 @@ export class SessionDataService {
       () => {
         log.info("Job deleted");
       },
-      err => this.restErrorService.showError("delete jobs failed", err)
+      (err) => this.restErrorService.showError("delete jobs failed", err)
     );
   }
 
@@ -167,7 +172,7 @@ export class SessionDataService {
       () => {
         log.info("Dataset deleted");
       },
-      err => this.restErrorService.showError("delete datasets failed", err)
+      (err) => this.restErrorService.showError("delete datasets failed", err)
     );
   }
 
@@ -245,7 +250,7 @@ export class SessionDataService {
       this.getTokenForDataset(this.getSessionId(), dataset.datasetId),
       this.configService.getFileBrokerUrl()
     ).pipe(
-      map(results => {
+      map((results) => {
         const [datasetToken, url] = results;
         return `${url}/sessions/${this.getSessionId()}/datasets/${
           dataset.datasetId
@@ -257,7 +262,7 @@ export class SessionDataService {
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
       this.download(
-        this.getDatasetUrl(d).pipe(map(url => url + "&download")),
+        this.getDatasetUrl(d).pipe(map((url) => url + "&download")),
         3
       );
     }
@@ -265,7 +270,7 @@ export class SessionDataService {
 
   openNewTab(dataset: Dataset) {
     this.newTab(
-      this.getDatasetUrl(dataset).pipe(map(url => url)),
+      this.getDatasetUrl(dataset).pipe(map((url) => url)),
       null,
       null,
       "Browser's pop-up blocker prevented opening a new tab"
@@ -301,7 +306,7 @@ export class SessionDataService {
         win.document.write(text);
       }
       url$.subscribe(
-        url => {
+        (url) => {
           // but we can set it's location later asynchronously
           win.location.href = url;
 
@@ -313,7 +318,8 @@ export class SessionDataService {
             }, autoCloseDelay);
           }
         },
-        err => this.restErrorService.showError("opening a new tab failed", err)
+        (err) =>
+          this.restErrorService.showError("opening a new tab failed", err)
       );
     } else {
       // Chrome allows only one download
@@ -337,11 +343,11 @@ export class SessionDataService {
   }
 
   getPersonalRules(rules: Array<Rule>) {
-    return rules.filter(r => r.username === this.tokenService.getUsername());
+    return rules.filter((r) => r.username === this.tokenService.getUsername());
   }
 
   getPublicRules(rules: Array<Rule>) {
-    return rules.filter(r => r.username === "everyone");
+    return rules.filter((r) => r.username === "everyone");
   }
 
   getApplicableRules(rules: Array<Rule>) {
@@ -369,8 +375,8 @@ export class SessionDataService {
 
     const sharedSessions = [];
 
-    sessions.forEach(session => {
-      session.rules.forEach(rule => {
+    sessions.forEach((session) => {
+      session.rules.forEach((rule) => {
         if (rule.sharedBy === username) {
           const sharedSession = _.clone(session);
           sharedSession.rules = [rule];
@@ -384,7 +390,7 @@ export class SessionDataService {
 
   isMySession(session: Session): boolean {
     return session.rules.some(
-      rule =>
+      (rule) =>
         rule.username === this.tokenService.getUsername() && !rule.sharedBy
     );
   }
@@ -398,7 +404,7 @@ export class SessionDataService {
     session: Session,
     exampleSessionOwnerUserId: string
   ): boolean {
-    return session.rules.some(rule => {
+    return session.rules.some((rule) => {
       return (
         exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId
       );
@@ -406,7 +412,9 @@ export class SessionDataService {
   }
 
   isReadOnlySession(session: Session) {
-    return !this.getApplicableRules(session.rules).some(rule => rule.readWrite);
+    return !this.getApplicableRules(session.rules).some(
+      (rule) => rule.readWrite
+    );
   }
 
   // Added the delete dataset code here as two components are sharing the code
@@ -479,37 +487,37 @@ export class SessionDataService {
         {
           text: BTN_DELETE,
           icon: "fas fa-times",
-          class: "btn-secondary"
+          class: "btn-secondary",
         },
         {
           text: BTN_UNDO,
           icon: "fas fa-undo",
-          class: "btn-info"
-        }
-      ]
+          class: "btn-info",
+        },
+      ],
     };
 
     const toast = this.toastrService.info(msg, "", options);
 
-    toast.onAction.pipe(filter(text => text === BTN_UNDO)).subscribe(
-      buttonText => {
+    toast.onAction.pipe(filter((text) => text === BTN_UNDO)).subscribe(
+      (buttonText) => {
         this.deleteDatasetsUndo(deletedDatasets);
         this.toastrService.clear(toast.toastId);
       },
-      err => this.errorService.showError("error in dataset deletion", err)
+      (err) => this.errorService.showError("error in dataset deletion", err)
     );
 
     toast.onHidden
       .pipe(
         takeUntil(toast.onAction), // only if there was no action
-        merge(toast.onAction.pipe(filter(text => text === BTN_DELETE)))
+        merge(toast.onAction.pipe(filter((text) => text === BTN_DELETE)))
       )
       .subscribe(
         () => {
           this.deleteDatasetsNow(deletedDatasets);
           this.toastrService.clear(toast.toastId);
         },
-        err => this.errorService.showError("error in dataset deletion", err)
+        (err) => this.errorService.showError("error in dataset deletion", err)
       );
   }
 
@@ -535,7 +543,7 @@ export class SessionDataService {
   getCompleteDatasets(datasetsMap: Map<string, Dataset>): Map<string, Dataset> {
     // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
     return new Map(
-      Array.from(datasetsMap).filter(entry => {
+      Array.from(datasetsMap).filter((entry) => {
         const dataset = entry[1];
         return dataset.fileId != null;
       })

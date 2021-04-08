@@ -19,7 +19,7 @@ export class DialogModalService {
 
   static observableFromPromiseWithDismissHandling(result: Promise<any>) {
     return observableFrom(result).pipe(
-      catchError(err => {
+      catchError((err) => {
         // dialog dismissed, cancel -> undefined, backdrop -> 0, esc -> 1
         if (err === undefined || err === 0 || err === 1) {
           return EMPTY;
@@ -65,7 +65,7 @@ export class DialogModalService {
 
   openPreModal(title, text) {
     const modalRef = this.modalService.open(PreModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.text = text;
     modalRef.componentInstance.title = title;
@@ -110,7 +110,7 @@ export class DialogModalService {
     ruleStream$: Observable<SessionEvent>
   ): Observable<any> {
     const modalRef = this.modalService.open(SharingModalComponent, {
-      size: "lg"
+      size: "lg",
     });
     modalRef.componentInstance.session = session;
     modalRef.componentInstance.ruleStream$ = ruleStream$;
@@ -127,6 +127,8 @@ export class DialogModalService {
     });
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.observable = observable;
-    return modalRef.result;
+    return DialogModalService.observableFromPromiseWithDismissHandling(
+      modalRef.result
+    );
   }
 }

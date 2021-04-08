@@ -1,11 +1,10 @@
+import { AfterViewInit, Component, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, AfterViewInit, ViewChild } from "@angular/core";
-import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
-  templateUrl: "./spinnermodal.html"
+  templateUrl: "./spinnermodal.html",
 })
 export class SpinnerModalComponent implements AfterViewInit {
   @Input() message: string;
@@ -18,10 +17,10 @@ export class SpinnerModalComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.observable.subscribe(
-      () => {
-        this.activeModal.close();
+      (result) => {
+        this.activeModal.close(result);
       },
-      err => {
+      (err) => {
         this.restErrorService.showError(this.message + " failed", err);
         this.activeModal.dismiss();
       }
