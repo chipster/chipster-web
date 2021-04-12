@@ -1580,7 +1580,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .pipe(
             mergeMap((name) => {
               dataset.name = name;
-              throw "jeejee";
+              return self.sessionDataService.updateDataset(dataset);
             })
           )
           .subscribe({
