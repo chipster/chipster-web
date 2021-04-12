@@ -13,10 +13,8 @@ import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import {
   Category,
   Dataset,
-  EventType,
   Job,
   Module,
-  Resource,
   SessionEvent,
   Tool,
 } from "chipster-js-common";
@@ -338,22 +336,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       });
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
-      .getDatasetStream()
-      .pipe(
-        filter(
-          (sessionEvent) =>
-            sessionEvent != null &&
-            sessionEvent.event.type === EventType.Update &&
-            sessionEvent.event.resourceType === Resource.Dataset &&
-            this.selectionService.selectedDatasets.some(
-              (selectedDataset) =>
-                selectedDataset.datasetId ===
-                (sessionEvent.newValue as Dataset).datasetId
-            )
-        ),
-        map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId),
-        startWith(null as SessionEvent)
-      );
+      .getSelectedDatasetsContentsUpdatedStream()
+      .pipe(startWith(null as SessionEvent));
 
     combineLatest([
       this.store.select("selectedTool"),

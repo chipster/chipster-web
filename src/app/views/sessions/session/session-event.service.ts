@@ -23,6 +23,7 @@ import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { WebSocketService } from "../../../shared/services/websocket.service";
+import { SelectionService } from "./selection.service";
 
 @Injectable()
 export class SessionEventService {
@@ -40,7 +41,8 @@ export class SessionEventService {
   constructor(
     private sessionResource: SessionResource,
     private websocketService: WebSocketService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private selectionService: SelectionService
   ) {}
 
   unsubscribe() {
@@ -134,6 +136,23 @@ export class SessionEventService {
 
   getRuleStream() {
     return this.ruleStream$;
+  }
+
+  getSelectedDatasetsContentsUpdatedStream(): Observable<string> {
+    return this.getDatasetStream().pipe(
+      filter(
+        (sessionEvent) =>
+          sessionEvent != null &&
+          sessionEvent.event.type === EventType.Update &&
+          sessionEvent.event.resourceType === Resource.Dataset &&
+          this.selectionService.selectedDatasets.some(
+            (selectedDataset) =>
+              selectedDataset.datasetId ===
+              (sessionEvent.newValue as Dataset).datasetId
+          )
+      ),
+      map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId)
+    );
   }
 
   createEvent(event, oldValue, newValue) {

@@ -41,7 +41,7 @@
 
 <div class="chipster-highlight">
   <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
-    <span class="h6">{{selectionService.selectedDatasets[0].name}}</span>
+    <span class="h6">{{datasetName}}</span>
     <span class="dropdown">
       <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton"
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
@@ -56,8 +56,10 @@
       </div>
     </span>
   </div>
+
   <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (delete)="deleteDatasets()">
   </ch-dataset-details>
+
   <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" (scrollFix)="doScrollFix.emit()"
     [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
 </div>
