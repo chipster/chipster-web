@@ -28,7 +28,7 @@
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@ng-bootstrap/ng-bootstrap": "^9.1.0",
     "@ng-select/ng-select": "^6.1.0",
-    "@ngrx/store": "^11.1.0",
+    "@ngrx/store": "^11.1.1",
     "ag-grid-angular": "^25.1.0",
     "ag-grid-community": "^25.1.0",
     "angular-split": "^5.0.0",
