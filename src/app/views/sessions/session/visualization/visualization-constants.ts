@@ -26,7 +26,9 @@ export default class VisualizationConstants {
         Tags.MOTHUR_GROUPS,
         Tags.MOTHUR_NAMES,
         Tags.MOTHUR_OLIGOS,
-        Tags.MOTHUR_STABILITY
+        Tags.MOTHUR_STABILITY,
+        Tags.MOTHUR_SHARED,
+        Tags.MOTHUR_TAXONOMY,
       ],
       supportAllTypes: false,
       anyInputCountSupported: false,
