@@ -74,7 +74,7 @@ export class QuerySessionDataService {
   isPhenodataType(sessionData: SessionData, dataset: Dataset) {
     return this.typeTagService.has(sessionData, dataset, Tags.GENE_EXPRS) 
       || this.typeTagService.has(sessionData, dataset, Tags.BAM)
-      || this.typeTagService.has(sessionData, dataset, Tags.PHYLOSEQ_SHARED)
+      || this.typeTagService.has(sessionData, dataset, Tags.MOTHUR_SHARED)
       || this.typeTagService.has(sessionData, dataset, Tags.R_RDA);
   }
 
