@@ -134,27 +134,93 @@
                   </button>
                 -->
 
+                <!-- traffic light -->
+                <!-- <button class="btn btn-sm btn-outline-secondary  mr-1" (click)="
+                $event.stopPropagation(); parametersDropdown.toggle()" title="Edit parameters and inputs"
+                  [disabled]="!selectedTool">
+                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
+                    aria-hidden="true"></span>
+                  <span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                </button> -->
+
                 <!-- parameters -->
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
                     $event.stopPropagation(); parametersDropdown.toggle()
                   " title="Edit parameters and inputs" [disabled]="!selectedTool">
-                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
+                  <span *ngIf="paramButtonWarning" class="fas fa-fw fa-exclamation-circle text-warning"
                     aria-hidden="true"></span>
-                  <!-- suppress JSBitwiseOperatorUsage -->
-
-                  <span *ngIf="runEnabled" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
-
+                  <span *ngIf="!paramButtonWarning" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
                   Parameters
                 </button>
 
                 <!-- run -->
-                <button class="btn btn-success run-button btn-sm button-wide flex-grow-1"
-                  (click)="runJob(runForEachEnabled)" [disabled]="!runEnabled">
-                  <span class="fas fa-play"></span>
-                  {{ runForEachEnabled === false ? "Run" : "Run For Each" }}
+                <button *ngIf="!runForManyVisible" class="btn btn-success run-button btn-sm button-wide flex-grow-1"
+                  (click)="runJob(false)" [disabled]="!runEnabled">
+                  <span class="fas fa-play"></span> Run
                 </button>
+
+                <div *ngIf="runForManyVisible" ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
+                  <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" ngbDropdownToggle
+                    id="runDropdownButton">
+                    <span class="fas fa-play"></span> Run</button>
+                  <div class="dropdown-menu dropdown-menu-right " ngbDropdownMenu aria-labelledby="runDropdownButton">
+                    <button ngbDropdownItem (click)="runJob(false)" [disabled]="!validatedTool.inputsValid"> Run Single
+                      Job</button>
+                    <button ngbDropdownItem (click)="runJob(true)" [disabled]="!validatedTool.runForEachValid">Run Job
+                      for Each File <span class="text-muted text-sm">{{validatedTool.selectedDatasets.length}}
+                        files</span></button>
+                    <button ngbDropdownItem (click)="runForEachSample()"
+                      [disabled]="!validatedTool.runForEachSampleValid">{{getRunForEachSampleButtonText()}} <span
+                        *ngIf="validatedTool.runForEachSampleValid"
+                        class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length}}
+                        samples</span></button>
+                    <div *ngIf="!validatedTool.runForEachSampleValid" class="dropdown-divider"></div>
+                    <button *ngIf="!validatedTool.runForEachSampleValid" ngbDropdownItem (click)="onDefineSamples()"
+                      [disabled]="validatedTool.runForEachSampleValid">Define Samples to Enable Run for Each
+                      Sample</button>
+
+                  </div>
+                </div>
+
+
+
+
+
+                <!-- <span class="dropdown float-right">
+                  <button [disabled]="sessionData.datasetsMap.size === 0"
+                    class="btn btn-sm btn-outline-secondary tool-bar-button ml-1" id="workflowDropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+                    <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="runDropdownMenuButton">
+                    <a class="dropdown-item">Select all files</a>
+                    <a class="dropdown-item" [class.disabled]="true">
+                      Select descendants of a file
+                    </a>
+                  </div>
+                </span>
+ -->
+
+                <!-- <i class="fas fa-lg fa-ellipsis-h "></i> -->
+
+
               </div>
+
             </div>
+            <!-- <div class="row">
+              <div class="col"></div>
+              <div class="col d-flex">
+          <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob(runForEachEnabled)"
+            [disabled]="!runEnabled">
+            <span class="fas fa-play"></span>
+            {{ runForEachEnabled === false ? "Run" : "Run For Each" }}
+          </button>
+
+        </div>
+      </div> -->
+
+
+
 
             <div class="row">
               <div class="col">

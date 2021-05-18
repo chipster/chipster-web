@@ -156,6 +156,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   deleteMenuItem: any;
   exportMenuItem: any;
   historyMenuItem: any;
+  groupsMenuItem: any;
+  dividerMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
 
@@ -748,6 +750,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const menu =
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
+            this.groupsMenuItem,
+            this.dividerMenuItem,
             Object.assign({}, this.deleteMenuItem, {
               title: "Delete (" + self.selectedDatasets.length + " files)",
             }),
@@ -755,9 +759,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         : [
             this.renameMenuItem,
             this.convertMenuItem,
-            this.deleteMenuItem,
+            this.groupsMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
+            this.dividerMenuItem,
+            this.deleteMenuItem,
           ];
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
@@ -1592,7 +1598,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.convertMenuItem = {
-      title: "Convert to Chipster format...",
+      title: "Convert to Chipster Format...",
       action: function (d): void {
         self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
       },
@@ -1603,6 +1609,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       title: "Delete",
       action: function (): void {
         self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
+      },
+    };
+
+    this.groupsMenuItem = {
+      title: "Define Samples...",
+      action: function (): void {
+        self.datasetModalService.openGroupsModal(
+          self.selectedDatasets,
+          self.sessionData
+        );
       },
     };
 
@@ -1621,6 +1637,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.sessionData
         );
       },
+    };
+
+    this.dividerMenuItem = {
+      divider: true,
     };
   }
 }

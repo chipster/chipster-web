@@ -349,7 +349,7 @@ export class WrangleModalComponent implements OnInit {
           const phenodataString = this.getPhenodataString();
           const metadataFiles = [
             {
-              name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
+              name: this.datasetService.PHENODATA_FILENAME,
               content: phenodataString,
             },
           ];

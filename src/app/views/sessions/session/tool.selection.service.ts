@@ -6,32 +6,65 @@ import { forkJoin, forkJoin as observableForkJoin, Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
-import { DatasetService } from "./dataset.service";
+import { DatasetService, SampleGroups } from "./dataset.service";
+import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "./get-session-data.service";
 import { ToolService } from "./tools/tool.service";
 import {
-  ParameterValidationResult,
+  SelectedTool,
   SelectedToolWithInputs,
-  SelectedToolWithValidatedInputs
+  SelectedToolWithValidatedInputs,
+  ValidatedTool,
+  ValidationResult,
 } from "./tools/ToolSelection";
 
 export interface SelectionOption {
   id: string;
   displayName: string;
 }
-
 @Injectable()
 export class ToolSelectionService {
   constructor(
     private toolService: ToolService,
     private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService
+    private datasetService: DatasetService,
+    private dialogModalService: DialogModalService
   ) {}
+
+  validateParametersAndGetValidatedTool(
+    toolWithParamsAndValidatedInputs: SelectedToolWithValidatedInputs
+  ) {
+    const parameterValidations: Map<
+      string,
+      ValidationResult
+    > = this.validateParameters(toolWithParamsAndValidatedInputs);
+    const parametersValid = Array.from(parameterValidations.values()).every(
+      (result: ValidationResult) => result.valid
+    );
+
+    const validationMessage = this.getValidationMessage(
+      parametersValid,
+      toolWithParamsAndValidatedInputs
+    );
+
+    return Object.assign(
+      {
+        valid:
+          toolWithParamsAndValidatedInputs.inputsValid &&
+          toolWithParamsAndValidatedInputs.phenodataValid &&
+          parametersValid,
+        parametersValid: parametersValid,
+        message: validationMessage,
+        parameterResults: parameterValidations,
+      },
+      toolWithParamsAndValidatedInputs
+    );
+  }
 
   validateParameters(
     selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
-  ): Map<string, ParameterValidationResult> {
-    const resultsMap = new Map<string, ParameterValidationResult>();
+  ): Map<string, ValidationResult> {
+    const resultsMap = new Map<string, ValidationResult>();
     if (
       selectedToolWithValidatedInputs &&
       selectedToolWithValidatedInputs.tool &&
@@ -47,7 +80,7 @@ export class ToolSelectionService {
     return resultsMap;
   }
 
-  validateParameter(parameter: ToolParameter): ParameterValidationResult {
+  validateParameter(parameter: ToolParameter): ValidationResult {
     // required parameter must not be emtpy
     if (!parameter.optional && !this.parameterHasValue(parameter)) {
       return { valid: false, message: "Required parameter can not be empty" };
@@ -65,14 +98,14 @@ export class ToolSelectionService {
       ) {
         return {
           valid: false,
-          message: "Value must be an integer"
+          message: "Value must be an integer",
         };
       }
       // min limit
       if (parameter.from && parameter.value < parameter.from) {
         return {
           valid: false,
-          message: "Value must be greater than or equal to " + parameter.from
+          message: "Value must be greater than or equal to " + parameter.from,
         };
       }
 
@@ -80,7 +113,7 @@ export class ToolSelectionService {
       if (parameter.to && parameter.value > parameter.to) {
         return {
           valid: false,
-          message: "Value must be less than or equal to " + parameter.to
+          message: "Value must be less than or equal to " + parameter.to,
         };
       }
     } else if (
@@ -103,14 +136,14 @@ export class ToolSelectionService {
       } catch (e) {
         log.warn("failed to create RegExp, parameter validation failed");
         return {
-          valid: true
+          valid: true,
         };
       }
 
       if (!this.testRegExpSupport(regExp)) {
         log.warn("validating string parameter failed");
         return {
-          valid: true
+          valid: true,
         };
       }
 
@@ -119,7 +152,7 @@ export class ToolSelectionService {
         ? { valid: true }
         : {
             valid: false,
-            message: "Illegal character '" + result[0] + "'"
+            message: "Illegal character '" + result[0] + "'",
           };
     }
 
@@ -175,8 +208,8 @@ export class ToolSelectionService {
       // get bound phenodatas for populating (phenodata dependent) parameters
       const boundPhenodatas = selectedToolWithInputs.phenodataBindings
         .map((phenodataBinding: PhenodataBinding) => phenodataBinding.dataset)
-        .filter(dataset => dataset != null)
-        .map(dataset => this.getSessionDataService.getPhenodata(dataset));
+        .filter((dataset) => dataset != null)
+        .map((dataset) => this.getSessionDataService.getPhenodata(dataset));
 
       // populating params is async as some selection options may require dataset contents
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map(
@@ -256,7 +289,7 @@ export class ToolSelectionService {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService
           .getMetadataColumns(phenodatas)
-          .map(column => {
+          .map((column) => {
             return { id: column };
           });
 
@@ -268,15 +301,42 @@ export class ToolSelectionService {
     return of(parameter); // always return, even if nothing gets done
   }
 
-  validateInputs(toolWithInputs: SelectedToolWithInputs): boolean {
+  validateInputs(toolWithInputs: SelectedToolWithInputs): ValidationResult {
+    // inputs are valid if tool has no  inputs
     if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
-      return true;
-    } else {
-      // phenodata inputs are not included in the bindings, so no need to deal with them
-      return toolWithInputs.inputBindings.every((binding: InputBinding) => {
-        return binding.toolInput.optional || binding.datasets.length > 0;
-      });
+      return { valid: true };
     }
+
+    // check that every required input is bound
+    // phenodata inputs are not included in the bindings, so no need to deal with them
+    const bindingsValid = toolWithInputs.inputBindings.every(
+      (binding: InputBinding) => {
+        return binding.toolInput.optional || binding.datasets.length > 0;
+      }
+    );
+    if (!bindingsValid) {
+      return { valid: false, message: "Input file missing" };
+    }
+
+    // check that there are no unbound datasets
+    const boundDatasetIds: string[] = toolWithInputs.inputBindings
+      .reduce((array: Dataset[], inputBinding: InputBinding) => {
+        array.push(...inputBinding.datasets);
+        return array;
+      }, [])
+      .filter((dataset) => dataset != null)
+      .map((dataset) => dataset.datasetId);
+
+    const allDatasetsBound =
+      toolWithInputs.selectedDatasets.length === 0 ||
+      toolWithInputs.selectedDatasets.every((dataset) =>
+        boundDatasetIds.includes(dataset.datasetId)
+      );
+
+    return {
+      valid: allDatasetsBound,
+      message: allDatasetsBound ? undefined : "Too many input files",
+    };
   }
 
   /**
@@ -288,7 +348,7 @@ export class ToolSelectionService {
   validatePhenodata(phenodataBindings: PhenodataBinding[]): boolean {
     // every returns true for an empty array
     return phenodataBindings.every(
-      binding =>
+      (binding) =>
         binding.toolInput.optional ||
         (!binding.toolInput.optional && binding.dataset != null)
     );
@@ -300,8 +360,9 @@ export class ToolSelectionService {
   ): boolean {
     return (
       toolWithInputs.tool &&
-      toolWithInputs.tool.inputs.length === 1 &&
-      !this.toolService.isMultiInput(toolWithInputs.tool.inputs[0]) &&
+      toolWithInputs.tool.inputs.length > 0 &&
+      // toolWithInputs.tool.inputs.length === 1 &&
+      // !this.toolService.isMultiInput(toolWithInputs.tool.inputs[0]) &&
       toolWithInputs.selectedDatasets &&
       toolWithInputs.selectedDatasets.length > 1 &&
       toolWithInputs.selectedDatasets.every((dataset: Dataset) =>
@@ -314,19 +375,178 @@ export class ToolSelectionService {
     );
   }
 
+  getValidatedToolForEachSample(
+    selectedToolWithInputs: SelectedToolWithInputs,
+    sessionData: SessionData
+  ): ValidatedTool[] {
+    const sampleGroups = this.datasetService.getSampleGroups(
+      selectedToolWithInputs.selectedDatasets
+    );
+
+    // all sample datasets, needed for checks
+    // for now support only paired end
+    const sampleDatasets: Dataset[] = this.datasetService.getPairedDatasets(
+      sampleGroups.pairedEndSamples
+    );
+
+    // get selected datasets which are not included in the sample groups
+    const sampleDatasetIds = sampleDatasets.map((dataset) => dataset.datasetId);
+    const nonSampleDatasets = selectedToolWithInputs.selectedDatasets.filter(
+      (dataset) => !sampleDatasetIds.includes(dataset.datasetId)
+    );
+
+    // TODO sanity check if nonSampleDatasets have datasets that look like sample datasets
+    // checking prefix maybe not exact enough?
+    // const sampleDatasetPrefix = UtilsService.getCommonPrefix(
+    //   sampleDatasets.map((dataset) => dataset.name)
+    // );
+
+    // for each sample, create new ValidatedTool
+    const validatedToolsForSamples = sampleGroups.pairedEndSamples.map(
+      (pairedEndSample) =>
+        this.rebindWithNewDatasetsAndValidate(
+          this.datasetService
+            .getPairedDatasets([pairedEndSample])
+            .concat(nonSampleDatasets),
+          selectedToolWithInputs,
+          sessionData,
+          pairedEndSample.sampleName
+        )
+    );
+
+    // // debug pring
+    // validatedToolsForSamples.forEach((sampleValidatedTool) => {
+    //   console.log("sample validated tool", sampleValidatedTool);
+    //   console.log("sample valid: ", sampleValidatedTool.valid);
+    //   sampleValidatedTool.inputBindings.forEach((inputBinding) => {
+    //     console.log(
+    //       inputBinding.toolInput.name.id +
+    //         " -> " +
+    //         inputBinding.datasets[0]?.name
+    //     );
+    //   });
+    // });
+
+    return validatedToolsForSamples;
+  }
+
+  /**
+   * Get a copy of the ValidatedTool with the given datasets used for bindings and validations.
+   *
+   * @param datasets
+   * @param originalToolWithInputs
+   * @param sessionData
+   * @param sampleName
+   * @returns
+   */
+  rebindWithNewDatasetsAndValidate(
+    datasets: Dataset[],
+    originalToolWithInputs: SelectedToolWithInputs,
+    sessionData: SessionData,
+    sampleName?: string
+  ): ValidatedTool {
+    const newSelectedTool: SelectedTool = {
+      tool: originalToolWithInputs.tool,
+      category: originalToolWithInputs.category,
+      module: originalToolWithInputs.module,
+    };
+
+    // bind inputs
+    const newInputBindings = this.toolService.bindInputs(
+      sessionData,
+      newSelectedTool.tool,
+      datasets
+    );
+
+    const newToolWithInputs: SelectedToolWithInputs = Object.assign(
+      {
+        inputBindings: newInputBindings,
+        selectedDatasets: datasets, // TODO should this be only those included in the bindings?
+      },
+      newSelectedTool
+    );
+
+    // validate inputs
+    const inputsValidation: ValidationResult = this.validateInputs(
+      newToolWithInputs
+    );
+    const inputsValid = inputsValidation.valid;
+    const inputsMessage = inputsValidation.message;
+
+    // don't try to bind and validate phenodata unless inputs are valid
+    // NOTE: input could be valid if they are all optional, and no data selected
+    // now bindPhenodata results as empty binding -> phenodata will be invalid
+    // which maybe is correct?
+    const phenodataBindings = inputsValid
+      ? this.toolService.bindPhenodata(newToolWithInputs)
+      : this.toolService.getUnboundPhenodataBindings(newToolWithInputs);
+
+    const phenodataValid = inputsValid
+      ? this.validatePhenodata(phenodataBindings)
+      : false;
+
+    // phenodata validation message, here for now
+    let phenodataMessage = "";
+    if (!phenodataValid) {
+      if (!inputsValid) {
+        phenodataMessage = "Inputs need to be valid to determine phenodata";
+      } else if (phenodataBindings.length > 1) {
+        phenodataMessage =
+          "Tool with multiple phenodata inputs not supported yet";
+      } else {
+        phenodataMessage = "No phenodata available";
+      }
+    }
+
+    // useful for validation message
+    // TODO populate this properly
+    const sampleGroups: SampleGroups = {
+      singleEndSamples: [],
+      pairedEndSamples: [],
+      pairMissingSamples: [],
+      sampleDataMissing: [],
+    };
+
+    const newToolWithValidatedInputs: SelectedToolWithValidatedInputs = Object.assign(
+      {
+        inputsValid: inputsValid,
+        inputsMessage: inputsMessage,
+        runForEachValid: false,
+        runForEachSampleValid: false,
+        sampleGroups: sampleGroups,
+        phenodataValid: phenodataValid,
+        phenodataMessage: phenodataMessage,
+        phenodataBindings: phenodataBindings,
+      },
+      newToolWithInputs
+    );
+
+    // parameters are not populated again as they should remain the same
+
+    // validate parameters and combine validations to new ValidatedTool
+    const newValidatedTool = this.validateParametersAndGetValidatedTool(
+      newToolWithValidatedInputs
+    );
+
+    return newValidatedTool;
+  }
+
   getValidationMessage(
     parametersValid: boolean,
-    inputsValid: boolean,
-    phenodataValid: boolean
+    toolWithValidatedInputs: SelectedToolWithValidatedInputs
   ): string {
+    const inputsValid = toolWithValidatedInputs.inputsValid;
+    const inputsMessage = toolWithValidatedInputs.inputsMessage;
+    const phenodataValid = toolWithValidatedInputs.phenodataValid;
+
     if (!parametersValid && !inputsValid) {
-      return "Invalid parameters and missing input files";
+      return "Invalid parameters and " + inputsMessage;
     } else if (!parametersValid && !phenodataValid) {
       return "Invalid parameters and missing phenodata";
     } else if (!parametersValid) {
       return "Invalid parameters";
     } else if (!inputsValid) {
-      return "Missing input files";
+      return inputsMessage;
     } else if (!phenodataValid) {
       return "Missing phenodata";
     } else {

@@ -1,12 +1,15 @@
 import { Injectable } from "@angular/core";
-import { Dataset, Job } from "chipster-js-common";
+import { Job } from "chipster-js-common";
 import log from "loglevel";
 import { interval, Observable, of } from "rxjs";
 import { distinctUntilChanged, map, startWith } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { SessionData } from "../../../model/session/session-data";
 import UtilsService from "../../../shared/utilities/utils";
 import { DatasetService } from "./dataset.service";
+import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session-data.service";
+import { ToolSelectionService } from "./tool.selection.service";
 import { ToolService } from "./tools/tool.service";
 import { ValidatedTool } from "./tools/ToolSelection";
 
@@ -16,7 +19,9 @@ export class JobService {
     private sessionDataService: SessionDataService,
     private toolService: ToolService,
     private restErrorService: RestErrorService,
-    private datasetService: DatasetService
+    private datasetService: DatasetService,
+    private toolSelectionService: ToolSelectionService,
+    private dialogModalService: DialogModalService
   ) {}
 
   static isRunning(job: Job): boolean {
@@ -66,29 +71,101 @@ export class JobService {
     );
   }
 
-  runForEach(validatedTool: ValidatedTool) {
+  runForEach(validatedTool: ValidatedTool, sessionData: SessionData) {
     // sanity check
     if (!validatedTool.runForEachValid) {
       log.warn("requesting run for each, but run for each validation not ok");
       return;
     }
 
-    // for each selected dataset, clone validatedTool and replace
-    // bindings with a single binding containing the selected dataset
-    const jobs: Job[] = validatedTool.selectedDatasets
-      .map((dataset: Dataset) => {
-        return Object.assign({}, validatedTool, {
-          inputBindings: [
-            {
-              toolInput: validatedTool.tool.inputs[0],
-              datasets: [dataset],
-            },
-          ],
-        });
-      })
-      .map((clonedTool: ValidatedTool) => {
-        return this.createJob(clonedTool);
-      });
+    // for each file, create new ValidatedTool
+    const reboundValidatedTools = validatedTool.selectedDatasets.map(
+      (dataset) =>
+        this.toolSelectionService.rebindWithNewDatasetsAndValidate(
+          [dataset],
+          validatedTool,
+          sessionData
+        )
+    );
+
+    // // debug print
+    // reboundValidatedTools.forEach((sampleValidatedTool) => {
+    //   console.log("SAMPLE VALIDATED TOOL", sampleValidatedTool);
+    //   console.log("sample valid: ", sampleValidatedTool.valid);
+    //   sampleValidatedTool.inputBindings.forEach((inputBinding) => {
+    //     console.log(
+    //       inputBinding.toolInput.name.id +
+    //         " -> " +
+    //         inputBinding.datasets[0]?.name
+    //     );
+    //   });
+    // });
+
+    // TODO check that all validatedTools are valid
+    const invalidValidatedToolsForSamples = reboundValidatedTools.filter(
+      (sampleValidatedTool) => sampleValidatedTool.valid === false
+    );
+    if (invalidValidatedToolsForSamples.length > 0) {
+      // FIXME add details
+      const message = "";
+
+      this.dialogModalService.openNotificationModal(
+        "Run for each sample not possible",
+        message
+      );
+      return;
+    }
+
+    // create jobs from ValidatedTools
+    const jobs: Job[] = reboundValidatedTools.map(
+      (sampleValidatedTool: ValidatedTool) => {
+        return this.createJob(sampleValidatedTool);
+      }
+    );
+
+    // submit
+    this.sessionDataService.createJobs(jobs).subscribe({
+      error: (error: any) => {
+        this.restErrorService.showError("Submitting jobs failed", error);
+      },
+    });
+  }
+
+  runForEachSample(validatedTool: ValidatedTool, sessionData) {
+    // sanity check
+    if (!validatedTool.runForEachSampleValid) {
+      log.warn(
+        "requesting run for each sample , but run for each validation not ok"
+      );
+      return;
+    }
+
+    const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
+      validatedTool,
+      sessionData
+    );
+
+    // check that all rebound validatedTools are valid
+    const invalidValidatedToolsForSamples = validatedToolsForSamples.filter(
+      (sampleValidatedTool) => sampleValidatedTool.valid === false
+    );
+    if (invalidValidatedToolsForSamples.length > 0) {
+      // FIXME add details
+      const message = "";
+
+      this.dialogModalService.openNotificationModal(
+        "Run for each sample not possible",
+        message
+      );
+      return;
+    }
+
+    // create jobs from ValidatedTools
+    const jobs: Job[] = validatedToolsForSamples.map(
+      (sampleValidatedTool: ValidatedTool) => {
+        return this.createJob(sampleValidatedTool);
+      }
+    );
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({

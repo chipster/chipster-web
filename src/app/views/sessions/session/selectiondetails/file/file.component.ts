@@ -11,7 +11,6 @@ import {
 } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -64,16 +63,11 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (datasetId) => {
-          if (datasetId !== this.dataset?.datasetId) {
-            log.warn(
-              "File component got missmatching datasetId",
-              datasetId,
-              this.dataset?.datasetId
-            );
+          if (datasetId === this.dataset?.datasetId) {
+            this.datasetName = this.sessionData.datasetsMap.get(
+              this.dataset.datasetId
+            )?.name;
           }
-          this.datasetName = this.sessionData.datasetsMap.get(
-            this.dataset.datasetId
-          )?.name;
         },
       });
   }
@@ -113,6 +107,13 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
   wrangleDataset() {
     this.datasetModalService.openWrangleModal(this.dataset, this.sessionData);
+  }
+
+  defineDatasetGroups() {
+    this.datasetModalService.openGroupsModal(
+      this.selectionService.selectedDatasets,
+      this.sessionData
+    );
   }
 
   ngOnDestroy() {

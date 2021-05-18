@@ -19,7 +19,6 @@ import {
   Tool,
 } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
 import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
@@ -38,18 +37,20 @@ import {
   SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
+import { DatasetService } from "../dataset.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
+import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { ToolService } from "./tool.service";
 import {
-  ParameterValidationResult,
   SelectedTool,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   ValidatedTool,
+  ValidationResult,
 } from "./ToolSelection";
 
 interface ToolSearchListItem {
@@ -93,7 +94,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public toolSearchList: Array<ToolSearchListItem>;
 
   public runEnabled: boolean;
-  public runForEachEnabled: boolean;
+  public runForManyVisible: boolean;
+  public paramButtonWarning: boolean;
   public runningJobs = 0;
   public jobList: Job[];
 
@@ -131,6 +133,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
+    private datasetService: DatasetService,
+    private datasetModalService: DatasetModalService,
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig
   ) {
@@ -215,15 +219,26 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   runJob(runForEach: boolean) {
-    let notificationText;
     if (runForEach) {
-      this.jobService.runForEach(this.validatedTool);
-      notificationText =
-        this.validatedTool.selectedDatasets.length + " jobs started";
+      this.jobService.runForEach(this.validatedTool, this.sessionData);
+      this.showRunJobToaster(this.validatedTool.selectedDatasets.length);
     } else {
       this.jobService.runJob(this.validatedTool);
-      notificationText = "Job started";
+      this.showRunJobToaster();
     }
+  }
+
+  runForEachSample() {
+    this.jobService.runForEachSample(this.validatedTool, this.sessionData);
+
+    this.showRunJobToaster(
+      this.validatedTool.sampleGroups.pairedEndSamples.length
+    );
+  }
+
+  private showRunJobToaster(jobCount = 1) {
+    const notificationText =
+      jobCount > 1 ? jobCount + " jobs started" : "Job started";
 
     // close the previous toastr not to cover the run button
     // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
@@ -332,7 +347,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe((t: SelectedTool) => {
         this.selectedTool = t;
         this.runEnabled = false;
-        this.runForEachEnabled = false;
+        this.paramButtonWarning = false;
+        this.runForManyVisible = false;
       });
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
@@ -383,13 +399,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(
         filter((value) => value !== null),
         map((toolWithInputs: SelectedToolWithInputs) => {
-          const inputsValid = this.toolSelectionService.validateInputs(
+          const inputsValidation: ValidationResult = this.toolSelectionService.validateInputs(
             toolWithInputs
           );
-          const runForEachValid = this.toolSelectionService.validateRunForEach(
-            toolWithInputs,
-            this.sessionData
-          );
+          const inputsValid = inputsValidation.valid;
+          const inputsMessage = inputsValidation.message;
 
           // don't try to bind and validate phenodata unless inputs are valid
           // NOTE: input could be valid if they are all optional, and no data selected
@@ -417,10 +431,35 @@ export class ToolsComponent implements OnInit, OnDestroy {
             }
           }
 
+          const runForEachValid = this.toolSelectionService.validateRunForEach(
+            toolWithInputs,
+            this.sessionData
+          );
+
+          const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
+            toolWithInputs,
+            this.sessionData
+          );
+
+          // check that all rebound validatedTools are valid, every returns true for empty array
+          const runForEachSampleValid =
+            validatedToolsForSamples.length > 0 &&
+            validatedToolsForSamples.every(
+              (sampleValidatedTool) => sampleValidatedTool.valid
+            );
+
+          // FIXME remove if not needed later on, may be needed with run button
+          const sampleGroups = this.datasetService.getSampleGroups(
+            toolWithInputs.selectedDatasets
+          );
+
           return Object.assign(
             {
               inputsValid: inputsValid,
+              inputsMessage: inputsMessage,
               runForEachValid: runForEachValid,
+              runForEachSampleValid: runForEachSampleValid,
+              sampleGroups: sampleGroups,
               phenodataValid: phenodataValid,
               phenodataMessage: phenodataMessage,
               phenodataBindings: phenodataBindings,
@@ -460,39 +499,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
       });
 
     // validate parameters after parameters changed (or populated)
-    combineLatest(
+    combineLatest([
       this.store
         .select("selectedToolWithPopulatedParams")
         .pipe(filter((value) => value !== null)),
-      this.parametersChanged$ // signals when user changes parameters
-    )
+      this.parametersChanged$, // signals when user changes parameters
+    ])
       .pipe(
         map(([toolWithParamsAndValidatedInputs]) => {
-          const parameterValidations: Map<
-            string,
-            ParameterValidationResult
-          > = this.toolSelectionService.validateParameters(
-            toolWithParamsAndValidatedInputs
-          );
-          const parametersValid = Array.from(
-            parameterValidations.values()
-          ).every((result: ParameterValidationResult) => result.valid);
-          const validationMessage = this.toolSelectionService.getValidationMessage(
-            parametersValid,
-            toolWithParamsAndValidatedInputs.inputsValid,
-            toolWithParamsAndValidatedInputs.phenodataValid
-          );
-
-          return Object.assign(
-            {
-              valid:
-                toolWithParamsAndValidatedInputs.inputsValid &&
-                toolWithParamsAndValidatedInputs.phenodataValid &&
-                parametersValid,
-              parametersValid: parametersValid,
-              message: validationMessage,
-              parameterResults: parameterValidations,
-            },
+          return this.toolSelectionService.validateParametersAndGetValidatedTool(
             toolWithParamsAndValidatedInputs
           );
         })
@@ -506,10 +521,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // subscribe to validated tool
     this.store.select("validatedTool").subscribe((tool: ValidatedTool) => {
-      log.debug("validated tool ready", tool);
       this.validatedTool = tool;
+
+      this.runForManyVisible =
+        tool && (tool.runForEachValid || tool.runForEachSampleValid);
+
       this.runEnabled = tool && tool.valid;
-      this.runForEachEnabled = tool && tool.runForEachValid;
+      this.paramButtonWarning = !this.runEnabled && !this.runForManyVisible;
     });
   }
 
@@ -538,5 +556,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
         "Find tool"
       )
     );
+  }
+
+  onDefineSamples() {
+    this.datasetModalService.openGroupsModal(
+      this.selectionService.selectedDatasets,
+      this.sessionData
+    );
+  }
+
+  getRunForEachSampleButtonText(): string {
+    return this.validatedTool?.sampleGroups != null &&
+      this.validatedTool.sampleGroups.pairedEndSamples.length > 0
+      ? "Run Job for Each Sample"
+      : // ? "Run Job for Each Sample (" + this.validatedTool.sampleGroups.size + ")"
+        "Run Job for Each Sample";
   }
 }

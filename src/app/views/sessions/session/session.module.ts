@@ -19,6 +19,7 @@ import { JobErrorModalComponent } from "./job-error-modal/job-error-modal.compon
 import { JobService } from "./job.service";
 import { ModifiedSessionGuard } from "./modified-session.guard";
 import { QuerySessionDataService } from "./query-session-data.service";
+import { SamplesModalComponent } from "./samples-modal/samples-modal.component";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
 import { DatasetModule } from "./selectiondetails/dataset.module";
@@ -49,7 +50,7 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     AgGridModule,
     FormsModule,
     NgSelectModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   declarations: [
     SessionComponent,
@@ -60,7 +61,8 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     ImportSessionModalComponent,
     SessionDetailsComponent,
     WrangleModalComponent,
-    MultiDropdownComponent
+    MultiDropdownComponent,
+    SamplesModalComponent,
   ],
   providers: [
     SessionEventService,
@@ -74,7 +76,7 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     JobService,
     ModifiedSessionGuard,
     UserEventService,
-    DatasetService
-  ]
+    DatasetService,
+  ],
 })
 export class SessionModule {}

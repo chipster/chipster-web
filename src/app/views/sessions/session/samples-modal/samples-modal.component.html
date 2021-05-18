@@ -1,0 +1,125 @@
+<div class="modal-header">
+  <h4 class="modal-title">Define Sample Files</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.close()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div *ngIf="state.isReady(); else statusTemplate" class="h-100">
+
+    <form [formGroup]="identifiersForm" (ngSubmit)=onFindPairs()>
+      <div class="form-group">
+        <div class="row">
+
+          <div class="col"> <label for="r1TokenInput" class="text-sm">Forward Identifier</label>
+            <input type="text" required placeholder="Identifier found in forward reads file names"
+              class="form-control form-control-sm" formControlName="r1Token" id="r1TokenInput">
+          </div>
+          <div class="col">
+            <label for="r2TokenInput" class="text-sm">Reverse Identifier</label>
+            <input type="text" required placeholder="Identifier found in reverse reads file names"
+              class="form-control form-control-sm" formControlName="r2Token" id="r2TokenInput">
+          </div>
+          <div class="col align-self-end float-right">
+            <button type="submit" [disabled]="!identifiersForm.valid" class="btn btn-sm btn-success">Find Pairs</button>
+            <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2">Reset
+              Everything</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <h2 class="h2-xs">Unpaired Files</h2>
+    <div>
+      <span class="text-sm">{{unpairedFiles.length}} unpaired
+        file{{getPluralEnd(pairedEndSamples.length)}}</span>
+      <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-right invisible mb-1">Reset
+        Everything</button>
+    </div>
+    <hr class="mt-1 mb-1" />
+    <div class="limit-height">
+      <div *ngFor="let dataset of unpairedFiles" class="">{{dataset.name}}</div>
+      <!-- <table class="table table-sm table-bordered table-striped">
+        <tbody>
+          <tr *ngFor="let dataset of unpairedFiles">
+            <td>{{dataset.name}}</td>
+          </tr>
+        </tbody>
+      </table> -->
+    </div>
+
+
+    <!-- <div class="row">
+      <div class="col">
+        <div>Reads1</div>
+        <div *ngFor="let dataset of reads1Files">{{dataset.name}}</div>
+      </div>
+
+      <div class="col">
+        <div>Reads2</div>
+        <div *ngFor="let dataset of reads2Files">{{dataset.name}}</div>
+      </div>
+    </div> -->
+
+
+    <h2 class="h2-xs mt-3">Paired Sample Files</h2>
+    <div class="">
+      <span class="text-sm">{{pairedEndSamples.length*2}} paired files, {{pairedEndSamples.length}}
+        sample{{getPluralEnd(pairedEndSamples.length)}}</span>
+      <button *ngIf="pairedEndSamples.length > 0" (click)="onResetPairs()"
+        class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
+    </div>
+
+    <div class="limit-height">
+      <table *ngIf="pairedEndSamples.length > 0" class="table table-sm table-striped table-bordered">
+        <thead class="text-center">
+          <th><i class="far fa-arrow-alt-circle-right"></i></th>
+          <th> <i class="far fa-arrow-alt-circle-left"></i></th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pairedEndSample of pairedEndSamples">
+            <td>{{pairedEndSample.pairs[0].r1File.name}}</td>
+            <td>{{pairedEndSample.pairs[0].r2File.name}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="pairMissingSamples.length > 0">
+      <h2 class="h2-xs mt-3">Paired End Sample Files With Missing Pair</h2>
+      <div class="">
+        <span class="text-sm">{{pairMissingSamples.length}} missing
+          pair{{getPluralEnd(pairMissingSamples.length)}}</span>
+        <button (click)="onResetMissing()" class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
+      </div>
+
+      <div class="limit-height">
+        <table class="table table-sm table-striped table-bordered ">
+          <thead class="text-center">
+            <th class="w-50"><i class="far fa-arrow-alt-circle-right"></i></th>
+            <th class="w-50"><i class="far fa-arrow-alt-circle-left"></i></th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pairedEndSample of pairMissingSamples">
+              <td *ngIf="pairedEndSample.pairs[0].r1File != null">{{pairedEndSample.pairs[0].r1File.name}}</td>
+              <td *ngIf="pairedEndSample.pairs[0].r1File == null"><i>missing</i></td>
+              <td *ngIf="pairedEndSample.pairs[0].r2File != null">{{pairedEndSample.pairs[0].r2File.name}}</td>
+              <td *ngIf="pairedEndSample.pairs[0].r2File == null"><i>missing</i></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #statusTemplate>
+    <ch-status [state]="state"></ch-status>
+  </ng-template>
+
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-sm btn-secondary float-left" (click)="activeModal.close()">Close</button>
+  <button type="button" class="btn btn-sm btn-success" (click)="onSave()">Save</button>
+</div>

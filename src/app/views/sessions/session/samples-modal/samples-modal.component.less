@@ -1,0 +1,31 @@
+.limit-height {
+  // max-height: 30%;
+  // height: 15ex;
+  // overflow-y: auto;
+  // overflow-x: hidden;
+  // margin: 0;
+}
+
+::ng-deep .modal {
+  max-height: 100vh;
+  .modal-dialog {
+    .modal-content {
+      .modal-body {
+        max-height: calc(90vh - 140px);
+        overflow-y: auto;
+      }
+    }
+  }
+}
+
+// .modal-body {
+//   // max-height: calc("80vh");
+//   // max-height: calc(~"100vh - 100px");
+//   max-height: 600px;
+//   overflow: auto;
+// }
+
+h2 {
+  margin-top: 3ex;
+  margin-bottom: 0;
+}

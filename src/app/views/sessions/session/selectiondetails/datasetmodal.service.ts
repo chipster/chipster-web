@@ -11,6 +11,7 @@ import {
   TypeTagService,
 } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
+import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 
@@ -86,6 +87,32 @@ export class DatasetModalService {
             "Convert to Chipster format failed",
             error
           ),
+      });
+  }
+
+  public openGroupsModal(datasets: Dataset[], sessionData: SessionData): void {
+    const modalRef = this.ngbModal.open(SamplesModalComponent, {
+      size: "xl",
+    });
+    modalRef.componentInstance.datasets = datasets;
+    modalRef.componentInstance.sessionData = sessionData;
+
+    // modal returns the observale which runs the action
+    // block with the spinner while waiting for that observable to complete
+    DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
+      .pipe(
+        mergeMap((run$) => {
+          return run$ != null
+            ? this.dialogModalService.openSpinnerModal("Saving groups", run$)
+            : EMPTY;
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          log.debug("Saving groups done", result);
+        },
+        error: (error) =>
+          this.errorService.showError("Saving groups failed", error),
       });
   }
 }

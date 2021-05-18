@@ -270,12 +270,7 @@ export class PhenodataVisualizationComponent
       }, "");
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
-      this.dataset.metadataFiles = [
-        {
-          name: this.datasetService.DEFAULT_PHENODATA_FILENAME,
-          content: phenodataString,
-        },
-      ];
+      this.datasetService.setPhenodata(this.dataset, phenodataString);
       this.sessionDataService.updateDataset(this.dataset).subscribe(
         () => log.info("dataset phenodata updated"),
         (err) =>

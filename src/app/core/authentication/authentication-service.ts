@@ -9,7 +9,7 @@ import {
   mergeMap,
   publishReplay,
   refCount,
-  tap
+  tap,
 } from "rxjs/operators";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -46,10 +46,7 @@ export class AuthenticationService {
     }
     this.saveToken(token);
 
-    this.user$ = this.getUser().pipe(
-      publishReplay(1),
-      refCount()
-    );
+    this.user$ = this.getUser().pipe(publishReplay(1), refCount());
   }
 
   // Do the authentication here based on userid and password
@@ -71,8 +68,8 @@ export class AuthenticationService {
   requestToken(username: string, password: string): Observable<string> {
     log.info("request token");
     return this.configService.getAuthUrl().pipe(
-      tap(url => log.info("url", url)),
-      mergeMap(authUrl => {
+      tap((url) => log.info("url", url)),
+      mergeMap((authUrl) => {
         const url = `${authUrl}/tokens`;
 
         return this.httpClient.post(
@@ -80,7 +77,7 @@ export class AuthenticationService {
           {},
           {
             headers: this.tokenService.getHttpBasicHeader(username, password),
-            responseType: "text"
+            responseType: "text",
           }
         );
       })
@@ -96,7 +93,7 @@ export class AuthenticationService {
     this.configService
       .getAuthUrl()
       .pipe(
-        mergeMap(authUrl => {
+        mergeMap((authUrl) => {
           const url = `${authUrl}/tokens/refresh`;
 
           return this.httpClient.post(
@@ -104,7 +101,7 @@ export class AuthenticationService {
             {},
             {
               headers: this.tokenService.getTokenHeader(),
-              responseType: "text"
+              responseType: "text",
             }
           );
         })
@@ -133,7 +130,7 @@ export class AuthenticationService {
     }
 
     return this.configService.getAuthUrl().pipe(
-      mergeMap(authUrl => {
+      mergeMap((authUrl) => {
         const url = `${authUrl}/tokens/check`;
 
         return this.httpClient
@@ -143,7 +140,7 @@ export class AuthenticationService {
               log.info("token is valid");
               return true;
             }),
-            catchError(error => {
+            catchError((error) => {
               if (error.status === 403) {
                 // token is invalid
                 log.info("check token got 403 -> token invalid");
@@ -173,7 +170,7 @@ export class AuthenticationService {
 
   getUser(): Observable<User> {
     return this.configService.getAuthUrl().pipe(
-      mergeMap(authUrl => {
+      mergeMap((authUrl) => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
         const url = `${authUrl}/users/${userId}`;
 
@@ -184,12 +181,12 @@ export class AuthenticationService {
 
   getUsers(): Observable<User[]> {
     return this.configService.getAuthUrl().pipe(
-      mergeMap(authUrl => {
+      mergeMap((authUrl) => {
         const url = `${authUrl}/users`;
 
         return <Observable<User[]>>this.authHttpClient.getAuth(url);
       }),
-      catchError(err => {
+      catchError((err) => {
         this.restErrorService.showError("failed to get users", err);
         throw err;
       })
@@ -198,7 +195,7 @@ export class AuthenticationService {
 
   updateUser(user: User): Observable<any> {
     return this.configService.getAuthUrl().pipe(
-      mergeMap(authUrl => {
+      mergeMap((authUrl) => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
         const url = `${authUrl}/users/${userId}`;
         return <Observable<User>>this.authHttpClient.putAuth(url, user);

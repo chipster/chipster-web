@@ -13,7 +13,7 @@ export default class UtilsService {
 
   static mapValues(map: Map<any, any>) {
     const array: any[] = [];
-    map.forEach(function(value: any) {
+    map.forEach(function (value: any) {
       array.push(value);
     });
     return array;
@@ -104,7 +104,7 @@ export default class UtilsService {
    * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
    */
   static equalStringArrays(first: Array<string>, second: Array<string>) {
-    return _.every(first, item => {
+    return _.every(first, (item) => {
       return _.includes(second, item);
     });
   }
@@ -121,7 +121,7 @@ export default class UtilsService {
 
   static parseISOStringToDate(s: any) {
     if (s != null) {
-      return new Date(Date.parse(s));    
+      return new Date(Date.parse(s));
     }
     return null;
   }
@@ -130,16 +130,19 @@ export default class UtilsService {
     return end.getTime() - start.getTime();
   }
 
-  static millisecondsToHumanFriendly(milliseconds: number, zero = "0", lessThanSecond = "less than second"): string {
-
+  static millisecondsToHumanFriendly(
+    milliseconds: number,
+    zero = "0",
+    lessThanSecond = "less than second"
+  ): string {
     let seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
     let days = Math.floor(hours / 24);
-    
-    // Remainders. For example, when the "minutes" is 74, the "minute" is "14"). 
-    // Now we show only the most significant unit (e.g. "1 hour") where the both values are equal. 
-    // Let's keep these anyway, in case we want to show more precision at some point, 
+
+    // Remainders. For example, when the "minutes" is 74, the "minute" is "14").
+    // Now we show only the most significant unit (e.g. "1 hour") where the both values are equal.
+    // Let's keep these anyway, in case we want to show more precision at some point,
     // e.g. "1 hour 14 minutes".
 
     let millisecond = milliseconds % 1000;
@@ -152,13 +155,13 @@ export default class UtilsService {
     }
 
     if (days > 1) {
-      return days + " days"
+      return days + " days";
     }
 
     if (hour == 1) {
       return "an hour";
     }
-    
+
     if (hour > 1) {
       return hour + " hours";
     }
@@ -172,11 +175,11 @@ export default class UtilsService {
     }
 
     if (second == 1) {
-      return "a second"
+      return "a second";
     }
 
     if (second > 0) {
-      return seconds + " seconds"
+      return seconds + " seconds";
     }
 
     if (millisecond > 0) {
@@ -184,10 +187,27 @@ export default class UtilsService {
     }
 
     if (millisecond == 0) {
-      return zero;;
+      return zero;
     }
 
     log.warn("unknown millisecond time " + milliseconds);
     return "" + milliseconds;
+  }
+
+  static getCommonPrefix(array: String[]) {
+    var A = array.concat().sort(),
+      a1 = A[0],
+      a2 = A[A.length - 1],
+      L = a1.length,
+      i = 0;
+    while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+    return a1.substring(0, i);
+  }
+
+  static partitionArray<Type>(array: Type[], fn): [Type[], Type[]] {
+    const passed: Type[] = [];
+    const rejected: Type[] = [];
+    array.forEach((x) => (fn(x) ? passed : rejected).push(x));
+    return [passed, rejected];
   }
 }

@@ -3,9 +3,10 @@ import {
   Dataset,
   InputBinding,
   Module,
-  Tool
+  Tool,
 } from "chipster-js-common";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
+import { SampleGroups } from "../dataset.service";
 
 export interface SelectedTool {
   tool: Tool;
@@ -21,7 +22,10 @@ export interface SelectedToolWithInputs extends SelectedTool {
 export interface SelectedToolWithValidatedInputs
   extends SelectedToolWithInputs {
   inputsValid: boolean;
+  inputsMessage?: string;
   runForEachValid: boolean;
+  runForEachSampleValid: boolean;
+  sampleGroups: SampleGroups;
   phenodataValid: boolean;
   phenodataMessage?: string;
   phenodataBindings: Array<PhenodataBinding>;
@@ -30,10 +34,10 @@ export interface ValidatedTool extends SelectedToolWithValidatedInputs {
   valid: boolean;
   parametersValid: boolean;
   message?: string;
-  parameterResults?: Map<string, ParameterValidationResult>;
+  parameterResults?: Map<string, ValidationResult>;
 }
 
-export interface ParameterValidationResult {
+export interface ValidationResult {
   valid: boolean;
   message?: string;
 }
