@@ -167,11 +167,11 @@ export class DatasetService {
 
       if (r2File != null) {
         samplesArray.push({
-          sampleId: uuidv4.v4(),
+          sampleId: uuidv4(),
           sampleName: sampleName,
           pairs: [
             {
-              pairId: uuidv4.v4(),
+              pairId: uuidv4(),
               r1File: r1File,
               r2File: r2File,
             },
