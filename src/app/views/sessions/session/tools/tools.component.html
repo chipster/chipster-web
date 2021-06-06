@@ -175,8 +175,8 @@
                         class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length +
                         validatedTool.sampleGroups.singleEndSamples.length}}
                         samples</span></button>
-                    <div *ngIf="!validatedTool.runForEachSampleValid" class="dropdown-divider"></div>
-                    <button *ngIf="!validatedTool.runForEachSampleValid" ngbDropdownItem (click)="onDefineSamples()"
+                    <div *ngIf="defineHintVisible" class="dropdown-divider"></div>
+                    <button *ngIf="defineHintVisible" ngbDropdownItem (click)="onDefineSamples()"
                       [disabled]="validatedTool.runForEachSampleValid">Define Samples to Enable Run for Each
                       Sample</button>
 

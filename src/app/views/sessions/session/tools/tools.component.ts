@@ -95,6 +95,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   public runEnabled: boolean;
   public runForManyVisible: boolean;
+  public defineHintVisible = false;
   public paramButtonWarning: boolean;
   public runningJobs = 0;
   public jobList: Job[];
@@ -523,6 +524,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
       this.runEnabled = tool && tool.valid;
       this.paramButtonWarning = !this.runEnabled && !this.runForManyVisible;
+      this.defineHintVisible =
+        tool != null &&
+        this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
+        this.validatedTool.sampleGroups.pairedEndSamples.length < 1 &&
+        this.validatedTool.sampleGroups.pairMissingSamples.length < 1;
     });
   }
 
