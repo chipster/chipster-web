@@ -172,7 +172,8 @@
                     <button ngbDropdownItem (click)="runForEachSample()"
                       [disabled]="!validatedTool.runForEachSampleValid">{{getRunForEachSampleButtonText()}} <span
                         *ngIf="validatedTool.runForEachSampleValid"
-                        class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length}}
+                        class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length +
+                        validatedTool.sampleGroups.singleEndSamples.length}}
                         samples</span></button>
                     <div *ngIf="!validatedTool.runForEachSampleValid" class="dropdown-divider"></div>
                     <button *ngIf="!validatedTool.runForEachSampleValid" ngbDropdownItem (click)="onDefineSamples()"

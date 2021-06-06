@@ -142,6 +142,7 @@ export class JobService {
 
     const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
       validatedTool,
+      validatedTool.sampleGroups,
       sessionData
     );
 

@@ -375,19 +375,69 @@ export class ToolSelectionService {
     );
   }
 
+  validateRunForEachSample(
+    toolWithInputs: SelectedToolWithInputs,
+    sampleGroups: SampleGroups,
+    sessionData: SessionData
+  ): ValidationResult {
+    if (
+      sampleGroups.singleEndSamples.length > 0 &&
+      (sampleGroups.pairedEndSamples.length > 0 ||
+        sampleGroups.pairMissingSamples.length > 0)
+    ) {
+      // both single and paired
+      return {
+        valid: false,
+        message:
+          "Selected files contain both single end and paired end sample files",
+      };
+    } else if (
+      sampleGroups.pairedEndSamples.length > 0 &&
+      sampleGroups.pairMissingSamples.length > 0
+    ) {
+      // only paired, but some pairs missing
+      return {
+        valid: false,
+        message:
+          "Selected files contained paired end sample files which are missing their pair file.",
+      };
+    } else {
+      // only single or only paired (without any missing)
+      // create validatedTools for each sample
+      const validatedToolsForSamples = this.getValidatedToolForEachSample(
+        toolWithInputs,
+        sampleGroups,
+        sessionData
+      );
+
+      // check that all rebound validatedTools are valid, every returns true for empty array
+      const runForEachSampleValid =
+        validatedToolsForSamples.length > 0 &&
+        validatedToolsForSamples.every(
+          (sampleValidatedTool) => sampleValidatedTool.valid
+        );
+
+      return {
+        valid: runForEachSampleValid,
+        message: runForEachSampleValid
+          ? undefined
+          : "Some samples failed input and parameter validation",
+      };
+    }
+  }
+
   getValidatedToolForEachSample(
     selectedToolWithInputs: SelectedToolWithInputs,
+    sampleGroups: SampleGroups,
     sessionData: SessionData
   ): ValidatedTool[] {
-    const sampleGroups = this.datasetService.getSampleGroups(
-      selectedToolWithInputs.selectedDatasets
-    );
-
     // all sample datasets, needed for checks
-    // for now support only paired end
-    const sampleDatasets: Dataset[] = this.datasetService.getPairedDatasets(
-      sampleGroups.pairedEndSamples
-    );
+
+    const singleEnd = sampleGroups.singleEndSamples.length > 0;
+
+    const sampleDatasets: Dataset[] = singleEnd
+      ? this.datasetService.getSingleEndDatasets(sampleGroups.singleEndSamples)
+      : this.datasetService.getPairedDatasets(sampleGroups.pairedEndSamples);
 
     // get selected datasets which are not included in the sample groups
     const sampleDatasetIds = sampleDatasets.map((dataset) => dataset.datasetId);
@@ -395,24 +445,34 @@ export class ToolSelectionService {
       (dataset) => !sampleDatasetIds.includes(dataset.datasetId)
     );
 
-    // TODO sanity check if nonSampleDatasets have datasets that look like sample datasets
+    // TODO sanity check if nonSampleDatasets have datasets that look like sample datasets?
     // checking prefix maybe not exact enough?
     // const sampleDatasetPrefix = UtilsService.getCommonPrefix(
     //   sampleDatasets.map((dataset) => dataset.name)
     // );
 
     // for each sample, create new ValidatedTool
-    const validatedToolsForSamples = sampleGroups.pairedEndSamples.map(
-      (pairedEndSample) =>
-        this.rebindWithNewDatasetsAndValidate(
-          this.datasetService
-            .getPairedDatasets([pairedEndSample])
-            .concat(nonSampleDatasets),
-          selectedToolWithInputs,
-          sessionData,
-          pairedEndSample.sampleName
+    const validatedToolsForSamples = singleEnd
+      ? sampleGroups.singleEndSamples.map((singleEndSample) =>
+          this.rebindWithNewDatasetsAndValidate(
+            this.datasetService
+              .getSingleEndDatasets([singleEndSample])
+              .concat(nonSampleDatasets),
+            selectedToolWithInputs,
+            sessionData,
+            singleEndSample.sampleName
+          )
         )
-    );
+      : sampleGroups.pairedEndSamples.map((pairedEndSample) =>
+          this.rebindWithNewDatasetsAndValidate(
+            this.datasetService
+              .getPairedDatasets([pairedEndSample])
+              .concat(nonSampleDatasets),
+            selectedToolWithInputs,
+            sessionData,
+            pairedEndSample.sampleName
+          )
+        );
 
     // // debug pring
     // validatedToolsForSamples.forEach((sampleValidatedTool) => {

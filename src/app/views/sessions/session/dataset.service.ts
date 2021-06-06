@@ -136,6 +136,18 @@ export class DatasetService {
     this.removeMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME);
   }
 
+  findSingleSampleFiles(datasets: Dataset[], token: string): SingleEndSample[] {
+    return datasets
+      .filter((dataset) => dataset.name.includes(token))
+      .map((dataset) => {
+        return {
+          file: dataset,
+          sampleId: uuidv4(),
+          sampleName: dataset.name,
+        };
+      });
+  }
+
   findSamplePairs(
     datasets: Dataset[],
     r1Token = "R1",
@@ -373,5 +385,9 @@ export class DatasetService {
       []
     );
     return datasets.filter((dataset) => dataset != null);
+  }
+
+  public getSingleEndDatasets(singleEndSamples: SingleEndSample[]): Dataset[] {
+    return singleEndSamples.map((singleEndSample) => singleEndSample.file);
   }
 }

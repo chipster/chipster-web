@@ -436,21 +436,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
             this.sessionData
           );
 
-          const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
-            toolWithInputs,
-            this.sessionData
-          );
-
-          // check that all rebound validatedTools are valid, every returns true for empty array
-          const runForEachSampleValid =
-            validatedToolsForSamples.length > 0 &&
-            validatedToolsForSamples.every(
-              (sampleValidatedTool) => sampleValidatedTool.valid
-            );
-
-          // FIXME remove if not needed later on, may be needed with run button
+          // FIXME if not needed later on, remove from here and do this at toolSelectionService.validateRunForEachSample
+          // may be needed for the run button
           const sampleGroups = this.datasetService.getSampleGroups(
             toolWithInputs.selectedDatasets
+          );
+
+          const runForEachSampleValidationResult: ValidationResult = this.toolSelectionService.validateRunForEachSample(
+            toolWithInputs,
+            sampleGroups,
+            this.sessionData
           );
 
           return Object.assign(
@@ -458,7 +453,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
               inputsValid: inputsValid,
               inputsMessage: inputsMessage,
               runForEachValid: runForEachValid,
-              runForEachSampleValid: runForEachSampleValid,
+              runForEachSampleValid: runForEachSampleValidationResult.valid,
               sampleGroups: sampleGroups,
               phenodataValid: phenodataValid,
               phenodataMessage: phenodataMessage,

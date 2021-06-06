@@ -8,7 +8,29 @@
 <div class="modal-body">
   <div *ngIf="state.isReady(); else statusTemplate" class="h-100">
 
-    <form [formGroup]="identifiersForm" (ngSubmit)=onFindPairs()>
+    <!-- single or paired selection-->
+    <div class="row">
+      <div class="col">
+        <form [formGroup]="singleOrPairedForm" (ngSubmit)=onFindPairs()>
+          <input type="radio" class="mr-1" value="paired" formControlName="singleOrPaired">Paired end
+          <input type="radio" class="ml-2 mr-1" value="single" formControlName="singleOrPaired">Single end
+        </form>
+      </div>
+      <div class="col align-self-end">
+        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2 float-right">Reset
+          All</button>
+      </div>
+    </div>
+
+    <!--- set single button -->
+    <div>
+      <button *ngIf="singleOrPairedForm.get('singleOrPaired').value === 'single'" [disabled]="!singleTokenForm.valid"
+        class="btn btn-sm btn-success" (click)="onFindSingle()">One File per Sample</button>
+    </div>
+
+    <!-- paired tokens and find-->
+    <form *ngIf="singleOrPairedForm.get('singleOrPaired').value === 'paired'" [formGroup]="identifiersForm"
+      (ngSubmit)=onFindPairs()>
       <div class="form-group">
         <div class="row">
 
@@ -23,71 +45,73 @@
           </div>
           <div class="col align-self-end float-right">
             <button type="submit" [disabled]="!identifiersForm.valid" class="btn btn-sm btn-success">Find Pairs</button>
-            <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2">Reset
-              Everything</button>
           </div>
         </div>
       </div>
     </form>
 
-    <h2 class="h2-xs">Unpaired Files</h2>
-    <div>
-      <span class="text-sm">{{unpairedFiles.length}} unpaired
-        file{{getPluralEnd(pairedEndSamples.length)}}</span>
-      <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-right invisible mb-1">Reset
-        Everything</button>
-    </div>
-    <hr class="mt-1 mb-1" />
-    <div class="limit-height">
-      <div *ngFor="let dataset of unpairedFiles" class="">{{dataset.name}}</div>
-      <!-- <table class="table table-sm table-bordered table-striped">
-        <tbody>
-          <tr *ngFor="let dataset of unpairedFiles">
-            <td>{{dataset.name}}</td>
-          </tr>
-        </tbody>
-      </table> -->
+    <div *ngIf="unpairedFiles.length > 0">
+      <h2 class="h2-xs">Undefined Files</h2>
+      <div>
+        <span class="text-sm">{{unpairedFiles.length}} undefined file{{getPluralEnd(unpairedFiles.length)}}</span>
+        <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-right invisible mb-1">Reset
+          Everything</button>
+      </div>
+      <hr class="mt-1 mb-1" />
+      <div class="limit-height">
+        <div *ngFor="let dataset of unpairedFiles" class="">{{dataset.name}}</div>
+      </div>
     </div>
 
 
-    <!-- <div class="row">
-      <div class="col">
-        <div>Reads1</div>
-        <div *ngFor="let dataset of reads1Files">{{dataset.name}}</div>
+    <div *ngIf="singleEndSamples.length > 0">
+      <h2 class="h2-xs mt-3">Samples &#8208; Single End</h2>
+      <div class="">
+        <span class="text-sm">{{singleEndSamples.length}}
+          sample{{getPluralEnd(singleEndSamples.length)}}</span>
+        <button *ngIf="singleEndSamples.length > 0" (click)="onResetSingle()"
+          class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
       </div>
 
-      <div class="col">
-        <div>Reads2</div>
-        <div *ngFor="let dataset of reads2Files">{{dataset.name}}</div>
+      <div class="limit-height">
+        <table class="table table-sm table-striped table-bordered">
+          <tbody>
+            <tr *ngFor="let singleEndSample of singleEndSamples">
+              <td>{{singleEndSample.file.name}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div> -->
-
-
-    <h2 class="h2-xs mt-3">Paired Sample Files</h2>
-    <div class="">
-      <span class="text-sm">{{pairedEndSamples.length*2}} paired files, {{pairedEndSamples.length}}
-        sample{{getPluralEnd(pairedEndSamples.length)}}</span>
-      <button *ngIf="pairedEndSamples.length > 0" (click)="onResetPairs()"
-        class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
     </div>
 
-    <div class="limit-height">
-      <table *ngIf="pairedEndSamples.length > 0" class="table table-sm table-striped table-bordered">
-        <thead class="text-center">
-          <th><i class="far fa-arrow-alt-circle-right"></i></th>
-          <th> <i class="far fa-arrow-alt-circle-left"></i></th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let pairedEndSample of pairedEndSamples">
-            <td>{{pairedEndSample.pairs[0].r1File.name}}</td>
-            <td>{{pairedEndSample.pairs[0].r2File.name}}</td>
-          </tr>
-        </tbody>
-      </table>
+
+    <div *ngIf="pairedEndSamples.length > 0">
+      <h2 class="h2-xs mt-3">Samples &#8208; Paired End</h2>
+      <div class="">
+        <span class="text-sm">{{pairedEndSamples.length}} sample{{getPluralEnd(pairedEndSamples.length)}},
+          {{pairedEndSamples.length*2}} files</span>
+        <button *ngIf="pairedEndSamples.length > 0" (click)="onResetPairs()"
+          class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
+      </div>
+
+      <div class="limit-height">
+        <table *ngIf="pairedEndSamples.length > 0" class="table table-sm table-striped table-bordered">
+          <thead class="text-center">
+            <th><i class="far fa-arrow-alt-circle-right"></i></th>
+            <th> <i class="far fa-arrow-alt-circle-left"></i></th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pairedEndSample of pairedEndSamples">
+              <td>{{pairedEndSample.pairs[0].r1File.name}}</td>
+              <td>{{pairedEndSample.pairs[0].r2File.name}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div *ngIf="pairMissingSamples.length > 0">
-      <h2 class="h2-xs mt-3">Paired End Sample Files With Missing Pair</h2>
+      <h2 class="h2-xs mt-3">Paired End Samples with Missing Pair</h2>
       <div class="">
         <span class="text-sm">{{pairMissingSamples.length}} missing
           pair{{getPluralEnd(pairMissingSamples.length)}}</span>

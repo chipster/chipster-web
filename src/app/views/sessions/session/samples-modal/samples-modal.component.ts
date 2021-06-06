@@ -6,7 +6,12 @@ import { defer, of, Subject } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 import { LoadState, State } from "../../../../model/loadstate";
 import { SessionData } from "../../../../model/session/session-data";
-import { DatasetService, PairedEndSample } from "../dataset.service";
+import {
+  DatasetService,
+  PairedEndSample,
+  SampleGroups,
+  SingleEndSample,
+} from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
 
 export interface ColumnItem {
@@ -35,9 +40,18 @@ export class SamplesModalComponent implements OnInit {
     r2Token: ["R2", Validators.required],
   });
 
+  singleTokenForm = this.fb.group({
+    singleToken: [""],
+  });
+
+  singleOrPairedForm = this.fb.group({
+    singleOrPaired: ["paired"],
+  });
+
   unpairedFiles: Dataset[] = [];
   pairedEndSamples: PairedEndSample[] = [];
   pairMissingSamples: PairedEndSample[] = [];
+  singleEndSamples: SingleEndSample[] = [];
   sampleGroupNamesArray: string[] = []; // easier to use in the template
 
   private unsubscribe: Subject<any> = new Subject();
@@ -48,13 +62,37 @@ export class SamplesModalComponent implements OnInit {
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
 
-    const sampleGroups = this.datasetService.getSampleGroups(this.datasets);
+    const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(
+      this.datasets
+    );
 
     this.unpairedFiles = sampleGroups.sampleDataMissing;
     this.pairedEndSamples = sampleGroups.pairedEndSamples;
     this.pairMissingSamples = sampleGroups.pairMissingSamples;
+    this.singleEndSamples = sampleGroups.singleEndSamples;
 
     this.state = new LoadState(State.Ready);
+  }
+
+  onFindSingle() {
+    const singleToken = this.singleTokenForm.get("singleToken").value;
+    const foundSingleEndSamples: SingleEndSample[] = this.datasetService.findSingleSampleFiles(
+      this.unpairedFiles,
+      singleToken
+    );
+
+    this.singleEndSamples.push(...foundSingleEndSamples);
+
+    // remove found from undefined
+    const foundDatasetIds: Set<string> = new Set(
+      foundSingleEndSamples.map(
+        (singleEndSample) => singleEndSample.file.datasetId
+      )
+    );
+
+    this.unpairedFiles = this.unpairedFiles.filter(
+      (dataset) => !foundDatasetIds.has(dataset.datasetId)
+    );
   }
 
   onFindPairs() {
@@ -103,8 +141,16 @@ export class SamplesModalComponent implements OnInit {
     this.pairedEndSamples = [];
   }
 
+  onResetSingle() {
+    this.unpairedFiles = this.unpairedFiles.concat(
+      this.singleEndSamples.map((singleEndSample) => singleEndSample.file)
+    );
+    this.singleEndSamples = [];
+  }
+
   onResetAll() {
     this.unpairedFiles = this.datasets;
+    this.singleEndSamples = [];
     this.pairedEndSamples = [];
     this.pairMissingSamples = [];
   }
@@ -141,7 +187,15 @@ export class SamplesModalComponent implements OnInit {
   private updateLocalDatasets(): Dataset[] {
     const updatedDatasets = [];
 
-    // TODO add single ended
+    // add sample data for single ended files
+    this.singleEndSamples.forEach((singleEndSample) => {
+      this.datasetService.setSampleData(
+        singleEndSample.file,
+        singleEndSample.sampleName,
+        singleEndSample.sampleId
+      );
+      updatedDatasets.push(singleEndSample.file);
+    });
 
     //  add sample data for paired files and paired end with missing other file
     this.pairedEndSamples
