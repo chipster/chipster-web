@@ -526,7 +526,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
         (tool.runForEachValidation.valid ||
           tool.runForEachSampleValidation.valid);
 
-      console.log("VALI", this.validatedTool);
       this.runEnabled =
         tool &&
         (tool.valid ||
