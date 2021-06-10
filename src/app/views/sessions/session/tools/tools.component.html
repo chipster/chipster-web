@@ -81,6 +81,74 @@
         </div>
       </div>
 
+      <!-- inputs dropdown panel -->
+      <!-- located here because needs full width parent to get size and position right, also here at the same height as the controlling button -->
+      <div ngbDropdown #inputsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
+        <button class="btn btn-sm hidden-dropdown-button" id="inputsDropdown" ngbDropdownToggle></button>
+        <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
+          <div class="container">
+            <table class="table table-sm table-condensed">
+              <tr>
+                <td><span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                  <span *ngIf="!runEnabled"> <i class="fas fa-fw fa-exclamation-circle text-warning"
+                      aria-hidden="true"></i></span>
+                </td>
+                <td class="text-nowrap">Run Single Job</td>
+
+                <td class="w-100">
+                  <span *ngIf="!runEnabled" class="alert alert-warning text-center p-1 mb-0">
+                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+                    {{validatedTool.message}}
+                    <!-- {{ validatedTool.inputsValidation.message }} -->
+                  </span>
+                </td>
+
+              </tr>
+              <tr>
+                <td><span *ngIf="validatedTool.runForEachValidation.valid"
+                    class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                  <span *ngIf="!validatedTool.runForEachValidation.valid"> <i
+                      class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
+                </td>
+                <td class="text-nowrap">Run Job for Each File</td>
+
+                <td>
+                  <span *ngIf="!validatedTool.runForEachValidation.valid"
+                    class="alert alert-warning text-center p-1 mb-0">
+                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+                    {{ validatedTool.runForEachValidation.message }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+
+                <td><span *ngIf="validatedTool.runForEachSampleValidation.valid"
+                    class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                  <span *ngIf="!validatedTool.runForEachSampleValidation.valid"> <i
+                      class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
+                </td>
+                <td class="text-nowrap"> Run Job for Each Sample</td>
+                <td>
+                  <span *ngIf="!validatedTool.runForEachSampleValidation.valid"
+                    class="alert alert-warning text-center p-1 mb-0">
+                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+                    {{ validatedTool.runForEachSampleValidation.message }}
+                  </span>
+                </td>
+
+              </tr>
+
+            </table>
+            <!-- <ch-tool-parameters [validatedTool]="validatedTool" (parametersChanged)="onParametersChanged()">
+          </ch-tool-parameters>
+          <ch-tool-inputs [validatedTool]="validatedTool" [sessionData]="sessionData"
+            (updateBindings)="setBindings($event)"></ch-tool-inputs> -->
+          </div>
+        </div>
+      </div>
+
+
+
       <!-- manual dropdown panel -->
       <!-- <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
         <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
@@ -134,14 +202,7 @@
                   </button>
                 -->
 
-                <!-- traffic light -->
-                <!-- <button class="btn btn-sm btn-outline-secondary  mr-1" (click)="
-                $event.stopPropagation(); parametersDropdown.toggle()" title="Edit parameters and inputs"
-                  [disabled]="!selectedTool">
-                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
-                    aria-hidden="true"></span>
-                  <span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
-                </button> -->
+
 
                 <!-- parameters -->
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
@@ -154,34 +215,46 @@
                 </button>
 
                 <!-- run -->
-                <button *ngIf="!runForManyVisible" class="btn btn-success run-button btn-sm button-wide flex-grow-1"
+                <button *ngIf="!runIsDropdown" class="btn btn-success run-button btn-sm button-wide flex-grow-1"
                   (click)="runJob(false)" [disabled]="!runEnabled">
                   <span class="fas fa-play"></span> Run
                 </button>
 
-                <div *ngIf="runForManyVisible" ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
+                <div *ngIf="runIsDropdown" ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
                   <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" ngbDropdownToggle
                     id="runDropdownButton">
                     <span class="fas fa-play"></span> Run</button>
                   <div class="dropdown-menu dropdown-menu-right " ngbDropdownMenu aria-labelledby="runDropdownButton">
-                    <button ngbDropdownItem (click)="runJob(false)" [disabled]="!validatedTool.inputsValid"> Run Single
+                    <button ngbDropdownItem (click)="runJob(false)" [disabled]="!validatedTool.inputsValidation.valid">
+                      Run
+                      Single
                       Job</button>
-                    <button ngbDropdownItem (click)="runJob(true)" [disabled]="!validatedTool.runForEachValid">Run Job
+                    <button ngbDropdownItem (click)="runJob(true)"
+                      [disabled]="!validatedTool.runForEachValidation.valid">Run Job
                       for Each File <span class="text-muted text-sm">{{validatedTool.selectedDatasets.length}}
                         files</span></button>
                     <button ngbDropdownItem (click)="runForEachSample()"
-                      [disabled]="!validatedTool.runForEachSampleValid">{{getRunForEachSampleButtonText()}} <span
-                        *ngIf="validatedTool.runForEachSampleValid"
+                      [disabled]="!validatedTool.runForEachSampleValidation.valid">{{getRunForEachSampleButtonText()}}
+                      <span *ngIf="validatedTool.runForEachSampleValidation.valid"
                         class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length +
                         validatedTool.sampleGroups.singleEndSamples.length}}
                         samples</span></button>
                     <div *ngIf="defineHintVisible" class="dropdown-divider"></div>
                     <button *ngIf="defineHintVisible" ngbDropdownItem (click)="onDefineSamples()"
-                      [disabled]="validatedTool.runForEachSampleValid">Define Samples to Enable Run for Each
+                      [disabled]="validatedTool.runForEachSampleValidation.valid">Define Samples to Enable Run for Each
                       Sample</button>
 
                   </div>
                 </div>
+
+                <!-- traffic light -->
+                <button class="btn btn-sm btn-outline-secondary  ml-1" (click)="
+                                $event.stopPropagation(); inputsDropdown.toggle()" title="Inputs info"
+                  [disabled]="!selectedTool">
+                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
+                    aria-hidden="true"></span>
+                  <span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                </button>
 
 
 

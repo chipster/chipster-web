@@ -73,7 +73,7 @@ export class JobService {
 
   runForEach(validatedTool: ValidatedTool, sessionData: SessionData) {
     // sanity check
-    if (!validatedTool.runForEachValid) {
+    if (validatedTool.runForEachValidation.valid !== true) {
       log.warn("requesting run for each, but run for each validation not ok");
       return;
     }
@@ -133,7 +133,7 @@ export class JobService {
 
   runForEachSample(validatedTool: ValidatedTool, sessionData) {
     // sanity check
-    if (!validatedTool.runForEachSampleValid) {
+    if (!validatedTool.runForEachSampleValidation.valid) {
       log.warn(
         "requesting run for each sample , but run for each validation not ok"
       );

@@ -21,13 +21,11 @@ export interface SelectedToolWithInputs extends SelectedTool {
 
 export interface SelectedToolWithValidatedInputs
   extends SelectedToolWithInputs {
-  inputsValid: boolean;
-  inputsMessage?: string;
-  runForEachValid: boolean;
-  runForEachSampleValid: boolean;
+  inputsValidation: ValidationResult;
+  runForEachValidation: ValidationResult;
+  runForEachSampleValidation: ValidationResult;
   sampleGroups: SampleGroups;
-  phenodataValid: boolean;
-  phenodataMessage?: string;
+  phenodataValidation: ValidationResult;
   phenodataBindings: Array<PhenodataBinding>;
 }
 export interface ValidatedTool extends SelectedToolWithValidatedInputs {

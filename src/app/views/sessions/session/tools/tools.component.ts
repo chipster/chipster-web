@@ -94,7 +94,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public toolSearchList: Array<ToolSearchListItem>;
 
   public runEnabled: boolean;
-  public runForManyVisible: boolean;
+  public runIsDropdown: boolean;
   public defineHintVisible = false;
   public paramButtonWarning: boolean;
   public runningJobs = 0;
@@ -349,7 +349,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         this.selectedTool = t;
         this.runEnabled = false;
         this.paramButtonWarning = false;
-        this.runForManyVisible = false;
+        this.runIsDropdown = false;
       });
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
@@ -400,9 +400,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(
         filter((value) => value !== null),
         map((toolWithInputs: SelectedToolWithInputs) => {
-          const inputsValidation: ValidationResult = this.toolSelectionService.validateInputs(
-            toolWithInputs
-          );
+          const inputsValidation: ValidationResult =
+            this.toolSelectionService.validateInputs(toolWithInputs);
           const inputsValid = inputsValidation.valid;
           const inputsMessage = inputsValidation.message;
 
@@ -432,10 +431,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
             }
           }
 
-          const runForEachValid = this.toolSelectionService.validateRunForEach(
-            toolWithInputs,
-            this.sessionData
-          );
+          const runForEachValidationResult: ValidationResult =
+            this.toolSelectionService.validateRunForEach(
+              toolWithInputs,
+              this.sessionData
+            );
 
           // FIXME if not needed later on, remove from here and do this at toolSelectionService.validateRunForEachSample
           // may be needed for the run button
@@ -443,21 +443,23 @@ export class ToolsComponent implements OnInit, OnDestroy {
             toolWithInputs.selectedDatasets
           );
 
-          const runForEachSampleValidationResult: ValidationResult = this.toolSelectionService.validateRunForEachSample(
-            toolWithInputs,
-            sampleGroups,
-            this.sessionData
-          );
+          const runForEachSampleValidationResult: ValidationResult =
+            this.toolSelectionService.validateRunForEachSample(
+              toolWithInputs,
+              sampleGroups,
+              this.sessionData
+            );
 
           return Object.assign(
             {
-              inputsValid: inputsValid,
-              inputsMessage: inputsMessage,
-              runForEachValid: runForEachValid,
-              runForEachSampleValid: runForEachSampleValidationResult.valid,
+              inputsValidation: { valid: inputsValid, message: inputsMessage },
+              runForEachValidation: runForEachValidationResult,
+              runForEachSampleValidation: runForEachSampleValidationResult,
               sampleGroups: sampleGroups,
-              phenodataValid: phenodataValid,
-              phenodataMessage: phenodataMessage,
+              phenodataValidation: {
+                valid: phenodataValid,
+                message: phenodataMessage,
+              },
               phenodataBindings: phenodataBindings,
             },
             toolWithInputs
@@ -519,11 +521,18 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store.select("validatedTool").subscribe((tool: ValidatedTool) => {
       this.validatedTool = tool;
 
-      this.runForManyVisible =
-        tool && (tool.runForEachValid || tool.runForEachSampleValid);
+      this.runIsDropdown =
+        tool &&
+        (tool.runForEachValidation.valid ||
+          tool.runForEachSampleValidation.valid);
 
-      this.runEnabled = tool && tool.valid;
-      this.paramButtonWarning = !this.runEnabled && !this.runForManyVisible;
+      console.log("VALI", this.validatedTool);
+      this.runEnabled =
+        tool &&
+        (tool.valid ||
+          tool.runForEachValidation.valid ||
+          tool.runForEachSampleValidation.valid);
+      this.paramButtonWarning = !this.runEnabled;
       this.defineHintVisible =
         tool != null &&
         this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
