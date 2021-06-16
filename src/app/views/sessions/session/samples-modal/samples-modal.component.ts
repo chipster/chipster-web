@@ -54,6 +54,9 @@ export class SamplesModalComponent implements OnInit {
   singleEndSamples: SingleEndSample[] = [];
   sampleGroupNamesArray: string[] = []; // easier to use in the template
 
+  nonUniqueWarning = false;
+  nonUniqueWarningText = "";
+
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
@@ -61,6 +64,14 @@ export class SamplesModalComponent implements OnInit {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next();
     this.state = new LoadState(State.Loading, "Loading data...");
+
+    // check for nonunique file names
+    const nonUniqueNames = this.findNonUniqueNames(this.datasets);
+    if (nonUniqueNames.length > 0) {
+      this.nonUniqueWarning = true;
+      this.nonUniqueWarningText =
+        "Selected files contain nonunique names: " + nonUniqueNames.join(", ");
+    }
 
     const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(
       this.datasets
@@ -76,10 +87,11 @@ export class SamplesModalComponent implements OnInit {
 
   onFindSingle() {
     const singleToken = this.singleTokenForm.get("singleToken").value;
-    const foundSingleEndSamples: SingleEndSample[] = this.datasetService.findSingleSampleFiles(
-      this.unpairedFiles,
-      singleToken
-    );
+    const foundSingleEndSamples: SingleEndSample[] =
+      this.datasetService.findSingleSampleFiles(
+        this.unpairedFiles,
+        singleToken
+      );
 
     this.singleEndSamples.push(...foundSingleEndSamples);
 
@@ -100,11 +112,8 @@ export class SamplesModalComponent implements OnInit {
     const r2Token = this.identifiersForm.get("r2Token").value;
 
     // find sample groups
-    const foundPairedSamples: PairedEndSample[] = this.datasetService.findSamplePairs(
-      this.unpairedFiles,
-      r1Token,
-      r2Token
-    );
+    const foundPairedSamples: PairedEndSample[] =
+      this.datasetService.findSamplePairs(this.unpairedFiles, r1Token, r2Token);
 
     //
     // TODO add several pairs / sample functionality
@@ -247,5 +256,20 @@ export class SamplesModalComponent implements OnInit {
 
   getPluralEnd(count: number) {
     return count > 1 ? "s" : "";
+  }
+
+  private findNonUniqueNames(datasets: Dataset[]): string[] {
+    const namesSet = new Set<string>();
+    const nonUnique: string[] = [];
+    datasets
+      .map((dataset) => dataset.name)
+      .forEach((name) => {
+        if (namesSet.has(name)) {
+          nonUnique.push(name);
+        } else {
+          namesSet.add(name);
+        }
+      });
+    return nonUnique;
   }
 }

@@ -8,6 +8,12 @@
 <div class="modal-body">
   <div *ngIf="state.isReady(); else statusTemplate" class="h-100">
 
+    <div class="alert alert-warning p-1" [class.invisible]="!nonUniqueWarning">
+      <i class="fas fa-fw fa-exclamation-circle"></i> {{ nonUniqueWarningText }}
+    </div>
+
+
+
     <!-- single or paired selection-->
     <div class="row">
       <div class="col">

@@ -189,6 +189,7 @@ export class DatasetService {
             },
           ],
         });
+        r2Files.splice(r2Files.indexOf(r2File), 1);
       }
     });
 
@@ -246,21 +247,18 @@ export class DatasetService {
     const pairedEndFilesWithSampleData = singleAndPairedPartitions[1];
 
     // create SingleEndSamples to return
-    const singleEndSamples: SingleEndSample[] = singleEndFilesWithSampleData.map(
-      ([dataset, sampleData]) => {
+    const singleEndSamples: SingleEndSample[] =
+      singleEndFilesWithSampleData.map(([dataset, sampleData]) => {
         return {
           sampleId: sampleData.sampleId,
           sampleName: sampleData.sampleName,
           file: dataset,
         };
-      }
-    );
+      });
 
     // create PairedEndSamples
-    const pairedSamplesMap: Map<
-      string,
-      PairedEndSample
-    > = this.getPairedSamplesMap(pairedEndFilesWithSampleData);
+    const pairedSamplesMap: Map<string, PairedEndSample> =
+      this.getPairedSamplesMap(pairedEndFilesWithSampleData);
 
     // separate those with other file missing
 
