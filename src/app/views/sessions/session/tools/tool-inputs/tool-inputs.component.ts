@@ -3,7 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
-  Output
+  Output,
 } from "@angular/core";
 import { Dataset, ToolInput } from "chipster-js-common";
 import * as _ from "lodash";
@@ -20,7 +20,7 @@ interface BindingModel {
 @Component({
   selector: "ch-tool-inputs",
   templateUrl: "./tool-inputs.component.html",
-  styleUrls: ["./tool-inputs.component.less"]
+  styleUrls: ["./tool-inputs.component.less"],
 })
 export class ToolInputsComponent implements OnChanges {
   @Input() sessionData: SessionData;
@@ -38,7 +38,7 @@ export class ToolInputsComponent implements OnChanges {
       this.ready = true;
       // create copy of the datasets property of each InputBinding as it's used as the model of the select
       // element in the template (and thus get's modified)
-      this.bindingModels = this.validatedTool.inputBindings.map(b => ({
+      this.bindingModels = this.validatedTool.inputBindings.map((b) => ({
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
         compatibleDatasets: this.validatedTool.selectedDatasets.filter(
@@ -48,7 +48,7 @@ export class ToolInputsComponent implements OnChanges {
               dataset,
               b.toolInput.type.name
             )
-        )
+        ),
       }));
     } else {
       this.ready = false;
@@ -58,11 +58,11 @@ export class ToolInputsComponent implements OnChanges {
   inputSelected(userEditedBinding: BindingModel) {
     // generate new input bindings: remove from other bindings the datasets which are present in the binding
     // edited by the user
-    const updatedBindings = this.bindingModels.map(bindingModel => {
+    const updatedBindings = this.bindingModels.map((bindingModel) => {
       if (bindingModel.input === userEditedBinding.input) {
         return {
           toolInput: bindingModel.input,
-          datasets: bindingModel.boundDatasets.slice()
+          datasets: bindingModel.boundDatasets.slice(),
         };
       } else {
         return {
@@ -70,7 +70,7 @@ export class ToolInputsComponent implements OnChanges {
           datasets: _.difference(
             bindingModel.boundDatasets,
             userEditedBinding.boundDatasets
-          )
+          ),
         };
       }
     });
@@ -79,7 +79,7 @@ export class ToolInputsComponent implements OnChanges {
       category: this.validatedTool.category,
       module: this.validatedTool.module,
       selectedDatasets: this.validatedTool.selectedDatasets,
-      inputBindings: updatedBindings
+      inputBindings: updatedBindings,
     });
   }
 

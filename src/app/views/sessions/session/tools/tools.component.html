@@ -78,15 +78,10 @@
           </ch-tool-parameters>
           <ch-tool-inputs [validatedTool]="validatedTool" [sessionData]="sessionData"
             (updateBindings)="setBindings($event)"></ch-tool-inputs>
-        </div>
-      </div>
 
-      <!-- inputs dropdown panel -->
-      <!-- located here because needs full width parent to get size and position right, also here at the same height as the controlling button -->
-      <div ngbDropdown #inputsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
-        <button class="btn btn-sm hidden-dropdown-button" id="inputsDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="inputsDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
+          <!-- run options -->
           <div class="container">
+            <h2 class="h2-xs mt-1 mb-2">Run options</h2>
             <table class="table table-sm table-condensed">
               <tr>
                 <td><span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
@@ -139,25 +134,12 @@
               </tr>
 
             </table>
-            <!-- <ch-tool-parameters [validatedTool]="validatedTool" (parametersChanged)="onParametersChanged()">
-          </ch-tool-parameters>
-          <ch-tool-inputs [validatedTool]="validatedTool" [sessionData]="sessionData"
-            (updateBindings)="setBindings($event)"></ch-tool-inputs> -->
           </div>
+
+
         </div>
       </div>
 
-
-
-      <!-- manual dropdown panel -->
-      <!-- <div ngbDropdown #manualDropdown="ngbDropdown" class="d-inline-block dropdown-div">
-        <button class="btn btn-sm hidden-dropdown-button" id="manualDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="manualDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
-          <ch-manual [page]="
-              toolService.getManualPage(selectedTool.tool.name.id) | async
-            " [showControls]="true"></ch-manual>
-        </div>
-      </div> -->
 
       <!-- category list -->
       <div class="col col-left">
@@ -248,17 +230,13 @@
                 </div>
 
                 <!-- traffic light -->
-                <button class="btn btn-sm btn-outline-secondary  ml-1" (click)="
+                <!-- <button class="btn btn-sm btn-outline-secondary  ml-1" (click)="
                                 $event.stopPropagation(); inputsDropdown.toggle()" title="Inputs info"
                   [disabled]="!selectedTool">
                   <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
                     aria-hidden="true"></span>
                   <span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
-                </button>
-
-
-
-
+                </button> -->
 
                 <!-- <span class="dropdown float-right">
                   <button [disabled]="sessionData.datasetsMap.size === 0"

@@ -27,7 +27,6 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   ready = false;
   showWarning: boolean;
   warningText: string;
-  runEnabled: boolean;
 
   private parametersChangedThrottle = new Subject<any>();
 
@@ -50,11 +49,6 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
       this.ready = true;
       this.showWarning = !this.validatedTool.valid;
       this.warningText = this.validatedTool.message;
-      this.runEnabled =
-        this.validatedTool &&
-        (this.validatedTool.valid ||
-          this.validatedTool.runForEachValidation.valid ||
-          this.validatedTool.runForEachSampleValidation.valid);
     } else {
       this.ready = false;
     }
