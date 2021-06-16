@@ -5,7 +5,7 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
-  Output
+  Output,
 } from "@angular/core";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { ToolParameter } from "chipster-js-common";
@@ -17,15 +17,17 @@ import { ValidatedTool } from "../ToolSelection";
 @Component({
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
-  styleUrls: ["./tool-parameters.component.less"]
+  styleUrls: ["./tool-parameters.component.less"],
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;
+
   @Output() parametersChanged: EventEmitter<any> = new EventEmitter();
 
   ready = false;
   showWarning: boolean;
   warningText: string;
+  runEnabled: boolean;
 
   private parametersChangedThrottle = new Subject<any>();
 
@@ -37,10 +39,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.parametersChangedThrottle
       .asObservable()
-      .pipe(
-        debounceTime(500),
-        takeUntil(this.unsubscribe)
-      )
+      .pipe(debounceTime(500), takeUntil(this.unsubscribe))
       .subscribe(() => {
         this.parametersChanged.emit();
       });
@@ -51,6 +50,11 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
       this.ready = true;
       this.showWarning = !this.validatedTool.valid;
       this.warningText = this.validatedTool.message;
+      this.runEnabled =
+        this.validatedTool &&
+        (this.validatedTool.valid ||
+          this.validatedTool.runForEachValidation.valid ||
+          this.validatedTool.runForEachSampleValidation.valid);
     } else {
       this.ready = false;
     }

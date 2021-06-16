@@ -6,9 +6,67 @@
   </h1>
 
   <!-- warning title -->
-  <div class="alert alert-warning text-center p-1 mb-0" [class.invisible]="!showWarning">
+  <!-- <div class="alert alert-warning text-center p-1 mb-0" [class.invisible]="!showWarning">
     <i class="fas fa-fw fa-exclamation-circle"></i> {{ warningText }}
-  </div>
+  </div> -->
+
+
+  <table class="table table-sm table-condensed">
+    <tr>
+      <td><span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+        <span *ngIf="!runEnabled"> <i class="fas fa-fw fa-exclamation-circle text-warning"
+            aria-hidden="true"></i></span>
+      </td>
+      <td class="text-nowrap">Run Single Job</td>
+
+      <td class="w-100">
+        <span *ngIf="!runEnabled" class="alert alert-warning text-center p-1 mb-0">
+          <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+          {{validatedTool.message}}
+          <!-- {{ validatedTool.inputsValidation.message }} -->
+        </span>
+      </td>
+
+    </tr>
+    <tr>
+      <td><span *ngIf="validatedTool.runForEachValidation.valid" class="fas fa-fw fa-check-circle text-success"
+          aria-hidden="true"></span>
+        <span *ngIf="!validatedTool.runForEachValidation.valid"> <i class="fas fa-fw fa-exclamation-circle text-warning"
+            aria-hidden="true"></i></span>
+      </td>
+      <td class="text-nowrap">Run Job for Each File</td>
+
+      <td>
+        <span *ngIf="!validatedTool.runForEachValidation.valid" class="alert alert-warning text-center p-1 mb-0">
+          <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+          {{ validatedTool.runForEachValidation.message }}
+        </span>
+      </td>
+    </tr>
+    <tr>
+
+      <td><span *ngIf="validatedTool.runForEachSampleValidation.valid" class="fas fa-fw fa-check-circle text-success"
+          aria-hidden="true"></span>
+        <span *ngIf="!validatedTool.runForEachSampleValidation.valid"> <i
+            class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
+      </td>
+      <td class="text-nowrap"> Run Job for Each Sample</td>
+      <td>
+        <span *ngIf="!validatedTool.runForEachSampleValidation.valid" class="alert alert-warning text-center p-1 mb-0">
+          <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+          {{ validatedTool.runForEachSampleValidation.message }}
+        </span>
+      </td>
+
+    </tr>
+
+  </table>
+
+
+
+
+
+
 
   <!-- parameters -->
   <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
@@ -59,7 +117,7 @@
                 !validatedTool.parameterResults.get(parameter.name.id).valid
               " class="alert alert-warning p-1 mb-0 mt-1 text-sm">
               {{
-                validatedTool.parameterResults.get(parameter.name.id).message
+              validatedTool.parameterResults.get(parameter.name.id).message
               }}
             </div>
           </td>
