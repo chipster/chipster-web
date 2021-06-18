@@ -415,7 +415,8 @@ export class ToolSelectionService {
     ) {
       return {
         valid: false,
-        message: "Tools with multiple mandatory inputs not supported",
+        message:
+          "Run for each not possible for tools which need more than one input files",
       };
     } else if (
       toolWithInputs.selectedDatasets == null ||
