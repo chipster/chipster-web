@@ -7,13 +7,13 @@ import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { DatasetService, SampleGroups } from "./dataset.service";
-import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "./get-session-data.service";
 import { ToolService } from "./tools/tool.service";
 import {
   SelectedTool,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
+  SelectedToolWithValidatedParameters,
   ValidatedTool,
   ValidationResult,
 } from "./tools/ToolSelection";
@@ -27,55 +27,90 @@ export class ToolSelectionService {
   constructor(
     private toolService: ToolService,
     private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService,
-    private dialogModalService: DialogModalService
+    private datasetService: DatasetService
   ) {}
 
-  validateParametersAndGetValidatedTool(
-    toolWithParamsAndValidatedInputs: SelectedToolWithValidatedInputs
+  getValidatedTool(
+    toolWithValidatedParams: SelectedToolWithValidatedParameters,
+    sessionData: SessionData,
+    validateRunForEachSample = true // needs to be false when rebinding for each sample
   ) {
-    const parameterValidations: Map<string, ValidationResult> =
-      this.validateParameters(toolWithParamsAndValidatedInputs);
-    const parametersValid = Array.from(parameterValidations.values()).every(
-      (result: ValidationResult) => result.valid
+    const runForEachValidationResult: ValidationResult =
+      this.validateRunForEach(toolWithValidatedParams, sessionData);
+
+    // FIXME if not needed later on, remove from here and do this at toolSelectionService.validateRunForEachSample
+    // may be needed for the run button
+    const sampleGroups = this.datasetService.getSampleGroups(
+      toolWithValidatedParams.selectedDatasets
     );
 
-    const validationMessage = this.getValidationMessage(
-      parametersValid,
-      toolWithParamsAndValidatedInputs
+    const runForEachSampleValidationResult: ValidationResult =
+      validateRunForEachSample
+        ? this.validateRunForEachSample(
+            toolWithValidatedParams,
+            sampleGroups,
+            sessionData
+          )
+        : { valid: false };
+
+    const singleJobValidationMessage = this.getValidationMessage(
+      toolWithValidatedParams.parametersValidation.valid,
+      toolWithValidatedParams
     );
+
+    const singleJobValidationResult: ValidationResult = {
+      valid:
+        toolWithValidatedParams.singleJobInputsValidation.valid &&
+        toolWithValidatedParams.phenodataValidation.valid &&
+        toolWithValidatedParams.parametersValidation.valid,
+      message: singleJobValidationMessage,
+    };
 
     return Object.assign(
       {
-        valid:
-          toolWithParamsAndValidatedInputs.inputsValidation.valid &&
-          toolWithParamsAndValidatedInputs.phenodataValidation.valid &&
-          parametersValid,
-        parametersValid: parametersValid,
-        message: validationMessage,
-        parameterResults: parameterValidations,
+        singleJobValidation: singleJobValidationResult,
+        runForEachValidation: runForEachValidationResult,
+        runForEachSampleValidation: runForEachSampleValidationResult,
+        sampleGroups: sampleGroups,
       },
-      toolWithParamsAndValidatedInputs
+      toolWithValidatedParams
     );
   }
 
   validateParameters(
-    selectedToolWithValidatedInputs: SelectedToolWithValidatedInputs
-  ): Map<string, ValidationResult> {
-    const resultsMap = new Map<string, ValidationResult>();
+    toolWithValidatedInputs: SelectedToolWithValidatedInputs
+  ): SelectedToolWithValidatedParameters {
+    const parametersValidations = new Map<string, ValidationResult>();
     if (
-      selectedToolWithValidatedInputs &&
-      selectedToolWithValidatedInputs.tool &&
-      selectedToolWithValidatedInputs.tool.parameters &&
-      selectedToolWithValidatedInputs.tool.parameters.length > 0
+      toolWithValidatedInputs &&
+      toolWithValidatedInputs.tool &&
+      toolWithValidatedInputs.tool.parameters &&
+      toolWithValidatedInputs.tool.parameters.length > 0
     ) {
-      selectedToolWithValidatedInputs.tool.parameters.forEach(
+      toolWithValidatedInputs.tool.parameters.forEach(
         (parameter: ToolParameter) => {
-          resultsMap.set(parameter.name.id, this.validateParameter(parameter));
+          parametersValidations.set(
+            parameter.name.id,
+            this.validateParameter(parameter)
+          );
         }
       );
     }
-    return resultsMap;
+
+    const parametersValid = Array.from(parametersValidations.values()).every(
+      (result: ValidationResult) => result.valid
+    );
+
+    return Object.assign(
+      {
+        parametersValidation: {
+          valid: parametersValid,
+          message: "Invalid parameters", // TODO add more details
+        },
+        parametersValidationResults: parametersValidations,
+      },
+      toolWithValidatedInputs
+    );
   }
 
   validateParameter(parameter: ToolParameter): ValidationResult {
@@ -346,7 +381,7 @@ export class ToolSelectionService {
     } else {
       return {
         valid: false,
-        message: "Too many input files",
+        message: "Some selected files not bound as inputs",
       };
     }
   }
@@ -392,19 +427,33 @@ export class ToolSelectionService {
       toolWithInputs.selectedDatasets.length === 1
     ) {
       return { valid: false, message: "Only one file selected" };
-    } else if (
-      // FIXME do proper binding and validation here
-      !toolWithInputs.selectedDatasets.every((dataset: Dataset) =>
-        this.toolService.isCompatible(
-          sessionData,
-          dataset,
-          toolWithInputs.tool.inputs[0].type.name
-        )
-      )
-    ) {
-      return { valid: false, message: "Incompatible input files" };
     } else {
-      return { valid: true };
+      // FIXME do proper binding and validation here
+      const validatedToolsForEachFile: ValidatedTool[] =
+        toolWithInputs.selectedDatasets.map((dataset) =>
+          this.rebindWithNewDatasetsAndValidate(
+            [dataset],
+            toolWithInputs,
+            sessionData
+          )
+        );
+
+      const allValid = validatedToolsForEachFile.every(
+        (validatedTool) => validatedTool.singleJobValidation.valid
+      );
+
+      if (allValid) {
+        return { valid: true };
+      } else {
+        const failCount = validatedToolsForEachFile.filter(
+          (validatedTool) => !validatedTool.singleJobValidation.valid
+        ).length;
+
+        return {
+          valid: false,
+          message: "Validaton failed for " + failCount + " files",
+        };
+      }
     }
   }
 
@@ -413,6 +462,12 @@ export class ToolSelectionService {
     sampleGroups: SampleGroups,
     sessionData: SessionData
   ): ValidationResult {
+    if (!toolWithInputs.tool) {
+      return { valid: false, message: "Tool missing" };
+    } else if (toolWithInputs.tool.inputs.length < 1) {
+      return { valid: false, message: "Tool takes no inputs" };
+    }
+
     if (
       sampleGroups.singleEndSamples.length < 1 &&
       sampleGroups.pairedEndSamples.length < 1 &&
@@ -454,14 +509,19 @@ export class ToolSelectionService {
       const runForEachSampleValid =
         validatedToolsForSamples.length > 0 &&
         validatedToolsForSamples.every(
-          (sampleValidatedTool) => sampleValidatedTool.valid
+          (sampleValidatedTool) =>
+            sampleValidatedTool.singleJobInputsValidation.valid
         );
+
+      const failCount: number = validatedToolsForSamples.filter(
+        (validatedTool) => !validatedTool.singleJobValidation.valid
+      ).length;
 
       return {
         valid: runForEachSampleValid,
         message: runForEachSampleValid
           ? undefined
-          : "Some samples failed input and parameter validation",
+          : "Validation failed for " + failCount + " samples",
       };
     }
   }
@@ -472,8 +532,7 @@ export class ToolSelectionService {
     sessionData: SessionData
   ): ValidatedTool[] {
     // all sample datasets, needed for checks
-
-    const singleEnd = sampleGroups.singleEndSamples.length > 0;
+    const singleEnd: boolean = sampleGroups.singleEndSamples.length > 0;
 
     const sampleDatasets: Dataset[] = singleEnd
       ? this.datasetService.getSingleEndDatasets(sampleGroups.singleEndSamples)
@@ -597,22 +656,13 @@ export class ToolSelectionService {
       }
     }
 
-    // useful for validation message
-    // TODO populate this properly
-    const sampleGroups: SampleGroups = {
-      singleEndSamples: [],
-      pairedEndSamples: [],
-      pairMissingSamples: [],
-      sampleDataMissing: [],
-    };
-
     const newToolWithValidatedInputs: SelectedToolWithValidatedInputs =
       Object.assign(
         {
-          inputsValidation: { valid: inputsValid, message: inputsMessage },
-          runForEachValidation: { valid: false },
-          runForEachSampleValidation: { valid: false },
-          sampleGroups: sampleGroups,
+          singleJobInputsValidation: {
+            valid: inputsValid,
+            message: inputsMessage,
+          },
           phenodataValidation: {
             valid: phenodataValid,
             message: phenodataMessage,
@@ -624,9 +674,16 @@ export class ToolSelectionService {
 
     // parameters are not populated again as they should remain the same
 
-    // validate parameters and combine validations to new ValidatedTool
-    const newValidatedTool = this.validateParametersAndGetValidatedTool(
+    // validate parameters
+    const newToolWithValidatedParams = this.validateParameters(
       newToolWithValidatedInputs
+    );
+
+    // get validated tool
+    const newValidatedTool = this.getValidatedTool(
+      newToolWithValidatedParams,
+      sessionData,
+      false
     );
 
     return newValidatedTool;
@@ -636,8 +693,9 @@ export class ToolSelectionService {
     parametersValid: boolean,
     toolWithValidatedInputs: SelectedToolWithValidatedInputs
   ): string {
-    const inputsValid = toolWithValidatedInputs.inputsValidation.valid;
-    const inputsMessage = toolWithValidatedInputs.inputsValidation.message;
+    const inputsValid = toolWithValidatedInputs.singleJobInputsValidation.valid;
+    const inputsMessage =
+      toolWithValidatedInputs.singleJobInputsValidation.message;
     const phenodataValid = toolWithValidatedInputs.phenodataValidation.valid;
 
     if (!parametersValid && !inputsValid) {

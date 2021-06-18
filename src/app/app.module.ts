@@ -25,7 +25,8 @@ import {
   selectedToolWithInputs,
   selectedToolWithPopulatedParams,
   selectedToolWithValidatedInputs,
-  validatedTool
+  selectedToolWithValidatedParams,
+  validatedTool,
 } from "./state/tool.reducer";
 import { AccessModule } from "./views/access/access.module";
 import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
@@ -64,14 +65,15 @@ import { TermsComponent } from "./views/terms/terms.component";
         selectedToolWithInputs,
         selectedToolWithValidatedInputs,
         selectedToolWithPopulatedParams,
+        selectedToolWithValidatedParams,
         validatedTool,
-        latestSession
+        latestSession,
       },
       {
         runtimeChecks: {
           strictStateImmutability: false, // TODO refactor store usage so that these can be removed
-          strictActionImmutability: false // for example parameter.value is currently mutated
-        }
+          strictActionImmutability: false, // for example parameter.value is currently mutated
+        },
       }
     ),
 
@@ -79,10 +81,10 @@ import { TermsComponent } from "./views/terms/terms.component";
     RoutingModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
-      toastComponent: ActionToastComponent
+      toastComponent: ActionToastComponent,
     }),
     HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
-    AppRoutingModule // must be last because a wildcard route is defined here
+    AppRoutingModule, // must be last because a wildcard route is defined here
   ],
   declarations: [
     NavigationComponent,
@@ -95,15 +97,15 @@ import { TermsComponent } from "./views/terms/terms.component";
     NotFoundComponent,
     MyllyHasMovedComponent,
     AccessibilityComponent,
-    PrivacyNoticeComponent
+    PrivacyNoticeComponent,
   ],
   providers: [
     SelectionService,
     TokenService,
     ErrorService,
-    { provide: ErrorHandler, useClass: AppErrorHandler }
+    { provide: ErrorHandler, useClass: AppErrorHandler },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {
   constructor(injector: Injector) {

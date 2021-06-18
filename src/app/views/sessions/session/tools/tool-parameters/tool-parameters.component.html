@@ -57,10 +57,10 @@
 
             <!-- validation message -->
             <div *ngIf="
-                !validatedTool.parameterResults.get(parameter.name.id).valid
+                !validatedTool.parametersValidationResults.get(parameter.name.id).valid
               " class="alert alert-warning p-1 mb-0 mt-1 text-sm">
               {{
-              validatedTool.parameterResults.get(parameter.name.id).message
+              validatedTool.parametersValidationResults.get(parameter.name.id).message
               }}
             </div>
           </td>

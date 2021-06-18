@@ -103,7 +103,8 @@ export class JobService {
 
     // TODO check that all validatedTools are valid
     const invalidValidatedToolsForSamples = reboundValidatedTools.filter(
-      (sampleValidatedTool) => sampleValidatedTool.valid === false
+      (sampleValidatedTool) =>
+        sampleValidatedTool.singleJobValidation.valid === false
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details
@@ -140,15 +141,17 @@ export class JobService {
       return;
     }
 
-    const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
-      validatedTool,
-      validatedTool.sampleGroups,
-      sessionData
-    );
+    const validatedToolsForSamples =
+      this.toolSelectionService.getValidatedToolForEachSample(
+        validatedTool,
+        validatedTool.sampleGroups,
+        sessionData
+      );
 
     // check that all rebound validatedTools are valid
     const invalidValidatedToolsForSamples = validatedToolsForSamples.filter(
-      (sampleValidatedTool) => sampleValidatedTool.valid === false
+      (sampleValidatedTool) =>
+        sampleValidatedTool.singleJobValidation.valid === false
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details

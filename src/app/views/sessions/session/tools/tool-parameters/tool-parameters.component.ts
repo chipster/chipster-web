@@ -47,8 +47,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges() {
     if (this.validatedTool != null) {
       this.ready = true;
-      this.showWarning = !this.validatedTool.valid;
-      this.warningText = this.validatedTool.message;
+      this.showWarning = !this.validatedTool.singleJobValidation.valid;
+      this.warningText = this.validatedTool.singleJobValidation.message;
     } else {
       this.ready = false;
     }

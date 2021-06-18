@@ -21,18 +21,22 @@ export interface SelectedToolWithInputs extends SelectedTool {
 
 export interface SelectedToolWithValidatedInputs
   extends SelectedToolWithInputs {
-  inputsValidation: ValidationResult;
-  runForEachValidation: ValidationResult;
-  runForEachSampleValidation: ValidationResult;
-  sampleGroups: SampleGroups;
+  singleJobInputsValidation: ValidationResult;
   phenodataValidation: ValidationResult;
   phenodataBindings: Array<PhenodataBinding>;
 }
-export interface ValidatedTool extends SelectedToolWithValidatedInputs {
-  valid: boolean;
-  parametersValid: boolean;
-  message?: string;
-  parameterResults?: Map<string, ValidationResult>;
+
+export interface SelectedToolWithValidatedParameters
+  extends SelectedToolWithValidatedInputs {
+  parametersValidation: ValidationResult;
+  parametersValidationResults?: Map<string, ValidationResult>;
+}
+
+export interface ValidatedTool extends SelectedToolWithValidatedParameters {
+  singleJobValidation: ValidationResult;
+  runForEachValidation: ValidationResult;
+  runForEachSampleValidation: ValidationResult;
+  sampleGroups: SampleGroups;
 }
 
 export interface ValidationResult {

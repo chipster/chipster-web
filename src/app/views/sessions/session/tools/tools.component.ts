@@ -34,6 +34,7 @@ import {
   SET_SELECTED_TOOL_WITH_INPUTS,
   SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+  SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
   SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
@@ -49,6 +50,7 @@ import {
   SelectedTool,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
+  SelectedToolWithValidatedParameters,
   ValidatedTool,
   ValidationResult,
 } from "./ToolSelection";
@@ -431,31 +433,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
             }
           }
 
-          const runForEachValidationResult: ValidationResult =
-            this.toolSelectionService.validateRunForEach(
-              toolWithInputs,
-              this.sessionData
-            );
-
-          // FIXME if not needed later on, remove from here and do this at toolSelectionService.validateRunForEachSample
-          // may be needed for the run button
-          const sampleGroups = this.datasetService.getSampleGroups(
-            toolWithInputs.selectedDatasets
-          );
-
-          const runForEachSampleValidationResult: ValidationResult =
-            this.toolSelectionService.validateRunForEachSample(
-              toolWithInputs,
-              sampleGroups,
-              this.sessionData
-            );
-
           return Object.assign(
             {
-              inputsValidation: { valid: inputsValid, message: inputsMessage },
-              runForEachValidation: runForEachValidationResult,
-              runForEachSampleValidation: runForEachSampleValidationResult,
-              sampleGroups: sampleGroups,
+              singleJobInputsValidation: {
+                valid: inputsValid,
+                message: inputsMessage,
+              },
               phenodataValidation: {
                 valid: phenodataValid,
                 message: phenodataMessage,
@@ -504,9 +487,30 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.parametersChanged$, // signals when user changes parameters
     ])
       .pipe(
-        map(([toolWithParamsAndValidatedInputs]) => {
-          return this.toolSelectionService.validateParametersAndGetValidatedTool(
-            toolWithParamsAndValidatedInputs
+        map(([toolWithPopulatedParamsAndValidatedInputs]) => {
+          return this.toolSelectionService.validateParameters(
+            toolWithPopulatedParamsAndValidatedInputs
+          );
+        })
+      )
+      .subscribe(
+        (toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
+          this.store.dispatch({
+            type: SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+            payload: toolWithValidatedParams,
+          });
+        }
+      );
+
+    // run for each validation and create validated tool
+    this.store
+      .select("selectedToolWithValidatedParams")
+      .pipe(
+        filter((value) => value !== null),
+        map((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
+          return this.toolSelectionService.getValidatedTool(
+            toolWithValidatedParams,
+            this.sessionData
           );
         })
       )
@@ -528,7 +532,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
       this.runEnabled =
         tool &&
-        (tool.valid ||
+        (tool.singleJobValidation.valid ||
           tool.runForEachValidation.valid ||
           tool.runForEachSampleValidation.valid);
       this.paramButtonWarning = !this.runEnabled;
