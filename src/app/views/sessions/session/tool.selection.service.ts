@@ -6,6 +6,7 @@ import { forkJoin, forkJoin as observableForkJoin, Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
+import UtilsService from "../../../shared/utilities/utils";
 import { DatasetService, SampleGroups } from "./dataset.service";
 import { GetSessionDataService } from "./get-session-data.service";
 import { ToolService } from "./tools/tool.service";
@@ -336,9 +337,27 @@ export class ToolSelectionService {
   }
 
   validateInputs(toolWithInputs: SelectedToolWithInputs): ValidationResult {
-    // inputs are valid if tool has no  inputs
     if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
+      // inputs are valid if tool has no  inputs
       return { valid: true };
+    } else if (
+      toolWithInputs.selectedDatasets.length >
+        this.toolService.getInputCountWithoutPhenodata(toolWithInputs.tool) &&
+      !this.toolService.hasMultiInputs(toolWithInputs.tool)
+    ) {
+      // more selected files than inputs
+      return {
+        valid: false,
+        message:
+          "Too many files selected. Tool takes " +
+          UtilsService.getCountAndUnit(
+            this.toolService.getInputCountWithoutPhenodata(toolWithInputs.tool),
+            "input"
+          ) +
+          ", " +
+          toolWithInputs.selectedDatasets.length +
+          " files selected.",
+      };
     }
 
     // check that every required input is bound
@@ -349,7 +368,18 @@ export class ToolSelectionService {
       }
     );
     if (!bindingsValid) {
-      return { valid: false, message: "Input file missing" };
+      if (toolWithInputs.selectedDatasets.length === 0) {
+        return {
+          valid: false,
+          message: "Tool has required inputs but no files selected.",
+        };
+      } else {
+        return {
+          valid: false,
+          message:
+            "Selected files are not compatible with all the required tool inputs",
+        };
+      }
     }
 
     // check that there are no unbound datasets
@@ -379,9 +409,15 @@ export class ToolSelectionService {
         message: "Incompatible input files",
       };
     } else {
+      const unboundDatasetNames = toolWithInputs.selectedDatasets
+        .filter((dataset) => !boundDatasetIds.includes(dataset.datasetId))
+        .map((dataset) => dataset.name);
+
       return {
         valid: false,
-        message: "Some selected files not bound as inputs",
+        message:
+          unboundDatasetNames.length +
+          " selected files could not be assigned as job input files",
       };
     }
   }
@@ -406,30 +442,32 @@ export class ToolSelectionService {
     sessionData: SessionData
   ): ValidationResult {
     if (!toolWithInputs.tool) {
-      return { valid: false, message: "Tool missing" };
+      return { valid: false, message: "Tool missing." };
     } else if (toolWithInputs.tool.inputs.length < 1) {
-      return { valid: false, message: "Tool takes no inputs" };
+      return { valid: false, message: "Tool takes no inputs." };
     } else if (
-      toolWithInputs.tool.inputs.filter((toolInput) => !toolInput.optional)
-        .length > 1
+      toolWithInputs.tool.inputs.filter(
+        (toolInput) => !toolInput.optional && !toolInput.meta
+      ).length > 1
     ) {
       return {
         valid: false,
-        message:
-          "Run for each not possible for tools which need more than one input files",
+        message: "Not possible for tools that require more than one inputs.",
       };
     } else if (
       toolWithInputs.selectedDatasets == null ||
       toolWithInputs.selectedDatasets.length < 1
     ) {
-      return { valid: false, message: "No files selected" };
+      return { valid: false, message: "No files selected." };
     } else if (
       toolWithInputs.selectedDatasets == null ||
       toolWithInputs.selectedDatasets.length === 1
     ) {
-      return { valid: false, message: "Only one file selected" };
+      return {
+        valid: false,
+        message: "Only one file selected.",
+      };
     } else {
-      // FIXME do proper binding and validation here
       const validatedToolsForEachFile: ValidatedTool[] =
         toolWithInputs.selectedDatasets.map((dataset) =>
           this.rebindWithNewDatasetsAndValidate(
@@ -452,7 +490,9 @@ export class ToolSelectionService {
 
         return {
           valid: false,
-          message: "Validaton failed for " + failCount + " files",
+          message:
+            "Parameter or input checks failed for " +
+            UtilsService.getCountAndUnit(failCount, "file"),
         };
       }
     }
@@ -464,9 +504,17 @@ export class ToolSelectionService {
     sessionData: SessionData
   ): ValidationResult {
     if (!toolWithInputs.tool) {
-      return { valid: false, message: "Tool missing" };
+      return { valid: false, message: "Tool missing." };
     } else if (toolWithInputs.tool.inputs.length < 1) {
-      return { valid: false, message: "Tool takes no inputs" };
+      return { valid: false, message: "Tool takes no inputs." };
+    } else if (toolWithInputs.selectedDatasets.length === 0) {
+      return { valid: false, message: "No files selected." };
+    } else if (toolWithInputs.selectedDatasets.length === 1) {
+      // prevents unnecessary dropdown run button when only one single end file is selected
+      return {
+        valid: false,
+        message: "Only one file selected.",
+      };
     }
 
     if (
@@ -477,7 +525,8 @@ export class ToolSelectionService {
       // no sample info available
       return {
         valid: false,
-        message: "No samples defined",
+        message:
+          "Selected files don't include any files defined as sample files.",
       };
     } else if (
       sampleGroups.singleEndSamples.length > 0 &&
@@ -488,17 +537,16 @@ export class ToolSelectionService {
       return {
         valid: false,
         message:
-          "Selected files contain both single end and paired end sample files",
+          "Selected files should only contain single end or paired end sample files, not both.",
       };
     } else if (sampleGroups.pairMissingSamples.length > 0) {
       // only paired, but some pairs missing
       return {
         valid: false,
         message:
-          "Selected files contain paired end sample files which are missing their pair file",
+          "Selected files contain paired end sample files which are missing their pair file.",
       };
     } else {
-      // only single or only paired (without any missing)
       // create validatedTools for each sample
       const validatedToolsForSamples = this.getValidatedToolForEachSample(
         toolWithInputs,
@@ -522,7 +570,8 @@ export class ToolSelectionService {
         valid: runForEachSampleValid,
         message: runForEachSampleValid
           ? undefined
-          : "Validation failed for " + failCount + " samples",
+          : "Parameter or input checks failed for " +
+            UtilsService.getCountAndUnit(failCount, "sample"),
       };
     }
   }
@@ -610,6 +659,7 @@ export class ToolSelectionService {
       category: originalToolWithInputs.category,
       module: originalToolWithInputs.module,
     };
+    log.info("rebind with new datasets and validate", datasets, sessionData);
 
     // bind inputs
     const newInputBindings = this.toolService.bindInputs(
@@ -700,15 +750,15 @@ export class ToolSelectionService {
     const phenodataValid = toolWithValidatedInputs.phenodataValidation.valid;
 
     if (!parametersValid && !inputsValid) {
-      return "Invalid parameters and " + inputsMessage;
+      return "Invalid parameters. " + inputsMessage;
     } else if (!parametersValid && !phenodataValid) {
-      return "Invalid parameters and missing phenodata";
+      return "Invalid parameters and missing phenodata.";
     } else if (!parametersValid) {
-      return "Invalid parameters";
+      return "Invalid parameters.";
     } else if (!inputsValid) {
       return inputsMessage;
     } else if (!phenodataValid) {
-      return "Missing phenodata";
+      return "Missing phenodata.";
     } else {
       return "";
     }

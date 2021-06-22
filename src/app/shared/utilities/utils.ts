@@ -210,4 +210,8 @@ export default class UtilsService {
     array.forEach((x) => (fn(x) ? passed : rejected).push(x));
     return [passed, rejected];
   }
+
+  static getCountAndUnit(count: number, unit: string) {
+    return count === 1 ? count + " " + unit : count + " " + unit + "s";
+  }
 }

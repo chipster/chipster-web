@@ -82,24 +82,20 @@
           <!-- run options -->
           <div class="container">
             <h2 class="h2-xs mt-1 mb-2">Run options</h2>
-            <table class="table table-sm table-condensed">
+            <table class="table table-sm text-sm table-condensed">
               <tr>
                 <td><span *ngIf="validatedTool.singleJobValidation.valid" class="fas fa-fw fa-check-circle text-success"
                     aria-hidden="true"></span>
                   <span *ngIf="!validatedTool.singleJobValidation.valid"> <i
                       class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
                 </td>
-                <td class="text-nowrap">Run Single Job</td>
-
+                <td class="text-nowrap">Run Tool</td>
                 <td class="w-100">
-                  <span *ngIf="!validatedTool.singleJobValidation.valid"
-                    class="alert alert-warning text-center p-1 mb-0">
-                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
-                    {{validatedTool.singleJobValidation.message}}
-                    <!-- {{ validatedTool.singleJobInputsValidation.message }} -->
-                  </span>
+                  <div *ngIf="validatedTool.singleJobValidation.valid">{{getRunSingleDescription()}}</div>
+                  <div *ngIf="!validatedTool.singleJobValidation.valid" class="alert alert-warning  p-1 mb-0">
+                    {{getRunSingleDescription()}}
+                  </div>
                 </td>
-
               </tr>
               <tr>
                 <td><span *ngIf="validatedTool.runForEachValidation.valid"
@@ -107,38 +103,37 @@
                   <span *ngIf="!validatedTool.runForEachValidation.valid"> <i
                       class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
                 </td>
-                <td class="text-nowrap">Run Job for Each File</td>
-
+                <td class="text-nowrap">Run Tool for Each File</td>
                 <td>
-                  <span *ngIf="!validatedTool.runForEachValidation.valid"
-                    class="alert alert-warning text-center p-1 mb-0">
-                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
+                  <div *ngIf="validatedTool.runForEachValidation.valid">Runs the tool
+                    {{validatedTool.selectedDatasets.length}} times. Each time one of the selected
+                    {{validatedTool.selectedDatasets.length}} files is used as a single input for the tool.
+                  </div>
+
+                  <div *ngIf="!validatedTool.runForEachValidation.valid" class="alert alert-warning p-1 mb-0">
                     {{ validatedTool.runForEachValidation.message }}
-                  </span>
+                  </div>
                 </td>
               </tr>
               <tr>
-
                 <td><span *ngIf="validatedTool.runForEachSampleValidation.valid"
                     class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
                   <span *ngIf="!validatedTool.runForEachSampleValidation.valid"> <i
                       class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
                 </td>
-                <td class="text-nowrap"> Run Job for Each Sample</td>
+                <td class="text-nowrap"> Run Tool for Each Sample</td>
                 <td>
-                  <span *ngIf="!validatedTool.runForEachSampleValidation.valid"
-                    class="alert alert-warning text-center p-1 mb-0">
-                    <!-- <i class="fas fa-fw fa-exclamation-circle"></i>  -->
-                    {{ validatedTool.runForEachSampleValidation.message }}
-                  </span>
+                  <div *ngIf="validatedTool.runForEachSampleValidation.valid">
+                    {{getRunForEachSampleDescription()}}
+                  </div>
+
+                  <div *ngIf="!validatedTool.runForEachSampleValidation.valid" class="alert alert-warning  p-1 mb-0">
+                    {{getRunForEachSampleDescription()}}
+                  </div>
                 </td>
-
               </tr>
-
             </table>
           </div>
-
-
         </div>
       </div>
 
@@ -210,20 +205,20 @@
                     <span class="fas fa-play"></span> Run</button>
                   <div class="dropdown-menu dropdown-menu-right " ngbDropdownMenu aria-labelledby="runDropdownButton">
                     <button ngbDropdownItem (click)="runJob(false)"
-                      [disabled]="!validatedTool.singleJobInputsValidation.valid">
-                      Run
-                      Single
-                      Job</button>
+                      [disabled]="!validatedTool.singleJobValidation.valid">
+                      Run Tool <span *ngIf="validatedTool.singleJobValidation.valid" class="text-muted text-sm">1
+                        job</span></button>
                     <button ngbDropdownItem (click)="runJob(true)"
-                      [disabled]="!validatedTool.runForEachValidation.valid">Run Job
-                      for Each File <span class="text-muted text-sm">{{validatedTool.selectedDatasets.length}}
-                        files</span></button>
+                      [disabled]="!validatedTool.runForEachValidation.valid">Run Tool for Each File <span
+                        *ngIf="validatedTool.runForEachValidation.valid"
+                        class="text-muted text-sm">{{validatedTool.selectedDatasets.length}}
+                        jobs</span></button>
                     <button ngbDropdownItem (click)="runForEachSample()"
-                      [disabled]="!validatedTool.runForEachSampleValidation.valid">{{getRunForEachSampleButtonText()}}
+                      [disabled]="!validatedTool.runForEachSampleValidation.valid">Run Tool For Each Sample
                       <span *ngIf="validatedTool.runForEachSampleValidation.valid"
                         class="text-muted text-sm">{{validatedTool.sampleGroups.pairedEndSamples.length +
                         validatedTool.sampleGroups.singleEndSamples.length}}
-                        samples</span></button>
+                        jobs</span></button>
                     <div *ngIf="defineHintVisible" class="dropdown-divider"></div>
                     <button *ngIf="defineHintVisible" ngbDropdownItem (click)="onDefineSamples()"
                       [disabled]="validatedTool.runForEachSampleValidation.valid">Define Samples to Enable Run for Each

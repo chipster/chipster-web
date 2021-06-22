@@ -4,7 +4,7 @@ import {
   InputBinding,
   Tool,
   ToolInput,
-  ToolParameter
+  ToolParameter,
 } from "chipster-js-common";
 import * as _ from "lodash";
 import { Observable } from "rxjs";
@@ -152,7 +152,7 @@ export class ToolService {
     // do the binding, one input at a time
     for (const toolInput of inputs) {
       // get compatible datasets
-      const compatibleDatasets = unboundDatasets.filter(dataset =>
+      const compatibleDatasets = unboundDatasets.filter((dataset) =>
         this.isCompatible(sessionData, dataset, toolInput.type.name)
       );
 
@@ -178,7 +178,7 @@ export class ToolService {
       .map((toolInput: ToolInput) => {
         return {
           toolInput: toolInput,
-          datasets: bindingsMap.get(toolInput)
+          datasets: bindingsMap.get(toolInput),
         };
       });
   }
@@ -186,7 +186,7 @@ export class ToolService {
   bindPhenodata(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
     // if no phenodata inputs, return empty array
     const phenodataInputs = toolWithInputs.tool.inputs.filter(
-      input => input.meta
+      (input) => input.meta
     );
     if (phenodataInputs.length === 0) {
       return [];
@@ -206,17 +206,17 @@ export class ToolService {
       // get all inputs
       .reduce((allInputs, binding) => allInputs.concat(binding.datasets), [])
       // get phenodatas for the inputs
-      .map(inputDataset =>
+      .map((inputDataset) =>
         this.getSessionDataService.getPhenodataDataset(inputDataset)
       )
       // pick first where phenodata found
-      .find(dataset => dataset != null);
+      .find((dataset) => dataset != null);
 
     return [
       {
         toolInput: firstPhenodataInput,
-        dataset: phenodataDataset
-      }
+        dataset: phenodataDataset,
+      },
     ];
   }
 
@@ -225,8 +225,8 @@ export class ToolService {
   ): PhenodataBinding[] {
     // if no phenodata inputs, return empty array
     return toolWithInputs.tool.inputs
-      .filter(input => input.meta)
-      .map(input => {
+      .filter((input) => input.meta)
+      .map((input) => {
         return { toolInput: input, dataset: null };
       });
   }
@@ -242,7 +242,7 @@ export class ToolService {
     return (
       bindings &&
       bindings.every(
-        binding =>
+        (binding) =>
           binding.toolInput.optional ||
           (binding.datasets && binding.datasets.length > 0)
       )
@@ -255,6 +255,17 @@ export class ToolService {
       (input.name.prefix && input.name.prefix.length > 0) ||
       (input.name.postfix && input.name.postfix.length > 0)
     );
+  }
+
+  hasMultiInputs(tool: Tool) {
+    return (
+      tool.inputs != null &&
+      tool.inputs.some((toolInput) => this.isMultiInput(toolInput))
+    );
+  }
+
+  getInputCountWithoutPhenodata(tool: Tool) {
+    return tool.inputs.filter((toolInput) => !toolInput.meta).length;
   }
 
   /** Return the id of the nth input instance of multi input
@@ -320,7 +331,7 @@ export class ToolService {
 
   getManualPage(toolId: string) {
     return this.configService.getManualToolPostfix().pipe(
-      map(manualPostfix => {
+      map((manualPostfix) => {
         if (toolId.endsWith(".java")) {
           // remove the java package name
           const splitted = toolId.split(".");
@@ -356,25 +367,25 @@ export class ToolService {
       tool.inputs
         // start with mandatory not generic, ignore phenodata
         .filter(
-          input =>
+          (input) =>
             !input.optional && !(input.type.name === "GENERIC") && !input.meta
         )
         // add optional not generic
         .concat(
           tool.inputs.filter(
-            input => input.type.name !== "GENERIC" && input.optional
+            (input) => input.type.name !== "GENERIC" && input.optional
           )
         )
         // add mandatory generic
         .concat(
           tool.inputs.filter(
-            input => input.type.name === "GENERIC" && !input.optional
+            (input) => input.type.name === "GENERIC" && !input.optional
           )
         )
         // add optional generic
         .concat(
           tool.inputs.filter(
-            input => input.type.name === "GENERIC" && input.optional
+            (input) => input.type.name === "GENERIC" && input.optional
           )
         )
     );

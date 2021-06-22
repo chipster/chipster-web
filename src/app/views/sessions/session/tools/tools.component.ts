@@ -578,11 +578,50 @@ export class ToolsComponent implements OnInit, OnDestroy {
     );
   }
 
-  getRunForEachSampleButtonText(): string {
-    return this.validatedTool?.sampleGroups != null &&
-      this.validatedTool.sampleGroups.pairedEndSamples.length > 0
-      ? "Run Job for Each Sample"
-      : // ? "Run Job for Each Sample (" + this.validatedTool.sampleGroups.size + ")"
-        "Run Job for Each Sample";
+  getRunSingleDescription(): string {
+    if (this.validatedTool.singleJobValidation.valid === true) {
+      if (
+        this.validatedTool.tool.inputs.length === 0 ||
+        this.validatedTool.inputBindings.length === 0
+      ) {
+        return "Runs the tool once.";
+      } else if (this.validatedTool.selectedDatasets.length === 1) {
+        return "Runs the tool once. Uses the one selected file as the tool input.";
+      } else if (this.validatedTool.selectedDatasets.length > 1) {
+        return (
+          "Runs the tool once. Uses all " +
+          this.validatedTool.selectedDatasets.length +
+          " selected files as the tool inputs."
+        );
+      }
+    } else {
+      return this.validatedTool.singleJobValidation.message;
+    }
+  }
+
+  getRunForEachSampleDescription(): string {
+    if (this.validatedTool.runForEachSampleValidation.valid === true) {
+      const runsTheTool = "Runs the tool ";
+
+      const middlePart =
+        this.validatedTool.sampleGroups.pairedEndSamples.length > 0
+          ? runsTheTool +
+            this.validatedTool.sampleGroups.pairedEndSamples.length +
+            " times. Each time the two paired files of a one sample are used as the tool inputs. "
+          : this.validatedTool.sampleGroups.singleEndSamples.length +
+            " times. Each time the single end sample file is used as the tool input. ";
+
+      const nonSampleFiles =
+        this.validatedTool.sampleGroups.sampleDataMissing.length > 0
+          ? "Selected files include the following non-sample files that are used as additional tool inputs files for all the tool runs: " +
+            this.validatedTool.sampleGroups.sampleDataMissing
+              .map((dataset) => dataset.name)
+              .join(", ") +
+            "."
+          : "";
+      return runsTheTool + middlePart + nonSampleFiles;
+    } else {
+      return this.validatedTool.runForEachSampleValidation.message;
+    }
   }
 }
