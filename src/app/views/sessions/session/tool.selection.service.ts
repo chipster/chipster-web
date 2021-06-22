@@ -492,7 +492,8 @@ export class ToolSelectionService {
           valid: false,
           message:
             "Parameter or input checks failed for " +
-            UtilsService.getCountAndUnit(failCount, "file"),
+            UtilsService.getCountAndUnit(failCount, "file") +
+            ".",
         };
       }
     }
@@ -571,7 +572,8 @@ export class ToolSelectionService {
         message: runForEachSampleValid
           ? undefined
           : "Parameter or input checks failed for " +
-            UtilsService.getCountAndUnit(failCount, "sample"),
+            UtilsService.getCountAndUnit(failCount, "sample") +
+            ".",
       };
     }
   }
