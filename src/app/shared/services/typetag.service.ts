@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Dataset } from "chipster-js-common";
+import * as log from "loglevel";
 import { SessionData } from "../../model/session/session-data";
 
 // tags for code completion and usage search
@@ -49,6 +50,21 @@ export const Tags = {
 export class TypeTagService {
   // noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
+    // debug logging
+    if (sessionData == null) {
+      log.warn("sessionData is null in isCompatible for " + dataset.name);
+    } else if (
+      sessionData.datasetTypeTags == null ||
+      sessionData.datasetTypeTags.size == 0
+    ) {
+      log.warn(
+        "empty sessionData.datasetTypetags in isCompatible for " +
+          dataset.name +
+          " " +
+          sessionData.datasetTypeTags
+      );
+    }
+
     const alwaysCompatible = [Tags.GENERIC, Tags.PHENODATA];
     if (alwaysCompatible.includes(type)) {
       return true;

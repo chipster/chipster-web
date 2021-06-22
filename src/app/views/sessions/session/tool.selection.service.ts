@@ -659,7 +659,6 @@ export class ToolSelectionService {
       category: originalToolWithInputs.category,
       module: originalToolWithInputs.module,
     };
-    log.info("rebind with new datasets and validate", datasets, sessionData);
 
     // bind inputs
     const newInputBindings = this.toolService.bindInputs(
