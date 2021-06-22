@@ -73,6 +73,7 @@ export class TypeTagService {
     const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
 
     if (!typeTags) {
+      log.warn("typetags", sessionData.datasetTypeTags, typeTags);
       throw new Error("dataset " + dataset.name + " does not have type tags");
     }
     return typeTags.has(type);
