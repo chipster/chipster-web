@@ -482,6 +482,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       });
 
     // validate parameters after parameters changed (or populated)
+    // null is meaningful here
+    // beware when changing session to avoid old data
     combineLatest([
       this.store.select("selectedToolWithPopulatedParams"),
       // .pipe(filter((value) => value !== null)),
@@ -632,8 +634,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
       const middlePart =
         this.validatedTool.sampleGroups.pairedEndSamples.length > 0
-          ? runsTheTool +
-            this.validatedTool.sampleGroups.pairedEndSamples.length +
+          ? this.validatedTool.sampleGroups.pairedEndSamples.length +
             " times. Each time the two paired files of a one sample are used as the tool inputs. "
           : this.validatedTool.sampleGroups.singleEndSamples.length +
             " times. Each time the single end sample file is used as the tool input. ";
@@ -654,6 +655,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private clearStoreToolSelections() {
     // don't clear selectedTool to avoid looping
+    // null should also go through the validation etc chain, but just to be sure
 
     this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
     this.store.dispatch({
