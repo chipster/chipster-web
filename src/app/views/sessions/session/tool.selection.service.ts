@@ -377,7 +377,7 @@ export class ToolSelectionService {
         return {
           valid: false,
           message:
-            "Selected files are not compatible with required tool inputs",
+            "Selected files are not compatible with required tool inputs.",
         };
       }
     }
