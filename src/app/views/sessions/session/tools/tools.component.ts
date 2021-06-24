@@ -28,7 +28,9 @@ import { SettingsService } from "../../../../shared/services/settings.service";
 import UtilsService from "../../../../shared/utilities/utils";
 import {
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
+  CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+  CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
   CLEAR_VALIDATED_TOOL,
   SET_SELECTED_TOOL,
   SET_SELECTED_TOOL_WITH_INPUTS,
@@ -163,6 +165,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.clearStoreToolSelections();
+    this.parametersChanged$ == null;
     this.unsubscribe.next();
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
@@ -212,7 +216,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   onParametersChanged() {
-    this.parametersChanged$.next(null);
+    if (this.parametersChanged$ != null) {
+      this.parametersChanged$.next(null);
+    }
   }
 
   openChange(isOpen) {
@@ -386,13 +392,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             ),
           });
         } else {
-          this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
-          this.store.dispatch({
-            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
-          });
-          this.store.dispatch({
-            type: CLEAR_VALIDATED_TOOL,
-          });
+          this.clearStoreToolSelections();
         }
       });
 
@@ -400,6 +400,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store
       .select("selectedToolWithInputs")
       .pipe(
+        takeUntil(this.unsubscribe),
         filter((value) => value !== null),
         map((toolWithInputs: SelectedToolWithInputs) => {
           const inputsValidation: ValidationResult =
@@ -460,6 +461,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store
       .select("selectedToolWithValidatedInputs")
       .pipe(
+        takeUntil(this.unsubscribe),
         filter((value) => value !== null),
         mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
           // populate params is async, and returns the same tool with params populated
@@ -481,24 +483,35 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     // validate parameters after parameters changed (or populated)
     combineLatest([
-      this.store
-        .select("selectedToolWithPopulatedParams")
-        .pipe(filter((value) => value !== null)),
+      this.store.select("selectedToolWithPopulatedParams"),
+      // .pipe(filter((value) => value !== null)),
       this.parametersChanged$, // signals when user changes parameters
     ])
       .pipe(
+        takeUntil(this.unsubscribe),
         map(([toolWithPopulatedParamsAndValidatedInputs]) => {
-          return this.toolSelectionService.validateParameters(
-            toolWithPopulatedParamsAndValidatedInputs
-          );
+          if (toolWithPopulatedParamsAndValidatedInputs == null) {
+            return null;
+          } else {
+            return this.toolSelectionService.validateParameters(
+              toolWithPopulatedParamsAndValidatedInputs
+            );
+          }
         })
       )
       .subscribe(
         (toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
-          this.store.dispatch({
-            type: SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
-            payload: toolWithValidatedParams,
-          });
+          // should we dispatch null here? now we do
+          if (toolWithValidatedParams != null) {
+            this.store.dispatch({
+              type: SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+              payload: toolWithValidatedParams,
+            });
+          } else {
+            this.store.dispatch({
+              type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+            });
+          }
         }
       );
 
@@ -506,42 +519,56 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.store
       .select("selectedToolWithValidatedParams")
       .pipe(
-        filter((value) => value !== null),
+        takeUntil(this.unsubscribe),
+        // filter((value) => value !== null),
         map((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
-          return this.toolSelectionService.getValidatedTool(
-            toolWithValidatedParams,
-            this.sessionData
-          );
+          if (toolWithValidatedParams == null) {
+            return null;
+          } else {
+            return this.toolSelectionService.getValidatedTool(
+              toolWithValidatedParams,
+              this.sessionData
+            );
+          }
         })
       )
       .subscribe((validatedTool: ValidatedTool) => {
-        this.store.dispatch({
-          type: SET_VALIDATED_TOOL,
-          payload: validatedTool,
-        });
+        if (validatedTool != null) {
+          this.store.dispatch({
+            type: SET_VALIDATED_TOOL,
+            payload: validatedTool,
+          });
+        } else {
+          this.store.dispatch({
+            type: CLEAR_VALIDATED_TOOL,
+          });
+        }
       });
 
     // subscribe to validated tool
-    this.store.select("validatedTool").subscribe((tool: ValidatedTool) => {
-      this.validatedTool = tool;
+    this.store
+      .select("validatedTool")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe((tool: ValidatedTool) => {
+        this.validatedTool = tool;
 
-      this.runIsDropdown =
-        tool &&
-        (tool.runForEachValidation.valid ||
-          tool.runForEachSampleValidation.valid);
+        this.runIsDropdown =
+          tool &&
+          (tool.runForEachValidation.valid ||
+            tool.runForEachSampleValidation.valid);
 
-      this.runEnabled =
-        tool &&
-        (tool.singleJobValidation.valid ||
-          tool.runForEachValidation.valid ||
-          tool.runForEachSampleValidation.valid);
-      this.paramButtonWarning = !this.runEnabled;
-      this.defineHintVisible =
-        tool != null &&
-        this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
-        this.validatedTool.sampleGroups.pairedEndSamples.length < 1 &&
-        this.validatedTool.sampleGroups.pairMissingSamples.length < 1;
-    });
+        this.runEnabled =
+          tool &&
+          (tool.singleJobValidation.valid ||
+            tool.runForEachValidation.valid ||
+            tool.runForEachSampleValidation.valid);
+        this.paramButtonWarning = !this.runEnabled;
+        this.defineHintVisible =
+          tool != null &&
+          this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
+          this.validatedTool.sampleGroups.pairedEndSamples.length < 1 &&
+          this.validatedTool.sampleGroups.pairMissingSamples.length < 1;
+      });
   }
 
   private subscribeToJobEvents() {
@@ -623,5 +650,24 @@ export class ToolsComponent implements OnInit, OnDestroy {
     } else {
       return this.validatedTool.runForEachSampleValidation.message;
     }
+  }
+
+  private clearStoreToolSelections() {
+    // don't clear selectedTool to avoid looping
+
+    this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
+    this.store.dispatch({
+      type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
+    });
+    this.store.dispatch({
+      type: CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
+    });
+    this.store.dispatch({
+      type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+    });
+
+    this.store.dispatch({
+      type: CLEAR_VALIDATED_TOOL,
+    });
   }
 }

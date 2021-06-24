@@ -80,7 +80,7 @@
             (updateBindings)="setBindings($event)"></ch-tool-inputs>
 
           <!-- run options -->
-          <div class="container">
+          <div class="container" *ngIf="validatedTool != null">
             <h2 class="h2-xs mt-1 mb-2">Run options</h2>
             <table class="table table-sm text-sm table-condensed">
               <tr>
