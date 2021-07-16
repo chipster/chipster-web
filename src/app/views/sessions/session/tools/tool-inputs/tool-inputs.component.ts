@@ -56,6 +56,7 @@ export class ToolInputsComponent implements OnChanges {
   }
 
   inputSelected(userEditedBinding: BindingModel) {
+    console.log("input selected");
     // generate new input bindings: remove from other bindings the datasets which are present in the binding
     // edited by the user
     const updatedBindings = this.bindingModels.map((bindingModel) => {
