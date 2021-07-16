@@ -27,8 +27,7 @@
           <select *ngIf="
               bindingModel.compatibleDatasets.length > 0 &&
               !bindingModel.input.name.spliced
-            " class="w-100" [(ngModel)]="bindingModel.boundDatasets[0]"
-            (ngModelChange)="$event.stopPropagation();inputSelected(bindingModel)">
+            " class="w-100" [(ngModel)]="bindingModel.boundDatasets[0]" (change)="inputSelected(bindingModel)">
             <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}
             </option>
           </select>
@@ -38,8 +37,7 @@
               bindingModel.compatibleDatasets.length > 0 &&
               bindingModel.input.name.spliced
             " [disabled]="bindingModel.compatibleDatasets.length < 1" class="w-100" multiple
-            [(ngModel)]="bindingModel.boundDatasets"
-            (ngModelChange)="$event.stopPropagation();inputSelected(bindingModel)">
+            [(ngModel)]="bindingModel.boundDatasets" (change)="inputSelected(bindingModel)">
             <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}
             </option>
           </select>
