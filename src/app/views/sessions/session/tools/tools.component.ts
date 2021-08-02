@@ -618,7 +618,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         return "Runs the tool once. Uses the one selected file as the tool input.";
       } else if (this.validatedTool.selectedDatasets.length > 1) {
         return (
-          "Runs the tool once. Uses all " +
+          "Runs the tool once. Uses all the " +
           this.validatedTool.selectedDatasets.length +
           " selected files as the tool inputs."
         );
