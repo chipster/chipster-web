@@ -7,6 +7,8 @@ import { IdPair } from "../../../model/id-pair";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import log from "loglevel";
+import { JobService } from "../../sessions/session/job.service";
+import { SessionResource } from "../../../shared/resources/session.resource";
 
 @Component({
   selector: "ch-jobs",
@@ -20,10 +22,17 @@ export class JobsComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService
+    private authHttpClient: AuthHttpClientService,
+    private sessionResource: SessionResource,
   ) {}
 
   ngOnInit() {
+
+    this.update();
+
+  }
+
+  update() {
     this.jobs = [];
 
     let sessionDbUrl;
@@ -78,5 +87,16 @@ export class JobsComponent implements OnInit {
         },
         err => this.restErrorService.showError("get jobs failed", err)
       );
+  }
+
+  isRunning(job: Job) {
+    return JobService.isRunning(job);
+  }
+  cancelJob(job: Job) {
+    const jobCopy = Object.assign({}, job);
+    this.sessionResource.cancelJob(job.sessionId, jobCopy).subscribe({
+      next: () => this.update(),
+      error: err => this.restErrorService.showError("cancel job failed", err)
+    });
   }
 }

@@ -146,10 +146,7 @@ export class SessionDataService {
   }
 
   cancelJob(job: Job) {
-    job.state = JobState.Cancelled;
-    job.stateDetail = "";
-
-    this.updateJob(job);
+    return this.sessionResource.cancelJob(this.sessionId, job).toPromise();
   }
 
   deleteJobs(jobs: Job[]) {

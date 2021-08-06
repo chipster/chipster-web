@@ -17,6 +17,7 @@
     <td>{{job.state}}</td>
     <td>{{job.stateDetail}}</td>
     <td>{{job.startTime}}</td>
+    <td><button *ngIf="isRunning(job)" class="btn btn-sm btn-link" (click)="cancelJob(job)">Cancel</button></td>
   </tr>
   </tbody>
 </table>
