@@ -45,6 +45,7 @@
     "ngx-toastr": "^14.1.0",
     "oidc-client": "^1.7.1",
     "pako": "^2.0.3",
+    "pdfjs-dist": "^2.7.570",
     "popper.js": "^1.15.0",
     "rxjs": "^6.6.7",
     "stacktrace-js": "^2.0.0",
