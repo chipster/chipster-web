@@ -7,7 +7,6 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -33,7 +32,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
 
   // noinspection JSUnusedLocalSymbols
-  constructor(public toolService: ToolService, private dropDown: NgbDropdown) {}
+  constructor(public toolService: ToolService) // private dropDown: NgbDropdown
+  {}
 
   ngOnInit() {
     this.parametersChangedThrottle
@@ -59,9 +59,9 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
     this.unsubscribe.complete();
   }
 
-  closeDropDownDialog() {
-    this.dropDown.close();
-  }
+  // closeDropDownDialog() {
+  //   this.dropDown.close();
+  // }
 
   onParametersChanged() {
     this.parametersChangedThrottle.next();

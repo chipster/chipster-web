@@ -78,62 +78,7 @@
           </ch-tool-parameters>
           <ch-tool-inputs [validatedTool]="validatedTool" [sessionData]="sessionData"
             (updateBindings)="setBindings($event)"></ch-tool-inputs>
-
-          <!-- run options -->
-          <div class="container" *ngIf="validatedTool != null">
-            <h2 class="h2-xs mt-1 mb-2">Run options</h2>
-            <table class="table table-sm text-sm table-condensed">
-              <tr>
-                <td><span *ngIf="validatedTool.singleJobValidation.valid" class="fas fa-fw fa-check-circle text-success"
-                    aria-hidden="true"></span>
-                  <span *ngIf="!validatedTool.singleJobValidation.valid"> <i
-                      class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
-                </td>
-                <td class="text-nowrap">Run Tool</td>
-                <td class="w-100">
-                  <div *ngIf="validatedTool.singleJobValidation.valid">{{getRunSingleDescription()}}</div>
-                  <div *ngIf="!validatedTool.singleJobValidation.valid" class="alert alert-warning  p-1 mb-0">
-                    {{getRunSingleDescription()}}
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td><span *ngIf="validatedTool.runForEachValidation.valid"
-                    class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
-                  <span *ngIf="!validatedTool.runForEachValidation.valid"> <i
-                      class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
-                </td>
-                <td class="text-nowrap">Run Tool for Each File</td>
-                <td>
-                  <div *ngIf="validatedTool.runForEachValidation.valid">Runs the tool
-                    {{validatedTool.selectedDatasets.length}} times. Each time one of the selected
-                    {{validatedTool.selectedDatasets.length}} files is used as a single input for the tool.
-                  </div>
-
-                  <div *ngIf="!validatedTool.runForEachValidation.valid" class="alert alert-warning p-1 mb-0">
-                    {{ validatedTool.runForEachValidation.message }}
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td><span *ngIf="validatedTool.runForEachSampleValidation.valid"
-                    class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
-                  <span *ngIf="!validatedTool.runForEachSampleValidation.valid"> <i
-                      class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i></span>
-                </td>
-                <td class="text-nowrap"> Run Tool for Each Sample</td>
-                <td>
-                  <div *ngIf="validatedTool.runForEachSampleValidation.valid">
-                    {{getRunForEachSampleDescription()}}
-                  </div>
-
-                  <div *ngIf="!validatedTool.runForEachSampleValidation.valid" class="alert alert-warning  p-1 mb-0">
-                    {{getRunForEachSampleDescription()}}
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
+          <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
         </div>
       </div>
 
@@ -184,14 +129,26 @@
 
 
                 <!-- parameters -->
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
+                <button class="btn btn-sm btn-outline-secondary mr-1" (click)="openParametersModal()"
+                  title="Edit parameters and inputs" [disabled]="!selectedTool">
+                  <span *ngIf="paramButtonWarning" class="fas fa-fw fa-exclamation-circle text-warning"
+                    aria-hidden="true"></span>
+                  <span *ngIf="!paramButtonWarning" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
+                  Parameters
+                </button>
+
+                <!-- parameters dropdown button -->
+                <!-- <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
                     $event.stopPropagation(); parametersDropdown.toggle()
                   " title="Edit parameters and inputs" [disabled]="!selectedTool">
                   <span *ngIf="paramButtonWarning" class="fas fa-fw fa-exclamation-circle text-warning"
                     aria-hidden="true"></span>
                   <span *ngIf="!paramButtonWarning" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
                   Parameters
-                </button>
+                </button> -->
+
+
+
 
                 <!-- run -->
                 <button *ngIf="!runIsDropdown" class="btn btn-success run-button btn-sm button-wide flex-grow-1"

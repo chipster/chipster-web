@@ -8,6 +8,8 @@ import { ManualModule } from "../../../manual/manual.module";
 import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
 import { FilterCompatibleDatasetsPipe } from "./filter-compatible-datasets.pipe";
 import { JobListComponent } from "./job-list/job-list.component";
+import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
+import { RunOptionsComponent } from "./run-options/run-options.component";
 import { ScrollerComponent } from "./scroller/scroller.component";
 import { ToolDetailsComponent } from "./tool-details/tool-details.component";
 import { ToolInputsComponent } from "./tool-inputs/tool-inputs.component";
@@ -24,7 +26,7 @@ import { ToolsComponent } from "./tools.component";
     FormsModule,
     NgbModule,
     ManualModule,
-    NgSelectModule
+    NgSelectModule,
   ],
   declarations: [
     ToolListItemComponent,
@@ -36,9 +38,11 @@ import { ToolsComponent } from "./tools.component";
     JobListComponent,
     ToolListAccordionComponent,
     ToolDetailsComponent,
-    CounterSpinnerComponent
+    CounterSpinnerComponent,
+    ParametersModalComponent,
+    RunOptionsComponent,
   ],
   providers: [ToolService],
-  exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent]
+  exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent],
 })
 export class ToolsModule {}

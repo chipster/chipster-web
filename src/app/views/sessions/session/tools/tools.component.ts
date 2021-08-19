@@ -47,6 +47,7 @@ import { SelectionService } from "../selection.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
+import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
 import { ToolService } from "./tool.service";
 import {
   SelectedTool,
@@ -141,7 +142,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private datasetService: DatasetService,
     private datasetModalService: DatasetModalService,
     private store: Store<any>,
-    dropdownConfig: NgbDropdownConfig
+    dropdownConfig: NgbDropdownConfig,
+    private ngbModal: NgbModal
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
@@ -607,52 +609,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     );
   }
 
-  getRunSingleDescription(): string {
-    if (this.validatedTool.singleJobValidation.valid === true) {
-      if (
-        this.validatedTool.tool.inputs.length === 0 ||
-        this.validatedTool.inputBindings.length === 0
-      ) {
-        return "Runs the tool once.";
-      } else if (this.validatedTool.selectedDatasets.length === 1) {
-        return "Runs the tool once. Uses the one selected file as the tool input.";
-      } else if (this.validatedTool.selectedDatasets.length > 1) {
-        return (
-          "Runs the tool once. Uses all the " +
-          this.validatedTool.selectedDatasets.length +
-          " selected files as the tool inputs."
-        );
-      }
-    } else {
-      return this.validatedTool.singleJobValidation.message;
-    }
-  }
-
-  getRunForEachSampleDescription(): string {
-    if (this.validatedTool.runForEachSampleValidation.valid === true) {
-      const runsTheTool = "Runs the tool ";
-
-      const middlePart =
-        this.validatedTool.sampleGroups.pairedEndSamples.length > 0
-          ? this.validatedTool.sampleGroups.pairedEndSamples.length +
-            " times. Each time the two paired files of a one sample are used as the tool inputs. "
-          : this.validatedTool.sampleGroups.singleEndSamples.length +
-            " times. Each time the single end sample file is used as the tool input. ";
-
-      const nonSampleFiles =
-        this.validatedTool.sampleGroups.sampleDataMissing.length > 0
-          ? "Selected files include the following non-sample files that are used as additional tool inputs files for all the tool runs: " +
-            this.validatedTool.sampleGroups.sampleDataMissing
-              .map((dataset) => dataset.name)
-              .join(", ") +
-            "."
-          : "";
-      return runsTheTool + middlePart + nonSampleFiles;
-    } else {
-      return this.validatedTool.runForEachSampleValidation.message;
-    }
-  }
-
   private clearStoreToolSelections() {
     // don't clear selectedTool to avoid looping
     // null should also go through the validation etc chain, but just to be sure
@@ -670,6 +626,21 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.store.dispatch({
       type: CLEAR_VALIDATED_TOOL,
+    });
+  }
+
+  openParametersModal() {
+    const modalRef = this.ngbModal.open(ParametersModalComponent, {
+      size: "lg",
+    });
+    modalRef.componentInstance.validatedTool = this.validatedTool;
+    modalRef.componentInstance.sessionData = this.sessionData;
+    modalRef.componentInstance.parametersChanged.subscribe({
+      next: () => this.onParametersChanged(),
+    });
+    modalRef.componentInstance.updateBindings.subscribe({
+      next: (toolWithInputs: SelectedToolWithInputs) =>
+        this.setBindings(toolWithInputs),
     });
   }
 }
