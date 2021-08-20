@@ -7,7 +7,11 @@ import {
   OnInit,
   ViewChild,
 } from "@angular/core";
-import { NgbDropdownConfig, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdownConfig,
+  NgbModal,
+  NgbModalRef,
+} from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import {
@@ -125,6 +129,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
   manualModalRef: any;
+
+  parametersModalRef: NgbModalRef;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -556,6 +562,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe((tool: ValidatedTool) => {
         this.validatedTool = tool;
 
+        // componentInstance is undefined for closed modal
+        if (this.parametersModalRef?.componentInstance != null) {
+          this.parametersModalRef.componentInstance.validatedTool =
+            this.validatedTool;
+        }
+
         this.runIsDropdown =
           tool &&
           (tool.runForEachValidation.valid ||
@@ -630,15 +642,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   openParametersModal() {
-    const modalRef = this.ngbModal.open(ParametersModalComponent, {
+    this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
-    modalRef.componentInstance.validatedTool = this.validatedTool;
-    modalRef.componentInstance.sessionData = this.sessionData;
-    modalRef.componentInstance.parametersChanged.subscribe({
+    this.parametersModalRef.componentInstance.validatedTool =
+      this.validatedTool;
+    this.parametersModalRef.componentInstance.sessionData = this.sessionData;
+    this.parametersModalRef.componentInstance.parametersChanged.subscribe({
       next: () => this.onParametersChanged(),
     });
-    modalRef.componentInstance.updateBindings.subscribe({
+    this.parametersModalRef.componentInstance.updateBindings.subscribe({
       next: (toolWithInputs: SelectedToolWithInputs) =>
         this.setBindings(toolWithInputs),
     });
