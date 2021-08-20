@@ -28,10 +28,11 @@
               <div class="dropdown-menu" aria-labelledby="workflowDropdownMenuButton">
                 <a class="dropdown-item" (click)="selectAll()">Select all files</a>
                 <a class="dropdown-item" (click)="selectChildren()" [class.disabled]="!isDatasetsSelected()">
-                  Select descendants of a file
+                  Select descendants of selected files
                 </a>
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" (click)="autoLayoutAll()">
-                  Reset positions
+                  Reset all positions
                 </a>
 
                 <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()">

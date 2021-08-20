@@ -102,7 +102,7 @@ export class SessionPanelComponent {
   }
 
   selectChildren() {
-    let children = this.getSessionDataService.getChildren(
+    const children = this.getSessionDataService.getChildren(
       this.selectionService.selectedDatasets
     );
     this.selectionHandlerService.setDatasetSelection(children);

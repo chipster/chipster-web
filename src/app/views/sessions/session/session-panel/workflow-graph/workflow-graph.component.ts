@@ -23,6 +23,7 @@ import { SettingsService } from "../../../../../shared/services/settings.service
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
@@ -86,7 +87,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private errorService: ErrorService,
     private settingService: SettingsService,
     private datasetService: DatasetService,
-    private visualizationEventService: VisualizationEventService
+    private visualizationEventService: VisualizationEventService,
+    private getSessionDataService: GetSessionDataService
   ) {}
 
   // actually selected datasets
@@ -157,6 +159,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   exportMenuItem: any;
   historyMenuItem: any;
   groupsMenuItem: any;
+  selectChildrenMenuItem: any;
   dividerMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
@@ -751,6 +754,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
             this.groupsMenuItem,
+            this.selectChildrenMenuItem,
             this.dividerMenuItem,
             Object.assign({}, this.deleteMenuItem, {
               title: "Delete (" + self.selectedDatasets.length + " files)",
@@ -760,6 +764,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.renameMenuItem,
             this.convertMenuItem,
             this.groupsMenuItem,
+            this.selectChildrenMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
             this.dividerMenuItem,
@@ -1291,8 +1296,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const datasetLeft = element.getBoundingClientRect().left;
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
-      .height;
+    const tooltipHeight = this.datasetTooltip
+      .node()
+      .getBoundingClientRect().height;
     const triangleHeight = this.datasetTooltipTriangle
       .node()
       .getBoundingClientRect().height;
@@ -1410,8 +1416,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onZoomInandOut(): void {
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect()
-      .height;
+    const tooltipHeight = this.datasetTooltip
+      .node()
+      .getBoundingClientRect().height;
 
     const toolTipClientRects = this.getToolTipBoundingClientRects();
 
@@ -1619,6 +1626,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.selectedDatasets,
           self.sessionData
         );
+      },
+    };
+
+    this.selectChildrenMenuItem = {
+      title: "Select Descendants",
+      action: function (): void {
+        const children = self.getSessionDataService.getChildren(
+          self.selectionService.selectedDatasets
+        );
+        self.selectionHandlerService.setDatasetSelection(children);
       },
     };
 
