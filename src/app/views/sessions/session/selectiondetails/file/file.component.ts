@@ -16,6 +16,8 @@ import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { GetSessionDataService } from "../../get-session-data.service";
+import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
@@ -49,6 +51,8 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private dialogModalService: DialogModalService,
     private restErrorService: RestErrorService,
     private sessionEventService: SessionEventService,
+    private getSessionDataService: GetSessionDataService,
+    private selectionHandlerService: SelectionHandlerService,
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
@@ -114,6 +118,13 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
       this.selectionService.selectedDatasets,
       this.sessionData
     );
+  }
+
+  selectChildren() {
+    const children = this.getSessionDataService.getChildren(
+      this.selectionService.selectedDatasets
+    );
+    this.selectionHandlerService.setDatasetSelection(children);
   }
 
   ngOnDestroy() {
