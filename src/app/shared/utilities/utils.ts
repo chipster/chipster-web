@@ -214,4 +214,8 @@ export default class UtilsService {
   static getCountAndUnit(count: number, unit: string) {
     return count === 1 ? count + " " + unit : count + " " + unit + "s";
   }
+
+  static onlyHasUniqueValues(array: Array<any>) {
+    return new Set(array).size === array.length;
+  }
 }
