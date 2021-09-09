@@ -1,26 +1,25 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
-import { mergeMap, tap, catchError, map } from "rxjs/operators";
+import log from "loglevel";
+import { empty, from, Observable } from "rxjs";
+import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
-import log from "loglevel"
-import { empty, from, Observable } from 'rxjs';
-import { BytesPipe } from '../../../shared/pipes/bytes.pipe';
-import FileBrokerStorage from './file-broker-storage';
+import FileBrokerStorage from "./file-broker-storage";
 
 @Component({
   selector: "ch-services",
   templateUrl: "./maintenance.component.html",
   styleUrls: ["./maintenance.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class MaintenanceComponent implements OnInit {
-
   storageIds = [];
   free = new Map();
   total = new Map();
+
   idOnStorage = new Map();
   schedule = new Map();
 
@@ -30,8 +29,7 @@ export class MaintenanceComponent implements OnInit {
 
   copySource: string;
   copyTarget: string;
-  copyMaxSize: string;
-
+  copyMaxSize: number;
 
   constructor(
     private configService: ConfigService,
@@ -41,123 +39,150 @@ export class MaintenanceComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-
     let fileBroker: Service;
 
-    this.configService.getInternalService("session-db", this.tokenService.getToken()).pipe(
-      mergeMap((service: Service) => {
-        return this.authHttpClient.getAuth(service.adminUri + "/admin/storages");
-      })
-    ).pipe(
-      tap((storages: FileStats[]) => {
-        storages.forEach(fileStats => {
-          log.info("db storage", fileStats);
-          this.addStorageId(fileStats.storageId);
-          this.sessionDbFileStats.set(fileStats.storageId, fileStats);
-        });
-      }),
-    )
-    .subscribe(null,
-    err => {
-      this.restErrorService.showError("failed to get storages", err);
-    });
+    this.configService
+      .getInternalService("session-db", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          return this.authHttpClient.getAuth(
+            service.adminUri + "/admin/storages"
+          );
+        })
+      )
+      .subscribe({
+        next: (storages: FileStats[]) => {
+          storages.forEach((fileStats) => {
+            log.info("db storage", fileStats);
+            this.addStorageId(fileStats.storageId);
+            this.sessionDbFileStats.set(fileStats.storageId, fileStats);
+          });
+        },
+        error: (err) => {
+          this.restErrorService.showError("failed to get storages", err);
+        },
+      });
 
-    this.configService.getInternalService("file-broker", this.tokenService.getToken()).pipe(
-      mergeMap((service: Service) => {
-        fileBroker = service;
-        log.info("get storages: " + fileBroker.adminUri + "/admin/storages");
-        return this.authHttpClient.getAuth(fileBroker.adminUri + "/admin/storages");
-      })
-    ).pipe(
-      tap((storages: FileBrokerStorage[]) => {
-        log.info("file-broker storages", storages);
-        storages.forEach((storage: FileBrokerStorage) => {
-          this.addStorageId(storage.storageId);
-          this.fileBrokerStorages.set(storage.storageId, storage);
-        });
-      }),
-      mergeMap((storages: FileBrokerStorage[]) => from(storages)),
-      mergeMap((storage: FileBrokerStorage) => this.updateStatus(storage.storageId, fileBroker)),
-      mergeMap((storageId: string) => this.updateId(storageId, fileBroker)),    
-      mergeMap((storageId: string) => this.updateFileStorageFileStats(storageId, fileBroker)),    
-    )
-    .subscribe(null,
-    err => {
-      this.restErrorService.showError("failed to get storages", err);
-    });
+    this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        mergeMap((service: Service) => {
+          fileBroker = service;
+          log.info("get storages: " + fileBroker.adminUri + "/admin/storages");
+          return this.authHttpClient.getAuth(
+            fileBroker.adminUri + "/admin/storages"
+          );
+        })
+      )
+      .pipe(
+        tap((storages: FileBrokerStorage[]) => {
+          log.info("file-broker storages", storages);
+          storages.forEach((storage: FileBrokerStorage) => {
+            this.addStorageId(storage.storageId);
+            this.fileBrokerStorages.set(storage.storageId, storage);
+          });
+        }),
+        mergeMap((storages: FileBrokerStorage[]) => from(storages)),
+        mergeMap((storage: FileBrokerStorage) =>
+          this.updateStatus(storage.storageId, fileBroker)
+        ),
+        mergeMap((storageId: string) => this.updateId(storageId, fileBroker)),
+        mergeMap((storageId: string) =>
+          this.updateFileStorageFileStats(storageId, fileBroker)
+        )
+      )
+      .subscribe({
+        next: (value) => {
+          const storagesSorted = Array.from(this.free)
+            .map(([storageId, freeSpace]) => ({ storageId, freeSpace }))
+            .sort((a, b) => a.freeSpace - b.freeSpace);
+
+          const leastFreeStorageId: string = storagesSorted[0].storageId;
+          const mostFreeStorageId: string =
+            storagesSorted[storagesSorted.length - 1].storageId;
+
+          this.copySource = leastFreeStorageId;
+          this.setCopyTarget(mostFreeStorageId);
+        },
+        error: (err) => {
+          this.restErrorService.showError("failed to get storages", err);
+        },
+      });
   }
 
   updateId(storageId: string, fileBroker: Service): Observable<string> {
-    return this.authHttpClient.getAuth(
-      fileBroker.adminUri + "/admin/storages/" + storageId + "/id"
-    ).pipe(      
-      catchError(err => {              
-        log.error("storage id request error", err);
-        // don't cancel other requests even if one of them fails
-        return empty();
-      }),
-      map((idResp: Object) => idResp["storageId"]),
-      tap((idOnStorage: string) => {
-        this.idOnStorage.set(storageId, idOnStorage); 
-      }),
-      map(() => storageId),
-    );
+    return this.authHttpClient
+      .getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/id")
+      .pipe(
+        catchError((err) => {
+          log.error("storage id request error", err);
+          // don't cancel other requests even if one of them fails
+          return empty();
+        }),
+        map((idResp: Object) => idResp["storageId"]),
+        tap((idOnStorage: string) => {
+          this.idOnStorage.set(storageId, idOnStorage);
+        }),
+        map(() => storageId)
+      );
   }
 
-  updateFileStorageFileStats(storageId: string, fileBroker: Service): Observable<string> {
-    return this.authHttpClient.getAuth(
-      fileBroker.adminUri + "/admin/storages/" + storageId + "/filestats"
-    ).pipe(      
-      catchError(err => {              
-        log.error("file stats request error", err);
-        // don't cancel other requests even if one of them fails
-        return empty();
-      }),
-      tap((fileStats: FileStats) => {
-        this.fileStorageFileStats.set(storageId, fileStats); 
-      }),
-      map(() => storageId),
-    );
+  updateFileStorageFileStats(
+    storageId: string,
+    fileBroker: Service
+  ): Observable<string> {
+    return this.authHttpClient
+      .getAuth(
+        fileBroker.adminUri + "/admin/storages/" + storageId + "/filestats"
+      )
+      .pipe(
+        catchError((err) => {
+          log.error("file stats request error", err);
+          // don't cancel other requests even if one of them fails
+          return empty();
+        }),
+        tap((fileStats: FileStats) => {
+          this.fileStorageFileStats.set(storageId, fileStats);
+        }),
+        map(() => storageId)
+      );
   }
 
   addStorageId(storageId: string) {
     log.info("add storageId", storageId, this.storageIds.indexOf(storageId));
     if (this.storageIds.indexOf(storageId) == -1) {
-
       this.storageIds.push(storageId);
     }
   }
 
   updateStatus(storageId: string, fileBroker: Service): Observable<string> {
-    return this.authHttpClient.getAuth(
-        fileBroker.adminUri + "/admin/storages/" + storageId + "/status"
-      ).pipe(
-        catchError(err => {              
+    return this.authHttpClient
+      .getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/status")
+      .pipe(
+        catchError((err) => {
           log.error("storage status request error", err);
           // don't cancel other requests even if one of them fails
           return empty();
         }),
         tap((status: Object) => {
-          this.free.set(storageId, status["diskFree,fs=storage"]); 
+          this.free.set(storageId, status["diskFree,fs=storage"]);
           this.total.set(storageId, status["diskTotal,fs=storage"]);
         }),
-        map(() => storageId),
+        map(() => storageId)
       );
   }
 
   backupDb(role: string) {
     // the backup service takes care of db backups
-    this.backup("backup", "/admin/backup/" + role)
-    .subscribe(null, err =>
+    this.backup("backup", "/admin/backup/" + role).subscribe(null, (err) =>
       this.restErrorService.showError("backup start failed", err)
     );
   }
 
   backupStorage(storageId: string) {
-      this.backup("file-broker", "/admin/storages/" + storageId + "/backup").pipe(
-        mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
-      )
-      .subscribe(null, err =>
+    this.backup("file-broker", "/admin/storages/" + storageId + "/backup")
+      .pipe(mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId)))
+      .subscribe(null, (err) =>
         this.restErrorService.showError("backup start failed", err)
       );
   }
@@ -169,17 +194,19 @@ export class MaintenanceComponent implements OnInit {
         mergeMap((service: Service) => {
           return this.authHttpClient.postAuth(service.adminUri + path, null);
         })
-      );      
+      );
   }
 
   updateFileStorageFileStatsOfOne(storageId: string) {
     let fileBroker = null;
-    return this.configService.getInternalService("file-broker", this.tokenService.getToken()).pipe(
-      tap((service: Service) => {
-        fileBroker = service;
-      }),
-      mergeMap(() => this.updateFileStorageFileStats(storageId, fileBroker)),    
-    )
+    return this.configService
+      .getInternalService("file-broker", this.tokenService.getToken())
+      .pipe(
+        tap((service: Service) => {
+          fileBroker = service;
+        }),
+        mergeMap(() => this.updateFileStorageFileStats(storageId, fileBroker))
+      );
   }
 
   disableBackups(storageId: string) {
@@ -187,11 +214,16 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.deleteAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule");
+          return this.authHttpClient.deleteAuth(
+            service.adminUri +
+              "/admin/storages/" +
+              storageId +
+              "/backup/schedule"
+          );
         }),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
-      )      
-      .subscribe(null, err =>
+      )
+      .subscribe(null, (err) =>
         this.restErrorService.showError("disable backup failed", err)
       );
   }
@@ -201,11 +233,17 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule", null);
+          return this.authHttpClient.postAuth(
+            service.adminUri +
+              "/admin/storages/" +
+              storageId +
+              "/backup/schedule",
+            null
+          );
         }),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("disable backup failed", err)
       );
   }
@@ -216,12 +254,15 @@ export class MaintenanceComponent implements OnInit {
       .pipe(
         mergeMap((service: Service) => {
           return this.authHttpClient.postAuth(
-            service.adminUri + "/admin/storages/" + storageId + "/delete-orphans",
+            service.adminUri +
+              "/admin/storages/" +
+              storageId +
+              "/delete-orphans",
             null
           );
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("delete orphans failed", err)
       );
   }
@@ -237,14 +278,30 @@ export class MaintenanceComponent implements OnInit {
           );
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("storage check failed", err)
       );
   }
 
   setCopyTarget(target: string) {
     this.copyTarget = target;
-    this.copyMaxSize = "" + BytesPipe.prototype.transform(this.free.get(target), 0);
+
+    const totalFree = Array.from(this.free.values()).reduce(
+      (sum, value) => (sum += value),
+      0
+    );
+    const preferredFree = totalFree / this.free.size;
+    const sourceFree = this.free.get(this.copySource);
+    const targetFree = this.free.get(this.copyTarget);
+
+    const sourceToPreferred = preferredFree - sourceFree;
+    const targetToPreferred = targetFree - preferredFree;
+
+    const smallestCopyMax = Math.floor(
+      Math.min(sourceToPreferred, targetToPreferred)
+    );
+
+    this.copyMaxSize = smallestCopyMax;
   }
 
   /**
@@ -252,58 +309,60 @@ export class MaintenanceComponent implements OnInit {
    * @param storageId
    */
   isOrphanCheckAllowed(storageId: string) {
-    return storageId == this.idOnStorage.get(storageId)
-  }
-
-  getCopyMaxSize() {    
-    let parts = this.copyMaxSize.split(" ");
-    if (parts.length >= 1) {
-      let number = parseFloat(parts[0]);
-      if (parts.length == 1) {
-        return number;
-      } else if (parts.length == 2) {
-        switch (parts[1]) {
-          case "k":
-          case "kB":
-          case "kiB":
-          return number * 1024
-          case "M":
-          case "MB":
-          case "MiB":
-          return number * 1024 * 1024
-          case "G":
-          case "GB":
-          case "GiB":
-          return number * 1024 * 1024 * 1024
-          case "T":
-          case "TB":
-          case "TiB":
-          return number * 1024 * 1024 * 1024 * 1024
-        }
-      } else {
-        this.restErrorService.showError("more than two parts " + this.copyMaxSize, null);
-      }
-    } else {
-      return null;
-    }
+    return storageId == this.idOnStorage.get(storageId);
   }
 
   copy(source: string, target: string) {
+    // sanity checks
+    if (
+      source == null ||
+      source.length < 1 ||
+      target == null ||
+      target.length < 1 ||
+      source === target
+    ) {
+      log.error("invalid copy source or target", source, target);
+      return;
+    }
+    const requestedCopyMax = this.copyMaxSize
+      ? this.copyMaxSize
+      : this.total.get(source) - this.free.get(source);
+    const targetFree = this.free.get(target);
+
+    if (requestedCopyMax > targetFree) {
+      log.error(
+        "requested to copy",
+        this.copyMaxSize,
+        "bytes from",
+        source,
+        "but target",
+        target,
+        "has only",
+        this.free.get(target),
+        "bytes free, aborting copy"
+      );
+      return;
+    }
+
     this.configService
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-
-          let url = service.adminUri + "/admin/storages/copy?source=" + source + "&target=" + target;
-          let copyMaxBytes = this.getCopyMaxSize();
-          if (copyMaxBytes) {
+          let url =
+            service.adminUri +
+            "/admin/storages/copy?source=" +
+            source +
+            "&target=" +
+            target;
+          const copyMaxBytes = this.copyMaxSize;
+          if (this.copyMaxSize) {
             url += "&maxBytes=" + copyMaxBytes;
           }
-          
+
           return this.authHttpClient.postAuth(url, null);
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("copy failed", err)
       );
   }
@@ -319,7 +378,7 @@ export class MaintenanceComponent implements OnInit {
           );
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("check orphans failed", err)
       );
   }
@@ -335,7 +394,7 @@ export class MaintenanceComponent implements OnInit {
           );
         })
       )
-      .subscribe(null, err =>
+      .subscribe(null, (err) =>
         this.restErrorService.showError("delete orphans failed", err)
       );
   }
