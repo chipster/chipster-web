@@ -6,11 +6,13 @@ describe("HistoryComponent", () => {
   let component: HistoryComponent;
   let fixture: ComponentFixture<HistoryComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [HistoryComponent]
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [HistoryComponent],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HistoryComponent);

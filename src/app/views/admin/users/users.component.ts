@@ -7,15 +7,12 @@ import { User } from "chipster-js-common";
   selector: "ch-users",
   templateUrl: "./users.component.html",
   styleUrls: ["./users.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class UsersComponent implements OnInit {
   users: User[];
 
-  constructor(
-    private restErrorService: RestErrorService,
-    private authenticationService: AuthenticationService
-  ) {}
+  constructor(private restErrorService: RestErrorService, private authenticationService: AuthenticationService) {}
 
   ngOnInit() {
     this.users = [];
@@ -24,7 +21,7 @@ export class UsersComponent implements OnInit {
       (users: User[]) => {
         this.users = users;
       },
-      err => this.restErrorService.showError("get users failed", err)
+      (err) => this.restErrorService.showError("get users failed", err)
     );
   }
 }

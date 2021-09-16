@@ -9,7 +9,7 @@ import { Component } from "@angular/core";
  */
 @Component({
   selector: "ch-link-button",
-  template: '<a href="javascript:void(0)" #anchor><ng-content></ng-content></a>'
+  template: '<a href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
 })
 export class LinkButtonComponent {
   constructor() {}

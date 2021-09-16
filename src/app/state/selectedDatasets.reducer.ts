@@ -5,10 +5,7 @@ export const TOGGLE_SELECTED_DATASET = "TOGGLE_SELECTED_DATASET";
 export const CLEAR_DATASET_SELECTIONS = "CLEAR_DATASET_SELECTIONS";
 export const SET_SELECTED_DATASETS = "SET_SELECTED_DATASETS";
 
-export function selectedDatasets(
-  state: Array<Dataset> = [],
-  { type, payload }
-) {
+export function selectedDatasets(state: Array<Dataset> = [], { type, payload }) {
   const stateDatasets = state.slice();
 
   switch (type) {
@@ -17,13 +14,8 @@ export function selectedDatasets(
 
     case TOGGLE_SELECTED_DATASET:
       _.forEach(payload, (payloadDataset: Dataset) => {
-        const index = _.findIndex(
-          stateDatasets,
-          (dataset: Dataset) => dataset.datasetId === payloadDataset.datasetId
-        );
-        index === -1
-          ? stateDatasets.push(payloadDataset)
-          : stateDatasets.splice(index, 1);
+        const index = _.findIndex(stateDatasets, (dataset: Dataset) => dataset.datasetId === payloadDataset.datasetId);
+        index === -1 ? stateDatasets.push(payloadDataset) : stateDatasets.splice(index, 1);
       });
       return stateDatasets;
 

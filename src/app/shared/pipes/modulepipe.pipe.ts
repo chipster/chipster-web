@@ -3,14 +3,12 @@ import { Module } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
-  name: "modulepipe"
+  name: "modulepipe",
 })
 export class ModulePipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}
 
   transform(modules: Array<Module>, searchWord: string) {
-    return searchWord
-      ? this.pipeService.findModulesContainingTool(modules, searchWord)
-      : modules;
+    return searchWord ? this.pipeService.findModulesContainingTool(modules, searchWord) : modules;
   }
 }

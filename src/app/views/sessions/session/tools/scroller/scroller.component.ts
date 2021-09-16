@@ -7,7 +7,7 @@ import { Component, HostListener, ViewChild } from "@angular/core";
  */
 @Component({
   selector: "ch-scroller",
-  templateUrl: "./scroller.component.html"
+  templateUrl: "./scroller.component.html",
 })
 export class ScrollerComponent {
   @ViewChild("scroll") scrollElement;

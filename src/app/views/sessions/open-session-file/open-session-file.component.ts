@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  ViewChild,
-} from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
@@ -47,10 +40,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   ) {}
 
   ngOnInit() {
-    this.flow = this.uploadService.getFlow(
-      this.fileAdded.bind(this),
-      this.fileSuccess.bind(this)
-    );
+    this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
   }
 
   fileAdded(file: any) {
@@ -109,9 +99,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
           // let the caller know if this was the last one
           if (this.fileStatus.size === this.finishedFiles.size) {
-            const sessionIds = Array.from(this.finishedFiles).map(
-              (f) => file.chipsterSessionId
-            );
+            const sessionIds = Array.from(this.finishedFiles).map((f) => file.chipsterSessionId);
             this.fileStatus.clear();
             this.finishedFiles.clear();
             this.done.emit(sessionIds);
@@ -120,35 +108,21 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             }
 
             // if there were warnings
-            if (
-              Array.from(this.warnings.values()).some(
-                (fileWarnings) => fileWarnings.length > 0
-              )
-            ) {
+            if (Array.from(this.warnings.values()).some((fileWarnings) => fileWarnings.length > 0)) {
               // collect warnings of all sessions to one message
               let msg = "";
               this.warnings.forEach((warnings, file: any) => {
                 if (warnings.length > 0) {
-                  msg +=
-                    "Warnings were found from the session file " +
-                    file.name +
-                    ". \n";
-                  msg +=
-                    "Please check that your session was imported correctly. \n";
+                  msg += "Warnings were found from the session file " + file.name + ". \n";
+                  msg += "Please check that your session was imported correctly. \n";
                   warnings.forEach((warning) => {
                     msg += "- " + warning + "\n";
                   });
                 } else {
-                  msg +=
-                    "There were no warnings about the session file " +
-                    file.name +
-                    ".\n";
+                  msg += "There were no warnings about the session file " + file.name + ".\n";
                 }
               });
-              return this.dialogModalService.openPreModal(
-                "Session import warnings",
-                msg
-              );
+              return this.dialogModalService.openPreModal("Session import warnings", msg);
             }
           }
 
@@ -161,10 +135,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
           this.sessionResource.deleteSession(sessionId).subscribe({
             error: (err2) => {
               // original error reported to user already
-              log.error(
-                "failed to delete the session after another error",
-                err2
-              );
+              log.error("failed to delete the session after another error", err2);
             },
           });
         },

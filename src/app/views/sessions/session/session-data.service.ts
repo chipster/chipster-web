@@ -23,15 +23,7 @@ import {
   Observable,
   of,
 } from "rxjs";
-import {
-  catchError,
-  concatMap,
-  filter,
-  map,
-  merge,
-  mergeMap,
-  takeUntil,
-} from "rxjs/operators";
+import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -130,10 +122,7 @@ export class SessionDataService {
         return this.createDataset(d);
       }),
       mergeMap((datasetId: string) => {
-        return forkJoin([
-          of(datasetId),
-          this.fileResource.uploadData(this.getSessionId(), datasetId, content),
-        ]);
+        return forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)]);
       }),
       mergeMap((result) => {
         return of(result[0]);
@@ -150,9 +139,7 @@ export class SessionDataService {
   }
 
   deleteJobs(jobs: Job[]) {
-    const deleteJobs$ = jobs.map((job: Job) =>
-      this.sessionResource.deleteJob(this.getSessionId(), job.jobId)
-    );
+    const deleteJobs$ = jobs.map((job: Job) => this.sessionResource.deleteJob(this.getSessionId(), job.jobId));
     observableMerge(...deleteJobs$).subscribe(
       () => {
         log.info("Job deleted");
@@ -194,11 +181,7 @@ export class SessionDataService {
   getTokenForSession(sessionId: string): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) =>
-        this.http.post(
-          sessionDbUrl + "/tokens/sessions/" + sessionId,
-          null,
-          this.tokenService.getTokenParams(true)
-        )
+        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, this.tokenService.getTokenParams(true))
       ),
       map((datasetToken: any) => datasetToken.tokenKey)
     );
@@ -214,11 +197,7 @@ export class SessionDataService {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) =>
         this.http.post(
-          sessionDbUrl +
-            "/tokens/sessions/" +
-            sessionId +
-            "/datasets/" +
-            datasetId,
+          sessionDbUrl + "/tokens/sessions/" + sessionId + "/datasets/" + datasetId,
           null,
           this.tokenService.getTokenParams(true)
         )
@@ -249,19 +228,14 @@ export class SessionDataService {
     ).pipe(
       map((results) => {
         const [datasetToken, url] = results;
-        return `${url}/sessions/${this.getSessionId()}/datasets/${
-          dataset.datasetId
-        }?token=${datasetToken}`;
+        return `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${datasetToken}`;
       })
     );
   }
 
   exportDatasets(datasets: Dataset[]) {
     for (const d of datasets) {
-      this.download(
-        this.getDatasetUrl(d).pipe(map((url) => url + "&download")),
-        3
-      );
+      this.download(this.getDatasetUrl(d).pipe(map((url) => url + "&download")), 3);
     }
   }
 
@@ -289,12 +263,7 @@ export class SessionDataService {
     );
   }
 
-  newTab(
-    url$: Observable<string>,
-    autoCloseDelay: number,
-    text: string,
-    popupErrorText: string
-  ) {
+  newTab(url$: Observable<string>, autoCloseDelay: number, text: string, popupErrorText: string) {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
     const win: any = window.open("", "_blank");
@@ -315,8 +284,7 @@ export class SessionDataService {
             }, autoCloseDelay);
           }
         },
-        (err) =>
-          this.restErrorService.showError("opening a new tab failed", err)
+        (err) => this.restErrorService.showError("opening a new tab failed", err)
       );
     } else {
       // Chrome allows only one download
@@ -353,9 +321,7 @@ export class SessionDataService {
 
   deletePersonalRules(session: Session) {
     return observableFrom(this.getPersonalRules(session.rules)).pipe(
-      concatMap((rule: Rule) =>
-        this.sessionResource.deleteRule(session.sessionId, rule.ruleId)
-      )
+      concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId))
     );
   }
 
@@ -386,10 +352,7 @@ export class SessionDataService {
   }
 
   isMySession(session: Session): boolean {
-    return session.rules.some(
-      (rule) =>
-        rule.username === this.tokenService.getUsername() && !rule.sharedBy
-    );
+    return session.rules.some((rule) => rule.username === this.tokenService.getUsername() && !rule.sharedBy);
   }
 
   /**
@@ -397,21 +360,14 @@ export class SessionDataService {
    * @param session
    * @param exampleSessionOwnerUserId
    */
-  isExampleSession(
-    session: Session,
-    exampleSessionOwnerUserId: string
-  ): boolean {
+  isExampleSession(session: Session, exampleSessionOwnerUserId: string): boolean {
     return session.rules.some((rule) => {
-      return (
-        exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId
-      );
+      return exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId;
     });
   }
 
   isReadOnlySession(session: Session) {
-    return !this.getApplicableRules(session.rules).some(
-      (rule) => rule.readWrite
-    );
+    return !this.getApplicableRules(session.rules).some((rule) => rule.readWrite);
   }
 
   // Added the delete dataset code here as two components are sharing the code
@@ -423,13 +379,7 @@ export class SessionDataService {
   deleteDatasetsUndo(deletedDatasets: Dataset[]) {
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(
-        this.getSessionId(),
-        Resource.Dataset,
-        dataset.datasetId,
-        EventType.Create,
-        null
-      );
+      const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Create, null);
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
   }
@@ -453,13 +403,7 @@ export class SessionDataService {
 
     // hide from the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(
-        this.getSessionId(),
-        Resource.Dataset,
-        dataset.datasetId,
-        EventType.Delete,
-        null
-      );
+      const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Delete, null);
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
@@ -548,15 +492,11 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(
-      this.getCompleteDatasets(sessionData.datasetsMap)
-    );
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {
     // sort by created date, oldest first (string comparison should do with the current date format)
-    return this.getDatasetList(sessionData).sort((a, b) =>
-      UtilsService.compareStringNullSafe(a.created, b.created)
-    );
+    return this.getDatasetList(sessionData).sort((a, b) => UtilsService.compareStringNullSafe(a.created, b.created));
   }
 }

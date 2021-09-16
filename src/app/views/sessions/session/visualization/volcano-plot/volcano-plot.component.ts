@@ -16,9 +16,7 @@ import VolcanoPlotDataRow from "./volcanoPlotDataRow";
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
 })
-export class VolcanoPlotComponent
-  extends PlotDirective
-  implements OnChanges, OnDestroy {
+export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];
   public volcanoPlotFCHeaders: Array<string>;
   public volcanoPlotPHeaders: Array<string>;
@@ -51,12 +49,8 @@ export class VolcanoPlotComponent
   checkTSVHeaders() {
     if (this.volcanoPlotService.containsPValOrFCHeader(this.tsv)) {
       // Extract the volcano plot related Headers needed to populate the list of option
-      this.volcanoPlotFCHeaders = this.volcanoPlotService.getVolcanoPlotFCColumnHeaders(
-        this.tsv
-      );
-      this.volcanoPlotPHeaders = this.volcanoPlotService.getVolcanoPlotPColumnHeaders(
-        this.tsv
-      );
+      this.volcanoPlotFCHeaders = this.volcanoPlotService.getVolcanoPlotFCColumnHeaders(this.tsv);
+      this.volcanoPlotPHeaders = this.volcanoPlotService.getVolcanoPlotPColumnHeaders(this.tsv);
 
       // Set the headers to be the first two for default setting
       if (this.volcanoPlotFCHeaders.length > 0) {
@@ -69,10 +63,7 @@ export class VolcanoPlotComponent
       this.redrawPlot();
       this.state = new LoadState(State.Ready);
     } else {
-      this.state = new LoadState(
-        State.Fail,
-        "No columns starting with pvalue or fold change value found."
-      );
+      this.state = new LoadState(State.Fail, "No columns starting with pvalue or fold change value found.");
     }
   }
 
@@ -95,10 +86,7 @@ export class VolcanoPlotComponent
       (in case we would want some special handling for those when drawing them
       for example) and clamp them down later when necessary (e.g. in selection).
       */
-      curPlotData.plotPoint = new Point(
-        dataRow.values[0],
-        -Math.log10(dataRow.values[1])
-      );
+      curPlotData.plotPoint = new Point(dataRow.values[0], -Math.log10(dataRow.values[1]));
       self.plotData.push(curPlotData);
     });
     this.drawPlot();
@@ -133,21 +121,13 @@ export class VolcanoPlotComponent
     };
     const padding = 50;
 
-    const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(
-      this.tsv
-    );
-    const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(
-      this.tsv
-    );
+    const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
+    const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
 
-    self.showZeroWarning =
-      this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
+    self.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
-    this.svg
-      .attr("width", size.width)
-      .attr("height", size.height)
-      .attr("id", "svg");
+    this.svg.attr("width", size.width).attr("height", size.height).attr("id", "svg");
 
     // Adding the X-axis
     this.xScale = d3
@@ -175,12 +155,7 @@ export class VolcanoPlotComponent
       .domain([0, yBoundary.max])
       .nice();
 
-    const yAxis = d3
-      .axisLeft(this.yScale)
-      .ticks(10)
-      .tickSize(-size.width)
-      .tickSizeOuter(0)
-      .tickPadding(5);
+    const yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0).tickPadding(5);
 
     this.svg
       .append("g")
@@ -195,20 +170,14 @@ export class VolcanoPlotComponent
     // Appending text label for the x axis
     this.svg
       .append("text")
-      .attr(
-        "transform",
-        "translate(" + size.width / 2 + "," + (size.height - padding / 3) + ")"
-      )
+      .attr("transform", "translate(" + size.width / 2 + "," + (size.height - padding / 3) + ")")
       .style("text-anchor", "middle")
       .text("fold change (log2)");
 
     this.svg
       .append("text")
       .attr("text-anchor", "middle")
-      .attr(
-        "transform",
-        "translate(" + padding / 2 + "," + size.height / 2 + ")rotate(-90)"
-      )
+      .attr("transform", "translate(" + padding / 2 + "," + size.height / 2 + ")rotate(-90)")
       .text("-log(p)");
 
     // add the points
@@ -227,10 +196,7 @@ export class VolcanoPlotComponent
         return self.yScale(self.clampY(d.plotPoint.y));
       })
       .attr("fill", function (d) {
-        if (
-          d.plotPoint.y >= -Math.log10(0.05) &&
-          Math.abs(d.plotPoint.x) >= 1
-        ) {
+        if (d.plotPoint.y >= -Math.log10(0.05) && Math.abs(d.plotPoint.x) >= 1) {
           if (d.plotPoint.x < 0) {
             return "green";
           } else {
@@ -249,10 +215,7 @@ export class VolcanoPlotComponent
     const limitedPlotData = this.plotData.map((val: PlotData) => {
       const limited = new PlotData();
       limited.id = val.id;
-      limited.plotPoint = new Point(
-        val.plotPoint.x,
-        this.clampY(val.plotPoint.y)
-      );
+      limited.plotPoint = new Point(val.plotPoint.x, this.clampY(val.plotPoint.y));
       return limited;
     });
 
@@ -300,14 +263,7 @@ export class VolcanoPlotComponent
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset(
-        "newDataset.tsv",
-        [this.dataset.datasetId],
-        "Volcano Plot",
-        data
-      )
-      .subscribe(null, (err) =>
-        this.restErrorService2.showError("create dataset failed", err)
-      );
+      .createDerivedDataset("newDataset.tsv", [this.dataset.datasetId], "Volcano Plot", data)
+      .subscribe(null, (err) => this.restErrorService2.showError("create dataset failed", err));
   }
 }

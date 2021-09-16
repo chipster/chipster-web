@@ -4,41 +4,24 @@
   <h1 class="text-center h1-xs">Log in to {{ appName }}</h1>
 
   <br />
-  
-  <div 
-    *ngFor="let oidc of getOidcConfigs()" 
-    placement="right" 
-    [ngbPopover]="popoverContent" 
+
+  <div
+    *ngFor="let oidc of getOidcConfigs()"
+    placement="right"
+    [ngbPopover]="popoverContent"
     triggers="mouseenter:mouseleave"
     [disablePopover]="oidc.description == null || oidc.description.length == 0">
-
     <!-- the html is trusted -->
-    <ng-template #popoverContent ><div [innerHtml]="oidc.description"></div></ng-template>
-      <button
-        *ngIf="oidc.logo"
-        class="btn btn-light btn-oidc btn-oidc-logo"
-        (click)="oidcLogin(oidc)"
-      >
-        <img
-          src="{{ oidc.logo }}"
-          alt="{{ oidc.oidcName }} login"
-          [style.width]="oidc.logoWidth"
-        />
-      </button>
-      <button
-        *ngIf="!oidc.logo && oidc.text"
-        class="btn btn-info btn-oidc"
-        (click)="oidcLogin(oidc)"
-      >
-        {{ oidc.text }}
-      </button>
-      <button
-        *ngIf="!oidc.logo && !oidc.text"
-        class="btn btn-info btn-oidc"
-        (click)="oidcLogin(oidc)"
-      >
-        Sign in with {{ oidc.oidcName }}
-      </button>
+    <ng-template #popoverContent><div [innerHtml]="oidc.description"></div></ng-template>
+    <button *ngIf="oidc.logo" class="btn btn-light btn-oidc btn-oidc-logo" (click)="oidcLogin(oidc)">
+      <img src="{{ oidc.logo }}" alt="{{ oidc.oidcName }} login" [style.width]="oidc.logoWidth" />
+    </button>
+    <button *ngIf="!oidc.logo && oidc.text" class="btn btn-info btn-oidc" (click)="oidcLogin(oidc)">
+      {{ oidc.text }}
+    </button>
+    <button *ngIf="!oidc.logo && !oidc.text" class="btn btn-info btn-oidc" (click)="oidcLogin(oidc)">
+      Sign in with {{ oidc.oidcName }}
+    </button>
     <br />
     <br />
   </div>
@@ -51,46 +34,24 @@
   </div>
 
   <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
-
-    <div class="form-group"    
-    placement="right" 
-    [ngbPopover]="popoverContent" 
-    triggers="mouseenter:mouseleave"
-    [disablePopover]="jaasDescription == null || jaasDescription.length == 0">
-
-    <!-- the html is trusted -->
-    <ng-template #popoverContent ><div [innerHtml]="jaasDescription"></div></ng-template>
+    <div
+      class="form-group"
+      placement="right"
+      [ngbPopover]="popoverContent"
+      triggers="mouseenter:mouseleave"
+      [disablePopover]="jaasDescription == null || jaasDescription.length == 0">
+      <!-- the html is trusted -->
+      <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
 
       <label for="username">Chipster username</label>
-      <input
-        class="form-control"
-        id="username"
-        required
-        ngModel
-        name="username"
-        #name="ngModel"
-        #usernameInput
-      />
+      <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput />
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        class="form-control"
-        ngModel
-        name="password"
-        #name="ngModel"
-        required
-      />
+      <input id="password" type="password" class="form-control" ngModel name="password" #name="ngModel" required />
     </div>
     <div class="form-actions text-center margin-top">
-      <button
-        class="btn btn-primary btn-login"
-        type="button"
-        (click)="login()"
-        [disabled]="myForm.invalid"
-      >
+      <button class="btn btn-primary btn-login" type="button" (click)="login()" [disabled]="myForm.invalid">
         Log In
       </button>
     </div>

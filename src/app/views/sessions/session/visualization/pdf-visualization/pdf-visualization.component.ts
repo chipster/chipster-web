@@ -9,7 +9,7 @@ import { LoadState, State } from "../../../../../model/loadstate";
 @Component({
   selector: "ch-pdf-visualization",
   templateUrl: "./pdf-visualization.component.html",
-  styleUrls: ["./pdf-visualization.component.less"]
+  styleUrls: ["./pdf-visualization.component.less"],
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   @Input()
@@ -36,10 +36,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   public readonly minZoom: number = 0.1;
   public readonly maxZoom: number = 4.0;
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
-  ) {}
+  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -65,7 +62,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
-        url => {
+        (url) => {
           this.src = url;
           this.urlReady = true;
         },
@@ -125,8 +122,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   private setShowAllButtonText() {
-    this.showAllButtonText = this.showAll
-      ? this.showSinglePagesText
-      : this.showAllPagesText;
+    this.showAllButtonText = this.showAll ? this.showSinglePagesText : this.showAllPagesText;
   }
 }

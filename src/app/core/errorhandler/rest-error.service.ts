@@ -19,10 +19,7 @@ export class RestErrorService {
   }
 
   static isHttpError(error: HttpErrorResponse | any, status: number) {
-    return (
-      (error instanceof HttpErrorResponse || error instanceof Response) &&
-      error.status === status
-    );
+    return (error instanceof HttpErrorResponse || error instanceof Response) && error.status === status;
   }
 
   static isClientOrConnectionError(error: HttpErrorResponse) {

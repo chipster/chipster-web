@@ -5,7 +5,7 @@ import { RouteService } from "../../shared/services/route.service";
 
 @Component({
   selector: "ch-access",
-  templateUrl: "./access.component.html"
+  templateUrl: "./access.component.html",
 })
 export class AccessComponent implements OnInit {
   file: string;
@@ -19,13 +19,13 @@ export class AccessComponent implements OnInit {
 
   ngOnInit(): void {
     this.configService.get(ConfigService.KEY_ACCESS_PATH).subscribe(
-      path => {
+      (path) => {
         if (path) {
           this.file = this.routeService.basename(path);
           this.manualPath = this.routeService.dirname(path) + "/";
         }
       },
-      err => {
+      (err) => {
         this.errorService.showError("Failed to get the access page path", err);
       }
     );

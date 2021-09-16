@@ -41,12 +41,8 @@ export class SessionPanelComponent {
 
   searchEnter(): void {
     // select highlighted datasets when the enter key is pressed
-    const allDatasets = this.sessionDataService.getDatasetList(
-      this.sessionData
-    );
-    this.selectionHandlerService.setDatasetSelection(
-      this.datasetsearchPipe.transform(allDatasets, this.datasetSearch)
-    );
+    const allDatasets = this.sessionDataService.getDatasetList(this.sessionData);
+    this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
     this.datasetSearch = null;
   }
 
@@ -55,29 +51,20 @@ export class SessionPanelComponent {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
     } else if (UtilsService.isShiftKey($event)) {
       //  datasets and their ids in the order of the dataset list
-      const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(
-        this.sessionData
-      );
+      const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(this.sessionData);
 
       // only apply to those filtered by dataset search
-      const searchDatasets = this.datasetsearchPipe.transform(
-        allDatasets,
-        this.datasetSearch
-      );
+      const searchDatasets = this.datasetsearchPipe.transform(allDatasets, this.datasetSearch);
       const searchIds = searchDatasets.map((d) => d.datasetId);
 
       // indexes of the old selection in the dataset list
-      const selectedIndexes = this.selectionService.selectedDatasets.map((d) =>
-        searchIds.indexOf(d.datasetId)
-      );
+      const selectedIndexes = this.selectionService.selectedDatasets.map((d) => searchIds.indexOf(d.datasetId));
       const clickIndex = searchIds.indexOf(dataset.datasetId);
       const newMin = Math.min(clickIndex, ...selectedIndexes);
       const newMax = Math.max(clickIndex, ...selectedIndexes);
 
       // datasets within the index range
-      const newSelection = _.range(newMin, newMax + 1).map(
-        (i) => searchDatasets[i]
-      );
+      const newSelection = _.range(newMin, newMax + 1).map((i) => searchDatasets[i]);
       this.selectionHandlerService.setDatasetSelection(newSelection);
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
@@ -86,11 +73,7 @@ export class SessionPanelComponent {
 
   autoLayoutAll(): void {
     let allDatasets = Array.from(this.sessionData.datasetsMap.values());
-    this.workflowGraphService.resetDoAndSaveLayout(
-      allDatasets,
-      this.sessionData.datasetsMap,
-      this.sessionData.jobsMap
-    );
+    this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
   }
 
   autoLayoutSelected(): void {
@@ -102,23 +85,17 @@ export class SessionPanelComponent {
   }
 
   selectChildren() {
-    const children = this.getSessionDataService.getChildren(
-      this.selectionService.selectedDatasets
-    );
+    const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);
     this.selectionHandlerService.setDatasetSelection(children);
   }
 
   selectAll() {
-    let all = this.sessionDataService.getCompleteDatasets(
-      this.sessionData.datasetsMap
-    );
+    let all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
     this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 
   getDatasetListSorted(): Dataset[] {
-    return this.sessionDataService.getDatasetListSortedByCreated(
-      this.sessionData
-    );
+    return this.sessionDataService.getDatasetListSortedByCreated(this.sessionData);
   }
 
   isDatasetsSelected() {

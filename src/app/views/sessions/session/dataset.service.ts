@@ -72,25 +72,18 @@ export class DatasetService {
 
     const contentRows = allRows.slice(1);
     return contentRows.every(
-      (row) =>
-        row.length === headers.length &&
-        row[groupIndex] != null &&
-        row[groupIndex] !== ""
+      (row) => row.length === headers.length && row[groupIndex] != null && row[groupIndex] !== ""
     );
   }
 
   removeMetadataFile(dataset: Dataset, metadataName: string) {
     if (dataset.metadataFiles != null) {
-      dataset.metadataFiles = dataset.metadataFiles.filter(
-        (metadataFile) => metadataFile.name !== metadataName
-      );
+      dataset.metadataFiles = dataset.metadataFiles.filter((metadataFile) => metadataFile.name !== metadataName);
     }
   }
 
   getMetadataFile(dataset: Dataset, metadataName: string): MetadataFile {
-    return dataset.metadataFiles?.find(
-      (metadataFile) => metadataFile.name === metadataName
-    );
+    return dataset.metadataFiles?.find((metadataFile) => metadataFile.name === metadataName);
   }
 
   addMetadataFile(dataset: Dataset, metadataFile: MetadataFile) {
@@ -111,13 +104,7 @@ export class DatasetService {
     });
   }
 
-  setSampleData(
-    dataset: Dataset,
-    sampleName: string,
-    sampleId: string,
-    pairId?: string,
-    direction?: string
-  ) {
+  setSampleData(dataset: Dataset, sampleName: string, sampleId: string, pairId?: string, direction?: string) {
     // if pairId and direction undefined, they will not be included in the json
     const content = JSON.stringify({
       sampleName: sampleName,
@@ -148,33 +135,20 @@ export class DatasetService {
       });
   }
 
-  findSamplePairs(
-    datasets: Dataset[],
-    r1Token = "R1",
-    r2Token = "R2"
-  ): PairedEndSample[] {
+  findSamplePairs(datasets: Dataset[], r1Token = "R1", r2Token = "R2"): PairedEndSample[] {
     const samplesArray: PairedEndSample[] = [];
 
     // r1 files
-    const r1Files = datasets.filter((dataset) =>
-      dataset.name.includes(r1Token)
-    );
+    const r1Files = datasets.filter((dataset) => dataset.name.includes(r1Token));
 
     // r2 files
-    const r2Files = datasets.filter(
-      (dataset) => !r1Files.includes(dataset) && dataset.name.includes(r2Token)
-    );
+    const r2Files = datasets.filter((dataset) => !r1Files.includes(dataset) && dataset.name.includes(r2Token));
 
     // find pair for each r1File
     r1Files.forEach((r1File) => {
-      const sampleName = r1File.name.substring(
-        0,
-        r1File.name.lastIndexOf(r1Token)
-      );
+      const sampleName = r1File.name.substring(0, r1File.name.lastIndexOf(r1Token));
       const r2File = r2Files.find(
-        (r2File) =>
-          r2File.name.substring(0, r2File.name.lastIndexOf(r2Token)) ===
-          sampleName
+        (r2File) => r2File.name.substring(0, r2File.name.lastIndexOf(r2Token)) === sampleName
       );
 
       if (r2File != null) {
@@ -200,9 +174,7 @@ export class DatasetService {
     // find files with / without sample data
     const sampleDataExistsPartitions = UtilsService.partitionArray(
       datasets,
-      (dataset) =>
-        this.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) !=
-        null
+      (dataset) => this.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null
     );
     const sampleDataMissing = sampleDataExistsPartitions[1];
     const filesWithSampleData = sampleDataExistsPartitions[0];
@@ -210,10 +182,7 @@ export class DatasetService {
     // parse sample data here to do it only once
     const datasetsWithParsedSampleJson = filesWithSampleData.map((dataset) => {
       // get and parse sample.json
-      const sampleDataFile = this.getMetadataFile(
-        dataset,
-        DatasetService.SAMPLE_DATA_FILENAME
-      );
+      const sampleDataFile = this.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME);
       const content = JSON.parse(sampleDataFile.content);
       return [dataset, content];
     });
@@ -236,39 +205,31 @@ export class DatasetService {
     });
 
     // partition to single end and paired end samples
-    const singleAndPairedPartitions = UtilsService.partitionArray(
-      datasetsAndSampleData,
-      (datasetAndSampleData) => {
-        const sampleData = datasetAndSampleData[1];
-        return sampleData.pairId == null;
-      }
-    );
+    const singleAndPairedPartitions = UtilsService.partitionArray(datasetsAndSampleData, (datasetAndSampleData) => {
+      const sampleData = datasetAndSampleData[1];
+      return sampleData.pairId == null;
+    });
     const singleEndFilesWithSampleData = singleAndPairedPartitions[0];
     const pairedEndFilesWithSampleData = singleAndPairedPartitions[1];
 
     // create SingleEndSamples to return
-    const singleEndSamples: SingleEndSample[] =
-      singleEndFilesWithSampleData.map(([dataset, sampleData]) => {
-        return {
-          sampleId: sampleData.sampleId,
-          sampleName: sampleData.sampleName,
-          file: dataset,
-        };
-      });
+    const singleEndSamples: SingleEndSample[] = singleEndFilesWithSampleData.map(([dataset, sampleData]) => {
+      return {
+        sampleId: sampleData.sampleId,
+        sampleName: sampleData.sampleName,
+        file: dataset,
+      };
+    });
 
     // create PairedEndSamples
-    const pairedSamplesMap: Map<string, PairedEndSample> =
-      this.getPairedSamplesMap(pairedEndFilesWithSampleData);
+    const pairedSamplesMap: Map<string, PairedEndSample> = this.getPairedSamplesMap(pairedEndFilesWithSampleData);
 
     // separate those with other file missing
 
     const noMissingPairsPartitions = UtilsService.partitionArray(
       Array.from(pairedSamplesMap.values()),
       (pairedEndSample) =>
-        pairedEndSample.pairs.every(
-          (sampleFilePair) =>
-            sampleFilePair.r1File != null && sampleFilePair.r2File != null
-        )
+        pairedEndSample.pairs.every((sampleFilePair) => sampleFilePair.r1File != null && sampleFilePair.r2File != null)
     );
     const pairedEndSamples: PairedEndSample[] = noMissingPairsPartitions[0];
     const pairMissingSamples: PairedEndSample[] = noMissingPairsPartitions[1];
@@ -281,22 +242,12 @@ export class DatasetService {
     };
   }
 
-  private getPairedSamplesMap(
-    pairedEndFilesWithSampleData
-  ): Map<string, PairedEndSample> {
+  private getPairedSamplesMap(pairedEndFilesWithSampleData): Map<string, PairedEndSample> {
     const pairedSamplesMap = new Map<string, PairedEndSample>();
     pairedEndFilesWithSampleData.map(([dataset, sampleData]) => {
       // check direction field
-      if (
-        sampleData.direction !== DatasetService.R1 &&
-        sampleData.direction !== DatasetService.R2
-      ) {
-        throw new Error(
-          "Illegal sample direction value: " +
-            sampleData.value +
-            " for " +
-            dataset.name
-        );
+      if (sampleData.direction !== DatasetService.R1 && sampleData.direction !== DatasetService.R2) {
+        throw new Error("Illegal sample direction value: " + sampleData.value + " for " + dataset.name);
       }
 
       if (!pairedSamplesMap.has(sampleData.sampleId)) {
@@ -307,14 +258,8 @@ export class DatasetService {
           pairs: [
             {
               pairId: sampleData.pairId,
-              r1File:
-                sampleData.direction === DatasetService.R1
-                  ? dataset
-                  : undefined,
-              r2File:
-                sampleData.direction === DatasetService.R2
-                  ? dataset
-                  : undefined,
+              r1File: sampleData.direction === DatasetService.R1 ? dataset : undefined,
+              r2File: sampleData.direction === DatasetService.R2 ? dataset : undefined,
             },
           ],
         });
@@ -322,24 +267,17 @@ export class DatasetService {
         // sample already exists
         const pairedEndSample = pairedSamplesMap.get(sampleData.sampleId);
 
-        const index = pairedEndSample.pairs.findIndex(
-          (filePair) => filePair.pairId === sampleData.pairId
-        );
+        const index = pairedEndSample.pairs.findIndex((filePair) => filePair.pairId === sampleData.pairId);
         if (index >= 0) {
           // pair already exists
 
           // check that file with the same direction doesn't exist yet
           if (
-            (sampleData.direction === DatasetService.R1 &&
-              pairedEndSample.pairs[index].r1File != null) ||
-            (sampleData.direction === DatasetService.R2 &&
-              pairedEndSample.pairs[index].r2File != null)
+            (sampleData.direction === DatasetService.R1 && pairedEndSample.pairs[index].r1File != null) ||
+            (sampleData.direction === DatasetService.R2 && pairedEndSample.pairs[index].r2File != null)
           ) {
             throw new Error(
-              "File with the same direction already exists: " +
-                dataset.name +
-                " " +
-                sampleData.direction
+              "File with the same direction already exists: " + dataset.name + " " + sampleData.direction
             );
           }
           // add to the pair
@@ -348,21 +286,14 @@ export class DatasetService {
           } else if (sampleData.direction === DatasetService.R2) {
             pairedEndSample.pairs[index].r2File = dataset;
           } else {
-            throw new Error(
-              "Unknown direction " +
-                sampleData.direction +
-                " in sample data for " +
-                dataset.name
-            );
+            throw new Error("Unknown direction " + sampleData.direction + " in sample data for " + dataset.name);
           }
         } else {
           // add new pair
           pairedEndSample.pairs.push({
             pairId: sampleData.pairId,
-            r1File:
-              sampleData.direction === DatasetService.R1 ? dataset : undefined,
-            r2File:
-              sampleData.direction === DatasetService.R2 ? dataset : undefined,
+            r1File: sampleData.direction === DatasetService.R1 ? dataset : undefined,
+            r2File: sampleData.direction === DatasetService.R2 ? dataset : undefined,
           });
         }
       }
@@ -373,15 +304,12 @@ export class DatasetService {
 
   /** Filters out nulls in case of missing pair */
   public getPairedDatasets(pairedEndSamples: PairedEndSample[]): Dataset[] {
-    const datasets: Dataset[] = pairedEndSamples.reduce(
-      (array, pairedSample) => {
-        pairedSample.pairs.forEach((sampleFilePair) => {
-          array.push(sampleFilePair.r1File, sampleFilePair.r2File);
-        });
-        return array;
-      },
-      []
-    );
+    const datasets: Dataset[] = pairedEndSamples.reduce((array, pairedSample) => {
+      pairedSample.pairs.forEach((sampleFilePair) => {
+        array.push(sampleFilePair.r1File, sampleFilePair.r2File);
+      });
+      return array;
+    }, []);
     return datasets.filter((dataset) => dataset != null);
   }
 

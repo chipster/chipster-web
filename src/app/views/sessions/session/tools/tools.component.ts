@@ -1,27 +1,9 @@
 import { DOCUMENT } from "@angular/common";
-import {
-  Component,
-  Inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from "@angular/core";
-import {
-  NgbDropdownConfig,
-  NgbModal,
-  NgbModalRef,
-} from "@ng-bootstrap/ng-bootstrap";
+import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
-import {
-  Category,
-  Dataset,
-  Job,
-  Module,
-  SessionEvent,
-  Tool,
-} from "chipster-js-common";
+import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
@@ -122,9 +104,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private lastJobStartedToastId: number;
 
   // use to signal that parameters have been changed and need to be validated
-  private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(
-    null
-  );
+  private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
   private unsubscribe: Subject<any> = new Subject();
   manualModalRef: any;
@@ -247,14 +227,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
   runForEachSample() {
     this.jobService.runForEachSample(this.validatedTool, this.sessionData);
 
-    this.showRunJobToaster(
-      this.validatedTool.sampleGroups.pairedEndSamples.length
-    );
+    this.showRunJobToaster(this.validatedTool.sampleGroups.pairedEndSamples.length);
   }
 
   private showRunJobToaster(jobCount = 1) {
-    const notificationText =
-      jobCount > 1 ? `${jobCount} jobs started` : "Job started";
+    const notificationText = jobCount > 1 ? `${jobCount} jobs started` : "Job started";
 
     // close the previous toastr not to cover the run button
     // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
@@ -323,8 +300,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     return termTokens.every(
       (termToken: string) =>
         item.toolName.toLowerCase().indexOf(termToken) !== -1 ||
-        (item.description &&
-          item.description.toLowerCase().indexOf(termToken) !== -1) ||
+        (item.description && item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
         item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
         item.toolId.toLowerCase().indexOf(termToken) !== -1
@@ -378,18 +354,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           const uptodateDatasets = selectedDatasets.map(
-            (dataset): Dataset =>
-              this.sessionData.datasetsMap.get(dataset.datasetId)
+            (dataset): Dataset => this.sessionData.datasetsMap.get(dataset.datasetId)
           );
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: {
-              inputBindings: this.toolService.bindInputs(
-                this.sessionData,
-                selectedTool.tool,
-                uptodateDatasets
-              ),
+              inputBindings: this.toolService.bindInputs(this.sessionData, selectedTool.tool, uptodateDatasets),
               selectedDatasets,
               ...selectedTool,
             },
@@ -406,8 +377,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         takeUntil(this.unsubscribe),
         filter((value) => value !== null),
         map((toolWithInputs: SelectedToolWithInputs) => {
-          const inputsValidation: ValidationResult =
-            this.toolSelectionService.validateInputs(toolWithInputs);
+          const inputsValidation: ValidationResult = this.toolSelectionService.validateInputs(toolWithInputs);
           const inputsValid = inputsValidation.valid;
           const inputsMessage = inputsValidation.message;
 
@@ -419,19 +389,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
             ? this.toolService.bindPhenodata(toolWithInputs)
             : this.toolService.getUnboundPhenodataBindings(toolWithInputs);
 
-          const phenodataValid = inputsValid
-            ? this.toolSelectionService.validatePhenodata(phenodataBindings)
-            : false;
+          const phenodataValid = inputsValid ? this.toolSelectionService.validatePhenodata(phenodataBindings) : false;
 
           // phenodata validation message, here for now
           let phenodataMessage = "";
           if (!phenodataValid) {
             if (!inputsValid) {
-              phenodataMessage =
-                "Inputs need to be valid to determine phenodata";
+              phenodataMessage = "Inputs need to be valid to determine phenodata";
             } else if (phenodataBindings.length > 1) {
-              phenodataMessage =
-                "Tool with multiple phenodata inputs not supported yet";
+              phenodataMessage = "Tool with multiple phenodata inputs not supported yet";
             } else {
               phenodataMessage = "No phenodata available";
             }
@@ -468,10 +434,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // populate params is async, and returns the same tool with params populated
           // if there are no params, just return the same tool as observable
           toolWithInputs.tool.parameters.length > 0
-            ? this.toolSelectionService.populateParameters(
-                toolWithInputs,
-                this.sessionData
-              )
+            ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData)
             : of(toolWithInputs)
         )
       )
@@ -496,26 +459,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (toolWithPopulatedParamsAndValidatedInputs == null) {
             return null;
           }
-          return this.toolSelectionService.validateParameters(
-            toolWithPopulatedParamsAndValidatedInputs
-          );
+          return this.toolSelectionService.validateParameters(toolWithPopulatedParamsAndValidatedInputs);
         })
       )
-      .subscribe(
-        (toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
-          // should we dispatch null here? now we do
-          if (toolWithValidatedParams != null) {
-            this.store.dispatch({
-              type: SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
-              payload: toolWithValidatedParams,
-            });
-          } else {
-            this.store.dispatch({
-              type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
-            });
-          }
+      .subscribe((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
+        // should we dispatch null here? now we do
+        if (toolWithValidatedParams != null) {
+          this.store.dispatch({
+            type: SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+            payload: toolWithValidatedParams,
+          });
+        } else {
+          this.store.dispatch({
+            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+          });
         }
-      );
+      });
 
     // run for each validation and create validated tool
     this.store
@@ -527,10 +486,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (toolWithValidatedParams == null) {
             return null;
           }
-          return this.toolSelectionService.getValidatedTool(
-            toolWithValidatedParams,
-            this.sessionData
-          );
+          return this.toolSelectionService.getValidatedTool(toolWithValidatedParams, this.sessionData);
         })
       )
       .subscribe((validatedTool: ValidatedTool) => {
@@ -555,20 +511,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
         // componentInstance is undefined for closed modal
         if (this.parametersModalRef?.componentInstance != null) {
-          this.parametersModalRef.componentInstance.validatedTool =
-            this.validatedTool;
+          this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
         }
 
-        this.runIsDropdown =
-          tool &&
-          (tool.runForEachValidation.valid ||
-            tool.runForEachSampleValidation.valid);
+        this.runIsDropdown = tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
 
         this.runEnabled =
           tool &&
-          (tool.singleJobValidation.valid ||
-            tool.runForEachValidation.valid ||
-            tool.runForEachSampleValidation.valid);
+          (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
         this.paramButtonWarning = !this.runEnabled;
         this.defineHintVisible =
           tool != null &&
@@ -606,10 +556,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   onDefineSamples() {
-    this.datasetModalService.openGroupsModal(
-      this.selectionService.selectedDatasets,
-      this.sessionData
-    );
+    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
   }
 
   private clearStoreToolSelections() {
@@ -636,15 +583,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
-    this.parametersModalRef.componentInstance.validatedTool =
-      this.validatedTool;
+    this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
     this.parametersModalRef.componentInstance.sessionData = this.sessionData;
     this.parametersModalRef.componentInstance.parametersChanged.subscribe({
       next: () => this.onParametersChanged(),
     });
     this.parametersModalRef.componentInstance.updateBindings.subscribe({
-      next: (toolWithInputs: SelectedToolWithInputs) =>
-        this.setBindings(toolWithInputs),
+      next: (toolWithInputs: SelectedToolWithInputs) => this.setBindings(toolWithInputs),
     });
   }
 }

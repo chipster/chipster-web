@@ -5,11 +5,13 @@ describe("BamviewerComponent", () => {
   let component: BamViewerComponent;
   let fixture: ComponentFixture<BamViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [BamViewerComponent]
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [BamViewerComponent],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BamViewerComponent);

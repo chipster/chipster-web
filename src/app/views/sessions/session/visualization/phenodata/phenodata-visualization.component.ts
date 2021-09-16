@@ -40,8 +40,7 @@ export enum PhenodataState {
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None,
 })
-export class PhenodataVisualizationComponent
-  implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() private dataset: Dataset;
   @Input() private datasetsMap: Map<string, Dataset>;
 
@@ -96,9 +95,7 @@ export class PhenodataVisualizationComponent
   ngAfterViewInit() {
     // not created in modal
     if (this.horizontalScrollDiv) {
-      this.nativeElementService.disableGestures(
-        this.horizontalScrollDiv.nativeElement
-      );
+      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
     }
   }
 
@@ -183,11 +180,7 @@ export class PhenodataVisualizationComponent
          loop.
          */
         // log.info(source);
-        if (
-          source === "edit" ||
-          source === "Autofill.fill" ||
-          source === "CopyPaste.paste"
-        ) {
+        if (source === "edit" || source === "Autofill.fill" || source === "CopyPaste.paste") {
           this.latestEdit = new Date().getTime();
           this.updateDataset();
         }
@@ -233,12 +226,7 @@ export class PhenodataVisualizationComponent
    */
   reset() {
     // do something only if there are removable columns
-    if (
-      this.headers.some(
-        (columnHeader: string) =>
-          !this.unremovableColumns.includes(columnHeader)
-      )
-    ) {
+    if (this.headers.some((columnHeader: string) => !this.unremovableColumns.includes(columnHeader))) {
       // get indexes of removable columns
       const removableColumnIndexces = this.headers
         .map((columnHeader: string, index: number) => {
@@ -247,9 +235,7 @@ export class PhenodataVisualizationComponent
         .filter((index) => index !== -1);
 
       // remove columns in reverse order to avoid messing up
-      removableColumnIndexces
-        .reverse()
-        .forEach((index) => this.removeColumn(index));
+      removableColumnIndexces.reverse().forEach((index) => this.removeColumn(index));
 
       this.updateViewAfterDelay();
       this.updateDataset();
@@ -257,27 +243,21 @@ export class PhenodataVisualizationComponent
   }
 
   private updateDataset() {
-    const phenodataString: string = [this.headers]
-      .concat(this.rows)
-      .reduce((result: string, row: Array<string>) => {
-        return (result +=
-          row
-            .reduce((rowString: string, cellValue: string) => {
-              const cellString = cellValue != null ? cellValue : "";
-              return rowString + cellString + "\t";
-            }, "")
-            .slice(0, -1) + "\n");
-      }, "");
+    const phenodataString: string = [this.headers].concat(this.rows).reduce((result: string, row: Array<string>) => {
+      return (result +=
+        row
+          .reduce((rowString: string, cellValue: string) => {
+            const cellString = cellValue != null ? cellValue : "";
+            return rowString + cellString + "\t";
+          }, "")
+          .slice(0, -1) + "\n");
+    }, "");
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
       this.datasetService.setPhenodata(this.dataset, phenodataString);
       this.sessionDataService.updateDataset(this.dataset).subscribe(
         () => log.info("dataset phenodata updated"),
-        (err) =>
-          this.restErrorService.showError(
-            "dataset phenodata update failed",
-            err
-          )
+        (err) => this.restErrorService.showError("dataset phenodata update failed", err)
       );
     }
   }
@@ -310,9 +290,7 @@ export class PhenodataVisualizationComponent
     const container = document.getElementById("tableContainer");
     if (!container) {
       // timer or event triggered the update
-      log.info(
-        "cancelling the phenodata update, because the container has been removed already"
-      );
+      log.info("cancelling the phenodata update, because the container has been removed already");
       return;
     }
     while (container.firstChild) {
@@ -338,17 +316,11 @@ export class PhenodataVisualizationComponent
     if (this.datasetService.hasOwnPhenodata(this.dataset)) {
       phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
       this.phenodataState = PhenodataState.OWN_PHENODATA;
-      this.phenodataFilled = this.datasetService.isPhenodataFilled(
-        this.dataset
-      );
+      this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
     } else {
-      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(
-        this.dataset
-      );
+      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.dataset);
       if (ancestorsWithPhenodata.length > 0) {
-        phenodataString = this.datasetService.getOwnPhenodata(
-          ancestorsWithPhenodata[0]
-        );
+        phenodataString = this.datasetService.getOwnPhenodata(ancestorsWithPhenodata[0]);
         this.phenodataState = PhenodataState.INHERITED_PHENODATA;
         this.phenodataAncestor = ancestorsWithPhenodata[0];
       } else {
@@ -430,8 +402,7 @@ export class PhenodataVisualizationComponent
       .pipe(
         tap((name) => {
           this.zone.runOutsideAngular(() => {
-            const colHeaders = (this.hot.getSettings() as ht.Options)
-              .colHeaders as Array<string>;
+            const colHeaders = (this.hot.getSettings() as ht.Options).colHeaders as Array<string>;
             this.hot.alter("insert_col", colHeaders.length);
             // remove undefined column header
             colHeaders.pop();
@@ -447,8 +418,6 @@ export class PhenodataVisualizationComponent
           this.updateDataset();
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("Add column failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("Add column failed", err));
   }
 }

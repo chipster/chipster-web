@@ -16,14 +16,7 @@ import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SharedModule,
-    NgbModule,
-    AdminRoutingModule,
-    FormsModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, SharedModule, NgbModule, AdminRoutingModule, FormsModule, ReactiveFormsModule],
   declarations: [
     AdminComponent,
     ServicesComponent,
@@ -34,7 +27,7 @@ import { UsersComponent } from "./users/users.component";
     StatisticsComponent,
     UsersComponent,
     JobOutputModalComponent,
-    MaintenanceComponent
-  ]
+    MaintenanceComponent,
+  ],
 })
 export class AdminModule {}

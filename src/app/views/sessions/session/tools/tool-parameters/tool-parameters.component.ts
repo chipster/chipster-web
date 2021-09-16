@@ -1,12 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -32,8 +24,9 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
 
   // noinspection JSUnusedLocalSymbols
-  constructor(public toolService: ToolService) // private dropDown: NgbDropdown
-  {}
+  constructor(
+    public toolService: ToolService // private dropDown: NgbDropdown
+  ) {}
 
   ngOnInit() {
     this.parametersChangedThrottle
@@ -77,10 +70,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
     const defaultValue = this.toolService.getDefaultValue(parameter);
     if (
       this.toolService.isSelectionParameter(parameter) &&
-      !this.toolService.selectionOptionsContains(
-        parameter.selectionOptions,
-        parameter.defaultValue
-      )
+      !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.defaultValue)
     ) {
       parameter.value = null;
     } else {
@@ -97,10 +87,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
     if (
       this.toolService.isSelectionParameter(parameter) &&
       !this.toolService.isDefaultValue(parameter, parameter.value) &&
-      !this.toolService.selectionOptionsContains(
-        parameter.selectionOptions,
-        parameter.value
-      )
+      !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)
     ) {
       return false;
     } else {

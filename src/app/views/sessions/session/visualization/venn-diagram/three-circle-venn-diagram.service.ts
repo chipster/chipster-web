@@ -27,49 +27,24 @@ export class ThreeCircleVennDiagramService {
     visualizationCenter: Point
   ): string {
     if (selectionCrossingCircles.length === 1) {
-      return this.oneCircleSelectionDescriptor(
-        circles,
-        selectionCrossingCircles[0],
-        radius
-      );
+      return this.oneCircleSelectionDescriptor(circles, selectionCrossingCircles[0], radius);
     } else if (selectionCrossingCircles.length === 2) {
-      return this.twoCircleSelectionDescriptor(
-        circles,
-        selectionCrossingCircles,
-        radius,
-        visualizationCenter
-      );
+      return this.twoCircleSelectionDescriptor(circles, selectionCrossingCircles, radius, visualizationCenter);
     } else {
-      return this.threeCircleSelectionDescriptor(
-        circles,
-        radius,
-        visualizationCenter
-      );
+      return this.threeCircleSelectionDescriptor(circles, radius, visualizationCenter);
     }
   }
 
   /*
    * @description: return svg path descriptor for area that includes one circle minus the areas of two other circles
    */
-  oneCircleSelectionDescriptor(
-    circles: Array<Circle>,
-    selectionCircle: Circle,
-    radius: number
-  ): string {
-    const otherCircles = circles.filter(
-      (circle: Circle) => !circle.equals(selectionCircle)
-    );
+  oneCircleSelectionDescriptor(circles: Array<Circle>, selectionCircle: Circle, radius: number): string {
+    const otherCircles = circles.filter((circle: Circle) => !circle.equals(selectionCircle));
     const firstCandidate = otherCircles[0];
     const secondCandidate = otherCircles[1];
 
-    const firstIntersections = VennDiagramUtils.getIntersections(
-      firstCandidate,
-      selectionCircle
-    );
-    const secondIntersections = VennDiagramUtils.getIntersections(
-      secondCandidate,
-      selectionCircle
-    );
+    const firstIntersections = VennDiagramUtils.getIntersections(firstCandidate, selectionCircle);
+    const secondIntersections = VennDiagramUtils.getIntersections(secondCandidate, selectionCircle);
 
     const firstRightMostPoint = VennDiagramUtils.getRightMostPoint(
       firstIntersections.point1,
@@ -127,25 +102,12 @@ export class ThreeCircleVennDiagramService {
   ): string {
     const circle1 = selectionCircles[0];
     const circle2 = selectionCircles[1];
-    const noSelectionCircle = _.first(
-      circles.filter((circle: Circle) => !_.includes(selectionCircles, circle))
-    );
+    const noSelectionCircle = _.first(circles.filter((circle: Circle) => !_.includes(selectionCircles, circle)));
 
-    const firstDrawPoint = VennDiagramUtils.getIntersectionPointOutsideCirle(
-      noSelectionCircle,
-      circle1,
-      circle2
-    );
+    const firstDrawPoint = VennDiagramUtils.getIntersectionPointOutsideCirle(noSelectionCircle, circle1, circle2);
 
-    const rightSideCircle = this.isRightSideCircle(
-      firstDrawPoint,
-      visualizationCenter,
-      circle1
-    )
-      ? circle1
-      : circle2;
-    const leftSideCircle =
-      rightSideCircle.center === circle1.center ? circle2 : circle1;
+    const rightSideCircle = this.isRightSideCircle(firstDrawPoint, visualizationCenter, circle1) ? circle1 : circle2;
+    const leftSideCircle = rightSideCircle.center === circle1.center ? circle2 : circle1;
 
     const secondDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       leftSideCircle,
@@ -167,31 +129,16 @@ export class ThreeCircleVennDiagramService {
   /*
    * @description: return svg path descriptor for area that is the intersection of all the three circles
    */
-  threeCircleSelectionDescriptor(
-    circles: Array<Circle>,
-    radius: number,
-    visualizationCenter: Point
-  ): string {
+  threeCircleSelectionDescriptor(circles: Array<Circle>, radius: number, visualizationCenter: Point): string {
     const firstCircle = circles[0];
     const secondCircle = circles[1];
     const thirdCircle = circles[2];
 
-    const firstDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
-      firstCircle,
-      secondCircle,
-      thirdCircle
-    );
-    const rightSideCircle = this.isRightSideCircle(
-      firstDrawPoint,
-      visualizationCenter,
-      secondCircle
-    )
+    const firstDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(firstCircle, secondCircle, thirdCircle);
+    const rightSideCircle = this.isRightSideCircle(firstDrawPoint, visualizationCenter, secondCircle)
       ? secondCircle
       : thirdCircle;
-    const leftSideCircle =
-      rightSideCircle.center === secondCircle.center
-        ? thirdCircle
-        : secondCircle;
+    const leftSideCircle = rightSideCircle.center === secondCircle.center ? thirdCircle : secondCircle;
     const secondDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       leftSideCircle,
       firstCircle,
@@ -209,19 +156,9 @@ export class ThreeCircleVennDiagramService {
             A ${radius} ${radius} 0 0 1 ${firstDrawPoint.x} ${firstDrawPoint.y}`;
   }
 
-  isRightSideCircle(
-    referencePoint: Point,
-    visualizationCenter: Point,
-    circle1: Circle
-  ): boolean {
-    const referenceVector = VennDiagramUtils.createVector2d(
-      referencePoint,
-      visualizationCenter
-    );
-    const circleCenterVector = VennDiagramUtils.createVector2d(
-      referencePoint,
-      circle1.center
-    );
+  isRightSideCircle(referencePoint: Point, visualizationCenter: Point, circle1: Circle): boolean {
+    const referenceVector = VennDiagramUtils.createVector2d(referencePoint, visualizationCenter);
+    const circleCenterVector = VennDiagramUtils.createVector2d(referencePoint, circle1.center);
     return referenceVector.crossProduct(circleCenterVector) >= 0;
   }
 }

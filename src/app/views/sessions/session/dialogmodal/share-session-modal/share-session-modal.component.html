@@ -4,8 +4,9 @@
 <div class="modal-body">
   <h5>Your UserID</h5>
   <p>
-    Your UserID is <strong>{{ getUsername() }}</strong
-    >. Give it to others who want to share sessions with you.
+    Your UserID is
+    <strong>{{ getUsername() }}</strong>
+    . Give it to others who want to share sessions with you.
   </p>
 
   <h5>Access rules</h5>
@@ -34,20 +35,14 @@
           <button
             *ngIf="isDeleteEnabled(rule)"
             class="btn btn-outline-dark btn-no-border"
-            (click)="deleteRule(rule.ruleId)"
-          >
+            (click)="deleteRule(rule.ruleId)">
             <span class="fas fa-times"></span>
           </button>
         </td>
       </tr>
       <tr *ngIf="newRule">
         <th scope="row">
-          <input
-            #usernameInput
-            type="text"
-            [(ngModel)]="newRule.username"
-            (keyup.enter)="saveRule()"
-          />
+          <input #usernameInput type="text" [(ngModel)]="newRule.username" (keyup.enter)="saveRule()" />
         </th>
         <td>
           <select [(ngModel)]="newRule.readWrite">
@@ -61,18 +56,10 @@
     </tbody>
   </table>
 
-  <button
-    class="btn btn-sm btn-primary"
-    *ngIf="!newRule"
-    (click)="addNewRule()"
-  >
-    Add rule
-  </button>
+  <button class="btn btn-sm btn-primary" *ngIf="!newRule" (click)="addNewRule()">Add rule</button>
 
   <div *ngIf="newRule">
-    <button class="btn btn-sm btn-secondary mr-1" (click)="newRule = null">
-      Cancel
-    </button>
+    <button class="btn btn-sm btn-secondary mr-1" (click)="newRule = null">Cancel</button>
     <button class="btn btn-sm btn-success" (click)="saveRule()">Save</button>
   </div>
 
@@ -92,8 +79,6 @@
   </div>
 </div>
 <div class="modal-footer">
-  <button type="submit" class="btn btn-info" (click)="save()" #submitButton>
-    Close
-  </button>
+  <button type="submit" class="btn btn-info" (click)="save()" #submitButton>Close</button>
   <!--<button type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>-->
 </div>

@@ -9,7 +9,7 @@ export class ContactSupportService {
   openContactSupportModal(log = null) {
     const modalRef = this.modalService.open(ContactSupportModalComponent, {
       size: "lg",
-      backdrop: "static" // don't close on backdrop click
+      backdrop: "static", // don't close on backdrop click
     });
     modalRef.componentInstance.log = log;
   }

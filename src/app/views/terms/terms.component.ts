@@ -10,7 +10,7 @@ import { RouteService } from "../../shared/services/route.service";
 @Component({
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
-  styleUrls: ["./terms.component.less"]
+  styleUrls: ["./terms.component.less"],
 })
 export class TermsComponent implements OnInit {
   // increase by one to force everyone to accept again
@@ -28,24 +28,23 @@ export class TermsComponent implements OnInit {
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe(
-      path => {
+      (path) => {
         this.termsOfUse = path;
       },
-      err =>
-        this.restErrorService.showError("failed to get the configuration", err)
+      (err) => this.restErrorService.showError("failed to get the configuration", err)
     );
 
-    this.route.queryParams.pipe(
-      filter(params => {
-        console.log(params);
-        return params["showAccept"];
-      }),
-    )
-    .subscribe(params => {
-      this.showAccept = !!params.showAccept;
-      console.log(this.showAccept);
-    }
-  );
+    this.route.queryParams
+      .pipe(
+        filter((params) => {
+          console.log(params);
+          return params["showAccept"];
+        })
+      )
+      .subscribe((params) => {
+        this.showAccept = !!params.showAccept;
+        console.log(this.showAccept);
+      });
   }
 
   accept() {
@@ -54,7 +53,7 @@ export class TermsComponent implements OnInit {
     this.configService
       .get(ConfigService.KEY_TERMS_OF_USE_VERSION)
       .pipe(
-        flatMap(v => {
+        flatMap((v) => {
           latestVersion = v;
           return this.authenticationService.getUser();
         }),
@@ -68,11 +67,7 @@ export class TermsComponent implements OnInit {
         () => {
           this.routeService.navigateAbsolute("/sessions");
         },
-        err =>
-          this.restErrorService.showError(
-            "updating the user object failed",
-            err
-          )
+        (err) => this.restErrorService.showError("updating the user object failed", err)
       );
   }
 }

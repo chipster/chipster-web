@@ -5,11 +5,14 @@
 <div class="chipster-highlight">
   <!-- workflow and files tabs -->
 
-  <ch-search-box placeholder="Find file" focusHotkey="f" focusHotkeyDescription="Find file"
-    (valueChange)="search($event)" (enterKey)="searchEnter()"></ch-search-box>
+  <ch-search-box
+    placeholder="Find file"
+    focusHotkey="f"
+    focusHotkeyDescription="Find file"
+    (valueChange)="search($event)"
+    (enterKey)="searchEnter()"></ch-search-box>
 
   <nav ngbNav #nav="ngbNav" class="nav-tabs">
-
     <!-- Workflow tab-->
     <ng-container ngbNavItem>
       <a ngbNavLink>Workflow</a>
@@ -20,9 +23,14 @@
 
             <!-- dropdown -->
             <span class="dropdown float-right">
-              <button [disabled]="sessionData.datasetsMap.size === 0"
-                class="btn btn-sm btn-outline-secondary tool-bar-button" id="workflowDropdownMenuButton"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+              <button
+                [disabled]="sessionData.datasetsMap.size === 0"
+                class="btn btn-sm btn-outline-secondary tool-bar-button"
+                id="workflowDropdownMenuButton"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                title="Actions">
                 <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="workflowDropdownMenuButton">
@@ -31,37 +39,44 @@
                   Select descendants of selected files
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" (click)="autoLayoutAll()">
-                  Reset all positions
-                </a>
+                <a class="dropdown-item" (click)="autoLayoutAll()">Reset all positions</a>
 
                 <a class="dropdown-item" (click)="autoLayoutSelected()" [class.disabled]="!isDatasetsSelected()">
                   Reset positions of selected files
                 </a>
 
-                <a class="dropdown-item" (click)="workflowGraph.resetZoomAndScroll()">
-                  Reset view
-                </a>
+                <a class="dropdown-item" (click)="workflowGraph.resetZoomAndScroll()">Reset view</a>
               </div>
             </span>
 
             <!-- zoom buttons-->
-            <button [disabled]="sessionData.datasetsMap.size === 0"
-              class="btn btn-sm btn-outline-secondary mr-2 float-right tool-bar-button" title="Zoom in"
+            <button
+              [disabled]="sessionData.datasetsMap.size === 0"
+              class="btn btn-sm btn-outline-secondary mr-2 float-right tool-bar-button"
+              title="Zoom in"
               (click)="workflowGraph.zoomIn()">
-              <span class=" fa fa-lg fa-search-plus "></span>
+              <span class="fa fa-lg fa-search-plus"></span>
             </button>
-            <button [disabled]="sessionData.datasetsMap.size === 0"
-              class="btn btn-sm btn-outline-secondary mr-1 float-right tool-bar-button" title="Zoom out"
+            <button
+              [disabled]="sessionData.datasetsMap.size === 0"
+              class="btn btn-sm btn-outline-secondary mr-1 float-right tool-bar-button"
+              title="Zoom out"
               (click)="workflowGraph.zoomOut()">
               <span class="fas fa-lg fa-search-minus"></span>
             </button>
           </div>
 
           <div class="ml-1">
-            <ch-workflow-graph id="workflow-graph" #workflowGraph [datasetsMap]="sessionData.datasetsMap"
-              [jobsMap]="sessionData.jobsMap" [modulesMap]="modulesMap" [datasetSearch]="datasetSearch"
-              [defaultScale]="1" [enabled]="true" [sessionData]="sessionData"></ch-workflow-graph>
+            <ch-workflow-graph
+              id="workflow-graph"
+              #workflowGraph
+              [datasetsMap]="sessionData.datasetsMap"
+              [jobsMap]="sessionData.jobsMap"
+              [modulesMap]="modulesMap"
+              [datasetSearch]="datasetSearch"
+              [defaultScale]="1"
+              [enabled]="true"
+              [sessionData]="sessionData"></ch-workflow-graph>
           </div>
         </div>
       </ng-template>
@@ -78,14 +93,14 @@
 
         <div id="file-list" class="p-0">
           <div class="list-group dataset-list list-group-sm pt-0">
-            <button type="button " class="dataset-list-button list-group-item list-group-item-action " [ngClass]="{
-                active: selectionService.isSelectedDatasetById(
-                  dataset.datasetId
-                )
-              }" (click)="toggleDatasetSelection($event, dataset)" *ngFor="
-                let dataset of (getDatasetListSorted()
-                  | datasetsearch: datasetSearch)
-              ">
+            <button
+              type="button "
+              class="dataset-list-button list-group-item list-group-item-action"
+              [ngClass]="{
+                active: selectionService.isSelectedDatasetById(dataset.datasetId)
+              }"
+              (click)="toggleDatasetSelection($event, dataset)"
+              *ngFor="let dataset of getDatasetListSorted() | datasetsearch: datasetSearch">
               {{ dataset.name }}
             </button>
           </div>

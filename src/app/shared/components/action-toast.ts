@@ -16,37 +16,28 @@ Added:
         /* the default toast component is div */
         display: block;
       }
-    `
+    `,
   ],
   template: `
-    <button
-      *ngIf="options.closeButton"
-      (click)="remove()"
-      class="toast-close-button"
-      aria-label="Close"
-    >
+    <button *ngIf="options.closeButton" (click)="remove()" class="toast-close-button" aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
     <div *ngIf="title" [class]="options.titleClass" [attr.aria-label]="title">
       {{ title }}
-      <ng-container *ngIf="duplicatesCount"
-        >[{{ duplicatesCount + 1 }}]</ng-container
-      >
+      <ng-container *ngIf="duplicatesCount">[{{ duplicatesCount + 1 }}]</ng-container>
     </div>
     <div
       *ngIf="message && options.enableHtml"
       role="alertdialog"
       aria-live="polite"
       [class]="options.messageClass"
-      [innerHTML]="message"
-    ></div>
+      [innerHTML]="message"></div>
     <div
       *ngIf="message && !options.enableHtml"
       role="alertdialog"
       aria-live="polite"
       [class]="options.messageClass"
-      [attr.aria-label]="message"
-    >
+      [attr.aria-label]="message">
       {{ message }}
     </div>
     <div *ngIf="options.progressBar">
@@ -55,10 +46,7 @@ Added:
 
     <div class="row">
       <div *ngFor="let b of options['links']">
-        <button
-          class="btn btn-toast btn-link pt-0"
-          (click)="action(b.text, $event)"
-        >
+        <button class="btn btn-toast btn-link pt-0" (click)="action(b.text, $event)">
           <i *ngIf="b.icon" [class]="b.icon"></i>
           {{ b.text }}
         </button>
@@ -68,11 +56,8 @@ Added:
     <div class="row">
       <div *ngFor="let b of options['buttons']">
         <button
-          class="btn btn-sm btn-toast ml-3 px-3 {{
-            b.class || 'btn-secondary'
-          }}"
-          (click)="action(b.text, $event)"
-        >
+          class="btn btn-sm btn-toast ml-3 px-3 {{ b.class || 'btn-secondary' }}"
+          (click)="action(b.text, $event)">
           <i *ngIf="b.icon" [class]="b.icon"></i>
           {{ b.text }}
         </button>
@@ -84,21 +69,15 @@ Added:
       state("inactive", style({ opacity: 0 })),
       state("active", style({ opacity: 1 })),
       state("removed", style({ opacity: 0 })),
-      transition(
-        "inactive => active",
-        animate("{{ easeTime }}ms {{ easing }}")
-      ),
-      transition("active => removed", animate("{{ easeTime }}ms {{ easing }}"))
-    ])
+      transition("inactive => active", animate("{{ easeTime }}ms {{ easing }}")),
+      transition("active => removed", animate("{{ easeTime }}ms {{ easing }}")),
+    ]),
   ],
-  preserveWhitespaces: false
+  preserveWhitespaces: false,
 })
 export class ActionToastComponent extends Toast {
   // constructor is only necessary when not using AoT
-  constructor(
-    protected toastrService: ToastrService,
-    public toastPackage: ToastPackage
-  ) {
+  constructor(protected toastrService: ToastrService, public toastPackage: ToastPackage) {
     super(toastrService, toastPackage);
   }
 

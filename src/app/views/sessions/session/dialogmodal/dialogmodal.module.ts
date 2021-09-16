@@ -25,9 +25,9 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     TempCopyModalComponent,
     PreModalComponent,
     DownloadFromUrlModalComponent,
-    NotificationModalComponent
+    NotificationModalComponent,
   ],
   providers: [NgbActiveModal, DialogModalService],
-  exports: []
+  exports: [],
 })
 export class DialogModalModule {}

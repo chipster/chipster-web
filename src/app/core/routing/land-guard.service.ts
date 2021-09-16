@@ -1,9 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  RouterStateSnapshot
-} from "@angular/router";
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../authentication/token.service";
 
@@ -12,15 +8,9 @@ import { TokenService } from "../authentication/token.service";
  */
 @Injectable()
 export class LandGuard implements CanActivate {
-  constructor(
-    private tokenService: TokenService,
-    private routeService: RouteService
-  ) {}
+  constructor(private tokenService: TokenService, private routeService: RouteService) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.tokenService.isTokenValid()) {
       this.routeService.navigateToAnalyze();
     } else {

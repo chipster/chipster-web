@@ -11,8 +11,7 @@
   y="0px"
   viewBox="0 0 100 100"
   enable-background="new 0 0 100 100"
-  xml:space="preserve"
->
+  xml:space="preserve">
   <circle
     fill="none"
     stroke="#80bdff"
@@ -21,8 +20,7 @@
     stroke-dasharray="80,10"
     cx="50"
     cy="50"
-    r="43"
-  >
+    r="43">
     <animateTransform
       *ngIf="count > 0"
       attributeName="transform"
@@ -31,8 +29,7 @@
       dur="5s"
       from="0 50 50"
       to="360 50 50"
-      repeatCount="indefinite"
-    />
+      repeatCount="indefinite" />
   </circle>
   <!-- <circle fill="none" stroke="#b8daff" stroke-width="4" stroke-miterlimit="10" stroke-dasharray="10,10" cx="50"
               cy="50" r="35">
@@ -42,12 +39,12 @@
 </svg>
 
 <span
-  style="font-family: monospace;"
+  style="font-family: monospace"
   class="text-primary position-absolute"
   [ngStyle]="{
     'right.px': offsetRight,
     'top.px': offsetTop,
     'font-size.px': fontSize
-  }"
-  ><strong>{{ count }}</strong></span
->
+  }">
+  <strong>{{ count }}</strong>
+</span>

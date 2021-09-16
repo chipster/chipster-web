@@ -7,10 +7,7 @@ export default class VennDiagramUtils {
   /*
    * @description: Intersection points of two circles
    */
-  static getIntersections(
-    circle1: Circle,
-    circle2: Circle
-  ): PointPair | undefined {
+  static getIntersections(circle1: Circle, circle2: Circle): PointPair | undefined {
     /* dx and dy are the vertical and horizontal distances between
      * the circle centers.
      */
@@ -21,10 +18,7 @@ export default class VennDiagramUtils {
     const distance = Math.sqrt(dy * dy + dx * dx);
 
     /* Check if circles do not intersect or circle2 circle is inside ancircle2 */
-    if (
-      distance > circle1.radius + circle2.radius ||
-      distance < Math.abs(circle1.radius - circle2.radius)
-    ) {
+    if (distance > circle1.radius + circle2.radius || distance < Math.abs(circle1.radius - circle2.radius)) {
       return undefined;
     }
 
@@ -34,11 +28,7 @@ export default class VennDiagramUtils {
      */
 
     /* Determine the distance from point 0 to point 2. */
-    const a =
-      (Math.pow(circle1.radius, 2) -
-        Math.pow(circle2.radius, 2) +
-        Math.pow(distance, 2)) /
-      (2.0 * distance);
+    const a = (Math.pow(circle1.radius, 2) - Math.pow(circle2.radius, 2) + Math.pow(distance, 2)) / (2.0 * distance);
 
     /* Determine the coordinates of point 2. */
     const x2 = circle1.center.x + (dx * a) / distance;
@@ -73,25 +63,16 @@ export default class VennDiagramUtils {
   /*
    * @description: Get Circles containing point
    */
-  static getCirclesByPosition(
-    circles: Array<VennCircle>,
-    point: Point
-  ): Array<VennCircle> {
+  static getCirclesByPosition(circles: Array<VennCircle>, point: Point): Array<VennCircle> {
     return circles.filter(
-      (vennCircle: VennCircle) =>
-        Point.distance(vennCircle.circle.center, point) <=
-        vennCircle.circle.radius
+      (vennCircle: VennCircle) => Point.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius
     );
   }
 
   /*
    * @description: Get rightmost point when comparing with vectors drawn from reference point
    */
-  static getRightMostPoint(
-    point1: Point,
-    point2: Point,
-    reference: Point
-  ): Point {
+  static getRightMostPoint(point1: Point, point2: Point, reference: Point): Point {
     const vector1 = this.createVector2d(reference, point1);
     const vector2 = this.createVector2d(reference, point2);
     return vector1.crossProduct(vector2) < 0 ? point1 : point2;
@@ -100,11 +81,7 @@ export default class VennDiagramUtils {
   /*
    * @description: Get leftmost point when comparing with vectors drawn from reference point
    */
-  static getLeftMostPoint(
-    point1: Point,
-    point2: Point,
-    reference: Point
-  ): Point {
+  static getLeftMostPoint(point1: Point, point2: Point, reference: Point): Point {
     const vector1 = this.createVector2d(reference, point1);
     const vector2 = this.createVector2d(reference, point2);
     return vector1.crossProduct(vector2) >= 0 ? point1 : point2;
@@ -113,28 +90,16 @@ export default class VennDiagramUtils {
   /*
    * @description: Get the intersectionpoint of other circles that is inside reference circle
    */
-  static getIntersectionPointInsideCircle(
-    reference: Circle,
-    other1: Circle,
-    other2: Circle
-  ): Point {
+  static getIntersectionPointInsideCircle(reference: Circle, other1: Circle, other2: Circle): Point {
     const intersections = VennDiagramUtils.getIntersections(other1, other2);
-    return reference.containsPoint(intersections.point1)
-      ? intersections.point1
-      : intersections.point2;
+    return reference.containsPoint(intersections.point1) ? intersections.point1 : intersections.point2;
   }
 
   /*
    * @description: Get the intersectionpoint of other circles that is outside reference circle
    */
-  static getIntersectionPointOutsideCirle(
-    reference: Circle,
-    other1: Circle,
-    other2: Circle
-  ): Point {
+  static getIntersectionPointOutsideCirle(reference: Circle, other1: Circle, other2: Circle): Point {
     const intersections = VennDiagramUtils.getIntersections(other1, other2);
-    return reference.containsPoint(intersections.point1)
-      ? intersections.point2
-      : intersections.point1;
+    return reference.containsPoint(intersections.point1) ? intersections.point2 : intersections.point1;
   }
 }

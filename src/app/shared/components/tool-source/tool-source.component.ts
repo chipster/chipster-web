@@ -6,24 +6,21 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 @Component({
   selector: "ch-tool-source",
   template: '<pre class="tool-source">{{source}}</pre>',
-  styleUrls: ["./tool-source.component.less"]
+  styleUrls: ["./tool-source.component.less"],
 })
 export class ToolSourceComponent implements OnInit {
   source: string;
   @Input()
   selectedTool: Tool;
 
-  constructor(
-    private toolResource: ToolResource,
-    private restErrorService: RestErrorService
-  ) {}
+  constructor(private toolResource: ToolResource, private restErrorService: RestErrorService) {}
 
   ngOnInit() {
     this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe(
-      sourceCode => {
+      (sourceCode) => {
         this.source = sourceCode;
       },
-      err => this.restErrorService.showError("get source code failed", err)
+      (err) => this.restErrorService.showError("get source code failed", err)
     );
   }
 }

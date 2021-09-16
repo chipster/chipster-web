@@ -68,9 +68,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe({
         next: (datasetId) => {
           if (datasetId === this.dataset?.datasetId) {
-            this.datasetName = this.sessionData.datasetsMap.get(
-              this.dataset.datasetId
-            )?.name;
+            this.datasetName = this.sessionData.datasetsMap.get(this.dataset.datasetId)?.name;
           }
         },
       });
@@ -87,15 +85,12 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
         })
       )
       .subscribe({
-        error: (err) =>
-          this.restErrorService.showError("Rename file failed", err),
+        error: (err) => this.restErrorService.showError("Rename file failed", err),
       });
   }
 
   deleteDatasets() {
-    this.sessionDataService.deleteDatasetsLater(
-      this.selectionService.selectedDatasets
-    );
+    this.sessionDataService.deleteDatasetsLater(this.selectionService.selectedDatasets);
   }
 
   exportDatasets() {
@@ -103,10 +98,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(
-      this.dataset,
-      this.sessionData
-    );
+    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData);
   }
 
   wrangleDataset() {
@@ -114,16 +106,11 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   defineDatasetGroups() {
-    this.datasetModalService.openGroupsModal(
-      this.selectionService.selectedDatasets,
-      this.sessionData
-    );
+    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
   }
 
   selectChildren() {
-    const children = this.getSessionDataService.getChildren(
-      this.selectionService.selectedDatasets
-    );
+    const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);
     this.selectionHandlerService.setDatasetSelection(children);
   }
 

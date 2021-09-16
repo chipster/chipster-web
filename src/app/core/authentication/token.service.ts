@@ -16,7 +16,7 @@ export class TokenService {
   private validUntil: Date;
   private roles: string[] = [];
 
-  constructor() { }
+  constructor() {}
 
   static getUsernameFromUserId(userId: string) {
     const regExp = new RegExp(".*?/(.*)"); // find first / and remember everything after it
@@ -34,10 +34,7 @@ export class TokenService {
   }
 
   getHttpBasicHeader(username: string, password: string) {
-    return new HttpHeaders().set(
-      "Authorization",
-      "Basic " + btoa(username + ":" + password)
-    );
+    return new HttpHeaders().set("Authorization", "Basic " + btoa(username + ":" + password));
   }
 
   getTokenHeader(): HttpHeaders {
@@ -49,11 +46,11 @@ export class TokenService {
     if (withCredentials) {
       return {
         headers: this.getTokenHeader(),
-        withCredentials: true
+        withCredentials: true,
       };
     } else {
       return {
-        headers: this.getTokenHeader()
+        headers: this.getTokenHeader(),
       };
     }
   }

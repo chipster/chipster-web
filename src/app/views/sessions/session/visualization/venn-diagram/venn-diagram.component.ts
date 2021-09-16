@@ -20,7 +20,7 @@ import { VennDiagramService } from "./venn-diagram.service";
 @Component({
   selector: "ch-venn-diagram",
   templateUrl: "./venn-diagram.component.html",
-  styleUrls: ["./venn-diagram.component.less"]
+  styleUrls: ["./venn-diagram.component.less"],
 })
 export class VennDiagramComponent implements OnChanges {
   @Input()
@@ -60,19 +60,13 @@ export class VennDiagramComponent implements OnChanges {
         this.files = _.chain(resultTSVs)
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map((tsv: Array<Array<string>>, index: number) => {
-            return new TSVFile(
-              tsv,
-              this.selectedDatasets[index].datasetId,
-              this.selectedDatasets[index].name
-            );
+            return new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name);
           })
           .value();
 
         this.symbolComparingEnabled = this.enableComparing("symbol");
         this.identifierComparingEnabled = this.enableComparing("identifier");
-        this.columnKey = this.identifierComparingEnabled
-          ? "identifier"
-          : "symbol";
+        this.columnKey = this.identifierComparingEnabled ? "identifier" : "symbol";
         this.drawVennDiagram(this.files);
       },
       (error: any) => {
@@ -87,28 +81,21 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   drawVennDiagram(files: Array<TSVFile>) {
-    const visualizationWidth = document.getElementById("visualization")
-      .offsetWidth;
+    const visualizationWidth = document.getElementById("visualization").offsetWidth;
     const circleRadius = 125;
     const size = { width: visualizationWidth, height: 500 };
     const visualizationArea = {
       width: size.width,
       height: size.height,
-      center: new Point(size.width / 2, size.height / 2)
+      center: new Point(size.width / 2, size.height / 2),
     };
 
-    this.vennCircles = this.createVennCircles(
-      files,
-      visualizationArea.center,
-      circleRadius
-    );
+    this.vennCircles = this.createVennCircles(files, visualizationArea.center, circleRadius);
     // color category
     const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
     // remove the previous graph, e.g. if a third file was just added
-    d3.select("#visualization")
-      .select("svg")
-      .remove();
+    d3.select("#visualization").select("svg").remove();
 
     // svg-element
     const svg = d3
@@ -134,10 +121,7 @@ export class VennDiagramComponent implements OnChanges {
 
     // Add filenames for each venn diagram circles and item counts in each segment
     const circleTextsGroup = svg.append("g").attr("id", "circleTextsGroup");
-    const filenameTexts = this.getVennCircleFileNameDescriptor(
-      this.vennCircles,
-      visualizationArea
-    );
+    const filenameTexts = this.getVennCircleFileNameDescriptor(this.vennCircles, visualizationArea);
     const segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(
       this.vennCircles,
       visualizationArea.center,
@@ -150,9 +134,9 @@ export class VennDiagramComponent implements OnChanges {
       .data(circleTexts)
       .enter()
       .append("text")
-      .attr("x", d => d.position.x)
-      .attr("y", d => d.position.y)
-      .text(d => d.text);
+      .attr("x", (d) => d.position.x)
+      .attr("y", (d) => d.position.y)
+      .text((d) => d.text);
 
     // selection group
     const selectionGroup = svg.append("g").attr("id", "vennselections");
@@ -164,10 +148,7 @@ export class VennDiagramComponent implements OnChanges {
 
       const coords = d3.mouse(document.getElementById("circleGroup"));
       const mouseposition = new Point(coords[0], coords[1]);
-      const selectionVennCircles = VennDiagramUtils.getCirclesByPosition(
-        this.vennCircles,
-        mouseposition
-      );
+      const selectionVennCircles = VennDiagramUtils.getCirclesByPosition(this.vennCircles, mouseposition);
       if (selectionVennCircles.length >= 1) {
         const selectionDescriptor = this.getSelectionDescriptor(
           this.vennCircles,
@@ -190,9 +171,7 @@ export class VennDiagramComponent implements OnChanges {
           this.vennCircles,
           this.columnKey
         );
-        const datasetIds = selectionVennCircles.map(
-          (vennCircle: VennCircle) => vennCircle.datasetId
-        );
+        const datasetIds = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.datasetId);
         if (!isShift) {
           this.diagramSelection.clearSelection();
         }
@@ -201,17 +180,11 @@ export class VennDiagramComponent implements OnChanges {
     });
   }
 
-  getVennCircleFileNameDescriptor(
-    vennCircles: Array<VennCircle>,
-    visualizationArea: any
-  ): Array<any> {
+  getVennCircleFileNameDescriptor(vennCircles: Array<VennCircle>, visualizationArea: any): Array<any> {
     return vennCircles.map((vennCircle: VennCircle) => {
       return new VennDiagramText(
         vennCircle.filename,
-        this.venndiagramService.getVennCircleFilenamePoint(
-          vennCircle,
-          visualizationArea.center
-        )
+        this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center)
       );
     });
   }
@@ -222,12 +195,8 @@ export class VennDiagramComponent implements OnChanges {
     circleRadius,
     visualizationArea
   ) {
-    const selectionCircles = selectionVennCircles.map(
-      (vennCircle: VennCircle) => vennCircle.circle
-    );
-    const circles = allVennCircles.map(
-      (vennCircle: VennCircle) => vennCircle.circle
-    );
+    const selectionCircles = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
+    const circles = allVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
     return this.venndiagramService.getSelectionDescriptor(
       circles,
       selectionCircles,
@@ -241,47 +210,23 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   createNewDataset(): void {
-    const parentDatasetIds = this.selectedDatasets.map(
-      (dataset: Dataset) => dataset.datasetId
-    );
+    const parentDatasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset.datasetId);
 
     let data;
     try {
-      data = this.venndiagramService.generateNewDatasetTSV(
-        this.files,
-        this.diagramSelection,
-        this.columnKey
-      );
+      data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
     } catch (error) {
-      this.dialogModalService.openNotificationModal(
-        "Create file failed",
-        error.message
-      );
+      this.dialogModalService.openNotificationModal("Create file failed", error.message);
       return;
     }
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
-      .createDerivedDataset(
-        "venn.tsv",
-        parentDatasetIds,
-        "Venn-Diagram",
-        tsvData
-      )
-      .subscribe(null, err =>
-        this.restErrorService.showError("Create file failed", err)
-      );
+      .createDerivedDataset("venn.tsv", parentDatasetIds, "Venn-Diagram", tsvData)
+      .subscribe(null, (err) => this.restErrorService.showError("Create file failed", err));
   }
 
-  createVennCircles(
-    files: Array<TSVFile>,
-    visualizationAreaCenter: Point,
-    radius: number
-  ): Array<VennCircle> {
-    const circleCenters = this.venndiagramService.getCircleCenterPoints(
-      files.length,
-      visualizationAreaCenter,
-      radius
-    );
+  createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
+    const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
     return files.map(
       (file: TSVFile, index: number) =>
         new VennCircle(
@@ -294,9 +239,7 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   enableComparing(key: string): boolean {
-    return _.every(this.files, (file: TSVFile) =>
-      _.includes(file.headers.headers, key)
-    );
+    return _.every(this.files, (file: TSVFile) => _.includes(file.headers.headers, key));
   }
 
   compareIntersectionBy(str: string): void {

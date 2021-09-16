@@ -45,9 +45,7 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.getAuth(
-            service.adminUri + "/admin/storages"
-          );
+          return this.authHttpClient.getAuth(service.adminUri + "/admin/storages");
         })
       )
       .subscribe({
@@ -69,9 +67,7 @@ export class MaintenanceComponent implements OnInit {
         mergeMap((service: Service) => {
           fileBroker = service;
           log.info("get storages: " + fileBroker.adminUri + "/admin/storages");
-          return this.authHttpClient.getAuth(
-            fileBroker.adminUri + "/admin/storages"
-          );
+          return this.authHttpClient.getAuth(fileBroker.adminUri + "/admin/storages");
         })
       )
       .pipe(
@@ -83,13 +79,9 @@ export class MaintenanceComponent implements OnInit {
           });
         }),
         mergeMap((storages: FileBrokerStorage[]) => from(storages)),
-        mergeMap((storage: FileBrokerStorage) =>
-          this.updateStatus(storage.storageId, fileBroker)
-        ),
+        mergeMap((storage: FileBrokerStorage) => this.updateStatus(storage.storageId, fileBroker)),
         mergeMap((storageId: string) => this.updateId(storageId, fileBroker)),
-        mergeMap((storageId: string) =>
-          this.updateFileStorageFileStats(storageId, fileBroker)
-        )
+        mergeMap((storageId: string) => this.updateFileStorageFileStats(storageId, fileBroker))
       )
       .subscribe({
         next: (value) => {
@@ -98,8 +90,7 @@ export class MaintenanceComponent implements OnInit {
             .sort((a, b) => a.freeSpace - b.freeSpace);
 
           const leastFreeStorageId: string = storagesSorted[0].storageId;
-          const mostFreeStorageId: string =
-            storagesSorted[storagesSorted.length - 1].storageId;
+          const mostFreeStorageId: string = storagesSorted[storagesSorted.length - 1].storageId;
 
           this.copySource = leastFreeStorageId;
           this.setCopyTarget(mostFreeStorageId);
@@ -111,41 +102,32 @@ export class MaintenanceComponent implements OnInit {
   }
 
   updateId(storageId: string, fileBroker: Service): Observable<string> {
-    return this.authHttpClient
-      .getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/id")
-      .pipe(
-        catchError((err) => {
-          log.error("storage id request error", err);
-          // don't cancel other requests even if one of them fails
-          return empty();
-        }),
-        map((idResp: Object) => idResp["storageId"]),
-        tap((idOnStorage: string) => {
-          this.idOnStorage.set(storageId, idOnStorage);
-        }),
-        map(() => storageId)
-      );
+    return this.authHttpClient.getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/id").pipe(
+      catchError((err) => {
+        log.error("storage id request error", err);
+        // don't cancel other requests even if one of them fails
+        return empty();
+      }),
+      map((idResp: Object) => idResp["storageId"]),
+      tap((idOnStorage: string) => {
+        this.idOnStorage.set(storageId, idOnStorage);
+      }),
+      map(() => storageId)
+    );
   }
 
-  updateFileStorageFileStats(
-    storageId: string,
-    fileBroker: Service
-  ): Observable<string> {
-    return this.authHttpClient
-      .getAuth(
-        fileBroker.adminUri + "/admin/storages/" + storageId + "/filestats"
-      )
-      .pipe(
-        catchError((err) => {
-          log.error("file stats request error", err);
-          // don't cancel other requests even if one of them fails
-          return empty();
-        }),
-        tap((fileStats: FileStats) => {
-          this.fileStorageFileStats.set(storageId, fileStats);
-        }),
-        map(() => storageId)
-      );
+  updateFileStorageFileStats(storageId: string, fileBroker: Service): Observable<string> {
+    return this.authHttpClient.getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/filestats").pipe(
+      catchError((err) => {
+        log.error("file stats request error", err);
+        // don't cancel other requests even if one of them fails
+        return empty();
+      }),
+      tap((fileStats: FileStats) => {
+        this.fileStorageFileStats.set(storageId, fileStats);
+      }),
+      map(() => storageId)
+    );
   }
 
   addStorageId(storageId: string) {
@@ -156,20 +138,18 @@ export class MaintenanceComponent implements OnInit {
   }
 
   updateStatus(storageId: string, fileBroker: Service): Observable<string> {
-    return this.authHttpClient
-      .getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/status")
-      .pipe(
-        catchError((err) => {
-          log.error("storage status request error", err);
-          // don't cancel other requests even if one of them fails
-          return empty();
-        }),
-        tap((status: Object) => {
-          this.free.set(storageId, status["diskFree,fs=storage"]);
-          this.total.set(storageId, status["diskTotal,fs=storage"]);
-        }),
-        map(() => storageId)
-      );
+    return this.authHttpClient.getAuth(fileBroker.adminUri + "/admin/storages/" + storageId + "/status").pipe(
+      catchError((err) => {
+        log.error("storage status request error", err);
+        // don't cancel other requests even if one of them fails
+        return empty();
+      }),
+      tap((status: Object) => {
+        this.free.set(storageId, status["diskFree,fs=storage"]);
+        this.total.set(storageId, status["diskTotal,fs=storage"]);
+      }),
+      map(() => storageId)
+    );
   }
 
   backupDb(role: string) {
@@ -182,31 +162,25 @@ export class MaintenanceComponent implements OnInit {
   backupStorage(storageId: string) {
     this.backup("file-broker", "/admin/storages/" + storageId + "/backup")
       .pipe(mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId)))
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("backup start failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("backup start failed", err));
   }
 
   backup(backupService: string, path: string) {
-    return this.configService
-      .getInternalService(backupService, this.tokenService.getToken())
-      .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(service.adminUri + path, null);
-        })
-      );
+    return this.configService.getInternalService(backupService, this.tokenService.getToken()).pipe(
+      mergeMap((service: Service) => {
+        return this.authHttpClient.postAuth(service.adminUri + path, null);
+      })
+    );
   }
 
   updateFileStorageFileStatsOfOne(storageId: string) {
     let fileBroker = null;
-    return this.configService
-      .getInternalService("file-broker", this.tokenService.getToken())
-      .pipe(
-        tap((service: Service) => {
-          fileBroker = service;
-        }),
-        mergeMap(() => this.updateFileStorageFileStats(storageId, fileBroker))
-      );
+    return this.configService.getInternalService("file-broker", this.tokenService.getToken()).pipe(
+      tap((service: Service) => {
+        fileBroker = service;
+      }),
+      mergeMap(() => this.updateFileStorageFileStats(storageId, fileBroker))
+    );
   }
 
   disableBackups(storageId: string) {
@@ -214,18 +188,11 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.deleteAuth(
-            service.adminUri +
-              "/admin/storages/" +
-              storageId +
-              "/backup/schedule"
-          );
+          return this.authHttpClient.deleteAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule");
         }),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("disable backup failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
   }
 
   enableBackups(storageId: string) {
@@ -234,18 +201,13 @@ export class MaintenanceComponent implements OnInit {
       .pipe(
         mergeMap((service: Service) => {
           return this.authHttpClient.postAuth(
-            service.adminUri +
-              "/admin/storages/" +
-              storageId +
-              "/backup/schedule",
+            service.adminUri + "/admin/storages/" + storageId + "/backup/schedule",
             null
           );
         }),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("disable backup failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
   }
 
   deleteOldOrphanFiles(storageId: string) {
@@ -254,17 +216,12 @@ export class MaintenanceComponent implements OnInit {
       .pipe(
         mergeMap((service: Service) => {
           return this.authHttpClient.postAuth(
-            service.adminUri +
-              "/admin/storages/" +
-              storageId +
-              "/delete-orphans",
+            service.adminUri + "/admin/storages/" + storageId + "/delete-orphans",
             null
           );
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("delete orphans failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
   }
 
   storageCheck(storageId: string) {
@@ -272,24 +229,16 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(
-            service.adminUri + "/admin/storages/" + storageId + "/check",
-            null
-          );
+          return this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/check", null);
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("storage check failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("storage check failed", err));
   }
 
   setCopyTarget(target: string) {
     this.copyTarget = target;
 
-    const totalFree = Array.from(this.free.values()).reduce(
-      (sum, value) => (sum += value),
-      0
-    );
+    const totalFree = Array.from(this.free.values()).reduce((sum, value) => (sum += value), 0);
     const preferredFree = totalFree / this.free.size;
     const sourceFree = this.free.get(this.copySource);
     const targetFree = this.free.get(this.copyTarget);
@@ -297,9 +246,7 @@ export class MaintenanceComponent implements OnInit {
     const sourceToPreferred = preferredFree - sourceFree;
     const targetToPreferred = targetFree - preferredFree;
 
-    const smallestCopyMax = Math.floor(
-      Math.min(sourceToPreferred, targetToPreferred)
-    );
+    const smallestCopyMax = Math.floor(Math.min(sourceToPreferred, targetToPreferred));
 
     this.copyMaxSize = smallestCopyMax;
   }
@@ -314,19 +261,11 @@ export class MaintenanceComponent implements OnInit {
 
   copy(source: string, target: string) {
     // sanity checks
-    if (
-      source == null ||
-      source.length < 1 ||
-      target == null ||
-      target.length < 1 ||
-      source === target
-    ) {
+    if (source == null || source.length < 1 || target == null || target.length < 1 || source === target) {
       log.error("invalid copy source or target", source, target);
       return;
     }
-    const requestedCopyMax = this.copyMaxSize
-      ? this.copyMaxSize
-      : this.total.get(source) - this.free.get(source);
+    const requestedCopyMax = this.copyMaxSize ? this.copyMaxSize : this.total.get(source) - this.free.get(source);
     const targetFree = this.free.get(target);
 
     if (requestedCopyMax > targetFree) {
@@ -348,12 +287,7 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          let url =
-            service.adminUri +
-            "/admin/storages/copy?source=" +
-            source +
-            "&target=" +
-            target;
+          let url = service.adminUri + "/admin/storages/copy?source=" + source + "&target=" + target;
           const copyMaxBytes = this.copyMaxSize;
           if (this.copyMaxSize) {
             url += "&maxBytes=" + copyMaxBytes;
@@ -362,9 +296,7 @@ export class MaintenanceComponent implements OnInit {
           return this.authHttpClient.postAuth(url, null);
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("copy failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("copy failed", err));
   }
 
   sessionDbCheckOrphans() {
@@ -372,15 +304,10 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(
-            service.adminUri + "/admin/check-orphans",
-            null
-          );
+          return this.authHttpClient.postAuth(service.adminUri + "/admin/check-orphans", null);
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("check orphans failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("check orphans failed", err));
   }
 
   sessionDbDeleteOrphans() {
@@ -388,15 +315,10 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(
-            service.adminUri + "/admin/delete-orphans",
-            null
-          );
+          return this.authHttpClient.postAuth(service.adminUri + "/admin/delete-orphans", null);
         })
       )
-      .subscribe(null, (err) =>
-        this.restErrorService.showError("delete orphans failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
   }
 }
 export class FileStats {

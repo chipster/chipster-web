@@ -1,12 +1,13 @@
 <div *ngIf="!state.isReady(); then statusTemplate"></div>
 
 <div class="row">
-
   <div class="col-md-9">
     <div id="expressionprofile"></div>
   </div>
 
-  <div class="col-md-3" id="selectedGeneList"
+  <div
+    class="col-md-3"
+    id="selectedGeneList"
     *ngIf="state.isReady() && selectedGeneExpressions && selectedGeneExpressions.length > 0">
     <button class="btn btn-info btn-sm" (click)="createNewDataset()">Create new file</button>
     <h6 class="lighter" style="margin-top: 10px">Selection</h6>
@@ -19,8 +20,8 @@
       </thead>
       <tbody>
         <tr *ngFor="let selection of viewSelectionList">
-          <td class="text-sm">{{selection.symbol}}</td>
-          <td class="text-sm">{{selection.identifier}}</td>
+          <td class="text-sm">{{ selection.symbol }}</td>
+          <td class="text-sm">{{ selection.identifier }}</td>
         </tr>
       </tbody>
     </table>

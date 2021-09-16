@@ -8,14 +8,7 @@ describe("TSVHeaders", () => {
   }
 
   const headers1 = createTSVFile().headers;
-  const headers2 = new TSVHeaders([
-    "identifier",
-    "asdf",
-    "sdf",
-    "ad",
-    "134",
-    "lkpd98s5"
-  ]);
+  const headers2 = new TSVHeaders(["identifier", "asdf", "sdf", "ad", "134", "lkpd98s5"]);
 
   describe("size", () => {
     it("should return the length of headers array", () => {
@@ -26,11 +19,7 @@ describe("TSVHeaders", () => {
 
   describe("getItemsByIndexes", () => {
     it("should return matching headers", () => {
-      expect(headers2.getItemsByIndexes([0, 1, 2])).toEqual([
-        "identifier",
-        "asdf",
-        "sdf"
-      ]);
+      expect(headers2.getItemsByIndexes([0, 1, 2])).toEqual(["identifier", "asdf", "sdf"]);
       expect(headers2.getItemsByIndexes([5])).toEqual(["lkpd98s5"]);
     });
 

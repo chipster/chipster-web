@@ -7,11 +7,7 @@ export default class TSVFile {
   public headers: TSVHeaders;
   public body: TSVBody;
 
-  constructor(
-    tsv: Array<Array<string>>,
-    public datasetId: string,
-    public filename: string
-  ) {
+  constructor(tsv: Array<Array<string>>, public datasetId: string, public filename: string) {
     // normalize header-row in tsv-file so that if headers are missing a column
     // or identifier is indicated by an empty string
 
@@ -53,9 +49,7 @@ export default class TSVFile {
    */
   public getColumnDataByHeaderKeys(keys: Array<string>): Array<Array<string>> {
     const columnIndexes = keys.map((key: string) => this.getColumnIndex(key));
-    return this.body.rows.map((tsvRow: TSVRow) =>
-      columnIndexes.map((index: number) => tsvRow.row[index])
-    );
+    return this.body.rows.map((tsvRow: TSVRow) => columnIndexes.map((index: number) => tsvRow.row[index]));
   }
 
   /*

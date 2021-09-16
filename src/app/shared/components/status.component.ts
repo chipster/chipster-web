@@ -5,18 +5,19 @@ import { LoadState } from "../../model/loadstate";
   selector: "ch-status",
   template: `
     <div>{{ state.message }}</div>
-    <button *ngIf="state.buttonText" class="btn btn-info btn-sm mt-3" (click)="onButton()">{{state.buttonText}}</button>
+    <button *ngIf="state.buttonText" class="btn btn-info btn-sm mt-3" (click)="onButton()">
+      {{ state.buttonText }}
+    </button>
   `,
   styles: [
     `
       div {
         font-style: italic;
       }
-    `
-  ]
+    `,
+  ],
 })
-export class StatusComponent {  
-  
+export class StatusComponent {
   @Input() state: LoadState;
 
   @Output() buttonEvent = new EventEmitter<void>();

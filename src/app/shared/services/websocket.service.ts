@@ -1,20 +1,12 @@
 import { Injectable } from "@angular/core";
 import { SessionEvent, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import {
-  EMPTY,
-  Observable,
-  Subject,
-  throwError as observableThrowError
-} from "rxjs";
+import { EMPTY, Observable, Subject, throwError as observableThrowError } from "rxjs";
 import { catchError, mergeMap } from "rxjs/operators";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import {
-  ErrorButton,
-  ErrorMessage
-} from "../../core/errorhandler/errormessage";
+import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
 import { ConfigService } from "./config.service";
 
 @Injectable()
@@ -69,16 +61,16 @@ export class WebSocketService {
           this.wsSubject$ = webSocket({
             url: wsUrl,
             openObserver: {
-              next: x => {
+              next: (x) => {
                 log.info("websocket open", x);
-              }
-            }
+              },
+            },
           });
 
           return this.wsSubject$;
         }),
         // convert unclean idle timeouts to clean (about 20% of them for unknown reason)
-        catchError(err => {
+        catchError((err) => {
           if (err.code === 1001 && err.reason === "Idle Timeout") {
             return EMPTY;
           } else {
@@ -87,11 +79,11 @@ export class WebSocketService {
         })
       )
       .subscribe(
-        data => {
+        (data) => {
           log.info("websocket event", data);
           listener.next(data);
         },
-        err => {
+        (err) => {
           log.info("websocket error", err);
           this.errorService.showErrorObject(
             new ErrorMessage(

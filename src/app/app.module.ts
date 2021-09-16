@@ -99,12 +99,7 @@ import { TermsComponent } from "./views/terms/terms.component";
     AccessibilityComponent,
     PrivacyNoticeComponent,
   ],
-  providers: [
-    SelectionService,
-    TokenService,
-    ErrorService,
-    { provide: ErrorHandler, useClass: AppErrorHandler },
-  ],
+  providers: [SelectionService, TokenService, ErrorService, { provide: ErrorHandler, useClass: AppErrorHandler }],
   bootstrap: [AppComponent],
 })
 export class AppModule {

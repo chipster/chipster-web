@@ -20,7 +20,7 @@ export default class TSV2File {
    * Replace "" -> <empty>, " " -> <space>, multiple " " -> <spaces>
    */
   private static spreadSheetReplace(headers: Array<string>): Array<string> {
-    return headers.map(header => {
+    return headers.map((header) => {
       if (header === "") {
         return "&lt;empty&gt;";
       }
@@ -48,9 +48,7 @@ export default class TSV2File {
     }
   }
 
-  private static getIsMissingHeaderColumn(
-    tsvArray: Array<Array<string>>
-  ): boolean {
+  private static getIsMissingHeaderColumn(tsvArray: Array<Array<string>>): boolean {
     if (tsvArray.length <= 2) {
       // have to guess
       return false;
@@ -74,11 +72,7 @@ export default class TSV2File {
     let headers: Array<string>;
 
     // type-service gives the column headers for some file types
-    const headersFromTypeString = typeTagService.get(
-      sessionData,
-      dataset,
-      Tags.COLUMN_TITLES
-    );
+    const headersFromTypeString = typeTagService.get(sessionData, dataset, Tags.COLUMN_TITLES);
 
     // headers hard coded by type
     if (headersFromTypeString) {
@@ -157,9 +151,7 @@ export default class TSV2File {
       return this.headersHardCodedByType;
     } else if (this.isFirstDataRowHeader) {
       return this.isMissingHeaderColumn
-        ? [this.headersWithIdentifierFix[0]].concat(
-            TSV2File.spreadSheetReplace(this.headersWithIdentifierFix.slice(1))
-          )
+        ? [this.headersWithIdentifierFix[0]].concat(TSV2File.spreadSheetReplace(this.headersWithIdentifierFix.slice(1)))
         : TSV2File.spreadSheetReplace(this.headers);
     }
     return this.headers;
@@ -180,10 +172,10 @@ export default class TSV2File {
     } else {
       sourceHeaders = this.headers;
     }
-    return sourceHeaders.map(header => {
+    return sourceHeaders.map((header) => {
       return {
         id: header,
-        displayName: TSV2File.parameterReplace(header)
+        displayName: TSV2File.parameterReplace(header),
       };
     });
   }

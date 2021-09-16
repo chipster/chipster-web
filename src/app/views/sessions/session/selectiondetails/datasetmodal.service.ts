@@ -6,10 +6,7 @@ import { EMPTY } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
-import {
-  Tags,
-  TypeTagService,
-} from "../../../../shared/services/typetag.service";
+import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
@@ -24,10 +21,7 @@ export class DatasetModalService {
     private typeTagService: TypeTagService
   ) {}
 
-  public openDatasetHistoryModal(
-    dataset: Dataset,
-    sessionData: SessionData
-  ): void {
+  public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
       size: "xl",
     });
@@ -71,10 +65,7 @@ export class DatasetModalService {
       .pipe(
         mergeMap((runWrangle$) => {
           return runWrangle$ != null
-            ? this.dialogModalService.openSpinnerModal(
-                "Convert to Chipster format",
-                runWrangle$
-              )
+            ? this.dialogModalService.openSpinnerModal("Convert to Chipster format", runWrangle$)
             : EMPTY;
         })
       )
@@ -82,11 +73,7 @@ export class DatasetModalService {
         next: (result) => {
           log.info("Convert done", result);
         },
-        error: (error) =>
-          this.errorService.showError(
-            "Convert to Chipster format failed",
-            error
-          ),
+        error: (error) => this.errorService.showError("Convert to Chipster format failed", error),
       });
   }
 
@@ -102,17 +89,14 @@ export class DatasetModalService {
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
         mergeMap((run$) => {
-          return run$ != null
-            ? this.dialogModalService.openSpinnerModal("Saving groups", run$)
-            : EMPTY;
+          return run$ != null ? this.dialogModalService.openSpinnerModal("Saving groups", run$) : EMPTY;
         })
       )
       .subscribe({
         next: (result) => {
           log.debug("Saving groups done", result);
         },
-        error: (error) =>
-          this.errorService.showError("Saving groups failed", error),
+        error: (error) => this.errorService.showError("Saving groups failed", error),
       });
   }
 }

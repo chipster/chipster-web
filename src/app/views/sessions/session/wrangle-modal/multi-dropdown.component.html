@@ -1,13 +1,23 @@
-<ng-select #dropdown [items]="items" [multiple]="multiple" [placeholder]="placeholder" bindLabel="name"
-  bindValue="index" [closeOnSelect]="!multiple" [(ngModel)]="selectedIndexes" (change)="onSelectionChange()"
-  (search)="onSearch($event)" (keyDown.enter)="onKeyDownEnter($event)" (open)="onOpen()">
-
+<ng-select
+  #dropdown
+  [items]="items"
+  [multiple]="multiple"
+  [placeholder]="placeholder"
+  bindLabel="name"
+  bindValue="index"
+  [closeOnSelect]="!multiple"
+  [(ngModel)]="selectedIndexes"
+  (change)="onSelectionChange()"
+  (search)="onSearch($event)"
+  (keyDown.enter)="onKeyDownEnter($event)"
+  (open)="onOpen()">
   <ng-template *ngIf="multiple" ng-header-tmp>
-    <button (click)="onSelectAll()" class="btn btn-sm btn-outline-secondary">{{selectAllButtonText}}</button>
+    <button (click)="onSelectAll()" class="btn btn-sm btn-outline-secondary">{{ selectAllButtonText }}</button>
     <button (click)="onDone()" class="btn btn-sm btn-outline-secondary ml-2">Done</button>
   </ng-template>
 
   <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-    <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected" /> {{item.name}}
+    <input id="item-{{ index }}" type="checkbox" [ngModel]="item$.selected" />
+    {{ item.name }}
   </ng-template>
 </ng-select>

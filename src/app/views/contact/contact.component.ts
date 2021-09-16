@@ -7,7 +7,7 @@ import { ContactSupportService } from "./contact-support.service";
 
 @Component({
   selector: "ch-contact",
-  templateUrl: "./contact.component.html"
+  templateUrl: "./contact.component.html",
 })
 export class ContactComponent implements OnInit {
   contactFile: string;
@@ -23,13 +23,13 @@ export class ContactComponent implements OnInit {
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe(
-      path => {
+      (path) => {
         if (path) {
           this.contactFile = this.routeService.basename(path);
           this.contactPath = this.routeService.dirname(path) + "/";
         }
       },
-      err => {
+      (err) => {
         this.errorService.showError("failed to get the contact page path", err);
       }
     );

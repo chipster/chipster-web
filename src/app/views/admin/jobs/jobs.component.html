@@ -1,23 +1,23 @@
 <table class="table">
   <thead>
-  <tr>
-    <th scope="col">Tool</th>
-    <th scope="col">Username</th>
-    <th scope="col">Module</th>
-    <th scope="col">State</th>
-    <th scope="col">State details</th>
-    <th scope="col">Start time</th>
-  </tr>
+    <tr>
+      <th scope="col">Tool</th>
+      <th scope="col">Username</th>
+      <th scope="col">Module</th>
+      <th scope="col">State</th>
+      <th scope="col">State details</th>
+      <th scope="col">Start time</th>
+    </tr>
   </thead>
   <tbody>
     <tr *ngFor="let job of jobs">
-    <th scope="row">{{job.toolName}}</th>
-    <td>{{job.createdBy}}</td>
-    <td>{{job.module}}</td>
-    <td>{{job.state}}</td>
-    <td>{{job.stateDetail}}</td>
-    <td>{{job.startTime}}</td>
-    <td><button *ngIf="isRunning(job)" class="btn btn-sm btn-link" (click)="cancelJob(job)">Cancel</button></td>
-  </tr>
+      <th scope="row">{{ job.toolName }}</th>
+      <td>{{ job.createdBy }}</td>
+      <td>{{ job.module }}</td>
+      <td>{{ job.state }}</td>
+      <td>{{ job.stateDetail }}</td>
+      <td>{{ job.startTime }}</td>
+      <td><button *ngIf="isRunning(job)" class="btn btn-sm btn-link" (click)="cancelJob(job)">Cancel</button></td>
+    </tr>
   </tbody>
 </table>

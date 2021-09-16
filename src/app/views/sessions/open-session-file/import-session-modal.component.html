@@ -7,34 +7,33 @@
 
 <div class="modal-body">
   <div *ngFor="let file of getFiles()">
-
-    <br>
-    <p>{{file.name}}</p>
+    <br />
+    <p>{{ file.name }}</p>
 
     <p *ngIf="!!fileStatus.get(file)">
       <span *ngIf="!finishedFiles.has(file)">
-        <i class="fas fa-circle-o-notch fa-spin" style="font-size:22px"></i>
+        <i class="fas fa-circle-o-notch fa-spin" style="font-size: 22px"></i>
       </span>
       <span>
-        {{fileStatus.get(file)}}
+        {{ fileStatus.get(file) }}
       </span>
     </p>
 
     <div *ngIf="!file.isComplete()">
-
-      <p *ngIf="file.size">Uploading {{file.size | bytes}}
-        <span *ngIf="file.currentSpeed">({{file.currentSpeed | bytes}}/s)</span>
+      <p *ngIf="file.size">
+        Uploading {{ file.size | bytes }}
+        <span *ngIf="file.currentSpeed">({{ file.currentSpeed | bytes }}/s)</span>
       </p>
 
       <p>
         <ngb-progressbar *ngIf="!file.error" [value]="file.progress() * 100" [max]="100"></ngb-progressbar>
       </p>
 
-      <p *ngIf="flow.timeRemaining()">{{flow.timeRemaining() | secondspipe}} remaining</p>
+      <p *ngIf="flow.timeRemaining()">{{ flow.timeRemaining() | secondspipe }} remaining</p>
 
       <div class="alert alert-danger" role="alert" *ngIf="file.error">
         <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-        Upload error: {{file.errorMessage}}
+        Upload error: {{ file.errorMessage }}
       </div>
 
       <p>
@@ -44,6 +43,5 @@
         </button>
       </p>
     </div>
-
   </div>
 </div>

@@ -6,10 +6,7 @@ export interface LatestSession {
   readonly sourceSessionId?: string;
 }
 
-export function latestSession(
-  state: LatestSession = { sessionId: null },
-  { type, payload }
-) {
+export function latestSession(state: LatestSession = { sessionId: null }, { type, payload }) {
   switch (type) {
     case SET_LATEST_SESSION:
       return payload;

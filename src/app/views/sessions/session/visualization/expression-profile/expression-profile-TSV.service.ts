@@ -20,9 +20,7 @@ export class ExpressionProfileTSVService {
    */
   public getGeneExpressions(tsv: TSVFile): Array<GeneExpression> {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    return _.map(tsv.body.rows, (row: TSVRow) =>
-      this.getGeneExpressionsByIndex(row, chipIndexes)
-    );
+    return _.map(tsv.body.rows, (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
   }
 
   /*
@@ -30,12 +28,8 @@ export class ExpressionProfileTSVService {
    */
   public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    const values = _.map(tsv.body.rows, (row: TSVRow) =>
-      row.getCellsByIndexes(chipIndexes)
-    );
-    const flatValues = _.map(_.flatten(values), (value: string) =>
-      parseFloat(value)
-    );
+    const values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
+    const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
     const min = _.min(flatValues);
     const max = _.max(flatValues);
     return new DomainBoundaries(min, max);
@@ -46,9 +40,7 @@ export class ExpressionProfileTSVService {
    */
   public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
     return _.chain(tsvHeaders.headers)
-      .map((cell: string, index: number) =>
-        _.startsWith(cell, "chip.") ? index : -1
-      )
+      .map((cell: string, index: number) => (_.startsWith(cell, "chip.") ? index : -1))
       .filter((cell: number) => cell !== -1)
       .value();
   }
@@ -65,10 +57,7 @@ export class ExpressionProfileTSVService {
   /*
    * Return a single GeneExpression based on id for the TSVRow and the values in indexes of row
    */
-  getGeneExpressionsByIndex(
-    row: TSVRow,
-    indexes: Array<number>
-  ): GeneExpression {
+  getGeneExpressionsByIndex(row: TSVRow, indexes: Array<number>): GeneExpression {
     const values = row.getCellsByIndexes(indexes);
     const numberValues = _.map(values, (value: string) => parseFloat(value));
     return new GeneExpression(row.id, numberValues);
@@ -77,12 +66,8 @@ export class ExpressionProfileTSVService {
   /*
    * Order body by first chip-value in each row
    */
-  public orderBodyByFirstValue(
-    geneExpressions: Array<GeneExpression>
-  ): Array<GeneExpression> {
-    return _.orderBy(geneExpressions, [
-      (geneExpression: GeneExpression) => _.first(geneExpression.values)
-    ]);
+  public orderBodyByFirstValue(geneExpressions: Array<GeneExpression>): Array<GeneExpression> {
+    return _.orderBy(geneExpressions, [(geneExpression: GeneExpression) => _.first(geneExpression.values)]);
   }
 
   /*

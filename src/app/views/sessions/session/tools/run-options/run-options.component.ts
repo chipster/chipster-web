@@ -26,10 +26,7 @@ export class RunOptionsComponent implements OnChanges {
 
   getRunSingleDescription(): string {
     if (this.validatedTool.singleJobValidation.valid === true) {
-      if (
-        this.validatedTool.tool.inputs.length === 0 ||
-        this.validatedTool.inputBindings.length === 0
-      ) {
+      if (this.validatedTool.tool.inputs.length === 0 || this.validatedTool.inputBindings.length === 0) {
         return "Runs the tool once.";
       } else if (this.validatedTool.selectedDatasets.length === 1) {
         return "Runs the tool once. Uses the one selected file as the tool input.";
@@ -59,9 +56,7 @@ export class RunOptionsComponent implements OnChanges {
       const nonSampleFiles =
         this.validatedTool.sampleGroups.sampleDataMissing.length > 0
           ? "Selected files include the following non-sample files that are used as additional tool inputs files for all the tool runs: " +
-            this.validatedTool.sampleGroups.sampleDataMissing
-              .map((dataset) => dataset.name)
-              .join(", ") +
+            this.validatedTool.sampleGroups.sampleDataMissing.map((dataset) => dataset.name).join(", ") +
             "."
           : "";
       return runsTheTool + middlePart + nonSampleFiles;

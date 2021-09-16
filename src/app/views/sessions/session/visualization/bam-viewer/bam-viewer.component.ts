@@ -12,7 +12,7 @@ import BamRecord from "./bamRecord";
 @Component({
   selector: "ch-bam-viewer",
   templateUrl: "bam-viewer.component.html",
-  styleUrls: ["./bam-viewer.component.less"]
+  styleUrls: ["./bam-viewer.component.less"],
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
   @Input()
@@ -61,12 +61,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading bam file...");
 
     this.fileResource
-      .getData(
-        this.sessionDataService.getSessionId(),
-        this.dataset,
-        this.maxBytes,
-        true
-      )
+      .getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
@@ -75,10 +70,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
           if (arrayBuffer) {
             // let determine the header block size to decode the header and the record part differently
 
-            const blockHeader = arrayBuffer.slice(
-              this.filePos,
-              this.BLOCK_HEADER_LENGTH + this.filePos
-            );
+            const blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
             const ba = new Uint8Array(blockHeader);
             const blockSize = (ba[17] << 8) | (ba[16] + 1);
 
@@ -89,10 +81,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
             this.readHeader(headerBuffer);
             // Read the record buffer
             this.getBGZFBlocks(recordBuffer);
-            this.state = new LoadState(
-              State.Ready,
-              "Loading Bam file complete"
-            );
+            this.state = new LoadState(State.Ready, "Loading Bam file complete");
           }
         },
         (error: any) => {
@@ -135,8 +124,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         this.chrName = name;
         // lRef= length of the reference sequence
         const lRef = this.readInt(header, p + lName + 4);
-        this.samHeader +=
-          "@SQ" + " " + "SN" + ":" + " " + name + " " + "LN:" + lRef + " ";
+        this.samHeader += "@SQ" + " " + "SN" + ":" + " " + name + " " + "LN:" + lRef + " ";
 
         p = p + 8 + lName;
         this.headerEnd = p;
@@ -160,10 +148,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     const blockSizeList = [];
 
     while (this.filePos < fileLimit) {
-      const blockHeader = arrayBuffer.slice(
-        this.filePos,
-        this.BLOCK_HEADER_LENGTH + this.filePos
-      );
+      const blockHeader = arrayBuffer.slice(this.filePos, this.BLOCK_HEADER_LENGTH + this.filePos);
       const ba = new Uint8Array(blockHeader);
       const blockSize = (ba[17] << 8) | (ba[16] + 1);
       if (blockSize < 28) {
@@ -172,10 +157,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
       blockSizeList.push(blockSize);
 
-      const compressedData = arrayBuffer.slice(
-        this.filePos,
-        this.filePos + this.BLOCK_HEADER_LENGTH + blockSize
-      );
+      const compressedData = arrayBuffer.slice(this.filePos, this.filePos + this.BLOCK_HEADER_LENGTH + blockSize);
       totalSize += compressedData.byteLength;
 
       // some blocks still behave differently, so pako still throws some error as incorrect header check
@@ -228,42 +210,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         seq,
         seqBytes;
 
-      const CIGAR_DECODER = [
-        "M",
-        "I",
-        "D",
-        "N",
-        "S",
-        "H",
-        "P",
-        "=",
-        "X",
-        "?",
-        "?",
-        "?",
-        "?",
-        "?",
-        "?",
-        "?"
-      ];
-      const SECRET_DECODER = [
-        "=",
-        "A",
-        "C",
-        "x",
-        "G",
-        "x",
-        "x",
-        "x",
-        "T",
-        "x",
-        "x",
-        "x",
-        "x",
-        "x",
-        "x",
-        "N"
-      ];
+      const CIGAR_DECODER = ["M", "I", "D", "N", "S", "H", "P", "=", "X", "?", "?", "?", "?", "?", "?", "?"];
+      const SECRET_DECODER = ["=", "A", "C", "x", "G", "x", "x", "x", "T", "x", "x", "x", "x", "x", "x", "N"];
 
       if (offset >= this.plain.length) {
         return;
@@ -271,19 +219,13 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
       blockSize = this.readInt(this.plain, offset);
       if (blockSize > MAX_GZIP_BLOCK_SIZE) {
-        this.state = new LoadState(
-          State.Fail,
-          "Loading the Bam records failed"
-        );
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
       blockEnd = offset + blockSize + 4;
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE || blockEnd > MAX_GZIP_BLOCK_SIZE) {
-        this.state = new LoadState(
-          State.Fail,
-          "Loading the Bam records failed"
-        );
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 
@@ -291,10 +233,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       pos = this.readInt(this.plain, offset + 8);
 
       if (refID < 0) {
-        this.state = new LoadState(
-          State.Fail,
-          "Loading the Bam records failed"
-        );
+        this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 
@@ -328,14 +267,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         // var opLen = ((cigop & 0x00ffffff) >> 4);
         const opLen = cigop >> 4;
         const opLtr = CIGAR_DECODER[cigop & 0xf];
-        if (
-          opLtr === "M" ||
-          opLtr === "EQ" ||
-          opLtr === "X" ||
-          opLtr === "D" ||
-          opLtr === "N" ||
-          opLtr === "="
-        ) {
+        if (opLtr === "M" || opLtr === "EQ" || opLtr === "X" || opLtr === "D" || opLtr === "N" || opLtr === "=") {
           lengthOnRef += opLen;
         }
         cigar = cigar + opLen + opLtr;
@@ -447,12 +379,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   // Utility Functions
   readInt(ba, offset) {
-    return (
-      (ba[offset + 3] << 24) |
-      (ba[offset + 2] << 16) |
-      (ba[offset + 1] << 8) |
-      ba[offset]
-    );
+    return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | ba[offset];
   }
 
   readByte(offset) {

@@ -8,6 +8,6 @@ import { LinkButtonComponent } from "./link-button.component";
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
   declarations: [LinkButtonComponent],
-  exports: [LinkButtonComponent]
+  exports: [LinkButtonComponent],
 })
 export class LinkButtonModule {}

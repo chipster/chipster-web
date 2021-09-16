@@ -14,7 +14,7 @@ import { takeUntil } from "rxjs/operators";
 @Component({
   selector: "ch-selection-panel",
   templateUrl: "./selection-panel.component.html",
-  styleUrls: ["./selection-panel.component.less"]
+  styleUrls: ["./selection-panel.component.less"],
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
   @Input()
@@ -74,21 +74,19 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     //     err => this.errorService.showError("dataset selection failed", err)
     //   );
 
-    this.selectionService.selectedJobs$
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (selectedJobs: Array<Job>) => {
-          this.selectedJobs = selectedJobs;
-          if (this.selectedJobs.length > 0) {
-            this.showFile = false;
-            this.showTool = false;
-            this.showJob = true;
-          } else {
-            this.showJob = false;
-          }
-        },
-        err => this.errorService.showError("job selection failed", err)
-      );
+    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe(
+      (selectedJobs: Array<Job>) => {
+        this.selectedJobs = selectedJobs;
+        if (this.selectedJobs.length > 0) {
+          this.showFile = false;
+          this.showTool = false;
+          this.showJob = true;
+        } else {
+          this.showJob = false;
+        }
+      },
+      (err) => this.errorService.showError("job selection failed", err)
+    );
   }
 
   ngOnDestroy() {

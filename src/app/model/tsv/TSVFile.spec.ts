@@ -49,10 +49,7 @@ describe("TSVFile", () => {
   describe("getColumnDataByHeaderKeys", () => {
     const symbolColumn = tsv.getColumnDataByHeaderKey("symbol");
     const chipcolumn6 = tsv.getColumnDataByHeaderKey("chip.microarray006.cel");
-    const columnsByHeaderKeys = tsv.getColumnDataByHeaderKeys([
-      "symbol",
-      "chip.microarray006.cel"
-    ]);
+    const columnsByHeaderKeys = tsv.getColumnDataByHeaderKeys(["symbol", "chip.microarray006.cel"]);
 
     it("should return arrays containing items by columnkeys", () => {
       expect(columnsByHeaderKeys[0][0]).toBe(symbolColumn[0]);
@@ -93,7 +90,7 @@ describe("TSVFile", () => {
         "flag.microarray011.cel",
         "flag.microarray012.cel",
         "p.adjusted",
-        "FC"
+        "FC",
       ],
       [
         "7369_at",
@@ -124,7 +121,7 @@ describe("TSVFile", () => {
         "P",
         "P",
         "0.000479",
-        "-6.58833333333333"
+        "-6.58833333333333",
       ],
       [
         "10610_at",
@@ -155,8 +152,8 @@ describe("TSVFile", () => {
         "A",
         "M",
         "0.000799",
-        "-0.849999999999999"
-      ]
+        "-0.849999999999999",
+      ],
     ];
 
     it("should return only first item", () => {

@@ -1,11 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  Dataset,
-  InputBinding,
-  Tool,
-  ToolInput,
-  ToolParameter,
-} from "chipster-js-common";
+import { Dataset, InputBinding, Tool, ToolInput, ToolParameter } from "chipster-js-common";
 import * as _ from "lodash";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -31,27 +25,17 @@ export class ToolService {
 
   //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
-    return (
-      parameter.type === "ENUM" ||
-      parameter.type === "COLUMN_SEL" ||
-      parameter.type === "METACOLUMN_SEL"
-    );
+    return parameter.type === "ENUM" || parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";
   }
 
   //noinspection JSMethodCanBeStatic
   isColumnSelectionParameter(parameter: ToolParameter) {
-    return (
-      parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL"
-    );
+    return parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";
   }
 
   //noinspection JSMethodCanBeStatic
   isNumberParameter(parameter: ToolParameter) {
-    return (
-      parameter.type === "INTEGER" ||
-      parameter.type === "DECIMAL" ||
-      parameter.type === "PERCENT"
-    );
+    return parameter.type === "INTEGER" || parameter.type === "DECIMAL" || parameter.type === "PERCENT";
   }
 
   //noinspection JSMethodCanBeStatic
@@ -89,10 +73,7 @@ export class ToolService {
   }
 
   getDefaultValue(toolParameter: ToolParameter): number | string {
-    if (
-      toolParameter.defaultValue != null &&
-      this.isNumberParameter(toolParameter)
-    ) {
+    if (toolParameter.defaultValue != null && this.isNumberParameter(toolParameter)) {
       return Number(toolParameter.defaultValue);
     } else {
       return toolParameter.defaultValue;
@@ -104,9 +85,7 @@ export class ToolService {
     // no default value
     if (parameter.defaultValue == null) {
       // if the default is not set, allow also null, undefined and empty string here
-      return this.isColumnSelectionParameter(parameter)
-        ? value == null
-        : value == null || String(value).trim() === "";
+      return this.isColumnSelectionParameter(parameter) ? value == null : value == null || String(value).trim() === "";
     }
 
     // default value, but no value
@@ -120,9 +99,7 @@ export class ToolService {
     // value must match default value
     if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
       // consider "0" and "0.0" equal
-      return (
-        parseFloat(value.toString()) === parseFloat(parameter.defaultValue)
-      );
+      return parseFloat(value.toString()) === parseFloat(parameter.defaultValue);
     } else {
       return parameter.defaultValue === String(value).trim();
     }
@@ -133,18 +110,12 @@ export class ToolService {
     return this.typeTagService.isCompatible(sessionData, dataset, type);
   }
 
-  bindInputs(
-    sessionData: SessionData,
-    tool: Tool,
-    datasets: Dataset[]
-  ): InputBinding[] {
+  bindInputs(sessionData: SessionData, tool: Tool, datasets: Dataset[]): InputBinding[] {
     // copy the array so that we can remove items from it
     let unboundDatasets = datasets.slice();
 
     // sort inputs to determine binding order, also filter out phenodata inputs
-    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool).filter(
-      (input: ToolInput) => !input.meta
-    );
+    const inputs: ToolInput[] = this.getInputsSortedForBinding(tool).filter((input: ToolInput) => !input.meta);
 
     // temp map
     const bindingsMap = new Map<ToolInput, Dataset[]>();
@@ -160,9 +131,7 @@ export class ToolService {
       let datasetsToBind: Dataset[] = [];
       if (compatibleDatasets.length > 0) {
         // pick the first or all if multi input
-        datasetsToBind = this.isMultiInput(toolInput)
-          ? compatibleDatasets
-          : compatibleDatasets.slice(0, 1);
+        datasetsToBind = this.isMultiInput(toolInput) ? compatibleDatasets : compatibleDatasets.slice(0, 1);
       }
 
       // save binding
@@ -185,9 +154,7 @@ export class ToolService {
 
   bindPhenodata(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
     // if no phenodata inputs, return empty array
-    const phenodataInputs = toolWithInputs.tool.inputs.filter(
-      (input) => input.meta
-    );
+    const phenodataInputs = toolWithInputs.tool.inputs.filter((input) => input.meta);
     if (phenodataInputs.length === 0) {
       return [];
     }
@@ -206,9 +173,7 @@ export class ToolService {
       // get all inputs
       .reduce((allInputs, binding) => allInputs.concat(binding.datasets), [])
       // get phenodatas for the inputs
-      .map((inputDataset) =>
-        this.getSessionDataService.getPhenodataDataset(inputDataset)
-      )
+      .map((inputDataset) => this.getSessionDataService.getPhenodataDataset(inputDataset))
       // pick first where phenodata found
       .find((dataset) => dataset != null);
 
@@ -220,9 +185,7 @@ export class ToolService {
     ];
   }
 
-  getUnboundPhenodataBindings(
-    toolWithInputs: SelectedToolWithInputs
-  ): PhenodataBinding[] {
+  getUnboundPhenodataBindings(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
     // if no phenodata inputs, return empty array
     return toolWithInputs.tool.inputs
       .filter((input) => input.meta)
@@ -241,27 +204,17 @@ export class ToolService {
   checkBindings(bindings: InputBinding[]): boolean {
     return (
       bindings &&
-      bindings.every(
-        (binding) =>
-          binding.toolInput.optional ||
-          (binding.datasets && binding.datasets.length > 0)
-      )
+      bindings.every((binding) => binding.toolInput.optional || (binding.datasets && binding.datasets.length > 0))
     );
   }
 
   //noinspection JSMethodCanBeStatic
   isMultiInput(input: ToolInput) {
-    return (
-      (input.name.prefix && input.name.prefix.length > 0) ||
-      (input.name.postfix && input.name.postfix.length > 0)
-    );
+    return (input.name.prefix && input.name.prefix.length > 0) || (input.name.postfix && input.name.postfix.length > 0);
   }
 
   hasMultiInputs(tool: Tool) {
-    return (
-      tool.inputs != null &&
-      tool.inputs.some((toolInput) => this.isMultiInput(toolInput))
-    );
+    return tool.inputs != null && tool.inputs.some((toolInput) => this.isMultiInput(toolInput));
   }
 
   getInputCountWithoutPhenodata(tool: Tool) {
@@ -309,21 +262,14 @@ export class ToolService {
     datasets: Array<Dataset>,
     sessionData: SessionData
   ): Array<Observable<Array<SelectionOption>>> {
-    return datasets.map((dataset: Dataset) =>
-      this.tsvService.getTSV2FileHeaders(dataset, sessionData)
-    );
+    return datasets.map((dataset: Dataset) => this.tsvService.getTSV2FileHeaders(dataset, sessionData));
   }
 
   //noinspection JSMethodCanBeStatic
   getMetadataColumns(phenodatas: Array<string>) {
-    const headers = phenodatas.reduce(
-      (allColumns: string[], phenodataString: string) => {
-        return allColumns.concat(
-          this.tsvService.getTSVHeaders(phenodataString)
-        );
-      },
-      []
-    );
+    const headers = phenodatas.reduce((allColumns: string[], phenodataString: string) => {
+      return allColumns.concat(this.tsvService.getTSVHeaders(phenodataString));
+    }, []);
 
     // return unique headers
     return Array.from(new Set(headers));
@@ -366,28 +312,13 @@ export class ToolService {
     return (
       tool.inputs
         // start with mandatory not generic, ignore phenodata
-        .filter(
-          (input) =>
-            !input.optional && !(input.type.name === "GENERIC") && !input.meta
-        )
+        .filter((input) => !input.optional && !(input.type.name === "GENERIC") && !input.meta)
         // add optional not generic
-        .concat(
-          tool.inputs.filter(
-            (input) => input.type.name !== "GENERIC" && input.optional
-          )
-        )
+        .concat(tool.inputs.filter((input) => input.type.name !== "GENERIC" && input.optional))
         // add mandatory generic
-        .concat(
-          tool.inputs.filter(
-            (input) => input.type.name === "GENERIC" && !input.optional
-          )
-        )
+        .concat(tool.inputs.filter((input) => input.type.name === "GENERIC" && !input.optional))
         // add optional generic
-        .concat(
-          tool.inputs.filter(
-            (input) => input.type.name === "GENERIC" && input.optional
-          )
-        )
+        .concat(tool.inputs.filter((input) => input.type.name === "GENERIC" && input.optional))
     );
   }
 
@@ -400,14 +331,9 @@ export class ToolService {
 
     for (const binding of bindings) {
       s += "\t";
-      const datasetsString: string = binding.datasets.reduce(
-        (a: string, b) => a + b.name + " ",
-        ""
-      );
+      const datasetsString: string = binding.datasets.reduce((a: string, b) => a + b.name + " ", "");
 
-      s += binding.toolInput.name.id
-        ? binding.toolInput.name.id
-        : binding.toolInput.name.prefix;
+      s += binding.toolInput.name.id ? binding.toolInput.name.id : binding.toolInput.name.prefix;
       s += " -> " + datasetsString;
       s += "\n";
     }

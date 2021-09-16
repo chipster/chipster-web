@@ -32,7 +32,7 @@ export default class VisualizationConstants {
       ],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "text",
@@ -40,7 +40,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.TEXT],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "expressionprofile",
@@ -48,7 +48,7 @@ export default class VisualizationConstants {
       supportAllTypes: false,
       typeTags: [Tags.GENE_EXPRS],
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "scatterplot",
@@ -56,7 +56,7 @@ export default class VisualizationConstants {
       supportAllTypes: false,
       typeTags: [Tags.GENE_EXPRS],
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "image",
@@ -64,7 +64,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.PNG, Tags.JPEG, Tags.GIF],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "pdf",
@@ -72,7 +72,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.PDF],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "html",
@@ -80,7 +80,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.HTML],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: "venn",
@@ -88,7 +88,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.TSV],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [2, 3]
+      supportedInputFileCounts: [2, 3],
     },
     {
       id: "volcanoplot",
@@ -96,7 +96,7 @@ export default class VisualizationConstants {
       typeTags: [Tags.PVALUE_AND_FOLD_CHANGE],
       supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     // {
     //   id: "bamviewer",
@@ -111,7 +111,7 @@ export default class VisualizationConstants {
       name: "Phenodata",
       supportAllTypes: false,
       typeTags: [Tags.GENE_EXPRS],
-      supportedInputFileCounts: [1]
+      supportedInputFileCounts: [1],
     },
     {
       id: VisualizationConstants.DETAILS_ID,
@@ -119,7 +119,7 @@ export default class VisualizationConstants {
       typeTags: [],
       supportAllTypes: true,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1]
-    }
+      supportedInputFileCounts: [1],
+    },
   ];
 }

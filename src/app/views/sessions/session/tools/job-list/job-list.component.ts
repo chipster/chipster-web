@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
 import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";

@@ -9,30 +9,18 @@ import Rectangle from "./rectangle";
 
 @Injectable()
 export class ExpressionProfileService {
-  constructor(
-    private expressionprofileTSVService: ExpressionProfileTSVService
-  ) {}
+  constructor(private expressionprofileTSVService: ExpressionProfileTSVService) {}
 
   // X-axis indexes for intervals the selection rectangle is crossing
   getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, tsv: TSVFile) {
-    let startIndex = this.getFloor(
-      linearXScale.invert(p1.x),
-      linearXScale.invert(p2.x)
-    );
-    let endIndex = this.getCeil(
-      linearXScale.invert(p1.x),
-      linearXScale.invert(p2.x)
-    );
+    let startIndex = this.getFloor(linearXScale.invert(p1.x), linearXScale.invert(p2.x));
+    let endIndex = this.getCeil(linearXScale.invert(p1.x), linearXScale.invert(p2.x));
     if (startIndex < 0) {
       startIndex = 0;
     }
 
-    if (
-      endIndex >=
-      this.expressionprofileTSVService.getChipHeaders(tsv).length - 1
-    ) {
-      endIndex =
-        this.expressionprofileTSVService.getChipHeaders(tsv).length - 1;
+    if (endIndex >= this.expressionprofileTSVService.getChipHeaders(tsv).length - 1) {
+      endIndex = this.expressionprofileTSVService.getChipHeaders(tsv).length - 1;
     }
 
     return {
@@ -49,17 +37,10 @@ export class ExpressionProfileService {
     return first >= second ? _.ceil(first) : _.ceil(second);
   }
 
-  createLines(
-    tsv: TSVFile,
-    chipIndex: number,
-    linearXScale: any,
-    yScale: any
-  ): Array<Line> {
+  createLines(tsv: TSVFile, chipIndex: number, linearXScale: any, yScale: any): Array<Line> {
     return _.map(tsv.body.rows, (tsvRow: TSVRow) => {
       // get indexes for finding raw data value for lines start and end points
-      const chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(
-        tsv.headers
-      );
+      const chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(tsv.headers);
       const chipLineStartDataIndex = chipIndexes[chipIndex];
       const chipLineEndDataIndex = chipIndexes[chipIndex + 1];
 
@@ -67,14 +48,7 @@ export class ExpressionProfileService {
       const lineStartValue = tsvRow.row[chipLineStartDataIndex];
       const lineEndValue = tsvRow.row[chipLineEndDataIndex];
 
-      return this.createLine(
-        tsvRow.id,
-        chipIndex,
-        lineStartValue,
-        lineEndValue,
-        linearXScale,
-        yScale
-      );
+      return this.createLine(tsvRow.id, chipIndex, lineStartValue, lineEndValue, linearXScale, yScale);
     });
   }
 
@@ -96,14 +70,10 @@ export class ExpressionProfileService {
   isIntersecting(line: Line, rectangle: Rectangle) {
     // Completely outside.
     if (
-      (line.start.x <= rectangle.topleft.x &&
-        line.end.x <= rectangle.topleft.x) ||
-      (line.start.y <= rectangle.topleft.y &&
-        line.end.y <= rectangle.topleft.y) ||
-      (line.start.x >= rectangle.bottomright.x &&
-        line.end.x >= rectangle.bottomright.x) ||
-      (line.start.y >= rectangle.bottomright.y &&
-        line.end.y >= rectangle.bottomright.y)
+      (line.start.x <= rectangle.topleft.x && line.end.x <= rectangle.topleft.x) ||
+      (line.start.y <= rectangle.topleft.y && line.end.y <= rectangle.topleft.y) ||
+      (line.start.x >= rectangle.bottomright.x && line.end.x >= rectangle.bottomright.x) ||
+      (line.start.y >= rectangle.bottomright.y && line.end.y >= rectangle.bottomright.y)
     ) {
       return false;
     }

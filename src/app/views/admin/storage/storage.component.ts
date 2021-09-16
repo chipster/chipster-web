@@ -11,7 +11,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   selector: "ch-storage",
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class StorageComponent implements OnInit {
   users: string[];
@@ -38,28 +38,22 @@ export class StorageComponent implements OnInit {
     this.configService
       .getSessionDbUrl()
       .pipe(
-        tap(url => (sessionDbUrl = url)),
+        tap((url) => (sessionDbUrl = url)),
         mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
         tap((users: string[]) => (this.users = users)),
         mergeMap((users: string[]) => from(users)),
-        mergeMap(user => {
-          return this.authHttpClient
-            .getAuth(
-              sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota"
-            )
-            .pipe(
-              catchError(err => {
-                log.error("quota request error", err);
-                // don't cancel other requests even if one of them fails
-                return empty();
-              })
-            );
+        mergeMap((user) => {
+          return this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
+            catchError((err) => {
+              log.error("quota request error", err);
+              // don't cancel other requests even if one of them fails
+              return empty();
+            })
+          );
         }),
         tap((quota: any) => this.quotas.set(quota.username, quota))
       )
-      .subscribe(null, err =>
-        this.restErrorService.showError("get quotas failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("get quotas failed", err));
   }
 
   selectUser(user: string) {
@@ -70,16 +64,12 @@ export class StorageComponent implements OnInit {
 
     this.configService
       .getSessionDbUrl()
-      .pipe(
-        flatMap(url =>
-          this.authHttpClient.getAuth(url + "/users/" + user + "/sessions")
-        )
-      )
+      .pipe(flatMap((url) => this.authHttpClient.getAuth(url + "/users/" + user + "/sessions")))
       .subscribe(
         (sessions: any[]) => {
           this.sessions = sessions;
         },
-        err => this.restErrorService.showError("get quotas failed", err)
+        (err) => this.restErrorService.showError("get quotas failed", err)
       );
   }
 }

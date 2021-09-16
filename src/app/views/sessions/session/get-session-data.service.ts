@@ -2,13 +2,14 @@ import { Injectable } from "@angular/core";
 import { Dataset, PhenodataUtils } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { QuerySessionDataService } from "./query-session-data.service";
-import { SessionDataService } from './session-data.service';
+import { SessionDataService } from "./session-data.service";
 
 @Injectable()
 export class GetSessionDataService {
   constructor(
     private querySessionDataService: QuerySessionDataService,
-    private sessionDataService: SessionDataService) {}
+    private sessionDataService: SessionDataService
+  ) {}
 
   private sessionData: SessionData;
 
@@ -32,9 +33,7 @@ export class GetSessionDataService {
    * @param dataset
    */
   getPhenodata(dataset: Dataset): string {
-    return this.querySessionDataService.getPhenodata(
-      this.sessionData,
-      dataset);
+    return this.querySessionDataService.getPhenodata(this.sessionData, dataset);
   }
 
   /**
@@ -45,21 +44,18 @@ export class GetSessionDataService {
    * @param dataset
    */
   getPhenodataDataset(dataset: Dataset): Dataset {
-    return this.querySessionDataService.getPhenodataDataset(
-      this.sessionData,
-      dataset);
+    return this.querySessionDataService.getPhenodataDataset(this.sessionData, dataset);
   }
 
   getAncestorDatasetsWithPhenodata(dataset: Dataset): Dataset[] {
-    return this.querySessionDataService.getAncestorDatasetsWithPhenodata(
-      this.sessionData,
-      dataset);
+    return this.querySessionDataService.getAncestorDatasetsWithPhenodata(this.sessionData, dataset);
   }
 
-  getChildren(datasets: Dataset[]) {    
+  getChildren(datasets: Dataset[]) {
     return this.querySessionDataService.getChildren(
-      datasets, 
-      this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap), 
-      this.sessionData.jobsMap);
+      datasets,
+      this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap),
+      this.sessionData.jobsMap
+    );
   }
 }

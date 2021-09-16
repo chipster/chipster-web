@@ -11,14 +11,7 @@ export class ErrorService {
   constructor(private ngZone: NgZone) {}
 
   showError(msg: string, err: Error): void {
-    const errorMessage = new ErrorMessage(
-      null,
-      msg,
-      true,
-      [ErrorButton.Reload, ErrorButton.ContactSupport],
-      [],
-      err
-    );
+    const errorMessage = new ErrorMessage(null, msg, true, [ErrorButton.Reload, ErrorButton.ContactSupport], [], err);
     if (err) {
       errorMessage.links = [ErrorButton.ShowDetails];
     }

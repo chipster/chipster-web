@@ -2,7 +2,7 @@ import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  templateUrl: "./temp-copy-modal.component.html"
+  templateUrl: "./temp-copy-modal.component.html",
 })
 export class TempCopyModalComponent implements AfterViewInit {
   @Input()
@@ -39,7 +39,7 @@ export class TempCopyModalComponent implements AfterViewInit {
   save(button: string) {
     this.activeModal.close({
       value: this.value,
-      button: button
+      button: button,
     });
   }
 

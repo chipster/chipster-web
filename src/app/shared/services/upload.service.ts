@@ -25,10 +25,7 @@ export class UploadService {
     private errorService: ErrorService
   ) {}
 
-  getFlow(
-    fileAdded: (file: any, event: any, flow: any) => any,
-    fileSuccess: (file: any) => any
-  ) {
+  getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {
     const flow = new Flow({
       // continuation from different browser session not implemented
       testChunks: false,
@@ -47,7 +44,7 @@ export class UploadService {
       // manual's recommendation for big files
       speedSmoothingFactor: 0.02,
       // allow the same file to be uploaded again
-      allowDuplicateUploads: true
+      allowDuplicateUploads: true,
     });
 
     if (!flow.support) {
@@ -74,7 +71,7 @@ export class UploadService {
   // noinspection JSMethodCanBeStatic
   private flowFileAdded(file: any, event: any, flow: any) {
     // each file has a unique target url
-    flow.opts.target = function(file2: any) {
+    flow.opts.target = function (file2: any) {
       return file2.chipsterTarget;
     };
 
@@ -82,10 +79,7 @@ export class UploadService {
   }
 
   startUpload(sessionId: string, file: any) {
-    forkJoin([
-      this.configService.getFileBrokerUrl(),
-      this.createDataset(sessionId, file.name)
-    ]).subscribe(
+    forkJoin([this.configService.getFileBrokerUrl(), this.createDataset(sessionId, file.name)]).subscribe(
       (value: [string, Dataset]) => {
         const url = value[0];
         const dataset = value[1];
@@ -96,7 +90,7 @@ export class UploadService {
         file.chipsterDatasetId = dataset.datasetId;
         file.resume();
       },
-      err => this.restErrorService.showError("upload failed", err)
+      (err) => this.restErrorService.showError("upload failed", err)
     );
   }
 
@@ -137,7 +131,7 @@ export class UploadService {
           displayName: "",
           description: "",
           type: "UNCHECKED_STRING",
-          value: url
+          value: url,
         });
 
         parameters.push({
@@ -145,7 +139,7 @@ export class UploadService {
           displayName: "",
           description: "",
           type: "ENUM",
-          value: "current"
+          value: "current",
         });
 
         parameters.push({
@@ -153,7 +147,7 @@ export class UploadService {
           displayName: "",
           description: "",
           type: "ENUM",
-          value: "yes"
+          value: "yes",
         });
 
         const job: Job = <Job>{
@@ -165,14 +159,14 @@ export class UploadService {
           state: "NEW",
           inputs: [],
           parameters: parameters,
-          metadataFiles: []
+          metadataFiles: [],
         };
 
         this.jobService.runJobDirect(job);
       },
-      error: err => {
+      error: (err) => {
         this.errorService.showError("Failed to download", err);
-      }
+      },
     });
   }
 }

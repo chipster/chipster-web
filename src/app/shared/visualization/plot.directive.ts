@@ -1,12 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import {
-  Directive,
-  HostListener,
-  Input,
-  OnChanges,
-  OnDestroy,
-} from "@angular/core";
+import { Directive, HostListener, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -45,10 +39,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   protected unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  constructor(
-    fileResource: FileResource,
-    sessionDataService: SessionDataService
-  ) {
+  constructor(fileResource: FileResource, sessionDataService: SessionDataService) {
     this.fileResource = fileResource;
     this.sessionDataService = sessionDataService;
     this.restErrorService = AppInjector.get(RestErrorService);
@@ -85,25 +76,17 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       .subscribe(
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(
-            parsedTSV,
-            this.dataset.datasetId,
-            datasetName
-          );
+          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
           if (this.tsv.body.size() > rowLimit) {
             if (showMore) {
               this.state = new LoadState(
                 State.Fail,
-                "Plot visualization is not allowed for TSV files with more than " +
-                  rowLimit +
-                  " data points"
+                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points"
               );
             } else {
               this.state = new LoadState(
                 State.TooLarge,
-                "Plot visualization may be slow for TSV files with more than " +
-                  rowLimit +
-                  " data points",
+                "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
                 "Show anyway"
               );
             }
@@ -173,10 +156,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       const width = Math.abs(endPoint.x - startPoint.x);
       const height = Math.abs(endPoint.y - startPoint.y);
 
-      d3.select(".band").attr(
-        "transform",
-        "translate(" + minX + "," + minY + ")"
-      );
+      d3.select(".band").attr("transform", "translate(" + minX + "," + minY + ")");
 
       d3.select(".band").attr("width", width).attr("height", height);
     });
@@ -196,11 +176,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   }
 
   resetSelectionRectangle() {
-    d3.select(".band")
-      .attr("width", 0)
-      .attr("height", 0)
-      .attr("x", 0)
-      .attr("y", 0);
+    d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
   }
   getSelectedDataSet() {}
 

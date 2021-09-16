@@ -8,15 +8,9 @@ import { StaticHtmlComponent } from "./static-html/static-html.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, NgbModule],
-  declarations: [
-    ManualComponent,
-    ManualModalComponent,
-    StaticHtmlComponent
-  ],
+  declarations: [ManualComponent, ManualModalComponent, StaticHtmlComponent],
   providers: [],
   exports: [ManualComponent, ManualModalComponent, StaticHtmlComponent],
-  entryComponents: [
-    ManualModalComponent,
-  ]
+  entryComponents: [ManualModalComponent],
 })
 export class ManualModule {}

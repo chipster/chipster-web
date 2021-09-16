@@ -1,11 +1,9 @@
 <div class="col-md-6 offset-md-3 margin-top" *ngIf="termsOfUse">
-
   <div class="margin-top">
-    <ch-manual assetsPath="/" page="{{termsOfUse}}" [showControls]=false></ch-manual>
+    <ch-manual assetsPath="/" page="{{ termsOfUse }}" [showControls]="false"></ch-manual>
   </div>
 
-  <div *ngIf="showAccept" class="text-center margin-top margin-bottom" >
+  <div *ngIf="showAccept" class="text-center margin-top margin-bottom">
     <button class="btn btn-primary" type="button" (click)="accept()">Accept</button>
   </div>
-
 </div>

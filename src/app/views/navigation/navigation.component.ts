@@ -63,9 +63,7 @@ export class NavigationComponent implements OnInit {
       (path) => {
         log.info("load custom favicon from", path);
         if (path) {
-          const link: HTMLLinkElement =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
+          const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement("link");
           link.type = "image/x-icon";
           link.rel = "shortcut icon";
           link.href = path;
@@ -75,10 +73,7 @@ export class NavigationComponent implements OnInit {
       (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the favicon path", err);
-        this.errorService.showError(
-          "failed to get the custom favicon path",
-          err
-        );
+        this.errorService.showError("failed to get the custom favicon path", err);
       }
     );
 

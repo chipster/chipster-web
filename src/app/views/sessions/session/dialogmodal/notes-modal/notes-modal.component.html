@@ -11,9 +11,7 @@
         [readonly]="readOnly"
         rows="15"
         [placeholder]="getPlaceHolder()"
-        [(ngModel)]="notes"
-      >
-      </textarea>
+        [(ngModel)]="notes"></textarea>
     </div>
   </div>
 
@@ -27,30 +25,7 @@
   </table>
 </div>
 <div class="modal-footer">
-  <button
-    *ngIf="!readOnly"
-    type="button"
-    class="btn btn-secondary pull-right"
-    (click)="cancel()"
-  >
-    Cancel
-  </button>
-  <button
-    *ngIf="!readOnly"
-    type="submit"
-    class="btn btn-info"
-    (click)="save()"
-    #submitButton
-  >
-    Save
-  </button>
-  <button
-    *ngIf="readOnly"
-    type="submit"
-    class="btn btn-info"
-    (click)="cancel()"
-    #submitButton
-  >
-    Close
-  </button>
+  <button *ngIf="!readOnly" type="button" class="btn btn-secondary pull-right" (click)="cancel()">Cancel</button>
+  <button *ngIf="!readOnly" type="submit" class="btn btn-info" (click)="save()" #submitButton>Save</button>
+  <button *ngIf="readOnly" type="submit" class="btn btn-info" (click)="cancel()" #submitButton>Close</button>
 </div>

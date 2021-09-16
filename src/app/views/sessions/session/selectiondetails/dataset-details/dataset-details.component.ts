@@ -28,11 +28,7 @@ export class DatasetDetailsComponent implements OnInit {
       (datasets: Array<Dataset>) => {
         this.datasets = datasets;
       },
-      (err) =>
-        this.errorService.showError(
-          "failed to get the selected datasets from store",
-          err
-        )
+      (err) => this.errorService.showError("failed to get the selected datasets from store", err)
     );
   }
 
@@ -41,8 +37,6 @@ export class DatasetDetailsComponent implements OnInit {
   }
 
   exportDatasets() {
-    this.sessionDataService.exportDatasets(
-      this.selectionService.selectedDatasets
-    );
+    this.sessionDataService.exportDatasets(this.selectionService.selectedDatasets);
   }
 }

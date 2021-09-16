@@ -2,15 +2,14 @@
   <i>No visualization available</i>
 </p>
 <div id="visTab">
-
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" (navChange)="onNavChange($event)" class="nav-tabs">
-
     <li [ngbNavItem]="getTabId('spreadsheet')" *ngIf="isTabVisible('spreadsheet')">
       <a ngbNavLink>Spreadsheet</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-spreadsheet-visualization [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData">
-          </ch-spreadsheet-visualization>
+          <ch-spreadsheet-visualization
+            [dataset]="selectionService.selectedDatasets[0]"
+            [sessionData]="sessionData"></ch-spreadsheet-visualization>
         </div>
       </ng-template>
     </li>
@@ -19,8 +18,9 @@
       <a ngbNavLink>Text</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-text-visualization [dataset]="selectionService.selectedDatasets[0]" [modalMode]=false>
-          </ch-text-visualization>
+          <ch-text-visualization
+            [dataset]="selectionService.selectedDatasets[0]"
+            [modalMode]="false"></ch-text-visualization>
         </div>
       </ng-template>
     </li>
@@ -29,8 +29,7 @@
       <a ngbNavLink>Expression Profile</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-expression-profile [dataset]="selectionService.selectedDatasets[0]">
-          </ch-expression-profile>
+          <ch-expression-profile [dataset]="selectionService.selectedDatasets[0]"></ch-expression-profile>
         </div>
       </ng-template>
     </li>
@@ -39,18 +38,19 @@
       <a ngbNavLink>Image</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-image-visualization [dataset]="selectionService.selectedDatasets[0]">
-          </ch-image-visualization>
+          <ch-image-visualization [dataset]="selectionService.selectedDatasets[0]"></ch-image-visualization>
         </div>
       </ng-template>
     </li>
 
     <li [ngbNavItem]="getTabId('pdf')" *ngIf="isTabVisible('pdf')">
-      <a ngbNavLink><i class="far fa-file-pdf"></i> PDF</a>
+      <a ngbNavLink>
+        <i class="far fa-file-pdf"></i>
+        PDF
+      </a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-pdf-visualization [dataset]="selectionService.selectedDatasets[0]">
-          </ch-pdf-visualization>
+          <ch-pdf-visualization [dataset]="selectionService.selectedDatasets[0]"></ch-pdf-visualization>
         </div>
       </ng-template>
     </li>
@@ -59,8 +59,7 @@
       <a ngbNavLink>HTML</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-htmlvisualization [dataset]="selectionService.selectedDatasets[0]">
-          </ch-htmlvisualization>
+          <ch-htmlvisualization [dataset]="selectionService.selectedDatasets[0]"></ch-htmlvisualization>
         </div>
       </ng-template>
     </li>
@@ -69,8 +68,7 @@
       <a ngbNavLink>Venn Diagram</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-venn-diagram [selectedDatasets]="selectionService.selectedDatasets">
-          </ch-venn-diagram>
+          <ch-venn-diagram [selectedDatasets]="selectionService.selectedDatasets"></ch-venn-diagram>
         </div>
       </ng-template>
     </li>
@@ -79,8 +77,7 @@
       <a ngbNavLink>Scatter Plot</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-scatter-plot [dataset]="selectionService.selectedDatasets[0]">
-          </ch-scatter-plot>
+          <ch-scatter-plot [dataset]="selectionService.selectedDatasets[0]"></ch-scatter-plot>
         </div>
       </ng-template>
     </li>
@@ -89,8 +86,7 @@
       <a ngbNavLink>Volcano Plot</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-volcano-plot [dataset]="selectionService.selectedDatasets[0]">
-          </ch-volcano-plot>
+          <ch-volcano-plot [dataset]="selectionService.selectedDatasets[0]"></ch-volcano-plot>
         </div>
       </ng-template>
     </li>
@@ -99,9 +95,9 @@
       <a ngbNavLink>Phenodata</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-phenodata-visualization [dataset]="selectionService.selectedDatasets[0]"
-            [datasetsMap]="sessionData.datasetsMap">
-          </ch-phenodata-visualization>
+          <ch-phenodata-visualization
+            [dataset]="selectionService.selectedDatasets[0]"
+            [datasetsMap]="sessionData.datasetsMap"></ch-phenodata-visualization>
         </div>
       </ng-template>
     </li>
@@ -110,15 +106,14 @@
       <a ngbNavLink>Details</a>
       <ng-template ngbNavContent>
         <div class="visualization-panel">
-          <ch-details-visualization [dataset]="selectionService.selectedDatasets[0]" [sessionData]="sessionData"
-            [tools]="tools">
-          </ch-details-visualization>
+          <ch-details-visualization
+            [dataset]="selectionService.selectedDatasets[0]"
+            [sessionData]="sessionData"
+            [tools]="tools"></ch-details-visualization>
         </div>
       </ng-template>
     </li>
-
   </ul>
 
   <div [ngbNavOutlet]="nav"></div>
-
 </div>

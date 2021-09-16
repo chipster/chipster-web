@@ -42,25 +42,19 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
     modalRef.componentInstance.placeHolder = "";
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openNotificationModal(title, message) {
     const modalRef = this.modalService.open(NotificationModalComponent);
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.message = message;
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   downloadFromUrlModal() {
     const modalRef = this.modalService.open(DownloadFromUrlModalComponent);
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openPreModal(title, text) {
@@ -69,9 +63,7 @@ export class DialogModalService {
     });
     modalRef.componentInstance.text = text;
     modalRef.componentInstance.title = title;
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openTempCopyModal(title, message, value, button1Text, button2Text) {
@@ -100,23 +92,16 @@ export class DialogModalService {
   openNotesModal(session): Observable<string> {
     const modalRef = this.modalService.open(NotesModalComponent);
     modalRef.componentInstance.session = session;
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openSharingModal(
-    session,
-    ruleStream$: Observable<SessionEvent>
-  ): Observable<any> {
+  openSharingModal(session, ruleStream$: Observable<SessionEvent>): Observable<any> {
     const modalRef = this.modalService.open(SharingModalComponent, {
       size: "lg",
     });
     modalRef.componentInstance.session = session;
     modalRef.componentInstance.ruleStream$ = ruleStream$;
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
   openSpinnerModal(message, observable) {
@@ -127,8 +112,6 @@ export class DialogModalService {
     });
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.observable = observable;
-    return DialogModalService.observableFromPromiseWithDismissHandling(
-      modalRef.result
-    );
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 }

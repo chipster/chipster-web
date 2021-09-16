@@ -3,7 +3,7 @@ import { Tool } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
-  name: "toolpipe"
+  name: "toolpipe",
 })
 export class ToolPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}

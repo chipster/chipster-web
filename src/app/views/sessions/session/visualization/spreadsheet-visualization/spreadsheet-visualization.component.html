@@ -1,27 +1,29 @@
 <div *ngIf="state.isReady(); else statusTemplate">
-
   <!-- preview and modal full file -->
-  <span style="font-size: smaller;" *ngIf="gotFullFile && !limitRows && rowCount > 0">Showing all
-    {{rowCount}} rows. </span>
-  <span style="font-size: smaller;" *ngIf="gotFullFile && !limitRows && rowCount === 0">No data rows.</span>
-
+  <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount > 0">
+    Showing all {{ rowCount }} rows.
+  </span>
+  <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount === 0">No data rows.</span>
 
   <!-- preview, full file, but preview limiting visible rows -->
-  <span style="font-size: smaller;" *ngIf="!modalMode && gotFullFile && limitRows">Showing the first {{rowCount}} of
-    {{rowCountBeforeLimit}} rows.</span>
+  <span style="font-size: smaller" *ngIf="!modalMode && gotFullFile && limitRows">
+    Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows.
+  </span>
 
   <!-- preview, line count maybe available in full screen-->
-  <span style="font-size: smaller;" *ngIf="!modalMode && !gotFullFile">Showing the first
-    {{rowCount}} rows.</span>
+  <span style="font-size: smaller" *ngIf="!modalMode && !gotFullFile">Showing the first {{ rowCount }} rows.</span>
 
   <!-- modal, total count not available -->
-  <span style="font-size: smaller;" *ngIf="modalMode && !gotFullFile">Showing the first
-    {{rowCount}} rows. File is too big for total row count.</span>
+  <span style="font-size: smaller" *ngIf="modalMode && !gotFullFile">
+    Showing the first {{ rowCount }} rows. File is too big for total row count.
+  </span>
 
   <!-- full screen text and link for preview-->
-  <span *ngIf="!modalMode && (!gotFullFile || limitRows)" style="font-size: smaller;"> View in <span class="btn-link"
-      (click)="showAll()">full
-      screen</span> {{goToFullScreenText}}.</span>
+  <span *ngIf="!modalMode && (!gotFullFile || limitRows)" style="font-size: smaller">
+    View in
+    <span class="btn-link" (click)="showAll()">full screen</span>
+    {{ goToFullScreenText }}.
+  </span>
   <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
 </div>
 
@@ -29,10 +31,10 @@
 
 <!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->
 <div *ngIf="!modalMode" class="horizontal-scroll" #horizontalScroll>
-  <div id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+  <div id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
 </div>
 
-<div *ngIf="modalMode" id="{{tableContainerId}}" class="spreadsheet-table-container"></div>
+<div *ngIf="modalMode" id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
 
 <ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>

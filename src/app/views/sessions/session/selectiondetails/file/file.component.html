@@ -1,7 +1,7 @@
 <h3 class="panel-title">
   <!-- single dataset selected -->
-  <div *ngIf="selectionService.selectedDatasets.length === 1;">
-    <span>File </span>
+  <div *ngIf="selectionService.selectedDatasets.length === 1">
+    <span>File</span>
     <!--
     {{dataset.name}}
 
@@ -17,16 +17,21 @@
         <a class="dropdown-item" (click)="showHistory()">History...</a>
       </div>
     </span>
-  -->
-  </div>
+  --></div>
 
   <!-- multiple datasets selected -->
   <div *ngIf="selectionService.selectedDatasets.length > 1">
-    <span class="">Files ({{selectionService.selectedDatasets.length}})</span>
+    <span class="">Files ({{ selectionService.selectedDatasets.length }})</span>
 
     <span class="dropdown">
-      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton"
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+      <button
+        class="btn btn-outline-dark dropdown-menu-button"
+        type="button"
+        id="fileDropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="Actions">
         <!--<i class="fas fa-caret-down" aria-hidden="true"></i>-->
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
@@ -35,20 +40,26 @@
         <div class="dropdown-divider"></div>
         <a class="dropdown-item" (click)="selectChildren()">Select Descendants</a>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="deleteDatasets()">Delete {{selectionService.selectedDatasets.length}}
-          files</a>
+        <a class="dropdown-item" (click)="deleteDatasets()">
+          Delete {{ selectionService.selectedDatasets.length }} files
+        </a>
       </div>
     </span>
   </div>
 </h3>
 
-
 <div class="chipster-highlight">
   <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
-    <span class="h6">{{datasetName}}</span>
+    <span class="h6">{{ datasetName }}</span>
     <span class="dropdown">
-      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton"
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
+      <button
+        class="btn btn-outline-dark dropdown-menu-button"
+        type="button"
+        id="fileDropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="Actions">
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
       <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
@@ -65,9 +76,13 @@
     </span>
   </div>
 
-  <ch-dataset-details *ngIf="selectionService.selectedDatasets.length > 1" (delete)="deleteDatasets()">
-  </ch-dataset-details>
+  <ch-dataset-details
+    *ngIf="selectionService.selectedDatasets.length > 1"
+    (delete)="deleteDatasets()"></ch-dataset-details>
 
-  <ch-visualizations *ngIf="selectionService.selectedDatasets.length > 0" (scrollFix)="doScrollFix.emit()"
-    [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
+  <ch-visualizations
+    *ngIf="selectionService.selectedDatasets.length > 0"
+    (scrollFix)="doScrollFix.emit()"
+    [sessionData]="sessionData"
+    [tools]="tools"></ch-visualizations>
 </div>

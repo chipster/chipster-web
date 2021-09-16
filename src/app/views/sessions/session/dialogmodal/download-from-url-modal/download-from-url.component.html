@@ -4,8 +4,13 @@
 <div class="modal-body">
   <div class="form-group">
     <label for="value">URL</label>
-    <input id="value" type="text" class="form-control" [(ngModel)]="value" [placeholder]="placeHolder"
-      (keydown.enter)="save($event)">
+    <input
+      id="value"
+      type="text"
+      class="form-control"
+      [(ngModel)]="value"
+      [placeholder]="placeHolder"
+      (keydown.enter)="save($event)" />
   </div>
 </div>
 <div class="modal-footer">

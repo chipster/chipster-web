@@ -7,11 +7,7 @@ import { VisualizationModalComponent } from "./visualizationmodal.component";
 export class VisualizationModalService {
   constructor(private ngbModal: NgbModal) {}
 
-  openVisualizationModal(
-    dataset: Dataset,
-    visualizationId: string,
-    sessionData?
-  ) {
+  openVisualizationModal(dataset: Dataset, visualizationId: string, sessionData?) {
     const modalRef = this.ngbModal.open(VisualizationModalComponent, {
       size: "xl",
     });

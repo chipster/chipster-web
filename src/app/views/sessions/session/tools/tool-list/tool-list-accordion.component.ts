@@ -13,7 +13,7 @@ import { ToolSelectionService } from "../../tool.selection.service";
 @Component({
   selector: "ch-tool-list-accordion",
   templateUrl: "./tool-list-accordion.component.html",
-  styleUrls: ["./tool-list-accordion.component.less"]
+  styleUrls: ["./tool-list-accordion.component.less"],
 })
 export class ToolListAccordionComponent implements OnInit {
   @Input()
@@ -44,10 +44,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   selectTool$ = new Subject();
 
-  constructor(
-    private pipeService: PipeService,
-    private toolSelectionService: ToolSelectionService
-  ) {}
+  constructor(private pipeService: PipeService, private toolSelectionService: ToolSelectionService) {}
 
   ngOnInit() {
     // TODO why copies?
@@ -80,15 +77,8 @@ export class ToolListAccordionComponent implements OnInit {
   }
 
   selectFirstVisible() {
-    const filteredModules = new ModulePipe(this.pipeService).transform(
-      this.modules,
-      this.searchTool
-    );
-    if (
-      filteredModules &&
-      !filteredModules.includes(this.selectedModule) &&
-      filteredModules[0]
-    ) {
+    const filteredModules = new ModulePipe(this.pipeService).transform(this.modules, this.searchTool);
+    if (filteredModules && !filteredModules.includes(this.selectedModule) && filteredModules[0]) {
       this.selectModule(filteredModules[0]);
     }
 
@@ -96,11 +86,7 @@ export class ToolListAccordionComponent implements OnInit {
       this.selectedModule.categories,
       this.searchTool
     );
-    if (
-      filteredCategories &&
-      filteredCategories.indexOf(this.selectedCategory) < 0 &&
-      filteredCategories[0]
-    ) {
+    if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
       this.selectCategory(filteredCategories[0]);
     }
   }
@@ -126,10 +112,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   searchEnter() {
     // select the first result
-    const visibleTools = new ToolPipe(this.pipeService).transform(
-      this.selectedCategory.tools,
-      this.searchTool
-    );
+    const visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
     if (visibleTools[0]) {
       this.searchTool = null;
       // this.selectTool(visibleTools[0].name.id);

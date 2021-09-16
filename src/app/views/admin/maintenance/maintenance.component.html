@@ -1,56 +1,43 @@
 <h4>auth</h4>
 <div class="scrollable">
-  <button class="btn btn-outline-primary" (click)="backupDb('auth')">
-    Start database backup
-  </button>
+  <button class="btn btn-outline-primary" (click)="backupDb('auth')">Start database backup</button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>job-history</h4>
-  <button class="btn btn-outline-primary" (click)="backupDb('job-history')">
-    Start database backup
-  </button>
+  <button class="btn btn-outline-primary" (click)="backupDb('job-history')">Start database backup</button>
   <p>Follow server logs to see the backup progress</p>
 
   <h4>session-db</h4>
 
   <div class="row">
     <div class="col">
-      <button class="btn btn-outline-primary" (click)="backupDb('session-db')">
-        Start database backup
-      </button>
+      <button class="btn btn-outline-primary" (click)="backupDb('session-db')">Start database backup</button>
     </div>
     <div class="col">
-      <button class="btn btn-outline-primary" (click)="sessionDbCheckOrphans()">
-        Start orphan check
-      </button>
+      <button class="btn btn-outline-primary" (click)="sessionDbCheckOrphans()">Start orphan check</button>
     </div>
     <div class="col">
-      <button class="btn btn-outline-primary" (click)="sessionDbDeleteOrphans()">
-        Start orphan deletion
-      </button>
+      <button class="btn btn-outline-primary" (click)="sessionDbDeleteOrphans()">Start orphan deletion</button>
     </div>
   </div>
   <p>Follow server logs to see the progress</p>
 
   <h4>file-broker</h4>
 
-
-  <div>
-    Copy files between file-storages. Follow file-broker logs to see the copy progress.
-  </div>
+  <div>Copy files between file-storages. Follow file-broker logs to see the copy progress.</div>
 
   <form class="mt-2">
     <div class="form-row">
-
       <div class="col">
         <label for="source">Source</label>
         <div ngbDropdown>
-          <button class="btn btn-outline-primary form-control" id="source" ngbDropdownToggle>{{ copySource ?
-            copySource :
-            "Source" }}</button>
+          <button class="btn btn-outline-primary form-control" id="source" ngbDropdownToggle>
+            {{ copySource ? copySource : "Source" }}
+          </button>
           <div ngbDropdownMenu aria-labelledby="source">
-            <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="copySource = storageId">{{ storageId
-              }}</button>
+            <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="copySource = storageId">
+              {{ storageId }}
+            </button>
           </div>
         </div>
       </div>
@@ -58,26 +45,29 @@
       <div class="col">
         <label for="target">Target</label>
         <div ngbDropdown>
-          <button class="btn btn-outline-primary form-control" id="target" ngbDropdownToggle>{{ copyTarget ?
-            copyTarget :
-            "Target"}}</button>
+          <button class="btn btn-outline-primary form-control" id="target" ngbDropdownToggle>
+            {{ copyTarget ? copyTarget : "Target" }}
+          </button>
           <div ngbDropdownMenu aria-labelledby="target">
-            <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="setCopyTarget(storageId)">{{ storageId
-              }}</button>
+            <button ngbDropdownItem *ngFor="let storageId of storageIds" (click)="setCopyTarget(storageId)">
+              {{ storageId }}
+            </button>
           </div>
         </div>
       </div>
 
       <div class="col">
-        <label for="copyMaxBytesForm" class="">Max total copy size, <b>bytes</b></label>
-        <input mdbInput type="text" name="text" [(ngModel)]="copyMaxSize" id="copyMaxBytesForm" class="form-control">
+        <label for="copyMaxBytesForm" class="">
+          Max total copy size,
+          <b>bytes</b>
+        </label>
+        <input mdbInput type="text" name="text" [(ngModel)]="copyMaxSize" id="copyMaxBytesForm" class="form-control" />
       </div>
 
       <div class="col">
         <label for="humanReadable">&nbsp;</label>
-        <div class="font-weight-bold" id="humanReadable">{{copyMaxSize | bytes}}</div>
+        <div class="font-weight-bold" id="humanReadable">{{ copyMaxSize | bytes }}</div>
       </div>
-
 
       <div class="col">
         <label for="copyButton">&nbsp;</label>
@@ -88,7 +78,6 @@
     </div>
   </form>
   <p></p>
-
 
   <h4>file-storage</h4>
 
@@ -112,41 +101,47 @@
     </thead>
     <tbody>
       <tr *ngFor="let storageId of storageIds">
-        <th scope="row">{{storageId}}</th>
-        <td>{{idOnStorage.get(storageId)}}</td>
-        <td>{{fileBrokerStorages.get(storageId)?.uri}}</td>
-        <td>{{sessionDbFileStats.get(storageId)?.fileCount}}</td>
-        <td>{{sessionDbFileStats.get(storageId)?.fileBytes | bytes}}</td>
-        <td>{{fileStorageFileStats.get(storageId)?.fileCount}}</td>
-        <td>{{fileStorageFileStats.get(storageId)?.fileBytes | bytes}}</td>
-        <td>{{total.get(storageId) | bytes}}</td>
-        <td>{{free.get(storageId) | bytes}}</td>
-        <td>{{fileStorageFileStats.get(storageId)?.status}}</td>
+        <th scope="row">{{ storageId }}</th>
+        <td>{{ idOnStorage.get(storageId) }}</td>
+        <td>{{ fileBrokerStorages.get(storageId)?.uri }}</td>
+        <td>{{ sessionDbFileStats.get(storageId)?.fileCount }}</td>
+        <td>{{ sessionDbFileStats.get(storageId)?.fileBytes | bytes }}</td>
+        <td>{{ fileStorageFileStats.get(storageId)?.fileCount }}</td>
+        <td>{{ fileStorageFileStats.get(storageId)?.fileBytes | bytes }}</td>
+        <td>{{ total.get(storageId) | bytes }}</td>
+        <td>{{ free.get(storageId) | bytes }}</td>
+        <td>{{ fileStorageFileStats.get(storageId)?.status }}</td>
         <td>
-          <button class="btn btn-outline-primary" (click)="backupStorage(storageId)">
-            Start backup
-          </button>
+          <button class="btn btn-outline-primary" (click)="backupStorage(storageId)">Start backup</button>
         </td>
         <td>
-          <button class="btn btn-outline-primary" (click)="disableBackups(storageId)"
+          <button
+            class="btn btn-outline-primary"
+            (click)="disableBackups(storageId)"
             [disabled]="!fileStorageFileStats.get(storageId)?.status">
             Disable backups
           </button>
         </td>
         <td>
-          <button class="btn btn-outline-primary" (click)="enableBackups(storageId)"
+          <button
+            class="btn btn-outline-primary"
+            (click)="enableBackups(storageId)"
             [disabled]="fileStorageFileStats.get(storageId)?.status">
             Enable backups
           </button>
         </td>
         <td>
-          <button class="btn btn-outline-primary" (click)="storageCheck(storageId)"
+          <button
+            class="btn btn-outline-primary"
+            (click)="storageCheck(storageId)"
             [disabled]="!isOrphanCheckAllowed(storageId)">
             Start storage check
           </button>
         </td>
         <td>
-          <button class="btn btn-outline-primary" (click)="deleteOldOrphanFiles(storageId)"
+          <button
+            class="btn btn-outline-primary"
+            (click)="deleteOldOrphanFiles(storageId)"
             [disabled]="!isOrphanCheckAllowed(storageId)">
             Delete old orphan files
           </button>

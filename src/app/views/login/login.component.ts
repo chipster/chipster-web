@@ -75,10 +75,7 @@ export class LoginComponent implements OnInit {
             (error) => {
               log.warn("checking token failed", error);
               this.initFailed = true;
-              this.restErrorService.showError(
-                "Initializing login page failed",
-                error
-              );
+              this.restErrorService.showError("Initializing login page failed", error);
             }
           );
         } else {
@@ -95,9 +92,7 @@ export class LoginComponent implements OnInit {
       .get(ConfigService.KEY_APP_NAME)
       .pipe(
         tap((appName) => (this.appName = appName)),
-        mergeMap(() =>
-          this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)
-        ),
+        mergeMap(() => this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)),
         tap((desc) => (this.jaasDescription = desc)),
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
@@ -112,19 +107,14 @@ export class LoginComponent implements OnInit {
         })
       )
       .subscribe(null, (error) => {
-        this.restErrorService.showError(
-          error,
-          "Initializing login page failed"
-        );
+        this.restErrorService.showError(error, "Initializing login page failed");
         log.warn("get configuration failed", error);
         this.initFailed = true;
       });
   }
 
   private getReturnUrl$() {
-    return this.route.queryParams.pipe(
-      map((params) => params["returnUrl"] || "/sessions")
-    );
+    return this.route.queryParams.pipe(map((params) => params["returnUrl"] || "/sessions"));
   }
 
   private redirect() {
@@ -133,22 +123,20 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
-    this.authenticationService
-      .login(this.myForm.value.username, this.myForm.value.password)
-      .subscribe(
-        () => {
-          // Route to Session creation page
-          this.redirect();
-        },
-        (errorResponse: HttpErrorResponse) => {
-          if (RestErrorService.isForbidden(errorResponse)) {
-            this.error = "Incorrect username or password";
-          } else {
-            this.error = "Connecting to authentication service failed";
-            log.error(errorResponse);
-          }
+    this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(
+      () => {
+        // Route to Session creation page
+        this.redirect();
+      },
+      (errorResponse: HttpErrorResponse) => {
+        if (RestErrorService.isForbidden(errorResponse)) {
+          this.error = "Incorrect username or password";
+        } else {
+          this.error = "Connecting to authentication service failed";
+          log.error(errorResponse);
         }
-      );
+      }
+    );
   }
 
   // Hack for the Enter key press for the button type='button'

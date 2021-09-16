@@ -26,11 +26,7 @@ export class SelectionService implements OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => (this.selectedDatasets = datasets),
-        (error: any) =>
-          this.errorService.showError(
-            "Error fetching datasets from store",
-            error
-          )
+        (error: any) => this.errorService.showError("Error fetching datasets from store", error)
       );
 
     // Sync selected jobs from store
@@ -42,11 +38,7 @@ export class SelectionService implements OnDestroy {
         (jobs: Array<Job>) => {
           this.selectedJobs = jobs;
         },
-        err =>
-          this.errorService.showError(
-            "Error fetching selected jobs from store",
-            err
-          )
+        (err) => this.errorService.showError("Error fetching selected jobs from store", err)
       );
   }
 
@@ -65,10 +57,7 @@ export class SelectionService implements OnDestroy {
    * @description: search by id if given dataset is currently selected
    */
   isSelectedDatasetById(datasetId: string): boolean {
-    return _.some(
-      this.selectedDatasets,
-      (dataset: Dataset) => dataset.datasetId === datasetId
-    );
+    return _.some(this.selectedDatasets, (dataset: Dataset) => dataset.datasetId === datasetId);
   }
 
   isSelectedJobById(jobId: string): boolean {

@@ -5,13 +5,10 @@ import { TokenService } from "../../../core/authentication/token.service";
 @Component({
   selector: "ch-account",
   templateUrl: "./account.component.html",
-  styleUrls: ["./account.component.less"]
+  styleUrls: ["./account.component.less"],
 })
 export class AccountComponent {
-  constructor(
-    private tokenService: TokenService,
-    private activeModal: NgbActiveModal
-  ) {}
+  constructor(private tokenService: TokenService, private activeModal: NgbActiveModal) {}
 
   getAccountName(): string {
     return this.tokenService.getAccountName();

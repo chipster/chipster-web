@@ -25,9 +25,7 @@ export class JobService {
   ) {}
 
   static isRunning(job: Job): boolean {
-    return (
-      job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING"
-    );
+    return job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING";
   }
 
   static getDuration(job: Job): Observable<string> {
@@ -42,10 +40,7 @@ export class JobService {
       if (job.endTime == null) {
         return of(null);
       }
-      const duration = UtilsService.millisecondsBetweenDates(
-        startDate,
-        endDate
-      );
+      const duration = UtilsService.millisecondsBetweenDates(startDate, endDate);
       return of(UtilsService.millisecondsToHumanFriendly(duration));
     } else {
       return interval(1000).pipe(
@@ -64,11 +59,7 @@ export class JobService {
   }
 
   static isSuccessful(job: Job): boolean {
-    return !(
-      job.state === "FAILED" ||
-      job.state === "FAILED_USER_ERROR" ||
-      job.state === "ERROR"
-    );
+    return !(job.state === "FAILED" || job.state === "FAILED_USER_ERROR" || job.state === "ERROR");
   }
 
   runForEach(validatedTool: ValidatedTool, sessionData: SessionData) {
@@ -79,13 +70,8 @@ export class JobService {
     }
 
     // for each file, create new ValidatedTool
-    const reboundValidatedTools = validatedTool.selectedDatasets.map(
-      (dataset) =>
-        this.toolSelectionService.rebindWithNewDatasetsAndValidate(
-          [dataset],
-          validatedTool,
-          sessionData
-        )
+    const reboundValidatedTools = validatedTool.selectedDatasets.map((dataset) =>
+      this.toolSelectionService.rebindWithNewDatasetsAndValidate([dataset], validatedTool, sessionData)
     );
 
     // // debug print
@@ -103,26 +89,20 @@ export class JobService {
 
     // TODO check that all validatedTools are valid
     const invalidValidatedToolsForSamples = reboundValidatedTools.filter(
-      (sampleValidatedTool) =>
-        sampleValidatedTool.singleJobValidation.valid === false
+      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details
       const message = "";
 
-      this.dialogModalService.openNotificationModal(
-        "Run for each sample not possible",
-        message
-      );
+      this.dialogModalService.openNotificationModal("Run for each sample not possible", message);
       return;
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = reboundValidatedTools.map(
-      (sampleValidatedTool: ValidatedTool) => {
-        return this.createJob(sampleValidatedTool);
-      }
-    );
+    const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) => {
+      return this.createJob(sampleValidatedTool);
+    });
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -135,41 +115,32 @@ export class JobService {
   runForEachSample(validatedTool: ValidatedTool, sessionData) {
     // sanity check
     if (!validatedTool.runForEachSampleValidation.valid) {
-      log.warn(
-        "requesting run for each sample , but run for each validation not ok"
-      );
+      log.warn("requesting run for each sample , but run for each validation not ok");
       return;
     }
 
-    const validatedToolsForSamples =
-      this.toolSelectionService.getValidatedToolForEachSample(
-        validatedTool,
-        validatedTool.sampleGroups,
-        sessionData
-      );
+    const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
+      validatedTool,
+      validatedTool.sampleGroups,
+      sessionData
+    );
 
     // check that all rebound validatedTools are valid
     const invalidValidatedToolsForSamples = validatedToolsForSamples.filter(
-      (sampleValidatedTool) =>
-        sampleValidatedTool.singleJobValidation.valid === false
+      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details
       const message = "";
 
-      this.dialogModalService.openNotificationModal(
-        "Run for each sample not possible",
-        message
-      );
+      this.dialogModalService.openNotificationModal("Run for each sample not possible", message);
       return;
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = validatedToolsForSamples.map(
-      (sampleValidatedTool: ValidatedTool) => {
-        return this.createJob(sampleValidatedTool);
-      }
-    );
+    const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) => {
+      return this.createJob(sampleValidatedTool);
+    });
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -218,8 +189,7 @@ export class JobService {
         if (
           toolParam.defaultValue &&
           toolParam.defaultValue.toLowerCase() === "empty" &&
-          (this.toolService.isColumnSelectionParameter(toolParam) ||
-            this.toolService.isStringParameter(toolParam))
+          (this.toolService.isColumnSelectionParameter(toolParam) || this.toolService.isStringParameter(toolParam))
         ) {
           value = toolParam.defaultValue;
         } else {
@@ -240,9 +210,7 @@ export class JobService {
     job.inputs = [];
 
     // add bound inputs
-    for (const inputBinding of validatedTool.inputBindings.filter(
-      (binding) => binding.datasets.length > 0
-    )) {
+    for (const inputBinding of validatedTool.inputBindings.filter((binding) => binding.datasets.length > 0)) {
       // single input
       if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
         job.inputs.push({
@@ -256,10 +224,7 @@ export class JobService {
         let i = 0;
         for (const dataset of inputBinding.datasets) {
           job.inputs.push({
-            inputId: this.toolService.getMultiInputId(
-              inputBinding.toolInput,
-              i
-            ),
+            inputId: this.toolService.getMultiInputId(inputBinding.toolInput, i),
             description: inputBinding.toolInput.description,
             datasetId: dataset.datasetId,
             displayName: dataset.name,

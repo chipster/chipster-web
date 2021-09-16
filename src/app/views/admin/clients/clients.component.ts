@@ -11,7 +11,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   selector: "ch-clients",
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class ClientsComponent implements OnInit {
   users: any[];
@@ -27,10 +27,8 @@ export class ClientsComponent implements OnInit {
     this.configService
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(
-        flatMap(service => {
-          return this.auhtHttpClient.getAuth(
-            service.adminUri + "/admin/topics"
-          );
+        flatMap((service) => {
+          return this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics");
         })
       )
       .subscribe(
@@ -38,13 +36,11 @@ export class ClientsComponent implements OnInit {
           this.users = [];
 
           // filter out server topics and get values as an array
-          const sessionIds = Object.keys(topics).filter(
-            topicName => topicName !== "jobs" && topicName !== "files"
-          );
-          const sessionTopics = sessionIds.map(id => topics[id]);
+          const sessionIds = Object.keys(topics).filter((topicName) => topicName !== "jobs" && topicName !== "files");
+          const sessionTopics = sessionIds.map((id) => topics[id]);
 
-          sessionTopics.forEach(topic => {
-            topic.forEach(user => {
+          sessionTopics.forEach((topic) => {
+            topic.forEach((user) => {
               const userCopy = _.clone(user);
               // clean up the user ip address
               let ip = userCopy.address;
@@ -61,7 +57,7 @@ export class ClientsComponent implements OnInit {
             });
           });
         },
-        err => this.restErrorService.showError("get clients failed", err)
+        (err) => this.restErrorService.showError("get clients failed", err)
       );
   }
 }

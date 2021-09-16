@@ -12,10 +12,7 @@ export class ToolsService {
   private modulesCache$: Observable<Module[]>;
   private modulesMapCache$: Observable<Map<string, Module>>;
 
-  constructor(
-    private toolResource: ToolResource,
-    private configService: ConfigService
-  ) {}
+  constructor(private toolResource: ToolResource, private configService: ConfigService) {}
 
   getTools(): Observable<Tool[]> {
     if (!this.toolsCache$) {
@@ -30,22 +27,17 @@ export class ToolsService {
         this.configService.getModules(), // names of the enabled modules
         this.toolResource.getModules() // all modules from the server
       ).pipe(
-        map(results => {
+        map((results) => {
           const enabledModules: string[] = results[0];
           const allModules: Module[] = results[1];
           return allModules
-            .filter(
-              (module: Module) => enabledModules.includes(module.name)
-            )
+            .filter((module: Module) => enabledModules.includes(module.name))
             .map((module: Module) => {
               // set moduleId
               module.moduleId = module.name.toLowerCase();
 
               // create categoriesMap
-              module.categoriesMap = UtilsService.arrayToMap(
-                module.categories,
-                "name"
-              );
+              module.categoriesMap = UtilsService.arrayToMap(module.categories, "name");
 
               return module;
             });

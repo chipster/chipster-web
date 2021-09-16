@@ -5,8 +5,9 @@
 <div *ngIf="state === ComponentState.NOT_FOUND" class="container-fluid">
   <h3 class="h3-xs">Session not found</h3>
   <p>
-    Go to <a [routerLink]="routeService.getRouterLinkSessions()">Sessions</a> to
-    open an existing session or to create a new one.
+    Go to
+    <a [routerLink]="routeService.getRouterLinkSessions()">Sessions</a>
+    to open an existing session or to create a new one.
   </p>
 </div>
 
@@ -15,8 +16,10 @@
     <!-- split 1 -->
     <as-split-area [size]="split1Size" class="d-flex flex-column">
       <!-- workflow and files -->
-      <ch-session-panel [sessionData]="sessionData" [modulesMap]="modulesMap" class="d-flex flex-column flex-grow-1">
-      </ch-session-panel>
+      <ch-session-panel
+        [sessionData]="sessionData"
+        [modulesMap]="modulesMap"
+        class="d-flex flex-column flex-grow-1"></ch-session-panel>
     </as-split-area>
 
     <!-- split 2-->
@@ -24,7 +27,10 @@
       <div *ngIf="!split3Visible; else selectionPanel">
         <div class="row">
           <div class="col">
-            <ch-tools [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules"
+            <ch-tools
+              [sessionData]="sessionData"
+              [toolsArray]="tools"
+              [modulesArray]="modules"
               [modulesMap]="modulesMap"></ch-tools>
           </div>
         </div>
@@ -33,20 +39,24 @@
           <div class="col">
             <!-- TODO refactor logic choosing whether to show job or file or session info -->
 
-            <ch-job *ngIf="selectionService.selectedJobs.length > 0" [sessionData]="sessionData" [tools]="tools">
-            </ch-job>
+            <ch-job
+              *ngIf="selectionService.selectedJobs.length > 0"
+              [sessionData]="sessionData"
+              [tools]="tools"></ch-job>
 
-            <ch-session-details *ngIf="
-                selectionService.selectedDatasets.length < 1 &&
-                !(selectionService.selectedJobs.length > 0)
-              " [session]="sessionData.session" [sessionData]="sessionData" (deleteSession)="onDeleteSession()">
-            </ch-session-details>
+            <ch-session-details
+              *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)"
+              [session]="sessionData.session"
+              [sessionData]="sessionData"
+              (deleteSession)="onDeleteSession()"></ch-session-details>
 
-            <ch-file *ngIf="
-                selectionService.selectedDatasets.length > 0 &&
-                !(selectionService.selectedJobs.length > 0)
-              " [dataset]="selectionService.selectedDatasets[0]" [jobs]="sessionData.jobsMap"
-              [sessionData]="sessionData" [tools]="tools" (doScrollFix)="doScrollFix()"></ch-file>
+            <ch-file
+              *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)"
+              [dataset]="selectionService.selectedDatasets[0]"
+              [jobs]="sessionData.jobsMap"
+              [sessionData]="sessionData"
+              [tools]="tools"
+              (doScrollFix)="doScrollFix()"></ch-file>
           </div>
         </div>
       </div>
@@ -60,8 +70,10 @@
     <as-split-area *ngIf="split3Visible" [size]="split3Size" class="split-3 scrollable">
       <div class="row">
         <div class="col">
-          <ch-tool-list-accordion [sessionData]="sessionData" [toolsArray]="tools" [modulesArray]="modules">
-          </ch-tool-list-accordion>
+          <ch-tool-list-accordion
+            [sessionData]="sessionData"
+            [toolsArray]="tools"
+            [modulesArray]="modules"></ch-tool-list-accordion>
         </div>
       </div>
     </as-split-area>

@@ -4,14 +4,10 @@ import { Store } from "@ngrx/store";
 import {
   TOGGLE_SELECTED_DATASET,
   CLEAR_DATASET_SELECTIONS,
-  SET_SELECTED_DATASETS
+  SET_SELECTED_DATASETS,
 } from "../../../state/selectedDatasets.reducer";
 import { Job } from "chipster-js-common";
-import {
-  TOGGLE_SELECTED_JOB,
-  CLEAR_JOB_SELECTIONS,
-  SET_SELECTED_JOBS
-} from "../../../state/selectedJobs.reducer";
+import { TOGGLE_SELECTED_JOB, CLEAR_JOB_SELECTIONS, SET_SELECTED_JOBS } from "../../../state/selectedJobs.reducer";
 import { CLEAR_SELECTED_TOOL } from "../../../state/tool.reducer";
 
 /*

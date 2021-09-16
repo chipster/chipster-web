@@ -19,10 +19,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
-  ) {}
+  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

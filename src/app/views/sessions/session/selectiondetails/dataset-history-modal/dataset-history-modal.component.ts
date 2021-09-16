@@ -22,7 +22,7 @@ interface HistoryOption {
 @Component({
   selector: "ch-dataset-history-modal",
   templateUrl: "./dataset-history-modal.component.html",
-  styleUrls: ["./dataset-history-modal.component.less"]
+  styleUrls: ["./dataset-history-modal.component.less"],
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;
@@ -35,23 +35,18 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     { id: "resultFileName", name: "Result file", enabled: true },
     { id: "date", name: "Date", enabled: true },
     { id: "stepTitle", name: "Step title", enabled: true },
-    { id: "sourceCode", name: "Source code", enabled: false }
+    { id: "sourceCode", name: "Source code", enabled: false },
   ];
 
   public historyOptionsMap: Map<string, HistoryOption>;
 
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    public querySessionDataService: QuerySessionDataService
-  ) {}
+  constructor(public activeModal: NgbActiveModal, public querySessionDataService: QuerySessionDataService) {}
 
   ngOnInit(): void {
     this.historyOptionsMap = new Map();
-    this.historyOptions.forEach(option =>
-      this.historyOptionsMap.set(option.id, option)
-    );
+    this.historyOptions.forEach((option) => this.historyOptionsMap.set(option.id, option));
     this.datasetHistorySteps = this.getHistoryData();
   }
 
@@ -65,31 +60,19 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
   private getHistoryData(): Array<DatasetHistoryStep> {
     const historySteps: Array<DatasetHistoryStep> = [this.dataset]
-      .concat(
-        this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(
-          this.sessionData,
-          this.dataset
-        )
-      )
-      .map(dataset => {
+      .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData, this.dataset))
+      .map((dataset) => {
         const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
 
         return {
           datasetName: dataset.name,
           date: sourceJob != null ? sourceJob.created : dataset.created,
-          sourceJobName:
-            sourceJob != null
-              ? sourceJob.toolCategory + " / " + sourceJob.toolName
-              : "not available",
+          sourceJobName: sourceJob != null ? sourceJob.toolCategory + " / " + sourceJob.toolName : "not available",
           sourceJob: sourceJob,
           parameterList: sourceJob != null ? sourceJob.parameters : [],
           inputFileNamesString:
-            sourceJob != null
-              ? sourceJob.inputs
-                  .map((jobInput: JobInput) => jobInput.displayName)
-                  .join(" ")
-              : "",
-          sourceCode: sourceJob != null ? sourceJob.sourceCode : null
+            sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",
+          sourceCode: sourceJob != null ? sourceJob.sourceCode : null,
         };
       });
 

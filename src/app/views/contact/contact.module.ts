@@ -10,6 +10,6 @@ import { ContactComponent } from "./contact.component";
 @NgModule({
   imports: [CommonModule, SharedModule, ManualModule, ReactiveFormsModule],
   declarations: [ContactComponent, ContactSupportModalComponent],
-  providers: [ContactSupportService]
+  providers: [ContactSupportService],
 })
 export class ContactModule {}

@@ -1,19 +1,11 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  ViewChild
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from "@angular/core";
 import log from "loglevel";
 import { ColumnItem } from "./wrangle-modal.component";
 
 @Component({
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
-  styleUrls: ["./multi-dropdown.component.less"]
+  styleUrls: ["./multi-dropdown.component.less"],
 })
 /**
  * Two things make things a little bit complicated here:
@@ -48,23 +40,17 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.indexToColumnItemMap.clear();
-    this.items.forEach(item => this.indexToColumnItemMap.set(item.index, item));
+    this.items.forEach((item) => this.indexToColumnItemMap.set(item.index, item));
 
     // make sure currently selected are included in the options, if not, unselect
     // shouldn't happen, but just in case
     // see selectedItem declaration
-    const selectedIndexesAsArray = []
-      .concat(this.selectedIndexes)
-      .filter(index => index != null);
-    const includedIndexes = selectedIndexesAsArray.filter(index =>
+    const selectedIndexesAsArray = [].concat(this.selectedIndexes).filter((index) => index != null);
+    const includedIndexes = selectedIndexesAsArray.filter((index) =>
       this.items.includes(this.indexToColumnItemMap.get(index))
     );
     if (selectedIndexesAsArray.length !== includedIndexes.length) {
-      log.warn(
-        "selected column not included in options after options change",
-        selectedIndexesAsArray,
-        includedIndexes
-      );
+      log.warn("selected column not included in options after options change", selectedIndexesAsArray, includedIndexes);
       this.selectedIndexes = includedIndexes;
       this.emit(this.selectedIndexes);
     }
@@ -74,11 +60,8 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
     if (!this.multiple) {
       return;
     }
-    this.filteredIndexes = event.items.map(item => item.index);
-    this.selectAllButtonText =
-      event.term.length > 0
-        ? this.selectAllFilteredString
-        : this.selectAllString;
+    this.filteredIndexes = event.items.map((item) => item.index);
+    this.selectAllButtonText = event.term.length > 0 ? this.selectAllFilteredString : this.selectAllString;
   }
 
   onKeyDownEnter(event): void {
@@ -93,7 +76,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   onSelectionChange(): void {
     // selectedIndexes may be array, value or null, always emit array without null
     // see selectedIndexes declaration
-    this.emit([].concat(this.selectedIndexes).filter(index => index != null));
+    this.emit([].concat(this.selectedIndexes).filter((index) => index != null));
   }
 
   onOpen(): void {
@@ -101,7 +84,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
       return;
     }
     this.selectAllButtonText = this.selectAllString;
-    this.filteredIndexes = this.items.map(item => item.index);
+    this.filteredIndexes = this.items.map((item) => item.index);
   }
 
   onSelectAll(): void {
@@ -117,16 +100,12 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   private emit(selected: number[]): void {
-    this.selectionChanged.emit(
-      selected.map(index => this.indexToColumnItemMap.get(index))
-    );
+    this.selectionChanged.emit(selected.map((index) => this.indexToColumnItemMap.get(index)));
   }
 
   private addFilteredToSelectedIndexes(): void {
     this.selectedIndexes = this.selectedIndexes.concat(
-      this.filteredIndexes.filter(
-        index => !this.selectedIndexes.includes(index)
-      )
+      this.filteredIndexes.filter((index) => !this.selectedIndexes.includes(index))
     );
     this.emit(this.selectedIndexes);
   }

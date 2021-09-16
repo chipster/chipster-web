@@ -4,6 +4,6 @@ import { HttpQueueService } from "./http-queue/http-queue.service";
 
 @NgModule({
   imports: [CommonModule],
-  providers: [HttpQueueService]
+  providers: [HttpQueueService],
 })
 export class RestServicesModule {}

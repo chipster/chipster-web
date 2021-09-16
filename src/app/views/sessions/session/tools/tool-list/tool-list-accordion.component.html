@@ -4,18 +4,25 @@
   <div class="row">
     <div class="col">
       <div class="btn-group">
-        <button type="button" class="btn btn-sm" (click)="selectModule(module)"
-          *ngFor="let module of modules | modulepipe:searchTool" [ngClass]="{'btn-primary':module === selectedModule,
-        'btn-light':module !== selectedModule}">{{module.name}}
+        <button
+          type="button"
+          class="btn btn-sm"
+          (click)="selectModule(module)"
+          *ngFor="let module of modules | modulepipe: searchTool"
+          [ngClass]="{ 'btn-primary': module === selectedModule, 'btn-light': module !== selectedModule }">
+          {{ module.name }}
         </button>
       </div>
-
     </div>
 
-
     <div class="col">
-      <ch-search-box #searchBox placeholder="Find tool" focusHotkey="t" focusHotkeyDescription="Find tool"
-        (valueChange)="search($event)" (enterKey)="searchEnter()"></ch-search-box>
+      <ch-search-box
+        #searchBox
+        placeholder="Find tool"
+        focusHotkey="t"
+        focusHotkeyDescription="Find tool"
+        (valueChange)="search($event)"
+        (enterKey)="searchEnter()"></ch-search-box>
     </div>
   </div>
 
@@ -24,18 +31,19 @@
     <div class="col">
       <h5>Tool</h5>
     </div>
-  -->
-  </div>
+  --></div>
 
   <div class="row tool-list-row">
     <div class="col">
       <ch-scroller>
         <div class="tool-list list-group-sm" id="category-tool-list">
           <div *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
-            <button type="button" class="list-group-item list-group-item-action tool-list-item"
-              [ngClass]="{active: category===selectedCategory}" (click)="selectCategory(category)">
-              <ch-tool-list-item [color]="category.color" [categoryname]="category.name">
-              </ch-tool-list-item>
+            <button
+              type="button"
+              class="list-group-item list-group-item-action tool-list-item"
+              [ngClass]="{ active: category === selectedCategory }"
+              (click)="selectCategory(category)">
+              <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
             </button>
 
             <ch-scroller>
@@ -52,7 +60,6 @@
               </div> -->
             </ch-scroller>
           </div>
-
         </div>
       </ch-scroller>
     </div>
@@ -70,6 +77,5 @@
         </div>
       </ch-scroller>
     </div>
-  -->
-  </div>
+  --></div>
 </div>

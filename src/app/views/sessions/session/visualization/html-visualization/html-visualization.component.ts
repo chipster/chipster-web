@@ -22,10 +22,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   public wrapperUrl = "assets/htmlvisualizationwrapper.html";
   private linkSrc: string;
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
-  ) {}
+  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -64,9 +61,7 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   run(htmlframe) {
     timeout(() => {
       if (!htmlframe.contentWindow || !htmlframe.contentWindow.document.body) {
-        console.log(
-          "will not set the frame height because it was removed already"
-        );
+        console.log("will not set the frame height because it was removed already");
         return;
       }
       const height = htmlframe.contentWindow.document.body.style.height;

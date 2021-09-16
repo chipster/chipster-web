@@ -5,18 +5,16 @@
 
 <div class="modal-body">
   <h5>Details</h5>
-  <pre style="white-space: pre-wrap;">{{ job.stateDetail }}</pre>
+  <pre style="white-space: pre-wrap">{{ job.stateDetail }}</pre>
 
   <button class="btn btn-sm btn-secondary mr-2" style="width: 11em" (click)="toggleScreenOutput()">
-    {{screenOutputButtonText}}
+    {{ screenOutputButtonText }}
   </button>
 
-  <button class="btn btn-sm btn-secondary" (click)="contactSupport()">
-    Contact support
-  </button>
+  <button class="btn btn-sm btn-secondary" (click)="contactSupport()">Contact support</button>
 
   <div *ngIf="screenOutputVisible" class="mt-3">
     <h5>Screen output</h5>
-    <pre style="white-space: pre-wrap;">{{ job.screenOutput }}</pre>
+    <pre style="white-space: pre-wrap">{{ job.screenOutput }}</pre>
   </div>
 </div>

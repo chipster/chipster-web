@@ -23,17 +23,8 @@ export class HistoryComponent implements OnInit {
   readonly attributeUserName = "createdBy";
 
   jobs: Array<JobHistory> = [];
-  jobFilterAttributeSet: Array<string> = [
-    this.attributeUserName,
-    "toolId",
-    "state",
-    "comp",
-    "module",
-  ];
-  jobFilterComparisonSet: Array<string> = [
-    this.comparisonIs,
-    this.comparisonIsNot,
-  ];
+  jobFilterAttributeSet: Array<string> = [this.attributeUserName, "toolId", "state", "comp", "module"];
+  jobFilterComparisonSet: Array<string> = [this.comparisonIs, this.comparisonIsNot];
 
   stringFiltersForm: FormGroup;
   startDateTimeFilterForm: FormGroup;
@@ -62,12 +53,8 @@ export class HistoryComponent implements OnInit {
       items: this.stringFiltersFormArray,
     });
 
-    this.startDateTimeFilterForm = this.formBuilder.group(
-      this.getEmptyTimeFilter()
-    );
-    this.endDateTimeFilterForm = this.formBuilder.group(
-      this.getEmptyTimeFilter()
-    );
+    this.startDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
+    this.endDateTimeFilterForm = this.formBuilder.group(this.getEmptyTimeFilter());
 
     this.resetForm();
 
@@ -85,12 +72,7 @@ export class HistoryComponent implements OnInit {
 
     for (let i = 0; i < this.stringFiltersFormArray.length; i++) {
       let filter = this.stringFiltersFormArray.value[i];
-      params = this.appendStringParam(
-        params,
-        filter.selectedAttribute,
-        filter.value,
-        filter.selectedComparison
-      );
+      params = this.appendStringParam(params, filter.selectedAttribute, filter.value, filter.selectedComparison);
     }
 
     const startDateControl = this.startDateTimeFilterForm.get("dateInput");
@@ -98,24 +80,14 @@ export class HistoryComponent implements OnInit {
 
     const startDate = this.ngbDateStructToString(startDateControl.value);
 
-    params = this.appendDateTimeParam(
-      params,
-      startDate,
-      startTimeControl.value,
-      ">"
-    );
+    params = this.appendDateTimeParam(params, startDate, startTimeControl.value, ">");
 
     const endDateControl = this.endDateTimeFilterForm.get("dateInput");
     const endTimeControl = this.endDateTimeFilterForm.get("timeInput");
 
     const endDate = this.ngbDateStructToString(endDateControl.value);
 
-    params = this.appendDateTimeParam(
-      params,
-      endDate,
-      endTimeControl.value,
-      "<"
-    );
+    params = this.appendDateTimeParam(params, endDate, endTimeControl.value, "<");
 
     return params;
   }
@@ -137,12 +109,7 @@ export class HistoryComponent implements OnInit {
   }
 
   appendStringParam(params, attribute, value, comparison) {
-    if (
-      attribute != null &&
-      attribute.length > 0 &&
-      value != null &&
-      value.length > 0
-    ) {
+    if (attribute != null && attribute.length > 0 && value != null && value.length > 0) {
       if (comparison === this.comparisonIsNot) {
         value = "!" + value;
       }
@@ -171,10 +138,7 @@ export class HistoryComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap((service) => {
-          return this.auhtHttpClient.getAuthWithParams(
-            service.adminUri + "/admin/jobhistory/rowcount",
-            filterParams
-          );
+          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams);
         })
       )
       .subscribe(
@@ -183,8 +147,7 @@ export class HistoryComponent implements OnInit {
           this.collectionSize = Math.ceil(recordNumber / 500) * 10;
           this.updateJobs(filterParams);
         },
-        (err) =>
-          this.errorHandlerService.showError("get job numbers failed", err)
+        (err) => this.errorHandlerService.showError("get job numbers failed", err)
       );
   }
 
@@ -196,10 +159,7 @@ export class HistoryComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap((service) => {
-          return this.auhtHttpClient.getAuthWithParams(
-            service.adminUri + "/admin/jobhistory",
-            filterParams
-          );
+          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams);
         })
       )
       .subscribe(
@@ -258,12 +218,8 @@ export class HistoryComponent implements OnInit {
       this.stringFiltersFormArray.removeAt(i);
     }
 
-    this.stringFiltersFormArray.push(
-      this.formBuilder.group(this.getDefaultStringFilter())
-    );
-    this.stringFiltersFormArray.push(
-      this.formBuilder.group(this.getEmptyStringFilter())
-    );
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getDefaultStringFilter()));
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
 
     this.startDateTimeFilterForm.reset(this.getEmptyTimeFilter());
     this.endDateTimeFilterForm.reset(this.getEmptyTimeFilter());
@@ -298,9 +254,7 @@ export class HistoryComponent implements OnInit {
   }
 
   addItem(): void {
-    this.stringFiltersFormArray.push(
-      this.formBuilder.group(this.getEmptyStringFilter())
-    );
+    this.stringFiltersFormArray.push(this.formBuilder.group(this.getEmptyStringFilter()));
   }
 
   toShortDateTime(isoDateString) {

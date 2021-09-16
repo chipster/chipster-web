@@ -12,10 +12,7 @@ import { SessionData } from "../../../../model/session/session-data";
 import TSV2File from "../../../../model/tsv/TSV2File";
 import { FileResource } from "../../../../shared/resources/fileresource";
 import { TsvService } from "../../../../shared/services/tsv.service";
-import {
-  Tags,
-  TypeTagService,
-} from "../../../../shared/services/typetag.service";
+import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
 
@@ -99,11 +96,7 @@ export class WrangleModalComponent implements OnInit {
 
     // get file contents
     this.fileResource
-      .getData(
-        this.sessionDataService.getSessionId(),
-        this.dataset,
-        this.dataset.size
-      )
+      .getData(this.sessionDataService.getSessionId(), this.dataset, this.dataset.size)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (result: any) => {
@@ -119,22 +112,12 @@ export class WrangleModalComponent implements OnInit {
           let parsedTSV = d3.tsvParseRows(result);
 
           // filter out comment lines, e.g. lines starting with ## in a VCF file
-          const skipLinesPrefix = this.typeTagService.get(
-            this.sessionData,
-            this.dataset,
-            Tags.SKIP_LINES
-          );
+          const skipLinesPrefix = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
           if (skipLinesPrefix) {
-            parsedTSV = parsedTSV.filter(
-              (row) => !row[0].startsWith(skipLinesPrefix)
-            );
+            parsedTSV = parsedTSV.filter((row) => !row[0].startsWith(skipLinesPrefix));
           }
 
-          this.tsv2File = this.tsvService.getTSV2FileFromArray(
-            this.dataset,
-            this.sessionData,
-            parsedTSV
-          );
+          this.tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset, this.sessionData, parsedTSV);
 
           const headers = this.tsv2File.getHeadersForSpreadSheet();
 
@@ -177,29 +160,17 @@ export class WrangleModalComponent implements OnInit {
   }
 
   getCellClass(params): string {
-    if (
-      this.selectedIdentifiers.some(
-        (columnItem: ColumnItem) =>
-          parseInt(params.colDef.field) === columnItem.index
-      )
-    ) {
+    if (this.selectedIdentifiers.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)) {
       return "identifier";
     } else if (
-      this.selectedSamples.some(
-        (columnItem: ColumnItem) =>
-          parseInt(params.colDef.field) === columnItem.index
-      )
+      this.selectedSamples.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)
     ) {
       return "sample";
     } else {
       const columnInOthers = this.selectedOthers.some(
-        (columnItem: ColumnItem) =>
-          parseInt(params.colDef.field) === columnItem.index
+        (columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index
       );
-      if (
-        (this.includeOthers() && columnInOthers) ||
-        (!this.includeOthers() && !columnInOthers)
-      ) {
+      if ((this.includeOthers() && columnInOthers) || (!this.includeOthers() && !columnInOthers)) {
         return "include";
       } else {
         return "exclude";
@@ -212,9 +183,7 @@ export class WrangleModalComponent implements OnInit {
   }
 
   public getSampleColumnNames(): Array<string> {
-    return this.selectedSamples.map(
-      (columnItem: ColumnItem) => columnItem.name
-    );
+    return this.selectedSamples.map((columnItem: ColumnItem) => columnItem.name);
   }
 
   public getSampleColumnNamesString(): string {
@@ -227,13 +196,11 @@ export class WrangleModalComponent implements OnInit {
     this.checkIdentifiersUnique(this.selectedIdentifiers);
 
     this.sampleItems = this.allItems.filter(
-      (item) =>
-        !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
     );
 
     this.otherItems = this.allItems.filter(
-      (item) =>
-        !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
     this.onSelectionChange();
   }
@@ -245,8 +212,7 @@ export class WrangleModalComponent implements OnInit {
     );
 
     this.otherItems = this.allItems.filter(
-      (item) =>
-        !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
     );
 
     this.onSelectionChange();
@@ -259,8 +225,7 @@ export class WrangleModalComponent implements OnInit {
     );
 
     this.sampleItems = this.allItems.filter(
-      (item) =>
-        !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
     );
 
     this.onSelectionChange();
@@ -277,10 +242,7 @@ export class WrangleModalComponent implements OnInit {
     const othersToInclude = this.includeOthers()
       ? this.selectedOthers
       : this.otherItems.filter((item) => !this.selectedOthers.includes(item));
-    const allIncluded = this.selectedIdentifiers.concat(
-      this.selectedSamples,
-      othersToInclude
-    );
+    const allIncluded = this.selectedIdentifiers.concat(this.selectedSamples, othersToInclude);
 
     const names = new Set<string>();
     allIncluded
@@ -340,8 +302,7 @@ export class WrangleModalComponent implements OnInit {
           log.info("Creating converted dataset");
 
           const newFileName =
-            this.dataset.name.endsWith(".txt") ||
-            this.dataset.name.endsWith(".tsv")
+            this.dataset.name.endsWith(".txt") || this.dataset.name.endsWith(".tsv")
               ? this.dataset.name.slice(0, -4) + "-converted.tsv"
               : this.dataset.name + "-converted.tsv";
 
@@ -368,9 +329,7 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private getColumnIndexes(columnItems: ColumnItem[]): number[] {
-    return columnItems
-      .map((columnItem: ColumnItem) => columnItem.index)
-      .sort((a, b) => a - b); // sort them just in case selection order or something messes the order;
+    return columnItems.map((columnItem: ColumnItem) => columnItem.index).sort((a, b) => a - b); // sort them just in case selection order or something messes the order;
   }
 
   private getWrangledFileString(): string {
@@ -387,9 +346,7 @@ export class WrangleModalComponent implements OnInit {
 
     // identifier not included here as it will be set as the first column
     // sort to retain the original order
-    const columnsToIncludeIndexes = sampleColumnIndexes
-      .concat(otherColumnsToIncludeIndexes)
-      .sort((a, b) => a - b);
+    const columnsToIncludeIndexes = sampleColumnIndexes.concat(otherColumnsToIncludeIndexes).sort((a, b) => a - b);
     const newRows = this.tsv2File.getBody().map((tsvRow: Array<string>) => {
       return [tsvRow[this.selectedIdentifiers[0].index]].concat(
         columnsToIncludeIndexes.map((index: number) => tsvRow[index])
@@ -404,9 +361,7 @@ export class WrangleModalComponent implements OnInit {
       const headerName = tsvHeaders[index];
       // add prefix for samples if missing
       if (sampleColumnIndexes.includes(index)) {
-        return headerName.startsWith(this.SAMPLE_PREFIX)
-          ? headerName
-          : this.SAMPLE_PREFIX + headerName;
+        return headerName.startsWith(this.SAMPLE_PREFIX) ? headerName : this.SAMPLE_PREFIX + headerName;
       } else {
         return headerName;
       }
@@ -420,13 +375,10 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private getPhenodataString(): string {
-    const phenodataHeaderString =
-      "sample\toriginal_name\tchiptype\tgroup\tdescription\n";
+    const phenodataHeaderString = "sample\toriginal_name\tchiptype\tgroup\tdescription\n";
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
-    const phenodataRowsString = this.getColumnIndexes(
-      this.selectedSamples
-    ).reduce((phenodataRows: string, index) => {
+    const phenodataRowsString = this.getColumnIndexes(this.selectedSamples).reduce((phenodataRows: string, index) => {
       const sampleHeader = tsvHeaders[index]; // this is the original, could have chip.
       const fixedSampleHeader = sampleHeader.startsWith(this.SAMPLE_PREFIX)
         ? sampleHeader.substring(this.SAMPLE_PREFIX.length)

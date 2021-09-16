@@ -32,18 +32,18 @@ export class OidcService {
     let appId;
 
     this.oidcConfigs$ = this.configService.get(ConfigService.KEY_APP_ID).pipe(
-      tap(id => (appId = id)),
+      tap((id) => (appId = id)),
       mergeMap(() => this.configService.getAuthUrl()),
-      mergeMap(authUrl => this.httpClient.get(authUrl + "/oidc/configs")),
+      mergeMap((authUrl) => this.httpClient.get(authUrl + "/oidc/configs")),
       map((configs: OidcConfig[]) => {
         return (
           configs
             // allow separate oidc configs for different apps
-            .filter(oidc => oidc.appId === appId)
+            .filter((oidc) => oidc.appId === appId)
         );
       }),
       tap((configs: OidcConfig[]) => {
-        configs.forEach(oidc => {
+        configs.forEach((oidc) => {
           const manager = new UserManager({
             authority: oidc.issuer,
             client_id: oidc.clientId,
@@ -51,7 +51,7 @@ export class OidcService {
             response_type: oidc.responseType,
             scope: oidc.scope,
             filterProtocolClaims: true,
-            loadUserInfo: false
+            loadUserInfo: false,
           });
           log.info("register oidc authentication " + oidc.oidcName);
           log.info("oidc settings: " + JSON.stringify(oidc));
@@ -63,12 +63,7 @@ export class OidcService {
   }
 
   startAuthentication(returnUrl: string, oidcConfig: OidcConfig) {
-    log.info(
-      "start oidc login: returnUrl:",
-      returnUrl,
-      ", oidcName: ",
-      oidcConfig.oidcName
-    );
+    log.info("start oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcConfig.oidcName);
     // put teh return url and oidc name to local storage,
     // because the OIDC login will redirect to a new page
     localStorage.setItem(this.keyReturnUrl, returnUrl);
@@ -80,8 +75,8 @@ export class OidcService {
         const extraQueryParams = {};
         if (oidcConfig.parameter) {
           const keyValues = oidcConfig.parameter.split(" ");
-          log.info("parse " + keyValues.length + " oidc parameters")
-          keyValues.forEach(keyValue => {
+          log.info("parse " + keyValues.length + " oidc parameters");
+          keyValues.forEach((keyValue) => {
             if (keyValue == null) {
               log.warn("cannot parse null parameter: " + keyValue);
               return;
@@ -107,7 +102,7 @@ export class OidcService {
           this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
         }
       },
-      err => this.restErrorService.showError("oidc config error", err)
+      (err) => this.restErrorService.showError("oidc config error", err)
     );
   }
 
@@ -126,13 +121,13 @@ export class OidcService {
           const manager = this.managers.get(oidcName);
           return from(manager.signinRedirectCallback());
         }),
-        mergeMap(user => this.getAndSaveToken(user, returnUrl))
+        mergeMap((user) => this.getAndSaveToken(user, returnUrl))
       )
       .subscribe(
         () => {
           this.routeService.navigateAbsolute(returnUrl);
         },
-        err => {
+        (err) => {
           let message = "oidc error";
           // at least OIDC login with missing userinfo claims sends a sensible message
           if (err.error && err.error.length > 0) {
@@ -145,15 +140,15 @@ export class OidcService {
 
   getAndSaveToken(user, returnUrl: string) {
     return this.configService.getAuthUrl().pipe(
-      mergeMap(authUrl =>
+      mergeMap((authUrl) =>
         this.httpClient.post(
           authUrl + "/oidc",
           {
             idToken: user.id_token,
-            accessToken: user.access_token
+            accessToken: user.access_token,
           },
           {
-            responseType: "text"
+            responseType: "text",
           }
         )
       ),

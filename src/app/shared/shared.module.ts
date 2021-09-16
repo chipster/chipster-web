@@ -57,7 +57,7 @@ import { WebSocketService } from "./services/websocket.service";
     AccountComponent,
     ToolSourceComponent,
     DummyRouteComponent,
-    ActionToastComponent
+    ActionToastComponent,
   ],
   providers: [
     PipeService,
@@ -76,7 +76,7 @@ import { WebSocketService } from "./services/websocket.service";
     UserService,
     ToolsService,
     NativeElementService,
-    WebSocketService
+    WebSocketService,
   ],
   exports: [
     BytesPipe,
@@ -92,7 +92,7 @@ import { WebSocketService } from "./services/websocket.service";
     SettingsComponent,
     AccountComponent,
     ToolSourceComponent,
-    ActionToastComponent
-  ]
+    ActionToastComponent,
+  ],
 })
 export class SharedModule {}

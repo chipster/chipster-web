@@ -6,10 +6,7 @@ import { EMPTY, from, Observable, of } from "rxjs";
 import { catchError, filter, map, mergeMap, tap } from "rxjs/operators";
 import * as StackTrace from "stacktrace-js";
 import { ErrorService } from "../../core/errorhandler/error.service";
-import {
-  ErrorButton,
-  ErrorMessage,
-} from "../../core/errorhandler/errormessage";
+import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
 import { RouteService } from "../../shared/services/route.service";
 import { ContactSupportService } from "../contact/contact-support.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
@@ -32,16 +29,13 @@ export class ErrorComponent implements OnInit {
 
   ngOnInit(): void {
     // clear errors when navigating to a new url
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationStart))
-      .subscribe(
-        () => {
-          this.toastIds.forEach((t) => this.toastrService.remove(t));
-          this.toastIds = [];
-        },
-        (err) =>
-          this.errorService.showError("getting router events failed", err)
-      );
+    this.router.events.pipe(filter((event) => event instanceof NavigationStart)).subscribe(
+      () => {
+        this.toastIds.forEach((t) => this.toastrService.remove(t));
+        this.toastIds = [];
+      },
+      (err) => this.errorService.showError("getting router events failed", err)
+    );
 
     this.errorService
       .getErrors()
@@ -118,10 +112,7 @@ export class ErrorComponent implements OnInit {
       })
     );
 
-    return this.dialogModalService.openSpinnerModal(
-      "Collecting information",
-      collectInfo$
-    );
+    return this.dialogModalService.openSpinnerModal("Collecting information", collectInfo$);
   }
 
   showDetails(title: string, errorMessage: ErrorMessage): Observable<any> {
@@ -131,10 +122,7 @@ export class ErrorComponent implements OnInit {
       })
     );
 
-    return this.dialogModalService.openSpinnerModal(
-      "Collecting information",
-      collectInfo$
-    );
+    return this.dialogModalService.openSpinnerModal("Collecting information", collectInfo$);
   }
 
   errorMessageToString(errorMessage: ErrorMessage): Observable<string> {
@@ -165,9 +153,7 @@ export class ErrorComponent implements OnInit {
       return from(StackTrace.fromError(error)).pipe(
         map((sf: []) => this.stackframesToString(sf)),
         map((stack) => info + "stack: \n" + stack + "\n"),
-        catchError((stackErr) =>
-          of(info + "stack: (failed to get the stack: " + stackErr + ")\n")
-        )
+        catchError((stackErr) => of(info + "stack: (failed to get the stack: " + stackErr + ")\n"))
       );
     } else {
       return of(info);
@@ -188,10 +174,7 @@ export class ErrorComponent implements OnInit {
     };
   }
 
-  stackframesToString(
-    stackframes: Record<string, unknown>[],
-    maxCount = 20
-  ): string {
+  stackframesToString(stackframes: Record<string, unknown>[], maxCount = 20): string {
     return stackframes
       .splice(0, maxCount)
       .map((sf) => sf.toString())

@@ -6,7 +6,7 @@ import { ToolService } from "../../tools/tool.service";
 @Component({
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
-  styleUrls: ["./dataset-parameter-list.component.less"]
+  styleUrls: ["./dataset-parameter-list.component.less"],
 })
 export class DatasetParameterListComponent implements OnChanges {
   @Input() tool: Tool;
@@ -71,14 +71,12 @@ export class DatasetParameterListComponent implements OnChanges {
 
   showWithTool(parameters: JobParameter[], tool: Tool) {
     this.isDefaultValueMap = new Map();
-    parameters.forEach(jobParameter => {
+    parameters.forEach((jobParameter) => {
       const clone = _.clone(jobParameter);
       let isDefault = false;
 
       if (tool) {
-        const toolParameter = tool.parameters.find(
-          p => p.name.id === jobParameter.parameterId
-        );
+        const toolParameter = tool.parameters.find((p) => p.name.id === jobParameter.parameterId);
 
         if (toolParameter) {
           // get the parameters display name from the tool
@@ -87,9 +85,7 @@ export class DatasetParameterListComponent implements OnChanges {
           // if an enum parameter
           if (toolParameter.selectionOptions) {
             // find the value's display name from the tool
-            const toolOption = toolParameter.selectionOptions.find(
-              o => o.id === jobParameter.value
-            );
+            const toolOption = toolParameter.selectionOptions.find((o) => o.id === jobParameter.value);
             if (toolOption) {
               if (toolOption.displayName) {
                 clone.value = toolOption.displayName;
@@ -104,10 +100,7 @@ export class DatasetParameterListComponent implements OnChanges {
             }
           }
 
-          isDefault = this.toolService.isDefaultValue(
-            toolParameter,
-            jobParameter.value
-          );
+          isDefault = this.toolService.isDefaultValue(toolParameter, jobParameter.value);
         }
       }
       this.isDefaultValueMap.set(clone, isDefault);
@@ -115,8 +108,8 @@ export class DatasetParameterListComponent implements OnChanges {
     });
 
     this.parameterListForView
-      .filter(p => p.displayName == null)
-      .forEach(p => {
+      .filter((p) => p.displayName == null)
+      .forEach((p) => {
         p.displayName = p.parameterId;
       });
   }

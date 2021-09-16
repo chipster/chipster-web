@@ -3,14 +3,7 @@ import { Injectable } from "@angular/core";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
-import {
-  catchError,
-  map,
-  mergeMap,
-  publishReplay,
-  refCount,
-  tap,
-} from "rxjs/operators";
+import { catchError, map, mergeMap, publishReplay, refCount, tap } from "rxjs/operators";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
@@ -38,9 +31,7 @@ export class AuthenticationService {
     let token = this.tokenService.getToken();
     if (token != null && !token.includes(".")) {
       // probably old UUID token, clear everything from local storage
-      log.info(
-        "found a token from the local storage, but it's not a JWS token. Clearing local storage..."
-      );
+      log.info("found a token from the local storage, but it's not a JWS token. Clearing local storage...");
       localStorage.clear();
       token = null;
     }
@@ -112,9 +103,7 @@ export class AuthenticationService {
         },
         (error: any) => {
           if (error.status === 403) {
-            log.info(
-              "got forbidden when trying to refresh token, stopping periodic token refresh"
-            );
+            log.info("got forbidden when trying to refresh token, stopping periodic token refresh");
             this.stopTokenRefresh();
           } else {
             log.info("refresh token failed", error.status, error.statusText);
@@ -133,33 +122,28 @@ export class AuthenticationService {
       mergeMap((authUrl) => {
         const url = `${authUrl}/tokens/check`;
 
-        return this.httpClient
-          .get<any>(url, this.tokenService.getTokenParams(false))
-          .pipe(
-            map((response: any) => {
-              log.info("token is valid");
-              return true;
-            }),
-            catchError((error) => {
-              if (error.status === 403) {
-                // token is invalid
-                log.info("check token got 403 -> token invalid");
-                return observableOf(false);
-              } else {
-                // for now, throw others
-                throw error;
-              }
-            })
-          );
+        return this.httpClient.get<any>(url, this.tokenService.getTokenParams(false)).pipe(
+          map((response: any) => {
+            log.info("token is valid");
+            return true;
+          }),
+          catchError((error) => {
+            if (error.status === 403) {
+              // token is invalid
+              log.info("check token got 403 -> token invalid");
+              return observableOf(false);
+            } else {
+              // for now, throw others
+              throw error;
+            }
+          })
+        );
       })
     );
   }
 
   scheduleTokenRefresh() {
-    this.tokenRefreshSchedulerId = window.setInterval(
-      this.refreshToken.bind(this),
-      TOKEN_REFRESH_INTERVAL
-    );
+    this.tokenRefreshSchedulerId = window.setInterval(this.refreshToken.bind(this), TOKEN_REFRESH_INTERVAL);
   }
 
   stopTokenRefresh() {

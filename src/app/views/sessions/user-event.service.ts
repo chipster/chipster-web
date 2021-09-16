@@ -36,10 +36,7 @@ export class UserEventService {
     this.topic = topic;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(
-      publish(),
-      refCount()
-    );
+    const stream = this.localSubject$.pipe(publish(), refCount());
 
     // encode the user event topic twice (the second round is done in WebsocketService) to pass
     // the Jetty WebSocketUpgradeFilter when there is a slash in the topic name
@@ -48,18 +45,14 @@ export class UserEventService {
     this.webSocketService.connect(this.localSubject$, encodedTopic);
 
     this.ruleStream$ = stream.pipe(
-      filter(wsData => wsData.resourceType === Resource.Rule),
-      mergeMap(data =>
-        this.handleRuleEvent(data, data.sessionId, userEventData)
-      ),
+      filter((wsData) => wsData.resourceType === Resource.Rule),
+      mergeMap((data) => this.handleRuleEvent(data, data.sessionId, userEventData)),
       publish(),
       refCount()
     );
 
     // update userEventData even if no one else subscribes
-    this.ruleStream$.subscribe(null, err =>
-      this.errorService.showError("error in rule events", err)
-    );
+    this.ruleStream$.subscribe(null, (err) => this.errorService.showError("error in rule events", err));
   }
 
   getRuleStream() {
@@ -71,7 +64,7 @@ export class UserEventService {
    */
   applyRuleStreamOfSession(session: Session) {
     return this.getRuleStream().pipe(
-      mergeMap(wsEvent => {
+      mergeMap((wsEvent) => {
         // sessionEventService can update individual sessions, let's reuse that
         return this.sessionEventService.handleRuleEvent(wsEvent, session);
       })
@@ -83,11 +76,7 @@ export class UserEventService {
    *
    * THe original event is sent when the updates are done.
    */
-  handleRuleEvent(
-    event: any,
-    sessionId: any,
-    userEventData: UserEventData
-  ): Observable<WsEvent> {
+  handleRuleEvent(event: any, sessionId: any, userEventData: UserEventData): Observable<WsEvent> {
     log.info("handleRuleEvent()", event);
     if (event.type === EventType.Create) {
       // new session was shared to us or a rule was added to the session we already have
@@ -108,18 +97,10 @@ export class UserEventService {
       );
     } else if (event.type === EventType.Delete) {
       const oldSession = userEventData.sessions.get(sessionId);
-      const rule = oldSession.rules.find(r => r.ruleId === event.resourceId);
-      const newRules = oldSession.rules.filter(
-        r => r.ruleId !== event.resourceId
-      );
+      const rule = oldSession.rules.find((r) => r.ruleId === event.resourceId);
+      const newRules = oldSession.rules.filter((r) => r.ruleId !== event.resourceId);
 
-      log.info(
-        "rule deleted",
-        oldSession,
-        rule,
-        newRules,
-        this.sessionDataService.getApplicableRules(newRules)
-      );
+      log.info("rule deleted", oldSession, rule, newRules, this.sessionDataService.getApplicableRules(newRules));
 
       // check if we should still see this session
       if (this.sessionDataService.getApplicableRules(newRules).length > 0) {

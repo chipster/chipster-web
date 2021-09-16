@@ -3,7 +3,7 @@ import { Job } from "chipster-js-common";
 
 export enum Action {
   Add,
-  Remove
+  Remove,
 }
 
 export default class SelectionEvent {

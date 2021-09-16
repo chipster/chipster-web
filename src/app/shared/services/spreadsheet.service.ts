@@ -39,10 +39,10 @@ export class SpreadsheetService {
       const colWidth = table
 
         // text from this column on each row
-        .map(row => row[colIndex])
+        .map((row) => row[colIndex])
 
         // width of the text
-        .map(cell => ctx.measureText(cell).width)
+        .map((cell) => ctx.measureText(cell).width)
 
         // max width in this column
         .reduce((a, b) => Math.max(a, b));

@@ -12,28 +12,33 @@
 </div>
 
 <table class="table table-hover table-sm text-sm">
-  <tr *ngFor="let job of jobsSorted" class="cursor-pointer" (click)="selectJob(job)"
-    [class.bg-primary]="isSelectedJobById(job.jobId)" [class.text-white]="isSelectedJobById(job.jobId)">
+  <tr
+    *ngFor="let job of jobsSorted"
+    class="cursor-pointer"
+    (click)="selectJob(job)"
+    [class.bg-primary]="isSelectedJobById(job.jobId)"
+    [class.text-white]="isSelectedJobById(job.jobId)">
     <td>{{ job.toolName }}</td>
     <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
       {{ job.created | localDate }}
     </td>
     <td>{{ job.state }}</td>
-    
+
     <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
-        {{ getDurationObservable(job) | async }}
+      {{ getDurationObservable(job) | async }}
     </td>
-   
-    <td valign="top" style="padding-left:10px"
+
+    <td
+      valign="top"
+      style="padding-left: 10px"
       *ngIf="job.state === 'RUNNING' || job.state === 'NEW'; else blankTemplate">
-      <button class="btn btn-link cancel-button"
-        (click)="$event.stopImmediatePropagation(); cancelJob(job)">
+      <button class="btn btn-link cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
         cancel
       </button>
     </td>
   </tr>
 
   <ng-template #blankTemplate>
-    <td style="padding-left:10px">&nbsp;</td>
+    <td style="padding-left: 10px">&nbsp;</td>
   </ng-template>
 </table>

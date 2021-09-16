@@ -9,11 +9,7 @@ export default class Circle {
   }
 
   equals(other: Circle): boolean {
-    return (
-      this.center.x === other.center.x &&
-      this.center.y === other.center.y &&
-      this.radius === other.radius
-    );
+    return this.center.x === other.center.x && this.center.y === other.center.y && this.radius === other.radius;
   }
 
   containsPoint(point: Point): boolean {

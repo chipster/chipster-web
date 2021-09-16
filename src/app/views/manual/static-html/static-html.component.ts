@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
-  OnChanges,
-  OnDestroy,
-  SimpleChanges,
-} from "@angular/core";
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges } from "@angular/core";
 import { SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import log from "loglevel";
@@ -14,8 +6,8 @@ import { ManualUtils } from "../manual-utils";
 
 /**
  * Show HTML files in an Angular app
- * 
- * The html is added to the element's [innerHtml] input. Angular doesn't compile that html, so we have 
+ *
+ * The html is added to the element's [innerHtml] input. Angular doesn't compile that html, so we have
  * to fix scrolling and router links ourselves directly in the DOM. The easiest way to know when Angular has
  * added the html to the DOM is to have the html available already when this component is created, Then we
  * know that the elements are in the DOM when the ngAfterViewInit() methods is called. This would be a problem
@@ -24,20 +16,14 @@ import { ManualUtils } from "../manual-utils";
 @Component({
   selector: "ch-static-html",
   templateUrl: "./static-html.component.html",
-  styleUrls: ["./static-html.component.less"]
+  styleUrls: ["./static-html.component.less"],
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
-
   @Input()
   html: SafeHtml;
   private anchors: any;
 
-  constructor(
-    private elementRef: ElementRef,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-  ) {
-  }
+  constructor(private elementRef: ElementRef, private router: Router, private activatedRoute: ActivatedRoute) {}
 
   ngAfterViewInit() {
     this.registerAnchorEventListeners();
@@ -59,31 +45,30 @@ export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
   public handleAnchorClick = (event: Event) => {
-    
     const anchor = event.target as HTMLAnchorElement;
 
     if (ManualUtils.isAbsoluteUrl(this.getHref(anchor))) {
-      // let the link navigate normally      
+      // let the link navigate normally
     } else {
       this.router.navigateByUrl(this.getHref(anchor));
       // prevent the page reload
       event.preventDefault();
     }
-  }
+  };
 
   registerAnchorEventListeners() {
-    this.anchors = this.elementRef.nativeElement.querySelectorAll('a');
+    this.anchors = this.elementRef.nativeElement.querySelectorAll("a");
     log.debug("regisrer anchor event listeners: " + this.anchors.length);
     this.anchors.forEach((anchor: HTMLAnchorElement) => {
-      anchor.addEventListener('click', this.handleAnchorClick)
-    })
+      anchor.addEventListener("click", this.handleAnchorClick);
+    });
   }
 
   unregisterAnchorEventListeners() {
     log.debug("unregisrer anchor event listeners: " + this.anchors.length);
     this.anchors.forEach((anchor: HTMLAnchorElement) => {
-      anchor.removeEventListener('click', this.handleAnchorClick)
-    })
+      anchor.removeEventListener("click", this.handleAnchorClick);
+    });
   }
 
   /**
@@ -91,7 +76,7 @@ export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges 
    *
    * URL fragment may point to a element id e.g. <div id="fragment"> or to a named anchor
    * <a name="fragment">. If there is no fragment, the Angular scrolls to top like a browser would normally
-   * do on a page change. 
+   * do on a page change.
    *
    * @param {string} fragment
    */

@@ -1,10 +1,4 @@
-import {
-  Category,
-  Dataset,
-  InputBinding,
-  Module,
-  Tool,
-} from "chipster-js-common";
+import { Category, Dataset, InputBinding, Module, Tool } from "chipster-js-common";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SampleGroups } from "../dataset.service";
 
@@ -19,15 +13,13 @@ export interface SelectedToolWithInputs extends SelectedTool {
   selectedDatasets: Array<Dataset>;
 }
 
-export interface SelectedToolWithValidatedInputs
-  extends SelectedToolWithInputs {
+export interface SelectedToolWithValidatedInputs extends SelectedToolWithInputs {
   singleJobInputsValidation: ValidationResult;
   phenodataValidation: ValidationResult;
   phenodataBindings: Array<PhenodataBinding>;
 }
 
-export interface SelectedToolWithValidatedParameters
-  extends SelectedToolWithValidatedInputs {
+export interface SelectedToolWithValidatedParameters extends SelectedToolWithValidatedInputs {
   parametersValidation: ValidationResult;
   parametersValidationResults?: Map<string, ValidationResult>;
 }

@@ -20,14 +20,7 @@ import { ToolService } from "./tool.service";
 import { ToolsComponent } from "./tools.component";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SharedModule,
-    FormsModule,
-    NgbModule,
-    ManualModule,
-    NgSelectModule,
-  ],
+  imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule, NgSelectModule],
   declarations: [
     ToolListItemComponent,
     ToolsComponent,

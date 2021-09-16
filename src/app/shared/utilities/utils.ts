@@ -35,12 +35,7 @@ export default class UtilsService {
     return event.shiftKey;
   }
 
-  static toggleSelection(
-    event: any,
-    item: any,
-    allItems: any[],
-    selectedItems: any[]
-  ) {
+  static toggleSelection(event: any, item: any, allItems: any[], selectedItems: any[]) {
     function isSelectionEmpty() {
       return selectedItems.length === 0;
     }
@@ -130,11 +125,7 @@ export default class UtilsService {
     return end.getTime() - start.getTime();
   }
 
-  static millisecondsToHumanFriendly(
-    milliseconds: number,
-    zero = "0",
-    lessThanSecond = "less than second"
-  ): string {
+  static millisecondsToHumanFriendly(milliseconds: number, zero = "0", lessThanSecond = "less than second"): string {
     let seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);

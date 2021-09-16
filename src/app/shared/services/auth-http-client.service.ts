@@ -5,10 +5,7 @@ import { Observable } from "rxjs";
 
 @Injectable()
 export class AuthHttpClientService {
-  constructor(
-    private httpClient: HttpClient,
-    private tokenService: TokenService
-  ) {}
+  constructor(private httpClient: HttpClient, private tokenService: TokenService) {}
 
   /**
    * Make unauthenticated GET request
@@ -31,10 +28,7 @@ export class AuthHttpClientService {
 
   getAuthHeader() {
     let headers = new HttpHeaders();
-    headers = headers.append(
-      "Authorization",
-      "Basic " + btoa("token:" + this.tokenService.getToken())
-    );
+    headers = headers.append("Authorization", "Basic " + btoa("token:" + this.tokenService.getToken()));
     return { headers: headers };
   }
 
@@ -70,10 +64,7 @@ export class AuthHttpClientService {
   getAuthWithParams(url, params?): Observable<any> {
     console.log(params);
     let headers = new HttpHeaders();
-    headers = headers.append(
-      "Authorization",
-      "Basic " + btoa("token:" + this.tokenService.getToken())
-    );
+    headers = headers.append("Authorization", "Basic " + btoa("token:" + this.tokenService.getToken()));
 
     return this.httpClient.get(url, { headers: headers, params: params });
   }

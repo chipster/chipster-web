@@ -23,13 +23,9 @@ export function selectedTool(state: SelectedTool = null, { type, payload }) {
 
 // tool with bindings
 export const SET_SELECTED_TOOL_WITH_INPUTS = "SET_SELECTED_TOOL_WITH_BINDINGS";
-export const CLEAR_SELECTED_TOOL_WITH_INPUTS =
-  "CLEAR_SELECTED_TOOL_WITH_BINDINGS";
+export const CLEAR_SELECTED_TOOL_WITH_INPUTS = "CLEAR_SELECTED_TOOL_WITH_BINDINGS";
 
-export function selectedToolWithInputs(
-  state: SelectedToolWithInputs = null,
-  { type, payload }
-) {
+export function selectedToolWithInputs(state: SelectedToolWithInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_INPUTS:
       return Object.assign({}, payload);
@@ -41,15 +37,10 @@ export function selectedToolWithInputs(
 }
 
 // tool with validated inputs
-export const SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS =
-  "SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS";
-export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS =
-  "CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS";
+export const SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS = "SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS";
+export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS = "CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS";
 
-export function selectedToolWithValidatedInputs(
-  state: SelectedToolWithValidatedInputs = null,
-  { type, payload }
-) {
+export function selectedToolWithValidatedInputs(state: SelectedToolWithValidatedInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS:
       return Object.assign({}, payload);
@@ -61,15 +52,10 @@ export function selectedToolWithValidatedInputs(
 }
 
 // tool with validated inputs and populated params
-export const SET_SELECTED_TOOL_WITH_POPULATED_PARAMS =
-  "SET_SELECTED_TOOL_WITH_POPULATED_PARAMS";
-export const CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS =
-  "CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS";
+export const SET_SELECTED_TOOL_WITH_POPULATED_PARAMS = "SET_SELECTED_TOOL_WITH_POPULATED_PARAMS";
+export const CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS = "CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS";
 
-export function selectedToolWithPopulatedParams(
-  state: SelectedToolWithValidatedInputs = null,
-  { type, payload }
-) {
+export function selectedToolWithPopulatedParams(state: SelectedToolWithValidatedInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_POPULATED_PARAMS:
       return Object.assign({}, payload);
@@ -81,15 +67,10 @@ export function selectedToolWithPopulatedParams(
 }
 
 // tool with validated inputs and populated params and validated params
-export const SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS =
-  "SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS";
-export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS =
-  "CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS";
+export const SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS = "SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS";
+export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS = "CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS";
 
-export function selectedToolWithValidatedParams(
-  state: SelectedToolWithValidatedParameters = null,
-  { type, payload }
-) {
+export function selectedToolWithValidatedParams(state: SelectedToolWithValidatedParameters = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
       return Object.assign({}, payload);

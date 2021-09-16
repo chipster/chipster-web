@@ -2,30 +2,30 @@
   <div class="row">
     <div class="col">
       <h3>Contact support</h3>
-      <p>In case something doesn't work, please use the Contact support feature to tell 
-        server maintainers what went wrong. You can share your last session, which often
-        makes it easier and faster to troubleshoot the issue.
+      <p>
+        In case something doesn't work, please use the Contact support feature to tell server maintainers what went
+        wrong. You can share your last session, which often makes it easier and faster to troubleshoot the issue.
       </p>
       <button class="btn btn-secondary" (click)="openContactSupportModal()" [disabled]="!isLoggedIn()">
         Contact support
       </button>
-      <br>
+      <br />
       <small *ngIf="!isLoggedIn()">
-        The contact support feature is available only for authenticated users. Please 
-        log in first or use the other contact details below.
-      </small>    
+        The contact support feature is available only for authenticated users. Please log in first or use the other
+        contact details below.
+      </small>
     </div>
-  </div> 
+  </div>
   <div class="row">
-    <div class="col">      
-        <div *ngIf="contactPath">
-          <ch-manual 
-          assetsPath="{{contactPath}}" 
-          page="{{contactFile}}" 
-          [showControls]=false
-          [addContainer]=false
-          [manualStyles]=false></ch-manual>
-        </div>
+    <div class="col">
+      <div *ngIf="contactPath">
+        <ch-manual
+          assetsPath="{{ contactPath }}"
+          page="{{ contactFile }}"
+          [showControls]="false"
+          [addContainer]="false"
+          [manualStyles]="false"></ch-manual>
+      </div>
     </div>
   </div>
 </div>

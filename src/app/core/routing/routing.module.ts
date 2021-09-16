@@ -6,6 +6,6 @@ import { LandGuard } from "./land-guard.service";
 
 @NgModule({
   imports: [CommonModule],
-  providers: [AuthGuard, LandGuard, AnalyzeGuard]
+  providers: [AuthGuard, LandGuard, AnalyzeGuard],
 })
 export class RoutingModule {}

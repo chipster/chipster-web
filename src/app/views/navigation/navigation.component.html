@@ -1,5 +1,10 @@
 <nav *ngIf="appNameReady" class="navbar navbar-expand-sm navbar-light" id="navbar">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-expanded="false"
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNav"
+    aria-expanded="false"
     aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -7,8 +12,13 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkHome" routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }">{{ appName }}</a>
+        <a
+          class="nav-link"
+          [routerLink]="routerLinkHome"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          {{ appName }}
+        </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" [routerLink]="routerLinkAnalyze" routerLinkActive="active">Analyze</a>
@@ -34,7 +44,6 @@
             class="text-warning fas fa-fw fa-exclamation-circle"></i> NOTE: Phenodata issue partly solved</a>
       </li> -->
 
-
       <!--
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li class="nav-item">
@@ -48,18 +57,32 @@
 
     <ul class="navbar-nav">
       <li *ngIf="isLoggedIn()" class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false"><i class="fas fa-user" aria-hidden="true"></i>
+        <a
+          class="nav-link dropdown-toggle"
+          href="#"
+          id="navbarDropdown"
+          role="button"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false">
+          <i class="fas fa-user" aria-hidden="true"></i>
           {{ getAccountName() }}
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-
           <!-- <div class="dropdown-header" (click)="$event.stopImmediatePropagation()">{{getUserId()}}</div> -->
-          <a class="dropdown-item" (click)="openAccount()"><i class="fas fa-user fa-fw lighter"></i> Account</a>
-          <a class="dropdown-item" (click)="openSettings()"><i class="fas fa-cog fa-fw lighter"></i> Settings</a>
+          <a class="dropdown-item" (click)="openAccount()">
+            <i class="fas fa-user fa-fw lighter"></i>
+            Account
+          </a>
+          <a class="dropdown-item" (click)="openSettings()">
+            <i class="fas fa-cog fa-fw lighter"></i>
+            Settings
+          </a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()"><i
-              class="fas fa-sign-out-alt fa-fw lighter"></i> Logout</a>
+          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()">
+            <i class="fas fa-sign-out-alt fa-fw lighter"></i>
+            Logout
+          </a>
         </div>
       </li>
 

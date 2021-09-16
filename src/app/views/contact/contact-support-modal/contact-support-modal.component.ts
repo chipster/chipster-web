@@ -1,18 +1,6 @@
 import { DOCUMENT } from "@angular/common";
-import {
-  AfterViewInit,
-  Component,
-  Inject,
-  Input,
-  OnInit,
-  ViewChild
-} from "@angular/core";
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  Validators
-} from "@angular/forms";
+import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild } from "@angular/core";
+import { AbstractControl, FormBuilder, FormControl, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
 import log from "loglevel";
@@ -29,13 +17,13 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 
 @Component({
   templateUrl: "./contact-support-modal.component.html",
-  styleUrls: ["./contact-support-modal.component.less"]
+  styleUrls: ["./contact-support-modal.component.less"],
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public supportForm = this.fb.group({
     message: ["", [Validators.required]],
     email: ["", [Validators.required, Validators.email]],
-    attach: ["", [Validators.required]] // force user to select
+    attach: ["", [Validators.required]], // force user to select
   });
 
   @Input()
@@ -72,11 +60,11 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           }
           return of(null);
         }),
-        tap(session => {
+        tap((session) => {
           this.session = session;
           if (this.session == null) {
             this.supportForm.patchValue({
-              attach: "no"
+              attach: "no",
             });
             this.supportForm.controls.attach.disable();
           }
@@ -86,23 +74,18 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           this.user = user;
           if (user.mail != null) {
             this.supportForm.patchValue({
-              email: user.mail
+              email: user.mail,
             });
             this.isVerifiedEmail = true;
           }
         }),
-        mergeMap(() =>
-          this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))
-        ),
-        tap(appId => (this.appId = appId))
+        mergeMap(() => this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))),
+        tap((appId) => (this.appId = appId))
       )
       .subscribe({
-        error: err => {
-          this.restErrorService.showError(
-            "support modal initialization failed",
-            err
-          );
-        }
+        error: (err) => {
+          this.restErrorService.showError("support modal initialization failed", err);
+        },
       });
   }
 
@@ -138,18 +121,14 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
       this.activeModal.close();
 
-      this.dialogModalService.openSpinnerModal(
-        "Sending the support request",
-        supportRequest$
-      );
+      this.dialogModalService.openSpinnerModal("Sending the support request", supportRequest$);
     }
   }
 
   getHostUrl() {
     // get the url of the app server
     // the current url is correct also when using "ng serve" (unlike the one from service-locator)
-    let url =
-      this.document.location.protocol + "//" + this.document.location.hostname;
+    let url = this.document.location.protocol + "//" + this.document.location.hostname;
     if (this.document.location.port != null) {
       url += ":" + this.document.location.port;
     }
@@ -164,8 +143,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     let copySessionId: string;
     const userId = this.user.auth + "/" + this.user.username;
     const utcDate = new Date().toISOString().split("T")[0];
-    const appHostUrl =
-      this.document.location.protocol + "//" + this.document.location.hostname;
+    const appHostUrl = this.document.location.protocol + "//" + this.document.location.hostname;
 
     // the "preview" version of the sessionData is enough
     return this.sessionResource.loadSession(sessionId, true).pipe(
@@ -177,9 +155,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
       tap((id: string) => {
         copySessionId = id;
       }),
-      mergeMap(() =>
-        this.configService.get(ConfigService.KEY_SUPPORT_SESSION_OWNER_USER_ID)
-      ),
+      mergeMap(() => this.configService.get(ConfigService.KEY_SUPPORT_SESSION_OWNER_USER_ID)),
       mergeMap((supportSessionOwner: string) => {
         // share the session to the special user
         const rule = new Rule();

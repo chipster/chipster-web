@@ -10,6 +10,6 @@ import { RestErrorService } from "./errorhandler/rest-error.service";
 @NgModule({
   imports: [CommonModule, AuthenticationModule],
   declarations: [],
-  providers: [RestErrorService]
+  providers: [RestErrorService],
 })
 export class CoreModule {}

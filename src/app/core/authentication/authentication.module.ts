@@ -6,6 +6,6 @@ import { TokenService } from "./token.service";
 
 @NgModule({
   imports: [CommonModule],
-  providers: [AuthenticationService, TokenService, OidcService]
+  providers: [AuthenticationService, TokenService, OidcService],
 })
 export class AuthenticationModule {}

@@ -12,7 +12,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   selector: "ch-services",
   templateUrl: "./services.component.html",
   styleUrls: ["./services.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class ServicesComponent implements OnInit {
   services: Service[];
@@ -39,39 +39,33 @@ export class ServicesComponent implements OnInit {
           this.services = services.sort((a, b) => a.role.localeCompare(b.role));
         }),
         // filter out services without admin uri
-        map((services: Service[]) =>
-          services.filter(service => service.adminUri != null)
-        ),
+        map((services: Service[]) => services.filter((service) => service.adminUri != null)),
         // create alive and status requests
-        mergeMap(services => {
+        mergeMap((services) => {
           const aliveRequests = services.map((service: Service) => {
-            return this.authHttpClient
-              .get(service.adminUri + "/admin/alive")
-              .pipe(
-                tap(() => {
-                  this.aliveMap.set(service, "OK");
-                }),
-                catchError(err => {
-                  log.warn("alive check failed", service.role, err);
-                  this.aliveMap.set(service, err.status);
-                  return of(false); // returning EMPTY would cancel others in forkJoin
-                })
-              );
+            return this.authHttpClient.get(service.adminUri + "/admin/alive").pipe(
+              tap(() => {
+                this.aliveMap.set(service, "OK");
+              }),
+              catchError((err) => {
+                log.warn("alive check failed", service.role, err);
+                this.aliveMap.set(service, err.status);
+                return of(false); // returning EMPTY would cancel others in forkJoin
+              })
+            );
           });
 
           const statusRequests = services.map((service: Service) => {
-            return this.authHttpClient
-              .getAuth(service.adminUri + "/admin/status")
-              .pipe(
-                tap(status => {
-                  this.statusMap.set(service.role, status);
-                }),
-                catchError(err => {
-                  log.warn("status check failed", service.role, err);
-                  this.statusMap.set(service.role, err.status);
-                  return of(false); // returning EMPTY would cancel others in forkJoin
-                })
-              );
+            return this.authHttpClient.getAuth(service.adminUri + "/admin/status").pipe(
+              tap((status) => {
+                this.statusMap.set(service.role, status);
+              }),
+              catchError((err) => {
+                log.warn("status check failed", service.role, err);
+                this.statusMap.set(service.role, err.status);
+                return of(false); // returning EMPTY would cancel others in forkJoin
+              })
+            );
           });
 
           return forkJoin(aliveRequests.concat(statusRequests));
@@ -81,9 +75,9 @@ export class ServicesComponent implements OnInit {
         next: () => {
           log.info("get services data done");
         },
-        error: err => {
+        error: (err) => {
           this.restErrorService.showError("get services data failed", err);
-        }
+        },
       });
   }
 

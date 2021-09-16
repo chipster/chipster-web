@@ -1,17 +1,22 @@
 <div *ngIf="state.isReady(); else statusTemplate">
-  <div class="row">    
+  <div class="row">
     <div class="col">
-      <label style="font-size: smaller;" *ngIf="!isCompleteFile()">First {{getSizeShown() | bytes}}. 
-      <span style=" font-style: italic">View in <span class="btn-link" (click)="showAll()">full screen</span>
-      to see the whole {{getSizeFull() | bytes}} file. </span></label>
-      <label style="font-size: smaller;" *ngIf="isCompleteFile()">File size {{getSizeFull() | bytes}}.</label>
+      <label style="font-size: smaller" *ngIf="!isCompleteFile()">
+        First {{ getSizeShown() | bytes }}.
+        <span style="font-style: italic">
+          View in
+          <span class="btn-link" (click)="showAll()">full screen</span>
+          to see the whole {{ getSizeFull() | bytes }} file.
+        </span>
+      </label>
+      <label style="font-size: smaller" *ngIf="isCompleteFile()">File size {{ getSizeFull() | bytes }}.</label>
       <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
     </div>
   </div>
-      
+
   <div class="row">
     <div class="col">
-      <pre class="text-view">{{data}}</pre>
+      <pre class="text-view">{{ data }}</pre>
     </div>
   </div>
 </div>

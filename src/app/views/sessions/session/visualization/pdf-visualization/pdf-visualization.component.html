@@ -1,40 +1,57 @@
 <div *ngIf="state.isReady(); else statusTemplate">
   <div class="row" id="pdf-view-navigation">
     <div class="col-md-5">
-
-      <button class="btn btn-secondary btn-sm tool-bar-button" (click)="zoomOut()" title="Zoom out"
+      <button
+        class="btn btn-secondary btn-sm tool-bar-button"
+        (click)="zoomOut()"
+        title="Zoom out"
         [disabled]="this.zoom <= this.minZoom">
         <span class="fas fa-lg fa-search-minus"></span>
       </button>
-      <button class="btn btn-secondary btn-sm ml-1 tool-bar-button" (click)="zoomIn()" title="Zoom in"
+      <button
+        class="btn btn-secondary btn-sm ml-1 tool-bar-button"
+        (click)="zoomIn()"
+        title="Zoom in"
         [disabled]="this.zoom >= this.maxZoom">
         <span class="fas fa-lg fa-search-plus"></span>
       </button>
 
       <span *ngIf="totalPages > 1">
-        <button class="btn btn-secondary btn-sm tool-bar-button ml-2" [disabled]="page === 1 || showAll"
-          (click)="previousPage()" title="Previous page">
+        <button
+          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          [disabled]="page === 1 || showAll"
+          (click)="previousPage()"
+          title="Previous page">
           <span class="fas fa-lg fa-angle-left"></span>
         </button>
-        <button class="btn btn-secondary btn-sm tool-bar-button ml-1" [disabled]="page >= totalPages || showAll"
-          (click)="nextPage()" title="Next page">
+        <button
+          class="btn btn-secondary btn-sm tool-bar-button ml-1"
+          [disabled]="page >= totalPages || showAll"
+          (click)="nextPage()"
+          title="Next page">
           <span class="fas fa-lg fa-angle-right"></span>
         </button>
 
-        <button *ngIf="!showAll" class="btn btn-secondary btn-sm tool-bar-button ml-2" (click)="toggleShowAll()"
+        <button
+          *ngIf="!showAll"
+          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          (click)="toggleShowAll()"
           [title]="showAllButtonText">
           <span class="far fa-lg fa-fw fa-copy"></span>
         </button>
-        <button *ngIf="showAll" class="btn btn-secondary btn-sm tool-bar-button ml-2" (click)="toggleShowAll()"
+        <button
+          *ngIf="showAll"
+          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          (click)="toggleShowAll()"
           [title]="showAllButtonText">
-          <span class="far fa-lg fa-fw fa-file"></span></button>
-
+          <span class="far fa-lg fa-fw fa-file"></span>
+        </button>
       </span>
     </div>
 
     <div class="col-md-2 text-center">
-      <div *ngIf="totalPages > 1 && !showAll" class="text-sm">Page {{page + " / " + totalPages}}</div>
-      <div *ngIf="totalPages > 1 && showAll" class="text-sm">All {{totalPages}} pages</div>
+      <div *ngIf="totalPages > 1 && !showAll" class="text-sm">Page {{ page + " / " + totalPages }}</div>
+      <div *ngIf="totalPages > 1 && showAll" class="text-sm">All {{ totalPages }} pages</div>
     </div>
 
     <div class="col-md-5">
@@ -43,15 +60,20 @@
         Open in new tab
       </button>
     </div>
-
   </div>
 </div>
 
-<pdf-viewer *ngIf="urlReady" [src]="src" [zoom]="zoom" [show-all]="showAll" [page]="page" style="display: block;"
-  (after-load-complete)="pdfLoadComplete($event)" (on-progress)="onProgress($event)">
-</pdf-viewer>
+<pdf-viewer
+  *ngIf="urlReady"
+  [src]="src"
+  [zoom]="zoom"
+  [show-all]="showAll"
+  [page]="page"
+  style="display: block"
+  (after-load-complete)="pdfLoadComplete($event)"
+  (on-progress)="onProgress($event)"></pdf-viewer>
 
 <ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>
-  <progress value="{{loadedBytes}}" max="{{totalBytes}}"></progress>
+  <progress value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
 </ng-template>

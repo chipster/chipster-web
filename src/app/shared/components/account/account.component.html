@@ -8,20 +8,22 @@
 <div class="modal-body">
   <table>
     <tr>
-      <td class="title">Username
+      <td class="title">
+        Username
         <p class="text-smaller text-muted">Use this when logging in.</p>
       </td>
-      <td class="value">{{getAccountName()}}</td>
+      <td class="value">{{ getAccountName() }}</td>
     </tr>
     <tr>
-      <td class="title">UserId<p class="text-smaller text-muted">Give this to someone who wants to share a session to
-          you.</p>
+      <td class="title">
+        UserId
+        <p class="text-smaller text-muted">Give this to someone who wants to share a session to you.</p>
       </td>
-      <td class="value">{{getUserId()}}</td>
+      <td class="value">{{ getUserId() }}</td>
     </tr>
   </table>
 </div>
 
-<div class=" modal-footer">
+<div class="modal-footer">
   <button type="button" class="btn btn-secondary float-right" (click)="close()">Close</button>
 </div>

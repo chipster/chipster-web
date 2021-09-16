@@ -1,9 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  RouterStateSnapshot
-} from "@angular/router";
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
@@ -23,10 +19,7 @@ export class AnalyzeGuard implements CanActivate {
     private userService: UserService
   ) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.userService.getLatestSession().pipe(
       mergeMap((latestSessionId: string) => {
         if (latestSessionId !== null) {

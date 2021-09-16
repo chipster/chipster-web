@@ -9,7 +9,7 @@ import { DatasetModalService } from "../datasetmodal.service";
 @Component({
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
-  styleUrls: ["./single-dataset.component.less"]
+  styleUrls: ["./single-dataset.component.less"],
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()
@@ -63,9 +63,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
     this.sessionDataService
       .updateDataset(dataset)
-      .subscribe(null, err =>
-        this.restErrorService.showError("saving notes failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("saving notes failed", err));
     input.placeholder = this.notesPlaceholderInactive;
   }
 
@@ -75,7 +73,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   getUsedToolFromToolset() {
     if (this.sourceJob) {
-      this.tool = this.tools.find(t => t.name.id === this.sourceJob.toolId);
+      this.tool = this.tools.find((t) => t.name.id === this.sourceJob.toolId);
 
       if (!this.tool) {
         log.info("No Tool found with this ID", this.sourceJob.toolId);
@@ -86,9 +84,6 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   showHistory(): void {
-    this.datasetModalService.openDatasetHistoryModal(
-      this.dataset,
-      this.sessionData
-    );
+    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData);
   }
 }

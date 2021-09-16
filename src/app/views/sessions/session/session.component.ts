@@ -1,21 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
-} from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import {
-  Dataset,
-  EventType,
-  Job,
-  JobState,
-  Module,
-  Rule,
-  Session,
-  SessionState,
-  Tool,
-} from "chipster-js-common";
+import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
@@ -119,17 +105,9 @@ export class SessionComponent implements OnInit, OnDestroy {
               const tools$ = this.toolsService.getTools();
               const modules$ = this.toolsService.getModules();
               const modulesMap$ = this.toolsService.getModulesMap();
-              const exampleSessionOwner$ = this.configService.get(
-                ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID
-              );
+              const exampleSessionOwner$ = this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID);
 
-              return forkJoin(
-                sessionData$,
-                tools$,
-                modules$,
-                modulesMap$,
-                exampleSessionOwner$
-              );
+              return forkJoin(sessionData$, tools$, modules$, modulesMap$, exampleSessionOwner$);
             })
           );
         })
@@ -162,24 +140,22 @@ export class SessionComponent implements OnInit, OnDestroy {
       );
 
     // subscribe to view settings
-    this.settingsService.showToolsPanel$
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (showToolsPanel: boolean) => {
-          if (showToolsPanel) {
-            this.split3Visible = true;
-            this.split1Size = 30;
-            this.split2Size = 45;
-            this.split3Size = 25;
-          } else {
-            this.split3Visible = false;
-            this.split1Size = 33;
-            this.split2Size = 67;
-            this.split3Size = 33;
-          }
-        },
-        (err) => this.errorService.showError("tool panel error", err)
-      );
+    this.settingsService.showToolsPanel$.pipe(takeUntil(this.unsubscribe)).subscribe(
+      (showToolsPanel: boolean) => {
+        if (showToolsPanel) {
+          this.split3Visible = true;
+          this.split1Size = 30;
+          this.split2Size = 45;
+          this.split3Size = 25;
+        } else {
+          this.split3Visible = false;
+          this.split1Size = 33;
+          this.split2Size = 67;
+          this.split3Size = 33;
+        }
+      },
+      (err) => this.errorService.showError("tool panel error", err)
+    );
   }
 
   ngOnDestroy(): void {
@@ -200,11 +176,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     nextState?: RouterStateSnapshot
   ): Observable<boolean> {
     // cancel navigation if destination is appName/analyze, e.g. when clicking Analyze in nav bar when in session view
-    if (
-      nextState &&
-      nextState.url &&
-      nextState.url === this.routeService.getRouterLinkAnalyze()
-    ) {
+    if (nextState && nextState.url && nextState.url === this.routeService.getRouterLinkAnalyze()) {
       return of(false);
     }
 
@@ -220,12 +192,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     // temporary session with changes is only case where we might possibly remain
     // on the page and therefore possible want to continue receiving session events
-    if (
-      !(
-        this.sessionData &&
-        this.sessionData.session.state === SessionState.TemporaryModified
-      )
-    ) {
+    if (!(this.sessionData && this.sessionData.session.state === SessionState.TemporaryModified)) {
       this.sessionEventService.unsubscribe();
     }
 
@@ -235,10 +202,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     }
 
     // no access anymore
-    if (
-      this.sessionDataService.getApplicableRules(this.sessionData.session.rules)
-        .length < 1
-    ) {
+    if (this.sessionDataService.getApplicableRules(this.sessionData.session.rules).length < 1) {
       return of(true);
     }
 
@@ -277,10 +241,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     // - loadSession().then()
     // - apply the queued updates
 
-    this.sessionEventService.setSessionData(
-      this.sessionDataService.getSessionId(),
-      this.sessionData
-    );
+    this.sessionEventService.setSessionData(this.sessionDataService.getSessionId(), this.sessionData);
 
     // rule stream
     this.sessionEventService
@@ -289,15 +250,9 @@ export class SessionComponent implements OnInit, OnDestroy {
       .subscribe((change) => {
         const rule: Rule = change.oldValue as Rule;
 
-        if (
-          change.event.type === EventType.Delete &&
-          rule.username === this.tokenService.getUsername()
-        ) {
+        if (change.event.type === EventType.Delete && rule.username === this.tokenService.getUsername()) {
           this.sessionEventService.unsubscribe();
-          this.toastrService.info(
-            this.sessionData.session.name,
-            "Session deleted"
-          );
+          this.toastrService.info(this.sessionData.session.name, "Session deleted");
           this.routeService.navigateAbsolute("/sessions");
         }
       });
@@ -334,20 +289,14 @@ export class SessionComponent implements OnInit, OnDestroy {
               (oldValue == null || oldValue.state !== JobState.ExpiredWaiting)
             ) {
               this.openErrorModal("Job expired", newValue);
-            } else if (
-              newValue.state === JobState.Failed &&
-              (oldValue == null || oldValue.state !== JobState.Failed)
-            ) {
+            } else if (newValue.state === JobState.Failed && (oldValue == null || oldValue.state !== JobState.Failed)) {
               this.openErrorModal("Job failed", newValue);
             } else if (
               newValue.state === JobState.FailedUserError &&
               (oldValue == null || oldValue.state !== JobState.FailedUserError)
             ) {
               this.openErrorModal("Job failed", newValue);
-            } else if (
-              newValue.state === JobState.Error &&
-              (oldValue == null || oldValue.state !== JobState.Error)
-            ) {
+            } else if (newValue.state === JobState.Error && (oldValue == null || oldValue.state !== JobState.Error)) {
               this.openErrorModal("Job error", newValue);
             }
           }
@@ -379,20 +328,18 @@ export class SessionComponent implements OnInit, OnDestroy {
           return of(sessionData);
         } else {
           log.info("read-only sesssion, create copy");
-          return this.sessionResource
-            .copySession(sessionData, sessionData.session.name, true)
-            .pipe(
-              mergeMap((id) => {
-                const queryParams = {};
-                queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
-                return from(
-                  this.routeService.navigateAbsolute("/analyze/" + id, {
-                    queryParams: queryParams,
-                  })
-                );
-              }),
-              mergeMap(() => NEVER)
-            );
+          return this.sessionResource.copySession(sessionData, sessionData.session.name, true).pipe(
+            mergeMap((id) => {
+              const queryParams = {};
+              queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
+              return from(
+                this.routeService.navigateAbsolute("/analyze/" + id, {
+                  queryParams: queryParams,
+                })
+              );
+            }),
+            mergeMap(() => NEVER)
+          );
         }
       })
     );
@@ -406,9 +353,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
     // the user doesn't need to be notified that the session is deleted
     this.sessionEventService.unsubscribe();
-    return this.sessionDataService
-      .deletePersonalRules(this.sessionData.session)
-      .pipe(map(() => true));
+    return this.sessionDataService.deletePersonalRules(this.sessionData.session).pipe(map(() => true));
   }
 
   /**
@@ -420,14 +365,12 @@ export class SessionComponent implements OnInit, OnDestroy {
   public onDeleteSession(): void {
     this.state = ComponentState.DELETING_SESSION;
 
-    this.sessionDataService
-      .deletePersonalRules(this.sessionData.session)
-      .subscribe(
-        () => {
-          log.debug("delete session request done");
-        },
-        (err) => this.restErrorService.showError("delete session failed", err)
-      );
+    this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe(
+      () => {
+        log.debug("delete session request done");
+      },
+      (err) => this.restErrorService.showError("delete session failed", err)
+    );
   }
 
   askKeepOrDiscardSession(): Observable<boolean> {
@@ -449,9 +392,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           if (dialogResult.button === keepButton) {
             this.sessionData.session.name = dialogResult.value;
             this.sessionData.session.state = SessionState.Ready;
-            return this.sessionService
-              .updateSession(this.sessionData.session)
-              .pipe(map(() => true));
+            return this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
           } else if (dialogResult.button === deleteButton) {
             return this.deleteTempSession();
           }
@@ -468,11 +409,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   private getKeepDialogFirstParagraph(): string {
-    if (
-      this.sessionData.session.rules.some(
-        (rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId
-      )
-    ) {
+    if (this.sessionData.session.rules.some((rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId)) {
       return "You have made changes to a <em>read-only<em> example session.";
     } else {
       return "You have made changes to a <em>read-only</em> shared session.";
@@ -510,26 +447,17 @@ export class SessionComponent implements OnInit, OnDestroy {
   private saveLatestSession(): void {
     const sourceSession = this.getSourceSessionId();
     if (sourceSession) {
-      this.userService.updateLatestSession(
-        this.sessionData.session.sessionId,
-        sourceSession
-      );
+      this.userService.updateLatestSession(this.sessionData.session.sessionId, sourceSession);
     } else {
       this.userService.updateLatestSession(this.sessionData.session.sessionId);
     }
 
-    log.info(
-      "saving latest session id",
-      this.sessionData.session.sessionId,
-      sourceSession
-    );
+    log.info("saving latest session id", this.sessionData.session.sessionId, sourceSession);
   }
 
   private removeSourceSessionParamIfRegularSession(session: Session): void {
     if (session.state === SessionState.Ready && this.getSourceSessionId()) {
-      log.info(
-        "opening session with state: ready, but source url param exists, redirect to id without parameters"
-      );
+      log.info("opening session with state: ready, but source url param exists, redirect to id without parameters");
       this.routeService.navigateAbsolute("/analyze/" + session.sessionId, {
         replaceUrl: true,
       });

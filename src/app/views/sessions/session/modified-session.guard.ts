@@ -1,9 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanDeactivate,
-  RouterStateSnapshot
-} from "@angular/router";
+import { ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot } from "@angular/router";
 import log from "loglevel";
 import { of } from "rxjs";
 import { catchError } from "rxjs/operators";
@@ -17,14 +13,12 @@ export class ModifiedSessionGuard implements CanDeactivate<SessionComponent> {
     currentState: RouterStateSnapshot,
     nextState?: RouterStateSnapshot
   ) {
-    return sessionComponent
-      .canDeactivate(sessionComponent, currentRoute, currentState, nextState)
-      .pipe(
-        catchError(err => {
-          log.error("route deactivation error", err);
-          // allow route change even in case of errors
-          return of(true);
-        })
-      );
+    return sessionComponent.canDeactivate(sessionComponent, currentRoute, currentState, nextState).pipe(
+      catchError((err) => {
+        log.error("route deactivation error", err);
+        // allow route change even in case of errors
+        return of(true);
+      })
+    );
   }
 }

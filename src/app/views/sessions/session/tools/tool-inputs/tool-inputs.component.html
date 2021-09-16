@@ -1,8 +1,6 @@
 <div *ngIf="ready" class="">
   <h2 class="h2-xs mt-3 mb-2">Input files</h2>
-  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">
-    No Inputs
-  </div>
+  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">No Inputs</div>
 
   <!-- <form name="inputsForm" *ngIf="tool"> -->
   <table class="table table-sm" *ngIf="bindingModels.length > 0">
@@ -24,38 +22,44 @@
         <!-- file selction dropdown -->
         <td>
           <!-- single input -->
-          <select *ngIf="
-              bindingModel.compatibleDatasets.length > 0 &&
-              !bindingModel.input.name.spliced
-            " class="w-100" [(ngModel)]="bindingModel.boundDatasets[0]" (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}
+          <select
+            *ngIf="bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced"
+            class="w-100"
+            [(ngModel)]="bindingModel.boundDatasets[0]"
+            (ngModelChange)="inputSelected(bindingModel)">
+            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">
+              {{ dataset.name }}
             </option>
           </select>
 
           <!-- multi input -->
-          <select *ngIf="
-              bindingModel.compatibleDatasets.length > 0 &&
-              bindingModel.input.name.spliced
-            " [disabled]="bindingModel.compatibleDatasets.length < 1" class="w-100" multiple
-            [(ngModel)]="bindingModel.boundDatasets" (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">{{ dataset.name }}
+          <select
+            *ngIf="bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced"
+            [disabled]="bindingModel.compatibleDatasets.length < 1"
+            class="w-100"
+            multiple
+            [(ngModel)]="bindingModel.boundDatasets"
+            (ngModelChange)="inputSelected(bindingModel)">
+            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">
+              {{ dataset.name }}
             </option>
           </select>
 
           <!-- no compatible inputs, show disabled dropdown -->
           <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
             <option *ngIf="validatedTool.selectedDatasets.length < 1" selected class="font-italic">No files</option>
-            <option *ngIf="
-                validatedTool.selectedDatasets.length > 0 &&
-                bindingModel.compatibleDatasets.length < 1
-              " selected class="font-italic">No compatible files</option>
+            <option
+              *ngIf="validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1"
+              selected
+              class="font-italic">
+              No compatible files
+            </option>
           </select>
 
           <!-- validation message -->
-          <div *ngIf="
-              !bindingModel.input.optional &&
-              bindingModel.boundDatasets.length < 1
-            " class="text-sm alert alert-warning p-1 mt-1 mb-0">
+          <div
+            *ngIf="!bindingModel.input.optional && bindingModel.boundDatasets.length < 1"
+            class="text-sm alert alert-warning p-1 mt-1 mb-0">
             Input file required
           </div>
         </td>

@@ -2,7 +2,7 @@ export enum ErrorButton {
   Reload = "Reload",
   LogIn = "Log in",
   ContactSupport = "Contact support",
-  ShowDetails = "Show details"
+  ShowDetails = "Show details",
 }
 
 export class ErrorMessage {

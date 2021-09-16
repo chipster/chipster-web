@@ -14,10 +14,7 @@ export function selectedJobs(state: Array<Job> = [], { type, payload }) {
 
     case TOGGLE_SELECTED_JOB:
       _.forEach(payload, (payloadJob: Job) => {
-        const index = _.findIndex(
-          stateJobs,
-          (job: Job) => job.jobId === payloadJob.jobId
-        );
+        const index = _.findIndex(stateJobs, (job: Job) => job.jobId === payloadJob.jobId);
         index === -1 ? stateJobs.push(payloadJob) : stateJobs.splice(index, 1);
       });
       return stateJobs;

@@ -18,11 +18,7 @@ export class TwoCircleVennDiagramService {
   /*
    * @description: select description generator
    */
-  getSelectionDescriptor(
-    circles: Array<Circle>,
-    selectionCircles: Array<Circle>,
-    radius: number
-  ) {
+  getSelectionDescriptor(circles: Array<Circle>, selectionCircles: Array<Circle>, radius: number) {
     return selectionCircles.length === 1
       ? this.oneSelectedCircleDescriptor(circles, selectionCircles[0], radius)
       : this.twoSelectedCirclesDescriptor(circles, radius);
@@ -31,15 +27,8 @@ export class TwoCircleVennDiagramService {
   /*
    * @description: get path descriptor for when one circle is selected
    */
-  oneSelectedCircleDescriptor(
-    circles: Array<Circle>,
-    selectionCircle: Circle,
-    radius: number
-  ) {
-    const intersections = VennDiagramUtils.getIntersections(
-      circles[0],
-      circles[1]
-    );
+  oneSelectedCircleDescriptor(circles: Array<Circle>, selectionCircle: Circle, radius: number) {
+    const intersections = VennDiagramUtils.getIntersections(circles[0], circles[1]);
     const firstDrawPoint = VennDiagramUtils.getRightMostPoint(
       intersections.point1,
       intersections.point2,
@@ -60,10 +49,7 @@ export class TwoCircleVennDiagramService {
    * @description: get path descriptor for when two circles are selected
    */
   twoSelectedCirclesDescriptor(circles: Array<Circle>, radius: number) {
-    const intersections = VennDiagramUtils.getIntersections(
-      circles[0],
-      circles[1]
-    );
+    const intersections = VennDiagramUtils.getIntersections(circles[0], circles[1]);
 
     return `M ${intersections.point1.x},${intersections.point1.y}
         A ${radius},${radius} 0 0,1 ${intersections.point2.x},${intersections.point2.y}

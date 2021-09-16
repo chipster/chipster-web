@@ -6,13 +6,10 @@ import { ToolService } from "../../sessions/session/tools/tool.service";
 @Component({
   selector: "ch-manual-modal-component",
   templateUrl: "./manual-modal.component.html",
-  styleUrls: ["./manual-modal.component.less"]
+  styleUrls: ["./manual-modal.component.less"],
 })
 export class ManualModalComponent {
   @Input() tool: Tool;
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    public toolService: ToolService
-  ) {}
+  constructor(public activeModal: NgbActiveModal, public toolService: ToolService) {}
 }

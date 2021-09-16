@@ -13,7 +13,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   selector: "ch-statistics",
   templateUrl: "./statistics.component.html",
   styleUrls: ["./statistics.component.less"],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.Emulated,
 })
 export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";
@@ -24,7 +24,7 @@ export class StatisticsComponent implements OnInit {
 
   form = new FormGroup({
     year: this.yearControl,
-    ignoreUsers: this.ignoreUsersControl
+    ignoreUsers: this.ignoreUsersControl,
   });
 
   userCount: number;
@@ -41,16 +41,13 @@ export class StatisticsComponent implements OnInit {
 
   ngOnInit(): void {
     this.configService.get(ConfigService.KEY_STATISTICS_IGNORE_USERS).subscribe(
-      usersString => {
+      (usersString) => {
         if (usersString) {
           this.ignoreUsersControl.setValue(usersString);
         }
       },
-      err => {
-        this.errorHandlerService.showError(
-          "Failed to get ignoreUsers default",
-          err
-        );
+      (err) => {
+        this.errorHandlerService.showError("Failed to get ignoreUsers default", err);
       }
     );
   }
@@ -65,29 +62,26 @@ export class StatisticsComponent implements OnInit {
 
     this.ignoreUsersControl.value
       .split(",")
-      .map(user => user.trim())
-      .filter(user => user.length > 0)
-      .forEach(user => {
+      .map((user) => user.trim())
+      .filter((user) => user.length > 0)
+      .forEach((user) => {
         params = params.append(this.IGNORE_USERS_PARAMS, user);
       });
 
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap(service => {
-          return this.auhtHttpClient.getAuthWithParams(
-            service.adminUri + "/admin/jobhistory/statistics",
-            params
-          );
+        flatMap((service) => {
+          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params);
         })
       )
       .subscribe(
-        result => {
+        (result) => {
           this.userCount = result["userCount"];
           this.jobCount = result["jobCount"];
           this.state = LoadState.Ready;
         },
-        err => {
+        (err) => {
           this.state = LoadState.Fail;
           this.errorHandlerService.showError("get statistics failed", err);
         }

@@ -1,10 +1,7 @@
 import { Component, OnDestroy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Subject } from "rxjs";
-import {
-  SessionListMode,
-  SettingsService,
-} from "../../services/settings.service";
+import { SessionListMode, SettingsService } from "../../services/settings.service";
 
 @Component({
   selector: "ch-settings",
@@ -15,10 +12,7 @@ export class SettingsComponent implements OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(
-    public settingsService: SettingsService,
-    public activeModal: NgbActiveModal
-  ) {}
+  constructor(public settingsService: SettingsService, public activeModal: NgbActiveModal) {}
 
   ngOnDestroy() {
     this.unsubscribe.next();
@@ -26,21 +20,15 @@ export class SettingsComponent implements OnDestroy {
   }
 
   toggleShowToolsPanel() {
-    this.settingsService.showToolsPanel$.next(
-      !this.settingsService.showToolsPanel$.getValue()
-    );
+    this.settingsService.showToolsPanel$.next(!this.settingsService.showToolsPanel$.getValue());
   }
 
   toggleSplitSelectionPanel() {
-    this.settingsService.splitSelectionPanel$.next(
-      !this.settingsService.splitSelectionPanel$.getValue()
-    );
+    this.settingsService.splitSelectionPanel$.next(!this.settingsService.splitSelectionPanel$.getValue());
   }
 
   toggleCompactToolList() {
-    this.settingsService.compactToolList$.next(
-      !this.settingsService.compactToolList$.getValue()
-    );
+    this.settingsService.compactToolList$.next(!this.settingsService.compactToolList$.getValue());
   }
 
   setSessionListMode(mode: SessionListMode) {

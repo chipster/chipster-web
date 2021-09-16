@@ -1,10 +1,4 @@
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  ViewEncapsulation,
-} from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
@@ -71,11 +65,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .subscribe(
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(
-            parsedTSV,
-            this.dataset.datasetId,
-            datasetName
-          );
+          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
           if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
             this.drawLineChart(this.tsv);
             this.state = new LoadState(State.Ready);
@@ -103,8 +93,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   drawLineChart(tsv: TSVFile) {
     const that = this;
     // Configurate svg and graph-area
-    const expressionprofileWidth = document.getElementById("expressionprofile")
-      .offsetWidth;
+    const expressionprofileWidth = document.getElementById("expressionprofile").offsetWidth;
     const margin = { top: 10, right: 0, bottom: 150, left: 40 };
     const size = { width: expressionprofileWidth, height: 600 };
     const graphArea = {
@@ -129,34 +118,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // Custom headers for x-axis
     const firstDataset: any = this.dataset;
-    const phenodataDescriptions = _.filter(
-      firstDataset.metadata,
-      (metadata: any) => {
-        return metadata.key === "description";
-      }
-    );
+    const phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => {
+      return metadata.key === "description";
+    });
 
     // Change default headers to values defined in phenodata if description value has been defined
-    const headers = _.map(
-      this.visualizationTSVService.getChipHeaders(tsv),
-      (header) => {
-        // find if there is a phenodata description matching header and containing a value
-        const phenodataHeader: any = _.find(
-          phenodataDescriptions,
-          (item: any) => {
-            return item.column === header && item.value !== null;
-          }
-        );
-        return phenodataHeader ? phenodataHeader.value : header;
-      }
-    );
+    const headers = _.map(this.visualizationTSVService.getChipHeaders(tsv), (header) => {
+      // find if there is a phenodata description matching header and containing a value
+      const phenodataHeader: any = _.find(phenodataDescriptions, (item: any) => {
+        return item.column === header && item.value !== null;
+      });
+      return phenodataHeader ? phenodataHeader.value : header;
+    });
 
     // X-axis and scale
     // Calculate points (in pixels) for positioning x-axis points
-    const chipRange = _.map(
-      headers,
-      (item, index) => (graphArea.width / headers.length) * index
-    );
+    const chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index);
     const xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
     // compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not
     // assignable to parameter of type 'AxisScale<string>'.
@@ -164,10 +141,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     svg
       .append("g")
       .attr("class", "x axis")
-      .attr(
-        "transform",
-        "translate(" + margin.left + "," + graphArea.height + ")"
-      )
+      .attr("transform", "translate(" + margin.left + "," + graphArea.height + ")")
       .call(xAxis)
       .selectAll("text")
       .attr("transform", "rotate(-65 0 0)")
@@ -201,19 +175,13 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("transform", "translate(" + margin.left + ",0)");
     const lineGenerator = d3
       .line()
-      .x((d: [number, number], i: number) =>
-        parseFloat(xScale(headers[i]).toString())
-      )
+      .x((d: [number, number], i: number) => parseFloat(xScale(headers[i]).toString()))
       .y((d: any) => yScale(d));
 
     const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const geneExpressions = this.visualizationTSVService.getGeneExpressions(
-      tsv
-    );
-    const orderedExpressionGenes = this.visualizationTSVService.orderBodyByFirstValue(
-      geneExpressions
-    );
+    const geneExpressions = this.visualizationTSVService.getGeneExpressions(tsv);
+    const orderedExpressionGenes = this.visualizationTSVService.orderBodyByFirstValue(geneExpressions);
 
     const paths = pathsGroup
       .selectAll(".path")
@@ -286,31 +254,19 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const endPoint = new Point(pos[0], pos[1]);
 
       if (endPoint.x < startPoint.x) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + endPoint.x + "," + startPoint.y + ")"
-        );
+        d3.select(".band").attr("transform", "translate(" + endPoint.x + "," + startPoint.y + ")");
       }
       if (endPoint.y < startPoint.y) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + endPoint.x + "," + endPoint.y + ")"
-        );
+        d3.select(".band").attr("transform", "translate(" + endPoint.x + "," + endPoint.y + ")");
       }
       if (endPoint.y < startPoint.y && endPoint.x > startPoint.x) {
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + startPoint.x + "," + endPoint.y + ")"
-        );
+        d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + endPoint.y + ")");
       }
 
       // set new position of band when user initializes drag
       if (startPoint.x === -1) {
         startPoint = new Point(endPoint.x, endPoint.y);
-        d3.select(".band").attr(
-          "transform",
-          "translate(" + startPoint.x + "," + startPoint.y + ")"
-        );
+        d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + startPoint.y + ")");
       }
 
       d3.select(".band")
@@ -324,12 +280,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const pos = d3.mouse(document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
 
-      if (
-        startPoint.x !== -1 &&
-        startPoint.y !== -1 &&
-        startPoint.x !== endPoint.x &&
-        startPoint.y !== endPoint.y
-      ) {
+      if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
         this.resetSelections();
         d3.selectAll(".path").attr("stroke-width", 1);
         const p1 = new Point(endPoint.x, endPoint.y);
@@ -344,41 +295,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         const intervals: Array<Interval> = [];
 
         // create intervals
-        for (
-          let chipValueIndex = intervalIndexes.start;
-          chipValueIndex < intervalIndexes.end;
-          chipValueIndex++
-        ) {
-          const lines = that.expressionProfileService.createLines(
-            tsv,
-            chipValueIndex,
-            linearXScale,
-            yScale
-          );
+        for (let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++) {
+          const lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
           const intervalStartIndex = chipValueIndex;
 
-          const rectangle = new Rectangle(
-            endPoint.x,
-            endPoint.y,
-            startPoint.x,
-            startPoint.y
-          );
+          const rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
           intervals.push(new Interval(intervalStartIndex, lines, rectangle));
         }
 
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
         for (const interval of intervals) {
           const intersectingLines = _.filter(interval.lines, (line: Line) => {
-            return that.expressionProfileService.isIntersecting(
-              line,
-              interval.rectangle
-            );
+            return that.expressionProfileService.isIntersecting(line, interval.rectangle);
           });
 
           // Line ids intersecting with selection as an array
-          ids = ids.concat(
-            _.map(intersectingLines, (line: Line) => line.lineId)
-          );
+          ids = ids.concat(_.map(intersectingLines, (line: Line) => line.lineId));
         }
 
         this.resetSelections();
@@ -391,11 +323,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     function resetSelectionRectangle() {
       startPoint = new Point(-1, -1);
-      d3.select(".band")
-        .attr("width", 0)
-        .attr("height", 0)
-        .attr("x", 0)
-        .attr("y", 0);
+      d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
     }
   }
 
@@ -404,19 +332,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset(
-        "dataset.tsv",
-        [this.dataset.datasetId],
-        "Expression profile",
-        data
-      )
+      .createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data)
       .subscribe(null);
   }
 
   getSelectionIds(): Array<string> {
-    return this.selectedGeneExpressions.map(
-      (expression: GeneExpression) => expression.id
-    );
+    return this.selectedGeneExpressions.map((expression: GeneExpression) => expression.id);
   }
 
   resetSelections(): void {
@@ -429,10 +350,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       this.removeSelectionStyle(id);
     }
 
-    const selectedGeneIds = _.filter(
-      this.getSelectionIds(),
-      (selectionId) => !_.includes(ids, selectionId)
-    );
+    const selectedGeneIds = _.filter(this.getSelectionIds(), (selectionId) => !_.includes(ids, selectionId));
     this.selectedGeneExpressions = _.map(selectedGeneIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id)
     );
@@ -444,9 +362,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const missingGeneExpressions = _.map(missingSelectionIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id)
     );
-    this.selectedGeneExpressions = this.selectedGeneExpressions.concat(
-      missingGeneExpressions
-    );
+    this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
     missingSelectionIds.forEach((id) => {
       this.setSelectionStyle(id);
     });
@@ -478,9 +394,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   setViewSelectionList(): void {
-    const rowIds = this.selectedGeneExpressions.map(
-      (geneExpression: GeneExpression) => geneExpression.id
-    );
+    const rowIds = this.selectedGeneExpressions.map((geneExpression: GeneExpression) => geneExpression.id);
     const rawTSVRows = this.tsv.body.getTSVRows(rowIds);
     const tsvSymbolIndex = this.tsv.getColumnIndex("symbol");
     const tsvIdentifierIndex = this.tsv.getColumnIndex("identifier");

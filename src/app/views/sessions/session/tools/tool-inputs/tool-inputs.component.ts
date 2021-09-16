@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import * as _ from "lodash";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -42,13 +36,8 @@ export class ToolInputsComponent implements OnChanges {
       this.bindingModels = this.validatedTool.inputBindings.map((b) => ({
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
-        compatibleDatasets: this.validatedTool.selectedDatasets.filter(
-          (dataset: Dataset) =>
-            this.toolService.isCompatible(
-              this.sessionData,
-              dataset,
-              b.toolInput.type.name
-            )
+        compatibleDatasets: this.validatedTool.selectedDatasets.filter((dataset: Dataset) =>
+          this.toolService.isCompatible(this.sessionData, dataset, b.toolInput.type.name)
         ),
       }));
     } else {
@@ -62,29 +51,22 @@ export class ToolInputsComponent implements OnChanges {
     // also automatically bind the rest if there's only one way to do the binding
 
     // remove user selected file from other bindings
-    const otherBindingModels = this.bindingModels.filter(
-      (bindingModel) => bindingModel !== userEditedBinding
-    );
+    const otherBindingModels = this.bindingModels.filter((bindingModel) => bindingModel !== userEditedBinding);
     otherBindingModels.forEach(
       (bindingModel) =>
-        (bindingModel.boundDatasets = _.difference(
-          bindingModel.boundDatasets,
-          userEditedBinding.boundDatasets
-        ))
+        (bindingModel.boundDatasets = _.difference(bindingModel.boundDatasets, userEditedBinding.boundDatasets))
     );
 
     // bind the rest of the inputs if there's only one way to bind them
     // will update bindingModels
     this.autoBindRest(otherBindingModels);
 
-    const updatedBindings: InputBinding[] = this.bindingModels.map(
-      (bindingModel) => {
-        return {
-          toolInput: bindingModel.input,
-          datasets: bindingModel.boundDatasets.slice(),
-        };
-      }
-    );
+    const updatedBindings: InputBinding[] = this.bindingModels.map((bindingModel) => {
+      return {
+        toolInput: bindingModel.input,
+        datasets: bindingModel.boundDatasets.slice(),
+      };
+    });
 
     this.updateBindings.emit({
       tool: this.validatedTool.tool,
@@ -97,9 +79,7 @@ export class ToolInputsComponent implements OnChanges {
 
   private autoBindRest(otherBindingModels: BindingModel[]) {
     const unboundOtherModels = otherBindingModels.filter(
-      (bindingModel) =>
-        bindingModel.boundDatasets != null &&
-        bindingModel.boundDatasets.length < 1
+      (bindingModel) => bindingModel.boundDatasets != null && bindingModel.boundDatasets.length < 1
     );
 
     // any unbound inputs?
@@ -108,35 +88,24 @@ export class ToolInputsComponent implements OnChanges {
     }
 
     // check that all unbound input types are unique
-    const uniqueTypes: Set<string> = new Set(
-      unboundOtherModels.map((bindingModel) => bindingModel.input.type.name)
-    );
+    const uniqueTypes: Set<string> = new Set(unboundOtherModels.map((bindingModel) => bindingModel.input.type.name));
     if (uniqueTypes.size !== unboundOtherModels.length) {
       return;
     }
 
     // check that for each unbound input, there exists exactly one compatible non-bound dataset
-    const currentlyBoundDatasets = [].concat(
-      ...this.bindingModels.map((bindingModel) => bindingModel.boundDatasets)
+    const currentlyBoundDatasets = [].concat(...this.bindingModels.map((bindingModel) => bindingModel.boundDatasets));
+
+    const compatibleUnboundDatasets: Array<Array<Dataset>> = unboundOtherModels.map((bindingModel) =>
+      _.difference(bindingModel.compatibleDatasets, currentlyBoundDatasets)
     );
 
-    const compatibleUnboundDatasets: Array<Array<Dataset>> =
-      unboundOtherModels.map((bindingModel) =>
-        _.difference(bindingModel.compatibleDatasets, currentlyBoundDatasets)
-      );
-
-    if (
-      compatibleUnboundDatasets.some(
-        (datasets: Dataset[]) => datasets.length !== 1
-      )
-    ) {
+    if (compatibleUnboundDatasets.some((datasets: Dataset[]) => datasets.length !== 1)) {
       return;
     }
 
     // check that for each unbound input, a unique file would be bound
-    const datasetIdsToBeBound: String[] = []
-      .concat(...compatibleUnboundDatasets)
-      .map((dataset) => dataset.datasetId);
+    const datasetIdsToBeBound: String[] = [].concat(...compatibleUnboundDatasets).map((dataset) => dataset.datasetId);
 
     if (!UtilsService.onlyHasUniqueValues(datasetIdsToBeBound)) {
       return;
@@ -144,10 +113,7 @@ export class ToolInputsComponent implements OnChanges {
 
     // all checks passed, bind unbound inputs by updating bindingModels
     unboundOtherModels.forEach((bindingModel) => {
-      bindingModel.boundDatasets = _.difference(
-        bindingModel.compatibleDatasets,
-        currentlyBoundDatasets
-      );
+      bindingModel.boundDatasets = _.difference(bindingModel.compatibleDatasets, currentlyBoundDatasets);
     });
   }
 
@@ -156,8 +122,6 @@ export class ToolInputsComponent implements OnChanges {
   }
 
   getPhenodataInputs() {
-    return this.validatedTool.tool.inputs.filter(
-      (input: ToolInput) => input.meta
-    );
+    return this.validatedTool.tool.inputs.filter((input: ToolInput) => input.meta);
   }
 }

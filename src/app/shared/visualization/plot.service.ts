@@ -30,12 +30,10 @@ export class PlotService {
 
     const selectedDataPoints = plotData
       .filter(
-        val => 
-          val.plotPoint.x <= maxX &&
-          val.plotPoint.x >= minX &&
-          val.plotPoint.y <= maxY &&
-          val.plotPoint.y >= minY)
-      .map(val => val.id);
+        (val) =>
+          val.plotPoint.x <= maxX && val.plotPoint.x >= minX && val.plotPoint.y <= maxY && val.plotPoint.y >= minY
+      )
+      .map((val) => val.id);
 
     return selectedDataPoints;
   }

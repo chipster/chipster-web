@@ -30,19 +30,14 @@ export class SessionService {
           session.name = name;
 
           // 'save' temp session when renaming it
-          if (
-            session.state === SessionState.TemporaryUnmodified ||
-            session.state === SessionState.TemporaryModified
-          ) {
+          if (session.state === SessionState.TemporaryUnmodified || session.state === SessionState.TemporaryModified) {
             session.state = SessionState.Ready;
           }
 
           return this.updateSession(session);
         })
       )
-      .subscribe(null, err =>
-        this.restErrorService.showError("Rename session failed", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("Rename session failed", err));
   }
 
   openNotesModalAndUpdate(session: Session) {
@@ -54,9 +49,7 @@ export class SessionService {
           return this.updateSession(session);
         })
       )
-      .subscribe(null, err =>
-        this.restErrorService.showError("Failed to edit session notes", err)
-      );
+      .subscribe(null, (err) => this.restErrorService.showError("Failed to edit session notes", err));
   }
 
   downloadSession(sessionId: string) {
@@ -64,7 +57,7 @@ export class SessionService {
       this.sessionWorkerResource.getPackageUrl(sessionId),
       this.sessionDataService.getTokenForSession(sessionId)
     ).pipe(
-      map(resp => {
+      map((resp) => {
         const url = resp[0];
         const token = resp[1];
         return url + "?token=" + token;
@@ -74,9 +67,6 @@ export class SessionService {
   }
 
   isTemporary(session: Session): boolean {
-    return (
-      session.state === SessionState.TemporaryModified ||
-      session.state === SessionState.TemporaryUnmodified
-    );
+    return session.state === SessionState.TemporaryModified || session.state === SessionState.TemporaryUnmodified;
   }
 }

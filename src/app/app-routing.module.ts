@@ -4,7 +4,7 @@ import { AnalyzeGuard } from "./core/routing/analyze-guard.service";
 import { AuthGuard } from "./core/routing/auth-guard.service";
 import { LandGuard } from "./core/routing/land-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
-import { AccessComponent } from './views/access/access.component';
+import { AccessComponent } from "./views/access/access.component";
 import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
 import { ContactComponent } from "./views/contact/contact.component";
 import { MyllyHasMovedComponent } from "./views/error/mylly.component";
@@ -24,7 +24,7 @@ const routes: Routes = [
   { path: "login", component: LoginComponent },
   {
     path: "mylly",
-    children: [{ path: "**", component: MyllyHasMovedComponent }]
+    children: [{ path: "**", component: MyllyHasMovedComponent }],
   },
   { path: "oidc/callback", component: OidcCallbackComponent },
   { path: "auth/oidc/haka/callback", component: OidcCallbackComponent },
@@ -36,25 +36,25 @@ const routes: Routes = [
   {
     path: "manual",
     // route all sub-paths here
-    children: [{ path: "**", component: ManualComponent }]
+    children: [{ path: "**", component: ManualComponent }],
   },
 
   {
     path: "analyze/:sessionId",
     component: SessionComponent,
     canActivate: [AuthGuard],
-    canDeactivate: [ModifiedSessionGuard]
+    canDeactivate: [ModifiedSessionGuard],
   },
 
   {
     path: "analyze",
     component: DummyRouteComponent, // guard always redirects
-    canActivate: [AuthGuard, AnalyzeGuard]
+    canActivate: [AuthGuard, AnalyzeGuard],
   },
   {
     path: "sessions",
     component: SessionListComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
 
   { path: "notfound", component: NotFoundComponent, pathMatch: "full" },
@@ -63,9 +63,9 @@ const routes: Routes = [
     path: "",
     component: DummyRouteComponent, // guard always redirects
     canActivate: [LandGuard],
-    pathMatch: "full"
+    pathMatch: "full",
   },
-  { path: "**", component: NotFoundComponent }
+  { path: "**", component: NotFoundComponent },
 ];
 
 @NgModule({
@@ -75,9 +75,7 @@ const routes: Routes = [
   //     enableTracing: true
   //   })
   // ],
-  imports: [
-    RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled", relativeLinkResolution: 'legacy' })
-  ],
-  exports: [RouterModule]
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled", relativeLinkResolution: "legacy" })],
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}

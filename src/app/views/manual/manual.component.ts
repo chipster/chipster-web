@@ -94,21 +94,16 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
           return this.getPage(this.assetsPath + this.currentPage);
         }),
         // parse the html
-        map((htmlString) =>
-          new DOMParser().parseFromString(htmlString, "text/html")
-        ),
+        map((htmlString) => new DOMParser().parseFromString(htmlString, "text/html")),
         // fix the links and image source addresses
         map((htmlDoc) => this.rewrite(htmlDoc, this.currentPage)),
         // show
         map((html) => {
-          this.html = this.sanitizer.bypassSecurityTrustHtml(
-            new XMLSerializer().serializeToString(html)
-          );
+          this.html = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html));
         })
       )
       .subscribe({
-        error: (err) =>
-          this.restErrorService.showError("page change failed", err),
+        error: (err) => this.restErrorService.showError("page change failed", err),
       });
   }
 

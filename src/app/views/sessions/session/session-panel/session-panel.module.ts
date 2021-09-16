@@ -13,13 +13,8 @@ import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule],
-  declarations: [
-    WorkflowGraphComponent,
-    SessionPanelComponent,
-    UploadModalComponent,
-    UploadComponent
-  ],
+  declarations: [WorkflowGraphComponent, SessionPanelComponent, UploadModalComponent, UploadComponent],
   providers: [WorkflowGraphService, UploadService, DatasetsearchPipe],
-  exports: [SessionPanelComponent, WorkflowGraphComponent]
+  exports: [SessionPanelComponent, WorkflowGraphComponent],
 })
 export class SessionPanelModule {}

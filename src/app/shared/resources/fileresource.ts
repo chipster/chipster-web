@@ -8,11 +8,7 @@ import { ConfigService } from "../services/config.service";
 
 @Injectable()
 export class FileResource {
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-    private tokenService: TokenService
-  ) {}
+  constructor(private configService: ConfigService, private http: HttpClient, private tokenService: TokenService) {}
 
   /**
    *
@@ -22,19 +18,9 @@ export class FileResource {
    * @param isReqArrayBuffer
    * @returns {any}
    */
-  getData(
-    sessionId: string,
-    dataset: Dataset,
-    maxBytes?: number,
-    isReqArrayBuffer?: boolean
-  ): Observable<any> {
+  getData(sessionId: string, dataset: Dataset, maxBytes?: number, isReqArrayBuffer?: boolean): Observable<any> {
     if (maxBytes) {
-      return this.getLimitedData(
-        sessionId,
-        dataset,
-        maxBytes,
-        isReqArrayBuffer
-      );
+      return this.getLimitedData(sessionId, dataset, maxBytes, isReqArrayBuffer);
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
@@ -43,38 +29,27 @@ export class FileResource {
       // For Bam Viewer, we need array buffer as reponse
       return apiUrl$.pipe(
         mergeMap((url: string) =>
-          this.http.get(
-            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-            {
-              headers: this.tokenService.getTokenHeader(),
-              withCredentials: true,
-              responseType: "arraybuffer"
-            }
-          )
+          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+            headers: this.tokenService.getTokenHeader(),
+            withCredentials: true,
+            responseType: "arraybuffer",
+          })
         )
       );
     } else {
       return apiUrl$.pipe(
         mergeMap((url: string) =>
-          this.http.get(
-            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-            {
-              headers: this.tokenService.getTokenHeader(),
-              withCredentials: true,
-              responseType: "text"
-            }
-          )
+          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+            headers: this.tokenService.getTokenHeader(),
+            withCredentials: true,
+            responseType: "text",
+          })
         )
       );
     }
   }
 
-  getLimitedData(
-    sessionId: string,
-    dataset: Dataset,
-    maxBytes: number,
-    isReqArrayBuffer?: boolean
-  ): Observable<any> {
+  getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
     if (maxBytes) {
       maxBytes = Math.min(maxBytes, dataset.size);
 
@@ -93,39 +68,29 @@ export class FileResource {
     if (isReqArrayBuffer) {
       return apiUrl$.pipe(
         mergeMap((url: string) =>
-          this.http.get(
-            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-            {
-              headers: headers,
-              withCredentials: true,
-              responseType: "arraybuffer",
-              reportProgress: true
-            }
-          )
+          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+            headers: headers,
+            withCredentials: true,
+            responseType: "arraybuffer",
+            reportProgress: true,
+          })
         )
       );
     } else {
       return apiUrl$.pipe(
         mergeMap((url: string) =>
-          this.http.get(
-            `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
-            {
-              headers: headers,
-              withCredentials: true,
-              responseType: "text",
-              reportProgress: true
-            }
-          )
+          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+            headers: headers,
+            withCredentials: true,
+            responseType: "text",
+            reportProgress: true,
+          })
         )
       );
     }
   }
 
-  uploadData(
-    sessionId: string,
-    datasetId: string,
-    data: string
-  ): Observable<any> {
+  uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
     return apiUrl$.pipe(
       mergeMap((url: string) =>

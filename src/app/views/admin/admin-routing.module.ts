@@ -26,13 +26,13 @@ const routes: Routes = [
       { path: "history", component: HistoryComponent },
       { path: "statistics", component: StatisticsComponent },
       { path: "maintenance", component: MaintenanceComponent },
-      { path: "**", redirectTo: "services" }
-    ]
-  }
+      { path: "**", redirectTo: "services" },
+    ],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AdminRoutingModule {}

@@ -21,7 +21,7 @@ export class RouteService {
 
   redirectToLoginAndBackWithCustomCurrentUrl(currentUrl: string) {
     this.navigateAbsolute("/login", {
-      queryParams: { returnUrl: currentUrl }
+      queryParams: { returnUrl: currentUrl },
     });
   }
 

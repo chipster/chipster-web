@@ -12,21 +12,9 @@ import { FileComponent } from "./file/file.component";
 import { JobComponent } from "./job/job.component";
 
 @NgModule({
-  imports: [
-    NgbModule,
-    CommonModule,
-    FormsModule,
-    SharedModule,
-    LinkButtonModule,
-    VisualizationsModule
-  ],
-  declarations: [
-    DatasetDetailsComponent,
-    FileComponent,
-    JobComponent,
-    DatasetHistoryModalComponent
-  ],
+  imports: [NgbModule, CommonModule, FormsModule, SharedModule, LinkButtonModule, VisualizationsModule],
+  declarations: [DatasetDetailsComponent, FileComponent, JobComponent, DatasetHistoryModalComponent],
   exports: [JobComponent, FileComponent, DatasetDetailsComponent],
-  providers: [DatasetModalService]
+  providers: [DatasetModalService],
 })
 export class DatasetModule {}

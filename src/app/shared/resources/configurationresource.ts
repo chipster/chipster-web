@@ -12,9 +12,7 @@ export class ConfigurationResource {
   constructor(private httpClient: HttpClient) {}
 
   getConfiguration(file: string): Observable<any> {
-    return this.httpClient
-      .get("/assets/conf/" + file, { responseType: "text" })
-      .pipe(map(conf => YAML.parse(conf)));
+    return this.httpClient.get("/assets/conf/" + file, { responseType: "text" }).pipe(map((conf) => YAML.parse(conf)));
   }
 
   getPublicServices(conf: any): Observable<Service[]> {
@@ -29,13 +27,8 @@ export class ConfigurationResource {
     // injecting AuhtHttpClientService would create a circular dependency
     // maybe we need some kind of static util class adding auth header?
     let headers = new HttpHeaders();
-    headers = headers.append(
-      "Authorization",
-      "Basic " + btoa("token:" + token)
-    );
+    headers = headers.append("Authorization", "Basic " + btoa("token:" + token));
 
-    return <any>(
-      this.httpClient.get(url, { headers: headers, withCredentials: true })
-    );
+    return <any>this.httpClient.get(url, { headers: headers, withCredentials: true });
   }
 }

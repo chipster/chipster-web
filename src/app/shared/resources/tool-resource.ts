@@ -11,16 +11,12 @@ export class ToolResource {
 
   getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.pipe(
-      mergeMap((apiUrl: string) => this.http.get<Module[]>(`${apiUrl}/modules`))
-    );
+    return apiUrl$.pipe(mergeMap((apiUrl: string) => this.http.get<Module[]>(`${apiUrl}/modules`)));
   }
 
   getTools(): Observable<Tool[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
-    return apiUrl$.pipe(
-      mergeMap((apiUrl: string) => this.http.get<Tool[]>(`${apiUrl}/tools`))
-    );
+    return apiUrl$.pipe(mergeMap((apiUrl: string) => this.http.get<Tool[]>(`${apiUrl}/tools`)));
   }
 
   getSourceCode(toolId: string): Observable<string> {
@@ -28,7 +24,7 @@ export class ToolResource {
     return apiUrl$.pipe(
       mergeMap((apiUrl: string) =>
         this.http.get(`${apiUrl}/tools/${toolId}/source`, {
-          responseType: "text"
+          responseType: "text",
         })
       )
     );

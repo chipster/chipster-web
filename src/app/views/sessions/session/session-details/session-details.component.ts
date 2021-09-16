@@ -14,7 +14,7 @@ import { SessionService } from "../session.service";
 @Component({
   selector: "ch-session-details",
   templateUrl: "./session-details.component.html",
-  styleUrls: ["./session-details.component.less"]
+  styleUrls: ["./session-details.component.less"],
 })
 export class SessionDetailsComponent {
   @Input()
@@ -44,10 +44,7 @@ export class SessionDetailsComponent {
   }
 
   sharingModal() {
-    this.dialogModalService.openSharingModal(
-      this.session,
-      this.sessionEventService.getRuleStream()
-    );
+    this.dialogModalService.openSharingModal(this.session, this.sessionEventService.getRuleStream());
   }
 
   duplicateModal(): void {
@@ -58,31 +55,24 @@ export class SessionDetailsComponent {
     this.dialogModalService
       .openSessionNameModal("Copy session", this.session.name + "_copy", "Copy")
       .pipe(
-        flatMap(name => {
+        flatMap((name) => {
           let copyOrUpdate$;
           if (!this.sessionService.isTemporary(this.sessionData.session)) {
             log.info("save a copy for normal session, copying session");
-            copyOrUpdate$ = this.sessionResource
-              .copySession(this.sessionData, name, false)
-              .pipe(
-                map(sessionId => {
-                  newSessionId = sessionId;
-                  return sessionId;
-                })
-              );
+            copyOrUpdate$ = this.sessionResource.copySession(this.sessionData, name, false).pipe(
+              map((sessionId) => {
+                newSessionId = sessionId;
+                return sessionId;
+              })
+            );
           } else {
             log.info("save a copy for temp session, updating session");
             this.sessionData.session.name = name;
             this.sessionData.session.state = SessionState.Ready;
-            copyOrUpdate$ = this.sessionService
-              .updateSession(this.sessionData.session)
-              .pipe(map(() => true));
+            copyOrUpdate$ = this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
           }
 
-          return this.dialogModalService.openSpinnerModal(
-            "Copy session",
-            copyOrUpdate$
-          );
+          return this.dialogModalService.openSpinnerModal("Copy session", copyOrUpdate$);
         })
       )
       .subscribe(
@@ -91,7 +81,7 @@ export class SessionDetailsComponent {
             this.routeService.navigateToSession(newSessionId);
           }
         },
-        err => this.restErrorService.showError("Copy session failed", err)
+        (err) => this.restErrorService.showError("Copy session failed", err)
       );
   }
 
@@ -101,12 +91,7 @@ export class SessionDetailsComponent {
 
   removeSessionModal() {
     this.dialogModalService
-      .openBooleanModal(
-        "Delete session",
-        "Delete session " + this.sessionData.session.name + "?",
-        "Delete",
-        "Cancel"
-      )
+      .openBooleanModal("Delete session", "Delete session " + this.sessionData.session.name + "?", "Delete", "Cancel")
       .then(
         () => {
           this.deleteSession.emit(this.session);

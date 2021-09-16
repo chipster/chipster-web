@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  NgZone,
-  OnChanges,
-  OnDestroy,
-  ViewChild
-} from "@angular/core";
+import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, ViewChild } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
@@ -19,20 +11,16 @@ import { FileResource } from "../../../../../shared/resources/fileresource";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 import { TsvService } from "../../../../../shared/services/tsv.service";
-import {
-  Tags,
-  TypeTagService
-} from "../../../../../shared/services/typetag.service";
+import { Tags, TypeTagService } from "../../../../../shared/services/typetag.service";
 import { SessionDataService } from "../../session-data.service";
 import { VisualizationModalService } from "../visualizationmodal.service";
 
 @Component({
   selector: "ch-spreadsheet-visualization",
   templateUrl: "./spreadsheet-visualization.component.html",
-  styleUrls: ["./spreadsheet-visualization.component.less"]
+  styleUrls: ["./spreadsheet-visualization.component.less"],
 })
-export class SpreadsheetVisualizationComponent
-  implements OnChanges, OnDestroy, AfterViewInit {
+export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
   @Input()
   dataset: Dataset;
   @Input()
@@ -57,11 +45,7 @@ export class SpreadsheetVisualizationComponent
   private parsedTsvTotalRowCount: number;
   public rowCount: number;
   public rowCountBeforeLimit: number;
-  readonly tableContainerId: string =
-    "tableContainer-" +
-    Math.random()
-      .toString(36)
-      .substr(2);
+  readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -121,9 +105,7 @@ export class SpreadsheetVisualizationComponent
         : false;
 
     // limit the full screen downloaded stream size also as it freezes the view
-    const maxLimit = this.modalMode
-      ? this.modalFileSizeLimit
-      : this.fileSizeLimit;
+    const maxLimit = this.modalMode ? this.modalFileSizeLimit : this.fileSizeLimit;
     const maxBytes = this.getTruncatedFile ? maxLimit : null;
 
     this.fileResource
@@ -151,22 +133,12 @@ export class SpreadsheetVisualizationComponent
           }
 
           // filter out comment lines, e.g. lines starting with ## in a VCF file
-          const skipLinesPrefix = this.typeTagService.get(
-            this.sessionData,
-            this.dataset,
-            Tags.SKIP_LINES
-          );
+          const skipLinesPrefix = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
           if (skipLinesPrefix) {
-            parsedTSV = parsedTSV.filter(
-              row => !row[0].startsWith(skipLinesPrefix)
-            );
+            parsedTSV = parsedTSV.filter((row) => !row[0].startsWith(skipLinesPrefix));
           }
 
-          const tsv2File = this.tsvService.getTSV2FileFromArray(
-            this.dataset,
-            this.sessionData,
-            parsedTSV
-          );
+          const tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset, this.sessionData, parsedTSV);
 
           let headers = tsv2File.getHeadersForSpreadSheet();
           let body = tsv2File.getBody();
@@ -196,8 +168,7 @@ export class SpreadsheetVisualizationComponent
             } else if (!this.gotFullFile && this.modalWillHaveFullFile) {
               this.goToFullScreenText = " to see all rows and total row count";
             } else if (!this.gotFullFile && !this.modalWillHaveFullFile) {
-              this.goToFullScreenText =
-                " to see more rows. File is too big for total row count";
+              this.goToFullScreenText = " to see more rows. File is too big for total row count";
             }
           }
 
@@ -207,10 +178,7 @@ export class SpreadsheetVisualizationComponent
           this.zone.runOutsideAngular(() => {
             // if the visualization isn't removed already
             if (container != null) {
-              this.hot = new Handsontable(
-                container,
-                this.getSettings(headers, body, container)
-              );
+              this.hot = new Handsontable(container, this.getSettings(headers, body, container));
             }
           });
           this.state = new LoadState(State.Ready);
@@ -225,9 +193,7 @@ export class SpreadsheetVisualizationComponent
   ngAfterViewInit() {
     // not created in modal
     if (this.horizontalScrollDiv) {
-      this.nativeElementService.disableGestures(
-        this.horizontalScrollDiv.nativeElement
-      );
+      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
     }
   }
 
@@ -248,20 +214,12 @@ export class SpreadsheetVisualizationComponent
   }
 
   showAll() {
-    this.visualizationModalService.openVisualizationModal(
-      this.dataset,
-      "spreadsheet",
-      this.sessionData
-    );
+    this.visualizationModalService.openVisualizationModal(this.dataset, "spreadsheet", this.sessionData);
   }
 
   getSettings(headers: string[], content: string[][], container) {
-    const tableHeight = this.modalMode
-      ? container.style.height
-      : content.length * 23 + 30; // extra for header-row and borders
-    const tableWidth = this.modalMode
-      ? null
-      : this.spreadsheetService.guessWidth(headers, content);
+    const tableHeight = this.modalMode ? container.style.height : content.length * 23 + 30; // extra for header-row and borders
+    const tableWidth = this.modalMode ? null : this.spreadsheetService.guessWidth(headers, content);
 
     return {
       data: content,
@@ -276,7 +234,7 @@ export class SpreadsheetVisualizationComponent
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
       width: tableWidth,
-      wordWrap: false
+      wordWrap: false,
     };
   }
 }

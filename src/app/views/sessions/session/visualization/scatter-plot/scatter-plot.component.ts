@@ -15,9 +15,7 @@ import Point from "../model/point";
   templateUrl: "./scatter-plot.component.html",
   styleUrls: ["./scatter-plot.component.less"],
 })
-export class ScatterPlotComponent
-  extends PlotDirective
-  implements OnChanges, OnDestroy {
+export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   public chipHeaders: Array<string> = [];
   private xScale: any;
   private yScale: any;
@@ -48,28 +46,20 @@ export class ScatterPlotComponent
     const self = this;
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       // Extracting header name without chip prefix
-      this.visualizationTSVService
-        .getChipHeaders(this.tsv)
-        .forEach(function (chipHeader) {
-          chipHeader = chipHeader.replace("chip.", "");
-          self.chipHeaders.push(chipHeader);
-        });
+      this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
+        chipHeader = chipHeader.replace("chip.", "");
+        self.chipHeaders.push(chipHeader);
+      });
       if (this.chipHeaders.length >= 2) {
         this.selectedXAxisHeader = this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
         this.redrawPlot();
         this.state = new LoadState(State.Ready);
       } else {
-        this.state = new LoadState(
-          State.Fail,
-          "Dataset does not have enough columns to generate scatterplot."
-        );
+        this.state = new LoadState(State.Fail, "Dataset does not have enough columns to generate scatterplot.");
       }
     } else {
-      this.state = new LoadState(
-        State.Fail,
-        "Only microarray data supported, no columns starting with chip. found."
-      );
+      this.state = new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found.");
     }
   }
 
@@ -78,9 +68,7 @@ export class ScatterPlotComponent
     this.plotData = [];
     const self = this;
     const geneValue = this.visualizationTSVService.getGeneExpressions(this.tsv);
-    const orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(
-      geneValue
-    );
+    const orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(geneValue);
 
     // Creating points for scatter plot combining two chip columns
     orderedGenesValues.forEach(function (geneRow) {
@@ -105,10 +93,7 @@ export class ScatterPlotComponent
     const padding = 50;
 
     // Define the SVG
-    this.svg
-      .attr("width", size.width)
-      .attr("height", size.height)
-      .attr("id", "svg");
+    this.svg.attr("width", size.width).attr("height", size.height).attr("id", "svg");
 
     this.xScale = d3
       .scaleLinear()
@@ -139,12 +124,7 @@ export class ScatterPlotComponent
         this.visualizationTSVService.getMaxY(self.plotData),
       ])
       .nice();
-    const yAxis = d3
-      .axisLeft(this.yScale)
-      .ticks(10)
-      .tickSize(-size.width)
-      .tickSizeOuter(0)
-      .tickPadding(5);
+    const yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0).tickPadding(5);
     this.svg
       .append("g")
       .attr("class", "axis")
@@ -158,20 +138,14 @@ export class ScatterPlotComponent
     // Appending text label for the x axis
     this.svg
       .append("text")
-      .attr(
-        "transform",
-        "translate(" + size.width / 2 + "," + (size.height - padding / 3) + ")"
-      )
+      .attr("transform", "translate(" + size.width / 2 + "," + (size.height - padding / 3) + ")")
       .style("text-anchor", "middle")
       .text(this.selectedXAxisHeader);
 
     this.svg
       .append("text")
       .attr("text-anchor", "middle")
-      .attr(
-        "transform",
-        "translate(" + padding / 2 + "," + size.height / 2 + ")rotate(-90)"
-      )
+      .attr("transform", "translate(" + padding / 2 + "," + size.height / 2 + ")rotate(-90)")
       .text(this.selectedYAxisHeader);
 
     // Add the points in the svg
@@ -241,14 +215,7 @@ export class ScatterPlotComponent
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset(
-        "newDataset.tsv",
-        [this.dataset.datasetId],
-        "Scatter Plot",
-        data
-      )
-      .subscribe(null, (err) =>
-        this.restErrorService2.showError("create dataset failed", err)
-      );
+      .createDerivedDataset("newDataset.tsv", [this.dataset.datasetId], "Scatter Plot", data)
+      .subscribe(null, (err) => this.restErrorService2.showError("create dataset failed", err));
   }
 }

@@ -3,25 +3,14 @@ import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
 import { forkJoin, of, Subject } from "rxjs";
-import {
-  debounceTime,
-  filter,
-  finalize,
-  map,
-  mergeMap,
-  takeUntil,
-  tap
-} from "rxjs/operators";
+import { debounceTime, filter, finalize, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../model/session/session-data";
 import { SessionResource } from "../../shared/resources/session.resource";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
-import {
-  SessionListMode,
-  SettingsService
-} from "../../shared/services/settings.service";
+import { SessionListMode, SettingsService } from "../../shared/services/settings.service";
 import { ToolsService } from "../../shared/services/tools.service";
 import { DialogModalService } from "./session/dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session/session-data.service";
@@ -32,7 +21,7 @@ import { UserEventService } from "./user-event.service";
 @Component({
   selector: "ch-session-list",
   templateUrl: "./session-list.component.html",
-  styleUrls: ["./session-list.component.less"]
+  styleUrls: ["./session-list.component.less"],
 })
 export class SessionListComponent implements OnInit, OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template
@@ -80,18 +69,16 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // subscribe to mode change
-    this.settingsService.sessionListMode$.subscribe(
-      (newMode: SessionListMode) => {
-        this.mode = newMode;
-      }
-    );
+    this.settingsService.sessionListMode$.subscribe((newMode: SessionListMode) => {
+      this.mode = newMode;
+    });
     this.sessionListLoading = true;
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
-        tap(userId => (this.exampleSessionOwnerUserId = userId)),
+        tap((userId) => (this.exampleSessionOwnerUserId = userId)),
         mergeMap(() => this.getSessionMap()),
-        tap(sessionMap => (this.userEventData.sessions = sessionMap)),
+        tap((sessionMap) => (this.userEventData.sessions = sessionMap)),
         tap(() => (this.sessionListLoading = false)),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions())
@@ -112,27 +99,18 @@ export class SessionListComponent implements OnInit, OnDestroy {
         // wait a while to see if the user is really interested about this session
         debounceTime(500),
         filter(() => this.selectedSession !== null),
-        mergeMap(session => {
-          return forkJoin(
-            this.sessionResource.loadSession(session.sessionId, true),
-            this.toolsService.getModulesMap()
-          );
+        mergeMap((session) => {
+          return forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap());
         }),
-        tap(results => {
+        tap((results) => {
           const sData = results[0];
           this.modulesMap = results[1];
 
           this.workflowPreviewLoading = false;
           // don't show if the selection has already changed
-          if (
-            this.selectedSession &&
-            sData.session &&
-            this.selectedSession.sessionId === sData.session.sessionId
-          ) {
+          if (this.selectedSession && sData.session && this.selectedSession.sessionId === sData.session.sessionId) {
             this.sessionData = sData;
-            this.sessionSize = this.sessionDataService.getSessionSize(
-              this.sessionData
-            );
+            this.sessionSize = this.sessionDataService.getSessionSize(this.sessionData);
           }
         }),
         // hide the spinner when unsubscribed (when the user has opened a session)
@@ -142,10 +120,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         () => {},
         (error: any) => {
           this.workflowPreviewFailed = true;
-          this.restErrorService.showError(
-            "Loading session preview failed",
-            error
-          );
+          this.restErrorService.showError("Loading session preview failed", error);
         }
       );
   }
@@ -168,15 +143,15 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
     return this.sessionResource.getSessions().pipe(
       tap((sessions: Session[]) => {
-        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+        sessions.forEach((s) => this.addOrMergeSession(sessionMap, s));
       }),
       mergeMap(() => this.sessionResource.getExampleSessions()),
       tap((sessions: Session[]) => {
-        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+        sessions.forEach((s) => this.addOrMergeSession(sessionMap, s));
       }),
       mergeMap(() => this.sessionResource.getShares()),
       tap((sessions: Session[]) => {
-        sessions.forEach(s => this.addOrMergeSession(sessionMap, s));
+        sessions.forEach((s) => this.addOrMergeSession(sessionMap, s));
       }),
       map(() => sessionMap)
     );
@@ -198,7 +173,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   ruleArrayToMap(rules: Rule[]) {
     const ruleMap = new Map<string, Rule>();
-    rules.forEach(r => ruleMap.set(r.ruleId, r));
+    rules.forEach((r) => ruleMap.set(r.ruleId, r));
     return ruleMap;
   }
 
@@ -209,9 +184,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.tokenService
       .getUsername$()
       .pipe(
-        tap(username =>
-          this.userEventService.connect(username, this.userEventData)
-        ),
+        tap((username) => this.userEventService.connect(username, this.userEventData)),
         mergeMap(() => this.userEventService.getRuleStream()),
         takeUntil(this.unsubscribe)
       )
@@ -222,14 +195,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
           // if the session was just removed
           if (!this.userEventData.sessions.has(sessionId)) {
             // try to delete from the deletingSessions
-            this.deletingSessions.forEach(s => {
+            this.deletingSessions.forEach((s) => {
               if (s.sessionId === sessionId) {
                 this.deletingSessions.delete(s);
               }
             });
           }
         },
-        err => {
+        (err) => {
           this.restErrorService.showError("Error in event handling", err);
         }
       );
@@ -249,7 +222,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.dialogModalService
       .openSessionNameModal("New session", defaultName, "Create")
       .pipe(
-        mergeMap(name => {
+        mergeMap((name) => {
           if (!name) {
             name = defaultName;
           }
@@ -272,12 +245,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
     const sessions = Array.from(this.userEventData.sessions.values());
 
     // Assigning a separate key for training sessions
-    sessions.forEach(s => {
-      this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
-        if (
-          rule.sharedBy === this.exampleSessionOwnerUserId &&
-          s.name.startsWith("course")
-        ) {
+    sessions.forEach((s) => {
+      this.sessionDataService.getApplicableRules(s.rules).forEach((rule) => {
+        if (rule.sharedBy === this.exampleSessionOwnerUserId && s.name.startsWith("course")) {
           rule.sharedBy = this.trainingSessionOwnerUserId;
         }
       });
@@ -288,8 +258,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     // may be change the list beforehand
     // show user's own sessions first
     sessionsByUser.set(null, []);
-    sessions.forEach(s => {
-      this.sessionDataService.getApplicableRules(s.rules).forEach(rule => {
+    sessions.forEach((s) => {
+      this.sessionDataService.getApplicableRules(s.rules).forEach((rule) => {
         if (!sessionsByUser.has(rule.sharedBy)) {
           sessionsByUser.set(rule.sharedBy, []);
         }
@@ -297,7 +267,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         if (
           !sessionsByUser
             .get(rule.sharedBy)
-            .map(s2 => s2.sessionId)
+            .map((s2) => s2.sessionId)
             .includes(s.sessionId)
         ) {
           sessionsByUser.get(rule.sharedBy).push(s);
@@ -310,24 +280,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionsByUserKeys.forEach((user: string) => {
       sessionsByUser.set(
         user,
-        sessionsByUser
-          .get(user)
-          .sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name))
+        sessionsByUser.get(user).sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name))
       );
     });
 
     // FIXME quick hack for ordering example and training sessions, needs refactor
-    const exampleIndex = this.sessionsByUserKeys.indexOf(
-      this.exampleSessionOwnerUserId
-    );
-    const trainingIndex = this.sessionsByUserKeys.indexOf(
-      this.trainingSessionOwnerUserId
-    );
-    if (
-      exampleIndex >= 0 &&
-      trainingIndex >= 0 &&
-      trainingIndex < exampleIndex
-    ) {
+    const exampleIndex = this.sessionsByUserKeys.indexOf(this.exampleSessionOwnerUserId);
+    const trainingIndex = this.sessionsByUserKeys.indexOf(this.trainingSessionOwnerUserId);
+    if (exampleIndex >= 0 && trainingIndex >= 0 && trainingIndex < exampleIndex) {
       this.sessionsByUserKeys[exampleIndex] = this.trainingSessionOwnerUserId;
       this.sessionsByUserKeys[trainingIndex] = this.exampleSessionOwnerUserId;
     }
@@ -462,11 +422,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
   acceptSession(session: Session) {
     const rule = session.rules[0];
     rule.sharedBy = null;
-    this.sessionResource
-      .updateRule(session.sessionId, rule)
-      .subscribe(null, (error: any) => {
-        this.restErrorService.showError("Failed to accept the share", error);
-      });
+    this.sessionResource.updateRule(session.sessionId, rule).subscribe(null, (error: any) => {
+      this.restErrorService.showError("Failed to accept the share", error);
+    });
   }
 
   sessionsUploaded(sessionIds: string[]) {
@@ -502,12 +460,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   deleteSession(session: Session) {
     this.dialogModalService
-      .openBooleanModal(
-        "Delete session",
-        "Delete session " + session.name + "?",
-        "Delete",
-        "Cancel"
-      )
+      .openBooleanModal("Delete session", "Delete session " + session.name + "?", "Delete", "Cancel")
       .then(
         () => {
           if (this.selectedSession === session) {
@@ -517,13 +470,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
           // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
           // delete the session only from this user (i.e. the rule)
-          this.sessionDataService
-            .deletePersonalRules(session)
-            .subscribe(null, (error: any) => {
-              // FIXME close preview if open
-              this.deletingSessions.delete(session);
-              this.restErrorService.showError("Deleting session failed", error);
-            });
+          this.sessionDataService.deletePersonalRules(session).subscribe(null, (error: any) => {
+            // FIXME close preview if open
+            this.deletingSessions.delete(session);
+            this.restErrorService.showError("Deleting session failed", error);
+          });
         },
         () => {
           // modal dismissed
@@ -532,11 +483,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   deleteRule(session: Session, rule: Rule) {
-    this.sessionResource
-      .deleteRule(session.sessionId, rule.ruleId)
-      .subscribe(null, (error: any) => {
-        this.restErrorService.showError("Deleting the share failed", error);
-      });
+    this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe(null, (error: any) => {
+      this.restErrorService.showError("Deleting the share failed", error);
+    });
   }
 
   isSessionSelected(session: Session) {
@@ -560,11 +509,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   getSharedByUsernamePart(userId: string): string {
-    if (
-      !userId ||
-      userId === this.exampleSessionOwnerUserId ||
-      userId === this.trainingSessionOwnerUserId
-    ) {
+    if (!userId || userId === this.exampleSessionOwnerUserId || userId === this.trainingSessionOwnerUserId) {
       return "";
     } else {
       return TokenService.getUsernameFromUserId(userId);
@@ -587,15 +532,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     // get the session to get all rules, because session list sessions have only user's own rule
     this.sessionResource
       .getSession(session.sessionId)
-      .pipe(
-        tap(s =>
-          this.dialogModalService.openSharingModal(
-            s,
-            this.userEventService.applyRuleStreamOfSession(s)
-          )
-        )
-      )
-      .subscribe(null, err => {
+      .pipe(tap((s) => this.dialogModalService.openSharingModal(s, this.userEventService.applyRuleStreamOfSession(s))))
+      .subscribe(null, (err) => {
         this.restErrorService.showError("Get session failed", err);
       });
   }
@@ -605,32 +543,20 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.dialogModalService
       .openSessionNameModal("Copy session", session.name + "_copy", "Copy")
       .pipe(
-        mergeMap(name => {
+        mergeMap((name) => {
           duplicateName = name;
           // use sessionData from preview if available
-          if (
-            this.sessionData &&
-            this.sessionData.session.sessionId === session.sessionId
-          ) {
+          if (this.sessionData && this.sessionData.session.sessionId === session.sessionId) {
             log.info("using session data from preview for duplicate");
             return of(this.sessionData);
           } else {
-            log.info(
-              "no session data from preview available, getting from server"
-            );
+            log.info("no session data from preview available, getting from server");
             return this.sessionResource.loadSession(session.sessionId);
           }
         }),
         mergeMap((sessionData: SessionData) => {
-          const copySessionObservable = this.sessionResource.copySession(
-            sessionData,
-            duplicateName,
-            false
-          );
-          return this.dialogModalService.openSpinnerModal(
-            "Copy session",
-            copySessionObservable
-          );
+          const copySessionObservable = this.sessionResource.copySession(sessionData, duplicateName, false);
+          return this.dialogModalService.openSpinnerModal("Copy session", copySessionObservable);
         })
       )
       .subscribe(
@@ -638,7 +564,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           log.info("updating sessions after duplicate");
           this.updateSessions();
         },
-        err => {
+        (err) => {
           this.restErrorService.showError("Copy session failed", err);
         }
       );
@@ -649,9 +575,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   getNotesButtonText(session: Session) {
-    return this.sessionDataService.hasPersonalRule(session.rules)
-      ? "Edit notes"
-      : "View notes";
+    return this.sessionDataService.hasPersonalRule(session.rules) ? "Edit notes" : "View notes";
   }
 
   closePreview() {

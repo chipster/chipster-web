@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
@@ -17,7 +10,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 
 @Component({
-  templateUrl: "./share-session-modal.component.html"
+  templateUrl: "./share-session-modal.component.html",
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()
@@ -49,7 +42,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       () => {
         this.rules = this.session.rules;
       },
-      err => this.errorService.showError("getting rule events failed", err)
+      (err) => this.errorService.showError("getting rule events failed", err)
     );
   }
 
@@ -79,15 +72,13 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   saveRule() {
-    this.sessionResource
-      .createRule(this.session.sessionId, this.newRule)
-      .subscribe(
-        resp => {
-          log.info("rule created", resp);
-          this.newRule = null;
-        },
-        err => this.restErrorService.showError("failed to add a new rule", err)
-      );
+    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
+      (resp) => {
+        log.info("rule created", resp);
+        this.newRule = null;
+      },
+      (err) => this.restErrorService.showError("failed to add a new rule", err)
+    );
   }
 
   addNewRule() {
@@ -98,12 +89,10 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   deleteRule(ruleId: string) {
-    this.sessionResource
-      .deleteRule(this.session.sessionId, ruleId)
-      .subscribe(
-        resp => log.info("rule deleted"),
-        err => this.restErrorService.showError("failed to delete the rule", err)
-      );
+    this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe(
+      (resp) => log.info("rule deleted"),
+      (err) => this.restErrorService.showError("failed to delete the rule", err)
+    );
   }
 
   getUsername() {

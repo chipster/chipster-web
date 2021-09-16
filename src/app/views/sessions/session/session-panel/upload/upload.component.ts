@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnInit,
-  ViewChild
-} from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -15,7 +9,7 @@ import { UploadModalComponent } from "./upload-modal.component";
 
 @Component({
   selector: "ch-add-dataset-modal",
-  templateUrl: "./upload.component.html"
+  templateUrl: "./upload.component.html",
 })
 export class UploadComponent implements AfterViewInit, OnInit {
   @Input() datasetsMap: Map<string, Dataset>;
@@ -38,17 +32,14 @@ export class UploadComponent implements AfterViewInit, OnInit {
   ) {}
 
   ngOnInit() {
-    this.flow = this.uploadService.getFlow(
-      this.fileAdded.bind(this),
-      this.fileSuccess.bind(this)
-    );
+    this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
   }
 
   fileAdded(file: any) {
     // open modal if not already open
     if (!this.modalOpen) {
       this.modalRef = this.modalService.open(UploadModalComponent, {
-        size: "lg"
+        size: "lg",
       });
 
       this.modalRef.componentInstance.sessionId = this.sessionId;
@@ -56,10 +47,10 @@ export class UploadComponent implements AfterViewInit, OnInit {
       this.modalOpen = true;
 
       this.modalRef.result.then(
-        result => {
+        (result) => {
           this.modalOpen = false;
         },
-        reason => {
+        (reason) => {
           this.modalOpen = false;
         }
       );

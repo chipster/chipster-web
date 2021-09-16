@@ -7,13 +7,18 @@
 </div>
 
 <!-- tool -->
-<ch-tool-details *ngIf="showTool || settingsService.splitSelectionPanel$.getValue()" [sessionData]="sessionData"
+<ch-tool-details
+  *ngIf="showTool || settingsService.splitSelectionPanel$.getValue()"
+  [sessionData]="sessionData"
   [selectedDatasets]="selectionService.selectedDatasets"></ch-tool-details>
 
 <!-- job -->
-<ch-job *ngIf="showJob" [sessionData]="sessionData">
-</ch-job>
+<ch-job *ngIf="showJob" [sessionData]="sessionData"></ch-job>
 
 <!-- file -->
-<ch-file *ngIf="showFile || settingsService.splitSelectionPanel$.getValue()" [dataset]="selectionService.selectedDatasets[0]"
-  [jobs]="sessionData.jobsMap" [sessionData]="sessionData" [tools]="tools"></ch-file>
+<ch-file
+  *ngIf="showFile || settingsService.splitSelectionPanel$.getValue()"
+  [dataset]="selectionService.selectedDatasets[0]"
+  [jobs]="sessionData.jobsMap"
+  [sessionData]="sessionData"
+  [tools]="tools"></ch-file>

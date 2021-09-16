@@ -4,7 +4,7 @@ import { Job, JobState } from "chipster-js-common";
 import { ContactSupportService } from "../../../contact/contact-support.service";
 
 @Component({
-  templateUrl: "./job-error-modal.component.html"
+  templateUrl: "./job-error-modal.component.html",
 })
 export class JobErrorModalComponent {
   private readonly showText = "Show screen output";
@@ -14,16 +14,11 @@ export class JobErrorModalComponent {
   @Input() job: Job;
 
   screenOutputVisible = false;
-  screenOutputButtonText = this.screenOutputVisible
-    ? this.hideText
-    : this.showText;
+  screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;
 
   JobState = JobState; // for using the enum in template
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private contactSupportService: ContactSupportService
-  ) {}
+  constructor(private activeModal: NgbActiveModal, private contactSupportService: ContactSupportService) {}
 
   close() {
     this.activeModal.close();
@@ -40,22 +35,13 @@ export class JobErrorModalComponent {
 
   toggleScreenOutput() {
     this.screenOutputVisible = !this.screenOutputVisible;
-    this.screenOutputButtonText = this.screenOutputVisible
-      ? this.hideText
-      : this.showText;
+    this.screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;
   }
 
   jobToLog(job: Job) {
     let log = "";
     log += "Job error\n";
-    log +=
-      "Tool:         " +
-      job.module +
-      " / " +
-      job.toolCategory +
-      " / " +
-      job.toolId +
-      "\n";
+    log += "Tool:         " + job.module + " / " + job.toolCategory + " / " + job.toolId + "\n";
     log += "State:        " + job.state + " (" + job.stateDetail + ")\n";
     log += "Created:      " + job.created + "\n";
     log += "Started:      " + job.startTime + "\n";
@@ -71,14 +57,7 @@ export class JobErrorModalComponent {
 
     log += "Inputs: \n";
     for (const input of job.inputs) {
-      log +=
-        "- " +
-        input.inputId +
-        ": " +
-        input.displayName +
-        " (" +
-        input.datasetId +
-        ")";
+      log += "- " + input.inputId + ": " + input.displayName + " (" + input.datasetId + ")";
     }
     log += "\n";
 

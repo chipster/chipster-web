@@ -3,7 +3,6 @@
 
   <div class="row">
     <div class="col">
-
       <!-- new session and import sessions buttons -->
       <div class="mt-2 mb-4">
         <button class="btn btn-sm btn-success mr-2" (click)="createSession()">
@@ -15,16 +14,13 @@
 
       <!-- session list -->
       <div class="session-list">
-
-        <div *ngIf="sessionListLoading" style="font-size: smaller; font-style:italic">
-          Loading...
-        </div>
+        <div *ngIf="sessionListLoading" style="font-size: smaller; font-style: italic">Loading...</div>
 
         <div *ngFor="let sharedByUsername of sessionsByUserKeys">
-
           <!-- sessions section header (Your sessions, Example sessions...) -->
-          <h5>{{getSharedByTitlePart(sharedByUsername)}}
-            <i>{{getSharedByUsernamePart(sharedByUsername)}}</i>
+          <h5>
+            {{ getSharedByTitlePart(sharedByUsername) }}
+            <i>{{ getSharedByUsernamePart(sharedByUsername) }}</i>
           </h5>
 
           <!-- info text if no personal sessions -->
@@ -37,193 +33,246 @@
           </table>
 
           <!-- session rows -->
-          <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
+          <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
             <tbody>
-              <tr *ngFor="let session of sessionsByUser.get(sharedByUsername)" (mouseover)="onSessionMouseover(session)"
-                (mouseout)="onSessionMouseout(session)" (click)="onSessionClick(session)"
-                [ngClass]="{'highlight': rowHighlighted(session)}" class="session-list-item"
+              <tr
+                *ngFor="let session of sessionsByUser.get(sharedByUsername)"
+                (mouseover)="onSessionMouseover(session)"
+                (mouseout)="onSessionMouseout(session)"
+                (click)="onSessionClick(session)"
+                [ngClass]="{ highlight: rowHighlighted(session) }"
+                class="session-list-item"
                 [title]="getSessionRowTitle()">
                 <td>
                   <!-- session name -->
-                  <span>{{session.name}}
+                  <span>
+                    {{ session.name }}
 
                     <!-- buttons -->
                     <span *ngIf="!this.deletingSessions.has(session)">
                       <!-- delete button -->
-                      <button class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
-                        [ngClass]="{'visible-button': buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)}"
-                        (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation(); "
+                      <button
+                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                        [ngClass]="{
+                          'visible-button':
+                            buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)
+                        }"
+                        (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation()"
                         title="Delete">
-                        <span class="fas fa-times "></span>
+                        <span class="fas fa-times"></span>
                       </button>
 
                       <!-- context menu button -->
-                      <div ngbDropdown #sessionDropdown="ngbDropdown" class="float-right d-inline-block"
-                        placement="bottom-right" (openChange)="sessionMenuOpenChange($event)">
-                        <button (click)="$event.stopImmediatePropagation();"
-                          [ngClass]="{'visible-button': buttonsVisible(session)}"
-                          [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                          class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" id="sessionDropdown"
-                          title="Actions" ngbDropdownToggle>
-                          <i class="fas fa-ellipsis-h" aria-hidden="true"></i></button>
+                      <div
+                        ngbDropdown
+                        #sessionDropdown="ngbDropdown"
+                        class="float-right d-inline-block"
+                        placement="bottom-right"
+                        (openChange)="sessionMenuOpenChange($event)">
+                        <button
+                          (click)="$event.stopImmediatePropagation()"
+                          [ngClass]="{ 'visible-button': buttonsVisible(session) }"
+                          [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                          class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                          id="sessionDropdown"
+                          title="Actions"
+                          ngbDropdownToggle>
+                          <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                        </button>
                         <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
-                          <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();rename(session)"
-                            [disabled]="sessionDataService.isReadOnlySession(session)">Rename&hellip;</button>
-                          <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();notes(session)">{{getNotesButtonText(session)}}&hellip;</button>
-                          <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();duplicate(session)">Save
-                            a copy&hellip;</button>
-                          <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();share(session)"
-                            [disabled]="sessionDataService.isReadOnlySession(session)">Share&hellip;</button>
-                          <button class="dropdown-item"
-                            (click)="$event.stopImmediatePropagation();sessionDropdown.toggle();download(session)">Download</button>
+                          <button
+                            class="dropdown-item"
+                            (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); rename(session)"
+                            [disabled]="sessionDataService.isReadOnlySession(session)">
+                            Rename&hellip;
+                          </button>
+                          <button
+                            class="dropdown-item"
+                            (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); notes(session)">
+                            {{ getNotesButtonText(session) }}&hellip;
+                          </button>
+                          <button
+                            class="dropdown-item"
+                            (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); duplicate(session)">
+                            Save a copy&hellip;
+                          </button>
+                          <button
+                            class="dropdown-item"
+                            (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); share(session)"
+                            [disabled]="sessionDataService.isReadOnlySession(session)">
+                            Share&hellip;
+                          </button>
+                          <button
+                            class="dropdown-item"
+                            (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); download(session)">
+                            Download
+                          </button>
                         </div>
                       </div>
                     </span>
 
                     <!-- preview button -->
-                    <button *ngIf="mode === SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW"
-                      (click)="$event.stopImmediatePropagation();selectSession(session)"
-                      [ngClass]="{'visible-button': buttonsVisible(session)}"
-                      [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                      class="btn btn-sm btn-outline-dark btn-no-border hidden float-right" title="Preview">
+                    <button
+                      *ngIf="mode === SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW"
+                      (click)="$event.stopImmediatePropagation(); selectSession(session)"
+                      [ngClass]="{ 'visible-button': buttonsVisible(session) }"
+                      [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                      class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                      title="Preview">
                       <span class="fas fa-eye"></span>
                     </button>
 
                     <!-- accept button -->
-                    <button *ngIf="isAcceptVisible(sharedByUsername)"
-                      (click)="$event.stopImmediatePropagation();acceptSession(session)"
-                      [ngClass]="{'visible-button': buttonsVisible(session)}"
-                      [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                      class="btn btn-sm btn-secondary hidden float-right mr-3" title="Accept">
+                    <button
+                      *ngIf="isAcceptVisible(sharedByUsername)"
+                      (click)="$event.stopImmediatePropagation(); acceptSession(session)"
+                      [ngClass]="{ 'visible-button': buttonsVisible(session) }"
+                      [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                      class="btn btn-sm btn-secondary hidden float-right mr-3"
+                      title="Accept">
                       <!-- <span class="fas fa-play"></span> -->
                       Accept share
                     </button>
 
                     <!-- open button -->
-                    <button *ngIf="mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN"
-                      (click)="$event.stopImmediatePropagation();openSession(session.sessionId)"
-                      [ngClass]="{'visible-button': buttonsVisible(session)}"
-                      [ngClass]="{'show-on-row-hover': !selectionDisabled}"
-                      class="btn btn-sm btn-secondary hidden float-right mr-3" title="Open">
+                    <button
+                      *ngIf="mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN"
+                      (click)="$event.stopImmediatePropagation(); openSession(session.sessionId)"
+                      [ngClass]="{ 'visible-button': buttonsVisible(session) }"
+                      [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                      class="btn btn-sm btn-secondary hidden float-right mr-3"
+                      title="Open">
                       <!-- <span class="fas fa-play"></span> -->
                       Open
                     </button>
 
                     <!-- deleting text instead of buttons for sessions which are being deleted -->
-                    <span *ngIf="deletingSessions.has(session)" class="float-right"
+                    <span
+                      *ngIf="deletingSessions.has(session)"
+                      class="float-right"
                       style="font-size: smaller; font-style: italic">
                       <!-- use hidden button to keep the row height static -->
                       <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
-                        <span class="fas fa-times "></span>
+                        <span class="fas fa-times"></span>
                       </button>
                       Deleting&hellip;
                     </span>
-
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
-          <br>
+          <br />
         </div>
       </div>
     </div>
 
     <!-- right side panel-->
     <div class="col">
-
       <div id="workflow-dataset-panel" class="text-muted">
-        <p *ngIf="mode !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">To open a session, click on the session
-          name.
+        <p *ngIf="mode !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">
+          To open a session, click on the session name.
         </p>
 
-        <p *ngIf="mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">Click on the session name to see a preview.
+        <p *ngIf="mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN">
+          Click on the session name to see a preview.
         </p>
 
-        <p>Sessions keep your analysis projects organized. They combine together your raw data files and analysis
-          results
+        <p>
+          Sessions keep your analysis projects organized. They combine together your raw data files and analysis results
           and also keep track of the analysis history. This makes it easy to understand afterwards how the data was
           analyzed.
         </p>
 
         <p>Creating a new session for each experiment is usually a good approach.</p>
 
-        <p>Sessions are stored on the server, but you can download session to a local zip file to have copy of
-          your
-          data or transfer data between different Chipster servers.</p>
+        <p>
+          Sessions are stored on the server, but you can download session to a local zip file to have copy of your data
+          or transfer data between different Chipster servers.
+        </p>
 
-        <p><em>It is highly recommended to have a backup of your data also
-            in some other location</em>.</p>
+        <p>
+          <em>It is highly recommended to have a backup of your data also in some other location</em>
+          .
+        </p>
       </div>
 
-
       <div id="session-preview" style="position: relative">
-        <div id="preview-container" *ngIf="selectedSession ">
-
-          <button *ngIf="mode !== SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW" id="close-button" class="close"
-            aria-label="Close" (click)="closePreview()" title="Close preview">
+        <div id="preview-container" *ngIf="selectedSession">
+          <button
+            *ngIf="mode !== SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW"
+            id="close-button"
+            class="close"
+            aria-label="Close"
+            (click)="closePreview()"
+            title="Close preview">
             <span aria-hidden="true">&times;</span>
           </button>
 
-          <h5 class="align-middle"> {{selectedSession.name}} <span
+          <h5 class="align-middle">
+            {{ selectedSession.name }}
+            <span
               *ngIf="mode === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW"
-              class="text-smaller lighter float-right"><i>preview</i></span></h5>
+              class="text-smaller lighter float-right">
+              <i>preview</i>
+            </span>
+          </h5>
 
           <div class="workflow-preview-panel">
-            <div *ngIf="workflowPreviewLoading" style="font-size: smaller; font-style:italic">
-              Loading preview...
-            </div>
+            <div *ngIf="workflowPreviewLoading" style="font-size: smaller; font-style: italic">Loading preview...</div>
 
-            <div *ngIf="workflowPreviewFailed" style="font-size: smaller; font-style:italic">
+            <div *ngIf="workflowPreviewFailed" style="font-size: smaller; font-style: italic">
               <i>Loading preview failed.</i>
             </div>
 
-            <div *ngIf="sessionData && !(sessionData.datasetsMap.size > 0)"
-              style="font-size: smaller; font-style:italic">No
-              data in this session.</div>
+            <div
+              *ngIf="sessionData && !(sessionData.datasetsMap.size > 0)"
+              style="font-size: smaller; font-style: italic">
+              No data in this session.
+            </div>
 
-            <div class="workflow-graph-panel"
+            <div
+              class="workflow-graph-panel"
               *ngIf="sessionData && sessionData.datasetsMap && sessionData.jobsMap && sessionData.datasetsMap.size > 0">
-              <ch-workflow-graph [datasetsMap]="sessionData.datasetsMap" [jobsMap]="sessionData.jobsMap"
-                [modulesMap]="modulesMap" [defaultScale]="0.5 " [enabled]="false "></ch-workflow-graph>
+              <ch-workflow-graph
+                [datasetsMap]="sessionData.datasetsMap"
+                [jobsMap]="sessionData.jobsMap"
+                [modulesMap]="modulesMap"
+                [defaultScale]="0.5"
+                [enabled]="false"></ch-workflow-graph>
             </div>
           </div>
-
 
           <table id="datesTable" class="table table-sm text-sm mt-2">
             <tr>
               <td class="lighter pr-2">Created:</td>
-              <td style="width: 100%">{{selectedSession.created | localDate}}</td>
+              <td style="width: 100%">{{ selectedSession.created | localDate }}</td>
             </tr>
             <tr>
               <td class="lighter pr-2">Last&nbsp;opened:</td>
-              <td style="width: 100%">{{selectedSession.accessed | localDate}}</td>
+              <td style="width: 100%">{{ selectedSession.accessed | localDate }}</td>
             </tr>
             <tr>
               <td class="lighter">Size:</td>
-              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">{{sessionSize | bytes:
-                0}}</td>
+              <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">
+                {{ sessionSize | bytes: 0 }}
+              </td>
               <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
             </tr>
           </table>
 
-
           <div>
             <!-- Create new element for each paragraph to preserve new line characters -->
-            <p *ngFor="let line of selectedSession.notes?.split( '\n') ">
-              {{line}}
+            <p *ngFor="let line of selectedSession.notes?.split('\n')">
+              {{ line }}
             </p>
           </div>
-
         </div>
       </div>
-
-    </div> <!-- col-->
-  </div> <!-- row-->
+    </div>
+    <!-- col-->
+  </div>
+  <!-- row-->
   <div class="row">
     <div class="col">
       <h5>Sent pending shares</h5>
@@ -239,7 +288,7 @@
       </table>
 
       <!-- session rows -->
-      <table class="table table-sm" [ngClass]="{'table-hover': !selectionDisabled}">
+      <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
         <tbody>
           <tr *ngIf="sessionShares.length > 0">
             <th>Shared to</th>
@@ -247,34 +296,40 @@
             <th></th>
             <th></th>
           </tr>
-          <tr *ngFor="let session of sessionShares" [ngClass]="{'highlight': rowHighlighted(session)}"
+          <tr
+            *ngFor="let session of sessionShares"
+            [ngClass]="{ highlight: rowHighlighted(session) }"
             class="session-list-item">
             <td>
-              <span>{{session.rules[0].username}}</span>
+              <span>{{ session.rules[0].username }}</span>
             </td>
             <td>
               <!-- session name -->
-              <span class="text-muted">{{session.name}}</span>
+              <span class="text-muted">{{ session.name }}</span>
             </td>
             <td>
-              <span class="text-muted">{{session.rules[0].created | localDate}}</span>
+              <span class="text-muted">{{ session.rules[0].created | localDate }}</span>
             </td>
             <td>
               <!-- buttons -->
               <span *ngIf="!this.deletingSessions.has(session)">
                 <!-- delete button -->
-                <button class="btn btn-sm btn-outline-dark btn-no-border hidden float-right visible-button"
-                  (click)="deleteRule(session, session.rules[0])" title="Revoke">
-                  <span class="fas fa-times "></span>
+                <button
+                  class="btn btn-sm btn-outline-dark btn-no-border hidden float-right visible-button"
+                  (click)="deleteRule(session, session.rules[0])"
+                  title="Revoke">
+                  <span class="fas fa-times"></span>
                 </button>
               </span>
 
               <!-- deleting text instead of buttons for sessions which are being deleted -->
-              <span *ngIf="deletingSessions.has(session)" class="float-right"
+              <span
+                *ngIf="deletingSessions.has(session)"
+                class="float-right"
                 style="font-size: smaller; font-style: italic">
                 <!-- use hidden button to keep the row height static -->
                 <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
-                  <span class="fas fa-times "></span>
+                  <span class="fas fa-times"></span>
                 </button>
                 Deleting&hellip;
               </span>

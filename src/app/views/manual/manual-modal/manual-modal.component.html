@@ -16,8 +16,10 @@
       <a ngbNavLink>Info</a>
 
       <ng-template ngbNavContent class="mt-4">
-        <ch-manual [page]="toolService.getManualPage(tool.name.id) | async" [showControls]=true [addContainer]=false>
-        </ch-manual>
+        <ch-manual
+          [page]="toolService.getManualPage(tool.name.id) | async"
+          [showControls]="true"
+          [addContainer]="false"></ch-manual>
       </ng-template>
     </ng-container>
 
@@ -32,7 +34,6 @@
   </nav>
 
   <div [ngbNavOutlet]="nav" class="mt-2"></div>
-
 </div>
 
 <!-- <div class="modal-footer">

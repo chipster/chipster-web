@@ -16,7 +16,7 @@ export default class TSVHeaders {
    * @description: Filter unwanted cells from row
    */
   public getItemsByIndexes(indexes: Array<number>): Array<any> {
-    return _.map(indexes, index => this.headers[index]);
+    return _.map(indexes, (index) => this.headers[index]);
   }
 
   /*

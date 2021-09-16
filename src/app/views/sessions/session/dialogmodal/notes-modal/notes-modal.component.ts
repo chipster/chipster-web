@@ -1,17 +1,11 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnInit,
-  ViewChild
-} from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
 @Component({
   templateUrl: "./notes-modal.component.html",
-  styleUrls: ["./notes-modal.component.less"]
+  styleUrls: ["./notes-modal.component.less"],
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
   @Input()
@@ -25,10 +19,7 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   public notes: string;
   public readOnly: boolean;
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private sessionDataService: SessionDataService
-  ) {}
+  constructor(private activeModal: NgbActiveModal, private sessionDataService: SessionDataService) {}
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened
@@ -49,9 +40,7 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.notes = this.session.notes;
-    this.readOnly = !this.sessionDataService.hasPersonalRule(
-      this.session.rules
-    );
+    this.readOnly = !this.sessionDataService.hasPersonalRule(this.session.rules);
   }
 
   save() {
@@ -63,9 +52,7 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   }
 
   getPlaceHolder() {
-    return this.readOnly
-      ? "You don't have permissions to add notes to this session"
-      : "Add notes here";
+    return this.readOnly ? "You don't have permissions to add notes to this session" : "Add notes here";
   }
 
   getTitle(): string {

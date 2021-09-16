@@ -25,9 +25,7 @@ export default class TSVBody {
    * @description: Get rows with ids
    */
   public getTSVRows(ids: Array<string>): Array<TSVRow> {
-    return _.filter(this.rows, (row: TSVRow) =>
-      _.includes(ids, row.id.toString())
-    );
+    return _.filter(this.rows, (row: TSVRow) => _.includes(ids, row.id.toString()));
   }
 
   /*
