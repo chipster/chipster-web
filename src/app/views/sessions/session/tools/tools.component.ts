@@ -44,7 +44,6 @@ import {
   SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
-import { DatasetService } from "../dataset.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
@@ -145,13 +144,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
-    private datasetService: DatasetService,
     private datasetModalService: DatasetModalService,
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig,
     private ngbModal: NgbModal
   ) {
     // prevent dropdowns from closing on click inside the dropdown
+    // eslint-disable-next-line no-param-reassign
     dropdownConfig.autoClose = "outside";
   }
 
@@ -174,7 +173,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.clearStoreToolSelections();
-    this.parametersChanged$ == null;
+    this.parametersChanged$ = null;
     this.unsubscribe.next();
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
@@ -209,7 +208,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   selectTool(tool: Tool) {
     const selectedTool: SelectedTool = {
-      tool: tool,
+      tool,
       category: this.selectedCategory,
       module: this.selectedModule,
     };
@@ -255,7 +254,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private showRunJobToaster(jobCount = 1) {
     const notificationText =
-      jobCount > 1 ? jobCount + " jobs started" : "Job started";
+      jobCount > 1 ? `${jobCount} jobs started` : "Job started";
 
     // close the previous toastr not to cover the run button
     // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
@@ -276,9 +275,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.runningJobs = this.jobList.reduce((runningCount, job) => {
       if (job.state === "RUNNING" || job.state === "NEW") {
         return runningCount + 1;
-      } else {
-        return runningCount;
       }
+      return runningCount;
     }, 0);
   }
 
@@ -303,7 +301,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             moduleId: module.moduleId,
             moduleName: module.name,
             category: category.name,
-            tool: tool,
+            tool,
             toolName: tool.name.displayName,
             toolId: tool.name.id,
             description: tool.description,
@@ -322,16 +320,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .split(/\s+/)
       .filter((s: string) => s.length > 0);
 
-    return termTokens.every((termToken: string) => {
-      return (
+    return termTokens.every(
+      (termToken: string) =>
         item.toolName.toLowerCase().indexOf(termToken) !== -1 ||
         (item.description &&
           item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
         item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
         item.toolId.toLowerCase().indexOf(termToken) !== -1
-      );
-    });
+    );
   }
 
   public searchBoxSelect(item) {
@@ -387,17 +384,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
-            payload: Object.assign(
-              {
-                inputBindings: this.toolService.bindInputs(
-                  this.sessionData,
-                  selectedTool.tool,
-                  uptodateDatasets
-                ),
-                selectedDatasets: selectedDatasets,
-              },
-              selectedTool
-            ),
+            payload: {
+              inputBindings: this.toolService.bindInputs(
+                this.sessionData,
+                selectedTool.tool,
+                uptodateDatasets
+              ),
+              selectedDatasets,
+              ...selectedTool,
+            },
           });
         } else {
           this.clearStoreToolSelections();
@@ -442,20 +437,18 @@ export class ToolsComponent implements OnInit, OnDestroy {
             }
           }
 
-          return Object.assign(
-            {
-              singleJobInputsValidation: {
-                valid: inputsValid,
-                message: inputsMessage,
-              },
-              phenodataValidation: {
-                valid: phenodataValid,
-                message: phenodataMessage,
-              },
-              phenodataBindings: phenodataBindings,
+          return {
+            singleJobInputsValidation: {
+              valid: inputsValid,
+              message: inputsMessage,
             },
-            toolWithInputs
-          );
+            phenodataValidation: {
+              valid: phenodataValid,
+              message: phenodataMessage,
+            },
+            phenodataBindings,
+            ...toolWithInputs,
+          };
         })
       )
       .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
@@ -471,16 +464,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.unsubscribe),
         filter((value) => value !== null),
-        mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) => {
+        mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) =>
           // populate params is async, and returns the same tool with params populated
           // if there are no params, just return the same tool as observable
-          return toolWithInputs.tool.parameters.length > 0
+          toolWithInputs.tool.parameters.length > 0
             ? this.toolSelectionService.populateParameters(
                 toolWithInputs,
                 this.sessionData
               )
-            : of(toolWithInputs);
-        })
+            : of(toolWithInputs)
+        )
       )
       .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
@@ -502,11 +495,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
         map(([toolWithPopulatedParamsAndValidatedInputs]) => {
           if (toolWithPopulatedParamsAndValidatedInputs == null) {
             return null;
-          } else {
-            return this.toolSelectionService.validateParameters(
-              toolWithPopulatedParamsAndValidatedInputs
-            );
           }
+          return this.toolSelectionService.validateParameters(
+            toolWithPopulatedParamsAndValidatedInputs
+          );
         })
       )
       .subscribe(
@@ -534,12 +526,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
         map((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
           if (toolWithValidatedParams == null) {
             return null;
-          } else {
-            return this.toolSelectionService.getValidatedTool(
-              toolWithValidatedParams,
-              this.sessionData
-            );
           }
+          return this.toolSelectionService.getValidatedTool(
+            toolWithValidatedParams,
+            this.sessionData
+          );
         })
       )
       .subscribe((validatedTool: ValidatedTool) => {
