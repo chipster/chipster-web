@@ -5,16 +5,9 @@
     "source.fixAll": true,
     "source.organizeImports": true
   },
-
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "eslint.options": {
     "extensions": [".ts", ".html"]
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "html"
-  ],
-  "prettier.disableLanguages": ["html"]
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "html"]
 }
