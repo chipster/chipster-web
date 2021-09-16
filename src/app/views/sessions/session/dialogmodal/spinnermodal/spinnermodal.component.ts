@@ -4,16 +4,13 @@ import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
-  templateUrl: "./spinnermodal.html",
+  templateUrl: "./spinnermodal.component.html",
 })
 export class SpinnerModalComponent implements AfterViewInit {
   @Input() message: string;
   @Input() observable: Observable<any>;
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private restErrorService: RestErrorService
-  ) {}
+  constructor(private activeModal: NgbActiveModal, private restErrorService: RestErrorService) {}
 
   ngAfterViewInit() {
     this.observable.subscribe(
@@ -21,7 +18,7 @@ export class SpinnerModalComponent implements AfterViewInit {
         this.activeModal.close(result);
       },
       (err) => {
-        this.restErrorService.showError(this.message + " failed", err);
+        this.restErrorService.showError(`${this.message} failed`, err);
         this.activeModal.dismiss();
       }
     );
