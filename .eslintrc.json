@@ -54,7 +54,7 @@
         "prefer-template": "off", // not sure if we want this
         "@typescript-eslint/dot-notation": "off", // for now, fix causes troubles,
         "class-methods-use-this": "off", // we have lot's of these, especially all services
-        "max-classes-per-file": "off" // used for small classes in maybe three files
+        "max-classes-per-file": "off" // used for small classes in maybe three files, should maybe use Types for these?
       }
     },
     {
