@@ -42,7 +42,7 @@ export class JobService {
       }
       const duration = UtilsService.millisecondsBetweenDates(startDate, endDate);
       return of(UtilsService.millisecondsToHumanFriendly(duration));
-    } else {
+    } 
       return interval(1000).pipe(
         startWith(0),
         map(() => {
@@ -55,7 +55,7 @@ export class JobService {
           return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
         }, distinctUntilChanged())
       );
-    }
+    
   }
 
   static isSuccessful(job: Job): boolean {
@@ -100,9 +100,7 @@ export class JobService {
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) => {
-      return this.createJob(sampleValidatedTool);
-    });
+    const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) => this.createJob(sampleValidatedTool));
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -138,9 +136,7 @@ export class JobService {
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) => {
-      return this.createJob(sampleValidatedTool);
-    });
+    const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) => this.createJob(sampleValidatedTool));
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -201,7 +197,7 @@ export class JobService {
         displayName: toolParam.name.displayName,
         description: toolParam.description,
         type: toolParam.type,
-        value: value,
+        value,
         // access selectionOptions, defaultValue, optional, from and to values from the toolParameter
       });
     }
@@ -237,12 +233,10 @@ export class JobService {
     // phenodata
     job.metadataFiles = validatedTool.phenodataBindings
       .filter((binding) => binding.dataset != null)
-      .map((binding) => {
-        return {
+      .map((binding) => ({
           name: binding.toolInput.name.id,
           content: this.datasetService.getOwnPhenodata(binding.dataset),
-        };
-      });
+        }));
 
     return job;
   }

@@ -54,10 +54,10 @@ export class AuthGuard implements CanActivate {
 
           if (!approvalRequired) {
             return true;
-          } else if (approved) {
+          } if (approved) {
             log.info("terms of use accepted already");
             return true;
-          } else {
+          } 
             log.info(
               "terms of use must be accepted first",
               ", required for this auth:",
@@ -71,7 +71,7 @@ export class AuthGuard implements CanActivate {
             );
             this.routeService.navigateAbsolute("/terms", { queryParams: { showAccept: "true" } });
             return false;
-          }
+          
         }),
         catchError((e) => {
           if (e.status === 403) {
@@ -83,10 +83,10 @@ export class AuthGuard implements CanActivate {
           return of(false);
         })
       );
-    } else {
+    } 
       this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
 
       return of(false);
-    }
+    
   }
 }

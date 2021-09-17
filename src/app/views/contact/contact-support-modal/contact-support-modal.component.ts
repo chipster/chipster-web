@@ -163,10 +163,10 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
         rule.username = supportSessionOwner;
         return this.sessionResource.createRule(copySessionId, rule);
       }),
-      map(() => {
+      map(() => 
         // return the url of the new session
-        return this.getHostUrl() + "/analyze/" + copySessionId;
-      })
+         this.getHostUrl() + "/analyze/" + copySessionId
+      )
     );
   }
 

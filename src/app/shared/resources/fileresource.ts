@@ -36,7 +36,7 @@ export class FileResource {
           })
         )
       );
-    } else {
+    } 
       return apiUrl$.pipe(
         mergeMap((url: string) =>
           this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
@@ -46,7 +46,7 @@ export class FileResource {
           })
         )
       );
-    }
+    
   }
 
   getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
@@ -69,25 +69,25 @@ export class FileResource {
       return apiUrl$.pipe(
         mergeMap((url: string) =>
           this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: headers,
+            headers,
             withCredentials: true,
             responseType: "arraybuffer",
             reportProgress: true,
           })
         )
       );
-    } else {
+    } 
       return apiUrl$.pipe(
         mergeMap((url: string) =>
           this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: headers,
+            headers,
             withCredentials: true,
             responseType: "text",
             reportProgress: true,
           })
         )
       );
-    }
+    
   }
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {

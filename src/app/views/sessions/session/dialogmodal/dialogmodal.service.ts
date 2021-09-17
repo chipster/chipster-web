@@ -23,10 +23,10 @@ export class DialogModalService {
         // dialog dismissed, cancel -> undefined, backdrop -> 0, esc -> 1
         if (err === undefined || err === 0 || err === 1) {
           return EMPTY;
-        } else {
+        } 
           // real error
           throw err;
-        }
+        
       })
     );
   }

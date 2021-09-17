@@ -71,9 +71,7 @@ export class StatisticsComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => {
-          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params);
-        })
+        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params))
       )
       .subscribe(
         (result) => {

@@ -29,6 +29,6 @@ export class ConfigurationResource {
     let headers = new HttpHeaders();
     headers = headers.append("Authorization", "Basic " + btoa("token:" + token));
 
-    return <any>this.httpClient.get(url, { headers: headers, withCredentials: true });
+    return <any>this.httpClient.get(url, { headers, withCredentials: true });
   }
 }

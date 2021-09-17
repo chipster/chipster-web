@@ -70,15 +70,15 @@ export class QuerySessionDataService {
 
   getChildren(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>) {
     // map takes care of duplicates
-    let allChildren = new Map<string, Dataset>();
+    const allChildren = new Map<string, Dataset>();
 
-    let allDatasets = Array.from(datasetsMap.values());
+    const allDatasets = Array.from(datasetsMap.values());
 
     Array.from(datasets).forEach((dataset) => {
-      let ownChildren = [];
+      const ownChildren = [];
       allDatasets.forEach((d) => {
         if (d.sourceJob != null) {
-          let sourceJob = jobsMap.get(d.sourceJob);
+          const sourceJob = jobsMap.get(d.sourceJob);
           if (sourceJob != null) {
             sourceJob.inputs.forEach((i) => {
               if (i.datasetId === dataset.datasetId) {

@@ -9,9 +9,7 @@ export default class TSVBody {
   }
 
   private createRows(tsvBody: Array<Array<string>>): Array<TSVRow> {
-    return _.map(tsvBody, (row: Array<string>, index: number) => {
-      return new TSVRow(row, index.toString());
-    });
+    return _.map(tsvBody, (row: Array<string>, index: number) => new TSVRow(row, index.toString()));
   }
 
   /*

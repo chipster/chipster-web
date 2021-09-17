@@ -72,7 +72,7 @@ export class SessionPanelComponent {
   }
 
   autoLayoutAll(): void {
-    let allDatasets = Array.from(this.sessionData.datasetsMap.values());
+    const allDatasets = Array.from(this.sessionData.datasetsMap.values());
     this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
   }
 
@@ -90,7 +90,7 @@ export class SessionPanelComponent {
   }
 
   selectAll() {
-    let all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
+    const all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
     this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 

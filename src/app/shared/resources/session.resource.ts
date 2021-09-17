@@ -96,23 +96,17 @@ export class SessionResource {
 
   getTypeTagsForDataset(sessionId: string, dataset: Dataset): Observable<Map<string, string>> {
     return this.configService.getTypeService().pipe(
-      mergeMap((typeServiceUrl) => {
-        return this.http.get(
+      mergeMap((typeServiceUrl) => this.http.get(
           typeServiceUrl + "/sessions/" + sessionId + "/datasets/" + dataset.datasetId,
           this.tokenService.getTokenParams(true)
-        );
-      }),
-      map((typesObj) => {
-        return this.objectToMap(typesObj[dataset.datasetId]);
-      })
+        )),
+      map((typesObj) => this.objectToMap(typesObj[dataset.datasetId]))
     );
   }
 
   getTypeTagsForSession(sessionId: string): Observable<Map<string, Map<string, string>>> {
     return this.configService.getTypeService().pipe(
-      mergeMap((typeServiceUrl) => {
-        return this.http.get(typeServiceUrl + "/sessions/" + sessionId, this.tokenService.getTokenParams(true));
-      }),
+      mergeMap((typeServiceUrl) => this.http.get(typeServiceUrl + "/sessions/" + sessionId, this.tokenService.getTokenParams(true))),
       map((typesObj) => {
         // convert js objects to es6 Maps
         const typesMap = new Map();
@@ -254,12 +248,10 @@ export class SessionResource {
 
   getRule(sessionId: string, ruleId: string): Observable<Rule> {
     return this.configService.getSessionDbUrl().pipe(
-      mergeMap((url: string) => {
-        return this.http.get(
+      mergeMap((url: string) => this.http.get(
           `${url}/sessions/${sessionId}/rules/${ruleId}`,
           this.tokenService.getTokenParams(true)
-        ) as Observable<Rule>;
-      })
+        ) as Observable<Rule>)
     );
   }
 

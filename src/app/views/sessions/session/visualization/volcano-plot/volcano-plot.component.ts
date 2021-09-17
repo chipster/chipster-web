@@ -77,7 +77,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       this.selectedXAxisHeader,
       this.selectedYAxisHeader
     );
-    this.volcanoPlotDataRows.forEach(function (dataRow) {
+    this.volcanoPlotDataRows.forEach((dataRow) => {
       const curPlotData = new PlotData();
       curPlotData.id = dataRow.id;
       /* y scale in volcanoplot is -log10(y)
@@ -106,9 +106,9 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     if (y === Infinity) {
       // get the max y value
       return this.yScale.invert(0);
-    } else {
+    } 
       return y;
-    }
+    
   }
 
   drawPlot() {
@@ -189,22 +189,18 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", function (d) {
-        return self.xScale(d.plotPoint.x);
-      })
-      .attr("cy", function (d) {
-        return self.yScale(self.clampY(d.plotPoint.y));
-      })
-      .attr("fill", function (d) {
+      .attr("cx", (d) => self.xScale(d.plotPoint.x))
+      .attr("cy", (d) => self.yScale(self.clampY(d.plotPoint.y)))
+      .attr("fill", (d) => {
         if (d.plotPoint.y >= -Math.log10(0.05) && Math.abs(d.plotPoint.x) >= 1) {
           if (d.plotPoint.x < 0) {
             return "green";
-          } else {
+          } 
             return "red";
-          }
-        } else {
+          
+        } 
           return "black";
-        }
+        
       });
   }
 
@@ -230,7 +226,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
     // change the color of the selected data points
-    this.selectedDataPointIds.forEach(function (selectedId) {
+    this.selectedDataPointIds.forEach((selectedId) => {
       self.setSelectionStyle(selectedId);
     });
   }

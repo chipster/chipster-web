@@ -3,6 +3,7 @@ import Point from "../model/point";
 import Vector2d from "../model/vector2d";
 import PointPair from "./point-pair";
 import VennCircle from "./venn-circle";
+
 export default class VennDiagramUtils {
   /*
    * @description: Intersection points of two circles

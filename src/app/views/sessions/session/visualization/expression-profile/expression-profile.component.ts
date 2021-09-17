@@ -118,16 +118,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // Custom headers for x-axis
     const firstDataset: any = this.dataset;
-    const phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => {
-      return metadata.key === "description";
-    });
+    const phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => metadata.key === "description");
 
     // Change default headers to values defined in phenodata if description value has been defined
     const headers = _.map(this.visualizationTSVService.getChipHeaders(tsv), (header) => {
       // find if there is a phenodata description matching header and containing a value
-      const phenodataHeader: any = _.find(phenodataDescriptions, (item: any) => {
-        return item.column === header && item.value !== null;
-      });
+      const phenodataHeader: any = _.find(phenodataDescriptions, (item: any) => item.column === header && item.value !== null);
       return phenodataHeader ? phenodataHeader.value : header;
     });
 
@@ -305,9 +301,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
         for (const interval of intervals) {
-          const intersectingLines = _.filter(interval.lines, (line: Line) => {
-            return that.expressionProfileService.isIntersecting(line, interval.rectangle);
-          });
+          const intersectingLines = _.filter(interval.lines, (line: Line) => that.expressionProfileService.isIntersecting(line, interval.rectangle));
 
           // Line ids intersecting with selection as an array
           ids = ids.concat(_.map(intersectingLines, (line: Line) => line.lineId));
@@ -398,11 +392,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const rawTSVRows = this.tsv.body.getTSVRows(rowIds);
     const tsvSymbolIndex = this.tsv.getColumnIndex("symbol");
     const tsvIdentifierIndex = this.tsv.getColumnIndex("identifier");
-    this.viewSelectionList = rawTSVRows.map((row: TSVRow) => {
-      return {
+    this.viewSelectionList = rawTSVRows.map((row: TSVRow) => ({
         symbol: row.row[tsvSymbolIndex],
         identifier: row.row[tsvIdentifierIndex],
-      };
-    });
+      }));
   }
 }

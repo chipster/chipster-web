@@ -154,17 +154,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   static getOpacity(isVisible: boolean): number {
     if (isVisible) {
       return 1.0;
-    } else {
+    } 
       return 0.25;
-    }
+    
   }
 
   static getToolTipOpacity(isVisible: boolean): number {
     if (isVisible) {
       return 0.75;
-    } else {
+    } 
       return 0.0;
-    }
+    
   }
 
   ngOnInit(): void {
@@ -518,9 +518,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .merge(this.d3PhenodataNodes)
       .attr("x", (d) => this.getPhenodataX(d))
       .attr("y", (d) => this.getPhenodataY(d))
-      .attr("id", function (d) {
-        return "node_" + d.datasetId;
-      })
+      .attr("id", (d) => "node_" + d.datasetId)
       // .attr("rx", this.nodeRadius)
       // .attr("ry", this.nodeRadius)
       .attr("width", this.nodeHeight)
@@ -584,9 +582,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         // use smaller font if the file extension is long
         if (UtilsService.getFileExtension(d.name).length <= 4) {
           return this.fontSize + "px";
-        } else {
+        } 
           return this.fontSize - 2 + "px";
-        }
+        
       })
       // .attr("stroke", d => (this.isSelectedDataset(d.dataset) ? "2.0" : "1"))
       .attr("fill", (d) => (this.isSelectedDataset(d.dataset) ? "white" : "black"))
@@ -665,9 +663,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.dividerMenuItem,
             this.selectChildrenMenuItem,
             this.dividerMenuItem,
-            Object.assign({}, this.deleteMenuItem, {
-              title: "Delete (" + self.selectedDatasets.length + " files)",
-            }),
+            { ...this.deleteMenuItem, title: "Delete (" + self.selectedDatasets.length + " files)",},
           ]
         : [
             this.renameMenuItem,
@@ -688,9 +684,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .merge(this.d3DatasetNodes)
       .attr("x", (d) => d.x)
       .attr("y", (d) => d.y)
-      .attr("id", function (d) {
-        return "node_" + d.datasetId;
-      })
+      .attr("id", (d) => "node_" + d.datasetId)
       .attr("rx", this.nodeRadius)
       .attr("ry", this.nodeRadius)
       .attr("width", this.nodeWidth)
@@ -735,7 +729,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.hideTooltip();
         }
       })
-      .on("click", function (d) {
+      .on("click", (d) => {
         if (self.enabled) {
           self.selectionHandlerService.clearJobSelection();
           if (!UtilsService.isCtrlKey(d3.event)) {
@@ -747,7 +741,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
-          .on("drag", function (d: DatasetNode) {
+          .on("drag", (d: DatasetNode) => {
             // don't allow datasets to be moved from the unselected dataset
             if (self.isSelectedDataset(d.dataset)) {
               self.dragStarted = true;
@@ -780,7 +774,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const toolTipClientRects = this.getToolTipBoundingClientRects();
 
     // Show search Tooltips
-    this.d3DatasetNodes.each(function (d, i) {
+    this.d3DatasetNodes.each((d, i) => {
       if (self.searchEnabled) {
         self.showToolTipByIdForSearch(d, i, toolTipClientRects);
       }
@@ -970,7 +964,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("y2", (d) => d.target.y)
       .style("opacity", () => WorkflowGraphComponent.getOpacity(!this.searchEnabled))
 
-      .on("click", function (d) {
+      .on("click", (d) => {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
       .on("mouseover", function () {
@@ -1012,9 +1006,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const datasetNodes = [];
 
     this.d3DatasetNodes
-      .filter((d) => {
-        return this.selectionService.isSelectedDatasetById(d.dataset.datasetId);
-      })
+      .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
       .each((d) => {
         if (d.dataset) {
           datasetNodes.push(d);
@@ -1094,13 +1086,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       datasetNodes.push({
         x: dataset.x,
         y: dataset.y,
-        name: name,
+        name,
         extension: UtilsService.getFileExtension(name),
         source: null,
         target: null,
-        sourceJob: sourceJob,
-        color: color,
-        dataset: dataset,
+        sourceJob,
+        color,
+        dataset,
         datasetId: dataset.datasetId,
         created: dataset.created,
       } as DatasetNode);
@@ -1124,7 +1116,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (targetNode.sourceJob) {
         const sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
-        sourceJob.inputs.forEach(function (input) {
+        sourceJob.inputs.forEach((input) => {
           const sourceNode = datasetNodesMap.get(input.datasetId);
           if (sourceNode && targetNode) {
             links.push({
@@ -1258,7 +1250,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.selectedDatasets.filter((dataset) => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length >
         0;
       if (isInSearch || isSelected) {
-        let datasetLeft, datasetTop;
+        let datasetLeft; let datasetTop;
         const element = document.getElementById("node_" + this.datasetToolTipArray[i].datasetId);
         if (element) {
           datasetLeft = element.getBoundingClientRect().left;
@@ -1374,7 +1366,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.renameMenuItem = {
       title: "Rename...",
-      action: function (d): void {
+      action (d): void {
         const dataset = _.clone(d.dataset);
         self.dialogModalService
           .openStringModal("Rename file", "File name", dataset.name, "Rename")
@@ -1393,7 +1385,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.convertMenuItem = {
       title: "Convert to Chipster Format...",
-      action: function (d): void {
+      action (d): void {
         self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
       },
       disabled: false, // optional, defaults to false
@@ -1401,21 +1393,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.deleteMenuItem = {
       title: "Delete",
-      action: function (): void {
+      action (): void {
         self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
       },
     };
 
     this.groupsMenuItem = {
       title: "Define Samples...",
-      action: function (): void {
+      action (): void {
         self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
       },
     };
 
     this.selectChildrenMenuItem = {
       title: "Select Descendants",
-      action: function (): void {
+      action (): void {
         const children = self.getSessionDataService.getChildren(self.selectionService.selectedDatasets);
         self.selectionHandlerService.setDatasetSelection(children);
       },
@@ -1423,14 +1415,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.exportMenuItem = {
       title: "Export",
-      action: function (d): void {
+      action (d): void {
         self.sessionDataService.exportDatasets([d.dataset]);
       },
     };
 
     this.historyMenuItem = {
       title: "History...",
-      action: function (d): void {
+      action (d): void {
         self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData);
       },
     };

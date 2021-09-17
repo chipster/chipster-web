@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Observable, forkJoin } from "rxjs";
 import { Tool, Module } from "chipster-js-common";
-import { ToolResource } from "../resources/tool-resource";
 import { shareReplay, map } from "rxjs/operators";
+import { ToolResource } from "../resources/tool-resource";
 import { ConfigService } from "./config.service";
 import UtilsService from "../utilities/utils";
 
@@ -51,9 +51,7 @@ export class ToolsService {
   getModulesMap(): Observable<Map<string, Module>> {
     if (!this.modulesMapCache$) {
       this.modulesMapCache$ = this.getModules().pipe(
-        map((modules: Module[]) => {
-          return UtilsService.arrayToMap(modules, "moduleId");
-        }),
+        map((modules: Module[]) => UtilsService.arrayToMap(modules, "moduleId")),
         shareReplay(1)
       );
     }

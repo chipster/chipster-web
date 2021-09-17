@@ -1,4 +1,5 @@
 import Circle from "../model/circle";
+
 export default class VennCircle {
   constructor(
     public datasetId: string,

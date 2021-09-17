@@ -99,10 +99,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
     // modal mode could be undefined, we want explicit true or false
     this.getTruncatedFile =
-      (!this.modalMode && this.dataset.size > this.fileSizeLimit) ||
-      (this.modalMode && this.dataset.size > this.modalFileSizeLimit)
-        ? true
-        : false;
+      !!((!this.modalMode && this.dataset.size > this.fileSizeLimit) ||
+      (this.modalMode && this.dataset.size > this.modalFileSizeLimit));
 
     // limit the full screen downloaded stream size also as it freezes the view
     const maxLimit = this.modalMode ? this.modalFileSizeLimit : this.fileSizeLimit;

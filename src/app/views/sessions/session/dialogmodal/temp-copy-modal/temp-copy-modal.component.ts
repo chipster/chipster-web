@@ -39,7 +39,7 @@ export class TempCopyModalComponent implements AfterViewInit {
   save(button: string) {
     this.activeModal.close({
       value: this.value,
-      button: button,
+      button,
     });
   }
 

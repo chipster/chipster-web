@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { User } from "chipster-js-common";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
-import { User } from "chipster-js-common";
 
 @Component({
   selector: "ch-users",

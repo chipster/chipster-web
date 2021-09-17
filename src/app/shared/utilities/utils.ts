@@ -13,7 +13,7 @@ export default class UtilsService {
 
   static mapValues(map: Map<any, any>) {
     const array: any[] = [];
-    map.forEach(function (value: any) {
+    map.forEach((value: any) => {
       array.push(value);
     });
     return array;
@@ -71,7 +71,7 @@ export default class UtilsService {
         const lastSelectedItem = selectedItems[selectedItems.length - 1];
         const indexOfLastSelection = allItems.indexOf(lastSelectedItem);
         const indexOfNewSelection = allItems.indexOf(item);
-        let from: number, to: number;
+        let from: number; let to: number;
         if (indexOfLastSelection < indexOfNewSelection) {
           from = indexOfLastSelection + 1;
           to = indexOfNewSelection + 1;
@@ -99,19 +99,17 @@ export default class UtilsService {
    * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
    */
   static equalStringArrays(first: Array<string>, second: Array<string>) {
-    return _.every(first, (item) => {
-      return _.includes(second, item);
-    });
+    return _.every(first, (item) => _.includes(second, item));
   }
 
   static compareStringNullSafe(a, b): number {
     if (a) {
       return a.localeCompare(b);
-    } else if (b) {
+    } if (b) {
       return -b.localeCompare(a);
-    } else {
+    } 
       return 0;
-    }
+    
   }
 
   static parseISOStringToDate(s: any) {
@@ -126,20 +124,20 @@ export default class UtilsService {
   }
 
   static millisecondsToHumanFriendly(milliseconds: number, zero = "0", lessThanSecond = "less than second"): string {
-    let seconds = Math.floor(milliseconds / 1000);
-    let minutes = Math.floor(seconds / 60);
-    let hours = Math.floor(minutes / 60);
-    let days = Math.floor(hours / 24);
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
     // Remainders. For example, when the "minutes" is 74, the "minute" is "14").
     // Now we show only the most significant unit (e.g. "1 hour") where the both values are equal.
     // Let's keep these anyway, in case we want to show more precision at some point,
     // e.g. "1 hour 14 minutes".
 
-    let millisecond = milliseconds % 1000;
-    let second = seconds % 60;
-    let minute = minutes % 60;
-    let hour = hours % 24;
+    const millisecond = milliseconds % 1000;
+    const second = seconds % 60;
+    const minute = minutes % 60;
+    const hour = hours % 24;
 
     if (days == 1) {
       return "a day";
@@ -186,11 +184,11 @@ export default class UtilsService {
   }
 
   static getCommonPrefix(array: String[]) {
-    var A = array.concat().sort(),
-      a1 = A[0],
-      a2 = A[A.length - 1],
-      L = a1.length,
-      i = 0;
+    const A = array.concat().sort();
+      const a1 = A[0];
+      const a2 = A[A.length - 1];
+      const L = a1.length;
+      let i = 0;
     while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
     return a1.substring(0, i);
   }

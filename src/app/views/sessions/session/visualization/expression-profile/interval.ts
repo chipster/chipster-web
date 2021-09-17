@@ -1,5 +1,6 @@
 import Line from "./line";
 import Rectangle from "./rectangle";
+
 export default class Interval {
   constructor(startIndex: number, lines: Array<Line>, rectangle: Rectangle) {
     this._startIndex = startIndex;

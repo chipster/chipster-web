@@ -27,9 +27,7 @@ export class ClientsComponent implements OnInit {
     this.configService
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => {
-          return this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics");
-        })
+        flatMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics"))
       )
       .subscribe(
         (topics: any[]) => {

@@ -1,4 +1,5 @@
 import Point from "./point";
+
 export default class Circle {
   center: Point;
   radius: number;

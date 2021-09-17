@@ -2,11 +2,11 @@ import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import { forkJoin, Observable, of } from "rxjs";
 import { flatMap, tap, catchError } from "rxjs/operators";
+import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { IdPair } from "../../../model/id-pair";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
-import log from "loglevel";
 import { JobService } from "../../sessions/session/job.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 
@@ -60,7 +60,7 @@ export class JobsComponent implements OnInit {
                   .pipe(
                     catchError((err) => {
                       log.error("failed to get a job", err);
-                      let job = new Job();
+                      const job = new Job();
                       job.state = JobState.Error;
                       job.stateDetail = "Admin view error, see console";
                       return of(job);
@@ -83,7 +83,7 @@ export class JobsComponent implements OnInit {
     return JobService.isRunning(job);
   }
   cancelJob(job: Job) {
-    const jobCopy = Object.assign({}, job);
+    const jobCopy = { ...job};
     this.sessionResource.cancelJob(job.sessionId, jobCopy).subscribe({
       next: () => this.update(),
       error: (err) => this.restErrorService.showError("cancel job failed", err),

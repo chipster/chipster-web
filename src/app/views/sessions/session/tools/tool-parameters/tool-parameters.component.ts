@@ -90,8 +90,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
       !this.toolService.selectionOptionsContains(parameter.selectionOptions, parameter.value)
     ) {
       return false;
-    } else {
+    } 
       return !this.toolService.isDefaultValue(parameter, parameter.value);
-    }
+    
   }
 }

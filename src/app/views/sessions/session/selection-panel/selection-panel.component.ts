@@ -1,15 +1,14 @@
-import { SessionDataService } from "../session-data.service";
-import { Dataset, Tool } from "chipster-js-common";
-import { SessionData } from "../../../../model/session/session-data";
+import { Dataset, Tool , Job } from "chipster-js-common";
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import { SelectionService } from "../selection.service";
 import * as _ from "lodash";
-import { ToolSelectionService } from "../tool.selection.service";
 import { Subject } from "rxjs";
-import { Job } from "chipster-js-common";
+import { takeUntil } from "rxjs/operators";
+import { SessionDataService } from "../session-data.service";
+import { SessionData } from "../../../../model/session/session-data";
+import { SelectionService } from "../selection.service";
+import { ToolSelectionService } from "../tool.selection.service";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
-import { takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "ch-selection-panel",

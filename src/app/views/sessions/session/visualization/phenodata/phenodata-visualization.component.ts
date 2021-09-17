@@ -148,7 +148,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     return {
       data: array,
       colHeaders: headers,
-      columnSorting: columnSorting,
+      columnSorting,
       manualColumnResize: true,
       sortIndicator: true,
       rowHeights: 23,
@@ -229,9 +229,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     if (this.headers.some((columnHeader: string) => !this.unremovableColumns.includes(columnHeader))) {
       // get indexes of removable columns
       const removableColumnIndexces = this.headers
-        .map((columnHeader: string, index: number) => {
-          return !this.unremovableColumns.includes(columnHeader) ? index : -1;
-        })
+        .map((columnHeader: string, index: number) => !this.unremovableColumns.includes(columnHeader) ? index : -1)
         .filter((index) => index !== -1);
 
       // remove columns in reverse order to avoid messing up
@@ -243,15 +241,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   private updateDataset() {
-    const phenodataString: string = [this.headers].concat(this.rows).reduce((result: string, row: Array<string>) => {
-      return (result +=
+    const phenodataString: string = [this.headers].concat(this.rows).reduce((result: string, row: Array<string>) => (result +=
         row
           .reduce((rowString: string, cellValue: string) => {
             const cellString = cellValue != null ? cellValue : "";
             return rowString + cellString + "\t";
           }, "")
-          .slice(0, -1) + "\n");
-    }, "");
+          .slice(0, -1) + "\n"), "");
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
       this.datasetService.setPhenodata(this.dataset, phenodataString);
@@ -409,7 +405,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             colHeaders.push(name);
             this.hot.updateSettings(
               {
-                colHeaders: colHeaders,
+                colHeaders,
               },
               false
             );

@@ -46,7 +46,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const self = this;
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       // Extracting header name without chip prefix
-      this.visualizationTSVService.getChipHeaders(this.tsv).forEach(function (chipHeader) {
+      this.visualizationTSVService.getChipHeaders(this.tsv).forEach((chipHeader) => {
         chipHeader = chipHeader.replace("chip.", "");
         self.chipHeaders.push(chipHeader);
       });
@@ -71,7 +71,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(geneValue);
 
     // Creating points for scatter plot combining two chip columns
-    orderedGenesValues.forEach(function (geneRow) {
+    orderedGenesValues.forEach((geneRow) => {
       const curPlotData = new PlotData();
       curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(
@@ -157,12 +157,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", function (d) {
-        return self.xScale(d.plotPoint.x);
-      })
-      .attr("cy", function (d) {
-        return self.yScale(d.plotPoint.y);
-      })
+      .attr("cx", (d) => self.xScale(d.plotPoint.x))
+      .attr("cy", (d) => self.yScale(d.plotPoint.y))
       .attr("fill", "red")
       .on("mouseover", (d: any) => {})
       .on("mouseout", (d: any) => {})
@@ -184,7 +180,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
     this.resetSelectionRectangle();
 
-    this.selectedDataPointIds.forEach(function (selectedId) {
+    this.selectedDataPointIds.forEach((selectedId) => {
       self.setSelectionStyle(selectedId);
     });
   }

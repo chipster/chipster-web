@@ -107,15 +107,15 @@ export class DatasetService {
   setSampleData(dataset: Dataset, sampleName: string, sampleId: string, pairId?: string, direction?: string) {
     // if pairId and direction undefined, they will not be included in the json
     const content = JSON.stringify({
-      sampleName: sampleName,
-      sampleId: sampleId,
-      pairId: pairId,
-      direction: direction,
+      sampleName,
+      sampleId,
+      pairId,
+      direction,
     });
 
     this.addMetadataFile(dataset, {
       name: DatasetService.SAMPLE_DATA_FILENAME,
-      content: content,
+      content,
     });
   }
 
@@ -126,13 +126,11 @@ export class DatasetService {
   findSingleSampleFiles(datasets: Dataset[], token: string): SingleEndSample[] {
     return datasets
       .filter((dataset) => dataset.name.includes(token))
-      .map((dataset) => {
-        return {
+      .map((dataset) => ({
           file: dataset,
           sampleId: uuidv4(),
           sampleName: dataset.name,
-        };
-      });
+        }));
   }
 
   findSamplePairs(datasets: Dataset[], r1Token = "R1", r2Token = "R2"): PairedEndSample[] {
@@ -154,12 +152,12 @@ export class DatasetService {
       if (r2File != null) {
         samplesArray.push({
           sampleId: uuidv4(),
-          sampleName: sampleName,
+          sampleName,
           pairs: [
             {
               pairId: uuidv4(),
-              r1File: r1File,
-              r2File: r2File,
+              r1File,
+              r2File,
             },
           ],
         });
@@ -213,13 +211,11 @@ export class DatasetService {
     const pairedEndFilesWithSampleData = singleAndPairedPartitions[1];
 
     // create SingleEndSamples to return
-    const singleEndSamples: SingleEndSample[] = singleEndFilesWithSampleData.map(([dataset, sampleData]) => {
-      return {
+    const singleEndSamples: SingleEndSample[] = singleEndFilesWithSampleData.map(([dataset, sampleData]) => ({
         sampleId: sampleData.sampleId,
         sampleName: sampleData.sampleName,
         file: dataset,
-      };
-    });
+      }));
 
     // create PairedEndSamples
     const pairedSamplesMap: Map<string, PairedEndSample> = this.getPairedSamplesMap(pairedEndFilesWithSampleData);
@@ -235,10 +231,10 @@ export class DatasetService {
     const pairMissingSamples: PairedEndSample[] = noMissingPairsPartitions[1];
 
     return {
-      singleEndSamples: singleEndSamples,
-      pairedEndSamples: pairedEndSamples,
-      pairMissingSamples: pairMissingSamples,
-      sampleDataMissing: sampleDataMissing,
+      singleEndSamples,
+      pairedEndSamples,
+      pairMissingSamples,
+      sampleDataMissing,
     };
   }
 

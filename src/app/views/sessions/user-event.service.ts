@@ -40,7 +40,7 @@ export class UserEventService {
 
     // encode the user event topic twice (the second round is done in WebsocketService) to pass
     // the Jetty WebSocketUpgradeFilter when there is a slash in the topic name
-    let encodedTopic = encodeURIComponent(topic);
+    const encodedTopic = encodeURIComponent(topic);
 
     this.webSocketService.connect(this.localSubject$, encodedTopic);
 
@@ -64,10 +64,10 @@ export class UserEventService {
    */
   applyRuleStreamOfSession(session: Session) {
     return this.getRuleStream().pipe(
-      mergeMap((wsEvent) => {
+      mergeMap((wsEvent) => 
         // sessionEventService can update individual sessions, let's reuse that
-        return this.sessionEventService.handleRuleEvent(wsEvent, session);
-      })
+         this.sessionEventService.handleRuleEvent(wsEvent, session)
+      )
     );
   }
 
@@ -87,7 +87,7 @@ export class UserEventService {
           return event;
         })
       );
-    } else if (event.type === EventType.Update) {
+    } if (event.type === EventType.Update) {
       return this.sessionResource.getSession(sessionId).pipe(
         map((session: Session) => {
           log.info("rule updated", session.name);
@@ -95,7 +95,7 @@ export class UserEventService {
           return event;
         })
       );
-    } else if (event.type === EventType.Delete) {
+    } if (event.type === EventType.Delete) {
       const oldSession = userEventData.sessions.get(sessionId);
       const rule = oldSession.rules.find((r) => r.ruleId === event.resourceId);
       const newRules = oldSession.rules.filter((r) => r.ruleId !== event.resourceId);
@@ -111,9 +111,9 @@ export class UserEventService {
         userEventData.sessions.delete(sessionId);
       }
       return of(event);
-    } else {
+    } 
       console.warn("unknown event type", event);
       return of(event);
-    }
+    
   }
 }

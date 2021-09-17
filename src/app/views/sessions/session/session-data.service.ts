@@ -121,12 +121,8 @@ export class SessionDataService {
         }
         return this.createDataset(d);
       }),
-      mergeMap((datasetId: string) => {
-        return forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)]);
-      }),
-      mergeMap((result) => {
-        return of(result[0]);
-      }),
+      mergeMap((datasetId: string) => forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)])),
+      mergeMap((result) => of(result[0])),
       catchError((err) => {
         log.info("create derived dataset failed", err);
         throw err;
@@ -361,9 +357,7 @@ export class SessionDataService {
    * @param exampleSessionOwnerUserId
    */
   isExampleSession(session: Session, exampleSessionOwnerUserId: string): boolean {
-    return session.rules.some((rule) => {
-      return exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId;
-    });
+    return session.rules.some((rule) => exampleSessionOwnerUserId && rule.sharedBy === exampleSessionOwnerUserId);
   }
 
   isReadOnlySession(session: Session) {
@@ -468,9 +462,9 @@ export class SessionDataService {
       return this.getDatasetList(sessionData)
         .map((dataset: Dataset) => dataset.size)
         .reduce((total, current) => total + current, 0);
-    } else {
+    } 
       return 0; // return 0 when no datasets
-    }
+    
   }
 
   /*

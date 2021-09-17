@@ -68,7 +68,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
           datasetName: dataset.name,
           date: sourceJob != null ? sourceJob.created : dataset.created,
           sourceJobName: sourceJob != null ? sourceJob.toolCategory + " / " + sourceJob.toolName : "not available",
-          sourceJob: sourceJob,
+          sourceJob,
           parameterList: sourceJob != null ? sourceJob.parameters : [],
           inputFileNamesString:
             sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",

@@ -1,11 +1,11 @@
 import { Injectable, Input } from "@angular/core";
-import { DatasetService } from "../../dataset.service";
 import { Dataset, Job } from "chipster-js-common";
-import UtilsService from "../../../../../shared/utilities/utils";
 import log from "loglevel";
+import * as _ from "lodash";
+import { DatasetService } from "../../dataset.service";
+import UtilsService from "../../../../../shared/utilities/utils";
 import { SessionDataService } from "../../session-data.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import * as _ from "lodash";
 
 /**
  * @desc Service functions needed to define the positions of the nodes and links
@@ -35,19 +35,19 @@ export class WorkflowGraphService {
 
   resetDoAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>): void {
     // create a copy of the datasets to wait for the websocket updates
-    let datasetsMapCopy = new Map();
+    const datasetsMapCopy = new Map();
 
     datasetsMap.forEach((d) => {
       datasetsMapCopy.set(d.datasetId, _.cloneDeep(d));
     });
 
     // create a set of datasetIds for efficient search
-    let datasetIdsToLayout = new Set();
+    const datasetIdsToLayout = new Set();
     datasets.forEach((d) => {
       datasetIdsToLayout.add(d.datasetId);
     });
 
-    let resetedDatasets: Dataset[] = [];
+    const resetedDatasets: Dataset[] = [];
 
     // clear the coordinates of the Dataset instances in the map and create a list of cleared
     // datasets that have to be layouted
@@ -63,7 +63,7 @@ export class WorkflowGraphService {
   }
 
   doAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobMap: Map<string, Job>): void {
-    let datasetsToUpdate = this.doLayout(datasets, datasetsMap, jobMap);
+    const datasetsToUpdate = this.doLayout(datasets, datasetsMap, jobMap);
 
     // update new dataset positions to server
     if (datasetsToUpdate.length > 0) {
@@ -92,12 +92,10 @@ export class WorkflowGraphService {
     // sort by the creation date to make parents precede their children in the array and to make this
     // more deterministic
     datasets = datasets
-      .sort((a, b) => {
-        return UtilsService.compareStringNullSafe(a.created, b.created);
-      })
+      .sort((a, b) => UtilsService.compareStringNullSafe(a.created, b.created))
       .filter((d) => d.x == null && d.y == null);
 
-    let datasetsToUpdate = [];
+    const datasetsToUpdate = [];
 
     datasets.forEach((d) => {
       datasetsToUpdate.push(...this.doLayoutRecursive(d.datasetId, datasetMap, jobMap));
@@ -107,17 +105,17 @@ export class WorkflowGraphService {
   }
 
   doLayoutRecursive(datasetId: string, datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
-    let dataset = datasetMap.get(datasetId);
+    const dataset = datasetMap.get(datasetId);
 
     // check if this dataset has a position already
     if (dataset.x != null && dataset.y != null) {
       return [];
     }
 
-    let datasetsToUpdate = [];
+    const datasetsToUpdate = [];
 
     // find parents
-    let sources = this.getSourceDatasets(dataset, datasetMap, jobMap);
+    const sources = this.getSourceDatasets(dataset, datasetMap, jobMap);
 
     // check if this is a root
     if (sources.length === 0) {
@@ -127,7 +125,7 @@ export class WorkflowGraphService {
 
       datasetsToUpdate.push(dataset);
     } else {
-      let firstSource = sources[0];
+      const firstSource = sources[0];
 
       // check if parent has a position
       if (firstSource.x == null || firstSource.y == null) {
@@ -156,18 +154,18 @@ export class WorkflowGraphService {
       return [];
     }
 
-    let sourceJob = jobMap.get(dataset.sourceJob);
+    const sourceJob = jobMap.get(dataset.sourceJob);
 
     if (sourceJob == null) {
       log.info("dataset's " + dataset.name + " source job not found");
       return [];
     }
 
-    let sources = [];
+    const sources = [];
 
     // iterate over the inputs of the source job
     sourceJob.inputs.forEach((input) => {
-      let source = datasetMap.get(input.datasetId);
+      const source = datasetMap.get(input.datasetId);
       if (source != null) {
         sources.push(source);
       } else {
@@ -198,15 +196,13 @@ export class WorkflowGraphService {
     }
 
     return {
-      x: x,
-      y: y,
+      x,
+      y,
     };
   }
 
   intersectsAny(datasets: Dataset[], x: number, y: number, w: number, h: number) {
-    return datasets.some((node: Dataset) => {
-      return this.intersectsNode(node, x, y, w, h);
-    });
+    return datasets.some((node: Dataset) => this.intersectsNode(node, x, y, w, h));
   }
 
   intersectsNode(dataset: Dataset, x: number, y: number, w: number, h: number) {
@@ -215,9 +211,9 @@ export class WorkflowGraphService {
         ? this.nodeWidth + this.xMargin + this.nodeWidth
         : this.nodeWidth;
       return x + w >= dataset.x && x < dataset.x + nodeWidth && y + h >= dataset.y && y < dataset.y + this.nodeHeight;
-    } else {
+    } 
       return false;
-    }
+    
   }
 
   isOverLapping(rectA: any, rectB: any) {

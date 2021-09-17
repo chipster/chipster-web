@@ -35,13 +35,11 @@ export class OidcService {
       tap((id) => (appId = id)),
       mergeMap(() => this.configService.getAuthUrl()),
       mergeMap((authUrl) => this.httpClient.get(authUrl + "/oidc/configs")),
-      map((configs: OidcConfig[]) => {
-        return (
+      map((configs: OidcConfig[]) => (
           configs
             // allow separate oidc configs for different apps
             .filter((oidc) => oidc.appId === appId)
-        );
-      }),
+        )),
       tap((configs: OidcConfig[]) => {
         configs.forEach((oidc) => {
           const manager = new UserManager({
@@ -96,7 +94,7 @@ export class OidcService {
 
         const manager = this.managers.get(oidcConfig.oidcName);
         if (manager) {
-          manager.signinRedirect({ extraQueryParams: extraQueryParams });
+          manager.signinRedirect({ extraQueryParams });
         } else {
           log.error("oidc provider not found: " + oidcConfig.oidcName);
           this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);

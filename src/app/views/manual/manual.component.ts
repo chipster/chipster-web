@@ -126,9 +126,9 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
       catchError((err) => {
         if (err.status === 404) {
           return observableOf("<html><body>Page not found</body></html>");
-        } else {
+        } 
           throw err;
-        }
+        
       })
     );
   }

@@ -43,10 +43,10 @@ export class SessionWorkerResource {
   supportRequest(message: string, sessionId: string, email: string, appId: string, log: string): Observable<any> {
     const supportRequest = {
       mail: email,
-      message: message,
+      message,
       session: sessionId,
       app: appId,
-      log: log,
+      log,
     };
 
     const apiUrl$ = this.configService.getSessionWorkerUrl();

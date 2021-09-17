@@ -44,9 +44,7 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.getAuth(service.adminUri + "/admin/storages");
-        })
+        mergeMap((service: Service) => this.authHttpClient.getAuth(service.adminUri + "/admin/storages"))
       )
       .subscribe({
         next: (storages: FileStats[]) => {
@@ -167,9 +165,7 @@ export class MaintenanceComponent implements OnInit {
 
   backup(backupService: string, path: string) {
     return this.configService.getInternalService(backupService, this.tokenService.getToken()).pipe(
-      mergeMap((service: Service) => {
-        return this.authHttpClient.postAuth(service.adminUri + path, null);
-      })
+      mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + path, null))
     );
   }
 
@@ -187,9 +183,7 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.deleteAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule");
-        }),
+        mergeMap((service: Service) => this.authHttpClient.deleteAuth(service.adminUri + "/admin/storages/" + storageId + "/backup/schedule")),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
       .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
@@ -199,12 +193,10 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(
+        mergeMap((service: Service) => this.authHttpClient.postAuth(
             service.adminUri + "/admin/storages/" + storageId + "/backup/schedule",
             null
-          );
-        }),
+          )),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId))
       )
       .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
@@ -214,12 +206,10 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(
+        mergeMap((service: Service) => this.authHttpClient.postAuth(
             service.adminUri + "/admin/storages/" + storageId + "/delete-orphans",
             null
-          );
-        })
+          ))
       )
       .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
   }
@@ -228,9 +218,7 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/check", null);
-        })
+        mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/check", null))
       )
       .subscribe(null, (err) => this.restErrorService.showError("storage check failed", err));
   }
@@ -303,9 +291,7 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(service.adminUri + "/admin/check-orphans", null);
-        })
+        mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + "/admin/check-orphans", null))
       )
       .subscribe(null, (err) => this.restErrorService.showError("check orphans failed", err));
   }
@@ -314,9 +300,7 @@ export class MaintenanceComponent implements OnInit {
     this.configService
       .getInternalService("session-db", this.tokenService.getToken())
       .pipe(
-        mergeMap((service: Service) => {
-          return this.authHttpClient.postAuth(service.adminUri + "/admin/delete-orphans", null);
-        })
+        mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + "/admin/delete-orphans", null))
       )
       .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
   }

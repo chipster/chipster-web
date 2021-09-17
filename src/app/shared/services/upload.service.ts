@@ -158,7 +158,7 @@ export class UploadService {
           toolDescription: "",
           state: "NEW",
           inputs: [],
-          parameters: parameters,
+          parameters,
           metadataFiles: [],
         };
 

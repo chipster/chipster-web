@@ -122,14 +122,12 @@ export class WrangleModalComponent implements OnInit {
           const headers = this.tsv2File.getHeadersForSpreadSheet();
 
           // create column selection dropdown items
-          this.allItems = headers.map((headerName: string, index: number) => {
-            return index === 0 && headerName === ""
+          this.allItems = headers.map((headerName: string, index: number) => index === 0 && headerName === ""
               ? {
-                  index: index,
+                  index,
                   name: "R rownames column",
                 }
-              : { index: index, name: headerName };
-          });
+              : { index, name: headerName });
 
           this.identifierItems = [...this.allItems];
           this.sampleItems = [...this.allItems];
@@ -148,7 +146,7 @@ export class WrangleModalComponent implements OnInit {
           this.previewRowData = this.tsv2File
             .getBody()
             .slice(0, this.previewRowCount)
-            .map((row: string[]) => Object.assign({}, row));
+            .map((row: string[]) => ({ ...row}));
 
           this.state = new LoadState(State.Ready);
         },
@@ -162,20 +160,20 @@ export class WrangleModalComponent implements OnInit {
   getCellClass(params): string {
     if (this.selectedIdentifiers.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)) {
       return "identifier";
-    } else if (
+    } if (
       this.selectedSamples.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)
     ) {
       return "sample";
-    } else {
+    } 
       const columnInOthers = this.selectedOthers.some(
         (columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index
       );
       if ((this.includeOthers() && columnInOthers) || (!this.includeOthers() && !columnInOthers)) {
         return "include";
-      } else {
+      } 
         return "exclude";
-      }
-    }
+      
+    
   }
 
   public onIncludeExcludeChange(): void {
@@ -347,11 +345,9 @@ export class WrangleModalComponent implements OnInit {
     // identifier not included here as it will be set as the first column
     // sort to retain the original order
     const columnsToIncludeIndexes = sampleColumnIndexes.concat(otherColumnsToIncludeIndexes).sort((a, b) => a - b);
-    const newRows = this.tsv2File.getBody().map((tsvRow: Array<string>) => {
-      return [tsvRow[this.selectedIdentifiers[0].index]].concat(
+    const newRows = this.tsv2File.getBody().map((tsvRow: Array<string>) => [tsvRow[this.selectedIdentifiers[0].index]].concat(
         columnsToIncludeIndexes.map((index: number) => tsvRow[index])
-      );
-    });
+      ));
 
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();
 
@@ -362,9 +358,9 @@ export class WrangleModalComponent implements OnInit {
       // add prefix for samples if missing
       if (sampleColumnIndexes.includes(index)) {
         return headerName.startsWith(this.SAMPLE_PREFIX) ? headerName : this.SAMPLE_PREFIX + headerName;
-      } else {
+      } 
         return headerName;
-      }
+      
     });
 
     // arrays to strings

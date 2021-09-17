@@ -71,7 +71,7 @@ export class HistoryComponent implements OnInit {
     let params = new HttpParams();
 
     for (let i = 0; i < this.stringFiltersFormArray.length; i++) {
-      let filter = this.stringFiltersFormArray.value[i];
+      const filter = this.stringFiltersFormArray.value[i];
       params = this.appendStringParam(params, filter.selectedAttribute, filter.value, filter.selectedComparison);
     }
 
@@ -97,11 +97,11 @@ export class HistoryComponent implements OnInit {
       // can't set directly in the constructor new Date(year, month, day), because that would
       // in local time. We don't set the time, which would be 00:00 and the time zone here is -2.
       // This would result to the previous day.
-      let date = new Date();
+      const date = new Date();
       date.setUTCFullYear(ngbDate.year);
       date.setUTCMonth(ngbDate.month - 1);
       date.setUTCDate(ngbDate.day);
-      let isoDate = date.toISOString().slice(0, 10);
+      const isoDate = date.toISOString().slice(0, 10);
 
       return isoDate;
     }
@@ -121,9 +121,9 @@ export class HistoryComponent implements OnInit {
 
   appendDateTimeParam(params, date, time, comparison) {
     if (date && time) {
-      let name = "created";
+      const name = "created";
       // can't use new Date(date + "T" + time), because that would assume it to be local time)
-      let value = date + "T" + time + ":00.000Z";
+      const value = date + "T" + time + ":00.000Z";
 
       params = params.append(name, comparison + value);
     }
@@ -132,14 +132,12 @@ export class HistoryComponent implements OnInit {
 
   updateJobCountAndJobs() {
     this.jobListLoading = true;
-    let filterParams = this.getFilterParams();
+    const filterParams = this.getFilterParams();
 
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => {
-          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams);
-        })
+        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams))
       )
       .subscribe(
         (recordNumber) => {
@@ -158,9 +156,7 @@ export class HistoryComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => {
-          return this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams);
-        })
+        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams))
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {
@@ -181,7 +177,7 @@ export class HistoryComponent implements OnInit {
 
   getDuration(jobHistory: JobHistory) {
     if (jobHistory && jobHistory.startTime) {
-      let startDate = UtilsService.parseISOStringToDate(jobHistory.startTime);
+      const startDate = UtilsService.parseISOStringToDate(jobHistory.startTime);
 
       let endDate = null;
       if (jobHistory.endTime) {
@@ -195,7 +191,7 @@ export class HistoryComponent implements OnInit {
         endDate = this.updateTime;
       }
 
-      let millis = UtilsService.millisecondsBetweenDates(startDate, endDate);
+      const millis = UtilsService.millisecondsBetweenDates(startDate, endDate);
       return UtilsService.millisecondsToHumanFriendly(millis);
     }
     return null;
@@ -259,8 +255,8 @@ export class HistoryComponent implements OnInit {
 
   toShortDateTime(isoDateString) {
     if (isoDateString) {
-      let date = isoDateString.slice(0, 10);
-      let time = isoDateString.slice(11, 16);
+      const date = isoDateString.slice(0, 10);
+      const time = isoDateString.slice(11, 16);
       return date + " " + time;
     }
     return null;

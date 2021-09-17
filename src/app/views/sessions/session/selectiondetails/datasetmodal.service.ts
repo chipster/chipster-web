@@ -63,11 +63,9 @@ export class DatasetModalService {
     // block with the spinner while waiting for that observable to complete
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
-        mergeMap((runWrangle$) => {
-          return runWrangle$ != null
+        mergeMap((runWrangle$) => runWrangle$ != null
             ? this.dialogModalService.openSpinnerModal("Convert to Chipster format", runWrangle$)
-            : EMPTY;
-        })
+            : EMPTY)
       )
       .subscribe({
         next: (result) => {
@@ -88,9 +86,7 @@ export class DatasetModalService {
     // block with the spinner while waiting for that observable to complete
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
-        mergeMap((run$) => {
-          return run$ != null ? this.dialogModalService.openSpinnerModal("Saving groups", run$) : EMPTY;
-        })
+        mergeMap((run$) => run$ != null ? this.dialogModalService.openSpinnerModal("Saving groups", run$) : EMPTY)
       )
       .subscribe({
         next: (result) => {

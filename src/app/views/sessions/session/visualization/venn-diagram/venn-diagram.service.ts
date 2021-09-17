@@ -113,14 +113,10 @@ export class VennDiagramService {
     const tsvFiles = files.filter((tsvFile: TSVFile) => selection.datasetIds.includes(tsvFile.datasetId));
 
     // put all rows from tsvFiles to maps, use columnKey as the key
-    const tsvMaps = tsvFiles.map((tsvFile: TSVFile) => {
-      return this.tsvFileToMap(tsvFile, keyColumn);
-    });
+    const tsvMaps = tsvFiles.map((tsvFile: TSVFile) => this.tsvFileToMap(tsvFile, keyColumn));
 
     // get headers of the tsvFiles
-    const tsvHeaders = tsvFiles.map((tsvFile: TSVFile) => {
-      return tsvFile.headers;
-    });
+    const tsvHeaders = tsvFiles.map((tsvFile: TSVFile) => tsvFile.headers);
 
     // go through selection, pick rows from all selected files
     const newRowsAsMaps = selection.values.map((selectionRow: Array<string>) => {
@@ -151,9 +147,7 @@ export class VennDiagramService {
     const uniqueHeadersArray = this.getUniqueHeaders(tsvHeaders);
 
     // turn maps to rows
-    const body = newRowsAsMaps.map((rowMap) => {
-      return uniqueHeadersArray.map((header) => rowMap.get(header));
-    });
+    const body = newRowsAsMaps.map((rowMap) => uniqueHeadersArray.map((header) => rowMap.get(header)));
 
     return [uniqueHeadersArray, ...body];
   }
@@ -208,17 +202,17 @@ export class VennDiagramService {
         visualizationAreaCenter.x - vennCircle.circle.radius * 0.5,
         vennCircle.circle.center.y - vennCircle.circle.radius - 3
       );
-    } else if (vennCircle.circle.center.x < visualizationAreaCenter.x) {
+    } if (vennCircle.circle.center.x < visualizationAreaCenter.x) {
       return new Point(
         vennCircle.circle.center.x - vennCircle.circle.radius * 1.2,
         vennCircle.circle.center.y + vennCircle.circle.radius + 5
       );
-    } else {
+    } 
       return new Point(
         vennCircle.circle.center.x + vennCircle.circle.radius * 0.8,
         vennCircle.circle.center.y + vennCircle.circle.radius + 5
       );
-    }
+    
   }
 
   /*
@@ -394,14 +388,12 @@ export class VennDiagramService {
         const columnIndex = tsvHeaders[i].getColumnIndexByKey(header);
         if (columnIndex !== -1) {
           return [tsvFile.filename, tsvMaps[i].get(key)[columnIndex]];
-        } else {
+        } 
           return null;
-        }
+        
       })
       .filter((fileAndValue) => fileAndValue != null)
-      .reduce((s: string, fileAndValue: Array<string>) => {
-        return s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>";
-      }, "");
+      .reduce((s: string, fileAndValue: Array<string>) => s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>", "");
 
     const message =
       `<p>Unequal value for row <i>${key}</i>, column <i>${header}</i>.</p>` +

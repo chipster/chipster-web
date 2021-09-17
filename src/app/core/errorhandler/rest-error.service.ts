@@ -99,21 +99,21 @@ export class RestErrorService {
 
     if (days > 1) {
       return days + " days";
-    } else if (days === 1) {
+    } if (days === 1) {
       return "a day";
-    } else if (hours > 1) {
+    } if (hours > 1) {
       return hours + " hours";
-    } else if (hours === 1) {
+    } if (hours === 1) {
       return "an hour";
-    } else if (minutes > 1) {
+    } if (minutes > 1) {
       return minutes + " minutes";
-    } else if (minutes === 1) {
+    } if (minutes === 1) {
       return "a minute";
-    } else if (seconds > 1) {
+    } if (seconds > 1) {
       return seconds + " seconds";
-    } else if (seconds === 1) {
+    } if (seconds === 1) {
       return "a second";
-    } else if (seconds === 0) {
+    } if (seconds === 0) {
       return "now";
     }
   }

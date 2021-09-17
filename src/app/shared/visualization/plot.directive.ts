@@ -106,12 +106,12 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     this.unsubscribe.complete();
   }
 
-  /** @description To check whether the file has the required column headers to create the visualization**/
+  /** @description To check whether the file has the required column headers to create the visualization* */
   checkTSVHeaders() {}
-  /** @description Extract the data to draw the plot**/
+  /** @description Extract the data to draw the plot* */
   populatePlotData() {}
 
-  /** @description manipulation of the svg**/
+  /** @description manipulation of the svg* */
   drawPlot() {
     this.dataSelectionModeEnable = false;
 
@@ -211,7 +211,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     }
   }
 
-  /** @description New Dataset Creation  from selected data points **/
+  /** @description New Dataset Creation  from selected data points * */
   createDatasetFromSelected() {}
 
   // Redraw the svg with the changed width of the window

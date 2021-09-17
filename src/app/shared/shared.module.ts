@@ -1,4 +1,4 @@
-///<reference path="pipes/secondspipe.pipe.ts"/>
+/// <reference path="pipes/secondspipe.pipe.ts"/>
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";

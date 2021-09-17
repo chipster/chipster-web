@@ -111,7 +111,7 @@ export class VolcanoPlotService {
     const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
 
     const logValues = [];
-    flatValues.forEach(function (yval) {
+    flatValues.forEach((yval) => {
       const curYval = -Math.log10(yval);
       // log(0) would be Infinity
       if (yval != 0) {
