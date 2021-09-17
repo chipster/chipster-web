@@ -51,7 +51,8 @@
         "require-jsdoc": "off",
         "import/prefer-default-export": "off",
         "@typescript-eslint/lines-between-class-members": "off",
-        "prefer-template": "warn"
+        "prefer-template": "warn",
+        "@typescript-eslint/dot-notation": "off"
       }
     },
     {
