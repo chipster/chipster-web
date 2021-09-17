@@ -47,12 +47,12 @@
             "style": "kebab-case"
           }
         ],
-        "no-console": "warn",
+        // "no-console": "warn",
         "require-jsdoc": "off",
-        "import/prefer-default-export": "off",
+        "import/prefer-default-export": "off", // our angular components don't use default export
         "@typescript-eslint/lines-between-class-members": "off",
-        "prefer-template": "warn",
-        "@typescript-eslint/dot-notation": "off"
+        "prefer-template": "off", // not sure if we want this
+        "@typescript-eslint/dot-notation": "off" // for now, fix causes troubles
       }
     },
     {
