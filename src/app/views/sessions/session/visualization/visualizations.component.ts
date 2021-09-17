@@ -146,17 +146,14 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
     if (isBlacklisted) {
       return false;
-    } else {
-      return (typeIsCompatible && inputCountIsCompatible) || phenodataSpecialCompatible;
     }
+    return (typeIsCompatible && inputCountIsCompatible) || phenodataSpecialCompatible;
   }
 
   containsTypeTags(tags: Array<string>) {
-    return _.every(this.selectionService.selectedDatasets, (dataset: Dataset) => {
-      return _.some(tags, (tag: string) => {
-        return this.typeTagService.isCompatible(this.sessionData, dataset, tag);
-      });
-    });
+    return _.every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
+      _.some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag))
+    );
   }
 
   getCompatibleVisualizations() {
@@ -168,7 +165,6 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     this.userInitiatedTabChange = true;
   }
 
-  //noinspection JSMethodCanBeStatic
   /**
    * Not static since used also from template
    * @param visId

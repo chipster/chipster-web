@@ -25,7 +25,6 @@ export class ToolInputsComponent implements OnChanges {
   bindingModels: BindingModel[];
   ready = false;
 
-  //noinspection JSUnusedLocalSymbols
   constructor(private toolService: ToolService) {}
 
   ngOnChanges() {
@@ -61,12 +60,10 @@ export class ToolInputsComponent implements OnChanges {
     // will update bindingModels
     this.autoBindRest(otherBindingModels);
 
-    const updatedBindings: InputBinding[] = this.bindingModels.map((bindingModel) => {
-      return {
-        toolInput: bindingModel.input,
-        datasets: bindingModel.boundDatasets.slice(),
-      };
-    });
+    const updatedBindings: InputBinding[] = this.bindingModels.map((bindingModel) => ({
+      toolInput: bindingModel.input,
+      datasets: bindingModel.boundDatasets.slice(),
+    }));
 
     this.updateBindings.emit({
       tool: this.validatedTool.tool,

@@ -23,27 +23,22 @@ export class ToolService {
     private getSessionDataService: GetSessionDataService
   ) {}
 
-  //noinspection JSMethodCanBeStatic
   isSelectionParameter(parameter: ToolParameter) {
     return parameter.type === "ENUM" || parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";
   }
 
-  //noinspection JSMethodCanBeStatic
   isColumnSelectionParameter(parameter: ToolParameter) {
     return parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";
   }
 
-  //noinspection JSMethodCanBeStatic
   isNumberParameter(parameter: ToolParameter) {
     return parameter.type === "INTEGER" || parameter.type === "DECIMAL" || parameter.type === "PERCENT";
   }
 
-  //noinspection JSMethodCanBeStatic
   isStringParameter(parameter: ToolParameter) {
     return parameter.type === "STRING" || parameter.type === "UNCHECKED_STRING";
   }
 
-  //noinspection JSMethodCanBeStatic
   /**
    * Get the step size for number inputs
    *
@@ -57,15 +52,15 @@ export class ToolService {
     if (parameter.type === "PERCENT") {
       // not used much, but used to be round figures in the old Java client
       return 0.01;
-    } else if (parameter.type === "DECIMAL") {
+    }
+    if (parameter.type === "DECIMAL") {
       // the same number of decimal places than the default value has
       if (parameter.defaultValue && parameter.defaultValue.includes(".")) {
         const decimalPlaces = parameter.defaultValue.split(".")[1].length;
         return Math.pow(0.1, decimalPlaces);
-      } else {
-        // default value missing or does not have a decimal point
-        return 0.001;
       }
+      // default value missing or does not have a decimal point
+      return 0.001;
     }
 
     // integer parameters
@@ -75,12 +70,10 @@ export class ToolService {
   getDefaultValue(toolParameter: ToolParameter): number | string {
     if (toolParameter.defaultValue != null && this.isNumberParameter(toolParameter)) {
       return Number(toolParameter.defaultValue);
-    } else {
-      return toolParameter.defaultValue;
     }
+    return toolParameter.defaultValue;
   }
 
-  //noinspection JSMethodCanBeStatic
   isDefaultValue(parameter: ToolParameter, value: number | string) {
     // no default value
     if (parameter.defaultValue == null) {
@@ -100,12 +93,10 @@ export class ToolService {
     if (parameter.type === "DECIMAL" || parameter.type === "PERCENT") {
       // consider "0" and "0.0" equal
       return parseFloat(value.toString()) === parseFloat(parameter.defaultValue);
-    } else {
-      return parameter.defaultValue === String(value).trim();
     }
+    return parameter.defaultValue === String(value).trim();
   }
 
-  //noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {
     return this.typeTagService.isCompatible(sessionData, dataset, type);
   }
@@ -144,12 +135,10 @@ export class ToolService {
     // return bindings in the same order as the original tool input, skip phenodata
     return tool.inputs
       .filter((input: ToolInput) => !input.meta)
-      .map((toolInput: ToolInput) => {
-        return {
-          toolInput: toolInput,
-          datasets: bindingsMap.get(toolInput),
-        };
-      });
+      .map((toolInput: ToolInput) => ({
+        toolInput,
+        datasets: bindingsMap.get(toolInput),
+      }));
   }
 
   bindPhenodata(toolWithInputs: SelectedToolWithInputs): PhenodataBinding[] {
@@ -189,12 +178,9 @@ export class ToolService {
     // if no phenodata inputs, return empty array
     return toolWithInputs.tool.inputs
       .filter((input) => input.meta)
-      .map((input) => {
-        return { toolInput: input, dataset: null };
-      });
+      .map((input) => ({ toolInput: input, dataset: null }));
   }
 
-  //noinspection JSMethodCanBeStatic
   /**
    *
    * @param bindings
@@ -208,7 +194,6 @@ export class ToolService {
     );
   }
 
-  //noinspection JSMethodCanBeStatic
   isMultiInput(input: ToolInput) {
     return (input.name.prefix && input.name.prefix.length > 0) || (input.name.postfix && input.name.postfix.length > 0);
   }
@@ -247,7 +232,6 @@ export class ToolService {
     return input.name.prefix + digits + input.name.postfix;
   }
 
-  //noinspection JSMethodCanBeStatic
   selectionOptionsContains(options: any[], value: string | number) {
     for (const option of options) {
       if (value === option.id) {
@@ -257,7 +241,6 @@ export class ToolService {
     return false;
   }
 
-  //noinspection JSMethodCanBeStatic
   getDatasetHeadersForParameter(
     datasets: Array<Dataset>,
     sessionData: SessionData
@@ -265,11 +248,12 @@ export class ToolService {
     return datasets.map((dataset: Dataset) => this.tsvService.getTSV2FileHeaders(dataset, sessionData));
   }
 
-  //noinspection JSMethodCanBeStatic
   getMetadataColumns(phenodatas: Array<string>) {
-    const headers = phenodatas.reduce((allColumns: string[], phenodataString: string) => {
-      return allColumns.concat(this.tsvService.getTSVHeaders(phenodataString));
-    }, []);
+    const headers = phenodatas.reduce(
+      (allColumns: string[], phenodataString: string) =>
+        allColumns.concat(this.tsvService.getTSVHeaders(phenodataString)),
+      []
+    );
 
     // return unique headers
     return Array.from(new Set(headers));
