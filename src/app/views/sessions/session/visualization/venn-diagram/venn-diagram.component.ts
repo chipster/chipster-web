@@ -44,8 +44,17 @@ export class VennDiagramComponent implements OnChanges {
   ) {}
 
   ngOnChanges() {
-    if (this.isEnabled) {
+    // FIXME only proceed if selectedDatasets.size 2 or 3
+    // otherwise unsubscribe and disable everything
+    if (
+      this.selectedDatasets != null &&
+      this.selectedDatasets.length >= 2 &&
+      this.selectedDatasets.length <= 3 &&
+      this.isEnabled
+    ) {
       this.init();
+    } else {
+      this.isEnabled = false;
     }
   }
 
@@ -59,9 +68,10 @@ export class VennDiagramComponent implements OnChanges {
       (resultTSVs: Array<any>) => {
         this.files = _.chain(resultTSVs)
           .map((tsv: any) => d3.tsvParseRows(tsv))
-          .map((tsv: Array<Array<string>>, index: number) => {
-            return new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name);
-          })
+          .map(
+            (tsv: Array<Array<string>>, index: number) =>
+              new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name)
+          )
           .value();
 
         this.symbolComparingEnabled = this.enableComparing("symbol");
@@ -112,10 +122,10 @@ export class VennDiagramComponent implements OnChanges {
       .data(this.vennCircles)
       .enter()
       .append("ellipse")
-      .attr("rx", (d: VennCircle, i: number) => d.circle.radius)
-      .attr("ry", (d: VennCircle, i: number) => d.circle.radius)
-      .attr("cx", (d: VennCircle, i: number) => d.circle.center.x)
-      .attr("cy", (d: VennCircle, i: number) => d.circle.center.y)
+      .attr("rx", (d: VennCircle) => d.circle.radius)
+      .attr("ry", (d: VennCircle) => d.circle.radius)
+      .attr("cx", (d: VennCircle) => d.circle.center.x)
+      .attr("cy", (d: VennCircle) => d.circle.center.y)
       .attr("opacity", 0.4)
       .attr("fill", (d: VennCircle, i: number) => colors(i.toString()));
 
@@ -181,12 +191,13 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   getVennCircleFileNameDescriptor(vennCircles: Array<VennCircle>, visualizationArea: any): Array<any> {
-    return vennCircles.map((vennCircle: VennCircle) => {
-      return new VennDiagramText(
-        vennCircle.filename,
-        this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center)
-      );
-    });
+    return vennCircles.map(
+      (vennCircle: VennCircle) =>
+        new VennDiagramText(
+          vennCircle.filename,
+          this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center)
+        )
+    );
   }
 
   getSelectionDescriptor(
