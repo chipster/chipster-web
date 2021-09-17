@@ -127,10 +127,10 @@ export class DatasetService {
     return datasets
       .filter((dataset) => dataset.name.includes(token))
       .map((dataset) => ({
-          file: dataset,
-          sampleId: uuidv4(),
-          sampleName: dataset.name,
-        }));
+        file: dataset,
+        sampleId: uuidv4(),
+        sampleName: dataset.name,
+      }));
   }
 
   findSamplePairs(datasets: Dataset[], r1Token = "R1", r2Token = "R2"): PairedEndSample[] {
@@ -212,10 +212,10 @@ export class DatasetService {
 
     // create SingleEndSamples to return
     const singleEndSamples: SingleEndSample[] = singleEndFilesWithSampleData.map(([dataset, sampleData]) => ({
-        sampleId: sampleData.sampleId,
-        sampleName: sampleData.sampleName,
-        file: dataset,
-      }));
+      sampleId: sampleData.sampleId,
+      sampleName: sampleData.sampleName,
+      file: dataset,
+    }));
 
     // create PairedEndSamples
     const pairedSamplesMap: Map<string, PairedEndSample> = this.getPairedSamplesMap(pairedEndFilesWithSampleData);

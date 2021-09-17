@@ -121,7 +121,9 @@ export class SessionDataService {
         }
         return this.createDataset(d);
       }),
-      mergeMap((datasetId: string) => forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)])),
+      mergeMap((datasetId: string) =>
+        forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)])
+      ),
       mergeMap((result) => of(result[0])),
       catchError((err) => {
         log.info("create derived dataset failed", err);
@@ -462,9 +464,8 @@ export class SessionDataService {
       return this.getDatasetList(sessionData)
         .map((dataset: Dataset) => dataset.size)
         .reduce((total, current) => total + current, 0);
-    } 
-      return 0; // return 0 when no datasets
-    
+    }
+    return 0; // return 0 when no datasets
   }
 
   /*

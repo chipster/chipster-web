@@ -83,7 +83,7 @@ export class JobsComponent implements OnInit {
     return JobService.isRunning(job);
   }
   cancelJob(job: Job) {
-    const jobCopy = { ...job};
+    const jobCopy = { ...job };
     this.sessionResource.cancelJob(job.sessionId, jobCopy).subscribe({
       next: () => this.update(),
       error: (err) => this.restErrorService.showError("cancel job failed", err),

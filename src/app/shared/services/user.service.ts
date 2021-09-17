@@ -65,39 +65,38 @@ export class UserService {
       tap((exampleSessions) => {
         sessions = sessions.concat(exampleSessions);
       }),
-      mergeMap(() => this.getLatestSessionFromStore().pipe(
+      mergeMap(() =>
+        this.getLatestSessionFromStore().pipe(
           mergeMap((latestSession: LatestSession) => {
             // valid id from store?
             const idFromStore = latestSession.sessionId;
             if (idFromStore && sessions.some((session) => session.sessionId === idFromStore)) {
               log.info("found valid latest session id from store", idFromStore);
               return observableOf(idFromStore);
-            } 
-              // valid source session id from store?
-              const sourceSessionIdFromStore = latestSession.sourceSessionId;
-              if (
-                sourceSessionIdFromStore &&
-                sessions.some((session) => session.sessionId === sourceSessionIdFromStore)
-              ) {
-                log.info("found valid source session id from store", sourceSessionIdFromStore);
-                return observableOf(sourceSessionIdFromStore);
-              } 
-                // valid id from session db?
-                return this.getLatestSessionFromSessionDb().pipe(
-                  mergeMap((idFromSessionDb: string) => {
-                    if (idFromSessionDb !== null && sessions.some((session) => session.sessionId === idFromSessionDb)) {
-                      log.info("found valid latest session id from sessionDb", idFromSessionDb);
-                      return observableOf(idFromSessionDb);
-                    } 
-                      log.info("no valid latest session id in sessionDb");
-                      return observableOf(null);
-                    
-                  })
-                );
-              
-            
+            }
+            // valid source session id from store?
+            const sourceSessionIdFromStore = latestSession.sourceSessionId;
+            if (
+              sourceSessionIdFromStore &&
+              sessions.some((session) => session.sessionId === sourceSessionIdFromStore)
+            ) {
+              log.info("found valid source session id from store", sourceSessionIdFromStore);
+              return observableOf(sourceSessionIdFromStore);
+            }
+            // valid id from session db?
+            return this.getLatestSessionFromSessionDb().pipe(
+              mergeMap((idFromSessionDb: string) => {
+                if (idFromSessionDb !== null && sessions.some((session) => session.sessionId === idFromSessionDb)) {
+                  log.info("found valid latest session id from sessionDb", idFromSessionDb);
+                  return observableOf(idFromSessionDb);
+                }
+                log.info("no valid latest session id in sessionDb");
+                return observableOf(null);
+              })
+            );
           })
-        ))
+        )
+      )
     );
   }
 
@@ -106,8 +105,6 @@ export class UserService {
   }
 
   getLatestSessionFromSessionDb(): Observable<string> {
-    return this.authenticationService.getUser().pipe(
-      map((user: User) => user.latestSession)
-    );
+    return this.authenticationService.getUser().pipe(map((user: User) => user.latestSession));
   }
 }

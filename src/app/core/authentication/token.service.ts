@@ -24,9 +24,8 @@ export class TokenService {
     // [1] contains the remembered part
     if (result && result[1].length > 0) {
       return result[1];
-    } 
-      return userId;
-    
+    }
+    return userId;
   }
 
   clear(): void {
@@ -48,11 +47,10 @@ export class TokenService {
         headers: this.getTokenHeader(),
         withCredentials: true,
       };
-    } 
-      return {
-        headers: this.getTokenHeader(),
-      };
-    
+    }
+    return {
+      headers: this.getTokenHeader(),
+    };
   }
 
   getToken(): string {

@@ -26,9 +26,7 @@ export class ClientsComponent implements OnInit {
   ngOnInit() {
     this.configService
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
-      .pipe(
-        flatMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics"))
-      )
+      .pipe(flatMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
       .subscribe(
         (topics: any[]) => {
           this.users = [];

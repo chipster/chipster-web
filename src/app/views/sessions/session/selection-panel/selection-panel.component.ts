@@ -1,4 +1,4 @@
-import { Dataset, Tool , Job } from "chipster-js-common";
+import { Dataset, Tool, Job } from "chipster-js-common";
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
 import * as _ from "lodash";
 import { Subject } from "rxjs";

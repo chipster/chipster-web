@@ -132,10 +132,9 @@ export class AuthenticationService {
               // token is invalid
               log.info("check token got 403 -> token invalid");
               return observableOf(false);
-            } 
-              // for now, throw others
-              throw error;
-            
+            }
+            // for now, throw others
+            throw error;
           })
         );
       })

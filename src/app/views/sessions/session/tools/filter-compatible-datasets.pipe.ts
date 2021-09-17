@@ -12,9 +12,8 @@ export class FilterCompatibleDatasetsPipe implements PipeTransform {
   transform(datasets: Dataset[], toolInput: ToolInput, sessionData: SessionData): Dataset[] {
     if (datasets) {
       return datasets.filter((dataset) => this.toolService.isCompatible(sessionData, dataset, toolInput.type.name));
-    } 
-      console.warn("datasets is falsy");
-      return [];
-    
+    }
+    console.warn("datasets is falsy");
+    return [];
   }
 }

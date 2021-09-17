@@ -36,17 +36,16 @@ export class FileResource {
           })
         )
       );
-    } 
-      return apiUrl$.pipe(
-        mergeMap((url: string) =>
-          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers: this.tokenService.getTokenHeader(),
-            withCredentials: true,
-            responseType: "text",
-          })
-        )
-      );
-    
+    }
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+          headers: this.tokenService.getTokenHeader(),
+          withCredentials: true,
+          responseType: "text",
+        })
+      )
+    );
   }
 
   getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
@@ -76,18 +75,17 @@ export class FileResource {
           })
         )
       );
-    } 
-      return apiUrl$.pipe(
-        mergeMap((url: string) =>
-          this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
-            headers,
-            withCredentials: true,
-            responseType: "text",
-            reportProgress: true,
-          })
-        )
-      );
-    
+    }
+    return apiUrl$.pipe(
+      mergeMap((url: string) =>
+        this.http.get(`${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`, {
+          headers,
+          withCredentials: true,
+          responseType: "text",
+          reportProgress: true,
+        })
+      )
+    );
   }
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {

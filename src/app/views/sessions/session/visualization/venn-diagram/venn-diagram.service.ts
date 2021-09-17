@@ -202,17 +202,17 @@ export class VennDiagramService {
         visualizationAreaCenter.x - vennCircle.circle.radius * 0.5,
         vennCircle.circle.center.y - vennCircle.circle.radius - 3
       );
-    } if (vennCircle.circle.center.x < visualizationAreaCenter.x) {
+    }
+    if (vennCircle.circle.center.x < visualizationAreaCenter.x) {
       return new Point(
         vennCircle.circle.center.x - vennCircle.circle.radius * 1.2,
         vennCircle.circle.center.y + vennCircle.circle.radius + 5
       );
-    } 
-      return new Point(
-        vennCircle.circle.center.x + vennCircle.circle.radius * 0.8,
-        vennCircle.circle.center.y + vennCircle.circle.radius + 5
-      );
-    
+    }
+    return new Point(
+      vennCircle.circle.center.x + vennCircle.circle.radius * 0.8,
+      vennCircle.circle.center.y + vennCircle.circle.radius + 5
+    );
   }
 
   /*
@@ -388,12 +388,14 @@ export class VennDiagramService {
         const columnIndex = tsvHeaders[i].getColumnIndexByKey(header);
         if (columnIndex !== -1) {
           return [tsvFile.filename, tsvMaps[i].get(key)[columnIndex]];
-        } 
-          return null;
-        
+        }
+        return null;
       })
       .filter((fileAndValue) => fileAndValue != null)
-      .reduce((s: string, fileAndValue: Array<string>) => s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>", "");
+      .reduce(
+        (s: string, fileAndValue: Array<string>) => s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>",
+        ""
+      );
 
     const message =
       `<p>Unequal value for row <i>${key}</i>, column <i>${header}</i>.</p>` +

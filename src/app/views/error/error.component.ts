@@ -55,12 +55,12 @@ export class ErrorComponent implements OnInit {
           };
 
           options.buttons = error.buttons.map((button) => ({
-              text: button,
-            }));
+            text: button,
+          }));
 
           options.links = error.links.map((link) => ({
-              text: link,
-            }));
+            text: link,
+          }));
 
           const toast = this.toastrService.warning(msg, title, options);
 
@@ -151,9 +151,8 @@ export class ErrorComponent implements OnInit {
         map((stack) => info + "stack: \n" + stack + "\n"),
         catchError((stackErr) => of(info + "stack: (failed to get the stack: " + stackErr + ")\n"))
       );
-    } 
-      return of(info);
-    
+    }
+    return of(info);
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value

@@ -154,17 +154,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   static getOpacity(isVisible: boolean): number {
     if (isVisible) {
       return 1.0;
-    } 
-      return 0.25;
-    
+    }
+    return 0.25;
   }
 
   static getToolTipOpacity(isVisible: boolean): number {
     if (isVisible) {
       return 0.75;
-    } 
-      return 0.0;
-    
+    }
+    return 0.0;
   }
 
   ngOnInit(): void {
@@ -582,9 +580,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         // use smaller font if the file extension is long
         if (UtilsService.getFileExtension(d.name).length <= 4) {
           return this.fontSize + "px";
-        } 
-          return this.fontSize - 2 + "px";
-        
+        }
+        return this.fontSize - 2 + "px";
       })
       // .attr("stroke", d => (this.isSelectedDataset(d.dataset) ? "2.0" : "1"))
       .attr("fill", (d) => (this.isSelectedDataset(d.dataset) ? "white" : "black"))
@@ -663,7 +660,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.dividerMenuItem,
             this.selectChildrenMenuItem,
             this.dividerMenuItem,
-            { ...this.deleteMenuItem, title: "Delete (" + self.selectedDatasets.length + " files)",},
+            { ...this.deleteMenuItem, title: "Delete (" + self.selectedDatasets.length + " files)" },
           ]
         : [
             this.renameMenuItem,
@@ -1250,7 +1247,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.selectedDatasets.filter((dataset) => dataset.datasetId === this.datasetToolTipArray[i].datasetId).length >
         0;
       if (isInSearch || isSelected) {
-        let datasetLeft; let datasetTop;
+        let datasetLeft;
+        let datasetTop;
         const element = document.getElementById("node_" + this.datasetToolTipArray[i].datasetId);
         if (element) {
           datasetLeft = element.getBoundingClientRect().left;
@@ -1366,7 +1364,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.renameMenuItem = {
       title: "Rename...",
-      action (d): void {
+      action(d): void {
         const dataset = _.clone(d.dataset);
         self.dialogModalService
           .openStringModal("Rename file", "File name", dataset.name, "Rename")
@@ -1385,7 +1383,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.convertMenuItem = {
       title: "Convert to Chipster Format...",
-      action (d): void {
+      action(d): void {
         self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
       },
       disabled: false, // optional, defaults to false
@@ -1393,21 +1391,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.deleteMenuItem = {
       title: "Delete",
-      action (): void {
+      action(): void {
         self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
       },
     };
 
     this.groupsMenuItem = {
       title: "Define Samples...",
-      action (): void {
+      action(): void {
         self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
       },
     };
 
     this.selectChildrenMenuItem = {
       title: "Select Descendants",
-      action (): void {
+      action(): void {
         const children = self.getSessionDataService.getChildren(self.selectionService.selectedDatasets);
         self.selectionHandlerService.setDatasetSelection(children);
       },
@@ -1415,14 +1413,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.exportMenuItem = {
       title: "Export",
-      action (d): void {
+      action(d): void {
         self.sessionDataService.exportDatasets([d.dataset]);
       },
     };
 
     this.historyMenuItem = {
       title: "History...",
-      action (d): void {
+      action(d): void {
         self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData);
       },
     };

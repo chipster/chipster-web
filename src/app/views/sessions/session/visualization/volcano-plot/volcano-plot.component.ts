@@ -106,9 +106,8 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     if (y === Infinity) {
       // get the max y value
       return this.yScale.invert(0);
-    } 
-      return y;
-    
+    }
+    return y;
   }
 
   drawPlot() {
@@ -195,12 +194,10 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
         if (d.plotPoint.y >= -Math.log10(0.05) && Math.abs(d.plotPoint.x) >= 1) {
           if (d.plotPoint.x < 0) {
             return "green";
-          } 
-            return "red";
-          
-        } 
-          return "black";
-        
+          }
+          return "red";
+        }
+        return "black";
       });
   }
 

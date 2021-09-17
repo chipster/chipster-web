@@ -39,13 +39,14 @@ export default class TSV2File {
   private static parameterReplace(header): string {
     if (header === "") {
       return "untitled";
-    } if (header === " ") {
+    }
+    if (header === " ") {
       return "<space>";
-    } if (/^\s$/.test(header)) {
+    }
+    if (/^\s$/.test(header)) {
       return "<spaces>";
-    } 
-      return header;
-    
+    }
+    return header;
   }
 
   private static getIsMissingHeaderColumn(tsvArray: Array<Array<string>>): boolean {
@@ -149,7 +150,8 @@ export default class TSV2File {
   public getHeadersForSpreadSheet(): Array<string> {
     if (this.hasHeadersHardcodedByType) {
       return this.headersHardCodedByType;
-    } if (this.isFirstDataRowHeader) {
+    }
+    if (this.isFirstDataRowHeader) {
       return this.isMissingHeaderColumn
         ? [this.headersWithIdentifierFix[0]].concat(TSV2File.spreadSheetReplace(this.headersWithIdentifierFix.slice(1)))
         : TSV2File.spreadSheetReplace(this.headers);
@@ -173,8 +175,8 @@ export default class TSV2File {
       sourceHeaders = this.headers;
     }
     return sourceHeaders.map((header) => ({
-        id: header,
-        displayName: TSV2File.parameterReplace(header),
-      }));
+      id: header,
+      displayName: TSV2File.parameterReplace(header),
+    }));
   }
 }

@@ -42,13 +42,15 @@ export class StorageComponent implements OnInit {
         mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
         tap((users: string[]) => (this.users = users)),
         mergeMap((users: string[]) => from(users)),
-        mergeMap((user) => this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
+        mergeMap((user) =>
+          this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
             catchError((err) => {
               log.error("quota request error", err);
               // don't cancel other requests even if one of them fails
               return empty();
             })
-          )),
+          )
+        ),
         tap((quota: any) => this.quotas.set(quota.username, quota))
       )
       .subscribe(null, (err) => this.restErrorService.showError("get quotas failed", err));

@@ -26,22 +26,20 @@ export class AnalyzeGuard implements CanActivate {
           log.info("navigating to valid latest session", latestSessionId);
           this.routeService.navigateToSession(latestSessionId);
           return of(false); // doesn't really matter if it's true or false, since navigating before?
-        } 
-          log.info("no valid latest session, creating new session");
-          return this.createNewTempSession().pipe(
-            map((newSessionId: string) => {
-              if (newSessionId !== null) {
-                log.info("created new session", newSessionId);
-                this.routeService.navigateToSession(newSessionId);
-                return false;
-              } 
-                log.warn("creating new session failed, going to sessions list");
-                this.routeService.navigateToSessions();
-                return false;
-              
-            })
-          );
-        
+        }
+        log.info("no valid latest session, creating new session");
+        return this.createNewTempSession().pipe(
+          map((newSessionId: string) => {
+            if (newSessionId !== null) {
+              log.info("created new session", newSessionId);
+              this.routeService.navigateToSession(newSessionId);
+              return false;
+            }
+            log.warn("creating new session failed, going to sessions list");
+            this.routeService.navigateToSessions();
+            return false;
+          })
+        );
       })
     );
   }

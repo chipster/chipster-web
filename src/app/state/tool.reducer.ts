@@ -13,7 +13,7 @@ export const CLEAR_SELECTED_TOOL = "CLEAR_SELECTED_TOOL";
 export function selectedTool(state: SelectedTool = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_SELECTED_TOOL:
       return null;
     default:
@@ -28,7 +28,7 @@ export const CLEAR_SELECTED_TOOL_WITH_INPUTS = "CLEAR_SELECTED_TOOL_WITH_BINDING
 export function selectedToolWithInputs(state: SelectedToolWithInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_INPUTS:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_INPUTS:
       return null;
     default:
@@ -43,7 +43,7 @@ export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS = "CLEAR_SELECTED_TOOL_WI
 export function selectedToolWithValidatedInputs(state: SelectedToolWithValidatedInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS:
       return null;
     default:
@@ -58,7 +58,7 @@ export const CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS = "CLEAR_SELECTED_TOOL_WI
 export function selectedToolWithPopulatedParams(state: SelectedToolWithValidatedInputs = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_POPULATED_PARAMS:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS:
       return null;
     default:
@@ -73,7 +73,7 @@ export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS = "CLEAR_SELECTED_TOOL_WI
 export function selectedToolWithValidatedParams(state: SelectedToolWithValidatedParameters = null, { type, payload }) {
   switch (type) {
     case SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
       return null;
     default:
@@ -88,7 +88,7 @@ export const CLEAR_VALIDATED_TOOL = "CLEAR_VALIDATED_TOOL";
 export function validatedTool(state: ValidatedTool = null, { type, payload }) {
   switch (type) {
     case SET_VALIDATED_TOOL:
-      return { ...payload};
+      return { ...payload };
     case CLEAR_VALIDATED_TOOL:
       return null;
     default:

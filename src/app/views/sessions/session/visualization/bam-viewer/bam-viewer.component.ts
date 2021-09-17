@@ -187,28 +187,28 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     while (offset < MAX_GZIP_BLOCK_SIZE) {
       const bamRecord = new BamRecord();
       let blockSize;
-        let blockEnd;
-        let refID;
-        let pos;
-        let bmn;
-        let bin;
-        let mq;
-        let nl;
-        let flag_nc;
-        let flag;
-        let nc;
-        let lseq;
-        let nextRefID;
-        let nextPos;
-        let readName;
-        let j;
-        let p;
-        let lengthOnRef;
-        let cigar;
-        let c;
-        let cigarArray;
-        let seq;
-        let seqBytes;
+      let blockEnd;
+      let refID;
+      let pos;
+      let bmn;
+      let bin;
+      let mq;
+      let nl;
+      let flag_nc;
+      let flag;
+      let nc;
+      let lseq;
+      let nextRefID;
+      let nextPos;
+      let readName;
+      let j;
+      let p;
+      let lengthOnRef;
+      let cigar;
+      let c;
+      let cigarArray;
+      let seq;
+      let seqBytes;
 
       const CIGAR_DECODER = ["M", "I", "D", "N", "S", "H", "P", "=", "X", "?", "?", "?", "?", "?", "?", "?"];
       const SECRET_DECODER = ["=", "A", "C", "x", "G", "x", "x", "x", "T", "x", "x", "x", "x", "x", "x", "N"];
@@ -392,7 +392,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   readFloat(offset) {
     const dataView = new DataView(this.plain.buffer);
-      const littleEndian = true;
+    const littleEndian = true;
     return dataView.getFloat32(offset, littleEndian);
   }
 }

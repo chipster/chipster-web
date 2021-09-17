@@ -211,9 +211,8 @@ export class WorkflowGraphService {
         ? this.nodeWidth + this.xMargin + this.nodeWidth
         : this.nodeWidth;
       return x + w >= dataset.x && x < dataset.x + nodeWidth && y + h >= dataset.y && y < dataset.y + this.nodeHeight;
-    } 
-      return false;
-    
+    }
+    return false;
   }
 
   isOverLapping(rectA: any, rectB: any) {

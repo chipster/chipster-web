@@ -42,20 +42,19 @@ export class JobService {
       }
       const duration = UtilsService.millisecondsBetweenDates(startDate, endDate);
       return of(UtilsService.millisecondsToHumanFriendly(duration));
-    } 
-      return interval(1000).pipe(
-        startWith(0),
-        map(() => {
-          let now = new Date();
-          if (now.getTime() < startDate.getTime()) {
-            // happens if your own computer time is lagging behind
-            now = startDate;
-          }
-          const millis = UtilsService.millisecondsBetweenDates(startDate, now);
-          return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
-        }, distinctUntilChanged())
-      );
-    
+    }
+    return interval(1000).pipe(
+      startWith(0),
+      map(() => {
+        let now = new Date();
+        if (now.getTime() < startDate.getTime()) {
+          // happens if your own computer time is lagging behind
+          now = startDate;
+        }
+        const millis = UtilsService.millisecondsBetweenDates(startDate, now);
+        return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
+      }, distinctUntilChanged())
+    );
   }
 
   static isSuccessful(job: Job): boolean {
@@ -100,7 +99,9 @@ export class JobService {
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) => this.createJob(sampleValidatedTool));
+    const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) =>
+      this.createJob(sampleValidatedTool)
+    );
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -136,7 +137,9 @@ export class JobService {
     }
 
     // create jobs from ValidatedTools
-    const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) => this.createJob(sampleValidatedTool));
+    const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) =>
+      this.createJob(sampleValidatedTool)
+    );
 
     // submit
     this.sessionDataService.createJobs(jobs).subscribe({
@@ -234,9 +237,9 @@ export class JobService {
     job.metadataFiles = validatedTool.phenodataBindings
       .filter((binding) => binding.dataset != null)
       .map((binding) => ({
-          name: binding.toolInput.name.id,
-          content: this.datasetService.getOwnPhenodata(binding.dataset),
-        }));
+        name: binding.toolInput.name.id,
+        content: this.datasetService.getOwnPhenodata(binding.dataset),
+      }));
 
     return job;
   }

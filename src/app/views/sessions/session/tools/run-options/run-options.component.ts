@@ -28,9 +28,11 @@ export class RunOptionsComponent implements OnChanges {
     if (this.validatedTool.singleJobValidation.valid === true) {
       if (this.validatedTool.tool.inputs.length === 0 || this.validatedTool.inputBindings.length === 0) {
         return "Runs the tool once.";
-      } if (this.validatedTool.selectedDatasets.length === 1) {
+      }
+      if (this.validatedTool.selectedDatasets.length === 1) {
         return "Runs the tool once. Uses the one selected file as the tool input.";
-      } if (this.validatedTool.selectedDatasets.length > 1) {
+      }
+      if (this.validatedTool.selectedDatasets.length > 1) {
         return (
           "Runs the tool once. Uses all the " +
           this.validatedTool.selectedDatasets.length +
@@ -60,8 +62,7 @@ export class RunOptionsComponent implements OnChanges {
             "."
           : "";
       return runsTheTool + middlePart + nonSampleFiles;
-    } 
-      return this.validatedTool.runForEachSampleValidation.message;
-    
+    }
+    return this.validatedTool.runForEachSampleValidation.message;
   }
 }

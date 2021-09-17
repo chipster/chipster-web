@@ -54,24 +54,24 @@ export class AuthGuard implements CanActivate {
 
           if (!approvalRequired) {
             return true;
-          } if (approved) {
+          }
+          if (approved) {
             log.info("terms of use accepted already");
             return true;
-          } 
-            log.info(
-              "terms of use must be accepted first",
-              ", required for this auth:",
-              approvalRequired,
-              ", accpeted version:",
-              user.termVersion,
-              ", latest version:",
-              latestVersion,
-              ", accepted timestamp:",
-              user.termsAccepted
-            );
-            this.routeService.navigateAbsolute("/terms", { queryParams: { showAccept: "true" } });
-            return false;
-          
+          }
+          log.info(
+            "terms of use must be accepted first",
+            ", required for this auth:",
+            approvalRequired,
+            ", accpeted version:",
+            user.termVersion,
+            ", latest version:",
+            latestVersion,
+            ", accepted timestamp:",
+            user.termsAccepted
+          );
+          this.routeService.navigateAbsolute("/terms", { queryParams: { showAccept: "true" } });
+          return false;
         }),
         catchError((e) => {
           if (e.status === 403) {
@@ -83,10 +83,9 @@ export class AuthGuard implements CanActivate {
           return of(false);
         })
       );
-    } 
-      this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
+    }
+    this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
 
-      return of(false);
-    
+    return of(false);
   }
 }

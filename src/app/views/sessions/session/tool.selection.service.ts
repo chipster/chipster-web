@@ -61,10 +61,10 @@ export class ToolSelectionService {
 
     return {
       singleJobValidation: singleJobValidationResult,
-        runForEachValidation: runForEachValidationResult,
-        runForEachSampleValidation: runForEachSampleValidationResult,
-        sampleGroups,
-      ...toolWithValidatedParams
+      runForEachValidation: runForEachValidationResult,
+      runForEachSampleValidation: runForEachSampleValidationResult,
+      sampleGroups,
+      ...toolWithValidatedParams,
     };
   }
 
@@ -87,11 +87,11 @@ export class ToolSelectionService {
 
     return {
       parametersValidation: {
-          valid: parametersValid,
-          message: "Invalid parameters", // TODO add more details
-        },
-        parametersValidationResults: parametersValidations,
-      ...toolWithValidatedInputs
+        valid: parametersValid,
+        message: "Invalid parameters", // TODO add more details
+      },
+      parametersValidationResults: parametersValidations,
+      ...toolWithValidatedInputs,
     };
   }
 
@@ -183,9 +183,8 @@ export class ToolSelectionService {
     if (result !== null) {
       log.warn("RegExp not supported properly");
       return false;
-    } 
-      return true;
-    
+    }
+    return true;
   }
 
   parameterHasValue(parameter: ToolParameter): boolean {
@@ -214,10 +213,10 @@ export class ToolSelectionService {
         .map((dataset) => this.getSessionDataService.getPhenodata(dataset));
 
       // populating params is async as some selection options may require dataset contents
-      const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) => this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData));
-      return forkJoin(populateParameterObservables).pipe(
-        map(() => selectedToolWithInputs)
+      const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) =>
+        this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData)
       );
+      return forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
     }
     return of(selectedToolWithInputs);
   }
@@ -271,7 +270,8 @@ export class ToolSelectionService {
             return parameter;
           })
         );
-      } if (parameter.type === "METACOLUMN_SEL") {
+      }
+      if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService.getMetadataColumns(phenodatas).map((column) => ({ id: column }));
 
@@ -287,7 +287,8 @@ export class ToolSelectionService {
     if (!toolWithInputs.tool || toolWithInputs.tool.inputs.length < 1) {
       // inputs are valid if tool has no  inputs
       return { valid: true };
-    } if (
+    }
+    if (
       toolWithInputs.selectedDatasets.length > this.toolService.getInputCountWithoutPhenodata(toolWithInputs.tool) &&
       !this.toolService.hasMultiInputs(toolWithInputs.tool)
     ) {
@@ -305,19 +306,20 @@ export class ToolSelectionService {
 
     // check that every required input is bound
     // phenodata inputs are not included in the bindings, so no need to deal with them
-    const bindingsValid = toolWithInputs.inputBindings.every((binding: InputBinding) => binding.toolInput.optional || binding.datasets.length > 0);
+    const bindingsValid = toolWithInputs.inputBindings.every(
+      (binding: InputBinding) => binding.toolInput.optional || binding.datasets.length > 0
+    );
     if (!bindingsValid) {
       if (toolWithInputs.selectedDatasets.length === 0) {
         return {
           valid: false,
           message: "Tool has required inputs but no files selected.",
         };
-      } 
-        return {
-          valid: false,
-          message: "Selected files are not compatible with required tool inputs.",
-        };
-      
+      }
+      return {
+        valid: false,
+        message: "Selected files are not compatible with required tool inputs.",
+      };
     }
 
     // check that there are no unbound datasets
@@ -335,21 +337,21 @@ export class ToolSelectionService {
 
     if (allDatasetsBound) {
       return { valid: true };
-    } if (toolWithInputs.tool.inputs.some((toolInput) => this.toolService.isMultiInput(toolInput))) {
+    }
+    if (toolWithInputs.tool.inputs.some((toolInput) => this.toolService.isMultiInput(toolInput))) {
       return {
         valid: false,
         message: "Incompatible input files",
       };
-    } 
-      const unboundDatasetNames = toolWithInputs.selectedDatasets
-        .filter((dataset) => !boundDatasetIds.includes(dataset.datasetId))
-        .map((dataset) => dataset.name);
+    }
+    const unboundDatasetNames = toolWithInputs.selectedDatasets
+      .filter((dataset) => !boundDatasetIds.includes(dataset.datasetId))
+      .map((dataset) => dataset.name);
 
-      return {
-        valid: false,
-        message: unboundDatasetNames.length + " selected files could not be assigned as job input files",
-      };
-    
+    return {
+      valid: false,
+      message: unboundDatasetNames.length + " selected files could not be assigned as job input files",
+    };
   }
 
   /**
@@ -368,40 +370,42 @@ export class ToolSelectionService {
   validateRunForEach(toolWithInputs: SelectedToolWithInputs, sessionData: SessionData): ValidationResult {
     if (!toolWithInputs.tool) {
       return { valid: false, message: "Tool missing." };
-    } if (toolWithInputs.tool.inputs.length < 1) {
+    }
+    if (toolWithInputs.tool.inputs.length < 1) {
       return { valid: false, message: "Tool takes no inputs." };
-    } if (toolWithInputs.tool.inputs.filter((toolInput) => !toolInput.optional && !toolInput.meta).length > 1) {
+    }
+    if (toolWithInputs.tool.inputs.filter((toolInput) => !toolInput.optional && !toolInput.meta).length > 1) {
       return {
         valid: false,
         message: "Not possible for tools that require more than one inputs.",
       };
-    } if (toolWithInputs.selectedDatasets == null || toolWithInputs.selectedDatasets.length < 1) {
+    }
+    if (toolWithInputs.selectedDatasets == null || toolWithInputs.selectedDatasets.length < 1) {
       return { valid: false, message: "No files selected." };
-    } if (toolWithInputs.selectedDatasets == null || toolWithInputs.selectedDatasets.length === 1) {
+    }
+    if (toolWithInputs.selectedDatasets == null || toolWithInputs.selectedDatasets.length === 1) {
       return {
         valid: false,
         message: "Only one file selected.",
       };
-    } 
-      const validatedToolsForEachFile: ValidatedTool[] = toolWithInputs.selectedDatasets.map((dataset) =>
-        this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData)
-      );
+    }
+    const validatedToolsForEachFile: ValidatedTool[] = toolWithInputs.selectedDatasets.map((dataset) =>
+      this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData)
+    );
 
-      const allValid = validatedToolsForEachFile.every((validatedTool) => validatedTool.singleJobValidation.valid);
+    const allValid = validatedToolsForEachFile.every((validatedTool) => validatedTool.singleJobValidation.valid);
 
-      if (allValid) {
-        return { valid: true };
-      } 
-        const failCount = validatedToolsForEachFile.filter(
-          (validatedTool) => !validatedTool.singleJobValidation.valid
-        ).length;
+    if (allValid) {
+      return { valid: true };
+    }
+    const failCount = validatedToolsForEachFile.filter(
+      (validatedTool) => !validatedTool.singleJobValidation.valid
+    ).length;
 
-        return {
-          valid: false,
-          message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
-        };
-      
-    
+    return {
+      valid: false,
+      message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
+    };
   }
 
   validateRunForEachSample(
@@ -411,11 +415,14 @@ export class ToolSelectionService {
   ): ValidationResult {
     if (!toolWithInputs.tool) {
       return { valid: false, message: "Tool missing." };
-    } if (toolWithInputs.tool.inputs.length < 1) {
+    }
+    if (toolWithInputs.tool.inputs.length < 1) {
       return { valid: false, message: "Tool takes no inputs." };
-    } if (toolWithInputs.selectedDatasets.length === 0) {
+    }
+    if (toolWithInputs.selectedDatasets.length === 0) {
       return { valid: false, message: "No files selected." };
-    } if (toolWithInputs.selectedDatasets.length === 1) {
+    }
+    if (toolWithInputs.selectedDatasets.length === 1) {
       // prevents unnecessary dropdown run button when only one single end file is selected
       return {
         valid: false,
@@ -433,7 +440,8 @@ export class ToolSelectionService {
         valid: false,
         message: "Selected files don't include any files defined as sample files.",
       };
-    } if (
+    }
+    if (
       sampleGroups.singleEndSamples.length > 0 &&
       (sampleGroups.pairedEndSamples.length > 0 || sampleGroups.pairMissingSamples.length > 0)
     ) {
@@ -442,32 +450,32 @@ export class ToolSelectionService {
         valid: false,
         message: "Selected files should only contain single end or paired end sample files, not both.",
       };
-    } if (sampleGroups.pairMissingSamples.length > 0) {
+    }
+    if (sampleGroups.pairMissingSamples.length > 0) {
       // only paired, but some pairs missing
       return {
         valid: false,
         message: "Selected files contain paired end sample files which are missing their pair file.",
       };
-    } 
-      // create validatedTools for each sample
-      const validatedToolsForSamples = this.getValidatedToolForEachSample(toolWithInputs, sampleGroups, sessionData);
+    }
+    // create validatedTools for each sample
+    const validatedToolsForSamples = this.getValidatedToolForEachSample(toolWithInputs, sampleGroups, sessionData);
 
-      // check that all rebound validatedTools are valid, every returns true for empty array
-      const runForEachSampleValid =
-        validatedToolsForSamples.length > 0 &&
-        validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobInputsValidation.valid);
+    // check that all rebound validatedTools are valid, every returns true for empty array
+    const runForEachSampleValid =
+      validatedToolsForSamples.length > 0 &&
+      validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobInputsValidation.valid);
 
-      const failCount: number = validatedToolsForSamples.filter(
-        (validatedTool) => !validatedTool.singleJobValidation.valid
-      ).length;
+    const failCount: number = validatedToolsForSamples.filter(
+      (validatedTool) => !validatedTool.singleJobValidation.valid
+    ).length;
 
-      return {
-        valid: runForEachSampleValid,
-        message: runForEachSampleValid
-          ? undefined
-          : "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "sample") + ".",
-      };
-    
+    return {
+      valid: runForEachSampleValid,
+      message: runForEachSampleValid
+        ? undefined
+        : "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "sample") + ".",
+    };
   }
 
   getValidatedToolForEachSample(
@@ -555,9 +563,9 @@ export class ToolSelectionService {
 
     const newToolWithInputs: SelectedToolWithInputs = {
       inputBindings: newInputBindings,
-        selectedDatasets: datasets, // TODO should this be only those included in the bindings?
-      
-      ...newSelectedTool
+      selectedDatasets: datasets, // TODO should this be only those included in the bindings?
+
+      ...newSelectedTool,
     };
 
     // validate inputs
@@ -589,15 +597,15 @@ export class ToolSelectionService {
 
     const newToolWithValidatedInputs: SelectedToolWithValidatedInputs = {
       singleJobInputsValidation: {
-          valid: inputsValid,
-          message: inputsMessage,
-        },
-        phenodataValidation: {
-          valid: phenodataValid,
-          message: phenodataMessage,
-        },
-        phenodataBindings,
-      ...newToolWithInputs
+        valid: inputsValid,
+        message: inputsMessage,
+      },
+      phenodataValidation: {
+        valid: phenodataValid,
+        message: phenodataMessage,
+      },
+      phenodataBindings,
+      ...newToolWithInputs,
     };
 
     // parameters are not populated again as they should remain the same
@@ -618,17 +626,20 @@ export class ToolSelectionService {
 
     if (!parametersValid && !inputsValid) {
       return "Invalid parameters. " + inputsMessage;
-    } if (!parametersValid && !phenodataValid) {
+    }
+    if (!parametersValid && !phenodataValid) {
       return "Invalid parameters and missing phenodata.";
-    } if (!parametersValid) {
+    }
+    if (!parametersValid) {
       return "Invalid parameters.";
-    } if (!inputsValid) {
+    }
+    if (!inputsValid) {
       return inputsMessage;
-    } if (!phenodataValid) {
+    }
+    if (!phenodataValid) {
       return "Missing phenodata.";
-    } 
-      return "";
-    
+    }
+    return "";
   }
 
   private setColumnSelectionParameterValueAfterPopulate(parameter: ToolParameter): void {

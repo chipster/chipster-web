@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Dataset , Job } from "chipster-js-common";
+import { Dataset, Job } from "chipster-js-common";
 import { Store } from "@ngrx/store";
 import {
   TOGGLE_SELECTED_DATASET,

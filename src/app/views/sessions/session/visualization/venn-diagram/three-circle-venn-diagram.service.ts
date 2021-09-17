@@ -28,11 +28,11 @@ export class ThreeCircleVennDiagramService {
   ): string {
     if (selectionCrossingCircles.length === 1) {
       return this.oneCircleSelectionDescriptor(circles, selectionCrossingCircles[0], radius);
-    } if (selectionCrossingCircles.length === 2) {
+    }
+    if (selectionCrossingCircles.length === 2) {
       return this.twoCircleSelectionDescriptor(circles, selectionCrossingCircles, radius, visualizationCenter);
-    } 
-      return this.threeCircleSelectionDescriptor(circles, radius, visualizationCenter);
-    
+    }
+    return this.threeCircleSelectionDescriptor(circles, radius, visualizationCenter);
   }
 
   /*

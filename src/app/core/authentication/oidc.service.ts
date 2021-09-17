@@ -35,11 +35,11 @@ export class OidcService {
       tap((id) => (appId = id)),
       mergeMap(() => this.configService.getAuthUrl()),
       mergeMap((authUrl) => this.httpClient.get(authUrl + "/oidc/configs")),
-      map((configs: OidcConfig[]) => (
-          configs
-            // allow separate oidc configs for different apps
-            .filter((oidc) => oidc.appId === appId)
-        )),
+      map((configs: OidcConfig[]) =>
+        configs
+          // allow separate oidc configs for different apps
+          .filter((oidc) => oidc.appId === appId)
+      ),
       tap((configs: OidcConfig[]) => {
         configs.forEach((oidc) => {
           const manager = new UserManager({

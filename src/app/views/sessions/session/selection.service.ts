@@ -1,5 +1,5 @@
 import { takeUntil } from "rxjs/operators";
-import { Dataset , Job } from "chipster-js-common";
+import { Dataset, Job } from "chipster-js-common";
 import * as _ from "lodash";
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";

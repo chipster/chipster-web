@@ -94,9 +94,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 
           const sessionId = params["sessionId"];
           return this.sessionResource.getSession(sessionId).pipe(
-            catchError((err) => 
-              // if session not found but sourceSession url param exists, go there
-               this.trySourceSessionIfSessionNotFound(err) // either navigate and return empty observable or rethrow err
+            catchError(
+              (err) =>
+                // if session not found but sourceSession url param exists, go there
+                this.trySourceSessionIfSessionNotFound(err) // either navigate and return empty observable or rethrow err
             ),
             mergeMap((session: Session) => {
               this.removeSourceSessionParamIfRegularSession(session); // may redirecto to session url without the query param
@@ -326,21 +327,20 @@ export class SessionComponent implements OnInit, OnDestroy {
       mergeMap((sessionData) => {
         if (this.sessionDataService.hasReadWriteAccess(sessionData)) {
           return of(sessionData);
-        } 
-          log.info("read-only sesssion, create copy");
-          return this.sessionResource.copySession(sessionData, sessionData.session.name, true).pipe(
-            mergeMap((id) => {
-              const queryParams = {};
-              queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
-              return from(
-                this.routeService.navigateAbsolute("/analyze/" + id, {
-                  queryParams,
-                })
-              );
-            }),
-            mergeMap(() => NEVER)
-          );
-        
+        }
+        log.info("read-only sesssion, create copy");
+        return this.sessionResource.copySession(sessionData, sessionData.session.name, true).pipe(
+          mergeMap((id) => {
+            const queryParams = {};
+            queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
+            return from(
+              this.routeService.navigateAbsolute("/analyze/" + id, {
+                queryParams,
+              })
+            );
+          }),
+          mergeMap(() => NEVER)
+        );
       })
     );
   }
@@ -393,7 +393,8 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.sessionData.session.name = dialogResult.value;
             this.sessionData.session.state = SessionState.Ready;
             return this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
-          } if (dialogResult.button === deleteButton) {
+          }
+          if (dialogResult.button === deleteButton) {
             return this.deleteTempSession();
           }
         }),
@@ -401,9 +402,8 @@ export class SessionComponent implements OnInit, OnDestroy {
           if (err === undefined || err === 0 || err === 1) {
             // dialog cancel, backdrop click or esc
             return of(false);
-          } 
-            throw err;
-          
+          }
+          throw err;
         })
       );
   }
@@ -411,9 +411,8 @@ export class SessionComponent implements OnInit, OnDestroy {
   private getKeepDialogFirstParagraph(): string {
     if (this.sessionData.session.rules.some((rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId)) {
       return "You have made changes to a <em>read-only<em> example session.";
-    } 
-      return "You have made changes to a <em>read-only</em> shared session.";
-    
+    }
+    return "You have made changes to a <em>read-only</em> shared session.";
   }
 
   doScrollFix(): void {

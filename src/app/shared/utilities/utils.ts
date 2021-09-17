@@ -71,7 +71,8 @@ export default class UtilsService {
         const lastSelectedItem = selectedItems[selectedItems.length - 1];
         const indexOfLastSelection = allItems.indexOf(lastSelectedItem);
         const indexOfNewSelection = allItems.indexOf(item);
-        let from: number; let to: number;
+        let from: number;
+        let to: number;
         if (indexOfLastSelection < indexOfNewSelection) {
           from = indexOfLastSelection + 1;
           to = indexOfNewSelection + 1;
@@ -105,11 +106,11 @@ export default class UtilsService {
   static compareStringNullSafe(a, b): number {
     if (a) {
       return a.localeCompare(b);
-    } if (b) {
+    }
+    if (b) {
       return -b.localeCompare(a);
-    } 
-      return 0;
-    
+    }
+    return 0;
   }
 
   static parseISOStringToDate(s: any) {
@@ -185,10 +186,10 @@ export default class UtilsService {
 
   static getCommonPrefix(array: String[]) {
     const A = array.concat().sort();
-      const a1 = A[0];
-      const a2 = A[A.length - 1];
-      const L = a1.length;
-      let i = 0;
+    const a1 = A[0];
+    const a2 = A[A.length - 1];
+    const L = a1.length;
+    let i = 0;
     while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
     return a1.substring(0, i);
   }

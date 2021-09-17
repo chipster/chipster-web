@@ -137,7 +137,9 @@ export class HistoryComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams))
+        flatMap((service) =>
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams)
+        )
       )
       .subscribe(
         (recordNumber) => {
@@ -156,7 +158,9 @@ export class HistoryComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams))
+        flatMap((service) =>
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams)
+        )
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {

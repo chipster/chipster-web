@@ -42,7 +42,8 @@ export class ServicesComponent implements OnInit {
         map((services: Service[]) => services.filter((service) => service.adminUri != null)),
         // create alive and status requests
         mergeMap((services) => {
-          const aliveRequests = services.map((service: Service) => this.authHttpClient.get(service.adminUri + "/admin/alive").pipe(
+          const aliveRequests = services.map((service: Service) =>
+            this.authHttpClient.get(service.adminUri + "/admin/alive").pipe(
               tap(() => {
                 this.aliveMap.set(service, "OK");
               }),
@@ -51,9 +52,11 @@ export class ServicesComponent implements OnInit {
                 this.aliveMap.set(service, err.status);
                 return of(false); // returning EMPTY would cancel others in forkJoin
               })
-            ));
+            )
+          );
 
-          const statusRequests = services.map((service: Service) => this.authHttpClient.getAuth(service.adminUri + "/admin/status").pipe(
+          const statusRequests = services.map((service: Service) =>
+            this.authHttpClient.getAuth(service.adminUri + "/admin/status").pipe(
               tap((status) => {
                 this.statusMap.set(service.role, status);
               }),
@@ -62,7 +65,8 @@ export class ServicesComponent implements OnInit {
                 this.statusMap.set(service.role, err.status);
                 return of(false); // returning EMPTY would cancel others in forkJoin
               })
-            ));
+            )
+          );
 
           return forkJoin(aliveRequests.concat(statusRequests));
         })

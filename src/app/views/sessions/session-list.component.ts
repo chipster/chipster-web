@@ -99,7 +99,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
         // wait a while to see if the user is really interested about this session
         debounceTime(500),
         filter(() => this.selectedSession !== null),
-        mergeMap((session) => forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap())),
+        mergeMap((session) =>
+          forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap())
+        ),
         tap((results) => {
           const sData = results[0];
           this.modulesMap = results[1];
@@ -304,7 +306,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
           if (!this.deletingSessions.has(session)) {
             this.selectSession(session);
           }
-          
         } else if (!this.deletingSessions.has(session)) {
           this.openSession(session.sessionId);
         }
@@ -316,7 +317,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
           if (!this.deletingSessions.has(session)) {
             this.selectSession(session);
           }
-          
         } else if (!this.deletingSessions.has(session)) {
           this.openSession(session.sessionId);
         }
@@ -330,7 +330,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
             this.selectSession(session);
             this.lightSelectSession(session);
           }
-          
         } else if (!this.deletingSessions.has(session)) {
           if (this.isSessionSelected(session)) {
             this.lightSelectSession(session);
@@ -497,21 +496,21 @@ export class SessionListComponent implements OnInit, OnDestroy {
   getSharedByTitlePart(userId: string): string {
     if (!userId) {
       return "Your sessions";
-    } if (userId === this.exampleSessionOwnerUserId) {
+    }
+    if (userId === this.exampleSessionOwnerUserId) {
       return "Example sessions";
-    } if (userId === this.trainingSessionOwnerUserId) {
+    }
+    if (userId === this.trainingSessionOwnerUserId) {
       return "Training sessions";
-    } 
-      return "Shared to you by ";
-    
+    }
+    return "Shared to you by ";
   }
 
   getSharedByUsernamePart(userId: string): string {
     if (!userId || userId === this.exampleSessionOwnerUserId || userId === this.trainingSessionOwnerUserId) {
       return "";
-    } 
-      return TokenService.getUsernameFromUserId(userId);
-    
+    }
+    return TokenService.getUsernameFromUserId(userId);
   }
 
   rename(session: Session) {
@@ -547,10 +546,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
           if (this.sessionData && this.sessionData.session.sessionId === session.sessionId) {
             log.info("using session data from preview for duplicate");
             return of(this.sessionData);
-          } 
-            log.info("no session data from preview available, getting from server");
-            return this.sessionResource.loadSession(session.sessionId);
-          
+          }
+          log.info("no session data from preview available, getting from server");
+          return this.sessionResource.loadSession(session.sessionId);
         }),
         mergeMap((sessionData: SessionData) => {
           const copySessionObservable = this.sessionResource.copySession(sessionData, duplicateName, false);
