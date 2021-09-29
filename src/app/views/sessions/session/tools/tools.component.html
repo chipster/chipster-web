@@ -82,22 +82,6 @@
     </div>
 
     <div class="row">
-      <!-- parameters dropdown panel -->
-      <!-- located here because needs full width parent to get size and position right, also here at the same height as the controlling button -->
-      <div ngbDropdown #parametersDropdown="ngbDropdown" class="d-inline-block dropdown-div">
-        <button class="btn btn-sm hidden-dropdown-button" id="parametersDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="parametersDropdown" *ngIf="selectedTool" class="tools-panel-dropdown">
-          <ch-tool-parameters
-            [validatedTool]="validatedTool"
-            (parametersChanged)="onParametersChanged()"></ch-tool-parameters>
-          <ch-tool-inputs
-            [validatedTool]="validatedTool"
-            [sessionData]="sessionData"
-            (updateBindings)="setBindings($event)"></ch-tool-inputs>
-          <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
-        </div>
-      </div>
-
       <!-- category list -->
       <div class="col col-left">
         <div class="list-group-sm" id="category-list">
@@ -146,14 +130,6 @@
           <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
             <div class="row mb-2">
               <div class="col d-flex">
-                <!-- manual -->
-                <!--
-                  <button class="btn btn-sm btn-outline-secondary mr-1 w-4" (click)="$event.stopPropagation(); manualDropdown.toggle();" title="More info"
-                    [disabled]="!selectedTool">
-                    <span class="fas fa-info" aria-hidden="true"></span>
-                  </button>
-                -->
-
                 <!-- parameters -->
                 <button
                   class="btn btn-sm btn-outline-secondary mr-1"
@@ -176,16 +152,6 @@
                     aria-hidden="true"></span>
                   Parameters
                 </button>
-
-                <!-- parameters dropdown button -->
-                <!-- <button class="btn btn-sm btn-outline-secondary dropdown-toggle mr-1" (click)="
-                    $event.stopPropagation(); parametersDropdown.toggle()
-                  " title="Edit parameters and inputs" [disabled]="!selectedTool">
-                  <span *ngIf="paramButtonWarning" class="fas fa-fw fa-exclamation-circle text-warning"
-                    aria-hidden="true"></span>
-                  <span *ngIf="!paramButtonWarning" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
-                  Parameters
-                </button> -->
 
                 <!-- run -->
                 <button
@@ -245,45 +211,8 @@
                     </button>
                   </div>
                 </div>
-
-                <!-- traffic light -->
-                <!-- <button class="btn btn-sm btn-outline-secondary  ml-1" (click)="
-                                $event.stopPropagation(); inputsDropdown.toggle()" title="Inputs info"
-                  [disabled]="!selectedTool">
-                  <span *ngIf="!runEnabled" class="fas fa-fw fa-exclamation-circle text-warning"
-                    aria-hidden="true"></span>
-                  <span *ngIf="runEnabled" class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
-                </button> -->
-
-                <!-- <span class="dropdown float-right">
-                  <button [disabled]="sessionData.datasetsMap.size === 0"
-                    class="btn btn-sm btn-outline-secondary tool-bar-button ml-1" id="workflowDropdownMenuButton"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Actions">
-                    <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="runDropdownMenuButton">
-                    <a class="dropdown-item">Select all files</a>
-                    <a class="dropdown-item" [class.disabled]="true">
-                      Select descendants of a file
-                    </a>
-                  </div>
-                </span>
- -->
-
-                <!-- <i class="fas fa-lg fa-ellipsis-h "></i> -->
               </div>
             </div>
-            <!-- <div class="row">
-              <div class="col"></div>
-              <div class="col d-flex">
-          <button class="btn btn-success run-button btn-sm button-wide flex-grow-1" (click)="runJob(runForEachEnabled)"
-            [disabled]="!runEnabled">
-            <span class="fas fa-play"></span>
-            {{ runForEachEnabled === false ? "Run" : "Run For Each" }}
-          </button>
-
-        </div>
-      </div> -->
 
             <div class="row">
               <div class="col">
