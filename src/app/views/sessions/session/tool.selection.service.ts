@@ -68,6 +68,16 @@ export class ToolSelectionService {
     };
   }
 
+  parametersHaveBeenChanged(toolWithValidatedInputs: SelectedToolWithValidatedInputs) {
+    return (
+      toolWithValidatedInputs?.tool?.parameters != null &&
+      toolWithValidatedInputs.tool.parameters.length > 0 &&
+      toolWithValidatedInputs.tool.parameters.some(
+        (parameter) => !this.toolService.isDefaultValue(parameter, parameter.value)
+      )
+    );
+  }
+
   validateParameters(toolWithValidatedInputs: SelectedToolWithValidatedInputs): SelectedToolWithValidatedParameters {
     const parametersValidations = new Map<string, ValidationResult>();
     if (
@@ -245,7 +255,7 @@ export class ToolSelectionService {
       // no datasets --> set to null
       if (datasets && datasets.length < 1) {
         parameter.selectionOptions = [];
-        parameter.value = null;
+        // parameter.value = null;
         return of(parameter);
       }
 
@@ -274,7 +284,6 @@ export class ToolSelectionService {
       if (parameter.type === "METACOLUMN_SEL") {
         // METACOLUMN_SEL
         parameter.selectionOptions = this.toolService.getMetadataColumns(phenodatas).map((column) => ({ id: column }));
-
         this.setColumnSelectionParameterValueAfterPopulate(parameter);
         return of(parameter);
       }

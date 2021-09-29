@@ -87,6 +87,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public runIsDropdown: boolean;
   public defineHintVisible = false;
   public paramButtonWarning: boolean;
+  public paramButtonChanged: boolean;
   public runningJobs = 0;
   public jobList: Job[];
 
@@ -338,6 +339,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         this.selectedTool = t;
         this.runEnabled = false;
         this.paramButtonWarning = false;
+        this.paramButtonChanged = false;
         this.runIsDropdown = false;
       });
 
@@ -520,6 +522,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           tool &&
           (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
         this.paramButtonWarning = !this.runEnabled;
+        this.paramButtonChanged = this.toolSelectionService.parametersHaveBeenChanged(tool);
         this.defineHintVisible =
           tool != null &&
           this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&

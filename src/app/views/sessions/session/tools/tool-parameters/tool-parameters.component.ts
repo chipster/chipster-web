@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } 
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
+import { ToolSelectionService } from "../../tool.selection.service";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 
@@ -25,7 +26,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
 
   // noinspection JSUnusedLocalSymbols
   constructor(
-    public toolService: ToolService // private dropDown: NgbDropdown
+    public toolService: ToolService,
+    private toolSelectionService: ToolSelectionService // private dropDown: NgbDropdown
   ) {}
 
   ngOnInit() {
@@ -79,8 +81,20 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
     this.parametersChanged.emit();
   }
 
+  resetAll() {
+    this.validatedTool.tool.parameters.forEach((parameter) => this.reset(parameter));
+  }
+
   getDisplayName(obj) {
     return this.toolService.getDisplayName(obj);
+  }
+
+  isResetAllVisible() {
+    return (
+      this.validatedTool?.tool?.parameters != null &&
+      this.validatedTool.tool.parameters.length > 0 &&
+      this.validatedTool.tool.parameters.some((parameter) => this.isResetVisible(parameter))
+    );
   }
 
   isResetVisible(parameter: ToolParameter): boolean {

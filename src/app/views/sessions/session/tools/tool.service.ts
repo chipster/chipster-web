@@ -76,7 +76,7 @@ export class ToolService {
 
   isDefaultValue(parameter: ToolParameter, value: number | string) {
     // no default value
-    if (parameter.defaultValue == null) {
+    if (parameter.defaultValue == null || parameter.defaultValue === "EMPTY") {
       // if the default is not set, allow also null, undefined and empty string here
       return this.isColumnSelectionParameter(parameter) ? value == null : value == null || String(value).trim() === "";
     }
@@ -112,7 +112,7 @@ export class ToolService {
     const bindingsMap = new Map<ToolInput, Dataset[]>();
 
     // do the binding, one input at a time
-    for (const toolInput of inputs) {
+    inputs.forEach((toolInput) => {
       // get compatible datasets
       const compatibleDatasets = unboundDatasets.filter((dataset) =>
         this.isCompatible(sessionData, dataset, toolInput.type.name)
@@ -130,7 +130,7 @@ export class ToolService {
 
       // remove bound datasets from unbound
       unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
-    }
+    });
 
     // return bindings in the same order as the original tool input, skip phenodata
     return tool.inputs
@@ -233,12 +233,7 @@ export class ToolService {
   }
 
   selectionOptionsContains(options: any[], value: string | number) {
-    for (const option of options) {
-      if (value === option.id) {
-        return true;
-      }
-    }
-    return false;
+    return options.some((option) => value === option.id);
   }
 
   getDatasetHeadersForParameter(

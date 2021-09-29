@@ -160,11 +160,20 @@
                   (click)="openParametersModal()"
                   title="Edit parameters and inputs"
                   [disabled]="!selectedTool">
+                  <!-- class="fas fa-fw fa-sliders-h" -->
+
                   <span
                     *ngIf="paramButtonWarning"
                     class="fas fa-fw fa-exclamation-circle text-warning"
                     aria-hidden="true"></span>
-                  <span *ngIf="!paramButtonWarning" class="fas fa-fw fa-sliders-h" aria-hidden="true"></span>
+                  <span
+                    *ngIf="!paramButtonWarning && !paramButtonChanged"
+                    class="fas fa-fw fa-edit"
+                    aria-hidden="true"></span>
+                  <span
+                    *ngIf="!paramButtonWarning && paramButtonChanged"
+                    class="fas fa-fw fa-edit text-primary"
+                    aria-hidden="true"></span>
                   Parameters
                 </button>
 

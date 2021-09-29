@@ -11,7 +11,31 @@
   </div> -->
 
   <!-- parameters -->
-  <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
+  <div class="row">
+    <div class="col">
+      <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
+    </div>
+
+    <div class="col">
+      <button
+        *ngIf="isResetAllVisible()"
+        class="btn btn-sm btn-outline-secondary mr-1 float-right"
+        (click)="resetAll()"
+        title="Reset all">
+        <span class="fas fa-fw fa-undo text-primary" aria-hidden="true"></span>
+        Reset All
+      </button>
+      <button
+        *ngIf="!isResetAllVisible()"
+        class="btn btn-sm btn-outline-secondary mr-1 float-right"
+        (click)="resetAll()"
+        title="Reset all"
+        [disabled]="true">
+        <span class="fas fa-fw fa-undo" aria-hidden="true"></span>
+        Reset All
+      </button>
+    </div>
+  </div>
 
   <form name="paramForm" *ngIf="validatedTool.tool">
     <div *ngIf="validatedTool.tool.parameters.length === 0" class="font-italic text-smaller">No parameters</div>
@@ -85,7 +109,7 @@
               [class.invisible]="!isResetVisible(parameter)"
               (click)="reset(parameter, $event)"
               title="Reset to default">
-              <i class="fas fa-undo"></i>
+              <i class="fas fa-undo text-primary"></i>
             </button>
           </td>
         </tr>
