@@ -252,10 +252,9 @@ export class ToolSelectionService {
 
     // column selection parameters
     if (this.toolService.isColumnSelectionParameter(parameter)) {
-      // no datasets --> set to null
+      // no datasets --> no options, don't reset the value to keep it for possible dataset selection in the future
       if (datasets && datasets.length < 1) {
         parameter.selectionOptions = [];
-        // parameter.value = null;
         return of(parameter);
       }
 

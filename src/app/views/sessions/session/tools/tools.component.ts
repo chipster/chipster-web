@@ -92,7 +92,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public jobList: Job[];
 
   modules: Array<Module> = [];
-  tools: Array<Tool> = [];
 
   selectedModule: Module = null; // used in modal to keep track of which module has been selected
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected
@@ -137,7 +136,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // TODO why the copies?
-    this.tools = _.cloneDeep(this.toolsArray);
+    // this.tools = _.cloneDeep(this.toolsArray);
     this.modules = _.cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
@@ -317,7 +316,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
     const module = this.modulesMap.get(item.moduleId);
     this.selectModule(module);
     this.selectCategory(module.categoriesMap.get(item.category));
-    this.selectTool(item.tool);
+    // get the tool from category, don't use the one in the event as for some reason it's not the same instance
+    const tool = module.categoriesMap.get(item.category).tools.filter((t1) => t1.name.id === item.toolId)[0];
+    this.selectTool(tool);
     const toolElementId = this.toolElementIdPrefix + item.toolId;
 
     setTimeout(() => {
