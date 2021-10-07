@@ -20,7 +20,7 @@ export class BytesPipe implements PipeTransform {
     const exponent = Math.floor(log1k); // 1
     const units = ["bytes", "kB", "MB", "GB", "TB", "PB"];
     const unit = units[exponent]; // kB
-    const scaled = <number>bytes / Math.pow(1024, exponent); // 332.77...
+    const scaled = <number>bytes / 1024 ** exponent; // 332.77...
     const rounded = scaled.toFixed(precision); // 333
 
     return rounded + " " + unit;

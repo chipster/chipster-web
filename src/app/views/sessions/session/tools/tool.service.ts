@@ -57,7 +57,7 @@ export class ToolService {
       // the same number of decimal places than the default value has
       if (parameter.defaultValue && parameter.defaultValue.includes(".")) {
         const decimalPlaces = parameter.defaultValue.split(".")[1].length;
-        return Math.pow(0.1, decimalPlaces);
+        return 0.1 ** decimalPlaces;
       }
       // default value missing or does not have a decimal point
       return 0.001;

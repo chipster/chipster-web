@@ -29,7 +29,7 @@ export default class VennDiagramUtils {
      */
 
     /* Determine the distance from point 0 to point 2. */
-    const a = (Math.pow(circle1.radius, 2) - Math.pow(circle2.radius, 2) + Math.pow(distance, 2)) / (2.0 * distance);
+    const a = (circle1.radius ** 2 - circle2.radius ** 2 + distance ** 2) / (2.0 * distance);
 
     /* Determine the coordinates of point 2. */
     const x2 = circle1.center.x + (dx * a) / distance;
@@ -38,7 +38,7 @@ export default class VennDiagramUtils {
     /* Determine the distance from point 2 to either of the
      * intersection points.
      */
-    const h = Math.sqrt(Math.pow(circle1.radius, 2) - Math.pow(a, 2));
+    const h = Math.sqrt(circle1.radius ** 2 - a ** 2);
 
     /* Now determine the offsets of the intersection points from
      * point 2.
