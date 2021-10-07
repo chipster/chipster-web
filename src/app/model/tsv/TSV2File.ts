@@ -1,6 +1,6 @@
 import { Dataset } from "chipster-js-common";
 import { Tags, TypeTagService } from "../../shared/services/typetag.service";
-import { SelectionOption } from "../../views/sessions/session/tool.selection.service";
+import { SelectionOption } from "../../views/sessions/session/SelectionOption";
 import { SessionData } from "../session/session-data";
 
 export default class TSV2File {

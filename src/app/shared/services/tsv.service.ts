@@ -7,7 +7,7 @@ import { SessionData } from "../../model/session/session-data";
 import TSV2File from "../../model/tsv/TSV2File";
 import TSVFile from "../../model/tsv/TSVFile";
 import "../../rxjs-operators";
-import { SelectionOption } from "../../views/sessions/session/tool.selection.service";
+import { SelectionOption } from "../../views/sessions/session/SelectionOption";
 import { FileResource } from "../resources/fileresource";
 import { TypeTagService } from "./typetag.service";
 

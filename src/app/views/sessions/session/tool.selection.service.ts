@@ -9,6 +9,7 @@ import { SessionData } from "../../../model/session/session-data";
 import UtilsService from "../../../shared/utilities/utils";
 import { DatasetService, SampleGroups } from "./dataset.service";
 import { GetSessionDataService } from "./get-session-data.service";
+import { SelectionOption } from "./SelectionOption";
 import { ToolService } from "./tools/tool.service";
 import {
   SelectedTool,
@@ -19,10 +20,6 @@ import {
   ValidationResult,
 } from "./tools/ToolSelection";
 
-export interface SelectionOption {
-  id: string;
-  displayName: string;
-}
 @Injectable()
 export class ToolSelectionService {
   constructor(

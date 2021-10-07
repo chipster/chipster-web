@@ -9,8 +9,8 @@ import { ConfigService } from "../../../../shared/services/config.service";
 import { TsvService } from "../../../../shared/services/tsv.service";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
+import { SelectionOption } from "../SelectionOption";
 import { SessionDataService } from "../session-data.service";
-import { SelectionOption } from "../tool.selection.service";
 import { SelectedToolWithInputs } from "./ToolSelection";
 
 @Injectable()
