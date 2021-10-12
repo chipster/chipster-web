@@ -1,14 +1,14 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
-import { forkJoin, Observable, of } from "rxjs";
-import { flatMap, tap, catchError } from "rxjs/operators";
 import log from "loglevel";
+import { forkJoin, Observable, of } from "rxjs";
+import { catchError, flatMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { IdPair } from "../../../model/id-pair";
+import { SessionResource } from "../../../shared/resources/session.resource";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import { JobService } from "../../sessions/session/job.service";
-import { SessionResource } from "../../../shared/resources/session.resource";
 
 @Component({
   selector: "ch-jobs",
@@ -86,7 +86,14 @@ export class JobsComponent implements OnInit {
     const jobCopy = { ...job };
     this.sessionResource.cancelJob(job.sessionId, jobCopy).subscribe({
       next: () => this.update(),
-      error: (err) => this.restErrorService.showError("cancel job failed", err),
+      error: (err) => {
+        if (err.error) {
+          // server sends a good error message if the job has already finished
+          this.restErrorService.showError("cancel job failed: " + err.error, err);
+        } else {
+          this.restErrorService.showError("cancel job failed", err);
+        }
+      },
     });
   }
 }
