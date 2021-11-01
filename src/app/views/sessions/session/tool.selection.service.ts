@@ -242,7 +242,7 @@ export class ToolSelectionService {
     sessionData: SessionData
   ): Observable<ToolParameter> {
     // for other than column selection parameters, set to default if no value
-    if (!this.toolService.isColumnSelectionParameter(parameter) && !parameter.value) {
+    if (!this.toolService.isColumnSelectionParameter(parameter) && parameter.value == null) {
       parameter.value = this.toolService.getDefaultValue(parameter);
       return of(parameter);
     }
