@@ -224,6 +224,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.update();
 
     this.applyZoom(this.defaultScale);
+    this.onSearchChanged();
 
     if (this.enabled) {
       this.subscriptions.push(
@@ -258,6 +259,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     //
+
     this.renderGraph();
     // how to call setScrollLimits() properly after the layout is done?
     // without this async call the scroll limits are initialized incorrectly and the view jumps on the first
@@ -277,19 +279,23 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if ("datasetSearch" in changes) {
-      if (this.datasetSearch) {
-        const filteredDatasets = this.pipeService.findDataset(
-          UtilsService.mapValues(this.datasetsMap),
-          this.datasetSearch
-        );
-        this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
-        this.searchEnabled = true;
-      } else {
-        this.filter = null;
-        this.searchEnabled = false;
-      }
-      this.renderGraph();
+      this.onSearchChanged();
     }
+  }
+
+  private onSearchChanged(): void {
+    if (this.datasetSearch != null && this.datasetSearch.trim().length > 0) {
+      const filteredDatasets = this.pipeService.findDataset(
+        UtilsService.mapValues(this.datasetsMap),
+        this.datasetSearch
+      );
+      this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
+      this.searchEnabled = true;
+    } else {
+      this.filter = null;
+      this.searchEnabled = false;
+    }
+    this.renderGraph();
   }
 
   ngOnDestroy(): void {
@@ -846,19 +852,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.selectionHandlerService.setDatasetSelection(selection);
 
       this.selectionRect = null;
-    } else {
-      /*
-      Listen for background clicks
-
-      Don't do anything if the context menu is open, because then the user clicked just to close
-      it. Listen for mousedown events like the context menu. This listener seems to be fired before the
-      contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
-      in the context menu onClose doesn't help also, because this was called earlier.
-      */
-      if (!this.isContextMenuOpen) {
-        this.selectionHandlerService.clearDatasetSelection();
-        this.selectionHandlerService.clearJobSelection();
-      }
+    } else if (!this.isContextMenuOpen) {
+      // Listen for background clicks
+      // Don't do anything if the context menu is open, because then the user clicked just to close
+      // it. Listen for mousedown events like the context menu. This listener seems to be fired before the
+      // contextMenu onClose, so the isContextMenuOpen does what it says. Using stopPropagation() etc.
+      // in the context menu onClose doesn't help also, because this was called earlier.
+      this.selectionHandlerService.clearDatasetSelection();
+      this.selectionHandlerService.clearJobSelection();
     }
   }
 
