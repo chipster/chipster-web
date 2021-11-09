@@ -123,8 +123,8 @@ export class NavigationComponent implements OnInit {
 
   public note() {
     this.dialogModalService.openNotificationModal(
-      "Platform issue",
-      "There is an ongoing issue with the platform that Chipster is running on. Because of the issue, user sessions are unavailable at the moment, resulting in errors when trying to use the service. \n\n The issue is expected to be fixed by midday of Wednesday 2021-11-10."
+      "Note",
+      "The issue of phenodata not being always saved has been solved. However, in some cases phenodata doesn't get generated after Convert to Chipster format. This will be fixed as soon as possible. There was also an issue with parameters sometimes not being visible, but it has also been solved."
     );
   }
 }
