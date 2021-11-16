@@ -2,7 +2,7 @@ import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { Role } from "chipster-js-common";
-import { flatMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
@@ -18,12 +18,16 @@ import { ConfigService } from "../../../shared/services/config.service";
 export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";
 
-  years = ["2020", "2021", "2022"];
-  yearControl = new FormControl(this.years[1]);
+  years = ["2017", "2018", "2019", "2020", "2021", "2022"];
+  yearControl = new FormControl(this.years[4]);
+  modules = ["all", "ngs", "microarray", "misc", "kielipankki"];
+  moduleControl = new FormControl(this.modules[0]);
+
   ignoreUsersControl = new FormControl("");
 
   form = new FormGroup({
     year: this.yearControl,
+    module: this.moduleControl,
     ignoreUsers: this.ignoreUsersControl,
   });
 
@@ -58,7 +62,7 @@ export class StatisticsComponent implements OnInit {
 
   updateStats(): void {
     this.state = LoadState.Loading;
-    let params = new HttpParams().append("year", this.yearControl.value);
+    let params = new HttpParams().append("year", this.yearControl.value).append("module", this.moduleControl.value);
 
     this.ignoreUsersControl.value
       .split(",")
@@ -71,7 +75,7 @@ export class StatisticsComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) =>
+        mergeMap((service) =>
           this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params)
         )
       )
