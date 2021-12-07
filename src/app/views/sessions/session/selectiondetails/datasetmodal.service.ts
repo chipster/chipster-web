@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset } from "chipster-js-common";
+import { Dataset, Tool } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -21,12 +21,13 @@ export class DatasetModalService {
     private typeTagService: TypeTagService
   ) {}
 
-  public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData): void {
+  public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData, tools: Tool[]): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
       size: "xl",
     });
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
+    modalRef.componentInstance.tools = tools;
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {

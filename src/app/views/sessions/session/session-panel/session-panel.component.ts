@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { Dataset, Module } from "chipster-js-common";
+import { Dataset, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
@@ -21,6 +21,8 @@ export class SessionPanelComponent {
   sessionData: SessionData;
   @Input()
   modulesMap: Map<string, Module>;
+  @Input()
+  tools: Tool[];
 
   datasetSearch: string;
 

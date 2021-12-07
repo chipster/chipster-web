@@ -1,14 +1,16 @@
 import { Component, Input, OnChanges, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, JobInput, JobParameter } from "chipster-js-common";
+import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
+import { ToolService } from "../../tools/tool.service";
 
 export class DatasetHistoryStep {
   datasetName: string;
   date: string;
   sourceJobName: string;
   sourceJob: Job;
+  tool: Tool;
   parameterList: JobParameter[];
   inputFileNamesString: string;
   sourceCode: string;
@@ -27,6 +29,7 @@ interface HistoryOption {
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
+  @Input() private tools: Tool[];
 
   public historyOptions: Array<HistoryOption> = [
     { id: "sourceJobName", name: "Tool", enabled: true },
@@ -42,7 +45,11 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
 
-  constructor(public activeModal: NgbActiveModal, public querySessionDataService: QuerySessionDataService) {}
+  constructor(
+    public activeModal: NgbActiveModal,
+    public querySessionDataService: QuerySessionDataService,
+    public toolService: ToolService
+  ) {}
 
   ngOnInit(): void {
     this.historyOptionsMap = new Map();
@@ -73,6 +80,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
           inputFileNamesString:
             sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",
           sourceCode: sourceJob != null ? sourceJob.sourceCode : null,
+          tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools),
         };
       });
 

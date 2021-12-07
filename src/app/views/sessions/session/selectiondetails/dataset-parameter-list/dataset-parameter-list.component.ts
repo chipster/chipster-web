@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import * as _ from "lodash";
+import log from "loglevel";
 import { ToolService } from "../../tools/tool.service";
 
 @Component({
@@ -91,7 +92,7 @@ export class DatasetParameterListComponent implements OnChanges {
                 clone.value = toolOption.displayName;
               }
             } else {
-              console.warn(
+              log.info(
                 "job parameter value" +
                   jobParameter.value +
                   "not found from the current tool " +

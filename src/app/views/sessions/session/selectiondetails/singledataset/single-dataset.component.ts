@@ -1,9 +1,9 @@
 import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
-import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SessionDataService } from "../../session-data.service";
+import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
@@ -37,7 +37,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   constructor(
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
-    private datasetModalService: DatasetModalService
+    private datasetModalService: DatasetModalService,
+    private toolService: ToolService
   ) {}
 
   ngOnInit() {
@@ -51,7 +52,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     this.toolCategory = this.sourceJob ? this.sourceJob.toolCategory : "";
     this.toolName = this.sourceJob ? this.sourceJob.toolName : "";
 
-    this.getUsedToolFromToolset();
+    this.tool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
   }
 
   editNotes(input) {
@@ -71,19 +72,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);
   }
 
-  getUsedToolFromToolset() {
-    if (this.sourceJob) {
-      this.tool = this.tools.find((t) => t.name.id === this.sourceJob.toolId);
-
-      if (!this.tool) {
-        log.info("No Tool found with this ID", this.sourceJob.toolId);
-      }
-    } else {
-      log.info("source job is null");
-    }
-  }
-
   showHistory(): void {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData);
+    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Dataset, InputBinding, Tool, ToolInput, ToolParameter } from "chipster-js-common";
+import { Dataset, InputBinding, Job, Tool, ToolInput, ToolParameter } from "chipster-js-common";
 import * as _ from "lodash";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -318,5 +318,13 @@ export class ToolService {
     }
 
     return s;
+  }
+
+  getLiveToolForSourceJob(sourceJob: Job, tools: Tool[]): Tool {
+    if (sourceJob != null) {
+      const tool = tools.find((t) => t.name.id === sourceJob.toolId);
+      return tool !== undefined ? tool : null;
+    }
+    return null;
   }
 }

@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Dataset, Job, Module } from "chipster-js-common";
+import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
 import * as _ from "lodash";
@@ -50,6 +50,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   enabled: boolean;
   @Input()
   sessionData: SessionData;
+  @Input()
+  tools: Tool[];
+
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -1422,7 +1425,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.historyMenuItem = {
       title: "History...",
       action(d): void {
-        self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData);
+        self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData, self.tools);
       },
     };
 

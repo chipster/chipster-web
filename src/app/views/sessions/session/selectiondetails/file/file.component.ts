@@ -98,7 +98,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData);
+    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
   }
 
   wrangleDataset() {

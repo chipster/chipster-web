@@ -50,7 +50,7 @@
             *ngIf="step.sourceJob && step.sourceJob.parameters.length > 0"
             [parameters]="step.sourceJob.parameters"
             [parametersLimit]="-1"
-            [tool]="null"
+            [tool]="step.tool"
             [historyMode]="true"></ch-dataset-parameter-list>
         </td>
       </tr>
