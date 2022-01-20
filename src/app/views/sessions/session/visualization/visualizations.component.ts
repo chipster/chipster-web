@@ -65,11 +65,12 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
             .map(this.getTabId.bind(this))
             .includes(this.active);
 
-          /*
-          We will get an empty selection in between when the selection is changed.
-          Don't clear the active visualization because we want to try to show the
-          same visualization for next selection too.
-         */
+          // We will get an empty selection in between when the selection is changed.
+          // Don't clear the active visualization because we want to try to show the
+          // same visualization for next selection too.
+
+          // Also, after previous was new tab, reset to first
+
           const previousNotCompatibleAndNotUserInitiated =
             !isPreviousCompatible && this.selectedDatasets.length > 0 && !this.userInitiatedTabChange;
           const previousIsCompatibleAndNotUserInitiated =
@@ -80,12 +81,15 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           const previousWasPhenodata =
             this.selectedDatasets.length > 0 && this.active === this.getTabId(VisualizationConstants.PHENODATA_ID);
 
+          const previousWasNewTab = this.active === this.getTabId(VisualizationConstants.NEW_TAB_ID);
+
           // if the user changed the tab to details, then details will be shown, otherwise the first available visualization will be shown
           if (
             previousWasPhenodata ||
             previousNotCompatibleAndNotUserInitiated ||
             previousIsCompatibleAndNotUserInitiated ||
-            previousNotCompatibleAndUserInitiated
+            previousNotCompatibleAndUserInitiated ||
+            previousWasNewTab
           ) {
             this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
             this.userInitiatedTabChange = false;
@@ -121,10 +125,10 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   isCompatibleVisualization(id: string): boolean {
     const isBlacklisted = this.visualizationBlacklist.includes(id);
 
-    // for now, only details supports gzipped files
+    // for now, only details and open in new tab support gzipped files
     if (
-      id !== VisualizationConstants.DETAILS_ID &&
-      this.selectedDatasets.some((dataset) => this.sessionData.datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP))
+      this.selectedDatasets.some((dataset) => this.sessionData.datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP)) &&
+      !(id === VisualizationConstants.DETAILS_ID || id === VisualizationConstants.NEW_TAB_ID)
     ) {
       return false;
     }

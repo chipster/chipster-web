@@ -16,6 +16,7 @@ import { ExpressionProfileComponent } from "./expression-profile/expression-prof
 import { ExpressionProfileService } from "./expression-profile/expression-profile.service";
 import { HtmlvisualizationComponent } from "./html-visualization/html-visualization.component";
 import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
+import { NewTabVisualizationComponent } from "./new-tab-visualization/new-tab-visualization.component";
 import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
 import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
 import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
@@ -38,6 +39,7 @@ import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
     VisualizationsComponent,
     VennDiagramComponent,
     PdfVisualizationComponent,
+    NewTabVisualizationComponent,
     HtmlvisualizationComponent,
     TextVisualizationComponent,
     VisualizationModalComponent,

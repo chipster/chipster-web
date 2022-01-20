@@ -113,6 +113,17 @@
         </div>
       </ng-template>
     </li>
+    <li [ngbNavItem]="getTabId('new-tab')" *ngIf="isTabVisible('new-tab')">
+      <a ngbNavLink>
+        <i class="fas fa-external-link-alt"></i>
+        Open in New Tab
+      </a>
+      <ng-template ngbNavContent>
+        <div class="visualization-panel">
+          <ch-new-tab-visualization [dataset]="selectionService.selectedDatasets[0]"></ch-new-tab-visualization>
+        </div>
+      </ng-template>
+    </li>
   </ul>
 
   <div [ngbNavOutlet]="nav"></div>

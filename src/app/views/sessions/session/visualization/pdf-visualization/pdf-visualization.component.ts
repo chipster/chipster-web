@@ -1,10 +1,10 @@
-import { takeUntil } from "rxjs/operators";
-import { Component, OnChanges, Input, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
-import { SessionDataService } from "../../session-data.service";
+import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { SessionDataService } from "../../session-data.service";
 
 @Component({
   selector: "ch-pdf-visualization",
@@ -71,10 +71,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
           this.restErrorService.showError(this.state.message, error);
         }
       );
-  }
-
-  openNewTab() {
-    this.sessionDataService.openNewTab(this.dataset);
   }
 
   ngOnDestroy() {

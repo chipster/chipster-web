@@ -11,6 +11,7 @@ export interface Visualization {
 export default class VisualizationConstants {
   static readonly PHENODATA_ID = "phenodata";
   static readonly DETAILS_ID = "details";
+  static readonly NEW_TAB_ID = "new-tab";
 
   static readonly VISUALIZATIONS: Array<Visualization> = [
     {
@@ -116,6 +117,14 @@ export default class VisualizationConstants {
     {
       id: VisualizationConstants.DETAILS_ID,
       name: "Details",
+      typeTags: [],
+      supportAllTypes: true,
+      anyInputCountSupported: false,
+      supportedInputFileCounts: [1],
+    },
+    {
+      id: VisualizationConstants.NEW_TAB_ID,
+      name: "Open in New Tab",
       typeTags: [],
       supportAllTypes: true,
       anyInputCountSupported: false,

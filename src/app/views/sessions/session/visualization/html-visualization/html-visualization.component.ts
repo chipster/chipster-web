@@ -75,8 +75,4 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
       }
     }, 100);
   }
-
-  openNewTab() {
-    this.sessionDataService.openNewTab(this.dataset);
-  }
 }
