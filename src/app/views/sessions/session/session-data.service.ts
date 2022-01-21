@@ -232,9 +232,7 @@ export class SessionDataService {
   }
 
   exportDatasets(datasets: Dataset[]) {
-    for (const d of datasets) {
-      this.download(this.getDatasetUrl(d).pipe(map((url) => url + "&download")), 3);
-    }
+    datasets.forEach((d) => this.download(this.getDatasetUrl(d).pipe(map((url) => url + "&download")), 3));
   }
 
   openNewTab(dataset: Dataset) {
