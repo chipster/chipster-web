@@ -91,7 +91,13 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
             previousNotCompatibleAndUserInitiated ||
             previousWasNewTab
           ) {
-            this.active = this.getTabId(_.first(Array.from(this.compatibleVisualizations)));
+            // if there's only new tab and details, select details to avoid automatic new tab
+            const compatibleVisualizationsArray: string[] = Array.from(this.compatibleVisualizations);
+            const firstOtherThanNewTab =
+              compatibleVisualizationsArray[0] !== VisualizationConstants.NEW_TAB_ID
+                ? compatibleVisualizationsArray[0]
+                : compatibleVisualizationsArray[1];
+            this.active = this.getTabId(firstOtherThanNewTab);
             this.userInitiatedTabChange = false;
           }
           // need to emit some event to session top so that the tool and visulazation div scrollTop
