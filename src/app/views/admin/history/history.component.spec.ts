@@ -9,9 +9,9 @@ describe("HistoryComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-    declarations: [HistoryComponent],
-    teardown: { destroyAfterEach: false }
-}).compileComponents();
+        declarations: [HistoryComponent],
+        teardown: { destroyAfterEach: false },
+      }).compileComponents();
     })
   );
 

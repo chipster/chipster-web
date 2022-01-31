@@ -9,9 +9,9 @@ describe("AdminComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-    declarations: [AdminComponent],
-    teardown: { destroyAfterEach: false }
-}).compileComponents();
+        declarations: [AdminComponent],
+        teardown: { destroyAfterEach: false },
+      }).compileComponents();
     })
   );
 

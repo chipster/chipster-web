@@ -53,7 +53,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   @Input()
   tools: Tool[];
 
-
   private zoomScale: number;
   private zoomMin = 0.2;
   private zoomMax = 2;
