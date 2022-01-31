@@ -7,10 +7,9 @@ import { ManualModalComponent } from "./manual-modal/manual-modal.component";
 import { StaticHtmlComponent } from "./static-html/static-html.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, NgbModule],
-  declarations: [ManualComponent, ManualModalComponent, StaticHtmlComponent],
-  providers: [],
-  exports: [ManualComponent, ManualModalComponent, StaticHtmlComponent],
-  entryComponents: [ManualModalComponent],
+    imports: [CommonModule, SharedModule, NgbModule],
+    declarations: [ManualComponent, ManualModalComponent, StaticHtmlComponent],
+    providers: [],
+    exports: [ManualComponent, ManualModalComponent, StaticHtmlComponent]
 })
 export class ManualModule {}

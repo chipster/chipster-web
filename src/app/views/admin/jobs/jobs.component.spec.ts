@@ -9,8 +9,9 @@ describe("JobsComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [JobsComponent],
-      }).compileComponents();
+    declarations: [JobsComponent],
+    teardown: { destroyAfterEach: false }
+}).compileComponents();
     })
   );
 

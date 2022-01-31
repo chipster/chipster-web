@@ -8,8 +8,9 @@ describe("BamviewerComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [BamViewerComponent],
-      }).compileComponents();
+    declarations: [BamViewerComponent],
+    teardown: { destroyAfterEach: false }
+}).compileComponents();
     })
   );
 

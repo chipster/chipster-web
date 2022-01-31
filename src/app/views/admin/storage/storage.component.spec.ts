@@ -9,8 +9,9 @@ describe("StorageComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [StorageComponent],
-      }).compileComponents();
+    declarations: [StorageComponent],
+    teardown: { destroyAfterEach: false }
+}).compileComponents();
     })
   );
 
