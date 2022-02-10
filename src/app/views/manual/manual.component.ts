@@ -152,6 +152,9 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
       const href = link.getAttribute("href");
       if (link.name) {
         // link target, nothing to do
+      } else if (href == null) {
+        // no href, nothing to do (probably error in the html)
+        log.warn("element <a> in " + path + " has no name or href");
       } else if (ManualUtils.isAbsoluteUrl(href)) {
         // open absolute links in a new tab
         link.target = "_blank";
