@@ -90,10 +90,11 @@ export class FileResource {
 
   uploadData(sessionId: string, datasetId: string, data: string): Observable<any> {
     const apiUrl$ = this.configService.getFileBrokerUrl();
+    const size = data.length;
     return apiUrl$.pipe(
-      mergeMap((url: string) =>
+      mergeMap((url: string) =>        
         this.http.put(
-          `${url}/sessions/${sessionId}/datasets/${datasetId}`,
+          `${url}/sessions/${sessionId}/datasets/${datasetId}?flowTotalSize=${size}`,
           data,
           this.tokenService.getTokenParams(true)
         )
