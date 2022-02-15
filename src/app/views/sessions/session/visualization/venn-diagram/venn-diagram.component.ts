@@ -1,10 +1,12 @@
 import { Component, Input, OnChanges } from "@angular/core";
+import { Logger } from "ag-grid-community";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
+import { ToastrService } from "ngx-toastr";
 import { forkJoin as observableForkJoin } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import TSVFile from "../../../../../model/tsv/TSVFile";
+import TSVFile, { NoColumnError } from "../../../../../model/tsv/TSVFile";
 import { TsvService } from "../../../../../shared/services/tsv.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -37,6 +39,7 @@ export class VennDiagramComponent implements OnChanges {
 
   constructor(
     private tsvService: TsvService,
+    private toastrService: ToastrService,
     private venndiagramService: VennDiagramService,
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
@@ -77,7 +80,16 @@ export class VennDiagramComponent implements OnChanges {
         this.symbolComparingEnabled = this.enableComparing("symbol");
         this.identifierComparingEnabled = this.enableComparing("identifier");
         this.columnKey = this.identifierComparingEnabled ? "identifier" : "symbol";
-        this.drawVennDiagram(this.files);
+        try {
+          this.drawVennDiagram(this.files);
+        } catch (err) {
+          if (err instanceof NoColumnError) {
+            // use toastrService directly, because our ErrorService doesn't show info-level messages
+            this.toastrService.info(err.message, "Column not found");
+          } else {
+            throw err;
+          }
+        }
       },
       (error: any) => {
         this.restErrorService.showError("Fetching TSV-files failed", error);
@@ -239,14 +251,23 @@ export class VennDiagramComponent implements OnChanges {
   createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
     const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
     return files.map(
-      (file: TSVFile, index: number) =>
-        new VennCircle(
-          file.datasetId,
-          file.filename,
-          file.getColumnDataByHeaderKeys(["symbol", "identifier"]),
-          new Circle(circleCenters[index], radius)
-        )
-    );
+      (file: TSVFile, index: number) => {
+        try {      
+          return new VennCircle(
+            file.datasetId,
+            file.filename,
+            file.getColumnDataByHeaderKeys(["symbol", "identifier"]),
+            new Circle(circleCenters[index], radius)
+            );          
+        } catch (err) {
+          if (err instanceof NoColumnError) {
+            // write better message now when we know the filename
+            throw new NoColumnError("The file '" + file.filename + "' has no columns 'identifier' or 'symbol'", err);
+          } else {
+            throw err;
+          }
+        }
+      });
   }
 
   enableComparing(key: string): boolean {

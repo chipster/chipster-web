@@ -3,6 +3,15 @@ import TSVHeaders from "./TSVHeaders";
 import TSVBody from "./TSVBody";
 import TSVRow from "./TSVRow";
 
+export const noColumnError = "NoColumnError";
+
+export class NoColumnError extends Error {
+  constructor(message, private cause?: Error) {    
+    super(message)    
+    // this.name = 'NoColumnError';
+    this.name = this.constructor.name;
+  }
+}
 export default class TSVFile {
   public headers: TSVHeaders;
   public body: TSVBody;
@@ -49,7 +58,19 @@ export default class TSVFile {
    */
   public getColumnDataByHeaderKeys(keys: Array<string>): Array<Array<string>> {
     const columnIndexes = keys.map((key: string) => this.getColumnIndex(key));
-    return this.body.rows.map((tsvRow: TSVRow) => columnIndexes.map((index: number) => tsvRow.row[index]));
+
+    if (columnIndexes.filter(index => index !== -1).length === 0) {
+      // throw new VError('columns "' + keys + '" not found');
+
+      // old school way, because VError is not compatible with webpack 5
+      throw new NoColumnError('columns "' + keys + '" not found');
+    }
+
+    const columnData = this.body.rows
+      .map((tsvRow: TSVRow) => columnIndexes.map((index: number) => tsvRow.row[index]));
+
+
+    return columnData;
   }
 
   /*
