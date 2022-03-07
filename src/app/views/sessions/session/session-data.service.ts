@@ -178,10 +178,11 @@ export class SessionDataService {
    */
   getTokenForSession(sessionId: string): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl: string) =>
-        this.http.post(sessionDbUrl + "/tokens/sessions/" + sessionId, null, this.tokenService.getTokenParams(true))
-      ),
-      map((datasetToken: any) => datasetToken.tokenKey)
+      mergeMap((sessionDbUrl: string) => {
+        const options = this.tokenService.getTokenParams(true);
+        options["responseType"] = "text";
+        return this.http.post<string>(sessionDbUrl + "/tokens/sessions/" + sessionId, null, options);
+      })
     );
   }
 
@@ -193,14 +194,16 @@ export class SessionDataService {
    */
   getTokenForDataset(sessionId: string, datasetId: string): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl: string) =>
-        this.http.post(
+      mergeMap((sessionDbUrl: string) => {
+        const options = this.tokenService.getTokenParams(true);
+        options["responseType"] = "text";
+
+        return this.http.post<string>(
           sessionDbUrl + "/tokens/sessions/" + sessionId + "/datasets/" + datasetId,
           null,
-          this.tokenService.getTokenParams(true)
-        )
-      ),
-      map((datasetToken: any) => datasetToken.tokenKey)
+          options
+        );
+      })
     );
   }
 
