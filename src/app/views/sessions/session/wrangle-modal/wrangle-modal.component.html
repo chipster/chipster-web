@@ -54,7 +54,7 @@
       [multiple]="false"
       (selectionChanged)="onIdentifierSelectionChange($event)"></ch-multi-dropdown>
     <div *ngIf="nonUniqueIdentifiers.size > 0" class="alert alert-warning p-1 mb-0 mt-2 text-sm">
-      <span>Identifier column contains {{ nonUniqueIdentifiers.size }} non-unique identifiers including</span>
+      <span>Identifier column contains {{ nonUniqueIdentifiers.size }} non-unique identifiers including&#32;</span>
       <span class="font-italic">{{ getNonUniquesString(nonUniqueIdentifiers) }}</span>
     </div>
 
