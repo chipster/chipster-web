@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
-import { empty, from } from "rxjs";
-import { catchError, flatMap, mergeMap, tap } from "rxjs/operators";
+import { EMPTY, from } from "rxjs";
+import { catchError, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { LoadState, State } from "../../../model/loadstate";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 
@@ -20,6 +21,8 @@ export class StorageComponent implements OnInit {
   selectedUser: string;
   sessions: any[];
 
+  userSessionsState: LoadState;
+
   @ViewChild("modalContent") modalContent: any;
 
   constructor(
@@ -33,41 +36,49 @@ export class StorageComponent implements OnInit {
     this.users = [];
     this.quotas = new Map();
 
-    let sessionDbUrl;
+    let sessionDbUrl: string;
     // check if its working properly
     this.configService
       .getSessionDbUrl()
       .pipe(
-        tap((url) => (sessionDbUrl = url)),
+        tap((url) => {
+          sessionDbUrl = url;
+        }),
         mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-        tap((users: string[]) => (this.users = users)),
+        tap((users: string[]) => {
+          this.users = users;
+        }),
         mergeMap((users: string[]) => from(users)),
         mergeMap((user) =>
           this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
             catchError((err) => {
               log.error("quota request error", err);
               // don't cancel other requests even if one of them fails
-              return empty();
+              return EMPTY;
             })
           )
         ),
         tap((quota: any) => this.quotas.set(quota.username, quota))
       )
-      .subscribe(null, (err) => this.restErrorService.showError("get quotas failed", err));
+      .subscribe({
+        error: (err) => this.restErrorService.showError("get quotas failed", err),
+      });
   }
 
   selectUser(user: string) {
-    this.modalService.open(this.modalContent, { size: "lg" });
+    this.modalService.open(this.modalContent, { size: "xl" });
 
     this.selectedUser = user;
+    this.userSessionsState = new LoadState(State.Loading);
     this.sessions = [];
 
     this.configService
       .getSessionDbUrl()
-      .pipe(flatMap((url) => this.authHttpClient.getAuth(url + "/users/" + user + "/sessions")))
+      .pipe(mergeMap((url) => this.authHttpClient.getAuth(url + "/users/" + encodeURIComponent(user) + "/sessions")))
       .subscribe(
         (sessions: any[]) => {
           this.sessions = sessions;
+          this.userSessionsState = new LoadState(State.Ready);
         },
         (err) => this.restErrorService.showError("get quotas failed", err)
       );

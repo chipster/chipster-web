@@ -25,9 +25,9 @@
     </button>
   </div>
   <div class="modal-body scrollable-parent">
-    <p *ngIf="!selectedUser">Loading sessions...</p>
-    <div *ngIf="selectedUser" class="scrollable">
-      <table class="table">
+    <div *ngIf="!userSessionsState.isReady()">Loading sessions...</div>
+    <div *ngIf="userSessionsState.isReady()" class="scrollable">
+      <table class="table table-sm table-striped">
         <thead>
           <tr>
             <th scope="col">Name</th>
