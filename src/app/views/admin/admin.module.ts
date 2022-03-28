@@ -2,6 +2,7 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { AgGridModule } from "ag-grid-angular";
 import { SharedModule } from "../../shared/shared.module";
 import { AdminRoutingModule } from "./admin-routing.module";
 import { AdminComponent } from "./admin.component";
@@ -16,7 +17,7 @@ import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, NgbModule, AdminRoutingModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, SharedModule, NgbModule, AdminRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule],
   declarations: [
     AdminComponent,
     ServicesComponent,

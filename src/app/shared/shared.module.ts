@@ -77,6 +77,7 @@ import { WebSocketService } from "./services/websocket.service";
     ToolsService,
     NativeElementService,
     WebSocketService,
+    BytesPipe,
   ],
   exports: [
     BytesPipe,

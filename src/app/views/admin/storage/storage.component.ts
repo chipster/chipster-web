@@ -1,10 +1,12 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { ColDef } from "ag-grid-community";
 import log from "loglevel";
-import { EMPTY, from } from "rxjs";
+import { EMPTY, forkJoin } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../model/loadstate";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 
@@ -16,7 +18,22 @@ import { ConfigService } from "../../../shared/services/config.service";
 })
 export class StorageComponent implements OnInit {
   users: string[];
-  quotas: Map<string, any>;
+  quotasMap: Map<string, any>;
+
+  columnDefs: ColDef[] = [
+    { field: "username", sortable: true, filter: true },
+    { field: "readWriteSessions", sortable: true },
+    { field: "readOnlySessions", sortable: true },
+    {
+      field: "size",
+      sortable: true,
+      valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
+    },
+  ];
+
+  rowSelection = "single";
+
+  rowData = [];
 
   selectedUser: string;
   sessions: any[];
@@ -29,12 +46,13 @@ export class StorageComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private authHttpClient: AuthHttpClientService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private bytesPipe: BytesPipe
   ) {}
 
   ngOnInit() {
     this.users = [];
-    this.quotas = new Map();
+    this.quotasMap = new Map();
 
     let sessionDbUrl: string;
     // check if its working properly
@@ -48,19 +66,24 @@ export class StorageComponent implements OnInit {
         tap((users: string[]) => {
           this.users = users;
         }),
-        mergeMap((users: string[]) => from(users)),
-        mergeMap((user) =>
-          this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
-            catchError((err) => {
-              log.error("quota request error", err);
-              // don't cancel other requests even if one of them fails
-              return EMPTY;
-            })
-          )
-        ),
-        tap((quota: any) => this.quotas.set(quota.username, quota))
+        mergeMap((users: string[]) => {
+          const userQuotas$ = users.map((user: string) =>
+            this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
+              catchError((err) => {
+                log.error("quota request error", err);
+                // don't cancel other requests even if one of them fails
+                return EMPTY;
+              })
+            )
+          );
+          return forkJoin(userQuotas$);
+        })
       )
       .subscribe({
+        next: (quotas) => {
+          quotas.forEach((quota) => this.quotasMap.set(quota.username, quota));
+          this.rowData = quotas;
+        },
         error: (err) => this.restErrorService.showError("get quotas failed", err),
       });
   }
@@ -82,5 +105,12 @@ export class StorageComponent implements OnInit {
         },
         (err) => this.restErrorService.showError("get quotas failed", err)
       );
+  }
+
+  onSelectionChanged($event) {
+    const username = $event.api.getSelectedNodes()[0]?.data?.username;
+    if (username != null) {
+      this.selectUser(username);
+    }
   }
 }
