@@ -19,7 +19,7 @@
       <table class="table table-sm table-striped">
         <thead>
           <tr>
-            <th scope="col">Name</th>
+            <!-- <th scope="col">Name</th> -->
             <th scope="col">Size</th>
             <th scope="col">Datasets</th>
             <th scope="col">Jobs</th>
@@ -30,7 +30,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let session of sessions">
-            <th scope="row">{{ session.name }}</th>
+            <!-- <th scope="row">{{ session.name }}</th> -->
             <td>{{ session.size | bytes: 0 }}</td>
             <td>{{ session.datasetCount }}</td>
             <td>{{ session.jobCount }}</td>
