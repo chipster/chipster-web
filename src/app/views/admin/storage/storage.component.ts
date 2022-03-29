@@ -38,7 +38,8 @@ export class StorageComponent implements OnInit {
   selectedUser: string;
   sessions: any[];
 
-  userSessionsState: LoadState;
+  public allSessionsState: LoadState = new LoadState(State.Loading);
+  public userSessionsState: LoadState = new LoadState(State.Loading);
 
   @ViewChild("modalContent") modalContent: any;
 
@@ -51,6 +52,7 @@ export class StorageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.userSessionsState = new LoadState(State.Loading);
     this.users = [];
     this.quotasMap = new Map();
 
@@ -83,6 +85,7 @@ export class StorageComponent implements OnInit {
         next: (quotas) => {
           quotas.forEach((quota) => this.quotasMap.set(quota.username, quota));
           this.rowData = quotas;
+          this.allSessionsState = LoadState.Ready;
         },
         error: (err) => this.restErrorService.showError("get quotas failed", err),
       });
