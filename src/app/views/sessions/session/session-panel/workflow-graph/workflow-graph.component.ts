@@ -1415,7 +1415,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.exportMenuItem = {
-      title: "Export",
+      title: "Download",
       action(d): void {
         self.sessionDataService.exportDatasets([d.dataset]);
       },
