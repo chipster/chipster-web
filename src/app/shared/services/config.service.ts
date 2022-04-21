@@ -139,4 +139,11 @@ export class ConfigService {
       map((s) => s.publicUri)
     );
   }
+
+  getAdminUri(role: string): Observable<string> {
+    return this.getPublicServices().pipe(
+      map((services) => this.getFirstByRole(role, services)),
+      map((s) => s.adminUri)
+    );
+  }
 }

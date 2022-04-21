@@ -39,7 +39,7 @@ export class StatisticsComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private errorHandlerService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
+    private authHttpClient: AuthHttpClientService,
     private tokenService: TokenService
   ) {}
 
@@ -76,7 +76,7 @@ export class StatisticsComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         mergeMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params)
+          this.authHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params)
         )
       )
       .subscribe(

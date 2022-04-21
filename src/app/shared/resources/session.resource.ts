@@ -1,6 +1,6 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
+import { Dataset, Job, JobState, Role, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import * as _ from "lodash";
 import log from "loglevel";
@@ -361,6 +361,32 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}/rules/${ruleId}`,
+              this.tokenService.getTokenParams(false)
+            ) as Observable<null>
+        )
+      );
+  }
+
+  deleteRulesForUser(sessionId: string, userId: string): Observable<null> {
+    const params = new HttpParams().set("userId", userId);
+    const options = { params, ...this.tokenService.getTokenParams(false) };
+
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap((url: string) => this.http.delete(`${url}/sessions/${sessionId}/rules`, options) as Observable<null>)
+      );
+  }
+
+  deleteSessionsForUser(userId: string): Observable<null> {
+    const encodedUserId = encodeURIComponent(userId);
+    return this.configService
+      .getAdminUri(Role.SESSION_DB)
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.delete(
+              `${url}/users/${encodedUserId}/sessions`,
               this.tokenService.getTokenParams(false)
             ) as Observable<null>
         )

@@ -7,8 +7,10 @@ import { catchError, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../model/loadstate";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
+import { SessionResource } from "../../../shared/resources/session.resource";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { BtnCellRendererComponent } from "./btn-cell-renderer.component";
 
 @Component({
   selector: "ch-storage",
@@ -20,8 +22,20 @@ export class StorageComponent implements OnInit {
   users: string[];
   quotasMap: Map<string, any>;
 
+  rowData = [];
   columnDefs: ColDef[] = [
-    { field: "username", sortable: true, filter: true },
+    {
+      field: "username",
+      sortable: true,
+      filter: true,
+      pinned: "left",
+      cellRenderer: "btnCellRenderer",
+      cellRendererParams: {
+        onClick: this.onSelectUser.bind(this),
+        userNameAsLabel: true,
+        getTargetValue: this.getUsername.bind(this),
+      },
+    },
     { field: "readWriteSessions", sortable: true },
     { field: "readOnlySessions", sortable: true },
     {
@@ -29,14 +43,52 @@ export class StorageComponent implements OnInit {
       sortable: true,
       valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
     },
+    {
+      field: "actions",
+      // pinned: "right",
+      cellRenderer: "btnCellRenderer",
+      cellRendererParams: {
+        onClick: this.onDelete.bind(this),
+        label: "Delete",
+        getTargetValue: this.getUsername.bind(this),
+      },
+    },
   ];
+
+  userSessionsRowData = [];
+  userSessionsColumnDefs: ColDef[] = [
+    // FIXME remove this field
+    { field: "name", sortable: true },
+    {
+      field: "size",
+      sortable: true,
+      valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
+    },
+    { field: "datasetCount", sortable: true },
+    { field: "jobCount", sortable: true },
+    { field: "inputCount", sortable: true },
+    { field: "parameterCount", sortable: true },
+    { field: "metadataCount", sortable: true },
+    { field: "sessionId", sortable: true },
+    {
+      field: "actions",
+      pinned: "right",
+      cellRenderer: "btnCellRenderer",
+      cellRendererParams: {
+        onClick: this.onDeleteSession.bind(this),
+        label: "Delete",
+        getTargetValue: this.getSessionId.bind(this),
+      },
+    },
+  ];
+
+  frameworkComponents = {
+    btnCellRenderer: BtnCellRendererComponent,
+  };
 
   rowSelection = "single";
 
-  rowData = [];
-
   selectedUser: string;
-  sessions: any[];
 
   public allSessionsState: LoadState = new LoadState(State.Loading);
   public userSessionsState: LoadState = new LoadState(State.Loading);
@@ -48,11 +100,11 @@ export class StorageComponent implements OnInit {
     private restErrorService: RestErrorService,
     private authHttpClient: AuthHttpClientService,
     private modalService: NgbModal,
-    private bytesPipe: BytesPipe
+    private bytesPipe: BytesPipe,
+    private sessionResource: SessionResource
   ) {}
 
   ngOnInit() {
-    this.userSessionsState = new LoadState(State.Loading);
     this.users = [];
     this.quotasMap = new Map();
 
@@ -92,28 +144,58 @@ export class StorageComponent implements OnInit {
   }
 
   selectUser(user: string) {
-    this.modalService.open(this.modalContent, { size: "xl" });
-
-    this.selectedUser = user;
     this.userSessionsState = new LoadState(State.Loading);
-    this.sessions = [];
+    this.selectedUser = user;
+    this.userSessionsRowData = [];
+
+    this.modalService.open(this.modalContent, { size: "xl" });
 
     this.configService
       .getSessionDbUrl()
       .pipe(mergeMap((url) => this.authHttpClient.getAuth(url + "/users/" + encodeURIComponent(user) + "/sessions")))
       .subscribe(
         (sessions: any[]) => {
-          this.sessions = sessions;
+          this.userSessionsRowData = sessions;
           this.userSessionsState = new LoadState(State.Ready);
         },
         (err) => this.restErrorService.showError("get quotas failed", err)
       );
   }
 
-  onSelectionChanged($event) {
-    const username = $event.api.getSelectedNodes()[0]?.data?.username;
-    if (username != null) {
-      this.selectUser(username);
-    }
+  onDelete(userId: string) {
+    console.log("delete sessions for user", userId);
+    this.sessionResource.deleteSessionsForUser(userId).subscribe({
+      next: () => {
+        console.log("delete sessions for user response");
+      },
+    });
   }
+
+  onDeleteSession(sessionId: string) {
+    console.log("delete session", sessionId, "for user", this.selectedUser);
+    this.sessionResource.deleteRulesForUser(sessionId, this.selectedUser).subscribe({
+      next: () => {
+        console.log("delete response");
+      },
+    });
+  }
+
+  onSelectUser(event) {
+    this.selectUser(event);
+  }
+
+  private getUsername(params) {
+    return params.data.username;
+  }
+
+  private getSessionId(params) {
+    return params.data.sessionId;
+  }
+
+  // onSelectionChanged($event) {
+  //   const username = $event.api.getSelectedNodes()[0]?.data?.username;
+  //   if (username != null) {
+  //     this.selectUser(username);
+  //   }
+  // }
 }
