@@ -120,18 +120,12 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    for (const propName in changes) {
-      if (propName === "dataset") {
-        if (this.dataset) {
-          console.log("ON CHANGES");
-          this.updateViewLater();
-        }
-      }
+    if (Object.keys(changes).includes("dataset") && this.dataset) {
+      this.updateViewLater();
     }
   }
 
   ngOnDestroy() {
-    console.log("ON DESTROY");
     this.unsubscribe.next();
     this.unsubscribe.complete();
 
