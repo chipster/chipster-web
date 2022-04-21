@@ -59,6 +59,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   sortColumn: number;
   sortOrder: boolean;
   sortingEnabled: boolean;
+  phenodataString: string;
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -85,7 +86,26 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .getDatasetStream()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
-        () => {
+        (event) => {
+          // TODO if phenodata view starts to use fields other than the phenodata (such as name) and needs to react
+          // to updates of those fields, add needed changes below. Now event stream causes update only if phenodata
+          // has been changed
+
+          // only react to events of this dataset
+          if (this.dataset == null || this.dataset.datasetId !== (event.newValue as Dataset)?.datasetId) {
+            return;
+          }
+
+          // get the latest datasets from the sessionData, because websocket events
+          // don't update selectedDatasets at the moment
+          // in this case, could use the one from the event also?
+          const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+
+          if (this.datasetService.getOwnPhenodata(updatedDataset) === this.phenodataString) {
+            return;
+          }
+
+          // someone else has changed phenodata, update
           this.updateViewLater();
         },
         (err) => this.errorService.showError("phenodata update failed", err)
@@ -103,6 +123,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     for (const propName in changes) {
       if (propName === "dataset") {
         if (this.dataset) {
+          console.log("ON CHANGES");
           this.updateViewLater();
         }
       }
@@ -110,6 +131,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnDestroy() {
+    console.log("ON DESTROY");
     this.unsubscribe.next();
     this.unsubscribe.complete();
 
@@ -252,6 +274,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             .slice(0, -1) + "\n"),
       ""
     );
+
+    this.phenodataString = phenodataString;
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
       this.datasetService.setPhenodata(this.dataset, phenodataString);
