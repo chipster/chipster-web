@@ -2,6 +2,7 @@ import { HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import jwt_decode from "jwt-decode";
 import { BehaviorSubject } from "rxjs";
+import ParsedToken from "./parsed-token";
 
 @Injectable()
 export class TokenService {
@@ -88,7 +89,7 @@ export class TokenService {
 
   setAuthToken(token: string): void {
     if (token != null) {
-      const parsedToken = jwt_decode(token);
+      const parsedToken: ParsedToken = jwt_decode(token);
       const expString = parsedToken.exp;
       const expSeconds = parseInt(expString, 10);
       const exp = new Date(expSeconds * 1000);
