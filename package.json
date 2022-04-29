@@ -36,7 +36,7 @@
     "bootstrap": "^4.6.1",
     "chipster-js-common": "^1.2.2",
     "d3": "5.4.0",
-    "d3-context-menu": "^1.1.1",
+    "d3-context-menu": "^2.1.0",
     "jquery": "^3.4.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.15",
