@@ -32,7 +32,7 @@
     "ag-grid-angular": "^25.1.0",
     "ag-grid-community": "^25.1.0",
     "angular-split": "^13.1.0",
-    "angular2-hotkeys": "^2.2.0",
+    "angular2-hotkeys": "^13.1.0",
     "bootstrap": "^4.6.1",
     "chipster-js-common": "^1.2.2",
     "d3": "5.4.0",
