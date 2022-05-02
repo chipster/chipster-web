@@ -4,6 +4,7 @@ import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
 import { map, mergeMap, publishReplay, refCount, shareReplay, take } from "rxjs/operators";
+import { TokenService } from "../../core/authentication/token.service";
 import { ConfigurationResource } from "../resources/configurationresource";
 import { RouteService } from "./route.service";
 
@@ -33,7 +34,8 @@ export class ConfigService {
   constructor(
     private configurationResource: ConfigurationResource,
     private router: Router,
-    private routeService: RouteService
+    private routeService: RouteService,
+    private tokenService: TokenService
   ) {}
 
   getChipsterConfiguration(): Observable<any> {
@@ -141,9 +143,11 @@ export class ConfigService {
   }
 
   getAdminUri(role: string): Observable<string> {
-    return this.getPublicServices().pipe(
-      map((services) => this.getFirstByRole(role, services)),
-      map((s) => s.adminUri)
+    return this.getInternalService(role, this.tokenService.getToken()).pipe(
+      map((s) => {
+        console.log("SERVICE", s);
+        return s.adminUri;
+      })
     );
   }
 }

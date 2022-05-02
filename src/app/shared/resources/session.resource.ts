@@ -380,17 +380,15 @@ export class SessionResource {
 
   deleteSessionsForUser(userId: string): Observable<null> {
     const encodedUserId = encodeURIComponent(userId);
-    return this.configService
-      .getAdminUri(Role.SESSION_DB)
-      .pipe(
-        mergeMap(
-          (url: string) =>
-            this.http.delete(
-              `${url}/users/${encodedUserId}/sessions`,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
-      );
+    return this.configService.getAdminUri(Role.SESSION_DB).pipe(
+      mergeMap((url: string) => {
+        console.log("URL", url);
+        return this.http.delete(
+          `${url}/admin/users/${encodedUserId}/sessions`,
+          this.tokenService.getTokenParams(false)
+        ) as Observable<null>;
+      })
+    );
   }
 
   deleteDataset(sessionId: string, datasetId: string): Observable<null> {
