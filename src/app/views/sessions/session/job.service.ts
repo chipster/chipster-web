@@ -25,7 +25,7 @@ export class JobService {
   ) {}
 
   static isRunning(job: Job): boolean {
-    return job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING";
+    return job.state === "NEW" || job.state === "WAITING" || job.state == "SCHEDULED" || job.state === "RUNNING";
   }
 
   static getDuration(job: Job): Observable<string> {

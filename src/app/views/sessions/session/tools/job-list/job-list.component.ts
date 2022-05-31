@@ -39,6 +39,10 @@ export class JobListComponent implements OnChanges {
     });
   }
 
+  isRunning(job: Job) {
+    return JobService.isRunning(job);
+  }
+
   getDurationObservable(job) {
     return this.durationMap.get(job.jobId);
   }

@@ -8,6 +8,7 @@ import { forkJoin, Observable, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
+import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 
@@ -446,7 +447,7 @@ export class SessionResource {
         // create jobs
         const oldJobs = Array.from(sessionData.jobsMap.values());
         const jobCopies = oldJobs
-          .filter((oldJob) => !this.isRunning(oldJob))
+          .filter((oldJob) => !JobService.isRunning(oldJob))
           .map((oldJob: Job) => {
             const jobCopy = _.clone(oldJob);
             jobCopy.sessionId = null;
@@ -475,15 +476,6 @@ export class SessionResource {
       }),
       map(() => createdSessionId)
     );
-  }
-
-  /**
-   * FIXME Replicated here from job.service to avoic circular reference.
-   * Refactor this or something else to a separate service
-   * @param job
-   */
-  private isRunning(job: Job): boolean {
-    return job.state === "NEW" || job.state === "WAITING" || job.state === "RUNNING";
   }
 
   private nullifyMissingInputs(job: Job, datasetsMap: Map<string, Dataset>): void {

@@ -250,7 +250,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   updateJobs() {
     this.jobList = this.getJobList();
     this.runningJobs = this.jobList.reduce((runningCount, job) => {
-      if (job.state === "RUNNING" || job.state === "NEW") {
+      if (JobService.isRunning(job)) {
         return runningCount + 1;
       }
       return runningCount;
