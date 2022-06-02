@@ -159,6 +159,7 @@ export class JobService {
   }
 
   runJobDirect(job: Job) {
+    console.log("JOB", job);
     this.sessionDataService.createJob(job).subscribe({
       error: (error: any) => {
         this.restErrorService.showError("Submitting job failed", error);

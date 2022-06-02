@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef } from "ag-grid-community";
+import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, forkJoin } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
@@ -108,21 +109,18 @@ export class StorageComponent implements OnInit {
     this.users = [];
     this.quotasMap = new Map();
 
-    let sessionDbUrl: string;
-    // check if its working properly
+    // get users and quota for each user
     this.configService
       .getSessionDbUrl()
       .pipe(
-        tap((url) => {
-          sessionDbUrl = url;
-        }),
-        mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
+        mergeMap((sessionDbUrl: string) => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
         tap((users: string[]) => {
           this.users = users;
         }),
-        mergeMap((users: string[]) => {
-          const userQuotas$ = users.map((user: string) =>
-            this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
+        mergeMap(() => this.configService.getAdminUri(Role.SESSION_DB)),
+        mergeMap((sessionDbAdminUrl: string) => {
+          const userQuotas$ = this.users.map((user: string) =>
+            this.authHttpClient.getAuth(sessionDbAdminUrl + "/admin/users/" + encodeURIComponent(user) + "/quota").pipe(
               catchError((err) => {
                 log.error("quota request error", err);
                 // don't cancel other requests even if one of them fails
@@ -151,8 +149,10 @@ export class StorageComponent implements OnInit {
     this.modalService.open(this.modalContent, { size: "xl" });
 
     this.configService
-      .getSessionDbUrl()
-      .pipe(mergeMap((url) => this.authHttpClient.getAuth(url + "/users/" + encodeURIComponent(user) + "/sessions")))
+      .getAdminUri(Role.SESSION_DB)
+      .pipe(
+        mergeMap((url) => this.authHttpClient.getAuth(url + "/admin/users/" + encodeURIComponent(user) + "/sessions"))
+      )
       .subscribe(
         (sessions: any[]) => {
           this.userSessionsRowData = sessions;
