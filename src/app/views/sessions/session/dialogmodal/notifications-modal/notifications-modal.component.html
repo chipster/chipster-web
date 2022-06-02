@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h4 class="modal-title">News</h4>
+</div>
+<div class="modal-body">
+  <div *ngFor="let n of notifications">
+    <h5 class="mb-0">{{ n.title }}</h5>
+    <div class="text-sm text-muted mb-1">{{ n.date | localDate }}</div>
+    <div class="mb-4" [innerHtml]="n.message"></div>
+  </div>
+  <!-- <div [innerHtml]="message"></div> -->
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-sm btn-secondary" (click)="close()">Close</button>
+</div>

@@ -121,10 +121,7 @@ export class NavigationComponent implements OnInit {
     return this.tokenService.getUsername();
   }
 
-  public note() {
-    this.dialogModalService.openNotificationModal(
-      "Note",
-      "The issue of phenodata not being always saved has been solved. However, in some cases phenodata doesn't get generated after Convert to Chipster format. This will be fixed as soon as possible. There was also an issue with parameters sometimes not being visible, but it has also been solved."
-    );
+  public openNotifications() {
+    this.dialogModalService.openNotificationsModal();
   }
 }
