@@ -1,5 +1,5 @@
-import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { TokenService } from "../../core/authentication/token.service";
 
@@ -62,7 +62,6 @@ export class AuthHttpClientService {
   }
 
   getAuthWithParams(url, params?): Observable<any> {
-    console.log(params);
     let headers = new HttpHeaders();
     headers = headers.append("Authorization", "Basic " + btoa("token:" + this.tokenService.getToken()));
 
