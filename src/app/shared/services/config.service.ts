@@ -1,11 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
 import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
 import { map, mergeMap, publishReplay, refCount, shareReplay, take } from "rxjs/operators";
+import { TokenService } from "../../core/authentication/token.service";
 import { ConfigurationResource } from "../resources/configurationresource";
-import { RouteService } from "./route.service";
 
 @Injectable()
 export class ConfigService {
@@ -30,11 +29,7 @@ export class ConfigService {
   private chipsterConf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
 
-  constructor(
-    private configurationResource: ConfigurationResource,
-    private router: Router,
-    private routeService: RouteService
-  ) {}
+  constructor(private configurationResource: ConfigurationResource, private tokenService: TokenService) {}
 
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {
@@ -138,5 +133,9 @@ export class ConfigService {
       map((services) => this.getFirstByRole(role, services)),
       map((s) => s.publicUri)
     );
+  }
+
+  getAdminUri(role: string): Observable<string> {
+    return this.getInternalService(role, this.tokenService.getToken()).pipe(map((s) => s.adminUri));
   }
 }
