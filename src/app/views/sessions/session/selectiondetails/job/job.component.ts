@@ -134,13 +134,6 @@ export class JobComponent implements OnInit, OnDestroy {
       let isDefault = false;
 
       if (tool) {
-        let slotCount = 1;
-        if (tool.slotCount != null) {
-          slotCount = tool.slotCount;
-        }
-
-        this.containerMemoryLimit = slotCount * 8 * 1024 * 1024 * 1024;
-
         const toolParameter = tool.parameters.find((p) => p.name.id === jobParameter.parameterId);
 
         if (toolParameter) {

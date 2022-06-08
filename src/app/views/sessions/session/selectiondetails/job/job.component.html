@@ -41,7 +41,7 @@
 
         <tr>
           <td class="lighter" style="white-space: nowrap">Memory usage:</td>
-          <td>{{ job.memoryUsage | bytes: 0 }} / {{ containerMemoryLimit | bytes: 0 }}</td>
+          <td>{{ job.memoryUsage | bytes: 0 }} / {{ job.memoryLimit | bytes: 0 }}</td>
         </tr>
 
         <tr>

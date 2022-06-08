@@ -28,10 +28,7 @@
       {{ getDurationObservable(job) | async }}
     </td>
 
-    <td
-      valign="top"
-      style="padding-left: 10px"
-      *ngIf="job.state === 'RUNNING' || job.state === 'NEW'; else blankTemplate">
+    <td valign="top" style="padding-left: 10px" *ngIf="isRunning(job); else blankTemplate">
       <button class="btn btn-link cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
         cancel
       </button>

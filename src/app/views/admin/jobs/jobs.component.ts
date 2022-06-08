@@ -42,16 +42,19 @@ export class JobsComponent implements OnInit {
       .pipe(
         flatMap((url) => {
           const newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=NEW");
+          const waitingJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=WAITING");
+          const scheduledJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=SCHEDULED");
           const runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=RUNNING");
-          return forkJoin(newJobs$, runningJobs$);
+          return forkJoin(newJobs$, waitingJobs$, scheduledJobs$, runningJobs$);
         })
       )
       .pipe(
         flatMap((newAndRunningJobs) => {
           const newJobs = newAndRunningJobs[0];
-
-          const runningJobs = newAndRunningJobs[1];
-          const jobIds = newJobs.concat(runningJobs);
+          const waitingJobs = newAndRunningJobs[1];
+          const scheduledJobs = newAndRunningJobs[2];
+          const runningJobs = newAndRunningJobs[3];
+          const jobIds = newJobs.concat(waitingJobs).concat(scheduledJobs).concat(runningJobs);
           const jobs$: Observable<Job>[] = jobIds.map(
             (idPair) =>
               <any>(
