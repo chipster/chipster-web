@@ -143,11 +143,6 @@ export class ConfigService {
   }
 
   getAdminUri(role: string): Observable<string> {
-    return this.getInternalService(role, this.tokenService.getToken()).pipe(
-      map((s) => {
-        console.log("SERVICE", s);
-        return s.adminUri;
-      })
-    );
+    return this.getInternalService(role, this.tokenService.getToken()).pipe(map((s) => s.adminUri));
   }
 }
