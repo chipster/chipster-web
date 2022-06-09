@@ -1,11 +1,12 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal, NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { SharedModule } from "../../../../shared/shared.module";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DialogModalService } from "./dialogmodal.service";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
+import { EditNotificationModalComponent } from "./edit-notification-modal/edit-notification-modal.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
 import { NotificationsModalComponent } from "./notifications-modal/notifications-modal.component";
@@ -16,7 +17,7 @@ import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, FormsModule, NgbModule],
+  imports: [CommonModule, SharedModule, ReactiveFormsModule, FormsModule, NgbModule],
   declarations: [
     StringModalComponent,
     BooleanModalComponent,
@@ -28,6 +29,7 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     DownloadFromUrlModalComponent,
     NotificationModalComponent,
     NotificationsModalComponent,
+    EditNotificationModalComponent,
   ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],

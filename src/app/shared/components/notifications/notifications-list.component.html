@@ -1,0 +1,23 @@
+<div *ngIf="state.isReady(); else statusTemplate">
+  <div *ngIf="editable" class="mt-3 mb-3">
+    <button class="btn btn-sm btn-success" (click)="onAdd()">Add</button>
+  </div>
+
+  <table class="table table">
+    <tbody>
+      <tr *ngFor="let n of notifications">
+        <td>
+          <ch-notification-message
+            [notification]="n"
+            [editable]="editable"
+            (edit)="onEdit($event)"
+            (delete)="onDelete($event)"></ch-notification-message>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<ng-template #statusTemplate>
+  <ch-status [state]="state"></ch-status>
+</ng-template>

@@ -3,8 +3,10 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionEvent } from "chipster-js-common";
 import { EMPTY, from as observableFrom, Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
+import { NotificationItem } from "../../../../shared/components/notifications/NotificationItem";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
+import { EditNotificationModalComponent } from "./edit-notification-modal/edit-notification-modal.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
 import { NotificationsModalComponent } from "./notifications-modal/notifications-modal.component";
@@ -56,6 +58,14 @@ export class DialogModalService {
     const modalRef = this.modalService.open(NotificationsModalComponent, {
       size: "lg",
     });
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+  }
+
+  openEditNotificationModal(notification: NotificationItem = null) {
+    const modalRef = this.modalService.open(EditNotificationModalComponent, {
+      size: "lg",
+    });
+    modalRef.componentInstance.notification = notification;
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

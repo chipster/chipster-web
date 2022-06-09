@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { User } from "chipster-js-common";
-import { AuthenticationService } from "../../../core/authentication/authentication-service";
-import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
+import { NotificationsService } from "../../../shared/services/notifications.service";
 
 @Component({
   selector: "ch-notifications",
@@ -10,18 +8,34 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class NotificationsComponent implements OnInit {
-  users: User[];
-
-  constructor(private restErrorService: RestErrorService, private authenticationService: AuthenticationService) {}
+  constructor(private notificationsService: NotificationsService) {}
 
   ngOnInit() {
-    this.users = [];
-
-    this.authenticationService.getUsers().subscribe(
-      (users: User[]) => {
-        this.users = users;
-      },
-      (err) => this.restErrorService.showError("get users failed", err)
-    );
+    // return this.configService
+    // .getSessionDbUrl()
+    // .pipe(
+    //   mergeMap((url: string) =>
+    //     this.http.get<Session>(`${url}/sessions/${sessionId}`, this.tokenService.getTokenParams(true))
+    //   )
+    // );
+    // .getSessionDbUrl()
+    // .pipe(
+    //   mergeMap((url: string) => this.authHttpClient.getAuth(url + "/users")),
+    //   mergeMap((users: string[]) => {
+    //     this.users = users;
+    //   }),
+    //   this.configService
+    //     .getAdminUri(Role.SESSION_DB)
+    //     .pipe(
+    //       mergeMap((url) => this.authHttpClient.getAuth(url + "/admin/users/" + encodeURIComponent(user) + "/sessions"))
+    //     )
+    //     .subscribe(
+    //       (sessions: any[]) => {
+    //         this.userSessionsRowData = sessions;
+    //         this.userSessionsState = new LoadState(State.Ready);
+    //       },
+    //       (err) => this.restErrorService.showError("get quotas failed", err)
+    //     );
+    // }
   }
 }

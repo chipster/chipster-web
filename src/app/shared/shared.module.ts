@@ -6,6 +6,8 @@ import { CoreModule } from "../core/core.module";
 import { AccountComponent } from "./components/account/account.component";
 import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
+import { NotificationMessageComponent } from "./components/notifications/notification-message.component";
+import { NotificationsListComponent } from "./components/notifications/notifications-list.component";
 import { SearchBoxComponent } from "./components/search-box/search-box.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { StatusComponent } from "./components/status.component";
@@ -26,6 +28,7 @@ import { ToolResource } from "./resources/tool-resource";
 import { AuthHttpClientService } from "./services/auth-http-client.service";
 import { ConfigService } from "./services/config.service";
 import { NativeElementService } from "./services/native-element.service";
+import { NotificationsService } from "./services/notifications.service";
 import { PipeService } from "./services/pipeservice.service";
 import { RouteService } from "./services/route.service";
 import { SettingsService } from "./services/settings.service";
@@ -58,6 +61,8 @@ import { WebSocketService } from "./services/websocket.service";
     ToolSourceComponent,
     DummyRouteComponent,
     ActionToastComponent,
+    NotificationMessageComponent,
+    NotificationsListComponent,
   ],
   providers: [
     PipeService,
@@ -78,6 +83,7 @@ import { WebSocketService } from "./services/websocket.service";
     NativeElementService,
     WebSocketService,
     BytesPipe,
+    NotificationsService,
   ],
   exports: [
     BytesPipe,
@@ -94,6 +100,8 @@ import { WebSocketService } from "./services/websocket.service";
     AccountComponent,
     ToolSourceComponent,
     ActionToastComponent,
+    NotificationMessageComponent,
+    NotificationsListComponent,
   ],
 })
 export class SharedModule {}
