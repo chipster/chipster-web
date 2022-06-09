@@ -5,13 +5,13 @@
 
   <table class="table table">
     <tbody>
-      <tr *ngFor="let n of notifications">
+      <tr *ngFor="let n of news">
         <td>
-          <ch-notification-message
-            [notification]="n"
+          <ch-news-item
+            [newsItem]="n"
             [editable]="editable"
             (edit)="onEdit($event)"
-            (delete)="onDelete($event)"></ch-notification-message>
+            (delete)="onDelete($event)"></ch-news-item>
         </td>
       </tr>
     </tbody>

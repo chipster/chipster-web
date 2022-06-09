@@ -3,13 +3,13 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionEvent } from "chipster-js-common";
 import { EMPTY, from as observableFrom, Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { NotificationItem } from "../../../../shared/components/notifications/NotificationItem";
+import { NewsItem } from "../../../../shared/components/news/NewsItem";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
-import { EditNotificationModalComponent } from "./edit-notification-modal/edit-notification-modal.component";
+import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
+import { NewsModalComponent } from "./news-modal/news-modal.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
-import { NotificationsModalComponent } from "./notifications-modal/notifications-modal.component";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
 import { SharingModalComponent } from "./share-session-modal/share-session-modal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
@@ -54,18 +54,18 @@ export class DialogModalService {
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openNotificationsModal() {
-    const modalRef = this.modalService.open(NotificationsModalComponent, {
+  openNewsModal() {
+    const modalRef = this.modalService.open(NewsModalComponent, {
       size: "lg",
     });
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openEditNotificationModal(notification: NotificationItem = null) {
-    const modalRef = this.modalService.open(EditNotificationModalComponent, {
+  openEditNewsModal(newsItem: NewsItem = null) {
+    const modalRef = this.modalService.open(EditNewsModalComponent, {
       size: "lg",
     });
-    modalRef.componentInstance.notification = notification;
+    modalRef.componentInstance.newsItem = newsItem;
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

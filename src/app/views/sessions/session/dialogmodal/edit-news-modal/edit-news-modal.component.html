@@ -40,13 +40,13 @@
           Message
           <span class="text-muted">(html)</span>
         </label>
-        <textarea style="height: 20em" formControlName="message" class="form-control form-control-sm"></textarea>
+        <textarea style="height: 20em" formControlName="body" class="form-control form-control-sm"></textarea>
       </div>
 
-      <div *ngIf="notification != null" class="form-row mt-3">
+      <div *ngIf="newsItem != null" class="form-row mt-3">
         <div class="col-md-6">
           <label>Date</label>
-          <div>{{ date | localDate }}</div>
+          <div>{{ created | localDate }}</div>
         </div>
         <div class="col-md-6">
           <label>Id</label>

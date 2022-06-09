@@ -6,10 +6,10 @@ import { SharedModule } from "../../../../shared/shared.module";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DialogModalService } from "./dialogmodal.service";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
-import { EditNotificationModalComponent } from "./edit-notification-modal/edit-notification-modal.component";
+import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
+import { NewsModalComponent } from "./news-modal/news-modal.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
-import { NotificationsModalComponent } from "./notifications-modal/notifications-modal.component";
 import { PreModalComponent } from "./pre-modal/pre-modal.component";
 import { SharingModalComponent } from "./share-session-modal/share-session-modal.component";
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
@@ -28,8 +28,8 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
     PreModalComponent,
     DownloadFromUrlModalComponent,
     NotificationModalComponent,
-    NotificationsModalComponent,
-    EditNotificationModalComponent,
+    NewsModalComponent,
+    EditNewsModalComponent,
   ],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],

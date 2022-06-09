@@ -122,6 +122,6 @@ export class NavigationComponent implements OnInit {
   }
 
   public openNotifications() {
-    this.dialogModalService.openNotificationsModal();
+    this.dialogModalService.openNewsModal();
   }
 }

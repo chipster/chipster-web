@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { NotificationsService } from "../../../shared/services/notifications.service";
+import { NewsService } from "../../../shared/services/news.service";
 
 @Component({
   selector: "ch-notifications",
@@ -8,7 +8,7 @@ import { NotificationsService } from "../../../shared/services/notifications.ser
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class NotificationsComponent implements OnInit {
-  constructor(private notificationsService: NotificationsService) {}
+  constructor(private notificationsService: NewsService) {}
 
   ngOnInit() {
     // return this.configService
