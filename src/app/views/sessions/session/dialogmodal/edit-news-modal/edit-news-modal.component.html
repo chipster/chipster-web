@@ -4,24 +4,6 @@
 <div class="modal-body">
   <form [formGroup]="form" class="">
     <div class="container form-group">
-      <!-- <div class="col-sm-2">
-        <label>Year</label>
-        <select formControlName="year" class="form-control form-control-sm">
-          <option class="text-sm" *ngFor="let year of years" [value]="year">
-            {{ year }}
-          </option>
-        </select>
-      </div>
-
-      <div class="col-sm-2">
-        <label>Module</label>
-        <select formControlName="module" class="form-control form-control-sm">
-          <option class="text-sm" *ngFor="let module of modules" [value]="module">
-            {{ module }}
-          </option>
-        </select>
-      </div> -->
-
       <div class="form-row">
         <label>Title</label>
         <input formControlName="title" class="form-control form-control-sm" />
@@ -44,14 +26,22 @@
       </div>
 
       <div *ngIf="newsItem != null" class="form-row mt-3">
-        <div class="col-md-6">
-          <label>Date</label>
-          <div>{{ created | localDate }}</div>
-        </div>
-        <div class="col-md-6">
-          <label>Id</label>
-          <div>{{ id }}</div>
-        </div>
+        <table class="table table-sm text-sm table-condensed table-borderless">
+          <tbody>
+            <tr>
+              <td>Created</td>
+              <td>{{ created | localDate }}</td>
+            </tr>
+            <tr>
+              <td>Modified</td>
+              <td>{{ modified | localDate }}</td>
+            </tr>
+            <tr>
+              <td>Id</td>
+              <td>{{ id }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </form>

@@ -27,18 +27,15 @@ export class EditNewsModalComponent implements OnInit {
   constructor(private activeModal: NgbActiveModal) {}
 
   ngOnInit(): void {
-    console.log(this.newsItem);
-
     if (this.newsItem == null) {
       this.modalTitle = "Add news";
     } else {
-      console.log(this.newsItem);
-
       this.titleControl.setValue(this.newsItem.contents.title);
       this.bodyControl.setValue(this.newsItem.contents.body);
       this.modalTitle = "Edit news";
       this.id = this.newsItem.newsId;
       this.created = this.newsItem.created;
+      this.modified = this.newsItem.modified;
     }
   }
 

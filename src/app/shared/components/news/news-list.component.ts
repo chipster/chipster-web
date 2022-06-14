@@ -24,7 +24,13 @@ export class NewsListComponent implements OnInit {
     this.state = LoadState.Loading;
     this.newsService.getAllNews().subscribe({
       next: (newNews: NewsItem[]) => {
-        this.news = newNews;
+        this.news = newNews.sort((a: NewsItem, b: NewsItem) => {
+          const aDate: Date = a.modified != null ? a.modified : a.created;
+          const bDate: Date = b.modified != null ? b.modified : b.created;
+
+          // Dates come from json and don't contain functions so recreate them
+          return new Date(bDate).getTime() - new Date(aDate).getTime();
+        });
         this.state = LoadState.Ready;
       },
     });
@@ -58,10 +64,10 @@ export class NewsListComponent implements OnInit {
     }
 
     this.newsService.deleteNewsItem(news).subscribe({
-      next: (result) => {
-        log.info("delete news done", result);
+      next: () => {
+        log.info("delete news done");
       },
-      error: (error) => log.warn("add news failed", error),
+      error: (error) => log.warn("delete news failed", error),
       complete: () => this.getNews(),
     });
   }
