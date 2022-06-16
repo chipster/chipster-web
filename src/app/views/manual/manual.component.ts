@@ -165,9 +165,18 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page
         link.href = this.routerPath + path + href;
-      } else {
+      } else if (href.indexOf(".html") !== -1) {
+        // .indexOf() instead of .endswith() because there can be a URL fragment after the file extension
         // relative urls navigate with the Angular router
         link.href = this.routerPath + href;
+      } else {
+        console.log(this.assetsPath, href);
+        // relative links to other files like pdf
+        // open in a new tab
+        link.target = "_blank";
+        link.href = this.assetsPath + href;
+        // convert to absolute
+        link.href = link.href;
       }
     });
 
