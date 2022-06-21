@@ -1,0 +1,7 @@
+<div *ngIf="state.isReady(); else statusTemplate">
+  <ch-news-list [editable]="true"></ch-news-list>
+</div>
+
+<ng-template #statusTemplate>
+  <ch-status [state]="state"></ch-status>
+</ng-template>

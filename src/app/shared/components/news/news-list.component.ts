@@ -9,10 +9,11 @@ import { NewsItem } from "./NewsItem";
   templateUrl: "./news-list.component.html",
 })
 export class NewsListComponent implements OnInit {
+  // @Input() news: NewsItem[];
   @Input() editable = false;
   public news: NewsItem[];
-
   public state: LoadState;
+  public errorMessage: string = "";
 
   constructor(private newsService: NewsService) {}
 
@@ -24,14 +25,16 @@ export class NewsListComponent implements OnInit {
     this.state = LoadState.Loading;
     this.newsService.getAllNews().subscribe({
       next: (newNews: NewsItem[]) => {
-        this.news = newNews.sort((a: NewsItem, b: NewsItem) => {
-          const aDate: Date = a.modified != null ? a.modified : a.created;
-          const bDate: Date = b.modified != null ? b.modified : b.created;
-
-          // Dates come from json and don't contain functions so recreate them
-          return new Date(bDate).getTime() - new Date(aDate).getTime();
-        });
+        this.news = newNews;
         this.state = LoadState.Ready;
+      },
+      error: (error) => {
+        console.log("list get news failed", error);
+        this.errorMessage =
+          error.status === 401 || error.status === 403
+            ? "For now, you need to log in to see the news."
+            : "Getting news failed.";
+        this.state = LoadState.Fail;
       },
     });
   }

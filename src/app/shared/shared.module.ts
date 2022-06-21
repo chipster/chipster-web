@@ -30,6 +30,7 @@ import { ConfigService } from "./services/config.service";
 import { NativeElementService } from "./services/native-element.service";
 import { NewsService } from "./services/news.service";
 import { PipeService } from "./services/pipeservice.service";
+import { PreferencesService } from "./services/preferences.service";
 import { RouteService } from "./services/route.service";
 import { SettingsService } from "./services/settings.service";
 import { SpreadsheetService } from "./services/spreadsheet.service";
@@ -84,6 +85,7 @@ import { WebSocketService } from "./services/websocket.service";
     WebSocketService,
     BytesPipe,
     NewsService,
+    PreferencesService,
   ],
   exports: [
     BytesPipe,

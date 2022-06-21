@@ -58,6 +58,7 @@ export class DialogModalService {
     const modalRef = this.modalService.open(NewsModalComponent, {
       size: "lg",
     });
+
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

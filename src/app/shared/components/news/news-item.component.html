@@ -9,7 +9,7 @@
 
   <div class="text-sm text-muted mb-1">
     <span>{{ newsItem.created | localDate }}</span>
-    <span *ngIf="newsItem.modified != null">, modified {{ newsItem.created | localDate }}</span>
+    <span *ngIf="newsItem.modified != null">, modified {{ newsItem.modified | localDate }}</span>
   </div>
   <div class="mb-4" [innerHtml]="newsItem.contents.body"></div>
 </div>

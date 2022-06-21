@@ -7,6 +7,8 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 import { AccountComponent } from "../../shared/components/account/account.component";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
 import { ConfigService } from "../../shared/services/config.service";
+import { NewsService } from "../../shared/services/news.service";
+import { PreferencesService } from "../../shared/services/preferences.service";
 import { RouteService } from "../../shared/services/route.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 
@@ -27,14 +29,18 @@ export class NavigationComponent implements OnInit {
   appName = "";
   appNameReady = false;
 
+  // news: NewsItem[];
+  // unreadNews: boolean = false;
+
   constructor(
     private tokenService: TokenService,
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService,
     private dialogModalService: DialogModalService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private newsService: NewsService,
+    private preferencesService: PreferencesService
   ) {}
 
   ngOnInit() {
@@ -91,7 +97,37 @@ export class NavigationComponent implements OnInit {
         this.errorService.showError("failed to get the app name", err);
       }
     );
+
+    // // news
+    // if (this.isLoggedIn()) {
+    //   this.getNews();
+    // }
+
+    // this.newsService.getNewsEvents().subscribe({
+    //   next: () => {
+    //     this.getNews();
+    //   },
+    // });
   }
+
+  // getNews() {
+  //   this.newsService.getAllNews().subscribe({
+  //     next: (newsItems: NewsItem[]) => {
+  //       this.news = newsItems;
+  //       console.log("next check if read");
+  //       if (this.news != null && this.news.length > 0) {
+  //         this.preferencesService.getNewsReadTime().subscribe({
+  //           next: (lastReadTime: Date) => {
+  //             console.log("got last read time", lastReadTime);
+  //             this.unreadNews =
+  //               lastReadTime != null && lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
+  //             console.log(this.unreadNews);
+  //           },
+  //         });
+  //       }
+  //     },
+  //   });
+  // }
 
   logout(): void {
     this.authenticationService.logout();
@@ -121,7 +157,11 @@ export class NavigationComponent implements OnInit {
     return this.tokenService.getUsername();
   }
 
-  public openNotifications() {
-    this.dialogModalService.openNewsModal();
+  public openNews() {
+    this.dialogModalService.openNewsModal().subscribe({
+      complete: () => {
+        // this.unreadNews = false;
+      },
+    });
   }
 }
