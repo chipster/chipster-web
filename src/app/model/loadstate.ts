@@ -29,4 +29,12 @@ export class LoadState {
   isReady(): boolean {
     return this.state === State.Ready;
   }
+
+  isLoading(): boolean {
+    return this.state === State.Loading;
+  }
+
+  isFail(): boolean {
+    return this.state === State.Fail;
+  }
 }

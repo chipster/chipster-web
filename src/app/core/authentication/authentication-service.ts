@@ -177,6 +177,7 @@ export class AuthenticationService {
   }
 
   updateUser(user: User): Observable<any> {
+    console.log("update user", user);
     return this.configService.getAuthUrl().pipe(
       mergeMap((authUrl) => {
         const userId = encodeURIComponent(this.tokenService.getUsername());

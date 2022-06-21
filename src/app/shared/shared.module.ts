@@ -6,6 +6,8 @@ import { CoreModule } from "../core/core.module";
 import { AccountComponent } from "./components/account/account.component";
 import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
+import { NewsItemComponent } from "./components/news/news-item.component";
+import { NewsListComponent } from "./components/news/news-list.component";
 import { SearchBoxComponent } from "./components/search-box/search-box.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { StatusComponent } from "./components/status.component";
@@ -26,7 +28,9 @@ import { ToolResource } from "./resources/tool-resource";
 import { AuthHttpClientService } from "./services/auth-http-client.service";
 import { ConfigService } from "./services/config.service";
 import { NativeElementService } from "./services/native-element.service";
+import { NewsService } from "./services/news.service";
 import { PipeService } from "./services/pipeservice.service";
+import { PreferencesService } from "./services/preferences.service";
 import { RouteService } from "./services/route.service";
 import { SettingsService } from "./services/settings.service";
 import { SpreadsheetService } from "./services/spreadsheet.service";
@@ -58,6 +62,8 @@ import { WebSocketService } from "./services/websocket.service";
     ToolSourceComponent,
     DummyRouteComponent,
     ActionToastComponent,
+    NewsItemComponent,
+    NewsListComponent,
   ],
   providers: [
     PipeService,
@@ -78,6 +84,8 @@ import { WebSocketService } from "./services/websocket.service";
     NativeElementService,
     WebSocketService,
     BytesPipe,
+    NewsService,
+    PreferencesService,
   ],
   exports: [
     BytesPipe,
@@ -94,6 +102,8 @@ import { WebSocketService } from "./services/websocket.service";
     AccountComponent,
     ToolSourceComponent,
     ActionToastComponent,
+    NewsItemComponent,
+    NewsListComponent,
   ],
 })
 export class SharedModule {}

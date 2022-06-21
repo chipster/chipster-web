@@ -6,7 +6,7 @@ import { ClientsComponent } from "./clients/clients.component";
 import { HistoryComponent } from "./history/history.component";
 import { JobsComponent } from "./jobs/jobs.component";
 import { MaintenanceComponent } from "./maintenance/maintenance.component";
-import { NotificationsComponent } from "./notifications/notifications.component";
+import { NewsComponent } from "./news/news.component";
 import { ServicesComponent } from "./services/services.component";
 import { StatisticsComponent } from "./statistics/statistics.component";
 import { StorageComponent } from "./storage/storage.component";
@@ -26,7 +26,7 @@ const routes: Routes = [
       { path: "jobs", component: JobsComponent },
       { path: "history", component: HistoryComponent },
       { path: "statistics", component: StatisticsComponent },
-      { path: "notifications", component: NotificationsComponent },
+      { path: "news", component: NewsComponent },
       { path: "maintenance", component: MaintenanceComponent },
       { path: "**", redirectTo: "services" },
     ],

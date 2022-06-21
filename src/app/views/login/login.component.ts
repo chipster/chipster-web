@@ -10,6 +10,7 @@ import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
+import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
 
@@ -48,7 +49,8 @@ export class LoginComponent implements OnInit {
     private routeService: RouteService,
     private tokenService: TokenService,
     private errorService: ErrorService,
-    private oidcService: OidcService
+    private oidcService: OidcService,
+    private newsService: NewsService
   ) {}
 
   ngOnInit() {
@@ -126,6 +128,8 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(
       () => {
         // Route to Session creation page
+        console.log("logged in");
+        this.newsService.updateNews();
         this.redirect();
       },
       (errorResponse: HttpErrorResponse) => {

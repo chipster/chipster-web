@@ -1,0 +1,53 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ modalTitle }}</h4>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="">
+    <div class="container form-group">
+      <div class="form-row">
+        <label>Title</label>
+        <input formControlName="title" class="form-control form-control-sm" />
+      </div>
+
+      <div class="form-row mt-3">
+        <label>
+          Short title
+          <span class="text-muted">&nbsp;(15 characters)</span>
+        </label>
+        <input formControlName="shortTitle" class="form-control form-control-sm" />
+      </div>
+
+      <div class="form-row mt-3">
+        <label>
+          Message
+          <span class="text-muted">(html)</span>
+        </label>
+        <textarea style="height: 20em" formControlName="body" class="form-control form-control-sm"></textarea>
+      </div>
+
+      <div *ngIf="newsItem != null" class="form-row mt-3">
+        <table class="table table-sm text-sm table-condensed table-borderless">
+          <tbody>
+            <tr>
+              <td>Created</td>
+              <td>{{ created | localDate }}</td>
+            </tr>
+            <tr>
+              <td>Modified</td>
+              <td>{{ modified | localDate }}</td>
+            </tr>
+            <tr>
+              <td>Id</td>
+              <td>{{ id }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-sm btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-sm btn-success" (click)="onSubmit()">Save</button>
+</div>
