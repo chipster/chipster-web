@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Dataset, InputBinding, Job, Tool, ToolInput, ToolParameter } from "chipster-js-common";
 import * as _ from "lodash";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { map, tap } from "rxjs/operators";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SessionData } from "../../../../model/session/session-data";
 import { ConfigService } from "../../../../shared/services/config.service";
@@ -240,7 +240,29 @@ export class ToolService {
     datasets: Array<Dataset>,
     sessionData: SessionData
   ): Array<Observable<Array<SelectionOption>>> {
-    return datasets.map((dataset: Dataset) => this.tsvService.getTSV2FileHeaders(dataset, sessionData));
+    return datasets.map((dataset: Dataset): Observable<Array<SelectionOption>> => {
+      /*
+      Cache file headers
+
+      When a tool with COLUMN_SEL parameter is selected, parameter panel must read
+      column titles of all selected tsv files to find out the parameter options. When user
+      has selected dozens of tsv files, this function is called every time the dataset 
+      selection is changed.
+
+      Without this caching, this would cause a request to file-broker for each dataset.
+
+      The cache is stored in sessionData, which get's cleared only when user opens another 
+      session. This shouldn't be a problem for now, when file contents are immutable. 
+      If the file contents may change in the future, this cache should be probably cleared too.
+      */
+      if (sessionData.cachedFileHeaders.has(dataset.datasetId)) {
+        return of(sessionData.cachedFileHeaders.get(dataset.datasetId));
+      }
+
+      return this.tsvService
+        .getTSV2FileHeaders(dataset, sessionData)
+        .pipe(tap((headers) => sessionData.cachedFileHeaders.set(dataset.datasetId, headers)));
+    });
   }
 
   getMetadataColumns(phenodatas: Array<string>) {
