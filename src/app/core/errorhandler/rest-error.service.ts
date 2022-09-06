@@ -124,5 +124,20 @@ export class RestErrorService {
     if (seconds === 0) {
       return "now";
     }
+    return seconds?.toString();
+  }
+
+  /**
+   * Version of showError to be used for admin api requests. In case of connection failed, adds admin backend note to the error message.
+   *
+   * @param message
+   * @param resp
+   */
+  showErrorAdmin(message: string, resp: Response | any) {
+    if (RestErrorService.isClientOrConnectionError(resp)) {
+      this.showError(message + " Connecting to admin backend failed.", resp);
+    } else {
+      this.showError(message, resp);
+    }
   }
 }

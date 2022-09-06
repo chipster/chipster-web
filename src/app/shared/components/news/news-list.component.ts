@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import log from "loglevel";
+import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
 import { NewsService } from "../../services/news.service";
 import { NewsItem } from "./NewsItem";
@@ -15,7 +16,7 @@ export class NewsListComponent implements OnInit {
   public state: LoadState;
   public errorMessage: string = "";
 
-  constructor(private newsService: NewsService) {}
+  constructor(private newsService: NewsService, private restErrorService: RestErrorService) {}
 
   ngOnInit(): void {
     this.getNews();
@@ -29,7 +30,7 @@ export class NewsListComponent implements OnInit {
         this.state = LoadState.Ready;
       },
       error: (error) => {
-        console.log("list get news failed", error);
+        log.warn("get news failed", error);
         this.errorMessage =
           error.status === 401 || error.status === 403
             ? "For now, you need to log in to see the news."
@@ -44,7 +45,10 @@ export class NewsListComponent implements OnInit {
       next: (result) => {
         log.info("add news done", result);
       },
-      error: (error) => log.warn("add news failed", error),
+      error: (error) => {
+        log.warn("add news failed", error);
+        this.restErrorService.showErrorAdmin("Add news failed.", error);
+      },
       complete: () => this.getNews(),
     });
   }
@@ -56,8 +60,13 @@ export class NewsListComponent implements OnInit {
 
     this.newsService.openModalAndUploadNews(newsItem).subscribe({
       next: (result) => log.info("edit news done", result),
-      error: (error) => log.warn("edit news failed", error),
-      complete: () => this.getNews(),
+      error: (error) => {
+        log.warn("edit news failed", error);
+        this.restErrorService.showErrorAdmin("Edit news failed.", error);
+      },
+      complete: () => {
+        this.getNews();
+      },
     });
   }
 
@@ -70,7 +79,10 @@ export class NewsListComponent implements OnInit {
       next: () => {
         log.info("delete news done");
       },
-      error: (error) => log.warn("delete news failed", error),
+      error: (error) => {
+        log.warn("delete news failed", error);
+        this.restErrorService.showErrorAdmin("Delete news failed.", error);
+      },
       complete: () => this.getNews(),
     });
   }
