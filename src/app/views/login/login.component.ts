@@ -39,6 +39,8 @@ export class LoginComponent implements OnInit {
   private usernameInput: ElementRef;
   oidcConfigs: OidcConfig[];
 
+  public multipleLoginMethods = false;
+
   jaasDescription: string;
 
   constructor(
@@ -99,6 +101,8 @@ export class LoginComponent implements OnInit {
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
           this.oidcConfigs = configs;
+          // this.oidcConfigs = this.testOidcConfigs;
+          this.multipleLoginMethods = this.oidcConfigs != null && this.oidcConfigs.length > 0;
 
           // everything ready, show login
           this.show = true;
@@ -128,7 +132,7 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(
       () => {
         // Route to Session creation page
-        console.log("logged in");
+        log.info("logged in");
         this.newsService.updateNews();
         this.redirect();
       },
@@ -165,4 +169,49 @@ export class LoginComponent implements OnInit {
   oidcLogin(oidc: OidcConfig) {
     this.oidcService.startAuthentication(this.returnUrl, oidc);
   }
+
+  testOidcConfigs: OidcConfig[] = [
+    {
+      oidcName: "",
+      issuer: "",
+      clientId: "",
+      redirectPath: "",
+      responseType: "",
+      logo: "https://chipster.rahtiapp.fi/assets/html/login/CSCLogin.png",
+      logoWidth: "",
+      text: "",
+      parameter: "",
+      appId: "",
+      description: "Test description",
+      scope: "",
+    },
+    {
+      oidcName: "",
+      issuer: "",
+      clientId: "",
+      redirectPath: "",
+      responseType: "",
+      logo: "https://chipster.rahtiapp.fi/assets/html/login/Haka_login_vaaka.jpg",
+      logoWidth: "",
+      text: "",
+      parameter: "",
+      appId: "",
+      description: "Test description",
+      scope: "",
+    },
+    {
+      oidcName: "",
+      issuer: "",
+      clientId: "",
+      redirectPath: "",
+      responseType: "",
+      logo: "https://chipster.rahtiapp.fi/assets/html/login/LoginVirtu.png",
+      logoWidth: "12em",
+      text: "",
+      parameter: "",
+      appId: "",
+      description: "Test description",
+      scope: "",
+    },
+  ];
 }

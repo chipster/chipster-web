@@ -1,7 +1,11 @@
 <div *ngIf="!show && !initFailed">&nbsp;Initializing login...</div>
 
 <div class="col-md-4 offset-md-4 margin-top" id="login" *ngIf="show">
-  <h1 class="text-center h1-xs">Log in to {{ appName }}</h1>
+  <h1 class="text-center h1-xs">
+    Log in to {{ appName }}
+    <!-- Log in -->
+    <span *ngIf="multipleLoginMethods">using</span>
+  </h1>
 
   <br />
 
@@ -26,7 +30,14 @@
     <br />
   </div>
 
-  <br />
+  <!-- <button style="background-color: #e8edf1" class="btn btn-light border rounded p-2 pt-3 pb-3">
+    <img src="/assets/html/launch_button.png" />
+    <span class="text-strong pl-2">Commercial, training and guest users</span>
+  </button> -->
+
+  <!-- <div class="text-center">OR</div> -->
+
+  <h1 *ngIf="multipleLoginMethods" class="text-center h1-xs">OR</h1>
 
   <div class="alert alert-warning" *ngIf="error">
     <strong>Login failed</strong>
@@ -43,7 +54,10 @@
       <!-- the html is trusted -->
       <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
 
-      <label for="username">Chipster username</label>
+      <label for="username">
+        <span *ngIf="multipleLoginMethods">Chipster username</span>
+        <span *ngIf="!multipleLoginMethods">Username</span>
+      </label>
       <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput />
     </div>
     <div class="form-group">
