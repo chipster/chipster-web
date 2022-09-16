@@ -58,7 +58,9 @@
           <p>
             You are logged in as
             <strong>{{ getAccountName() }}</strong>
-            . Go to
+            <span>.</span>
+            <!-- span is a hack for preventing prettier formatting adding extra space-->
+            Go to
             <a [routerLink]="routerLinkAnalyze">Analyze</a>
             or
             <a [routerLink]="routerLinkSessions">Sessions</a>
