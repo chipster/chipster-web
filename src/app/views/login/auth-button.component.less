@@ -1,0 +1,35 @@
+button {
+  display: grid;
+  border: 1px #dfe1e3 solid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  place-content: center;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  color: #595959;
+  // min-height: 168px;
+  width: 182px;
+  height: 168px;
+  outline: transparent solid 1px;
+  transition: all 0.3s ease-in-out 0s;
+}
+
+button:hover {
+  outline: 2px var(--primary) solid;
+  border-color: var(--primary);
+}
+
+img {
+  place-self: center;
+  max-width: 200px;
+  padding: 8px 24px;
+  max-height: 120px;
+}
+
+.auth-label {
+  background-color: rgba(0, 0, 0, 0.016);
+  font-size: 14px;
+  padding: 4px;
+  box-shadow: rgb(0 0 0 / 5%) 0px -1px 0px 0px;
+}

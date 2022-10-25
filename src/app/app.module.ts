@@ -36,6 +36,7 @@ import { ErrorComponent } from "./views/error/error.component";
 import { MyllyHasMovedComponent } from "./views/error/mylly.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
 import { HomeComponent } from "./views/home/home.component";
+import { AuthButtonComponent } from "./views/login/auth-button.component";
 import { LoginComponent } from "./views/login/login.component";
 import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
 import { ManualModule } from "./views/manual/manual.module";
@@ -89,6 +90,7 @@ import { TermsComponent } from "./views/terms/terms.component";
   declarations: [
     NavigationComponent,
     LoginComponent,
+    AuthButtonComponent,
     OidcCallbackComponent,
     HomeComponent,
     AppComponent,

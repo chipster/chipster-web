@@ -1,3 +1,12 @@
+.auth-row {
+  margin: 20px auto;
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr; /* Size of items defined inside container */
+  grid-template-rows: 1fr auto;
+  column-gap: 1.5rem;
+}
+
 .btn-login {
   width: 12em;
 }
@@ -8,21 +17,4 @@
 
 #login {
   max-width: 24em;
-}
-
-.btn-oidc-logo:not(:hover) {
-  background-color: white;
-  border-color: white;
-}
-
-.btn-oidc-logo {
-  padding: 0 0 0 0;
-}
-
-.btn-oidc-logo img {
-  width: 100%;
-}
-
-.btn-oidc {
-  width: 100%;
 }

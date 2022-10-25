@@ -29,6 +29,8 @@ export class LoginComponent implements OnInit {
   error: string;
   appName: string;
 
+  showLoginForm = false;
+
   private returnUrl: string;
   public ssoLoginUrl: string;
 
@@ -95,27 +97,29 @@ export class LoginComponent implements OnInit {
     this.configService
       .get(ConfigService.KEY_APP_NAME)
       .pipe(
-        tap((appName) => (this.appName = appName)),
+        tap((appName) => {
+          this.appName = appName;
+        }),
         mergeMap(() => this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)),
-        tap((desc) => (this.jaasDescription = desc)),
+        tap((desc) => {
+          this.jaasDescription = desc;
+        }),
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
           this.oidcConfigs = configs;
-          // this.oidcConfigs = this.testOidcConfigs;
           this.multipleLoginMethods = this.oidcConfigs != null && this.oidcConfigs.length > 0;
+          this.showLoginForm = !this.multipleLoginMethods;
 
           // everything ready, show login
           this.show = true;
-          // allow Angular to create the element first
-          setTimeout(() => {
-            this.usernameInput.nativeElement.focus();
-          }, 0);
         })
       )
-      .subscribe(null, (error) => {
-        this.restErrorService.showError(error, "Initializing login page failed");
-        log.warn("get configuration failed", error);
-        this.initFailed = true;
+      .subscribe({
+        error: (error) => {
+          this.restErrorService.showError(error, "Initializing login page failed");
+          log.warn("get configuration failed", error);
+          this.initFailed = true;
+        },
       });
   }
 
@@ -126,6 +130,14 @@ export class LoginComponent implements OnInit {
   private redirect() {
     log.info("logged in, return to " + this.returnUrl);
     this.routeService.navigateAbsolute(this.returnUrl);
+  }
+
+  openLocalLogin() {
+    this.showLoginForm = true;
+    // allow Angular to create the element first
+    setTimeout(() => {
+      this.usernameInput.nativeElement.focus();
+    }, 0);
   }
 
   login() {
@@ -170,6 +182,10 @@ export class LoginComponent implements OnInit {
     this.oidcService.startAuthentication(this.returnUrl, oidc);
   }
 
+  backToAuthSelect() {
+    this.showLoginForm = false;
+  }
+
   testOidcConfigs: OidcConfig[] = [
     {
       oidcName: "",
@@ -177,12 +193,12 @@ export class LoginComponent implements OnInit {
       clientId: "",
       redirectPath: "",
       responseType: "",
-      logo: "https://chipster.rahtiapp.fi/assets/html/login/CSCLogin.png",
+      logo: "",
       logoWidth: "",
       text: "",
       parameter: "",
       appId: "",
-      description: "Test description",
+      description: "",
       scope: "",
     },
     {
@@ -191,26 +207,12 @@ export class LoginComponent implements OnInit {
       clientId: "",
       redirectPath: "",
       responseType: "",
-      logo: "https://chipster.rahtiapp.fi/assets/html/login/Haka_login_vaaka.jpg",
+      logo: "",
       logoWidth: "",
       text: "",
       parameter: "",
       appId: "",
-      description: "Test description",
-      scope: "",
-    },
-    {
-      oidcName: "",
-      issuer: "",
-      clientId: "",
-      redirectPath: "",
-      responseType: "",
-      logo: "https://chipster.rahtiapp.fi/assets/html/login/LoginVirtu.png",
-      logoWidth: "12em",
-      text: "",
-      parameter: "",
-      appId: "",
-      description: "Test description",
+      description: "",
       scope: "",
     },
   ];

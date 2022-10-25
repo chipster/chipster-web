@@ -1,82 +1,66 @@
 <div *ngIf="!show && !initFailed">&nbsp;Initializing login...</div>
 
-<div class="col-md-4 offset-md-4 margin-top" id="login" *ngIf="show">
-  <h1 class="text-center h1-xs">
-    Log in to {{ appName }}
-    <!-- Log in -->
-    <span *ngIf="multipleLoginMethods">using</span>
-  </h1>
+<div *ngIf="show">
+  <!-- auth method selection-->
+  <div *ngIf="!showLoginForm">
+    <h3 class="text-center mt-4">Select authentication method</h3>
 
-  <br />
-
-  <div
-    *ngFor="let oidc of getOidcConfigs()"
-    placement="right"
-    [ngbPopover]="popoverContent"
-    triggers="mouseenter:mouseleave"
-    [disablePopover]="oidc.description == null || oidc.description.length == 0">
-    <!-- the html is trusted -->
-    <ng-template #popoverContent><div [innerHtml]="oidc.description"></div></ng-template>
-    <button *ngIf="oidc.logo" class="btn btn-light btn-oidc btn-oidc-logo" (click)="oidcLogin(oidc)">
-      <img src="{{ oidc.logo }}" alt="{{ oidc.oidcName }} login" [style.width]="oidc.logoWidth" />
-    </button>
-    <button *ngIf="!oidc.logo && oidc.text" class="btn btn-info btn-oidc" (click)="oidcLogin(oidc)">
-      {{ oidc.text }}
-    </button>
-    <button *ngIf="!oidc.logo && !oidc.text" class="btn btn-info btn-oidc" (click)="oidcLogin(oidc)">
-      Sign in with {{ oidc.oidcName }}
-    </button>
-    <br />
-    <br />
+    <div class="auth-row">
+      <div *ngFor="let oidc of getOidcConfigs()">
+        <ch-auth-button
+          name="{{ oidc.text }}"
+          logo="{{ oidc.logo }}"
+          description="{{ oidc.description }}"
+          (selectAuth)="oidcLogin(oidc)"></ch-auth-button>
+      </div>
+      <div>
+        <ch-auth-button
+          name="Chipster login"
+          logo="/assets/html/login/LoginLocal.svg"
+          [description]="jaasDescription"
+          (selectAuth)="openLocalLogin()"></ch-auth-button>
+      </div>
+    </div>
   </div>
 
-  <!-- <button style="background-color: #e8edf1" class="btn btn-light border rounded p-2 pt-3 pb-3">
-    <img src="/assets/html/launch_button.png" />
-    <span class="text-strong pl-2">Commercial, training and guest users</span>
-  </button> -->
+  <!-- local login form-->
+  <div *ngIf="showLoginForm">
+    <h3 class="text-center mt-4">{{ appName }} login</h3>
 
-  <!-- <div class="text-center">OR</div> -->
+    <div style="margin-left: auto; margin-right: auto" class="col mt-3" id="login" *ngIf="show">
+      <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
+        <div class="form-group" placement="right">
+          <!-- the html is trusted -->
+          <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
 
-  <h1 *ngIf="multipleLoginMethods" class="text-center h1-xs">OR</h1>
+          <label for="username">
+            <span *ngIf="multipleLoginMethods">Chipster username</span>
+            <span *ngIf="!multipleLoginMethods">Username</span>
+          </label>
+          <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" class="form-control" ngModel name="password" #name="ngModel" required />
+        </div>
 
-  <div class="alert alert-warning" *ngIf="error">
-    <strong>Login failed</strong>
-    <p>{{ error }}</p>
-  </div>
+        <div class="alert alert-warning" *ngIf="error">
+          <strong>Login failed</strong>
+          <p>{{ error }}</p>
+        </div>
 
-  <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
-    <div
-      class="form-group"
-      placement="right"
-      [ngbPopover]="popoverContent"
-      triggers="mouseenter:mouseleave"
-      [disablePopover]="jaasDescription == null || jaasDescription.length == 0">
-      <!-- the html is trusted -->
-      <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
-
-      <label for="username">
-        <span *ngIf="multipleLoginMethods">Chipster username</span>
-        <span *ngIf="!multipleLoginMethods">Username</span>
-      </label>
-      <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput />
+        <div class="form-actions text-center margin-top">
+          <button class="btn btn-primary btn-login" type="button" (click)="login()" [disabled]="myForm.invalid">
+            Log In
+          </button>
+          <div *ngIf="multipleLoginMethods" class="mt-4 text-smaller">
+            <button class="btn btn-link" (click)="backToAuthSelect()">
+              <!-- <i class="fa fa-arrow-left" aria-hidden="true"></i> -->
+              Select an other authentication method
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input id="password" type="password" class="form-control" ngModel name="password" #name="ngModel" required />
-    </div>
-    <div class="form-actions text-center margin-top">
-      <button class="btn btn-primary btn-login" type="button" (click)="login()" [disabled]="myForm.invalid">
-        Log In
-      </button>
-    </div>
-  </form>
-
-  <div *ngIf="ssoLoginUrl">
-    <br />
-    <br />
-    <br />
-    <a href="{{ ssoLoginUrl }}">
-      <img src="/assets/Haka_login_vaaka.jpg" width="350" alt="[Haka Login]" />
-    </a>
   </div>
 </div>
