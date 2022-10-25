@@ -15,7 +15,7 @@
       </div>
       <div>
         <ch-auth-button
-          name="Chipster login"
+          name="{{ appName }} login"
           logo="/assets/html/login/LoginLocal.svg"
           [description]="jaasDescription"
           (selectAuth)="openLocalLogin()"></ch-auth-button>
@@ -34,7 +34,7 @@
           <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
 
           <label for="username">
-            <span *ngIf="multipleLoginMethods">Chipster username</span>
+            <span *ngIf="multipleLoginMethods">{{ appName }} username</span>
             <span *ngIf="!multipleLoginMethods">Username</span>
           </label>
           <input class="form-control" id="username" required ngModel name="username" #name="ngModel" #usernameInput />
