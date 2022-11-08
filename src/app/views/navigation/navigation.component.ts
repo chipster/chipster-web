@@ -65,15 +65,31 @@ export class NavigationComponent implements OnInit {
       }
     );
 
+    // set custom favicon if found in the config
+    // default icons now specified in index.html
+    // at the moment custom config can only specify path to basic png
+    // so links to other icons are removed from dom if custom config available
+    // custom config used for mylly
     this.configService.get(ConfigService.KEY_FAVICON).subscribe(
       (path) => {
         log.info("load custom favicon from", path);
-        if (path) {
-          const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement("link");
-          link.type = "image/x-icon";
-          link.rel = "shortcut icon";
-          link.href = path;
-          document.getElementsByTagName("head")[0].appendChild(link);
+        if (path != null && path.trim().length > 0) {
+          const iconLinkPng: HTMLLinkElement = document.querySelector("link[rel='icon'][type='image/png'");
+          const iconLinkSvg: HTMLLinkElement = document.querySelector("link[rel='icon'][type='image/svg+xml");
+          const iconLinkAppleTouch: HTMLLinkElement = document.querySelector("link[rel='apple-touch-icon']");
+
+          // update the path for the basic png
+          if (iconLinkPng != null) {
+            iconLinkPng.href = path;
+          }
+
+          // remove icons other than basic png
+          if (iconLinkSvg != null) {
+            iconLinkSvg.remove();
+          }
+          if (iconLinkAppleTouch != null) {
+            iconLinkAppleTouch.remove();
+          }
         }
       },
       (err) => {

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 72.789998 72.789997"
+   version="1.1"
+   id="svg32"
+   sodipodi:docname="icon.svg"
+   width="72.790001"
+   height="72.790001"
+   inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview34"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="4.207947"
+     inkscape:cx="143.77557"
+     inkscape:cy="42.300913"
+     inkscape:window-width="1680"
+     inkscape:window-height="1050"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1-2" />
+  <defs
+     id="defs4">
+    <style
+       id="style2">.cls-1{fill:#0053ad;}.cls-2{fill:#fcc35d;}.cls-3{fill:#006fe6;}.cls-4{fill:#e95a1c;}</style>
+  </defs>
+  <title
+     id="title6">Chipster_logo_1</title>
+  <g
+     id="Layer_2"
+     data-name="Layer 2"
+     inkscape:transform-center-x="-5.7034938"
+     inkscape:transform-center-y="18.298709">
+    <g
+       id="Layer_1-2"
+       data-name="Layer 1">
+      <circle
+         class="cls-2"
+         cx="28.959999"
+         cy="14.33"
+         r="14.33"
+         id="circle24" />
+      <circle
+         class="cls-3"
+         cx="18.860001"
+         cy="50.369999"
+         r="18.860001"
+         id="circle26" />
+      <circle
+         class="cls-4"
+         cx="55.759998"
+         cy="37.09"
+         r="17.030001"
+         id="circle28" />
+    </g>
+  </g>
+  <metadata
+     id="metadata194">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Chipster_logo_1</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
