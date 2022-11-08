@@ -72,8 +72,8 @@ export class NavigationComponent implements OnInit {
     // custom config used for mylly
     this.configService.get(ConfigService.KEY_FAVICON).subscribe(
       (path) => {
-        log.info("load custom favicon from", path);
         if (path != null && path.trim().length > 0) {
+          log.info("load custom favicon from", path);
           const iconLinkPng: HTMLLinkElement = document.querySelector("link[rel='icon'][type='image/png'");
           const iconLinkSvg: HTMLLinkElement = document.querySelector("link[rel='icon'][type='image/svg+xml");
           const iconLinkAppleTouch: HTMLLinkElement = document.querySelector("link[rel='apple-touch-icon']");
