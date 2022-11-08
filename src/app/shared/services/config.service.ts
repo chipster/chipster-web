@@ -9,7 +9,6 @@ import { ConfigurationResource } from "../resources/configurationresource";
 @Injectable()
 export class ConfigService {
   public static readonly KEY_CUSTOM_CSS = "custom-css";
-  public static readonly KEY_FAVICON = "favicon";
   public static readonly KEY_APP_NAME = "app-name";
   public static readonly KEY_APP_ID = "app-id";
   public static readonly KEY_TERMS_OF_USE_AUTHS = "terms-of-use-auths";
