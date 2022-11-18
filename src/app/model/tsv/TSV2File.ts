@@ -50,7 +50,7 @@ export default class TSV2File {
   }
 
   private static getIsMissingHeaderColumn(tsvArray: Array<Array<string>>): boolean {
-    if (tsvArray.length <= 2) {
+    if (tsvArray.length < 2) {
       // have to guess
       return false;
     }
