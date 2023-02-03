@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Observable, forkJoin } from "rxjs";
-import { Tool, Module } from "chipster-js-common";
-import { shareReplay, map } from "rxjs/operators";
+import { Category, Module, Tool } from "chipster-js-common";
+import { forkJoin, Observable } from "rxjs";
+import { map, shareReplay } from "rxjs/operators";
 import { ToolResource } from "../resources/tool-resource";
-import { ConfigService } from "./config.service";
 import UtilsService from "../utilities/utils";
+import { ConfigService } from "./config.service";
 
 @Injectable()
 export class ToolsService {
@@ -56,5 +56,13 @@ export class ToolsService {
       );
     }
     return this.modulesMapCache$;
+  }
+
+  categoryContainsToolId(category: Category, toolId: string): boolean {
+    return (
+      category != null &&
+      category.tools != null &&
+      category.tools.some((toolInCategory: Tool) => toolInCategory.name.id === toolId)
+    );
   }
 }

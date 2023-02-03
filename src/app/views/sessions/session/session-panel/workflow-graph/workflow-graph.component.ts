@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Dataset, Job, Module, Tool } from "chipster-js-common";
+import { Category, Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
 import * as d3ContextMenu from "d3-context-menu";
 import * as _ from "lodash";
@@ -12,6 +12,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
+import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -82,7 +83,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private settingService: SettingsService,
     private datasetService: DatasetService,
     private visualizationEventService: VisualizationEventService,
-    private getSessionDataService: GetSessionDataService
+    private getSessionDataService: GetSessionDataService,
+    private toolsService: ToolsService
   ) {}
 
   // actually selected datasets
@@ -1055,31 +1057,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   ): DatasetNode[] {
     const datasetNodes: DatasetNode[] = [];
     datasetsMap.forEach((dataset: Dataset) => {
-      let color = "gray";
+      let color: string = "gray";
       let sourceJob = null;
 
       if (dataset.sourceJob) {
+        // should we search color even if sourceJob not in jobsMap?
         if (jobsMap.has(dataset.sourceJob)) {
           sourceJob = jobsMap.get(dataset.sourceJob);
-
-          const module = modulesMap.get(sourceJob.module);
-          if (module) {
-            const category = module.categoriesMap.get(sourceJob.toolCategory);
-            if (category) {
-              color = category.color;
-            } else {
-              // log.info('dataset\'s ' + dataset.name + ' category ' + sourceJob.toolCategory + ' not found')
-            }
-          } else {
-            // log.info('dataset\'s ' + dataset.name + ' module ' + sourceJob.module + ' not found')
+          const foundColor = this.getDatasetColor(dataset, sourceJob, modulesMap);
+          if (foundColor != null) {
+            color = foundColor;
           }
-        } else {
-          // log.info("source job of dataset " + dataset.name + " not found");
         }
-      } else {
-        // log.info('dataset source job ' +  dataset.name + ' is null');
       }
-
       // when opening a session file, datasets may be without names for some time
       const name = dataset.name ? dataset.name : "";
 
@@ -1313,6 +1303,85 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         }
       }
     }
+  }
+
+  /**
+   *  Search criteria:
+   *
+   *  Tool exists:
+   *
+   *  1) module, category, tool
+   *  2) module, tool
+   *  3) category, tool
+   *
+   *  Tool doesn't exist any more:
+   *
+   *  4) module, category
+   *  5) category    ( maybe go with gray instead of this?)
+   *
+   *
+   * @param dataset
+   * @param sourceJob
+   * @param datasetsMap
+   * @param modulesMap
+   * @returns
+   */
+  private getDatasetColor(dataset: Dataset, sourceJob: Job, modulesMap: Map<string, Module>): string {
+    if (dataset?.sourceJob == null) {
+      return null;
+    }
+
+    const module = modulesMap.get(sourceJob.module);
+    if (module) {
+      // module match, search for exact category
+      const category: Category = module.categoriesMap.get(sourceJob.toolCategory);
+      if (category != null && this.toolsService.categoryContainsToolId(category, sourceJob.toolId)) {
+        // exact module, category, tool match
+        return category.color;
+      }
+
+      // module match, search the tool from all the categories in that module
+      const matchingCategory: Category = module.categories.find((otherCategory) =>
+        this.toolsService.categoryContainsToolId(otherCategory, sourceJob.toolId)
+      );
+      if (matchingCategory != null) {
+        // found same module, other category
+        return matchingCategory.color;
+      }
+    }
+
+    // search other modules for tool
+    const otherModules: Module[] = Array.from(modulesMap.values()).filter(
+      (module2) => module2.moduleId !== sourceJob.module
+    );
+    const categoryWithTool: Category = otherModules
+      .flatMap((mod) => mod.categories)
+      .find((cat) => this.toolsService.categoryContainsToolId(cat, sourceJob.toolId));
+    if (categoryWithTool != null) {
+      // found tool from other module
+      return categoryWithTool.color;
+    }
+
+    // tool not found, search for module and category match
+    if (module) {
+      // module match, search for exact category
+      const category: Category = module.categoriesMap.get(sourceJob.toolCategory);
+      if (category != null) {
+        // found module and category (no tool)
+        return category.color;
+      }
+    }
+
+    // tool and module not found, search for category only
+    const categoryWithTool2: Category = otherModules
+      .flatMap((mod) => mod.categories)
+      .find((cat) => cat.name === sourceJob.toolCategory);
+    if (categoryWithTool2 != null) {
+      // found tool from other module
+      return categoryWithTool2.color;
+    }
+
+    return null;
   }
 
   private getPhenodataX(datasetNode: DatasetNode): number {
