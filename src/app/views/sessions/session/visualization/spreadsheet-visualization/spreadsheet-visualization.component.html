@@ -1,21 +1,27 @@
 <div *ngIf="state.isReady(); else statusTemplate">
   <!-- preview and modal full file -->
+  <!-- prettier-ignore -->
   <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount > 0">
-    Showing all {{ rowCount }} rows.
+    Showing all {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
   </span>
   <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount === 0">No data rows.</span>
 
   <!-- preview, full file, but preview limiting visible rows -->
+  <!-- prettier-ignore -->
   <span style="font-size: smaller" *ngIf="!modalMode && gotFullFile && limitRows">
-    Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows.
+    Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
   </span>
 
   <!-- preview, line count maybe available in full screen-->
-  <span style="font-size: smaller" *ngIf="!modalMode && !gotFullFile">Showing the first {{ rowCount }} rows.</span>
+  <!-- prettier-ignore -->
+  <span style="font-size: smaller" *ngIf="!modalMode && !gotFullFile">
+    Showing the first {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
+  </span>
 
   <!-- modal, total count not available -->
+  <!-- prettier-ignore -->
   <span style="font-size: smaller" *ngIf="modalMode && !gotFullFile">
-    Showing the first {{ rowCount }} rows. File is too big for total row count.
+    Showing the first {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>. File is too big for total row count.
   </span>
 
   <!-- full screen text and link for preview-->

@@ -35,10 +35,13 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   // takes ~100 ms with ADSL
   private readonly fileSizeLimit = 1 * 1024 * 1024;
   private readonly modalFileSizeLimit = 10 * 1024 * 1024;
+  public readonly columnLimit: number = 500;
+
   // nice round number for tables with reasonable number of columns
   private readonly maxRowsLimit = 100;
   public gotFullFile: boolean;
   public limitRows: boolean;
+  public limitColumns: boolean = false;
   public getTruncatedFile: boolean;
   public modalWillHaveFullFile: boolean;
   public goToFullScreenText: string;
@@ -152,10 +155,19 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
           // if there is only one line, show it as content, because Handsontable doesn't allow
           // headers to be shown alone
+
           if (body.length === 0) {
             body = [headers];
             headers = null;
             this.rowCount = 0;
+          }
+          const columnCount = headers != null ? headers.length : body.length;
+          if (columnCount > this.columnLimit) {
+            this.limitColumns = true;
+            if (headers != null) {
+              headers = headers.slice(0, this.columnLimit);
+            }
+            body = body.map((row) => row.slice(0, this.columnLimit));
           }
 
           // set the text after full screen link
