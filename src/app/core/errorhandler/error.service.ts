@@ -31,4 +31,9 @@ export class ErrorService {
   getErrors(): Observable<ErrorMessage> {
     return this.errors$;
   }
+
+  showSimpleError(title: string, msg: string): void {
+    const errorMessage = new ErrorMessage(title, msg, true, [], [], null);
+    this.showErrorObject(errorMessage);
+  }
 }

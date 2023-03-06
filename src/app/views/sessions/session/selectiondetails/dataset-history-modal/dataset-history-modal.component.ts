@@ -1,8 +1,11 @@
 import { Component, Input, OnChanges, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
+import * as FileSaver from "file-saver";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
+import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 
 export class DatasetHistoryStep {
@@ -48,7 +51,9 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   constructor(
     public activeModal: NgbActiveModal,
     public querySessionDataService: QuerySessionDataService,
-    public toolService: ToolService
+    public toolService: ToolService,
+    public sessionDataService: SessionDataService,
+    public errorService: ErrorService
   ) {}
 
   ngOnInit(): void {
@@ -63,6 +68,99 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
   updateOption(option: HistoryOption): void {
     option.enabled = !option.enabled;
+  }
+
+  downloadAsTextFile() {
+    // check browser support
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const isFileSaverSupported = !!new Blob();
+    } catch (e) {
+      this.errorService.showSimpleError("Not supported", "Save as text file not supported by your web browser.");
+      return;
+    }
+
+    const blob = new Blob([this.getHistoryAsString()], { type: "text/plain;charset=utf-8" });
+    FileSaver.saveAs(blob, "history-" + this.dataset.name + "-" + this.dataset.datasetId + ".txt");
+  }
+
+  copyToClipboard() {
+    navigator.clipboard.writeText(this.getHistoryAsString()).then(
+      () => {
+        // success
+      },
+      () => {
+        // fail
+        this.errorService.showSimpleError("Copy to clipboard failed", "");
+      }
+    );
+  }
+
+  private getHistoryAsString(): string {
+    const line = "----------------------------------------------------------------------------\n";
+    const doubleLine = "============================================================================\n";
+
+    const header = "History of " + this.dataset.name + "\n" + doubleLine + "\n";
+
+    const steps: string = this.getHistoryData().reduce((s: string, step: DatasetHistoryStep, i) => {
+      // tool
+      const toolString =
+        (this.historyOptionsMap.get("sourceJobName").enabled
+          ? this.historyOptionsMap.get("sourceJobName").name + ": " + step.sourceJobName
+          : "") + "\n";
+
+      // input files
+      const inputFilesString =
+        (this.historyOptionsMap.get("inputFileNames").enabled
+          ? this.historyOptionsMap.get("inputFileNames").name + ": " + step.inputFileNamesString
+          : "") + "\n";
+
+      // parameters
+      const parametersString =
+        (this.historyOptionsMap.get("parameters").enabled
+          ? this.historyOptionsMap.get("parameters").name +
+            ":\n" +
+            step.parameterList.reduce(
+              (params: string, param: JobParameter) => params + "\t" + param.displayName + ": " + param.value + "\n",
+              ""
+            )
+          : "") + "\n";
+
+      // date
+      const dateString =
+        (this.historyOptionsMap.get("date").enabled ? this.historyOptionsMap.get("date").name + ": " + step.date : "") +
+        "\n";
+
+      // result file
+      const resultFileString =
+        (this.historyOptionsMap.get("resultFileName").enabled
+          ? this.historyOptionsMap.get("resultFileName").name + ": " + step.datasetName
+          : "") + "\n";
+
+      // source code TODO pad with tabs
+      const sourceCodeString =
+        (this.historyOptionsMap.get("sourceCode").enabled
+          ? this.historyOptionsMap.get("sourceCode").name +
+            ":\n" +
+            (step.sourceCode != null ? step.sourceCode : "not available").replace(/^/gm, "\t")
+          : "") + "\n";
+
+      const stepString =
+        "Step " +
+        (i + 1) +
+        "\n" +
+        line +
+        toolString +
+        inputFilesString +
+        parametersString +
+        dateString +
+        resultFileString +
+        sourceCodeString +
+        "\n\n\n";
+      return s + stepString;
+    }, "");
+
+    return header + steps;
   }
 
   private getHistoryData(): Array<DatasetHistoryStep> {

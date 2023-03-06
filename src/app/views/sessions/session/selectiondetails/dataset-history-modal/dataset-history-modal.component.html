@@ -7,6 +7,7 @@
 <div class="modal-body">
   <!-- options -->
   <h2 class="h2-xs">Fields</h2>
+
   <div class="form-group">
     <div class="row">
       <div *ngFor="let option of historyOptions; let i = index" class="col-sm">
@@ -24,7 +25,25 @@
   </div>
 
   <!-- history steps -->
-  <h2 class="h2-xs">History</h2>
+  <h2 class="h2-xs">
+    History
+    <span class="dropdown float-right">
+      <button
+        class="btn btn-sm btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false">
+        Export
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" (click)="copyToClipboard()">Copy to clipboard</a>
+        <a class="dropdown-item" (click)="downloadAsTextFile()">Download as text file</a>
+      </div>
+    </span>
+  </h2>
+
   <table class="table table-sm text-sm table-condensed">
     <div class="step" *ngFor="let step of datasetHistorySteps; let i = index">
       <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
@@ -79,5 +98,5 @@
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
+  <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.close()">Close</button>
 </div>
