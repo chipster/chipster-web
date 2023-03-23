@@ -22,7 +22,7 @@
             <ch-add-dataset-modal [sessionId]="sessionDataService.getSessionId()"></ch-add-dataset-modal>
 
             <!-- dropdown -->
-            <span class="dropdown float-right">
+            <span class="dropdown float-end">
               <button
                 [disabled]="sessionData.datasetsMap.size === 0"
                 class="btn btn-sm btn-outline-secondary tool-bar-button"
@@ -52,14 +52,14 @@
             <!-- zoom buttons-->
             <button
               [disabled]="sessionData.datasetsMap.size === 0"
-              class="btn btn-sm btn-outline-secondary mr-2 float-right tool-bar-button"
+              class="btn btn-sm btn-outline-secondary mr-2 float-end tool-bar-button"
               title="Zoom in"
               (click)="workflowGraph.zoomIn()">
               <span class="fa fa-lg fa-search-plus"></span>
             </button>
             <button
               [disabled]="sessionData.datasetsMap.size === 0"
-              class="btn btn-sm btn-outline-secondary mr-1 float-right tool-bar-button"
+              class="btn btn-sm btn-outline-secondary mr-1 float-end tool-bar-button"
               title="Zoom out"
               (click)="workflowGraph.zoomOut()">
               <span class="fas fa-lg fa-search-minus"></span>
@@ -101,7 +101,7 @@
                 active: selectionService.isSelectedDatasetById(dataset.datasetId)
               }"
               (click)="toggleDatasetSelection($event, dataset)"
-              *ngFor="let dataset of getDatasetListSorted() | datasetsearch: datasetSearch">
+              *ngFor="let dataset of getDatasetListSorted() | datasetsearch : datasetSearch">
               {{ dataset.name }}
             </button>
           </div>
