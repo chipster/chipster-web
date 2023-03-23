@@ -16,14 +16,14 @@
     <div class="row">
       <div class="col">
         <form [formGroup]="singleOrPairedForm" (ngSubmit)="onFindPairs()">
-          <input type="radio" class="mr-1" value="paired" formControlName="singleOrPaired" />
+          <input type="radio" class="me-1" value="paired" formControlName="singleOrPaired" />
           Paired end
-          <input type="radio" class="ml-2 mr-1" value="single" formControlName="singleOrPaired" />
+          <input type="radio" class="ms-2 me-1" value="single" formControlName="singleOrPaired" />
           Single end
         </form>
       </div>
       <div class="col align-self-end">
-        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2 float-end">Reset All</button>
+        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ms-2 float-end">Reset All</button>
       </div>
     </div>
 

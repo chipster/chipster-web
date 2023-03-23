@@ -53,7 +53,7 @@
             <div style="font-weight: bolder">{{ item.toolName }}</div>
           </ng-template>
         </ng-select>
-        <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter mr-2 float-end"></i>
+        <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter me-2 float-end"></i>
       </div>
 
       <!-- jobs button -->
@@ -62,7 +62,7 @@
           <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
         </span>
         <button
-          class="btn btn-link float-end pr-3 mr-4"
+          class="btn btn-link float-end pr-3 me-4"
           (click)="$event.stopPropagation(); jobsDropdown.toggle()"
           title="Jobs">
           Jobs
@@ -136,7 +136,7 @@
               <div class="col d-flex" *ngIf="selectedTool.tool.name.id === validatedTool.tool.name.id">
                 <!-- parameters -->
                 <button
-                  class="btn btn-sm btn-outline-secondary mr-1"
+                  class="btn btn-sm btn-outline-secondary me-1"
                   (click)="openParametersModal()"
                   title="Edit parameters and inputs"
                   [disabled]="!selectedTool">
