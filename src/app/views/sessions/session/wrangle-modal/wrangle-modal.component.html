@@ -9,7 +9,7 @@
   <div *ngIf="state.isReady(); else statusTemplate">
     <h3 id="preview-header" class="h3-xs">
       Source file preview
-      <span class="float-right font-weight-light">{{ dataset.name }}</span>
+      <span class="float-end font-weight-light">{{ dataset.name }}</span>
     </h3>
 
     <div class="scrolling-wrapper" #horizontalScroll>
@@ -22,7 +22,7 @@
       <!-- row col here to prevent alert from going on top of legends -->
       <div class="row">
         <div class="col">
-          <span class="float-right text-sm">
+          <span class="float-end text-sm">
             <i class="legend-icon far fa-square identifier" aria-hidden="true"></i>
             <span class="legend-text">Identifier</span>
             <i class="legend-icon far fa-square sample" aria-hidden="true"></i>

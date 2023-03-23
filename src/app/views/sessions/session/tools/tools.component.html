@@ -38,7 +38,7 @@
           isn't enough space below it? -->
         <ng-select
           #searchBox
-          class="float-right"
+          class="float-end"
           placeholder="Find tool"
           [items]="toolSearchList"
           [virtualScroll]="true"
@@ -53,16 +53,16 @@
             <div style="font-weight: bolder">{{ item.toolName }}</div>
           </ng-template>
         </ng-select>
-        <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter mr-2 float-right"></i>
+        <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter mr-2 float-end"></i>
       </div>
 
       <!-- jobs button -->
       <div class="col col-right" id="jobButton">
-        <span class="float-right position-relative">
+        <span class="float-end position-relative">
           <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
         </span>
         <button
-          class="btn btn-link float-right pr-3 mr-4"
+          class="btn btn-link float-end pr-3 mr-4"
           (click)="$event.stopPropagation(); jobsDropdown.toggle()"
           title="Jobs">
           Jobs

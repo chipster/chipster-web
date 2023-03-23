@@ -30,7 +30,7 @@
     <span class="btn-link" (click)="showAll()">full screen</span>
     {{ goToFullScreenText }}.
   </span>
-  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-right">Full Screen</ch-link-button>
+  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end">Full Screen</ch-link-button>
 </div>
 
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->

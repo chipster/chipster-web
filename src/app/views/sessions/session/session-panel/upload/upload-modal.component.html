@@ -67,11 +67,11 @@
   <div class="row">
     <div class="col">
       <!-- <span *ngIf="flow.getSize()" class="badge badge-info pull-left">Total Size: {{flow.getSize() | bytes}}</span> -->
-      <span *ngIf="flow.timeRemaining()" class="float-left">
+      <span *ngIf="flow.timeRemaining()" class="float-start">
         <i>Time remaining: {{ flow.timeRemaining() | secondspipe }}</i>
       </span>
 
-      <div class="float-right text-nowrap">
+      <div class="float-end text-nowrap">
         <button class="btn btn-outline-secondary btn-sm controlButton ml-1" (click)="flow.cancel()">
           <i class="fas fa-times" aria-hidden="true"></i>
           Cancel all
@@ -91,7 +91,7 @@
 
 <div class="modal-footer">
   <div class="col px-0">
-    <div class="float-left">
+    <div class="float-start">
       <button
         class="btn btn-sm btn-success dropdown-toggle"
         type="button"
@@ -112,6 +112,6 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn-sm btn-secondary float-right" (click)="activeModal.close()">Close</button>
+    <button type="button" class="btn btn-sm btn-secondary float-end" (click)="activeModal.close()">Close</button>
   </div>
 </div>

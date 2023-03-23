@@ -1,7 +1,7 @@
 <div>
   <h5 class="mb-0">
     {{ newsItem.contents.title }}
-    <span *ngIf="editable" class="float-right">
+    <span *ngIf="editable" class="float-end">
       <button (click)="onEdit(newsItem)" class="btn btn-link">Edit</button>
       <button (click)="onDelete(newsItem)" class="btn btn-link">Delete</button>
     </span>

@@ -19,7 +19,7 @@
     <div class="col">
       <button
         *ngIf="isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary mr-1 float-right"
+        class="btn btn-sm btn-outline-secondary mr-1 float-end"
         (click)="resetAll()"
         title="Reset all">
         <span class="fas fa-fw fa-undo text-primary" aria-hidden="true"></span>
@@ -27,7 +27,7 @@
       </button>
       <button
         *ngIf="!isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary mr-1 float-right"
+        class="btn btn-sm btn-outline-secondary mr-1 float-end"
         (click)="resetAll()"
         title="Reset all"
         [disabled]="true">
@@ -105,7 +105,7 @@
             <!-- reset to default -->
             <button
               type="button"
-              class="btn btn-sm btn-outline-dark btn-no-border float-right"
+              class="btn btn-sm btn-outline-dark btn-no-border float-end"
               [class.invisible]="!isResetVisible(parameter)"
               (click)="reset(parameter, $event)"
               title="Reset to default">

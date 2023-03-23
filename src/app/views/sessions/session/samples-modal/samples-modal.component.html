@@ -23,9 +23,7 @@
         </form>
       </div>
       <div class="col align-self-end">
-        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2 float-right">
-          Reset All
-        </button>
+        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ml-2 float-end">Reset All</button>
       </div>
     </div>
 
@@ -67,7 +65,7 @@
               formControlName="r2Token"
               id="r2TokenInput" />
           </div>
-          <div class="col align-self-end float-right">
+          <div class="col align-self-end float-end">
             <button type="submit" [disabled]="!identifiersForm.valid" class="btn btn-sm btn-success">Find Pairs</button>
           </div>
         </div>
@@ -78,7 +76,7 @@
       <h2 class="h2-xs">Undefined Files</h2>
       <div>
         <span class="text-sm">{{ unpairedFiles.length }} undefined file{{ getPluralEnd(unpairedFiles.length) }}</span>
-        <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-right invisible mb-1">
+        <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-end invisible mb-1">
           Reset Everything
         </button>
       </div>
@@ -95,7 +93,7 @@
         <button
           *ngIf="singleEndSamples.length > 0"
           (click)="onResetSingle()"
-          class="btn btn-sm btn-secondary float-right mb-1">
+          class="btn btn-sm btn-secondary float-end mb-1">
           Reset
         </button>
       </div>
@@ -121,7 +119,7 @@
         <button
           *ngIf="pairedEndSamples.length > 0"
           (click)="onResetPairs()"
-          class="btn btn-sm btn-secondary float-right mb-1">
+          class="btn btn-sm btn-secondary float-end mb-1">
           Reset
         </button>
       </div>
@@ -148,7 +146,7 @@
         <span class="text-sm">
           {{ pairMissingSamples.length }} missing pair{{ getPluralEnd(pairMissingSamples.length) }}
         </span>
-        <button (click)="onResetMissing()" class="btn btn-sm btn-secondary float-right mb-1">Reset</button>
+        <button (click)="onResetMissing()" class="btn btn-sm btn-secondary float-end mb-1">Reset</button>
       </div>
 
       <div class="limit-height">
@@ -176,6 +174,6 @@
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-sm btn-secondary float-left" (click)="activeModal.close()">Close</button>
+  <button type="button" class="btn btn-sm btn-secondary float-start" (click)="activeModal.close()">Close</button>
   <button type="button" class="btn btn-sm btn-success" (click)="onSave()">Save</button>
 </div>

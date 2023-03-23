@@ -52,7 +52,7 @@
                     <span *ngIf="!this.deletingSessions.has(session)">
                       <!-- delete button -->
                       <button
-                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                        class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                         [ngClass]="{
                           'visible-button':
                             buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)
@@ -66,14 +66,14 @@
                       <div
                         ngbDropdown
                         #sessionDropdown="ngbDropdown"
-                        class="float-right d-inline-block"
+                        class="float-end d-inline-block"
                         placement="bottom-right"
                         (openChange)="sessionMenuOpenChange($event)">
                         <button
                           (click)="$event.stopImmediatePropagation()"
                           [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                           [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                          class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                          class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                           id="sessionDropdown"
                           title="Actions"
                           ngbDropdownToggle>
@@ -117,7 +117,7 @@
                       (click)="$event.stopImmediatePropagation(); selectSession(session)"
                       [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                       [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                      class="btn btn-sm btn-outline-dark btn-no-border hidden float-right"
+                      class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                       title="Preview">
                       <span class="fas fa-eye"></span>
                     </button>
@@ -128,7 +128,7 @@
                       (click)="$event.stopImmediatePropagation(); acceptSession(session)"
                       [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                       [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                      class="btn btn-sm btn-secondary hidden float-right mr-3"
+                      class="btn btn-sm btn-secondary hidden float-end mr-3"
                       title="Accept">
                       <!-- <span class="fas fa-play"></span> -->
                       Accept share
@@ -140,7 +140,7 @@
                       (click)="$event.stopImmediatePropagation(); openSession(session.sessionId)"
                       [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                       [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                      class="btn btn-sm btn-secondary hidden float-right mr-3"
+                      class="btn btn-sm btn-secondary hidden float-end mr-3"
                       title="Open">
                       <!-- <span class="fas fa-play"></span> -->
                       Open
@@ -149,7 +149,7 @@
                     <!-- deleting text instead of buttons for sessions which are being deleted -->
                     <span
                       *ngIf="deletingSessions.has(session)"
-                      class="float-right"
+                      class="float-end"
                       style="font-size: smaller; font-style: italic">
                       <!-- use hidden button to keep the row height static -->
                       <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
@@ -213,7 +213,7 @@
             {{ selectedSession.name }}
             <span
               *ngIf="mode === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW"
-              class="text-smaller lighter float-right">
+              class="text-smaller lighter float-end">
               <i>preview</i>
             </span>
           </h5>
@@ -255,7 +255,7 @@
             <tr>
               <td class="lighter">Size:</td>
               <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">
-                {{ sessionSize | bytes: 0 }}
+                {{ sessionSize | bytes : 0 }}
               </td>
               <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
             </tr>
@@ -315,7 +315,7 @@
               <span *ngIf="!this.deletingSessions.has(session)">
                 <!-- delete button -->
                 <button
-                  class="btn btn-sm btn-outline-dark btn-no-border hidden float-right visible-button"
+                  class="btn btn-sm btn-outline-dark btn-no-border hidden float-end visible-button"
                   (click)="deleteRule(session, session.rules[0])"
                   title="Revoke">
                   <span class="fas fa-times"></span>
@@ -325,7 +325,7 @@
               <!-- deleting text instead of buttons for sessions which are being deleted -->
               <span
                 *ngIf="deletingSessions.has(session)"
-                class="float-right"
+                class="float-end"
                 style="font-size: smaller; font-style: italic">
                 <!-- use hidden button to keep the row height static -->
                 <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
