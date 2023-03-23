@@ -2,13 +2,13 @@
 // https://getbootstrap.com/docs/4.1/getting-started/theming/
 // ./node_modules/bootstrap/scss/_variables.scss
 
-$theme-colors: (
-  "primary": darken(#007bff, 5%),
-  "success": darken(#28a745, 5%),
-  "info": darken(#17a2b8, 5%),
-  //"primary": #0e5db8,
-  //"success": #0e866c,,,
-);
+// $theme-colors: (
+//   // "primary": darken(#007bff, 5%),
+//   // "success": darken(#28a745, 5%),
+//   // "info": darken(#17a2b8, 5%),
+//   //"primary": #0e5db8,
+//   //"success": #0e866c,,,
+// );
 
 // bootstrap import needs to be after the customizations
 // for now simply importing everything, could also pick what's needed
