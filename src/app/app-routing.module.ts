@@ -75,7 +75,7 @@ const routes: Routes = [
   //     enableTracing: true
   //   })
   // ],
-  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled", relativeLinkResolution: "legacy" })],
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled" })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

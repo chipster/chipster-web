@@ -1,6 +1,6 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
 import { flatMap } from "rxjs/operators";
@@ -26,10 +26,10 @@ export class HistoryComponent implements OnInit {
   jobFilterAttributeSet: Array<string> = [this.attributeUserName, "toolId", "state", "comp", "module"];
   jobFilterComparisonSet: Array<string> = [this.comparisonIs, this.comparisonIsNot];
 
-  stringFiltersForm: FormGroup;
-  startDateTimeFilterForm: FormGroup;
-  endDateTimeFilterForm: FormGroup;
-  stringFiltersFormArray: FormArray;
+  stringFiltersForm: UntypedFormGroup;
+  startDateTimeFilterForm: UntypedFormGroup;
+  endDateTimeFilterForm: UntypedFormGroup;
+  stringFiltersFormArray: UntypedFormArray;
 
   jobListLoading = false;
   page = 1;
@@ -41,7 +41,7 @@ export class HistoryComponent implements OnInit {
     private configService: ConfigService,
     private errorHandlerService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private modalService: NgbModal,
     private tokenService: TokenService
   ) {}

@@ -1,6 +1,6 @@
 import { DOCUMENT } from "@angular/common";
 import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild } from "@angular/core";
-import { AbstractControl, FormBuilder, FormControl, Validators } from "@angular/forms";
+import { AbstractControl, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
 import log from "loglevel";
@@ -46,7 +46,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
     private dialogModalService: DialogModalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     @Inject(DOCUMENT) private document
   ) {}
 
@@ -180,14 +180,14 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   }
 
   get message() {
-    return this.supportForm.get("message") as FormControl;
+    return this.supportForm.get("message") as UntypedFormControl;
   }
 
   get attach() {
-    return this.supportForm.get("attach") as FormControl;
+    return this.supportForm.get("attach") as UntypedFormControl;
   }
 
   get email() {
-    return this.supportForm.get("email") as FormControl;
+    return this.supportForm.get("email") as UntypedFormControl;
   }
 }

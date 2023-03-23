@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from "@angular/core";
-import { FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -71,8 +71,8 @@ export class WrangleModalComponent implements OnInit {
   columnTypes: Array<ColumnType> = [];
 
   includeExcludeOptions = [this.INCLUDE, this.EXCLUDE];
-  includeExclude = new FormControl(this.INCLUDE);
-  includeExcludeForm = new FormGroup({ includeExclude: this.includeExclude });
+  includeExclude = new UntypedFormControl(this.INCLUDE);
+  includeExcludeForm = new UntypedFormGroup({ includeExclude: this.includeExclude });
 
   nonUniqueIdentifiers = new Set<string>();
   nonUniqueIncludedColumns = new Set<string>();

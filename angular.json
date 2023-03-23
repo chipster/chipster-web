@@ -8,16 +8,13 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
-
         },
         "@schematics/angular:application": {
           "strict": true
         }
       },
-
       "root": "",
       "sourceRoot": "src",
-
       "prefix": "ch",
       "architect": {
         "build": {
@@ -40,9 +37,6 @@
               "node_modules/ag-grid-community/dist/styles/ag-theme-alpine.css"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "src/assets/lib/handsontable/handsontable.full.js",
               "node_modules/yamljs/dist/yaml.min.js",
@@ -81,7 +75,6 @@
                   "maximumError": "4kb"
                 }
               ]
-
             }
           },
           "defaultConfiguration": ""
@@ -111,9 +104,6 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/popper.js/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "src/assets/lib/handsontable/handsontable.full.js",
               "node_modules/yamljs/dist/yaml.min.js",
@@ -131,10 +121,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         },
         "e2e": {
@@ -151,11 +138,17 @@
         }
       }
     }
-},
-  "defaultProject": "chipster-web",
-    "cli": {
-      "analytics": false,
-    "defaultCollection": "@angular-eslint/schematics"
+  },
+  "cli": {
+    "analytics": false,
+    "schematicCollections": ["@angular-eslint/schematics"]
+  },
+  "schematics": {
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
+    }
   }
-
 }

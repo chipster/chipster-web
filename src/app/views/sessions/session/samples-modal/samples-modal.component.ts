@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { UntypedFormBuilder, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { defer, of, Subject } from "rxjs";
@@ -22,7 +22,7 @@ export interface ColumnItem {
 export class SamplesModalComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private datasetService: DatasetService,
     private sessionDataService: SessionDataService
   ) {}
