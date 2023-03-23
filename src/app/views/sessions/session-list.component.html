@@ -5,7 +5,7 @@
     <div class="col">
       <!-- new session and import sessions buttons -->
       <div class="mt-2 mb-4">
-        <button class="btn btn-sm btn-success mr-2" (click)="createSession()">
+        <button class="btn btn-sm btn-success me-2" (click)="createSession()">
           <span class="fas fa-plus" aria-hidden="true"></span>
           New session
         </button>
@@ -128,7 +128,7 @@
                       (click)="$event.stopImmediatePropagation(); acceptSession(session)"
                       [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                       [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                      class="btn btn-sm btn-secondary hidden float-end mr-3"
+                      class="btn btn-sm btn-secondary hidden float-end me-3"
                       title="Accept">
                       <!-- <span class="fas fa-play"></span> -->
                       Accept share
@@ -140,7 +140,7 @@
                       (click)="$event.stopImmediatePropagation(); openSession(session.sessionId)"
                       [ngClass]="{ 'visible-button': buttonsVisible(session) }"
                       [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
-                      class="btn btn-sm btn-secondary hidden float-end mr-3"
+                      class="btn btn-sm btn-secondary hidden float-end me-3"
                       title="Open">
                       <!-- <span class="fas fa-play"></span> -->
                       Open

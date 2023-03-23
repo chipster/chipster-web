@@ -9,7 +9,7 @@
         <span class="fas fa-lg fa-search-minus"></span>
       </button>
       <button
-        class="btn btn-secondary btn-sm ml-1 tool-bar-button"
+        class="btn btn-secondary btn-sm ms-1 tool-bar-button"
         (click)="zoomIn()"
         title="Zoom in"
         [disabled]="this.zoom >= this.maxZoom">
@@ -18,14 +18,14 @@
 
       <span *ngIf="totalPages > 1">
         <button
-          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          class="btn btn-secondary btn-sm tool-bar-button ms-2"
           [disabled]="page === 1 || showAll"
           (click)="previousPage()"
           title="Previous page">
           <span class="fas fa-lg fa-angle-left"></span>
         </button>
         <button
-          class="btn btn-secondary btn-sm tool-bar-button ml-1"
+          class="btn btn-secondary btn-sm tool-bar-button ms-1"
           [disabled]="page >= totalPages || showAll"
           (click)="nextPage()"
           title="Next page">
@@ -34,14 +34,14 @@
 
         <button
           *ngIf="!showAll"
-          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          class="btn btn-secondary btn-sm tool-bar-button ms-2"
           (click)="toggleShowAll()"
           [title]="showAllButtonText">
           <span class="far fa-lg fa-fw fa-copy"></span>
         </button>
         <button
           *ngIf="showAll"
-          class="btn btn-secondary btn-sm tool-bar-button ml-2"
+          class="btn btn-secondary btn-sm tool-bar-button ms-2"
           (click)="toggleShowAll()"
           [title]="showAllButtonText">
           <span class="far fa-lg fa-fw fa-file"></span>
