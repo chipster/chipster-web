@@ -1,6 +1,6 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
@@ -19,13 +19,13 @@ export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";
 
   years = ["2017", "2018", "2019", "2020", "2021", "2022"];
-  yearControl = new FormControl(this.years[4]);
+  yearControl = new UntypedFormControl(this.years[4]);
   modules = ["all", "ngs", "microarray", "misc", "kielipankki"];
-  moduleControl = new FormControl(this.modules[0]);
+  moduleControl = new UntypedFormControl(this.modules[0]);
 
-  ignoreUsersControl = new FormControl("");
+  ignoreUsersControl = new UntypedFormControl("");
 
-  form = new FormGroup({
+  form = new UntypedFormGroup({
     year: this.yearControl,
     module: this.moduleControl,
     ignoreUsers: this.ignoreUsersControl,

@@ -7,7 +7,7 @@ $theme-colors: (
   "success": darken(#28a745, 5%),
   "info": darken(#17a2b8, 5%),
   //"primary": #0e5db8,
-  //"success": #0e866c,
+  //"success": #0e866c,,,
 );
 
 // bootstrap import needs to be after the customizations
@@ -17,4 +17,4 @@ $theme-colors: (
 // This is herebecause when having directly in the angular.json
 // the bootstrap stuff didn't seem to get loaded before ngx-toaster --> errors.
 // https://github.com/scttcper/ngx-toastr/issues/318
-@import "../node_modules/ngx-toastr/toastr-bs4-alert.scss";
+@import "../node_modules/ngx-toastr/toastr-bs5-alert.scss";

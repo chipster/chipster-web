@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { FormGroup } from "@angular/forms";
+import { UntypedFormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
 import { map, mergeMap, tap } from "rxjs/operators";
@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
   public ssoLoginUrl: string;
 
   @ViewChild("myForm")
-  private myForm: FormGroup;
+  private myForm: UntypedFormGroup;
 
   @ViewChild("usernameInput")
   private usernameInput: ElementRef;

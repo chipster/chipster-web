@@ -6,7 +6,8 @@
     "types": [
       "d3",
       "handsontable",
-      "flowjs"
+      "flowjs",
+      "@angular/localize"
     ]
   },
   "files": [

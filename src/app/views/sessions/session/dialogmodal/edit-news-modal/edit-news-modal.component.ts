@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { FormControl, FormGroup } from "@angular/forms";
+import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 
@@ -11,14 +11,14 @@ export class EditNewsModalComponent implements OnInit {
   @Input()
   newsItem: NewsItem;
 
-  titleControl = new FormControl("");
-  shortTitleControl = new FormControl("");
-  bodyControl = new FormControl("");
+  titleControl = new UntypedFormControl("");
+  shortTitleControl = new UntypedFormControl("");
+  bodyControl = new UntypedFormControl("");
   id: string;
   created: Date;
   modified: Date;
 
-  form = new FormGroup({
+  form = new UntypedFormGroup({
     title: this.titleControl,
     shortTitle: this.shortTitleControl,
     body: this.bodyControl,
