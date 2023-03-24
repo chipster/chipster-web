@@ -1,9 +1,11 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef } from "ag-grid-community";
+import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, forkJoin } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
+import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../model/loadstate";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
@@ -48,7 +50,8 @@ export class StorageComponent implements OnInit {
     private restErrorService: RestErrorService,
     private authHttpClient: AuthHttpClientService,
     private modalService: NgbModal,
-    private bytesPipe: BytesPipe
+    private bytesPipe: BytesPipe,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit() {
@@ -57,10 +60,15 @@ export class StorageComponent implements OnInit {
     this.quotasMap = new Map();
 
     let sessionDbUrl: string;
+    let sessionDbAdminUrl: string;
     // check if its working properly
     this.configService
-      .getSessionDbUrl()
+      .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(
+        tap((service) => {
+          sessionDbAdminUrl = service.adminUri;
+        }),
+        mergeMap(() => this.configService.getSessionDbUrl()),
         tap((url) => {
           sessionDbUrl = url;
         }),
@@ -70,7 +78,7 @@ export class StorageComponent implements OnInit {
         }),
         mergeMap((users: string[]) => {
           const userQuotas$ = users.map((user: string) =>
-            this.authHttpClient.getAuth(sessionDbUrl + "/users/" + encodeURIComponent(user) + "/quota").pipe(
+            this.authHttpClient.getAuth(sessionDbAdminUrl + "/admin/users/" + encodeURIComponent(user) + "/quota").pipe(
               catchError((err) => {
                 log.error("quota request error", err);
                 // don't cancel other requests even if one of them fails
@@ -99,8 +107,12 @@ export class StorageComponent implements OnInit {
     this.sessions = [];
 
     this.configService
-      .getSessionDbUrl()
-      .pipe(mergeMap((url) => this.authHttpClient.getAuth(url + "/users/" + encodeURIComponent(user) + "/sessions")))
+      .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
+      .pipe(
+        mergeMap((service) =>
+          this.authHttpClient.getAuth(service.adminUri + "/admin/users/" + encodeURIComponent(user) + "/sessions")
+        )
+      )
       .subscribe(
         (sessions: any[]) => {
           this.sessions = sessions;
