@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+@import "bootstrap-custom";
 
 // allow absolute positioning inside the search field
 .tab-form-container {
@@ -161,7 +162,7 @@ button.btn-no-border {
   border-radius: 0px;
   border-width: 0px 0px 3px 0px;
   border-bottom-style: solid;
-  border-bottom-color: var(--primary);
+  border-bottom-color: $primary;
   color: #000;
   background-color: transparent;
   border-top-width: white;
@@ -176,7 +177,7 @@ button.btn-no-border {
   border-radius: 0px;
   border-width: 0px 0px 3px 0px;
   border-bottom-style: solid;
-  border-bottom-color: var(--primary);
+  border-bottom-color: $primary;
   color: #000;
   background-color: transparent;
   border-top-width: white;
@@ -189,6 +190,3 @@ button.btn-no-border {
 .nav-tabs {
   border-bottom: 0;
 }
-
-/* Importing Bootstrap SCSS file. */
-@import 'bootstrap/scss/bootstrap';
