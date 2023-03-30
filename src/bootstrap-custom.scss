@@ -1,17 +1,27 @@
-// see
-// https://getbootstrap.com/docs/4.1/getting-started/theming/
-// ./node_modules/bootstrap/scss/_variables.scss
+// See https://getbootstrap.com/docs/5.2/customize/sass/ about importing bootstrap scss.
+// For some reason option B on that page didn't seem to work, maybe it wasnt't including all the
+// separate files.
 
-// $theme-colors: (
-//   // "primary": darken(#007bff, 5%),
-//   // "success": darken(#28a745, 5%),
-//   // "info": darken(#17a2b8, 5%),
-//   //"primary": #0e5db8,
-//   //"success": #0e866c,,,
-// );
+// Now importing functions first so that they can be used to manipulate colors if needed, and them
+// importing all the rest, which I guess imports functions again. Seems to work
 
-// bootstrap import needs to be after the customizations
-// for now simply importing everything, could also pick what's needed
+// Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import "../node_modules/bootstrap/scss/functions";
+
+// Override variables
+// shade-color(red, 20%) to darken
+// ting-color(red, 20%) to lighten
+
+$primary: #006fe6;
+$secondary: #6c757d;
+$success: shade-color(#23923d, 10%); // hex is the color we used to have, need to darken a bit for the text to go white
+$info: #148ea1;
+// $warning: magenta;
+// $danger: magenta;
+// $light: magenta;
+// $dark: magenta;
+
+// Import all the bootstrap (functions will be imported again)
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 // This is herebecause when having directly in the angular.json
