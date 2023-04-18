@@ -14,9 +14,7 @@
 <ng-template #modalContent let-c="close" let-d="dismiss">
   <div class="modal-header">
     <h4 class="modal-title">Sessions of {{ selectedUser }}</h4>
-    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="d('Cross click')"></button>
   </div>
   <div class="modal-body scrollable-parent">
     <div *ngIf="!userSessionsState.isReady()">Loading sessions...</div>
@@ -36,7 +34,7 @@
         <tbody>
           <tr *ngFor="let session of sessions">
             <!-- <th scope="row">{{ session.name }}</th> -->
-            <td>{{ session.size | bytes: 0 }}</td>
+            <td>{{ session.size | bytes : 0 }}</td>
             <td>{{ session.datasetCount }}</td>
             <td>{{ session.jobCount }}</td>
             <td>{{ session.inputCount }}</td>

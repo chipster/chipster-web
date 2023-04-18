@@ -202,12 +202,11 @@
           <button
             *ngIf="mode !== SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW"
             id="close-button"
-            class="close"
+            type="button"
+            class="btn-close"
             aria-label="Close"
             (click)="closePreview()"
-            title="Close preview">
-            <span aria-hidden="true">&times;</span>
-          </button>
+            title="Close preview"></button>
 
           <h5 class="align-middle">
             {{ selectedSession.name }}
