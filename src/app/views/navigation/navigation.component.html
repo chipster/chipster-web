@@ -88,30 +88,22 @@
     </ul>
 
     <ul class="navbar-nav">
-      <li *ngIf="isLoggedIn()" class="nav-item dropdown">
-        <a
-          class="nav-link dropdown-toggle"
-          href="#"
-          id="navbarDropdown"
-          role="button"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false">
+      <li *ngIf="isLoggedIn()" class="nav-item" ngbDropdown>
+        <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
           <i class="fas fa-user" aria-hidden="true"></i>
           {{ getAccountName() }}
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-          <!-- <div class="dropdown-header" (click)="$event.stopImmediatePropagation()">{{getUserId()}}</div> -->
-          <a class="dropdown-item" (click)="openAccount()">
+        <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu dropdown-menu-end">
+          <a ngbDropdownItem (click)="openAccount()">
             <i class="fas fa-user fa-fw lighter"></i>
             Account
           </a>
-          <a class="dropdown-item" (click)="openSettings()">
+          <a ngbDropdownItem (click)="openSettings()">
             <i class="fas fa-cog fa-fw lighter"></i>
             Settings
           </a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" [routerLink]="routerLinkHome" (click)="logout()">
+          <a ngbDropdownItem [routerLink]="routerLinkHome" (click)="logout()">
             <i class="fas fa-sign-out-alt fa-fw lighter"></i>
             Logout
           </a>
