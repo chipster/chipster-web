@@ -15,7 +15,8 @@
 $primary: #006fe6;
 $secondary: #6c757d;
 $success: shade-color(#23923d, 10%); // hex is the color we used to have, need to darken a bit for the text to go white
-$info: #148ea1;
+$info: shade-color(#148ea1, 10%);
+// $info: #148ea1;
 // $warning: magenta;
 // $danger: magenta;
 // $light: magenta;
