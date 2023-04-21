@@ -667,9 +667,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
             this.groupsMenuItem,
-            this.dividerMenuItem,
+
             this.selectChildrenMenuItem,
-            this.dividerMenuItem,
+
             { ...this.deleteMenuItem, title: "Delete (" + self.selectedDatasets.length + " files)" },
           ]
         : [
@@ -678,7 +678,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.groupsMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
-            this.dividerMenuItem,
+
             this.selectChildrenMenuItem,
             this.dividerMenuItem,
             this.deleteMenuItem,

@@ -2,78 +2,65 @@
   <!-- single dataset selected -->
   <div *ngIf="selectionService.selectedDatasets.length === 1">
     <span>File</span>
-    <!--
-    {{dataset.name}}
-
-    <span class="dropdown">
-      <button class="btn btn-outline-dark dropdown-menu-button" type="button" id="fileDropdownMenuButton" data-toggle="dropdown"
-        aria-haspopup="true" aria-expanded="false" title="Actions">
-        <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
-      </button>
-      <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
-        <a class="dropdown-item" (click)="renameDataset()">Rename...</a>
-        <a class="dropdown-item" (click)="deleteDatasets()">Delete...</a>
-        <a class="dropdown-item" (click)="exportDatasets()">Export</a>
-        <a class="dropdown-item" (click)="showHistory()">History...</a>
-      </div>
-    </span>
-  --></div>
+  </div>
 
   <!-- multiple datasets selected -->
   <div *ngIf="selectionService.selectedDatasets.length > 1">
     <span class="">Files ({{ selectionService.selectedDatasets.length }})</span>
 
-    <span class="dropdown">
+    <!-- context dropdown -->
+    <div ngbDropdown class="d-inline-block">
       <button
-        class="btn btn-outline-dark dropdown-menu-button"
         type="button"
-        id="fileDropdownMenuButton"
-        data-toggle="dropdown"
+        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
+        id="filesDropdownMenuButton"
+        ngbDropdownToggle
         aria-haspopup="true"
         aria-expanded="false"
         title="Actions">
-        <!--<i class="fas fa-caret-down" aria-hidden="true"></i>-->
+        <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
-      <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
-        <a class="dropdown-item" (click)="defineDatasetGroups()">Define Samples...</a>
+      <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
+        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="selectChildren()">Select Descendants</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="deleteDatasets()">
+        <button ngbDropdownItem (click)="deleteDatasets()">
           Delete {{ selectionService.selectedDatasets.length }} files
-        </a>
+        </button>
       </div>
-    </span>
+    </div>
   </div>
 </h3>
 
 <div class="chipster-highlight">
   <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
     <span class="h6">{{ datasetName }}</span>
-    <span class="dropdown">
+
+    <!-- context dropdown -->
+    <div ngbDropdown class="d-inline-block">
       <button
-        class="btn btn-outline-dark dropdown-menu-button"
         type="button"
+        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
         id="fileDropdownMenuButton"
-        data-toggle="dropdown"
+        ngbDropdownToggle
         aria-haspopup="true"
         aria-expanded="false"
         title="Actions">
+        <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
-      <div class="dropdown-menu" aria-labelledby="fileDropdownMenuButton">
-        <a class="dropdown-item" (click)="renameDataset()">Rename...</a>
-        <a class="dropdown-item" (click)="wrangleDataset()">Convert to Chipster Format...</a>
-        <a class="dropdown-item" (click)="defineDatasetGroups()">Define Samples...</a>
-        <a class="dropdown-item" (click)="exportDatasets()">Export</a>
-        <a class="dropdown-item" (click)="showHistory()">History...</a>
+      <div ngbDropdownMenu aria-labelledby="fileDropdownMenuButton">
+        <button ngbDropdownItem (click)="renameDataset()">Rename&hellip;</button>
+        <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster Format&hellip;</button>
+        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+        <button ngbDropdownItem (click)="exportDatasets()">Export</button>
+        <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
+        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="selectChildren()">Select Descendants</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="deleteDatasets()">Delete</a>
+        <button ngbDropdownItem (click)="deleteDatasets()">Delete</button>
       </div>
-    </span>
+    </div>
   </div>
 
   <ch-dataset-details

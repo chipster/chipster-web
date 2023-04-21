@@ -3,26 +3,30 @@
 <div class="chipster-highlight">
   <div class="mb-2">
     <span class="h6">{{ session.name }}</span>
-    <span class="dropdown">
+
+    <!-- context dropdown -->
+    <div ngbDropdown class="d-inline-block">
       <button
-        class="btn btn-outline-dark dropdown-menu-button"
         type="button"
+        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
         id="sessionDropdownMenuButton"
-        data-toggle="dropdown"
+        ngbDropdownToggle
         aria-haspopup="true"
         aria-expanded="false"
         title="Actions">
+        <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
         <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
       </button>
-      <div class="dropdown-menu" aria-labelledby="sessionDropdownMenuButton">
-        <a class="dropdown-item" (click)="renameSessionModal()">Rename&hellip;</a>
-        <a class="dropdown-item" (click)="notesModal()">Edit notes&hellip;</a>
-        <a class="dropdown-item" (click)="sharingModal()">Share&hellip;</a>
-        <a class="dropdown-item" (click)="duplicateModal()">Save a copy&hellip;</a>
-        <a class="dropdown-item" (click)="downloadSession()">Download</a>
-        <a class="dropdown-item" (click)="removeSessionModal()">Delete&hellip;</a>
+      <div ngbDropdownMenu aria-labelledby="sessionDropdownMenuButton">
+        <button ngbDropdownItem (click)="renameSessionModal()">Rename&hellip;</button>
+        <button ngbDropdownItem (click)="notesModal()">Edit Notes&hellip;</button>
+        <button ngbDropdownItem (click)="sharingModal()">Share&hellip;</button>
+        <button ngbDropdownItem (click)="duplicateModal()">Save a Copy&hellip;</button>
+        <button ngbDropdownItem (click)="downloadSession()">Download&hellip;</button>
+        <div class="dropdown-divider"></div>
+        <button ngbDropdownItem (click)="removeSessionModal()">Delete&hellip;</button>
       </div>
-    </span>
+    </div>
   </div>
 
   <div class="border p-3" style="background-color: white">
@@ -33,7 +37,7 @@
       </tr>
       <tr>
         <td class="lighter">Size:</td>
-        <td width="100%">{{ getSessionSize() | bytes: 0 }}</td>
+        <td width="100%">{{ getSessionSize() | bytes : 0 }}</td>
       </tr>
       <tr>
         <td class="lighter">Notes:</td>
