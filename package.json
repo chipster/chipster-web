@@ -29,7 +29,6 @@
     "@ng-bootstrap/ng-bootstrap": "^14.0.1",
     "@ng-select/ng-select": "^10.0.3",
     "@ngrx/store": "^15.4.0",
-    "@popperjs/core": "^2.11.6",
     "ag-grid-angular": "^27.2.1",
     "ag-grid-community": "^27.2.1",
     "angular-split": "^15.0.0",
