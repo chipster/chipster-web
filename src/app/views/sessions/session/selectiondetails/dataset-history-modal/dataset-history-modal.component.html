@@ -23,23 +23,26 @@
   </div>
 
   <!-- history steps -->
-  <h2 class="h2-xs">
+  <h2 class="h2-xs mt-3">
     History
-    <span class="dropdown float-end">
+
+    <!-- context dropdown -->
+    <div ngbDropdown class="d-inline-block float-end">
       <button
-        class="btn btn-sm btn-secondary dropdown-toggle"
         type="button"
-        id="dropdownMenuButton"
-        data-toggle="dropdown"
+        class="btn btn-sm btn-secondary"
+        id="historyDropdownMenuButton"
+        ngbDropdownToggle
         aria-haspopup="true"
-        aria-expanded="false">
+        aria-expanded="false"
+        title="Actions">
         Export
       </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" (click)="copyToClipboard()">Copy to clipboard</a>
-        <a class="dropdown-item" (click)="downloadAsTextFile()">Download as text file</a>
+      <div ngbDropdownMenu aria-labelledby="historyDropdownMenuButton">
+        <button ngbDropdownItem (click)="copyToClipboard()">Copy to clipboard</button>
+        <button ngbDropdownItem (click)="downloadAsTextFile()">Download as text file</button>
       </div>
-    </span>
+    </div>
   </h2>
 
   <table class="table table-sm text-sm table-condensed">
