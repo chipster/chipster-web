@@ -59,6 +59,11 @@ button.dropdown-menu-button {
   line-height: 1;
 }
 
+// hack to get rid of caret in certain dropdown buttons
+button.no-caret-dropdown::after {
+  display: none;
+}
+
 #selectedGeneList {
   margin-top: 10px;
 }
