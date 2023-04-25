@@ -73,10 +73,12 @@ button.no-caret-dropdown::after {
 }
 
 .visualization-panel {
+  position: relative; /* required for pdf vizualization */
   padding: 15px;
   background-color: white;
   border: 1px solid #e1e1e8;
-  border-top: 0;
+  margin-top: 1px;
+  // border-top: 0;
   /*
   Keep the scroll position when changing visualizations
 
