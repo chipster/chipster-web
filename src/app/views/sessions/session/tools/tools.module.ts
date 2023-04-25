@@ -5,6 +5,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { SharedModule } from "../../../../shared/shared.module";
 import { ManualModule } from "../../../manual/manual.module";
+import { LinkButtonModule } from "../link-button/link-button.module";
 import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
 import { FilterCompatibleDatasetsPipe } from "./filter-compatible-datasets.pipe";
 import { JobListComponent } from "./job-list/job-list.component";
@@ -20,7 +21,7 @@ import { ToolService } from "./tool.service";
 import { ToolsComponent } from "./tools.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule, NgSelectModule],
+  imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule, LinkButtonModule, NgSelectModule],
   declarations: [
     ToolListItemComponent,
     ToolsComponent,
