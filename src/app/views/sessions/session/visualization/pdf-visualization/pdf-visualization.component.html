@@ -63,8 +63,8 @@
   [src]="src"
   [zoom]="zoom"
   [show-all]="showAll"
+  [fit-to-page]="true"
   [page]="page"
-  style="display: block"
   (after-load-complete)="pdfLoadComplete($event)"
   (on-progress)="onProgress($event)"></pdf-viewer>
 
