@@ -66,18 +66,20 @@
 
 #moduleBtnGroup {
   .btn:focus {
-    outline: 0.4px dotted #6c757d !important;
-    box-shadow: none !important;
+    // Commented for now because outline stays after click which looks ugly.
+    // outline: 0.4px dotted #6c757d !important;
+    // box-shadow: none !important;
   }
+
   .btn-primary {
     border-radius: 0px;
     border-width: 0px 0px 3px 0px;
     border-bottom-style: solid;
-    border-bottom-color: var(--primary);
     color: #000;
     background-color: transparent;
     border-top-width: white;
     margin: 2px;
+    @include border-bottom-primary;
   }
   .btn-light {
     border-radius: 0px;
