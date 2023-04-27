@@ -206,7 +206,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   private createRemoveButton(col: number, TH: any) {
     const button = document.createElement("A");
-    button.className = "pull-right";
+    button.className = "float-end";
     // use id instead of class to make it more specific than the 'color: inherit' rule in the bootstrap styles
     button.id = "phenodata-header-button";
     button.innerHTML = "&times;";
