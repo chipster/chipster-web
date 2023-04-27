@@ -62,7 +62,7 @@
           <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
         </span>
         <button
-          class="btn btn-link float-end pe-3 me-4"
+          class="btn btn-link no-underline-link-button float-end pe-3 me-4"
           (click)="$event.stopPropagation(); jobsDropdown.toggle()"
           title="Jobs">
           Jobs
@@ -222,7 +222,9 @@
               <div class="col">
                 <div *ngIf="selectedTool">
                   <span>{{ selectedTool.tool.description }}</span>
-                  <ch-link-button (click)="openManualModal()">&#x20;More&nbsp;info&hellip;</ch-link-button>
+                  <ch-link-button class="no-underline-link-button" (click)="openManualModal()">
+                    &#x20;More&nbsp;info&hellip;
+                  </ch-link-button>
                 </div>
               </div>
             </div>
