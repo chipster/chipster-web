@@ -51,7 +51,7 @@
             </button>
             <button
               type="button"
-              class="btn btn-outline-dark btn-no-border btn-sm pull-right"
+              class="btn btn-outline-dark btn-no-border btn-sm float-end"
               (click)="cancelUpload(file)"
               *ngIf="!file.isComplete()">
               <i class="fas fa-times" aria-hidden="true"></i>
@@ -64,7 +64,7 @@
 
   <div class="row">
     <div class="col">
-      <!-- <span *ngIf="flow.getSize()" class="badge badge-info pull-left">Total Size: {{flow.getSize() | bytes}}</span> -->
+      <!-- <span *ngIf="flow.getSize()" class="badge badge-info float-start">Total Size: {{flow.getSize() | bytes}}</span> -->
       <span *ngIf="flow.timeRemaining()" class="float-start">
         <i>Time remaining: {{ flow.timeRemaining() | secondspipe }}</i>
       </span>

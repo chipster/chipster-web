@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <div *ngIf="showControls">
-        <button class="btn btn-secondary btn-sm pull-right" (click)="openNewWindow()">Open in new tab</button>
+        <button class="btn btn-secondary btn-sm float-end" (click)="openNewWindow()">Open in new tab</button>
       </div>
 
       <ch-static-html *ngIf="html" [html]="html"></ch-static-html>

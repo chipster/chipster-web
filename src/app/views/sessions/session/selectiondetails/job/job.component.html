@@ -5,7 +5,7 @@
     </div>
 
     <div class="col-md-1">
-      <button class="btn btn-sm btn-link pull-right" (click)="close()">Close</button>
+      <button class="btn btn-sm btn-link float-end" (click)="close()">Close</button>
     </div>
   </div>
   <div class="chipster-highlight">
@@ -41,12 +41,12 @@
 
         <tr>
           <td class="lighter" style="white-space: nowrap">Memory usage:</td>
-          <td>{{ job.memoryUsage | bytes: 0 }} / {{ job.memoryLimit | bytes: 0 }}</td>
+          <td>{{ job.memoryUsage | bytes : 0 }} / {{ job.memoryLimit | bytes : 0 }}</td>
         </tr>
 
         <tr>
           <td class="lighter" style="white-space: nowrap">Storage usage:</td>
-          <td>{{ job.storageUsage | bytes: 0 }}</td>
+          <td>{{ job.storageUsage | bytes : 0 }}</td>
         </tr>
 
         <tr *ngIf="failed">
