@@ -197,3 +197,7 @@ button.btn-no-border {
 .nav-tabs {
   border-bottom: 0;
 }
+
+@mixin bottom-border-primary {
+  border-bottom-color: $primary;
+}
