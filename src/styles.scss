@@ -201,3 +201,11 @@ button.btn-no-border {
 @mixin bottom-border-primary {
   border-bottom-color: $primary;
 }
+
+.no-underline-link-button {
+  text-decoration: none;
+}
+
+.no-underline-link-button:hover {
+  text-decoration: underline;
+}
