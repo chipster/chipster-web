@@ -33,7 +33,7 @@ export class DialogModalService {
     );
   }
 
-  openSessionNameModal(title, name, buttonText = "Save"): Observable<string> {
+  openSessionNameModal(title, name, buttonText = "Rename"): Observable<string> {
     return this.openStringModal(title, "Session name", name, buttonText);
   }
 
