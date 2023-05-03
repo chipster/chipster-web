@@ -1,50 +1,51 @@
 <nav *ngIf="appNameReady" class="navbar navbar-expand-sm navbar-light" id="navbar">
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-toggle="collapse"
-    data-target="#navbarNav"
-    aria-expanded="false"
-    aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <div class="container-fluid">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav me-auto">
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          [routerLink]="routerLinkHome"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }">
-          {{ appName }}
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkAnalyze" routerLinkActive="active">Analyze</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkSessions" routerLinkActive="active">Sessions</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkManual" routerLinkActive="active">Manual</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkAccess" routerLinkActive="active">Getting Access</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="routerLinkContact" routerLinkActive="active">Contact</a>
-      </li>
-      <li class="nav-item" *ngIf="isAdmin()">
-        <a class="nav-link" [routerLink]="routerLinkAdmin" routerLinkActive="active">Admin</a>
-      </li>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [routerLink]="routerLinkHome"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">
+            {{ appName }}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="routerLinkAnalyze" routerLinkActive="active">Analyze</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="routerLinkSessions" routerLinkActive="active">Sessions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="routerLinkManual" routerLinkActive="active">Manual</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="routerLinkAccess" routerLinkActive="active">Getting Access</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="routerLinkContact" routerLinkActive="active">Contact</a>
+        </li>
+        <li class="nav-item" *ngIf="isAdmin()">
+          <a class="nav-link" [routerLink]="routerLinkAdmin" routerLinkActive="active">Admin</a>
+        </li>
 
-      <li class="nav-item">
-        <a class="nav-link" [routerLink]="" (click)="openNews()">
-          News
-          <!-- <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i> -->
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="" (click)="openNews()">
+            News
+            <!-- <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i> -->
 
-          <!-- <span class="fa-layers fa-fw">
+            <!-- <span class="fa-layers fa-fw">
             <i class="fa-solid fa-circle"></i>
             <span class="fa-layers-text fa-inverse" data-fa-transform="shrink-10 down-3" style="font-weight: 800">
               27
@@ -60,23 +61,23 @@
             <i class="fa-solid fa-square fa-stack-2x"></i>
             <i class="fab fa-1 fa-stack-1x fa-inverse"></i>
           </span> -->
-          <!-- Version 5.3 released -->
-        </a>
-      </li>
+            <!-- Version 5.3 released -->
+          </a>
+        </li>
 
-      <!-- <li class="nav-item ms-4">
+        <!-- <li class="nav-item ms-4">
         <a class="nav-link" [routerLink]="" (click)="openNotifications()">
           <i class="text-info fas fa-fw fa-exclamation-circle"></i>
           Version 5.3 released
         </a>
       </li>
  -->
-      <!-- <li class="nav-item ms-4">
+        <!-- <li class="nav-item ms-4">
         <a class="nav-link" [routerLink]="" (click)="note()"><i
             class="text-warning fas fa-fw fa-exclamation-circle"></i> NOTE: Phenodata issue partly solved</a>
       </li> -->
 
-      <!--
+        <!--
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <li class="nav-item">
         <a class="nav-link disabled">
@@ -84,35 +85,35 @@
           Service in limited use!
         </a>
       </li>
-      -->
-    </ul>
+      --></ul>
 
-    <ul class="navbar-nav">
-      <li *ngIf="isLoggedIn()" class="nav-item" ngbDropdown>
-        <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
-          <i class="fas fa-user" aria-hidden="true"></i>
-          {{ getAccountName() }}
-        </a>
-        <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu dropdown-menu-end">
-          <a ngbDropdownItem (click)="openAccount()">
-            <i class="fas fa-user fa-fw lighter"></i>
-            Account
+      <ul class="navbar-nav">
+        <li *ngIf="isLoggedIn()" class="nav-item" ngbDropdown>
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
+            <i class="fas fa-user" aria-hidden="true"></i>
+            {{ getAccountName() }}
           </a>
-          <a ngbDropdownItem (click)="openSettings()">
-            <i class="fas fa-cog fa-fw lighter"></i>
-            Settings
-          </a>
-          <div class="dropdown-divider"></div>
-          <a ngbDropdownItem [routerLink]="routerLinkHome" (click)="logout()">
-            <i class="fas fa-sign-out-alt fa-fw lighter"></i>
-            Logout
-          </a>
-        </div>
-      </li>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu dropdown-menu-end">
+            <a ngbDropdownItem (click)="openAccount()">
+              <i class="fas fa-user fa-fw lighter"></i>
+              Account
+            </a>
+            <a ngbDropdownItem (click)="openSettings()">
+              <i class="fas fa-cog fa-fw lighter"></i>
+              Settings
+            </a>
+            <div class="dropdown-divider"></div>
+            <a ngbDropdownItem [routerLink]="routerLinkHome" (click)="logout()">
+              <i class="fas fa-sign-out-alt fa-fw lighter"></i>
+              Logout
+            </a>
+          </div>
+        </li>
 
-      <li class="nav-item">
-        <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Log In</a>
-      </li>
-    </ul>
+        <li class="nav-item">
+          <a *ngIf="!isLoggedIn()" [routerLink]="routerLinkLogin" class="nav-link" routerLinkActive="active">Log In</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
