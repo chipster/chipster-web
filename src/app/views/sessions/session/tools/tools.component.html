@@ -2,18 +2,6 @@
 <div class="chipster-highlight mb-3">
   <div class="container-fluid">
     <div class="row mb-2">
-      <!-- jobs dropdown panel -->
-      <!--
-        located here because needs full width parent to get size and position right, also here at the same
-      -->
-      <!-- height as the controlling button -->
-      <div ngbDropdown #jobsDropdown="ngbDropdown" class="d-inline-block dropdown-div">
-        <button class="btn btn-sm hidden-dropdown-button" id="jobsDropdown" ngbDropdownToggle></button>
-        <div ngbDropdownMenu aria-labelledby="jobsDropdown" class="tools-panel-dropdown">
-          <ch-job-list [jobs]="getJobList()" (jobSelected)="onJobSelection($event)"></ch-job-list>
-        </div>
-      </div>
-
       <!-- module buttons -->
       <div class="col col-left">
         <div class="btn-group" id="moduleBtnGroup">
