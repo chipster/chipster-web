@@ -1,20 +1,15 @@
+<h3 class="h3-xs mt-4">Job Details</h3>
+<div *ngIf="!job" class="fst-italic text-smaller">Select job to see details</div>
+
 <div *ngIf="job">
-  <div class="row">
-    <div class="col-md-11">
-      <h3 class="panel-title">Job</h3>
-    </div>
+  <div class="border p-3" style="background-color: white">
+    <table class="table table-sm text-sm align-top">
+      <tbody>
+        <tr>
+          <td class="lighter">Tool:</td>
+          <td class="wide-max" width="100%">{{ job.toolCategory + " / " + job.toolName }}</td>
+        </tr>
 
-    <div class="col-md-1">
-      <button class="btn btn-sm btn-link float-end" (click)="close()">Close</button>
-    </div>
-  </div>
-  <div class="chipster-highlight">
-    <h6>
-      {{ job.toolCategory + " / " + job.toolName }}
-    </h6>
-
-    <div class="border p-3" style="background-color: white">
-      <table class="table table-sm text-sm">
         <tr>
           <td class="lighter">Status:</td>
           <td class="wide-max">{{ state }}</td>
@@ -56,44 +51,37 @@
           </td>
         </tr>
 
-        <tr *ngIf="parameterListForView.length > 0">
-          <td><b>Parameters</b></td>
-        </tr>
-
-        <tr *ngFor="let param of parameterListForView">
-          <td class="lighter" style="white-space: nowrap">
-            <div *ngIf="param.displayName; then paramName; else ParamID"></div>
-            <ng-template #paramName>
-              <span>{{ param.displayName }}</span>
-            </ng-template>
-            <ng-template #ParamID>
-              <span>{{ param.parameterId }}</span>
-            </ng-template>
-          </td>
-          <td
-            class="wide-max"
-            width="100%"
-            [ngStyle]="{ 'font-weight': isDefaultValueMap.get(param) ? 'normal' : 'bold' }">
-            {{ param.value }}
+        <tr>
+          <td class="lighter">Parameters:</td>
+          <td class="ps-0">
+            <ch-dataset-parameter-list
+              [parameters]="parameterListForView"
+              [parametersLimit]="-1"
+              [tool]="tool"></ch-dataset-parameter-list>
           </td>
         </tr>
-        <tr *ngIf="job.inputs.length > 0">
-          <td><b>Inputs</b></td>
-        </tr>
-        <tr *ngFor="let input of job.inputs">
-          <td class="lighter" style="white-space: nowrap">{{ input.inputId }}</td>
-          <td class="wide-max" width="100%">{{ input.displayName }}</td>
-        </tr>
-      </table>
-    </div>
 
-    <div class="card" style="width: 100%; margin-top: 30px">
-      <div class="card-body">
-        <h6>Screen Output</h6>
-        <p class="card-text text-sm"></p>
-        <pre style="margin-bottom: 0em">{{ screenOutput }}</pre>
-        <i *ngIf="isRunning" class="fas fa-circle-notch fa-spin fa-fw"></i>
-      </div>
-    </div>
+        <tr>
+          <td class="lighter">Inputs:</td>
+          <td class="ps-0 pt-0">
+            <table class="table table-sm">
+              <tbody>
+                <tr *ngFor="let input of job.inputs">
+                  <td class="lighter" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
+                  <td>{{ input.displayName }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="h3-xs mt-4">Screen Output</h3>
+
+  <div class="text-sm bg-white border container">
+    <pre style="margin-bottom: 0em">{{ screenOutput }}</pre>
+    <i *ngIf="isRunning" class="fas fa-circle-notch fa-spin fa-fw"></i>
   </div>
 </div>

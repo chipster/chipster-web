@@ -2,7 +2,9 @@
   <tbody>
     <tr *ngFor="let param of parameterListForView; let i = index">
       <ng-template [ngIf]="i < limit">
-        <td [ngClass]="{ 'no-top-border': i === 0, lighter: !historyMode, 'no-horizontal-padding': historyMode }">
+        <td
+          style="width: 60%"
+          [ngClass]="{ 'no-top-border': i === 0, lighter: !historyMode, 'no-horizontal-padding': historyMode }">
           {{ param.displayName }}
         </td>
         <td

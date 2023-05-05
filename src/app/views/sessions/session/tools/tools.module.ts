@@ -37,6 +37,6 @@ import { ToolsComponent } from "./tools.component";
     RunOptionsComponent,
   ],
   providers: [ToolService],
-  exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent],
+  exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent, JobListComponent],
 })
 export class ToolsModule {}

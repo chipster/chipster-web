@@ -150,7 +150,7 @@ export class JobComponent implements OnInit, OnDestroy {
               }
             } else {
               log.warn(
-                `job parameter value${jobParameter.value}not found from the current tool ` +
+                `job parameter value${jobParameter.value} not found from the current tool ` +
                   `paramater options, showing the id`
               );
             }

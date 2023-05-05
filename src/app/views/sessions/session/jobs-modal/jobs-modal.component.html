@@ -1,0 +1,17 @@
+<div class="modal-header">
+  <h4 class="modal-title">Jobs</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
+</div>
+
+<div class="modal-body" style="background-color: #f7f7f9">
+  <div style="height: 16rem; max-height: 16rem; overflow-y: auto" class="mb-4">
+    <ch-job-list [jobs]="jobs" (jobSelected)="onJobSelection($event)"></ch-job-list>
+  </div>
+
+  <hr class="" />
+
+  <ch-job *ngIf="jobs.length > 0" [sessionData]="sessionData" [tools]="tools"></ch-job>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-sm btn-secondary float-start" (click)="activeModal.close()">Close</button>
+</div>

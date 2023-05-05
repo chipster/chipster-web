@@ -22,6 +22,9 @@ $info: shade-color(#148ea1, 10%);
 // $light: magenta;
 // $dark: magenta;
 
+$table-active-color: white;
+$table-active-bg: $primary;
+
 // Import all the bootstrap (functions will be imported again)
 @import "../node_modules/bootstrap/scss/bootstrap";
 

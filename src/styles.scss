@@ -194,6 +194,12 @@ button.btn-no-border {
   border-width: 0px 0px 0px 0px;
 }
 
+// bootstrap hover stripes and active doesn't work perfecty
+// thus some manual styling needed for the jobs table
+tr.hoverable-row:hover {
+  background-color: $light;
+}
+
 .nav-tabs {
   border-bottom: 0;
 }
