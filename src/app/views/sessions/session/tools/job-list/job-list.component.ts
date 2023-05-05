@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
-import { NgbDropdown } from "@ng-bootstrap/ng-bootstrap";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -20,11 +19,7 @@ export class JobListComponent implements OnChanges {
 
   @Output() private jobSelected = new EventEmitter<Job>();
 
-  constructor(
-    private dropDown: NgbDropdown,
-    private selectionService: SelectionService,
-    private sessionDataService: SessionDataService
-  ) {}
+  constructor(private selectionService: SelectionService, private sessionDataService: SessionDataService) {}
 
   ngOnChanges() {
     this.jobsSorted = this.jobs.sort((a, b) => {
@@ -49,11 +44,6 @@ export class JobListComponent implements OnChanges {
 
   selectJob(job: Job) {
     this.jobSelected.emit(job);
-    this.dropDown.close();
-  }
-
-  closeDropDown() {
-    this.dropDown.close();
   }
 
   createDurationObservable(job: Job): Observable<string> {

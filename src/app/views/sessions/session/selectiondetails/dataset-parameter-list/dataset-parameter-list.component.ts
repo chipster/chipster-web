@@ -17,8 +17,8 @@ export class DatasetParameterListComponent implements OnChanges {
 
   noLimit = false;
   showAll = false;
-  limit: number;
   defaultLimit = 3;
+  limit: number = this.defaultLimit;
   buttonText: string;
 
   currentTool: Tool = null;
@@ -48,26 +48,24 @@ export class DatasetParameterListComponent implements OnChanges {
     }
 
     // number of params may change if all parameters are shown when a new dataset is selected
-    this.udpateLimits();
+    this.updateLimits();
   }
 
-  udpateLimits() {
-    if (this.parametersLimit < 0) {
-      this.noLimit = true;
-    }
+  updateLimits() {
+    this.limit = this.parametersLimit == null ? this.defaultLimit : this.parametersLimit;
+    this.noLimit = this.parametersLimit < 0;
 
     if (this.noLimit || this.showAll) {
       this.limit = this.parameterListForView.length;
       this.buttonText = "Show less";
     } else {
-      this.limit = this.parametersLimit;
       this.buttonText = "Show all";
     }
   }
 
   toggleParameterList() {
     this.showAll = !this.showAll;
-    this.udpateLimits();
+    this.updateLimits();
   }
 
   showWithTool(parameters: JobParameter[], tool: Tool) {

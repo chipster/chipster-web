@@ -26,6 +26,7 @@ import {
   SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
+import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
@@ -125,6 +126,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private toastrService: ToastrService,
     private errorService: ErrorService,
     private datasetModalService: DatasetModalService,
+    private dialogModalService: DialogModalService,
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig,
     private ngbModal: NgbModal
@@ -257,6 +259,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  // FIXME remove after jobs in modal
   onJobSelection(job: Job) {
     this.selectionHandlerService.setJobSelection([job]);
   }
@@ -305,6 +308,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
         item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
         item.toolId.toLowerCase().indexOf(termToken) !== -1
     );
+  }
+
+  public openJobs() {
+    this.dialogModalService.openJobsModal(this.getJobList(), this.toolsArray, this.sessionData);
   }
 
   public searchBoxSelect(item) {

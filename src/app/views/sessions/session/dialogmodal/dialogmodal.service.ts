@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { SessionEvent } from "chipster-js-common";
+import { Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, from as observableFrom, Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
+import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
+import { JobsModalComponent } from "../jobs-modal/jobs-modal.component";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
@@ -119,6 +121,17 @@ export class DialogModalService {
     });
     modalRef.componentInstance.session = session;
     modalRef.componentInstance.ruleStream$ = ruleStream$;
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+  }
+
+  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData) {
+    const modalRef = this.modalService.open(JobsModalComponent, {
+      size: "xl",
+    });
+    modalRef.componentInstance.jobs = jobs;
+    modalRef.componentInstance.tools = tools;
+    modalRef.componentInstance.sessionData = sessionData;
+
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

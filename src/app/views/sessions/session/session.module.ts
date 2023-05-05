@@ -17,6 +17,7 @@ import { DialogModalModule } from "./dialogmodal/dialogmodal.module";
 import { GetSessionDataService } from "./get-session-data.service";
 import { JobErrorModalComponent } from "./job-error-modal/job-error-modal.component";
 import { JobService } from "./job.service";
+import { JobsModalComponent } from "./jobs-modal/jobs-modal.component";
 import { ModifiedSessionGuard } from "./modified-session.guard";
 import { QuerySessionDataService } from "./query-session-data.service";
 import { SamplesModalComponent } from "./samples-modal/samples-modal.component";
@@ -63,6 +64,7 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     WrangleModalComponent,
     MultiDropdownComponent,
     SamplesModalComponent,
+    JobsModalComponent,
   ],
   providers: [
     SessionEventService,
