@@ -259,11 +259,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  // FIXME remove after jobs in modal
-  onJobSelection(job: Job) {
-    this.selectionHandlerService.setJobSelection([job]);
-  }
-
   openManualModal() {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg",
