@@ -2,8 +2,8 @@
 <div *ngIf="!job" class="fst-italic text-smaller">Select job to see details</div>
 
 <div *ngIf="job">
-  <div class="border p-3" style="background-color: white">
-    <table class="table table-sm text-sm align-top">
+  <div class="border p-3 pb-0" style="background-color: white">
+    <table class="table table-sm text-sm align-top mb-0">
       <tbody>
         <tr>
           <td class="lighter">Tool:</td>
@@ -63,7 +63,7 @@
 
         <tr>
           <td class="lighter">Inputs:</td>
-          <td class="ps-0 pt-0">
+          <td class="p-0">
             <table class="table table-sm">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
