@@ -54,14 +54,16 @@ Added:
     </div>
 
     <div class="row">
-      <div class="mt-2">
-        <button
-          *ngFor="let b of options['buttons']"
-          class="btn btn-sm btn-toast ml-3 px-3 {{ b.class || 'btn-secondary' }}"
-          (click)="action(b.text, $event)">
-          <i *ngIf="b.icon" [class]="b.icon"></i>
-          {{ b.text }}
-        </button>
+      <div class="mt-2 ps-0 pe-0">
+        <span class="float-end">
+          <button
+            *ngFor="let b of options['buttons']"
+            class="btn btn-sm ms-2 mt-2 {{ b.class || 'btn-secondary' }}"
+            (click)="action(b.text, $event)">
+            <i *ngIf="b.icon" [class]="b.icon"></i>
+            {{ b.text }}
+          </button>
+        </span>
       </div>
     </div>
   `,
