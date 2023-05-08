@@ -54,8 +54,9 @@ Added:
     </div>
 
     <div class="row">
-      <div *ngFor="let b of options['buttons']">
+      <div class="mt-2">
         <button
+          *ngFor="let b of options['buttons']"
           class="btn btn-sm btn-toast ml-3 px-3 {{ b.class || 'btn-secondary' }}"
           (click)="action(b.text, $event)">
           <i *ngIf="b.icon" [class]="b.icon"></i>
