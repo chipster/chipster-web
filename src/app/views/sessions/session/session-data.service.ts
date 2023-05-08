@@ -23,7 +23,7 @@ import {
   Observable,
   of,
 } from "rxjs";
-import { catchError, concatMap, filter, map, merge, mergeMap, takeUntil } from "rxjs/operators";
+import { catchError, concatMap, filter, map, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -412,7 +412,6 @@ export class SessionDataService {
       msg = "Deleting " + deletedDatasets.length + " files";
     }
 
-    const BTN_DELETE = "Delete";
     const BTN_UNDO = "Undo";
 
     const options = {
@@ -422,11 +421,6 @@ export class SessionDataService {
       timeOut: 5000,
       extendedTimeOut: 5000,
       buttons: [
-        {
-          text: BTN_DELETE,
-          icon: "fas fa-times",
-          class: "btn-secondary",
-        },
         {
           text: BTN_UNDO,
           icon: "fas fa-undo",
@@ -447,8 +441,7 @@ export class SessionDataService {
 
     toast.onHidden
       .pipe(
-        takeUntil(toast.onAction), // only if there was no action
-        merge(toast.onAction.pipe(filter((text) => text === BTN_DELETE)))
+        takeUntil(toast.onAction) // only if there was no action
       )
       .subscribe(
         () => {
