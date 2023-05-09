@@ -12,9 +12,11 @@
 
         <tr>
           <td class="lighter">Status:</td>
-          <td class="wide-max">{{ state }}</td>
-          <span *ngIf="isRunning && job.stateDetail">({{ job.stateDetail }})</span>
-          <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+          <td class="wide-max">
+            {{ state }}
+            <span *ngIf="isRunning && job.stateDetail">- {{ job.stateDetail }}</span>
+            <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+          </td>
         </tr>
         <tr>
           <td class="lighter">Created:</td>

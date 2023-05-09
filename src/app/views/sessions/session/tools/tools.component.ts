@@ -11,7 +11,6 @@ import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
-import UtilsService from "../../../../shared/utilities/utils";
 import {
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
@@ -31,6 +30,7 @@ import { JobService } from "../job.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
+import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
@@ -120,6 +120,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private jobService: JobService,
     private selectionHandlerService: SelectionHandlerService,
     private sessionEventService: SessionEventService,
+    private sessionDataService: SessionDataService,
     public toolService: ToolService,
     private modalService: NgbModal,
     private hotkeysService: HotkeysService,
@@ -245,12 +246,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }).toastId;
   }
 
-  getJobList(): Job[] {
-    return UtilsService.mapValues(this.sessionData.jobsMap);
-  }
-
   updateJobs() {
-    this.jobList = this.getJobList();
+    this.jobList = this.sessionDataService.getJobList(this.sessionData);
     this.runningJobs = this.jobList.reduce((runningCount, job) => {
       if (JobService.isRunning(job)) {
         return runningCount + 1;
@@ -306,7 +303,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public openJobs() {
-    this.dialogModalService.openJobsModal(this.getJobList(), this.toolsArray, this.sessionData);
+    this.dialogModalService.openJobsModal(
+      this.sessionDataService.getJobList(this.sessionData),
+      this.toolsArray,
+      this.sessionData
+    );
   }
 
   public searchBoxSelect(item) {
