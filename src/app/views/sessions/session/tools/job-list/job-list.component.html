@@ -3,9 +3,9 @@
     <tr>
       <th>Tool</th>
       <th>Start Time</th>
-      <th>Status</th>
       <th>Duration</th>
-      <th></th>
+      <th>Status</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -18,15 +18,17 @@
       <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
         {{ job.created | localDate }}
       </td>
-      <td>{{ job.state }}</td>
 
       <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
         {{ getDurationObservable(job) | async }}
       </td>
 
-      <td valign="top" style="padding-left: 10px" *ngIf="isRunning(job); else blankTemplate">
+      <td>
+        {{ job.state }}
+      </td>
+      <td valign="top" *ngIf="isRunning(job); else blankTemplate">
         <ch-link-button class="cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
-          cancel
+          Cancel
         </ch-link-button>
       </td>
     </tr>

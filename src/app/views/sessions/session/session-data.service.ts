@@ -484,6 +484,10 @@ export class SessionDataService {
     return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
   }
 
+  getJobList(sessionData: SessionData): Job[] {
+    return UtilsService.mapValues(sessionData.jobsMap);
+  }
+
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {
     // sort by created date, oldest first (string comparison should do with the current date format)
     return this.getDatasetList(sessionData).sort((a, b) => UtilsService.compareStringNullSafe(a.created, b.created));
