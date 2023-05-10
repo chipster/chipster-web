@@ -19,6 +19,5 @@
 <ch-file
   *ngIf="showFile || settingsService.splitSelectionPanel$.getValue()"
   [dataset]="selectionService.selectedDatasets[0]"
-  [jobs]="sessionData.jobsMap"
   [sessionData]="sessionData"
   [tools]="tools"></ch-file>
