@@ -9,7 +9,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import { Dataset, Job, Tool } from "chipster-js-common";
+import { Dataset, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
@@ -31,8 +31,6 @@ import { DatasetModalService } from "../datasetmodal.service";
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
   @Input()
   dataset: Dataset;
-  @Input()
-  private jobs: Map<string, Job>;
   @Input()
   sessionData: SessionData;
   @Input()

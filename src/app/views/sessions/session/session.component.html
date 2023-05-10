@@ -41,15 +41,14 @@
             <!-- TODO refactor logic choosing whether to show job or file or session info -->
 
             <ch-session-details
-              *ngIf="selectionService.selectedDatasets.length < 1 && !(selectionService.selectedJobs.length > 0)"
+              *ngIf="selectionService.selectedDatasets.length < 1"
               [session]="sessionData.session"
               [sessionData]="sessionData"
               (deleteSession)="onDeleteSession()"></ch-session-details>
 
             <ch-file
-              *ngIf="selectionService.selectedDatasets.length > 0 && !(selectionService.selectedJobs.length > 0)"
+              *ngIf="selectionService.selectedDatasets.length > 0"
               [dataset]="selectionService.selectedDatasets[0]"
-              [jobs]="sessionData.jobsMap"
               [sessionData]="sessionData"
               [tools]="tools"
               (doScrollFix)="doScrollFix()"></ch-file>
