@@ -36,8 +36,8 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
   public historyOptions: Array<HistoryOption> = [
     { id: "sourceJobName", name: "Tool", enabled: true },
-    { id: "inputFileNames", name: "Input files", enabled: true },
     { id: "parameters", name: "Parameters", enabled: true },
+    { id: "inputFileNames", name: "Input files", enabled: true },
     { id: "resultFileName", name: "Result file", enabled: true },
     { id: "date", name: "Date", enabled: true },
     { id: "stepTitle", name: "Step title", enabled: true },
@@ -112,7 +112,12 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
       // input files
       const inputFilesString =
         (this.historyOptionsMap.get("inputFileNames").enabled
-          ? this.historyOptionsMap.get("inputFileNames").name + ": " + step.inputFileNamesString
+          ? this.historyOptionsMap.get("inputFileNames").name +
+            ":\n" +
+            step.sourceJob.inputs.reduce(
+              (inputs: string, input: JobInput) => inputs + "\t" + input.inputId + ": " + input.displayName + "\n",
+              ""
+            )
           : "") + "\n";
 
       // parameters

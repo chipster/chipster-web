@@ -45,57 +45,69 @@
     </div>
   </h2>
 
-  <table class="table table-sm text-sm table-condensed">
-    <div class="step" *ngFor="let step of datasetHistorySteps; let i = index">
-      <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
-        <td class="" colspan="2">
-          <h4 class="h4-xs step-header">Step {{ i + 1 }}</h4>
-        </td>
-      </tr>
+  <div class="step" *ngFor="let step of datasetHistorySteps; let i = index">
+    <table class="table table-sm text-sm align-top mb-0">
+      <tbody>
+        <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
+          <td class="" colspan="2">
+            <h4 class="h4-xs step-header">Step {{ i + 1 }}</h4>
+          </td>
+          <td></td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
-        <td class="lighter no-break">{{ historyOptionsMap.get("sourceJobName").name }}:</td>
-        <td class="width-max">{{ step.sourceJobName }}</td>
-      </tr>
+        <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
+          <td class="lighter no-break">{{ historyOptionsMap.get("sourceJobName").name }}:</td>
+          <td class="w-100">{{ step.sourceJobName }}</td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
-        <td class="lighter no-break">{{ historyOptionsMap.get("inputFileNames").name }}:</td>
-        <td class="width-max">{{ step.inputFileNamesString }}</td>
-      </tr>
+        <tr *ngIf="historyOptionsMap.get('parameters').enabled">
+          <td class="lighter no-break">{{ historyOptionsMap.get("parameters").name }}:</td>
+          <td class="w-100">
+            <ch-dataset-parameter-list
+              *ngIf="step.sourceJob && step.sourceJob.parameters.length > 0"
+              [parameters]="step.sourceJob.parameters"
+              [parametersLimit]="-1"
+              [tool]="step.tool"
+              [historyMode]="true"></ch-dataset-parameter-list>
+          </td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('parameters').enabled">
-        <td class="lighter no-break">{{ historyOptionsMap.get("parameters").name }}:</td>
-        <td class="width-max" id="parameters-container">
-          <ch-dataset-parameter-list
-            *ngIf="step.sourceJob && step.sourceJob.parameters.length > 0"
-            [parameters]="step.sourceJob.parameters"
-            [parametersLimit]="-1"
-            [tool]="step.tool"
-            [historyMode]="true"></ch-dataset-parameter-list>
-        </td>
-      </tr>
+        <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
+          <td class="lighter no-break">{{ historyOptionsMap.get("inputFileNames").name }}:</td>
+          <td class="ps-0">
+            <table class="table table-sm">
+              <tbody>
+                <tr *ngFor="let input of step.sourceJob.inputs">
+                  <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
+                  <td>{{ input.displayName }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('date').enabled">
-        <td class="lighter no-break">{{ historyOptionsMap.get("date").name }}:</td>
-        <td class="width-max">{{ step.date | localDate }}</td>
-      </tr>
+        <tr *ngIf="historyOptionsMap.get('date').enabled">
+          <td class="lighter no-break">{{ historyOptionsMap.get("date").name }}:</td>
+          <td class="w-100">{{ step.date | localDate }}</td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('resultFileName').enabled">
-        <td class="lighter">{{ historyOptionsMap.get("resultFileName").name }}:</td>
-        <td class="width-max">{{ step.datasetName }}</td>
-      </tr>
+        <tr *ngIf="historyOptionsMap.get('resultFileName').enabled">
+          <td class="lighter no-break">{{ historyOptionsMap.get("resultFileName").name }}:</td>
+          <td class="w-100">{{ step.datasetName }}</td>
+        </tr>
 
-      <tr *ngIf="historyOptionsMap.get('sourceCode').enabled">
-        <td class="lighter no-break">Source code:</td>
-        <td class="width-max">
-          <pre
-            *ngIf="step.sourceCode != null && step.sourceCode.length > 0"
-            style="overflow: auto; width: 600px"><code>{{step.sourceCode}}</code></pre>
-          <div *ngIf="step.sourceCode == null || step.sourceCode.length < 1">not available</div>
-        </td>
-      </tr>
-    </div>
-  </table>
+        <tr *ngIf="historyOptionsMap.get('sourceCode').enabled">
+          <td class="lighter no-break">Source code:</td>
+          <td class="w-100">
+            <pre
+              *ngIf="step.sourceCode != null && step.sourceCode.length > 0"
+              style="overflow: auto; width: 600px"><code>{{step.sourceCode}}</code></pre>
+            <div *ngIf="step.sourceCode == null || step.sourceCode.length < 1">not available</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="modal-footer">
