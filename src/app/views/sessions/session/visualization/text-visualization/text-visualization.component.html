@@ -5,12 +5,14 @@
         First {{ getSizeShown() | bytes }}.
         <span style="font-style: italic">
           View in
-          <span class="btn-link" (click)="showAll()">full screen</span>
+          <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
           to see the whole {{ getSizeFull() | bytes }} file.
         </span>
       </label>
       <label style="font-size: smaller" *ngIf="isCompleteFile()">File size {{ getSizeFull() | bytes }}.</label>
-      <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end">Full Screen</ch-link-button>
+      <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end no-underline-link-button">
+        Full Screen
+      </ch-link-button>
     </div>
   </div>
 

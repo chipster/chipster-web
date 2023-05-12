@@ -27,10 +27,12 @@
   <!-- full screen text and link for preview-->
   <span *ngIf="!modalMode && (!gotFullFile || limitRows)" style="font-size: smaller">
     View in
-    <span class="btn-link" (click)="showAll()">full screen</span>
+    <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
     {{ goToFullScreenText }}.
   </span>
-  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end">Full Screen</ch-link-button>
+  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="no-underline-link-button float-end">
+    Full Screen
+  </ch-link-button>
 </div>
 
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
