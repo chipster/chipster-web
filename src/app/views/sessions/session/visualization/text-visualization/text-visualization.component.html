@@ -11,6 +11,7 @@
       </label>
       <label style="font-size: smaller" *ngIf="isCompleteFile()">File size {{ getSizeFull() | bytes }}.</label>
       <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end no-underline-link-button">
+        <i class="fa-solid fa-expand"></i>
         Full Screen
       </ch-link-button>
     </div>
