@@ -30,7 +30,9 @@
     <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
     {{ goToFullScreenText }}.
   </span>
+
   <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="no-underline-link-button float-end">
+    <i class="fa-solid fa-expand"></i>
     Full Screen
   </ch-link-button>
 </div>
