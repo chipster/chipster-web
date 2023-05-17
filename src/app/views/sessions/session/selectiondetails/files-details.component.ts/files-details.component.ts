@@ -9,4 +9,6 @@ import { Dataset } from "chipster-js-common";
 export class FilesDetailsComponent {
   @Input()
   datasets: Dataset[];
+  @Input()
+  showDate: boolean = true;
 }

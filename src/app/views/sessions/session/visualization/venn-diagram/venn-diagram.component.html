@@ -1,12 +1,17 @@
 <div *ngIf="bigFiles && !isEnabled">
-  <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
+  <div class="align-middle">
+    <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
+    <span class="ps-3">Venn diagram is shown automatically only for small files.</span>
+  </div>
+  <hr />
+  <ch-files-details [datasets]="selectedDatasets" [showDate]="false"></ch-files-details>
 </div>
 <div class="row">
   <div class="col-md-8">
     <div class="w-100" id="visualization"></div>
   </div>
 
-  <div class="col-md-4">
+  <div class="col-md-4" *ngIf="isEnabled">
     <div class="">Common denominator</div>
 
     <select name="keyColumn" [(ngModel)]="columnKey" (ngModelChange)="resetSelection()">

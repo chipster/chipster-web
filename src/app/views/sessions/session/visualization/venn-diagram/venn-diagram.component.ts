@@ -55,6 +55,9 @@ export class VennDiagramComponent implements OnChanges {
   ngOnChanges() {
     this.isEnabled = false;
 
+    // remove the previous graph, e.g. if a third file was just added
+    d3.select("#visualization").select("svg").remove();
+
     // only 2 or 3 inputs ok
     const validInputCount =
       this.selectedDatasets != null && this.selectedDatasets.length >= 2 && this.selectedDatasets.length <= 3;
@@ -142,9 +145,6 @@ export class VennDiagramComponent implements OnChanges {
     this.vennCircles = this.createVennCircles(files, visualizationArea.center, circleRadius);
     // color category
     const colors = d3.scaleOrdinal(d3.schemeCategory10);
-
-    // remove the previous graph, e.g. if a third file was just added
-    d3.select("#visualization").select("svg").remove();
 
     // svg-element
     const svg = d3
