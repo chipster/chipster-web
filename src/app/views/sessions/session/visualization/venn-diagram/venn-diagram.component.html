@@ -1,40 +1,38 @@
-<section id="venndiagram">
-  <div *ngIf="!isEnabled">
-    <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
+<div *ngIf="bigFiles && !isEnabled">
+  <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
+</div>
+<div class="row">
+  <div class="col-md-8">
+    <div class="w-100" id="visualization"></div>
   </div>
-  <div class="row" *ngIf="isEnabled">
-    <div class="col-md-8">
-      <div id="visualization"></div>
-    </div>
 
-    <div class="col-md-4">
-      <div class="">Common denominator</div>
+  <div class="col-md-4">
+    <div class="">Common denominator</div>
 
-      <select name="keyColumn" [(ngModel)]="columnKey" (ngModelChange)="resetSelection()">
-        <option value="identifier" [disabled]="!identifierComparingEnabled">identifier</option>
-        <option value="symbol" [disabled]="!symbolComparingEnabled">symbol</option>
-      </select>
+    <select name="keyColumn" [(ngModel)]="columnKey" (ngModelChange)="resetSelection()">
+      <option value="identifier" [disabled]="!identifierComparingEnabled">identifier</option>
+      <option value="symbol" [disabled]="!symbolComparingEnabled">symbol</option>
+    </select>
 
-      <div *ngIf="diagramSelection.values.length > 0" style="margin: 2px">
-        <div class="mt-2">
-          Selected: {{ diagramSelection.values.length }}
-          <button class="btn btn-sm btn-success float-end" (click)="createNewDataset()">Create file</button>
-        </div>
-        <table class="table table-sm text-sm">
-          <thead>
-            <tr class="fw-bold">
-              <td class="border-top-0">Symbol</td>
-              <td class="border-top-0">Identifier</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of diagramSelection.values">
-              <td>{{ item[0] }}</td>
-              <td>{{ item[1] }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <div *ngIf="diagramSelection.values.length > 0" style="margin: 2px">
+      <div class="mt-2">
+        Selected: {{ diagramSelection.values.length }}
+        <button class="btn btn-sm btn-success float-end" (click)="createNewDataset()">Create file</button>
       </div>
+      <table class="table table-sm text-sm">
+        <thead>
+          <tr class="fw-bold">
+            <td class="border-top-0">Symbol</td>
+            <td class="border-top-0">Identifier</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of diagramSelection.values">
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-</section>
+</div>

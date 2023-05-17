@@ -1,5 +1,4 @@
-import { Component, Input, OnChanges } from "@angular/core";
-import { Logger } from "ag-grid-community";
+import { Component, ElementRef, Input, OnChanges, ViewChild } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import * as _ from "lodash";
@@ -36,6 +35,13 @@ export class VennDiagramComponent implements OnChanges {
   identifierComparingEnabled: boolean;
 
   isEnabled = false;
+  bigFiles = false;
+  private widthInterval;
+  private visualizationWidth: number;
+
+  @ViewChild("vizu") el: ElementRef;
+
+  private readonly autoDrawLimit = 1 * 1024 * 1024;
 
   constructor(
     private tsvService: TsvService,
@@ -47,21 +53,46 @@ export class VennDiagramComponent implements OnChanges {
   ) {}
 
   ngOnChanges() {
-    // FIXME only proceed if selectedDatasets.size 2 or 3
-    // otherwise unsubscribe and disable everything
-    if (
-      this.selectedDatasets != null &&
-      this.selectedDatasets.length >= 2 &&
-      this.selectedDatasets.length <= 3 &&
-      this.isEnabled
-    ) {
-      this.init();
-    } else {
+    this.isEnabled = false;
+
+    // only 2 or 3 inputs ok
+    const validInputCount =
+      this.selectedDatasets != null && this.selectedDatasets.length >= 2 && this.selectedDatasets.length <= 3;
+
+    if (!validInputCount) {
       this.isEnabled = false;
+      return;
+    }
+
+    // if big files, draw button instead of diagram
+    this.bigFiles =
+      this.selectedDatasets.reduce((sum: number, dataset: Dataset) => sum + dataset.size, 0) > this.autoDrawLimit;
+
+    if (!this.bigFiles) {
+      this.enable();
     }
   }
 
-  init() {
+  enable() {
+    if (!this.visualizationWidth) {
+      this.widthInterval = setInterval(this.waitForWidthAndEnable.bind(this), 10);
+    } else {
+      this.init();
+      this.isEnabled = true;
+    }
+  }
+
+  private waitForWidthAndEnable() {
+    const visualizationWidth = document.getElementById("visualization").offsetWidth;
+    if (visualizationWidth > 0) {
+      clearInterval(this.widthInterval);
+      this.visualizationWidth = visualizationWidth;
+      this.init();
+      this.isEnabled = true;
+    }
+  }
+
+  private init() {
     const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
     const tsvObservables = datasetIds.map((dataset: Dataset) =>
       this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset)
@@ -97,13 +128,9 @@ export class VennDiagramComponent implements OnChanges {
     );
   }
 
-  enable() {
-    this.isEnabled = true;
-    this.init();
-  }
-
   drawVennDiagram(files: Array<TSVFile>) {
-    const visualizationWidth = document.getElementById("visualization").offsetWidth;
+    // const visualizationWidth = document.getElementById("visualization").offsetWidth;
+    const visualizationWidth = this.visualizationWidth;
     const circleRadius = 125;
     const size = { width: visualizationWidth, height: 500 };
     const visualizationArea = {
@@ -250,24 +277,23 @@ export class VennDiagramComponent implements OnChanges {
 
   createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {
     const circleCenters = this.venndiagramService.getCircleCenterPoints(files.length, visualizationAreaCenter, radius);
-    return files.map(
-      (file: TSVFile, index: number) => {
-        try {      
-          return new VennCircle(
-            file.datasetId,
-            file.filename,
-            file.getColumnDataByHeaderKeys(["symbol", "identifier"]),
-            new Circle(circleCenters[index], radius)
-            );          
-        } catch (err) {
-          if (err instanceof NoColumnError) {
-            // write better message now when we know the filename
-            throw new NoColumnError("The file '" + file.filename + "' has no columns 'identifier' or 'symbol'", err);
-          } else {
-            throw err;
-          }
+    return files.map((file: TSVFile, index: number) => {
+      try {
+        return new VennCircle(
+          file.datasetId,
+          file.filename,
+          file.getColumnDataByHeaderKeys(["symbol", "identifier"]),
+          new Circle(circleCenters[index], radius)
+        );
+      } catch (err) {
+        if (err instanceof NoColumnError) {
+          // write better message now when we know the filename
+          throw new NoColumnError("The file '" + file.filename + "' has no columns 'identifier' or 'symbol'", err);
+        } else {
+          throw err;
         }
-      });
+      }
+    });
   }
 
   enableComparing(key: string): boolean {
