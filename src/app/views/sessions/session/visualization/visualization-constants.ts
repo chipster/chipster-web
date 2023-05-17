@@ -84,14 +84,6 @@ export default class VisualizationConstants {
       supportedInputFileCounts: [1],
     },
     {
-      id: "venn",
-      name: "Venn-Diagram",
-      typeTags: [Tags.TSV],
-      supportAllTypes: false,
-      anyInputCountSupported: false,
-      supportedInputFileCounts: [2, 3],
-    },
-    {
       id: "volcanoplot",
       name: "Volcano Plot",
       typeTags: [Tags.PVALUE_AND_FOLD_CHANGE],
@@ -127,8 +119,15 @@ export default class VisualizationConstants {
       name: "Details",
       typeTags: [],
       supportAllTypes: true,
+      anyInputCountSupported: true,
+    },
+    {
+      id: "venn",
+      name: "Venn-Diagram",
+      typeTags: [Tags.TSV],
+      supportAllTypes: false,
       anyInputCountSupported: false,
-      supportedInputFileCounts: [1],
+      supportedInputFileCounts: [2, 3],
     },
   ];
 }

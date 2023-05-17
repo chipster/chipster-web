@@ -1,6 +1,9 @@
 <ch-single-dataset
-  [dataset]="dataset"
+  *ngIf="datasets.length === 1"
+  [dataset]="datasets[0]"
   [jobs]="sessionData.jobsMap"
   [sessionData]="sessionData"
   [tools]="tools"
   [parametersLimit]="-1"></ch-single-dataset>
+
+<ch-files-details *ngIf="datasets.length > 1" [datasets]="datasets"></ch-files-details>

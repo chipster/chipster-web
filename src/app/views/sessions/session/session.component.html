@@ -46,12 +46,12 @@
               [sessionData]="sessionData"
               (deleteSession)="onDeleteSession()"></ch-session-details>
 
-            <ch-file
+            <ch-selected-files
               *ngIf="selectionService.selectedDatasets.length > 0"
               [dataset]="selectionService.selectedDatasets[0]"
               [sessionData]="sessionData"
               [tools]="tools"
-              (doScrollFix)="doScrollFix()"></ch-file>
+              (doScrollFix)="doScrollFix()"></ch-selected-files>
           </div>
         </div>
       </div>

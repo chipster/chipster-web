@@ -16,8 +16,8 @@
 <ch-job *ngIf="showJob" [sessionData]="sessionData"></ch-job>
 
 <!-- file -->
-<ch-file
+<ch-selected-files
   *ngIf="showFile || settingsService.splitSelectionPanel$.getValue()"
   [dataset]="selectionService.selectedDatasets[0]"
   [sessionData]="sessionData"
-  [tools]="tools"></ch-file>
+  [tools]="tools"></ch-selected-files>

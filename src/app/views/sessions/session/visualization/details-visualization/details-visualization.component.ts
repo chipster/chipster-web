@@ -1,5 +1,5 @@
-import { Dataset, Tool } from "chipster-js-common";
 import { Component, Input } from "@angular/core";
+import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
@@ -8,11 +8,9 @@ import { SessionData } from "../../../../../model/session/session-data";
 })
 export class DetailsVisualizationComponent {
   @Input()
-  dataset: Dataset;
+  datasets: Dataset[];
   @Input()
   sessionData: SessionData;
   @Input()
   tools: Tool[];
-
-  constructor() {}
 }

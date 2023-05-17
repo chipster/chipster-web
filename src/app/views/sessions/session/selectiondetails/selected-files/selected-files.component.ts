@@ -24,9 +24,9 @@ import { SessionEventService } from "../../session-event.service";
 import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
-  selector: "ch-file",
-  templateUrl: "./file.component.html",
-  styleUrls: ["./file.component.less"],
+  selector: "ch-selected-files",
+  templateUrl: "./selected-files.component.html",
+  styleUrls: ["./selected-files.component.less"],
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

@@ -8,8 +8,8 @@ import { VisualizationsModule } from "../visualization/visualizations.module";
 import { DatasetDetailsComponent } from "./dataset-details/dataset-details.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { DatasetModalService } from "./datasetmodal.service";
-import { FileComponent } from "./file/file.component";
 import { JobComponent } from "./job/job.component";
+import { FileComponent } from "./selected-files/selected-files.component";
 
 @NgModule({
   imports: [NgbModule, CommonModule, FormsModule, SharedModule, LinkButtonModule, VisualizationsModule],

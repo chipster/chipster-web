@@ -1,41 +1,10 @@
-<h3 class="panel-title">
-  <!-- single dataset selected -->
-  <div *ngIf="selectionService.selectedDatasets.length === 1">
-    <span>File</span>
-  </div>
-
-  <!-- multiple datasets selected -->
-  <div *ngIf="selectionService.selectedDatasets.length > 1">
-    <span class="">Files ({{ selectionService.selectedDatasets.length }})</span>
-
-    <!-- context dropdown -->
-    <div ngbDropdown class="d-inline-block">
-      <button
-        type="button"
-        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
-        id="filesDropdownMenuButton"
-        ngbDropdownToggle
-        aria-haspopup="true"
-        aria-expanded="false"
-        title="Actions">
-        <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
-        <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
-      </button>
-      <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
-        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
-        <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="deleteDatasets()">
-          Delete {{ selectionService.selectedDatasets.length }} files
-        </button>
-      </div>
-    </div>
-  </div>
-</h3>
+<h3 class="panel-title">Selected Files</h3>
 
 <div class="chipster-highlight">
-  <div style="margin-bottom: 0.5em" *ngIf="selectionService.selectedDatasets.length === 1">
-    <span class="h6">{{ datasetName }}</span>
+  <!-- single file -->
+  <div *ngIf="selectionService.selectedDatasets.length === 1">
+    <!-- file name -->
+    <span *ngIf="selectionService.selectedDatasets.length === 1" class="h6">{{ datasetName }}</span>
 
     <!-- context dropdown -->
     <div ngbDropdown class="d-inline-block">
@@ -63,10 +32,37 @@
     </div>
   </div>
 
-  <ch-dataset-details
-    *ngIf="selectionService.selectedDatasets.length > 1"
-    (delete)="deleteDatasets()"></ch-dataset-details>
+  <!-- multiple files -->
+  <div *ngIf="selectionService.selectedDatasets.length > 1">
+    <!-- file count -->
+    <span *ngIf="selectionService.selectedDatasets.length > 1" class="h6">
+      {{ selectionService.selectedDatasets.length }} files
+    </span>
 
+    <!-- context dropdown -->
+    <div ngbDropdown class="d-inline-block">
+      <button
+        type="button"
+        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
+        id="filesDropdownMenuButton"
+        ngbDropdownToggle
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="Actions">
+        <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
+      </button>
+      <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
+        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
+        <div class="dropdown-divider"></div>
+        <button ngbDropdownItem (click)="deleteDatasets()">
+          Delete {{ selectionService.selectedDatasets.length }} files
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- visualization tabs -->
   <ch-visualizations
     *ngIf="selectionService.selectedDatasets.length > 0"
     (scrollFix)="doScrollFix.emit()"

@@ -8,6 +8,7 @@ import { PlotService } from "../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../shared/visualization/visualizationTSV.service";
 import { LinkButtonModule } from "../link-button/link-button.module";
 import { DatasetParameterListComponent } from "../selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
+import { FilesDetailsComponent } from "../selectiondetails/files-details.component.ts/files-details.component";
 import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
 import { BamViewerComponent } from "./bam-viewer/bam-viewer.component";
 import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
@@ -52,6 +53,7 @@ import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
     BamViewerComponent,
     DetailsVisualizationComponent,
     SingleDatasetComponent,
+    FilesDetailsComponent,
     DatasetParameterListComponent,
   ],
   providers: [
@@ -66,6 +68,6 @@ import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
     VolcanoPlotService,
     VisualizationEventService,
   ],
-  exports: [VisualizationsComponent, SingleDatasetComponent, DatasetParameterListComponent],
+  exports: [VisualizationsComponent, SingleDatasetComponent, FilesDetailsComponent, DatasetParameterListComponent],
 })
 export class VisualizationsModule {}

@@ -64,15 +64,6 @@
       </ng-template>
     </li>
 
-    <li [ngbNavItem]="getTabId('venn')" *ngIf="isTabVisible('venn')">
-      <a ngbNavLink>Venn Diagram</a>
-      <ng-template ngbNavContent>
-        <div class="visualization-panel">
-          <ch-venn-diagram [selectedDatasets]="selectionService.selectedDatasets"></ch-venn-diagram>
-        </div>
-      </ng-template>
-    </li>
-
     <li [ngbNavItem]="getTabId('scatterplot')" *ngIf="isTabVisible('scatterplot')">
       <a ngbNavLink>Scatter Plot</a>
       <ng-template ngbNavContent>
@@ -119,9 +110,18 @@
       <ng-template ngbNavContent>
         <div class="visualization-panel">
           <ch-details-visualization
-            [dataset]="selectionService.selectedDatasets[0]"
+            [datasets]="selectionService.selectedDatasets"
             [sessionData]="sessionData"
             [tools]="tools"></ch-details-visualization>
+        </div>
+      </ng-template>
+    </li>
+
+    <li [ngbNavItem]="getTabId('venn')" *ngIf="isTabVisible('venn')">
+      <a ngbNavLink>Venn Diagram</a>
+      <ng-template ngbNavContent>
+        <div class="visualization-panel">
+          <ch-venn-diagram [selectedDatasets]="selectionService.selectedDatasets"></ch-venn-diagram>
         </div>
       </ng-template>
     </li>
