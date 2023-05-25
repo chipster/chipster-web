@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Injectable } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
-import { forkJoin, Observable, timer } from "rxjs";
+import { Observable, forkJoin, timer } from "rxjs";
 import { map } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -127,7 +127,7 @@ export class UploadService {
       next: (url: string) => {
         const parameters = [];
         parameters.push({
-          parameterId: "paramUrl",
+          parameterId: "url_str",
           displayName: "",
           description: "",
           type: "UNCHECKED_STRING",
@@ -135,7 +135,7 @@ export class UploadService {
         });
 
         parameters.push({
-          parameterId: "paramFileExtension",
+          parameterId: "file_extension",
           displayName: "",
           description: "",
           type: "ENUM",
@@ -143,7 +143,7 @@ export class UploadService {
         });
 
         parameters.push({
-          parameterId: "paramCheckCerts",
+          parameterId: "check_certs_str",
           displayName: "",
           description: "",
           type: "ENUM",
@@ -151,10 +151,10 @@ export class UploadService {
         });
 
         const job: Job = <Job>{
-          toolId: "fi.csc.chipster.tools.common.DownloadFile.java",
+          toolId: "download-file.py",
           toolCategory: "Data retrieval",
           module: "Misc",
-          toolName: "Download file from URL directly to server",
+          toolName: "Download file from URL",
           toolDescription: "",
           state: "NEW",
           inputs: [],
