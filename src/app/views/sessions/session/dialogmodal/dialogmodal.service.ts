@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Job, SessionEvent, Tool } from "chipster-js-common";
+import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, from as observableFrom, Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
 import { JobsModalComponent } from "../jobs-modal/jobs-modal.component";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
+import { DeleteFilesModalComponent } from "./delete-files-modal/delete-files-modal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
 import { NewsModalComponent } from "./news-modal/news-modal.component";
@@ -105,6 +106,13 @@ export class DialogModalService {
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.okButtonText = okButtonText;
     modalRef.componentInstance.cancelButtonText = cancelButtonText;
+
+    return modalRef.result;
+  }
+
+  openDeleteFilesModal(datasets: Dataset[]) {
+    const modalRef = this.modalService.open(DeleteFilesModalComponent, { size: "md" });
+    modalRef.componentInstance.datasets = datasets;
 
     return modalRef.result;
   }

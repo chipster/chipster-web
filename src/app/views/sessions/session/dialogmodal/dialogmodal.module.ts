@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal, NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { SharedModule } from "../../../../shared/shared.module";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
+import { DeleteFilesModalComponent } from "./delete-files-modal/delete-files-modal.component";
 import { DialogModalService } from "./dialogmodal.service";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
@@ -21,6 +22,7 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
   declarations: [
     StringModalComponent,
     BooleanModalComponent,
+    DeleteFilesModalComponent,
     NotesModalComponent,
     SharingModalComponent,
     SpinnerModalComponent,

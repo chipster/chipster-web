@@ -88,7 +88,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   deleteDatasets() {
-    this.sessionDataService.deleteDatasetsLater(this.selectionService.selectedDatasets);
+    this.sessionDataService.openDeleteFilesConfirm(this.selectionService.selectedDatasets);
   }
 
   exportDatasets() {

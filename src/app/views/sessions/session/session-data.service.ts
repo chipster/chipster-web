@@ -14,7 +14,7 @@ import {
 } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
-import { ToastrService } from "ngx-toastr";
+import { ProgressAnimationType, ToastrService } from "ngx-toastr";
 import {
   forkJoin,
   forkJoin as observableForkJoin,
@@ -32,6 +32,7 @@ import { FileResource } from "../../../shared/resources/fileresource";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
 import UtilsService from "../../../shared/utilities/utils";
+import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SessionEventService } from "./session-event.service";
 
@@ -49,6 +50,7 @@ export class SessionDataService {
     private selectionHandlerService: SelectionHandlerService,
     private toastrService: ToastrService,
     private restErrorService: RestErrorService,
+    private dialogModalService: DialogModalService,
     private http: HttpClient
   ) {}
 
@@ -381,6 +383,17 @@ export class SessionDataService {
     });
   }
 
+  openDeleteFilesConfirm(datasets: Dataset[]) {
+    this.dialogModalService.openDeleteFilesModal(datasets).then(
+      () => {
+        this.deleteDatasetsLater(datasets);
+      },
+      () => {
+        // modal dismissed
+      }
+    );
+  }
+
   /**
    * Poor man's undo for the dataset deletion.
    *
@@ -407,19 +420,26 @@ export class SessionDataService {
     let msg;
 
     if (deletedDatasets.length === 1) {
-      msg = "Deleting file " + deletedDatasets[0].name;
+      msg = "Deleted file <b>" + deletedDatasets[0].name + "</b>";
     } else {
-      msg = "Deleting " + deletedDatasets.length + " files";
+      msg = "Deleted " + deletedDatasets.length + " files";
     }
 
     const BTN_UNDO = "Undo";
 
+    const progressAnimation: ProgressAnimationType = "increasing";
+
     const options = {
-      positionClass: "toast-bottom-left",
+      positionClass: "toast-top-right",
       closeButton: true,
       tapToDismiss: false,
-      timeOut: 5000,
-      extendedTimeOut: 5000,
+      timeOut: 8000,
+      easeTime: 300,
+      extendedTimeOut: 8000,
+      progressAnimation,
+      progressBar: true,
+      enableHtml: true,
+
       buttons: [
         {
           text: BTN_UNDO,

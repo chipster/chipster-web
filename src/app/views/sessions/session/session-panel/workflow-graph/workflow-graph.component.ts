@@ -670,7 +670,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
             this.selectChildrenMenuItem,
 
-            { ...this.deleteMenuItem, title: "Delete (" + self.selectedDatasets.length + " files)" },
+            { ...this.deleteMenuItem, title: "Delete " + self.selectedDatasets.length + " files" },
           ]
         : [
             this.renameMenuItem,
@@ -1464,7 +1464,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.deleteMenuItem = {
       title: "Delete",
       action(): void {
-        self.sessionDataService.deleteDatasetsLater(self.selectedDatasets);
+        self.sessionDataService.openDeleteFilesConfirm(self.selectedDatasets);
       },
     };
 
