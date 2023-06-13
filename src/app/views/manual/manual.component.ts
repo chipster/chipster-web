@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
-import { Observable, of as observableOf, Subject } from "rxjs";
+import { Observable, Subject, of as observableOf } from "rxjs";
 import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -185,6 +185,14 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
       const src = img.getAttribute("src");
       if (src && !ManualUtils.isAbsoluteUrl(src)) {
         img.src = this.assetsPath + src;
+      }
+    });
+
+    const embeds = htmlDoc.getElementsByTagName("embed");
+    Array.from(embeds).forEach((embed) => {
+      const src = embed.getAttribute("src");
+      if (src && !ManualUtils.isAbsoluteUrl(src)) {
+        embed.src = this.assetsPath + src;
       }
     });
 
