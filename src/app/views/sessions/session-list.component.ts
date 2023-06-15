@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
-import { forkJoin, of, Subject } from "rxjs";
+import { Subject, forkJoin, of } from "rxjs";
 import { debounceTime, filter, finalize, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
@@ -42,6 +42,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   public sessionListLoading = false;
   public workflowPreviewLoading = false;
   public workflowPreviewFailed = false;
+  public stats: {} = null;
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
@@ -241,6 +242,17 @@ export class SessionListComponent implements OnInit, OnDestroy {
       });
   }
 
+  updateStats() {
+    this.sessionResource.getStats().subscribe(
+      (stats: {}) => {
+        this.stats = stats;
+      },
+      (error: any) => {
+        this.restErrorService.showError("failed to get session statistics", error);
+      }
+    );
+  }
+
   updateSessions() {
     const sessions = Array.from(this.userEventData.sessions.values());
 
@@ -295,6 +307,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionShares = this.sessionDataService.getPendingShares(sessions);
     this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
     this.sessionsByUser = sessionsByUser;
+
+    this.updateStats();
   }
 
   onSessionClick(session: Session) {

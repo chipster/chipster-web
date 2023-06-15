@@ -4,7 +4,7 @@ import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import * as _ from "lodash";
 import log from "loglevel";
-import { forkJoin, Observable, of as observableOf, of } from "rxjs";
+import { Observable, forkJoin, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
@@ -136,6 +136,16 @@ export class SessionResource {
       .getSessionDbUrl()
       .pipe(
         mergeMap((url: string) => this.http.get<Session[]>(`${url}/sessions`, this.tokenService.getTokenParams(true)))
+      );
+  }
+
+  getStats(): Observable<Object> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap((url: string) =>
+          this.http.get<Object>(`${url}/sessions/stats`, this.tokenService.getTokenParams(true))
+        )
       );
   }
 

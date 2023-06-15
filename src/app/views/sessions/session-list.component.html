@@ -195,6 +195,20 @@
           <em>It is highly recommended to have a backup of your data also in some other location</em>
           .
         </p>
+
+        <table class="table table-sm text-sm mt-2" *ngIf="stats !== null">
+          <tr>
+            <td class="lighter pe-2">Sessions:</td>
+            <td class="lighter" style="width: 100%">{{ sessionsByUser.get(null).length }}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Total Size:</td>
+            <td *ngIf="stats !== null" class="lighter" style="width: 100%">
+              {{ stats["size"] | bytes : 0 }}
+            </td>
+            <td *ngIf="stats === null" class="lighter" style="width: 100%">Loading...</td>
+          </tr>
+        </table>
       </div>
 
       <div id="session-preview" style="position: relative">
