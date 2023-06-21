@@ -3,7 +3,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef } from "ag-grid-community";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
-import { EMPTY, forkJoin } from "rxjs";
+import { forkJoin, of } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -77,15 +77,18 @@ export class StorageComponent implements OnInit {
           this.users = users;
         }),
         mergeMap((users: string[]) => {
-          const userQuotas$ = users.map((user: string) =>
-            this.authHttpClient.getAuth(sessionDbAdminUrl + "/admin/users/" + encodeURIComponent(user) + "/quota").pipe(
+          const userQuotas$ = users.map((user: string) => {
+            const url = sessionDbAdminUrl + "/admin/users/" + encodeURIComponent(user) + "/quota";
+            return this.authHttpClient.getAuth(url).pipe(
               catchError((err) => {
                 log.error("quota request error", err);
                 // don't cancel other requests even if one of them fails
-                return EMPTY;
+                return of({
+                  username: user,
+                });
               })
-            )
-          );
+            );
+          });
           return forkJoin(userQuotas$);
         })
       )
