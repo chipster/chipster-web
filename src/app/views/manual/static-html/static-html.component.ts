@@ -45,6 +45,13 @@ export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
   public handleAnchorClick = (event: Event) => {
+    if (!(event.target instanceof HTMLAnchorElement)) {
+      log.warn(
+        "Cannot handle click event, because this is not an anchor element. Is there an unclosed anchor on the page?",
+        event
+      );
+      return;
+    }
     const anchor = event.target as HTMLAnchorElement;
 
     if (ManualUtils.isAbsoluteUrl(this.getHref(anchor))) {
