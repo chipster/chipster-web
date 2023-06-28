@@ -69,8 +69,17 @@
             <table class="table table-sm">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
-                  <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
-                  <td>{{ input.displayName }}</td>
+                  <td class="" style="width: 60%; white-space: nowrap">{{ input.displayName || input.inputId }}</td>
+                  <td *ngIf="hasDataset(input.datasetId)">
+                    <!-- align like normal text in the table -->
+                    <button
+                      class="btn btn-sm btn-link"
+                      style="padding: 0 0 0 0; border: 0; font-size: small; vertical-align: top"
+                      (click)="selectDataset(input.datasetId)">
+                      {{ getDatasetName(input.datasetId) }}
+                    </button>
+                  </td>
+                  <td *ngIf="!hasDataset(input.datasetId)">(deleted)</td>
                 </tr>
               </tbody>
             </table>

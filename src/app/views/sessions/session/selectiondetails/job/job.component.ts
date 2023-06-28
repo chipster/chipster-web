@@ -1,8 +1,9 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
-import { empty, Observable, Subject } from "rxjs";
+import { Observable, Subject, empty } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -38,6 +39,7 @@ export class JobComponent implements OnInit, OnDestroy {
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
 
   constructor(
+    public activeModal: NgbActiveModal,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
@@ -124,6 +126,24 @@ export class JobComponent implements OnInit, OnDestroy {
 
   cancelJob() {
     this.sessionDataService.cancelJob(this.job);
+  }
+
+  selectDataset(datasetId: string) {
+    const dataset = this.getDataset(datasetId);
+    this.selectionHandlerService.setDatasetSelection([dataset]);
+    this.activeModal.close();
+  }
+
+  getDataset(datasetId: string) {
+    return this.sessionData.datasetsMap.get(datasetId);
+  }
+
+  hasDataset(datasetId: string) {
+    return this.getDataset(datasetId) != null;
+  }
+
+  getDatasetName(datasetId: string) {
+    return this.getDataset(datasetId).name;
   }
 
   showWithTool(parameters: JobParameter[], tool: Tool) {
