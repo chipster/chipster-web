@@ -9,11 +9,13 @@
     </tr>
   </thead>
   <tbody>
+    <!-- add id to be able to scroll to the selected job -->
     <tr
       *ngFor="let job of jobsSorted"
       class="cursor-pointer hoverable-row"
       (click)="selectJob(job)"
-      [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }">
+      [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }"
+      attr.id="job-id-{{ job.jobId }}">
       <td>{{ job.toolName }}</td>
       <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
         {{ job.created | localDate }}

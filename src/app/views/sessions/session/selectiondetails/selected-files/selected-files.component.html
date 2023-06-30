@@ -25,7 +25,11 @@
         <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
         <button ngbDropdownItem (click)="exportDatasets()">Export</button>
         <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
+        <div class="dropdown-divider"></div>
+        <button ngbDropdownItem (click)="showJob()">Show Job</button>
+        <!-- <button ngbDropdownItem (click)="selectTool()">Select Tool</button>
+        <button ngbDropdownItem (click)="selectToolAndParameters()">Select Tool and Copy Parameters</button> -->
+        <button ngbDropdownItem (click)="selectChildren()">Select All Descendants</button>
         <div class="dropdown-divider"></div>
         <button ngbDropdownItem (click)="deleteDatasets()">Delete</button>
       </div>

@@ -9,7 +9,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import { Dataset, Tool } from "chipster-js-common";
+import { Dataset, Job, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
@@ -41,6 +41,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   datasetName: string;
 
   private unsubscribe: Subject<any> = new Subject();
+  sourceJob: Job;
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -56,6 +57,8 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
+
+    this.sourceJob = this.sessionDataService.getJobById(this.dataset.sourceJob, this.sessionData.jobsMap);
   }
 
   ngOnInit(): void {
@@ -106,6 +109,20 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   defineDatasetGroups() {
     this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
   }
+
+  showJob() {
+    this.selectionHandlerService.setJobSelection([this.sourceJob]);
+
+    this.dialogModalService.openJobsModal(
+      this.sessionDataService.getJobList(this.sessionData),
+      this.tools,
+      this.sessionData
+    );
+  }
+
+  selectTool() {}
+
+  selectToolAndParameters() {}
 
   selectChildren() {
     const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);
