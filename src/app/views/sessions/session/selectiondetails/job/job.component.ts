@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import { Dataset, Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { Observable, Subject, empty } from "rxjs";
@@ -37,6 +37,7 @@ export class JobComponent implements OnInit, OnDestroy {
   parameterListForView: Array<JobParameter> = [];
   containerMemoryLimit = null;
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
+  outputDatasets: Dataset[];
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -101,6 +102,10 @@ export class JobComponent implements OnInit, OnDestroy {
         this.state = _.capitalize(job.state);
         this.screenOutput = job.screenOutput;
         this.duration = JobService.getDuration(job);
+
+        this.outputDatasets = this.sessionDataService
+          .getDatasetList(this.sessionData)
+          .filter((d) => d.sourceJob === jobId);
 
         return;
       }

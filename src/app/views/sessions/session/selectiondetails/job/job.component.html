@@ -64,22 +64,38 @@
         </tr>
 
         <tr>
-          <td class="lighter">Inputs:</td>
-          <td class="ps-0">
+          <td class="lighter">Input files:</td>
+          <td class="table-td">
             <table class="table table-sm">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
-                  <td class="" style="width: 60%; white-space: nowrap">{{ input.displayName || input.inputId }}</td>
+                  <td style="width: 60%; white-space: nowrap">
+                    {{ input.displayName || input.inputId }}
+                  </td>
+
                   <td *ngIf="hasDataset(input.datasetId)">
-                    <!-- align like normal text in the table -->
-                    <button
-                      class="btn btn-sm btn-link"
-                      style="padding: 0 0 0 0; border: 0; font-size: small; vertical-align: top"
-                      (click)="selectDataset(input.datasetId)">
+                    <ch-link-button class="no-underline-link-button" (click)="selectDataset(input.datasetId)">
                       {{ getDatasetName(input.datasetId) }}
-                    </button>
+                    </ch-link-button>
                   </td>
                   <td *ngIf="!hasDataset(input.datasetId)">(deleted)</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="lighter">Result files:</td>
+          <td class="table-td">
+            <table class="table table-sm">
+              <tbody>
+                <tr *ngFor="let output of outputDatasets">
+                  <td class="" style="width: 60%; white-space: nowrap"></td>
+                  <td>
+                    <ch-link-button class="no-underline-link-button" (click)="selectDataset(output.datasetId)">
+                      {{ output.name }}
+                    </ch-link-button>
+                  </td>
                 </tr>
               </tbody>
             </table>
