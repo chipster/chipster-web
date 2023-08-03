@@ -6,7 +6,7 @@ import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
+import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
@@ -17,7 +17,6 @@ import {
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
   CLEAR_VALIDATED_TOOL,
-  SET_SELECTED_TOOL,
   SET_SELECTED_TOOL_WITH_INPUTS,
   SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
@@ -33,8 +32,6 @@ import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
-import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
-import { ToolService } from "./tool.service";
 import {
   SelectedTool,
   SelectedToolWithInputs,
@@ -43,6 +40,8 @@ import {
   ValidatedTool,
   ValidationResult,
 } from "./ToolSelection";
+import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
+import { ToolService } from "./tool.service";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -190,12 +189,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(tool: Tool) {
-    const selectedTool: SelectedTool = {
-      tool,
-      category: this.selectedCategory,
-      module: this.selectedModule,
-    };
-    this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
+    this.toolSelectionService.selectTool(this.selectedModule, this.selectedCategory, tool);
   }
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
@@ -340,6 +334,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .select("selectedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedTool) => {
+        console.log("tools.component.ts", t);
         this.selectedTool = t;
         this.runEnabled = false;
         this.paramButtonWarning = false;

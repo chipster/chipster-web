@@ -1,16 +1,17 @@
 import { Injectable } from "@angular/core";
-import { Dataset, InputBinding, ToolParameter } from "chipster-js-common";
+import { Store } from "@ngrx/store";
+import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
-import { forkJoin, forkJoin as observableForkJoin, Observable, of } from "rxjs";
+import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import UtilsService from "../../../shared/utilities/utils";
+import { SET_SELECTED_TOOL } from "../../../state/tool.reducer";
+import { SelectionOption } from "./SelectionOption";
 import { DatasetService, SampleGroups } from "./dataset.service";
 import { GetSessionDataService } from "./get-session-data.service";
-import { SelectionOption } from "./SelectionOption";
-import { ToolService } from "./tools/tool.service";
 import {
   SelectedTool,
   SelectedToolWithInputs,
@@ -19,14 +20,25 @@ import {
   ValidatedTool,
   ValidationResult,
 } from "./tools/ToolSelection";
+import { ToolService } from "./tools/tool.service";
 
 @Injectable()
 export class ToolSelectionService {
   constructor(
     private toolService: ToolService,
     private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService
+    private datasetService: DatasetService,
+    private store: Store<any>
   ) {}
+
+  selectTool(module: Module, category: Category, tool: Tool) {
+    const selectedTool: SelectedTool = {
+      tool,
+      category,
+      module,
+    };
+    this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
+  }
 
   getValidatedTool(
     toolWithValidatedParams: SelectedToolWithValidatedParameters,
