@@ -78,7 +78,7 @@ export class StorageComponent implements OnInit {
         }),
         mergeMap((users: string[]) => {
           const userQuotas$ = users.map((user: string) => {
-            const url = sessionDbAdminUrl + "/admin/users/" + encodeURIComponent(user) + "/quota";
+            const url = sessionDbAdminUrl + "/admin/users/quota?userId=" + encodeURIComponent(user);
             return this.authHttpClient.getAuth(url).pipe(
               catchError((err) => {
                 log.error("quota request error", err);
@@ -113,7 +113,7 @@ export class StorageComponent implements OnInit {
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(
         mergeMap((service) =>
-          this.authHttpClient.getAuth(service.adminUri + "/admin/users/" + encodeURIComponent(user) + "/sessions")
+          this.authHttpClient.getAuth(service.adminUri + "/admin/users/sessions?userId=" + encodeURIComponent(user))
         )
       )
       .subscribe(

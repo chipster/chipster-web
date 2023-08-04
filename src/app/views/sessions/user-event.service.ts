@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import { Observable, of, Subject } from "rxjs";
+import { Observable, Subject, of } from "rxjs";
 import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -38,11 +38,7 @@ export class UserEventService {
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.pipe(publish(), refCount());
 
-    // encode the user event topic twice (the second round is done in WebsocketService) to pass
-    // the Jetty WebSocketUpgradeFilter when there is a slash in the topic name
-    const encodedTopic = encodeURIComponent(topic);
-
-    this.webSocketService.connect(this.localSubject$, encodedTopic);
+    this.webSocketService.connect(this.localSubject$, "users/" + topic);
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),

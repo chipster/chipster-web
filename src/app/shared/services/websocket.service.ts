@@ -3,7 +3,7 @@ import { SessionEvent, WsEvent } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, throwError as observableThrowError } from "rxjs";
 import { catchError, mergeMap } from "rxjs/operators";
-import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { WebSocketSubject, webSocket } from "rxjs/webSocket";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
@@ -53,7 +53,7 @@ export class WebSocketService {
       .pipe(
         mergeMap((eventsUrl: string) => {
           const encodedTopic = encodeURIComponent(this.topic);
-          const wsUrl = `${eventsUrl}/events/${encodedTopic}?token=${this.tokenService.getToken()}`;
+          const wsUrl = `${eventsUrl}?topic=${encodedTopic}&token=${this.tokenService.getToken()}`;
           log.debug("event URL", wsUrl);
 
           // convert websocket to observable
