@@ -34,7 +34,7 @@
     "angular-split": "^15.0.0",
     "angular2-hotkeys": "^13.1.0",
     "bootstrap": "^5.2.3",
-    "chipster-js-common": "^1.3.2",
+    "chipster-js-common": "^1.3.4",
     "d3": "5.4.0",
     "d3-context-menu": "^2.1.0",
     "file-saver": "^2.0.5",
