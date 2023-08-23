@@ -24,12 +24,12 @@
     </select>
 
     <div class="alert alert-primary mt-3" role="alert" *ngIf="showZeroWarning">
-      -log(p) values displayed at the upper y axis limit correspond to genes with padj values rounded to zero by edgeR /
-      DESeq2
+      -log(p) values displayed at the upper y axis limit correspond to features with padj values rounded to zero by
+      edgeR / DESeq2
     </div>
 
     <div id="selectedGeneList" *ngIf="selectedDataRows && selectedDataRows.length > 0">
-      <p class="text-sm-center">{{ selectedDataRows.length }} Genes Selected</p>
+      <p class="text-sm-center">{{ selectedDataRows.length }} Features Selected</p>
       <div class="table table-sm">
         <tr *ngFor="let gene of selectedDataRows">
           <td class="text-sm">{{ gene.row[0] }}</td>
