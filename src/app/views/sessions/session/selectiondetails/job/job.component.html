@@ -65,12 +65,26 @@
 
         <tr>
           <td class="lighter">Inputs:</td>
-          <td class="ps-0">
+          <td class="p-0">
             <table class="table table-sm">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
                   <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
                   <td>{{ input.displayName }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="lighter text-nowrap">Application versions:</td>
+          <td class="p-0">
+            <table class="table table-sm">
+              <tbody>
+                <tr *ngFor="let appVersion of getApplicationVersions()">
+                  <td class="" style="width: 60%; white-space: nowrap">{{ appVersion.application }}</td>
+                  <td>{{ appVersion.version }}</td>
                 </tr>
               </tbody>
             </table>

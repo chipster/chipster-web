@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Job } from "chipster-js-common";
+import { Job, MetadataFile } from "chipster-js-common";
 import log from "loglevel";
 import { interval, Observable, of } from "rxjs";
 import { distinctUntilChanged, map, startWith } from "rxjs/operators";
@@ -15,6 +15,8 @@ import { ValidatedTool } from "./tools/ToolSelection";
 
 @Injectable()
 export class JobService {
+  readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
+
   constructor(
     private sessionDataService: SessionDataService,
     private toolService: ToolService,
@@ -242,5 +244,24 @@ export class JobService {
       }));
 
     return job;
+  }
+
+  getApplicationVersions(job: Job) {
+    const applicationVersionFiles = job.metadataFiles.filter(
+      (metadataFile: MetadataFile) => metadataFile.name === this.APPLICATION_VERSIONS_FILENAME
+    );
+
+    if (applicationVersionFiles.length < 1) {
+      return [];
+    }
+    if (applicationVersionFiles.length > 1) {
+      log.warn("more than one applicaton versions file in job", job.jobId, job.toolId);
+    }
+
+    const applicationVersionsString = applicationVersionFiles[0].content;
+    const applicationVersions = JSON.parse(applicationVersionsString);
+
+    // filter out r session info for now (it's quite large)
+    return applicationVersions.filter((appVersion) => appVersion.application !== "R Session Info");
   }
 }

@@ -43,7 +43,8 @@ export class JobComponent implements OnInit, OnDestroy {
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
     private errorService: ErrorService,
-    private toolService: ToolService
+    private toolService: ToolService,
+    private jobService: JobService
   ) {}
 
   ngOnInit() {
@@ -167,5 +168,9 @@ export class JobComponent implements OnInit, OnDestroy {
       .forEach((p) => {
         p.displayName = p.parameterId;
       });
+  }
+
+  getApplicationVersions() {
+    return this.jobService.getApplicationVersions(this.job);
   }
 }
