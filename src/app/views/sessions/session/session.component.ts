@@ -4,7 +4,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
-import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
+import { EMPTY, NEVER, Observable, Subject, forkJoin, from, of } from "rxjs";
 // New imports for rxjs v6
 import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
@@ -121,6 +121,8 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.modules = results[2];
           this.modulesMap = results[3];
           this.exampleSessionOwnerUserId = results[4];
+
+          console.log("modules", this.modules);
 
           // save latest session id
           this.saveLatestSession();

@@ -151,7 +151,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.addHotKeys();
 
-    this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    if (this.modules[0] != null) {
+      this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    } else {
+      this.errorService.showError("Cannot select module: " + this.modules, null);
+    }
   }
 
   ngOnDestroy() {
@@ -171,10 +175,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectModuleAndFirstCategoryAndFirstTool(module: Module) {
-    if (module == null) {
-      this.errorService.showError("Cannot select module: " + module, null);
-    }
-
     this.selectedModule = module;
     if (module.categories.length > 0) {
       this.selectCategoryAndFirstTool(module.categories[0]);
