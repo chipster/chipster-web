@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
-import { forkJoin, Observable } from "rxjs";
+import { Observable, forkJoin } from "rxjs";
 import { map, shareReplay } from "rxjs/operators";
 import { ToolResource } from "../resources/tool-resource";
 import UtilsService from "../utilities/utils";
@@ -29,8 +29,10 @@ export class ToolsService {
       ).pipe(
         map((results) => {
           const enabledModules: string[] = results[0];
+          console.log("enabled modules: " + enabledModules);
           const allModules: Module[] = results[1];
-          return allModules
+          console.log("all modules: " + allModules);
+          const filteredModules = allModules
             .filter((module: Module) => enabledModules.includes(module.name))
             .map((module: Module) => {
               // set moduleId
@@ -41,6 +43,8 @@ export class ToolsService {
 
               return module;
             });
+          console.log("filtered modules: " + filteredModules);
+          return filteredModules;
         }),
         shareReplay(1)
       );
