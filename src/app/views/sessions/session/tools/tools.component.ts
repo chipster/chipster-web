@@ -6,7 +6,7 @@ import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject, combineLatest, of, Subject } from "rxjs";
+import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
@@ -33,8 +33,6 @@ import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
-import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
-import { ToolService } from "./tool.service";
 import {
   SelectedTool,
   SelectedToolWithInputs,
@@ -43,6 +41,8 @@ import {
   ValidatedTool,
   ValidationResult,
 } from "./ToolSelection";
+import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
+import { ToolService } from "./tool.service";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -151,7 +151,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.addHotKeys();
 
-    this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    if (this.modules[0] != null) {
+      this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    } else {
+      this.errorService.showError("Cannot select module: " + this.modules, null);
+    }
   }
 
   ngOnDestroy() {
