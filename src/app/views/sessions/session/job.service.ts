@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Job, MetadataFile } from "chipster-js-common";
 import log from "loglevel";
-import { interval, Observable, of } from "rxjs";
+import { Observable, interval, of } from "rxjs";
 import { distinctUntilChanged, map, startWith } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -10,8 +10,8 @@ import { DatasetService } from "./dataset.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
-import { ToolService } from "./tools/tool.service";
 import { ValidatedTool } from "./tools/ToolSelection";
+import { ToolService } from "./tools/tool.service";
 
 @Injectable()
 export class JobService {
@@ -261,7 +261,9 @@ export class JobService {
     const applicationVersionsString = applicationVersionFiles[0].content;
     const applicationVersions = JSON.parse(applicationVersionsString);
 
-    // filter out r session info for now (it's quite large)
-    return applicationVersions.filter((appVersion) => appVersion.application !== "R Session Info");
+    return applicationVersions.map((appVersion) => ({
+      application: appVersion.application,
+      version: appVersion.version.trim(),
+    }));
   }
 }

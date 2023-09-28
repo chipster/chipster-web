@@ -49,7 +49,7 @@
         <tr *ngIf="failed">
           <td class="lighter" style="white-space: nowrap">Error message:</td>
           <td class="wide-max">
-            <span *ngIf="job.stateDetail">{{ job.stateDetail }}</span>
+            <pre *ngIf="job.stateDetail">{{ job.stateDetail }}</pre>
           </td>
         </tr>
 
@@ -69,7 +69,7 @@
             <table class="table table-sm mb-0">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
-                  <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
+                  <td class="label-td">{{ input.inputId }}</td>
                   <td>{{ input.displayName }}</td>
                 </tr>
               </tbody>
@@ -83,8 +83,24 @@
             <table class="table table-sm">
               <tbody>
                 <tr *ngFor="let appVersion of getApplicationVersions()">
-                  <td class="" style="width: 60%; white-space: nowrap">{{ appVersion.application }}</td>
-                  <td>{{ appVersion.version }}</td>
+                  <td *ngIf="appVersion.application !== 'R Session Info'" class="label-td">
+                    {{ appVersion.application }}
+                  </td>
+                  <td *ngIf="appVersion.application !== 'R' && appVersion.application !== 'R Session Info'">
+                    <pre class="m-0">{{ appVersion.version }}</pre>
+                  </td>
+                  <td *ngIf="appVersion.application === 'R'">
+                    <pre class="d-inline m-0">{{ appVersion.version }}</pre>
+                    <span>
+                      <ch-link-button class="no-underline-link-button ms-2" (click)="toggleRSessionInfo()">
+                        <span *ngIf="rSessionInfoVisible">Hide</span>
+                        <span *ngIf="!rSessionInfoVisible">Show</span>
+                        R session info
+                      </ch-link-button>
+                    </span>
+
+                    <pre *ngIf="rSessionInfoVisible" class="mt-2">{{ getRSessionInfo() }}</pre>
+                  </td>
                 </tr>
               </tbody>
             </table>

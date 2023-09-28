@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
-import { empty, Observable, Subject } from "rxjs";
+import { Observable, Subject, empty } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -30,6 +30,7 @@ export class JobComponent implements OnInit, OnDestroy {
   duration: Observable<string> = empty();
   tool: Tool;
   parameterLimit = 12;
+  rSessionInfoVisible = false;
 
   private unsubscribe: Subject<any> = new Subject();
   // noinspection JSMismatchedCollectionQueryUpdate
@@ -172,5 +173,15 @@ export class JobComponent implements OnInit, OnDestroy {
 
   getApplicationVersions() {
     return this.jobService.getApplicationVersions(this.job);
+  }
+
+  getRSessionInfo() {
+    return this.jobService
+      .getApplicationVersions(this.job)
+      .filter((appVersion) => appVersion.application === "R Session Info")[0]?.version;
+  }
+
+  toggleRSessionInfo() {
+    this.rSessionInfoVisible = !this.rSessionInfoVisible;
   }
 }
