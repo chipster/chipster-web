@@ -12,6 +12,7 @@ import { LoadState, State } from "../../../model/loadstate";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 
 @Component({
   selector: "ch-storage",
@@ -24,17 +25,34 @@ export class StorageComponent implements OnInit {
   quotasMap: Map<string, any>;
 
   columnDefs: ColDef[] = [
+    { field: "username", sortable: true, filter: true, pinned: "left" },
     { field: "user", sortable: true, filter: true },
     { field: "auth", sortable: true, filter: true },
-    { field: "username", sortable: true, filter: true, pinned: "left" },
-    { field: "created", sortable: true, filter: "agDateColumnFilter" },
-    { field: "modified", sortable: true, filter: "agDateColumnFilter" },
-    { field: "readWriteSessions", sortable: true },
-    { field: "readOnlySessions", sortable: true },
+    { field: "created", sortable: true, filter: true },
+    { field: "modified", sortable: true, filter: true },
+    {
+      field: "readWriteSessions",
+      headerName: "Sessions RW",
+      sortable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+      resizable: true,
+      type: "rightAligned",
+    },
+    { field: "readOnlySessions", headerName: "Sessions RO", sortable: true, type: "numericColumn" },
     {
       field: "size",
       sortable: true,
       valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
+    },
+    {
+      field: "actions",
+      pinned: "right",
+      cellRenderer: AgBtnCellRendererComponent,
+      cellRendererParams: {
+        onSessions: this.onSessions.bind(this),
+        onDelete: this.onDeleteUser.bind(this),
+      },
     },
   ];
 
@@ -168,6 +186,14 @@ export class StorageComponent implements OnInit {
     });
   }
 
+  onDeleteUser(event) {
+    console.log("delete user", event);
+  }
+
+  onSessions(event) {
+    this.selectUser(event.username);
+  }
+
   selectUser(user: string) {
     this.modalService.open(this.modalContent, { size: "xl" });
 
@@ -192,9 +218,9 @@ export class StorageComponent implements OnInit {
   }
 
   onSelectionChanged($event) {
-    const username = $event.api.getSelectedNodes()[0]?.data?.username;
-    if (username != null) {
-      this.selectUser(username);
-    }
+    // const username = $event.api.getSelectedNodes()[0]?.data?.username;
+    // if (username != null) {
+    //   this.selectUser(username);
+    // }
   }
 }
