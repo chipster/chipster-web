@@ -33,7 +33,7 @@ export class StorageComponent implements OnInit {
     },
   ];
 
-  rowSelection = "single";
+  public rowSelection: "single" | "multiple" = "single";
 
   rowData = [];
 
