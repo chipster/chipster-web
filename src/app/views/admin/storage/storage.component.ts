@@ -159,24 +159,20 @@ export class StorageComponent implements OnInit {
         // get difference of both sets
         const difference = new Set([...sessionDbUsersSet].filter((x) => !authUsersSet.has(x)));
 
-        console.log("authUsers", authUsersSet);
-        console.log("sessionDbUsers", sessionDbUsersSet);
-
         const combinedUsers = sessionDbUsers
           .filter((sessionDbUser) => intersection.has(sessionDbUser.username))
-          .map((sessionDbUser) => {
+          .map((sessionDbUser) =>
             // combine sessionDbUser properties and corresponding authUser properties
             // both have username so order matters!
-            console.log(sessionDbUser.modified);
-            return {
+            ({
               ...authUsersMap.get(sessionDbUser.username),
               ...sessionDbUser,
               user: authUsersMap.get(sessionDbUser.username).username,
               modified: new Date(authUsersMap.get(sessionDbUser.username).modified),
               created: new Date(authUsersMap.get(sessionDbUser.username).created),
-            };
-          });
-        console.log(combinedUsers);
+            })
+          );
+
         const missingUsers = [];
         sessionDbUsers.forEach((sessionDbUser) => {});
         this.rowData = combinedUsers;
