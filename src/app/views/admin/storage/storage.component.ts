@@ -21,7 +21,6 @@ import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class StorageComponent implements OnInit {
-  users: string[];
   quotasMap: Map<string, any>;
 
   columnDefs: ColDef[] = [
@@ -47,10 +46,12 @@ export class StorageComponent implements OnInit {
     },
     {
       field: "actions",
+      resizable: true,
       pinned: "right",
       cellRenderer: AgBtnCellRendererComponent,
       cellRendererParams: {
         onSessions: this.onSessions.bind(this),
+        onDeleteSessions: this.onDeleteSessions.bind(this),
         onDelete: this.onDeleteUser.bind(this),
       },
     },
@@ -79,8 +80,14 @@ export class StorageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.refresh();
+  }
+
+  private refresh() {
+    this.allSessionsState = new LoadState(State.Loading);
     this.userSessionsState = new LoadState(State.Loading);
-    this.users = [];
+    this.rowData = [];
+    this.sessions = [];
     this.quotasMap = new Map();
 
     const authUsers$ = this.authenticationService.getUsers();
@@ -88,18 +95,15 @@ export class StorageComponent implements OnInit {
     let sessionDbUrl: string;
     let sessionDbAdminUrl: string;
     // check if its working properly
-    const sessionDbUsers$ = this.configService.getInternalService(Role.SESSION_DB, this.tokenService.getToken()).pipe(
-      tap((service) => {
-        sessionDbAdminUrl = service.adminUri;
+    const sessionDbUsers$ = this.configService.getAdminUri(Role.SESSION_DB).pipe(
+      tap((uri: string) => {
+        sessionDbAdminUrl = uri;
       }),
       mergeMap(() => this.configService.getSessionDbUrl()),
       tap((url) => {
         sessionDbUrl = url;
       }),
       mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-      tap((users: string[]) => {
-        this.users = users;
-      }),
       mergeMap((users: string[]) => {
         const userQuotas$ = users.map((user: string) => {
           const url = sessionDbAdminUrl + "/admin/users/quota?userId=" + encodeURIComponent(user);
@@ -113,20 +117,17 @@ export class StorageComponent implements OnInit {
             })
           );
         });
-        return forkJoin(userQuotas$);
+
+        // just returning [] messes up the forkJoin later on
+        return userQuotas$ == null || userQuotas$.length === 0 ? of([]) : forkJoin(userQuotas$);
       })
     );
-    // sessionDbUsers$.subscribe({
-    //   next: (quotas) => {
-    //     quotas.forEach((quota) => this.quotasMap.set(quota.username, quota));
-    //     this.rowData = quotas;
-    //     this.allSessionsState = LoadState.Ready;
-    //   },
-    //   error: (err) => this.restErrorService.showError("get quotas failed", err),
-    // });
+
+    console.log("sessionDbUsers$", sessionDbUsers$);
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
+        console.log("authUsers", authUsers);
         sessionDbUsers.forEach((quota) => this.quotasMap.set(quota.username, quota));
 
         // sessionDbUsers to a set
@@ -174,7 +175,7 @@ export class StorageComponent implements OnInit {
           );
 
         const missingUsers = [];
-        sessionDbUsers.forEach((sessionDbUser) => {});
+
         this.rowData = combinedUsers;
         this.allSessionsState = LoadState.Ready;
       },
@@ -184,6 +185,53 @@ export class StorageComponent implements OnInit {
 
   onDeleteUser(event) {
     console.log("delete user", event);
+  }
+
+  onDeleteSessions(event) {
+    const username = event.username;
+    console.log("delete sessions for", username);
+
+    this.configService
+      .getAdminUri(Role.SESSION_DB)
+      .pipe(
+        mergeMap((sessionDbAdminUrl: string) => {
+          const url = sessionDbAdminUrl + "/admin/users/sessions?userId=" + encodeURIComponent(username);
+          return this.authHttpClient.deleteAuth(url);
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          console.log("delete sessions for", username, "done");
+          this.refresh();
+        },
+        error: (err) => this.restErrorService.showError("Delete sessions for " + username + " failed", err),
+      });
+
+    //   mergeMap(() => this.configService.getSessionDbUrl()),
+    //   tap((url) => {
+    //     sessionDbUrl = url;
+    //   }),
+    //   mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
+    //   tap((users: string[]) => {
+    //     // FIXME use this instead of getting auth users above
+    //     this.users = users;
+    //   }),
+    //   mergeMap((users: string[]) => {
+    //     const userQuotas$ = users.map((user: string) => {
+    //       const url = sessionDbAdminUrl + "/admin/users/quota?userId=" + encodeURIComponent(user);
+    //       return this.authHttpClient.getAuth(url).pipe(
+    //         catchError((err) => {
+    //           log.error("quota request error", err);
+    //           // don't cancel other requests even if one of them fails
+    //           return of({
+    //             username: user,
+    //           });
+    //         })
+    //       );
+    //     });
+    //     return forkJoin(userQuotas$);
+    //   })
+    // );
   }
 
   onSessions(event) {

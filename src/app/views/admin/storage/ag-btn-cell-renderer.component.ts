@@ -5,8 +5,12 @@ import { ICellRendererParams } from "ag-grid-community";
 @Component({
   selector: "ch-ag-btn-cell-renderer",
   template: `
-    <button class="btn btn-secondary btn-sm" (click)="onSessions()">Sessions</button>
-    <!-- <button class="btn btn-danger btn-sm ms-2" (click)="onDelete()">Delete</button> -->
+    <div>
+      <button class="btn btn-secondary btn-sm" (click)="onSessions()">Sessions</button>
+      <button class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">Delete sessions</button>
+
+      <!-- <button class="btn btn-danger btn-sm ms-2" (click)="onDelete()">Delete</button> -->
+    </div>
   `,
 })
 export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
@@ -28,5 +32,9 @@ export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
 
   onDelete() {
     this.params.onDelete(this.params.data);
+  }
+
+  onDeleteSessions() {
+    this.params.onDeleteSessions(this.params.data);
   }
 }
