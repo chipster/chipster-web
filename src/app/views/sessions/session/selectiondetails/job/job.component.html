@@ -49,7 +49,7 @@
         <tr *ngIf="failed">
           <td class="lighter" style="white-space: nowrap">Error message:</td>
           <td class="wide-max">
-            <span *ngIf="job.stateDetail">{{ job.stateDetail }}</span>
+            <pre *ngIf="job.stateDetail">{{ job.stateDetail }}</pre>
           </td>
         </tr>
 
@@ -66,7 +66,7 @@
         <tr>
           <td class="lighter">Input files:</td>
           <td class="table-td">
-            <table class="table table-sm">
+            <table class="table table-sm mb-0">
               <tbody>
                 <tr *ngFor="let input of job.inputs">
                   <td style="width: 60%; white-space: nowrap">
@@ -87,7 +87,7 @@
         <tr>
           <td class="lighter">Result files:</td>
           <td class="table-td">
-            <table class="table table-sm">
+            <table class="table table-sm mb-0">
               <tbody>
                 <tr *ngFor="let output of outputDatasets">
                   <td class="" style="width: 60%; white-space: nowrap"></td>
@@ -95,6 +95,36 @@
                     <ch-link-button class="no-underline-link-button" (click)="selectDataset(output.datasetId)">
                       {{ output.name }}
                     </ch-link-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="lighter text-nowrap">Application versions:</td>
+          <td class="p-0">
+            <table class="table table-sm">
+              <tbody>
+                <tr *ngFor="let appVersion of getApplicationVersions()">
+                  <td *ngIf="appVersion.application !== 'R Session Info'" class="label-td">
+                    {{ appVersion.application }}
+                  </td>
+                  <td *ngIf="appVersion.application !== 'R' && appVersion.application !== 'R Session Info'">
+                    <pre class="m-0">{{ appVersion.version }}</pre>
+                  </td>
+                  <td *ngIf="appVersion.application === 'R'">
+                    <pre class="d-inline m-0">{{ appVersion.version }}</pre>
+                    <span>
+                      <ch-link-button class="no-underline-link-button ms-2" (click)="toggleRSessionInfo()">
+                        <span *ngIf="rSessionInfoVisible">Hide</span>
+                        <span *ngIf="!rSessionInfoVisible">Show</span>
+                        R session info
+                      </ch-link-button>
+                    </span>
+
+                    <pre *ngIf="rSessionInfoVisible" class="mt-2">{{ getRSessionInfo() }}</pre>
                   </td>
                 </tr>
               </tbody>

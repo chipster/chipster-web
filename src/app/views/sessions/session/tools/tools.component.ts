@@ -150,7 +150,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.addHotKeys();
 
-    this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    if (this.modules[0] != null) {
+      this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
+    } else {
+      this.errorService.showError("Cannot select module: " + this.modules, null);
+    }
   }
 
   ngOnDestroy() {

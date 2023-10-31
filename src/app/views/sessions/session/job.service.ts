@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { Job } from "chipster-js-common";
+import { Job, MetadataFile } from "chipster-js-common";
 import log from "loglevel";
-import { interval, Observable, of } from "rxjs";
+import { Observable, interval, of } from "rxjs";
 import { distinctUntilChanged, map, startWith } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -10,11 +10,13 @@ import { DatasetService } from "./dataset.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
-import { ToolService } from "./tools/tool.service";
 import { ValidatedTool } from "./tools/ToolSelection";
+import { ToolService } from "./tools/tool.service";
 
 @Injectable()
 export class JobService {
+  readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
+
   constructor(
     private sessionDataService: SessionDataService,
     private toolService: ToolService,
@@ -242,5 +244,26 @@ export class JobService {
       }));
 
     return job;
+  }
+
+  getApplicationVersions(job: Job) {
+    const applicationVersionFiles = job.metadataFiles.filter(
+      (metadataFile: MetadataFile) => metadataFile.name === this.APPLICATION_VERSIONS_FILENAME
+    );
+
+    if (applicationVersionFiles.length < 1) {
+      return [];
+    }
+    if (applicationVersionFiles.length > 1) {
+      log.warn("more than one applicaton versions file in job", job.jobId, job.toolId);
+    }
+
+    const applicationVersionsString = applicationVersionFiles[0].content;
+    const applicationVersions = JSON.parse(applicationVersionsString);
+
+    return applicationVersions.map((appVersion) => ({
+      application: appVersion.application,
+      version: appVersion.version.trim(),
+    }));
   }
 }

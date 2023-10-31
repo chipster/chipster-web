@@ -112,6 +112,7 @@
       <th scope="col"></th>
       <th scope="col">Status</th>
       <th scope="col">Memory usage</th>
+      <th scope="col">Storage usage</th>
       <th scope="col">Comp</th>
     </tr>
   </thead>
@@ -136,6 +137,9 @@
       </td>
       <td>
         <span *ngIf="jobhistory.memoryUsage !== 0">{{ jobhistory.memoryUsage | bytes }}</span>
+      </td>
+      <td>
+        <span *ngIf="jobhistory.storageUsage !== 0">{{ jobhistory.storageUsage | bytes }}</span>
       </td>
       <td>{{ jobhistory.comp }}</td>
     </tr>

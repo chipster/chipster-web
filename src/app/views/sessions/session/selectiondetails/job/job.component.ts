@@ -31,6 +31,7 @@ export class JobComponent implements OnInit, OnDestroy {
   duration: Observable<string> = empty();
   tool: Tool;
   parameterLimit = 12;
+  rSessionInfoVisible = false;
 
   private unsubscribe: Subject<any> = new Subject();
   // noinspection JSMismatchedCollectionQueryUpdate
@@ -46,7 +47,8 @@ export class JobComponent implements OnInit, OnDestroy {
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
     private errorService: ErrorService,
-    private toolService: ToolService
+    private toolService: ToolService,
+    private jobService: JobService
   ) {}
 
   ngOnInit() {
@@ -192,5 +194,19 @@ export class JobComponent implements OnInit, OnDestroy {
       .forEach((p) => {
         p.displayName = p.parameterId;
       });
+  }
+
+  getApplicationVersions() {
+    return this.jobService.getApplicationVersions(this.job);
+  }
+
+  getRSessionInfo() {
+    return this.jobService
+      .getApplicationVersions(this.job)
+      .filter((appVersion) => appVersion.application === "R Session Info")[0]?.version;
+  }
+
+  toggleRSessionInfo() {
+    this.rSessionInfoVisible = !this.rSessionInfoVisible;
   }
 }

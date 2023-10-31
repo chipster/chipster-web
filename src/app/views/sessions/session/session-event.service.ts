@@ -11,7 +11,7 @@ import {
   WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
-import { never as observableNever, Observable, of as observableOf, Subject } from "rxjs";
+import { Observable, Subject, never as observableNever, of as observableOf } from "rxjs";
 import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -51,7 +51,7 @@ export class SessionEventService {
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.pipe(publish(), refCount());
 
-    this.websocketService.connect(this.localSubject$, sessionId);
+    this.websocketService.connect(this.localSubject$, "sessions/" + sessionId);
 
     // track any changes to session
     stream.subscribe(

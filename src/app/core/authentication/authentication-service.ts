@@ -155,7 +155,7 @@ export class AuthenticationService {
     return this.configService.getAuthUrl().pipe(
       mergeMap((authUrl) => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
-        const url = `${authUrl}/users/${userId}`;
+        const url = `${authUrl}/users?userId=${userId}`;
 
         return <Observable<User>>this.authHttpClient.getAuth(url);
       })
@@ -177,11 +177,11 @@ export class AuthenticationService {
   }
 
   updateUser(user: User): Observable<any> {
-    console.log("update user", user);
+    log.info("update user", user);
     return this.configService.getAuthUrl().pipe(
       mergeMap((authUrl) => {
         const userId = encodeURIComponent(this.tokenService.getUsername());
-        const url = `${authUrl}/users/${userId}`;
+        const url = `${authUrl}/users?userId=${userId}`;
         return <Observable<User>>this.authHttpClient.putAuth(url, user);
       })
     );

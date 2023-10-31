@@ -16,11 +16,11 @@ import * as _ from "lodash";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
 import {
+  Observable,
   forkJoin,
   forkJoin as observableForkJoin,
   from as observableFrom,
   merge as observableMerge,
-  Observable,
   of,
 } from "rxjs";
 import { catchError, concatMap, filter, map, mergeMap, takeUntil } from "rxjs/operators";
@@ -433,9 +433,9 @@ export class SessionDataService {
       positionClass: "toast-top-right",
       closeButton: true,
       tapToDismiss: false,
-      timeOut: 8000,
+      timeOut: 15000,
       easeTime: 300,
-      extendedTimeOut: 8000,
+      extendedTimeOut: 15000,
       progressAnimation,
       progressBar: true,
       enableHtml: true,

@@ -76,7 +76,8 @@
           <td class="lighter no-break">{{ historyOptionsMap.get("inputFileNames").name }}:</td>
           <td class="ps-0">
             <table class="table table-sm">
-              <tbody>
+              <!-- imported files don't have a sourceJob -->
+              <tbody *ngIf="step.sourceJob != null">
                 <tr *ngFor="let input of step.sourceJob.inputs">
                   <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
                   <td>{{ input.displayName }}</td>
