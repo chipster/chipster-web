@@ -8,12 +8,13 @@ import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import UtilsService from "../../../shared/utilities/utils";
-import { SET_SELECTED_TOOL } from "../../../state/tool.reducer";
+import { SET_SELECTED_TOOL, SET_SELECTED_TOOL_BY_ID } from "../../../state/tool.reducer";
 import { SelectionOption } from "./SelectionOption";
 import { DatasetService, SampleGroups } from "./dataset.service";
 import { GetSessionDataService } from "./get-session-data.service";
 import {
   SelectedTool,
+  SelectedToolById,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
@@ -30,6 +31,16 @@ export class ToolSelectionService {
     private datasetService: DatasetService,
     private store: Store<any>
   ) {}
+
+  selectToolById(moduleId: string, categoryName: string, toolId: string) {
+    const selectedToolById: SelectedToolById = {
+      toolId,
+      categoryName,
+      moduleId,
+    };
+
+    this.store.dispatch({ type: SET_SELECTED_TOOL_BY_ID, payload: selectedToolById });
+  }
 
   selectTool(module: Module, category: Category, tool: Tool) {
     const selectedTool: SelectedTool = {

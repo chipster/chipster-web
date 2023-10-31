@@ -34,6 +34,7 @@ import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import {
   SelectedTool,
+  SelectedToolById,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
@@ -314,18 +315,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const module = this.modulesMap.get(item.moduleId);
-    this.selectModule(module);
-    this.selectCategory(module.categoriesMap.get(item.category));
-    // get the tool from category, don't use the one in the event as for some reason it's not the same instance
-    const tool = module.categoriesMap.get(item.category).tools.filter((t1) => t1.name.id === item.toolId)[0];
-    this.selectTool(tool);
-    const toolElementId = this.toolElementIdPrefix + item.toolId;
-
-    setTimeout(() => {
-      this.searchBoxModel = null;
-      this.document.getElementById(toolElementId).focus();
-    });
+    this.toolSelectionService.selectToolById(item.moduleId, item.category, item.toolId);
   }
 
   public searchBoxBlur() {
@@ -333,12 +323,36 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   private subscribeToToolEvents() {
+    this.store
+      .select("selectedToolById")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe((t: SelectedToolById) => {
+        if (t != null) {
+          // get the tool from categroy based on the id
+          // other parts of the UI may have their own instances of tools,
+          // which don't have the saved parameter values
+          const module = this.modulesMap.get(t.moduleId);
+          const category = module.categoriesMap.get(t.categoryName);
+          const tool = category.tools.filter((t1) => t1.name.id === t.toolId)[0];
+
+          this.selectModule(module);
+          this.selectCategory(category);
+          this.selectTool(tool);
+
+          const toolElementId = this.toolElementIdPrefix + t.toolId;
+
+          setTimeout(() => {
+            this.searchBoxModel = null;
+            this.document.getElementById(toolElementId).focus();
+          });
+        }
+      });
+
     // subscribe to selected tool
     this.store
       .select("selectedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedTool) => {
-        console.log("tools.component.ts", t);
         this.selectedTool = t;
         this.runEnabled = false;
         this.paramButtonWarning = false;

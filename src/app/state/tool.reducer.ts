@@ -1,10 +1,26 @@
 import {
   SelectedTool,
+  SelectedToolById,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
   ValidatedTool,
 } from "../views/sessions/session/tools/ToolSelection";
+
+// select tool outside of tool list, e.g. from search or SelectedFilesComponent
+export const SET_SELECTED_TOOL_BY_ID = "SET_SELECTED_TOOL_BY_ID";
+export const CLEAR_SELECTED_TOOL_BY_ID = "CLEAR_SELECTED_TOOL_BY_ID";
+
+export function selectedToolById(state: SelectedToolById = null, { type, payload }) {
+  switch (type) {
+    case SET_SELECTED_TOOL_BY_ID:
+      return { ...payload };
+    case CLEAR_SELECTED_TOOL_BY_ID:
+      return null;
+    default:
+      return state;
+  }
+}
 
 // tool
 export const SET_SELECTED_TOOL = "SET_SELECTED_TOOL";

@@ -50,7 +50,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   sourceJob: Job;
   sourceTool: Tool;
   modulesMap: Map<string, Module>;
-  sourceJobModule: Module;
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -72,19 +71,14 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
     this.sourceJob = this.sessionDataService.getJobById(this.dataset.sourceJob, this.sessionData.jobsMap);
 
-    // if (this.sourceJob != null && this.modulesMap != null) {
-    //   log.info("source module found", this.sourceJobModule);
-    //   this.sourceJobModule = this.modulesMap.get(this.sourceJob.module);
-    // } else {
-    //   log.info("source module not found");
-    //   this.sourceJobModule = null;
-    // }
-    // this.sourceTool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
+    this.sourceTool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
   }
 
   ngOnInit(): void {
     this.toolsService.getModulesMap().subscribe(
-      (modulesMap) => (this.modulesMap = modulesMap),
+      (modulesMap) => {
+        this.modulesMap = modulesMap;
+      },
       (err) => this.restErrorService.showError("failed to get modules", err)
     );
 
@@ -153,7 +147,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     const category = module.categoriesMap.get(this.sourceJob.toolCategory);
     log.info("found category", category);
 
-    this.toolSelectionService.selectTool(module, category, this.sourceTool);
+    this.toolSelectionService.selectToolById(module.moduleId, category.name, this.sourceTool.name.id);
   }
 
   selectToolAndParameters() {}

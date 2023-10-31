@@ -22,6 +22,7 @@ import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
 import {
   selectedTool,
+  selectedToolById,
   selectedToolWithInputs,
   selectedToolWithPopulatedParams,
   selectedToolWithValidatedInputs,
@@ -62,6 +63,7 @@ import { TermsComponent } from "./views/terms/terms.component";
       {
         selectedDatasets,
         selectedJobs,
+        selectedToolById,
         selectedTool,
         selectedToolWithInputs,
         selectedToolWithValidatedInputs,

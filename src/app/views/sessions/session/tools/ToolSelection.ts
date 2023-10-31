@@ -2,6 +2,11 @@ import { Category, Dataset, InputBinding, Module, Tool } from "chipster-js-commo
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SampleGroups } from "../dataset.service";
 
+export interface SelectedToolById {
+  toolId: string;
+  categoryName: string;
+  moduleId: string;
+}
 export interface SelectedTool {
   tool: Tool;
   category: Category;
