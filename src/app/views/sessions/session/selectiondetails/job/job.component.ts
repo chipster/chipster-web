@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import { Dataset, Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import log from "loglevel";
 import { Observable, Subject, empty } from "rxjs";
@@ -36,6 +36,7 @@ export class JobComponent implements OnInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
+  inputListForView: Array<JobInput> = [];
   containerMemoryLimit = null;
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
   outputDatasets: Dataset[];
@@ -57,6 +58,7 @@ export class JobComponent implements OnInit, OnDestroy {
       (selectedJobs: Array<Job>) => {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
+        this.inputListForView = [];
         let jobId = null;
 
         if (selectedJobs && selectedJobs.length > 0) {
@@ -65,10 +67,12 @@ export class JobComponent implements OnInit, OnDestroy {
 
           if (job) {
             this.tool = this.tools.find((t) => t.name.id === job.toolId);
-            if (this.tool) {
-              this.showWithTool(job.parameters, this.tool);
-            } else {
-              log.warn(`no tool found with ID${job.toolId}`);
+
+            this.showParameters(job.parameters, this.tool);
+            this.showInputs(job.inputs, this.tool);
+
+            if (!this.tool) {
+              log.warn(`no tool found with ID ${job.toolId}`);
             }
           } else {
             log.warn("source job is null");
@@ -153,7 +157,7 @@ export class JobComponent implements OnInit, OnDestroy {
     return this.getDataset(datasetId).name;
   }
 
-  showWithTool(parameters: JobParameter[], tool: Tool) {
+  showParameters(parameters: JobParameter[], tool: Tool) {
     this.isDefaultValueMap = new Map();
 
     parameters.forEach((jobParameter) => {
@@ -193,6 +197,33 @@ export class JobComponent implements OnInit, OnDestroy {
       .filter((p) => p.displayName == null)
       .forEach((p) => {
         p.displayName = p.parameterId;
+      });
+  }
+
+  showInputs(inputs: JobInput[], tool: Tool) {
+    /* The new Chipster has misleadingly saved dataset name in input.displayName at 
+    least between 2018-2023(?). Try to find the displayName from the current tool 
+    instead, otherwise show the plain inputId. 
+    */
+    inputs.forEach((jobInput) => {
+      const clone = _.clone(jobInput);
+
+      if (tool) {
+        const toolInput = tool.inputs.find((i) => i.name.id === jobInput.inputId);
+
+        if (toolInput) {
+          // get the input display name from the tool
+          clone.displayName = toolInput.name.displayName;
+        }
+      }
+
+      this.inputListForView.push(clone);
+    });
+
+    this.inputListForView
+      .filter((i) => i.displayName == null)
+      .forEach((i) => {
+        i.displayName = i.inputId;
       });
   }
 
