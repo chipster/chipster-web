@@ -11,12 +11,12 @@ import {
 } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
-import log from "loglevel";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ToolsService } from "../../../../../shared/services/tools.service";
+import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -63,25 +63,19 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private toolService: ToolService,
     private toolsService: ToolsService,
-    private toolSelectionService: ToolSelectionService
+    private toolSelectionService: ToolSelectionService,
+    private datasetContextMenuService: DatasetContextMenuService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
 
-    this.sourceJob = this.sessionDataService.getJobById(this.dataset.sourceJob, this.sessionData.jobsMap);
+    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset], this.sessionData.jobsMap);
 
-    this.sourceTool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
+    this.sourceTool = this.datasetContextMenuService.getSoureTool(this.sourceJob, this.tools);
   }
 
   ngOnInit(): void {
-    this.toolsService.getModulesMap().subscribe(
-      (modulesMap) => {
-        this.modulesMap = modulesMap;
-      },
-      (err) => this.restErrorService.showError("failed to get modules", err)
-    );
-
     // subscribe to selected dataset content changes, needed for getting new file name after Rename
     this.sessionEventService
       .getSelectedDatasetsContentsUpdatedStream()
@@ -131,23 +125,11 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showJob() {
-    this.selectionHandlerService.setJobSelection([this.sourceJob]);
-
-    this.dialogModalService.openJobsModal(
-      this.sessionDataService.getJobList(this.sessionData),
-      this.tools,
-      this.sessionData
-    );
+    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
   }
 
   selectTool() {
-    log.info("select tool", this.sourceTool, this.modulesMap);
-    const module = this.modulesMap.get(this.sourceJob.module);
-    log.info("found module", module);
-    const category = module.categoriesMap.get(this.sourceJob.toolCategory);
-    log.info("found category", category);
-
-    this.toolSelectionService.selectToolById(module.moduleId, category.name, this.sourceTool.name.id);
+    this.datasetContextMenuService.selectTool(this.sourceJob);
   }
 
   selectToolAndParameters() {}

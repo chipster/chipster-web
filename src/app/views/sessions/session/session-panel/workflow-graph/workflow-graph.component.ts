@@ -14,6 +14,7 @@ import { PipeService } from "../../../../../shared/services/pipeservice.service"
 import { SettingsService } from "../../../../../shared/services/settings.service";
 import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
+import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
@@ -65,6 +66,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   // private readonly primaryColor = "#007bff"; // bootstap primary
   private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
+  private selectedDatasetSourceJob: Job;
+  private selectedDatasetSourceTool: Tool;
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -84,7 +87,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private datasetService: DatasetService,
     private visualizationEventService: VisualizationEventService,
     private getSessionDataService: GetSessionDataService,
-    private toolsService: ToolsService
+    private toolsService: ToolsService,
+    private datasetContextMenuService: DatasetContextMenuService
   ) {}
 
   // actually selected datasets
@@ -150,8 +154,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   exportMenuItem: any;
   historyMenuItem: any;
   groupsMenuItem: any;
-  selectChildrenMenuItem: any;
   dividerMenuItem: any;
+  showJobMenuItem: any;
+  selectToolMenuItem: any;
+  selectChildrenMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
 
@@ -250,6 +256,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.selectionEnabled = true;
             this.update();
             this.renderGraph();
+
+            // update these to know if context menu items should be disabled or not
+            this.selectedDatasetSourceJob = this.datasetContextMenuService.getSourceJob(
+              this.selectedDatasets,
+              this.jobsMap
+            );
+
+            this.selectedDatasetSourceTool = this.datasetContextMenuService.getSoureTool(
+              this.selectedDatasetSourceJob,
+              this.tools
+            );
           },
           (err) => this.errorService.showError("get dataset selections failed", err)
         )
@@ -678,7 +695,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.groupsMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
-
+            this.dividerMenuItem,
+            this.showJobMenuItem,
+            this.selectToolMenuItem,
             this.selectChildrenMenuItem,
             this.dividerMenuItem,
             this.deleteMenuItem,
@@ -1472,6 +1491,28 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       title: "Define Samples...",
       action(): void {
         self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
+      },
+    };
+
+    this.showJobMenuItem = {
+      title: "Show Job",
+      action(d): void {
+        self.datasetContextMenuService.showJob(self.selectedDatasetSourceJob, self.tools, self.sessionData);
+      },
+      disabled(): boolean {
+        return self.selectedDatasetSourceJob == null;
+      },
+    };
+
+    this.selectToolMenuItem = {
+      title: "Select Tool",
+      action(d): void {
+        // this doesn't need self.selectedDatasetSourceTool, because
+        // the job already knows the toolId
+        self.datasetContextMenuService.selectTool(self.selectedDatasetSourceJob);
+      },
+      disabled(): boolean {
+        return self.selectedDatasetSourceTool == null;
       },
     };
 

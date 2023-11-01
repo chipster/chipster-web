@@ -332,8 +332,30 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // other parts of the UI may have their own instances of tools,
           // which don't have the saved parameter values
           const module = this.modulesMap.get(t.moduleId);
+
+          if (module == null) {
+            this.errorService.showSimpleError(
+              "Module not found",
+              "Module " + t.moduleId + " does not exist. Please try to find the tool from other modules."
+            );
+            return;
+          }
           const category = module.categoriesMap.get(t.categoryName);
+          if (category == null) {
+            this.errorService.showSimpleError(
+              "Category not found",
+              "Category " + t.categoryName + " does not exist. Please try to find the tool from other categories."
+            );
+            return;
+          }
           const tool = category.tools.filter((t1) => t1.name.id === t.toolId)[0];
+          if (tool == null) {
+            this.errorService.showSimpleError(
+              "Tool not found",
+              "Tool " + t.toolId + " does not exist. Please try to find an alternative tool."
+            );
+            return;
+          }
 
           this.selectModule(module);
           this.selectCategory(category);
