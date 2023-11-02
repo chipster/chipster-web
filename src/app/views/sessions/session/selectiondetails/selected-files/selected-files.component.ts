@@ -1,21 +1,10 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
-import { ToolsService } from "../../../../../shared/services/tools.service";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
@@ -23,8 +12,6 @@ import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
-import { ToolSelectionService } from "../../tool.selection.service";
-import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
@@ -60,10 +47,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private sessionEventService: SessionEventService,
     private getSessionDataService: GetSessionDataService,
     private selectionHandlerService: SelectionHandlerService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private toolService: ToolService,
-    private toolsService: ToolsService,
-    private toolSelectionService: ToolSelectionService,
     private datasetContextMenuService: DatasetContextMenuService
   ) {}
 

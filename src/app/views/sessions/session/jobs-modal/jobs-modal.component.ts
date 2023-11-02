@@ -37,7 +37,7 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
     // scroll to the job when it's selected from "Show job" in File context menu
     // don't scroll after every job selection event, otherwise this modal is unusable
     const jobs = this.selectionService.selectedJobs;
-    log.info("scroll to", jobs);
+
     if (jobs.length === 1) {
       const rowId = "job-id-" + jobs[0].jobId;
       const el = document.getElementById(rowId);
