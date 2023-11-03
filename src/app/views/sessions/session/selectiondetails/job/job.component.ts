@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import JobOutput from "chipster-js-common/lib/model/joboutput";
 import * as _ from "lodash";
 import log from "loglevel";
 import { Observable, Subject, empty } from "rxjs";
@@ -39,7 +40,7 @@ export class JobComponent implements OnInit, OnDestroy {
   inputListForView: Array<JobInput> = [];
   containerMemoryLimit = null;
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
-  outputDatasets: Dataset[];
+  outputListForView: Array<JobOutput> = [];
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -59,6 +60,7 @@ export class JobComponent implements OnInit, OnDestroy {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
         this.inputListForView = [];
+        this.outputListForView = [];
         let jobId = null;
 
         if (selectedJobs && selectedJobs.length > 0) {
@@ -109,9 +111,22 @@ export class JobComponent implements OnInit, OnDestroy {
         this.screenOutput = job.screenOutput;
         this.duration = JobService.getDuration(job);
 
-        this.outputDatasets = this.sessionDataService
-          .getDatasetList(this.sessionData)
-          .filter((d) => d.sourceJob === jobId);
+        if (job.outputs != null) {
+          this.outputListForView = job.outputs;
+        } else {
+          // only jobs since Chipster version 11/2023 define outputs
+          log.info("job doesn't define outputs, find from datasets");
+          this.sessionDataService
+            .getDatasetList(this.sessionData)
+            .filter((d) => d.sourceJob === jobId)
+            .forEach((d) => {
+              this.outputListForView.push({
+                outputId: null,
+                displayName: null,
+                datasetId: d.datasetId,
+              });
+            });
+        }
 
         return;
       }
@@ -202,13 +217,15 @@ export class JobComponent implements OnInit, OnDestroy {
 
   showInputs(inputs: JobInput[], tool: Tool) {
     /* The new Chipster has misleadingly saved dataset name in input.displayName at 
-    least between 2018-2023(?). Try to find the displayName from the current tool 
+    least between 2018-2023. Try to find the displayName from the current tool 
     instead, otherwise show the plain inputId. 
     */
     inputs.forEach((jobInput) => {
       const clone = _.clone(jobInput);
 
-      if (tool) {
+      // if datasetName is not null, then we can already trust the displayName
+      if (jobInput.datasetName == null && tool) {
+        // if datasetName is null, we can try to find a displayName from the current tool for old jobs
         const toolInput = tool.inputs.find((i) => i.name.id === jobInput.inputId);
 
         if (toolInput) {

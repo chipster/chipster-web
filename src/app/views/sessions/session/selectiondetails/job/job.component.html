@@ -89,13 +89,17 @@
           <td class="table-td">
             <table class="table table-sm mb-0">
               <tbody>
-                <tr *ngFor="let output of outputDatasets">
-                  <td class="" style="width: 60%; white-space: nowrap"></td>
-                  <td>
+                <tr *ngFor="let output of outputListForView">
+                  <td style="width: 60%; white-space: nowrap">
+                    {{ output.displayName || output.outputId }}
+                  </td>
+
+                  <td *ngIf="hasDataset(output.datasetId)">
                     <ch-link-button class="no-underline-link-button" (click)="selectDataset(output.datasetId)">
-                      {{ output.name }}
+                      {{ getDatasetName(output.datasetId) }}
                     </ch-link-button>
                   </td>
+                  <td *ngIf="!hasDataset(output.datasetId)">(deleted)</td>
                 </tr>
               </tbody>
             </table>

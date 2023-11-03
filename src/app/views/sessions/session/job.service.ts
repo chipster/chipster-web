@@ -210,25 +210,30 @@ export class JobService {
     // set inputs
     job.inputs = [];
 
+    const inputDatasetNames = new Map<string, string>();
+
     // add bound inputs
     for (const inputBinding of validatedTool.inputBindings.filter((binding) => binding.datasets.length > 0)) {
       // single input
       if (!this.toolService.isMultiInput(inputBinding.toolInput)) {
         job.inputs.push({
           inputId: inputBinding.toolInput.name.id,
+          displayName: inputBinding.toolInput.name.displayName,
           description: inputBinding.toolInput.description,
           datasetId: inputBinding.datasets[0].datasetId,
-          displayName: inputBinding.datasets[0].name,
+          datasetName: inputBinding.datasets[0].name,
         });
       } else {
         // multi input
         let i = 0;
         for (const dataset of inputBinding.datasets) {
+          const inputId = this.toolService.getMultiInputId(inputBinding.toolInput, i);
           job.inputs.push({
-            inputId: this.toolService.getMultiInputId(inputBinding.toolInput, i),
+            inputId,
+            displayName: inputBinding.toolInput.name.displayName,
             description: inputBinding.toolInput.description,
             datasetId: dataset.datasetId,
-            displayName: dataset.name,
+            datasetName: dataset.name,
           });
           i++;
         }
