@@ -67,7 +67,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // private readonly primaryColor = "#007bff"; // bootstap primary
   private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
   private selectedDatasetSourceJob: Job;
-  private selectedDatasetSourceTool: Tool;
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -156,7 +155,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   groupsMenuItem: any;
   dividerMenuItem: any;
   showJobMenuItem: any;
-  selectToolMenuItem: any;
   selectChildrenMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
@@ -261,11 +259,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.selectedDatasetSourceJob = this.datasetContextMenuService.getSourceJob(
               this.selectedDatasets,
               this.jobsMap
-            );
-
-            this.selectedDatasetSourceTool = this.datasetContextMenuService.getSoureTool(
-              this.selectedDatasetSourceJob,
-              this.tools
             );
           },
           (err) => this.errorService.showError("get dataset selections failed", err)
@@ -697,7 +690,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.historyMenuItem,
             this.dividerMenuItem,
             this.showJobMenuItem,
-            this.selectToolMenuItem,
             this.selectChildrenMenuItem,
             this.dividerMenuItem,
             this.deleteMenuItem,
@@ -1501,18 +1493,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       },
       disabled(): boolean {
         return self.selectedDatasetSourceJob == null;
-      },
-    };
-
-    this.selectToolMenuItem = {
-      title: "Select Tool",
-      action(d): void {
-        // this doesn't need self.selectedDatasetSourceTool, because
-        // the job already knows the toolId
-        self.datasetContextMenuService.selectTool(self.selectedDatasetSourceJob);
-      },
-      disabled(): boolean {
-        return self.selectedDatasetSourceTool == null;
       },
     };
 

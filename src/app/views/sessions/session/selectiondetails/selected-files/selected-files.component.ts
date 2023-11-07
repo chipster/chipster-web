@@ -35,7 +35,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
   sourceJob: Job;
-  sourceTool: Tool;
   modulesMap: Map<string, Module>;
 
   constructor(
@@ -54,8 +53,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetName = this.dataset.name;
 
     this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset], this.sessionData.jobsMap);
-
-    this.sourceTool = this.datasetContextMenuService.getSoureTool(this.sourceJob, this.tools);
   }
 
   ngOnInit(): void {
@@ -109,10 +106,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
   showJob() {
     this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
-  }
-
-  selectTool() {
-    this.datasetContextMenuService.selectTool(this.sourceJob);
   }
 
   selectToolAndParameters() {}
