@@ -5,13 +5,13 @@
         <tbody>
           <tr>
             <td class="lighter">Created&nbsp;with:</td>
-            <td class="width-max">{{ toolCategory }} / {{ toolName }}</td>
-            <td>
+            <td class="width-max">
+              {{ toolCategory }} / {{ toolName }}
               <!-- context dropdown -->
-              <div ngbDropdown class="d-inline-block float-end">
+              <div ngbDropdown class="d-inline-block">
                 <button
                   type="button"
-                  class="btn btn-sm btn-outline-secondary tool-bar-button no-caret-dropdown"
+                  class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
                   id="viewDropdownMenuButton"
                   ngbDropdownToggle
                   aria-haspopup="true"
