@@ -302,6 +302,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public openJobs() {
+    // scroll to latest jobs at top, if some other job was selected before
+    this.selectionHandlerService.setJobSelection([]);
+
     this.dialogModalService.openJobsModal(
       this.sessionDataService.getJobList(this.sessionData),
       this.toolsArray,
