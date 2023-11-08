@@ -12,6 +12,7 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import {
+  CLEAR_SELECTED_TOOL_BY_ID,
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
@@ -608,6 +609,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // don't clear selectedTool to avoid looping
     // null should also go through the validation etc chain, but just to be sure
 
+    this.store.dispatch({ type: CLEAR_SELECTED_TOOL_BY_ID });
     this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
     this.store.dispatch({
       type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
