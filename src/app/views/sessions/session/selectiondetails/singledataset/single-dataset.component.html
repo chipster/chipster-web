@@ -6,6 +6,26 @@
           <tr>
             <td class="lighter">Created&nbsp;with:</td>
             <td class="width-max">{{ toolCategory }} / {{ toolName }}</td>
+            <td>
+              <!-- context dropdown -->
+              <div ngbDropdown class="d-inline-block float-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary tool-bar-button no-caret-dropdown"
+                  id="viewDropdownMenuButton"
+                  ngbDropdownToggle
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  title="Actions">
+                  <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
+                  <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
+                </button>
+                <div ngbDropdownMenu aria-labelledby="viewDropdownMenuButton">
+                  <button ngbDropdownItem (click)="selectTool()" [class.disabled]="!tool">Select Tool</button>
+                  <button ngbDropdownItem (click)="showJob()" [class.disabled]="!sourceJob">Show Job</button>
+                </div>
+              </div>
+            </td>
           </tr>
           <tr *ngIf="sourceJob && sourceJob.parameters.length > 0">
             <td class="lighter">Parameters:</td>

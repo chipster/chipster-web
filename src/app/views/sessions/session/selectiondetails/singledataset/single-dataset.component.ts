@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
@@ -38,7 +39,8 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
     private datasetModalService: DatasetModalService,
-    private toolService: ToolService
+    private toolService: ToolService,
+    private datasetContextMenuService: DatasetContextMenuService
   ) {}
 
   ngOnInit() {
@@ -74,5 +76,13 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   showHistory(): void {
     this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
+  }
+
+  selectTool() {
+    this.datasetContextMenuService.selectTool(this.sourceJob);
+  }
+
+  showJob() {
+    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
   }
 }
