@@ -114,10 +114,16 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
         (this.historyOptionsMap.get("inputFileNames").enabled
           ? this.historyOptionsMap.get("inputFileNames").name +
             ":\n" +
-            step.sourceJob.inputs.reduce(
-              (inputs: string, input: JobInput) => inputs + "\t" + input.inputId + ": " + input.displayName + "\n",
-              ""
-            )
+            step.sourceJob.inputs.reduce((inputs: string, input: JobInput) => {
+              // jobs until 11/2023 have datasetName in input.displayName
+              if (input.datasetName == null) {
+                return inputs + "\t" + input.inputId + ": " + input.displayName + "\n";
+              }
+              if (input.displayName != null) {
+                return inputs + "\t" + input.displayName + ": " + input.datasetName + "\n";
+              }
+              return inputs + "\t" + input.inputId + ": " + input.datasetName + "\n";
+            }, "")
           : "") + "\n";
 
       // parameters

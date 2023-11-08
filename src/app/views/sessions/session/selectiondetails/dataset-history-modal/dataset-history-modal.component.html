@@ -79,8 +79,16 @@
               <!-- imported files don't have a sourceJob -->
               <tbody *ngIf="step.sourceJob != null">
                 <tr *ngFor="let input of step.sourceJob.inputs">
-                  <td class="" style="width: 60%; white-space: nowrap">{{ input.inputId }}</td>
-                  <td>{{ input.displayName }}</td>
+                  <!-- old jobs (until 11/2023) have datasetName in input.displayName -->
+                  <td *ngIf="input.datasetName == null" class="" style="width: 60%; white-space: nowrap">
+                    {{ input.inputId }}
+                  </td>
+                  <td *ngIf="input.datasetName == null">{{ input.displayName }}</td>
+                  <!-- if input.datasetName is not null, then this is a new job-->
+                  <td *ngIf="input.datasetName != null" class="" style="width: 60%; white-space: nowrap">
+                    {{ input.displayName || input.inputId }}
+                  </td>
+                  <td *ngIf="input.datasetName != null">{{ input.datasetName }}</td>
                 </tr>
               </tbody>
             </table>
