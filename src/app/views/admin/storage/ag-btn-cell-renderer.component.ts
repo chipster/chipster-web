@@ -6,10 +6,11 @@ import { ICellRendererParams } from "ag-grid-community";
   selector: "ch-ag-btn-cell-renderer",
   template: `
     <div>
-      <button class="btn btn-secondary btn-sm" (click)="onSessions()">Sessions</button>
-      <button class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">Delete sessions</button>
-
-      <!-- <button class="btn btn-danger btn-sm ms-2" (click)="onDelete()">Delete</button> -->
+      <button *ngIf="params.onSessions" class="btn btn-secondary btn-sm" (click)="onSessions()">Sessions</button>
+      <button *ngIf="params.onDelete" class="btn btn-danger btn-sm ms-2" (click)="onDelete()">Delete</button>
+      <button *ngIf="params.onDeleteSessions" class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">
+        Delete sessions
+      </button>
     </div>
   `,
 })
@@ -19,7 +20,7 @@ export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
     return false;
   }
   public label: string;
-  private params: any;
+  public params: any;
 
   agInit(params: any): void {
     this.params = params;

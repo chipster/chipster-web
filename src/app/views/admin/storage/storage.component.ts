@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ColDef } from "ag-grid-community";
+import { ColDef, GridOptions } from "ag-grid-community";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, of } from "rxjs";
@@ -12,6 +12,7 @@ import { LoadState, State } from "../../../model/loadstate";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { UserService } from "../../../shared/services/user.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 
 @Component({
@@ -23,32 +24,56 @@ import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 export class StorageComponent implements OnInit {
   quotasMap: Map<string, any>;
 
-  columnDefs: ColDef[] = [
-    { field: "username", sortable: true, filter: true, pinned: "left" },
-    { field: "user", sortable: true, filter: true },
-    { field: "auth", sortable: true, filter: true },
-    { field: "created", sortable: true, filter: true },
-    { field: "modified", sortable: true, filter: true },
+  public combinedUsersGridOptions: GridOptions;
+  public combinedUsersGridReady = false;
+
+  private fieldUsername: ColDef = {
+    field: "username",
+    sortable: true,
+    filter: true,
+    pinned: "left",
+  };
+  private fieldUser: ColDef = { field: "user", sortable: true, filter: true };
+  private fieldAuth: ColDef = { field: "auth", sortable: true, filter: true };
+  private fieldCreated: ColDef = { field: "created", sortable: true, filter: true };
+  private fieldModified: ColDef = { field: "modified", sortable: true, filter: true };
+
+  private fieldReadWriteSessions: ColDef = {
+    field: "readWriteSessions",
+    headerName: "Sessions RW",
+    sortable: true,
+    wrapHeaderText: true,
+    autoHeaderHeight: true,
+    resizable: true,
+    type: "rightAligned",
+  };
+  private fieldReadOnlySessions: ColDef = {
+    field: "readOnlySessions",
+    headerName: "Sessions RO",
+    sortable: true,
+    type: "numericColumn",
+  };
+  private fieldSize: ColDef = {
+    field: "size",
+    sortable: true,
+    valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
+  };
+  private fieldActions: ColDef = {
+    field: "actions",
+    resizable: true,
+    pinned: "right",
+    cellRenderer: AgBtnCellRendererComponent,
+  };
+
+  combinedUsersColumnDefs: ColDef[] = [
+    this.fieldUsername,
+    this.fieldCreated,
+    this.fieldModified,
+    this.fieldReadWriteSessions,
+    this.fieldReadOnlySessions,
+    this.fieldSize,
     {
-      field: "readWriteSessions",
-      headerName: "Sessions RW",
-      sortable: true,
-      wrapHeaderText: true,
-      autoHeaderHeight: true,
-      resizable: true,
-      type: "rightAligned",
-    },
-    { field: "readOnlySessions", headerName: "Sessions RO", sortable: true, type: "numericColumn" },
-    {
-      field: "size",
-      sortable: true,
-      valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
-    },
-    {
-      field: "actions",
-      resizable: true,
-      pinned: "right",
-      cellRenderer: AgBtnCellRendererComponent,
+      ...this.fieldActions,
       cellRendererParams: {
         onSessions: this.onSessions.bind(this),
         onDeleteSessions: this.onDeleteSessions.bind(this),
@@ -57,9 +82,38 @@ export class StorageComponent implements OnInit {
     },
   ];
 
+  authOnlyUsersColumnDefs: ColDef[] = [
+    this.fieldAuth,
+    this.fieldUsername,
+    this.fieldCreated,
+    this.fieldModified,
+    {
+      ...this.fieldActions,
+      cellRendererParams: {
+        onDelete: this.onDeleteUser.bind(this),
+      },
+    },
+  ];
+
+  sessionDbOnlyColumnDefs: ColDef[] = [
+    this.fieldUsername,
+    this.fieldReadWriteSessions,
+    this.fieldReadOnlySessions,
+    this.fieldSize,
+    {
+      ...this.fieldActions,
+      cellRendererParams: {
+        onSessions: this.onSessions.bind(this),
+        onDeleteSessions: this.onDeleteSessions.bind(this),
+      },
+    },
+  ];
+
   public rowSelection: "single" | "multiple" = "single";
 
-  rowData = [];
+  public combinedUsers = [];
+  public authOnlyUsers = [];
+  public sessionDbOnlyUsers = [];
 
   selectedUser: string;
   sessions: any[];
@@ -76,7 +130,8 @@ export class StorageComponent implements OnInit {
     private modalService: NgbModal,
     private bytesPipe: BytesPipe,
     private tokenService: TokenService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -86,7 +141,13 @@ export class StorageComponent implements OnInit {
   private refresh() {
     this.allSessionsState = new LoadState(State.Loading);
     this.userSessionsState = new LoadState(State.Loading);
-    this.rowData = [];
+
+    this.combinedUsersGridReady = false;
+
+    this.combinedUsers = [];
+    this.authOnlyUsers = [];
+    this.sessionDbOnlyUsers = [];
+
     this.sessions = [];
     this.quotasMap = new Map();
 
@@ -158,7 +219,16 @@ export class StorageComponent implements OnInit {
         const intersection = new Set([...sessionDbUsersSet].filter((x) => authUsersSet.has(x)));
 
         // get difference of both sets
-        const difference = new Set([...sessionDbUsersSet].filter((x) => !authUsersSet.has(x)));
+        const inSessionDbNotAuth = [...sessionDbUsersSet]
+          .filter((x) => !authUsersSet.has(x))
+          .map((username) => sessionDbUsersMap.get(username));
+
+        const inAuthNotSessionDb = [...authUsersSet]
+          .filter((x) => !sessionDbUsersSet.has(x))
+          .map((username) => authUsersMap.get(username));
+        console.log(sessionDbUsersMap);
+        console.log("sessiondb not auth", inSessionDbNotAuth);
+        console.log("auth not sessiondb", inAuthNotSessionDb);
 
         const combinedUsers = sessionDbUsers
           .filter((sessionDbUser) => intersection.has(sessionDbUser.username))
@@ -174,17 +244,62 @@ export class StorageComponent implements OnInit {
             })
           );
 
-        const missingUsers = [];
+        this.combinedUsers = combinedUsers;
+        this.authOnlyUsers = inAuthNotSessionDb.map((authUser) => ({
+          ...authUser,
+          user: authUser.username,
+          username: authUser.auth + "/" + authUser.username,
+        }));
+        this.sessionDbOnlyUsers = inSessionDbNotAuth;
 
-        this.rowData = combinedUsers;
+        // grid options
+        this.combinedUsersGridOptions = {
+          rowData: this.combinedUsers,
+          columnDefs: this.combinedUsersColumnDefs,
+
+          rowSelection: this.rowSelection,
+
+          // EVENTS
+          // Add event handlers
+          onRowClicked: (event) => console.log("A row was clicked"),
+          onColumnResized: (event) => console.log("A column was resized"),
+          onGridReady: (event) => {
+            console.log("The grid is now ready");
+            this.combinedUsersGridReady = true;
+          },
+          onGridPreDestroyed: (event) => {
+            console.log("The grid pre destroyed");
+            this.combinedUsersGridReady = false;
+          },
+
+          // CALLBACKS
+          getRowHeight: (params) => 25,
+        };
+
         this.allSessionsState = LoadState.Ready;
       },
       error: (err) => this.restErrorService.showError("get users and quotas failed", err),
     });
   }
 
+  onDeleteMultipleUsers(event) {
+    console.log("delete multiple users", event);
+  }
+
   onDeleteUser(event) {
-    console.log("delete user", event);
+    const username = event.username;
+    console.log("delete user", username);
+
+    const users: string[] = [username, username];
+
+    this.userService.deleteUser(...users).subscribe({
+      next: (res) => {
+        console.log("delete user", username, "done");
+        console.log(res);
+        this.refresh();
+      },
+      error: (err) => this.restErrorService.showError("Delete user " + username + " failed", err),
+    });
   }
 
   onDeleteSessions(event) {
@@ -202,6 +317,7 @@ export class StorageComponent implements OnInit {
       .subscribe({
         next: (res) => {
           console.log("delete sessions for", username, "done");
+          console.log(res);
           this.refresh();
         },
         error: (err) => this.restErrorService.showError("Delete sessions for " + username + " failed", err),
@@ -254,11 +370,19 @@ export class StorageComponent implements OnInit {
       )
       .subscribe(
         (sessions: any[]) => {
+          console.log("sessions", sessions);
           this.sessions = sessions;
           this.userSessionsState = new LoadState(State.Ready);
         },
         (err) => this.restErrorService.showError("get quotas failed", err)
       );
+  }
+
+  getFilteredCount(): number {
+    // console.log(this.combinedUsersGridOptions.api);
+
+    return this.combinedUsersGridOptions.api.getDisplayedRowCount();
+    // return 0;
   }
 
   onSelectionChanged($event) {
