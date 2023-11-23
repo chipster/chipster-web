@@ -208,4 +208,8 @@ export default class UtilsService {
   static onlyHasUniqueValues(array: Array<any>) {
     return new Set(array).size === array.length;
   }
+
+  static sIfMany(array: any[]): string {
+    return array.length > 1 ? "s" : "";
+  }
 }

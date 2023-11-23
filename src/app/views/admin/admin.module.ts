@@ -15,6 +15,7 @@ import { NewsComponent } from "./news/news.component";
 import { ServicesComponent } from "./services/services.component";
 import { StatisticsComponent } from "./statistics/statistics.component";
 import { AgBtnCellRendererComponent } from "./storage/ag-btn-cell-renderer.component";
+import { ConfirmDeleteModalComponent } from "./storage/confirm-delete-modal/confirm-delete-modal.component";
 import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
@@ -33,6 +34,7 @@ import { UsersComponent } from "./users/users.component";
     MaintenanceComponent,
     NewsComponent,
     AgBtnCellRendererComponent,
+    ConfirmDeleteModalComponent,
   ],
 })
 export class AdminModule {}

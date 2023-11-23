@@ -1,0 +1,16 @@
+<div>
+  <!-- for some reason dropdown button doesn't get clicks inside ag-grid -->
+  <!-- <div ngbDropdown class="d-inline-block">
+    <button type="button" class="btn btn-sm btn-danger ms-2" id="deleteDropdown" ngbDropdownToggle>Delete</button>
+    <div ngbDropdownMenu aria-labelledby="deleteDropdown">
+      <button ngbDropdownItem (click)="onDeleteUser()">Delete users</button>
+      <button ngbDropdownItem (click)="onDeleteSessions()">Delete sessions</button>
+    </div>
+  </div> -->
+
+  <button *ngIf="params.onShowSessions" class="btn btn-secondary btn-sm" (click)="onShowSessions()">Sessions</button>
+  <button *ngIf="params.onDeleteUser" class="btn btn-danger btn-sm ms-2" (click)="onDeleteUser()">Delete</button>
+  <button *ngIf="params.onDeleteSessions" class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">
+    Delete sessions
+  </button>
+</div>
