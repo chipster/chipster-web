@@ -1,19 +1,24 @@
+import { HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { User } from "chipster-js-common";
+import { Role, User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
 import { map, mergeMap, take, tap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { LatestSession, SET_LATEST_SESSION } from "../../state/latest-session.reducer";
 import { SessionResource } from "../resources/session.resource";
+import { AuthHttpClientService } from "./auth-http-client.service";
+import { ConfigService } from "./config.service";
 
 @Injectable()
 export class UserService {
   constructor(
     private store: Store<any>,
     private authenticationService: AuthenticationService,
-    private sessionResource: SessionResource
+    private sessionResource: SessionResource,
+    private configService: ConfigService,
+    private authHttpClient: AuthHttpClientService
   ) {}
 
   public updateLatestSession(sessionId: string, sourceSessionId?: string) {
@@ -106,5 +111,19 @@ export class UserService {
 
   getLatestSessionFromSessionDb(): Observable<string> {
     return this.authenticationService.getUser().pipe(map((user: User) => user.latestSession));
+  }
+
+  deleteUser(...userId: string[]): Observable<any> {
+    return this.configService.getAdminUri(Role.AUTH).pipe(
+      mergeMap((authAdminUrl: string) => {
+        let httpParams = new HttpParams();
+        userId.forEach((id) => {
+          httpParams = httpParams.append("userId", id);
+        });
+
+        const url = authAdminUrl + "/admin/users";
+        return this.authHttpClient.deleteAuth(url, httpParams);
+      })
+    );
   }
 }

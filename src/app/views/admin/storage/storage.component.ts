@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ColDef } from "ag-grid-community";
+import { ColDef, GridApi, GridOptions } from "ag-grid-community";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, of } from "rxjs";
@@ -12,7 +12,12 @@ import { LoadState, State } from "../../../model/loadstate";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { SessionDbAdminService } from "../../../shared/services/sessiondb-admin.service";
+import { UserService } from "../../../shared/services/user.service";
+import UtilsService from "../../../shared/utilities/utils";
+import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
+import { ConfirmDeleteModalComponent } from "./confirm-delete-modal/confirm-delete-modal.component";
 
 @Component({
   selector: "ch-storage",
@@ -21,44 +26,110 @@ import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class StorageComponent implements OnInit {
-  users: string[];
   quotasMap: Map<string, any>;
 
-  columnDefs: ColDef[] = [
-    { field: "username", sortable: true, filter: true, pinned: "left" },
-    { field: "user", sortable: true, filter: true },
-    { field: "auth", sortable: true, filter: true },
-    { field: "created", sortable: true, filter: true },
-    { field: "modified", sortable: true, filter: true },
+  public combinedGridOptions: GridOptions;
+  public combinedGridReady = false;
+  public authOnlyGridOptions: GridOptions;
+  public authOnlyGridReady = false;
+  public sessionDbOnlyGridOptions: GridOptions;
+  public sessionDbOnlyGridReady = false;
+
+  private fieldUsername: ColDef = {
+    field: "username",
+    sortable: true,
+    filter: true,
+    pinned: "left",
+  };
+  private fieldUser: ColDef = { field: "user", sortable: true, filter: true };
+  private fieldAuth: ColDef = { field: "auth", sortable: true, filter: true };
+  private fieldName: ColDef = { field: "name", sortable: true, filter: true };
+  private fieldEmail: ColDef = { field: "email", sortable: true, filter: true };
+  private fieldCreated: ColDef = { field: "created", sortable: true, filter: true };
+  private fieldModified: ColDef = { field: "modified", sortable: true, filter: true };
+
+  private fieldReadWriteSessions: ColDef = {
+    field: "readWriteSessions",
+    headerName: "Sessions RW",
+    sortable: true,
+    wrapHeaderText: true,
+    autoHeaderHeight: true,
+    // resizable: true,
+    type: "rightAligned",
+  };
+  private fieldReadOnlySessions: ColDef = {
+    field: "readOnlySessions",
+    headerName: "Sessions RO",
+    sortable: true,
+    type: "numericColumn",
+  };
+  private fieldSize: ColDef = {
+    field: "size",
+    sortable: true,
+    valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
+    type: "numericColumn",
+  };
+  private fieldActions: ColDef = {
+    field: "actions",
+    width: 290,
+    // resizable: true,
+    pinned: "right",
+    cellRenderer: AgBtnCellRendererComponent,
+  };
+
+  combinedColumnDefs: ColDef[] = [
+    this.fieldUsername,
+    this.fieldName,
+    this.fieldEmail,
+    this.fieldCreated,
+    this.fieldModified,
+    this.fieldReadWriteSessions,
+    this.fieldReadOnlySessions,
+    this.fieldSize,
     {
-      field: "readWriteSessions",
-      headerName: "Sessions RW",
-      sortable: true,
-      wrapHeaderText: true,
-      autoHeaderHeight: true,
-      resizable: true,
-      type: "rightAligned",
-    },
-    { field: "readOnlySessions", headerName: "Sessions RO", sortable: true, type: "numericColumn" },
-    {
-      field: "size",
-      sortable: true,
-      valueFormatter: (params) => this.bytesPipe.transform(params.value, 0) as string,
-    },
-    {
-      field: "actions",
-      pinned: "right",
-      cellRenderer: AgBtnCellRendererComponent,
+      ...this.fieldActions,
       cellRendererParams: {
-        onSessions: this.onSessions.bind(this),
-        onDelete: this.onDeleteUser.bind(this),
+        onShowSessions: this.onShowSessions.bind(this),
+        onDeleteSessions: this.onDeleteSingleUsersSessions.bind(this),
+        onDeleteUser: this.onDeleteSingleUser.bind(this),
+      },
+    },
+  ];
+
+  authOnlyColumnDefs: ColDef[] = [
+    this.fieldAuth,
+    this.fieldUsername,
+    this.fieldName,
+    this.fieldEmail,
+    this.fieldCreated,
+    this.fieldModified,
+    {
+      ...this.fieldActions,
+      cellRendererParams: {
+        onDeleteUser: this.onDeleteSingleUser.bind(this),
+      },
+    },
+  ];
+
+  sessionDbOnlyColumnDefs: ColDef[] = [
+    this.fieldUsername,
+    this.fieldReadWriteSessions,
+    this.fieldReadOnlySessions,
+    this.fieldSize,
+    {
+      ...this.fieldActions,
+      cellRendererParams: {
+        onShowSessions: this.onShowSessions.bind(this),
+        onDeleteSessions: this.onDeleteSingleUsersSessions.bind(this),
       },
     },
   ];
 
   public rowSelection: "single" | "multiple" = "single";
 
-  rowData = [];
+  public combinedUsers = [];
+  public authOnlyUsers = [];
+  public sessionDbOnlyUsers = [];
 
   selectedUser: string;
   sessions: any[];
@@ -75,12 +146,28 @@ export class StorageComponent implements OnInit {
     private modalService: NgbModal,
     private bytesPipe: BytesPipe,
     private tokenService: TokenService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private userService: UserService,
+    private sessionDbAdminService: SessionDbAdminService
   ) {}
 
   ngOnInit() {
+    this.refresh();
+  }
+
+  private refresh() {
+    this.allSessionsState = new LoadState(State.Loading);
     this.userSessionsState = new LoadState(State.Loading);
-    this.users = [];
+
+    this.combinedGridReady = false;
+    this.authOnlyGridReady = false;
+    this.sessionDbOnlyGridReady = false;
+
+    this.combinedUsers = [];
+    this.authOnlyUsers = [];
+    this.sessionDbOnlyUsers = [];
+
+    this.sessions = [];
     this.quotasMap = new Map();
 
     const authUsers$ = this.authenticationService.getUsers();
@@ -88,18 +175,15 @@ export class StorageComponent implements OnInit {
     let sessionDbUrl: string;
     let sessionDbAdminUrl: string;
     // check if its working properly
-    const sessionDbUsers$ = this.configService.getInternalService(Role.SESSION_DB, this.tokenService.getToken()).pipe(
-      tap((service) => {
-        sessionDbAdminUrl = service.adminUri;
+    const sessionDbUsers$ = this.configService.getAdminUri(Role.SESSION_DB).pipe(
+      tap((uri: string) => {
+        sessionDbAdminUrl = uri;
       }),
       mergeMap(() => this.configService.getSessionDbUrl()),
       tap((url) => {
         sessionDbUrl = url;
       }),
       mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-      tap((users: string[]) => {
-        this.users = users;
-      }),
       mergeMap((users: string[]) => {
         const userQuotas$ = users.map((user: string) => {
           const url = sessionDbAdminUrl + "/admin/users/quota?userId=" + encodeURIComponent(user);
@@ -113,17 +197,11 @@ export class StorageComponent implements OnInit {
             })
           );
         });
-        return forkJoin(userQuotas$);
+
+        // just returning [] messes up the forkJoin later on
+        return userQuotas$ == null || userQuotas$.length === 0 ? of([]) : forkJoin(userQuotas$);
       })
     );
-    // sessionDbUsers$.subscribe({
-    //   next: (quotas) => {
-    //     quotas.forEach((quota) => this.quotasMap.set(quota.username, quota));
-    //     this.rowData = quotas;
-    //     this.allSessionsState = LoadState.Ready;
-    //   },
-    //   error: (err) => this.restErrorService.showError("get quotas failed", err),
-    // });
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
@@ -157,7 +235,13 @@ export class StorageComponent implements OnInit {
         const intersection = new Set([...sessionDbUsersSet].filter((x) => authUsersSet.has(x)));
 
         // get difference of both sets
-        const difference = new Set([...sessionDbUsersSet].filter((x) => !authUsersSet.has(x)));
+        const inSessionDbNotAuth = [...sessionDbUsersSet]
+          .filter((x) => !authUsersSet.has(x))
+          .map((username) => sessionDbUsersMap.get(username));
+
+        const inAuthNotSessionDb = [...authUsersSet]
+          .filter((x) => !sessionDbUsersSet.has(x))
+          .map((username) => authUsersMap.get(username));
 
         const combinedUsers = sessionDbUsers
           .filter((sessionDbUser) => intersection.has(sessionDbUser.username))
@@ -173,24 +257,140 @@ export class StorageComponent implements OnInit {
             })
           );
 
-        const missingUsers = [];
-        sessionDbUsers.forEach((sessionDbUser) => {});
-        this.rowData = combinedUsers;
+        this.combinedUsers = combinedUsers;
+        this.authOnlyUsers = inAuthNotSessionDb.map((authUser) => ({
+          ...authUser,
+          user: authUser.username,
+          username: authUser.auth + "/" + authUser.username,
+        }));
+        this.sessionDbOnlyUsers = inSessionDbNotAuth;
+
+        // grid options
+        const commonOptions = { suppressRowClickSelection: true, suppressCellFocus: true };
+
+        this.combinedGridOptions = {
+          ...commonOptions,
+          ...{
+            rowData: this.combinedUsers,
+            columnDefs: this.combinedColumnDefs,
+
+            // rowSelection: this.rowSelection,
+
+            onGridReady: (params) => {
+              // params.columnApi.autoSizeAllColumns();
+              this.combinedGridReady = true;
+            },
+            onGridPreDestroyed: () => {
+              this.combinedGridReady = false;
+            },
+            // getRowHeight: (params) => 25,
+          },
+        };
+
+        this.authOnlyGridOptions = {
+          ...commonOptions,
+          ...{
+            rowData: this.authOnlyUsers,
+            columnDefs: this.authOnlyColumnDefs,
+            rowSelection: this.rowSelection,
+            onGridReady: (params) => {
+              // params.columnApi.autoSizeAllColumns();
+              this.authOnlyGridReady = true;
+            },
+            onGridPreDestroyed: () => {
+              this.authOnlyGridReady = false;
+            },
+          },
+        };
+
+        this.sessionDbOnlyGridOptions = {
+          ...commonOptions,
+          ...{
+            rowData: this.sessionDbOnlyUsers,
+            columnDefs: this.sessionDbOnlyColumnDefs,
+            rowSelection: this.rowSelection,
+            onGridReady: (params) => {
+              // params.columnApi.autoSizeAllColumns();
+              this.sessionDbOnlyGridReady = true;
+            },
+            onGridPreDestroyed: () => {
+              this.sessionDbOnlyGridReady = false;
+            },
+          },
+        };
+
         this.allSessionsState = LoadState.Ready;
       },
       error: (err) => this.restErrorService.showError("get users and quotas failed", err),
     });
   }
 
-  onDeleteUser(event) {
-    console.log("delete user", event);
-  }
-
-  onSessions(event) {
+  onShowSessions(event) {
     this.selectUser(event.username);
   }
 
-  selectUser(user: string) {
+  onDeleteUsers(users: any[]) {
+    this.combinedGridOptions.columnApi.autoSizeAllColumns();
+
+    this.deleteUsers(...users);
+  }
+
+  onDeleteSessions(users: any[]) {
+    this.deleteSessions(...users);
+  }
+
+  onDeleteUsersAndSessions(users: any[]) {
+    this.deleteSessions(...users);
+    this.deleteUsers(...users);
+  }
+
+  onDeleteSingleUser(user: any) {
+    this.deleteUsers(user);
+  }
+
+  onDeleteSingleUsersSessions(user: any) {
+    this.deleteSessions(user);
+  }
+
+  deleteSessions(...users: any[]) {
+    const userIds: string[] = users.map((user) => user.username);
+
+    this.openConfirmModal(
+      "Delete sessions",
+      "Are you sure you want to delete all sessions for " + users.length + " user" + UtilsService.sIfMany(users) + "?",
+      users
+    ).subscribe({
+      next: () => {
+        this.sessionDbAdminService.deleteSessions(...userIds).subscribe({
+          next: (res) => {
+            this.refresh();
+          },
+          error: (err) => this.restErrorService.showError("Delete sessions failed", err),
+        });
+      },
+    });
+  }
+
+  private deleteUsers(...users: any) {
+    const userIds: string[] = users.map((user) => user.username);
+
+    this.openConfirmModal(
+      "Delete users",
+      "Are you sure you want to delete the following " + users.length + " user" + UtilsService.sIfMany(users) + "?",
+      users
+    ).subscribe({
+      next: () => {
+        this.userService.deleteUser(...userIds).subscribe({
+          next: () => {
+            this.refresh();
+          },
+          error: (err) => this.restErrorService.showError("Delete users failed", err),
+        });
+      },
+    });
+  }
+
+  private selectUser(user: string) {
     this.modalService.open(this.modalContent, { size: "xl" });
 
     this.selectedUser = user;
@@ -213,10 +413,34 @@ export class StorageComponent implements OnInit {
       );
   }
 
-  onSelectionChanged($event) {
-    // const username = $event.api.getSelectedNodes()[0]?.data?.username;
-    // if (username != null) {
-    //   this.selectUser(username);
-    // }
+  getFilteredCount(gridApi: GridApi): number {
+    return gridApi.getDisplayedRowCount();
+  }
+
+  /**
+   * For some reason the grid api doesn't have a method to get the filtered rows.
+   *
+   * @param gridApi
+   * @returns
+   */
+  public getFilteredRows(gridApi: GridApi): any[] {
+    const rows = [];
+    gridApi.forEachNodeAfterFilter((node) => {
+      rows.push(node.data);
+    });
+    return rows;
+  }
+
+  private getFilteredUserIds(gridApi: GridApi): string[] {
+    const rows = this.getFilteredRows(gridApi);
+    return rows.map((row) => row.username);
+  }
+
+  private openConfirmModal(title, message, users: any[]) {
+    const modalRef = this.modalService.open(ConfirmDeleteModalComponent);
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.users = users;
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 }

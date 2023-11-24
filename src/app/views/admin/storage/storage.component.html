@@ -1,48 +1,134 @@
-<ag-grid-angular
-  *ngIf="allSessionsState.isReady(); else statusTemplate"
-  style="width: 100%; height: 100%"
-  class="ag-theme-alpine"
-  [rowData]="rowData"
-  [columnDefs]="columnDefs"
-  [rowSelection]="rowSelection"
-  (selectionChanged)="onSelectionChanged($event)"></ag-grid-angular>
+<div class="mt-2">
+  <ul ngbNav #nav="ngbNav" class="nav-tabs">
+    <!-- Users -->
+    <li ngbNavItem>
+      <button ngbNavLink>Users</button>
+      <ng-template ngbNavContent style="position: relative; width: 100%">
+        <div *ngIf="combinedGridReady">
+          <div class="summary">
+            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}
 
-<ng-template #statusTemplate>
-  <ch-status [state]="allSessionsState"></ch-status>
-</ng-template>
+            <div ngbDropdown class="d-inline-block">
+              <button
+                type="button"
+                [disabled]="combinedUsers.length < 1"
+                class="btn btn-sm btn-danger"
+                id="dropdownBasic1"
+                ngbDropdownToggle>
+                Delete
+              </button>
+              <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                <button ngbDropdownItem (click)="onDeleteUsers(getFilteredRows(combinedGridOptions.api))">
+                  Delete users
+                </button>
+                <button ngbDropdownItem (click)="onDeleteSessions(getFilteredRows(combinedGridOptions.api))">
+                  Delete sessions
+                </button>
+                <button ngbDropdownItem (click)="onDeleteUsersAndSessions(getFilteredRows(combinedGridOptions.api))">
+                  Delete users and sessions
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<ng-template #modalContent let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <h4 class="modal-title">Sessions of {{ selectedUser }}</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="d('Cross click')"></button>
-  </div>
-  <div class="modal-body scrollable-parent">
-    <div *ngIf="!userSessionsState.isReady()">Loading sessions...</div>
-    <div *ngIf="userSessionsState.isReady()" class="scrollable">
-      <table class="table table-sm table-striped">
-        <thead>
-          <tr>
-            <!-- <th scope="col">Name</th> -->
-            <th scope="col">Size</th>
-            <th scope="col">Datasets</th>
-            <th scope="col">Jobs</th>
-            <th scope="col">Inputs</th>
-            <th scope="col">Parameters</th>
-            <th scope="col">Phenodata entries</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let session of sessions">
-            <!-- <th scope="row">{{ session.name }}</th> -->
-            <td>{{ session.size | bytes : 0 }}</td>
-            <td>{{ session.datasetCount }}</td>
-            <td>{{ session.jobCount }}</td>
-            <td>{{ session.inputCount }}</td>
-            <td>{{ session.parameterCount }}</td>
-            <td>{{ session.metadataCount }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <ag-grid-angular
+          *ngIf="allSessionsState.isReady(); else statusTemplate"
+          style="width: 100%; height: 700px"
+          class="ag-theme-alpine"
+          [gridOptions]="combinedGridOptions"></ag-grid-angular>
+      </ng-template>
+    </li>
+
+    <!-- Auth only -->
+    <li ngbNavItem>
+      <button ngbNavLink>Auth only</button>
+      <ng-template ngbNavContent>
+        <div *ngIf="authOnlyGridReady">
+          <div class="summary">
+            Users: {{ getFilteredCount(authOnlyGridOptions.api) }} / {{ authOnlyUsers.length }}
+
+            <button
+              [disabled]="authOnlyUsers.length < 1"
+              class="btn btn-sm btn-danger"
+              (click)="onDeleteUsers(getFilteredRows(authOnlyGridOptions.api))">
+              Delete users
+            </button>
+          </div>
+        </div>
+
+        <ag-grid-angular
+          *ngIf="allSessionsState.isReady(); else statusTemplate"
+          style="width: 100%; height: 700px"
+          class="ag-theme-alpine"
+          [gridOptions]="authOnlyGridOptions"></ag-grid-angular>
+      </ng-template>
+    </li>
+
+    <!-- SessionDB only -->
+    <li ngbNavItem>
+      <button ngbNavLink>SessionDB only</button>
+      <ng-template ngbNavContent>
+        <div *ngIf="sessionDbOnlyGridReady">
+          <div class="summary">
+            Users: {{ getFilteredCount(sessionDbOnlyGridOptions.api) }} / {{ sessionDbOnlyUsers.length }}
+
+            <button
+              [disabled]="sessionDbOnlyUsers.length < 1"
+              class="btn btn-sm btn-danger"
+              (click)="onDeleteSessions(getFilteredRows(sessionDbOnlyGridOptions.api))">
+              Delete sessions
+            </button>
+          </div>
+        </div>
+
+        <ag-grid-angular
+          *ngIf="allSessionsState.isReady(); else statusTemplate"
+          style="width: 100%; height: 700px"
+          class="ag-theme-alpine"
+          [gridOptions]="sessionDbOnlyGridOptions"></ag-grid-angular>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
+
+  <ng-template #statusTemplate>
+    <ch-status [state]="allSessionsState"></ch-status>
+  </ng-template>
+
+  <ng-template #modalContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h4 class="modal-title">Sessions of {{ selectedUser }}</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="d('Cross click')"></button>
     </div>
-  </div>
-</ng-template>
+    <div class="modal-body scrollable-parent">
+      <div *ngIf="!userSessionsState.isReady()">Loading sessions...</div>
+      <div *ngIf="userSessionsState.isReady()" class="scrollable">
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <!-- <th scope="col">Name</th> -->
+              <th scope="col">Size</th>
+              <th scope="col">Datasets</th>
+              <th scope="col">Jobs</th>
+              <th scope="col">Inputs</th>
+              <th scope="col">Parameters</th>
+              <th scope="col">Phenodata entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let session of sessions">
+              <!-- <th scope="row">{{ session.name }}</th> -->
+              <td>{{ session.size | bytes : 0 }}</td>
+              <td>{{ session.datasetCount }}</td>
+              <td>{{ session.jobCount }}</td>
+              <td>{{ session.inputCount }}</td>
+              <td>{{ session.parameterCount }}</td>
+              <td>{{ session.metadataCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-template>
+</div>

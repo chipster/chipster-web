@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { TokenService } from "../../core/authentication/token.service";
@@ -57,8 +57,8 @@ export class AuthHttpClientService {
    *
    * @param url
    */
-  deleteAuth(url): Observable<any> {
-    return this.httpClient.delete(url, this.getAuthHeader());
+  deleteAuth(url, params?: HttpParams): Observable<any> {
+    return this.httpClient.delete(url, { ...this.getAuthHeader(), params });
   }
 
   getAuthWithParams(url, params?): Observable<any> {

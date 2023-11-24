@@ -4,10 +4,7 @@ import { ICellRendererParams } from "ag-grid-community";
 
 @Component({
   selector: "ch-ag-btn-cell-renderer",
-  template: `
-    <button class="btn btn-secondary btn-sm" (click)="onSessions()">Sessions</button>
-    <!-- <button class="btn btn-danger btn-sm ms-2" (click)="onDelete()">Delete</button> -->
-  `,
+  templateUrl: "./ag-btn-cell-renderer.component.html",
 })
 export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,18 +12,22 @@ export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
     return false;
   }
   public label: string;
-  private params: any;
+  public params: any;
 
   agInit(params: any): void {
     this.params = params;
     this.label = params.label;
   }
 
-  onSessions() {
-    this.params.onSessions(this.params.data);
+  onShowSessions() {
+    this.params.onShowSessions(this.params.data);
   }
 
-  onDelete() {
-    this.params.onDelete(this.params.data);
+  onDeleteUser() {
+    this.params.onDeleteUser(this.params.data);
+  }
+
+  onDeleteSessions() {
+    this.params.onDeleteSessions(this.params.data);
   }
 }

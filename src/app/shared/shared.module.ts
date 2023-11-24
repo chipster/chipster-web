@@ -32,6 +32,7 @@ import { NewsService } from "./services/news.service";
 import { PipeService } from "./services/pipeservice.service";
 import { PreferencesService } from "./services/preferences.service";
 import { RouteService } from "./services/route.service";
+import { SessionDbAdminService } from "./services/sessiondb-admin.service";
 import { SettingsService } from "./services/settings.service";
 import { SpreadsheetService } from "./services/spreadsheet.service";
 import { ToolsService } from "./services/tools.service";
@@ -86,6 +87,7 @@ import { WebSocketService } from "./services/websocket.service";
     BytesPipe,
     NewsService,
     PreferencesService,
+    SessionDbAdminService,
   ],
   exports: [
     BytesPipe,
