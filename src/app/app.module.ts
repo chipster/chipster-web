@@ -22,6 +22,7 @@ import { selectedDatasets } from "./state/selectedDatasets.reducer";
 import { selectedJobs } from "./state/selectedJobs.reducer";
 import {
   selectedTool,
+  selectedToolById,
   selectedToolWithInputs,
   selectedToolWithPopulatedParams,
   selectedToolWithValidatedInputs,
@@ -42,6 +43,7 @@ import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
 import { ManualModule } from "./views/manual/manual.module";
 import { NavigationComponent } from "./views/navigation/navigation.component";
 import { PrivacyNoticeComponent } from "./views/privacy-notice/privacy-notice.component";
+import { DatasetContextMenuService } from "./views/sessions/session/dataset.cotext.menu.service";
 import { SelectionService } from "./views/sessions/session/selection.service";
 import { SessionModule } from "./views/sessions/session/session.module";
 import { TermsComponent } from "./views/terms/terms.component";
@@ -62,6 +64,7 @@ import { TermsComponent } from "./views/terms/terms.component";
       {
         selectedDatasets,
         selectedJobs,
+        selectedToolById,
         selectedTool,
         selectedToolWithInputs,
         selectedToolWithValidatedInputs,
@@ -101,7 +104,13 @@ import { TermsComponent } from "./views/terms/terms.component";
     AccessibilityComponent,
     PrivacyNoticeComponent,
   ],
-  providers: [SelectionService, TokenService, ErrorService, { provide: ErrorHandler, useClass: AppErrorHandler }],
+  providers: [
+    SelectionService,
+    DatasetContextMenuService,
+    TokenService,
+    ErrorService,
+    { provide: ErrorHandler, useClass: AppErrorHandler },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {

@@ -1,20 +1,11 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from "@angular/core";
-import { Dataset, Tool } from "chipster-js-common";
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from "@angular/core";
+import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -35,12 +26,16 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   sessionData: SessionData;
   @Input()
   tools: Tool[];
+  @Input()
+  modules: Module[];
 
   @Output() doScrollFix = new EventEmitter();
 
   datasetName: string;
 
   private unsubscribe: Subject<any> = new Subject();
+  sourceJob: Job;
+  modulesMap: Map<string, Module>;
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -51,11 +46,13 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private sessionEventService: SessionEventService,
     private getSessionDataService: GetSessionDataService,
     private selectionHandlerService: SelectionHandlerService,
-    private changeDetectorRef: ChangeDetectorRef
+    private datasetContextMenuService: DatasetContextMenuService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
+
+    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset], this.sessionData.jobsMap);
   }
 
   ngOnInit(): void {
@@ -106,6 +103,12 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   defineDatasetGroups() {
     this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
   }
+
+  showJob() {
+    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
+  }
+
+  selectToolAndParameters() {}
 
   selectChildren() {
     const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);

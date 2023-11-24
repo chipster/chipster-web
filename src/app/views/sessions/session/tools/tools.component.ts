@@ -12,12 +12,12 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import {
+  CLEAR_SELECTED_TOOL_BY_ID,
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
   CLEAR_VALIDATED_TOOL,
-  SET_SELECTED_TOOL,
   SET_SELECTED_TOOL_WITH_INPUTS,
   SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
@@ -35,6 +35,7 @@ import { SessionEventService } from "../session-event.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import {
   SelectedTool,
+  SelectedToolById,
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
@@ -194,12 +195,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(tool: Tool) {
-    const selectedTool: SelectedTool = {
-      tool,
-      category: this.selectedCategory,
-      module: this.selectedModule,
-    };
-    this.store.dispatch({ type: SET_SELECTED_TOOL, payload: selectedTool });
+    this.toolSelectionService.selectTool(this.selectedModule, this.selectedCategory, tool);
   }
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
@@ -307,6 +303,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public openJobs() {
+    // scroll to latest jobs at top, if some other job was selected before
+    this.selectionHandlerService.setJobSelection([]);
+
     this.dialogModalService.openJobsModal(
       this.sessionDataService.getJobList(this.sessionData),
       this.toolsArray,
@@ -320,18 +319,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const module = this.modulesMap.get(item.moduleId);
-    this.selectModule(module);
-    this.selectCategory(module.categoriesMap.get(item.category));
-    // get the tool from category, don't use the one in the event as for some reason it's not the same instance
-    const tool = module.categoriesMap.get(item.category).tools.filter((t1) => t1.name.id === item.toolId)[0];
-    this.selectTool(tool);
-    const toolElementId = this.toolElementIdPrefix + item.toolId;
-
-    setTimeout(() => {
-      this.searchBoxModel = null;
-      this.document.getElementById(toolElementId).focus();
-    });
+    this.toolSelectionService.selectToolById(item.moduleId, item.category, item.toolId);
   }
 
   public searchBoxBlur() {
@@ -339,6 +327,53 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   private subscribeToToolEvents() {
+    this.store
+      .select("selectedToolById")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe((t: SelectedToolById) => {
+        if (t != null) {
+          // get the tool from categroy based on the id
+          // other parts of the UI may have their own instances of tools,
+          // which don't have the saved parameter values
+          const module = this.modulesMap.get(t.moduleId);
+
+          if (module == null) {
+            this.errorService.showSimpleError(
+              "Module not found",
+              "Module " + t.moduleId + " does not exist. Please try to find the tool from other modules."
+            );
+            return;
+          }
+          const category = module.categoriesMap.get(t.categoryName);
+          if (category == null) {
+            this.errorService.showSimpleError(
+              "Category not found",
+              "Category " + t.categoryName + " does not exist. Please try to find the tool from other categories."
+            );
+            return;
+          }
+          const tool = category.tools.filter((t1) => t1.name.id === t.toolId)[0];
+          if (tool == null) {
+            this.errorService.showSimpleError(
+              "Tool not found",
+              "Tool " + t.toolId + " does not exist. Please try to find an alternative tool."
+            );
+            return;
+          }
+
+          this.selectModule(module);
+          this.selectCategory(category);
+          this.selectTool(tool);
+
+          const toolElementId = this.toolElementIdPrefix + t.toolId;
+
+          setTimeout(() => {
+            this.searchBoxModel = null;
+            this.document.getElementById(toolElementId).focus();
+          });
+        }
+      });
+
     // subscribe to selected tool
     this.store
       .select("selectedTool")
@@ -574,6 +609,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // don't clear selectedTool to avoid looping
     // null should also go through the validation etc chain, but just to be sure
 
+    this.store.dispatch({ type: CLEAR_SELECTED_TOOL_BY_ID });
     this.store.dispatch({ type: CLEAR_SELECTED_TOOL_WITH_INPUTS });
     this.store.dispatch({
       type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,

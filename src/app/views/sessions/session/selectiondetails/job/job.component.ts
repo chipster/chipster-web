@@ -1,5 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
-import { Job, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import JobOutput from "chipster-js-common/lib/model/joboutput";
 import * as _ from "lodash";
 import log from "loglevel";
 import { Observable, Subject, empty } from "rxjs";
@@ -35,10 +37,13 @@ export class JobComponent implements OnInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
+  inputListForView: Array<JobInput> = [];
   containerMemoryLimit = null;
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
+  outputListForView: Array<JobOutput> = [];
 
   constructor(
+    public activeModal: NgbActiveModal,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
@@ -54,6 +59,8 @@ export class JobComponent implements OnInit, OnDestroy {
       (selectedJobs: Array<Job>) => {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
+        this.inputListForView = [];
+        this.outputListForView = [];
         let jobId = null;
 
         if (selectedJobs && selectedJobs.length > 0) {
@@ -62,10 +69,12 @@ export class JobComponent implements OnInit, OnDestroy {
 
           if (job) {
             this.tool = this.tools.find((t) => t.name.id === job.toolId);
-            if (this.tool) {
-              this.showWithTool(job.parameters, this.tool);
-            } else {
-              log.warn(`no tool found with ID${job.toolId}`);
+
+            this.showParameters(job.parameters, this.tool);
+            this.showInputs(job.inputs, this.tool);
+
+            if (!this.tool) {
+              log.warn(`no tool found with ID ${job.toolId}`);
             }
           } else {
             log.warn("source job is null");
@@ -102,6 +111,23 @@ export class JobComponent implements OnInit, OnDestroy {
         this.screenOutput = job.screenOutput;
         this.duration = JobService.getDuration(job);
 
+        if (job.outputs != null) {
+          this.outputListForView = job.outputs;
+        } else {
+          // only jobs since Chipster version 11/2023 define outputs
+          log.info("job doesn't define outputs, find from datasets");
+          this.sessionDataService
+            .getDatasetList(this.sessionData)
+            .filter((d) => d.sourceJob === jobId)
+            .forEach((d) => {
+              this.outputListForView.push({
+                outputId: null,
+                displayName: null,
+                datasetId: d.datasetId,
+              });
+            });
+        }
+
         return;
       }
     }
@@ -128,7 +154,25 @@ export class JobComponent implements OnInit, OnDestroy {
     this.sessionDataService.cancelJob(this.job);
   }
 
-  showWithTool(parameters: JobParameter[], tool: Tool) {
+  selectDataset(datasetId: string) {
+    const dataset = this.getDataset(datasetId);
+    this.selectionHandlerService.setDatasetSelection([dataset]);
+    this.activeModal.close();
+  }
+
+  getDataset(datasetId: string) {
+    return this.sessionData.datasetsMap.get(datasetId);
+  }
+
+  hasDataset(datasetId: string) {
+    return this.getDataset(datasetId) != null;
+  }
+
+  getDatasetName(datasetId: string) {
+    return this.getDataset(datasetId).name;
+  }
+
+  showParameters(parameters: JobParameter[], tool: Tool) {
     this.isDefaultValueMap = new Map();
 
     parameters.forEach((jobParameter) => {
@@ -168,6 +212,35 @@ export class JobComponent implements OnInit, OnDestroy {
       .filter((p) => p.displayName == null)
       .forEach((p) => {
         p.displayName = p.parameterId;
+      });
+  }
+
+  showInputs(inputs: JobInput[], tool: Tool) {
+    /* The new Chipster has misleadingly saved dataset name in input.displayName at 
+    least between 2018-2023. Try to find the displayName from the current tool 
+    instead, otherwise show the plain inputId. 
+    */
+    inputs.forEach((jobInput) => {
+      const clone = _.clone(jobInput);
+
+      // if datasetName is not null, then we can already trust the displayName
+      if (jobInput.datasetName == null && tool) {
+        // if datasetName is null, we can try to find a displayName from the current tool for old jobs
+        const toolInput = tool.inputs.find((i) => i.name.id === jobInput.inputId);
+
+        if (toolInput) {
+          // get the input display name from the tool
+          clone.displayName = toolInput.name.displayName;
+        }
+      }
+
+      this.inputListForView.push(clone);
+    });
+
+    this.inputListForView
+      .filter((i) => i.displayName == null)
+      .forEach((i) => {
+        i.displayName = i.inputId;
       });
   }
 
