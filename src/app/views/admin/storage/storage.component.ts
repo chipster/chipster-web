@@ -280,7 +280,7 @@ export class StorageComponent implements OnInit {
             // rowSelection: this.rowSelection,
 
             onGridReady: (params) => {
-              params.columnApi.autoSizeAllColumns();
+              // params.columnApi.autoSizeAllColumns();
               this.combinedGridReady = true;
             },
             onGridPreDestroyed: () => {
@@ -297,7 +297,7 @@ export class StorageComponent implements OnInit {
             columnDefs: this.authOnlyColumnDefs,
             rowSelection: this.rowSelection,
             onGridReady: (params) => {
-              params.columnApi.autoSizeAllColumns();
+              // params.columnApi.autoSizeAllColumns();
               this.authOnlyGridReady = true;
             },
             onGridPreDestroyed: () => {
@@ -313,7 +313,7 @@ export class StorageComponent implements OnInit {
             columnDefs: this.sessionDbOnlyColumnDefs,
             rowSelection: this.rowSelection,
             onGridReady: (params) => {
-              params.columnApi.autoSizeAllColumns();
+              // params.columnApi.autoSizeAllColumns();
               this.sessionDbOnlyGridReady = true;
             },
             onGridPreDestroyed: () => {
