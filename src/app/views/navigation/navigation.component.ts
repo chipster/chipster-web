@@ -5,6 +5,7 @@ import { AuthenticationService } from "../../core/authentication/authentication-
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { AccountComponent } from "../../shared/components/account/account.component";
+import { NewsItem } from "../../shared/components/news/NewsItem";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
 import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
@@ -29,8 +30,8 @@ export class NavigationComponent implements OnInit {
   appName = "";
   appNameReady = false;
 
-  // news: NewsItem[];
-  // unreadNews: boolean = false;
+  news: NewsItem[];
+  unreadNews: boolean = false;
 
   constructor(
     private tokenService: TokenService,
@@ -80,36 +81,36 @@ export class NavigationComponent implements OnInit {
       }
     );
 
-    // // news
-    // if (this.isLoggedIn()) {
-    //   this.getNews();
-    // }
+    // news
+    if (this.isLoggedIn()) {
+      this.getNews();
+    }
 
-    // this.newsService.getNewsEvents().subscribe({
-    //   next: () => {
-    //     this.getNews();
-    //   },
-    // });
+    this.newsService.getNewsEvents().subscribe({
+      next: () => {
+        this.getNews();
+      },
+    });
   }
 
-  // getNews() {
-  //   this.newsService.getAllNews().subscribe({
-  //     next: (newsItems: NewsItem[]) => {
-  //       this.news = newsItems;
-  //       console.log("next check if read");
-  //       if (this.news != null && this.news.length > 0) {
-  //         this.preferencesService.getNewsReadTime().subscribe({
-  //           next: (lastReadTime: Date) => {
-  //             console.log("got last read time", lastReadTime);
-  //             this.unreadNews =
-  //               lastReadTime != null && lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
-  //             console.log(this.unreadNews);
-  //           },
-  //         });
-  //       }
-  //     },
-  //   });
-  // }
+  getNews() {
+    this.newsService.getAllNews().subscribe({
+      next: (newsItems: NewsItem[]) => {
+        this.news = newsItems;
+        log.info("next check if read");
+        if (this.news != null && this.news.length > 0) {
+          this.preferencesService.getNewsReadTime().subscribe({
+            next: (lastReadTime: Date) => {
+              log.info("got last read time", lastReadTime);
+              this.unreadNews =
+                lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
+              log.info(this.unreadNews);
+            },
+          });
+        }
+      },
+    });
+  }
 
   logout(): void {
     this.authenticationService.logout();
@@ -140,9 +141,9 @@ export class NavigationComponent implements OnInit {
   }
 
   public openNews() {
-    this.dialogModalService.openNewsModal().subscribe({
+    this.dialogModalService.openNewsModal(this.news).subscribe({
       complete: () => {
-        // this.unreadNews = false;
+        this.unreadNews = false;
       },
     });
   }

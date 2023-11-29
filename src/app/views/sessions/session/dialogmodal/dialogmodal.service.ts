@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
-import { EMPTY, from as observableFrom, Observable } from "rxjs";
+import { EMPTY, Observable, from as observableFrom } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
@@ -57,10 +57,11 @@ export class DialogModalService {
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  openNewsModal() {
+  openNewsModal(news: NewsItem[]) {
     const modalRef = this.modalService.open(NewsModalComponent, {
       size: "lg",
     });
+    modalRef.componentInstance.news = news;
 
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
