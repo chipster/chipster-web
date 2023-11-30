@@ -22,8 +22,8 @@ export class AuthHttpClientService {
    *
    * @param url
    */
-  getAuth(url): Observable<any> {
-    return this.httpClient.get(url, this.getAuthHeader());
+  getAuth(url, params?: HttpParams): Observable<any> {
+    return this.httpClient.get(url, { ...this.getAuthHeader(), params });
   }
 
   getAuthHeader() {

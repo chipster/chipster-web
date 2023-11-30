@@ -212,4 +212,11 @@ export default class UtilsService {
   static sIfMany(array: any[]): string {
     return array.length > 1 ? "s" : "";
   }
+
+  static stringToDateKeepNull(s: string): Date | null {
+    if (s) {
+      return new Date(s);
+    }
+    return null;
+  }
 }

@@ -2,9 +2,8 @@ import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions } from "ag-grid-community";
 import { Role } from "chipster-js-common";
-import log from "loglevel";
-import { forkJoin, of } from "rxjs";
-import { catchError, mergeMap, tap } from "rxjs/operators";
+import { forkJoin } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -25,6 +24,20 @@ import { ConfirmDeleteModalComponent } from "./confirm-delete-modal/confirm-dele
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
 })
+
+/**
+ * For this class:
+ *
+ * userId: auth/username
+ *
+ * For example:
+ * userId: jaas/demo
+ * auth: jaas
+ * username: demo
+ *
+ * In backend databases (auth, sessiondb) this may not be the case.
+ *
+ */
 export class StorageComponent implements OnInit {
   quotasMap: Map<string, any>;
 
@@ -35,18 +48,28 @@ export class StorageComponent implements OnInit {
   public sessionDbOnlyGridOptions: GridOptions;
   public sessionDbOnlyGridReady = false;
 
-  private fieldUsername: ColDef = {
-    field: "username",
+  private fieldUserId: ColDef = {
+    field: "userId",
     sortable: true,
     filter: true,
     pinned: "left",
   };
-  private fieldUser: ColDef = { field: "user", sortable: true, filter: true };
+  private fieldUsername: ColDef = { field: "user", sortable: true, filter: true };
   private fieldAuth: ColDef = { field: "auth", sortable: true, filter: true };
   private fieldName: ColDef = { field: "name", sortable: true, filter: true };
   private fieldEmail: ColDef = { field: "email", sortable: true, filter: true };
-  private fieldCreated: ColDef = { field: "created", sortable: true, filter: true };
-  private fieldModified: ColDef = { field: "modified", sortable: true, filter: true };
+  private fieldCreated: ColDef = {
+    field: "created",
+    sortable: true,
+    filter: true,
+    cellRenderer: this.customDateRenderer.bind(this),
+  };
+  private fieldModified: ColDef = {
+    field: "modified",
+    sortable: true,
+    filter: true,
+    cellRenderer: this.customDateRenderer.bind(this),
+  };
 
   private fieldReadWriteSessions: ColDef = {
     field: "readWriteSessions",
@@ -78,7 +101,7 @@ export class StorageComponent implements OnInit {
   };
 
   combinedColumnDefs: ColDef[] = [
-    this.fieldUsername,
+    this.fieldUserId,
     this.fieldName,
     this.fieldEmail,
     this.fieldCreated,
@@ -97,6 +120,7 @@ export class StorageComponent implements OnInit {
   ];
 
   authOnlyColumnDefs: ColDef[] = [
+    this.fieldUserId,
     this.fieldAuth,
     this.fieldUsername,
     this.fieldName,
@@ -112,7 +136,7 @@ export class StorageComponent implements OnInit {
   ];
 
   sessionDbOnlyColumnDefs: ColDef[] = [
-    this.fieldUsername,
+    this.fieldUserId,
     this.fieldReadWriteSessions,
     this.fieldReadOnlySessions,
     this.fieldSize,
@@ -172,45 +196,19 @@ export class StorageComponent implements OnInit {
 
     const authUsers$ = this.authenticationService.getUsers();
 
-    let sessionDbUrl: string;
-    let sessionDbAdminUrl: string;
-    // check if its working properly
-    const sessionDbUsers$ = this.configService.getAdminUri(Role.SESSION_DB).pipe(
-      tap((uri: string) => {
-        sessionDbAdminUrl = uri;
-      }),
-      mergeMap(() => this.configService.getSessionDbUrl()),
-      tap((url) => {
-        sessionDbUrl = url;
-      }),
-      mergeMap(() => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-      mergeMap((users: string[]) => {
-        const userQuotas$ = users.map((user: string) => {
-          const url = sessionDbAdminUrl + "/admin/users/quota?userId=" + encodeURIComponent(user);
-          return this.authHttpClient.getAuth(url).pipe(
-            catchError((err) => {
-              log.error("quota request error", err);
-              // don't cancel other requests even if one of them fails
-              return of({
-                username: user,
-              });
-            })
-          );
-        });
-
-        // just returning [] messes up the forkJoin later on
-        return userQuotas$ == null || userQuotas$.length === 0 ? of([]) : forkJoin(userQuotas$);
-      })
+    const sessionDbUsers$ = this.configService.getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl) => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
+      mergeMap((users: string[]) => this.sessionDbAdminService.getQuotas(...users))
     );
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
-        sessionDbUsers.forEach((quota) => this.quotasMap.set(quota.username, quota));
+        sessionDbUsers.forEach((quota) => this.quotasMap.set(quota.userId, quota));
 
         // sessionDbUsers to a set
         const sessionDbUsersSet = new Set();
         sessionDbUsers.forEach((sessionDbUser) => {
-          sessionDbUsersSet.add(sessionDbUser.username);
+          sessionDbUsersSet.add(sessionDbUser.userId);
         });
 
         // authUsers to a set
@@ -222,7 +220,7 @@ export class StorageComponent implements OnInit {
         // sessionDbUsers to a map
         const sessionDbUsersMap = new Map();
         sessionDbUsers.forEach((sessionDbUser) => {
-          sessionDbUsersMap.set(sessionDbUser.username, sessionDbUser);
+          sessionDbUsersMap.set(sessionDbUser.userId, sessionDbUser);
         });
 
         // authUsers to a map
@@ -237,23 +235,23 @@ export class StorageComponent implements OnInit {
         // get difference of both sets
         const inSessionDbNotAuth = [...sessionDbUsersSet]
           .filter((x) => !authUsersSet.has(x))
-          .map((username) => sessionDbUsersMap.get(username));
+          .map((userId) => sessionDbUsersMap.get(userId));
 
         const inAuthNotSessionDb = [...authUsersSet]
           .filter((x) => !sessionDbUsersSet.has(x))
-          .map((username) => authUsersMap.get(username));
+          .map((userId) => authUsersMap.get(userId));
 
         const combinedUsers = sessionDbUsers
-          .filter((sessionDbUser) => intersection.has(sessionDbUser.username))
+          .filter((sessionDbUser) => intersection.has(sessionDbUser.userId))
           .map((sessionDbUser) =>
             // combine sessionDbUser properties and corresponding authUser properties
             // both have username so order matters!
             ({
-              ...authUsersMap.get(sessionDbUser.username),
+              ...authUsersMap.get(sessionDbUser.userId),
               ...sessionDbUser,
-              user: authUsersMap.get(sessionDbUser.username).username,
-              modified: new Date(authUsersMap.get(sessionDbUser.username).modified),
-              created: new Date(authUsersMap.get(sessionDbUser.username).created),
+              user: authUsersMap.get(sessionDbUser.userId).username,
+              modified: UtilsService.stringToDateKeepNull(authUsersMap.get(sessionDbUser.userId).modified),
+              created: UtilsService.stringToDateKeepNull(authUsersMap.get(sessionDbUser.userId).created),
             })
           );
 
@@ -261,7 +259,7 @@ export class StorageComponent implements OnInit {
         this.authOnlyUsers = inAuthNotSessionDb.map((authUser) => ({
           ...authUser,
           user: authUser.username,
-          username: authUser.auth + "/" + authUser.username,
+          userId: authUser.auth + "/" + authUser.username,
         }));
         this.sessionDbOnlyUsers = inSessionDbNotAuth;
 
@@ -326,7 +324,7 @@ export class StorageComponent implements OnInit {
   }
 
   onShowSessions(event) {
-    this.selectUser(event.username);
+    this.selectUser(event.userId);
   }
 
   onDeleteUsers(users: any[]) {
@@ -353,7 +351,7 @@ export class StorageComponent implements OnInit {
   }
 
   deleteSessions(...users: any[]) {
-    const userIds: string[] = users.map((user) => user.username);
+    const userIds: string[] = users.map((user) => user.userId);
 
     this.openConfirmModal(
       "Delete sessions",
@@ -372,7 +370,7 @@ export class StorageComponent implements OnInit {
   }
 
   private deleteUsers(...users: any) {
-    const userIds: string[] = users.map((user) => user.username);
+    const userIds: string[] = users.map((user) => user.userId);
 
     this.openConfirmModal(
       "Delete users",
@@ -405,8 +403,8 @@ export class StorageComponent implements OnInit {
         )
       )
       .subscribe(
-        (sessions: any[]) => {
-          this.sessions = sessions;
+        (result: any[]) => {
+          this.sessions = result[0]?.sessions;
           this.userSessionsState = new LoadState(State.Ready);
         },
         (err) => this.restErrorService.showError("get quotas failed", err)
@@ -431,9 +429,22 @@ export class StorageComponent implements OnInit {
     return rows;
   }
 
+  customDateRenderer(params: any): string {
+    const date = params.value;
+    if (date instanceof Date) {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Note: Months are zero-based
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+    return params.value;
+  }
   private getFilteredUserIds(gridApi: GridApi): string[] {
     const rows = this.getFilteredRows(gridApi);
-    return rows.map((row) => row.username);
+    return rows.map((row) => row.userId);
   }
 
   private openConfirmModal(title, message, users: any[]) {
