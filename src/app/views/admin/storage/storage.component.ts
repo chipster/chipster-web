@@ -323,6 +323,10 @@ export class StorageComponent implements OnInit {
     });
   }
 
+  onClearFilters(gridApi: GridApi) {
+    gridApi.setFilterModel(null);
+  }
+
   onShowSessions(event) {
     this.selectUser(event.userId);
   }

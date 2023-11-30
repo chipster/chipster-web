@@ -8,6 +8,15 @@
           <div class="summary">
             Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}
 
+            <!-- clear filters button -->
+            <button
+              [disabled]="!combinedGridOptions.api.isAnyFilterPresent()"
+              class="btn btn-sm btn-secondary"
+              (click)="onClearFilters(combinedGridOptions.api)">
+              Clear filters
+            </button>
+
+            <!-- delete button -->
             <div ngbDropdown class="d-inline-block">
               <button
                 type="button"
