@@ -57,7 +57,7 @@ export class StorageComponent implements OnInit {
   private fieldUsername: ColDef = { field: "user", sortable: true, filter: true };
   private fieldAuth: ColDef = { field: "auth", sortable: true, filter: true };
   private fieldName: ColDef = { field: "name", sortable: true, filter: true };
-  private fieldEmail: ColDef = { field: "email", sortable: true, filter: true };
+  private fieldMail: ColDef = { field: "mail", sortable: true, filter: true };
   private fieldCreated: ColDef = {
     field: "created",
     sortable: true,
@@ -103,7 +103,7 @@ export class StorageComponent implements OnInit {
   combinedColumnDefs: ColDef[] = [
     this.fieldUserId,
     this.fieldName,
-    this.fieldEmail,
+    this.fieldMail,
     this.fieldCreated,
     this.fieldModified,
     this.fieldReadWriteSessions,
@@ -124,7 +124,7 @@ export class StorageComponent implements OnInit {
     this.fieldAuth,
     this.fieldUsername,
     this.fieldName,
-    this.fieldEmail,
+    this.fieldMail,
     this.fieldCreated,
     this.fieldModified,
     {
