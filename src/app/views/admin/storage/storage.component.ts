@@ -357,7 +357,7 @@ export class StorageComponent implements OnInit {
 
     const oldGuestsFilter = {
       userId: { type: "startsWith", filter: "jaas/UnitTest" },
-      created: oldGuestsConditions,
+      modified: oldGuestsConditions,
     };
     gridApi.setFilterModel(oldGuestsFilter);
   }
