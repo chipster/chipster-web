@@ -208,13 +208,13 @@ export class StorageComponent implements OnInit {
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
         const sessionDbNullUsers = sessionDbUsers.filter((user) => user.userId == null);
-        if (sessionDbNullUsers.size() > 0) {
-          log.warn("sessionDb has", sessionDbNullUsers.size(), "null userIds", sessionDbNullUsers);
+        if (sessionDbNullUsers.length > 0) {
+          log.warn("sessionDb has", sessionDbNullUsers.length, "null userIds", sessionDbNullUsers);
         }
 
         const sessionDbTrimUsers = sessionDbUsers.filter((user) => user.userId !== user.userId.trim());
-        if (sessionDbTrimUsers.size() > 0) {
-          log.warn("sessionDb has", sessionDbTrimUsers.size(), "userIds that need trimming", sessionDbTrimUsers);
+        if (sessionDbTrimUsers.length > 0) {
+          log.warn("sessionDb has", sessionDbTrimUsers.length, "userIds that need trimming", sessionDbTrimUsers);
         }
 
         sessionDbUsers.forEach((quota) => this.quotasMap.set(quota.userId, quota));
