@@ -212,7 +212,7 @@ export class StorageComponent implements OnInit {
           log.warn("sessionDb has", sessionDbNullUsers.length, "null userIds", sessionDbNullUsers);
         }
 
-        const sessionDbTrimUsers = sessionDbUsers.filter((user) => user.userId !== user.userId.trim());
+        const sessionDbTrimUsers = sessionDbUsers.filter((user) => user.userId !== user.userId?.trim());
         if (sessionDbTrimUsers.length > 0) {
           log.warn("sessionDb has", sessionDbTrimUsers.length, "userIds that need trimming", sessionDbTrimUsers);
         }
