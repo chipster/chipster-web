@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions } from "ag-grid-community";
 import { Role } from "chipster-js-common";
+import log from "loglevel";
 import { forkJoin } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
@@ -206,6 +207,16 @@ export class StorageComponent implements OnInit {
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
+        const sessionDbUserTrimCount = sessionDbUsers.filter((user) => user.username === user.username.trim()).length;
+        if (sessionDbUserTrimCount > 0) {
+          log.warn(
+            "sessionDb has",
+            sessionDbUserTrimCount,
+            "userIds that need trimming",
+            sessionDbUsers.filter((user) => user.username === user.username.trim())
+          );
+        }
+
         sessionDbUsers.forEach((quota) => this.quotasMap.set(quota.userId, quota));
 
         // sessionDbUsers to a set
