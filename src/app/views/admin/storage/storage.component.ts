@@ -281,6 +281,8 @@ export class StorageComponent implements OnInit {
             onGridPreDestroyed: () => {
               this.combinedGridReady = false;
             },
+            onFilterChanged: this.onFilterChanged.bind(this),
+
             // getRowHeight: (params) => 25,
           },
         };
@@ -327,6 +329,25 @@ export class StorageComponent implements OnInit {
     gridApi.setFilterModel(null);
   }
 
+  onSelectOldGuests(gridApi: GridApi) {
+    const now = new Date();
+
+    // 3 months ago
+    const limitTimestamp = now.getTime() - 3 * 31 * 24 * 60 * 60 * 1000;
+    const limitDate = new Date(limitTimestamp);
+
+    const oldGuestsConditions = {
+      type: "lessThan",
+      dateFrom: UtilsService.renderDate(limitDate),
+    };
+
+    const oldGuestsFilter = {
+      userId: { type: "startsWith", filter: "jaas/UnitTest" },
+      created: oldGuestsConditions,
+    };
+    gridApi.setFilterModel(oldGuestsFilter);
+  }
+
   onShowSessions(event) {
     this.selectUser(event.userId);
   }
@@ -352,6 +373,10 @@ export class StorageComponent implements OnInit {
 
   onDeleteSingleUsersSessions(user: any) {
     this.deleteSessions(user);
+  }
+
+  onFilterChanged(params: any): void {
+    // Handle filter change here
   }
 
   deleteSessions(...users: any[]) {
@@ -434,18 +459,9 @@ export class StorageComponent implements OnInit {
   }
 
   customDateRenderer(params: any): string {
-    const date = params.value;
-    if (date instanceof Date) {
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Note: Months are zero-based
-      const day = date.getDate().toString().padStart(2, "0");
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
-    return params.value;
+    return UtilsService.renderDate(params.value);
   }
+
   private getFilteredUserIds(gridApi: GridApi): string[] {
     const rows = this.getFilteredRows(gridApi);
     return rows.map((row) => row.userId);
