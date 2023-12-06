@@ -196,12 +196,13 @@ export class StorageComponent implements OnInit {
 
     const authUsers$ = this.authenticationService.getUsers();
 
-    const sessionDbUsers$ = this.configService.getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl) => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-      mergeMap((users: string[]) =>
-        this.sessionDbAdminService.getQuotas(...users.filter((user) => user == null || user === "null"))
-      )
-    );
+    const sessionDbUsers$ = this.sessionDbAdminService.getQuotas();
+    // const sessionDbUsers$ = this.configService.getSessionDbUrl().pipe(
+    //   mergeMap((sessionDbUrl) => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
+    //   mergeMap((users: string[]) =>
+    //     this.sessionDbAdminService.getQuotas(...users.filter((user) => user == null || user === "null"))
+    //   )
+    // );
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
