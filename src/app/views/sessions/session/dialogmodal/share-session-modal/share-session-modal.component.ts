@@ -72,6 +72,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   saveRule() {
+    this.newRule.username = this.newRule.username.trim();
     this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
       (resp) => {
         log.info("rule created", resp);
