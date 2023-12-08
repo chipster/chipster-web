@@ -367,8 +367,6 @@ export class StorageComponent implements OnInit {
   }
 
   onDeleteUsers(users: any[]) {
-    this.combinedGridOptions.columnApi.autoSizeAllColumns();
-
     this.deleteUsers(...users);
   }
 
