@@ -62,6 +62,20 @@
           <div class="summary">
             Users: {{ getFilteredCount(authOnlyGridOptions.api) }} / {{ authOnlyUsers.length }}
 
+            <!-- clear filters button -->
+            <button
+              [disabled]="!authOnlyGridOptions.api.isAnyFilterPresent()"
+              class="btn btn-sm btn-secondary"
+              (click)="onClearFilters(authOnlyGridOptions.api)">
+              Clear filters
+            </button>
+
+            <!-- old guests button -->
+            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(authOnlyGridOptions.api)">
+              Select old guests
+            </button>
+
+            <!-- delete button -->
             <button
               [disabled]="authOnlyUsers.length < 1"
               class="btn btn-sm btn-danger"
@@ -87,6 +101,20 @@
           <div class="summary">
             Users: {{ getFilteredCount(sessionDbOnlyGridOptions.api) }} / {{ sessionDbOnlyUsers.length }}
 
+            <!-- clear filters button -->
+            <button
+              [disabled]="!sessionDbOnlyGridOptions.api.isAnyFilterPresent()"
+              class="btn btn-sm btn-secondary"
+              (click)="onClearFilters(sessionDbOnlyGridOptions.api)">
+              Clear filters
+            </button>
+
+            <!-- old guests button -->
+            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(sessionDbOnlyGridOptions.api)">
+              Select old guests
+            </button>
+
+            <!-- delete button -->
             <button
               [disabled]="sessionDbOnlyUsers.length < 1"
               class="btn btn-sm btn-danger"
