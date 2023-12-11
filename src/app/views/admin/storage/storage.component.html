@@ -22,7 +22,7 @@
             </button>
 
             <!-- delete button -->
-            <div ngbDropdown class="d-inline-block">
+            <div ngbDropdown class="delete">
               <button
                 type="button"
                 [disabled]="combinedUsers.length < 1"
@@ -76,12 +76,14 @@
             </button>
 
             <!-- delete button -->
-            <button
-              [disabled]="authOnlyUsers.length < 1"
-              class="btn btn-sm btn-danger"
-              (click)="onDeleteUsers(getFilteredRows(authOnlyGridOptions.api))">
-              Delete users
-            </button>
+            <div class="delete">
+              <button
+                [disabled]="authOnlyUsers.length < 1"
+                class="btn btn-sm btn-danger"
+                (click)="onDeleteUsers(getFilteredRows(authOnlyGridOptions.api))">
+                Delete users
+              </button>
+            </div>
           </div>
         </div>
 
@@ -115,12 +117,14 @@
             </button>
 
             <!-- delete button -->
-            <button
-              [disabled]="sessionDbOnlyUsers.length < 1"
-              class="btn btn-sm btn-danger"
-              (click)="onDeleteSessions(getFilteredRows(sessionDbOnlyGridOptions.api))">
-              Delete sessions
-            </button>
+            <div class="delete">
+              <button
+                [disabled]="sessionDbOnlyUsers.length < 1"
+                class="btn btn-sm btn-danger"
+                (click)="onDeleteSessions(getFilteredRows(sessionDbOnlyGridOptions.api))">
+                Delete sessions
+              </button>
+            </div>
           </div>
         </div>
 
