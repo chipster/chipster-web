@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
 import log from "loglevel";
-import { forkJoin, Observable, of } from "rxjs";
+import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    log.info("auth guard", this.tokenService.getAccountName());
+    // log.info("auth guard", this.tokenService.getAccountName());
 
     // redirect to home during service breaks
     // this.tokenService.getAccountName();

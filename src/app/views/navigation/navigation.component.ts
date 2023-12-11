@@ -97,14 +97,11 @@ export class NavigationComponent implements OnInit {
     this.newsService.getAllNews().subscribe({
       next: (newsItems: NewsItem[]) => {
         this.news = newsItems;
-        log.info("next check if read");
         if (this.news != null && this.news.length > 0) {
           this.preferencesService.getNewsReadTime().subscribe({
             next: (lastReadTime: Date) => {
-              log.info("got last read time", lastReadTime);
               this.unreadNews =
                 lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
-              log.info(this.unreadNews);
             },
           });
         }

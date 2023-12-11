@@ -33,15 +33,15 @@ export class PreferencesService {
   }
 
   public getNewsReadTime(): Observable<Date> {
-    console.log("get last read time");
-
-    return this.authenticationService.getUser().pipe(
-      map((user: User): Date => {
-        console.log("user", user);
-        return user.preferences != null && user.preferences[PreferencesService.KEY_NEWS] != null
-          ? user.preferences[PreferencesService.KEY_NEWS][PreferencesService.KEY_NEWS_LAST_READ_TIME]
-          : null;
-      })
-    );
+    return this.authenticationService
+      .getUser()
+      .pipe(
+        map(
+          (user: User): Date =>
+            user.preferences != null && user.preferences[PreferencesService.KEY_NEWS] != null
+              ? user.preferences[PreferencesService.KEY_NEWS][PreferencesService.KEY_NEWS_LAST_READ_TIME]
+              : null
+        )
+      );
   }
 }
