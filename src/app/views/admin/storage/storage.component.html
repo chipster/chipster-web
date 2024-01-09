@@ -21,6 +21,16 @@
               Filter old guests
             </button>
 
+            <!-- list filter buttons -->
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(combinedGridOptions.api)">
+              <span *ngIf="!listFilterVisible">Open</span>
+              <span *ngIf="listFilterVisible">Close</span>
+              filter list
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(combinedGridOptions.api)">
+              Filter listed users
+            </button>
+
             <!-- delete button -->
             <div ngbDropdown class="delete">
               <button
@@ -46,11 +56,25 @@
           </div>
         </div>
 
+        <!-- user list filter -->
+        <textarea
+          [hidden]="!listFilterVisible"
+          class="mb-1 form-control"
+          #notesArea
+          id="session-notes"
+          rows="15"
+          placeholder="One user per line. If line contains a comma, only use the first part."
+          [(ngModel)]="listFilterText"></textarea>
+
         <ag-grid-angular
           *ngIf="allSessionsState.isReady(); else statusTemplate"
           style="width: 100%; height: 700px"
           class="ag-theme-alpine"
           [gridOptions]="combinedGridOptions"></ag-grid-angular>
+
+        <div *ngIf="combinedGridReady" class="text-monospace text-small m-3">
+          <div *ngFor="let user of getFilteredRows(combinedGridOptions.api)">{{ user.username }}</div>
+        </div>
       </ng-template>
     </li>
 

@@ -54,6 +54,9 @@ export class StorageComponent implements OnInit {
     sortable: true,
     filter: true,
     pinned: "left",
+    filterParams: {
+      maxNumConditions: 10000, // needed for the list filter
+    },
   };
   private fieldUsername: ColDef = { field: "user", sortable: true, filter: true };
   private fieldAuth: ColDef = { field: "auth", sortable: true, filter: true };
@@ -161,6 +164,9 @@ export class StorageComponent implements OnInit {
 
   public allSessionsState: LoadState = new LoadState(State.Loading);
   public userSessionsState: LoadState = new LoadState(State.Loading);
+
+  public listFilterVisible = false;
+  public listFilterText = "";
 
   @ViewChild("modalContent") modalContent: any;
 
@@ -362,6 +368,38 @@ export class StorageComponent implements OnInit {
     gridApi.setFilterModel(oldGuestsFilter);
   }
 
+  onToggleListFilter(gridApi: GridApi) {
+    this.listFilterVisible = !this.listFilterVisible;
+  }
+
+  onFilterListed(gridApi: GridApi) {
+    console.log("onFilterListed", this.parseListFilter(this.listFilterText));
+
+    const userIds = this.parseListFilter(this.listFilterText);
+    const conditions = userIds.map((userId) => ({ filterType: "text", type: "equals", filter: userId }));
+
+    const userListFilter = {
+      userId: {
+        filterType: "text",
+        operator: "OR",
+        conditions,
+        // condition1: {
+        //   filterType: "text",
+        //   type: "startsWith",
+        //   filter: "jaas/chipster",
+        // },
+        // condition2: {
+        //   filterType: "text",
+        //   type: "startsWith",
+        //   filter: "jaas/admin",
+        // },
+
+        // conditions: userIdFilters,
+      },
+    };
+    gridApi.setFilterModel(userListFilter);
+  }
+
   onShowSessions(event) {
     this.selectUser(event.userId);
   }
@@ -388,6 +426,7 @@ export class StorageComponent implements OnInit {
   }
 
   onFilterChanged(params: any): void {
+    console.log("onFilterChanged", params.api.getFilterModel());
     // Handle filter change here
   }
 
@@ -472,6 +511,22 @@ export class StorageComponent implements OnInit {
 
   customDateRenderer(params: any): string {
     return UtilsService.renderDate(params.value);
+  }
+
+  private parseListFilter(listFilterText: string): string[] {
+    // split by new line
+    const lines = listFilterText.split("\n");
+
+    // split by comma and only keep the first part
+    const userIds = lines.map((line) => line.split(",")[0]);
+
+    // trim each userId
+    const trimmedUserIds = userIds.map((userId) => userId.trim());
+
+    // remove empty userIds
+    const nonEmptyUserIds = trimmedUserIds.filter((userId) => userId.length > 0);
+
+    return nonEmptyUserIds;
   }
 
   private getFilteredUserIds(gridApi: GridApi): string[] {

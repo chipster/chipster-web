@@ -9,5 +9,6 @@
   "eslint.options": {
     "extensions": [".ts", ".html"]
   },
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "html"]
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "html"],
+  "workbench.colorTheme": "Visual Studio Dark"
 }
