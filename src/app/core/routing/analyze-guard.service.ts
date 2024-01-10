@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from "@angular/router";
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
@@ -12,7 +12,7 @@ import { UserService } from "../../shared/services/user.service";
  * Redirect to latest session or new session if no latest found.
  */
 @Injectable()
-export class AnalyzeGuard implements CanActivate {
+export class AnalyzeGuard  {
   constructor(
     private routeService: RouteService,
     private sessionResource: SessionResource,
