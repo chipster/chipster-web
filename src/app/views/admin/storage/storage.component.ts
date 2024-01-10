@@ -65,13 +65,13 @@ export class StorageComponent implements OnInit {
   private fieldCreated: ColDef = {
     field: "created",
     sortable: true,
-    filter: true,
+    filter: "agDateColumnFilter",
     cellRenderer: this.customDateRenderer.bind(this),
   };
   private fieldModified: ColDef = {
     field: "modified",
     sortable: true,
-    filter: true,
+    filter: "agDateColumnFilter",
     cellRenderer: this.customDateRenderer.bind(this),
   };
 
