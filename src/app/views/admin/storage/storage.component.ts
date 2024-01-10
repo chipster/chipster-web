@@ -499,7 +499,13 @@ export class StorageComponent implements OnInit {
   }
 
   getUsername(userId: string): string {
-    return this.authenticationService.getUsername(userId);
+    let username;
+    try {
+      username = this.authenticationService.getUsername(userId);
+    } catch (err) {
+      username = userId;
+    }
+    return username;
   }
 
   private parseListFilter(listFilterText: string): string[] {
