@@ -221,6 +221,7 @@
           <thead>
             <tr>
               <!-- <th scope="col">Name</th> -->
+              <th scope="col">SessionId</th>
               <th scope="col">Size</th>
               <th scope="col">Datasets</th>
               <th scope="col">Jobs</th>
@@ -232,6 +233,7 @@
           <tbody>
             <tr *ngFor="let session of sessions">
               <!-- <th scope="row">{{ session.name }}</th> -->
+              <td>{{ session.sessionId }}</td>
               <td>{{ session.size | bytes : 0 }}</td>
               <td>{{ session.datasetCount }}</td>
               <td>{{ session.jobCount }}</td>
