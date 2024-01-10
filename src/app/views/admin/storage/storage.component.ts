@@ -498,6 +498,10 @@ export class StorageComponent implements OnInit {
     return UtilsService.renderDate(params.value);
   }
 
+  getFilteredTotalSize(gridApi: GridApi): number {
+    return this.getFilteredRows(gridApi).reduce((total, user) => total + user.size, 0);
+  }
+
   getUsername(userId: string): string {
     let username;
     try {

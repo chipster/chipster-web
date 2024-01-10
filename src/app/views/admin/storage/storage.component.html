@@ -6,12 +6,13 @@
       <ng-template ngbNavContent style="position: relative; width: 100%">
         <div *ngIf="combinedGridReady">
           <div class="summary">
-            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}
+            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}, Size:
+            {{ getFilteredTotalSize(combinedGridOptions.api) | bytes : 0 }}
 
             <!-- clear filters button -->
             <button
               [disabled]="!combinedGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(combinedGridOptions.api)">
               Clear filters
             </button>
@@ -89,7 +90,7 @@
             <!-- clear filters button -->
             <button
               [disabled]="!authOnlyGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(authOnlyGridOptions.api)">
               Clear filters
             </button>
@@ -154,7 +155,7 @@
             <!-- clear filters button -->
             <button
               [disabled]="!sessionDbOnlyGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(sessionDbOnlyGridOptions.api)">
               Clear filters
             </button>
