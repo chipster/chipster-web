@@ -373,8 +373,6 @@ export class StorageComponent implements OnInit {
   }
 
   onFilterListed(gridApi: GridApi) {
-    console.log("onFilterListed", this.parseListFilter(this.listFilterText));
-
     const userIds = this.parseListFilter(this.listFilterText);
     const conditions = userIds.map((userId) => ({ filterType: "text", type: "equals", filter: userId }));
 
@@ -383,18 +381,6 @@ export class StorageComponent implements OnInit {
         filterType: "text",
         operator: "OR",
         conditions,
-        // condition1: {
-        //   filterType: "text",
-        //   type: "startsWith",
-        //   filter: "jaas/chipster",
-        // },
-        // condition2: {
-        //   filterType: "text",
-        //   type: "startsWith",
-        //   filter: "jaas/admin",
-        // },
-
-        // conditions: userIdFilters,
       },
     };
     gridApi.setFilterModel(userListFilter);
@@ -426,7 +412,6 @@ export class StorageComponent implements OnInit {
   }
 
   onFilterChanged(params: any): void {
-    console.log("onFilterChanged", params.api.getFilterModel());
     // Handle filter change here
   }
 
@@ -511,6 +496,10 @@ export class StorageComponent implements OnInit {
 
   customDateRenderer(params: any): string {
     return UtilsService.renderDate(params.value);
+  }
+
+  getUsername(userId: string): string {
+    return this.authenticationService.getUsername(userId);
   }
 
   private parseListFilter(listFilterText: string): string[] {
