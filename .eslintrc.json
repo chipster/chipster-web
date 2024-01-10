@@ -1,29 +1,33 @@
 {
   "root": true,
-  "ignorePatterns": ["projects/**/*"],
+  "ignorePatterns": [
+    "projects/**/*"
+  ],
   "env": {
     "browser": true,
     "es6": true
   },
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "parser": "@typescript-eslint/parser",
-      "plugins": ["@typescript-eslint"],
+      "plugins": [
+        "@typescript-eslint"
+      ],
       "parserOptions": {
-        "project": ["tsconfig.json"],
+        "project": [
+          "tsconfig.json"
+        ],
         "createDefaultProgram": true,
         "ecmaVersion": 2020,
         "sourceType": "module"
       },
       "extends": [
         "eslint:recommended",
-        // "plugin:import/recommended",
         "airbnb-base",
         "airbnb-typescript",
-        // "google",
-        // "plugin:import/errors",
-        // "plugin:import/warnings",
         "plugin:import/recommended",
         "plugin:import/typescript",
         "plugin:@angular-eslint/recommended",
@@ -47,20 +51,23 @@
             "style": "kebab-case"
           }
         ],
-        // "no-console": "warn",
         "require-jsdoc": "off",
-        "import/prefer-default-export": "off", // our angular components don't use default export
+        "import/prefer-default-export": "off",
         "@typescript-eslint/lines-between-class-members": "off",
-        "prefer-template": "off", // not sure if we want this
-        "@typescript-eslint/dot-notation": "off", // for now, fix causes troubles,
-        "class-methods-use-this": "off", // we have lot's of these, especially all services
-        "max-classes-per-file": "off", // used for small classes in maybe three files, should maybe use Types for these?
-        "prefer-destructuring": "off" // not sure if reasonable with typescript, fix loses type information?
+        "prefer-template": "off",
+        "@typescript-eslint/dot-notation": "off",
+        "class-methods-use-this": "off",
+        "max-classes-per-file": "off",
+        "prefer-destructuring": "off"
       }
     },
     {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
       "rules": {}
     }
   ]
