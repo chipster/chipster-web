@@ -119,6 +119,7 @@ export class StorageComponent implements OnInit {
         onShowSessions: this.onShowSessions.bind(this),
         onDeleteSessions: this.onDeleteSingleUsersSessions.bind(this),
         onDeleteUser: this.onDeleteSingleUser.bind(this),
+        onDeleteUserAndSessions: this.onDeleteSingleUserAndSessions.bind(this),
       },
     },
   ];
@@ -401,6 +402,11 @@ export class StorageComponent implements OnInit {
   onDeleteUsersAndSessions(users: any[]) {
     this.deleteSessions(...users);
     this.deleteUsers(...users);
+  }
+
+  onDeleteSingleUserAndSessions(user: any) {
+    this.deleteSessions(user);
+    this.deleteUsers(user);
   }
 
   onDeleteSingleUser(user: any) {

@@ -30,4 +30,8 @@ export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
   onDeleteSessions() {
     this.params.onDeleteSessions(this.params.data);
   }
+
+  onDeleteUserAndSessions() {
+    this.params.onDeleteUserAndSessions(this.params.data);
+  }
 }
