@@ -141,7 +141,8 @@ export class ToolSelectionService {
         };
       }
       // min limit
-      if (parameter.from && parameter.value < parameter.from) {
+      // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+      if (parameter.from && +parameter.value < parameter.from) {
         return {
           valid: false,
           message: "Value must be greater than or equal to " + parameter.from,
@@ -149,7 +150,8 @@ export class ToolSelectionService {
       }
 
       // max limit
-      if (parameter.to && parameter.value > parameter.to) {
+      // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+      if (parameter.to && +parameter.value > parameter.to) {
         return {
           valid: false,
           message: "Value must be less than or equal to " + parameter.to,
