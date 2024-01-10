@@ -81,18 +81,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "chipster-web:build"
+            "buildTarget": "chipster-web:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "chipster-web:build:production"
+              "buildTarget": "chipster-web:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "chipster-web:build"
+            "buildTarget": "chipster-web:build"
           }
         },
         "test": {
