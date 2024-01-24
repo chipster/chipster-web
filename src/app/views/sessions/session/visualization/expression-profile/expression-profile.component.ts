@@ -42,7 +42,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     private visualizationTSVService: VisualizationTSVService,
     private fileResource: FileResource,
     private restErrorService: RestErrorService
-  ) {}
+  ) { }
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -331,7 +331,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("dataset.tsv", [this.dataset.datasetId], "Expression profile", data)
+      .createDerivedDataset("dataset.tsv", [this.dataset], "Expression profile", data)
       .subscribe(null);
   }
 

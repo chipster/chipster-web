@@ -160,8 +160,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .attr("cx", (d) => self.xScale(d.plotPoint.x))
       .attr("cy", (d) => self.yScale(d.plotPoint.y))
       .attr("fill", "red")
-      .on("mouseover", (d: any) => {})
-      .on("mouseout", (d: any) => {})
+      .on("mouseover", (d: any) => { })
+      .on("mouseout", (d: any) => { })
       .on("click", (d: PlotData) => {
         // Need to store the datapoints what the user has clicked
       });
@@ -211,7 +211,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("newDataset.tsv", [this.dataset.datasetId], "Scatter Plot", data)
+      .createDerivedDataset("newDataset.tsv", [this.dataset], "Scatter Plot", data)
       .subscribe(null, (err) => this.restErrorService2.showError("create dataset failed", err));
   }
 }

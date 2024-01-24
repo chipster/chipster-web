@@ -52,7 +52,7 @@ export class SessionDataService {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   getSessionId(): string {
     return this.sessionId;
@@ -96,7 +96,7 @@ export class SessionDataService {
    */
   createDerivedDataset(
     name: string,
-    sourceDatasetIds: string[],
+    sourceDatasets: Dataset[],
     toolName: string,
     content: string,
     toolCategory = "Interactive visualizations",
@@ -108,9 +108,14 @@ export class SessionDataService {
     job.toolCategory = toolCategory;
     job.toolName = toolName;
 
-    job.inputs = sourceDatasetIds.map((id) => {
+    let inputCount = 0;
+    job.inputs = sourceDatasets.map((dataset) => {
       const input = new JobInput();
-      input.datasetId = id;
+      input.datasetId = dataset.datasetId;
+      input.inputId = "input" + inputCount;
+      input.displayName = "Input " + inputCount;
+      input.datasetName = dataset.name;
+      inputCount++;
       return input;
     });
 
@@ -254,13 +259,13 @@ export class SessionDataService {
       url$,
       autoCloseDelay * 1000,
       "<p>Please wait until the download starts. Then you can close " +
-        "this tab. It will close automatically after " +
-        autoCloseDelay +
-        " seconds.</p>",
+      "this tab. It will close automatically after " +
+      autoCloseDelay +
+      " seconds.</p>",
 
       "Browser's pop-up blocker prevented some exports. " +
-        "Please disable the pop-up blocker for this site or " +
-        "export the files one by one."
+      "Please disable the pop-up blocker for this site or " +
+      "export the files one by one."
     );
   }
 
