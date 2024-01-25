@@ -23,7 +23,7 @@
             </button>
 
             <!-- list filter buttons -->
-            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(combinedGridOptions.api)">
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter()">
               <span *ngIf="!listFilterVisible">Open</span>
               <span *ngIf="listFilterVisible">Close</span>
               filter list
@@ -101,7 +101,7 @@
             </button>
 
             <!-- list filter buttons -->
-            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(authOnlyGridOptions.api)">
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter()">
               <span *ngIf="!listFilterVisible">Open</span>
               <span *ngIf="listFilterVisible">Close</span>
               filter list
@@ -161,7 +161,7 @@
             </button>
 
             <!-- list filter buttons -->
-            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(sessionDbOnlyGridOptions.api)">
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter()">
               <span *ngIf="!listFilterVisible">Open</span>
               <span *ngIf="listFilterVisible">Close</span>
               filter list
@@ -212,16 +212,24 @@
 
   <ng-template #modalContent let-c="close" let-d="dismiss">
     <div class="modal-header">
-      <h4 class="modal-title">Sessions of {{ selectedUser }}</h4>
+      <h4 class="modal-title" id="tableTitle">Sessions of {{ selectedUser }}</h4>
       <button type="button" class="btn-close" aria-label="Close" (click)="d('Cross click')"></button>
     </div>
+
     <div class="modal-body scrollable-parent">
       <div *ngIf="!userSessionsState.isReady()">Loading sessions...</div>
       <div *ngIf="userSessionsState.isReady()" class="scrollable">
-        <table class="table table-sm table-striped">
+        <!-- checkbox for enabling session name column in the table -->
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="showSessionNames" [(ngModel)]="showSessionNames" />
+          <label class="form-check-label" for="showSessionNames">Show session names</label>
+        </div>
+
+        <!-- sessions table -->
+        <table class="table table-sm table-striped" aria-describedby="tableTitle">
           <thead>
             <tr>
-              <!-- <th scope="col">Name</th> -->
+              <th *ngIf="showSessionNames" scope="col">Name</th>
               <th scope="col">SessionId</th>
               <th scope="col">Size</th>
               <th scope="col">Datasets</th>
@@ -233,7 +241,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let session of sessions">
-              <!-- <th scope="row">{{ session.name }}</th> -->
+              <td *ngIf="showSessionNames">{{ session.name }}</td>
               <td>{{ session.sessionId }}</td>
               <td>{{ session.size | bytes : 0 }}</td>
               <td>{{ session.datasetCount }}</td>
