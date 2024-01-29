@@ -1,6 +1,7 @@
 import { HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Role } from "chipster-js-common";
+import log from "loglevel";
 import { Observable, of } from "rxjs";
 import { mergeMap, tap } from "rxjs/operators";
 import { AuthHttpClientService } from "./auth-http-client.service";
@@ -11,6 +12,7 @@ export class SessionDbAdminService {
   constructor(private configService: ConfigService, private authHttpClient: AuthHttpClientService) {}
 
   deleteSessions(...userId: string[]): Observable<any> {
+    log.info("delete sessions for", userId);
     return this.configService.getAdminUri(Role.SESSION_DB).pipe(
       mergeMap((sessionDbAdminUrl: string) => {
         let httpParams = new HttpParams();

@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h4 class="modal-title">{{ title }}</h4>
-  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+  <button [disabled]="!closeEnabled" type="button" class="btn-close" aria-label="Close" (click)="onClose()"></button>
 </div>
 
 <div class="modal-body">
@@ -8,10 +8,28 @@
     {{ message }}
   </h3>
 
-  <div *ngFor="let user of users">{{ user.userId }}</div>
+  <ag-grid-angular
+    style="width: 100%; height: 400px"
+    class="ag-theme-alpine"
+    [gridOptions]="gridOptions"></ag-grid-angular>
+
+  <button
+    *ngIf="deleteVisible"
+    [disabled]="!deleteEnabled"
+    type="button"
+    class="btn btn-sm btn-danger mt-3 mb-3 w-100"
+    (click)="onDelete()">
+    Delete
+  </button>
+  <button
+    *ngIf="!deleteVisible"
+    type="button"
+    class="btn btn-sm btn-secondary mt-3 mb-3 w-100"
+    (click)="onCancelDelete()">
+    Cancel
+  </button>
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.dismiss()">Close</button>
-  <button type="button" class="btn btn-sm btn-danger" (click)="activeModal.close(true)">Delete</button>
+  <button [disabled]="!closeEnabled" type="button" class="btn btn-sm btn-secondary" (click)="onClose()">Close</button>
 </div>

@@ -1,10 +1,11 @@
-import { HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Role, User } from "chipster-js-common";
+
+import { HttpParams } from "@angular/common/http";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
-import { map, mergeMap, take, tap } from "rxjs/operators";
+import { delay, map, mergeMap, take, tap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { LatestSession, SET_LATEST_SESSION } from "../../state/latest-session.reducer";
 import { SessionResource } from "../resources/session.resource";
@@ -114,7 +115,9 @@ export class UserService {
   }
 
   deleteUser(...userId: string[]): Observable<any> {
+    log.info("delete user", userId);
     return this.configService.getAdminUri(Role.AUTH).pipe(
+      delay(1000),
       mergeMap((authAdminUrl: string) => {
         let httpParams = new HttpParams();
         userId.forEach((id) => {

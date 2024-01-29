@@ -17,7 +17,7 @@ import { UserService } from "../../../shared/services/user.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
-import { ConfirmDeleteModalComponent } from "./confirm-delete-modal/confirm-delete-modal.component";
+import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
 
 @Component({
   selector: "ch-storage",
@@ -49,6 +49,8 @@ export class StorageComponent implements OnInit {
   public sessionDbOnlyGridOptions: GridOptions;
   public sessionDbOnlyGridReady = false;
 
+  public showSessionNames = false;
+
   private fieldUserId: ColDef = {
     field: "userId",
     sortable: true,
@@ -74,7 +76,6 @@ export class StorageComponent implements OnInit {
     filter: "agDateColumnFilter",
     cellRenderer: this.customDateRenderer.bind(this),
   };
-
   private fieldReadWriteSessions: ColDef = {
     field: "readWriteSessions",
     headerName: "Sessions RW",
@@ -205,12 +206,6 @@ export class StorageComponent implements OnInit {
     const authUsers$ = this.authenticationService.getUsers();
 
     const sessionDbUsers$ = this.sessionDbAdminService.getQuotas();
-    // const sessionDbUsers$ = this.configService.getSessionDbUrl().pipe(
-    //   mergeMap((sessionDbUrl) => this.authHttpClient.getAuth(sessionDbUrl + "/users")),
-    //   mergeMap((users: string[]) =>
-    //     this.sessionDbAdminService.getQuotas(...users.filter((user) => user == null || user === "null"))
-    //   )
-    // );
 
     forkJoin([authUsers$, sessionDbUsers$]).subscribe({
       next: ([authUsers, sessionDbUsers]) => {
@@ -292,19 +287,13 @@ export class StorageComponent implements OnInit {
           ...{
             rowData: this.combinedUsers,
             columnDefs: this.combinedColumnDefs,
-
-            // rowSelection: this.rowSelection,
-
-            onGridReady: (params) => {
-              // params.columnApi.autoSizeAllColumns();
+            onGridReady: () => {
               this.combinedGridReady = true;
             },
             onGridPreDestroyed: () => {
               this.combinedGridReady = false;
             },
             onFilterChanged: this.onFilterChanged.bind(this),
-
-            // getRowHeight: (params) => 25,
           },
         };
 
@@ -314,8 +303,7 @@ export class StorageComponent implements OnInit {
             rowData: this.authOnlyUsers,
             columnDefs: this.authOnlyColumnDefs,
             rowSelection: this.rowSelection,
-            onGridReady: (params) => {
-              // params.columnApi.autoSizeAllColumns();
+            onGridReady: () => {
               this.authOnlyGridReady = true;
             },
             onGridPreDestroyed: () => {
@@ -330,8 +318,7 @@ export class StorageComponent implements OnInit {
             rowData: this.sessionDbOnlyUsers,
             columnDefs: this.sessionDbOnlyColumnDefs,
             rowSelection: this.rowSelection,
-            onGridReady: (params) => {
-              // params.columnApi.autoSizeAllColumns();
+            onGridReady: () => {
               this.sessionDbOnlyGridReady = true;
             },
             onGridPreDestroyed: () => {
@@ -369,7 +356,7 @@ export class StorageComponent implements OnInit {
     gridApi.setFilterModel(oldGuestsFilter);
   }
 
-  onToggleListFilter(gridApi: GridApi) {
+  onToggleListFilter() {
     this.listFilterVisible = !this.listFilterVisible;
   }
 
@@ -400,13 +387,11 @@ export class StorageComponent implements OnInit {
   }
 
   onDeleteUsersAndSessions(users: any[]) {
-    this.deleteSessions(...users);
-    this.deleteUsers(...users);
+    this.deleteUserAndSessions(...users);
   }
 
   onDeleteSingleUserAndSessions(user: any) {
-    this.deleteSessions(user);
-    this.deleteUsers(user);
+    this.deleteUserAndSessions(user);
   }
 
   onDeleteSingleUser(user: any) {
@@ -417,44 +402,36 @@ export class StorageComponent implements OnInit {
     this.deleteSessions(user);
   }
 
-  onFilterChanged(params: any): void {
+  onFilterChanged(): void {
     // Handle filter change here
   }
 
-  deleteSessions(...users: any[]) {
-    const userIds: string[] = users.map((user) => user.userId);
+  private deleteSessions(...users: any[]) {
+    this.openConfirmModal(DeleteAction.DeleteSessions, users).subscribe({
+      next: (result) => {
+        if (result) {
+          this.refresh();
+        }
+      },
+    });
+  }
 
-    this.openConfirmModal(
-      "Delete sessions",
-      "Are you sure you want to delete all sessions for " + users.length + " user" + UtilsService.sIfMany(users) + "?",
-      users
-    ).subscribe({
-      next: () => {
-        this.sessionDbAdminService.deleteSessions(...userIds).subscribe({
-          next: (res) => {
-            this.refresh();
-          },
-          error: (err) => this.restErrorService.showError("Delete sessions failed", err),
-        });
+  private deleteUserAndSessions(...users: any[]) {
+    this.openConfirmModal(DeleteAction.DeleteUserAndSessions, users).subscribe({
+      next: (result) => {
+        if (result) {
+          this.refresh();
+        }
       },
     });
   }
 
   private deleteUsers(...users: any) {
-    const userIds: string[] = users.map((user) => user.userId);
-
-    this.openConfirmModal(
-      "Delete users",
-      "Are you sure you want to delete the following " + users.length + " user" + UtilsService.sIfMany(users) + "?",
-      users
-    ).subscribe({
-      next: () => {
-        this.userService.deleteUser(...userIds).subscribe({
-          next: () => {
-            this.refresh();
-          },
-          error: (err) => this.restErrorService.showError("Delete users failed", err),
-        });
+    this.openConfirmModal(DeleteAction.DeleteUser, users).subscribe({
+      next: (result) => {
+        if (result) {
+          this.refresh();
+        }
       },
     });
   }
@@ -487,7 +464,7 @@ export class StorageComponent implements OnInit {
   }
 
   /**
-   * For some reason the grid api doesn't have a method to get the filtered rows.
+   * The grid api doesn't have a method to get the filtered rows.
    *
    * @param gridApi
    * @returns
@@ -539,10 +516,9 @@ export class StorageComponent implements OnInit {
     return rows.map((row) => row.userId);
   }
 
-  private openConfirmModal(title, message, users: any[]) {
-    const modalRef = this.modalService.open(ConfirmDeleteModalComponent);
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
+  private openConfirmModal(deleteAction: DeleteAction, users: any[]) {
+    const modalRef = this.modalService.open(ConfirmDeleteModalComponent, { size: "lg", backdrop: "static" });
+    modalRef.componentInstance.deleteAction = deleteAction;
     modalRef.componentInstance.users = users;
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
