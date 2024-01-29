@@ -195,4 +195,13 @@ export class AuthenticationService {
       this.scheduleTokenRefresh();
     }
   }
+
+  getUsername(userId: string): string {
+    const parts: string[] = userId.split("/");
+    if (parts.length !== 2) {
+      throw new Error("invalid userId");
+    }
+
+    return parts[1];
+  }
 }

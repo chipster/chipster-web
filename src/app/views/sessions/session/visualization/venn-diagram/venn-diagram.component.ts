@@ -50,7 +50,7 @@ export class VennDiagramComponent implements OnChanges {
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService
-  ) {}
+  ) { }
 
   ngOnChanges() {
     this.isEnabled = false;
@@ -260,7 +260,6 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   createNewDataset(): void {
-    const parentDatasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset.datasetId);
 
     let data;
     try {
@@ -271,7 +270,7 @@ export class VennDiagramComponent implements OnChanges {
     }
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
-      .createDerivedDataset("venn.tsv", parentDatasetIds, "Venn-Diagram", tsvData)
+      .createDerivedDataset("venn.tsv", this.selectedDatasets, "Venn-Diagram", tsvData)
       .subscribe(null, (err) => this.restErrorService.showError("Create file failed", err));
   }
 

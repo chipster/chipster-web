@@ -256,7 +256,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("newDataset.tsv", [this.dataset.datasetId], "Volcano Plot", data)
+      .createDerivedDataset("newDataset.tsv", [this.dataset], "Volcano Plot", data)
       .subscribe(null, (err) => this.restErrorService2.showError("create dataset failed", err));
   }
 }

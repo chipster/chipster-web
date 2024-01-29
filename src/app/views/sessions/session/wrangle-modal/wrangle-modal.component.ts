@@ -4,7 +4,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
-import { defer, of, Subject } from "rxjs";
+import { Subject, defer, of } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../model/loadstate";
@@ -40,7 +40,7 @@ export class WrangleModalComponent implements OnInit {
     private restErrorService: RestErrorService,
     private tsvService: TsvService,
     private datasetService: DatasetService
-  ) {}
+  ) { }
 
   public static FILE_SIZE_LIMIT = 200; // MB
 
@@ -125,9 +125,9 @@ export class WrangleModalComponent implements OnInit {
           this.allItems = headers.map((headerName: string, index: number) =>
             index === 0 && headerName === ""
               ? {
-                  index,
-                  name: "R rownames column",
-                }
+                index,
+                name: "R rownames column",
+              }
               : { index, name: headerName }
           );
 
@@ -314,7 +314,7 @@ export class WrangleModalComponent implements OnInit {
 
           return this.sessionDataService.createDerivedDataset(
             newFileName,
-            [this.dataset.datasetId],
+            [this.dataset],
             "Convert to Chipster format",
             wrangledFileString,
             "Import",
@@ -335,11 +335,11 @@ export class WrangleModalComponent implements OnInit {
     const otherColumnsToIncludeIndexes = this.includeOthers()
       ? otherColumnIdexes
       : this.getColumnIndexes(this.allItems).filter(
-          (item) =>
-            !this.getColumnIndexes(this.selectedIdentifiers)
-              .concat(sampleColumnIndexes, otherColumnIdexes)
-              .includes(item)
-        );
+        (item) =>
+          !this.getColumnIndexes(this.selectedIdentifiers)
+            .concat(sampleColumnIndexes, otherColumnIdexes)
+            .includes(item)
+      );
 
     // identifier not included here as it will be set as the first column
     // sort to retain the original order

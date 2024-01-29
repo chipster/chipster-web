@@ -9,8 +9,9 @@
   </div> -->
 
   <button *ngIf="params.onShowSessions" class="btn btn-secondary btn-sm" (click)="onShowSessions()">Sessions</button>
-  <button *ngIf="params.onDeleteUser" class="btn btn-danger btn-sm ms-2" (click)="onDeleteUser()">Delete</button>
-  <button *ngIf="params.onDeleteSessions" class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">
-    Delete sessions
+  <button *ngIf="params.onDeleteUser" class="btn btn-danger btn-sm ms-2" (click)="onDeleteUser()">D user</button>
+  <button *ngIf="params.onDeleteSessions" class="btn btn-danger btn-sm ms-2" (click)="onDeleteSessions()">D ses</button>
+  <button *ngIf="params.onDeleteUserAndSessions" class="btn btn-danger btn-sm ms-2" (click)="onDeleteUserAndSessions()">
+    D both
   </button>
 </div>

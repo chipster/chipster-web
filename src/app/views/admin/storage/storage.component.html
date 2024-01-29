@@ -6,12 +6,13 @@
       <ng-template ngbNavContent style="position: relative; width: 100%">
         <div *ngIf="combinedGridReady">
           <div class="summary">
-            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}
+            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}, Size:
+            {{ getFilteredTotalSize(combinedGridOptions.api) | bytes : 0 }}
 
             <!-- clear filters button -->
             <button
               [disabled]="!combinedGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(combinedGridOptions.api)">
               Clear filters
             </button>
@@ -89,7 +90,7 @@
             <!-- clear filters button -->
             <button
               [disabled]="!authOnlyGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(authOnlyGridOptions.api)">
               Clear filters
             </button>
@@ -97,6 +98,16 @@
             <!-- old guests button -->
             <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(authOnlyGridOptions.api)">
               Filter old guests
+            </button>
+
+            <!-- list filter buttons -->
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(authOnlyGridOptions.api)">
+              <span *ngIf="!listFilterVisible">Open</span>
+              <span *ngIf="listFilterVisible">Close</span>
+              filter list
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(authOnlyGridOptions.api)">
+              Filter listed users
             </button>
 
             <!-- delete button -->
@@ -111,11 +122,25 @@
           </div>
         </div>
 
+        <!-- user list filter -->
+        <textarea
+          [hidden]="!listFilterVisible"
+          class="mb-1 form-control"
+          #notesArea
+          id="session-notes"
+          rows="15"
+          placeholder="One user per line. If line contains a comma, only use the first part."
+          [(ngModel)]="listFilterText"></textarea>
+
         <ag-grid-angular
           *ngIf="allSessionsState.isReady(); else statusTemplate"
           style="width: 100%; height: 700px"
           class="ag-theme-alpine"
           [gridOptions]="authOnlyGridOptions"></ag-grid-angular>
+
+        <div *ngIf="authOnlyGridReady" class="text-monospace text-small m-3">
+          <div *ngFor="let user of getFilteredRows(authOnlyGridOptions.api)">{{ user.username }}</div>
+        </div>
       </ng-template>
     </li>
 
@@ -130,9 +155,19 @@
             <!-- clear filters button -->
             <button
               [disabled]="!sessionDbOnlyGridOptions.api.isAnyFilterPresent()"
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-info"
               (click)="onClearFilters(sessionDbOnlyGridOptions.api)">
               Clear filters
+            </button>
+
+            <!-- list filter buttons -->
+            <button class="btn btn-sm btn-secondary ms-4" (click)="onToggleListFilter(sessionDbOnlyGridOptions.api)">
+              <span *ngIf="!listFilterVisible">Open</span>
+              <span *ngIf="listFilterVisible">Close</span>
+              filter list
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(sessionDbOnlyGridOptions.api)">
+              Filter listed users
             </button>
 
             <!-- delete button -->
@@ -147,11 +182,25 @@
           </div>
         </div>
 
+        <!-- user list filter -->
+        <textarea
+          [hidden]="!listFilterVisible"
+          class="mb-1 form-control"
+          #notesArea
+          id="session-notes"
+          rows="15"
+          placeholder="One user per line. If line contains a comma, only use the first part."
+          [(ngModel)]="listFilterText"></textarea>
+
         <ag-grid-angular
           *ngIf="allSessionsState.isReady(); else statusTemplate"
           style="width: 100%; height: 700px"
           class="ag-theme-alpine"
           [gridOptions]="sessionDbOnlyGridOptions"></ag-grid-angular>
+
+        <div *ngIf="sessionDbOnlyGridReady" class="text-monospace text-small m-3">
+          <div *ngFor="let user of getFilteredRows(sessionDbOnlyGridOptions.api)">{{ getUsername(user.userId) }}</div>
+        </div>
       </ng-template>
     </li>
   </ul>
@@ -173,6 +222,7 @@
           <thead>
             <tr>
               <!-- <th scope="col">Name</th> -->
+              <th scope="col">SessionId</th>
               <th scope="col">Size</th>
               <th scope="col">Datasets</th>
               <th scope="col">Jobs</th>
@@ -184,6 +234,7 @@
           <tbody>
             <tr *ngFor="let session of sessions">
               <!-- <th scope="row">{{ session.name }}</th> -->
+              <td>{{ session.sessionId }}</td>
               <td>{{ session.size | bytes : 0 }}</td>
               <td>{{ session.datasetCount }}</td>
               <td>{{ session.jobCount }}</td>
