@@ -52,13 +52,13 @@
           }
         ],
         "require-jsdoc": "off",
-        "import/prefer-default-export": "off",
+        "import/prefer-default-export": "off", // our angular components don't use default export
         "@typescript-eslint/lines-between-class-members": "off",
-        "prefer-template": "off",
-        "@typescript-eslint/dot-notation": "off",
-        "class-methods-use-this": "off",
-        "max-classes-per-file": "off",
-        "prefer-destructuring": "off"
+        "prefer-template": "off", // not sure if we want this
+        "@typescript-eslint/dot-notation": "off", // for now, fix causes troubles,
+        "class-methods-use-this": "off", // we have lot's of these, especially all services
+        "max-classes-per-file": "off", // used for small classes in maybe three files, should maybe use Types for these?
+        "prefer-destructuring": "off" // not sure if reasonable with typescript, fix loses type information?
       }
     },
     {
