@@ -88,7 +88,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private getSessionDataService: GetSessionDataService,
     private toolsService: ToolsService,
     private datasetContextMenuService: DatasetContextMenuService
-  ) {}
+  ) { }
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -210,12 +210,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
     this.d3PhenodataLabelsGroup = this.zoomGroup.append("g").attr("class", "phenodataLabel");
     this.d3PhenodataWarningsGroup = this.zoomGroup.append("g").attr("class", "phenodataWarning");
+
+    // remove old elements, otherwise jumping between Workflow and List tabs keeps adding more elements
+    d3.select(".dataset-tooltip").remove();
     this.datasetTooltip = d3
       .select("body")
       .append("div")
       .attr("class", "dataset-tooltip")
       .style("opacity", 0)
       .html("tooltip");
+    d3.select(".dataset-tooltip-triangle").remove();
     this.datasetTooltipTriangle = d3
       .select("body")
       .append("div")
@@ -676,24 +680,24 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const menu =
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
-            this.groupsMenuItem,
+          this.groupsMenuItem,
 
-            this.selectChildrenMenuItem,
+          this.selectChildrenMenuItem,
 
-            { ...this.deleteMenuItem, title: "Delete " + self.selectedDatasets.length + " files" },
-          ]
+          { ...this.deleteMenuItem, title: "Delete " + self.selectedDatasets.length + " files" },
+        ]
         : [
-            this.renameMenuItem,
-            this.convertMenuItem,
-            this.groupsMenuItem,
-            this.exportMenuItem,
-            this.historyMenuItem,
-            this.dividerMenuItem,
-            this.showJobMenuItem,
-            this.selectChildrenMenuItem,
-            this.dividerMenuItem,
-            this.deleteMenuItem,
-          ];
+          this.renameMenuItem,
+          this.convertMenuItem,
+          this.groupsMenuItem,
+          this.exportMenuItem,
+          this.historyMenuItem,
+          this.dividerMenuItem,
+          this.showJobMenuItem,
+          this.selectChildrenMenuItem,
+          this.dividerMenuItem,
+          this.deleteMenuItem,
+        ];
 
     // enter().append() creates elements for the new nodes, then merge old nodes to configure them all
     this.d3DatasetNodes
