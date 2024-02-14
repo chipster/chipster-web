@@ -50,7 +50,6 @@
     "tslib": "^2.2.0",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1",
-    "webpack": "^5.51.1",
     "yamljs": "^0.3.0"
   },
   "optionalDependencies": {
