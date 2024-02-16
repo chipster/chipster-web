@@ -11,10 +11,11 @@ import { SessionData } from "../../model/session/session-data";
 import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
+import { FileState } from "chipster-js-common/lib/model/dataset";
 
 @Injectable()
 export class SessionResource {
-  constructor(private configService: ConfigService, private http: HttpClient, private tokenService: TokenService) {}
+  constructor(private configService: ConfigService, private http: HttpClient, private tokenService: TokenService) { }
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
@@ -51,8 +52,29 @@ export class SessionResource {
 
         const data = new SessionData();
 
+        const completeDatasets = datasets.filter(this.isDatasetComplete);
+
+        if (datasets.length != completeDatasets.length) {
+          /*
+          Skip non-complete datasets
+
+          These datasets are skipped also when we get a WebSocket event in SessionEventService.handleDatasetEvent().
+
+          Someone may have just started a download, but let's show it only when it has 
+          finished. 
+
+          Most likely the existing datasets without fileId are result of the earlier race-condition, where  the app 
+          tried to save the dataset position immediately after it was created, overwriting the fileId every now 
+          and then.
+
+          Skipping these datasets here and in the SessionEventService should fix the race-condition and hide these 
+          broken datasets from the app.
+          */
+          console.warn("skipped " + (datasets.length - completeDatasets.length) + " non-complete datasets");
+        }
+
         data.session = session;
-        data.datasetsMap = UtilsService.arrayToMap(datasets, "datasetId");
+        data.datasetsMap = UtilsService.arrayToMap(completeDatasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
 
         data.datasetTypeTags = types;
@@ -60,6 +82,21 @@ export class SessionResource {
         return data;
       })
     );
+  }
+
+  isDatasetComplete(dataset: Dataset) {
+
+    if (dataset.fileId == null) {
+      return false;
+    }
+
+    if (dataset.state != null) {
+      return dataset.state == FileState.Complete;
+
+    } else {
+      // old dataset without state, let's assume it's COMPLETE
+      return true;
+    }
   }
 
   /**

@@ -38,7 +38,7 @@ export class SessionEventService {
     private websocketService: WebSocketService,
     private errorService: ErrorService,
     private selectionService: SelectionService
-  ) {}
+  ) { }
 
   unsubscribe() {
     this.websocketService.unsubscribe();
@@ -179,6 +179,13 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
+
+          // accept only complete datasets, see SessionResource.loadSession()
+          if (!this.sessionResource.isDatasetComplete(remote)) {
+            log.info("wait until upload is completed", remote);
+            return observableNever();
+          }
+
           sessionData.datasetsMap.set(event.resourceId, remote);
           return this.createEvent(event, null, remote);
         })
@@ -187,6 +194,13 @@ export class SessionEventService {
     if (event.type === EventType.Update) {
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
+
+          // accept only complete datasets, see SessionResource.loadSession()
+          if (!this.sessionResource.isDatasetComplete(remote)) {
+            log.info("wait until upload is completed", remote);
+            return observableNever();
+          }
+
           const local = sessionData.datasetsMap.get(event.resourceId);
           sessionData.datasetsMap.set(event.resourceId, remote);
           return this.createEvent(event, local, remote);
