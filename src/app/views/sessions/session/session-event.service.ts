@@ -19,6 +19,7 @@ import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { WebSocketService } from "../../../shared/services/websocket.service";
 import { SelectionService } from "./selection.service";
+import { FileState } from "chipster-js-common/lib/model/dataset";
 
 @Injectable()
 export class SessionEventService {
@@ -177,14 +178,14 @@ export class SessionEventService {
 
   handleDatasetEvent(event: any, sessionId: string, sessionData: SessionData): Observable<SessionEvent> {
     if (event.type === EventType.Create) {
+      // accept only complete datasets, see SessionResource.loadSession()
+      if (event.state !== FileState.Complete) {
+        log.info("wait until upload is completed", event);
+        return observableNever();
+      }
+
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
-          // accept only complete datasets, see SessionResource.loadSession()
-          if (!this.sessionResource.isDatasetComplete(remote)) {
-            log.info("wait until upload is completed", remote);
-            return observableNever();
-          }
 
           sessionData.datasetsMap.set(event.resourceId, remote);
           return this.createEvent(event, null, remote);
@@ -192,14 +193,15 @@ export class SessionEventService {
       );
     }
     if (event.type === EventType.Update) {
+
+      // accept only complete datasets, see SessionResource.loadSession()
+      if (event.state !== FileState.Complete) {
+        log.info("wait until upload is completed", event);
+        return observableNever();
+      }
+
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
-          // accept only complete datasets, see SessionResource.loadSession()
-          if (!this.sessionResource.isDatasetComplete(remote)) {
-            log.info("wait until upload is completed", remote);
-            return observableNever();
-          }
 
           const local = sessionData.datasetsMap.get(event.resourceId);
           sessionData.datasetsMap.set(event.resourceId, remote);
