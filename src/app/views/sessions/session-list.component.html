@@ -204,7 +204,7 @@
           <tr>
             <td class="lighter">Total Size:</td>
             <td *ngIf="stats !== null" class="lighter" style="width: 100%">
-              {{ stats["size"] | bytes : 0 }}
+              {{ stats["size"] | bytes: 0 }}
             </td>
             <td *ngIf="stats === null" class="lighter" style="width: 100%">Loading...</td>
           </tr>
@@ -268,7 +268,7 @@
             <tr>
               <td class="lighter">Size:</td>
               <td *ngIf="sessionSize !== null && sessionData !== undefined" style="width: 100%">
-                {{ sessionSize | bytes : 0 }}
+                {{ sessionSize | bytes: 0 }}
               </td>
               <td *ngIf="sessionSize === null || sessionData === undefined" style="width: 100%">Loading...</td>
             </tr>

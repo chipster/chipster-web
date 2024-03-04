@@ -101,7 +101,7 @@
                 active: selectionService.isSelectedDatasetById(dataset.datasetId)
               }"
               (click)="toggleDatasetSelection($event, dataset)"
-              *ngFor="let dataset of getDatasetListSorted() | datasetsearch : datasetSearch">
+              *ngFor="let dataset of getDatasetListSorted() | datasetsearch: datasetSearch">
               {{ dataset.name }}
             </button>
           </div>

@@ -481,11 +481,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
-          .on("drag", () => {
-            this.dragBackground(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
+          .on("drag", event => {
+            this.dragBackground(event.x, event.dx, event.y, event.dy);
           })
-          .on("end", () => {
-            this.dragBackgroundEnd(d3.event);
+          .on("end", event => {
+            this.dragBackgroundEnd(event);
           })
       );
   }
@@ -554,7 +554,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("stroke", (d) => (this.isSelectedDataset(d.dataset) ? this.primaryColor : d.color))
 
       .style("opacity", (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)))
-      .on("mouseover", function (d) {
+      .on("mouseover", function (event, d) {
         if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
           d3.select(this).style("fill", "#e9ecef");
         }
@@ -569,10 +569,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       })
       .classed("phenodata-node", true);
 
-    this.d3PhenodataNodes.on("click", (d: DatasetNode) => {
+    this.d3PhenodataNodes.on("click", (event, d: DatasetNode) => {
       if (self.enabled) {
         self.selectionHandlerService.clearJobSelection();
-        if (!UtilsService.isCtrlKey(d3.event)) {
+        if (!UtilsService.isCtrlKey(event)) {
           self.selectionHandlerService.clearDatasetSelection();
           self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
           self.visualizationEventService.phenodataSelected(true);
@@ -731,7 +731,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           },
         })
       )
-      .on("mouseover", function (d) {
+      .on("mouseover", function (event, d) {
         if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
           d3.select(this).style("fill", "#e9ecef");
         }
@@ -751,10 +751,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           self.hideTooltip();
         }
       })
-      .on("click", (d) => {
+      .on("click", (event, d) => {
         if (self.enabled) {
           self.selectionHandlerService.clearJobSelection();
-          if (!UtilsService.isCtrlKey(d3.event)) {
+          if (!UtilsService.isCtrlKey(event)) {
             self.selectionHandlerService.clearDatasetSelection();
           }
           self.selectionHandlerService.toggleDatasetSelection([d.dataset]);
@@ -763,15 +763,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
-          .on("drag", (d: DatasetNode) => {
+          .on("drag", (event, d: DatasetNode) => {
             // don't allow datasets to be moved from the unselected dataset
             if (self.isSelectedDataset(d.dataset)) {
               self.dragStarted = true;
               self.hideTooltip(0);
-              self.dragNodes(d3.event.x, d3.event.dx, d3.event.y, d3.event.dy);
+              self.dragNodes(event.x, event.dx, event.y, event.dy);
             }
           })
-          .on("end", function (d: DatasetNode) {
+          .on("end", function (event, d: DatasetNode) {
             // check the flag to differentiate between drag and click events
             if (self.dragStarted) {
               self.dragStarted = false;
@@ -981,7 +981,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("y2", (d) => d.target.y)
       .style("opacity", () => WorkflowGraphComponent.getOpacity(!this.searchEnabled))
 
-      .on("click", (d) => {
+      .on("click", (event, d) => {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
       .on("mouseover", function () {

@@ -81,13 +81,13 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
             if (showMore) {
               this.state = new LoadState(
                 State.Fail,
-                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points"
+                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
               );
             } else {
               this.state = new LoadState(
                 State.TooLarge,
                 "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
-                "Show anyway"
+                "Show anyway",
               );
             }
           } else {
@@ -97,7 +97,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
@@ -138,16 +138,17 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
     // Register for drag handlers
 
-    drag.on("start", () => {
+    drag.on("start", (event) => {
       // Set new position of band
-      const pos = d3.mouse(document.getElementById("dragGroup"));
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
       startPoint = new Point(pos[0], pos[1]);
     });
 
-    drag.on("drag", () => {
+    drag.on("drag", (event) => {
       this.dataSelectionModeEnable = true; // change the tab for showing selected gene
 
-      const pos = d3.mouse(document.getElementById("dragGroup"));
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
+
       const endPoint = new Point(pos[0], pos[1]);
 
       const minX = Math.min(startPoint.x, endPoint.x);
@@ -161,8 +162,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       d3.select(".band").attr("width", width).attr("height", height);
     });
 
-    drag.on("end", () => {
-      const pos = d3.mouse(document.getElementById("dragGroup"));
+    drag.on("end", (event) => {
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
       // need to get the points that included in the band
       this.resetSelections();

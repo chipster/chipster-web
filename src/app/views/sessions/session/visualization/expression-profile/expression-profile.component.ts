@@ -41,8 +41,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     private sessionDataService: SessionDataService,
     private visualizationTSVService: VisualizationTSVService,
     private fileResource: FileResource,
-    private restErrorService: RestErrorService
-  ) { }
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
@@ -72,14 +72,14 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           } else {
             this.state = new LoadState(
               State.Fail,
-              "Only microarray data supported, no columns starting with chip found."
+              "Only microarray data supported, no columns starting with chip found.",
             );
           }
         },
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
 
     this.selectedGeneExpressions = [];
@@ -125,7 +125,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       // find if there is a phenodata description matching header and containing a value
       const phenodataHeader: any = _.find(
         phenodataDescriptions,
-        (item: any) => item.column === header && item.value !== null
+        (item: any) => item.column === header && item.value !== null,
       );
       return phenodataHeader ? phenodataHeader.value : header;
     });
@@ -199,16 +199,17 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         const colorIndex = _.floor((i / tsv.body.size()) * 20).toString();
         return color(colorIndex);
       })
-      .on("mouseover", (d: any) => {
+      .on("mouseover", (event, d: any) => {
         that.setSelectionHoverStyle(d.id);
       })
-      .on("mouseout", (d: any) => {
+      .on("mouseout", (event, d: any) => {
         that.removeSelectionHoverStyle(d.id);
       })
-      .on("click", (d: GeneExpression) => {
+      .on("click", (event, d: GeneExpression) => {
+        console.log("click", event, d);
         const id = d.id;
-        const isCtrl = UtilsService.isCtrlKey(d3.event);
-        const isShift = UtilsService.isShiftKey(d3.event);
+        const isCtrl = UtilsService.isCtrlKey(event);
+        const isShift = UtilsService.isShiftKey(event);
         if (isShift) {
           that.addSelections([id]);
         } else if (isCtrl) {
@@ -248,8 +249,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     let startPoint = new Point(-1, -1); // startpoint for dragging
 
     // Register drag handlers
-    drag.on("drag", () => {
-      const pos = d3.mouse(document.getElementById("dragGroup"));
+    drag.on("drag", (event) => {
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
 
       if (endPoint.x < startPoint.x) {
@@ -275,8 +276,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         .attr("height", Math.abs(startPoint.y - endPoint.y));
     });
 
-    drag.on("end", () => {
-      const pos = d3.mouse(document.getElementById("dragGroup"));
+    drag.on("end", (event) => {
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
 
       if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
@@ -289,7 +290,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           endPoint,
           startPoint,
           linearXScale,
-          tsv
+          tsv,
         );
         const intervals: Array<Interval> = [];
 
@@ -305,7 +306,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
         for (const interval of intervals) {
           const intersectingLines = _.filter(interval.lines, (line: Line) =>
-            that.expressionProfileService.isIntersecting(line, interval.rectangle)
+            that.expressionProfileService.isIntersecting(line, interval.rectangle),
           );
 
           // Line ids intersecting with selection as an array
@@ -351,7 +352,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     const selectedGeneIds = _.filter(this.getSelectionIds(), (selectionId) => !_.includes(ids, selectionId));
     this.selectedGeneExpressions = _.map(selectedGeneIds, (id) =>
-      this.visualizationTSVService.getGeneExpression(this.tsv, id)
+      this.visualizationTSVService.getGeneExpression(this.tsv, id),
     );
   }
 
@@ -359,7 +360,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const selectionIds = this.getSelectionIds();
     const missingSelectionIds = _.difference(ids, selectionIds);
     const missingGeneExpressions = _.map(missingSelectionIds, (id) =>
-      this.visualizationTSVService.getGeneExpression(this.tsv, id)
+      this.visualizationTSVService.getGeneExpression(this.tsv, id),
     );
     this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
     missingSelectionIds.forEach((id) => {

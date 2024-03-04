@@ -49,8 +49,8 @@ export class VennDiagramComponent implements OnChanges {
     private venndiagramService: VennDiagramService,
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService
-  ) { }
+    private dialogModalService: DialogModalService,
+  ) {}
 
   ngOnChanges() {
     this.isEnabled = false;
@@ -98,7 +98,7 @@ export class VennDiagramComponent implements OnChanges {
   private init() {
     const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
     const tsvObservables = datasetIds.map((dataset: Dataset) =>
-      this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset)
+      this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset),
     );
 
     observableForkJoin(tsvObservables).subscribe(
@@ -107,7 +107,7 @@ export class VennDiagramComponent implements OnChanges {
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map(
             (tsv: Array<Array<string>>, index: number) =>
-              new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name)
+              new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name),
           )
           .value();
 
@@ -127,7 +127,7 @@ export class VennDiagramComponent implements OnChanges {
       },
       (error: any) => {
         this.restErrorService.showError("Fetching TSV-files failed", error);
-      }
+      },
     );
   }
 
@@ -174,7 +174,7 @@ export class VennDiagramComponent implements OnChanges {
     const segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(
       this.vennCircles,
       visualizationArea.center,
-      this.columnKey
+      this.columnKey,
     );
 
     const circleTexts = [...filenameTexts, ...segmentItemCountTexts];
@@ -189,13 +189,13 @@ export class VennDiagramComponent implements OnChanges {
 
     // selection group
     const selectionGroup = svg.append("g").attr("id", "vennselections");
-    circleGroup.on("click", () => {
-      const isShift = UtilsService.isShiftKey(d3.event);
+    circleGroup.on("click", (event) => {
+      const isShift = UtilsService.isShiftKey(event);
       if (!isShift) {
         selectionGroup.selectAll("*").remove();
       }
 
-      const coords = d3.mouse(document.getElementById("circleGroup"));
+      const coords = d3.pointer(event, document.getElementById("circleGroup"));
       const mouseposition = new Point(coords[0], coords[1]);
       const selectionVennCircles = VennDiagramUtils.getCirclesByPosition(this.vennCircles, mouseposition);
       if (selectionVennCircles.length >= 1) {
@@ -203,7 +203,7 @@ export class VennDiagramComponent implements OnChanges {
           this.vennCircles,
           selectionVennCircles,
           circleRadius,
-          visualizationArea
+          visualizationArea,
         );
 
         selectionGroup
@@ -218,7 +218,7 @@ export class VennDiagramComponent implements OnChanges {
         const values = this.venndiagramService.getDataIntersection(
           selectionVennCircles,
           this.vennCircles,
-          this.columnKey
+          this.columnKey,
         );
         const datasetIds = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.datasetId);
         if (!isShift) {
@@ -234,8 +234,8 @@ export class VennDiagramComponent implements OnChanges {
       (vennCircle: VennCircle) =>
         new VennDiagramText(
           vennCircle.filename,
-          this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center)
-        )
+          this.venndiagramService.getVennCircleFilenamePoint(vennCircle, visualizationArea.center),
+        ),
     );
   }
 
@@ -243,7 +243,7 @@ export class VennDiagramComponent implements OnChanges {
     allVennCircles: Array<VennCircle>,
     selectionVennCircles: Array<VennCircle>,
     circleRadius,
-    visualizationArea
+    visualizationArea,
   ) {
     const selectionCircles = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
     const circles = allVennCircles.map((vennCircle: VennCircle) => vennCircle.circle);
@@ -251,7 +251,7 @@ export class VennDiagramComponent implements OnChanges {
       circles,
       selectionCircles,
       circleRadius,
-      visualizationArea.center
+      visualizationArea.center,
     );
   }
 
@@ -260,7 +260,6 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   createNewDataset(): void {
-
     let data;
     try {
       data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
@@ -282,7 +281,7 @@ export class VennDiagramComponent implements OnChanges {
           file.datasetId,
           file.filename,
           file.getColumnDataByHeaderKeys(["symbol", "identifier"]),
-          new Circle(circleCenters[index], radius)
+          new Circle(circleCenters[index], radius),
         );
       } catch (err) {
         if (err instanceof NoColumnError) {
