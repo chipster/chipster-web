@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GridOptions } from "ag-grid-community";
+import { GridOptions, GridReadyEvent } from "ag-grid-community";
 import log from "loglevel";
 import { Observable, Subject, concat, of } from "rxjs";
 import { catchError, mergeMap, takeUntil, tap } from "rxjs/operators";
@@ -51,12 +51,13 @@ export class ConfirmDeleteModalComponent implements OnInit {
   private refreshAfterClose: boolean = false;
 
   private cancelDelete$ = new Subject();
+  api: any;
 
   constructor(
     private activeModal: NgbActiveModal,
     private userService: UserService,
     private restErrorService: RestErrorService,
-    private sessionDbAdminService: SessionDbAdminService
+    private sessionDbAdminService: SessionDbAdminService,
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +66,7 @@ export class ConfirmDeleteModalComponent implements OnInit {
       case DeleteAction.DeleteUser:
         this.title = "Delete users, keep sessions";
         this.message = `Are you sure you want to delete the following ${this.users.length} user${UtilsService.sIfMany(
-          this.users
+          this.users,
         )}?`;
         break;
       case DeleteAction.DeleteSessions:
@@ -77,7 +78,7 @@ export class ConfirmDeleteModalComponent implements OnInit {
       case DeleteAction.DeleteUserAndSessions:
         this.title = "Delete users and sessions";
         this.message = `Are you sure you want to delete the following ${this.users.length} user${UtilsService.sIfMany(
-          this.users
+          this.users,
         )} and their sessions?`;
         break;
       default:
@@ -111,6 +112,9 @@ export class ConfirmDeleteModalComponent implements OnInit {
         { field: "deleteUser" },
         { field: "deleteSessions" },
       ],
+      onGridReady: (event: GridReadyEvent) => {
+        this.api = event.api;
+      },
     };
   }
 
@@ -202,20 +206,20 @@ export class ConfirmDeleteModalComponent implements OnInit {
     return of(row).pipe(
       tap(() => {
         row.deleteUser = DeleteStatus.Deleting;
-        this.gridOptions.api.redrawRows();
+        this.api.redrawRows();
       }),
       mergeMap(() =>
         this.userService.deleteUser(row.userId).pipe(
           catchError((error) => {
             log.warn("delete user failed", error);
             return of(false);
-          })
-        )
+          }),
+        ),
       ),
       tap((result) => {
         row.deleteUser = result === false ? DeleteStatus.Failed : DeleteStatus.Done;
-        this.gridOptions.api.redrawRows();
-      })
+        this.api.redrawRows();
+      }),
     );
   }
 
@@ -223,20 +227,20 @@ export class ConfirmDeleteModalComponent implements OnInit {
     return of(row).pipe(
       tap(() => {
         row.deleteSessions = DeleteStatus.Deleting;
-        this.gridOptions.api.redrawRows();
+        this.api.redrawRows();
       }),
       mergeMap(() =>
         this.sessionDbAdminService.deleteSessions(row.userId).pipe(
           catchError((error) => {
             log.warn("delete sessions failed", error);
             return of(false);
-          })
-        )
+          }),
+        ),
       ),
       tap((result) => {
         row.deleteSessions = result === false ? DeleteStatus.Failed : DeleteStatus.Done;
-        this.gridOptions.api.redrawRows();
-      })
+        this.api.redrawRows();
+      }),
     );
   }
 
@@ -274,6 +278,6 @@ export class ConfirmDeleteModalComponent implements OnInit {
         row.deleteSessions = status;
       }
     });
-    this.gridOptions.api.redrawRows();
+    this.api.redrawRows();
   }
 }

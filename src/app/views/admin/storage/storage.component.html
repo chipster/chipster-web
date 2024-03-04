@@ -6,19 +6,19 @@
       <ng-template ngbNavContent style="position: relative; width: 100%">
         <div *ngIf="combinedGridReady">
           <div class="summary">
-            Users: {{ getFilteredCount(combinedGridOptions.api) }} / {{ combinedUsers.length }}, Size:
-            {{ getFilteredTotalSize(combinedGridOptions.api) | bytes : 0 }}
+            Users: {{ getFilteredCount(combinedGridApi) }} / {{ combinedUsers.length }}, Size:
+            {{ getFilteredTotalSize(combinedGridApi) | bytes: 0 }}
 
             <!-- clear filters button -->
             <button
-              [disabled]="!combinedGridOptions.api.isAnyFilterPresent()"
+              [disabled]="!combinedGridApi.isAnyFilterPresent()"
               class="btn btn-sm btn-info"
-              (click)="onClearFilters(combinedGridOptions.api)">
+              (click)="onClearFilters(combinedGridApi)">
               Clear filters
             </button>
 
             <!-- old guests button -->
-            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(combinedGridOptions.api)">
+            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(combinedGridApi)">
               Filter old guests
             </button>
 
@@ -28,7 +28,7 @@
               <span *ngIf="listFilterVisible">Close</span>
               filter list
             </button>
-            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(combinedGridOptions.api)">
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(combinedGridApi)">
               Filter listed users
             </button>
 
@@ -43,13 +43,11 @@
                 Delete
               </button>
               <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                <button ngbDropdownItem (click)="onDeleteUsers(getFilteredRows(combinedGridOptions.api))">
-                  Delete users
-                </button>
-                <button ngbDropdownItem (click)="onDeleteSessions(getFilteredRows(combinedGridOptions.api))">
+                <button ngbDropdownItem (click)="onDeleteUsers(getFilteredRows(combinedGridApi))">Delete users</button>
+                <button ngbDropdownItem (click)="onDeleteSessions(getFilteredRows(combinedGridApi))">
                   Delete sessions
                 </button>
-                <button ngbDropdownItem (click)="onDeleteUsersAndSessions(getFilteredRows(combinedGridOptions.api))">
+                <button ngbDropdownItem (click)="onDeleteUsersAndSessions(getFilteredRows(combinedGridApi))">
                   Delete users and sessions
                 </button>
               </div>
@@ -74,7 +72,7 @@
           [gridOptions]="combinedGridOptions"></ag-grid-angular>
 
         <div *ngIf="combinedGridReady" class="text-monospace text-small m-3">
-          <div *ngFor="let user of getFilteredRows(combinedGridOptions.api)">{{ user.username }}</div>
+          <div *ngFor="let user of getFilteredRows(combinedGridApi)">{{ user.username }}</div>
         </div>
       </ng-template>
     </li>
@@ -85,18 +83,18 @@
       <ng-template ngbNavContent>
         <div *ngIf="authOnlyGridReady">
           <div class="summary">
-            Users: {{ getFilteredCount(authOnlyGridOptions.api) }} / {{ authOnlyUsers.length }}
+            Users: {{ getFilteredCount(authOnlyGridApi) }} / {{ authOnlyUsers.length }}
 
             <!-- clear filters button -->
             <button
-              [disabled]="!authOnlyGridOptions.api.isAnyFilterPresent()"
+              [disabled]="!authOnlyGridApi.isAnyFilterPresent()"
               class="btn btn-sm btn-info"
-              (click)="onClearFilters(authOnlyGridOptions.api)">
+              (click)="onClearFilters(authOnlyGridApi)">
               Clear filters
             </button>
 
             <!-- old guests button -->
-            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(authOnlyGridOptions.api)">
+            <button class="btn btn-sm btn-secondary" (click)="onSelectOldGuests(authOnlyGridApi)">
               Filter old guests
             </button>
 
@@ -106,7 +104,7 @@
               <span *ngIf="listFilterVisible">Close</span>
               filter list
             </button>
-            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(authOnlyGridOptions.api)">
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(authOnlyGridApi)">
               Filter listed users
             </button>
 
@@ -115,7 +113,7 @@
               <button
                 [disabled]="authOnlyUsers.length < 1"
                 class="btn btn-sm btn-danger"
-                (click)="onDeleteUsers(getFilteredRows(authOnlyGridOptions.api))">
+                (click)="onDeleteUsers(getFilteredRows(authOnlyGridApi))">
                 Delete users
               </button>
             </div>
@@ -139,7 +137,7 @@
           [gridOptions]="authOnlyGridOptions"></ag-grid-angular>
 
         <div *ngIf="authOnlyGridReady" class="text-monospace text-small m-3">
-          <div *ngFor="let user of getFilteredRows(authOnlyGridOptions.api)">{{ user.username }}</div>
+          <div *ngFor="let user of getFilteredRows(authOnlyGridApi)">{{ user.username }}</div>
         </div>
       </ng-template>
     </li>
@@ -150,13 +148,13 @@
       <ng-template ngbNavContent>
         <div *ngIf="sessionDbOnlyGridReady">
           <div class="summary">
-            Users: {{ getFilteredCount(sessionDbOnlyGridOptions.api) }} / {{ sessionDbOnlyUsers.length }}
+            Users: {{ getFilteredCount(sessionDbOnlyGridApi) }} / {{ sessionDbOnlyUsers.length }}
 
             <!-- clear filters button -->
             <button
-              [disabled]="!sessionDbOnlyGridOptions.api.isAnyFilterPresent()"
+              [disabled]="!sessionDbOnlyGridApi.isAnyFilterPresent()"
               class="btn btn-sm btn-info"
-              (click)="onClearFilters(sessionDbOnlyGridOptions.api)">
+              (click)="onClearFilters(sessionDbOnlyGridApi)">
               Clear filters
             </button>
 
@@ -166,7 +164,7 @@
               <span *ngIf="listFilterVisible">Close</span>
               filter list
             </button>
-            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(sessionDbOnlyGridOptions.api)">
+            <button class="btn btn-sm btn-secondary" (click)="onFilterListed(sessionDbOnlyGridApi)">
               Filter listed users
             </button>
 
@@ -175,7 +173,7 @@
               <button
                 [disabled]="sessionDbOnlyUsers.length < 1"
                 class="btn btn-sm btn-danger"
-                (click)="onDeleteSessions(getFilteredRows(sessionDbOnlyGridOptions.api))">
+                (click)="onDeleteSessions(getFilteredRows(sessionDbOnlyGridApi))">
                 Delete sessions
               </button>
             </div>
@@ -199,7 +197,7 @@
           [gridOptions]="sessionDbOnlyGridOptions"></ag-grid-angular>
 
         <div *ngIf="sessionDbOnlyGridReady" class="text-monospace text-small m-3">
-          <div *ngFor="let user of getFilteredRows(sessionDbOnlyGridOptions.api)">{{ getUsername(user.userId) }}</div>
+          <div *ngFor="let user of getFilteredRows(sessionDbOnlyGridApi)">{{ getUsername(user.userId) }}</div>
         </div>
       </ng-template>
     </li>
@@ -243,7 +241,7 @@
             <tr *ngFor="let session of sessions">
               <td *ngIf="showSessionNames">{{ session.name }}</td>
               <td>{{ session.sessionId }}</td>
-              <td>{{ session.size | bytes : 0 }}</td>
+              <td>{{ session.size | bytes: 0 }}</td>
               <td>{{ session.datasetCount }}</td>
               <td>{{ session.jobCount }}</td>
               <td>{{ session.inputCount }}</td>

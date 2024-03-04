@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ColDef, GridApi, GridOptions } from "ag-grid-community";
+import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin } from "rxjs";
@@ -48,6 +48,10 @@ export class StorageComponent implements OnInit {
   public authOnlyGridReady = false;
   public sessionDbOnlyGridOptions: GridOptions;
   public sessionDbOnlyGridReady = false;
+
+  public authOnlyGridApi: GridApi<any>;
+  public sessionDbOnlyGridApi: GridApi<any>;
+  public combinedGridApi: GridApi<any>;
 
   public showSessionNames = false;
 
@@ -181,7 +185,7 @@ export class StorageComponent implements OnInit {
     private tokenService: TokenService,
     private authenticationService: AuthenticationService,
     private userService: UserService,
-    private sessionDbAdminService: SessionDbAdminService
+    private sessionDbAdminService: SessionDbAdminService,
   ) {}
 
   ngOnInit() {
@@ -268,7 +272,7 @@ export class StorageComponent implements OnInit {
               user: authUsersMap.get(sessionDbUser.userId).username,
               modified: UtilsService.stringToDateKeepNull(authUsersMap.get(sessionDbUser.userId).modified),
               created: UtilsService.stringToDateKeepNull(authUsersMap.get(sessionDbUser.userId).created),
-            })
+            }),
           );
 
         this.combinedUsers = combinedUsers;
@@ -287,8 +291,9 @@ export class StorageComponent implements OnInit {
           ...{
             rowData: this.combinedUsers,
             columnDefs: this.combinedColumnDefs,
-            onGridReady: () => {
+            onGridReady: (event: GridReadyEvent) => {
               this.combinedGridReady = true;
+              this.combinedGridApi = event.api;
             },
             onGridPreDestroyed: () => {
               this.combinedGridReady = false;
@@ -303,8 +308,9 @@ export class StorageComponent implements OnInit {
             rowData: this.authOnlyUsers,
             columnDefs: this.authOnlyColumnDefs,
             rowSelection: this.rowSelection,
-            onGridReady: () => {
+            onGridReady: (event: GridReadyEvent) => {
               this.authOnlyGridReady = true;
+              this.authOnlyGridApi = event.api;
             },
             onGridPreDestroyed: () => {
               this.authOnlyGridReady = false;
@@ -318,8 +324,9 @@ export class StorageComponent implements OnInit {
             rowData: this.sessionDbOnlyUsers,
             columnDefs: this.sessionDbOnlyColumnDefs,
             rowSelection: this.rowSelection,
-            onGridReady: () => {
+            onGridReady: (event: GridReadyEvent) => {
               this.sessionDbOnlyGridReady = true;
+              this.sessionDbOnlyGridApi = event.api;
             },
             onGridPreDestroyed: () => {
               this.sessionDbOnlyGridReady = false;
@@ -447,15 +454,15 @@ export class StorageComponent implements OnInit {
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(
         mergeMap((service) =>
-          this.authHttpClient.getAuth(service.adminUri + "/admin/users/sessions?userId=" + encodeURIComponent(user))
-        )
+          this.authHttpClient.getAuth(service.adminUri + "/admin/users/sessions?userId=" + encodeURIComponent(user)),
+        ),
       )
       .subscribe(
         (result: any[]) => {
           this.sessions = result[0]?.sessions;
           this.userSessionsState = new LoadState(State.Ready);
         },
-        (err) => this.restErrorService.showError("get quotas failed", err)
+        (err) => this.restErrorService.showError("get quotas failed", err),
       );
   }
 
