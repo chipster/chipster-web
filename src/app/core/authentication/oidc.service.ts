@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import log from "loglevel";
-import { UserManager } from "oidc-client-ts";
+import { UserManager } from "oidc-client";
 import { from, Observable } from "rxjs";
 import { map, mergeMap, share, tap } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
@@ -23,7 +23,7 @@ export class OidcService {
     private httpClient: HttpClient,
     private restErrorService: RestErrorService,
     private routeService: RouteService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     this.init();
   }
@@ -38,7 +38,7 @@ export class OidcService {
       map((configs: OidcConfig[]) =>
         configs
           // allow separate oidc configs for different apps
-          .filter((oidc) => oidc.appId === appId),
+          .filter((oidc) => oidc.appId === appId)
       ),
       tap((configs: OidcConfig[]) => {
         configs.forEach((oidc) => {
@@ -56,7 +56,7 @@ export class OidcService {
           this.managers.set(oidc.oidcName, manager);
         });
       }),
-      share(),
+      share()
     );
   }
 
@@ -100,7 +100,7 @@ export class OidcService {
           this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
         }
       },
-      (err) => this.restErrorService.showError("oidc config error", err),
+      (err) => this.restErrorService.showError("oidc config error", err)
     );
   }
 
@@ -119,7 +119,7 @@ export class OidcService {
           const manager = this.managers.get(oidcName);
           return from(manager.signinRedirectCallback());
         }),
-        mergeMap((user) => this.getAndSaveToken(user, returnUrl)),
+        mergeMap((user) => this.getAndSaveToken(user, returnUrl))
       )
       .subscribe(
         () => {
@@ -132,7 +132,7 @@ export class OidcService {
             message = err.error;
           }
           this.restErrorService.showError(message, err);
-        },
+        }
       );
   }
 
@@ -147,12 +147,12 @@ export class OidcService {
           },
           {
             responseType: "text",
-          },
-        ),
+          }
+        )
       ),
       tap((token: string) => {
         this.authenticationService.saveToken(token);
-      }),
+      })
     );
   }
 
