@@ -19,11 +19,14 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) {}
+  constructor(
+    private sessionDataService: SessionDataService,
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading image file...");
 
     // check for empty file
@@ -43,12 +46,12 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading image file failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

@@ -73,7 +73,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     private nativeElementService: NativeElementService,
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService
+    private datasetService: DatasetService,
   ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
@@ -108,7 +108,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // someone else has changed phenodata, update
           this.updateViewLater();
         },
-        (err) => this.errorService.showError("phenodata update failed", err)
+        (err) => this.errorService.showError("phenodata update failed", err),
       );
   }
 
@@ -126,7 +126,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
 
     if (this.hot) {
@@ -216,7 +216,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       () => {
         this.removeColumn(col);
       },
-      false
+      false,
     );
 
     if (TH.firstChild.lastChild.nodeName === "A") {
@@ -266,7 +266,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
               return rowString + cellString + "\t";
             }, "")
             .slice(0, -1) + "\n"),
-      ""
+      "",
     );
 
     this.phenodataString = phenodataString;
@@ -275,7 +275,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       this.datasetService.setPhenodata(this.dataset, phenodataString);
       this.sessionDataService.updateDataset(this.dataset).subscribe(
         () => log.info("dataset phenodata updated"),
-        (err) => this.restErrorService.showError("dataset phenodata update failed", err)
+        (err) => this.restErrorService.showError("dataset phenodata update failed", err),
       );
     }
   }
@@ -429,12 +429,12 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
               {
                 colHeaders,
               },
-              false
+              false,
             );
           });
 
           this.updateDataset();
-        })
+        }),
       )
       .subscribe(null, (err) => this.restErrorService.showError("Add column failed", err));
   }

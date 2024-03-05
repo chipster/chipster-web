@@ -52,7 +52,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
   show(showMore: boolean) {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
 
     this.clearPlot();
 
@@ -102,7 +102,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

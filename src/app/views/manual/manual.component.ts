@@ -51,7 +51,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
     private activatedRoute: ActivatedRoute,
     private configService: ConfigService,
     private sanitizer: DomSanitizer,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
   ) {}
 
   /**
@@ -78,7 +78,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
             "route changed",
             this.activatedRoute.snapshot.url,
             this.page,
-            this.activatedRoute.snapshot.fragment
+            this.activatedRoute.snapshot.fragment,
           );
           // only way to update the StaticHtmlComponent is to destroy it first
           this.html = null;
@@ -100,7 +100,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
         // show
         map((html) => {
           this.html = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html));
-        })
+        }),
       )
       .subscribe({
         error: (err) => this.restErrorService.showError("page change failed", err),
@@ -108,7 +108,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -128,7 +128,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
           return observableOf("<html><body>Page not found</body></html>");
         }
         throw err;
-      })
+      }),
     );
   }
 

@@ -12,10 +12,13 @@ export class SettingsComponent implements OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(public settingsService: SettingsService, public activeModal: NgbActiveModal) {}
+  constructor(
+    public settingsService: SettingsService,
+    public activeModal: NgbActiveModal,
+  ) {}
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -37,7 +40,7 @@ export class SettingsComponent implements OnDestroy {
 
   showDataselectionTooltip() {
     this.settingsService.showDatasetSelectionTooltip$.next(
-      !this.settingsService.showDatasetSelectionTooltip$.getValue()
+      !this.settingsService.showDatasetSelectionTooltip$.getValue(),
     );
   }
 }

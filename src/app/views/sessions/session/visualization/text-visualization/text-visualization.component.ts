@@ -36,12 +36,12 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     private fileResource: FileResource,
     private sessionDataService: SessionDataService,
     private visualizationModalService: VisualizationModalService,
-    private errorHandlerService: RestErrorService
+    private errorHandlerService: RestErrorService,
   ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading data...");
     this.data = null;
 
@@ -64,12 +64,12 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.errorHandlerService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

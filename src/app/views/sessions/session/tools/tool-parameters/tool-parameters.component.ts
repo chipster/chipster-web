@@ -27,7 +27,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   // noinspection JSUnusedLocalSymbols
   constructor(
     public toolService: ToolService,
-    private toolSelectionService: ToolSelectionService // private dropDown: NgbDropdown
+    private toolSelectionService: ToolSelectionService, // private dropDown: NgbDropdown
   ) {}
 
   ngOnInit() {
@@ -50,7 +50,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -59,7 +59,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   // }
 
   onParametersChanged() {
-    this.parametersChangedThrottle.next();
+    this.parametersChangedThrottle.next(null);
   }
 
   reset(parameter: ToolParameter, $event?: Event) {

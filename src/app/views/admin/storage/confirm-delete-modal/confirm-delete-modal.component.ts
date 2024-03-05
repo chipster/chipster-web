@@ -182,7 +182,7 @@ export class ConfirmDeleteModalComponent implements OnInit {
   }
 
   onCancelDelete() {
-    this.cancelDelete$.next();
+    this.cancelDelete$.next(null);
 
     this.setAllRowsStatus(this.deleteAction, DeleteStatus.Cancelled);
     this.deleteEnabled = !this.allRowsFinished();

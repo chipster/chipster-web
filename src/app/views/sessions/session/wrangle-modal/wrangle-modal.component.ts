@@ -39,8 +39,8 @@ export class WrangleModalComponent implements OnInit {
     private typeTagService: TypeTagService,
     private restErrorService: RestErrorService,
     private tsvService: TsvService,
-    private datasetService: DatasetService
-  ) { }
+    private datasetService: DatasetService,
+  ) {}
 
   public static FILE_SIZE_LIMIT = 200; // MB
 
@@ -83,7 +83,7 @@ export class WrangleModalComponent implements OnInit {
 
   ngOnInit(): void {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // check for empty file
@@ -104,7 +104,7 @@ export class WrangleModalComponent implements OnInit {
 
           if (result.length !== this.dataset.size) {
             log.warn(
-              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset.size}`
+              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset.size}`,
             );
           }
 
@@ -125,10 +125,10 @@ export class WrangleModalComponent implements OnInit {
           this.allItems = headers.map((headerName: string, index: number) =>
             index === 0 && headerName === ""
               ? {
-                index,
-                name: "R rownames column",
-              }
-              : { index, name: headerName }
+                  index,
+                  name: "R rownames column",
+                }
+              : { index, name: headerName },
           );
 
           this.identifierItems = [...this.allItems];
@@ -155,7 +155,7 @@ export class WrangleModalComponent implements OnInit {
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
@@ -167,7 +167,7 @@ export class WrangleModalComponent implements OnInit {
       return "sample";
     }
     const columnInOthers = this.selectedOthers.some(
-      (columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index
+      (columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index,
     );
     if ((this.includeOthers() && columnInOthers) || (!this.includeOthers() && !columnInOthers)) {
       return "include";
@@ -193,11 +193,11 @@ export class WrangleModalComponent implements OnInit {
     this.checkIdentifiersUnique(this.selectedIdentifiers);
 
     this.sampleItems = this.allItems.filter(
-      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item),
     );
 
     this.otherItems = this.allItems.filter(
-      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item),
     );
     this.onSelectionChange();
   }
@@ -205,11 +205,11 @@ export class WrangleModalComponent implements OnInit {
   public onSampleSelectionChange(event): void {
     this.selectedSamples = event;
     this.identifierItems = this.allItems.filter(
-      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item),
     );
 
     this.otherItems = this.allItems.filter(
-      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedSamples).includes(item),
     );
 
     this.onSelectionChange();
@@ -218,11 +218,11 @@ export class WrangleModalComponent implements OnInit {
   public onOtherSelectionChange(event): void {
     this.selectedOthers = event;
     this.identifierItems = this.allItems.filter(
-      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedSamples.concat(this.selectedOthers).includes(item),
     );
 
     this.sampleItems = this.allItems.filter(
-      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item)
+      (item) => !this.selectedIdentifiers.concat(this.selectedOthers).includes(item),
     );
 
     this.onSelectionChange();
@@ -318,9 +318,9 @@ export class WrangleModalComponent implements OnInit {
             "Convert to Chipster format",
             wrangledFileString,
             "Import",
-            metadataFiles
+            metadataFiles,
           );
-        })
+        }),
       );
     this.activeModal.close(wrangle$);
   }
@@ -335,11 +335,11 @@ export class WrangleModalComponent implements OnInit {
     const otherColumnsToIncludeIndexes = this.includeOthers()
       ? otherColumnIdexes
       : this.getColumnIndexes(this.allItems).filter(
-        (item) =>
-          !this.getColumnIndexes(this.selectedIdentifiers)
-            .concat(sampleColumnIndexes, otherColumnIdexes)
-            .includes(item)
-      );
+          (item) =>
+            !this.getColumnIndexes(this.selectedIdentifiers)
+              .concat(sampleColumnIndexes, otherColumnIdexes)
+              .includes(item),
+        );
 
     // identifier not included here as it will be set as the first column
     // sort to retain the original order
@@ -348,8 +348,8 @@ export class WrangleModalComponent implements OnInit {
       .getBody()
       .map((tsvRow: Array<string>) =>
         [tsvRow[this.selectedIdentifiers[0].index]].concat(
-          columnsToIncludeIndexes.map((index: number) => tsvRow[index])
-        )
+          columnsToIncludeIndexes.map((index: number) => tsvRow[index]),
+        ),
       );
 
     const tsvHeaders = this.tsv2File.getHeadersForSpreadSheet();

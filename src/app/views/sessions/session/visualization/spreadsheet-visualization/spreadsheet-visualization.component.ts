@@ -65,12 +65,12 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     private restErrorService: RestErrorService,
     private spreadsheetService: SpreadsheetService,
     private nativeElementService: NativeElementService,
-    private tsvService: TsvService
+    private tsvService: TsvService,
   ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // Hack hack fix. There seems to be some timing issue when creating handsontable the first time.
@@ -119,7 +119,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
           if (!this.getTruncatedFile && !this.gotFullFile) {
             log.warn(
-              `should have gotten full file, but result size is ${result.length} while dataset size is ${this.dataset.size}`
+              `should have gotten full file, but result size is ${result.length} while dataset size is ${this.dataset.size}`,
             );
           }
 
@@ -197,7 +197,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
         (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
@@ -210,7 +210,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
   ngOnDestroy() {
     this.destroyHot();
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

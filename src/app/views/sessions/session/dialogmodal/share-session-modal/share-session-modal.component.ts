@@ -33,7 +33,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     private tokenService: TokenService,
     private restErrorService: RestErrorService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -42,12 +42,12 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       () => {
         this.rules = this.session.rules;
       },
-      (err) => this.errorService.showError("getting rule events failed", err)
+      (err) => this.errorService.showError("getting rule events failed", err),
     );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -78,7 +78,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
         log.info("rule created", resp);
         this.newRule = null;
       },
-      (err) => this.restErrorService.showError("failed to add a new rule", err)
+      (err) => this.restErrorService.showError("failed to add a new rule", err),
     );
   }
 
@@ -92,7 +92,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   deleteRule(ruleId: string) {
     this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe(
       (resp) => log.info("rule deleted"),
-      (err) => this.restErrorService.showError("failed to delete the rule", err)
+      (err) => this.restErrorService.showError("failed to delete the rule", err),
     );
   }
 

@@ -15,7 +15,11 @@ import { FileState } from "chipster-js-common/lib/model/dataset";
 
 @Injectable()
 export class SessionResource {
-  constructor(private configService: ConfigService, private http: HttpClient, private tokenService: TokenService) { }
+  constructor(
+    private configService: ConfigService,
+    private http: HttpClient,
+    private tokenService: TokenService,
+  ) {}
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
@@ -80,19 +84,17 @@ export class SessionResource {
         data.datasetTypeTags = types;
 
         return data;
-      })
+      }),
     );
   }
 
   isDatasetComplete(dataset: Dataset) {
-
     if (dataset.fileId == null) {
       return false;
     }
 
     if (dataset.state != null) {
       return dataset.state == FileState.Complete;
-
     } else {
       // old dataset without state, let's assume it's COMPLETE
       return true;
@@ -109,15 +111,15 @@ export class SessionResource {
    * @param observables
    * @returns {Observable<any>}
    */
-  forkJoinWithoutCancel(observables): Observable<Array<{}>> {
+  forkJoinWithoutCancel(observables): Observable<unknown> {
     const errors = [];
     const catchedObservables = observables.map((o) =>
       o.pipe(
         catchError((err) => {
           errors.push(err);
           return observableOf(null);
-        })
-      )
+        }),
+      ),
     );
     return forkJoin(catchedObservables).pipe(
       map((res) => {
@@ -128,7 +130,7 @@ export class SessionResource {
         } else {
           return res;
         }
-      })
+      }),
     );
   }
 
@@ -137,17 +139,17 @@ export class SessionResource {
       mergeMap((typeServiceUrl) =>
         this.http.get(
           typeServiceUrl + "/sessions/" + sessionId + "/datasets/" + dataset.datasetId,
-          this.tokenService.getTokenParams(true)
-        )
+          this.tokenService.getTokenParams(true),
+        ),
       ),
-      map((typesObj) => this.objectToMap(typesObj[dataset.datasetId]))
+      map((typesObj) => this.objectToMap(typesObj[dataset.datasetId])),
     );
   }
 
   getTypeTagsForSession(sessionId: string): Observable<Map<string, Map<string, string>>> {
     return this.configService.getTypeService().pipe(
       mergeMap((typeServiceUrl) =>
-        this.http.get(typeServiceUrl + "/sessions/" + sessionId, this.tokenService.getTokenParams(true))
+        this.http.get(typeServiceUrl + "/sessions/" + sessionId, this.tokenService.getTokenParams(true)),
       ),
       map((typesObj) => {
         // convert js objects to es6 Maps
@@ -156,7 +158,7 @@ export class SessionResource {
           typesMap.set(datasetId, this.objectToMap(typesObj[datasetId]));
         }
         return typesMap;
-      })
+      }),
     );
   }
 
@@ -172,7 +174,7 @@ export class SessionResource {
     return this.configService
       .getSessionDbUrl()
       .pipe(
-        mergeMap((url: string) => this.http.get<Session[]>(`${url}/sessions`, this.tokenService.getTokenParams(true)))
+        mergeMap((url: string) => this.http.get<Session[]>(`${url}/sessions`, this.tokenService.getTokenParams(true))),
       );
   }
 
@@ -181,8 +183,8 @@ export class SessionResource {
       .getSessionDbUrl()
       .pipe(
         mergeMap((url: string) =>
-          this.http.get<Object>(`${url}/sessions/stats`, this.tokenService.getTokenParams(true))
-        )
+          this.http.get<Object>(`${url}/sessions/stats`, this.tokenService.getTokenParams(true)),
+        ),
       );
   }
 
@@ -192,8 +194,8 @@ export class SessionResource {
       tap((id) => (appId = id)),
       mergeMap(() => this.configService.getSessionDbUrl()),
       mergeMap((url: string) =>
-        this.http.get<Session[]>(`${url}/sessions?appId=${appId}`, this.tokenService.getTokenParams(true))
-      )
+        this.http.get<Session[]>(`${url}/sessions?appId=${appId}`, this.tokenService.getTokenParams(true)),
+      ),
     );
   }
 
@@ -202,60 +204,60 @@ export class SessionResource {
       .getSessionDbUrl()
       .pipe(
         mergeMap((url: string) =>
-          this.http.get<Session[]>(`${url}/sessions/shares`, this.tokenService.getTokenParams(true))
-        )
+          this.http.get<Session[]>(`${url}/sessions/shares`, this.tokenService.getTokenParams(true)),
+        ),
       );
   }
 
   createSession(session: Session): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) => this.http.post(`${url}/sessions/`, session, this.tokenService.getTokenParams(true))),
-      map((response: Session) => response.sessionId)
+      map((response: Session) => response.sessionId),
     );
   }
 
   createDataset(sessionId: string, dataset: Dataset): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) =>
-        this.http.post(`${url}/sessions/${sessionId}/datasets`, dataset, this.tokenService.getTokenParams(true))
+        this.http.post(`${url}/sessions/${sessionId}/datasets`, dataset, this.tokenService.getTokenParams(true)),
       ),
-      map((response: Dataset) => response.datasetId)
+      map((response: Dataset) => response.datasetId),
     );
   }
 
   createDatasets(sessionId: string, datasets: Dataset[]): Observable<Dataset[]> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) =>
-        this.http.post(`${url}/sessions/${sessionId}/datasets/array`, datasets, this.tokenService.getTokenParams(true))
+        this.http.post(`${url}/sessions/${sessionId}/datasets/array`, datasets, this.tokenService.getTokenParams(true)),
       ),
-      map((response: {}) => response["datasets"])
+      map((response: {}) => response["datasets"]),
     );
   }
 
   createJob(sessionId: string, job: Job): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) =>
-        this.http.post(`${url}/sessions/${sessionId}/jobs`, job, this.tokenService.getTokenParams(true))
+        this.http.post(`${url}/sessions/${sessionId}/jobs`, job, this.tokenService.getTokenParams(true)),
       ),
-      map((response: Job) => response.jobId)
+      map((response: Job) => response.jobId),
     );
   }
 
   createJobs(sessionId: string, jobs: Job[]): Observable<Job[]> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) =>
-        this.http.post(`${url}/sessions/${sessionId}/jobs/array`, jobs, this.tokenService.getTokenParams(true))
+        this.http.post(`${url}/sessions/${sessionId}/jobs/array`, jobs, this.tokenService.getTokenParams(true)),
       ),
-      map((response: {}) => response["jobs"])
+      map((response: {}) => response["jobs"]),
     );
   }
 
   createRule(sessionId: string, rule: Rule): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) =>
-        this.http.post(`${url}/sessions/${sessionId}/rules`, rule, this.tokenService.getTokenParams(true))
+        this.http.post(`${url}/sessions/${sessionId}/rules`, rule, this.tokenService.getTokenParams(true)),
       ),
-      map((response: Rule) => response.ruleId)
+      map((response: Rule) => response.ruleId),
     );
   }
 
@@ -265,8 +267,8 @@ export class SessionResource {
       .getSessionDbUrl()
       .pipe(
         mergeMap((url: string) =>
-          this.http.get<Session>(`${url}/sessions/${sessionId}`, this.tokenService.getTokenParams(true))
-        )
+          this.http.get<Session>(`${url}/sessions/${sessionId}`, this.tokenService.getTokenParams(true)),
+        ),
       );
   }
 
@@ -278,9 +280,9 @@ export class SessionResource {
           (url: string) =>
             this.http.get(
               `${url}/sessions/${sessionId}/datasets/${datasetId}`,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<Dataset>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Dataset>,
+        ),
       );
   }
 
@@ -292,9 +294,9 @@ export class SessionResource {
           (url: string) =>
             this.http.get(
               `${url}/sessions/${sessionId}/jobs/${jobId}`,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<Job>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Job>,
+        ),
       );
   }
 
@@ -306,9 +308,9 @@ export class SessionResource {
           (url: string) =>
             this.http.get(
               `${url}/sessions/${sessionId}/rules/${ruleId}`,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<Rule>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Rule>,
+        ),
       );
   }
 
@@ -321,9 +323,9 @@ export class SessionResource {
             this.http.put(
               `${url}/sessions/${session.sessionId}`,
               session,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -336,9 +338,9 @@ export class SessionResource {
             this.http.put(
               `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}`,
               dataset,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -351,9 +353,9 @@ export class SessionResource {
             this.http.put(
               `${url}/sessions/${sessionId}/rules/${rule.ruleId}`,
               rule,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -366,9 +368,9 @@ export class SessionResource {
             this.http.put(
               `${url}/sessions/${sessionId}/datasets/array`,
               datasets,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -381,9 +383,9 @@ export class SessionResource {
             this.http.put(
               `${url}/sessions/${sessionId}/jobs/${job.jobId}`,
               job,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -395,9 +397,9 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}`,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -409,9 +411,9 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}/rules/${ruleId}`,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -423,9 +425,9 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}/datasets/${datasetId}`,
-              this.tokenService.getTokenParams(false)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -437,9 +439,9 @@ export class SessionResource {
           (url: string) =>
             this.http.delete(
               `${url}/sessions/${sessionId}/jobs/${jobId}`,
-              this.tokenService.getTokenParams(true)
-            ) as Observable<null>
-        )
+              this.tokenService.getTokenParams(true),
+            ) as Observable<null>,
+        ),
       );
   }
 
@@ -449,7 +451,7 @@ export class SessionResource {
       sessionData.datasetsMap.size,
       "datasets,",
       sessionData.jobsMap.size,
-      "jobs"
+      "jobs",
     );
     if (!name) {
       name = "unnamed session";
@@ -521,7 +523,7 @@ export class SessionResource {
         log.info("set to", session.state);
         return this.updateSession(session);
       }),
-      map(() => createdSessionId)
+      map(() => createdSessionId),
     );
   }
 

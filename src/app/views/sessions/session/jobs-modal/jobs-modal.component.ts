@@ -25,7 +25,7 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
     private selectionService: SelectionService,
     private sessionEventService: SessionEventService,
     private errorService: ErrorService,
-    private sessionDataService: SessionDataService
+    private sessionDataService: SessionDataService,
   ) {}
 
   ngOnInit(): void {
@@ -75,12 +75,12 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
         () => {
           this.updateJobs();
         },
-        (err) => this.errorService.showError("failed to update jobs", err)
+        (err) => this.errorService.showError("failed to update jobs", err),
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 }

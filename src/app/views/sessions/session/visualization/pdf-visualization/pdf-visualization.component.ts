@@ -42,11 +42,14 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   public readonly minZoom: number = 0.1;
   public readonly maxZoom: number = 4.0;
 
-  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) { }
+  constructor(
+    private sessionDataService: SessionDataService,
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.urlReady = false;
     this.loadedBytes = 0;
@@ -75,12 +78,12 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         (error: any) => {
           this.state = new LoadState(State.Loading, "Loading pdf file failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -90,16 +93,15 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   pdfLoadComplete(pdf: any) {
-
     this.totalPages = pdf.numPages;
     this.state = new LoadState(State.Ready);
 
-    // store page heights      
+    // store page heights
     for (let i = 1; i <= this.totalPages; i++) {
-      pdf.getPage(i).then(page => {
+      pdf.getPage(i).then((page) => {
         // 0: x, 1: y, 2: width, 3: height
         this.unscaledPageHeights[i] = page.view[3];
-      })
+      });
     }
   }
 
@@ -113,7 +115,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
       // sum of all pages
       for (let i = 1; i <= this.totalPages; i++) {
         if (i < this.unscaledPageHeights.length) {
-
           // we could get the scaled height of page directly from viewport.height, but only after the page is rendered
           // viewport.scale is different than this.zoom, maybe calcualated from page width and the container width?
           // <div class="page"> has 10px bottom margin
@@ -124,7 +125,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
       }
 
       this.height = totalHeight;
-
     } else {
       // height of the current page, see more comments above
       this.height = this.unscaledPageHeights[this.page] * viewport.scale + 10;

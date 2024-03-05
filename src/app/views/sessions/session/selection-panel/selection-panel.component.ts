@@ -38,7 +38,7 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     public sessionDataService: SessionDataService,
     private toolSelectionService: ToolSelectionService,
     public settingsService: SettingsService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -84,12 +84,12 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
           this.showJob = false;
         }
       },
-      (err) => this.errorService.showError("job selection failed", err)
+      (err) => this.errorService.showError("job selection failed", err),
     );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 }

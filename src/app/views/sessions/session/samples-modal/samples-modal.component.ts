@@ -24,7 +24,7 @@ export class SamplesModalComponent implements OnInit {
     public activeModal: NgbActiveModal,
     private fb: UntypedFormBuilder,
     private datasetService: DatasetService,
-    private sessionDataService: SessionDataService
+    private sessionDataService: SessionDataService,
   ) {}
 
   @Input() datasets: Dataset[];
@@ -57,7 +57,7 @@ export class SamplesModalComponent implements OnInit {
 
   ngOnInit(): void {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // check for nonunique file names
@@ -81,14 +81,14 @@ export class SamplesModalComponent implements OnInit {
     const singleToken = this.singleTokenForm.get("singleToken").value;
     const foundSingleEndSamples: SingleEndSample[] = this.datasetService.findSingleSampleFiles(
       this.unpairedFiles,
-      singleToken
+      singleToken,
     );
 
     this.singleEndSamples.push(...foundSingleEndSamples);
 
     // remove found from undefined
     const foundDatasetIds: Set<string> = new Set(
-      foundSingleEndSamples.map((singleEndSample) => singleEndSample.file.datasetId)
+      foundSingleEndSamples.map((singleEndSample) => singleEndSample.file.datasetId),
     );
 
     this.unpairedFiles = this.unpairedFiles.filter((dataset) => !foundDatasetIds.has(dataset.datasetId));
@@ -102,7 +102,7 @@ export class SamplesModalComponent implements OnInit {
     const foundPairedSamples: PairedEndSample[] = this.datasetService.findSamplePairs(
       this.unpairedFiles,
       r1Token,
-      r2Token
+      r2Token,
     );
 
     //
@@ -124,7 +124,7 @@ export class SamplesModalComponent implements OnInit {
 
     // remove found from unpaired
     const newlyPairedDatasetIds: Set<string> = new Set(
-      this.datasetService.getPairedDatasets(foundPairedSamples).map((dataset) => dataset.datasetId)
+      this.datasetService.getPairedDatasets(foundPairedSamples).map((dataset) => dataset.datasetId),
     );
     this.unpairedFiles = this.unpairedFiles.filter((dataset) => !newlyPairedDatasetIds.has(dataset.datasetId));
   }
@@ -136,7 +136,7 @@ export class SamplesModalComponent implements OnInit {
 
   onResetSingle() {
     this.unpairedFiles = this.unpairedFiles.concat(
-      this.singleEndSamples.map((singleEndSample) => singleEndSample.file)
+      this.singleEndSamples.map((singleEndSample) => singleEndSample.file),
     );
     this.singleEndSamples = [];
   }
@@ -163,8 +163,8 @@ export class SamplesModalComponent implements OnInit {
 
     const run$ = defer(() =>
       of(this.updateLocalDatasets()).pipe(
-        mergeMap((updatedDatasets) => this.sessionDataService.updateDatasets(updatedDatasets))
-      )
+        mergeMap((updatedDatasets) => this.sessionDataService.updateDatasets(updatedDatasets)),
+      ),
     );
 
     this.activeModal.close(run$);
@@ -193,7 +193,7 @@ export class SamplesModalComponent implements OnInit {
             sampleName,
             sampleId,
             sampleFilePair.pairId,
-            DatasetService.R1
+            DatasetService.R1,
           );
           updatedDatasets.push(sampleFilePair.r1File);
         }
@@ -204,7 +204,7 @@ export class SamplesModalComponent implements OnInit {
             sampleName,
             sampleId,
             sampleFilePair.pairId,
-            DatasetService.R2
+            DatasetService.R2,
           );
           updatedDatasets.push(sampleFilePair.r2File);
         }

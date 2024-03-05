@@ -45,7 +45,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     private errorService: ErrorService,
     private visualizationEventService: VisualizationEventService,
     private datasetService: DatasetService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -54,7 +54,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .pipe(
         tap((blacklist) => (this.visualizationBlacklist = blacklist as unknown as string[])),
         mergeMap(() => this.store.select("selectedDatasets")),
-        takeUntil(this.unsubscribe)
+        takeUntil(this.unsubscribe),
       )
       .subscribe(
         (datasets: Array<Dataset>) => {
@@ -104,7 +104,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           // changes to show some part of tool section
           this.scrollFix.emit();
         },
-        (err) => this.errorService.showError("visualization change failed", err)
+        (err) => this.errorService.showError("visualization change failed", err),
       );
 
     this.visualizationEventService
@@ -120,7 +120,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -162,7 +162,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   containsTypeTags(tags: Array<string>) {
     return _.every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
-      _.some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag))
+      _.some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag)),
     );
   }
 

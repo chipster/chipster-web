@@ -42,7 +42,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
   constructor(
     private fileResource: FileResource,
     private sessionDataService: SessionDataService,
-    private errorHandlerService: RestErrorService
+    private errorHandlerService: RestErrorService,
   ) {
     this.bamRecordList = new Array<BamRecord>();
   }
@@ -57,7 +57,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.bamRecordList = [];
     this.samHeader = "";
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading bam file...");
 
     this.fileResource
@@ -87,12 +87,12 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading bam file failed");
           this.errorHandlerService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

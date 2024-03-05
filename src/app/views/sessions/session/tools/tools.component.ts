@@ -131,7 +131,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private dialogModalService: DialogModalService,
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig,
-    private ngbModal: NgbModal
+    private ngbModal: NgbModal,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     // eslint-disable-next-line no-param-reassign
@@ -162,7 +162,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.clearStoreToolSelections();
     this.parametersChanged$ = null;
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
 
@@ -298,7 +298,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         (item.description && item.description.toLowerCase().indexOf(termToken) !== -1) ||
         item.category.toLowerCase().indexOf(termToken) !== -1 ||
         item.moduleName.toLowerCase().indexOf(termToken) !== -1 ||
-        item.toolId.toLowerCase().indexOf(termToken) !== -1
+        item.toolId.toLowerCase().indexOf(termToken) !== -1,
     );
   }
 
@@ -309,7 +309,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.dialogModalService.openJobsModal(
       this.sessionDataService.getJobList(this.sessionData),
       this.toolsArray,
-      this.sessionData
+      this.sessionData,
     );
   }
 
@@ -340,7 +340,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (module == null) {
             this.errorService.showSimpleError(
               "Module not found",
-              "Module " + t.moduleId + " does not exist. Please try to find the tool from other modules."
+              "Module " + t.moduleId + " does not exist. Please try to find the tool from other modules.",
             );
             return;
           }
@@ -348,7 +348,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (category == null) {
             this.errorService.showSimpleError(
               "Category not found",
-              "Category " + t.categoryName + " does not exist. Please try to find the tool from other categories."
+              "Category " + t.categoryName + " does not exist. Please try to find the tool from other categories.",
             );
             return;
           }
@@ -356,7 +356,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (tool == null) {
             this.errorService.showSimpleError(
               "Tool not found",
-              "Tool " + t.toolId + " does not exist. Please try to find an alternative tool."
+              "Tool " + t.toolId + " does not exist. Please try to find an alternative tool.",
             );
             return;
           }
@@ -399,7 +399,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           const uptodateDatasets = selectedDatasets.map(
-            (dataset): Dataset => this.sessionData.datasetsMap.get(dataset.datasetId)
+            (dataset): Dataset => this.sessionData.datasetsMap.get(dataset.datasetId),
           );
 
           this.store.dispatch({
@@ -460,7 +460,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             phenodataBindings,
             ...toolWithInputs,
           };
-        })
+        }),
       )
       .subscribe((toolWithValidatedInputs: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
@@ -480,8 +480,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // if there are no params, just return the same tool as observable
           toolWithInputs.tool.parameters.length > 0
             ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData)
-            : of(toolWithInputs)
-        )
+            : of(toolWithInputs),
+        ),
       )
       .subscribe((toolWithPopulatedParams: SelectedToolWithValidatedInputs) => {
         this.store.dispatch({
@@ -505,7 +505,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             return null;
           }
           return this.toolSelectionService.validateParameters(toolWithPopulatedParamsAndValidatedInputs);
-        })
+        }),
       )
       .subscribe((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
         // should we dispatch null here? now we do
@@ -532,7 +532,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             return null;
           }
           return this.toolSelectionService.getValidatedTool(toolWithValidatedParams, this.sessionData);
-        })
+        }),
       )
       .subscribe((validatedTool: ValidatedTool) => {
         if (validatedTool != null) {
@@ -582,7 +582,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
         () => {
           this.updateJobs();
         },
-        (err) => this.errorService.showError("failed to update jobs", err)
+        (err) => this.errorService.showError("failed to update jobs", err),
       );
   }
 
@@ -596,8 +596,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
           return false;
         },
         undefined,
-        "Find tool"
-      )
+        "Find tool",
+      ),
     );
   }
 

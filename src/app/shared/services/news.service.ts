@@ -17,11 +17,11 @@ export class NewsService {
     private dialogModalService: DialogModalService,
     private configService: ConfigService,
     private httpClient: HttpClient,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   public updateNews() {
-    this.newsSubject.next();
+    this.newsSubject.next(null);
   }
 
   public getNewsEvents(): Observable<any> {
@@ -36,7 +36,7 @@ export class NewsService {
           return this.addNewsItem(editedNews.contents);
         }
         return this.updateNewsItem(editedNews);
-      })
+      }),
     );
     return action$;
   }
@@ -47,7 +47,7 @@ export class NewsService {
         const news = this.httpClient.get<NewsItem[]>(`${url}/news`, this.tokenService.getTokenParams(true));
         return news;
       }),
-      map((news: NewsItem[]) => this.sortNews(news))
+      map((news: NewsItem[]) => this.sortNews(news)),
     );
   }
 
@@ -59,10 +59,10 @@ export class NewsService {
           {
             contents: newsContents,
           },
-          this.tokenService.getTokenParams(true)
-        )
+          this.tokenService.getTokenParams(true),
+        ),
       ),
-      map((response: NewsItem) => response.newsId)
+      map((response: NewsItem) => response.newsId),
     );
   }
 
@@ -71,8 +71,8 @@ export class NewsService {
       .getAdminUri(Role.SESSION_DB)
       .pipe(
         mergeMap((url: string) =>
-          this.httpClient.put(`${url}/admin/news/${news.newsId}/`, news, this.tokenService.getTokenParams(true))
-        )
+          this.httpClient.put(`${url}/admin/news/${news.newsId}/`, news, this.tokenService.getTokenParams(true)),
+        ),
       );
   }
 
@@ -81,8 +81,8 @@ export class NewsService {
       .getAdminUri(Role.SESSION_DB)
       .pipe(
         mergeMap((url: string) =>
-          this.httpClient.delete(`${url}/admin/news/${news.newsId}/`, this.tokenService.getTokenParams(true))
-        )
+          this.httpClient.delete(`${url}/admin/news/${news.newsId}/`, this.tokenService.getTokenParams(true)),
+        ),
       );
   }
 

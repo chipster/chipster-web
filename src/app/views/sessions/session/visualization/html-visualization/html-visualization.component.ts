@@ -22,11 +22,14 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   public wrapperUrl = "assets/htmlvisualizationwrapper.html";
   private linkSrc: string;
 
-  constructor(private sessionDataService: SessionDataService, private restErrorService: RestErrorService) {}
+  constructor(
+    private sessionDataService: SessionDataService,
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading html file...");
 
     // check for empty file
@@ -49,12 +52,12 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
         (error: any) => {
           this.state = new LoadState(State.Fail, "Loading html file failed");
           this.restErrorService.showError(this.state.message, error);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

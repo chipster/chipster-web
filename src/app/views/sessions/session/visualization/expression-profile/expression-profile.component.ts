@@ -46,7 +46,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.state = new LoadState(State.Loading, "Loading data...");
     setTimeout(() => this.update(), 100);
   }
@@ -86,7 +86,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 

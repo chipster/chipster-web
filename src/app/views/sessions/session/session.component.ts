@@ -76,7 +76,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
-    private getSessionDataService: GetSessionDataService
+    private getSessionDataService: GetSessionDataService,
   ) {}
 
   ngOnInit(): void {
@@ -97,7 +97,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             catchError(
               (err) =>
                 // if session not found but sourceSession url param exists, go there
-                this.trySourceSessionIfSessionNotFound(err) // either navigate and return empty observable or rethrow err
+                this.trySourceSessionIfSessionNotFound(err), // either navigate and return empty observable or rethrow err
             ),
             mergeMap((session: Session) => {
               this.removeSourceSessionParamIfRegularSession(session); // may redirecto to session url without the query param
@@ -109,9 +109,9 @@ export class SessionComponent implements OnInit, OnDestroy {
               const exampleSessionOwner$ = this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID);
 
               return forkJoin(sessionData$, tools$, modules$, modulesMap$, exampleSessionOwner$);
-            })
+            }),
           );
-        })
+        }),
       )
       .subscribe(
         (results) => {
@@ -137,7 +137,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.state = ComponentState.FAIL;
             this.restErrorService.showError("Loading session failed", error);
           }
-        }
+        },
       );
 
     // subscribe to view settings
@@ -155,14 +155,14 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.split3Size = 33;
         }
       },
-      (err) => this.errorService.showError("tool panel error", err)
+      (err) => this.errorService.showError("tool panel error", err),
     );
   }
 
   ngOnDestroy(): void {
     this.sessionEventService.unsubscribe();
 
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -174,7 +174,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     sessionComponent: SessionComponent,
     currentRoute: ActivatedRouteSnapshot,
     currentState: RouterStateSnapshot,
-    nextState?: RouterStateSnapshot
+    nextState?: RouterStateSnapshot,
   ): Observable<boolean> {
     // cancel navigation if destination is appName/analyze, e.g. when clicking Analyze in nav bar when in session view
     if (nextState && nextState.url && nextState.url === this.routeService.getRouterLinkAnalyze()) {
@@ -219,7 +219,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           if (leave) {
             this.sessionEventService.unsubscribe();
           }
-        })
+        }),
       );
 
       return leavePage$;
@@ -278,7 +278,7 @@ export class SessionComponent implements OnInit, OnDestroy {
               "old value:",
               oldValue,
               "new value:",
-              newValue
+              newValue,
             );
           }
 
@@ -302,7 +302,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             }
           }
         },
-        (err) => this.errorService.showError("session event error", err)
+        (err) => this.errorService.showError("session event error", err),
       );
   }
 
@@ -336,12 +336,12 @@ export class SessionComponent implements OnInit, OnDestroy {
             return from(
               this.routeService.navigateAbsolute("/analyze/" + id, {
                 queryParams,
-              })
+              }),
             );
           }),
-          mergeMap(() => NEVER)
+          mergeMap(() => NEVER),
         );
-      })
+      }),
     );
   }
 
@@ -369,7 +369,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       () => {
         log.debug("delete session request done");
       },
-      (err) => this.restErrorService.showError("delete session failed", err)
+      (err) => this.restErrorService.showError("delete session failed", err),
     );
   }
 
@@ -385,7 +385,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
         this.sessionData.session.name,
         keepButton,
-        deleteButton
+        deleteButton,
       )
       .pipe(
         mergeMap((dialogResult) => {
@@ -404,7 +404,7 @@ export class SessionComponent implements OnInit, OnDestroy {
             return of(false);
           }
           throw err;
-        })
+        }),
       );
   }
 

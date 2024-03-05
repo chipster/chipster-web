@@ -65,7 +65,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private configService: ConfigService,
     private tokenService: TokenService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
   ) {}
 
   ngOnInit() {
@@ -82,7 +82,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         tap((sessionMap) => (this.userEventData.sessions = sessionMap)),
         tap(() => (this.sessionListLoading = false)),
         tap(() => this.subscribeToEvents()),
-        tap(() => this.updateSessions())
+        tap(() => this.updateSessions()),
       )
       .subscribe(null, (error: any) => {
         this.restErrorService.showError("Updating sessions failed", error);
@@ -101,7 +101,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         debounceTime(500),
         filter(() => this.selectedSession !== null),
         mergeMap((session) =>
-          forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap())
+          forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap()),
         ),
         tap((results) => {
           const sData = results[0];
@@ -115,14 +115,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
           }
         }),
         // hide the spinner when unsubscribed (when the user has opened a session)
-        finalize(() => (this.workflowPreviewLoading = false))
+        finalize(() => (this.workflowPreviewLoading = false)),
       )
       .subscribe(
         () => {},
         (error: any) => {
           this.workflowPreviewFailed = true;
           this.restErrorService.showError("Loading session preview failed", error);
-        }
+        },
       );
   }
 
@@ -154,7 +154,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       tap((sessions: Session[]) => {
         sessions.forEach((s) => this.addOrMergeSession(sessionMap, s));
       }),
-      map(() => sessionMap)
+      map(() => sessionMap),
     );
   }
 
@@ -187,7 +187,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .pipe(
         tap((username) => this.userEventService.connect(username, this.userEventData)),
         mergeMap(() => this.userEventService.getRuleStream()),
-        takeUntil(this.unsubscribe)
+        takeUntil(this.unsubscribe),
       )
       .subscribe(
         (wsEvent: WsEvent) => {
@@ -205,14 +205,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
         },
         (err) => {
           this.restErrorService.showError("Error in event handling", err);
-        }
+        },
       );
   }
 
   ngOnDestroy() {
     this.userEventService.unsubscribe();
 
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -235,7 +235,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         tap((sessionId: string) => {
           session.sessionId = sessionId;
           this.openSession(sessionId);
-        })
+        }),
       )
       .subscribe(null, (error: any) => {
         this.restErrorService.showError("Creating a new session failed", error);
@@ -249,7 +249,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       },
       (error: any) => {
         this.restErrorService.showError("failed to get session statistics", error);
-      }
+      },
     );
   }
 
@@ -292,7 +292,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionsByUserKeys.forEach((user: string) => {
       sessionsByUser.set(
         user,
-        sessionsByUser.get(user).sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name))
+        sessionsByUser.get(user).sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name)),
       );
     });
 
@@ -489,7 +489,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         },
         () => {
           // modal dismissed
-        }
+        },
       );
   }
 
@@ -567,7 +567,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         mergeMap((sessionData: SessionData) => {
           const copySessionObservable = this.sessionResource.copySession(sessionData, duplicateName, false);
           return this.dialogModalService.openSpinnerModal("Copy session", copySessionObservable);
-        })
+        }),
       )
       .subscribe(
         () => {
@@ -576,7 +576,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         },
         (err) => {
           this.restErrorService.showError("Copy session failed", err);
-        }
+        },
       );
   }
 

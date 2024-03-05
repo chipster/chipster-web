@@ -17,7 +17,10 @@ export class SelectionService implements OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(private store: Store<any>, private errorService: ErrorService) {
+  constructor(
+    private store: Store<any>,
+    private errorService: ErrorService,
+  ) {
     // Sync selected datasets from store
     this.selectedDatasets$ = this.store.select("selectedDatasets");
     this.store
@@ -25,7 +28,7 @@ export class SelectionService implements OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
         (datasets: Array<Dataset>) => (this.selectedDatasets = datasets),
-        (error: any) => this.errorService.showError("Error fetching datasets from store", error)
+        (error: any) => this.errorService.showError("Error fetching datasets from store", error),
       );
 
     // Sync selected jobs from store
@@ -37,7 +40,7 @@ export class SelectionService implements OnDestroy {
         (jobs: Array<Job>) => {
           this.selectedJobs = jobs;
         },
-        (err) => this.errorService.showError("Error fetching selected jobs from store", err)
+        (err) => this.errorService.showError("Error fetching selected jobs from store", err),
       );
   }
 
@@ -64,7 +67,7 @@ export class SelectionService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 }

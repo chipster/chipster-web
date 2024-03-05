@@ -46,7 +46,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private sessionEventService: SessionEventService,
     private getSessionDataService: GetSessionDataService,
     private selectionHandlerService: SelectionHandlerService,
-    private datasetContextMenuService: DatasetContextMenuService
+    private datasetContextMenuService: DatasetContextMenuService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -77,7 +77,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
         mergeMap((name) => {
           dataset.name = name;
           return this.sessionDataService.updateDataset(dataset);
-        })
+        }),
       )
       .subscribe({
         error: (err) => this.restErrorService.showError("Rename file failed", err),
@@ -116,7 +116,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 }

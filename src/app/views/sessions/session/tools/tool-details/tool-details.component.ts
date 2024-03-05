@@ -19,7 +19,7 @@ export class ToolDetailsComponent implements OnDestroy {
   constructor() {}
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 }

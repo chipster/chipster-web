@@ -50,7 +50,7 @@ export class JobComponent implements OnInit, OnDestroy {
     private sessionEventService: SessionEventService,
     private errorService: ErrorService,
     private toolService: ToolService,
-    private jobService: JobService
+    private jobService: JobService,
   ) {}
 
   ngOnInit() {
@@ -82,7 +82,7 @@ export class JobComponent implements OnInit, OnDestroy {
         }
         this.update(jobId);
       },
-      (err) => this.errorService.showError("updating selected jobs failed", err)
+      (err) => this.errorService.showError("updating selected jobs failed", err),
     );
 
     // job modification events
@@ -95,7 +95,7 @@ export class JobComponent implements OnInit, OnDestroy {
             this.update(this.job.jobId);
           }
         },
-        (err) => this.errorService.showError("getting job events failed", err)
+        (err) => this.errorService.showError("getting job events failed", err),
       );
   }
 
@@ -146,7 +146,7 @@ export class JobComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe.next();
+    this.unsubscribe.next(null);
     this.unsubscribe.complete();
   }
 
@@ -197,7 +197,7 @@ export class JobComponent implements OnInit, OnDestroy {
             } else {
               log.warn(
                 `job parameter value${jobParameter.value} not found from the current tool ` +
-                  `paramater options, showing the id`
+                  `paramater options, showing the id`,
               );
             }
           }
