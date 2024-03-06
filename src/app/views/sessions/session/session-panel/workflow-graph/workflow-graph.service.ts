@@ -1,7 +1,7 @@
 import { Injectable, Input } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
-import * as _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import { DatasetService } from "../../dataset.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { SessionDataService } from "../../session-data.service";
@@ -30,7 +30,7 @@ export class WorkflowGraphService {
   constructor(
     private datasetService: DatasetService,
     private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
   ) {}
 
   resetDoAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>): void {
@@ -38,7 +38,7 @@ export class WorkflowGraphService {
     const datasetsMapCopy = new Map();
 
     datasetsMap.forEach((d) => {
-      datasetsMapCopy.set(d.datasetId, _.cloneDeep(d));
+      datasetsMapCopy.set(d.datasetId, cloneDeep(d));
     });
 
     // create a set of datasetIds for efficient search

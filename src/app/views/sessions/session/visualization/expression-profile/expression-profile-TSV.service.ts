@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import * as _ from "lodash";
+import { map, flatten, min as _min, max as _max, startsWith, first, orderBy, chain } from "lodash-es";
 import GeneExpression from "./geneexpression";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "./domainboundaries";
@@ -20,7 +20,7 @@ export class ExpressionProfileTSVService {
    */
   public getGeneExpressions(tsv: TSVFile): Array<GeneExpression> {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    return _.map(tsv.body.rows, (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
+    return map(tsv.body.rows, (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
   }
 
   /*
@@ -28,10 +28,10 @@ export class ExpressionProfileTSVService {
    */
   public getDomainBoundaries(tsv: TSVFile): DomainBoundaries {
     const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
-    const values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
-    const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
-    const min = _.min(flatValues);
-    const max = _.max(flatValues);
+    const values = map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(chipIndexes));
+    const flatValues = map(flatten(values), (value: string) => parseFloat(value));
+    const min = _min(flatValues);
+    const max = _max(flatValues);
     return new DomainBoundaries(min, max);
   }
 
@@ -39,8 +39,8 @@ export class ExpressionProfileTSVService {
    * Return array containing numbers indicating indexes for column headers starting with 'chip.'
    */
   public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
-    return _.chain(tsvHeaders.headers)
-      .map((cell: string, index: number) => (_.startsWith(cell, "chip.") ? index : -1))
+    return chain(tsvHeaders.headers)
+      .map((cell: string, index: number) => (startsWith(cell, "chip.") ? index : -1))
       .filter((cell: number) => cell !== -1)
       .value();
   }
@@ -59,7 +59,7 @@ export class ExpressionProfileTSVService {
    */
   getGeneExpressionsByIndex(row: TSVRow, indexes: Array<number>): GeneExpression {
     const values = row.getCellsByIndexes(indexes);
-    const numberValues = _.map(values, (value: string) => parseFloat(value));
+    const numberValues = map(values, (value: string) => parseFloat(value));
     return new GeneExpression(row.id, numberValues);
   }
 
@@ -67,7 +67,7 @@ export class ExpressionProfileTSVService {
    * Order body by first chip-value in each row
    */
   public orderBodyByFirstValue(geneExpressions: Array<GeneExpression>): Array<GeneExpression> {
-    return _.orderBy(geneExpressions, [(geneExpression: GeneExpression) => _.first(geneExpression.values)]);
+    return orderBy(geneExpressions, [(geneExpression: GeneExpression) => first(geneExpression.values)]);
   }
 
   /*

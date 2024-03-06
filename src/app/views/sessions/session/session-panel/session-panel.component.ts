@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Module, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { range } from "lodash-es";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
@@ -34,7 +34,7 @@ export class SessionPanelComponent {
     private selectionHandlerService: SelectionHandlerService,
     public selectionService: SelectionService,
     private restErrorService: RestErrorService,
-    private workflowGraphService: WorkflowGraphService
+    private workflowGraphService: WorkflowGraphService,
   ) {} // used by template
 
   search(value: any): void {
@@ -66,7 +66,7 @@ export class SessionPanelComponent {
       const newMax = Math.max(clickIndex, ...selectedIndexes);
 
       // datasets within the index range
-      const newSelection = _.range(newMin, newMax + 1).map((i) => searchDatasets[i]);
+      const newSelection = range(newMin, newMax + 1).map((i) => searchDatasets[i]);
       this.selectionHandlerService.setDatasetSelection(newSelection);
     } else {
       this.selectionHandlerService.setDatasetSelection([dataset]);
@@ -82,7 +82,7 @@ export class SessionPanelComponent {
     this.workflowGraphService.resetDoAndSaveLayout(
       this.selectionService.selectedDatasets,
       this.sessionData.datasetsMap,
-      this.sessionData.jobsMap
+      this.sessionData.jobsMap,
     );
   }
 

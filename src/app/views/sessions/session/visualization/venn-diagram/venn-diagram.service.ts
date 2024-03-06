@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import * as _ from "lodash";
+import { tail, every, includes, sortBy, differenceBy, chain, head, forEach } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -15,7 +15,7 @@ import VennDiagramText from "./venn-diagram-text";
 export class VennDiagramService {
   constructor(
     private twoCircleVenndiagramService: TwoCircleVennDiagramService,
-    private threeCircleVenndiagramService: ThreeCircleVennDiagramService
+    private threeCircleVenndiagramService: ThreeCircleVennDiagramService,
   ) {}
 
   getCircleCenterPoints(fileCount: number, visualizationAreaCenter: Point, radius: number): Array<Point> {
@@ -28,7 +28,7 @@ export class VennDiagramService {
     circles: Array<Circle>,
     selectionCircles: Array<Circle>,
     radius: number,
-    visualizationCenter: Point
+    visualizationCenter: Point,
   ): string {
     return circles.length === 2
       ? this.twoCircleVenndiagramService.getSelectionDescriptor(circles, selectionCircles, radius)
@@ -36,7 +36,7 @@ export class VennDiagramService {
           circles,
           selectionCircles,
           radius,
-          visualizationCenter
+          visualizationCenter,
         );
   }
 
@@ -46,9 +46,9 @@ export class VennDiagramService {
   getDataIntersection(
     selectionCircles: Array<VennCircle>,
     allCircles: Array<VennCircle>,
-    columnKey: string
+    columnKey: string,
   ): Array<Array<string>> {
-    const differenceCircles = allCircles.filter((circle: VennCircle) => !_.includes(selectionCircles, circle));
+    const differenceCircles = allCircles.filter((circle: VennCircle) => !includes(selectionCircles, circle));
     return this.getSelectionData(selectionCircles, differenceCircles, columnKey);
   }
 
@@ -58,7 +58,7 @@ export class VennDiagramService {
   getSelectionData(
     selectionCircles: Array<VennCircle>,
     difference: Array<VennCircle>,
-    columnKey: string
+    columnKey: string,
   ): Array<Array<string>> {
     const compareByIndex = columnKey === "symbol" ? 0 : 1;
 
@@ -72,7 +72,7 @@ export class VennDiagramService {
     const differenceValues = difference.map((vennCircle: VennCircle) => vennCircle.data);
 
     // intersecting values from selected circles minus values in difference circles
-    return _.differenceBy(intersection, ...differenceValues, compareByIndex as any);
+    return differenceBy(intersection, ...differenceValues, compareByIndex as any);
   }
 
   /*
@@ -84,13 +84,13 @@ export class VennDiagramService {
   intersectionBySubarrayIndex(values: Array<Array<Array<string>>>, compareByIndex: number): Array<Array<string>> {
     const result = [];
 
-    const arraysToCompare = _.tail(values).map((array: Array<Array<string>>) =>
-      array.map((row: Array<string>) => row[compareByIndex])
+    const arraysToCompare = tail(values).map((array: Array<Array<string>>) =>
+      array.map((row: Array<string>) => row[compareByIndex]),
     );
 
-    _.forEach(_.head(values), (pair: Array<string>) => {
+    forEach(head(values), (pair: Array<string>) => {
       const comparator = pair[compareByIndex];
-      if (_.every(arraysToCompare, (array: Array<string>) => _.includes(array, comparator))) {
+      if (every(arraysToCompare, (array: Array<string>) => includes(array, comparator))) {
         result.push(pair);
       }
     });
@@ -103,7 +103,7 @@ export class VennDiagramService {
   generateNewDatasetTSV(
     files: Array<TSVFile>,
     selection: VennDiagramSelection,
-    keyColumn: string
+    keyColumn: string,
   ): Array<Array<string>> {
     // the order here is different from normal tsv files
     // this is the order identifier and symbol are shown in the venn diagram side panel
@@ -177,8 +177,8 @@ export class VennDiagramService {
    * @description: Find out rows which contain a value from values-array in the given column
    */
   getTSVRowsContainingValues(file: TSVFile, values: Array<string>, columnIndex: number): Array<TSVRow> {
-    return _.chain(file.body.rows)
-      .filter((row: TSVRow) => _.includes(values, row.getCellByIndex(columnIndex)))
+    return chain(file.body.rows)
+      .filter((row: TSVRow) => includes(values, row.getCellByIndex(columnIndex)))
       .value();
   }
 
@@ -200,18 +200,18 @@ export class VennDiagramService {
     if (vennCircle.circle.center.x === visualizationAreaCenter.x) {
       return new Point(
         visualizationAreaCenter.x - vennCircle.circle.radius * 0.5,
-        vennCircle.circle.center.y - vennCircle.circle.radius - 3
+        vennCircle.circle.center.y - vennCircle.circle.radius - 3,
       );
     }
     if (vennCircle.circle.center.x < visualizationAreaCenter.x) {
       return new Point(
         vennCircle.circle.center.x - vennCircle.circle.radius * 1.2,
-        vennCircle.circle.center.y + vennCircle.circle.radius + 5
+        vennCircle.circle.center.y + vennCircle.circle.radius + 5,
       );
     }
     return new Point(
       vennCircle.circle.center.x + vennCircle.circle.radius * 0.8,
-      vennCircle.circle.center.y + vennCircle.circle.radius + 5
+      vennCircle.circle.center.y + vennCircle.circle.radius + 5,
     );
   }
 
@@ -221,7 +221,7 @@ export class VennDiagramService {
   getVennDiagramSegmentTexts(
     vennCircles: Array<VennCircle>,
     visualizationAreaCenter: Point,
-    columnKey: string
+    columnKey: string,
   ): Array<VennDiagramText> {
     return vennCircles.length === 2
       ? this.getTwoVennDiagramSegmentTexts(vennCircles, visualizationAreaCenter, columnKey)
@@ -234,7 +234,7 @@ export class VennDiagramService {
   getTwoVennDiagramSegmentTexts(
     circles: Array<VennCircle>,
     visualizationAreaCenter: Point,
-    columnKey: string
+    columnKey: string,
   ): Array<VennDiagramText> {
     const result = [];
 
@@ -249,7 +249,7 @@ export class VennDiagramService {
     const leftCircleCount = this.getSelectionData([leftCircle], [rightCircle], columnKey).length.toString();
     const leftCirclePosition = new Point(
       leftCircle.circle.center.x - leftCircle.circle.radius * 0.5,
-      leftCircle.circle.center.y
+      leftCircle.circle.center.y,
     );
     result.push(new VennDiagramText(leftCircleCount, leftCirclePosition));
 
@@ -257,7 +257,7 @@ export class VennDiagramService {
     const rightCircleCount = this.getSelectionData([rightCircle], [leftCircle], columnKey).length.toString();
     const rightCirclePosition = new Point(
       rightCircle.circle.center.x + rightCircle.circle.radius * 0.5,
-      rightCircle.circle.center.y
+      rightCircle.circle.center.y,
     );
     result.push(new VennDiagramText(rightCircleCount, rightCirclePosition));
 
@@ -270,12 +270,12 @@ export class VennDiagramService {
   getThreeVennDiagramSegmentTexts(
     circles: Array<VennCircle>,
     visualizationAreaCenter: Point,
-    columnKey: string
+    columnKey: string,
   ): Array<VennDiagramText> {
     const result = [];
     const radius = circles[0].circle.radius;
 
-    const circlesSortedByXAxis = _.sortBy(circles, (circle: VennCircle) => circle.circle.center.x);
+    const circlesSortedByXAxis = sortBy(circles, (circle: VennCircle) => circle.circle.center.x);
 
     // circles sorted by x-axis value
     const bottomLeftCircle = circlesSortedByXAxis[0];
@@ -288,56 +288,56 @@ export class VennDiagramService {
     const intersectionBottomLeftTopCirclesCount = this.getSelectionData(
       [bottomLeftCircle, topCircle],
       [bottomRightCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const intersectionBottomLeftTopCirclesPosition = new Point(
       visualizationAreaCenter.x - radius * 0.6,
-      visualizationAreaCenter.y - radius * 0.2
+      visualizationAreaCenter.y - radius * 0.2,
     );
     result.push(new VennDiagramText(intersectionBottomLeftTopCirclesCount, intersectionBottomLeftTopCirclesPosition));
 
     const intersectionBottomRightTopCirclesCount = this.getSelectionData(
       [topCircle, bottomRightCircle],
       [bottomLeftCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const intersectionBottomRightTopCirclesPosition = new Point(
       visualizationAreaCenter.x + radius * 0.6,
-      visualizationAreaCenter.y - radius * 0.2
+      visualizationAreaCenter.y - radius * 0.2,
     );
     result.push(new VennDiagramText(intersectionBottomRightTopCirclesCount, intersectionBottomRightTopCirclesPosition));
 
     const intersectionBottomRightBottomLeftCirclesCount = this.getSelectionData(
       [bottomLeftCircle, bottomRightCircle],
       [topCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const intersectionBottomRightBottomLeftCirclesPosition = new Point(
       visualizationAreaCenter.x,
-      visualizationAreaCenter.y + radius
+      visualizationAreaCenter.y + radius,
     );
     result.push(
       new VennDiagramText(
         intersectionBottomRightBottomLeftCirclesCount,
-        intersectionBottomRightBottomLeftCirclesPosition
-      )
+        intersectionBottomRightBottomLeftCirclesPosition,
+      ),
     );
 
     const bottomLeftCircleCount = this.getSelectionData(
       [bottomLeftCircle],
       [topCircle, bottomRightCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const bottomLeftCirclePosition = new Point(
       bottomLeftCircle.circle.center.x - radius * 0.5,
-      bottomLeftCircle.circle.center.y
+      bottomLeftCircle.circle.center.y,
     );
     result.push(new VennDiagramText(bottomLeftCircleCount, bottomLeftCirclePosition));
 
     const topCircleCount = this.getSelectionData(
       [topCircle],
       [bottomLeftCircle, bottomRightCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const topCirclePosition = new Point(topCircle.circle.center.x, topCircle.circle.center.y - radius * 0.3);
     result.push(new VennDiagramText(topCircleCount, topCirclePosition));
@@ -345,11 +345,11 @@ export class VennDiagramService {
     const bottomRightCircleCount = this.getSelectionData(
       [bottomRightCircle],
       [topCircle, bottomLeftCircle],
-      columnKey
+      columnKey,
     ).length.toString();
     const bottomRightCirclePosition = new Point(
       bottomRightCircle.circle.center.x + radius * 0.3,
-      bottomRightCircle.circle.center.y
+      bottomRightCircle.circle.center.y,
     );
     result.push(new VennDiagramText(bottomRightCircleCount, bottomRightCirclePosition));
 
@@ -365,14 +365,14 @@ export class VennDiagramService {
             uniqueHeadersSet.add(header);
           });
           return uniqueHeadersSet;
-        }, new Set<string>())
+        }, new Set<string>()),
     );
   }
 
   private tsvFileToMap(tsvFile: TSVFile, keyColumn): Map<string, Array<string>> {
     const keyColumnIndex = tsvFile.headers.getColumnIndexByKey(keyColumn);
     return new Map(
-      tsvFile.body.getRawDataRows().map((row: Array<string>) => [row[keyColumnIndex], row] as [string, Array<string>])
+      tsvFile.body.getRawDataRows().map((row: Array<string>) => [row[keyColumnIndex], row] as [string, Array<string>]),
     );
   }
 
@@ -381,7 +381,7 @@ export class VennDiagramService {
     tsvMaps: Array<Map<string, Array<string>>>,
     tsvHeaders: Array<TSVHeaders>,
     key: string,
-    header: string
+    header: string,
   ): string {
     const filesAndValues = tsvFiles
       .map((tsvFile, i) => {
@@ -394,7 +394,7 @@ export class VennDiagramService {
       .filter((fileAndValue) => fileAndValue != null)
       .reduce(
         (s: string, fileAndValue: Array<string>) => s + "<li>" + fileAndValue[0] + ": " + fileAndValue[1] + "</li>",
-        ""
+        "",
       );
 
     const message =

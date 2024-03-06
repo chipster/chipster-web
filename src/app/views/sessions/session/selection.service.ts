@@ -1,6 +1,6 @@
 import { takeUntil } from "rxjs/operators";
 import { Dataset, Job } from "chipster-js-common";
-import * as _ from "lodash";
+import { some } from "lodash-es";
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
@@ -59,11 +59,11 @@ export class SelectionService implements OnDestroy {
    * @description: search by id if given dataset is currently selected
    */
   isSelectedDatasetById(datasetId: string): boolean {
-    return _.some(this.selectedDatasets, (dataset: Dataset) => dataset.datasetId === datasetId);
+    return some(this.selectedDatasets, (dataset: Dataset) => dataset.datasetId === datasetId);
   }
 
   isSelectedJobById(jobId: string): boolean {
-    return _.some(this.selectedJobs, (job: Job) => job.jobId === jobId);
+    return some(this.selectedJobs, (job: Job) => job.jobId === jobId);
   }
 
   ngOnDestroy() {

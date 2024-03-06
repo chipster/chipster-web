@@ -1,5 +1,5 @@
 import { Job } from "chipster-js-common";
-import * as _ from "lodash";
+import { findIndex, forEach } from "lodash-es";
 
 export const TOGGLE_SELECTED_JOB = "TOGGLE_SELECTED_JOB";
 export const CLEAR_JOB_SELECTIONS = "CLEAR_JOB_SELECTIONS";
@@ -13,8 +13,8 @@ export function selectedJobs(state: Array<Job> = [], { type, payload }) {
       return payload;
 
     case TOGGLE_SELECTED_JOB:
-      _.forEach(payload, (payloadJob: Job) => {
-        const index = _.findIndex(stateJobs, (job: Job) => job.jobId === payloadJob.jobId);
+      forEach(payload, (payloadJob: Job) => {
+        const index = findIndex(stateJobs, (job: Job) => job.jobId === payloadJob.jobId);
         index === -1 ? stateJobs.push(payloadJob) : stateJobs.splice(index, 1);
       });
       return stateJobs;

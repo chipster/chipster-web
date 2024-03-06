@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { Dataset, PhenodataUtils, Job } from "chipster-js-common";
-import * as _ from "lodash";
 import { SessionData } from "../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../shared/services/typetag.service";
 import { DatasetService } from "./dataset.service";
@@ -13,14 +12,17 @@ import { DatasetService } from "./dataset.service";
  */
 @Injectable()
 export class QuerySessionDataService {
-  constructor(private datasetService: DatasetService, private typeTagService: TypeTagService) {}
+  constructor(
+    private datasetService: DatasetService,
+    private typeTagService: TypeTagService,
+  ) {}
 
   public getAncestorDatasetsBottomUpBreadthFirst(sessionData: SessionData, dataset: Dataset): Array<Dataset> {
     return PhenodataUtils.getAncestorsBottomUpBreadthFirstWithFilter(
       [dataset],
       () => true,
       sessionData.jobsMap,
-      sessionData.datasetsMap
+      sessionData.datasetsMap,
     );
   }
 
@@ -33,7 +35,7 @@ export class QuerySessionDataService {
    */
   getPhenodata(sessionData: SessionData, dataset: Dataset): string {
     return PhenodataUtils.getPhenodata(dataset, sessionData.jobsMap, sessionData.datasetsMap, (dataset) =>
-      this.isPhenodataType(sessionData, dataset)
+      this.isPhenodataType(sessionData, dataset),
     );
   }
 
@@ -46,7 +48,7 @@ export class QuerySessionDataService {
    */
   getPhenodataDataset(sessionData: SessionData, dataset: Dataset): Dataset {
     return PhenodataUtils.getPhenodataDataset(dataset, sessionData.jobsMap, sessionData.datasetsMap, (dataset) =>
-      this.isPhenodataType(sessionData, dataset)
+      this.isPhenodataType(sessionData, dataset),
     );
   }
 
@@ -55,7 +57,7 @@ export class QuerySessionDataService {
       dataset,
       sessionData.jobsMap,
       sessionData.datasetsMap,
-      (dataset) => this.isPhenodataType(sessionData, dataset)
+      (dataset) => this.isPhenodataType(sessionData, dataset),
     );
   }
 

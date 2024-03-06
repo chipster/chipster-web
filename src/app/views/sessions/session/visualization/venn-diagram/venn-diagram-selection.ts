@@ -1,11 +1,11 @@
-import * as _ from "lodash";
+import { uniq } from "lodash-es";
 
 export default class VennDiagramSelection {
   datasetIds: Array<string> = [];
   values: Array<Array<string>> = [];
 
   addSelection(datasetIds: Array<string>, values: Array<Array<string>>) {
-    this.datasetIds = _.uniq(this.datasetIds.concat(datasetIds));
+    this.datasetIds = uniq(this.datasetIds.concat(datasetIds));
     this.values = this.values.concat(values);
   }
 

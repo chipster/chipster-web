@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { tail } from "lodash-es";
 import TSVHeaders from "./TSVHeaders";
 import TSVBody from "./TSVBody";
 import TSVRow from "./TSVRow";
@@ -6,7 +6,10 @@ import TSVRow from "./TSVRow";
 export const noColumnError = "NoColumnError";
 
 export class NoColumnError extends Error {
-  constructor(message, private cause?: Error) {    
+  constructor(
+    message,
+    private cause?: Error,
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -15,13 +18,17 @@ export default class TSVFile {
   public headers: TSVHeaders;
   public body: TSVBody;
 
-  constructor(tsv: Array<Array<string>>, public datasetId: string, public filename: string) {
+  constructor(
+    tsv: Array<Array<string>>,
+    public datasetId: string,
+    public filename: string,
+  ) {
     // normalize header-row in tsv-file so that if headers are missing a column
     // or identifier is indicated by an empty string
 
     const normalizedHeaders = this.getNormalizeHeaders(tsv);
     this.headers = new TSVHeaders(normalizedHeaders);
-    this.body = new TSVBody(_.tail(tsv));
+    this.body = new TSVBody(tail(tsv));
     datasetId;
     filename;
   }
@@ -58,16 +65,14 @@ export default class TSVFile {
   public getColumnDataByHeaderKeys(keys: Array<string>): Array<Array<string>> {
     const columnIndexes = keys.map((key: string) => this.getColumnIndex(key));
 
-    if (columnIndexes.filter(index => index !== -1).length === 0) {
+    if (columnIndexes.filter((index) => index !== -1).length === 0) {
       // throw new VError('columns "' + keys + '" not found');
 
       // old school way, because VError is not compatible with webpack 5
       throw new NoColumnError('columns "' + keys + '" not found');
     }
 
-    const columnData = this.body.rows
-      .map((tsvRow: TSVRow) => columnIndexes.map((index: number) => tsvRow.row[index]));
-
+    const columnData = this.body.rows.map((tsvRow: TSVRow) => columnIndexes.map((index: number) => tsvRow.row[index]));
 
     return columnData;
   }

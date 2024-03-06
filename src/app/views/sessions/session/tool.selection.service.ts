@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
-import * as _ from "lodash";
+import { flatten } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
 import { map } from "rxjs/operators";
@@ -29,7 +29,7 @@ export class ToolSelectionService {
     private toolService: ToolService,
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService,
-    private store: Store<any>
+    private store: Store<any>,
   ) {}
 
   selectToolById(moduleId: string, categoryName: string, toolId: string) {
@@ -54,7 +54,7 @@ export class ToolSelectionService {
   getValidatedTool(
     toolWithValidatedParams: SelectedToolWithValidatedParameters,
     sessionData: SessionData,
-    validateRunForEachSample = true // needs to be false when rebinding for each sample
+    validateRunForEachSample = true, // needs to be false when rebinding for each sample
   ) {
     const runForEachValidationResult: ValidationResult = this.validateRunForEach(toolWithValidatedParams, sessionData);
 
@@ -68,7 +68,7 @@ export class ToolSelectionService {
 
     const singleJobValidationMessage = this.getValidationMessage(
       toolWithValidatedParams.parametersValidation.valid,
-      toolWithValidatedParams
+      toolWithValidatedParams,
     );
 
     const singleJobValidationResult: ValidationResult = {
@@ -93,7 +93,7 @@ export class ToolSelectionService {
       toolWithValidatedInputs?.tool?.parameters != null &&
       toolWithValidatedInputs.tool.parameters.length > 0 &&
       toolWithValidatedInputs.tool.parameters.some(
-        (parameter) => !this.toolService.isDefaultValue(parameter, parameter.value)
+        (parameter) => !this.toolService.isDefaultValue(parameter, parameter.value),
       )
     );
   }
@@ -112,7 +112,7 @@ export class ToolSelectionService {
     }
 
     const parametersValid = Array.from(parametersValidations.values()).every(
-      (result: ValidationResult) => result.valid
+      (result: ValidationResult) => result.valid,
     );
 
     return {
@@ -229,13 +229,13 @@ export class ToolSelectionService {
 
   populateParameters(
     selectedToolWithInputs: SelectedToolWithValidatedInputs,
-    sessionData: SessionData
+    sessionData: SessionData,
   ): Observable<SelectedToolWithValidatedInputs> {
     if (selectedToolWithInputs.tool) {
       // get bound datasets for populating (dataset dependent) parameters
       const boundDatasets = selectedToolWithInputs.inputBindings.reduce(
         (datasets: Array<Dataset>, inputBinding: InputBinding) => datasets.concat(inputBinding.datasets),
-        []
+        [],
       );
 
       // get bound phenodatas for populating (phenodata dependent) parameters
@@ -246,7 +246,7 @@ export class ToolSelectionService {
 
       // populating params is async as some selection options may require dataset contents
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) =>
-        this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData)
+        this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData),
       );
       return forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
     }
@@ -264,7 +264,7 @@ export class ToolSelectionService {
     parameter: ToolParameter,
     datasets: Array<Dataset>,
     phenodatas: Array<string>,
-    sessionData: SessionData
+    sessionData: SessionData,
   ): Observable<ToolParameter> {
     // for other than column selection parameters, set to default if no value
     if (!this.toolService.isColumnSelectionParameter(parameter) && parameter.value == null) {
@@ -295,11 +295,11 @@ export class ToolSelectionService {
           map((headersForAllDatasets: Array<Array<SelectionOption>>) => {
             // FIXME make options unique in case several datasets selected
             // for now headers come only from the first datasets
-            const selectionOptions = _.flatten(headersForAllDatasets);
+            const selectionOptions = flatten(headersForAllDatasets);
             parameter.selectionOptions = selectionOptions;
             this.setColumnSelectionParameterValueAfterPopulate(parameter);
             return parameter;
-          })
+          }),
         );
       }
       if (parameter.type === "METACOLUMN_SEL") {
@@ -337,7 +337,7 @@ export class ToolSelectionService {
     // check that every required input is bound
     // phenodata inputs are not included in the bindings, so no need to deal with them
     const bindingsValid = toolWithInputs.inputBindings.every(
-      (binding: InputBinding) => binding.toolInput.optional || binding.datasets.length > 0
+      (binding: InputBinding) => binding.toolInput.optional || binding.datasets.length > 0,
     );
     if (!bindingsValid) {
       if (toolWithInputs.selectedDatasets.length === 0) {
@@ -393,7 +393,7 @@ export class ToolSelectionService {
   validatePhenodata(phenodataBindings: PhenodataBinding[]): boolean {
     // every returns true for an empty array
     return phenodataBindings.every(
-      (binding) => binding.toolInput.optional || (!binding.toolInput.optional && binding.dataset != null)
+      (binding) => binding.toolInput.optional || (!binding.toolInput.optional && binding.dataset != null),
     );
   }
 
@@ -420,7 +420,7 @@ export class ToolSelectionService {
       };
     }
     const validatedToolsForEachFile: ValidatedTool[] = toolWithInputs.selectedDatasets.map((dataset) =>
-      this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData)
+      this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData),
     );
 
     const allValid = validatedToolsForEachFile.every((validatedTool) => validatedTool.singleJobValidation.valid);
@@ -429,7 +429,7 @@ export class ToolSelectionService {
       return { valid: true };
     }
     const failCount = validatedToolsForEachFile.filter(
-      (validatedTool) => !validatedTool.singleJobValidation.valid
+      (validatedTool) => !validatedTool.singleJobValidation.valid,
     ).length;
 
     return {
@@ -441,7 +441,7 @@ export class ToolSelectionService {
   validateRunForEachSample(
     toolWithInputs: SelectedToolWithInputs,
     sampleGroups: SampleGroups,
-    sessionData: SessionData
+    sessionData: SessionData,
   ): ValidationResult {
     if (!toolWithInputs.tool) {
       return { valid: false, message: "Tool missing." };
@@ -497,7 +497,7 @@ export class ToolSelectionService {
       validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobInputsValidation.valid);
 
     const failCount: number = validatedToolsForSamples.filter(
-      (validatedTool) => !validatedTool.singleJobValidation.valid
+      (validatedTool) => !validatedTool.singleJobValidation.valid,
     ).length;
 
     return {
@@ -511,7 +511,7 @@ export class ToolSelectionService {
   getValidatedToolForEachSample(
     selectedToolWithInputs: SelectedToolWithInputs,
     sampleGroups: SampleGroups,
-    sessionData: SessionData
+    sessionData: SessionData,
   ): ValidatedTool[] {
     // all sample datasets, needed for checks
     const singleEnd: boolean = sampleGroups.singleEndSamples.length > 0;
@@ -523,7 +523,7 @@ export class ToolSelectionService {
     // get selected datasets which are not included in the sample groups
     const sampleDatasetIds = sampleDatasets.map((dataset) => dataset.datasetId);
     const nonSampleDatasets = selectedToolWithInputs.selectedDatasets.filter(
-      (dataset) => !sampleDatasetIds.includes(dataset.datasetId)
+      (dataset) => !sampleDatasetIds.includes(dataset.datasetId),
     );
 
     // TODO sanity check if nonSampleDatasets have datasets that look like sample datasets?
@@ -539,16 +539,16 @@ export class ToolSelectionService {
             this.datasetService.getSingleEndDatasets([singleEndSample]).concat(nonSampleDatasets),
             selectedToolWithInputs,
             sessionData,
-            singleEndSample.sampleName
-          )
+            singleEndSample.sampleName,
+          ),
         )
       : sampleGroups.pairedEndSamples.map((pairedEndSample) =>
           this.rebindWithNewDatasetsAndValidate(
             this.datasetService.getPairedDatasets([pairedEndSample]).concat(nonSampleDatasets),
             selectedToolWithInputs,
             sessionData,
-            pairedEndSample.sampleName
-          )
+            pairedEndSample.sampleName,
+          ),
         );
 
     // // debug pring
@@ -580,7 +580,7 @@ export class ToolSelectionService {
     datasets: Dataset[],
     originalToolWithInputs: SelectedToolWithInputs,
     sessionData: SessionData,
-    sampleName?: string
+    sampleName?: string,
   ): ValidatedTool {
     const newSelectedTool: SelectedTool = {
       tool: originalToolWithInputs.tool,

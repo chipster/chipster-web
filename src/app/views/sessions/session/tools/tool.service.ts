@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Dataset, InputBinding, Job, Tool, ToolInput, ToolParameter } from "chipster-js-common";
-import * as _ from "lodash";
+import { difference } from "lodash-es";
 import { Observable, of } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
@@ -20,7 +20,7 @@ export class ToolService {
     private sessionDataService: SessionDataService,
     private tsvService: TsvService,
     private configService: ConfigService,
-    private getSessionDataService: GetSessionDataService
+    private getSessionDataService: GetSessionDataService,
   ) {}
 
   isSelectionParameter(parameter: ToolParameter) {
@@ -115,7 +115,7 @@ export class ToolService {
     inputs.forEach((toolInput) => {
       // get compatible datasets
       const compatibleDatasets = unboundDatasets.filter((dataset) =>
-        this.isCompatible(sessionData, dataset, toolInput.type.name)
+        this.isCompatible(sessionData, dataset, toolInput.type.name),
       );
 
       // if no compatible datasets found, binding gets empty datasets array
@@ -129,7 +129,7 @@ export class ToolService {
       bindingsMap.set(toolInput, datasetsToBind);
 
       // remove bound datasets from unbound
-      unboundDatasets = _.difference(unboundDatasets, datasetsToBind);
+      unboundDatasets = difference(unboundDatasets, datasetsToBind);
     });
 
     // return bindings in the same order as the original tool input, skip phenodata
@@ -238,7 +238,7 @@ export class ToolService {
 
   getDatasetHeadersForParameter(
     datasets: Array<Dataset>,
-    sessionData: SessionData
+    sessionData: SessionData,
   ): Array<Observable<Array<SelectionOption>>> {
     return datasets.map((dataset: Dataset): Observable<Array<SelectionOption>> => {
       /*
@@ -269,7 +269,7 @@ export class ToolService {
     const headers = phenodatas.reduce(
       (allColumns: string[], phenodataString: string) =>
         allColumns.concat(this.tsvService.getTSVHeaders(phenodataString)),
-      []
+      [],
     );
 
     // return unique headers
@@ -294,7 +294,7 @@ export class ToolService {
           }
         }
         return toolId;
-      })
+      }),
     );
   }
 

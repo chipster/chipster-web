@@ -1,6 +1,5 @@
 import { Dataset, Tool, Job } from "chipster-js-common";
 import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import * as _ from "lodash";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { SessionDataService } from "../session-data.service";

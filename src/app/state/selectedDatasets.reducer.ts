@@ -1,5 +1,5 @@
 import { Dataset } from "chipster-js-common";
-import * as _ from "lodash";
+import { findIndex, forEach } from "lodash-es";
 
 export const TOGGLE_SELECTED_DATASET = "TOGGLE_SELECTED_DATASET";
 export const CLEAR_DATASET_SELECTIONS = "CLEAR_DATASET_SELECTIONS";
@@ -13,8 +13,8 @@ export function selectedDatasets(state: Array<Dataset> = [], { type, payload }) 
       return payload;
 
     case TOGGLE_SELECTED_DATASET:
-      _.forEach(payload, (payloadDataset: Dataset) => {
-        const index = _.findIndex(stateDatasets, (dataset: Dataset) => dataset.datasetId === payloadDataset.datasetId);
+      forEach(payload, (payloadDataset: Dataset) => {
+        const index = findIndex(stateDatasets, (dataset: Dataset) => dataset.datasetId === payloadDataset.datasetId);
         index === -1 ? stateDatasets.push(payloadDataset) : stateDatasets.splice(index, 1);
       });
       return stateDatasets;

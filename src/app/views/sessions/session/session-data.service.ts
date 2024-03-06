@@ -12,7 +12,7 @@ import {
   Session,
   WsEvent,
 } from "chipster-js-common";
-import * as _ from "lodash";
+import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
 import {
@@ -51,8 +51,8 @@ export class SessionDataService {
     private toastrService: ToastrService,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
-    private http: HttpClient
-  ) { }
+    private http: HttpClient,
+  ) {}
 
   getSessionId(): string {
     return this.sessionId;
@@ -100,7 +100,7 @@ export class SessionDataService {
     toolName: string,
     content: string,
     toolCategory = "Interactive visualizations",
-    metadataFiles: MetadataFile[] = null
+    metadataFiles: MetadataFile[] = null,
   ): Observable<string> {
     const job = new Job();
     job.state = JobState.Completed;
@@ -129,13 +129,13 @@ export class SessionDataService {
         return this.createDataset(d);
       }),
       mergeMap((datasetId: string) =>
-        forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)])
+        forkJoin([of(datasetId), this.fileResource.uploadData(this.getSessionId(), datasetId, content)]),
       ),
       mergeMap((result) => of(result[0])),
       catchError((err) => {
         log.info("create derived dataset failed", err);
         throw err;
-      })
+      }),
     );
   }
 
@@ -149,19 +149,19 @@ export class SessionDataService {
       () => {
         log.info("Job deleted");
       },
-      (err) => this.restErrorService.showError("delete jobs failed", err)
+      (err) => this.restErrorService.showError("delete jobs failed", err),
     );
   }
 
   deleteDatasets(datasets: Dataset[]) {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
-      this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId)
+      this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId),
     );
     observableMerge(...deleteDatasets$).subscribe(
       () => {
         log.info("Dataset deleted");
       },
-      (err) => this.restErrorService.showError("delete datasets failed", err)
+      (err) => this.restErrorService.showError("delete datasets failed", err),
     );
   }
 
@@ -189,7 +189,7 @@ export class SessionDataService {
         const options = this.tokenService.getTokenParams(true);
         options["responseType"] = "text";
         return this.http.post<string>(sessionDbUrl + "/tokens/sessions/" + sessionId, null, options);
-      })
+      }),
     );
   }
 
@@ -208,9 +208,9 @@ export class SessionDataService {
         return this.http.post<string>(
           sessionDbUrl + "/tokens/sessions/" + sessionId + "/datasets/" + datasetId,
           null,
-          options
+          options,
         );
-      })
+      }),
     );
   }
 
@@ -232,12 +232,12 @@ export class SessionDataService {
   getDatasetUrl(dataset: Dataset): Observable<string> {
     return observableForkJoin(
       this.getTokenForDataset(this.getSessionId(), dataset.datasetId),
-      this.configService.getFileBrokerUrl()
+      this.configService.getFileBrokerUrl(),
     ).pipe(
       map((results) => {
         const [datasetToken, url] = results;
         return `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${datasetToken}`;
-      })
+      }),
     );
   }
 
@@ -250,7 +250,7 @@ export class SessionDataService {
       this.getDatasetUrl(dataset).pipe(map((url) => url)),
       null,
       null,
-      "Browser's pop-up blocker prevented opening a new tab"
+      "Browser's pop-up blocker prevented opening a new tab",
     );
   }
 
@@ -259,13 +259,13 @@ export class SessionDataService {
       url$,
       autoCloseDelay * 1000,
       "<p>Please wait until the download starts. Then you can close " +
-      "this tab. It will close automatically after " +
-      autoCloseDelay +
-      " seconds.</p>",
+        "this tab. It will close automatically after " +
+        autoCloseDelay +
+        " seconds.</p>",
 
       "Browser's pop-up blocker prevented some exports. " +
-      "Please disable the pop-up blocker for this site or " +
-      "export the files one by one."
+        "Please disable the pop-up blocker for this site or " +
+        "export the files one by one.",
     );
   }
 
@@ -290,7 +290,7 @@ export class SessionDataService {
             }, autoCloseDelay);
           }
         },
-        (err) => this.restErrorService.showError("opening a new tab failed", err)
+        (err) => this.restErrorService.showError("opening a new tab failed", err),
       );
     } else {
       // Chrome allows only one download
@@ -327,7 +327,7 @@ export class SessionDataService {
 
   deletePersonalRules(session: Session) {
     return observableFrom(this.getPersonalRules(session.rules)).pipe(
-      concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId))
+      concatMap((rule: Rule) => this.sessionResource.deleteRule(session.sessionId, rule.ruleId)),
     );
   }
 
@@ -347,7 +347,7 @@ export class SessionDataService {
     sessions.forEach((session) => {
       session.rules.forEach((rule) => {
         if (rule.sharedBy === username) {
-          const sharedSession = _.clone(session);
+          const sharedSession = clone(session);
           sharedSession.rules = [rule];
           sharedSessions.push(sharedSession);
         }
@@ -395,7 +395,7 @@ export class SessionDataService {
       },
       () => {
         // modal dismissed
-      }
+      },
     );
   }
 
@@ -410,7 +410,7 @@ export class SessionDataService {
   deleteDatasetsLater(datasets: Dataset[]) {
     log.info("deleting datasets" + datasets);
     // make a copy so that further selection changes won't change the array
-    const deletedDatasets = _.clone(datasets);
+    const deletedDatasets = clone(datasets);
 
     // all selected datasets are going to be deleted
     // clear selection to avoid problems in other parts of the UI
@@ -461,19 +461,19 @@ export class SessionDataService {
         this.deleteDatasetsUndo(deletedDatasets);
         this.toastrService.clear(toast.toastId);
       },
-      (err) => this.errorService.showError("error in dataset deletion", err)
+      (err) => this.errorService.showError("error in dataset deletion", err),
     );
 
     toast.onHidden
       .pipe(
-        takeUntil(toast.onAction) // only if there was no action
+        takeUntil(toast.onAction), // only if there was no action
       )
       .subscribe(
         () => {
           this.deleteDatasetsNow(deletedDatasets);
           this.toastrService.clear(toast.toastId);
         },
-        (err) => this.errorService.showError("error in dataset deletion", err)
+        (err) => this.errorService.showError("error in dataset deletion", err),
       );
   }
 
@@ -501,7 +501,7 @@ export class SessionDataService {
       Array.from(datasetsMap).filter((entry) => {
         const dataset = entry[1];
         return dataset.fileId != null;
-      })
+      }),
     );
   }
 

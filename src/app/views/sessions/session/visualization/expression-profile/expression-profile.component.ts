@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
-import * as _ from "lodash";
+import { filter, map, find, difference, uniq, includes, floor, intersection } from "lodash-es";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -118,12 +118,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // Custom headers for x-axis
     const firstDataset: any = this.dataset;
-    const phenodataDescriptions = _.filter(firstDataset.metadata, (metadata: any) => metadata.key === "description");
+    const phenodataDescriptions = filter(firstDataset.metadata, (metadata: any) => metadata.key === "description");
 
     // Change default headers to values defined in phenodata if description value has been defined
-    const headers = _.map(this.visualizationTSVService.getChipHeaders(tsv), (header) => {
+    const headers = map(this.visualizationTSVService.getChipHeaders(tsv), (header) => {
       // find if there is a phenodata description matching header and containing a value
-      const phenodataHeader: any = _.find(
+      const phenodataHeader: any = find(
         phenodataDescriptions,
         (item: any) => item.column === header && item.value !== null,
       );
@@ -132,7 +132,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // X-axis and scale
     // Calculate points (in pixels) for positioning x-axis points
-    const chipRange = _.map(headers, (item, index) => (graphArea.width / headers.length) * index);
+    const chipRange = map(headers, (item, index) => (graphArea.width / headers.length) * index);
     const xScale = d3.scaleOrdinal().range(chipRange).domain(headers);
     // compile error hidden with <any>: Argument of type 'ScaleOrdinal<string, {}>' is not
     // assignable to parameter of type 'AxisScale<string>'.
@@ -196,7 +196,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("stroke", (d: any, i: number) => {
         //     There are 20 different colors in colorcategory. Setting same color for each consecutive 5% of lines.
         //     So for 100 lines 5 first lines gets first color in category, next 5 lines get second color and so on.
-        const colorIndex = _.floor((i / tsv.body.size()) * 20).toString();
+        const colorIndex = floor((i / tsv.body.size()) * 20).toString();
         return color(colorIndex);
       })
       .on("mouseover", (event, d: any) => {
@@ -305,16 +305,16 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
         for (const interval of intervals) {
-          const intersectingLines = _.filter(interval.lines, (line: Line) =>
+          const intersectingLines = filter(interval.lines, (line: Line) =>
             that.expressionProfileService.isIntersecting(line, interval.rectangle),
           );
 
           // Line ids intersecting with selection as an array
-          ids = ids.concat(_.map(intersectingLines, (line: Line) => line.lineId));
+          ids = ids.concat(map(intersectingLines, (line: Line) => line.lineId));
         }
 
         this.resetSelections();
-        this.addSelections(_.uniq(ids));
+        this.addSelections(uniq(ids));
 
         // remove duplicate ids
         resetSelectionRectangle();
@@ -350,16 +350,16 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       this.removeSelectionStyle(id);
     }
 
-    const selectedGeneIds = _.filter(this.getSelectionIds(), (selectionId) => !_.includes(ids, selectionId));
-    this.selectedGeneExpressions = _.map(selectedGeneIds, (id) =>
+    const selectedGeneIds = filter(this.getSelectionIds(), (selectionId) => !includes(ids, selectionId));
+    this.selectedGeneExpressions = map(selectedGeneIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id),
     );
   }
 
   addSelections(ids: Array<string>) {
     const selectionIds = this.getSelectionIds();
-    const missingSelectionIds = _.difference(ids, selectionIds);
-    const missingGeneExpressions = _.map(missingSelectionIds, (id) =>
+    const missingSelectionIds = difference(ids, selectionIds);
+    const missingGeneExpressions = map(missingSelectionIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id),
     );
     this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
@@ -371,8 +371,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   toggleSelections(ids: Array<string>) {
     const selectionIds = this.getSelectionIds();
-    const selectionIdsToAdd = _.difference(ids, selectionIds);
-    const selectionIdsToRemove = _.intersection(ids, selectionIds);
+    const selectionIdsToAdd = difference(ids, selectionIds);
+    const selectionIdsToRemove = intersection(ids, selectionIds);
     this.addSelections(selectionIdsToAdd);
     this.removeSelections(selectionIdsToRemove);
   }

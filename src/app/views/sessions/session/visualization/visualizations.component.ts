@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { find, includes, every, some } from "lodash-es";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil, tap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -139,13 +139,13 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    const visualization = _.find(this.visualizations, (visualization2) => visualization2.id === id);
+    const visualization = find(this.visualizations, (visualization2) => visualization2.id === id);
     const datasetSelectionCount = this.selectedDatasets.length;
 
     const typeIsCompatible = visualization.supportAllTypes || this.containsTypeTags(visualization.typeTags);
 
     const inputCountIsCompatible =
-      visualization.anyInputCountSupported || _.includes(visualization.supportedInputFileCounts, datasetSelectionCount);
+      visualization.anyInputCountSupported || includes(visualization.supportedInputFileCounts, datasetSelectionCount);
 
     // here for now, to enable phenodata visualization for files which have their own
     // phenodata but which are not GENE_EXPR or BAM
@@ -161,8 +161,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   containsTypeTags(tags: Array<string>) {
-    return _.every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
-      _.some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag)),
+    return every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
+      some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag)),
     );
   }
 

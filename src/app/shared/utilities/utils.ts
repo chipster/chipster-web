@@ -1,5 +1,5 @@
 import { Dataset } from "chipster-js-common";
-import * as _ from "lodash";
+import { every, includes } from "lodash-es";
 import log from "loglevel";
 
 export default class UtilsService {
@@ -100,7 +100,7 @@ export default class UtilsService {
    * Check that two given arrays contain same strings. Given parameter-arrays must be of equal length
    */
   static equalStringArrays(first: Array<string>, second: Array<string>) {
-    return _.every(first, (item) => _.includes(second, item));
+    return every(first, (item) => includes(second, item));
   }
 
   static compareStringNullSafe(a, b): number {

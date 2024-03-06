@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import * as _ from "lodash";
+import { startsWith, map, flatten, min as _min, max as _max, chain } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -14,15 +14,15 @@ export class VolcanoPlotService {
    * @description Return the index of the column containing the column header starting with "p."/"pvalue"/"padj"/"PValue"/"FDR",which will be in y axis
    */
   public getPValueHeaderIndex(tsvHeaders: TSVHeaders): Array<number> {
-    return _.chain(tsvHeaders.headers)
+    return chain(tsvHeaders.headers)
       .map((cell: string, index: number) =>
-        _.startsWith(cell, "p.") ||
-        _.startsWith(cell, "pvalue") ||
-        _.startsWith(cell, "padj") ||
-        _.startsWith(cell, "PValue") ||
-        _.startsWith(cell, "FDR")
+        startsWith(cell, "p.") ||
+        startsWith(cell, "pvalue") ||
+        startsWith(cell, "padj") ||
+        startsWith(cell, "PValue") ||
+        startsWith(cell, "FDR")
           ? index
-          : -1
+          : -1,
       )
       .filter((cell: number) => cell !== -1)
       .value();
@@ -32,9 +32,9 @@ export class VolcanoPlotService {
    * Return the index of the column containing the column header starting with "FC"/"log2FoldChange"/"logFC",which will be in x axis
    */
   public getFCValueHeaderIndex(tsvHeaders: TSVHeaders): Array<number> {
-    return _.chain(tsvHeaders.headers)
+    return chain(tsvHeaders.headers)
       .map((cell: string, index: number) =>
-        _.startsWith(cell, "FC") || _.startsWith(cell, "log2FoldChange") || _.startsWith(cell, "logFC") ? index : -1
+        startsWith(cell, "FC") || startsWith(cell, "log2FoldChange") || startsWith(cell, "logFC") ? index : -1,
       )
       .filter((cell: number) => cell !== -1)
       .value();
@@ -55,13 +55,13 @@ export class VolcanoPlotService {
   public getVolcanoPlotDataRows(
     tsv: TSVFile,
     selectedFCHeader: string,
-    selectedPValHeader: string
+    selectedPValHeader: string,
   ): Array<VolcanoPlotDataRow> {
     const volcanoDataIndexes = [];
     volcanoDataIndexes.push(tsv.headers.getColumnIndexByKey(selectedFCHeader));
     volcanoDataIndexes.push(tsv.headers.getColumnIndexByKey(selectedPValHeader));
 
-    return _.map(tsv.body.rows, (row: TSVRow) => this.getVolcanoPlotDataRowByIndex(row, volcanoDataIndexes));
+    return map(tsv.body.rows, (row: TSVRow) => this.getVolcanoPlotDataRowByIndex(row, volcanoDataIndexes));
   }
 
   /**
@@ -69,7 +69,7 @@ export class VolcanoPlotService {
    */
   public getVolcanoPlotDataRowByIndex(row: TSVRow, indexes: Array<number>): VolcanoPlotDataRow {
     const values = row.getCellsByIndexes(indexes);
-    const numberValues = _.map(values, (value: string) => parseFloat(value));
+    const numberValues = map(values, (value: string) => parseFloat(value));
     return new VolcanoPlotDataRow(row.id, numberValues);
   }
 
@@ -94,10 +94,10 @@ export class VolcanoPlotService {
    */
   getVolcanoPlotDataXBoundary(tsv: TSVFile): DomainBoundaries {
     const FCIndexes = this.getFCValueHeaderIndex(tsv.headers);
-    const values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(FCIndexes));
-    const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
-    const min = _.min(flatValues);
-    const max = _.max(flatValues);
+    const values = map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(FCIndexes));
+    const flatValues = map(flatten(values), (value: string) => parseFloat(value));
+    const min = _min(flatValues);
+    const max = _max(flatValues);
 
     return new DomainBoundaries(min, max);
   }
@@ -107,8 +107,8 @@ export class VolcanoPlotService {
    */
   getVolcanoPlotDataYBoundary(tsv: TSVFile) {
     const PValueIndexes = this.getPValueHeaderIndex(tsv.headers);
-    const values = _.map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(PValueIndexes));
-    const flatValues = _.map(_.flatten(values), (value: string) => parseFloat(value));
+    const values = map(tsv.body.rows, (row: TSVRow) => row.getCellsByIndexes(PValueIndexes));
+    const flatValues = map(flatten(values), (value: string) => parseFloat(value));
 
     const logValues = [];
     flatValues.forEach((yval) => {
@@ -118,8 +118,8 @@ export class VolcanoPlotService {
         logValues.push(curYval);
       }
     });
-    const min = _.min(logValues);
-    const max = _.max(logValues);
+    const min = _min(logValues);
+    const max = _max(logValues);
 
     return new DomainBoundaries(min, max);
   }

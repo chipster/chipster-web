@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
-import * as _ from "lodash";
+import { clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap } from "rxjs/operators";
@@ -457,7 +457,7 @@ export class SessionResource {
       name = "unnamed session";
     }
 
-    const newSession: Session = _.clone(sessionData.session);
+    const newSession: Session = clone(sessionData.session);
     newSession.sessionId = null;
     newSession.name = name;
     newSession.state = SessionState.Import;
@@ -473,9 +473,9 @@ export class SessionResource {
         // create datasets
         const oldDatasets = Array.from(sessionData.datasetsMap.values());
         const clones = oldDatasets.map((dataset: Dataset) => {
-          const clone = _.clone(dataset);
-          clone.sessionId = null;
-          return clone;
+          const _clone = clone(dataset);
+          _clone.sessionId = null;
+          return _clone;
         });
 
         const createDatasetsRequest = clones.length > 0 ? this.createDatasets(createdSessionId, clones) : of([]);
@@ -498,7 +498,7 @@ export class SessionResource {
         const jobCopies = oldJobs
           .filter((oldJob) => !JobService.isRunning(oldJob))
           .map((oldJob: Job) => {
-            const jobCopy = _.clone(oldJob);
+            const jobCopy = clone(oldJob);
             jobCopy.sessionId = null;
             this.nullifyMissingInputs(jobCopy, newDatasetsMap);
             return jobCopy;

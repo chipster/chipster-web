@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Tool, Dataset, Category, Module } from "chipster-js-common";
-import * as _ from "lodash";
+import { some } from "lodash-es";
 
 @Injectable()
 export class PipeService {
@@ -23,7 +23,7 @@ export class PipeService {
    */
   containingToolBySearchWord(tools: Array<Tool>, searchWord: string) {
     const lowerCaseSearchWord = searchWord.toLowerCase();
-    return _.some(tools, (tool: Tool) => tool.name.displayName.toLowerCase().includes(lowerCaseSearchWord));
+    return some(tools, (tool: Tool) => tool.name.displayName.toLowerCase().includes(lowerCaseSearchWord));
   }
 
   /*

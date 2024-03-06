@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { sortBy } from "lodash-es";
 import Point from "../model/point";
 
 export default class Rectangle {
@@ -7,8 +7,8 @@ export default class Rectangle {
 
   constructor(x1: number, y1: number, x2: number, y2: number) {
     // order given xs and ys to find topleft and bottomright corners
-    const xs = _.sortBy([x1, x2]);
-    const ys = _.sortBy([y1, y2]);
+    const xs = sortBy([x1, x2]);
+    const ys = sortBy([y1, y2]);
 
     this._topleft = new Point(xs[0], ys[0]);
     this._bottomright = new Point(xs[1], ys[1]);

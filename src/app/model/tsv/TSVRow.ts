@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { map } from "lodash-es";
 
 export default class TSVRow {
   id: string;
@@ -17,7 +17,7 @@ export default class TSVRow {
    * Return new array from row containing items in indexes array
    */
   getCellsByIndexes(indexes: Array<number>): Array<string> {
-    return _.map(indexes, (index: number) => this.getCellByIndex(index));
+    return map(indexes, (index: number) => this.getCellByIndex(index));
   }
 
   /*

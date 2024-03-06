@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import * as _ from "lodash";
+import { map, floor, ceil } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import Point from "../model/point";
@@ -30,15 +30,15 @@ export class ExpressionProfileService {
   }
 
   getFloor(first: number, second: number) {
-    return first <= second ? _.floor(first) : _.floor(second);
+    return first <= second ? floor(first) : floor(second);
   }
 
   getCeil(first: number, second: number) {
-    return first >= second ? _.ceil(first) : _.ceil(second);
+    return first >= second ? ceil(first) : ceil(second);
   }
 
   createLines(tsv: TSVFile, chipIndex: number, linearXScale: any, yScale: any): Array<Line> {
-    return _.map(tsv.body.rows, (tsvRow: TSVRow) => {
+    return map(tsv.body.rows, (tsvRow: TSVRow) => {
       // get indexes for finding raw data value for lines start and end points
       const chipIndexes = this.expressionprofileTSVService.getChipHeaderIndexes(tsv.headers);
       const chipLineStartDataIndex = chipIndexes[chipIndex];
@@ -58,7 +58,7 @@ export class ExpressionProfileService {
     lineStartValue: string,
     lineEndValue: string,
     linearXScale: any,
-    yScale: any
+    yScale: any,
   ): Line {
     // get pixel values for lines start and end positions
     const [x1, y1] = [linearXScale(chipValueIndex), yScale(lineStartValue)];

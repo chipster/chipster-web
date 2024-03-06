@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
-import * as _ from "lodash";
+import { capitalize, clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, Subject, empty } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -107,7 +107,7 @@ export class JobComponent implements OnInit, OnDestroy {
         this.job = job;
         this.isRunning = JobService.isRunning(job);
         this.failed = !JobService.isSuccessful(job);
-        this.state = _.capitalize(job.state);
+        this.state = capitalize(job.state);
         this.screenOutput = job.screenOutput;
         this.duration = JobService.getDuration(job);
 
@@ -176,7 +176,7 @@ export class JobComponent implements OnInit, OnDestroy {
     this.isDefaultValueMap = new Map();
 
     parameters.forEach((jobParameter) => {
-      const clone = _.clone(jobParameter);
+      const _clone = clone(jobParameter);
       let isDefault = false;
 
       if (tool) {
@@ -184,7 +184,7 @@ export class JobComponent implements OnInit, OnDestroy {
 
         if (toolParameter) {
           // get the parameters display name from the tool
-          clone.displayName = toolParameter.name.displayName;
+          _clone.displayName = toolParameter.name.displayName;
 
           // if an enum parameter
           if (toolParameter.selectionOptions) {
@@ -192,7 +192,7 @@ export class JobComponent implements OnInit, OnDestroy {
             const toolOption = toolParameter.selectionOptions.find((o) => o.id === jobParameter.value);
             if (toolOption) {
               if (toolOption.displayName) {
-                clone.value = toolOption.displayName;
+                _clone.value = toolOption.displayName;
               }
             } else {
               log.warn(
@@ -204,8 +204,8 @@ export class JobComponent implements OnInit, OnDestroy {
           isDefault = this.toolService.isDefaultValue(toolParameter, jobParameter.value);
         }
       }
-      this.isDefaultValueMap.set(clone, isDefault);
-      this.parameterListForView.push(clone);
+      this.isDefaultValueMap.set(_clone, isDefault);
+      this.parameterListForView.push(_clone);
     });
 
     this.parameterListForView
@@ -221,7 +221,7 @@ export class JobComponent implements OnInit, OnDestroy {
     instead, otherwise show the plain inputId. 
     */
     inputs.forEach((jobInput) => {
-      const clone = _.clone(jobInput);
+      const _clone = clone(jobInput);
 
       // if datasetName is not null, then we can already trust the displayName
       if (jobInput.datasetName == null && tool) {
@@ -230,11 +230,11 @@ export class JobComponent implements OnInit, OnDestroy {
 
         if (toolInput) {
           // get the input display name from the tool
-          clone.displayName = toolInput.name.displayName;
+          _clone.displayName = toolInput.name.displayName;
         }
       }
 
-      this.inputListForView.push(clone);
+      this.inputListForView.push(_clone);
     });
 
     this.inputListForView

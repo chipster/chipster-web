@@ -4,7 +4,7 @@ import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-boots
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
@@ -140,8 +140,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // TODO why the copies?
-    // this.tools = _.cloneDeep(this.toolsArray);
-    this.modules = _.cloneDeep(this.modulesArray);
+    // this.tools = cloneDeep(this.toolsArray);
+    this.modules = cloneDeep(this.modulesArray);
     this.toolSearchList = this.createToolSearchList();
 
     this.subscribeToToolEvents();

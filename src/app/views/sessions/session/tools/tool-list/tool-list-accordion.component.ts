@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SearchBoxComponent } from "../../../../../shared/components/search-box/search-box.component";
@@ -44,12 +44,15 @@ export class ToolListAccordionComponent implements OnInit {
 
   selectTool$ = new Subject();
 
-  constructor(private pipeService: PipeService, private toolSelectionService: ToolSelectionService) {}
+  constructor(
+    private pipeService: PipeService,
+    private toolSelectionService: ToolSelectionService,
+  ) {}
 
   ngOnInit() {
     // TODO why copies?
-    this.tools = _.cloneDeep(this.toolsArray);
-    this.modules = _.cloneDeep(this.modulesArray);
+    this.tools = cloneDeep(this.toolsArray);
+    this.modules = cloneDeep(this.modulesArray);
 
     // FIXME after tool state refactoring
     // trigger parameter validation
@@ -84,7 +87,7 @@ export class ToolListAccordionComponent implements OnInit {
 
     const filteredCategories = new CategoryPipe(this.pipeService).transform(
       this.selectedModule.categories,
-      this.searchTool
+      this.searchTool,
     );
     if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
       this.selectCategory(filteredCategories[0]);

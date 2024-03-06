@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { clone } from "lodash-es";
 import log from "loglevel";
 import { ToolService } from "../../tools/tool.service";
 
@@ -71,7 +71,7 @@ export class DatasetParameterListComponent implements OnChanges {
   showWithTool(parameters: JobParameter[], tool: Tool) {
     this.isDefaultValueMap = new Map();
     parameters.forEach((jobParameter) => {
-      const clone = _.clone(jobParameter);
+      const _clone = clone(jobParameter);
       let isDefault = false;
 
       if (tool) {
@@ -79,7 +79,7 @@ export class DatasetParameterListComponent implements OnChanges {
 
         if (toolParameter) {
           // get the parameters display name from the tool
-          clone.displayName = toolParameter.name.displayName;
+          _clone.displayName = toolParameter.name.displayName;
 
           // if an enum parameter
           if (toolParameter.selectionOptions) {
@@ -87,14 +87,14 @@ export class DatasetParameterListComponent implements OnChanges {
             const toolOption = toolParameter.selectionOptions.find((o) => o.id === jobParameter.value);
             if (toolOption) {
               if (toolOption.displayName) {
-                clone.value = toolOption.displayName;
+                _clone.value = toolOption.displayName;
               }
             } else {
               log.info(
                 "job parameter value" +
                   jobParameter.value +
                   "not found from the current tool " +
-                  "paramater options, showing the id"
+                  "paramater options, showing the id",
               );
             }
           }
@@ -102,8 +102,8 @@ export class DatasetParameterListComponent implements OnChanges {
           isDefault = this.toolService.isDefaultValue(toolParameter, jobParameter.value);
         }
       }
-      this.isDefaultValueMap.set(clone, isDefault);
-      this.parameterListForView.push(clone);
+      this.isDefaultValueMap.set(_clone, isDefault);
+      this.parameterListForView.push(_clone);
     });
 
     this.parameterListForView

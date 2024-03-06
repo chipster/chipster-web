@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
-import * as _ from "lodash";
+import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { ToolService } from "../tool.service";
@@ -36,7 +36,7 @@ export class ToolInputsComponent implements OnChanges {
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
         compatibleDatasets: this.validatedTool.selectedDatasets.filter((dataset: Dataset) =>
-          this.toolService.isCompatible(this.sessionData, dataset, b.toolInput.type.name)
+          this.toolService.isCompatible(this.sessionData, dataset, b.toolInput.type.name),
         ),
       }));
     } else {
@@ -53,7 +53,7 @@ export class ToolInputsComponent implements OnChanges {
     const otherBindingModels = this.bindingModels.filter((bindingModel) => bindingModel !== userEditedBinding);
     otherBindingModels.forEach(
       (bindingModel) =>
-        (bindingModel.boundDatasets = _.difference(bindingModel.boundDatasets, userEditedBinding.boundDatasets))
+        (bindingModel.boundDatasets = difference(bindingModel.boundDatasets, userEditedBinding.boundDatasets)),
     );
 
     // bind the rest of the inputs if there's only one way to bind them
@@ -76,7 +76,7 @@ export class ToolInputsComponent implements OnChanges {
 
   private autoBindRest(otherBindingModels: BindingModel[]) {
     const unboundOtherModels = otherBindingModels.filter(
-      (bindingModel) => bindingModel.boundDatasets != null && bindingModel.boundDatasets.length < 1
+      (bindingModel) => bindingModel.boundDatasets != null && bindingModel.boundDatasets.length < 1,
     );
 
     // any unbound inputs?
@@ -94,7 +94,7 @@ export class ToolInputsComponent implements OnChanges {
     const currentlyBoundDatasets = [].concat(...this.bindingModels.map((bindingModel) => bindingModel.boundDatasets));
 
     const compatibleUnboundDatasets: Array<Array<Dataset>> = unboundOtherModels.map((bindingModel) =>
-      _.difference(bindingModel.compatibleDatasets, currentlyBoundDatasets)
+      difference(bindingModel.compatibleDatasets, currentlyBoundDatasets),
     );
 
     if (compatibleUnboundDatasets.some((datasets: Dataset[]) => datasets.length !== 1)) {
@@ -110,7 +110,7 @@ export class ToolInputsComponent implements OnChanges {
 
     // all checks passed, bind unbound inputs by updating bindingModels
     unboundOtherModels.forEach((bindingModel) => {
-      bindingModel.boundDatasets = _.difference(bindingModel.compatibleDatasets, currentlyBoundDatasets);
+      bindingModel.boundDatasets = difference(bindingModel.compatibleDatasets, currentlyBoundDatasets);
     });
   }
 

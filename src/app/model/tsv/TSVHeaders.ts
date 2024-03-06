@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { findIndex, includes, map } from "lodash-es";
 
 export default class TSVHeaders {
   public headers: Array<string>;
@@ -16,7 +16,7 @@ export default class TSVHeaders {
    * @description: Filter unwanted cells from row
    */
   public getItemsByIndexes(indexes: Array<number>): Array<any> {
-    return _.map(indexes, (index) => this.headers[index]);
+    return map(indexes, (index) => this.headers[index]);
   }
 
   /*
@@ -24,13 +24,13 @@ export default class TSVHeaders {
    * @return: index of header and -1 if not found
    */
   public getColumnIndexByKey(key: string): number {
-    return _.findIndex(this.headers, (header: string) => header === key);
+    return findIndex(this.headers, (header: string) => header === key);
   }
 
   /*
    * @description: does headers contain identifier cell
    */
   public hasIdentifierColumn(): boolean {
-    return _.includes(this.headers, "identifier");
+    return includes(this.headers, "identifier");
   }
 }

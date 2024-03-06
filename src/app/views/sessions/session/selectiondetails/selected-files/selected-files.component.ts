@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
-import * as _ from "lodash";
+import { clone } from "lodash-es";
 import { Subject } from "rxjs";
 import { mergeMap, takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -70,7 +70,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   renameDataset() {
-    const dataset = _.clone(this.dataset);
+    const dataset = clone(this.dataset);
     this.dialogModalService
       .openStringModal("Rename file", "File name", dataset.name, "Rename")
       .pipe(

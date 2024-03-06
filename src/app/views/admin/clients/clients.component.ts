@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Role } from "chipster-js-common";
-import * as _ from "lodash";
+import { clone } from "lodash-es";
 import { flatMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -20,7 +20,7 @@ export class ClientsComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit() {
@@ -37,7 +37,7 @@ export class ClientsComponent implements OnInit {
 
           sessionTopics.forEach((topic) => {
             topic.forEach((user) => {
-              const userCopy = _.clone(user);
+              const userCopy = clone(user);
               // clean up the user ip address
               let ip = userCopy.address;
               // why there is a slash in the beginning?
@@ -53,7 +53,7 @@ export class ClientsComponent implements OnInit {
             });
           });
         },
-        (err) => this.restErrorService.showError("get clients failed", err)
+        (err) => this.restErrorService.showError("get clients failed", err),
       );
   }
 }

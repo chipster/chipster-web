@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import * as _ from "lodash";
+import { includes, first } from "lodash-es";
 import Circle from "../model/circle";
 import Point from "../model/point";
 import VennDiagramUtils from "./venn-diagram-utils";
@@ -24,7 +24,7 @@ export class ThreeCircleVennDiagramService {
     circles: Array<Circle>,
     selectionCrossingCircles: Array<Circle>,
     radius: number,
-    visualizationCenter: Point
+    visualizationCenter: Point,
   ): string {
     if (selectionCrossingCircles.length === 1) {
       return this.oneCircleSelectionDescriptor(circles, selectionCrossingCircles[0], radius);
@@ -49,40 +49,40 @@ export class ThreeCircleVennDiagramService {
     const firstRightMostPoint = VennDiagramUtils.getRightMostPoint(
       firstIntersections.point1,
       firstIntersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
     const firstLeftMostPoint = VennDiagramUtils.getLeftMostPoint(
       firstIntersections.point1,
       firstIntersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
 
     const secondRightMostPoint = VennDiagramUtils.getRightMostPoint(
       secondIntersections.point1,
       secondIntersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
     const secondLeftMostPoint = VennDiagramUtils.getLeftMostPoint(
       secondIntersections.point1,
       secondIntersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
 
     const firstDrawPoint = VennDiagramUtils.getRightMostPoint(
       firstRightMostPoint,
       secondRightMostPoint,
-      selectionCircle.center
+      selectionCircle.center,
     );
     const secondDrawPoint = VennDiagramUtils.getLeftMostPoint(
       firstLeftMostPoint,
       secondLeftMostPoint,
-      selectionCircle.center
+      selectionCircle.center,
     );
 
     const thirdDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       selectionCircle,
       firstCandidate,
-      secondCandidate
+      secondCandidate,
     );
 
     return `M ${firstDrawPoint.x} ${firstDrawPoint.y}
@@ -98,11 +98,11 @@ export class ThreeCircleVennDiagramService {
     circles: Array<Circle>,
     selectionCircles: Array<Circle>,
     radius: number,
-    visualizationCenter: Point
+    visualizationCenter: Point,
   ): string {
     const circle1 = selectionCircles[0];
     const circle2 = selectionCircles[1];
-    const noSelectionCircle = _.first(circles.filter((circle: Circle) => !_.includes(selectionCircles, circle)));
+    const noSelectionCircle = first(circles.filter((circle: Circle) => !includes(selectionCircles, circle)));
 
     const firstDrawPoint = VennDiagramUtils.getIntersectionPointOutsideCirle(noSelectionCircle, circle1, circle2);
 
@@ -112,12 +112,12 @@ export class ThreeCircleVennDiagramService {
     const secondDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       leftSideCircle,
       rightSideCircle,
-      noSelectionCircle
+      noSelectionCircle,
     );
     const thirdDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       rightSideCircle,
       leftSideCircle,
-      noSelectionCircle
+      noSelectionCircle,
     );
 
     return `M ${firstDrawPoint.x} ${firstDrawPoint.y}
@@ -142,12 +142,12 @@ export class ThreeCircleVennDiagramService {
     const secondDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       leftSideCircle,
       firstCircle,
-      rightSideCircle
+      rightSideCircle,
     );
     const thirdDrawPoint = VennDiagramUtils.getIntersectionPointInsideCircle(
       rightSideCircle,
       leftSideCircle,
-      firstCircle
+      firstCircle,
     );
 
     return `M ${firstDrawPoint.x} ${firstDrawPoint.y}
