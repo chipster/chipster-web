@@ -23,7 +23,10 @@
             "allowedCommonJsDependencies": [
                 "mousetrap",
                 "pdfjs-dist",
-                "stacktrace-js"
+                "oidc-client",
+                "loglevel",
+                "file-saver",
+                "d3-context-menu"
             ],
             "outputPath": "dist",
             "index": "src/index.html",
