@@ -24,6 +24,7 @@
                 "mousetrap",
                 "pdfjs-dist",
                 "oidc-client",
+                "stacktrace-js",
                 "loglevel",
                 "file-saver",
                 "d3-context-menu"
