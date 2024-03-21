@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnChanges, ViewChild } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
-import { chain, every, includes } from "lodash-es";
+import { every, includes } from "lodash-es";
 import { ToastrService } from "ngx-toastr";
 import { forkJoin as observableForkJoin } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -103,13 +103,12 @@ export class VennDiagramComponent implements OnChanges {
 
     observableForkJoin(tsvObservables).subscribe(
       (resultTSVs: Array<any>) => {
-        this.files = chain(resultTSVs)
+        this.files = resultTSVs
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map(
             (tsv: Array<Array<string>>, index: number) =>
               new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name),
-          )
-          .value();
+          );
 
         this.symbolComparingEnabled = this.enableComparing("symbol");
         this.identifierComparingEnabled = this.enableComparing("identifier");

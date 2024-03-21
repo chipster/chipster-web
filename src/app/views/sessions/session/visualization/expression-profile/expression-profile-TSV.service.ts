@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { map, flatten, min as _min, max as _max, startsWith, first, orderBy, chain } from "lodash-es";
+import { map, flatten, min as _min, max as _max, startsWith, first, orderBy } from "lodash-es";
 import GeneExpression from "./geneexpression";
 import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "./domainboundaries";
@@ -39,10 +39,9 @@ export class ExpressionProfileTSVService {
    * Return array containing numbers indicating indexes for column headers starting with 'chip.'
    */
   public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
-    return chain(tsvHeaders.headers)
+    return tsvHeaders.headers
       .map((cell: string, index: number) => (startsWith(cell, "chip.") ? index : -1))
-      .filter((cell: number) => cell !== -1)
-      .value();
+      .filter((cell: number) => cell !== -1);
   }
 
   /*

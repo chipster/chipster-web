@@ -3,7 +3,7 @@
  are used by other visualization components also
  */
 import { Injectable } from "@angular/core";
-import { map, min as _min, max as _max, flatten, orderBy, startsWith, chain, first } from "lodash-es";
+import { map, min as _min, max as _max, flatten, orderBy, startsWith, first } from "lodash-es";
 import TSVFile from "../../model/tsv/TSVFile";
 import TSVHeaders from "../../model/tsv/TSVHeaders";
 import TSVRow from "../../model/tsv/TSVRow";
@@ -44,10 +44,9 @@ export class VisualizationTSVService {
    * Return array containing numbers indicating indexes for column headers starting with 'chip.'
    */
   public getChipHeaderIndexes(tsvHeaders: TSVHeaders): Array<number> {
-    return chain(tsvHeaders.headers)
+    return tsvHeaders.headers
       .map((cell: string, index: number) => (startsWith(cell, "chip.") ? index : -1))
-      .filter((cell: number) => cell !== -1)
-      .value();
+      .filter((cell: number) => cell !== -1);
   }
 
   /*

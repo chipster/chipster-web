@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { startsWith, map, flatten, min as _min, max as _max, chain } from "lodash-es";
+import { startsWith, map, flatten, min as _min, max as _max } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -14,7 +14,7 @@ export class VolcanoPlotService {
    * @description Return the index of the column containing the column header starting with "p."/"pvalue"/"padj"/"PValue"/"FDR",which will be in y axis
    */
   public getPValueHeaderIndex(tsvHeaders: TSVHeaders): Array<number> {
-    return chain(tsvHeaders.headers)
+    return tsvHeaders.headers
       .map((cell: string, index: number) =>
         startsWith(cell, "p.") ||
         startsWith(cell, "pvalue") ||
@@ -24,20 +24,18 @@ export class VolcanoPlotService {
           ? index
           : -1,
       )
-      .filter((cell: number) => cell !== -1)
-      .value();
+      .filter((cell: number) => cell !== -1);
   }
 
   /**
    * Return the index of the column containing the column header starting with "FC"/"log2FoldChange"/"logFC",which will be in x axis
    */
   public getFCValueHeaderIndex(tsvHeaders: TSVHeaders): Array<number> {
-    return chain(tsvHeaders.headers)
+    return tsvHeaders.headers
       .map((cell: string, index: number) =>
         startsWith(cell, "FC") || startsWith(cell, "log2FoldChange") || startsWith(cell, "logFC") ? index : -1,
       )
-      .filter((cell: number) => cell !== -1)
-      .value();
+      .filter((cell: number) => cell !== -1);
   }
 
   /**

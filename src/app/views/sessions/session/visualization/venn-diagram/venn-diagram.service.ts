@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { tail, every, includes, sortBy, differenceBy, chain, head, forEach } from "lodash-es";
+import { tail, every, includes, sortBy, differenceBy, head, forEach } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -177,9 +177,7 @@ export class VennDiagramService {
    * @description: Find out rows which contain a value from values-array in the given column
    */
   getTSVRowsContainingValues(file: TSVFile, values: Array<string>, columnIndex: number): Array<TSVRow> {
-    return chain(file.body.rows)
-      .filter((row: TSVRow) => includes(values, row.getCellByIndex(columnIndex)))
-      .value();
+    return file.body.rows.filter((row: TSVRow) => includes(values, row.getCellByIndex(columnIndex)));
   }
 
   /*
