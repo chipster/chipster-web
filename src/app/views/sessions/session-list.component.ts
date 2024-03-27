@@ -552,7 +552,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   duplicate(session: Session) {
     let duplicateName; // ugly
     this.dialogModalService
-      .openSessionNameModal("Copy session", session.name + "_copy", "Copy")
+      .openSessionNameModal("Duplicate session", session.name + "_copy", "Duplicate")
       .pipe(
         mergeMap((name) => {
           duplicateName = name;
@@ -566,7 +566,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         }),
         mergeMap((sessionData: SessionData) => {
           const copySessionObservable = this.sessionResource.copySession(sessionData, duplicateName, false);
-          return this.dialogModalService.openSpinnerModal("Copy session", copySessionObservable);
+          return this.dialogModalService.openSpinnerModal("Duplicate session", copySessionObservable);
         }),
       )
       .subscribe(
@@ -575,7 +575,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.updateSessions();
         },
         (err) => {
-          this.restErrorService.showError("Copy session failed", err);
+          this.restErrorService.showError("Duplicate session failed", err);
         },
       );
   }

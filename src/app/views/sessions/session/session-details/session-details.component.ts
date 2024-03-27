@@ -53,12 +53,12 @@ export class SessionDetailsComponent {
     let newSessionId: string; // ugly
 
     this.dialogModalService
-      .openSessionNameModal("Copy session", this.session.name + "_copy", "Copy")
+      .openSessionNameModal("Duplicate session", this.session.name + "_copy", "Duplicate")
       .pipe(
         flatMap((name) => {
           let copyOrUpdate$;
           if (!this.sessionService.isTemporary(this.sessionData.session)) {
-            log.info("save a copy for normal session, copying session");
+            log.info("duplicate for normal session, copying session");
             copyOrUpdate$ = this.sessionResource.copySession(this.sessionData, name, false).pipe(
               map((sessionId) => {
                 newSessionId = sessionId;
@@ -66,13 +66,13 @@ export class SessionDetailsComponent {
               })
             );
           } else {
-            log.info("save a copy for temp session, updating session");
+            log.info("duplicate for temp session, updating session");
             this.sessionData.session.name = name;
             this.sessionData.session.state = SessionState.Ready;
             copyOrUpdate$ = this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
           }
 
-          return this.dialogModalService.openSpinnerModal("Copy session", copyOrUpdate$);
+          return this.dialogModalService.openSpinnerModal("Duplicate session", copyOrUpdate$);
         })
       )
       .subscribe(
@@ -81,7 +81,7 @@ export class SessionDetailsComponent {
             this.routeService.navigateToSession(newSessionId);
           }
         },
-        (err) => this.restErrorService.showError("Copy session failed", err)
+        (err) => this.restErrorService.showError("Duplicate session failed", err)
       );
   }
 
