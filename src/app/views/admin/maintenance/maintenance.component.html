@@ -112,42 +112,56 @@
         <td>{{ free.get(storageId) | bytes }}</td>
         <td>{{ fileStorageFileStats.get(storageId)?.status }}</td>
         <td>
-          <button class="btn btn-outline-primary" (click)="backupStorage(storageId)">Start backup</button>
-        </td>
-        <td>
-          <button
-            class="btn btn-outline-primary"
-            (click)="disableBackups(storageId)"
-            [disabled]="!fileStorageFileStats.get(storageId)?.status">
-            Disable backups
-          </button>
-        </td>
-        <td>
-          <button
-            class="btn btn-outline-primary"
-            (click)="enableBackups(storageId)"
-            [disabled]="fileStorageFileStats.get(storageId)?.status">
-            Enable backups
-          </button>
-        </td>
-        <td>
-          <button
-            class="btn btn-outline-primary"
-            (click)="storageCheck(storageId)"
-            [disabled]="!isOrphanCheckAllowed(storageId)">
-            Start storage check
-          </button>
-        </td>
-        <td>
-          <button
-            class="btn btn-outline-primary"
-            (click)="deleteOldOrphanFiles(storageId)"
-            [disabled]="!isOrphanCheckAllowed(storageId)">
-            Delete old orphan files
-          </button>
+          <div ngbDropdown>
+            <button class="btn btn-info" id="maintenance-dropdown" ngbDropdownToggle>Actions</button>
+            <div ngbDropdownMenu="maintenance-dropdown">
+              <button ngbDropdownItem (click)="backupStorage(storageId)" [disabled]="!isBackupNowAllowed(storageId)">
+                Start backup
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="disableBackups(storageId)"
+                [disabled]="!isBackupDisableAllowed(storageId)">
+                Disable backups
+              </button>
+              <button ngbDropdownItem (click)="enableBackups(storageId)" [disabled]="!isBackupEnableAllowed(storageId)">
+                Enable backups
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="storageCheck(storageId, false, false, null)"
+                [disabled]="!isOrphanCheckAllowed(storageId)">
+                Start storage check
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="storageCheck(storageId, false, false, 24)"
+                [disabled]="!isOrphanCheckAllowed(storageId)">
+                Delete uploads older than 24 h
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="storageCheck(storageId, true, false, null)"
+                [disabled]="!isOrphanCheckAllowed(storageId)">
+                Delete datasets of missing files
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="storageCheck(storageId, false, true, null)"
+                [disabled]="!isOrphanCheckAllowed(storageId) || !isS3Storage(storageId)">
+                Verify checksums
+              </button>
+              <button
+                ngbDropdownItem
+                (click)="deleteOldOrphanFiles(storageId)"
+                [disabled]="!isOrphanCheckAllowed(storageId)">
+                Delete old orphan files
+              </button>
+            </div>
+          </div>
         </td>
       </tr>
     </tbody>
-    <p>See file-storage logs to see the progress and results</p>
+    <p>See file-broker and file-storage logs to see the progress and results.</p>
   </table>
 </div>
