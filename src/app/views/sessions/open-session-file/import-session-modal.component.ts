@@ -23,7 +23,7 @@ export class ImportSessionModalComponent {
     private sessionResource: SessionResource,
     private errorService: ErrorService,
     public activeModal: NgbActiveModal,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
   ) {}
 
   fileAdded(file: any) {
@@ -37,11 +37,11 @@ export class ImportSessionModalComponent {
       (sessionId) => {
         // progress bar is enough for the upload status
         this.fileStatus.set(file, undefined);
-        this.uploadService.startUpload(sessionId, file);
+        this.uploadService.startUpload(sessionId, file, true);
       },
       (err) => {
         this.error(file, err);
-      }
+      },
     );
   }
 
@@ -62,7 +62,7 @@ export class ImportSessionModalComponent {
       () => {
         console.log("session deleted");
       },
-      (err) => this.restErrorService.showError("session delete failed", err)
+      (err) => this.restErrorService.showError("session delete failed", err),
     );
   }
 

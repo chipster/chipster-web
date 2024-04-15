@@ -22,7 +22,7 @@ export class UploadService {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private jobService: JobService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {
@@ -78,7 +78,7 @@ export class UploadService {
     file.pause();
   }
 
-  startUpload(sessionId: string, file: any) {
+  startUpload(sessionId: string, file: any, temporary: boolean) {
     forkJoin([this.configService.getFileBrokerUrl(), this.createDataset(sessionId, file.name)]).subscribe(
       (value: [string, Dataset]) => {
         const url = value[0];
@@ -86,11 +86,15 @@ export class UploadService {
         file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
           dataset.datasetId
         }?token=${this.tokenService.getToken()}`;
+        if (temporary) {
+          // hint that this file is going to be deleted soon
+          file.chipsterTarget += "&temporary=true";
+        }
         file.chipsterSessionId = sessionId;
         file.chipsterDatasetId = dataset.datasetId;
         file.resume();
       },
-      (err) => this.restErrorService.showError("upload failed", err)
+      (err) => this.restErrorService.showError("upload failed", err),
     );
   }
 
@@ -101,7 +105,7 @@ export class UploadService {
         d.datasetId = datasetId;
         this.sessionResource.updateDataset(sessionId, d);
         return d;
-      })
+      }),
     );
   }
 
