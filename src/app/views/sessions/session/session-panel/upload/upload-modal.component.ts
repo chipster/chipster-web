@@ -32,7 +32,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
     public activeModal: NgbActiveModal,
     private uploadService: UploadService,
     private sessionResource: SessionResource,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -51,7 +51,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // called by upload.component
   fileAdded(file: any) {
-    this.uploadService.startUpload(this.sessionId, file);
+    this.uploadService.startUpload(this.sessionId, file, false);
   }
 
   ngAfterViewInit() {
