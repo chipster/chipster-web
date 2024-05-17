@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
-import { empty, from, Observable } from "rxjs";
+import { empty, from, Observable, of } from "rxjs";
 import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -104,7 +104,7 @@ export class MaintenanceComponent implements OnInit {
         // don't cancel other requests even if one of them fails
         return empty();
       }),
-      map((idResp: Object) => idResp["storageId"]),
+      map((idResp: Object) => (idResp ? idResp["storageId"] : null)),
       tap((idOnStorage: string) => {
         this.idOnStorage.set(storageId, idOnStorage);
       }),
@@ -279,7 +279,7 @@ export class MaintenanceComponent implements OnInit {
   }
 
   isS3Storage(storageId: string) {
-    return storageId.startsWith("s3");
+    return storageId != null && storageId.startsWith("s3");
   }
 
   isBackupScheduled(storageId: string) {
