@@ -247,7 +247,9 @@ export class SessionDataService {
 
   openNewTab(dataset: Dataset) {
     this.newTab(
-      this.getDatasetUrl(dataset).pipe(map((url) => url)),
+      /* Set type=true to ask server to add a content-type header, because Chrome doesn't
+      open pdf files in new tab without it. */
+      this.getDatasetUrl(dataset).pipe(map((url) => url + "&type=true")),
       null,
       null,
       "Browser's pop-up blocker prevented opening a new tab",
