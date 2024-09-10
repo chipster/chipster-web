@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import { forkJoin } from "rxjs";
-import { flatMap, map } from "rxjs/operators";
+import { flatMap, map, mergeMap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
@@ -15,7 +15,7 @@ export class SessionService {
     private dialogModalService: DialogModalService,
     private restErrorService: RestErrorService,
     private sessionDataService: SessionDataService,
-    private sessionWorkerResource: SessionWorkerResource
+    private sessionWorkerResource: SessionWorkerResource,
   ) {}
 
   updateSession(session: Session) {
@@ -35,7 +35,7 @@ export class SessionService {
           }
 
           return this.updateSession(session);
-        })
+        }),
       )
       .subscribe(null, (err) => this.restErrorService.showError("Rename session failed", err));
   }
@@ -47,23 +47,18 @@ export class SessionService {
         flatMap((notes: string) => {
           session.notes = notes;
           return this.updateSession(session);
-        })
+        }),
       )
       .subscribe(null, (err) => this.restErrorService.showError("Failed to edit session notes", err));
   }
 
   downloadSession(sessionId: string) {
-    const authenticatedUrl$ = forkJoin(
-      this.sessionWorkerResource.getPackageUrl(sessionId),
-      this.sessionDataService.getTokenForSession(sessionId)
-    ).pipe(
-      map((resp) => {
-        const url = resp[0];
-        const token = resp[1];
-        return url + "?token=" + token;
-      })
-    );
-    this.sessionDataService.download(authenticatedUrl$, 15);
+    this.sessionDataService
+      .getTokenForSession(sessionId, true)
+      .pipe(mergeMap((token) => this.sessionWorkerResource.packageSession(sessionId, token)))
+      .subscribe(null, (err) => this.restErrorService.showError("Failed to package the session", err));
+
+    // this.sessionDataService.download(authenticatedUrl$, 15);
   }
 
   isTemporary(session: Session): boolean {

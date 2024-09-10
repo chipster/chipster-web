@@ -183,12 +183,16 @@ export class SessionDataService {
    * The token is valid only for this one session, only for read-only operations and only for
    * a limited time, 24 hours by default.
    */
-  getTokenForSession(sessionId: string): Observable<string> {
+  getTokenForSession(sessionId: string, readWrite: boolean): Observable<string> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((sessionDbUrl: string) => {
         const options = this.tokenService.getTokenParams(true);
         options["responseType"] = "text";
-        return this.http.post<string>(sessionDbUrl + "/tokens/sessions/" + sessionId, null, options);
+        return this.http.post<string>(
+          sessionDbUrl + "/tokens/sessions/" + sessionId + "?readWrite=" + readWrite,
+          null,
+          options,
+        );
       }),
     );
   }

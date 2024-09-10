@@ -14,8 +14,17 @@ export class SessionWorkerResource {
     private tokenService: TokenService,
     private configService: ConfigService,
     private restErrorService: RestErrorService,
-    private http: HttpClient
+    private http: HttpClient,
   ) {}
+
+  packageSession(sessionId: string, token: string): Observable<string> {
+    return this.getPackageUrl(sessionId).pipe(
+      // FIXME should be POST
+      // FXIME token should be in header
+      mergeMap((url: string) => this.http.get(url + "?token=" + token)),
+      map((json) => json["datasetId"]),
+    );
+  }
 
   getPackageUrl(sessionId: string): Observable<string> {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
@@ -29,14 +38,14 @@ export class SessionWorkerResource {
         this.http.post(
           `${url}/sessions/${sessionId}/datasets/${zipDatasetId}`,
           {},
-          this.tokenService.getTokenParams(true)
-        )
+          this.tokenService.getTokenParams(true),
+        ),
       ),
       tap((x) => console.log("extractSession()", x)),
       catchError((e) => {
         this.restErrorService.showError("extract session failed", e);
         throw never();
-      })
+      }),
     );
   }
 
@@ -52,8 +61,8 @@ export class SessionWorkerResource {
     const apiUrl$ = this.configService.getSessionWorkerUrl();
     return apiUrl$.pipe(
       mergeMap((url: string) =>
-        this.http.post(url + "/support/request", supportRequest, this.tokenService.getTokenParams(true))
-      )
+        this.http.post(url + "/support/request", supportRequest, this.tokenService.getTokenParams(true)),
+      ),
     );
   }
 }
