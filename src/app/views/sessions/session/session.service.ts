@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
-import { Session, SessionState } from "chipster-js-common";
-import { forkJoin } from "rxjs";
-import { flatMap, map, mergeMap } from "rxjs/operators";
+import { Dataset, Session, SessionEvent, SessionState } from "chipster-js-common";
+import { filter, flatMap, map, mergeMap, take, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SessionDataService } from "./session-data.service";
+import { SessionEventService } from "./session-event.service";
 
 @Injectable()
 export class SessionService {
@@ -16,6 +16,7 @@ export class SessionService {
     private restErrorService: RestErrorService,
     private sessionDataService: SessionDataService,
     private sessionWorkerResource: SessionWorkerResource,
+    private sessionEventService: SessionEventService,
   ) {}
 
   updateSession(session: Session) {
@@ -53,12 +54,30 @@ export class SessionService {
   }
 
   downloadSession(sessionId: string) {
-    this.sessionDataService
-      .getTokenForSession(sessionId, true)
-      .pipe(mergeMap((token) => this.sessionWorkerResource.packageSession(sessionId, token)))
-      .subscribe(null, (err) => this.restErrorService.showError("Failed to package the session", err));
+    var datasetId = null;
 
-    // this.sessionDataService.download(authenticatedUrl$, 15);
+    // get read-write token for the session
+    var zipDataset$ = this.sessionDataService.getTokenForSession(sessionId, true).pipe(
+      // ask session-worker to package the session to a zip file and save it as a dataset to the server session
+      mergeMap((token) => this.sessionWorkerResource.packageSession(sessionId, token)),
+      // session-worker responds with datasetId
+      tap((id: string) => (datasetId = id)),
+      // get stream of dataset changes
+      mergeMap(() => this.sessionEventService.getDatasetStream()),
+      // wait until we see the compoleted zip file dataset (SessionEventService filters out uploading dataset events)
+      filter((e: SessionEvent) => e.event.resourceId === datasetId),
+      // first event is enough (there are soon more events, e.g. updated position and deletion)
+      take(1),
+      // exportDatasets() wants the Dataset object
+      map((e: SessionEvent) => e.newValue),
+    );
+
+    this.dialogModalService
+      // show spinner the zip file is completed
+      .openSpinnerModal("Preparing download", zipDataset$)
+      // start download when it does
+      .pipe(tap((dataset: Dataset) => this.sessionDataService.exportDatasets([dataset])))
+      .subscribe(null, (err) => this.restErrorService.showError("Failed to start the download", err));
   }
 
   isTemporary(session: Session): boolean {

@@ -25,6 +25,7 @@ import { SelectionService } from "./selection.service";
 import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
+import UtilsService from "../../../shared/utilities/utils";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -122,10 +123,14 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.modulesMap = results[3];
           this.exampleSessionOwnerUserId = results[4];
 
+          // subscribe as soon as possible to reduce the likehood of missing events
+          this.subscribeToEvents();
+
+          // clean up old stuff from the session
+          this.cleanUpSession();
+
           // save latest session id
           this.saveLatestSession();
-
-          this.subscribeToEvents();
 
           // ready to go
           this.state = ComponentState.READY;
@@ -157,6 +162,51 @@ export class SessionComponent implements OnInit, OnDestroy {
       },
       (err) => this.errorService.showError("tool panel error", err),
     );
+  }
+
+  /**
+   * Delete old zip exports
+   *
+   * These could potentially consume significant amount of storage space.
+   * Let's delete them after it's clear that the download should have completed
+   * already.
+   */
+  cleanUpSession() {
+    if (this.sessionDataService.isReadOnlySession(this.sessionData.session)) {
+      log.info("skip check for temporary-zip-exports because this a read-only session");
+    } else {
+      this.sessionData.datasetsMap.forEach((dataset) => {
+        dataset.metadataFiles.forEach((mf) => {
+          if (mf.name === "temporary-zip-export") {
+            const created = UtilsService.parseISOStringToDate(dataset.created);
+            let now = new Date();
+
+            const millis = UtilsService.millisecondsBetweenDates(created, now);
+            const days = 3;
+            const limit = days * 24 * 60 * 60 * 1000;
+
+            if (millis > limit) {
+              log.info(
+                "delete old temporary-zip-export: " + dataset.name + ", state: " + dataset.state + ", age: " + millis,
+              );
+
+              this.sessionDataService.deleteDatasets([dataset]);
+            } else {
+              log.info(
+                "keep recent temporary-zip-export: " +
+                  dataset.name +
+                  ", state: " +
+                  dataset.state +
+                  ", age: " +
+                  millis +
+                  ", limit. " +
+                  limit,
+              );
+            }
+          }
+        });
+      });
+    }
   }
 
   ngOnDestroy(): void {
