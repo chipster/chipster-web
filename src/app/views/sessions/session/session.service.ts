@@ -1,12 +1,14 @@
 import { Injectable } from "@angular/core";
-import { Dataset, Session, SessionEvent, SessionState } from "chipster-js-common";
-import { filter, flatMap, map, mergeMap, take, tap } from "rxjs/operators";
+import { Dataset, Session, SessionState } from "chipster-js-common";
+import * as log from "loglevel";
+import { forkJoin, NEVER, Observable } from "rxjs";
+import { flatMap, map, mergeMap, tap } from "rxjs/operators";
+import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { SessionWorkerResource } from "../../../shared/resources/sessionworker.resource";
+import { ConfigService } from "../../../shared/services/config.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
-import { SessionDataService } from "./session-data.service";
-import { SessionEventService } from "./session-event.service";
 
 @Injectable()
 export class SessionService {
@@ -14,9 +16,9 @@ export class SessionService {
     private sessionResource: SessionResource,
     private dialogModalService: DialogModalService,
     private restErrorService: RestErrorService,
-    private sessionDataService: SessionDataService,
     private sessionWorkerResource: SessionWorkerResource,
-    private sessionEventService: SessionEventService,
+    private configService: ConfigService,
+    private errorService: ErrorService,
   ) {}
 
   updateSession(session: Session) {
@@ -54,33 +56,80 @@ export class SessionService {
   }
 
   downloadSession(sessionId: string) {
-    var datasetId = null;
+    log.info("download session", sessionId);
+    let datasetId;
 
     // get read-write token for the session
-    var zipDataset$ = this.sessionDataService.getTokenForSession(sessionId, true).pipe(
-      // ask session-worker to package the session to a zip file and save it as a dataset to the server session
-      mergeMap((token) => this.sessionWorkerResource.packageSession(sessionId, token)),
-      // session-worker responds with datasetId
-      tap((id: string) => (datasetId = id)),
-      // get stream of dataset changes
-      mergeMap(() => this.sessionEventService.getDatasetStream()),
-      // wait until we see the compoleted zip file dataset (SessionEventService filters out uploading dataset events)
-      filter((e: SessionEvent) => e.event.resourceId === datasetId),
-      // first event is enough (there are soon more events, e.g. updated position and deletion)
-      take(1),
-      // exportDatasets() wants the Dataset object
-      map((e: SessionEvent) => e.newValue),
+    var zipDataset$ = this.sessionWorkerResource.packageSession(sessionId).pipe(
+      tap((json: any) => {
+        let errors = json["errors"];
+
+        if (errors.length > 0) {
+          this.restErrorService.showError("failed to create zip package", errors);
+          return NEVER;
+        }
+        // session-worker responds with datasetId
+        datasetId = json["datasetId"];
+        log.info("zip session datasetId", datasetId);
+      }),
+      mergeMap(() => this.sessionResource.getDataset(sessionId, datasetId)),
     );
 
-    this.dialogModalService
+    let downloadUrl$ = this.dialogModalService
       // show spinner the zip file is completed
-      .openSpinnerModal("Preparing download", zipDataset$)
-      // start download when it does
-      .pipe(tap((dataset: Dataset) => this.sessionDataService.exportDatasets([dataset])))
-      .subscribe(null, (err) => this.restErrorService.showError("Failed to start the download", err));
+      .openSpinnerModal("Packaging session", zipDataset$)
+      .pipe(mergeMap((dataset) => this.getDownloadUrl(sessionId, dataset)));
+
+    this.download(downloadUrl$);
   }
 
   isTemporary(session: Session): boolean {
     return session.state === SessionState.TemporaryModified || session.state === SessionState.TemporaryUnmodified;
+  }
+
+  /**
+   * Get an pre-authenticated url of the dataset file
+   *
+   * When the url is used for something that can't set the Authorization header
+   * (e.g. browser WebSocket client, file downloads and external visualization libraries)
+   * we must include the authentiation information in the URL where it's more visible to
+   * the user and in server logs.
+   *
+   * If we would use the user's own token in the URL, the user might share
+   * this dataset URL without realising that the token gives access to all
+   * session of the user.
+   *
+   * Use limited token instead, which is valid only for this one dataset on only for a limited
+   * time.
+   */
+  getDatasetUrl(sessionId: string, dataset: Dataset): Observable<string> {
+    return forkJoin(
+      this.sessionResource.getTokenForDataset(sessionId, dataset.datasetId),
+      this.configService.getFileBrokerUrl(),
+    ).pipe(
+      map((results) => {
+        const [datasetToken, url] = results;
+        return `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}?token=${datasetToken}`;
+      }),
+    );
+  }
+
+  getDownloadUrl(sessionId: string, dataset: Dataset): Observable<string> {
+    return this.getDatasetUrl(sessionId, dataset).pipe(map((url) => url + "&download"));
+  }
+
+  exportDatasets(sessionId: string, datasets: Dataset[]) {
+    datasets.forEach((d) => this.download(this.getDownloadUrl(sessionId, d)));
+  }
+
+  download(url$: Observable<string>) {
+    url$.subscribe(
+      (url) => {
+        window.location.href = url;
+      },
+      (err) => {
+        this.errorService.showError("starting download failed", err);
+      },
+    );
   }
 }

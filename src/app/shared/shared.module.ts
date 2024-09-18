@@ -40,6 +40,7 @@ import { TsvService } from "./services/tsv.service";
 import { TypeTagService } from "./services/typetag.service";
 import { UserService } from "./services/user.service";
 import { WebSocketService } from "./services/websocket.service";
+import { TabService } from "./services/tab.service";
 
 /*
  * @description: Shared module should contain application global resources
@@ -88,6 +89,7 @@ import { WebSocketService } from "./services/websocket.service";
     NewsService,
     PreferencesService,
     SessionDbAdminService,
+    TabService,
   ],
   exports: [
     BytesPipe,

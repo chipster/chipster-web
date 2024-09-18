@@ -1,10 +1,11 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, of, never } from "rxjs";
-import { map, mergeMap, tap, catchError } from "rxjs/operators";
+import { forkJoin, never, Observable } from "rxjs";
+import { catchError, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
-import { ConfigService } from "../services/config.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
+import { ConfigService } from "../services/config.service";
+import { SessionResource } from "./session.resource";
 
 @Injectable()
 export class SessionWorkerResource {
@@ -14,21 +15,30 @@ export class SessionWorkerResource {
     private tokenService: TokenService,
     private configService: ConfigService,
     private restErrorService: RestErrorService,
+    private sessionResource: SessionResource,
     private http: HttpClient,
   ) {}
 
-  packageSession(sessionId: string, token: string): Observable<string> {
-    return this.getPackageUrl(sessionId).pipe(
-      // FIXME should be POST
-      // FXIME token should be in header
-      mergeMap((url: string) => this.http.get(url + "?token=" + token)),
-      map((json) => json["datasetId"]),
+  packageSession(sessionId: string): Observable<any> {
+    return forkJoin({
+      /**
+       * Get read-write token for the session
+       *
+       * Now we can send the token in http header, so we could use the auth token as well. But we happened
+       * to have this code for getting a session token, so let's use it and maybe we should use them more
+       * widely in the future to minimize access rights.
+       */
+      token: this.sessionResource.getTokenForSession(sessionId, true),
+      url: this.configService.getSessionWorkerUrl(),
+    }).pipe(
+      mergeMap((res) =>
+        this.http.post(`${res.url}/sessions/${sessionId}`, {}, this.tokenService.getTokenParamsWithToken(res.token)),
+      ),
+      catchError((e) => {
+        this.restErrorService.showError("package session failed", e);
+        throw never();
+      }),
     );
-  }
-
-  getPackageUrl(sessionId: string): Observable<string> {
-    const apiUrl$ = this.configService.getSessionWorkerUrl();
-    return apiUrl$.pipe(map((url: string) => `${url}/sessions/${sessionId}`));
   }
 
   extractSession(sessionId: string, zipDatasetId: string): Observable<any> {

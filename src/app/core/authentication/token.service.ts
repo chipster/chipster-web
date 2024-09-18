@@ -38,9 +38,35 @@ export class TokenService {
   }
 
   getTokenHeader(): HttpHeaders {
-    return this.getHttpBasicHeader("token", this.getToken());
+    return this.getTokenHeaderWithToken(this.getToken());
   }
 
+  getTokenHeaderWithToken(token: string): HttpHeaders {
+    return this.getHttpBasicHeader("token", token);
+  }
+
+  /**
+   * Get token header for http requests using a custom token
+   *
+   * For example, to make a request with session specific token.
+   *
+   * @param token
+   * @returns
+   */
+  getTokenParamsWithToken(token: string) {
+    return {
+      headers: this.getTokenHeaderWithToken(token),
+    };
+  }
+
+  /**
+   * Get token header for http requests, using user's general authentication token
+   *
+   * This token gives access to all sessions of the user.
+   *
+   * @param withCredentials
+   * @returns
+   */
   getTokenParams(withCredentials: boolean) {
     // TODO why withCredentials is set for some requests, but not all?
     if (withCredentials) {

@@ -1,4 +1,3 @@
-import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import {
   Dataset,
@@ -15,26 +14,20 @@ import {
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
-import {
-  Observable,
-  forkJoin,
-  forkJoin as observableForkJoin,
-  from as observableFrom,
-  merge as observableMerge,
-  of,
-} from "rxjs";
-import { catchError, concatMap, filter, map, mergeMap, takeUntil } from "rxjs/operators";
+import { Observable, forkJoin, from as observableFrom, merge as observableMerge, of } from "rxjs";
+import { catchError, concatMap, filter, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../model/session/session-data";
 import { FileResource } from "../../../shared/resources/fileresource";
 import { SessionResource } from "../../../shared/resources/session.resource";
-import { ConfigService } from "../../../shared/services/config.service";
+import { TabService } from "../../../shared/services/tab.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SelectionHandlerService } from "./selection-handler.service";
 import { SessionEventService } from "./session-event.service";
+import { SessionService } from "./session.service";
 
 @Injectable()
 export class SessionDataService {
@@ -42,7 +35,7 @@ export class SessionDataService {
 
   constructor(
     private sessionResource: SessionResource,
-    private configService: ConfigService,
+    private sessionService: SessionService,
     private fileResource: FileResource,
     private errorService: ErrorService,
     private tokenService: TokenService,
@@ -51,7 +44,7 @@ export class SessionDataService {
     private toastrService: ToastrService,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
-    private http: HttpClient,
+    private tabService: TabService,
   ) {}
 
   getSessionId(): string {
@@ -177,131 +170,16 @@ export class SessionDataService {
     return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
   }
 
-  /**
-   * Get a limited token for session
-   *
-   * The token is valid only for this one session, only for read-only operations and only for
-   * a limited time, 24 hours by default.
-   */
-  getTokenForSession(sessionId: string, readWrite: boolean): Observable<string> {
-    return this.configService.getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl: string) => {
-        const options = this.tokenService.getTokenParams(true);
-        options["responseType"] = "text";
-        return this.http.post<string>(
-          sessionDbUrl + "/tokens/sessions/" + sessionId + "?readWrite=" + readWrite,
-          null,
-          options,
-        );
-      }),
-    );
-  }
-
-  /**
-   * Get a limited token for dataset
-   *
-   * The token is valid only for this one dataset, only for read-only operations and only for
-   * a limited time, 1 minute by default.
-   */
-  getTokenForDataset(sessionId: string, datasetId: string): Observable<string> {
-    return this.configService.getSessionDbUrl().pipe(
-      mergeMap((sessionDbUrl: string) => {
-        const options = this.tokenService.getTokenParams(true);
-        options["responseType"] = "text";
-
-        return this.http.post<string>(
-          sessionDbUrl + "/tokens/sessions/" + sessionId + "/datasets/" + datasetId,
-          null,
-          options,
-        );
-      }),
-    );
-  }
-
-  /**
-   * Get an pre-authenticated url of the dataset file
-   *
-   * When the url is used for something that can't set the Authorization header
-   * (e.g. browser WebSocket client, file downloads and external visualization libraries)
-   * we must include the authentiation information in the URL where it's more visible to
-   * the user and in server logs.
-   *
-   * If we would use the user's own token in the URL, the user might share
-   * this dataset URL without realising that the token gives access to all
-   * session of the user.
-   *
-   * Use limited token instead, which is valid only for this one dataset on only for a limited
-   * time.
-   */
   getDatasetUrl(dataset: Dataset): Observable<string> {
-    return observableForkJoin(
-      this.getTokenForDataset(this.getSessionId(), dataset.datasetId),
-      this.configService.getFileBrokerUrl(),
-    ).pipe(
-      map((results) => {
-        const [datasetToken, url] = results;
-        return `${url}/sessions/${this.getSessionId()}/datasets/${dataset.datasetId}?token=${datasetToken}`;
-      }),
-    );
+    return this.sessionService.getDatasetUrl(this.getSessionId(), dataset);
   }
 
   exportDatasets(datasets: Dataset[]) {
-    datasets.forEach((d) => this.download(this.getDatasetUrl(d).pipe(map((url) => url + "&download")), 3));
+    this.sessionService.exportDatasets(this.getSessionId(), datasets);
   }
 
   openNewTab(dataset: Dataset) {
-    this.newTab(
-      /* Set type=true to ask server to add a content-type header, because Chrome doesn't
-      open pdf files in new tab without it. */
-      this.getDatasetUrl(dataset).pipe(map((url) => url + "&type=true")),
-      null,
-      null,
-      "Browser's pop-up blocker prevented opening a new tab",
-    );
-  }
-
-  download(url$: Observable<string>, autoCloseDelay: number) {
-    this.newTab(
-      url$,
-      autoCloseDelay * 1000,
-      "<p>Please wait until the download starts. Then you can close " +
-        "this tab. It will close automatically after " +
-        autoCloseDelay +
-        " seconds.</p>",
-
-      "Browser's pop-up blocker prevented some exports. " +
-        "Please disable the pop-up blocker for this site or " +
-        "export the files one by one.",
-    );
-  }
-
-  newTab(url$: Observable<string>, autoCloseDelay: number, text: string, popupErrorText: string) {
-    // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
-    // open a new tab for the download, because Chrome complains about a download in the same tab ('_self')
-    const win: any = window.open("", "_blank");
-    if (win) {
-      if (text) {
-        win.document.write(text);
-      }
-      url$.subscribe(
-        (url) => {
-          // but we can set it's location later asynchronously
-          win.location.href = url;
-
-          // we can close the useless empty tab, but unfortunately only after a while, otherwise the
-          // download won't start
-          if (autoCloseDelay) {
-            setTimeout(() => {
-              win.close();
-            }, autoCloseDelay);
-          }
-        },
-        (err) => this.restErrorService.showError("opening a new tab failed", err),
-      );
-    } else {
-      // Chrome allows only one download
-      this.errorService.showError(popupErrorText, null);
-    }
+    this.tabService.openNewTab(this.getSessionId(), dataset);
   }
 
   hasReadWriteAccess(sessionData: SessionData) {

@@ -544,4 +544,45 @@ export class SessionResource {
 
     return this.updateJob(sessionId, job);
   }
+
+  /**
+   * Get a limited token for session
+   *
+   * The token is valid only for this one session, only for read-only operations and only for
+   * a limited time, 24 hours by default.
+   */
+  getTokenForSession(sessionId: string, readWrite: boolean): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl: string) => {
+        const options = this.tokenService.getTokenParams(true);
+        options["responseType"] = "text";
+        return this.http.post<string>(
+          sessionDbUrl + "/tokens/sessions/" + sessionId + "?readWrite=" + readWrite,
+          null,
+          options,
+        );
+      }),
+    );
+  }
+
+  /**
+   * Get a limited token for dataset
+   *
+   * The token is valid only for this one dataset, only for read-only operations and only for
+   * a limited time, 1 minute by default.
+   */
+  getTokenForDataset(sessionId: string, datasetId: string): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((sessionDbUrl: string) => {
+        const options = this.tokenService.getTokenParams(true);
+        options["responseType"] = "text";
+
+        return this.http.post<string>(
+          sessionDbUrl + "/tokens/sessions/" + sessionId + "/datasets/" + datasetId,
+          null,
+          options,
+        );
+      }),
+    );
+  }
 }
