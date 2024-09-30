@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEnca
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
-import * as d3ContextMenu from "d3-context-menu";
+import d3ContextMenu from "d3-context-menu";
 import { max as _max, clone, cloneDeep } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
 import { mergeMap } from "rxjs/operators";
