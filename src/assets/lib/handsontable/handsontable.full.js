@@ -32593,7 +32593,7 @@ var jsonpatch;
         if (obj === undefined) {
             return true;
         }
-        if (typeof obj == "array" || (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) == "object") {
+        if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) == "object") {
             for (var i in obj) {
                 if (hasUndefined(obj[i])) {
                     return true;

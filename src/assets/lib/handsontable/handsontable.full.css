@@ -26,6 +26,7 @@
  * Version: 0.34.5
  * Release date: 12/10/2017 (built at 12/12/2017 16:00:04)
  */
+ @charset "UTF-8";
 /**
  * Fix for bootstrap styles
  */
@@ -1058,7 +1059,6 @@ thead .htCollapseButton:after {
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
-@charset "UTF-8";
 
 /*!
  * Pikaday
@@ -1086,7 +1086,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     display: table;
 }
 .pika-single:after { clear: both }
-.pika-single { *zoom: 1 }
+/* .pika-single { *zoom: 1 } */
 
 .pika-single.is-hidden {
     display: none;
@@ -1110,7 +1110,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 
 .pika-label {
     display: inline-block;
-    *display: inline;
+    /* *display: inline; */
     position: relative;
     z-index: 9999;
     overflow: hidden;
@@ -1151,8 +1151,8 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     background-repeat: no-repeat;
     background-size: 75% 75%;
     opacity: .5;
-    *position: absolute;
-    *top: 0;
+    /* *position: absolute;
+    *top: 0; */
 }
 
 .pika-prev:hover,
@@ -1164,14 +1164,14 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .is-rtl .pika-next {
     float: left;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAUklEQVR42u3VMQoAIBADQf8Pgj+OD9hG2CtONJB2ymQkKe0HbwAP0xucDiQWARITIDEBEnMgMQ8S8+AqBIl6kKgHiXqQqAeJepBo/z38J/U0uAHlaBkBl9I4GwAAAABJRU5ErkJggg==');
-    *left: 0;
+    /* *left: 0; */
 }
 
 .pika-next,
 .is-rtl .pika-prev {
     float: right;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAU0lEQVR42u3VOwoAMAgE0dwfAnNjU26bYkBCFGwfiL9VVWoO+BJ4Gf3gtsEKKoFBNTCoCAYVwaAiGNQGMUHMkjGbgjk2mIONuXo0nC8XnCf1JXgArVIZAQh5TKYAAAAASUVORK5CYII=');
-    *right: 0;
+    /* *right: 0; */
 }
 
 .pika-prev.is-disabled,
@@ -1182,7 +1182,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 
 .pika-select {
     display: inline-block;
-    *display: inline;
+    /* *display: inline; */
 }
 
 .pika-table {
