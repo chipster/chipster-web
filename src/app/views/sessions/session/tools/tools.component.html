@@ -3,8 +3,33 @@
   <div class="container-fluid" *ngIf="selectedModule">
     <div class="row mb-2">
       <!-- module buttons -->
+
       <div class="col col-left">
-        <div class="btn-group" id="moduleBtnGroup">
+        <h4 *ngIf="toolsetTitleVisible" class="h4-xs lighter p-0 d-inline-block float-start">Toolset</h4>
+
+        <ng-select
+          *ngIf="moduleSelectionMode === ModuleSelectionMode.Dropdown"
+          #moduleDropdown
+          class="w-100"
+          [items]="modules"
+          bindLabel="name"
+          [clearable]="false"
+          [searchable]="false"
+          [(ngModel)]="selectedModule"
+          (change)="dropDownSelectModule($event)"
+          [dropdownPosition]="'bottom'">
+          <ng-template ng-label-tmp let-item="item">
+            <div>
+              {{ item.name }}
+            </div>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div>{{ item.name }}</div>
+          </ng-template>
+        </ng-select>
+
+        <!-- Old module selection tabs -->
+        <div *ngIf="moduleSelectionMode === ModuleSelectionMode.Tabs" class="btn-group" id="moduleBtnGroup">
           <button
             type="button"
             class="btn"
@@ -14,7 +39,9 @@
               'btn-primary': module.moduleId === selectedModule.moduleId,
               'btn-light': module.moduleId !== selectedModule.moduleId
             }">
-            {{ module.name }}
+            <span class="text-nowrap">
+              {{ module.name }}
+            </span>
           </button>
         </div>
       </div>
@@ -24,24 +51,29 @@
         <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines,
           maybe if the machine is slower to render the content below and the ng-select thinks there
           isn't enough space below it? -->
-        <ng-select
-          #searchBox
-          class="float-end"
-          placeholder="Find tool"
-          [items]="toolSearchList"
-          [virtualScroll]="true"
-          [searchFn]="filterTool"
-          [(ngModel)]="searchBoxModel"
-          (change)="searchBoxSelect($event)"
-          notFoundText="No tools found"
-          (blur)="searchBoxBlur()"
-          [dropdownPosition]="'bottom'">
-          <ng-template ng-option-tmp let-item="item">
-            <div style="font-size: smaller">{{ item.moduleName }} - {{ item.category }}</div>
-            <div style="font-weight: bolder">{{ item.toolName }}</div>
-          </ng-template>
-        </ng-select>
-        <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter me-2 float-end"></i>
+
+        <h4 *ngIf="toolsetTitleVisible" class="h4-xs invisible w-100 lighter p-0 d-inline-block float-start">Find</h4>
+        <div #findDiv class="">
+          <ng-select
+            id="searchTool"
+            #searchTool
+            class="float-end"
+            [items]="toolSearchList"
+            [virtualScroll]="true"
+            [searchFn]="filterTool"
+            [(ngModel)]="searchBoxModel"
+            (change)="searchBoxSelect($event)"
+            notFoundText="No tools found"
+            (blur)="searchBoxBlur()"
+            placeholder="Find tool"
+            [dropdownPosition]="'bottom'">
+            <ng-template ng-option-tmp let-item="item">
+              <div style="font-size: smaller">{{ item.moduleName }} - {{ item.category }}</div>
+              <div style="font-weight: bolder">{{ item.toolName }}</div>
+            </ng-template>
+          </ng-select>
+          <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter me-2 float-end"></i>
+        </div>
       </div>
 
       <!-- jobs button -->

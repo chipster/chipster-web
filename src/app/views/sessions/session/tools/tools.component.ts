@@ -55,6 +55,13 @@ interface ToolSearchListItem {
   description: string;
 }
 
+// Define the enum
+enum ModuleSelectionMode {
+  Tabs = "tabs",
+  Dropdown = "dropdown"
+}
+
+
 @Component({
   selector: "ch-tools",
   templateUrl: "./tools.component.html",
@@ -98,6 +105,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
   selectedModule: Module = null; // used in modal to keep track of which module has been selected
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected
 
+  public ModuleSelectionMode = ModuleSelectionMode; // for template references
+  public moduleSelectionMode: ModuleSelectionMode = ModuleSelectionMode.Dropdown;
+  public toolsetTitleVisible = true;
+
+
   compactToolList = true;
 
   public searchBoxModel: ToolSearchListItem;
@@ -112,6 +124,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   manualModalRef: any;
 
   parametersModalRef: NgbModalRef;
+
+
+
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -142,6 +157,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // TODO why the copies?
     // this.tools = cloneDeep(this.toolsArray);
     this.modules = cloneDeep(this.modulesArray);
+
+
     this.toolSearchList = this.createToolSearchList();
 
     this.subscribeToToolEvents();
@@ -169,6 +186,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     if (this.manualModalRef != null) {
       this.manualModalRef.close();
     }
+  }
+
+  dropDownSelectModule(module: Module) {
+    this.selectModuleAndFirstCategoryAndFirstTool(module);
   }
 
   selectModule(module: Module) {
