@@ -23,7 +23,7 @@ export class ServicesComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private authHttpClient: AuthHttpClientService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit(): void {
@@ -51,8 +51,8 @@ export class ServicesComponent implements OnInit {
                 log.warn("alive check failed", service.role, err);
                 this.aliveMap.set(service, err.status);
                 return of(false); // returning EMPTY would cancel others in forkJoin
-              })
-            )
+              }),
+            ),
           );
 
           const statusRequests = services.map((service: Service) =>
@@ -64,12 +64,12 @@ export class ServicesComponent implements OnInit {
                 log.warn("status check failed", service.role, err);
                 this.statusMap.set(service.role, err.status);
                 return of(false); // returning EMPTY would cancel others in forkJoin
-              })
-            )
+              }),
+            ),
           );
 
           return forkJoin(aliveRequests.concat(statusRequests));
-        })
+        }),
       )
       .subscribe({
         next: () => {
@@ -91,6 +91,23 @@ export class ServicesComponent implements OnInit {
       if (statusObj) {
         // 2 for pretty
         return JSON.stringify(statusObj, null, 2);
+      }
+    }
+    return "";
+  }
+
+  getVersionString(service): string {
+    if (service) {
+      const statusObj = this.getStatusObject(service);
+      if (statusObj) {
+        let version = statusObj["chipsterBuildVersion"];
+        if (version) {
+          if (service.role === "toolbox") {
+            let toolsBinVersion = statusObj["toolsBinVersion"];
+            return version + " (tools-bin: " + toolsBinVersion + ")";
+          }
+          return version;
+        }
       }
     }
     return "";

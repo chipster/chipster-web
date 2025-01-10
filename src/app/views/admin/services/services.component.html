@@ -4,6 +4,7 @@
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Alive</th>
+        <th scope="col">Version</th>
         <th scope="col">Status info</th>
         <th scope="col">URL</th>
         <th scope="col">Admin URL</th>
@@ -13,6 +14,7 @@
       <tr *ngFor="let service of services">
         <th scope="row">{{ service.role }}</th>
         <td>{{ this.aliveMap.get(service) }}</td>
+        <td>{{ getVersionString(service) }}</td>
         <td>
           <span
             *ngIf="getStatusString(service).length > 10"
