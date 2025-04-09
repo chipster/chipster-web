@@ -15,6 +15,7 @@ export class ParametersModalComponent {
   @Input() sessionData: SessionData;
   @Output() parametersChanged = new EventEmitter();
   @Output() updateBindings = new EventEmitter();
+  @Output() resourcesChanged = new EventEmitter();
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.updateBindings.emit(toolWithInputs);
@@ -22,5 +23,9 @@ export class ParametersModalComponent {
 
   onParametersChanged() {
     this.parametersChanged.emit();
+  }
+
+  onResourcesChanged() {
+    this.resourcesChanged.emit();
   }
 }

@@ -27,6 +27,7 @@ import {
   selectedToolWithPopulatedParams,
   selectedToolWithValidatedInputs,
   selectedToolWithValidatedParams,
+  selectedToolWithValidatedResources,
   validatedTool,
 } from "./state/tool.reducer";
 import { AccessModule } from "./views/access/access.module";
@@ -48,61 +49,71 @@ import { SelectionService } from "./views/sessions/session/selection.service";
 import { SessionModule } from "./views/sessions/session/session.module";
 import { TermsComponent } from "./views/terms/terms.component";
 
-@NgModule({ declarations: [
-        NavigationComponent,
-        LoginComponent,
-        AuthButtonComponent,
-        OidcCallbackComponent,
-        HomeComponent,
-        AppComponent,
-        ErrorComponent,
-        TermsComponent,
-        NotFoundComponent,
-        MyllyHasMovedComponent,
-        AccessibilityComponent,
-        PrivacyNoticeComponent,
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        FormsModule,
-        CoreModule,
-        ContactModule,
-        SessionModule,
-        ManualModule,
-        AccessModule,
-        NgbModule,
-        AdminModule,
-        StoreModule.forRoot({
-            selectedDatasets,
-            selectedJobs,
-            selectedToolById,
-            selectedTool,
-            selectedToolWithInputs,
-            selectedToolWithValidatedInputs,
-            selectedToolWithPopulatedParams,
-            selectedToolWithValidatedParams,
-            validatedTool,
-            latestSession,
-        }, {
-            runtimeChecks: {
-                strictStateImmutability: false, // TODO refactor store usage so that these can be removed
-                strictActionImmutability: false, // for example parameter.value is currently mutated
-            },
-        }),
-        SharedModule,
-        RoutingModule,
-        BrowserAnimationsModule,
-        ToastrModule.forRoot({
-            toastComponent: ActionToastComponent,
-        }),
-        HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
-        AppRoutingModule], providers: [
-        SelectionService,
-        DatasetContextMenuService,
-        TokenService,
-        ErrorService,
-        { provide: ErrorHandler, useClass: AppErrorHandler },
-        provideHttpClient(withInterceptorsFromDi()),
-    ] })
+@NgModule({
+  declarations: [
+    NavigationComponent,
+    LoginComponent,
+    AuthButtonComponent,
+    OidcCallbackComponent,
+    HomeComponent,
+    AppComponent,
+    ErrorComponent,
+    TermsComponent,
+    NotFoundComponent,
+    MyllyHasMovedComponent,
+    AccessibilityComponent,
+    PrivacyNoticeComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    CoreModule,
+    ContactModule,
+    SessionModule,
+    ManualModule,
+    AccessModule,
+    NgbModule,
+    AdminModule,
+    StoreModule.forRoot(
+      {
+        selectedDatasets,
+        selectedJobs,
+        selectedToolById,
+        selectedTool,
+        selectedToolWithInputs,
+        selectedToolWithValidatedInputs,
+        selectedToolWithPopulatedParams,
+        selectedToolWithValidatedParams,
+        selectedToolWithValidatedResources,
+        validatedTool,
+        latestSession,
+      },
+      {
+        runtimeChecks: {
+          strictStateImmutability: false, // TODO refactor store usage so that these can be removed
+          strictActionImmutability: false, // for example parameter.value is currently mutated
+        },
+      },
+    ),
+    SharedModule,
+    RoutingModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      toastComponent: ActionToastComponent,
+    }),
+    HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
+    AppRoutingModule,
+  ],
+  providers: [
+    SelectionService,
+    DatasetContextMenuService,
+    TokenService,
+    ErrorService,
+    { provide: ErrorHandler, useClass: AppErrorHandler },
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+})
 export class AppModule {
   constructor(injector: Injector) {
     setAppInjector(injector);

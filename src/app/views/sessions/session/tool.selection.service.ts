@@ -18,6 +18,7 @@ import {
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
+  SelectedToolWithValidatedResources,
   ValidatedTool,
   ValidationResult,
 } from "./tools/ToolSelection";
@@ -52,7 +53,7 @@ export class ToolSelectionService {
   }
 
   getValidatedTool(
-    toolWithValidatedParams: SelectedToolWithValidatedParameters,
+    toolWithValidatedParams: SelectedToolWithValidatedResources,
     sessionData: SessionData,
     validateRunForEachSample = true, // needs to be false when rebinding for each sample
   ) {
@@ -119,6 +120,9 @@ export class ToolSelectionService {
       parametersValidation: {
         valid: parametersValid,
         message: "Invalid parameters", // TODO add more details
+      },
+      resources: {
+        slotCount: null,
       },
       parametersValidationResults: parametersValidations,
       ...toolWithValidatedInputs,
@@ -311,6 +315,48 @@ export class ToolSelectionService {
     }
 
     return of(parameter); // always return, even if nothing gets done
+  }
+
+  validateResources(
+    toolWithValidatedParameters: SelectedToolWithValidatedParameters,
+  ): SelectedToolWithValidatedResources {
+    let resourceValidations = this.getResourceValidations(toolWithValidatedParameters);
+    const resourcesValid = Array.from(resourceValidations.values()).every((result: ValidationResult) => result.valid);
+
+    return {
+      resourcesValidation: {
+        valid: resourcesValid,
+        message: "Invalid computing resources", // TODO add more details
+      },
+      resourcesValidationResults: resourceValidations,
+      ...toolWithValidatedParameters,
+    };
+  }
+
+  getResourceValidations(toolWithValidatedParameters: SelectedToolWithValidatedParameters) {
+    const resourcesValidations = new Map<string, ValidationResult>();
+    if (toolWithValidatedParameters.resources.slotCount != null) {
+      if (!Number.isInteger(toolWithValidatedParameters.resources.slotCount as number)) {
+        resourcesValidations.set("slots", {
+          valid: false,
+          message: "Value must be an integer",
+        });
+      }
+      // min limit
+      // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+      else if (+toolWithValidatedParameters.resources.slotCount < 1) {
+        resourcesValidations.set("slots", {
+          valid: false,
+          message: "Value too low",
+        });
+      } else {
+        resourcesValidations.set("slots", {
+          valid: true,
+        });
+      }
+    }
+
+    return resourcesValidations;
   }
 
   validateInputs(toolWithInputs: SelectedToolWithInputs): ValidationResult {
@@ -643,8 +689,11 @@ export class ToolSelectionService {
     // validate parameters
     const newToolWithValidatedParams = this.validateParameters(newToolWithValidatedInputs);
 
+    // validate resources
+    const newToolWithValidatedResources = this.validateResources(newToolWithValidatedParams);
+
     // get validated tool
-    const newValidatedTool = this.getValidatedTool(newToolWithValidatedParams, sessionData, false);
+    const newValidatedTool = this.getValidatedTool(newToolWithValidatedResources, sessionData, false);
 
     return newValidatedTool;
   }

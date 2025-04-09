@@ -4,6 +4,7 @@ import {
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
+  SelectedToolWithValidatedResources,
   ValidatedTool,
 } from "../views/sessions/session/tools/ToolSelection";
 
@@ -91,6 +92,24 @@ export function selectedToolWithValidatedParams(state: SelectedToolWithValidated
     case SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
+      return null;
+    default:
+      return state;
+  }
+}
+
+// tool with validated inputs and populated params and validated params and validated resources
+export const SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES = "SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES";
+export const CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES = "CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES";
+
+export function selectedToolWithValidatedResources(
+  state: SelectedToolWithValidatedResources = null,
+  { type, payload },
+) {
+  switch (type) {
+    case SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES:
+      return { ...payload };
+    case CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES:
       return null;
     default:
       return state;

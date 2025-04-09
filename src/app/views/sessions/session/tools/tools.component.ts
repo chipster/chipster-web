@@ -17,11 +17,13 @@ import {
   CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
   CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+  CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES,
   CLEAR_VALIDATED_TOOL,
   SET_SELECTED_TOOL_WITH_INPUTS,
   SET_SELECTED_TOOL_WITH_POPULATED_PARAMS,
   SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS,
   SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS,
+  SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES,
   SET_VALIDATED_TOOL,
 } from "../../../../state/tool.reducer";
 import { ManualModalComponent } from "../../../manual/manual-modal/manual-modal.component";
@@ -39,6 +41,7 @@ import {
   SelectedToolWithInputs,
   SelectedToolWithValidatedInputs,
   SelectedToolWithValidatedParameters,
+  SelectedToolWithValidatedResources,
   ValidatedTool,
   ValidationResult,
 } from "./ToolSelection";
@@ -58,9 +61,8 @@ interface ToolSearchListItem {
 // Define the enum
 enum ModuleSelectionMode {
   Tabs = "tabs",
-  Dropdown = "dropdown"
+  Dropdown = "dropdown",
 }
-
 
 @Component({
   selector: "ch-tools",
@@ -87,6 +89,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @ViewChild("searchBox")
   searchBox;
 
+  private toolsMap: Map<string, Tool>;
+
   public selectedTool: SelectedTool;
   public validatedTool: ValidatedTool;
 
@@ -109,7 +113,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public moduleSelectionMode: ModuleSelectionMode = ModuleSelectionMode.Dropdown;
   public toolsetTitleVisible = true;
 
-
   compactToolList = true;
 
   public searchBoxModel: ToolSearchListItem;
@@ -119,14 +122,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   // use to signal that parameters have been changed and need to be validated
   private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  private resourcesChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
   private unsubscribe: Subject<any> = new Subject();
   manualModalRef: any;
 
   parametersModalRef: NgbModalRef;
-
-
-
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -158,7 +159,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // this.tools = cloneDeep(this.toolsArray);
     this.modules = cloneDeep(this.modulesArray);
 
-
     this.toolSearchList = this.createToolSearchList();
 
     this.subscribeToToolEvents();
@@ -174,11 +174,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
     } else {
       this.errorService.showError("Cannot select module: " + this.modules, null);
     }
+
+    this.toolsMap = new Map(this.toolsArray.map((entry: any) => [entry.key, entry.value]));
   }
 
   ngOnDestroy() {
     this.clearStoreToolSelections();
     this.parametersChanged$ = null;
+    this.resourcesChanged$ = null;
     this.unsubscribe.next(null);
     this.unsubscribe.complete();
     this.hotkeysService.remove(this.searchBoxHotkey);
@@ -229,6 +232,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   onParametersChanged() {
     if (this.parametersChanged$ != null) {
       this.parametersChanged$.next(null);
+    }
+  }
+
+  onResourcesChanged() {
+    if (this.resourcesChanged$ != null) {
+      this.resourcesChanged$.next(null);
     }
   }
 
@@ -542,17 +551,47 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // run for each validation and create validated tool
-    this.store
-      .select("selectedToolWithValidatedParams")
+    // validate resources after resources changed
+    // null is meaningful here
+    // beware when changing session to avoid old data
+    combineLatest([
+      this.store.select("selectedToolWithValidatedParams"),
+      // .pipe(filter((value) => value !== null)),
+      this.resourcesChanged$, // signals when user changes parameters
+    ])
       .pipe(
         takeUntil(this.unsubscribe),
-        // filter((value) => value !== null),
-        map((toolWithValidatedParams: SelectedToolWithValidatedParameters) => {
+        map(([toolWithValidatedParams]) => {
           if (toolWithValidatedParams == null) {
             return null;
           }
-          return this.toolSelectionService.getValidatedTool(toolWithValidatedParams, this.sessionData);
+          return this.toolSelectionService.validateResources(toolWithValidatedParams);
+        }),
+      )
+      .subscribe((toolWithValidatedResources: SelectedToolWithValidatedResources) => {
+        if (toolWithValidatedResources != null) {
+          this.store.dispatch({
+            type: SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES,
+            payload: toolWithValidatedResources,
+          });
+        } else {
+          this.store.dispatch({
+            type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES,
+          });
+        }
+      });
+
+    // run for each validation and create validated tool
+    this.store
+      .select("selectedToolWithValidatedResources")
+      .pipe(
+        takeUntil(this.unsubscribe),
+        // filter((value) => value !== null),
+        map((toolWithValidatedResources: SelectedToolWithValidatedResources) => {
+          if (toolWithValidatedResources == null) {
+            return null;
+          }
+          return this.toolSelectionService.getValidatedTool(toolWithValidatedResources, this.sessionData);
         }),
       )
       .subscribe((validatedTool: ValidatedTool) => {
@@ -643,6 +682,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
 
     this.store.dispatch({
+      type: CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES,
+    });
+
+    this.store.dispatch({
       type: CLEAR_VALIDATED_TOOL,
     });
   }
@@ -658,6 +701,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
     this.parametersModalRef.componentInstance.updateBindings.subscribe({
       next: (toolWithInputs: SelectedToolWithInputs) => this.setBindings(toolWithInputs),
+    });
+    this.parametersModalRef.componentInstance.resourcesChanged.subscribe({
+      next: () => this.onResourcesChanged(),
     });
   }
 }

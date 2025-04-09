@@ -1,0 +1,133 @@
+<div *ngIf="ready" class="">
+  <!-- <h1 class="h1-xs">{{validatedTool.tool.name.displayName}}
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
+  </h1> -->
+
+  <!-- warning title -->
+  <!-- <div class="alert alert-warning text-center p-1 mb-0" [class.invisible]="!showWarning">
+    <i class="fas fa-fw fa-exclamation-circle"></i> {{ warningText }}
+  </div> -->
+
+  <!-- parameters -->
+  <div class="row">
+    <div class="col">
+      <h2 class="h2-xs mt-1 mb-2">Computing resources</h2>
+    </div>
+
+    <div class="col">
+      <button
+        *ngIf="isResetAllVisible()"
+        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        (click)="resetAll()"
+        title="Reset all">
+        <span class="fas fa-fw fa-undo text-primary" aria-hidden="true"></span>
+        Reset All
+      </button>
+      <button
+        *ngIf="!isResetAllVisible()"
+        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        (click)="resetAll()"
+        title="Reset all"
+        [disabled]="true">
+        <span class="fas fa-fw fa-undo" aria-hidden="true"></span>
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <form name="paramForm" *ngIf="validatedTool.tool">
+    <table class="table table-sm">
+      <tbody>
+        <tr>
+          <td style="width: 60%">
+            <!-- parameter name -->
+            Memory
+
+            <!-- parameter description -->
+            <div class="text-sm text-muted">
+              Maximum amount of memory (RAM) for the tool (GiB). Memory and CPU are adjusted together.
+            </div>
+          </td>
+
+          <!-- parameter value -->
+
+          <td>
+            <!-- number -->
+            <input
+              class="w-100"
+              type="number"
+              [(ngModel)]="memory"
+              name="memory"
+              min="{{ memoryRatio }}"
+              max="{{ memoryRatio * maxSlots }}"
+              step="{{ memoryRatio }}"
+              required="false"
+              (ngModelChange)="onMemoryChanged()" />
+
+            <!-- validation message -->
+            <div *ngIf="!getSlotsValidation().valid" class="alert alert-warning p-1 mb-0 mt-1 text-sm">
+              {{ getSlotsValidation().message }}
+            </div>
+          </td>
+
+          <!-- buttons -->
+          <td>
+            <!-- reset to default -->
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-dark btn-no-border float-end"
+              [class.invisible]="!isResetVisible()"
+              (click)="resetSlots($event)"
+              title="Reset to default">
+              <i class="fas fa-undo text-primary"></i>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td style="width: 60%">
+            <!-- parameter name -->
+            CPU
+            <!-- parameter description -->
+            <div class="text-sm text-muted">
+              Maximum number of CPU cores the tool is allowed to use. Memory and CPU are adjusted together.
+            </div>
+          </td>
+
+          <!-- parameter value -->
+
+          <td>
+            <!-- number -->
+            <input
+              class="w-100"
+              type="number"
+              [(ngModel)]="cpu"
+              name="cpu"
+              min="{{ cpuRatio }}"
+              max="{{ cpuRatio * maxSlots }}"
+              step="{{ cpuRatio }}"
+              required="false"
+              (ngModelChange)="onCpuChanged()" />
+
+            <!-- validation message -->
+            <div *ngIf="!getSlotsValidation().valid" class="alert alert-warning p-1 mb-0 mt-1 text-sm">
+              {{ getSlotsValidation().message }}
+            </div>
+          </td>
+
+          <!-- buttons -->
+          <td>
+            <!-- reset to default -->
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-dark btn-no-border float-end"
+              [class.invisible]="!isResetVisible()"
+              (click)="resetSlots($event)"
+              title="Reset to default">
+              <i class="fas fa-undo text-primary"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>

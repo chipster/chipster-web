@@ -9,6 +9,7 @@
     [validatedTool]="validatedTool"
     [sessionData]="sessionData"
     (updateBindings)="setBindings($event)"></ch-tool-inputs>
+  <ch-tool-resources [validatedTool]="validatedTool" (resourcesChanged)="onResourcesChanged()"></ch-tool-resources>
   <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
 </div>
 

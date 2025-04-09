@@ -27,15 +27,24 @@ export interface SelectedToolWithValidatedInputs extends SelectedToolWithInputs 
 export interface SelectedToolWithValidatedParameters extends SelectedToolWithValidatedInputs {
   parametersValidation: ValidationResult;
   parametersValidationResults?: Map<string, ValidationResult>;
+  // place for storing the customized resources in the next stage. Should we create a separate stage for this?
+  resources: ToolResources;
 }
 
-export interface ValidatedTool extends SelectedToolWithValidatedParameters {
+export interface SelectedToolWithValidatedResources extends SelectedToolWithValidatedParameters {
+  resourcesValidation: ValidationResult;
+  resourcesValidationResults?: Map<string, ValidationResult>;
+}
+export interface ToolResources {
+  slotCount: number;
+}
+
+export interface ValidatedTool extends SelectedToolWithValidatedResources {
   singleJobValidation: ValidationResult;
   runForEachValidation: ValidationResult;
   runForEachSampleValidation: ValidationResult;
   sampleGroups: SampleGroups;
 }
-
 export interface ValidationResult {
   valid: boolean;
   message?: string;

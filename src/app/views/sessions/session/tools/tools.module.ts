@@ -19,6 +19,7 @@ import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item
 import { ToolParametersComponent } from "./tool-parameters/tool-parameters.component";
 import { ToolService } from "./tool.service";
 import { ToolsComponent } from "./tools.component";
+import { ToolResourcesComponent } from "./tool-resources/tool-resources.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule, LinkButtonModule, NgSelectModule],
@@ -26,6 +27,7 @@ import { ToolsComponent } from "./tools.component";
     ToolListItemComponent,
     ToolsComponent,
     ToolParametersComponent,
+    ToolResourcesComponent,
     ToolInputsComponent,
     FilterCompatibleDatasetsPipe,
     ScrollerComponent,
