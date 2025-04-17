@@ -4,14 +4,15 @@ import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { clone } from "lodash-es";
 import log from "loglevel";
-import { Observable, forkJoin, of as observableOf, of } from "rxjs";
-import { catchError, defaultIfEmpty, map, mergeMap, tap } from "rxjs/operators";
+import { Observable, forkJoin, from, of as observableOf, of } from "rxjs";
+import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
 import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
+import _, { chunk } from "lodash";
 
 @Injectable()
 export class SessionResource {
@@ -41,9 +42,50 @@ export class SessionResource {
         const sessionDatasets$ = this.http
           .get(`${url}/sessions/${sessionId}/datasets`, this.tokenService.getTokenParams(true))
           .pipe(tap((x) => log.debug("sessionDatasets", x)));
+
+        /* Get jobs in chunks
+
+        Getting e.g. 1000 jobs from remote database may take longer than 30 timeout in Ingress.
+        Get first only the list of IDs and then the actual jobs in chunks.
+        */
         const sessionJobs$ = this.http
-          .get(`${url}/sessions/${sessionId}/jobs`, this.tokenService.getTokenParams(true))
-          .pipe(tap((x) => log.debug("sessionJobs", x)));
+          // get IDs
+          .get(`${url}/sessions/${sessionId}/jobs/ids`, this.tokenService.getTokenParams(true))
+          .pipe(
+            tap((x) => log.debug("sessionJobs", x)),
+            // divede list if IDs to chunks
+            map((jobIds: []) => _.chunk(jobIds, 100)),
+            // create a job request for each junk
+            map((chunks: []) => {
+              return chunks.map((chunkJobIds) => {
+                const requestOptions = this.tokenService.getTokenParams(true);
+
+                requestOptions["body"] = chunkJobIds;
+
+                // should be GET, but browsers don't allow sending body in it
+                return this.http.request("POST", `${url}/sessions/${sessionId}/jobs/arrayGet`, requestOptions);
+              });
+            }),
+            // create new rxjs event for each chunk to be able to control the concurrency
+            mergeMap((chunkObservables) => from(chunkObservables)),
+            // execute max 1 request concurrently to prevent one user from hogging too much server resources
+            mergeMap((chunkObservable) => chunkObservable, 1),
+            // wait until stream completes
+            toArray(),
+            // merge arrays of each chunk
+            map((chunkJobs) => chunkJobs.flat(1)),
+            map((jobs) => {
+              // check if some jobs were not found
+              const nullCount = jobs.filter((j) => j == null).length;
+              if (nullCount > 0) {
+                // probably just deleted after the ID list was retrieved
+                console.log("jobs not found: " + nullCount);
+                // delete placeholders of deleted jobs
+                return jobs.filter((j) => j != null);
+              }
+              return jobs;
+            }),
+          );
 
         // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
         return this.forkJoinWithoutCancel([session$, sessionDatasets$, sessionJobs$, types$]);
