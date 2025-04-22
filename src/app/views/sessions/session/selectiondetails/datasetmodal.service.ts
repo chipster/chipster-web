@@ -11,6 +11,9 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
+import { SessionResource } from "../../../../shared/resources/session.resource";
+import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
+import { RouteService } from "../../../../shared/services/route.service";
 
 @Injectable()
 export class DatasetModalService {
@@ -18,7 +21,10 @@ export class DatasetModalService {
     private ngbModal: NgbModal,
     private dialogModalService: DialogModalService,
     private errorService: ErrorService,
-    private typeTagService: TypeTagService
+    private typeTagService: TypeTagService,
+    private sessionResource: SessionResource,
+    private restErrorService: RestErrorService,
+    private routeService: RouteService,
   ) {}
 
   public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData, tools: Tool[]): void {
@@ -39,7 +45,7 @@ export class DatasetModalService {
     ) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
-        "Convert only works for tab delimeted text files."
+        "Convert only works for tab delimeted text files.",
       );
       return;
     }
@@ -49,7 +55,7 @@ export class DatasetModalService {
         "Converting file not possible",
         "The file is too big to be converted. The size limit is " +
           WrangleModalComponent.FILE_SIZE_LIMIT +
-          " MB at the moment but it will be removed in the future."
+          " MB at the moment but it will be removed in the future.",
       );
       return;
     }
@@ -67,8 +73,8 @@ export class DatasetModalService {
         mergeMap((runWrangle$) =>
           runWrangle$ != null
             ? this.dialogModalService.openSpinnerModal("Convert to Chipster format", runWrangle$)
-            : EMPTY
-        )
+            : EMPTY,
+        ),
       )
       .subscribe({
         next: (result) => {
@@ -89,13 +95,51 @@ export class DatasetModalService {
     // block with the spinner while waiting for that observable to complete
     DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result)
       .pipe(
-        mergeMap((run$) => (run$ != null ? this.dialogModalService.openSpinnerModal("Saving groups", run$) : EMPTY))
+        mergeMap((run$) => (run$ != null ? this.dialogModalService.openSpinnerModal("Saving groups", run$) : EMPTY)),
       )
       .subscribe({
         next: (result) => {
           log.debug("Saving groups done", result);
         },
         error: (error) => this.errorService.showError("Saving groups failed", error),
+      });
+  }
+
+  public openCopyToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
+    this.dialogModalService
+      .openSessionNameModal("Copy Selection to a New Session", sessionData.session.name + "_part", "Copy")
+      .pipe(
+        mergeMap((name) => {
+          log.info("copying selected datasets and jobs");
+
+          const sourceJobIds = selectedDatasets
+            .map((dataset) => dataset.sourceJob)
+            .filter((sourceJob) => sourceJob != null);
+
+          const sourceJobs = new Map(sourceJobIds.map((jobId: string) => [jobId, sessionData.jobsMap.get(jobId)]));
+          const selectedDatasetsMap = new Map(selectedDatasets.map((dataset: Dataset) => [dataset.datasetId, dataset]));
+
+          const selectedSessionData: SessionData = {
+            session: sessionData.session,
+            datasetsMap: selectedDatasetsMap,
+            jobsMap: sourceJobs,
+            datasetTypeTags: null,
+            cachedFileHeaders: null,
+          };
+
+          const copy = this.sessionResource.copySession(selectedSessionData, name, false);
+
+          // return observable of the new sessionId
+          return this.dialogModalService.openSpinnerModal("Copy selection", copy);
+        }),
+      )
+      .subscribe({
+        next: (newSessionId: string) => {
+          if (newSessionId != null) {
+            this.routeService.navigateToSession(newSessionId);
+          }
+        },
+        error: (err) => this.restErrorService.showError("Copying selection failed", err),
       });
   }
 }

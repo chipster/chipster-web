@@ -468,7 +468,14 @@ export class SessionComponent implements OnInit, OnDestroy {
   doScrollFix(): void {
     const scrollToTop = setInterval(() => {
       const div = document.getElementById("myDiv");
-      const visRect = document.getElementById("visTab").getBoundingClientRect();
+      const visTab = document.getElementById("visTab");
+      if (visTab == null) {
+        // view has already changed
+        // seems to happen at least when using "Copy to a New Session"
+        console.log("doScrollFix cancelled");
+        return;
+      }
+      const visRect = visTab.getBoundingClientRect();
       if (visRect.top < 1) {
         div.scrollTo(0, 0);
       } else {
