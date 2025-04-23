@@ -23,6 +23,7 @@
         <button ngbDropdownItem (click)="sharingModal()">Share&hellip;</button>
         <button ngbDropdownItem (click)="duplicateModal()">Duplicate&hellip;</button>
         <button ngbDropdownItem (click)="downloadSession()">Download&hellip;</button>
+        <button ngbDropdownItem (click)="selectAllDatasets()">Select all Files&hellip;</button>
         <div class="dropdown-divider"></div>
         <button ngbDropdownItem (click)="removeSessionModal()">Delete&hellip;</button>
       </div>
@@ -37,7 +38,7 @@
       </tr>
       <tr>
         <td class="lighter">Size:</td>
-        <td width="100%">{{ getSessionSize() | bytes : 0 }}</td>
+        <td width="100%">{{ getSessionSize() | bytes: 0 }}</td>
       </tr>
       <tr>
         <td class="lighter">Notes:</td>
