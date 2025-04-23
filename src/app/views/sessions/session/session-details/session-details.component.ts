@@ -10,7 +10,6 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { SessionService } from "../session.service";
-import { SelectionHandlerService } from "../selection-handler.service";
 
 @Component({
   selector: "ch-session-details",
@@ -33,8 +32,7 @@ export class SessionDetailsComponent {
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private sessionResource: SessionResource,
-    private routeService: RouteService,
-    private selectionHandlerService: SelectionHandlerService,
+    private routeService: RouteService
   ) {}
 
   renameSessionModal() {
@@ -65,7 +63,7 @@ export class SessionDetailsComponent {
               map((sessionId) => {
                 newSessionId = sessionId;
                 return sessionId;
-              }),
+              })
             );
           } else {
             log.info("duplicate for temp session, updating session");
@@ -75,7 +73,7 @@ export class SessionDetailsComponent {
           }
 
           return this.dialogModalService.openSpinnerModal("Duplicate session", copyOrUpdate$);
-        }),
+        })
       )
       .subscribe(
         () => {
@@ -83,7 +81,7 @@ export class SessionDetailsComponent {
             this.routeService.navigateToSession(newSessionId);
           }
         },
-        (err) => this.restErrorService.showError("Duplicate session failed", err),
+        (err) => this.restErrorService.showError("Duplicate session failed", err)
       );
   }
 
@@ -100,12 +98,8 @@ export class SessionDetailsComponent {
         },
         () => {
           // modal dismissed
-        },
+        }
       );
-  }
-
-  selectAllDatasets() {
-    this.selectionHandlerService.setDatasetSelection(Array.from(this.sessionData.datasetsMap.values()));
   }
 
   getSessionSize() {
