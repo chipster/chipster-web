@@ -16,11 +16,13 @@ import { SharingModalComponent } from "./share-session-modal/share-session-modal
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
+import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component";
 
 @NgModule({
   imports: [CommonModule, SharedModule, ReactiveFormsModule, FormsModule, NgbModule],
   declarations: [
     StringModalComponent,
+    DropdownModalComponent,
     BooleanModalComponent,
     DeleteFilesModalComponent,
     NotesModalComponent,

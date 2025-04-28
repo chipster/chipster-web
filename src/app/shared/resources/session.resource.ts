@@ -12,7 +12,8 @@ import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
-import _, { chunk } from "lodash";
+import _ from "lodash";
+import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class SessionResource {
@@ -503,57 +504,11 @@ export class SessionResource {
     newSession.sessionId = null;
     newSession.name = name;
     newSession.state = SessionState.Import;
-    let createdSessionId: string;
 
     // create session
-    const createSession$ = this.createSession(newSession);
-
-    return createSession$.pipe(
-      mergeMap((sessionId: string) => {
-        createdSessionId = sessionId;
-
-        // create datasets
-        const oldDatasets = Array.from(sessionData.datasetsMap.values());
-        const clones = oldDatasets.map((dataset: Dataset) => {
-          const _clone = clone(dataset);
-          _clone.sessionId = null;
-          return _clone;
-        });
-
-        const createDatasetsRequest = clones.length > 0 ? this.createDatasets(createdSessionId, clones) : of([]);
-
-        // emit an empty array in case request completes without emitting anything
-        // (don't know if this ever happends) otherwise this won't continue to the
-        //  next mergeMap() when the session is empty
-        return createDatasetsRequest.pipe(defaultIfEmpty([]));
-      }),
-      mergeMap((createdDatasets: Dataset[]) => {
-        log.info("created", createdDatasets.length, "datasets");
-        // create dataset map for checking inputs later
-        const newDatasetsMap: Map<string, Dataset> = createdDatasets.reduce((tempMap, dataset) => {
-          tempMap.set(dataset.datasetId, dataset);
-          return tempMap;
-        }, new Map());
-
-        // create jobs
-        const oldJobs = Array.from(sessionData.jobsMap.values());
-        const jobCopies = oldJobs
-          .filter((oldJob) => !JobService.isRunning(oldJob))
-          .map((oldJob: Job) => {
-            const jobCopy = clone(oldJob);
-            jobCopy.sessionId = null;
-            this.nullifyMissingInputs(jobCopy, newDatasetsMap);
-            return jobCopy;
-          });
-
-        const createJobsRequest = jobCopies.length > 0 ? this.createJobs(createdSessionId, jobCopies) : of([]);
-
-        // see the comment of the forkJoin above
-        return createJobsRequest.pipe(defaultIfEmpty([]));
-      }),
-      mergeMap((createdJobs: Job[]) => {
-        log.info("created", createdJobs.length, "jobs");
-        return this.getSession(createdSessionId);
+    return this.createSession(newSession).pipe(
+      mergeMap((sessionId) => {
+        return this.copyToExistingSession(sessionId, sessionData);
       }),
       mergeMap((session) => {
         log.info("session copied, current state", session.state, temporary);
@@ -563,9 +518,54 @@ export class SessionResource {
           session.state = SessionState.Ready;
         }
         log.info("set to", session.state);
-        return this.updateSession(session);
+        return this.updateSession(session).pipe(map(() => session.sessionId));
       }),
-      map(() => createdSessionId),
+    );
+  }
+
+  copyToExistingSession(targetSessionId, sessionData): Observable<Session> {
+    // create datasets
+    const oldDatasets = Array.from(sessionData.datasetsMap.values());
+    const clones = oldDatasets.map((dataset: Dataset) => {
+      const _clone = clone(dataset);
+      _clone.sessionId = null;
+      return _clone;
+    });
+
+    const createDatasetsRequest = clones.length > 0 ? this.createDatasets(targetSessionId, clones) : of([]);
+
+    // emit an empty array in case request completes without emitting anything
+    // (don't know if this ever happends) otherwise this won't continue to the
+    //  next mergeMap() when the session is empty
+    return createDatasetsRequest.pipe(defaultIfEmpty([])).pipe(
+      mergeMap((createdDatasets: Dataset[]) => {
+        log.info("created", createdDatasets.length, "datasets");
+        // create dataset map for checking inputs later
+        const newDatasetsMap: Map<string, Dataset> = createdDatasets.reduce((tempMap, dataset) => {
+          tempMap.set(dataset.datasetId, dataset);
+          return tempMap;
+        }, new Map());
+
+        // create jobs
+        const oldJobs: Job[] = Array.from(sessionData.jobsMap.values());
+        const jobCopies = oldJobs
+          .filter((oldJob) => !JobService.isRunning(oldJob))
+          .map((oldJob: Job) => {
+            const jobCopy = clone(oldJob);
+            jobCopy.sessionId = null;
+            this.nullifyMissingInputs(jobCopy, newDatasetsMap);
+            return jobCopy;
+          });
+
+        const createJobsRequest = jobCopies.length > 0 ? this.createJobs(targetSessionId, jobCopies) : of([]);
+
+        // see the comment of the forkJoin above
+        return createJobsRequest.pipe(defaultIfEmpty([]));
+      }),
+      mergeMap((createdJobs: Job[]) => {
+        log.info("created", createdJobs.length, "jobs");
+        return this.getSession(targetSessionId);
+      }),
     );
   }
 
@@ -578,6 +578,74 @@ export class SessionResource {
         return datasetsMap.has(input.datasetId);
       });
     }
+  }
+
+  /**
+   * Generate new Dataset and Job IDs
+   *
+   * @param sessionData
+   */
+  changeIds(sessionData: SessionData) {
+    /*
+    Now we generate new IDs on the client. Now when we change the IDs anyway, maybe we should let the server generate them.
+    */
+
+    // map from old ID (key) to new ID (value)
+    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap.keys()).map((key) => [key, uuidv4()]));
+    const jobIdMap = new Map(Array.from(sessionData.jobsMap.keys()).map((key) => [key, uuidv4()]));
+
+    // maps for updated objects
+    const newDatasetsMap = new Map<string, Dataset>();
+    const newJobsMap = new Map<string, Job>();
+
+    // update datasets and their sourceJobIds
+    datasetIdMap.forEach((newId, oldId) => {
+      const dataset = sessionData.datasetsMap.get(oldId);
+      dataset.datasetId = newId;
+      if (dataset.sourceJob != null) {
+        const newSourceJobId = jobIdMap.get(dataset.sourceJob);
+        if (newSourceJobId == null) {
+          console.log("source job not found for dataset " + dataset.name);
+        } else {
+          dataset.sourceJob = newSourceJobId;
+        }
+      }
+      newDatasetsMap.set(dataset.datasetId, dataset);
+    });
+
+    // update jobs and their input datasetIds
+    jobIdMap.forEach((newId, oldId) => {
+      const job = sessionData.jobsMap.get(oldId);
+      job.jobId = newId;
+      if (job.inputs != null) {
+        job.inputs.forEach((input) => {
+          if (input.datasetId != null) {
+            const newDatasetId = datasetIdMap.get(input.datasetId);
+            if (newDatasetId == null) {
+              console.log("input dataset not found for job " + job.toolId);
+            } else {
+              input.datasetId = newDatasetId;
+            }
+          }
+        });
+      }
+      if (job.outputs != null) {
+        job.outputs.forEach((output) => {
+          if (output.datasetId != null) {
+            const newDatasetId = datasetIdMap.get(output.datasetId);
+            if (newDatasetId == null) {
+              console.log("output dataset not found for job " + job.toolId);
+            } else {
+              output.datasetId = newDatasetId;
+            }
+          }
+        });
+      }
+      newJobsMap.set(job.jobId, job);
+    });
+
+    sessionData.datasetsMap = newDatasetsMap;
+    sessionData.jobsMap = newJobsMap;
   }
 
   cancelJob(sessionId: string, job: Job) {

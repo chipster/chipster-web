@@ -1,0 +1,29 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ title }}</h4>
+</div>
+<div class="modal-body">
+  <div class="form-group">
+    <label for="value">{{ description }}</label>
+
+    <br />
+    <br />
+
+    <div ngbDropdown class="d-inline-block">
+      <button type="button" class="btn btn-outline-primary" id="value" ngbDropdownToggle>
+        {{ getOptionName(value) }}
+      </button>
+      <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+        <button ngbDropdownItem *ngFor="let key of optionKeys" (click)="select(key)">
+          {{ getOptionName(key) }}
+        </button>
+      </div>
+    </div>
+
+    <br />
+    <br />
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary float-end" (click)="cancel()">Cancel</button>
+    <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save()">{{ buttonText }}</button>
+  </div>
+</div>
