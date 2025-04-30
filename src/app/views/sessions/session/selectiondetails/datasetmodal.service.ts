@@ -107,7 +107,7 @@ export class DatasetModalService {
 
   public openCopyToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
     this.dialogModalService
-      .openSessionNameModal("Copy Selection to a New Session", sessionData.session.name + "_part", "Copy")
+      .openSessionNameModal("Copy Selected Files to a New Session", sessionData.session.name + "_part", "Copy")
       .pipe(
         mergeMap((name) => {
           log.info("copying selected datasets and jobs");
@@ -152,10 +152,10 @@ export class DatasetModalService {
 
           return this.dialogModalService.openOptionModal(
             "Merge session",
-            "Select session to merge. The selected session will be merged to the right side of the current session.",
+            "Select session to merge into the current session. The selected session will be merged to the right side of the current files.",
             sessionIdToNameMap,
             "Merge",
-            "Choose",
+            "Select",
           );
         }),
         mergeMap((sourceSessionId) => this.sessionResource.loadSession(sourceSessionId, true)),
