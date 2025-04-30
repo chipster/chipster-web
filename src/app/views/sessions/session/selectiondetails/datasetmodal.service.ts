@@ -142,4 +142,49 @@ export class DatasetModalService {
         error: (err) => this.restErrorService.showError("Copying selection failed", err),
       });
   }
+
+  openMergeSessionModal(sessionData: SessionData) {
+    this.sessionResource
+      .getSessions()
+      .pipe(
+        mergeMap((sessions) => {
+          const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
+
+          return this.dialogModalService.openOptionModal(
+            "Merge session",
+            "Select session to merge. The selected session will be merged to the right side of the current session.",
+            sessionIdToNameMap,
+            "Merge",
+            "Choose",
+          );
+        }),
+        mergeMap((sourceSessionId) => this.sessionResource.loadSession(sourceSessionId, true)),
+        mergeMap((sourceSessionData) => {
+          // find out the width of the current session workflow
+          const maxSourceX = Math.max(...Array.from(sessionData.datasetsMap.values()).map((d) => d.x));
+          // add the width of the dataset blob and little margin
+          const xOffset = maxSourceX + 100;
+
+          console.log("width of the current session is " + maxSourceX + ", move merged session by " + xOffset);
+
+          // move other session sideways
+          // we can modify sourceSessionData directly, because its our own copy which we just got from the server
+          Array.from(sourceSessionData.datasetsMap.values()).forEach((dataset) => {
+            // xOffset is -Infinity if the current session is empty
+            if (xOffset != null && xOffset > 0 && dataset.x != null) {
+              dataset.x = dataset.x + xOffset;
+            }
+          });
+
+          // generate new Dataset and Job IDs so that we can merge the same datasets several times
+          this.sessionResource.changeIds(sourceSessionData);
+
+          return this.sessionResource.copyToExistingSession(sessionData.session.sessionId, sourceSessionData);
+        }),
+      )
+      .subscribe({
+        next: (x) => console.log("completed session merge", x),
+        error: (err) => this.restErrorService.showError("failed to merge session", err),
+      });
+  }
 }
