@@ -105,7 +105,7 @@ export class SessionDetailsComponent {
   }
 
   mergeSessionModal() {
-    this.datasetModalService.openMergeSessionModal(this.sessionData);
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
   }
 
   getSessionSize() {

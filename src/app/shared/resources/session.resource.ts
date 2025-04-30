@@ -13,7 +13,6 @@ import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import _ from "lodash";
-import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class SessionResource {
@@ -578,74 +577,6 @@ export class SessionResource {
         return datasetsMap.has(input.datasetId);
       });
     }
-  }
-
-  /**
-   * Generate new Dataset and Job IDs
-   *
-   * @param sessionData
-   */
-  changeIds(sessionData: SessionData) {
-    /*
-    Now we generate new IDs on the client. Now when we change the IDs anyway, maybe we should let the server generate them.
-    */
-
-    // map from old ID (key) to new ID (value)
-    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap.keys()).map((key) => [key, uuidv4()]));
-    const jobIdMap = new Map(Array.from(sessionData.jobsMap.keys()).map((key) => [key, uuidv4()]));
-
-    // maps for updated objects
-    const newDatasetsMap = new Map<string, Dataset>();
-    const newJobsMap = new Map<string, Job>();
-
-    // update datasets and their sourceJobIds
-    datasetIdMap.forEach((newId, oldId) => {
-      const dataset = sessionData.datasetsMap.get(oldId);
-      dataset.datasetId = newId;
-      if (dataset.sourceJob != null) {
-        const newSourceJobId = jobIdMap.get(dataset.sourceJob);
-        if (newSourceJobId == null) {
-          console.log("source job not found for dataset " + dataset.name);
-        } else {
-          dataset.sourceJob = newSourceJobId;
-        }
-      }
-      newDatasetsMap.set(dataset.datasetId, dataset);
-    });
-
-    // update jobs and their input datasetIds
-    jobIdMap.forEach((newId, oldId) => {
-      const job = sessionData.jobsMap.get(oldId);
-      job.jobId = newId;
-      if (job.inputs != null) {
-        job.inputs.forEach((input) => {
-          if (input.datasetId != null) {
-            const newDatasetId = datasetIdMap.get(input.datasetId);
-            if (newDatasetId == null) {
-              console.log("input dataset not found for job " + job.toolId);
-            } else {
-              input.datasetId = newDatasetId;
-            }
-          }
-        });
-      }
-      if (job.outputs != null) {
-        job.outputs.forEach((output) => {
-          if (output.datasetId != null) {
-            const newDatasetId = datasetIdMap.get(output.datasetId);
-            if (newDatasetId == null) {
-              console.log("output dataset not found for job " + job.toolId);
-            } else {
-              output.datasetId = newDatasetId;
-            }
-          }
-        });
-      }
-      newJobsMap.set(job.jobId, job);
-    });
-
-    sessionData.datasetsMap = newDatasetsMap;
-    sessionData.jobsMap = newJobsMap;
   }
 
   cancelJob(sessionId: string, job: Job) {

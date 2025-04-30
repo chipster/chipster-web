@@ -1521,7 +1521,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           datasets = [d.dataset];
         }
 
-        self.datasetModalService.openCopyToNewSessionModal(datasets, self.sessionData);
+        self.datasetModalService.openCopySelectionToNewSessionModal(datasets, self.sessionData);
       },
     };
 

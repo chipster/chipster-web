@@ -70,7 +70,6 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   mergeSession() {
-    console.log("mergeSession()");
-    this.datasetModalService.openMergeSessionModal(this.sessionData);
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
   }
 }
