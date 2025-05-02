@@ -141,9 +141,9 @@ export class DatasetModalService {
 
           return this.dialogModalService.openOptionModal(
             "Copy Selected files to and Existing Session",
-            "Select a session into which the selected files will be copied. The selected files will be copied to the right side of the selected session.",
+            "Select a session into which the selected files will be copied. The files will be copied to the right side of the selected session.",
             sessionIdToNameMap,
-            "Merge",
+            "Copy",
             "Select",
           );
         }),
@@ -187,7 +187,7 @@ export class DatasetModalService {
 
           return this.dialogModalService.openOptionModal(
             "Merge session",
-            "Select a session to merge into the current session. The selected session will be merged to the right side of the current files.",
+            "Select a session to merge into the current session. The selected session will be merged to the right side of current files.",
             sessionIdToNameMap,
             "Merge",
             "Select",
