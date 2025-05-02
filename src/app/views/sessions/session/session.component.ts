@@ -337,17 +337,21 @@ export class SessionComponent implements OnInit, OnDestroy {
             // if the job has just failed
             if (
               newValue.state === JobState.ExpiredWaiting &&
-              (oldValue == null || oldValue.state !== JobState.ExpiredWaiting)
+              oldValue != null &&
+              oldValue.state !== JobState.ExpiredWaiting
             ) {
               this.openErrorModal("Job expired", newValue);
-            } else if (newValue.state === JobState.Failed && (oldValue == null || oldValue.state !== JobState.Failed)) {
+            } else if (newValue.state === JobState.Failed && oldValue != null && oldValue.state !== JobState.Failed) {
+              log.info("job event", change);
               this.openErrorModal("Job failed", newValue);
             } else if (
               newValue.state === JobState.FailedUserError &&
-              (oldValue == null || oldValue.state !== JobState.FailedUserError)
+              oldValue != null &&
+              oldValue.state !== JobState.FailedUserError
             ) {
+              log.info("job event", change);
               this.openErrorModal("Job failed", newValue);
-            } else if (newValue.state === JobState.Error && (oldValue == null || oldValue.state !== JobState.Error)) {
+            } else if (newValue.state === JobState.Error && oldValue != null && oldValue.state !== JobState.Error) {
               this.openErrorModal("Job error", newValue);
             }
           }
