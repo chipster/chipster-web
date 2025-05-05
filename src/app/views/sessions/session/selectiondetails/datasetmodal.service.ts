@@ -186,8 +186,8 @@ export class DatasetModalService {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
           return this.dialogModalService.openOptionModal(
-            "Merge session",
-            "Select a session to merge into the current session. The selected session will be merged to the right side of current files.",
+            "Select a Session to Merge into This Session",
+            "The selected session will be merged to the right side of current files.",
             sessionIdToNameMap,
             "Merge",
             "Select",
