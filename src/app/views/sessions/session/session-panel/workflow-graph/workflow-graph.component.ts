@@ -156,6 +156,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dividerMenuItem: any;
   showJobMenuItem: any;
   selectChildrenMenuItem: any;
+  copySelectedToNewSessionMenuItem: any;
+  copySelectedToExistingSessionMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
 
@@ -683,6 +685,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.groupsMenuItem,
 
             this.selectChildrenMenuItem,
+            this.copySelectedToNewSessionMenuItem,
+            this.copySelectedToExistingSessionMenuItem,
 
             { ...this.deleteMenuItem, title: "Delete " + self.selectedDatasets.length + " files" },
           ]
@@ -695,6 +699,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.dividerMenuItem,
             this.showJobMenuItem,
             this.selectChildrenMenuItem,
+            this.copySelectedToNewSessionMenuItem,
+            this.copySelectedToExistingSessionMenuItem,
             this.dividerMenuItem,
             this.deleteMenuItem,
           ];
@@ -1505,6 +1511,34 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       action(): void {
         const children = self.getSessionDataService.getChildren(self.selectionService.selectedDatasets);
         self.selectionHandlerService.setDatasetSelection(children);
+      },
+    };
+
+    this.copySelectedToNewSessionMenuItem = {
+      title: "Copy to a New Session",
+      action(d): void {
+        let datasets = self.selectionService.selectedDatasets;
+
+        // context menu can be opened for one dataset also without selection
+        if (datasets.length == 0) {
+          datasets = [d.dataset];
+        }
+
+        self.datasetModalService.openCopySelectionToNewSessionModal(datasets, self.sessionData);
+      },
+    };
+
+    this.copySelectedToExistingSessionMenuItem = {
+      title: "Copy to an Existing Session",
+      action(d): void {
+        let datasets = self.selectionService.selectedDatasets;
+
+        // context menu can be opened for one dataset also without selection
+        if (datasets.length == 0) {
+          datasets = [d.dataset];
+        }
+
+        self.datasetModalService.openCopySelectionToExistingSessionModal(datasets, self.sessionData);
       },
     };
 

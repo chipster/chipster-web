@@ -1,19 +1,16 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
-import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset } from "chipster-js-common";
-import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
-import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
-import { JobService } from "../../job.service";
 import { UploadModalComponent } from "./upload-modal.component";
+import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
+import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
   selector: "ch-add-dataset-modal",
   templateUrl: "./upload.component.html",
 })
 export class UploadComponent implements AfterViewInit, OnInit {
-  @Input() datasetsMap: Map<string, Dataset>;
-  @Input() sessionId: string;
+  @Input() sessionData: SessionData;
 
   @ViewChild("uploadFilesButton") uploadFilesButton;
   @ViewChild("uploadFolderButton") uploadFolderButton;
@@ -25,10 +22,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
   constructor(
     private modalService: NgbModal,
     private uploadService: UploadService,
-    private dialogModalService: DialogModalService,
-    private errorService: ErrorService,
-    private jobService: JobService,
-    private activeModal: NgbActiveModal
+    private datasetModalService: DatasetModalService,
   ) {}
 
   ngOnInit() {
@@ -42,17 +36,17 @@ export class UploadComponent implements AfterViewInit, OnInit {
         size: "lg",
       });
 
-      this.modalRef.componentInstance.sessionId = this.sessionId;
+      this.modalRef.componentInstance.sessionId = this.sessionData.session.sessionId;
       this.modalRef.componentInstance.flow = this.flow;
       this.modalOpen = true;
 
       this.modalRef.result.then(
-        (result) => {
+        () => {
           this.modalOpen = false;
         },
-        (reason) => {
+        () => {
           this.modalOpen = false;
-        }
+        },
       );
     }
 
@@ -73,5 +67,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
 
   downloadFromUrl() {
     this.uploadService.openDialogAndDowloadFromUrl();
+  }
+
+  mergeSession() {
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
   }
 }

@@ -18,6 +18,7 @@ import { SharingModalComponent } from "./share-session-modal/share-session-modal
 import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
 import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
+import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component";
 
 @Injectable()
 export class DialogModalService {
@@ -32,7 +33,7 @@ export class DialogModalService {
         }
         // real error
         throw err;
-      })
+      }),
     );
   }
 
@@ -47,6 +48,16 @@ export class DialogModalService {
     modalRef.componentInstance.description = description;
     modalRef.componentInstance.buttonText = buttonText;
     modalRef.componentInstance.placeHolder = "";
+    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+  }
+
+  openOptionModal(title, description, options, buttonText, placeholder) {
+    const modalRef = this.modalService.open(DropdownModalComponent);
+    modalRef.componentInstance.options = options;
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.description = description;
+    modalRef.componentInstance.buttonText = buttonText;
+    modalRef.componentInstance.placeHolder = placeholder;
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 

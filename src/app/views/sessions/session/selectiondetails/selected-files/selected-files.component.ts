@@ -104,6 +104,20 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
   }
 
+  copyToNewSession() {
+    this.datasetModalService.openCopySelectionToNewSessionModal(
+      this.selectionService.selectedDatasets,
+      this.sessionData,
+    );
+  }
+
+  copyToExistingSession() {
+    this.datasetModalService.openCopySelectionToExistingSessionModal(
+      this.selectionService.selectedDatasets,
+      this.sessionData,
+    );
+  }
+
   showJob() {
     this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
   }

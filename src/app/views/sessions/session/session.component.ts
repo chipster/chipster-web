@@ -337,17 +337,21 @@ export class SessionComponent implements OnInit, OnDestroy {
             // if the job has just failed
             if (
               newValue.state === JobState.ExpiredWaiting &&
-              (oldValue == null || oldValue.state !== JobState.ExpiredWaiting)
+              oldValue != null &&
+              oldValue.state !== JobState.ExpiredWaiting
             ) {
               this.openErrorModal("Job expired", newValue);
-            } else if (newValue.state === JobState.Failed && (oldValue == null || oldValue.state !== JobState.Failed)) {
+            } else if (newValue.state === JobState.Failed && oldValue != null && oldValue.state !== JobState.Failed) {
+              log.info("job event", change);
               this.openErrorModal("Job failed", newValue);
             } else if (
               newValue.state === JobState.FailedUserError &&
-              (oldValue == null || oldValue.state !== JobState.FailedUserError)
+              oldValue != null &&
+              oldValue.state !== JobState.FailedUserError
             ) {
+              log.info("job event", change);
               this.openErrorModal("Job failed", newValue);
-            } else if (newValue.state === JobState.Error && (oldValue == null || oldValue.state !== JobState.Error)) {
+            } else if (newValue.state === JobState.Error && oldValue != null && oldValue.state !== JobState.Error) {
               this.openErrorModal("Job error", newValue);
             }
           }
@@ -468,7 +472,14 @@ export class SessionComponent implements OnInit, OnDestroy {
   doScrollFix(): void {
     const scrollToTop = setInterval(() => {
       const div = document.getElementById("myDiv");
-      const visRect = document.getElementById("visTab").getBoundingClientRect();
+      const visTab = document.getElementById("visTab");
+      if (visTab == null) {
+        // view has already changed
+        // seems to happen at least when using "Copy to a New Session"
+        console.log("doScrollFix cancelled");
+        return;
+      }
+      const visRect = visTab.getBoundingClientRect();
       if (visRect.top < 1) {
         div.scrollTo(0, 0);
       } else {
