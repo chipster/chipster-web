@@ -1,5 +1,5 @@
 <div *ngIf="ready" class="">
-  <h2 class="h2-xs mt-1 mb-2">Run options</h2>
+  <!-- <h2 class="h2-xs mt-1 mb-2">Run options</h2> -->
   <table class="table table-sm text-sm table-condensed">
     <tbody>
       <tr>
@@ -43,7 +43,7 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td class="no-bottom-border">
           <span
             *ngIf="validatedTool.runForEachSampleValidation.valid"
             class="fas fa-fw fa-check-circle text-success"
@@ -52,8 +52,8 @@
             <i class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i>
           </span>
         </td>
-        <td class="text-nowrap">Run Tool for Each Sample</td>
-        <td>
+        <td class="text-nowrap" class="no-bottom-border">Run Tool for Each Sample</td>
+        <td class="no-bottom-border">
           <div *ngIf="validatedTool.runForEachSampleValidation.valid">
             {{ getRunForEachSampleDescription() }}
           </div>

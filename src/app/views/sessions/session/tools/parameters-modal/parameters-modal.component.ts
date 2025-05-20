@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
+import { Tool } from "chipster-js-common";
 
 @Component({
   selector: "ch-parameters-modal",
@@ -13,6 +14,7 @@ export class ParametersModalComponent {
 
   @Input() validatedTool: ValidatedTool;
   @Input() sessionData: SessionData;
+  @Input() origTool: Tool;
   @Output() parametersChanged = new EventEmitter();
   @Output() updateBindings = new EventEmitter();
   @Output() resourcesChanged = new EventEmitter();

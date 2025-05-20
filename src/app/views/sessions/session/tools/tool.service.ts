@@ -349,4 +349,16 @@ export class ToolService {
     }
     return null;
   }
+
+  getMemoryRatio() {
+    return 8;
+  }
+
+  getCpuRatio() {
+    return 2;
+  }
+
+  getMaxSlots() {
+    return 10;
+  }
 }

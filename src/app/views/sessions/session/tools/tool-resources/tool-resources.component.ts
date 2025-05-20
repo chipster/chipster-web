@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
-import { ToolParameter } from "chipster-js-common";
+import { Tool, ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
 import { ToolService } from "../tool.service";
@@ -12,6 +12,7 @@ import { ValidatedTool } from "../ToolSelection";
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;
+  @Input() origTool: Tool;
 
   @Output() resourcesChanged: EventEmitter<any> = new EventEmitter();
 
@@ -23,9 +24,9 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   memory: number;
   cpu: number;
 
-  memoryRatio = 8;
-  cpuRatio = 2;
-  maxSlots = 10;
+  memoryRatio = this.toolService.getMemoryRatio();
+  cpuRatio = this.toolService.getCpuRatio();
+  maxSlots = this.toolService.getMaxSlots();
 
   private resourceChangedThrottle = new Subject<any>();
 
@@ -50,6 +51,11 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       this.showWarning = !this.validatedTool.resourcesValidation.valid;
       this.warningText = this.validatedTool.resourcesValidation.message;
 
+      // init with slots from tool
+      if (this.validatedTool.resources.slotCount == null) {
+        this.validatedTool.resources.slotCount = this.validatedTool.tool.slotCount;
+      }
+
       let slots = this.validatedTool.resources.slotCount;
 
       if (slots == null) {
@@ -69,11 +75,15 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
 
   onCpuChanged() {
     this.validatedTool.resources.slotCount = this.cpu / this.cpuRatio;
+    // save slots when dataset is changed. It's ugly to modify the tool, but parameters are stored there too
+    this.validatedTool.tool.slotCount = this.validatedTool.resources.slotCount;
     this.resourceChangedThrottle.next(null);
   }
 
   onMemoryChanged() {
     this.validatedTool.resources.slotCount = this.memory / this.memoryRatio;
+    // save slots when dataset is changed. It's ugly to modify the tool, but parameters are stored there too
+    this.validatedTool.tool.slotCount = this.validatedTool.resources.slotCount;
     this.resourceChangedThrottle.next(null);
   }
 
@@ -82,12 +92,13 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetAll() {
-    this.validatedTool.resources.slotCount = this.validatedTool.tool.slotCount;
+    this.validatedTool.tool.slotCount = this.origTool.slotCount;
+    this.validatedTool.resources.slotCount = this.origTool.slotCount;
     this.resourcesChanged.emit();
   }
 
   isResetAllVisible() {
-    return this.validatedTool?.tool?.slotCount !== this.validatedTool?.resources?.slotCount;
+    return this.origTool.slotCount !== this.validatedTool?.resources?.slotCount;
   }
 
   isResetVisible(): boolean {

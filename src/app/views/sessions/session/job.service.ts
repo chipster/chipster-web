@@ -23,7 +23,7 @@ export class JobService {
     private restErrorService: RestErrorService,
     private datasetService: DatasetService,
     private toolSelectionService: ToolSelectionService,
-    private dialogModalService: DialogModalService
+    private dialogModalService: DialogModalService,
   ) {}
 
   static isRunning(job: Job): boolean {
@@ -55,7 +55,7 @@ export class JobService {
         }
         const millis = UtilsService.millisecondsBetweenDates(startDate, now);
         return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
-      }, distinctUntilChanged())
+      }, distinctUntilChanged()),
     );
   }
 
@@ -72,7 +72,7 @@ export class JobService {
 
     // for each file, create new ValidatedTool
     const reboundValidatedTools = validatedTool.selectedDatasets.map((dataset) =>
-      this.toolSelectionService.rebindWithNewDatasetsAndValidate([dataset], validatedTool, sessionData)
+      this.toolSelectionService.rebindWithNewDatasetsAndValidate([dataset], validatedTool, sessionData),
     );
 
     // // debug print
@@ -90,7 +90,7 @@ export class JobService {
 
     // TODO check that all validatedTools are valid
     const invalidValidatedToolsForSamples = reboundValidatedTools.filter(
-      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false
+      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false,
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details
@@ -102,7 +102,7 @@ export class JobService {
 
     // create jobs from ValidatedTools
     const jobs: Job[] = reboundValidatedTools.map((sampleValidatedTool: ValidatedTool) =>
-      this.createJob(sampleValidatedTool)
+      this.createJob(sampleValidatedTool),
     );
 
     // submit
@@ -123,12 +123,12 @@ export class JobService {
     const validatedToolsForSamples = this.toolSelectionService.getValidatedToolForEachSample(
       validatedTool,
       validatedTool.sampleGroups,
-      sessionData
+      sessionData,
     );
 
     // check that all rebound validatedTools are valid
     const invalidValidatedToolsForSamples = validatedToolsForSamples.filter(
-      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false
+      (sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid === false,
     );
     if (invalidValidatedToolsForSamples.length > 0) {
       // FIXME add details
@@ -140,7 +140,7 @@ export class JobService {
 
     // create jobs from ValidatedTools
     const jobs: Job[] = validatedToolsForSamples.map((sampleValidatedTool: ValidatedTool) =>
-      this.createJob(sampleValidatedTool)
+      this.createJob(sampleValidatedTool),
     );
 
     // submit
@@ -248,12 +248,20 @@ export class JobService {
         content: this.datasetService.getOwnPhenodata(binding.dataset),
       }));
 
+    // resources
+    if (validatedTool.resources.slotCount != null) {
+      // maybe job should have only slots instead
+      // ToolResourcesComponent uses GiB, Job.memoryLimit is in bytes
+      job.memoryLimit = validatedTool.resources.slotCount * this.toolService.getMemoryRatio() * 1024 * 1024 * 1024;
+      job.cpuLimit = validatedTool.resources.slotCount * this.toolService.getCpuRatio();
+    }
+
     return job;
   }
 
   getApplicationVersions(job: Job) {
     const applicationVersionFiles = job.metadataFiles.filter(
-      (metadataFile: MetadataFile) => metadataFile.name === this.APPLICATION_VERSIONS_FILENAME
+      (metadataFile: MetadataFile) => metadataFile.name === this.APPLICATION_VERSIONS_FILENAME,
     );
 
     if (applicationVersionFiles.length < 1) {

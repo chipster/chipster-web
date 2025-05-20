@@ -11,13 +11,13 @@
   <!-- parameters -->
   <div class="row">
     <div class="col">
-      <h2 class="h2-xs mt-1 mb-2">Computing resources</h2>
+      <!-- <h2 class="h2-xs mt-1 mb-2">Computing resources</h2> -->
     </div>
 
     <div class="col">
       <button
         *ngIf="isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        class="btn btn-sm btn-outline-secondary me-1 mb-2 float-end"
         (click)="resetAll()"
         title="Reset all">
         <span class="fas fa-fw fa-undo text-primary" aria-hidden="true"></span>
@@ -25,7 +25,7 @@
       </button>
       <button
         *ngIf="!isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        class="btn btn-sm btn-outline-secondary me-1 mb-2 float-end"
         (click)="resetAll()"
         title="Reset all"
         [disabled]="true">
@@ -84,7 +84,7 @@
           </td>
         </tr>
         <tr>
-          <td style="width: 60%">
+          <td style="width: 60%" class="no-bottom-border">
             <!-- parameter name -->
             CPU
             <!-- parameter description -->
@@ -95,7 +95,7 @@
 
           <!-- parameter value -->
 
-          <td>
+          <td class="no-bottom-border">
             <!-- number -->
             <input
               class="w-100"
@@ -115,7 +115,7 @@
           </td>
 
           <!-- buttons -->
-          <td>
+          <td class="no-bottom-border">
             <!-- reset to default -->
             <button
               type="button"

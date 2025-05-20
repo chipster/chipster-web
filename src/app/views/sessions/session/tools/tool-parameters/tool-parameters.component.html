@@ -11,13 +11,13 @@
   <!-- parameters -->
   <div class="row">
     <div class="col">
-      <h2 class="h2-xs mt-1 mb-2">Parameters</h2>
+      <!-- <h2 class="h2-xs mt-1 mb-2">Parameters</h2> -->
     </div>
 
     <div class="col">
       <button
         *ngIf="isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        class="btn btn-sm btn-outline-secondary me-1 mb-2 float-end"
         (click)="resetAll()"
         title="Reset all">
         <span class="fas fa-fw fa-undo text-primary" aria-hidden="true"></span>
@@ -25,7 +25,7 @@
       </button>
       <button
         *ngIf="!isResetAllVisible()"
-        class="btn btn-sm btn-outline-secondary me-1 float-end"
+        class="btn btn-sm btn-outline-secondary me-1 mb-2 float-end"
         (click)="resetAll()"
         title="Reset all"
         [disabled]="true">
@@ -40,8 +40,8 @@
 
     <table class="table table-sm" *ngIf="validatedTool.tool.parameters.length > 0">
       <tbody>
-        <tr *ngFor="let parameter of validatedTool.tool.parameters; let i = index">
-          <td style="width: 60%">
+        <tr *ngFor="let parameter of validatedTool.tool.parameters; let i = index; let isLast = last">
+          <td style="width: 60%" [class.no-bottom-border]="isLast">
             <!-- parameter name -->
             {{ getDisplayName(parameter) }}
             <!-- <span class="text-sm text-muted" *ngIf="parameter.optional">
@@ -54,7 +54,7 @@
 
           <!-- parameter value -->
 
-          <td>
+          <td [class.no-bottom-border]="isLast">
             <!-- selection parameter -->
             <select
               *ngIf="toolService.isSelectionParameter(parameter)"
@@ -99,7 +99,7 @@
           </td>
 
           <!-- buttons -->
-          <td>
+          <td [class.no-bottom-border]="isLast">
             <!-- reset to default -->
             <button
               type="button"

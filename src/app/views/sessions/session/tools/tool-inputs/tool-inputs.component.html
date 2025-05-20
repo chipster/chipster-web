@@ -1,12 +1,12 @@
 <div *ngIf="ready" class="">
-  <h2 class="h2-xs mt-3 mb-2">Input files</h2>
+  <!-- <h2 class="h2-xs mt-3 mb-2">Input files</h2> -->
   <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">No Inputs</div>
 
   <!-- <form name="inputsForm" *ngIf="tool"> -->
   <table class="table table-sm" *ngIf="bindingModels.length > 0">
     <tbody>
-      <tr *ngFor="let bindingModel of bindingModels">
-        <td style="width: 60%">
+      <tr *ngFor="let bindingModel of bindingModels; let isLast = last">
+        <td style="width: 60%" [class.no-bottom-border]="isLast">
           <!-- input name -->
           {{ getDisplayName(bindingModel.input) }}
 
@@ -20,7 +20,7 @@
         </td>
 
         <!-- file selction dropdown -->
-        <td>
+        <td [class.no-bottom-border]="isLast">
           <!-- single input -->
           <select
             *ngIf="bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced"
@@ -65,7 +65,7 @@
         </td>
 
         <!-- align with parameters, which have the reset button -->
-        <td>
+        <td [class.no-bottom-border]="isLast">
           <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-end">
             <i class="fas fa-undo"></i>
           </button>

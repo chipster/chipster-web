@@ -175,7 +175,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.errorService.showError("Cannot select module: " + this.modules, null);
     }
 
-    this.toolsMap = new Map(this.toolsArray.map((entry: any) => [entry.key, entry.value]));
+    this.toolsMap = new Map(this.toolsArray.map((tool: Tool) => [tool.name.id, tool]));
   }
 
   ngOnDestroy() {
@@ -691,11 +691,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   openParametersModal() {
+    const origTool = this.toolsMap.get(this.validatedTool.tool.name.id);
+
     this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
     this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
     this.parametersModalRef.componentInstance.sessionData = this.sessionData;
+    this.parametersModalRef.componentInstance.origTool = origTool;
     this.parametersModalRef.componentInstance.parametersChanged.subscribe({
       next: () => this.onParametersChanged(),
     });

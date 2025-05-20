@@ -4,13 +4,67 @@
 </div>
 
 <div class="modal-body">
-  <ch-tool-parameters [validatedTool]="validatedTool" (parametersChanged)="onParametersChanged()"></ch-tool-parameters>
-  <ch-tool-inputs
-    [validatedTool]="validatedTool"
-    [sessionData]="sessionData"
-    (updateBindings)="setBindings($event)"></ch-tool-inputs>
-  <ch-tool-resources [validatedTool]="validatedTool" (resourcesChanged)="onResourcesChanged()"></ch-tool-resources>
-  <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
+  <div ngbAccordion>
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Parameters</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <ch-tool-parameters
+              [validatedTool]="validatedTool"
+              (parametersChanged)="onParametersChanged()"></ch-tool-parameters>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Input Files</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <ch-tool-inputs
+              [validatedTool]="validatedTool"
+              [sessionData]="sessionData"
+              (updateBindings)="setBindings($event)"></ch-tool-inputs>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Run Options</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="true">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Computing Resources</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <ch-tool-resources
+              [validatedTool]="validatedTool"
+              [origTool]="origTool"
+              (resourcesChanged)="onResourcesChanged()"></ch-tool-resources>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-footer">
