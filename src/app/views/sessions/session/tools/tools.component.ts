@@ -557,7 +557,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     combineLatest([
       this.store.select("selectedToolWithValidatedParams"),
       // .pipe(filter((value) => value !== null)),
-      this.resourcesChanged$, // signals when user changes parameters
+      this.resourcesChanged$, // signals when user changes resources
     ])
       .pipe(
         takeUntil(this.unsubscribe),

@@ -46,19 +46,15 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges() {
     if (this.validatedTool != null) {
-      console.log("validated tool", this.validatedTool);
+      console.log("ngOnChanges() validated tool", this.validatedTool);
       this.ready = true;
       this.showWarning = !this.validatedTool.resourcesValidation.valid;
       this.warningText = this.validatedTool.resourcesValidation.message;
 
-      // init with slots from tool
-      if (this.validatedTool.resources.slotCount == null) {
-        this.validatedTool.resources.slotCount = this.validatedTool.tool.slotCount;
-      }
-
-      let slots = this.validatedTool.resources.slotCount;
+      let slots = this.validatedTool.tool.slotCount;
 
       if (slots == null) {
+        console.log("slots is null, set to 1");
         slots = 1;
       }
       this.cpu = slots * this.cpuRatio;
@@ -74,16 +70,16 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onCpuChanged() {
-    this.validatedTool.resources.slotCount = this.cpu / this.cpuRatio;
     // save slots when dataset is changed. It's ugly to modify the tool, but parameters are stored there too
-    this.validatedTool.tool.slotCount = this.validatedTool.resources.slotCount;
+    this.validatedTool.tool.slotCount = this.cpu / this.cpuRatio;
+
     this.resourceChangedThrottle.next(null);
   }
 
   onMemoryChanged() {
-    this.validatedTool.resources.slotCount = this.memory / this.memoryRatio;
     // save slots when dataset is changed. It's ugly to modify the tool, but parameters are stored there too
-    this.validatedTool.tool.slotCount = this.validatedTool.resources.slotCount;
+    this.validatedTool.tool.slotCount = this.memory / this.memoryRatio;
+
     this.resourceChangedThrottle.next(null);
   }
 
@@ -93,12 +89,11 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
 
   resetAll() {
     this.validatedTool.tool.slotCount = this.origTool.slotCount;
-    this.validatedTool.resources.slotCount = this.origTool.slotCount;
     this.resourcesChanged.emit();
   }
 
   isResetAllVisible() {
-    return this.origTool.slotCount !== this.validatedTool?.resources?.slotCount;
+    return this.origTool.slotCount !== this.validatedTool.tool.slotCount;
   }
 
   isResetVisible(): boolean {

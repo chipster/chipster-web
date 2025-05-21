@@ -121,9 +121,6 @@ export class ToolSelectionService {
         valid: parametersValid,
         message: "Invalid parameters", // TODO add more details
       },
-      resources: {
-        slotCount: null,
-      },
       parametersValidationResults: parametersValidations,
       ...toolWithValidatedInputs,
     };
@@ -323,6 +320,8 @@ export class ToolSelectionService {
     let resourceValidations = this.getResourceValidations(toolWithValidatedParameters);
     const resourcesValid = Array.from(resourceValidations.values()).every((result: ValidationResult) => result.valid);
 
+    log.info("validateResources()", resourceValidations);
+
     return {
       resourcesValidation: {
         valid: resourcesValid,
@@ -335,8 +334,8 @@ export class ToolSelectionService {
 
   getResourceValidations(toolWithValidatedParameters: SelectedToolWithValidatedParameters) {
     const resourcesValidations = new Map<string, ValidationResult>();
-    if (toolWithValidatedParameters.resources.slotCount != null) {
-      if (!Number.isInteger(toolWithValidatedParameters.resources.slotCount as number)) {
+    if (toolWithValidatedParameters.tool.slotCount != null) {
+      if (!Number.isInteger(toolWithValidatedParameters.tool.slotCount as number)) {
         resourcesValidations.set("slots", {
           valid: false,
           message: "Value must be an integer",
@@ -344,7 +343,7 @@ export class ToolSelectionService {
       }
       // min limit
       // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
-      else if (+toolWithValidatedParameters.resources.slotCount < 1) {
+      else if (+toolWithValidatedParameters.tool.slotCount < 1) {
         resourcesValidations.set("slots", {
           valid: false,
           message: "Value too low",

@@ -249,11 +249,11 @@ export class JobService {
       }));
 
     // resources
-    if (validatedTool.resources.slotCount != null) {
+    if (validatedTool.tool.slotCount != null) {
       // maybe job should have only slots instead
       // ToolResourcesComponent uses GiB, Job.memoryLimit is in bytes
-      job.memoryLimit = validatedTool.resources.slotCount * this.toolService.getMemoryRatio() * 1024 * 1024 * 1024;
-      job.cpuLimit = validatedTool.resources.slotCount * this.toolService.getCpuRatio();
+      job.memoryLimit = validatedTool.tool.slotCount * this.toolService.getMemoryRatio() * 1024 * 1024 * 1024;
+      job.cpuLimit = validatedTool.tool.slotCount * this.toolService.getCpuRatio();
     }
 
     return job;
