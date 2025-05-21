@@ -623,6 +623,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
         this.runEnabled =
           tool &&
+          tool.resourcesValidation.valid &&
           (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
         this.paramButtonWarning = !this.runEnabled;
         this.paramButtonChanged = this.toolSelectionService.parametersHaveBeenChanged(tool);
