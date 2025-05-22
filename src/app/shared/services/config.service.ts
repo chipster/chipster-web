@@ -28,7 +28,10 @@ export class ConfigService {
   private chipsterConf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
 
-  constructor(private configurationResource: ConfigurationResource, private tokenService: TokenService) {}
+  constructor(
+    private configurationResource: ConfigurationResource,
+    private tokenService: TokenService,
+  ) {}
 
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {
@@ -51,7 +54,7 @@ export class ConfigService {
       this.publicServices$ = this.getChipsterConfiguration().pipe(
         mergeMap((conf) => this.configurationResource.getPublicServices(conf)),
         publishReplay(1),
-        refCount()
+        refCount(),
       );
     }
     return this.publicServices$;
@@ -61,7 +64,7 @@ export class ConfigService {
     return this.getConfiguration().pipe(
       mergeMap((conf) => this.configurationResource.getInternalServices(conf, token)),
       publishReplay(1),
-      refCount()
+      refCount(),
     );
   }
 
@@ -93,6 +96,10 @@ export class ConfigService {
     return this.getPublicUri(Role.TOOLBOX);
   }
 
+  getSchedulerUrl(): Observable<string> {
+    return this.getPublicUri(Role.SCHEDULER);
+  }
+
   getTypeService(): Observable<string> {
     return this.getPublicUri(Role.TYPE_SERVICE);
   }
@@ -119,7 +126,7 @@ export class ConfigService {
       map((conf) => {
         log.debug("get conf key", key, conf);
         return conf[key];
-      })
+      }),
     );
   }
 
@@ -130,7 +137,7 @@ export class ConfigService {
   getPublicUri(role: string): Observable<string> {
     return this.getPublicServices().pipe(
       map((services) => this.getFirstByRole(role, services)),
-      map((s) => s.publicUri)
+      map((s) => s.publicUri),
     );
   }
 

@@ -250,10 +250,16 @@ export class JobService {
 
     // resources
     if (validatedTool.tool.slotCount != null) {
-      // maybe job should have only slots instead
+      // job should have slots directly to avoid using cpu/memory ratios here (SchedulerResource.getQuotas() would be async)
       // ToolResourcesComponent uses GiB, Job.memoryLimit is in bytes
-      job.memoryLimit = validatedTool.tool.slotCount * this.toolService.getMemoryRatio() * 1024 * 1024 * 1024;
-      job.cpuLimit = validatedTool.tool.slotCount * this.toolService.getCpuRatio();
+      job.memoryLimit = validatedTool.tool.slotCount * 8 * 1024 * 1024 * 1024;
+      job.cpuLimit = validatedTool.tool.slotCount * 2;
+    }
+
+    if (validatedTool.tool.storage != null) {
+      // Job.storageLimit is in bytes
+      //TODO add a new field for storageLimit (but comp fill overwrite this)
+      job.storageUsage = validatedTool.tool.storage * 1024 * 1024 * 1024;
     }
 
     return job;

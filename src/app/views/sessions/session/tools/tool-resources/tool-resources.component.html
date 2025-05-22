@@ -38,90 +38,46 @@
   <form name="paramForm" *ngIf="validatedTool.tool">
     <table class="table table-sm">
       <tbody>
-        <tr>
-          <td style="width: 60%">
+        <tr *ngFor="let id of keys(resources); let isLast = last">
+          <td style="width: 60%" [class.no-bottom-border]="isLast">
             <!-- parameter name -->
-            Memory
+            {{ resources[id].title }}
 
             <!-- parameter description -->
             <div class="text-sm text-muted">
-              Maximum amount of memory (RAM) for the tool (GiB). Memory and CPU are adjusted together.
+              {{ resources[id].description }}
             </div>
           </td>
 
           <!-- parameter value -->
 
-          <td>
+          <td [class.no-bottom-border]="isLast">
             <!-- number -->
             <input
               class="w-100"
               type="number"
-              [(ngModel)]="memory"
-              name="memory"
-              min="{{ memoryRatio }}"
-              max="{{ memoryRatio * maxSlots }}"
-              step="{{ memoryRatio }}"
+              [(ngModel)]="resources[id].value"
+              name="{{ id }}"
+              min="{{ resources[id].min }}"
+              max="{{ resources[id].max }}"
+              step="{{ resources[id].step }}"
               required="false"
-              (ngModelChange)="onMemoryChanged()" />
+              (ngModelChange)="onResourceChanged(id)" />
 
             <!-- validation message -->
-            <div *ngIf="!getSlotsValidation().valid" class="alert alert-warning p-1 mb-0 mt-1 text-sm">
-              {{ getSlotsValidation().message }}
+            <div *ngIf="!getResourceValidation(id).valid" class="alert alert-warning p-1 mb-0 mt-1 text-sm">
+              {{ getResourceValidation(id).message }}
             </div>
           </td>
 
           <!-- buttons -->
-          <td>
+          <td [class.no-bottom-border]="isLast">
             <!-- reset to default -->
             <button
               type="button"
               class="btn btn-sm btn-outline-dark btn-no-border float-end"
-              [class.invisible]="!isResetVisible()"
-              (click)="resetSlots($event)"
-              title="Reset to default">
-              <i class="fas fa-undo text-primary"></i>
-            </button>
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 60%" class="no-bottom-border">
-            <!-- parameter name -->
-            CPU
-            <!-- parameter description -->
-            <div class="text-sm text-muted">
-              Maximum number of CPU cores the tool is allowed to use. Memory and CPU are adjusted together.
-            </div>
-          </td>
-
-          <!-- parameter value -->
-
-          <td class="no-bottom-border">
-            <!-- number -->
-            <input
-              class="w-100"
-              type="number"
-              [(ngModel)]="cpu"
-              name="cpu"
-              min="{{ cpuRatio }}"
-              max="{{ cpuRatio * maxSlots }}"
-              step="{{ cpuRatio }}"
-              required="false"
-              (ngModelChange)="onCpuChanged()" />
-
-            <!-- validation message -->
-            <div *ngIf="!getSlotsValidation().valid" class="alert alert-warning p-1 mb-0 mt-1 text-sm">
-              {{ getSlotsValidation().message }}
-            </div>
-          </td>
-
-          <!-- buttons -->
-          <td class="no-bottom-border">
-            <!-- reset to default -->
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-dark btn-no-border float-end"
-              [class.invisible]="!isResetVisible()"
-              (click)="resetSlots($event)"
+              [class.invisible]="!isResetVisible(id)"
+              (click)="reset(id)"
               title="Reset to default">
               <i class="fas fa-undo text-primary"></i>
             </button>

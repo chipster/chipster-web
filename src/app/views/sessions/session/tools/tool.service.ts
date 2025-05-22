@@ -10,17 +10,17 @@ import { TsvService } from "../../../../shared/services/tsv.service";
 import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
 import { SelectionOption } from "../SelectionOption";
-import { SessionDataService } from "../session-data.service";
 import { SelectedToolWithInputs } from "./ToolSelection";
+import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
 
 @Injectable()
 export class ToolService {
   constructor(
     private typeTagService: TypeTagService,
-    private sessionDataService: SessionDataService,
     private tsvService: TsvService,
     private configService: ConfigService,
     private getSessionDataService: GetSessionDataService,
+    private schedulerResource: SchedulerResource,
   ) {}
 
   isSelectionParameter(parameter: ToolParameter) {
@@ -348,17 +348,5 @@ export class ToolService {
       return tool !== undefined ? tool : null;
     }
     return null;
-  }
-
-  getMemoryRatio() {
-    return 8;
-  }
-
-  getCpuRatio() {
-    return 2;
-  }
-
-  getMaxSlots() {
-    return 10;
   }
 }

@@ -320,8 +320,6 @@ export class ToolSelectionService {
     let resourceValidations = this.getResourceValidations(toolWithValidatedParameters);
     const resourcesValid = Array.from(resourceValidations.values()).every((result: ValidationResult) => result.valid);
 
-    log.info("validateResources()", resourceValidations);
-
     return {
       resourcesValidation: {
         valid: resourcesValid,
@@ -333,26 +331,52 @@ export class ToolSelectionService {
   }
 
   getResourceValidations(toolWithValidatedParameters: SelectedToolWithValidatedParameters) {
+    // we should utilize limits from ToolResourceComponent.Resources
     const resourcesValidations = new Map<string, ValidationResult>();
-    if (toolWithValidatedParameters.tool.slotCount != null) {
-      if (!Number.isInteger(toolWithValidatedParameters.tool.slotCount as number)) {
-        resourcesValidations.set("slots", {
-          valid: false,
-          message: "Value must be an integer",
-        });
-      }
-      // min limit
-      // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
-      else if (+toolWithValidatedParameters.tool.slotCount < 1) {
-        resourcesValidations.set("slots", {
-          valid: false,
-          message: "Value too low",
-        });
-      } else {
-        resourcesValidations.set("slots", {
-          valid: true,
-        });
-      }
+    if (toolWithValidatedParameters.tool.slotCount == null) {
+      resourcesValidations.set("slots", {
+        valid: true,
+      });
+    } else if (!Number.isInteger(toolWithValidatedParameters.tool.slotCount as number)) {
+      resourcesValidations.set("slots", {
+        valid: false,
+        message: "Value must be an integer",
+      });
+    }
+    // min limit
+    // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+    else if (+toolWithValidatedParameters.tool.slotCount < 1) {
+      resourcesValidations.set("slots", {
+        valid: false,
+        message: "Value too low",
+      });
+    } else {
+      resourcesValidations.set("slots", {
+        valid: true,
+      });
+    }
+
+    if (toolWithValidatedParameters.tool.storage == null) {
+      resourcesValidations.set("storage", {
+        valid: true,
+      });
+    } else if (!Number.isInteger(toolWithValidatedParameters.tool.storage as number)) {
+      resourcesValidations.set("storage", {
+        valid: false,
+        message: "Value must be an integer",
+      });
+    }
+    // min limit
+    // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+    else if (+toolWithValidatedParameters.tool.storage < 1) {
+      resourcesValidations.set("storage", {
+        valid: false,
+        message: "Value too low",
+      });
+    } else {
+      resourcesValidations.set("storage", {
+        valid: true,
+      });
     }
 
     return resourcesValidations;

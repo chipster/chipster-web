@@ -41,6 +41,7 @@ import { TypeTagService } from "./services/typetag.service";
 import { UserService } from "./services/user.service";
 import { WebSocketService } from "./services/websocket.service";
 import { TabService } from "./services/tab.service";
+import { SchedulerResource } from "./resources/scheduler-resource";
 
 /*
  * @description: Shared module should contain application global resources
@@ -72,6 +73,7 @@ import { TabService } from "./services/tab.service";
     TsvService,
     ConfigurationResource,
     ToolResource,
+    SchedulerResource,
     SessionWorkerResource,
     FileResource,
     SessionResource,
