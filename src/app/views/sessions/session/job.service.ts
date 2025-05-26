@@ -12,6 +12,7 @@ import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ValidatedTool } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
+import { SchedulerResource } from "../../../shared/resources/scheduler-resource";
 
 @Injectable()
 export class JobService {
@@ -24,6 +25,7 @@ export class JobService {
     private datasetService: DatasetService,
     private toolSelectionService: ToolSelectionService,
     private dialogModalService: DialogModalService,
+    private schedulerResource: SchedulerResource,
   ) {}
 
   static isRunning(job: Job): boolean {
@@ -250,10 +252,11 @@ export class JobService {
 
     // resources
     if (validatedTool.tool.slotCount != null) {
-      // job should have slots directly to avoid using cpu/memory ratios here (SchedulerResource.getQuotas() would be async)
+      // job should have slots directly to avoid using cpu/memory ratios here
       // ToolResourcesComponent uses GiB, Job.memoryLimit is in bytes
-      job.memoryLimit = validatedTool.tool.slotCount * 8 * 1024 * 1024 * 1024;
-      job.cpuLimit = validatedTool.tool.slotCount * 2;
+      job.memoryLimit =
+        validatedTool.tool.slotCount * this.schedulerResource.getJobQuota().memoryRatio * 1024 * 1024 * 1024;
+      job.cpuLimit = validatedTool.tool.slotCount * this.schedulerResource.getJobQuota().cpuRatio;
     }
 
     if (validatedTool.tool.storage != null) {

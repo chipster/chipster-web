@@ -149,11 +149,15 @@
         <div style="position: relative; height: 100%">
           <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
             <div class="row mb-2">
-              <div class="col d-flex" *ngIf="selectedTool.tool.name.id !== validatedTool.tool.name.id">
+              <div
+                class="col d-flex"
+                *ngIf="validatedTool == null || selectedTool.tool.name.id !== validatedTool.tool.name.id">
                 <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
                 &nbsp; Validating tool inputs...
               </div>
-              <div class="col d-flex" *ngIf="selectedTool.tool.name.id === validatedTool.tool.name.id">
+              <div
+                class="col d-flex"
+                *ngIf="validatedTool != null && selectedTool.tool.name.id === validatedTool.tool.name.id">
                 <!-- parameters -->
                 <button
                   class="btn btn-sm btn-outline-secondary me-1"

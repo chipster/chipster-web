@@ -47,6 +47,7 @@ import {
 } from "./ToolSelection";
 import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
 import { ToolService } from "./tool.service";
+import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -148,6 +149,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     dropdownConfig: NgbDropdownConfig,
     private ngbModal: NgbModal,
+    private schedulerResource: SchedulerResource,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     // eslint-disable-next-line no-param-reassign
@@ -565,7 +567,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (toolWithValidatedParams == null) {
             return null;
           }
-          return this.toolSelectionService.validateResources(toolWithValidatedParams);
+          return this.toolSelectionService.validateResources(
+            toolWithValidatedParams,
+            this.schedulerResource.getJobQuota(),
+          );
         }),
       )
       .subscribe((toolWithValidatedResources: SelectedToolWithValidatedResources) => {

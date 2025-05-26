@@ -13,6 +13,7 @@ import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import _ from "lodash";
+import { SchedulerResource } from "./scheduler-resource";
 
 @Injectable()
 export class SessionResource {
@@ -20,6 +21,7 @@ export class SessionResource {
     private configService: ConfigService,
     private http: HttpClient,
     private tokenService: TokenService,
+    private schedulerResource: SchedulerResource,
   ) {}
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
@@ -87,14 +89,23 @@ export class SessionResource {
             }),
           );
 
+        // not really part of session, but let's initilize it to avoid async calls later
+        const jobQuota = this.schedulerResource.initJobQuota();
+
         // catch all errors to prevent forkJoin from cancelling other requests, which will make ugly server logs
-        return this.forkJoinWithoutCancel([session$, sessionDatasets$, sessionJobs$, types$]);
+        return this.forkJoinWithoutCancel({
+          session: session$,
+          datasets: sessionDatasets$,
+          jobs: sessionJobs$,
+          types: types$,
+          jobQuota: jobQuota,
+        });
       }),
       map((param: Array<{}>) => {
-        const session: Session = param[0] as Session;
-        const datasets: Dataset[] = param[1] as Dataset[];
-        const jobs: Job[] = param[2] as Job[];
-        const types = param[3] as Map<string, Map<string, string>>;
+        const session: Session = param["session"] as Session;
+        const datasets: Dataset[] = param["datasets"] as Dataset[];
+        const jobs: Job[] = param["jobs"] as Job[];
+        const types = param["types"] as Map<string, Map<string, string>>;
 
         const data = new SessionData();
 
@@ -153,16 +164,18 @@ export class SessionResource {
    * @param observables
    * @returns {Observable<any>}
    */
-  forkJoinWithoutCancel(observables): Observable<unknown> {
+  forkJoinWithoutCancel(observables: Object): Observable<unknown> {
     const errors = [];
-    const catchedObservables = observables.map((o) =>
-      o.pipe(
+    const catchedObservables = {};
+
+    for (const key in observables) {
+      catchedObservables[key] = observables[key].pipe(
         catchError((err) => {
           errors.push(err);
           return observableOf(null);
         }),
-      ),
-    );
+      );
+    }
     return forkJoin(catchedObservables).pipe(
       map((res) => {
         if (errors.length > 0) {

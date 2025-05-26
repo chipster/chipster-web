@@ -23,6 +23,7 @@ import {
   ValidationResult,
 } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
+import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
 
 @Injectable()
 export class ToolSelectionService {
@@ -31,6 +32,7 @@ export class ToolSelectionService {
     private getSessionDataService: GetSessionDataService,
     private datasetService: DatasetService,
     private store: Store<any>,
+    private schedulerResource: SchedulerResource,
   ) {}
 
   selectToolById(moduleId: string, categoryName: string, toolId: string) {
@@ -316,8 +318,9 @@ export class ToolSelectionService {
 
   validateResources(
     toolWithValidatedParameters: SelectedToolWithValidatedParameters,
+    quotas: JobQuota,
   ): SelectedToolWithValidatedResources {
-    let resourceValidations = this.getResourceValidations(toolWithValidatedParameters);
+    let resourceValidations = this.getResourceValidations(toolWithValidatedParameters, quotas);
     const resourcesValid = Array.from(resourceValidations.values()).every((result: ValidationResult) => result.valid);
 
     return {
@@ -330,56 +333,53 @@ export class ToolSelectionService {
     };
   }
 
-  getResourceValidations(toolWithValidatedParameters: SelectedToolWithValidatedParameters) {
-    // we should utilize limits from ToolResourceComponent.Resources
+  getResourceValidations(toolWithValidatedParameters: SelectedToolWithValidatedParameters, quotas: JobQuota) {
     const resourcesValidations = new Map<string, ValidationResult>();
-    if (toolWithValidatedParameters.tool.slotCount == null) {
-      resourcesValidations.set("slots", {
-        valid: true,
-      });
-    } else if (!Number.isInteger(toolWithValidatedParameters.tool.slotCount as number)) {
-      resourcesValidations.set("slots", {
-        valid: false,
-        message: "Value must be an integer",
-      });
-    }
-    // min limit
-    // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
-    else if (+toolWithValidatedParameters.tool.slotCount < 1) {
-      resourcesValidations.set("slots", {
-        valid: false,
-        message: "Value too low",
-      });
-    } else {
-      resourcesValidations.set("slots", {
-        valid: true,
-      });
-    }
 
-    if (toolWithValidatedParameters.tool.storage == null) {
-      resourcesValidations.set("storage", {
-        valid: true,
-      });
-    } else if (!Number.isInteger(toolWithValidatedParameters.tool.storage as number)) {
-      resourcesValidations.set("storage", {
-        valid: false,
-        message: "Value must be an integer",
-      });
-    }
-    // min limit
-    // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
-    else if (+toolWithValidatedParameters.tool.storage < 1) {
-      resourcesValidations.set("storage", {
-        valid: false,
-        message: "Value too low",
-      });
-    } else {
-      resourcesValidations.set("storage", {
-        valid: true,
-      });
-    }
+    resourcesValidations.set(
+      "slots",
+      this.getResourceValidation(toolWithValidatedParameters.tool.slotCount, quotas.defaultSlots, quotas.maxSlots),
+    );
+
+    resourcesValidations.set(
+      "storage",
+      this.getResourceValidation(toolWithValidatedParameters.tool.storage, quotas.defaultStorage, quotas.maxStorage),
+    );
 
     return resourcesValidations;
+  }
+
+  getResourceValidation(value: any, min: number, max: number) {
+    console.log(value, min, max, typeof value, typeof value === "number");
+    if (value == null) {
+      // null is a valid request, then scheduler and comp can use defaults
+      return {
+        valid: true,
+      };
+      // allow floats too, to get better error message when user enters e.g. 1 (cpu) and value is 0.5 (slots)
+    } else if (typeof value !== "number") {
+      return {
+        valid: false,
+        message: "Value must be a number",
+      };
+    }
+    // min limit
+    // we have just checked that the value is a number, but use '+' to cast it so that TypeScript knows it too
+    else if (+value < min) {
+      return {
+        valid: false,
+        message: "Value too low",
+      };
+    } else if (+value > max) {
+      return {
+        valid: false,
+        message: "Value too high",
+      };
+    } else {
+      return {
+        valid: true,
+      };
+    }
   }
 
   validateInputs(toolWithInputs: SelectedToolWithInputs): ValidationResult {
@@ -713,7 +713,9 @@ export class ToolSelectionService {
     const newToolWithValidatedParams = this.validateParameters(newToolWithValidatedInputs);
 
     // validate resources
-    const newToolWithValidatedResources = this.validateResources(newToolWithValidatedParams);
+    const quotas = this.schedulerResource.getJobQuota();
+
+    const newToolWithValidatedResources = this.validateResources(newToolWithValidatedParams, quotas);
 
     // get validated tool
     const newValidatedTool = this.getValidatedTool(newToolWithValidatedResources, sessionData, false);

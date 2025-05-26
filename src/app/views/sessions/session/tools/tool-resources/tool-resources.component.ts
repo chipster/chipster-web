@@ -6,7 +6,7 @@ import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { Quotas, SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
+import { JobQuota, SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
 
 interface Resource {
   title: string;
@@ -15,6 +15,7 @@ interface Resource {
   max: number;
   step: number;
   value: number;
+  outputRatio: number;
 }
 
 interface Resources {
@@ -36,13 +37,6 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   ready = false;
   showWarning: boolean;
   warningText: string;
-
-  memoryRatio;
-  cpuRatio;
-  maxSlots;
-  defaultSlots;
-  defaultStorage;
-  maxStorage;
 
   resources: Resources;
 
@@ -66,72 +60,64 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
-    this.schedulerResource.getQuotas().subscribe({
-      next: (quotas: Quotas) => {
-        this.cpuRatio = quotas.cpuRatio;
-        this.memoryRatio = quotas.memoryRatio;
-        this.defaultSlots = quotas.defaultSlots;
-        this.defaultStorage = quotas.defaultStorage;
-        this.maxSlots = quotas.maxSlots;
-        this.maxStorage = quotas.maxStorage;
+    const quotas = this.schedulerResource.getJobQuota();
 
-        this.resources = {
-          memory: {
-            title: "Memory",
-            description: "Maximum amount of memory (RAM) for the tool (GiB). Memory and CPU are adjusted together.",
-            min: this.memoryRatio,
-            max: this.memoryRatio * this.maxSlots,
-            step: this.memoryRatio,
-            value: null,
-          },
-          cpu: {
-            title: "CPU",
-            description:
-              "Maximum number of CPU cores the tool is allowed to use. Memory and CPU are adjusted together.",
-            min: this.cpuRatio,
-            max: this.cpuRatio * this.maxSlots,
-            step: this.cpuRatio,
-            value: null,
-          },
-          storage: {
-            title: "Storage",
-            description: "Maximum amount of file storage for the tool (GiB).",
-            min: this.defaultStorage,
-            max: this.maxStorage,
-            step: this.defaultStorage,
-            value: null,
-          },
-        };
-
-        if (this.validatedTool != null) {
-          this.ready = true;
-          this.showWarning = !this.validatedTool.resourcesValidation.valid;
-          this.warningText = this.validatedTool.resourcesValidation.message;
-
-          let slots = this.validatedTool.tool.slotCount;
-
-          if (slots == null) {
-            // log.info("slots is null, set to " + this.defaultSlots);
-            slots = this.defaultSlots;
-          }
-
-          this.resources.cpu.value = slots * this.cpuRatio;
-          this.resources.memory.value = slots * this.memoryRatio;
-
-          let storage = this.validatedTool.tool.storage;
-
-          if (storage == null) {
-            // log.info("storage is null, set to " + this.defaultStorage);
-            storage = this.defaultStorage;
-          }
-
-          this.resources.storage.value = storage;
-        } else {
-          this.ready = false;
-        }
+    this.resources = {
+      memory: {
+        title: "Memory",
+        description: "Maximum amount of memory (RAM) for the tool (GiB). Memory and CPU are adjusted together.",
+        min: quotas.memoryRatio,
+        max: quotas.memoryRatio * quotas.maxSlots,
+        step: quotas.memoryRatio,
+        value: null,
+        outputRatio: quotas.memoryRatio,
       },
-      error: (err) => this.restErrorService.showError("failed to get quotas", err),
-    });
+      cpu: {
+        title: "CPU",
+        description: "Maximum number of CPU cores the tool is allowed to use. Memory and CPU are adjusted together.",
+        min: quotas.cpuRatio,
+        max: quotas.cpuRatio * quotas.maxSlots,
+        step: quotas.cpuRatio,
+        value: null,
+        outputRatio: quotas.cpuRatio,
+      },
+      storage: {
+        title: "Storage",
+        description: "Maximum amount of file storage for the tool (GiB).",
+        min: quotas.defaultStorage,
+        max: quotas.maxStorage,
+        step: quotas.defaultStorage,
+        value: null,
+        outputRatio: 1,
+      },
+    };
+
+    if (this.validatedTool != null) {
+      this.ready = true;
+      this.showWarning = !this.validatedTool.resourcesValidation.valid;
+      this.warningText = this.validatedTool.resourcesValidation.message;
+
+      let slots = this.validatedTool.tool.slotCount;
+
+      if (slots == null) {
+        // log.info("slots is null, set to " + this.defaultSlots);
+        slots = quotas.defaultSlots;
+      }
+
+      this.resources.cpu.value = slots * quotas.cpuRatio;
+      this.resources.memory.value = slots * quotas.memoryRatio;
+
+      let storage = this.validatedTool.tool.storage;
+
+      if (storage == null) {
+        // log.info("storage is null, set to " + this.defaultStorage);
+        storage = quotas.defaultStorage;
+      }
+
+      this.resources.storage.value = storage;
+    } else {
+      this.ready = false;
+    }
   }
 
   ngOnDestroy() {
@@ -143,13 +129,13 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
     // it's ugly to modify the tool, but parameters are stored there too
     switch (id) {
       case "memory":
-        this.validatedTool.tool.slotCount = this.resources[id].value / this.memoryRatio;
+        this.validatedTool.tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
         break;
       case "cpu":
-        this.validatedTool.tool.slotCount = this.resources[id].value / this.cpuRatio;
+        this.validatedTool.tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
         break;
       case "storage":
-        this.validatedTool.tool.storage = this.resources[id].value;
+        this.validatedTool.tool.storage = this.resources[id].value / this.resources[id].outputRatio;
         break;
     }
 
