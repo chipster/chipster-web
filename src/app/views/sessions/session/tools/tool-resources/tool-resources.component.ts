@@ -97,6 +97,19 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       this.showWarning = !this.validatedTool.resourcesValidation.valid;
       this.warningText = this.validatedTool.resourcesValidation.message;
 
+      if (this.origTool.slotCount == null) {
+        // use lower max limit for tools that doesn't define any # SLOTS
+        // just to limit careless use, no need to check in server side
+        this.resources.cpu.max = quotas.cpuRatio * quotas.preferredSlots;
+        this.resources.memory.max = quotas.memoryRatio * quotas.preferredSlots;
+      }
+
+      if (this.origTool.storage == null) {
+        // use lower max limit for tools that doesn't define any # STORAGE
+        // just to limit careless use, no need to check in server side
+        this.resources.storage.max = quotas.preferredStorage;
+      }
+
       let slots = this.validatedTool.tool.slotCount;
 
       if (slots == null) {

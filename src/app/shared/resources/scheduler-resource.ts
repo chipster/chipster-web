@@ -12,6 +12,8 @@ export interface JobQuota {
   maxStorage: number;
   defaultSlots: number;
   defaultStorage: number;
+  preferredSlots: number;
+  preferredStorage: number;
 }
 
 @Injectable()
@@ -37,6 +39,8 @@ export class SchedulerResource {
             maxStorage: resp["max-storage"],
             defaultSlots: resp["default-slots"],
             defaultStorage: resp["default-storage"],
+            preferredSlots: resp["preferred-slots"],
+            preferredStorage: resp["preferred-storage"],
           };
         }),
         tap((quotas) => {
