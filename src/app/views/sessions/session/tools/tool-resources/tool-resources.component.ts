@@ -6,7 +6,7 @@ import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { JobQuota, SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
+import { SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
 
 interface Resource {
   title: string;

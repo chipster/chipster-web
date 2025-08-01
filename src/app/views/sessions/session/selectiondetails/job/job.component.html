@@ -38,12 +38,12 @@
 
         <tr>
           <td class="lighter" style="white-space: nowrap">Memory usage:</td>
-          <td>{{ job.memoryUsage | bytes : 0 }} / {{ job.memoryLimit | bytes : 0 }}</td>
+          <td>{{ job.memoryUsage | bytes: 0 }} / {{ job.memoryLimit | bytes: 0 }}</td>
         </tr>
 
         <tr>
           <td class="lighter" style="white-space: nowrap">Storage usage:</td>
-          <td>{{ job.storageUsage | bytes : 0 }}</td>
+          <td>{{ job.storageUsage | bytes: 0 }} / {{ job.storageLimit | bytes: 0 }}</td>
         </tr>
 
         <tr *ngIf="failed">

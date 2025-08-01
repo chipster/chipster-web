@@ -252,17 +252,12 @@ export class JobService {
 
     // resources
     if (validatedTool.tool.slotCount != null) {
-      // job should have slots directly to avoid using cpu/memory ratios here
-      // ToolResourcesComponent uses GiB, Job.memoryLimit is in bytes
-      job.memoryLimit =
-        validatedTool.tool.slotCount * this.schedulerResource.getJobQuota().memoryRatio * 1024 * 1024 * 1024;
-      job.cpuLimit = validatedTool.tool.slotCount * this.schedulerResource.getJobQuota().cpuRatio;
+      job.slotLimit = validatedTool.tool.slotCount;
     }
 
     if (validatedTool.tool.storage != null) {
-      // Job.storageLimit is in bytes
-      //TODO add a new field for storageLimit (but comp fill overwrite this)
-      job.storageUsage = validatedTool.tool.storage * 1024 * 1024 * 1024;
+      // Job.storageLimit is in bytes, but Tool.storage in GiB
+      job.storageLimit = validatedTool.tool.storage * 1024 * 1024 * 1024;
     }
 
     return job;
