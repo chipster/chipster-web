@@ -34,7 +34,9 @@ export class OidcService {
     let appId;
 
     this.oidcConfigs$ = this.configService.get(ConfigService.KEY_APP_ID).pipe(
-      tap((id) => (appId = id)),
+      tap((id) => {
+        appId = id;
+      }),
       mergeMap(() => this.configService.getAuthUrl()),
       mergeMap((authUrl) => this.httpClient.get(authUrl + "/oidc/configs")),
       map((configs: OidcConfig[]) =>
@@ -70,8 +72,8 @@ export class OidcService {
     localStorage.setItem(this.keyOidcName, oidcConfig.oidcName);
 
     // wait until managers are created
-    this.oidcConfigs$.subscribe(
-      () => {
+    this.oidcConfigs$.subscribe({
+      next: () => {
         const extraQueryParams = {};
         if (oidcConfig.parameter) {
           const keyValues = oidcConfig.parameter.split(" ");
@@ -82,7 +84,7 @@ export class OidcService {
               return;
             }
             const split = keyValue.split("=");
-            if (split.length != 2) {
+            if (split.length !== 2) {
               log.warn("oidc parameter parsing failed: " + keyValue);
               return;
             }
@@ -102,8 +104,8 @@ export class OidcService {
           this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
         }
       },
-      (err) => this.restErrorService.showError("oidc config error", err),
-    );
+      error: (err) => this.restErrorService.showError("oidc config error", err),
+    });
   }
 
   completeAuthentication() {
@@ -123,12 +125,12 @@ export class OidcService {
         }),
         mergeMap((user) => this.getAndSaveToken(user, returnUrl)),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.newsService.updateNews();
           this.routeService.navigateAbsolute(returnUrl);
         },
-        (err) => {
+        error: (err) => {
           let message = "oidc error";
           // at least OIDC login with missing userinfo claims sends a sensible message
           if (err.error && err.error.length > 0) {
@@ -136,7 +138,7 @@ export class OidcService {
           }
           this.restErrorService.showError(message, err);
         },
-      );
+      });
   }
 
   getAndSaveToken(user, returnUrl: string) {
