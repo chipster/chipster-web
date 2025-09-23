@@ -39,9 +39,8 @@
         <li class="nav-item" *ngIf="isAdmin()">
           <a class="nav-link" [routerLink]="routerLinkAdmin" routerLinkActive="active">Admin</a>
         </li>
-
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="" (click)="openNews()">
+          <a class="nav-link cursor-pointer" [routerLink]="" (click)="openNews()">
             News
             <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i>
 
