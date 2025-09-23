@@ -5,6 +5,7 @@ import { UserManager } from "oidc-client";
 import { from, Observable } from "rxjs";
 import { map, mergeMap, share, tap } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
+import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "../../views/login/oidc-config";
 import { RestErrorService } from "../errorhandler/rest-error.service";
@@ -23,7 +24,8 @@ export class OidcService {
     private httpClient: HttpClient,
     private restErrorService: RestErrorService,
     private routeService: RouteService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private newsService: NewsService,
   ) {
     this.init();
   }
@@ -38,7 +40,7 @@ export class OidcService {
       map((configs: OidcConfig[]) =>
         configs
           // allow separate oidc configs for different apps
-          .filter((oidc) => oidc.appId === appId)
+          .filter((oidc) => oidc.appId === appId),
       ),
       tap((configs: OidcConfig[]) => {
         configs.forEach((oidc) => {
@@ -56,7 +58,7 @@ export class OidcService {
           this.managers.set(oidc.oidcName, manager);
         });
       }),
-      share()
+      share(),
     );
   }
 
@@ -100,7 +102,7 @@ export class OidcService {
           this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
         }
       },
-      (err) => this.restErrorService.showError("oidc config error", err)
+      (err) => this.restErrorService.showError("oidc config error", err),
     );
   }
 
@@ -119,10 +121,11 @@ export class OidcService {
           const manager = this.managers.get(oidcName);
           return from(manager.signinRedirectCallback());
         }),
-        mergeMap((user) => this.getAndSaveToken(user, returnUrl))
+        mergeMap((user) => this.getAndSaveToken(user, returnUrl)),
       )
       .subscribe(
         () => {
+          this.newsService.updateNews();
           this.routeService.navigateAbsolute(returnUrl);
         },
         (err) => {
@@ -132,7 +135,7 @@ export class OidcService {
             message = err.error;
           }
           this.restErrorService.showError(message, err);
-        }
+        },
       );
   }
 
@@ -147,12 +150,12 @@ export class OidcService {
           },
           {
             responseType: "text",
-          }
-        )
+          },
+        ),
       ),
       tap((token: string) => {
         this.authenticationService.saveToken(token);
-      })
+      }),
     );
   }
 
