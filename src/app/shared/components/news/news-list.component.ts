@@ -16,7 +16,10 @@ export class NewsListComponent implements OnInit {
   public state: LoadState;
   public errorMessage: string = "";
 
-  constructor(private newsService: NewsService, private restErrorService: RestErrorService) {}
+  constructor(
+    private newsService: NewsService,
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngOnInit(): void {
     this.getNews();
@@ -31,10 +34,7 @@ export class NewsListComponent implements OnInit {
       },
       error: (error) => {
         log.warn("get news failed", error);
-        this.errorMessage =
-          error.status === 401 || error.status === 403
-            ? "For now, you need to log in to see the news."
-            : "Getting news failed.";
+        this.errorMessage = "Getting news failed.";
         this.state = LoadState.Fail;
       },
     });
@@ -47,7 +47,7 @@ export class NewsListComponent implements OnInit {
       },
       error: (error) => {
         log.warn("add news failed", error);
-        this.restErrorService.showErrorAdmin("Add news failed.", error);
+        this.restErrorService.showErrorAdmin("Adding news failed.", error);
       },
       complete: () => this.getNews(),
     });
