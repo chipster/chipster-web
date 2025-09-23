@@ -42,49 +42,13 @@
         <li class="nav-item">
           <a class="nav-link cursor-pointer" [routerLink]="" (click)="openNews()">
             News
-            <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i>
-
-            <!-- <span class="fa-layers fa-fw">
-            <i class="fa-solid fa-circle"></i>
-            <span class="fa-layers-text fa-inverse" data-fa-transform="shrink-10 down-3" style="font-weight: 800">
-              27
+            <!-- <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i> -->
+            <span *ngIf="isLoggedIn() && unreadNewsCount > 0" class="badge bg-primary rounded-pill">
+              {{ unreadNewsCount }}
             </span>
-          </span>
-
-          <span class="fa-layers fa-fw" style="background: MistyRose">
-            <i class="fa-solid fa-envelope"></i>
-            <span class="fa-layers-counter" style="background: Tomato">1,419</span>
-          </span>
-
-          <span class="fa-stack fa-2x">
-            <i class="fa-solid fa-square fa-stack-2x"></i>
-            <i class="fab fa-1 fa-stack-1x fa-inverse"></i>
-          </span> -->
-            <!-- Version 5.3 released -->
           </a>
         </li>
-
-        <!-- <li class="nav-item ms-4">
-        <a class="nav-link" [routerLink]="" (click)="openNotifications()">
-          <i class="text-info fas fa-fw fa-exclamation-circle"></i>
-          Version 5.3 released
-        </a>
-      </li>
- -->
-        <!-- <li class="nav-item ms-4">
-        <a class="nav-link" [routerLink]="" (click)="note()"><i
-            class="text-warning fas fa-fw fa-exclamation-circle"></i> NOTE: Phenodata issue partly solved</a>
-      </li> -->
-
-        <!--
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <li class="nav-item">
-        <a class="nav-link disabled">
-          <i class="fas fa-exclamation-triangle"></i>
-          Service in limited use!
-        </a>
-      </li>
-      --></ul>
+      </ul>
 
       <ul class="navbar-nav">
         <li *ngIf="isLoggedIn()" class="nav-item" ngbDropdown>

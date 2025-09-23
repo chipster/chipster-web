@@ -32,6 +32,7 @@ export class NavigationComponent implements OnInit {
 
   news: NewsItem[];
   unreadNews: boolean = false;
+  unreadNewsCount: number = 0; // Add this new property
 
   constructor(
     private tokenService: TokenService,
@@ -41,7 +42,7 @@ export class NavigationComponent implements OnInit {
     private dialogModalService: DialogModalService,
     private modalService: NgbModal,
     private newsService: NewsService,
-    private preferencesService: PreferencesService
+    private preferencesService: PreferencesService,
   ) {}
 
   ngOnInit() {
@@ -63,7 +64,7 @@ export class NavigationComponent implements OnInit {
         // why error service doesn't show these reliably?
         log.error("failed to get the custom css path", err);
         this.errorService.showError("failed to get the custom css path", err);
-      }
+      },
     );
 
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
@@ -78,7 +79,7 @@ export class NavigationComponent implements OnInit {
         // why error service doesn't show these reliably?
         log.error("failed to get the app name", err);
         this.errorService.showError("failed to get the app name", err);
-      }
+      },
     );
 
     // news
@@ -100,8 +101,12 @@ export class NavigationComponent implements OnInit {
         if (this.news != null && this.news.length > 0) {
           this.preferencesService.getNewsReadTime().subscribe({
             next: (lastReadTime: Date) => {
+              // Calculate both unread flag and count
               this.unreadNews =
                 lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
+              this.unreadNewsCount = this.news.filter(
+                (item) => lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(item),
+              ).length;
             },
           });
         }
@@ -141,6 +146,7 @@ export class NavigationComponent implements OnInit {
     this.dialogModalService.openNewsModal(this.news).subscribe({
       complete: () => {
         this.unreadNews = false;
+        this.unreadNewsCount = 0; // Reset the count when news modal is closed
       },
     });
   }
