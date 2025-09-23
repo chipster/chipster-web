@@ -143,11 +143,17 @@ export class NavigationComponent implements OnInit {
   }
 
   public openNews() {
-    this.dialogModalService.openNewsModal(this.news).subscribe({
-      complete: () => {
-        this.unreadNews = false;
-        this.unreadNewsCount = 0; // Reset the count when news modal is closed
-      },
-    });
+    if (this.isLoggedIn()) {
+      this.dialogModalService.openNewsModal(this.news).subscribe({
+        complete: () => {
+          this.unreadNews = false;
+          this.unreadNewsCount = 0; // Reset the count when news modal is closed
+        },
+      });
+    } else {
+      this.dialogModalService
+        .openNotificationModal("Not logged in", "For now, you need to log in to see the news.")
+        .subscribe();
+    }
   }
 }
