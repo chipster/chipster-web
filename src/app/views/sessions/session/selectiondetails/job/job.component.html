@@ -1,148 +1,177 @@
 <h3 class="h3-xs mt-4">Job Details</h3>
-<div *ngIf="!job" class="fst-italic text-smaller">Select job to see details</div>
+@if (!job) {
+  <div class="fst-italic text-smaller">Select job to see details</div>
+}
 
-<div *ngIf="job">
-  <div class="border p-3 pb-0" style="background-color: white">
-    <table class="table table-sm text-sm align-top mb-0">
-      <tbody>
-        <tr>
-          <td class="lighter">Tool:</td>
-          <td class="wide-max" width="100%">{{ job.toolCategory + " / " + job.toolName }}</td>
-        </tr>
-
-        <tr>
-          <td class="lighter">Status:</td>
-          <td class="wide-max">
-            {{ state }}
-            <span *ngIf="isRunning && job.stateDetail">- {{ job.stateDetail }}</span>
-            <button *ngIf="isRunning" class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
-          </td>
-        </tr>
-        <tr>
-          <td class="lighter">Created:</td>
-          <td class="wide-max" width="100%">{{ job.created | localDate }}</td>
-        </tr>
-        <tr>
-          <td class="lighter">Started:</td>
-          <td class="wide-max" width="100%">{{ job.startTime | localDate }}</td>
-        </tr>
-        <tr>
-          <td class="lighter">Ended:</td>
-          <td>{{ job.endTime | localDate }}</td>
-        </tr>
-
-        <tr *ngIf="duration != null">
-          <td class="lighter">Duration:</td>
-          <td>{{ duration | async }}</td>
-        </tr>
-
-        <tr>
-          <td class="lighter" style="white-space: nowrap">Memory usage:</td>
-          <td>{{ job.memoryUsage | bytes: 0 }} / {{ job.memoryLimit | bytes: 0 }}</td>
-        </tr>
-
-        <tr>
-          <td class="lighter" style="white-space: nowrap">Storage usage:</td>
-          <td>{{ job.storageUsage | bytes: 0 }} / {{ job.storageLimit | bytes: 0 }}</td>
-        </tr>
-
-        <tr *ngIf="failed">
-          <td class="lighter" style="white-space: nowrap">Error message:</td>
-          <td class="wide-max">
-            <pre *ngIf="job.stateDetail">{{ job.stateDetail }}</pre>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="lighter">Parameters:</td>
-          <td class="ps-0">
-            <ch-dataset-parameter-list
-              [parameters]="parameterListForView"
-              [parametersLimit]="-1"
+@if (job) {
+  <div>
+    <div class="border p-3 pb-0" style="background-color: white">
+      <table class="table table-sm text-sm align-top mb-0">
+        <tbody>
+          <tr>
+            <td class="lighter">Tool:</td>
+            <td class="wide-max" width="100%">{{ job.toolCategory + " / " + job.toolName }}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Status:</td>
+            <td class="wide-max">
+              {{ state }}
+              @if (isRunning && job.stateDetail) {
+                <span>- {{ job.stateDetail }}</span>
+              }
+              @if (isRunning) {
+                <button class="btn btn-sm btn-link" (click)="cancelJob()">Cancel</button>
+              }
+            </td>
+          </tr>
+          <tr>
+            <td class="lighter">Created:</td>
+            <td class="wide-max" width="100%">{{ job.created | localDate }}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Started:</td>
+            <td class="wide-max" width="100%">{{ job.startTime | localDate }}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Ended:</td>
+            <td>{{ job.endTime | localDate }}</td>
+          </tr>
+          @if (duration != null) {
+            <tr>
+              <td class="lighter">Duration:</td>
+              <td>{{ duration | async }}</td>
+            </tr>
+          }
+          <tr>
+            <td class="lighter" style="white-space: nowrap">Memory usage:</td>
+            <td>{{ job.memoryUsage | bytes: 0 }} / {{ job.memoryLimit | bytes: 0 }}</td>
+          </tr>
+          <tr>
+            <td class="lighter" style="white-space: nowrap">Storage usage:</td>
+            <td>{{ job.storageUsage | bytes: 0 }} / {{ job.storageLimit | bytes: 0 }}</td>
+          </tr>
+          @if (failed) {
+            <tr>
+              <td class="lighter" style="white-space: nowrap">Error message:</td>
+              <td class="wide-max">
+                @if (job.stateDetail) {
+                  <pre>{{ job.stateDetail }}</pre>
+                }
+              </td>
+            </tr>
+          }
+          <tr>
+            <td class="lighter">Parameters:</td>
+            <td class="ps-0">
+              <ch-dataset-parameter-list
+                [parameters]="parameterListForView"
+                [parametersLimit]="-1"
               [tool]="tool"></ch-dataset-parameter-list>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="lighter">Input files:</td>
-          <td class="table-td">
-            <table class="table table-sm mb-0">
-              <tbody>
-                <tr *ngFor="let input of inputListForView">
-                  <td style="width: 60%; white-space: nowrap">
-                    {{ input.displayName || input.inputId }}
-                  </td>
-
-                  <td *ngIf="hasDataset(input.datasetId)">
-                    <ch-link-button class="no-underline-link-button" (click)="selectDataset(input.datasetId)">
-                      {{ getDatasetName(input.datasetId) }}
-                    </ch-link-button>
-                  </td>
-                  <td *ngIf="!hasDataset(input.datasetId)">(deleted)</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td class="lighter">Result files:</td>
-          <td class="table-td">
-            <table class="table table-sm mb-0">
-              <tbody>
-                <tr *ngFor="let output of outputListForView">
-                  <td style="width: 60%; white-space: nowrap">
-                    {{ output.displayName || output.outputId }}
-                  </td>
-
-                  <td *ngIf="hasDataset(output.datasetId)">
-                    <ch-link-button class="no-underline-link-button" (click)="selectDataset(output.datasetId)">
-                      {{ getDatasetName(output.datasetId) }}
-                    </ch-link-button>
-                  </td>
-                  <td *ngIf="!hasDataset(output.datasetId)">(deleted)</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="lighter text-nowrap">Application versions:</td>
-          <td class="p-0">
-            <table class="table table-sm">
-              <tbody>
-                <tr *ngFor="let appVersion of getApplicationVersions()">
-                  <td *ngIf="appVersion.application !== 'R Session Info'" class="label-td">
-                    {{ appVersion.application }}
-                  </td>
-                  <td *ngIf="appVersion.application !== 'R' && appVersion.application !== 'R Session Info'">
-                    <pre class="m-0">{{ appVersion.version }}</pre>
-                  </td>
-                  <td *ngIf="appVersion.application === 'R'">
-                    <pre class="d-inline m-0">{{ appVersion.version }}</pre>
-                    <span>
-                      <ch-link-button class="no-underline-link-button ms-2" (click)="toggleRSessionInfo()">
-                        <span *ngIf="rSessionInfoVisible">Hide</span>
-                        <span *ngIf="!rSessionInfoVisible">Show</span>
-                        R session info
-                      </ch-link-button>
-                    </span>
-
-                    <pre *ngIf="rSessionInfoVisible" class="mt-2">{{ getRSessionInfo() }}</pre>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="lighter">Input files:</td>
+            <td class="table-td">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  @for (input of inputListForView; track input) {
+                    <tr>
+                      <td style="width: 60%; white-space: nowrap">
+                        {{ input.displayName || input.inputId }}
+                      </td>
+                      @if (hasDataset(input.datasetId)) {
+                        <td>
+                          <ch-link-button class="no-underline-link-button" (click)="selectDataset(input.datasetId)">
+                            {{ getDatasetName(input.datasetId) }}
+                          </ch-link-button>
+                        </td>
+                      }
+                      @if (!hasDataset(input.datasetId)) {
+                        <td>(deleted)</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="lighter">Result files:</td>
+            <td class="table-td">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  @for (output of outputListForView; track output) {
+                    <tr>
+                      <td style="width: 60%; white-space: nowrap">
+                        {{ output.displayName || output.outputId }}
+                      </td>
+                      @if (hasDataset(output.datasetId)) {
+                        <td>
+                          <ch-link-button class="no-underline-link-button" (click)="selectDataset(output.datasetId)">
+                            {{ getDatasetName(output.datasetId) }}
+                          </ch-link-button>
+                        </td>
+                      }
+                      @if (!hasDataset(output.datasetId)) {
+                        <td>(deleted)</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="lighter text-nowrap">Application versions:</td>
+            <td class="p-0">
+              <table class="table table-sm">
+                <tbody>
+                  @for (appVersion of getApplicationVersions(); track appVersion) {
+                    <tr>
+                      @if (appVersion.application !== 'R Session Info') {
+                        <td class="label-td">
+                          {{ appVersion.application }}
+                        </td>
+                      }
+                      @if (appVersion.application !== 'R' && appVersion.application !== 'R Session Info') {
+                        <td>
+                          <pre class="m-0">{{ appVersion.version }}</pre>
+                        </td>
+                      }
+                      @if (appVersion.application === 'R') {
+                        <td>
+                          <pre class="d-inline m-0">{{ appVersion.version }}</pre>
+                          <span>
+                            <ch-link-button class="no-underline-link-button ms-2" (click)="toggleRSessionInfo()">
+                              @if (rSessionInfoVisible) {
+                                <span>Hide</span>
+                              }
+                              @if (!rSessionInfoVisible) {
+                                <span>Show</span>
+                              }
+                              R session info
+                            </ch-link-button>
+                          </span>
+                          @if (rSessionInfoVisible) {
+                            <pre class="mt-2">{{ getRSessionInfo() }}</pre>
+                          }
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="h3-xs mt-4">Screen Output</h3>
+    <div class="text-sm bg-white border container">
+      <pre style="margin-bottom: 0em">{{ screenOutput }}</pre>
+      @if (isRunning) {
+        <i class="fas fa-circle-notch fa-spin fa-fw"></i>
+      }
+    </div>
   </div>
-
-  <h3 class="h3-xs mt-4">Screen Output</h3>
-
-  <div class="text-sm bg-white border container">
-    <pre style="margin-bottom: 0em">{{ screenOutput }}</pre>
-    <i *ngIf="isRunning" class="fas fa-circle-notch fa-spin fa-fw"></i>
-  </div>
-</div>
+}

@@ -15,17 +15,19 @@
       <li>jobs and data are sometimes deleted due to version updates, maintenance or bugs</li>
     </ul>
   </div>
--->
+  -->
 
-  <div *ngIf="homeHeaderPath">
-    <ch-manual
-      [assetsPath]="homeHeaderPath"
-      [page]="homeHeaderFile"
-      [showControls]="false"
-      [addContainer]="false"
-      [routerPath]="homeRouterPath"
+  @if (homeHeaderPath) {
+    <div>
+      <ch-manual
+        [assetsPath]="homeHeaderPath"
+        [page]="homeHeaderFile"
+        [showControls]="false"
+        [addContainer]="false"
+        [routerPath]="homeRouterPath"
       [manualStyles]="false"></ch-manual>
-  </div>
+    </div>
+  }
 
   <div class="row" id="getstarted">
     <div class="col">
@@ -36,25 +38,25 @@
 
         <!-- Service break noticification (see also a redirection in AuthGuard) -->
         <!-- <div class="alert alert-warning">
-          <p>
-            <b>The service is temporarily unavailable due to storage maintenance.</b>
-          </p>
-        </div> -->
+        <p>
+          <b>The service is temporarily unavailable due to storage maintenance.</b>
+        </p>
+      </div> -->
 
-        <div class="panel-body">
-          <p *ngIf="tokenHasExpired()">
+      <div class="panel-body">
+        @if (tokenHasExpired()) {
+          <p>
             <i>Login expired, please log in again.</i>
           </p>
+        }
 
+        @if (!isLoggedIn()) {
           <button
-            *ngIf="!isLoggedIn(); else alreadyLoggedIn"
             class="btn btn-sm btn-primary"
             [routerLink]="routerLinkLogin">
             Log In
           </button>
-        </div>
-
-        <ng-template #alreadyLoggedIn>
+        } @else {
           <p>
             You are logged in as
             <strong>{{ getAccountName() }}</strong>
@@ -66,18 +68,22 @@
             <a [routerLink]="routerLinkSessions">Sessions</a>
             to continue.
           </p>
-        </ng-template>
+        }
       </div>
+
     </div>
   </div>
+</div>
 
-  <div *ngIf="homePath && homeFile && homeRouterPath">
+@if (homePath && homeFile && homeRouterPath) {
+  <div>
     <ch-manual
       [assetsPath]="homePath"
       [page]="homeFile"
       [showControls]="false"
       [addContainer]="false"
       [routerPath]="homeRouterPath"
-      [manualStyles]="false"></ch-manual>
+    [manualStyles]="false"></ch-manual>
   </div>
+}
 </div>

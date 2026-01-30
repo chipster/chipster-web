@@ -27,16 +27,19 @@
               </div>
             </td>
           </tr>
-          <tr *ngIf="sourceJob && sourceJob.parameters.length > 0">
-            <td class="lighter">Parameters:</td>
-            <td id="parameters-container">
-              <ch-dataset-parameter-list
-                *ngIf="sourceJob && sourceJob.parameters.length > 0"
-                [parameters]="sourceJob.parameters"
-                [parametersLimit]="parametersLimit"
-                [tool]="tool"></ch-dataset-parameter-list>
-            </td>
-          </tr>
+          @if (sourceJob && sourceJob.parameters.length > 0) {
+            <tr>
+              <td class="lighter">Parameters:</td>
+              <td id="parameters-container">
+                @if (sourceJob && sourceJob.parameters.length > 0) {
+                  <ch-dataset-parameter-list
+                    [parameters]="sourceJob.parameters"
+                    [parametersLimit]="parametersLimit"
+                  [tool]="tool"></ch-dataset-parameter-list>
+                }
+              </td>
+            </tr>
+          }
 
           <tr>
             <td class="lighter">Size:</td>
@@ -65,7 +68,7 @@
                 placeholder="{{ notesPlaceholderInactive }} "
                 (focus)="editNotes(notesInput)"
                 (focusout)="saveNotes(dataset, notesInput)"
-                #notesInput></textarea>
+              #notesInput></textarea>
             </td>
           </tr>
         </tbody>

@@ -1,5 +1,9 @@
-<div *ngIf="selectionService.selectedDatasets.length > 0">
-  <span class="h6" *ngFor="let dataset of selectionService.selectedDatasets">
-    {{ dataset.name }}
-  </span>
-</div>
+@if (selectionService.selectedDatasets.length > 0) {
+  <div>
+    @for (dataset of selectionService.selectedDatasets; track dataset) {
+      <span class="h6">
+        {{ dataset.name }}
+      </span>
+    }
+  </div>
+}

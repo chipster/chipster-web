@@ -7,14 +7,16 @@
   </div>
   <div class="row">
     <div class="col">
-      <div *ngIf="manualPath">
-        <ch-manual
-          assetsPath="{{ manualPath }}"
-          page="{{ file }}"
-          [showControls]="false"
-          [addContainer]="false"
+      @if (manualPath) {
+        <div>
+          <ch-manual
+            assetsPath="{{ manualPath }}"
+            page="{{ file }}"
+            [showControls]="false"
+            [addContainer]="false"
           [manualStyles]="false"></ch-manual>
-      </div>
+        </div>
+      }
     </div>
   </div>
 </div>

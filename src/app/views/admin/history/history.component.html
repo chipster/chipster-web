@@ -1,36 +1,42 @@
 <form [formGroup]="stringFiltersForm" (ngSubmit)="onSubmit()" class="mt-3">
-  <div formArrayName="items" *ngFor="let item of stringFiltersFormArray.controls; let i = index">
-    <div [formGroupName]="i" class="form-group form-row">
-      <div class="col-sm-2">
-        <select formControlName="selectedAttribute" class="form-control form-control-sm">
-          <option value=""></option>
-          <option class="text-sm" *ngFor="let attribute of jobFilterAttributeSet" [value]="attribute">
-            {{ attribute }}
-          </option>
-        </select>
-      </div>
-      <div class="col-sm-1">
-        <select formControlName="selectedComparison" class="form-control form-control-sm">
-          <option class="text-sm" *ngFor="let comparison of jobFilterComparisonSet" [value]="comparison">
-            {{ comparison }}
-          </option>
-        </select>
-      </div>
-      <div class="col-sm-2">
-        <input type="text" formControlName="value" placeholder="" class="form-control form-control-sm" />
-      </div>
-      <div class="col-sm-1">
-        <!-- without type="button" the enter key in the input fields triggers this button -->
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-dark btn-no-border"
-          (click)="deleteFilter(i)"
-          title="Delete filter">
-          <span class="fas fa-times"></span>
-        </button>
+  @for (item of stringFiltersFormArray.controls; track item; let i = $index) {
+    <div formArrayName="items">
+      <div [formGroupName]="i" class="form-group form-row">
+        <div class="col-sm-2">
+          <select formControlName="selectedAttribute" class="form-control form-control-sm">
+            <option value=""></option>
+            @for (attribute of jobFilterAttributeSet; track attribute) {
+              <option class="text-sm" [value]="attribute">
+                {{ attribute }}
+              </option>
+            }
+          </select>
+        </div>
+        <div class="col-sm-1">
+          <select formControlName="selectedComparison" class="form-control form-control-sm">
+            @for (comparison of jobFilterComparisonSet; track comparison) {
+              <option class="text-sm" [value]="comparison">
+                {{ comparison }}
+              </option>
+            }
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <input type="text" formControlName="value" placeholder="" class="form-control form-control-sm" />
+        </div>
+        <div class="col-sm-1">
+          <!-- without type="button" the enter key in the input fields triggers this button -->
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-dark btn-no-border"
+            (click)="deleteFilter(i)"
+            title="Delete filter">
+            <span class="fas fa-times"></span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <div [formGroup]="startDateTimeFilterForm" class="form-group form-row">
     <label class="col-sm-2 col-form-label">Created after</label>
@@ -91,57 +97,70 @@
       [directionLinks]="true"
       [maxSize]="10"
       [(page)]="page"
-      (pageChange)="onPageChange(page)"></ngb-pagination>
+    (pageChange)="onPageChange(page)"></ngb-pagination>
   </div>
 </div>
 
-<div *ngIf="jobListLoading" class="row">
-  <div class="col">
-    <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
-    Loading job list..
+@if (jobListLoading) {
+  <div class="row">
+    <div class="col">
+      <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
+      Loading job list..
+    </div>
   </div>
-</div>
-<table class="table" *ngIf="!jobListLoading">
-  <thead>
-    <tr>
-      <th scope="col">Username</th>
-      <th scope="col">Module</th>
-      <th scope="col">Tool</th>
-      <th scope="col">Created</th>
-      <th scope="col">Duration</th>
-      <th scope="col"></th>
-      <th scope="col">Status</th>
-      <th scope="col">Memory usage</th>
-      <th scope="col">Storage usage</th>
-      <th scope="col">Comp</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let jobhistory of jobs" class="text-sm">
-      <td>{{ jobhistory.createdBy }}</td>
-      <td>{{ jobhistory.module }}</td>
-      <td>{{ jobhistory.toolId }}</td>
-      <td>{{ toShortDateTime(jobhistory.created) }}</td>
-      <td>{{ getDuration(jobhistory) }}</td>
-      <td>
-        <button
-          *ngIf="jobhistory.screenOutput"
-          class="btn btn-sm btn-outline-info"
-          (click)="openJobOutputModal(jobhistory)">
-          Output
-        </button>
-      </td>
-      <td>
-        {{ jobhistory.state }}
-        <span *ngIf="jobhistory.stateDetail">({{ jobhistory.stateDetail }})</span>
-      </td>
-      <td>
-        <span *ngIf="jobhistory.memoryUsage !== 0">{{ jobhistory.memoryUsage | bytes }}</span>
-      </td>
-      <td>
-        <span *ngIf="jobhistory.storageUsage !== 0">{{ jobhistory.storageUsage | bytes }}</span>
-      </td>
-      <td>{{ jobhistory.comp }}</td>
-    </tr>
-  </tbody>
-</table>
+}
+@if (!jobListLoading) {
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Username</th>
+        <th scope="col">Module</th>
+        <th scope="col">Tool</th>
+        <th scope="col">Created</th>
+        <th scope="col">Duration</th>
+        <th scope="col"></th>
+        <th scope="col">Status</th>
+        <th scope="col">Memory usage</th>
+        <th scope="col">Storage usage</th>
+        <th scope="col">Comp</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (jobhistory of jobs; track jobhistory) {
+        <tr class="text-sm">
+          <td>{{ jobhistory.createdBy }}</td>
+          <td>{{ jobhistory.module }}</td>
+          <td>{{ jobhistory.toolId }}</td>
+          <td>{{ toShortDateTime(jobhistory.created) }}</td>
+          <td>{{ getDuration(jobhistory) }}</td>
+          <td>
+            @if (jobhistory.screenOutput) {
+              <button
+                class="btn btn-sm btn-outline-info"
+                (click)="openJobOutputModal(jobhistory)">
+                Output
+              </button>
+            }
+          </td>
+          <td>
+            {{ jobhistory.state }}
+            @if (jobhistory.stateDetail) {
+              <span>({{ jobhistory.stateDetail }})</span>
+            }
+          </td>
+          <td>
+            @if (jobhistory.memoryUsage !== 0) {
+              <span>{{ jobhistory.memoryUsage | bytes }}</span>
+            }
+          </td>
+          <td>
+            @if (jobhistory.storageUsage !== 0) {
+              <span>{{ jobhistory.storageUsage | bytes }}</span>
+            }
+          </td>
+          <td>{{ jobhistory.comp }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

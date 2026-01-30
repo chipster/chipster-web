@@ -12,15 +12,17 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let user of users">
-      <td>{{ user.auth }}</td>
-      <td>{{ user.username }}</td>
-      <td>{{ user.organization }}</td>
-      <td>{{ user.name }}</td>
-      <td>{{ user.mail }}</td>
-      <td title="version: {{ user.termsVersion }}">{{ user.termsAccepted | localDate }}</td>
-      <td>{{ user.created | localDate }}</td>
-      <td>{{ user.modified | localDate }}</td>
-    </tr>
+    @for (user of users; track user) {
+      <tr>
+        <td>{{ user.auth }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.organization }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.mail }}</td>
+        <td title="version: {{ user.termsVersion }}">{{ user.termsAccepted | localDate }}</td>
+        <td>{{ user.created | localDate }}</td>
+        <td>{{ user.modified | localDate }}</td>
+      </tr>
+    }
   </tbody>
 </table>

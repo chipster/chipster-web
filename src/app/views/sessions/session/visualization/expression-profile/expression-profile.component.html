@@ -1,33 +1,36 @@
-<div *ngIf="!state.isReady(); then statusTemplate"></div>
+@if (!state.isReady()) {
+  <ch-status [state]="state"></ch-status>
+}
 
 <div class="row">
   <div class="col-md-9">
     <div id="expressionprofile"></div>
   </div>
 
-  <div
-    class="col-md-3"
-    id="selectedGeneList"
-    *ngIf="state.isReady() && selectedGeneExpressions && selectedGeneExpressions.length > 0">
-    <button class="btn btn-info btn-sm" (click)="createNewDataset()">Create new file</button>
-    <h6 class="lighter" style="margin-top: 10px">Selection</h6>
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <td>Symbol</td>
-          <td>Identifier</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let selection of viewSelectionList">
-          <td class="text-sm">{{ selection.symbol }}</td>
-          <td class="text-sm">{{ selection.identifier }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (state.isReady() && selectedGeneExpressions && selectedGeneExpressions.length > 0) {
+    <div
+      class="col-md-3"
+      id="selectedGeneList"
+      >
+      <button class="btn btn-info btn-sm" (click)="createNewDataset()">Create new file</button>
+      <h6 class="lighter" style="margin-top: 10px">Selection</h6>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <td>Symbol</td>
+            <td>Identifier</td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (selection of viewSelectionList; track selection) {
+            <tr>
+              <td class="text-sm">{{ selection.symbol }}</td>
+              <td class="text-sm">{{ selection.identifier }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>
 
-<ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
-</ng-template>

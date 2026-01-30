@@ -1,120 +1,138 @@
-<div *ngIf="ready" class="">
-  <!-- <h2 class="h2-xs mt-3 mb-2">Input files</h2> -->
-  <div *ngIf="validatedTool.tool.inputs.length === 0" class="font-italic text-smaller">No Inputs</div>
-
-  <!-- <form name="inputsForm" *ngIf="tool"> -->
-  <table class="table table-sm" *ngIf="bindingModels.length > 0">
-    <tbody>
-      <tr *ngFor="let bindingModel of bindingModels; let isLast = last">
-        <td style="width: 60%" [class.no-bottom-border]="isLast">
-          <!-- input name -->
-          {{ getDisplayName(bindingModel.input) }}
-
-          <!-- input description -->
-          <!-- <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
-            <i>(optional)</i>
-          </span> -->
-          <div class="text-sm text-muted">
-            {{ bindingModel.input.description }}
-          </div>
-        </td>
-
-        <!-- file selction dropdown -->
-        <td [class.no-bottom-border]="isLast">
-          <!-- single input -->
-          <select
-            *ngIf="bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced"
-            class="w-100"
-            [(ngModel)]="bindingModel.boundDatasets[0]"
-            (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">
-              {{ dataset.name }}
-            </option>
-          </select>
-
-          <!-- multi input -->
-          <select
-            *ngIf="bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced"
-            [disabled]="bindingModel.compatibleDatasets.length < 1"
-            class="w-100"
-            multiple
-            [(ngModel)]="bindingModel.boundDatasets"
-            (ngModelChange)="inputSelected(bindingModel)">
-            <option *ngFor="let dataset of bindingModel.compatibleDatasets" [ngValue]="dataset">
-              {{ dataset.name }}
-            </option>
-          </select>
-
-          <!-- no compatible inputs, show disabled dropdown -->
-          <select *ngIf="bindingModel.compatibleDatasets.length < 1" disabled class="w-100">
-            <option *ngIf="validatedTool.selectedDatasets.length < 1" selected class="font-italic">No files</option>
-            <option
-              *ngIf="validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1"
-              selected
-              class="font-italic">
-              No compatible files
-            </option>
-          </select>
-
-          <!-- validation message -->
-          <div
-            *ngIf="!bindingModel.input.optional && bindingModel.boundDatasets.length < 1"
-            class="text-sm alert alert-warning p-1 mt-1 mb-0">
-            Input file required
-          </div>
-        </td>
-
-        <!-- align with parameters, which have the reset button -->
-        <td [class.no-bottom-border]="isLast">
-          <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-end">
-            <i class="fas fa-undo"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <!-- </form> -->
-
-  <div *ngIf="validatedTool.phenodataBindings.length > 0">
-    <h2 class="h2-xs mt-3 mb-2">Phenodata</h2>
-    <table class="table table-sm" *ngIf="bindingModels.length > 0">
-      <tbody>
-        <!-- phenodata valid -->
-        <tr *ngIf="validatedTool.phenodataValidation.valid">
-          <td>
-            Using phenodata of
-            <i>{{ validatedTool.phenodataBindings[0].dataset.name }}</i>
-          </td>
-        </tr>
-
-        <!-- phenodata not valid -->
-        <tr *ngIf="!validatedTool.phenodataValidation.valid">
-          <td>
-            <div class="alert alert-warning text-sm p-1 mb-0">
-              {{ validatedTool.phenodataValidation.message }}
-            </div>
-          </td>
-        </tr>
+@if (ready) {
+  <div class="">
+    <!-- <h2 class="h2-xs mt-3 mb-2">Input files</h2> -->
+    @if (validatedTool.tool.inputs.length === 0) {
+      <div class="font-italic text-smaller">No Inputs</div>
+    }
+    <!-- <form name="inputsForm" *ngIf="tool"> -->
+    @if (bindingModels.length > 0) {
+      <table class="table table-sm">
+        <tbody>
+          @for (bindingModel of bindingModels; track bindingModel; let isLast = $last) {
+            <tr>
+              <td style="width: 60%" [class.no-bottom-border]="isLast">
+                <!-- input name -->
+                {{ getDisplayName(bindingModel.input) }}
+                <!-- input description -->
+                <!-- <span class="text-sm text-muted" *ngIf="bindingModel.input.optional">
+                <i>(optional)</i>
+              </span> -->
+              <div class="text-sm text-muted">
+                {{ bindingModel.input.description }}
+              </div>
+            </td>
+            <!-- file selction dropdown -->
+            <td [class.no-bottom-border]="isLast">
+              <!-- single input -->
+              @if (bindingModel.compatibleDatasets.length > 0 && !bindingModel.input.name.spliced) {
+                <select
+                  class="w-100"
+                  [(ngModel)]="bindingModel.boundDatasets[0]"
+                  (ngModelChange)="inputSelected(bindingModel)">
+                  @for (dataset of bindingModel.compatibleDatasets; track dataset) {
+                    <option [ngValue]="dataset">
+                      {{ dataset.name }}
+                    </option>
+                  }
+                </select>
+              }
+              <!-- multi input -->
+              @if (bindingModel.compatibleDatasets.length > 0 && bindingModel.input.name.spliced) {
+                <select
+                  [disabled]="bindingModel.compatibleDatasets.length < 1"
+                  class="w-100"
+                  multiple
+                  [(ngModel)]="bindingModel.boundDatasets"
+                  (ngModelChange)="inputSelected(bindingModel)">
+                  @for (dataset of bindingModel.compatibleDatasets; track dataset) {
+                    <option [ngValue]="dataset">
+                      {{ dataset.name }}
+                    </option>
+                  }
+                </select>
+              }
+              <!-- no compatible inputs, show disabled dropdown -->
+              @if (bindingModel.compatibleDatasets.length < 1) {
+                <select disabled class="w-100">
+                  @if (validatedTool.selectedDatasets.length < 1) {
+                    <option selected class="font-italic">No files</option>
+                  }
+                  @if (validatedTool.selectedDatasets.length > 0 && bindingModel.compatibleDatasets.length < 1) {
+                    <option
+                      selected
+                      class="font-italic">
+                      No compatible files
+                    </option>
+                  }
+                </select>
+              }
+              <!-- validation message -->
+              @if (!bindingModel.input.optional && bindingModel.boundDatasets.length < 1) {
+                <div
+                  class="text-sm alert alert-warning p-1 mt-1 mb-0">
+                  Input file required
+                </div>
+              }
+            </td>
+            <!-- align with parameters, which have the reset button -->
+            <td [class.no-bottom-border]="isLast">
+              <button type="button" class="invisible btn btn-sm btn-outline-dark btn-no-border float-end">
+                <i class="fas fa-undo"></i>
+              </button>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
+  }
+<!-- </form> -->
+@if (validatedTool.phenodataBindings.length > 0) {
+  <div>
+    <h2 class="h2-xs mt-3 mb-2">Phenodata</h2>
+    @if (bindingModels.length > 0) {
+      <table class="table table-sm">
+        <tbody>
+          <!-- phenodata valid -->
+          @if (validatedTool.phenodataValidation.valid) {
+            <tr>
+              <td>
+                Using phenodata of
+                <i>{{ validatedTool.phenodataBindings[0].dataset.name }}</i>
+              </td>
+            </tr>
+          }
+          <!-- phenodata not valid -->
+          @if (!validatedTool.phenodataValidation.valid) {
+            <tr>
+              <td>
+                <div class="alert alert-warning text-sm p-1 mb-0">
+                  {{ validatedTool.phenodataValidation.message }}
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </div>
-  <!-- <h2 *ngIf="getPhenodataInputs().length > 0" class="h2-xs mt-3 mb-2">Phenodata</h2>
-  <table class="table table-sm" *ngIf="bindingModels.length > 0">
-    <tbody *ngIf="!validatedTool.phenodataValid">
-      <tr *ngIf="!validatedTool.inputsValid">
-        <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
-      </tr>
-
-      <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
-        <td class="text-sm text-warning">No phenodata for</td>
-        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
-      </tr>
-    </tbody>
-    <tbody *ngIf="validatedTool.phenodataValid">
-      <tr *ngFor="let phenodataInput of getPhenodataInputs()">
-        <td style="width: 60%">Using phenodata of</td>
-        <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
-      </tr>
-    </tbody>
-  </table> -->
+}
+<!-- <h2 *ngIf="getPhenodataInputs().length > 0" class="h2-xs mt-3 mb-2">Phenodata</h2>
+<table class="table table-sm" *ngIf="bindingModels.length > 0">
+  <tbody *ngIf="!validatedTool.phenodataValid">
+    <tr *ngIf="!validatedTool.inputsValid">
+      <td class="text-sm text-warning">Inputs need to be valid to determine phenodata</td>
+    </tr>
+    <tr *ngIf="validatedTool.inputsValid && !validatedTool.phenodataValid">
+      <td class="text-sm text-warning">No phenodata for</td>
+      <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+    </tr>
+  </tbody>
+  <tbody *ngIf="validatedTool.phenodataValid">
+    <tr *ngFor="let phenodataInput of getPhenodataInputs()">
+      <td style="width: 60%">Using phenodata of</td>
+      <td>{{bindingModels[0]?.boundDatasets[0]?.name}}</td>
+    </tr>
+  </tbody>
+</table> -->
 </div>
+}

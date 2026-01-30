@@ -3,18 +3,22 @@
     <div class="col-sm-2">
       <label>Year</label>
       <select formControlName="year" class="form-control form-control-sm">
-        <option class="text-sm" *ngFor="let year of years" [value]="year">
-          {{ year }}
-        </option>
+        @for (year of years; track year) {
+          <option class="text-sm" [value]="year">
+            {{ year }}
+          </option>
+        }
       </select>
     </div>
 
     <div class="col-sm-2">
       <label>Module</label>
       <select formControlName="module" class="form-control form-control-sm">
-        <option class="text-sm" *ngFor="let module of modules" [value]="module">
-          {{ module }}
-        </option>
+        @for (module of modules; track module) {
+          <option class="text-sm" [value]="module">
+            {{ module }}
+          </option>
+        }
       </select>
     </div>
 
@@ -31,15 +35,18 @@
   </div>
 </form>
 
-<div *ngIf="state.isReady(); else statusTemplate">
-  <div class="row">
-    <div *ngIf="userCount != null" class="col-sm-3 text-sm">
-      <div>Users: {{ userCount }}</div>
-      <div>Jobs: {{ jobCount }}</div>
+@if (state.isReady()) {
+  <div>
+    <div class="row">
+      @if (userCount != null) {
+        <div class="col-sm-3 text-sm">
+          <div>Users: {{ userCount }}</div>
+          <div>Jobs: {{ jobCount }}</div>
+        </div>
+      }
     </div>
   </div>
-</div>
-
-<ng-template #statusTemplate>
+} @else {
   <ch-status [state]="state"></ch-status>
-</ng-template>
+}
+

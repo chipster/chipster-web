@@ -1,21 +1,25 @@
 <table class="table table-sm text-sm">
   <tbody>
-    <tr *ngFor="let param of parameterListForView; let i = index">
-      <ng-template [ngIf]="i < limit">
-        <td style="width: 60%" [ngClass]="{ 'no-top-border': i === 0, 'no-horizontal-padding': historyMode }">
-          {{ param.displayName }}
+    @for (param of parameterListForView; track param; let i = $index) {
+      <tr>
+        @if (i < limit) {
+          <td style="width: 60%" [ngClass]="{ 'no-top-border': i === 0, 'no-horizontal-padding': historyMode }">
+            {{ param.displayName }}
+          </td>
+          <td
+            [ngStyle]="{ 'font-weight': historyMode || isDefaultValueMap.get(param) ? 'normal' : 'bold' }"
+            [ngClass]="{ 'no-top-border': i === 0 }">
+            {{ param.value }}
+          </td>
+        }
+      </tr>
+    }
+    @if (!noLimit && parameterListForView.length > defaultLimit) {
+      <tr>
+        <td colspan="2">
+          <ch-link-button (click)="toggleParameterList()">{{ buttonText }}</ch-link-button>
         </td>
-        <td
-          [ngStyle]="{ 'font-weight': historyMode || isDefaultValueMap.get(param) ? 'normal' : 'bold' }"
-          [ngClass]="{ 'no-top-border': i === 0 }">
-          {{ param.value }}
-        </td>
-      </ng-template>
-    </tr>
-    <tr *ngIf="!noLimit && parameterListForView.length > defaultLimit">
-      <td colspan="2">
-        <ch-link-button (click)="toggleParameterList()">{{ buttonText }}</ch-link-button>
-      </td>
-    </tr>
+      </tr>
+    }
   </tbody>
 </table>

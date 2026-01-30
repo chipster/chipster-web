@@ -10,33 +10,33 @@
   </thead>
   <tbody>
     <!-- add id to be able to scroll to the selected job -->
-    <tr
-      *ngFor="let job of jobsSorted"
-      class="cursor-pointer hoverable-row"
-      (click)="selectJob(job)"
-      [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }"
-      attr.id="job-id-{{ job.jobId }}">
-      <td>{{ job.toolName }}</td>
-      <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
-        {{ job.created | localDate }}
-      </td>
+    @for (job of jobsSorted; track job) {
+      <tr
+        class="cursor-pointer hoverable-row"
+        (click)="selectJob(job)"
+        [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }"
+        attr.id="job-id-{{ job.jobId }}">
+        <td>{{ job.toolName }}</td>
+        <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
+          {{ job.created | localDate }}
+        </td>
+        <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
+          {{ getDurationObservable(job) | async }}
+        </td>
+        <td>
+          {{ job.state }}
+        </td>
+        @if (isRunning(job)) {
+          <td valign="top">
+            <ch-link-button class="cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
+              Cancel
+            </ch-link-button>
+          </td>
+        } @else {
+          <td style="padding-left: 10px">&nbsp;</td>
+        }
+      </tr>
+    }
 
-      <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
-        {{ getDurationObservable(job) | async }}
-      </td>
-
-      <td>
-        {{ job.state }}
-      </td>
-      <td valign="top" *ngIf="isRunning(job); else blankTemplate">
-        <ch-link-button class="cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
-          Cancel
-        </ch-link-button>
-      </td>
-    </tr>
-
-    <ng-template #blankTemplate>
-      <td style="padding-left: 10px">&nbsp;</td>
-    </ng-template>
   </tbody>
 </table>

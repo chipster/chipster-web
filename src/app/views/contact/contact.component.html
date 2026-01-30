@@ -10,22 +10,26 @@
         Contact support
       </button>
       <br />
-      <small *ngIf="!isLoggedIn()">
-        The contact support feature is available only for authenticated users. Please log in first or use the other
-        contact details below.
-      </small>
+      @if (!isLoggedIn()) {
+        <small>
+          The contact support feature is available only for authenticated users. Please log in first or use the other
+          contact details below.
+        </small>
+      }
     </div>
   </div>
   <div class="row">
     <div class="col">
-      <div *ngIf="contactPath">
-        <ch-manual
-          assetsPath="{{ contactPath }}"
-          page="{{ contactFile }}"
-          [showControls]="false"
-          [addContainer]="false"
+      @if (contactPath) {
+        <div>
+          <ch-manual
+            assetsPath="{{ contactPath }}"
+            page="{{ contactFile }}"
+            [showControls]="false"
+            [addContainer]="false"
           [manualStyles]="false"></ch-manual>
-      </div>
+        </div>
+      }
     </div>
   </div>
 </div>

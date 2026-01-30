@@ -7,10 +7,11 @@
   </div>
 </div>
 
-<div *ngIf="state.isReady(); else statusTemplate" class="scrollable">
-  <img [src]="src" />
-</div>
-
-<ng-template #statusTemplate>
+@if (state.isReady()) {
+  <div class="scrollable">
+    <img [src]="src" />
+  </div>
+} @else {
   <ch-status [state]="state"></ch-status>
-</ng-template>
+}
+

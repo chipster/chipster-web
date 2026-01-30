@@ -1,29 +1,35 @@
-<div *ngIf="state.isReady(); else statusTemplate">
-  <div class="row">
-    <div class="col">
-      <label style="font-size: smaller" *ngIf="!isCompleteFile()">
-        First {{ getSizeShown() | bytes }}.
-        <span style="font-style: italic">
-          View in
-          <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
-          to see the whole {{ getSizeFull() | bytes }} file.
-        </span>
-      </label>
-      <label style="font-size: smaller" *ngIf="isCompleteFile()">File size {{ getSizeFull() | bytes }}.</label>
-      <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="float-end no-underline-link-button">
-        <i class="fa-solid fa-expand"></i>
-        Full Screen
-      </ch-link-button>
+@if (state.isReady()) {
+  <div>
+    <div class="row">
+      <div class="col">
+        @if (!isCompleteFile()) {
+          <label style="font-size: smaller">
+            First {{ getSizeShown() | bytes }}.
+            <span style="font-style: italic">
+              View in
+              <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
+              to see the whole {{ getSizeFull() | bytes }} file.
+            </span>
+          </label>
+        }
+        @if (isCompleteFile()) {
+          <label style="font-size: smaller">File size {{ getSizeFull() | bytes }}.</label>
+        }
+        @if (!modalMode) {
+          <ch-link-button (click)="showAll()" class="float-end no-underline-link-button">
+            <i class="fa-solid fa-expand"></i>
+            Full Screen
+          </ch-link-button>
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <pre class="text-view">{{ data }}</pre>
+      </div>
     </div>
   </div>
-
-  <div class="row">
-    <div class="col">
-      <pre class="text-view">{{ data }}</pre>
-    </div>
-  </div>
-</div>
-
-<ng-template #statusTemplate>
+} @else {
   <ch-status [state]="state"></ch-status>
-</ng-template>
+}
+

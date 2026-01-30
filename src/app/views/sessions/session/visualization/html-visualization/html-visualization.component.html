@@ -1,16 +1,21 @@
-<div *ngIf="state.isReady(); else statusTemplate">
-  <div class="scroller">
-    <iframe
-      #htmlframe
-      *ngIf="src"
-      width="100%"
+@if (state.isReady()) {
+  <div>
+    <div class="scroller">
+      @if (src) {
+        <iframe
+          #htmlframe
+          width="100%"
       [src]="wrapperUrl + '?location=' + src | trustedresource"
       scrolling="no"
       frameborder="0"
       (load)="run(htmlframe)"></iframe>
+}
   </div>
 </div>
+} @else {
 
-<ng-template #statusTemplate>
   <ch-status [state]="state"></ch-status>
-</ng-template>
+
+}
+
+

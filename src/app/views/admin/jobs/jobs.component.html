@@ -10,14 +10,18 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let job of jobs">
-      <th scope="row">{{ job.toolName }}</th>
-      <td>{{ job.createdBy }}</td>
-      <td>{{ job.module }}</td>
-      <td>{{ job.state }}</td>
-      <td>{{ job.stateDetail }}</td>
-      <td>{{ job.startTime }}</td>
-      <td><button *ngIf="isRunning(job)" class="btn btn-sm btn-link" (click)="cancelJob(job)">Cancel</button></td>
-    </tr>
+    @for (job of jobs; track job) {
+      <tr>
+        <th scope="row">{{ job.toolName }}</th>
+        <td>{{ job.createdBy }}</td>
+        <td>{{ job.module }}</td>
+        <td>{{ job.state }}</td>
+        <td>{{ job.stateDetail }}</td>
+        <td>{{ job.startTime }}</td>
+        <td>@if (isRunning(job)) {
+          <button class="btn btn-sm btn-link" (click)="cancelJob(job)">Cancel</button>
+        }</td>
+      </tr>
+    }
   </tbody>
 </table>

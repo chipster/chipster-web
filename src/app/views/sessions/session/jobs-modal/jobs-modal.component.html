@@ -10,7 +10,9 @@
 
   <hr class="" />
 
-  <ch-job *ngIf="jobs.length > 0" [sessionData]="sessionData" [tools]="tools"></ch-job>
+  @if (jobs.length > 0) {
+    <ch-job [sessionData]="sessionData" [tools]="tools"></ch-job>
+  }
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-sm btn-secondary float-start" (click)="activeModal.close()">Close</button>

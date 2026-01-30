@@ -43,9 +43,11 @@
       <tr>
         <td class="lighter">Notes:</td>
         <td width="100%">
-          <p class="mb-1" *ngFor="let line of session.notes?.split('\n')">
-            {{ line }}
-          </p>
+          @for (line of session.notes?.split('\n'); track line) {
+            <p class="mb-1">
+              {{ line }}
+            </p>
+          }
         </td>
       </tr>
     </table>

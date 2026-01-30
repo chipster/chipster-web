@@ -8,17 +8,19 @@
 
   <div class="form-group">
     <div class="row">
-      <div *ngFor="let option of historyOptions; let i = index" class="col-sm">
-        <label class="no-break">
-          <input
-            type="checkbox"
-            name="{{ option.id }}"
-            value="{{ option.enabled }}"
-            [checked]="option.enabled"
-            (change)="updateOption(option)" />
-          {{ option.name }}
-        </label>
-      </div>
+      @for (option of historyOptions; track option; let i = $index) {
+        <div class="col-sm">
+          <label class="no-break">
+            <input
+              type="checkbox"
+              name="{{ option.id }}"
+              value="{{ option.enabled }}"
+              [checked]="option.enabled"
+              (change)="updateOption(option)" />
+            {{ option.name }}
+          </label>
+        </div>
+      }
     </div>
   </div>
 
@@ -45,80 +47,106 @@
     </div>
   </h2>
 
-  <div class="step" *ngFor="let step of datasetHistorySteps; let i = index">
-    <table class="table table-sm text-sm align-top mb-0">
-      <tbody>
-        <tr *ngIf="historyOptionsMap.get('stepTitle').enabled">
-          <td class="" colspan="2">
-            <h4 class="h4-xs step-header">Step {{ i + 1 }}</h4>
-          </td>
-          <td></td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('sourceJobName').enabled">
-          <td class="lighter no-break">{{ historyOptionsMap.get("sourceJobName").name }}:</td>
-          <td class="w-100">{{ step.sourceJobName }}</td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('parameters').enabled">
-          <td class="lighter no-break">{{ historyOptionsMap.get("parameters").name }}:</td>
-          <td class="w-100">
-            <ch-dataset-parameter-list
-              *ngIf="step.sourceJob && step.sourceJob.parameters.length > 0"
-              [parameters]="step.sourceJob.parameters"
-              [parametersLimit]="-1"
-              [tool]="step.tool"
-              [historyMode]="true"></ch-dataset-parameter-list>
-          </td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('inputFileNames').enabled">
-          <td class="lighter no-break">{{ historyOptionsMap.get("inputFileNames").name }}:</td>
-          <td class="ps-0">
-            <table class="table table-sm">
-              <!-- imported files don't have a sourceJob -->
-              <tbody *ngIf="step.sourceJob != null">
-                <tr *ngFor="let input of step.sourceJob.inputs">
-                  <!-- old jobs (until 11/2023) have datasetName in input.displayName -->
-                  <td *ngIf="input.datasetName == null" class="" style="width: 60%; white-space: nowrap">
-                    {{ input.inputId }}
-                  </td>
-                  <td *ngIf="input.datasetName == null">{{ input.displayName }}</td>
-                  <!-- if input.datasetName is not null, then this is a new job-->
-                  <td *ngIf="input.datasetName != null" class="" style="width: 60%; white-space: nowrap">
-                    {{ input.displayName || input.inputId }}
-                  </td>
-                  <td *ngIf="input.datasetName != null">{{ input.datasetName }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('date').enabled">
-          <td class="lighter no-break">{{ historyOptionsMap.get("date").name }}:</td>
-          <td class="w-100">{{ step.date | localDate }}</td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('resultFileName').enabled">
-          <td class="lighter no-break">{{ historyOptionsMap.get("resultFileName").name }}:</td>
-          <td class="w-100">{{ step.datasetName }}</td>
-        </tr>
-
-        <tr *ngIf="historyOptionsMap.get('sourceCode').enabled">
-          <td class="lighter no-break">Source code:</td>
-          <td class="w-100">
-            <pre
-              *ngIf="step.sourceCode != null && step.sourceCode.length > 0"
-              style="overflow: auto; width: 600px"><code>{{step.sourceCode}}</code></pre>
-            <div *ngIf="step.sourceCode == null || step.sourceCode.length < 1">not available</div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  @for (step of datasetHistorySteps; track step; let i = $index) {
+    <div class="step">
+      <table class="table table-sm text-sm align-top mb-0">
+        <tbody>
+          @if (historyOptionsMap.get('stepTitle').enabled) {
+            <tr>
+              <td class="" colspan="2">
+                <h4 class="h4-xs step-header">Step {{ i + 1 }}</h4>
+              </td>
+              <td></td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('sourceJobName').enabled) {
+            <tr>
+              <td class="lighter no-break">{{ historyOptionsMap.get("sourceJobName").name }}:</td>
+              <td class="w-100">{{ step.sourceJobName }}</td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('parameters').enabled) {
+            <tr>
+              <td class="lighter no-break">{{ historyOptionsMap.get("parameters").name }}:</td>
+              <td class="w-100">
+                @if (step.sourceJob && step.sourceJob.parameters.length > 0) {
+                  <ch-dataset-parameter-list
+                    [parameters]="step.sourceJob.parameters"
+                    [parametersLimit]="-1"
+                    [tool]="step.tool"
+                  [historyMode]="true"></ch-dataset-parameter-list>
+                }
+              </td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('inputFileNames').enabled) {
+            <tr>
+              <td class="lighter no-break">{{ historyOptionsMap.get("inputFileNames").name }}:</td>
+              <td class="ps-0">
+                <table class="table table-sm">
+                  <!-- imported files don't have a sourceJob -->
+                  @if (step.sourceJob != null) {
+                    <tbody>
+                      @for (input of step.sourceJob.inputs; track input) {
+                        <tr>
+                          <!-- old jobs (until 11/2023) have datasetName in input.displayName -->
+                          @if (input.datasetName == null) {
+                            <td class="" style="width: 60%; white-space: nowrap">
+                              {{ input.inputId }}
+                            </td>
+                          }
+                          @if (input.datasetName == null) {
+                            <td>{{ input.displayName }}</td>
+                          }
+                          <!-- if input.datasetName is not null, then this is a new job-->
+                          @if (input.datasetName != null) {
+                            <td class="" style="width: 60%; white-space: nowrap">
+                              {{ input.displayName || input.inputId }}
+                            </td>
+                          }
+                          @if (input.datasetName != null) {
+                            <td>{{ input.datasetName }}</td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  }
+                </table>
+              </td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('date').enabled) {
+            <tr>
+              <td class="lighter no-break">{{ historyOptionsMap.get("date").name }}:</td>
+              <td class="w-100">{{ step.date | localDate }}</td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('resultFileName').enabled) {
+            <tr>
+              <td class="lighter no-break">{{ historyOptionsMap.get("resultFileName").name }}:</td>
+              <td class="w-100">{{ step.datasetName }}</td>
+            </tr>
+          }
+          @if (historyOptionsMap.get('sourceCode').enabled) {
+            <tr>
+              <td class="lighter no-break">Source code:</td>
+              <td class="w-100">
+                @if (step.sourceCode != null && step.sourceCode.length > 0) {
+                  <pre
+                    style="overflow: auto; width: 600px"><code>{{step.sourceCode}}</code></pre>
+                  }
+                  @if (step.sourceCode == null || step.sourceCode.length < 1) {
+                    <div>not available</div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
-</div>
 
-<div class="modal-footer">
-  <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.close()">Close</button>
-</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-sm btn-secondary" (click)="activeModal.close()">Close</button>
+  </div>

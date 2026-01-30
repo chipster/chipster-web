@@ -1,254 +1,274 @@
 <h3 class="panel-title"><span>Tools</span></h3>
 <div class="chipster-highlight mb-3">
-  <div class="container-fluid" *ngIf="selectedModule">
-    <div class="row mb-2">
-      <!-- module buttons -->
-
-      <div class="col col-left">
-        <h4 *ngIf="toolsetTitleVisible" class="h4-xs lighter p-0 d-inline-block float-start">Toolset</h4>
-
-        <ng-select
-          *ngIf="moduleSelectionMode === ModuleSelectionMode.Dropdown"
-          #moduleDropdown
-          class="w-100"
-          [items]="modules"
-          bindLabel="name"
-          [clearable]="false"
-          [searchable]="false"
-          [(ngModel)]="selectedModule"
-          (change)="dropDownSelectModule($event)"
-          [dropdownPosition]="'bottom'">
-          <ng-template ng-label-tmp let-item="item">
-            <div>
-              {{ item.name }}
-            </div>
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item">
-            <div>{{ item.name }}</div>
-          </ng-template>
-        </ng-select>
-
-        <!-- Old module selection tabs -->
-        <div *ngIf="moduleSelectionMode === ModuleSelectionMode.Tabs" class="btn-group" id="moduleBtnGroup">
-          <button
-            type="button"
-            class="btn"
-            (click)="selectModuleAndFirstCategoryAndFirstTool(module)"
-            *ngFor="let module of modules"
+  @if (selectedModule) {
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <!-- module buttons -->
+        <div class="col col-left">
+          @if (toolsetTitleVisible) {
+            <h4 class="h4-xs lighter p-0 d-inline-block float-start">Toolset</h4>
+          }
+          @if (moduleSelectionMode === ModuleSelectionMode.Dropdown) {
+            <ng-select
+              #moduleDropdown
+              class="w-100"
+              [items]="modules"
+              bindLabel="name"
+              [clearable]="false"
+              [searchable]="false"
+              [(ngModel)]="selectedModule"
+              (change)="dropDownSelectModule($event)"
+              [dropdownPosition]="'bottom'">
+              <ng-template ng-label-tmp let-item="item">
+                <div>
+                  {{ item.name }}
+                </div>
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                <div>{{ item.name }}</div>
+              </ng-template>
+            </ng-select>
+          }
+          <!-- Old module selection tabs -->
+          @if (moduleSelectionMode === ModuleSelectionMode.Tabs) {
+            <div class="btn-group" id="moduleBtnGroup">
+              @for (module of modules; track module) {
+                <button
+                  type="button"
+                  class="btn"
+                  (click)="selectModuleAndFirstCategoryAndFirstTool(module)"
             [ngClass]="{
               'btn-primary': module.moduleId === selectedModule.moduleId,
               'btn-light': module.moduleId !== selectedModule.moduleId
             }">
-            <span class="text-nowrap">
-              {{ module.name }}
-            </span>
+                  <span class="text-nowrap">
+                    {{ module.name }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <!-- search box -->
+        <div class="col col-middle">
+          <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines,
+          maybe if the machine is slower to render the content below and the ng-select thinks there
+          isn't enough space below it? -->
+          @if (toolsetTitleVisible) {
+            <h4 class="h4-xs invisible w-100 lighter p-0 d-inline-block float-start">Find</h4>
+          }
+          <div #findDiv class="">
+            <ng-select
+              id="searchTool"
+              #searchTool
+              class="float-end"
+              [items]="toolSearchList"
+              [virtualScroll]="true"
+              [searchFn]="filterTool"
+              [(ngModel)]="searchBoxModel"
+              (change)="searchBoxSelect($event)"
+              notFoundText="No tools found"
+              (blur)="searchBoxBlur()"
+              placeholder="Find tool"
+              [dropdownPosition]="'bottom'">
+              <ng-template ng-option-tmp let-item="item">
+                <div style="font-size: smaller">{{ item.moduleName }} - {{ item.category }}</div>
+                <div style="font-weight: bolder">{{ item.toolName }}</div>
+              </ng-template>
+            </ng-select>
+            <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter me-2 float-end"></i>
+          </div>
+        </div>
+        <!-- jobs button -->
+        <div class="col col-right" id="jobButton">
+          <span class="float-end position-relative">
+            <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
+          </span>
+          <button
+            class="btn btn-link no-underline-link-button float-end pe-3 me-4"
+            (click)="$event.stopPropagation(); openJobs()"
+            title="Jobs">
+            Jobs
           </button>
         </div>
       </div>
-
-      <!-- search box -->
-      <div class="col col-middle">
-        <!-- without [dropdownPosition]="'bottom'" the menu opens upwards first on some machines,
-          maybe if the machine is slower to render the content below and the ng-select thinks there
-          isn't enough space below it? -->
-
-        <h4 *ngIf="toolsetTitleVisible" class="h4-xs invisible w-100 lighter p-0 d-inline-block float-start">Find</h4>
-        <div #findDiv class="">
-          <ng-select
-            id="searchTool"
-            #searchTool
-            class="float-end"
-            [items]="toolSearchList"
-            [virtualScroll]="true"
-            [searchFn]="filterTool"
-            [(ngModel)]="searchBoxModel"
-            (change)="searchBoxSelect($event)"
-            notFoundText="No tools found"
-            (blur)="searchBoxBlur()"
-            placeholder="Find tool"
-            [dropdownPosition]="'bottom'">
-            <ng-template ng-option-tmp let-item="item">
-              <div style="font-size: smaller">{{ item.moduleName }} - {{ item.category }}</div>
-              <div style="font-weight: bolder">{{ item.toolName }}</div>
-            </ng-template>
-          </ng-select>
-          <i style="padding-top: 0.5em; font-size: 110%" class="fas fa-search lighter me-2 float-end"></i>
+      <!-- tool list column titles -->
+      <div class="row">
+        <div class="col col-left">
+          <h4 class="h4-xs lighter">Category</h4>
         </div>
+        <div class="col col-middle">
+          <h4 class="h4-xs lighter">Tool</h4>
+        </div>
+        <div class="col col-right"></div>
       </div>
-
-      <!-- jobs button -->
-      <div class="col col-right" id="jobButton">
-        <span class="float-end position-relative">
-          <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
-        </span>
-        <button
-          class="btn btn-link no-underline-link-button float-end pe-3 me-4"
-          (click)="$event.stopPropagation(); openJobs()"
-          title="Jobs">
-          Jobs
-        </button>
-      </div>
-    </div>
-
-    <!-- tool list column titles -->
-    <div class="row">
-      <div class="col col-left">
-        <h4 class="h4-xs lighter">Category</h4>
-      </div>
-      <div class="col col-middle">
-        <h4 class="h4-xs lighter">Tool</h4>
-      </div>
-      <div class="col col-right"></div>
-    </div>
-
-    <div class="row">
-      <!-- category list -->
-      <div class="col col-left">
-        <div class="list-group" id="category-list">
-          <button
-            type="button"
-            class="list-group-item list-group-item-action tool-list-item"
+      <div class="row">
+        <!-- category list -->
+        <div class="col col-left">
+          <div class="list-group" id="category-list">
+            @for (category of selectedModule.categories; track category) {
+              <button
+                type="button"
+                class="list-group-item list-group-item-action tool-list-item"
             [ngClass]="{
               active: category === selectedCategory,
               compact: settingsService.compactToolList$.getValue()
             }"
-            (click)="selectCategoryAndFirstTool(category)"
-            *ngFor="let category of selectedModule.categories"
-            id="{{ categoryElementIdPrefix + category.name }}">
-            <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
-          </button>
+                (click)="selectCategoryAndFirstTool(category)"
+                id="{{ categoryElementIdPrefix + category.name }}">
+                <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
+              </button>
+            }
+          </div>
         </div>
-      </div>
-
-      <!-- tool list -->
-      <div class="col col-middle">
-        <div style="position: relative; height: 100%">
-          <div
-            class="list-group"
-            *ngIf="selectedCategory"
-            id="tool-list"
-            style="position: absolute; height: 100%; width: 100%">
-            <button
-              type="button"
-              class="list-group-item list-group-item-action tool-list-item"
+        <!-- tool list -->
+        <div class="col col-middle">
+          <div style="position: relative; height: 100%">
+            @if (selectedCategory) {
+              <div
+                class="list-group"
+                id="tool-list"
+                style="position: absolute; height: 100%; width: 100%">
+                @for (tool of selectedCategory.tools; track tool) {
+                  <button
+                    type="button"
+                    class="list-group-item list-group-item-action tool-list-item"
               [ngClass]="{
                 active: tool.name.id === selectedTool?.tool.name.id,
                 compact: settingsService.compactToolList$.getValue()
               }"
-              (click)="selectTool(tool)"
-              *ngFor="let tool of selectedCategory.tools"
-              id="{{ toolElementIdPrefix + tool.name.id }}">
-              {{ tool.name.displayName }}
-            </button>
+                    (click)="selectTool(tool)"
+                    id="{{ toolElementIdPrefix + tool.name.id }}">
+                    {{ tool.name.displayName }}
+                  </button>
+                }
+              </div>
+            }
           </div>
         </div>
-      </div>
-
-      <!-- action buttons and tool description -->
-      <div class="col col-right">
-        <div style="position: relative; height: 100%">
-          <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
-            <div class="row mb-2">
-              <div
-                class="col d-flex"
-                *ngIf="validatedTool == null || selectedTool.tool.name.id !== validatedTool.tool.name.id">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
-                &nbsp; Validating tool inputs...
-              </div>
-              <div
-                class="col d-flex"
-                *ngIf="validatedTool != null && selectedTool.tool.name.id === validatedTool.tool.name.id">
-                <!-- parameters -->
-                <button
-                  class="btn btn-sm btn-outline-secondary me-1"
-                  (click)="openParametersModal()"
-                  title="Edit parameters and inputs"
-                  [disabled]="!selectedTool">
-                  <!-- class="fas fa-fw fa-sliders-h" -->
-
-                  <span
-                    *ngIf="paramButtonWarning"
-                    class="fas fa-fw fa-exclamation-circle text-warning"
-                    aria-hidden="true"></span>
-                  <span
-                    *ngIf="!paramButtonWarning && !paramButtonChanged"
-                    class="fas fa-fw fa-edit"
-                    aria-hidden="true"></span>
-                  <span
-                    *ngIf="!paramButtonWarning && paramButtonChanged"
-                    class="fas fa-fw fa-edit text-primary"
-                    aria-hidden="true"></span>
-                  Parameters
-                </button>
-
-                <!-- run -->
-                <button
-                  *ngIf="!runIsDropdown"
-                  class="btn btn-success run-button btn-sm button-wide flex-grow-1"
-                  (click)="runJob(false)"
-                  [disabled]="!runEnabled">
-                  <span class="fas fa-play"></span>
-                  Run
-                </button>
-
-                <div *ngIf="runIsDropdown" ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
-                  <button
-                    class="btn btn-success run-button btn-sm button-wide flex-grow-1"
-                    ngbDropdownToggle
-                    id="runDropdownButton">
-                    <span class="fas fa-play"></span>
-                    Run
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-right" ngbDropdownMenu aria-labelledby="runDropdownButton">
-                    <button
-                      ngbDropdownItem
-                      (click)="runJob(false)"
-                      [disabled]="!validatedTool.singleJobValidation.valid">
-                      Run Tool
-                      <span *ngIf="validatedTool.singleJobValidation.valid" class="text-muted text-sm">1 job</span>
-                    </button>
-                    <button
-                      ngbDropdownItem
-                      (click)="runJob(true)"
-                      [disabled]="!validatedTool.runForEachValidation.valid">
-                      Run Tool for Each File
-                      <span *ngIf="validatedTool.runForEachValidation.valid" class="text-muted text-sm">
-                        {{ validatedTool.selectedDatasets.length }} jobs
-                      </span>
-                    </button>
-                    <button
-                      ngbDropdownItem
-                      (click)="runForEachSample()"
-                      [disabled]="!validatedTool.runForEachSampleValidation.valid">
-                      Run Tool For Each Sample
-                      <span *ngIf="validatedTool.runForEachSampleValidation.valid" class="text-muted text-sm">
-                        {{
-                          validatedTool.sampleGroups.pairedEndSamples.length +
-                            validatedTool.sampleGroups.singleEndSamples.length
-                        }}
-                        jobs
-                      </span>
-                    </button>
-                    <div *ngIf="defineHintVisible" class="dropdown-divider"></div>
-                    <button
-                      *ngIf="defineHintVisible"
-                      ngbDropdownItem
-                      (click)="onDefineSamples()"
-                      [disabled]="validatedTool.runForEachSampleValidation.valid">
-                      Define Samples to Enable Run for Each Sample
-                    </button>
+        <!-- action buttons and tool description -->
+        <div class="col col-right">
+          <div style="position: relative; height: 100%">
+            <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
+              <div class="row mb-2">
+                @if (validatedTool == null || selectedTool.tool.name.id !== validatedTool.tool.name.id) {
+                  <div
+                    class="col d-flex"
+                    >
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
+                    &nbsp; Validating tool inputs...
                   </div>
-                </div>
+                }
+                @if (validatedTool != null && selectedTool.tool.name.id === validatedTool.tool.name.id) {
+                  <div
+                    class="col d-flex"
+                    >
+                    <!-- parameters -->
+                    <button
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      (click)="openParametersModal()"
+                      title="Edit parameters and inputs"
+                      [disabled]="!selectedTool">
+                      <!-- class="fas fa-fw fa-sliders-h" -->
+                      @if (paramButtonWarning) {
+                        <span
+                          class="fas fa-fw fa-exclamation-circle text-warning"
+                        aria-hidden="true"></span>
+                      }
+                      @if (!paramButtonWarning && !paramButtonChanged) {
+                        <span
+                          class="fas fa-fw fa-edit"
+                        aria-hidden="true"></span>
+                      }
+                      @if (!paramButtonWarning && paramButtonChanged) {
+                        <span
+                          class="fas fa-fw fa-edit text-primary"
+                        aria-hidden="true"></span>
+                      }
+                      Parameters
+                    </button>
+                    <!-- run -->
+                    @if (!runIsDropdown) {
+                      <button
+                        class="btn btn-success run-button btn-sm button-wide flex-grow-1"
+                        (click)="runJob(false)"
+                        [disabled]="!runEnabled">
+                        <span class="fas fa-play"></span>
+                        Run
+                      </button>
+                    }
+                    @if (runIsDropdown) {
+                      <div ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
+                        <button
+                          class="btn btn-success run-button btn-sm button-wide flex-grow-1"
+                          ngbDropdownToggle
+                          id="runDropdownButton">
+                          <span class="fas fa-play"></span>
+                          Run
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" ngbDropdownMenu aria-labelledby="runDropdownButton">
+                          <button
+                            ngbDropdownItem
+                            (click)="runJob(false)"
+                            [disabled]="!validatedTool.singleJobValidation.valid">
+                            Run Tool
+                            @if (validatedTool.singleJobValidation.valid) {
+                              <span class="text-muted text-sm">1 job</span>
+                            }
+                          </button>
+                          <button
+                            ngbDropdownItem
+                            (click)="runJob(true)"
+                            [disabled]="!validatedTool.runForEachValidation.valid">
+                            Run Tool for Each File
+                            @if (validatedTool.runForEachValidation.valid) {
+                              <span class="text-muted text-sm">
+                                {{ validatedTool.selectedDatasets.length }} jobs
+                              </span>
+                            }
+                          </button>
+                          <button
+                            ngbDropdownItem
+                            (click)="runForEachSample()"
+                            [disabled]="!validatedTool.runForEachSampleValidation.valid">
+                            Run Tool For Each Sample
+                            @if (validatedTool.runForEachSampleValidation.valid) {
+                              <span class="text-muted text-sm">
+                                {{
+                                validatedTool.sampleGroups.pairedEndSamples.length +
+                                validatedTool.sampleGroups.singleEndSamples.length
+                                }}
+                                jobs
+                              </span>
+                            }
+                          </button>
+                          @if (defineHintVisible) {
+                            <div class="dropdown-divider"></div>
+                          }
+                          @if (defineHintVisible) {
+                            <button
+                              ngbDropdownItem
+                              (click)="onDefineSamples()"
+                              [disabled]="validatedTool.runForEachSampleValidation.valid">
+                              Define Samples to Enable Run for Each Sample
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
-            </div>
-
-            <div class="row">
-              <div class="col">
-                <div *ngIf="selectedTool">
-                  <span>{{ selectedTool.tool.description }}</span>
-                  <ch-link-button class="no-underline-link-button" (click)="openManualModal()">
-                    &#x20;More&nbsp;info&hellip;
-                  </ch-link-button>
+              <div class="row">
+                <div class="col">
+                  @if (selectedTool) {
+                    <div>
+                      <span>{{ selectedTool.tool.description }}</span>
+                      <ch-link-button class="no-underline-link-button" (click)="openManualModal()">
+                        &#x20;More&nbsp;info&hellip;
+                      </ch-link-button>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
@@ -256,5 +276,5 @@
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

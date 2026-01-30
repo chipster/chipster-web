@@ -21,21 +21,22 @@
     cx="50"
     cy="50"
     r="43">
-    <animateTransform
-      *ngIf="count > 0"
-      attributeName="transform"
-      attributeType="XML"
-      type="rotate"
-      dur="5s"
-      from="0 50 50"
-      to="360 50 50"
-      repeatCount="indefinite" />
+    @if (count > 0) {
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        type="rotate"
+        dur="5s"
+        from="0 50 50"
+        to="360 50 50"
+        repeatCount="indefinite" />
+    }
   </circle>
   <!-- <circle fill="none" stroke="#b8daff" stroke-width="4" stroke-miterlimit="10" stroke-dasharray="10,10" cx="50"
-              cy="50" r="35">
-              <animateTransform attributeName="transform" attributeType="XML" type="rotate" dur="5s" from="0 50 50" to="-360 50 50"
-                repeatCount="indefinite" />
-            </circle> -->
+  cy="50" r="35">
+  <animateTransform attributeName="transform" attributeType="XML" type="rotate" dur="5s" from="0 50 50" to="-360 50 50"
+    repeatCount="indefinite" />
+</circle> -->
 </svg>
 
 <span

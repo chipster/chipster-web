@@ -2,76 +2,83 @@
 
 <div class="chipster-highlight">
   <!-- single file -->
-  <div *ngIf="selectionService.selectedDatasets.length === 1">
-    <!-- file name -->
-    <span *ngIf="selectionService.selectedDatasets.length === 1" class="h6">{{ datasetName }}</span>
-
-    <!-- context dropdown -->
-    <div ngbDropdown class="d-inline-block">
-      <button
-        type="button"
-        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
-        id="fileDropdownMenuButton"
-        ngbDropdownToggle
-        aria-haspopup="true"
-        aria-expanded="false"
-        title="Actions">
-        <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
-        <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
-      </button>
-      <div ngbDropdownMenu aria-labelledby="fileDropdownMenuButton">
-        <button ngbDropdownItem (click)="renameDataset()">Rename&hellip;</button>
-        <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster Format&hellip;</button>
-        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
-        <button ngbDropdownItem (click)="exportDatasets()">Export</button>
-        <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
-        <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="showJob()" [disabled]="sourceJob == null">Show Job</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select All Descendants</button>
-        <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
-        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
-        <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="deleteDatasets()">Delete</button>
+  @if (selectionService.selectedDatasets.length === 1) {
+    <div>
+      <!-- file name -->
+      @if (selectionService.selectedDatasets.length === 1) {
+        <span class="h6">{{ datasetName }}</span>
+      }
+      <!-- context dropdown -->
+      <div ngbDropdown class="d-inline-block">
+        <button
+          type="button"
+          class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
+          id="fileDropdownMenuButton"
+          ngbDropdownToggle
+          aria-haspopup="true"
+          aria-expanded="false"
+          title="Actions">
+          <!-- <i class="fa-solid fa-bars" aria-hidden="true"></i> -->
+          <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
+        </button>
+        <div ngbDropdownMenu aria-labelledby="fileDropdownMenuButton">
+          <button ngbDropdownItem (click)="renameDataset()">Rename&hellip;</button>
+          <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster Format&hellip;</button>
+          <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+          <button ngbDropdownItem (click)="exportDatasets()">Export</button>
+          <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="showJob()" [disabled]="sourceJob == null">Show Job</button>
+          <button ngbDropdownItem (click)="selectChildren()">Select All Descendants</button>
+          <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
+          <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="deleteDatasets()">Delete</button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <!-- multiple files -->
-  <div *ngIf="selectionService.selectedDatasets.length > 1">
-    <!-- file count -->
-    <span *ngIf="selectionService.selectedDatasets.length > 1" class="h6">
-      {{ selectionService.selectedDatasets.length }} files
-    </span>
-
-    <!-- context dropdown -->
-    <div ngbDropdown class="d-inline-block">
-      <button
-        type="button"
-        class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
-        id="filesDropdownMenuButton"
-        ngbDropdownToggle
-        aria-haspopup="true"
-        aria-expanded="false"
-        title="Actions">
-        <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
-      </button>
-      <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
-        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
-        <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
-        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
-        <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="deleteDatasets()">
-          Delete {{ selectionService.selectedDatasets.length }} files
+  @if (selectionService.selectedDatasets.length > 1) {
+    <div>
+      <!-- file count -->
+      @if (selectionService.selectedDatasets.length > 1) {
+        <span class="h6">
+          {{ selectionService.selectedDatasets.length }} files
+        </span>
+      }
+      <!-- context dropdown -->
+      <div ngbDropdown class="d-inline-block">
+        <button
+          type="button"
+          class="btn btn-sm ms-1 btn-outline-dark no-caret-dropdown dropdown-menu-button"
+          id="filesDropdownMenuButton"
+          ngbDropdownToggle
+          aria-haspopup="true"
+          aria-expanded="false"
+          title="Actions">
+          <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
         </button>
+        <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
+          <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+          <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
+          <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
+          <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="deleteDatasets()">
+            Delete {{ selectionService.selectedDatasets.length }} files
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <!-- visualization tabs -->
-  <ch-visualizations
-    *ngIf="selectionService.selectedDatasets.length > 0"
-    (scrollFix)="doScrollFix.emit()"
-    [sessionData]="sessionData"
+  @if (selectionService.selectedDatasets.length > 0) {
+    <ch-visualizations
+      (scrollFix)="doScrollFix.emit()"
+      [sessionData]="sessionData"
     [tools]="tools"></ch-visualizations>
+  }
 </div>

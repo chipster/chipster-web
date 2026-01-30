@@ -1,11 +1,15 @@
 <div class="dataset-details">
   <table class="table table-sm table-borderless align-top">
     <tbody>
-      <tr *ngFor="let dataset of datasets">
-        <td class="">{{ dataset.name }}</td>
-        <td class="text-muted">{{ dataset.size | bytes : 0 }}</td>
-        <td *ngIf="showDate" class="text-muted">{{ dataset.created | localDate }}</td>
-      </tr>
+      @for (dataset of datasets; track dataset) {
+        <tr>
+          <td class="">{{ dataset.name }}</td>
+          <td class="text-muted">{{ dataset.size | bytes : 0 }}</td>
+          @if (showDate) {
+            <td class="text-muted">{{ dataset.created | localDate }}</td>
+          }
+        </tr>
+      }
     </tbody>
   </table>
 </div>

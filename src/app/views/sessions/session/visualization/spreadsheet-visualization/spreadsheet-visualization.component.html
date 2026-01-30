@@ -1,51 +1,73 @@
-<div *ngIf="state.isReady(); else statusTemplate">
-  <!-- preview and modal full file -->
-  <!-- prettier-ignore -->
-  <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount > 0">
-    Showing all {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
-  </span>
-  <span style="font-size: smaller" *ngIf="gotFullFile && !limitRows && rowCount === 0">No data rows.</span>
-
-  <!-- preview, full file, but preview limiting visible rows -->
-  <!-- prettier-ignore -->
-  <span style="font-size: smaller" *ngIf="!modalMode && gotFullFile && limitRows">
-    Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
-  </span>
-
-  <!-- preview, line count maybe available in full screen-->
-  <!-- prettier-ignore -->
-  <span style="font-size: smaller" *ngIf="!modalMode && !gotFullFile">
-    Showing the first {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>.
-  </span>
-
-  <!-- modal, total count not available -->
-  <!-- prettier-ignore -->
-  <span style="font-size: smaller" *ngIf="modalMode && !gotFullFile">
-    Showing the first {{ rowCount }} rows<span *ngIf="limitColumns"> and the first {{ columnLimit }} columns</span>. File is too big for total row count.
-  </span>
-
-  <!-- full screen text and link for preview-->
-  <span *ngIf="!modalMode && (!gotFullFile || limitRows)" style="font-size: smaller">
-    View in
-    <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
-    {{ goToFullScreenText }}.
-  </span>
-
-  <ch-link-button *ngIf="!modalMode" (click)="showAll()" class="no-underline-link-button float-end">
-    <i class="fa-solid fa-expand"></i>
-    Full Screen
-  </ch-link-button>
-</div>
+@if (state.isReady()) {
+  <div>
+    <!-- preview and modal full file -->
+    <!-- prettier-ignore -->
+    @if (gotFullFile && !limitRows && rowCount > 0) {
+      <span style="font-size: smaller">
+        Showing all {{ rowCount }} rows@if (limitColumns) {
+        <span> and the first {{ columnLimit }} columns</span>
+        }.
+      </span>
+    }
+    @if (gotFullFile && !limitRows && rowCount === 0) {
+      <span style="font-size: smaller">No data rows.</span>
+    }
+    <!-- preview, full file, but preview limiting visible rows -->
+    <!-- prettier-ignore -->
+    @if (!modalMode && gotFullFile && limitRows) {
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows@if (limitColumns) {
+        <span> and the first {{ columnLimit }} columns</span>
+        }.
+      </span>
+    }
+    <!-- preview, line count maybe available in full screen-->
+    <!-- prettier-ignore -->
+    @if (!modalMode && !gotFullFile) {
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} rows@if (limitColumns) {
+        <span> and the first {{ columnLimit }} columns</span>
+        }.
+      </span>
+    }
+    <!-- modal, total count not available -->
+    <!-- prettier-ignore -->
+    @if (modalMode && !gotFullFile) {
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} rows@if (limitColumns) {
+        <span> and the first {{ columnLimit }} columns</span>
+        }. File is too big for total row count.
+      </span>
+    }
+    <!-- full screen text and link for preview-->
+    @if (!modalMode && (!gotFullFile || limitRows)) {
+      <span style="font-size: smaller">
+        View in
+        <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
+        {{ goToFullScreenText }}.
+      </span>
+    }
+    @if (!modalMode) {
+      <ch-link-button (click)="showAll()" class="no-underline-link-button float-end">
+        <i class="fa-solid fa-expand"></i>
+        Full Screen
+      </ch-link-button>
+    }
+  </div>
+} @else {
+  <ch-status [state]="state"></ch-status>
+}
 
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
 
 <!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->
-<div *ngIf="!modalMode" class="horizontal-scroll" #horizontalScroll>
+@if (!modalMode) {
+  <div class="horizontal-scroll" #horizontalScroll>
+    <div id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
+  </div>
+}
+
+@if (modalMode) {
   <div id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
-</div>
+}
 
-<div *ngIf="modalMode" id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
-
-<ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
-</ng-template>

@@ -4,14 +4,15 @@
   <div class="row">
     <div class="col">
       <div class="btn-group">
-        <button
-          type="button"
-          class="btn btn-sm"
-          (click)="selectModule(module)"
-          *ngFor="let module of modules | modulepipe: searchTool"
-          [ngClass]="{ 'btn-primary': module === selectedModule, 'btn-light': module !== selectedModule }">
-          {{ module.name }}
-        </button>
+        @for (module of modules | modulepipe: searchTool; track module) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            (click)="selectModule(module)"
+            [ngClass]="{ 'btn-primary': module === selectedModule, 'btn-light': module !== selectedModule }">
+            {{ module.name }}
+          </button>
+        }
       </div>
     </div>
 
@@ -22,7 +23,7 @@
         focusHotkey="t"
         focusHotkeyDescription="Find tool"
         (valueChange)="search($event)"
-        (enterKey)="searchEnter()"></ch-search-box>
+      (enterKey)="searchEnter()"></ch-search-box>
     </div>
   </div>
 
@@ -37,18 +38,18 @@
     <div class="col">
       <ch-scroller>
         <div class="tool-list list-group-sm" id="category-tool-list">
-          <div *ngFor="let category of selectedModule.categories | categorypipe: searchTool">
-            <button
-              type="button"
-              class="list-group-item list-group-item-action tool-list-item"
-              [ngClass]="{ active: category === selectedCategory }"
-              (click)="selectCategory(category)">
-              <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
-            </button>
-
-            <ch-scroller>
-              <!-- fix missing toolSelection first-->
-              <!-- <div class="tool-list list-group-sm" *ngIf="selectedCategory===category" id="tool-list">
+          @for (category of selectedModule.categories | categorypipe: searchTool; track category) {
+            <div>
+              <button
+                type="button"
+                class="list-group-item list-group-item-action tool-list-item"
+                [ngClass]="{ active: category === selectedCategory }"
+                (click)="selectCategory(category)">
+                <ch-tool-list-item [color]="category.color" [categoryname]="category.name"></ch-tool-list-item>
+              </button>
+              <ch-scroller>
+                <!-- fix missing toolSelection first-->
+                <!-- <div class="tool-list list-group-sm" *ngIf="selectedCategory===category" id="tool-list">
                 <button type="button" class="tool-item list-group-item list-group-item-action tool-list-item"
                   [ngClass]="{active: tool===toolSelection?.tool}" (click)="selectTool(tool)"
                   *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool" id="tool-button-{{tool.id}}"
@@ -56,26 +57,26 @@
                   (mouseenter)="tool.description && p.open()" (mouseleave)="tool.description && p.close()">
                   {{tool.name.displayName}}
                 </button>
-
               </div> -->
             </ch-scroller>
           </div>
-        </div>
-      </ch-scroller>
-    </div>
+        }
+      </div>
+    </ch-scroller>
+  </div>
 
-    <!--
-    <div class="col">
-      <ch-scroller>
-        <div class="tool-list list-group-sm" *ngIf="selectedCategory" id="tool-list">
-          <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool===toolSelection?.tool}"
-            (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool" id="tool-button-{{tool.id}}"
-            ngbPopover="{{tool.description}}" triggers="manual" container="body" placement="left" #p="ngbPopover" (mouseenter)="tool.description && p.open()"
-            (mouseleave)="tool.description && p.close()">
-            {{tool.name.displayName}}
-          </button>
-        </div>
-      </ch-scroller>
-    </div>
-  --></div>
+  <!--
+  <div class="col">
+    <ch-scroller>
+      <div class="tool-list list-group-sm" *ngIf="selectedCategory" id="tool-list">
+        <button type="button" class="list-group-item list-group-item-action tool-list-item" [ngClass]="{active: tool===toolSelection?.tool}"
+          (click)="selectTool(tool)" *ngFor="let tool of selectedCategory.tools | toolpipe:searchTool" id="tool-button-{{tool.id}}"
+          ngbPopover="{{tool.description}}" triggers="manual" container="body" placement="left" #p="ngbPopover" (mouseenter)="tool.description && p.open()"
+          (mouseleave)="tool.description && p.close()">
+          {{tool.name.displayName}}
+        </button>
+      </div>
+    </ch-scroller>
+  </div>
+--></div>
 </div>

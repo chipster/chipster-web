@@ -1,9 +1,12 @@
-<ch-single-dataset
-  *ngIf="datasets.length === 1"
-  [dataset]="datasets[0]"
-  [jobs]="sessionData.jobsMap"
-  [sessionData]="sessionData"
-  [tools]="tools"
+@if (datasets.length === 1) {
+  <ch-single-dataset
+    [dataset]="datasets[0]"
+    [jobs]="sessionData.jobsMap"
+    [sessionData]="sessionData"
+    [tools]="tools"
   [parametersLimit]="-1"></ch-single-dataset>
+}
 
-<ch-files-details *ngIf="datasets.length > 1" [datasets]="datasets"></ch-files-details>
+@if (datasets.length > 1) {
+  <ch-files-details [datasets]="datasets"></ch-files-details>
+}
