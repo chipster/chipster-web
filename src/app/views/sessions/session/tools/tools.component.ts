@@ -1,5 +1,5 @@
-import { DOCUMENT } from "@angular/common";
-import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+
+import { Component, Inject, Input, OnDestroy, OnInit, ViewChild, DOCUMENT } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
