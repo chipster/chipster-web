@@ -2,12 +2,15 @@ import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { LoadState } from "../../../model/loadstate";
 import { NewsItem } from "../../../shared/components/news/NewsItem";
 import { NewsService } from "../../../shared/services/news.service";
+import { StatusComponent } from "../../../shared/components/status.component";
+import { NewsListComponent } from "../../../shared/components/news/news-list.component";
 
 @Component({
   selector: "ch-notifications",
   templateUrl: "./news.component.html",
   styleUrls: ["./news.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [StatusComponent, NewsListComponent],
 })
 export class NewsComponent implements OnInit {
   public news: NewsItem[];

@@ -8,6 +8,8 @@ import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { ManualUtils } from "./manual-utils";
+import { StaticHtmlComponent } from "./static-html/static-html.component";
+import { NgClass } from "@angular/common";
 
 /**
  * Show HTML files in an Angular app
@@ -23,6 +25,7 @@ import { ManualUtils } from "./manual-utils";
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
   styleUrls: ["./manual.component.less"],
+  imports: [StaticHtmlComponent, NgClass]
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
   private unsubscribe: Subject<any> = new Subject();

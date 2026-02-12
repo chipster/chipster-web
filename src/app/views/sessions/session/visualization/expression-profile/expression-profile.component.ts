@@ -18,12 +18,14 @@ import GeneExpression from "./geneexpression";
 import Interval from "./interval";
 import Line from "./line";
 import Rectangle from "./rectangle";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 @Component({
   selector: "ch-expression-profile",
   templateUrl: "./expression-profile.component.html",
   styleUrls: ["./expression-profile.component.less"],
   encapsulation: ViewEncapsulation.None,
+  imports: [StatusComponent]
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   @Input()

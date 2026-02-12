@@ -7,6 +7,7 @@ import { ValidatedTool } from "../ToolSelection";
 import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
+import { FormsModule } from "@angular/forms";
 
 interface Resource {
   title: string;
@@ -27,6 +28,7 @@ interface Resources {
   selector: "ch-tool-resources",
   templateUrl: "./tool-resources.component.html",
   styleUrls: ["./tool-resources.component.less"],
+  imports: [FormsModule]
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;

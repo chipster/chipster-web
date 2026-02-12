@@ -1,10 +1,8 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { NewsItem } from "./NewsItem";
+import { LocalDatePipe } from "../../pipes/local-date.pipe";
 
-@Component({
-  selector: "ch-news-item",
-  templateUrl: "./news-item.component.html",
-})
+@Component({ selector: "ch-news-item", templateUrl: "./news-item.component.html", imports: [LocalDatePipe] })
 export class NewsItemComponent {
   @Input() newsItem: NewsItem;
   @Input() editable = false;

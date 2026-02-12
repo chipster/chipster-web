@@ -6,12 +6,14 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-clients",
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [LocalDatePipe]
 })
 export class ClientsComponent implements OnInit {
   users: any[];

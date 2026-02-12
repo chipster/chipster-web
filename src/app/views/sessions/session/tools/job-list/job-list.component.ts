@@ -5,11 +5,15 @@ import { map } from "rxjs/operators";
 import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
+import { AsyncPipe, NgClass } from "@angular/common";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
 
 @Component({
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
   styleUrls: ["./job-list.component.less"],
+  imports: [LocalDatePipe, AsyncPipe, LinkButtonComponent, NgClass]
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];

@@ -3,11 +3,13 @@ import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-accessibility",
   templateUrl: "./accessibility.component.html",
   styleUrls: ["./accessibility.component.less"],
+  imports: [ManualComponent],
 })
 export class AccessibilityComponent implements OnInit {
   public accessibilityPath: string;
@@ -17,7 +19,7 @@ export class AccessibilityComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -32,7 +34,7 @@ export class AccessibilityComponent implements OnInit {
           this.accessibilityPath = "assets/manual/";
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the accessibility page", err)
+      (err) => this.errorService.showError("failed to get the path of the accessibility page", err),
     );
   }
 }

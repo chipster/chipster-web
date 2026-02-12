@@ -35,8 +35,13 @@ import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
 import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgbModule,
+    SharedModule,
+    LinkButtonModule,
+    PdfViewerModule,
     VisualizationsComponent,
     VennDiagramComponent,
     PdfVisualizationComponent,
@@ -56,6 +61,7 @@ import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
     FilesDetailsComponent,
     DatasetParameterListComponent,
   ],
+  declarations: [],
   providers: [
     ExpressionProfileTSVService,
     ExpressionProfileService,

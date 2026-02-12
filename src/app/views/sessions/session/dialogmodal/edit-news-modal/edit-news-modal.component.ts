@@ -1,11 +1,10 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
-@Component({
-  templateUrl: "./edit-news-modal.component.html",
-})
+@Component({ templateUrl: "./edit-news-modal.component.html", imports: [LocalDatePipe, ReactiveFormsModule] })
 export class EditNewsModalComponent implements OnInit {
   public modalTitle: string;
   @Input()
@@ -18,11 +17,7 @@ export class EditNewsModalComponent implements OnInit {
   created: Date;
   modified: Date;
 
-  form = new UntypedFormGroup({
-    title: this.titleControl,
-    shortTitle: this.shortTitleControl,
-    body: this.bodyControl,
-  });
+  form = new UntypedFormGroup({ title: this.titleControl, shortTitle: this.shortTitleControl, body: this.bodyControl });
 
   constructor(private activeModal: NgbActiveModal) {}
 

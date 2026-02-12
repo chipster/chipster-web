@@ -48,8 +48,10 @@ import { SchedulerResource } from "./resources/scheduler-resource";
  */
 
 @NgModule({
-  imports: [CommonModule, CoreModule, FormsModule],
-  declarations: [
+  imports: [
+    CommonModule, 
+    CoreModule, 
+    FormsModule,
     BytesPipe,
     TrustedResourcePipe,
     LocalDatePipe,
@@ -66,7 +68,8 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     DummyRouteComponent,
     ActionToastComponent,
     NewsItemComponent,
-    NewsListComponent,
+    NewsListComponent,],
+  declarations: [
   ],
   providers: [
     PipeService,

@@ -11,11 +11,27 @@ import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { SessionService } from "../session.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
+import { BytesPipe } from "../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+  NgbDropdownButtonItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
 
 @Component({
   selector: "ch-session-details",
   templateUrl: "./session-details.component.html",
   styleUrls: ["./session-details.component.less"],
+  imports: [
+    BytesPipe, 
+    LocalDatePipe,    
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,]
 })
 export class SessionDetailsComponent {
   @Input()

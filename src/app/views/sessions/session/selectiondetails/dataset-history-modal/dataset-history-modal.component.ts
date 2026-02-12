@@ -7,6 +7,14 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
 
 export class DatasetHistoryStep {
   datasetName: string;
@@ -28,6 +36,14 @@ interface HistoryOption {
   selector: "ch-dataset-history-modal",
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"],
+  imports: [
+    DatasetParameterListComponent, 
+    LocalDatePipe,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+  ]
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;

@@ -5,10 +5,12 @@ import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 @Component({
   selector: "ch-image-visualization",
   templateUrl: "./image-visualization.component.html",
+  imports: [StatusComponent]
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   @Input()

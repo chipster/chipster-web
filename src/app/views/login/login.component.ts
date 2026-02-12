@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { UntypedFormGroup } from "@angular/forms";
+import { FormsModule, UntypedFormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
 import { map, mergeMap, tap } from "rxjs/operators";
@@ -13,11 +13,13 @@ import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
+import { AuthButtonComponent } from "./auth-button.component";
 
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.less"],
+  imports: [AuthButtonComponent, FormsModule]
 })
 export class LoginComponent implements OnInit {
   static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ViewChild, ɵfindLocaleData } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -6,11 +6,28 @@ import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { FormsModule } from "@angular/forms";
+import { NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from "@ng-bootstrap/ng-bootstrap/dropdown";
 
 @Component({
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
+  imports: [
+    DatasetParameterListComponent,
+    BytesPipe,
+    LocalDatePipe,
+    LinkButtonComponent,
+    FormsModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+  ],
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()
@@ -40,7 +57,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     private restErrorService: RestErrorService,
     private datasetModalService: DatasetModalService,
     private toolService: ToolService,
-    private datasetContextMenuService: DatasetContextMenuService
+    private datasetContextMenuService: DatasetContextMenuService,
   ) {}
 
   ngOnInit() {

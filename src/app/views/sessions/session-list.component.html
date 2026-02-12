@@ -35,6 +35,7 @@
                 </tbody>
               </table>
             }
+
             <!-- session rows -->
             <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
               <tbody>
@@ -56,15 +57,18 @@
                             <!-- delete button -->
                             <button
                               class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
-                        [ngClass]="{
-                          'visible-button':
-                            buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)
-                        }"
-                              (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation()"
+                              [ngClass]="{
+                                'visible-button':
+                                  buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules),
+                              }"
+                              (click)="
+                                deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation()
+                              "
                               title="Delete">
                               <span class="fas fa-times"></span>
                             </button>
                             <!-- context menu button -->
+
                             <div
                               ngbDropdown
                               #sessionDropdown="ngbDropdown"
@@ -83,30 +87,34 @@
                               </button>
                               <div ngbDropdownMenu aria-labelledby="sessionDropdown" class="dropdown-menu-left">
                                 <button
-                                  class="dropdown-item"
+                                  ngbDropdownItem
                                   (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); rename(session)"
                                   [disabled]="sessionDataService.isReadOnlySession(session)">
                                   Rename&hellip;
                                 </button>
                                 <button
-                                  class="dropdown-item"
+                                  ngbDropdownItem
                                   (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); notes(session)">
                                   {{ getNotesButtonText(session) }}&hellip;
                                 </button>
                                 <button
-                                  class="dropdown-item"
-                                  (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); duplicate(session)">
+                                  ngbDropdownItem
+                                  (click)="
+                                    $event.stopImmediatePropagation(); sessionDropdown.toggle(); duplicate(session)
+                                  ">
                                   Duplicate&hellip;
                                 </button>
                                 <button
-                                  class="dropdown-item"
+                                  ngbDropdownItem
                                   (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); share(session)"
                                   [disabled]="sessionDataService.isReadOnlySession(session)">
                                   Share&hellip;
                                 </button>
                                 <button
-                                  class="dropdown-item"
-                                  (click)="$event.stopImmediatePropagation(); sessionDropdown.toggle(); download(session)">
+                                  ngbDropdownItem
+                                  (click)="
+                                    $event.stopImmediatePropagation(); sessionDropdown.toggle(); download(session)
+                                  ">
                                   Download
                                 </button>
                               </div>
@@ -150,9 +158,7 @@
                         }
                         <!-- deleting text instead of buttons for sessions which are being deleted -->
                         @if (deletingSessions.has(session)) {
-                          <span
-                            class="float-end"
-                            style="font-size: smaller; font-style: italic">
+                          <span class="float-end" style="font-size: smaller; font-style: italic">
                             <!-- use hidden button to keep the row height static -->
                             <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
                               <span class="fas fa-times"></span>
@@ -176,15 +182,11 @@
     <div class="col">
       <div id="workflow-dataset-panel" class="text-muted">
         @if (mode !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
-          <p>
-            To open a session, click on the session name.
-          </p>
+          <p>To open a session, click on the session name.</p>
         }
 
         @if (mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
-          <p>
-            Click on the session name to see a preview.
-          </p>
+          <p>Click on the session name to see a preview.</p>
         }
 
         <p>
@@ -236,13 +238,12 @@
                 class="btn-close"
                 aria-label="Close"
                 (click)="closePreview()"
-              title="Close preview"></button>
+                title="Close preview"></button>
             }
             <h5 class="align-middle">
               {{ selectedSession.name }}
               @if (mode === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW) {
-                <span
-                  class="text-smaller lighter float-end">
+                <span class="text-smaller lighter float-end">
                   <i>preview</i>
                 </span>
               }
@@ -257,21 +258,16 @@
                 </div>
               }
               @if (sessionData && !(sessionData.datasetsMap.size > 0)) {
-                <div
-                  style="font-size: smaller; font-style: italic">
-                  No data in this session.
-                </div>
+                <div style="font-size: smaller; font-style: italic">No data in this session.</div>
               }
               @if (sessionData && sessionData.datasetsMap && sessionData.jobsMap && sessionData.datasetsMap.size > 0) {
-                <div
-                  class="workflow-graph-panel"
-                  >
+                <div class="workflow-graph-panel">
                   <ch-workflow-graph
                     [datasetsMap]="sessionData.datasetsMap"
                     [jobsMap]="sessionData.jobsMap"
                     [modulesMap]="modulesMap"
                     [defaultScale]="0.5"
-                  [enabled]="false"></ch-workflow-graph>
+                    [enabled]="false"></ch-workflow-graph>
                 </div>
               }
             </div>
@@ -298,7 +294,7 @@
             </table>
             <div>
               <!-- Create new element for each paragraph to preserve new line characters -->
-              @for (line of selectedSession.notes?.split('\n'); track line) {
+              @for (line of selectedSession.notes?.split("\n"); track line) {
                 <p>
                   {{ line }}
                 </p>
@@ -339,9 +335,7 @@
             </tr>
           }
           @for (session of sessionShares; track session) {
-            <tr
-              [ngClass]="{ highlight: rowHighlighted(session) }"
-              class="session-list-item">
+            <tr [ngClass]="{ highlight: rowHighlighted(session) }" class="session-list-item">
               <td>
                 <span>{{ session.rules[0].username }}</span>
               </td>
@@ -367,9 +361,7 @@
                 }
                 <!-- deleting text instead of buttons for sessions which are being deleted -->
                 @if (deletingSessions.has(session)) {
-                  <span
-                    class="float-end"
-                    style="font-size: smaller; font-style: italic">
+                  <span class="float-end" style="font-size: smaller; font-style: italic">
                     <!-- use hidden button to keep the row height static -->
                     <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
                       <span class="fas fa-times"></span>

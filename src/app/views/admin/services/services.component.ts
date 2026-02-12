@@ -7,12 +7,14 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { NgbPopover } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: "ch-services",
   templateUrl: "./services.component.html",
   styleUrls: ["./services.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [NgbPopover]
 })
 export class ServicesComponent implements OnInit {
   services: Service[];

@@ -1,13 +1,16 @@
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbActiveModal, NgbProgressbar, NgbProgressbarModule } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { UploadService } from "../../../../../shared/services/upload.service";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { SecondsPipe } from "../../../../../shared/pipes/secondspipe.pipe";
 
 @Component({
   selector: "ch-add-dataset-modal-content",
   templateUrl: "./upload-modal.component.html",
   styleUrls: ["./upload-modal.component.less"],
+  imports: [BytesPipe, SecondsPipe, NgbProgressbar]
 })
 export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() sessionId: string;

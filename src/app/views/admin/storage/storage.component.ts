@@ -1,5 +1,13 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { 
+  NgbModal, 
+  NgbNavContent,
+	NgbNav,
+	NgbNavItem,
+  NgbNavLink,
+	NgbNavLinkButton,
+	NgbNavOutlet,
+} from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
@@ -18,12 +26,38 @@ import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
+import { StatusComponent } from "../../../shared/components/status.component";
+import { FormsModule } from "@angular/forms";
+import { AgGridAngular } from "ag-grid-angular";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
+
 
 @Component({
   selector: "ch-storage",
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [
+    BytesPipe, 
+    StatusComponent, 
+    FormsModule,  
+    AgGridAngular, 
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+    NgbNav,
+    NgbNavLink,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLinkButton,
+    NgbNavOutlet,
+  ]
 })
 
 /**

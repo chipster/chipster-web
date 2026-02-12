@@ -3,11 +3,13 @@ import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-privacy-notice",
   templateUrl: "./privacy-notice.component.html",
   styleUrls: ["./privacy-notice.component.less"],
+  imports: [ManualComponent],
 })
 export class PrivacyNoticeComponent implements OnInit {
   public htmlPath: string;
@@ -17,7 +19,7 @@ export class PrivacyNoticeComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -31,7 +33,7 @@ export class PrivacyNoticeComponent implements OnInit {
           log.error("app config " + ConfigService.KEY_PRIVACE_NOTICE_PATH + " is not set");
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the privacy notice page", err)
+      (err) => this.errorService.showError("failed to get the path of the privacy notice page", err),
     );
   }
 }

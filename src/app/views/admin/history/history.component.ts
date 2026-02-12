@@ -1,7 +1,7 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { ReactiveFormsModule, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
+import { NgbDatepicker, NgbDatepickerModule, NgbModal, NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
 import { flatMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
@@ -10,12 +10,14 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 
 @Component({
   selector: "ch-history",
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [BytesPipe, NgbPagination, NgbDatepickerModule, ReactiveFormsModule]
 })
 export class HistoryComponent implements OnInit {
   readonly comparisonIs = "is";

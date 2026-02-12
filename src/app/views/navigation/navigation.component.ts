@@ -12,11 +12,25 @@ import { NewsService } from "../../shared/services/news.service";
 import { PreferencesService } from "../../shared/services/preferences.service";
 import { RouteService } from "../../shared/services/route.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
+import { RouterModule } from "@angular/router";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
+
 
 @Component({
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.less"],
+  imports: [
+    RouterModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,]
 })
 export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;

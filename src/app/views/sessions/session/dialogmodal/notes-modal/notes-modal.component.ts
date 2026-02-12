@@ -2,10 +2,13 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/cor
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./notes-modal.component.html",
   styleUrls: ["./notes-modal.component.less"],
+  imports: [LocalDatePipe, FormsModule]
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
   @Input()

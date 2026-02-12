@@ -1,6 +1,6 @@
 
 import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild, DOCUMENT } from "@angular/core";
-import { AbstractControl, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
+import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
 import log from "loglevel";
@@ -18,6 +18,7 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 @Component({
   templateUrl: "./contact-support-modal.component.html",
   styleUrls: ["./contact-support-modal.component.less"],
+  imports: [ReactiveFormsModule]
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public supportForm = this.fb.group({

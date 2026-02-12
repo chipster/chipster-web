@@ -48,6 +48,19 @@ import {
 import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
 import { ToolService } from "./tool.service";
 import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
+import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
+import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item.component";
+import { LinkButtonComponent } from "../link-button/link-button.component";
+import { NgSelectComponent } from "@ng-select/ng-select";
+import { NgClass } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
+
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -70,6 +83,17 @@ enum ModuleSelectionMode {
   templateUrl: "./tools.component.html",
   styleUrls: ["./tools.component.less"],
   providers: [NgbDropdownConfig],
+  imports: [
+    CounterSpinnerComponent, 
+    ToolListItemComponent, 
+    LinkButtonComponent, 
+    NgSelectComponent, 
+    FormsModule, 
+    NgClass,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,]
 })
 export class ToolsComponent implements OnInit, OnDestroy {
   public readonly categoryElementIdPrefix = "category-button-";

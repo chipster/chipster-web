@@ -5,11 +5,13 @@ import { debounceTime, takeUntil } from "rxjs/operators";
 import { ToolSelectionService } from "../../tool.selection.service";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"],
+  imports: [FormsModule]
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;

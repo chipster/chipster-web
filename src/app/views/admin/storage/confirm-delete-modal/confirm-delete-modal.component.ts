@@ -9,6 +9,7 @@ import { RestErrorService } from "../../../../core/errorhandler/rest-error.servi
 import { SessionDbAdminService } from "../../../../shared/services/sessiondb-admin.service";
 import { UserService } from "../../../../shared/services/user.service";
 import UtilsService from "../../../../shared/utilities/utils";
+import { AgGridAngular } from "ag-grid-angular";
 
 export enum DeleteAction {
   DeleteUser,
@@ -30,6 +31,7 @@ enum DeleteStatus {
   selector: "ch-confirm-delete-modal",
   templateUrl: "./confirm-delete-modal.component.html",
   styleUrls: ["./confirm-delete-modal.component.less"],
+  imports: [AgGridAngular]
 })
 export class ConfirmDeleteModalComponent implements OnInit {
   @Input() users: any[];

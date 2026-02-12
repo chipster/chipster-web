@@ -3,11 +3,14 @@ import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ToolService } from "../../tools/tool.service";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { NgClass, NgStyle } from "@angular/common";
 
 @Component({
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"],
+  imports: [LinkButtonComponent, NgClass, NgStyle]
 })
 export class DatasetParameterListComponent implements OnChanges {
   @Input() tool: Tool;

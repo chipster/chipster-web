@@ -1,11 +1,14 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from "@angular/core";
 import log from "loglevel";
 import { ColumnItem } from "./wrangle-modal.component";
+import { NgLabelTemplateDirective, NgOptionTemplateDirective, NgSelectComponent, NgSelectModule } from "@ng-select/ng-select";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
+  imports: [NgSelectModule, FormsModule]
 })
 /**
  * Two things make things a little bit complicated here:

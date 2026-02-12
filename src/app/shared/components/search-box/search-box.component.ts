@@ -1,10 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { Hotkey, HotkeysService } from "angular2-hotkeys";
 
 @Component({
   selector: "ch-search-box",
   templateUrl: "./search-box.component.html",
   styleUrls: ["./search-box.component.less"],
+  imports: [FormsModule]
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {
   @Input()

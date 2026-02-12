@@ -1,8 +1,10 @@
 import { Component } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./download-from-url.component.html",
+  imports: [FormsModule]
 })
 export class DownloadFromUrlModalComponent {
   value = "";

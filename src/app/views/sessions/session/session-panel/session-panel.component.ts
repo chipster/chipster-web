@@ -10,11 +10,45 @@ import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
 import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
+import { SearchBoxComponent } from "../../../../shared/components/search-box/search-box.component";
+import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
+import { UploadComponent } from "./upload/upload.component";
+import { NgClass } from "@angular/common";
+import { 
+    NgbNav, 
+    NgbNavOutlet,
+    NgbNavLink,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLinkButton,
+} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
 
 @Component({
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"],
+  imports: [
+    SearchBoxComponent, 
+    UploadComponent, 
+    WorkflowGraphComponent, 
+    DatasetsearchPipe, 
+    NgClass, 
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+    NgbNav,
+    NgbNavLink,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLinkButton,
+    NgbNavOutlet,]
 })
 export class SessionPanelComponent {
   @Input()

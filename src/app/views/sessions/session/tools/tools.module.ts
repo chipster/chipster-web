@@ -22,8 +22,14 @@ import { ToolsComponent } from "./tools.component";
 import { ToolResourcesComponent } from "./tool-resources/tool-resources.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, FormsModule, NgbModule, ManualModule, LinkButtonModule, NgSelectModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    SharedModule,
+    FormsModule,
+    NgbModule,
+    ManualModule,
+    LinkButtonModule,
+    NgSelectModule,
     ToolListItemComponent,
     ToolsComponent,
     ToolParametersComponent,
@@ -38,6 +44,7 @@ import { ToolResourcesComponent } from "./tool-resources/tool-resources.componen
     ParametersModalComponent,
     RunOptionsComponent,
   ],
+  declarations: [],
   providers: [ToolService],
   exports: [ToolsComponent, ToolListAccordionComponent, ToolDetailsComponent, JobListComponent],
 })

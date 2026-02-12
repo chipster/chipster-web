@@ -4,11 +4,14 @@ import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
+import { RouterModule } from "@angular/router";
 
 @Component({
   selector: "ch-home",
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.less"],
+  imports: [ManualComponent, RouterModule],
 })
 export class HomeComponent implements OnInit {
   routerLinkLogin: string;
@@ -25,7 +28,7 @@ export class HomeComponent implements OnInit {
     private tokenService: TokenService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -39,7 +42,7 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page", this.homePath, this.homeFile);
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the home page", err)
+      (err) => this.errorService.showError("failed to get the path of the home page", err),
     );
 
     this.configService.get(ConfigService.KEY_HOME_HEADER_PATH).subscribe(
@@ -50,7 +53,7 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page header", this.homePath, this.homeFile);
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the home page header", err)
+      (err) => this.errorService.showError("failed to get the path of the home page header", err),
     );
 
     this.routerLinkSessions = this.routeService.getRouterLinkSessions();

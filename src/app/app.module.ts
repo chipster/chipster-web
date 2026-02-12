@@ -51,6 +51,9 @@ import { TermsComponent } from "./views/terms/terms.component";
 
 @NgModule({
   declarations: [
+  ],
+  bootstrap: [AppComponent],
+  imports: [
     NavigationComponent,
     LoginComponent,
     AuthButtonComponent,
@@ -63,9 +66,6 @@ import { TermsComponent } from "./views/terms/terms.component";
     MyllyHasMovedComponent,
     AccessibilityComponent,
     PrivacyNoticeComponent,
-  ],
-  bootstrap: [AppComponent],
-  imports: [
     BrowserModule,
     FormsModule,
     CoreModule,

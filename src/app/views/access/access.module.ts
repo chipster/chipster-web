@@ -3,8 +3,5 @@ import { NgModule } from "@angular/core";
 import { ManualModule } from "../manual/manual.module";
 import { AccessComponent } from "./access.component";
 
-@NgModule({
-  imports: [CommonModule, ManualModule],
-  declarations: [AccessComponent],
-})
+@NgModule({ imports: [CommonModule, ManualModule, AccessComponent], declarations: [] })
 export class AccessModule {}

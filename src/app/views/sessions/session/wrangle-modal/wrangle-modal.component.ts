@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -15,6 +15,9 @@ import { TsvService } from "../../../../shared/services/tsv.service";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
+import { MultiDropdownComponent } from "./multi-dropdown.component";
+import { StatusComponent } from "../../../../shared/components/status.component";
+import { AgGridAngular } from "ag-grid-angular";
 
 enum ColumnType {
   Identifier,
@@ -30,6 +33,7 @@ export interface ColumnItem {
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
   styleUrls: ["./wrangle-modal.component.less"],
+  imports: [MultiDropdownComponent, StatusComponent, ReactiveFormsModule, AgGridAngular]
 })
 export class WrangleModalComponent implements OnInit {
   constructor(

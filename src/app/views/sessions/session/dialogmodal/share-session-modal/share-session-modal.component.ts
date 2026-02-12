@@ -8,9 +8,12 @@ import { TokenService } from "../../../../../core/authentication/token.service";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./share-session-modal.component.html",
+  imports: [LocalDatePipe, FormsModule]
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()

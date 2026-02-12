@@ -4,10 +4,12 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { LoadState } from "../../../model/loadstate";
 import { NewsService } from "../../services/news.service";
 import { NewsItem } from "./NewsItem";
+import { NewsItemComponent } from "./news-item.component";
 
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
+  imports: [NewsItemComponent]
 })
 export class NewsListComponent implements OnInit {
   // @Input() news: NewsItem[];

@@ -6,11 +6,14 @@ import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionDataService } from "../../session-data.service";
+import { TrustedResourcePipe } from "../../../../../shared/pipes/trustedresource.pipe";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 @Component({
   selector: "ch-htmlvisualization",
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
+  imports: [TrustedResourcePipe, StatusComponent]
 })
 export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
   @Input()

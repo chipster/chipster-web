@@ -17,11 +17,32 @@ import { SessionDataService } from "./session/session-data.service";
 import { SessionService } from "./session/session.service";
 import { UserEventData } from "./user-event-data";
 import { UserEventService } from "./user-event.service";
+import { OpenSessionFileComponent } from "./open-session-file/open-session-file.component";
+import { BytesPipe } from "../../shared/pipes/bytes.pipe";
+import { WorkflowGraphComponent } from "./session/session-panel/workflow-graph/workflow-graph.component";
+import { LocalDatePipe } from "../../shared/pipes/local-date.pipe";
+import { NgClass } from "@angular/common";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
 
 @Component({
   selector: "ch-session-list",
   templateUrl: "./session-list.component.html",
   styleUrls: ["./session-list.component.less"],
+  imports: [
+    OpenSessionFileComponent, 
+    BytesPipe, 
+    WorkflowGraphComponent, 
+    LocalDatePipe, 
+    NgClass, 
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,]
 })
 export class SessionListComponent implements OnInit, OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template

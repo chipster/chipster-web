@@ -8,7 +8,7 @@ export const noColumnError = "NoColumnError";
 export class NoColumnError extends Error {
   constructor(
     message,
-    private cause?: Error,
+    cause?: Error,
   ) {
     super(message);
     this.name = this.constructor.name;

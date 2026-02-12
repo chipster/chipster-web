@@ -1,6 +1,6 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
@@ -8,12 +8,14 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { LoadState } from "../../../model/loadstate";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { StatusComponent } from "../../../shared/components/status.component";
 
 @Component({
   selector: "ch-statistics",
   templateUrl: "./statistics.component.html",
   styleUrls: ["./statistics.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [StatusComponent, ReactiveFormsModule],
 })
 export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";
@@ -40,7 +42,7 @@ export class StatisticsComponent implements OnInit {
     private configService: ConfigService,
     private errorHandlerService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class StatisticsComponent implements OnInit {
       },
       (err) => {
         this.errorHandlerService.showError("Failed to get ignoreUsers default", err);
-      }
+      },
     );
   }
 
@@ -76,8 +78,8 @@ export class StatisticsComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         mergeMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params)
-        )
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params),
+        ),
       )
       .subscribe(
         (result) => {
@@ -88,7 +90,7 @@ export class StatisticsComponent implements OnInit {
         (err) => {
           this.state = LoadState.Fail;
           this.errorHandlerService.showError("get statistics failed", err);
-        }
+        },
       );
   }
 }

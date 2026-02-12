@@ -9,11 +9,14 @@ import { VisualizationTSVService } from "../../../../../shared/visualization/vis
 import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
 import Point from "../model/point";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-scatter-plot",
   templateUrl: "./scatter-plot.component.html",
   styleUrls: ["./scatter-plot.component.less"],
+  imports: [StatusComponent, FormsModule]
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   public chipHeaders: Array<string> = [];

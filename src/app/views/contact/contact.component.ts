@@ -4,11 +4,9 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { ContactSupportService } from "./contact-support.service";
+import { ManualComponent } from "../manual/manual.component";
 
-@Component({
-  selector: "ch-contact",
-  templateUrl: "./contact.component.html",
-})
+@Component({ selector: "ch-contact", templateUrl: "./contact.component.html", imports: [ManualComponent] })
 export class ContactComponent implements OnInit {
   contactFile: string;
   contactPath: string;
@@ -18,7 +16,7 @@ export class ContactComponent implements OnInit {
     private configService: ConfigService,
     private routeService: RouteService,
     private tokenService: TokenService,
-    private contactSupportService: ContactSupportService
+    private contactSupportService: ContactSupportService,
   ) {}
 
   ngOnInit() {
@@ -31,7 +29,7 @@ export class ContactComponent implements OnInit {
       },
       (err) => {
         this.errorService.showError("failed to get the contact page path", err);
-      }
+      },
     );
   }
 

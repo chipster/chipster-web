@@ -1,15 +1,18 @@
 import { ChangeDetectorRef, Component } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbActiveModal, NgbProgressbar } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { UploadService } from "../../../shared/services/upload.service";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
+import { SecondsPipe } from "../../../shared/pipes/secondspipe.pipe";
 
 @Component({
   selector: "ch-import-session-modal",
   templateUrl: "./import-session-modal.component.html",
+  imports: [BytesPipe, SecondsPipe, NgbProgressbar]
 })
 export class ImportSessionModalComponent {
   public flow: any;

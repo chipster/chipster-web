@@ -13,11 +13,25 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
 import { DatasetModalService } from "../datasetmodal.service";
+import { VisualizationsComponent } from "../../visualization/visualizations.component";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
 
 @Component({
   selector: "ch-selected-files",
   templateUrl: "./selected-files.component.html",
   styleUrls: ["./selected-files.component.less"],
+  imports: [
+    VisualizationsComponent,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+  ]
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

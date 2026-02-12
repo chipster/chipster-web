@@ -8,8 +8,15 @@ import { ContactSupportService } from "./contact-support.service";
 import { ContactComponent } from "./contact.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, ManualModule, ReactiveFormsModule],
-  declarations: [ContactComponent, ContactSupportModalComponent],
+  imports: [
+    CommonModule,
+    SharedModule,
+    ManualModule,
+    ReactiveFormsModule,
+    ContactComponent,
+    ContactSupportModalComponent,
+  ],
+  declarations: [],
   providers: [ContactSupportService],
 })
 export class ContactModule {}

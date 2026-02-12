@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, RouterModule, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
@@ -26,6 +26,13 @@ import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
 import UtilsService from "../../../shared/utilities/utils";
+import { SessionPanelComponent } from "./session-panel/session-panel.component";
+import { ToolsComponent } from "./tools/tools.component";
+import { SessionDetailsComponent } from "./session-details/session-details.component";
+import { FileComponent } from "./selectiondetails/selected-files/selected-files.component";
+import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
+import { ToolListAccordionComponent } from "./tools/tool-list/tool-list-accordion.component";
+import { SplitAreaComponent, SplitComponent } from "angular-split";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -38,6 +45,7 @@ export enum ComponentState {
   selector: "ch-session",
   templateUrl: "./session.component.html",
   styleUrls: ["./session.component.less"],
+  imports: [SessionPanelComponent, ToolsComponent, SessionDetailsComponent, FileComponent, SelectionPanelComponent, ToolListAccordionComponent, SplitAreaComponent, SplitComponent, RouterModule]
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;

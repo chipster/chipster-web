@@ -20,8 +20,14 @@ import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, NgbModule, AdminRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    SharedModule,
+    NgbModule,
+    AdminRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AgGridModule,
     AdminComponent,
     ServicesComponent,
     ClientsComponent,
@@ -36,5 +42,6 @@ import { UsersComponent } from "./users/users.component";
     AgBtnCellRendererComponent,
     ConfirmDeleteModalComponent,
   ],
+  declarations: [],
 })
 export class AdminModule {}

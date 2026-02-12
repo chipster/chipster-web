@@ -17,11 +17,14 @@ import VennDiagramSelection from "./venn-diagram-selection";
 import VennDiagramText from "./venn-diagram-text";
 import VennDiagramUtils from "./venn-diagram-utils";
 import { VennDiagramService } from "./venn-diagram.service";
+import { FilesDetailsComponent } from "../../selectiondetails/files-details.component.ts/files-details.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-venn-diagram",
   templateUrl: "./venn-diagram.component.html",
   styleUrls: ["./venn-diagram.component.less"],
+  imports: [FilesDetailsComponent, FormsModule]
 })
 export class VennDiagramComponent implements OnChanges {
   @Input()

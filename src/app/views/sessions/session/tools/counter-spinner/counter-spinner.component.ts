@@ -1,9 +1,11 @@
+import { NgStyle } from "@angular/common";
 import { Component, Input, OnChanges } from "@angular/core";
 
 @Component({
   selector: "ch-counter-spinner",
   templateUrl: "./counter-spinner.component.html",
   styleUrls: ["./counter-spinner.component.less"],
+  imports: [NgStyle],
 })
 export class CounterSpinnerComponent implements OnChanges {
   @Input() count: number;

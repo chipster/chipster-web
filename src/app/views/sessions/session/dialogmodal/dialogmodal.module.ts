@@ -19,8 +19,12 @@ import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.compon
 import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, ReactiveFormsModule, FormsModule, NgbModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    SharedModule,
+    ReactiveFormsModule,
+    FormsModule,
+    NgbModule,
     StringModalComponent,
     DropdownModalComponent,
     BooleanModalComponent,
@@ -35,6 +39,7 @@ import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component
     NewsModalComponent,
     EditNewsModalComponent,
   ],
+  declarations: [],
   providers: [NgbActiveModal, DialogModalService],
   exports: [],
 })

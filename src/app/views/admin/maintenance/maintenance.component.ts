@@ -8,12 +8,28 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import FileBrokerStorage from "./file-broker-storage";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
+import { FormsModule } from "@angular/forms";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownItem,
+} from '@ng-bootstrap/ng-bootstrap/dropdown';
+
 
 @Component({
   selector: "ch-services",
   templateUrl: "./maintenance.component.html",
   styleUrls: ["./maintenance.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [
+    BytesPipe, 
+    FormsModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,]
 })
 export class MaintenanceComponent implements OnInit {
   storageIds = [];

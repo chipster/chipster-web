@@ -5,11 +5,14 @@ import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { PdfViewerComponent, PdfViewerModule } from "ng2-pdf-viewer";
 
 @Component({
   selector: "ch-pdf-visualization",
   templateUrl: "./pdf-visualization.component.html",
   styleUrls: ["./pdf-visualization.component.less"],
+  imports: [StatusComponent, PdfViewerModule]
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   @Input()
