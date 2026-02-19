@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import log from "loglevel";
-import { UserManager } from "oidc-client";
+import { UserManager } from "oidc-client-ts";
 import { from, Observable } from "rxjs";
 import { map, mergeMap, share, tap } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
@@ -65,47 +65,68 @@ export class OidcService {
   }
 
   startAuthentication(returnUrl: string, oidcConfig: OidcConfig) {
+
+    // save full url to know where to return
+    returnUrl = window.location.origin + returnUrl;
+
     log.info("start oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcConfig.oidcName);
-    // put teh return url and oidc name to local storage,
+    // put the return url and oidc name to local storage,
     // because the OIDC login will redirect to a new page
     localStorage.setItem(this.keyReturnUrl, returnUrl);
     localStorage.setItem(this.keyOidcName, oidcConfig.oidcName);
 
     // wait until managers are created
-    this.oidcConfigs$.subscribe({
-      next: () => {
-        const extraQueryParams = {};
-        if (oidcConfig.parameter) {
-          const keyValues = oidcConfig.parameter.split(" ");
-          log.info("parse " + keyValues.length + " oidc parameters");
-          keyValues.forEach((keyValue) => {
-            if (keyValue == null) {
-              log.warn("cannot parse null parameter: " + keyValue);
-              return;
-            }
-            const split = keyValue.split("=");
-            if (split.length !== 2) {
-              log.warn("oidc parameter parsing failed: " + keyValue);
-              return;
-            }
-            const key = split[0];
-            const value = split[1];
-            extraQueryParams[key] = value;
-          });
-        } else {
-          log.info("no oidc parameter");
-        }
+    this.oidcConfigs$.pipe(
+      // mergeMap(() => this.configService.getWebServerUrl()),
+      // window.location.origin doesn't work on laptop
+      mergeMap(() => {
+        const loginUrl = oidcConfig["loginPath"] + "?id=" + oidcConfig.oidcName;
+        log.info("start OIDC authentication in " + loginUrl)
+        return this.httpClient.post(loginUrl, null);
+      })
 
-        const manager = this.managers.get(oidcConfig.oidcName);
-        if (manager) {
-          manager.signinRedirect({ extraQueryParams });
-        } else {
-          log.error("oidc provider not found: " + oidcConfig.oidcName);
-          this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
-        }
-      },
-      error: (err) => this.restErrorService.showError("oidc config error", err),
+    ).subscribe(loginUrl => {
+        log.info("go to " + loginUrl);
+        window.location.href = "" + loginUrl;
+
+        // window.location.replace(window.location.href);
     });
+
+    // wait until managers are created
+    // this.oidcConfigs$.subscribe({
+    //   next: () => {
+    //     const extraQueryParams = {};
+    //     if (oidcConfig.parameter) {
+    //       const keyValues = oidcConfig.parameter.split(" ");
+    //       log.info("parse " + keyValues.length + " oidc parameters");
+    //       keyValues.forEach((keyValue) => {
+    //         if (keyValue == null) {
+    //           log.warn("cannot parse null parameter: " + keyValue);
+    //           return;
+    //         }
+    //         const split = keyValue.split("=");
+    //         if (split.length !== 2) {
+    //           log.warn("oidc parameter parsing failed: " + keyValue);
+    //           return;
+    //         }
+    //         const key = split[0];
+    //         const value = split[1];
+    //         extraQueryParams[key] = value;
+    //       });
+    //     } else {
+    //       log.info("no oidc parameter");
+    //     }
+
+    //     const manager = this.managers.get(oidcConfig.oidcName);
+    //     if (manager) {
+    //       manager.signinRedirect({ extraQueryParams });
+    //     } else {
+    //       log.error("oidc provider not found: " + oidcConfig.oidcName);
+    //       this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
+    //     }
+    //   },
+    //   error: (err) => this.restErrorService.showError("oidc config error", err),
+    // });
   }
 
   completeAuthentication() {

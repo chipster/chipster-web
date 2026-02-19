@@ -104,6 +104,10 @@ export class ConfigService {
     return this.getPublicUri(Role.TYPE_SERVICE);
   }
 
+  getWebServerUrl(): Observable<string> {
+    return this.getPublicUri(Role.WEB_SERVER);
+  }
+
   getModules(): Observable<string[]> {
     return this.getConfiguration().pipe(map((conf) => conf["modules"]));
   }
