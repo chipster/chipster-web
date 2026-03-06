@@ -61,6 +61,10 @@ export class RouteService {
     return this.router.routerState.snapshot.url;
   }
 
+  getCurrentQueryParams() {
+    return this.router.parseUrl(this.getCurrentUrl()).queryParams;
+  }
+
   /**
    * Get the file name from the url or path
    *

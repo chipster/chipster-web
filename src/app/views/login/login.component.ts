@@ -54,7 +54,7 @@ export class LoginComponent implements OnInit {
     private tokenService: TokenService,
     private errorService: ErrorService,
     private oidcService: OidcService,
-    private newsService: NewsService
+    private newsService: NewsService,
   ) {}
 
   ngOnInit() {
@@ -82,14 +82,14 @@ export class LoginComponent implements OnInit {
               log.warn("checking token failed", error);
               this.initFailed = true;
               this.restErrorService.showError("Initializing login page failed", error);
-            }
+            },
           );
         } else {
           // no local token -> continue
           this.continueInit();
         }
       },
-      (err) => this.errorService.showError("failed to get the return url", err)
+      (err) => this.errorService.showError("failed to get the return url", err),
     );
   }
 
@@ -112,7 +112,7 @@ export class LoginComponent implements OnInit {
 
           // everything ready, show login
           this.show = true;
-        })
+        }),
       )
       .subscribe({
         error: (error) => {
@@ -155,7 +155,7 @@ export class LoginComponent implements OnInit {
           this.error = "Connecting to authentication service failed";
           log.error(errorResponse);
         }
-      }
+      },
     );
   }
 
@@ -189,31 +189,15 @@ export class LoginComponent implements OnInit {
   testOidcConfigs: OidcConfig[] = [
     {
       oidcName: "",
-      issuer: "",
-      clientId: "",
-      redirectPath: "",
-      responseType: "",
       logo: "",
-      logoWidth: "",
       text: "",
-      parameter: "",
-      appId: "",
       description: "",
-      scope: "",
     },
     {
       oidcName: "",
-      issuer: "",
-      clientId: "",
-      redirectPath: "",
-      responseType: "",
       logo: "",
-      logoWidth: "",
       text: "",
-      parameter: "",
-      appId: "",
       description: "",
-      scope: "",
     },
   ];
 }

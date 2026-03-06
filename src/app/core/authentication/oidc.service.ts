@@ -1,185 +1,144 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import log from "loglevel";
-import { UserManager } from "oidc-client-ts";
-import { from, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { map, mergeMap, share, tap } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "../../views/login/oidc-config";
 import { RestErrorService } from "../errorhandler/rest-error.service";
-import { AuthenticationService } from "./authentication-service";
+import { TokenService } from "./token.service";
+import { ErrorService } from "../errorhandler/error.service";
 
 @Injectable()
 export class OidcService {
   readonly keyReturnUrl = "oidcReturnUrl";
-  readonly keyOidcName = "oidcName";
+  readonly keyChipsterOidcLoginSessionId = "chipsterOidcLoginSessionId";
 
-  managers = new Map<string, UserManager>();
+  // managers = new Map<string, UserManager>();
   oidcConfigs$: Observable<OidcConfig[]>;
 
   constructor(
-    private authenticationService: AuthenticationService,
     private httpClient: HttpClient,
     private restErrorService: RestErrorService,
+    private errorService: ErrorService,
     private routeService: RouteService,
     private configService: ConfigService,
+    private tokenService: TokenService,
     private newsService: NewsService,
   ) {
     this.init();
   }
 
   init() {
-    let appId;
-
-    this.oidcConfigs$ = this.configService.get(ConfigService.KEY_APP_ID).pipe(
-      tap((id) => {
-        appId = id;
-      }),
-      mergeMap(() => this.configService.getAuthUrl()),
+    this.oidcConfigs$ = this.configService.getAuthUrl().pipe(
       mergeMap((authUrl) => this.httpClient.get(authUrl + "/oidc/configs")),
-      map((configs: OidcConfig[]) =>
-        configs
-          // allow separate oidc configs for different apps
-          .filter((oidc) => oidc.appId === appId),
-      ),
-      tap((configs: OidcConfig[]) => {
-        configs.forEach((oidc) => {
-          const manager = new UserManager({
-            authority: oidc.issuer,
-            client_id: oidc.clientId,
-            redirect_uri: window.location.origin + oidc.redirectPath,
-            response_type: oidc.responseType,
-            scope: oidc.scope,
-            filterProtocolClaims: true,
-            loadUserInfo: false,
-          });
-          log.info("register oidc authentication " + oidc.oidcName);
-          log.info("oidc settings: " + JSON.stringify(oidc));
-          this.managers.set(oidc.oidcName, manager);
-        });
-      }),
+      map((configs: OidcConfig[]) => configs),
       share(),
     );
   }
 
   startAuthentication(returnUrl: string, oidcConfig: OidcConfig) {
-
-    // save full url to know where to return
-    returnUrl = window.location.origin + returnUrl;
-
     log.info("start oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcConfig.oidcName);
-    // put the return url and oidc name to local storage,
-    // because the OIDC login will redirect to a new page
-    localStorage.setItem(this.keyReturnUrl, returnUrl);
-    localStorage.setItem(this.keyOidcName, oidcConfig.oidcName);
 
-    // wait until managers are created
-    this.oidcConfigs$.pipe(
-      // mergeMap(() => this.configService.getWebServerUrl()),
-      // window.location.origin doesn't work on laptop
-      mergeMap(() => {
-        const loginUrl = oidcConfig["loginPath"] + "?id=" + oidcConfig.oidcName;
-        log.info("start OIDC authentication in " + loginUrl)
-        return this.httpClient.post(loginUrl, null);
-      })
-
-    ).subscribe(loginUrl => {
-        log.info("go to " + loginUrl);
-        window.location.href = "" + loginUrl;
-
-        // window.location.replace(window.location.href);
-    });
-
-    // wait until managers are created
-    // this.oidcConfigs$.subscribe({
-    //   next: () => {
-    //     const extraQueryParams = {};
-    //     if (oidcConfig.parameter) {
-    //       const keyValues = oidcConfig.parameter.split(" ");
-    //       log.info("parse " + keyValues.length + " oidc parameters");
-    //       keyValues.forEach((keyValue) => {
-    //         if (keyValue == null) {
-    //           log.warn("cannot parse null parameter: " + keyValue);
-    //           return;
-    //         }
-    //         const split = keyValue.split("=");
-    //         if (split.length !== 2) {
-    //           log.warn("oidc parameter parsing failed: " + keyValue);
-    //           return;
-    //         }
-    //         const key = split[0];
-    //         const value = split[1];
-    //         extraQueryParams[key] = value;
-    //       });
-    //     } else {
-    //       log.info("no oidc parameter");
-    //     }
-
-    //     const manager = this.managers.get(oidcConfig.oidcName);
-    //     if (manager) {
-    //       manager.signinRedirect({ extraQueryParams });
-    //     } else {
-    //       log.error("oidc provider not found: " + oidcConfig.oidcName);
-    //       this.restErrorService.showError("oidc provider not found: " + oidcConfig.oidcName, null);
-    //     }
-    //   },
-    //   error: (err) => this.restErrorService.showError("oidc config error", err),
-    // });
-  }
-
-  completeAuthentication() {
-    const returnUrl = localStorage.getItem(this.keyReturnUrl);
-    const oidcName = localStorage.getItem(this.keyOidcName);
-    localStorage.removeItem(this.keyReturnUrl);
-    localStorage.removeItem(this.keyOidcName);
-
-    log.info("complete oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcName);
-
-    // wait until managers are created
+    // wait for configs
     this.oidcConfigs$
       .pipe(
-        mergeMap(() => {
-          const manager = this.managers.get(oidcName);
-          return from(manager.signinRedirectCallback());
+        mergeMap(() => this.configService.getAuthUrl()),
+        mergeMap((authUrl) => {
+          // make a request to auth to start the login process and get the url where to go next
+          const loginInitUrl = authUrl + "/oidc/login" + "?oidcName=" + oidcConfig.oidcName;
+          log.info("start OIDC authentication in " + loginInitUrl);
+          return this.httpClient.post(loginInitUrl, null);
         }),
-        mergeMap((user) => this.getAndSaveToken(user, returnUrl)),
       )
       .subscribe({
-        next: () => {
-          this.newsService.updateNews();
-          this.routeService.navigateAbsolute(returnUrl);
+        next: (loginResponse) => {
+          const loginUrl = loginResponse["url"];
+          const chipsterOidcLoginId = loginResponse[this.keyChipsterOidcLoginSessionId];
+
+          // put the return url to local storage,
+          // because the OIDC login will redirect to a new page
+          localStorage.setItem(this.keyReturnUrl, returnUrl);
+          // store chipsterLoginId for the callback
+          localStorage.setItem(this.keyChipsterOidcLoginSessionId, chipsterOidcLoginId);
+
+          // use the browser to navigate to the authentication service
+          log.info("navigate to " + loginUrl);
+          window.location.href = "" + loginUrl;
         },
         error: (err) => {
-          let message = "oidc error";
-          // at least OIDC login with missing userinfo claims sends a sensible message
-          if (err.error && err.error.length > 0) {
-            message = err.error;
-          }
-          this.restErrorService.showError(message, err);
+          this.restErrorService.showError("failed to initiate OIDC login", err);
         },
       });
   }
 
-  getAndSaveToken(user, returnUrl: string) {
-    return this.configService.getAuthUrl().pipe(
-      mergeMap((authUrl) =>
-        this.httpClient.post(
-          authUrl + "/oidc",
-          {
-            idToken: user.id_token,
-            accessToken: user.access_token,
-          },
-          {
-            responseType: "text",
-          },
-        ),
-      ),
-      tap((token: string) => {
-        this.authenticationService.saveToken(token);
-      }),
-    );
+  completeAuthentication() {
+    const returnUrl = localStorage.getItem(this.keyReturnUrl);
+    const chipsterOidcLoginSessionId = localStorage.getItem(this.keyChipsterOidcLoginSessionId);
+
+    localStorage.removeItem(this.keyReturnUrl);
+    localStorage.removeItem(this.keyChipsterOidcLoginSessionId);
+
+    if (chipsterOidcLoginSessionId == null) {
+      this.errorService.showError(
+        "please log in again",
+        new Error("Cannot complete OIDC authentication: login ID not found (probably used already)."),
+      );
+      return;
+    }
+
+    log.info("complete OIDC login: returnUrl:", returnUrl);
+
+    const code = this.routeService.getCurrentQueryParams().code;
+    const state = this.routeService.getCurrentQueryParams().state;
+    const error = this.routeService.getCurrentQueryParams().error;
+    const errorDetails = this.routeService.getCurrentQueryParams().error_details;
+
+    if (error != null) {
+      this.restErrorService.showError("error in OIDC authentication: " + error + " (" + errorDetails + ")", null);
+      return;
+    }
+
+    // wait for configs
+    this.configService
+      .getAuthUrl()
+      .pipe(
+        mergeMap((authUrl) => {
+          const json = {
+            code: code,
+            state: state,
+          };
+
+          json[this.keyChipsterOidcLoginSessionId] = chipsterOidcLoginSessionId;
+
+          // make a request to auth to start the login process and get the url where to go next
+          const loginCompleteUrl = authUrl + "/oidc/callback";
+          log.info("complete OIDC authentication in " + loginCompleteUrl);
+          return this.httpClient.post(loginCompleteUrl, json, { responseType: "text" });
+        }),
+      )
+      .subscribe({
+        next: (chipsterToken) => {
+          log.info("save chipster token");
+          this.tokenService.setAuthToken(chipsterToken);
+
+          this.newsService.updateNews();
+
+          log.info("navigate to return url", returnUrl);
+          this.routeService.navigateAbsolute(returnUrl);
+        },
+        error: (err) => {
+          var message = "failed to complete OIDC login";
+          if (err.error != null) {
+            //
+            message += " (" + err.error + ")";
+          }
+
+          this.restErrorService.showError(message, err);
+        },
+      });
   }
 
   getOidcConfigs$() {
