@@ -11,6 +11,7 @@ import {
   Session,
   WsEvent,
 } from "chipster-js-common";
+import { FileState } from "chipster-js-common/lib/model/dataset";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
@@ -267,7 +268,13 @@ export class SessionDataService {
   deleteDatasetsUndo(deletedDatasets: Dataset[]) {
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Create, null);
+      const wsEvent = new WsEvent(
+        this.getSessionId(),
+        Resource.Dataset,
+        dataset.datasetId,
+        EventType.Create,
+        FileState.Complete,
+      );
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
   }
@@ -301,6 +308,7 @@ export class SessionDataService {
     this.selectionHandlerService.clearDatasetSelection();
 
     // hide from the workflowgraph
+    // state seems to be irrelevant when deleting
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Delete, null);
       this.sessionEventService.generateLocalEvent(wsEvent);
