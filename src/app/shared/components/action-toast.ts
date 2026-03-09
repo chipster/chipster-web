@@ -85,8 +85,6 @@ export class ActionToastComponent extends Toast {
     public toastPackage: ToastPackage,
   ) {
     super(toastrService, toastPackage);
-    console.log("ActionToast options.progressBar:", this.options.progressBar);
-    console.log("ActionToast width:", this.width);
   }
 
   action(buttonText: string, event: Event): boolean {
