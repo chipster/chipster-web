@@ -318,7 +318,7 @@ export class SessionDataService {
 
     const BTN_UNDO = "Undo";
 
-    const progressAnimation: ProgressAnimationType = "increasing";
+    const progressAnimation: ProgressAnimationType = "decreasing";
 
     const options = {
       positionClass: "toast-top-right",
