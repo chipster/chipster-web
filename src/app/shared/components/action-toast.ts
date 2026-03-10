@@ -41,7 +41,7 @@ Added:
       {{ message }}
     </div>
     <div *ngIf="options.progressBar">
-      <div class="toast-progress" [style.width]="width + '%'"></div>
+      <div class="toast-progress" [style.width]="width() + '%'"></div>
     </div>
 
     <div class="row">
@@ -80,7 +80,10 @@ Added:
 })
 export class ActionToastComponent extends Toast {
   // constructor is only necessary when not using AoT
-  constructor(protected toastrService: ToastrService, public toastPackage: ToastPackage) {
+  constructor(
+    protected toastrService: ToastrService,
+    public toastPackage: ToastPackage,
+  ) {
     super(toastrService, toastPackage);
   }
 
