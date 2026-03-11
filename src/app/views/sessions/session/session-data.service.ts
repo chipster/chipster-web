@@ -11,6 +11,7 @@ import {
   Session,
   WsEvent,
 } from "chipster-js-common";
+import { FileState } from "chipster-js-common/lib/model/dataset";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
@@ -108,7 +109,7 @@ export class SessionDataService {
       input.inputId = "input" + inputCount;
       input.displayName = "Input " + inputCount;
       input.datasetName = dataset.name;
-      inputCount++;
+      inputCount += 1;
       return input;
     });
 
@@ -184,13 +185,7 @@ export class SessionDataService {
 
   hasReadWriteAccess(sessionData: SessionData) {
     const rules = this.getApplicableRules(sessionData.session.rules);
-
-    for (const rule of rules) {
-      if (rule.readWrite) {
-        return true;
-      }
-    }
-    return false;
+    return rules.some((rule) => rule.readWrite);
   }
 
   hasPersonalRule(rules: Array<Rule>) {
@@ -267,7 +262,13 @@ export class SessionDataService {
   deleteDatasetsUndo(deletedDatasets: Dataset[]) {
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Create, null);
+      const wsEvent = new WsEvent(
+        this.getSessionId(),
+        Resource.Dataset,
+        dataset.datasetId,
+        EventType.Create,
+        FileState.Complete,
+      );
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
   }
@@ -301,6 +302,7 @@ export class SessionDataService {
     this.selectionHandlerService.clearDatasetSelection();
 
     // hide from the workflowgraph
+    // state seems to be irrelevant when deleting
     deletedDatasets.forEach((dataset: Dataset) => {
       const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Delete, null);
       this.sessionEventService.generateLocalEvent(wsEvent);
@@ -316,7 +318,7 @@ export class SessionDataService {
 
     const BTN_UNDO = "Undo";
 
-    const progressAnimation: ProgressAnimationType = "increasing";
+    const progressAnimation: ProgressAnimationType = "decreasing";
 
     const options = {
       positionClass: "toast-top-right",
@@ -340,25 +342,25 @@ export class SessionDataService {
 
     const toast = this.toastrService.info(msg, "", options);
 
-    toast.onAction.pipe(filter((text) => text === BTN_UNDO)).subscribe(
-      (buttonText) => {
+    toast.onAction.pipe(filter((text) => text === BTN_UNDO)).subscribe({
+      next: () => {
         this.deleteDatasetsUndo(deletedDatasets);
         this.toastrService.clear(toast.toastId);
       },
-      (err) => this.errorService.showError("error in dataset deletion", err),
-    );
+      error: (err) => this.errorService.showError("error in dataset deletion", err),
+    });
 
     toast.onHidden
       .pipe(
         takeUntil(toast.onAction), // only if there was no action
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.deleteDatasetsNow(deletedDatasets);
           this.toastrService.clear(toast.toastId);
         },
-        (err) => this.errorService.showError("error in dataset deletion", err),
-      );
+        error: (err) => this.errorService.showError("error in dataset deletion", err),
+      });
   }
 
   getSessionSize(sessionData: SessionData): number {

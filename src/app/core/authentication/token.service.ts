@@ -1,7 +1,7 @@
 import { HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { jwtDecode } from "jwt-decode";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import ParsedToken from "./parsed-token";
 
 @Injectable()
@@ -12,12 +12,13 @@ export class TokenService {
 
   private username$: BehaviorSubject<string> = new BehaviorSubject(null);
 
+  // emit when token changes, true if valid token, false if no or invalid token
+  private tokenChanged: Subject<boolean> = new Subject();
+
   private username: string;
   private name: string;
   private validUntil: Date;
   private roles: string[] = [];
-
-  constructor() {}
 
   static getUsernameFromUserId(userId: string) {
     const regExp = new RegExp(".*?/(.*)"); // find first / and remember everything after it
@@ -84,6 +85,14 @@ export class TokenService {
     return localStorage.getItem(this.KEY_TOKEN);
   }
 
+  /**
+   * Emit when token changes, true if valid token, false if no or invalid token
+   *
+   */
+  getTokenChanged(): Observable<boolean> {
+    return this.tokenChanged.asObservable();
+  }
+
   hasRole(role: string) {
     return this.roles.includes(role);
   }
@@ -134,6 +143,7 @@ export class TokenService {
       this.roles = [];
     }
     this.username$.next(this.username);
+    this.tokenChanged.next(this.isTokenValid());
   }
 
   isLoggedIn() {
