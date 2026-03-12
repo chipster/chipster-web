@@ -7,6 +7,7 @@ import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
+import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
 import UtilsService from "../../../shared/utilities/utils";
 import { SET_SELECTED_TOOL, SET_SELECTED_TOOL_BY_ID } from "../../../state/tool.reducer";
 import { SelectionOption } from "./SelectionOption";
@@ -23,7 +24,6 @@ import {
   ValidationResult,
 } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
-import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
 
 @Injectable()
 export class ToolSelectionService {
@@ -350,7 +350,6 @@ export class ToolSelectionService {
   }
 
   getResourceValidation(value: any, min: number, max: number) {
-    console.log(value, min, max, typeof value, typeof value === "number");
     if (value == null) {
       // null is a valid request, then scheduler and comp can use defaults
       return {
