@@ -63,6 +63,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private zoom;
   private isContextMenuOpen = false;
   private showDatasetSelectionTooltip = false;
+  private lastContextMenuEvent: any; // Store the event for context menu handling
+  private pendingContextMenuSelection: Dataset[] = null; // Pending selection for context menu
 
   // private readonly primaryColor = "#007bff"; // bootstap primary
   private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
@@ -259,7 +261,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.selectedDatasets = datasets;
             this.selectionEnabled = true;
             this.update();
-            this.renderGraph();
+
+            // Skip rendering if context menu is opening (prevents DOM rebuild interference)
+            if (!this.isContextMenuOpen) {
+              this.renderGraph();
+            }
 
             // update these to know if context menu items should be disabled or not
             this.selectedDatasetSourceJob = this.datasetContextMenuService.getSourceJob(
@@ -678,7 +684,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .selectAll<SVGRectElement, {}>("rect")
       .data(this.datasetNodes, (d: DatasetNode) => d.datasetId);
 
-    // context menu items, custom text for delete when multiple files seleted
+    // context menu items
     const menu =
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
@@ -688,7 +694,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.copySelectedToNewSessionMenuItem,
             this.copySelectedToExistingSessionMenuItem,
 
-            { ...this.deleteMenuItem, title: "Delete " + self.selectedDatasets.length + " files" },
+            this.deleteMenuItem,
           ]
         : [
             this.renameMenuItem,
@@ -726,14 +732,52 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         WorkflowGraphComponent.getOpacity(!this.searchEnabled || (this.filter && this.filter.has(d.datasetId))),
       )
       // .classed("selected-dataset", d => this.isSelectedDataset(d.dataset))
+      .on("mousedown", (event, d) => {
+        // Handle right-click (button 2) - update selection immediately for visual feedback
+        if (event.button === 2) {
+          self.lastContextMenuEvent = event;
+
+          const isAlreadySelected = self.selectionService.isSelectedDatasetById(d.dataset.datasetId);
+
+          if (!isAlreadySelected) {
+            const isCtrlPressed = UtilsService.isCtrlKey(event);
+
+            if (isCtrlPressed) {
+              // Ctrl+right-click: add to selection
+              const newSelection = [...self.selectionService.selectedDatasets, d.dataset];
+              self.pendingContextMenuSelection = newSelection;
+              self.selectionHandlerService.setDatasetSelection(newSelection);
+            } else {
+              // Normal right-click: replace selection
+              self.selectionHandlerService.clearJobSelection();
+              self.pendingContextMenuSelection = [d.dataset];
+              self.selectionHandlerService.setDatasetSelection([d.dataset]);
+            }
+
+            // Wait for next tick to allow one render, then block further renders
+            setTimeout(() => {
+              self.isContextMenuOpen = true;
+            }, 0);
+          } else {
+            // Already selected: keep current selection
+            self.pendingContextMenuSelection = self.selectionService.selectedDatasets;
+            self.isContextMenuOpen = true; // Block renders immediately for already-selected items
+          }
+        }
+      })
       .on(
         "contextmenu",
         d3ContextMenu(menu, {
           onOpen: () => {
-            this.isContextMenuOpen = true;
+            // Set flag to prevent renders while menu is open
+            self.isContextMenuOpen = true;
           },
           onClose: () => {
             this.isContextMenuOpen = false;
+            this.lastContextMenuEvent = null;
+            this.pendingContextMenuSelection = null;
+            // Re-render to ensure everything is in sync
+            self.renderGraph();
           },
         }),
       )
@@ -1164,7 +1208,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (isPhenodatanode) {
-      this.datasetTooltip.html("phenodata" + "-" + dataset.name);
+      this.datasetTooltip.html(`phenodata-${dataset.name}`);
     }
     this.datasetTooltip
       .style("left", datasetLeft - 5 + "px")
@@ -1483,9 +1527,24 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.deleteMenuItem = {
-      title: "Delete",
-      action(): void {
-        self.sessionDataService.openDeleteFilesConfirm(self.selectedDatasets);
+      title(d): string {
+        // Use pending selection if available (context menu about to open), otherwise use current selection
+        const datasets = self.pendingContextMenuSelection || self.selectionService.selectedDatasets;
+        const count = datasets.length;
+        if (count > 1) {
+          return "Delete " + count + " files";
+        }
+        return "Delete";
+      },
+      action(d): void {
+        let datasets = self.selectionService.selectedDatasets;
+
+        // context menu can be opened for one dataset also without selection
+        if (datasets.length === 0) {
+          datasets = [d.dataset];
+        }
+
+        self.sessionDataService.openDeleteFilesConfirm(datasets);
       },
     };
 
