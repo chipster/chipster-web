@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
@@ -19,7 +20,11 @@ export class JobListComponent implements OnChanges {
 
   @Output() private jobSelected = new EventEmitter<Job>();
 
-  constructor(private selectionService: SelectionService, private sessionDataService: SessionDataService) {}
+  constructor(
+    private selectionService: SelectionService,
+    private sessionDataService: SessionDataService,
+    private dialogModalService: DialogModalService,
+  ) {}
 
   ngOnChanges() {
     this.jobsSorted = this.jobs.sort((a, b) => {
@@ -54,12 +59,24 @@ export class JobListComponent implements OnChanges {
           return null;
         }
         return duration;
-      })
+      }),
     );
   }
 
   cancelJob(job: Job) {
     this.sessionDataService.cancelJob(job);
+  }
+
+  hasRunningJobs(): boolean {
+    return this.jobsSorted?.some((job) => JobService.isRunning(job));
+  }
+
+  runningJobCount(): number {
+    return this.jobsSorted?.filter((job) => JobService.isRunning(job)).length ?? 0;
+  }
+
+  cancelAllJobs() {
+    this.jobsSorted.filter((job) => JobService.isRunning(job)).forEach((job) => this.sessionDataService.cancelJob(job));
   }
 
   isSelectedJobById(jobId: string): boolean {
