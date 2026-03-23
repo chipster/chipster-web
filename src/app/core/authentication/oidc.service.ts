@@ -39,39 +39,66 @@ export class OidcService {
     );
   }
 
-  startAuthentication(returnUrl: string, oidcConfig: OidcConfig) {
+  startAuthentication(returnUrl: string, oidcConfig: OidcConfig, authUrl: string) {
     log.info("start oidc login: returnUrl:", returnUrl, ", oidcName: ", oidcConfig.oidcName);
 
     // wait for configs
-    this.oidcConfigs$
-      .pipe(
-        mergeMap(() => this.configService.getAuthUrl()),
-        mergeMap((authUrl) => {
-          // make a request to auth to start the login process and get the url where to go next
-          const loginInitUrl = authUrl + "/oidc/login" + "?oidcName=" + oidcConfig.oidcName;
-          log.info("start OIDC authentication in " + loginInitUrl);
-          return this.httpClient.post(loginInitUrl, null);
-        }),
-      )
-      .subscribe({
-        next: (loginResponse) => {
-          const loginUrl = loginResponse["url"];
-          const chipsterOidcLoginId = loginResponse[this.keyChipsterOidcLoginSessionId];
+    return this.oidcConfigs$.pipe(
+      mergeMap(() => {
+        // make a request to auth to start the login session
+        const createLoginSessionUrl = authUrl + "/oidc/loginSession" + "?oidcName=" + oidcConfig.oidcName;
 
-          // put the return url to local storage,
-          // because the OIDC login will redirect to a new page
-          localStorage.setItem(this.keyReturnUrl, returnUrl);
-          // store chipsterLoginId for the callback
-          localStorage.setItem(this.keyChipsterOidcLoginSessionId, chipsterOidcLoginId);
+        log.info("create OIDC login session in  " + createLoginSessionUrl);
+        return this.httpClient.post(createLoginSessionUrl, null);
+      }),
+      mergeMap((loginSessionJson: any) => {
+        log.info("got OIDC login session response", loginSessionJson);
 
-          // use the browser to navigate to the authentication service
-          log.info("navigate to " + loginUrl);
-          window.location.href = "" + loginUrl;
-        },
-        error: (err) => {
-          this.restErrorService.showError("failed to initiate OIDC login", err);
-        },
-      });
+        const chipsterLoginSessionId = loginSessionJson[this.keyChipsterOidcLoginSessionId];
+
+        // put the return url to local storage,
+        // because the OIDC login will redirect to a new page
+        localStorage.setItem(this.keyReturnUrl, returnUrl);
+        // store chipsterLoginId for the callback
+        localStorage.setItem(this.keyChipsterOidcLoginSessionId, chipsterLoginSessionId);
+
+        const loginUrl = authUrl + "/oidc/login";
+        // const loginUrl = authUrl + "/oidc/login?" + this.keyChipsterOidcLoginSessionId + "=" + chipsterLoginSessionId;
+
+        log.info("navigate to " + loginUrl);
+        // window.location.href = "" + loginUrl;
+
+        const payload = {};
+        payload[this.keyChipsterOidcLoginSessionId] = chipsterLoginSessionId;
+
+        this.postAndNavigate(loginUrl, payload);
+
+        return null;
+      }),
+    );
+  }
+
+  // https://stackoverflow.com/a/43021899
+  postAndNavigate(url, payload) {
+    const form = document.createElement("form");
+    // no user interaction is necessary
+    form.style.visibility = "hidden";
+    // forms by default use GET query strings
+    form.method = "POST";
+    form.action = url;
+    for (const key in payload) {
+      log.info("add form field", key, payload[key]);
+      const input = document.createElement("input");
+      input.name = this.keyChipsterOidcLoginSessionId;
+      input.name = key;
+      input.value = payload[key];
+      // add key/value pair to form
+      form.appendChild(input);
+    }
+    // forms cannot be submitted outside of body
+    document.body.appendChild(form);
+    // send the payload and navigate
+    form.submit();
   }
 
   completeAuthentication() {
@@ -91,32 +118,21 @@ export class OidcService {
 
     log.info("complete OIDC login: returnUrl:", returnUrl);
 
-    const code = this.routeService.getCurrentQueryParams().code;
-    const state = this.routeService.getCurrentQueryParams().state;
-    const error = this.routeService.getCurrentQueryParams().error;
-    const errorDetails = this.routeService.getCurrentQueryParams().error_details;
-
-    if (error != null) {
-      this.restErrorService.showError("error in OIDC authentication: " + error + " (" + errorDetails + ")", null);
-      return;
-    }
-
     // wait for configs
     this.configService
       .getAuthUrl()
       .pipe(
         mergeMap((authUrl) => {
-          const json = {
-            code: code,
-            state: state,
-          };
-
+          const json = {};
           json[this.keyChipsterOidcLoginSessionId] = chipsterOidcLoginSessionId;
 
-          // make a request to auth to start the login process and get the url where to go next
-          const loginCompleteUrl = authUrl + "/oidc/callback";
-          log.info("complete OIDC authentication in " + loginCompleteUrl);
-          return this.httpClient.post(loginCompleteUrl, json, { responseType: "text" });
+          // make a request to auth to complete the login process
+          const loginSessionUrl = authUrl + "/oidc/loginSessionComplete";
+          log.info("complete OIDC authentication in " + loginSessionUrl);
+          // return this.httpClient.post(loginSessionUrl, json, { responseType: "text" });
+          return this.httpClient.post(loginSessionUrl, json, { responseType: "text", withCredentials: true });
+          // return this.httpClient.delete(loginSessionUrl, { body: json, responseType: "text", withCredentials: true });
+          // return this.httpClient.delete(loginSessionUrl, { responseType: "text", withCredentials: true });
         }),
       )
       .subscribe({

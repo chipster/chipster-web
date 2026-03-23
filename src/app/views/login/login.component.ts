@@ -13,6 +13,7 @@ import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
+import { error } from "jquery";
 
 @Component({
   selector: "ch-login",
@@ -179,7 +180,14 @@ export class LoginComponent implements OnInit {
   }
 
   oidcLogin(oidc: OidcConfig) {
-    this.oidcService.startAuthentication(this.returnUrl, oidc);
+    this.configService
+      .getAuthUrl()
+      .pipe(mergeMap((authUrl) => this.oidcService.startAuthentication(this.returnUrl, oidc, authUrl)))
+      .subscribe({
+        error: (err) => {
+          this.errorService.showError("failed to initiate OIDC login", err);
+        },
+      });
   }
 
   backToAuthSelect() {
