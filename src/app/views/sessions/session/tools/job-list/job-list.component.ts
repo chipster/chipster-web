@@ -76,7 +76,20 @@ export class JobListComponent implements OnChanges {
   }
 
   cancelAllJobs() {
-    this.jobsSorted.filter((job) => JobService.isRunning(job)).forEach((job) => this.sessionDataService.cancelJob(job));
+    const count = this.runningJobCount();
+    this.dialogModalService
+      .openBooleanModal(
+        "Cancel all jobs",
+        `Are you sure you want to cancel ${count} running ${count === 1 ? "job" : "jobs"}?`,
+        "Cancel all",
+        "Close",
+      )
+      .then(() => {
+        this.jobsSorted
+          .filter((job) => JobService.isRunning(job))
+          .forEach((job) => this.sessionDataService.cancelJob(job));
+      })
+      .catch(() => {});
   }
 
   isSelectedJobById(jobId: string): boolean {
