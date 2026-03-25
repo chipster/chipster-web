@@ -17,6 +17,7 @@ export class JobListComponent implements OnChanges {
   jobsSorted: Job[];
 
   durationMap = new Map<string, Observable<string>>();
+  runningJobCount = 0;
 
   @Output() private jobSelected = new EventEmitter<Job>();
 
@@ -37,6 +38,8 @@ export class JobListComponent implements OnChanges {
     this.jobsSorted.forEach((job) => {
       this.durationMap.set(job.jobId, this.createDurationObservable(job));
     });
+
+    this.runningJobCount = this.jobsSorted.filter((job) => JobService.isRunning(job)).length;
   }
 
   isRunning(job: Job) {
@@ -67,16 +70,8 @@ export class JobListComponent implements OnChanges {
     this.sessionDataService.cancelJob(job);
   }
 
-  hasRunningJobs(): boolean {
-    return this.jobsSorted?.some((job) => JobService.isRunning(job));
-  }
-
-  runningJobCount(): number {
-    return this.jobsSorted?.filter((job) => JobService.isRunning(job)).length ?? 0;
-  }
-
   cancelAllJobs() {
-    const count = this.runningJobCount();
+    const count = this.runningJobCount;
     this.dialogModalService
       .openBooleanModal(
         "Cancel all jobs",
