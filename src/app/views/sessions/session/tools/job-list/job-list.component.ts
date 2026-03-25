@@ -19,12 +19,12 @@ export class JobListComponent implements OnChanges {
   durationMap = new Map<string, Observable<string>>();
   runningJobCount = 0;
 
-  @Output() private jobSelected = new EventEmitter<Job>();
+  @Output() private readonly jobSelected = new EventEmitter<Job>();
 
   constructor(
-    private selectionService: SelectionService,
-    private sessionDataService: SessionDataService,
-    private dialogModalService: DialogModalService,
+    private readonly selectionService: SelectionService,
+    private readonly sessionDataService: SessionDataService,
+    private readonly dialogModalService: DialogModalService,
   ) {}
 
   ngOnChanges() {
