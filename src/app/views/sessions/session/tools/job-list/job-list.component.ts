@@ -84,7 +84,7 @@ export class JobListComponent implements OnChanges {
       )
       .then(
         () => {
-          const runningJobs = this.jobsSorted.filter((job) => JobService.isRunning(job));
+          const runningJobs = (this.jobsSorted ?? []).filter((job) => JobService.isRunning(job));
           const promises = runningJobs.map((job) => this.sessionDataService.cancelJob(job));
           Promise.allSettled(promises).then((results) => {
             results.forEach((r, i) => {
