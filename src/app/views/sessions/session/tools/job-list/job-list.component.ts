@@ -28,7 +28,7 @@ export class JobListComponent implements OnChanges {
   ) {}
 
   ngOnChanges() {
-    this.jobsSorted = this.jobs.sort((a, b) => {
+    this.jobsSorted = [...this.jobs].sort((a, b) => {
       const d1 = new Date(a.created).getTime();
       const d2 = new Date(b.created).getTime();
       return d2 - d1;
