@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
@@ -25,6 +26,7 @@ export class JobListComponent implements OnChanges {
     private readonly selectionService: SelectionService,
     private readonly sessionDataService: SessionDataService,
     private readonly dialogModalService: DialogModalService,
+    private readonly errorService: ErrorService,
   ) {}
 
   ngOnChanges() {
@@ -67,7 +69,8 @@ export class JobListComponent implements OnChanges {
   }
 
   cancelJob(job: Job) {
-    this.sessionDataService.cancelJob(job);
+    this.sessionDataService.cancelJob(job)
+      .catch((err) => this.errorService.showError(`Cancelling job failed for: ${job.toolName}`, err));
   }
 
   cancelAllJobs() {
@@ -80,9 +83,15 @@ export class JobListComponent implements OnChanges {
         "Close",
       )
       .then(() => {
-        this.jobsSorted
-          .filter((job) => JobService.isRunning(job))
-          .forEach((job) => this.sessionDataService.cancelJob(job));
+        const runningJobs = this.jobsSorted.filter((job) => JobService.isRunning(job));
+        const promises = runningJobs.map((job) => this.sessionDataService.cancelJob(job));
+        Promise.allSettled(promises).then((results) => {
+          results.forEach((r, i) => {
+            if (r.status === "rejected") {
+              this.errorService.showError(`Cancelling job failed for: ${runningJobs[i].toolName}`, r.reason);
+            }
+          });
+        });
       })
       .catch(() => {});
   }
