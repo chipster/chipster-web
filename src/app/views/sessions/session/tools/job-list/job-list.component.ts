@@ -82,18 +82,22 @@ export class JobListComponent implements OnChanges {
         "Cancel all",
         "Close",
       )
-      .then(() => {
-        const runningJobs = this.jobsSorted.filter((job) => JobService.isRunning(job));
-        const promises = runningJobs.map((job) => this.sessionDataService.cancelJob(job));
-        Promise.allSettled(promises).then((results) => {
-          results.forEach((r, i) => {
-            if (r.status === "rejected") {
-              this.errorService.showError(`Cancelling job failed for: ${runningJobs[i].toolName}`, r.reason);
-            }
+      .then(
+        () => {
+          const runningJobs = this.jobsSorted.filter((job) => JobService.isRunning(job));
+          const promises = runningJobs.map((job) => this.sessionDataService.cancelJob(job));
+          Promise.allSettled(promises).then((results) => {
+            results.forEach((r, i) => {
+              if (r.status === "rejected") {
+                this.errorService.showError(`Cancelling job failed for: ${runningJobs[i].toolName}`, r.reason);
+              }
+            });
           });
-        });
-      })
-      .catch(() => {});
+        },
+        () => {
+          // modal dismissed
+        },
+      );
   }
 
   isSelectedJobById(jobId: string): boolean {
