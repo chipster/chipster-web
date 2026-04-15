@@ -51,7 +51,7 @@ export class OidcService {
         log.info("create OIDC login session in  " + createLoginSessionUrl);
         return this.httpClient.post(createLoginSessionUrl, null);
       }),
-      mergeMap((loginSessionJson: any) => {
+      map((loginSessionJson: any) => {
         log.info("got OIDC login session response", loginSessionJson);
 
         const chipsterLoginSessionId = loginSessionJson[this.keyChipsterOidcLoginSessionId];
@@ -63,14 +63,13 @@ export class OidcService {
         localStorage.setItem(this.keyChipsterOidcLoginSessionId, chipsterLoginSessionId);
 
         const loginUrl = authUrl + "/oidc/login";
-        // const loginUrl = authUrl + "/oidc/login?" + this.keyChipsterOidcLoginSessionId + "=" + chipsterLoginSessionId;
 
         log.info("navigate to " + loginUrl);
-        // window.location.href = "" + loginUrl;
 
         const payload = {};
         payload[this.keyChipsterOidcLoginSessionId] = chipsterLoginSessionId;
 
+        // used form post to send the login session id, because otherwise it would be visible in the url
         this.postAndNavigate(loginUrl, payload);
 
         return null;
@@ -79,7 +78,7 @@ export class OidcService {
   }
 
   // https://stackoverflow.com/a/43021899
-  postAndNavigate(url, payload) {
+  postAndNavigate(url: string, payload: any) {
     const form = document.createElement("form");
     // no user interaction is necessary
     form.style.visibility = "hidden";
