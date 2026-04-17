@@ -33,6 +33,24 @@ export class JobComponent implements OnInit, OnDestroy {
   tool: Tool;
   parameterLimit = 12;
   rSessionInfoVisible = false;
+  hideInputLines = false;
+  filteredScreenOutput: string = null;
+  isRTool = false;
+
+  toggleInputLines() {
+    this.hideInputLines = !this.hideInputLines;
+    this.filteredScreenOutput = this.filterScreenOutput();
+  }
+
+  private filterScreenOutput(): string {
+    if (!this.hideInputLines || !this.screenOutput) {
+      return this.screenOutput;
+    }
+    return this.screenOutput
+      .split("\n")
+      .filter((line) => !line.startsWith(">"))
+      .join("\n");
+  }
 
   private unsubscribe: Subject<any> = new Subject();
   // noinspection JSMismatchedCollectionQueryUpdate
@@ -61,6 +79,7 @@ export class JobComponent implements OnInit, OnDestroy {
         this.parameterListForView = [];
         this.inputListForView = [];
         this.outputListForView = [];
+        this.hideInputLines = false;
         let jobId = null;
 
         if (selectedJobs && selectedJobs.length > 0) {
@@ -109,6 +128,8 @@ export class JobComponent implements OnInit, OnDestroy {
         this.failed = !JobService.isSuccessful(job);
         this.state = capitalize(job.state);
         this.screenOutput = job.screenOutput;
+        this.isRTool = job.toolId?.endsWith(".R") ?? false;
+        this.filteredScreenOutput = this.filterScreenOutput();
         this.duration = JobService.getDuration(job);
 
         if (job.outputs != null) {
