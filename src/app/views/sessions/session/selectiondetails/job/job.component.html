@@ -139,10 +139,15 @@
     </table>
   </div>
 
-  <h3 class="h3-xs mt-4">Screen Output</h3>
+  <div class="mb-1 mt-4 d-flex justify-content-between align-items-center">
+    <h3 class="h3-xs mb-0">Screen Output</h3>
+    <button *ngIf="isRTool" class="btn btn-sm btn-secondary" (click)="toggleInputLines()">
+      {{ hideInputLines ? "Show input lines" : "Hide input lines" }}
+    </button>
+  </div>
 
   <div class="text-sm bg-white border container">
-    <pre style="margin-bottom: 0em">{{ screenOutput }}</pre>
+    <pre style="margin-bottom: 0em">{{ filteredScreenOutput }}</pre>
     <i *ngIf="isRunning" class="fas fa-circle-notch fa-spin fa-fw"></i>
   </div>
 </div>
