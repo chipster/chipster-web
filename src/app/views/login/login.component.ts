@@ -185,7 +185,13 @@ export class LoginComponent implements OnInit {
       .pipe(mergeMap((authUrl) => this.oidcService.startAuthentication(this.returnUrl, oidc, authUrl)))
       .subscribe({
         error: (err) => {
-          this.errorService.showError("failed to initiate OIDC login", err);
+          if (err.error != null) {
+            // http error message is in err.error
+            this.restErrorService.showError("failed to initiate OIDC login: " + err.error, err);
+          } else {
+            // in case we end up here with something else than an http error
+            this.restErrorService.showError("failed to initiate OIDC login", err);
+          }
         },
       });
   }

@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import log from "loglevel";
 import { Observable } from "rxjs";
-import { map, mergeMap, share, tap } from "rxjs/operators";
+import { map, mergeMap, share } from "rxjs/operators";
 import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -14,7 +14,7 @@ import { ErrorService } from "../errorhandler/error.service";
 @Injectable()
 export class OidcService {
   readonly keyReturnUrl = "oidcReturnUrl";
-  readonly keyChipsterOidcLoginSessionId = "chipsterOidcLoginSessionId";
+  readonly keyLoginSessionId = "chipsterOidcLoginSessionId";
 
   // managers = new Map<string, UserManager>();
   oidcConfigs$: Observable<OidcConfig[]>;
@@ -54,20 +54,20 @@ export class OidcService {
       map((loginSessionJson: any) => {
         log.info("got OIDC login session response", loginSessionJson);
 
-        const chipsterLoginSessionId = loginSessionJson[this.keyChipsterOidcLoginSessionId];
+        const loginSessionId = loginSessionJson[this.keyLoginSessionId];
 
         // put the return url to local storage,
         // because the OIDC login will redirect to a new page
         localStorage.setItem(this.keyReturnUrl, returnUrl);
         // store chipsterLoginId for the callback
-        localStorage.setItem(this.keyChipsterOidcLoginSessionId, chipsterLoginSessionId);
+        localStorage.setItem(this.keyLoginSessionId, loginSessionId);
 
         const loginUrl = authUrl + "/oidc/login";
 
         log.info("navigate to " + loginUrl);
 
         const payload = {};
-        payload[this.keyChipsterOidcLoginSessionId] = chipsterLoginSessionId;
+        payload[this.keyLoginSessionId] = loginSessionId;
 
         // used form post to send the login session id, because otherwise it would be visible in the url
         this.postAndNavigate(loginUrl, payload);
@@ -88,7 +88,7 @@ export class OidcService {
     for (const key in payload) {
       log.info("add form field", key, payload[key]);
       const input = document.createElement("input");
-      input.name = this.keyChipsterOidcLoginSessionId;
+      input.name = this.keyLoginSessionId;
       input.name = key;
       input.value = payload[key];
       // add key/value pair to form
@@ -102,12 +102,12 @@ export class OidcService {
 
   completeAuthentication() {
     const returnUrl = localStorage.getItem(this.keyReturnUrl);
-    const chipsterOidcLoginSessionId = localStorage.getItem(this.keyChipsterOidcLoginSessionId);
+    const loginSessionId = localStorage.getItem(this.keyLoginSessionId);
 
     localStorage.removeItem(this.keyReturnUrl);
-    localStorage.removeItem(this.keyChipsterOidcLoginSessionId);
+    localStorage.removeItem(this.keyLoginSessionId);
 
-    if (chipsterOidcLoginSessionId == null) {
+    if (loginSessionId == null) {
       this.errorService.showError(
         "please log in again",
         new Error("Cannot complete OIDC authentication: login ID not found (probably used already)."),
@@ -123,7 +123,7 @@ export class OidcService {
       .pipe(
         mergeMap((authUrl) => {
           const json = {};
-          json[this.keyChipsterOidcLoginSessionId] = chipsterOidcLoginSessionId;
+          json[this.keyLoginSessionId] = loginSessionId;
 
           // make a request to auth to complete the login process
           const loginSessionUrl = authUrl + "/oidc/loginSessionComplete";
