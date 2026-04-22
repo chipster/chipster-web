@@ -46,9 +46,14 @@ export class JobComponent implements OnInit, OnDestroy {
     if (!this.hideInputLines || !this.screenOutput) {
       return this.screenOutput;
     }
-    return this.screenOutput
-      .split("\n")
-      .filter((line) => !line.startsWith(">"))
+    const lines = this.screenOutput.split("\n");
+    let prevWasInput = false; // this for clarity instead of reduce
+    return lines
+      .filter((line) => {
+        const isInput = line.startsWith(">") || (prevWasInput && line.startsWith("+"));
+        prevWasInput = isInput;
+        return !isInput;
+      })
       .join("\n");
   }
 
@@ -237,9 +242,9 @@ export class JobComponent implements OnInit, OnDestroy {
   }
 
   showInputs(inputs: JobInput[], tool: Tool) {
-    /* The new Chipster has misleadingly saved dataset name in input.displayName at 
-    least between 2018-2023. Try to find the displayName from the current tool 
-    instead, otherwise show the plain inputId. 
+    /* The new Chipster has misleadingly saved dataset name in input.displayName at
+    least between 2018-2023. Try to find the displayName from the current tool
+    instead, otherwise show the plain inputId.
     */
     inputs.forEach((jobInput) => {
       const _clone = clone(jobInput);
