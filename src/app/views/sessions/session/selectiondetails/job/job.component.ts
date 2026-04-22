@@ -33,8 +33,9 @@ export class JobComponent implements OnInit, OnDestroy {
   tool: Tool;
   parameterLimit = 12;
   rSessionInfoVisible = false;
-  hideInputLines = false;
+  hideInputLines = true;
   filteredScreenOutput: string = null;
+  hasInputLines = false;
   isRTool = false;
 
   toggleInputLines() {
@@ -84,7 +85,7 @@ export class JobComponent implements OnInit, OnDestroy {
         this.parameterListForView = [];
         this.inputListForView = [];
         this.outputListForView = [];
-        this.hideInputLines = false;
+        this.hideInputLines = true;
         let jobId = null;
 
         if (selectedJobs && selectedJobs.length > 0) {
@@ -134,6 +135,7 @@ export class JobComponent implements OnInit, OnDestroy {
         this.state = capitalize(job.state);
         this.screenOutput = job.screenOutput;
         this.isRTool = job.toolId?.endsWith(".R") ?? false;
+        this.hasInputLines = this.screenOutput?.split("\n").some((line) => line.startsWith(">")) ?? false;
         this.filteredScreenOutput = this.filterScreenOutput();
         this.duration = JobService.getDuration(job);
 
