@@ -13,6 +13,7 @@ import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
+import { error } from "jquery";
 
 @Component({
   selector: "ch-login",
@@ -54,7 +55,7 @@ export class LoginComponent implements OnInit {
     private tokenService: TokenService,
     private errorService: ErrorService,
     private oidcService: OidcService,
-    private newsService: NewsService
+    private newsService: NewsService,
   ) {}
 
   ngOnInit() {
@@ -82,14 +83,14 @@ export class LoginComponent implements OnInit {
               log.warn("checking token failed", error);
               this.initFailed = true;
               this.restErrorService.showError("Initializing login page failed", error);
-            }
+            },
           );
         } else {
           // no local token -> continue
           this.continueInit();
         }
       },
-      (err) => this.errorService.showError("failed to get the return url", err)
+      (err) => this.errorService.showError("failed to get the return url", err),
     );
   }
 
@@ -112,7 +113,7 @@ export class LoginComponent implements OnInit {
 
           // everything ready, show login
           this.show = true;
-        })
+        }),
       )
       .subscribe({
         error: (error) => {
@@ -155,7 +156,7 @@ export class LoginComponent implements OnInit {
           this.error = "Connecting to authentication service failed";
           log.error(errorResponse);
         }
-      }
+      },
     );
   }
 
@@ -179,7 +180,20 @@ export class LoginComponent implements OnInit {
   }
 
   oidcLogin(oidc: OidcConfig) {
-    this.oidcService.startAuthentication(this.returnUrl, oidc);
+    this.configService
+      .getAuthUrl()
+      .pipe(mergeMap((authUrl) => this.oidcService.startAuthentication(this.returnUrl, oidc, authUrl)))
+      .subscribe({
+        error: (err) => {
+          if (err.error != null) {
+            // http error message is in err.error
+            this.restErrorService.showError("failed to initiate OIDC login: " + err.error, err);
+          } else {
+            // in case we end up here with something else than an http error
+            this.restErrorService.showError("failed to initiate OIDC login", err);
+          }
+        },
+      });
   }
 
   backToAuthSelect() {
@@ -189,31 +203,15 @@ export class LoginComponent implements OnInit {
   testOidcConfigs: OidcConfig[] = [
     {
       oidcName: "",
-      issuer: "",
-      clientId: "",
-      redirectPath: "",
-      responseType: "",
       logo: "",
-      logoWidth: "",
       text: "",
-      parameter: "",
-      appId: "",
       description: "",
-      scope: "",
     },
     {
       oidcName: "",
-      issuer: "",
-      clientId: "",
-      redirectPath: "",
-      responseType: "",
       logo: "",
-      logoWidth: "",
       text: "",
-      parameter: "",
-      appId: "",
       description: "",
-      scope: "",
     },
   ];
 }
