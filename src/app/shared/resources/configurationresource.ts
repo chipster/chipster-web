@@ -4,15 +4,14 @@ import { Role, Service } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import "../../rxjs-operators";
-
-declare let YAML: any;
+import { parse } from "yaml";
 
 @Injectable()
 export class ConfigurationResource {
   constructor(private httpClient: HttpClient) {}
 
   getConfiguration(file: string): Observable<any> {
-    return this.httpClient.get("/assets/conf/" + file, { responseType: "text" }).pipe(map((conf) => YAML.parse(conf)));
+    return this.httpClient.get("/assets/conf/" + file, { responseType: "text" }).pipe(map((conf) => parse(conf)));
   }
 
   getPublicServices(conf: any): Observable<Service[]> {
