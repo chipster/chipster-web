@@ -21,14 +21,7 @@ export class SessionWorkerResource {
 
   packageSession(sessionId: string): Observable<any> {
     return forkJoin({
-      /**
-       * Get read-write token for the session
-       *
-       * Now we can send the token in http header, so we could use the auth token as well. But we happened
-       * to have this code for getting a session token, so let's use it and maybe we should use them more
-       * widely in the future to minimize access rights.
-       */
-      token: this.sessionResource.getTokenForSession(sessionId, true),
+      token: this.sessionResource.getTokenForSession(sessionId, false),
       url: this.configService.getSessionWorkerUrl(),
     }).pipe(
       mergeMap((res) =>
