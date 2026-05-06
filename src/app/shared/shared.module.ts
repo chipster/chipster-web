@@ -8,6 +8,7 @@ import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
 import { NewsItemComponent } from "./components/news/news-item.component";
 import { NewsListComponent } from "./components/news/news-list.component";
+import { HotkeyCheatsheetComponent } from "./components/hotkey-cheatsheet/hotkey-cheatsheet.component";
 import { SearchBoxComponent } from "./components/search-box/search-box.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { StatusComponent } from "./components/status.component";
@@ -58,6 +59,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     CategoryPipe,
     ModulePipe,
     SecondsPipe,
+    HotkeyCheatsheetComponent,
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,
@@ -102,6 +104,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     CategoryPipe,
     ModulePipe,
     SecondsPipe,
+    HotkeyCheatsheetComponent,
     SearchBoxComponent,
     StatusComponent,
     SettingsComponent,

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
-import { Hotkey, HotkeysService } from "angular2-hotkeys";
+import { HotkeyService } from "../../services/hotkey.service";
 
 @Component({
   selector: "ch-search-box",
@@ -25,27 +25,22 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
 
   searchTerm: string;
 
-  private hotkey: Hotkey | Hotkey[];
+  private unregisterHotkey: (() => void) | null = null;
 
-  constructor(private hotkeysService: HotkeysService) {}
+  constructor(private readonly hotkeyService: HotkeyService) {}
 
   ngOnInit() {
-    // add focus hotkey
-    this.hotkey = this.hotkeysService.add(
-      new Hotkey(
+    if (this.focusHotkey) {
+      this.unregisterHotkey = this.hotkeyService.register(
         this.focusHotkey,
-        (event: KeyboardEvent): boolean => {
-          this.focus();
-          return false; // Prevent bubbling
-        },
-        undefined,
-        this.focusHotkeyDescription
-      )
-    );
+        this.focusHotkeyDescription,
+        () => this.focus(),
+      );
+    }
   }
 
   ngOnDestroy() {
-    this.hotkeysService.remove(this.hotkey);
+    this.unregisterHotkey?.();
   }
 
   focus() {

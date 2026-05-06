@@ -2,8 +2,9 @@ import { DOCUMENT } from "@angular/common";
 import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Hotkey, HotkeysService } from "angular2-hotkeys";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
+import { NgSelectComponent } from "@ng-select/ng-select";
+import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
 import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
@@ -90,6 +91,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @ViewChild("searchBox")
   searchBox;
 
+  @ViewChild("searchTool")
+  searchTool: NgSelectComponent;
+
+  private unregisterHotkey: (() => void) | null = null;
+
   private toolsMap: Map<string, Tool>;
 
   public selectedTool: SelectedTool;
@@ -117,8 +123,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   compactToolList = true;
 
   public searchBoxModel: ToolSearchListItem;
-  private searchBoxHotkey: Hotkey | Hotkey[];
-
   private lastJobStartedToastId: number;
 
   // use to signal that parameters have been changed and need to be validated
@@ -141,7 +145,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private sessionDataService: SessionDataService,
     public toolService: ToolService,
     private modalService: NgbModal,
-    private hotkeysService: HotkeysService,
     private toastrService: ToastrService,
     private errorService: ErrorService,
     private datasetModalService: DatasetModalService,
@@ -150,6 +153,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     dropdownConfig: NgbDropdownConfig,
     private ngbModal: NgbModal,
     private schedulerResource: SchedulerResource,
+    private hotkeyService: HotkeyService,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
     // eslint-disable-next-line no-param-reassign
@@ -169,8 +173,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.subscribeToJobEvents();
 
-    this.addHotKeys();
-
     if (this.modules[0] != null) {
       this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
     } else {
@@ -178,16 +180,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
 
     this.toolsMap = new Map(this.toolsArray.map((tool: Tool) => [tool.name.id, tool]));
+
+    this.unregisterHotkey = this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open());
   }
 
   ngOnDestroy() {
+    this.unregisterHotkey?.();
     this.clearStoreToolSelections();
     this.parametersChanged$ = null;
     this.resourcesChanged$ = null;
     this.unsubscribe.next(null);
     this.unsubscribe.complete();
-    this.hotkeysService.remove(this.searchBoxHotkey);
-
     if (this.manualModalRef != null) {
       this.manualModalRef.close();
     }
@@ -650,21 +653,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
         },
         (err) => this.errorService.showError("failed to update jobs", err),
       );
-  }
-
-  private addHotKeys() {
-    // add search box hotkey
-    this.searchBoxHotkey = this.hotkeysService.add(
-      new Hotkey(
-        "t",
-        (): boolean => {
-          this.searchBox.focus();
-          return false;
-        },
-        undefined,
-        "Find tool",
-      ),
-    );
   }
 
   onDefineSamples() {
