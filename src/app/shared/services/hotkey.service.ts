@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 
 @Injectable({ providedIn: "root" })
 export class HotkeyService {
-  private shortcuts = new Map<string, { callback: () => void; description: string }>();
+  private readonly shortcuts = new Map<string, { callback: () => void; description: string }>();
 
   register(key: string, description: string, callback: () => void): () => void {
     this.shortcuts.set(key.toLowerCase(), { callback, description });
@@ -11,6 +11,10 @@ export class HotkeyService {
 
   getShortcuts(): Array<{ key: string; description: string }> {
     return Array.from(this.shortcuts.entries()).map(([key, { description }]) => ({ key, description }));
+  }
+
+  openShortcuts(): void {
+    this.shortcuts.get("?")?.callback();
   }
 
   handleKeydown(event: KeyboardEvent): void {
