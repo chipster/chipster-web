@@ -94,7 +94,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   @ViewChild("searchTool")
   searchTool: NgSelectComponent;
 
-  private unregisterHotkey: (() => void) | null = null;
+  private readonly unregisterHotkeys: Array<() => void> = [];
 
   private toolsMap: Map<string, Tool>;
 
@@ -133,6 +133,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   manualModalRef: any;
 
   parametersModalRef: NgbModalRef;
+  private jobsModalRef: NgbModalRef | null = null;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -181,11 +182,14 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
     this.toolsMap = new Map(this.toolsArray.map((tool: Tool) => [tool.name.id, tool]));
 
-    this.unregisterHotkey = this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open());
+    this.unregisterHotkeys.push(
+      this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open()),
+      this.hotkeyService.register("j", "Open jobs", () => this.toggleJobs()),
+    );
   }
 
   ngOnDestroy() {
-    this.unregisterHotkey?.();
+    this.unregisterHotkeys.forEach((fn) => fn());
     this.clearStoreToolSelections();
     this.parametersChanged$ = null;
     this.resourcesChanged$ = null;
@@ -346,6 +350,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.toolsArray,
       this.sessionData,
     );
+  }
+
+  public toggleJobs() {
+    if (this.jobsModalRef) {
+      this.jobsModalRef.close();
+    } else {
+      this.selectionHandlerService.setJobSelection([]);
+      this.jobsModalRef = this.dialogModalService.openJobsModal(
+        this.sessionDataService.getJobList(this.sessionData),
+        this.toolsArray,
+        this.sessionData,
+      );
+      this.jobsModalRef.hidden.subscribe(() => {
+        this.jobsModalRef = null;
+      });
+    }
   }
 
   public searchBoxSelect(item) {
