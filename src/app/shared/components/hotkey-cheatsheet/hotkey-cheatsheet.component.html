@@ -1,0 +1,17 @@
+<ng-template #content>
+  <div class="modal-header">
+    <h4 class="modal-title">Keyboard shortcuts</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <dl>
+      <ng-container *ngFor="let shortcut of shortcuts">
+        <dt><kbd>{{ shortcut.key }}</kbd></dt>
+        <dd>{{ shortcut.description }}</dd>
+      </ng-container>
+    </dl>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  </div>
+</ng-template>

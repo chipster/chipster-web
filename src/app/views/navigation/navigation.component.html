@@ -65,6 +65,10 @@
               <i class="fas fa-cog fa-fw lighter"></i>
               Settings
             </a>
+            <a ngbDropdownItem (click)="openKeyboardShortcuts()">
+              <i class="fas fa-keyboard fa-fw lighter"></i>
+              Keyboard shortcuts
+            </a>
             <div class="dropdown-divider"></div>
             <a ngbDropdownItem [routerLink]="routerLinkHome" (click)="logout()">
               <i class="fas fa-sign-out-alt fa-fw lighter"></i>

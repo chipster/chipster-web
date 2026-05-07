@@ -5,7 +5,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { StoreModule } from "@ngrx/store";
-import { HotkeyModule } from "angular2-hotkeys";
 import { ToastrModule } from "ngx-toastr";
 import { setAppInjector } from "./app-injector";
 import { AppRoutingModule } from "./app-routing.module";
@@ -102,7 +101,6 @@ import { TermsComponent } from "./views/terms/terms.component";
     ToastrModule.forRoot({
       toastComponent: ActionToastComponent,
     }),
-    HotkeyModule.forRoot({ cheatSheetCloseEsc: true }),
     AppRoutingModule,
   ],
   providers: [

@@ -8,6 +8,7 @@ import { AccountComponent } from "../../shared/components/account/account.compon
 import { NewsItem } from "../../shared/components/news/NewsItem";
 import { SettingsComponent } from "../../shared/components/settings/settings.component";
 import { ConfigService } from "../../shared/services/config.service";
+import { HotkeyService } from "../../shared/services/hotkey.service";
 import { NewsService } from "../../shared/services/news.service";
 import { PreferencesService } from "../../shared/services/preferences.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -43,6 +44,7 @@ export class NavigationComponent implements OnInit {
     private modalService: NgbModal,
     private newsService: NewsService,
     private preferencesService: PreferencesService,
+    private readonly hotkeyService: HotkeyService,
   ) {}
 
   ngOnInit() {
@@ -132,6 +134,10 @@ export class NavigationComponent implements OnInit {
 
   openSettings(): void {
     this.modalService.open(SettingsComponent);
+  }
+
+  openKeyboardShortcuts(): void {
+    this.hotkeyService.openShortcuts();
   }
 
   getAccountName(): string {
