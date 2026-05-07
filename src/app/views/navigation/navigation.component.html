@@ -57,18 +57,18 @@
             {{ getAccountName() }}
           </a>
           <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu dropdown-menu-end">
-            <a ngbDropdownItem (click)="openAccount()">
+            <button ngbDropdownItem (click)="openAccount()">
               <i class="fas fa-user fa-fw lighter"></i>
               Account
-            </a>
-            <a ngbDropdownItem (click)="openSettings()">
+            </button>
+            <button ngbDropdownItem (click)="openSettings()">
               <i class="fas fa-cog fa-fw lighter"></i>
               Settings
-            </a>
-            <a ngbDropdownItem (click)="openKeyboardShortcuts()">
+            </button>
+            <button ngbDropdownItem (click)="openKeyboardShortcuts()">
               <i class="fas fa-keyboard fa-fw lighter"></i>
               Keyboard shortcuts
-            </a>
+            </button>
             <div class="dropdown-divider"></div>
             <a ngbDropdownItem [routerLink]="routerLinkHome" (click)="logout()">
               <i class="fas fa-sign-out-alt fa-fw lighter"></i>
