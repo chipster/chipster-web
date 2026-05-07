@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
 import log from "loglevel";
@@ -10,6 +10,7 @@ import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
+import { JobListComponent } from "../tools/job-list/job-list.component";
 
 @Component({
   selector: "ch-jobs-modal",
@@ -46,8 +47,13 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         log.warn("scrolling to job failed, element id not found: ", rowId);
       }
+    } else if (this.jobListComponent?.jobsSorted.length > 0) {
+      // auto-select first job to enable immediate arrow key navigation; setTimeout defers past view check cycle (NG0100)
+      setTimeout(() => this.onJobSelection(this.jobListComponent.jobsSorted[0]));
     }
   }
+
+  @ViewChild(JobListComponent) jobListComponent!: JobListComponent;
 
   jobs: Job[];
   @Input() tools: Tool[];
@@ -59,6 +65,17 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param job
    *
    */
+  @HostListener("keydown", ["$event"])
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      this.jobListComponent?.navigateJob(1);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      this.jobListComponent?.navigateJob(-1);
+    }
+  }
+
   onJobSelection(job: Job) {
     this.selectionHandlerService.setJobSelection([job]);
   }
