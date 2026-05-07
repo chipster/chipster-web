@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
 import { catchError } from "rxjs/operators";
@@ -144,15 +144,12 @@ export class DialogModalService {
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 
-  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData) {
-    const modalRef = this.modalService.open(JobsModalComponent, {
-      size: "xl",
-    });
+  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData): NgbModalRef {
+    const modalRef = this.modalService.open(JobsModalComponent, { size: "xl" });
     modalRef.componentInstance.jobs = jobs;
     modalRef.componentInstance.tools = tools;
     modalRef.componentInstance.sessionData = sessionData;
-
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return modalRef;
   }
 
   openSpinnerModal(message, observable) {
