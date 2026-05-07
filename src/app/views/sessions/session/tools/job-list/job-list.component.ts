@@ -56,6 +56,17 @@ export class JobListComponent implements OnChanges {
     this.jobSelected.emit(job);
   }
 
+  public navigateJob(direction: 1 | -1): void {
+    if (!this.jobsSorted?.length) {
+      return;
+    }
+    const current = this.jobsSorted.findIndex((j) => this.selectionService.isSelectedJobById(j.jobId));
+    const next = Math.max(0, Math.min(this.jobsSorted.length - 1, (current === -1 ? 0 : current) + direction));
+    const job = this.jobsSorted[next];
+    this.jobSelected.emit(job);
+    document.getElementById(`job-id-${job.jobId}`)?.scrollIntoView({ block: "nearest" });
+  }
+
   createDurationObservable(job: Job): Observable<string> {
     return JobService.getDuration(job).pipe(
       map((duration) => {
