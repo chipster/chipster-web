@@ -55,6 +55,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
   phenodataAncestor: Dataset;
   phenodataFilled = false;
+  groupColumnMissing = false;
   ready = false;
   sortColumn: number;
   sortOrder: boolean;
@@ -287,6 +288,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private updateView() {
     this.ready = false;
     this.phenodataFilled = false;
+    this.groupColumnMissing = false;
     this.phenodataAncestor = null;
     this.headers = [];
     this.rows = [];
@@ -335,6 +337,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
       this.phenodataState = PhenodataState.OWN_PHENODATA;
       this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
+      this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
     } else {
       const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.dataset);
       if (ancestorsWithPhenodata.length > 0) {
