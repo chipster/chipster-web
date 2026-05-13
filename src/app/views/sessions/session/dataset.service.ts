@@ -56,12 +56,8 @@ export class DatasetService {
 
   isPhenodataFilled(dataset: Dataset): boolean {
     // TODO maybe use parent phenodata
-    if (!this.hasOwnPhenodata(dataset)) {
-      return false;
-    }
-
-    const allRows = d3.tsvParseRows(this.getOwnPhenodata(dataset));
-    if (allRows.length < 2) {
+    const allRows = this.parsePhenodataRows(dataset);
+    if (allRows == null || allRows.length < 2) {
       return false;
     }
     const headers = allRows[0];
@@ -74,6 +70,19 @@ export class DatasetService {
     return contentRows.every(
       (row) => row.length === headers.length && row[groupIndex] != null && row[groupIndex] !== ""
     );
+  }
+
+  hasGroupColumn(dataset: Dataset): boolean {
+    const allRows = this.parsePhenodataRows(dataset);
+    return allRows != null && allRows[0].includes(this.GROUP_COLOMN);
+  }
+
+  private parsePhenodataRows(dataset: Dataset): string[][] | null {
+    if (!this.hasOwnPhenodata(dataset)) {
+      return null;
+    }
+    const allRows = d3.tsvParseRows(this.getOwnPhenodata(dataset));
+    return allRows.length > 0 ? allRows : null;
   }
 
   removeMetadataFile(dataset: Dataset, metadataName: string) {
