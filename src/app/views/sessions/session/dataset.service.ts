@@ -40,7 +40,7 @@ export class DatasetService {
 
   readonly PHENODATA_PREFIX = "phenodata";
   readonly PHENODATA_FILENAME = "phenodata.tsv";
-  readonly GROUP_COLOMN = "group";
+  readonly GROUP_COLUMN = "group";
 
   hasOwnPhenodata(dataset: Dataset): boolean {
     return PhenodataUtils.hasOwnPhenodata(dataset);
@@ -61,7 +61,7 @@ export class DatasetService {
       return false;
     }
     const headers = allRows[0];
-    const groupIndex = headers.indexOf(this.GROUP_COLOMN);
+    const groupIndex = headers.indexOf(this.GROUP_COLUMN);
     if (groupIndex === -1) {
       return false;
     }
@@ -74,7 +74,7 @@ export class DatasetService {
 
   hasGroupColumn(dataset: Dataset): boolean {
     const allRows = this.parsePhenodataRows(dataset);
-    return allRows != null && allRows[0].includes(this.GROUP_COLOMN);
+    return allRows != null && allRows[0].includes(this.GROUP_COLUMN);
   }
 
   private parsePhenodataRows(dataset: Dataset): string[][] | null {
