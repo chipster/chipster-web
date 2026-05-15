@@ -200,6 +200,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         if (source === "edit" || source === "Autofill.fill" || source === "CopyPaste.paste") {
           this.latestEdit = new Date().getTime();
           this.updateDataset();
+          this.zone.run(() => this.updateWarnings());
         }
       },
     };
@@ -232,6 +233,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     });
 
     this.updateDataset();
+    this.zone.run(() => this.updateWarnings());
   }
 
   /**
@@ -283,6 +285,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   private updateViewAfterDelay() {
     setTimeout(() => this.updateView(), 200);
+  }
+
+  private updateWarnings() {
+    this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
+    this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
   }
 
   private updateView() {
@@ -437,6 +444,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           });
 
           this.updateDataset();
+          this.updateWarnings();
         }),
       )
       .subscribe(null, (err) => this.restErrorService.showError("Add column failed", err));
