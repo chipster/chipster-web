@@ -217,7 +217,12 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     button.addEventListener(
       "click",
       () => {
-        this.removeColumn(col);
+        this.zone.run(() => {
+          const columnName = this.headers[col];
+          this.stringModalService
+            .openBooleanModal("Delete column", `Are you sure you want to delete column '${columnName}'?`, "Delete", "Cancel")
+            .then(() => this.removeColumn(col), () => {});
+        });
       },
       false,
     );
