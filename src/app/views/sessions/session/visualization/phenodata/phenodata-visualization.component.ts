@@ -51,6 +51,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   latestEdit: number;
   deferredUpdatesTimerId: number | null = null;
   unremovableColumns = ["sample", "original_name"];
+
+  get hasEditableColumns(): boolean {
+    return this.headers.some((h) => !this.unremovableColumns.includes(h));
+  }
   PhenodataState = PhenodataState; // for using the enum in template
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
   phenodataAncestor: Dataset;
@@ -251,19 +255,41 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
    *
    */
   reset() {
-    // do something only if there are removable columns
-    if (this.headers.some((columnHeader: string) => !this.unremovableColumns.includes(columnHeader))) {
-      // get indexes of removable columns
-      const removableColumnIndexces = this.headers
-        .map((columnHeader: string, index: number) => (!this.unremovableColumns.includes(columnHeader) ? index : -1))
-        .filter((index) => index !== -1);
-
-      // remove columns in reverse order to avoid messing up
-      removableColumnIndexces.reverse().forEach((index) => this.removeColumn(index));
-
-      this.updateViewAfterDelay();
-      this.updateDataset();
+    if (!this.hasEditableColumns) {
+      return;
     }
+    this.stringModalService
+      .openChoiceModal(
+        "Clear phenodata",
+        "Editable columns can be cleared of their values, or deleted entirely.",
+        "Would you like to clear the values or delete the columns?",
+        "Delete columns",
+        "Clear values",
+        "Cancel",
+      )
+      .then((action: number) => {
+        if (action === 1) {
+          const keepIndices = this.headers
+            .map((h, i) => (this.unremovableColumns.includes(h) ? i : -1))
+            .filter((i) => i !== -1);
+          this.headers = keepIndices.map((i) => this.headers[i]);
+          this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
+          this.updateDataset();
+          this.updateViewAfterDelay();
+        } else if (action === 2) {
+          const removableIndices = this.headers
+            .map((h, i) => (this.unremovableColumns.includes(h) ? -1 : i))
+            .filter((i) => i !== -1);
+          this.rows.forEach((_row, rowIndex) => {
+            removableIndices.forEach((colIndex) => {
+              this.rows[rowIndex][colIndex] = "";
+            });
+          });
+          this.updateDataset();
+          this.updateViewAfterDelay();
+          this.zone.run(() => this.updateWarnings());
+        }
+      }, () => {});
   }
 
   private updateDataset() {

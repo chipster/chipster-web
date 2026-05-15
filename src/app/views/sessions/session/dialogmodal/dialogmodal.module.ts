@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal, NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { SharedModule } from "../../../../shared/shared.module";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
+import { ChoiceModalComponent } from "./choicemodal/choice-modal.component";
 import { DeleteFilesModalComponent } from "./delete-files-modal/delete-files-modal.component";
 import { DialogModalService } from "./dialogmodal.service";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
@@ -24,6 +25,7 @@ import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component
     StringModalComponent,
     DropdownModalComponent,
     BooleanModalComponent,
+    ChoiceModalComponent,
     DeleteFilesModalComponent,
     NotesModalComponent,
     SharingModalComponent,
