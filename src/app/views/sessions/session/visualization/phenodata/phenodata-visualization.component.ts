@@ -211,7 +211,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     button.className = "float-end";
     // use id instead of class to make it more specific than the 'color: inherit' rule in the bootstrap styles
     button.id = "phenodata-header-button";
-    button.innerHTML = "&times;";
+    button.innerHTML = '<i class="fas fa-xmark"></i>';
+    button.title = "Remove column";
 
     button.addEventListener(
       "click",
@@ -221,10 +222,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       false,
     );
 
-    if (TH.firstChild.lastChild.nodeName === "A") {
-      TH.firstChild.removeChild(TH.firstChild.lastChild);
+    const existing = TH.firstChild.querySelector("#phenodata-header-button");
+    if (existing) {
+      existing.remove();
     }
-    TH.firstChild.appendChild(button);
+    TH.firstChild.insertBefore(button, TH.firstChild.firstChild);
   }
 
   removeColumn(index: number) {
