@@ -7,6 +7,7 @@ import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
 import { JobsModalComponent } from "../jobs-modal/jobs-modal.component";
 import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
+import { ChoiceModalComponent } from "./choicemodal/choice-modal.component";
 import { DeleteFilesModalComponent } from "./delete-files-modal/delete-files-modal.component";
 import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
 import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
@@ -110,6 +111,17 @@ export class DialogModalService {
     modalRef.componentInstance.placeHolder = "";
 
     return observableFrom(modalRef.result);
+  }
+
+  openChoiceModal(title, message, question, action1ButtonText, action2ButtonText, cancelButtonText) {
+    const modalRef = this.modalService.open(ChoiceModalComponent);
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.question = question;
+    modalRef.componentInstance.action1ButtonText = action1ButtonText;
+    modalRef.componentInstance.action2ButtonText = action2ButtonText;
+    modalRef.componentInstance.cancelButtonText = cancelButtonText;
+    return modalRef.result;
   }
 
   openBooleanModal(title, message, okButtonText, cancelButtonText) {
