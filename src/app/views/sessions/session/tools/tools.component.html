@@ -204,14 +204,14 @@
                       ngbDropdownItem
                       (click)="runJob(false)"
                       [disabled]="!validatedTool.singleJobValidation.valid">
-                      Run Tool
+                      Run tool
                       <span *ngIf="validatedTool.singleJobValidation.valid" class="text-muted text-sm">1 job</span>
                     </button>
                     <button
                       ngbDropdownItem
                       (click)="runJob(true)"
                       [disabled]="!validatedTool.runForEachValidation.valid">
-                      Run Tool for Each File
+                      Run tool for each file
                       <span *ngIf="validatedTool.runForEachValidation.valid" class="text-muted text-sm">
                         {{ validatedTool.selectedDatasets.length }} jobs
                       </span>
@@ -220,7 +220,7 @@
                       ngbDropdownItem
                       (click)="runForEachSample()"
                       [disabled]="!validatedTool.runForEachSampleValidation.valid">
-                      Run Tool For Each Sample
+                      Run tool for each sample
                       <span *ngIf="validatedTool.runForEachSampleValidation.valid" class="text-muted text-sm">
                         {{
                           validatedTool.sampleGroups.pairedEndSamples.length +
@@ -235,7 +235,7 @@
                       ngbDropdownItem
                       (click)="onDefineSamples()"
                       [disabled]="validatedTool.runForEachSampleValidation.valid">
-                      Define Samples to Enable Run for Each Sample
+                      Define samples to enable run for each sample
                     </button>
                   </div>
                 </div>

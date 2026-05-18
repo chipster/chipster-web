@@ -21,7 +21,7 @@
         </form>
       </div>
       <div class="col align-self-end">
-        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ms-2 float-end">Reset All</button>
+        <button type="button" (click)="onResetAll()" class="btn btn-sm btn-secondary ms-2 float-end">Reset all</button>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
         [disabled]="!singleTokenForm.valid"
         class="btn btn-sm btn-success"
         (click)="onFindSingle()">
-        One File per Sample
+        One file per sample
       </button>
     </div>
 
@@ -64,7 +64,7 @@
               id="r2TokenInput" />
           </div>
           <div class="col align-self-end float-end">
-            <button type="submit" [disabled]="!identifiersForm.valid" class="btn btn-sm btn-success">Find Pairs</button>
+            <button type="submit" [disabled]="!identifiersForm.valid" class="btn btn-sm btn-success">Find pairs</button>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@
       <div>
         <span class="text-sm">{{ unpairedFiles.length }} undefined file{{ getPluralEnd(unpairedFiles.length) }}</span>
         <button (click)="onResetAll()" class="btn btn-sm btn-secondary float-end invisible mb-1">
-          Reset Everything
+          Reset everything
         </button>
       </div>
       <hr class="mt-1 mb-1" />
