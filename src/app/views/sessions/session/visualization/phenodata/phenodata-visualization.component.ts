@@ -51,9 +51,15 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   latestEdit: number;
   deferredUpdatesTimerId: number | null = null;
   unremovableColumns = ["sample", "original_name"];
+  private originalPhenodataString: string | null = null;
+  private originalDatasetId: string | null = null;
 
   get hasEditableColumns(): boolean {
     return this.headers.some((h) => !this.unremovableColumns.includes(h));
+  }
+
+  get canReset(): boolean {
+    return this.hasEditableColumns || (this.originalPhenodataString != null && this.originalPhenodataString !== this.phenodataString);
   }
   PhenodataState = PhenodataState; // for using the enum in template
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
@@ -260,12 +266,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
     this.stringModalService
       .openChoiceModal(
-        "Clear phenodata",
-        "Editable columns can be cleared of their values, or deleted entirely.",
-        "Would you like to clear the values or delete the columns?",
+        "Reset phenodata",
+        "You can clear the values in editable columns, delete all editable columns, or reset the phenodata to the state it was in when you opened this view.",
+        "What would you like to do?",
         "Delete columns",
         "Clear values",
         "Cancel",
+        { text: "Reset to previous", disabled: this.originalPhenodataString === this.phenodataString },
       )
       .then((action: number) => {
         if (action === 1) {
@@ -288,6 +295,14 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           this.updateDataset();
           this.updateViewAfterDelay();
           this.zone.run(() => this.updateWarnings());
+        } else if (action === 3 && this.originalPhenodataString != null) {
+          this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
+          this.phenodataString = this.originalPhenodataString;
+          this.sessionDataService.updateDataset(this.dataset).subscribe(
+            () => log.info("dataset phenodata updated"),
+            (err) => this.restErrorService.showError("dataset phenodata update failed", err),
+          );
+          this.updateViewAfterDelay();
         }
       }, () => {});
   }
@@ -376,6 +391,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     if (this.datasetService.hasOwnPhenodata(this.dataset)) {
       phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
       this.phenodataState = PhenodataState.OWN_PHENODATA;
+      if (this.dataset.datasetId !== this.originalDatasetId) {
+        this.originalDatasetId = this.dataset.datasetId;
+        this.originalPhenodataString = phenodataString;
+      }
+      this.phenodataString = phenodataString;
       this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
       this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
     } else {
