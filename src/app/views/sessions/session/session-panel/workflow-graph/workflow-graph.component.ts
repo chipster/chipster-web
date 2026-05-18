@@ -1519,7 +1519,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.convertMenuItem = {
-      title: "Convert to Chipster Format...",
+      title: "Convert to Chipster format...",
       action(d): void {
         self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
       },
@@ -1549,14 +1549,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.groupsMenuItem = {
-      title: "Define Samples...",
+      title: "Define samples...",
       action(): void {
         self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
       },
     };
 
     this.showJobMenuItem = {
-      title: "Show Job",
+      title: "Show job",
       action(d): void {
         self.datasetContextMenuService.showJob(self.selectedDatasetSourceJob, self.tools, self.sessionData);
       },
@@ -1566,7 +1566,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.selectChildrenMenuItem = {
-      title: "Select Descendants",
+      title: "Select descendants",
       action(): void {
         const children = self.getSessionDataService.getChildren(self.selectionService.selectedDatasets);
         self.selectionHandlerService.setDatasetSelection(children);
@@ -1574,7 +1574,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.copySelectedToNewSessionMenuItem = {
-      title: "Copy to a New Session",
+      title: "Copy to new session",
       action(d): void {
         let datasets = self.selectionService.selectedDatasets;
 
@@ -1588,7 +1588,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.copySelectedToExistingSessionMenuItem = {
-      title: "Copy to an Existing Session",
+      title: "Copy to existing session",
       action(d): void {
         let datasets = self.selectionService.selectedDatasets;
 
