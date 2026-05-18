@@ -1500,7 +1500,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const self = this;
 
     this.renameMenuItem = {
-      title: "Rename...",
+      title: "Rename&hellip;",
       action(d): void {
         const dataset = clone(d.dataset);
         self.dialogModalService
@@ -1519,7 +1519,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.convertMenuItem = {
-      title: "Convert to Chipster format...",
+      title: "Convert to Chipster format&hellip;",
       action(d): void {
         self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
       },
@@ -1549,7 +1549,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.groupsMenuItem = {
-      title: "Define samples...",
+      title: "Define samples&hellip;",
       action(): void {
         self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
       },
@@ -1574,7 +1574,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.copySelectedToNewSessionMenuItem = {
-      title: "Copy to new session",
+      title: "Copy to new session&hellip;",
       action(d): void {
         let datasets = self.selectionService.selectedDatasets;
 
@@ -1588,7 +1588,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.copySelectedToExistingSessionMenuItem = {
-      title: "Copy to existing session",
+      title: "Copy to existing session&hellip;",
       action(d): void {
         let datasets = self.selectionService.selectedDatasets;
 
@@ -1609,7 +1609,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.historyMenuItem = {
-      title: "History...",
+      title: "History&hellip;",
       action(d): void {
         self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData, self.tools);
       },
