@@ -96,8 +96,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     this.sessionEventService
       .getDatasetStream()
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (event) => {
+      .subscribe({
+        next: (event) => {
           // TODO if phenodata view starts to use fields other than the phenodata (such as name) and needs to react
           // to updates of those fields, add needed changes below. Now event stream causes update only if phenodata
           // has been changed
@@ -119,8 +119,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // someone else has changed phenodata, update
           this.updateViewLater();
         },
-        (err) => this.errorService.showError("phenodata update failed", err),
-      );
+        error: (err) => this.errorService.showError("phenodata update failed", err),
+      });
   }
 
   ngAfterViewInit() {
@@ -298,10 +298,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         } else if (action === 3 && this.originalPhenodataString != null) {
           this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
           this.phenodataString = this.originalPhenodataString;
-          this.sessionDataService.updateDataset(this.dataset).subscribe(
-            () => log.info("dataset phenodata updated"),
-            (err) => this.restErrorService.showError("dataset phenodata update failed", err),
-          );
+          this.sessionDataService.updateDataset(this.dataset).subscribe({
+            next: () => log.info("dataset phenodata updated"),
+            error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
+          });
           this.updateViewAfterDelay();
         }
       }, () => {});
@@ -324,10 +324,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
       this.datasetService.setPhenodata(this.dataset, phenodataString);
-      this.sessionDataService.updateDataset(this.dataset).subscribe(
-        () => log.info("dataset phenodata updated"),
-        (err) => this.restErrorService.showError("dataset phenodata update failed", err),
-      );
+      this.sessionDataService.updateDataset(this.dataset).subscribe({
+        next: () => log.info("dataset phenodata updated"),
+        error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
+      });
     }
   }
 
@@ -500,6 +500,6 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           this.updateWarnings();
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("Add column failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Add column failed", err) });
   }
 }
