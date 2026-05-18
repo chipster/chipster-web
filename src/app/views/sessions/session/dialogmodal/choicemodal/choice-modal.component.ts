@@ -9,6 +9,8 @@ export class ChoiceModalComponent implements AfterViewInit {
   @Input() message: string;
   @Input() action1ButtonText: string;
   @Input() action2ButtonText: string;
+  @Input() action3ButtonText: string;
+  @Input() action3Disabled = false;
   @Input() cancelButtonText: string;
   @Input() question: string;
 
@@ -26,6 +28,10 @@ export class ChoiceModalComponent implements AfterViewInit {
 
   action2() {
     this.activeModal.close(2);
+  }
+
+  action3() {
+    this.activeModal.close(3);
   }
 
   cancel() {
