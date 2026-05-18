@@ -21,15 +21,15 @@
       </button>
       <div ngbDropdownMenu aria-labelledby="fileDropdownMenuButton">
         <button ngbDropdownItem (click)="renameDataset()">Rename&hellip;</button>
-        <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster Format&hellip;</button>
-        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
+        <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster format&hellip;</button>
+        <button ngbDropdownItem (click)="defineDatasetGroups()">Define samples&hellip;</button>
         <button ngbDropdownItem (click)="exportDatasets()">Export</button>
         <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
         <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="showJob()" [disabled]="sourceJob == null">Show Job</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select All Descendants</button>
-        <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
-        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
+        <button ngbDropdownItem (click)="showJob()" [disabled]="sourceJob == null">Show job</button>
+        <button ngbDropdownItem (click)="selectChildren()">Select all descendants</button>
+        <button ngbDropdownItem (click)="copyToNewSession()">Copy to new session...</button>
+        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to existing session...</button>
         <div class="dropdown-divider"></div>
         <button ngbDropdownItem (click)="deleteDatasets()">Delete</button>
       </div>
@@ -56,10 +56,10 @@
         <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
       </button>
       <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
-        <button ngbDropdownItem (click)="defineDatasetGroups()">Define Samples&hellip;</button>
-        <button ngbDropdownItem (click)="selectChildren()">Select Descendants</button>
-        <button ngbDropdownItem (click)="copyToNewSession()">Copy to a New Session...</button>
-        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to an Existing Session...</button>
+        <button ngbDropdownItem (click)="defineDatasetGroups()">Define samples&hellip;</button>
+        <button ngbDropdownItem (click)="selectChildren()">Select descendants</button>
+        <button ngbDropdownItem (click)="copyToNewSession()">Copy to new session...</button>
+        <button ngbDropdownItem (click)="copyToExistingSession()">Copy to existing session...</button>
         <div class="dropdown-divider"></div>
         <button ngbDropdownItem (click)="deleteDatasets()">
           Delete {{ selectionService.selectedDatasets.length }} files
