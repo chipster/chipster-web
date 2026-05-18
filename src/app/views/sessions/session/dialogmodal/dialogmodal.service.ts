@@ -113,13 +113,15 @@ export class DialogModalService {
     return observableFrom(modalRef.result);
   }
 
-  openChoiceModal(title, message, question, action1ButtonText, action2ButtonText, cancelButtonText, action3?: { text: string; disabled?: boolean }) {
+  openChoiceModal(title, message, question, action1: { text: string; disabled?: boolean }, action2: { text: string; disabled?: boolean }, cancelButtonText: string, action3?: { text: string; disabled?: boolean }) {
     const modalRef = this.modalService.open(ChoiceModalComponent, { size: "lg" });
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.question = question;
-    modalRef.componentInstance.action1ButtonText = action1ButtonText;
-    modalRef.componentInstance.action2ButtonText = action2ButtonText;
+    modalRef.componentInstance.action1ButtonText = action1.text;
+    modalRef.componentInstance.action1Disabled = action1.disabled ?? false;
+    modalRef.componentInstance.action2ButtonText = action2.text;
+    modalRef.componentInstance.action2Disabled = action2.disabled ?? false;
     modalRef.componentInstance.cancelButtonText = cancelButtonText;
     if (action3) {
       modalRef.componentInstance.action3ButtonText = action3.text;

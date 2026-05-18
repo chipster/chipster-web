@@ -8,6 +8,6 @@
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary me-auto" (click)="cancel()">{{ cancelButtonText }}</button>
   <button *ngIf="action3ButtonText" type="button" class="btn btn-info me-1" (click)="action3()" [disabled]="action3Disabled">{{ action3ButtonText }}</button>
-  <button type="button" class="btn btn-info me-1" (click)="action2()">{{ action2ButtonText }}</button>
-  <button type="submit" class="btn btn-info" (click)="action1()" #submitButton>{{ action1ButtonText }}</button>
+  <button type="button" class="btn btn-info me-1" (click)="action2()" [disabled]="action2Disabled">{{ action2ButtonText }}</button>
+  <button type="submit" class="btn btn-info" (click)="action1()" [disabled]="action1Disabled" #submitButton>{{ action1ButtonText }}</button>
 </div>
