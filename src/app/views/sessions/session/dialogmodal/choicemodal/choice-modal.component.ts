@@ -8,7 +8,9 @@ export class ChoiceModalComponent implements AfterViewInit {
   @Input() title: string;
   @Input() message: string;
   @Input() action1ButtonText: string;
+  @Input() action1Disabled = false;
   @Input() action2ButtonText: string;
+  @Input() action2Disabled = false;
   @Input() action3ButtonText: string;
   @Input() action3Disabled = false;
   @Input() cancelButtonText: string;

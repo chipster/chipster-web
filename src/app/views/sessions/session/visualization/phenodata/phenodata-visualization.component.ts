@@ -58,6 +58,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     return this.headers.some((h) => !this.unremovableColumns.includes(h));
   }
 
+  get hasEditableValues(): boolean {
+    const editableIndices = this.headers
+      .map((h, i) => (this.unremovableColumns.includes(h) ? -1 : i))
+      .filter((i) => i !== -1);
+    return this.rows.some((row) => editableIndices.some((i) => row[i] != null && row[i] !== ""));
+  }
+
   get canReset(): boolean {
     return this.hasEditableColumns || (this.originalPhenodataString != null && this.originalPhenodataString !== this.phenodataString);
   }
@@ -274,8 +281,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         "Reset phenodata",
         "You can clear the values in editable columns, delete all editable columns, or reset the phenodata to the state it was in when you opened this view.",
         "What would you like to do?",
-        "Delete columns",
-        "Clear values",
+        { text: "Delete columns", disabled: !this.hasEditableColumns },
+        { text: "Clear values", disabled: !this.hasEditableValues },
         "Cancel",
         { text: "Reset to previous", disabled: this.originalPhenodataString === this.phenodataString },
       )
