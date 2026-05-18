@@ -41,15 +41,15 @@ export enum PhenodataState {
   encapsulation: ViewEncapsulation.None,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input() private dataset: Dataset;
-  @Input() private datasetsMap: Map<string, Dataset>;
+  @Input() private dataset!: Dataset;
+  @Input() private datasetsMap!: Map<string, Dataset>;
 
   // MUST be handled outside Angular zone to prevent a change detection loop
-  hot;
-  rows: Array<Array<string>>;
-  headers: string[];
-  latestEdit: number;
-  deferredUpdatesTimerId: number | null = null;
+  hot: any;
+  rows: Array<Array<string>> = [];
+  headers: string[] = [];
+  latestEdit = 0;
+  deferredUpdatesTimerId: number | undefined = undefined;
   unremovableColumns = ["sample", "original_name"];
   private originalPhenodataString: string | null = null;
   private originalDatasetId: string | null = null;
@@ -63,14 +63,14 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
   PhenodataState = PhenodataState; // for using the enum in template
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
-  phenodataAncestor: Dataset;
+  phenodataAncestor: Dataset | null = null;
   phenodataFilled = false;
   groupColumnMissing = false;
   ready = false;
-  sortColumn: number;
-  sortOrder: boolean;
-  sortingEnabled: boolean;
-  phenodataString: string;
+  sortColumn: number | null = null;
+  sortOrder: boolean | null = null;
+  sortingEnabled = false;
+  phenodataString = "";
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -111,6 +111,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // don't update selectedDatasets at the moment
           // in this case, could use the one from the event also?
           const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+          if (updatedDataset == null) {
+            return;
+          }
 
           if (this.datasetService.getOwnPhenodata(updatedDataset) === this.phenodataString) {
             return;
@@ -158,7 +161,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   private updateSize(array: string[][], headers: string[]) {
     const container = document.getElementById("tableContainer");
-
+    if (!container) {
+      return;
+    }
     container.style.width = this.getWidth(array, headers) + "px";
     container.style.height = this.getHeight(array) + "px";
   }
@@ -308,17 +313,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   private updateDataset() {
-    const phenodataString: string = [this.headers].concat(this.rows).reduce(
-      (result: string, row: Array<string>) =>
-        (result +=
-          row
-            .reduce((rowString: string, cellValue: string) => {
-              const cellString = cellValue != null ? cellValue : "";
-              return rowString + cellString + "\t";
-            }, "")
-            .slice(0, -1) + "\n"),
-      "",
-    );
+    const phenodataString = [this.headers, ...this.rows]
+      .map((row) => row.map((cell) => cell ?? "").join("\t"))
+      .join("\n") + "\n";
 
     this.phenodataString = phenodataString;
 
@@ -379,12 +376,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    this.dataset = this.datasetsMap.get(this.dataset.datasetId);
-    if (this.dataset == null) {
+    const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+    if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
       return;
     }
+    this.dataset = updatedDataset;
 
     // find phenodata for this dataset, could be own or inherited
     let phenodataString;
@@ -444,7 +442,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private updateViewLater() {
     if (!this.isEditingNow()) {
       this.updateViewAfterDelay();
-    } else {
+    } else if (this.deferredUpdatesTimerId == null) {
       /*
        Defer updates when the table is being edited
 
@@ -464,16 +462,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
        so that we could recognize the events that we have create ourselves and wouldn't have
        to apply them to the table.
        */
-
-      if (this.deferredUpdatesTimerId == null) {
-        this.deferredUpdatesTimerId = window.setInterval(() => {
-          if (!this.isEditingNow()) {
-            window.clearInterval(this.deferredUpdatesTimerId);
-            this.deferredUpdatesTimerId = null;
-            this.updateViewAfterDelay();
-          }
-        }, 100);
-      }
+      this.deferredUpdatesTimerId = window.setInterval(() => {
+        if (!this.isEditingNow()) {
+          window.clearInterval(this.deferredUpdatesTimerId);
+          this.deferredUpdatesTimerId = undefined;
+          this.updateViewAfterDelay();
+        }
+      }, 100);
     }
   }
 
