@@ -266,7 +266,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
    *
    */
   reset() {
-    if (!this.hasEditableColumns) {
+    if (!this.canReset) {
       return;
     }
     this.stringModalService
