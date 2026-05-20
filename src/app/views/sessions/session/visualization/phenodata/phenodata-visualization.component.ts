@@ -50,17 +50,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   headers: string[] = [];
   latestEdit = 0;
   deferredUpdatesTimerId: number | undefined = undefined;
-  unremovableColumns = ["sample", "original_name"];
+  nonEditableColumns = ["sample", "original_name"];
   private originalPhenodataString: string | null = null;
   private originalDatasetId: string | null = null;
 
   get hasEditableColumns(): boolean {
-    return this.headers.some((h) => !this.unremovableColumns.includes(h));
+    return this.headers.some((h) => !this.nonEditableColumns.includes(h));
   }
 
   get hasEditableValues(): boolean {
     const editableIndices = this.headers
-      .map((h, i) => (this.unremovableColumns.includes(h) ? -1 : i))
+      .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
       .filter((i) => i !== -1);
     return this.rows.some((row) => editableIndices.some((i) => row[i] != null && row[i] !== ""));
   }
@@ -198,11 +198,18 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       height: this.getHeight(array),
 
       afterGetColHeader: (col: number, TH: any) => {
-        if (this.unremovableColumns.includes(headers[col])) {
+        if (this.nonEditableColumns.includes(headers[col])) {
           // removal not allowed
           return;
         }
         this.createRemoveButton(col, TH);
+      },
+
+      cells: (_row: number, col: number) => {
+        if (this.nonEditableColumns.includes(headers[col])) {
+          return { readOnly: true };
+        }
+        return {};
       },
 
       afterChange: (changes: any, source: string) => {
@@ -289,7 +296,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .then((action: number) => {
         if (action === 1) {
           const keepIndices = this.headers
-            .map((h, i) => (this.unremovableColumns.includes(h) ? i : -1))
+            .map((h, i) => (this.nonEditableColumns.includes(h) ? i : -1))
             .filter((i) => i !== -1);
           this.headers = keepIndices.map((i) => this.headers[i]);
           this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
@@ -297,7 +304,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           this.updateViewAfterDelay();
         } else if (action === 2) {
           const removableIndices = this.headers
-            .map((h, i) => (this.unremovableColumns.includes(h) ? -1 : i))
+            .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
             .filter((i) => i !== -1);
           this.rows.forEach((_row, rowIndex) => {
             removableIndices.forEach((colIndex) => {
