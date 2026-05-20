@@ -12,6 +12,7 @@ import { ConfigService } from "./config.service";
 @Injectable()
 export class WebSocketService {
   topic: string;
+  private lastCloseCode: number = null;
 
   datasetStream$: Observable<SessionEvent>;
   jobStream$: Observable<SessionEvent>;
@@ -65,6 +66,11 @@ export class WebSocketService {
                 log.info("websocket open", x);
               },
             },
+            closeObserver: {
+              next: (e: CloseEvent) => {
+                this.lastCloseCode = e.code;
+              },
+            },
           });
 
           return this.wsSubject$;
@@ -99,8 +105,22 @@ export class WebSocketService {
           log.info("websocket closed");
           // if not unsubscribed
           if (this.topic) {
-            // reconnect after clean close (server idle timeout)
-            this.connect(listener, topic);
+            if (this.lastCloseCode === 1013) {
+              // server closed because its send queue was full — we missed events
+              this.errorService.showErrorObject(
+                new ErrorMessage(
+                  null,
+                  "Connection lost, please reload the page.",
+                  false,
+                  [ErrorButton.Reload],
+                  [ErrorButton.ShowDetails],
+                  new Error("WebSocket closed with code 1013: send queue full, some updates may have been missed")
+                )
+              );
+            } else {
+              // reconnect after clean close (server idle timeout)
+              this.connect(listener, topic);
+            }
           }
         }
       );
