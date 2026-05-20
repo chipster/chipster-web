@@ -493,10 +493,15 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         tap((name) => {
           this.zone.runOutsideAngular(() => {
             const colHeaders = (this.hot.getSettings() as ht.Options).colHeaders as Array<string>;
-            this.hot.alter("insert_col", colHeaders.length);
-            // remove undefined column header
-            colHeaders.pop();
-            colHeaders.push(name);
+            const lastNonEditableIdx = colHeaders.reduce(
+              (acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc),
+              -1,
+            );
+            const insertIndex =
+              name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : colHeaders.length;
+            this.hot.alter("insert_col", insertIndex);
+            // Handsontable inserts an undefined entry at insertIndex; replace it with the name.
+            colHeaders[insertIndex] = name;
             this.hot.updateSettings(
               {
                 colHeaders,
