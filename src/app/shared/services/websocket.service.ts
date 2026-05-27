@@ -12,7 +12,7 @@ import { ConfigService } from "./config.service";
 @Injectable()
 export class WebSocketService {
   topic: string;
-  private lastCloseCode: number = null;
+  private lastCloseCode: number | null = null;
 
   datasetStream$: Observable<SessionEvent>;
   jobStream$: Observable<SessionEvent>;
@@ -47,6 +47,7 @@ export class WebSocketService {
    */
   connect(listener, topic: string) {
     this.topic = topic;
+    this.lastCloseCode = null;
 
     // get the url of the websocket server
     this.configService
