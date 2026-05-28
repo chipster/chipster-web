@@ -106,8 +106,8 @@ export class WebSocketService {
           log.info("websocket closed");
           // if not unsubscribed
           if (this.topic) {
-            if (this.lastCloseCode === 1013) {
-              // server closed because its send queue was full — we missed events
+            if (this.lastCloseCode === 1011 || this.lastCloseCode === 1013) {
+              // 1011 UNEXPECTED_CONDITION (send error) or 1013 TRY_AGAIN_LATER (queue full) — events were lost, reload to recover
               this.errorService.showErrorObject(
                 new ErrorMessage(
                   null,
@@ -115,7 +115,7 @@ export class WebSocketService {
                   false,
                   [ErrorButton.Reload],
                   [ErrorButton.ShowDetails],
-                  new Error("WebSocket closed with code 1013: send queue full, some updates may have been missed")
+                  new Error(`WebSocket closed with code ${this.lastCloseCode}: some updates may have been missed`)
                 )
               );
             } else {
