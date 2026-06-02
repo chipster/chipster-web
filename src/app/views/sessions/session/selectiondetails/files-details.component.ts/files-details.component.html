@@ -3,11 +3,11 @@
     <tbody>
       <tr *ngFor="let dataset of datasets">
         <td class="">{{ dataset.name }}</td>
+        <td class="text-muted">{{ dataset.size | bytes : 0 }}</td>
+        <td *ngIf="showDate" class="text-muted">{{ dataset.created | localDate }}</td>
         <td>
           <ch-label-pill *ngFor="let label of labelsFor(dataset)" [label]="label"></ch-label-pill>
         </td>
-        <td class="text-muted">{{ dataset.size | bytes : 0 }}</td>
-        <td *ngIf="showDate" class="text-muted">{{ dataset.created | localDate }}</td>
       </tr>
     </tbody>
   </table>

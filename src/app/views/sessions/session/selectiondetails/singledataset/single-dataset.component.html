@@ -27,15 +27,6 @@
               </div>
             </td>
           </tr>
-          <tr>
-            <td class="lighter">Labels:</td>
-            <td>
-              <ch-label-pill *ngFor="let label of getDatasetLabels()" [label]="label"></ch-label-pill>
-              <ch-link-button class="no-underline-link-button text-sm ms-1" (click)="editLabels()">
-                Edit labels&hellip;
-              </ch-link-button>
-            </td>
-          </tr>
           <tr *ngIf="sourceJob && sourceJob.parameters.length > 0">
             <td class="lighter">Parameters:</td>
             <td id="parameters-container">
@@ -54,6 +45,22 @@
           <tr>
             <td class="lighter">Date:</td>
             <td>{{ dataset.created | localDate }}</td>
+          </tr>
+          <tr>
+            <td class="lighter">Labels:</td>
+            <td>
+              <ng-container *ngIf="getDatasetLabels() as labels">
+                <ch-link-button *ngFor="let label of labels" (click)="editLabels()">
+                  <ch-label-pill [label]="label"></ch-label-pill>
+                </ch-link-button>
+                <ch-link-button
+                  *ngIf="labels.length === 0"
+                  class="no-underline-link-button text-sm"
+                  (click)="editLabels()">
+                  Add labels
+                </ch-link-button>
+              </ng-container>
+            </td>
           </tr>
           <tr>
             <td class="lighter">History:</td>
