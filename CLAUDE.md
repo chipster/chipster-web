@@ -13,12 +13,12 @@ This file covers the **frontend** (Angular dev server, `chipster-web`). The back
 
 **Container setup** (all servers in container):
 ```
-WORKSPACE=~/git/workspace PORTS=8000-8110,4200 ./sandbox.sh
+WORKSPACE=~/workspace PORTS=8000-8110,4200 ./sandbox.sh
 ```
 
 **Host setup** (backend on host, container for Claude Code only):
 ```
-WORKSPACE=~/git/workspace ./sandbox.sh
+WORKSPACE=~/workspace ./sandbox.sh
 ```
 
 **Check before starting servers:**
