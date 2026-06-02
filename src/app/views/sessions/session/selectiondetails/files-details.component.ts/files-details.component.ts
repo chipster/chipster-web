@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
+import { getSortedLabels } from "../../labels/labels-util";
 
 @Component({
   selector: "ch-files-details",
@@ -19,8 +20,6 @@ export class FilesDetailsComponent {
     if (!this.sessionData) {
       return [];
     }
-    return (dataset.labelIds ?? [])
-      .map((id) => this.sessionData.labelsMap.get(id))
-      .filter((t) => t != null);
+    return getSortedLabels(dataset.labelIds, this.sessionData.labelsMap);
   }
 }

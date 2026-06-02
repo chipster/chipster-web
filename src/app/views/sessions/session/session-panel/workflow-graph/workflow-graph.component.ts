@@ -18,6 +18,7 @@ import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
 import { getLabelColor } from "../../labels/label-palette";
 import { LabelsContextMenuService } from "../../labels/labels-context-menu.service";
+import { getSortedLabels } from "../../labels/labels-util";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -1201,12 +1202,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const dotOverlap = 5; // pull dots up so they overlap the node's bottom edge by this much
 
     this.datasetNodes.forEach((node: DatasetNode) => {
-      const labelIds: string[] = (node.dataset.labelIds ?? []).filter((id) => labelsMap.has(id));
-      if (labelIds.length === 0) {
+      const labels = getSortedLabels(node.dataset.labelIds, labelsMap);
+      if (labels.length === 0) {
         return;
       }
-      const visible: Label[] = labelIds.slice(0, maxVisible).map((id) => labelsMap.get(id));
-      const overflow = labelIds.length - visible.length;
+      const visible: Label[] = labels.slice(0, maxVisible);
+      const overflow = labels.length - visible.length;
 
       const centerY = node.y + this.nodeHeight - dotOverlap + dotRadius;
       let cursorX = node.x + dotRadius;
@@ -1228,7 +1229,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
       if (overflow > 0) {
-        const hiddenLabels = labelIds.slice(maxVisible).map((id) => labelsMap.get(id)?.name ?? "").join(", ");
+        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
         const overflowColor = getLabelColor("grey");
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("circle")
@@ -1263,12 +1264,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const maxPillWidth = 70; // cap so long names don't bleed into neighbouring nodes
 
     this.datasetNodes.forEach((node: DatasetNode) => {
-      const labelIds: string[] = (node.dataset.labelIds ?? []).filter((id) => labelsMap.has(id));
-      if (labelIds.length === 0) {
+      const labels = getSortedLabels(node.dataset.labelIds, labelsMap);
+      if (labels.length === 0) {
         return;
       }
-      const visible: Label[] = labelIds.slice(0, maxVisible).map((id) => labelsMap.get(id));
-      const overflow = labelIds.length - visible.length;
+      const visible: Label[] = labels.slice(0, maxVisible);
+      const overflow = labels.length - visible.length;
 
       let baseY = node.y + this.nodeHeight - pillOverlap;
       const cursorX = node.x;
@@ -1304,7 +1305,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
       if (overflow > 0) {
-        const hiddenLabels = labelIds.slice(maxVisible).map((id) => labelsMap.get(id)?.name ?? "").join(", ");
+        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
         const overflowText = "+" + overflow;
         const overflowColor = getLabelColor("grey");
         const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
