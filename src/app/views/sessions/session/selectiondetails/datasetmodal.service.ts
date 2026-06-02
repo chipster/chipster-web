@@ -11,6 +11,7 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
+import { LabelsModalComponent } from "../labels/labels-modal.component";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { RouteService } from "../../../../shared/services/route.service";
@@ -36,6 +37,12 @@ export class DatasetModalService {
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
     modalRef.componentInstance.tools = tools;
+  }
+
+  public openLabelsModal(selectedDatasets: Dataset[], sessionData: SessionData): void {
+    const modalRef = this.ngbModal.open(LabelsModalComponent, {});
+    modalRef.componentInstance.sessionData = sessionData;
+    modalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
@@ -255,6 +262,7 @@ export class DatasetModalService {
       session: sessionData.session,
       datasetsMap: selectedDatasetsMap,
       jobsMap: sourceJobs,
+      labelsMap: sessionData.labelsMap ?? new Map(),
       datasetTypeTags: null,
       cachedFileHeaders: null,
     };

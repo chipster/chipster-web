@@ -27,6 +27,15 @@
               </div>
             </td>
           </tr>
+          <tr>
+            <td class="lighter">Labels:</td>
+            <td>
+              <ch-label-pill *ngFor="let label of getDatasetLabels()" [label]="label"></ch-label-pill>
+              <ch-link-button class="no-underline-link-button text-sm ms-1" (click)="editLabels()">
+                Edit labels&hellip;
+              </ch-link-button>
+            </td>
+          </tr>
           <tr *ngIf="sourceJob && sourceJob.parameters.length > 0">
             <td class="lighter">Parameters:</td>
             <td id="parameters-container">

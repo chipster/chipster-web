@@ -1,0 +1,45 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ isEdit ? "Edit label" : "New label" }}</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <label class="form-label">Name</label>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Label name"
+      ngbAutofocus
+      [maxlength]="maxNameLength"
+      [(ngModel)]="name"
+      (keyup.enter)="canSave() && save()" />
+    <div class="form-text text-end">{{ name.length }} / {{ maxNameLength }}</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Color</label>
+    <div class="d-flex flex-wrap gap-1">
+      <button
+        *ngFor="let c of palette"
+        type="button"
+        class="ch-swatch"
+        [class.ch-swatch-selected]="color === c.key"
+        [style.background-color]="c.background"
+        [title]="c.label"
+        (click)="color = c.key"></button>
+    </div>
+  </div>
+
+  <div>
+    <label class="form-label">Preview</label>
+    <div><ch-label-pill [label]="previewLabel()"></ch-label-pill></div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="!canSave()" (click)="save()">
+    {{ isEdit ? "Save" : "Create" }}
+  </button>
+</div>

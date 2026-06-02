@@ -85,4 +85,15 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   showJob() {
     this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
   }
+
+  editLabels(): void {
+    this.datasetModalService.openLabelsModal([this.dataset], this.sessionData);
+  }
+
+  getDatasetLabels() {
+    const labelIds = this.dataset?.labelIds ?? [];
+    return labelIds
+      .map((id) => this.sessionData.labelsMap.get(id))
+      .filter((t) => t != null);
+  }
 }

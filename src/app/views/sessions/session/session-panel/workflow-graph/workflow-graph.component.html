@@ -1,1 +1,22 @@
 <section id="workflowvisualization"></section>
+<button
+  type="button"
+  class="label-legend"
+  [class.label-legend-horizontal]="legendOrientation === 'horizontal'"
+  *ngIf="labelLegend.length > 0"
+  (click)="openLabelsModal()">
+  <span class="label-legend-title" *ngIf="showLegendTitle">Labels</span>
+  <span class="label-legend-items">
+    <span class="label-legend-item" *ngFor="let label of labelLegend">
+      <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
+      <span class="label-legend-name">{{ label.name }}</span>
+    </span>
+  </span>
+</button>
+<button
+  type="button"
+  class="btn btn-sm btn-primary label-legend-add-button"
+  *ngIf="labelLegend.length === 0"
+  (click)="openLabelsModal()">
+  + Add labels
+</button>

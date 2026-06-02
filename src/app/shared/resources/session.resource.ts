@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
+import { Dataset, Job, JobState, Label, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { clone } from "lodash-es";
 import log from "loglevel";
@@ -44,6 +44,13 @@ export class SessionResource {
         const sessionDatasets$ = this.http
           .get(`${url}/sessions/${sessionId}/datasets`, this.tokenService.getTokenParams(true))
           .pipe(tap((x) => log.debug("sessionDatasets", x)));
+
+        const sessionLabels$ = this.http
+          .get<Label[]>(`${url}/sessions/${sessionId}/labels`, this.tokenService.getTokenParams(true))
+          .pipe(
+            catchError(() => observableOf([] as Label[])),
+            tap((x) => log.debug("sessionLabels", x)),
+          );
 
         /* Get jobs in chunks
 
@@ -97,6 +104,7 @@ export class SessionResource {
           session: session$,
           datasets: sessionDatasets$,
           jobs: sessionJobs$,
+          labels: sessionLabels$,
           types: types$,
           jobQuota: jobQuota,
         });
@@ -105,6 +113,7 @@ export class SessionResource {
         const session: Session = param["session"] as Session;
         const datasets: Dataset[] = param["datasets"] as Dataset[];
         const jobs: Job[] = param["jobs"] as Job[];
+        const labels: Label[] = (param["labels"] as Label[]) ?? [];
         const types = param["types"] as Map<string, Map<string, string>>;
 
         const data = new SessionData();
@@ -133,6 +142,7 @@ export class SessionResource {
         data.session = session;
         data.datasetsMap = UtilsService.arrayToMap(completeDatasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
+        data.labelsMap = UtilsService.arrayToMap(labels, "labelId");
 
         data.datasetTypeTags = types;
 
@@ -495,6 +505,72 @@ export class SessionResource {
             this.http.delete(
               `${url}/sessions/${sessionId}/jobs/${jobId}`,
               this.tokenService.getTokenParams(true),
+            ) as Observable<null>,
+        ),
+      );
+  }
+
+  getLabel(sessionId: string, labelId: string): Observable<Label> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/labels/${labelId}`,
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Label>,
+        ),
+      );
+  }
+
+  getLabels(sessionId: string): Observable<Label[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/labels`,
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Label[]>,
+        ),
+      );
+  }
+
+  createLabel(sessionId: string, label: Label): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/labels`, label, this.tokenService.getTokenParams(true)),
+      ),
+      map((response: { labelId: string }) => response.labelId),
+    );
+  }
+
+  updateLabel(sessionId: string, label: Label): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.put(
+              `${url}/sessions/${sessionId}/labels/${label.labelId}`,
+              label,
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
+      );
+  }
+
+  deleteLabel(sessionId: string, labelId: string): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.delete(
+              `${url}/sessions/${sessionId}/labels/${labelId}`,
+              this.tokenService.getTokenParams(false),
             ) as Observable<null>,
         ),
       );

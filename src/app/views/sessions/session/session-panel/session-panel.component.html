@@ -18,7 +18,7 @@
       <a ngbNavLink>Workflow</a>
       <ng-template ngbNavContent>
         <div id="workflow-graph-panel">
-          <div class="mt-3 mb-1 ms-1 me-1">
+          <div class="mt-3 mb-1">
             <ch-add-dataset-modal [sessionData]="sessionData"></ch-add-dataset-modal>
 
             <!-- context dropdown -->
@@ -46,6 +46,16 @@
                   Reset positions of selected files
                 </button>
                 <button ngbDropdownItem (click)="workflowGraph.resetZoomAndScroll()">Reset view</button>
+                <div class="dropdown-divider"></div>
+                <button ngbDropdownItem (click)="workflowGraph.toggleLabelDisplayMode()">
+                  {{ workflowGraph.labelDisplayMode === "dots" ? "Show labels as text" : "Show labels as dots" }}
+                </button>
+                <button ngbDropdownItem (click)="workflowGraph.toggleLegendOrientation()">
+                  {{ workflowGraph.legendOrientation === "vertical" ? "Show legend horizontally" : "Show legend vertically" }}
+                </button>
+                <button ngbDropdownItem (click)="workflowGraph.toggleLegendTitle()">
+                  {{ workflowGraph.showLegendTitle ? "Hide labels title" : "Show labels title" }}
+                </button>
               </div>
             </div>
 
@@ -66,7 +76,7 @@
             </button>
           </div>
 
-          <div class="ms-1">
+          <div>
             <ch-workflow-graph
               id="workflow-graph"
               #workflowGraph

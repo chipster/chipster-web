@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Job, Module, Tool } from "chipster-js-common";
+import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
 import d3ContextMenu from "d3-context-menu";
 import { max as _max, clone, cloneDeep } from "lodash-es";
@@ -16,6 +16,8 @@ import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
+import { getLabelColor } from "../../labels/label-palette";
+import { LabelsContextMenuService } from "../../labels/labels-context-menu.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -90,6 +92,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private getSessionDataService: GetSessionDataService,
     private toolsService: ToolsService,
     private datasetContextMenuService: DatasetContextMenuService,
+    private labelsContextMenuService: LabelsContextMenuService,
   ) {}
 
   // actually selected datasets
@@ -107,17 +110,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3PhenodataNodesGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3LinksGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3LinksDefsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
-  d3LabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
-  d3PhenodataLabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3CaptionsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3PhenodataCaptionsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataWarningsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataLinksGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3LabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3SelectionRectGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3ZoomBackgroundGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
 
   d3Links: d3.Selection<SVGLineElement, Link, SVGGElement, {}>;
   d3PhenodataLinks: d3.Selection<SVGLineElement, DatasetNode, SVGGElement, {}>;
-  d3Labels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
-  d3PhenodataLabels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
+  d3Captions: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
+  d3PhenodataCaptions: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataWarnings: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
   d3DatasetNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
@@ -147,6 +151,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   searchEnabled = false;
   selectionEnabled = false;
 
+  labelDisplayMode: "dots" | "pills" = "dots";
+  legendOrientation: "vertical" | "horizontal" = "horizontal";
+  showLegendTitle = true;
+  labelLegend: Label[] = [];
+
   selectionRect: any;
 
   renameMenuItem: any;
@@ -155,6 +164,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   exportMenuItem: any;
   historyMenuItem: any;
   groupsMenuItem: any;
+  labelsMenuItem: any;
   dividerMenuItem: any;
   showJobMenuItem: any;
   selectChildrenMenuItem: any;
@@ -211,9 +221,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .append("g")
       .attr("class", "phenodata")
       .attr("id", "d3PhenodataNodesGroup");
-    this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
-    this.d3PhenodataLabelsGroup = this.zoomGroup.append("g").attr("class", "phenodataLabel");
+    this.d3CaptionsGroup = this.zoomGroup.append("g").attr("class", "caption");
+    this.d3PhenodataCaptionsGroup = this.zoomGroup.append("g").attr("class", "phenodataCaption");
     this.d3PhenodataWarningsGroup = this.zoomGroup.append("g").attr("class", "phenodataWarning");
+    this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "labels");
 
     // remove old elements, otherwise jumping between Workflow and List tabs keeps adding more elements
     d3.select(".dataset-tooltip").remove();
@@ -252,6 +263,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.updateSvgSize();
           },
           (err) => this.errorService.showError("get dataset events failed", err),
+        ),
+      );
+
+      this.subscriptions.push(
+        this.sessionEventService.getLabelStream().subscribe(
+          () => {
+            // label name/color may have changed, redraw pills
+            this.renderLabels();
+          },
+          (err) => this.errorService.showError("get label events failed", err),
         ),
       );
 
@@ -596,15 +617,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  renderLabels(): void {
-    this.d3Labels = this.d3LabelsGroup
+  renderCaptions(): void {
+    this.d3Captions = this.d3CaptionsGroup
       .selectAll<SVGTextElement, {}>("text")
       .data(this.datasetNodes, (d: DatasetNode) => d.datasetId);
 
-    this.d3Labels
+    this.d3Captions
       .enter()
       .append("text")
-      .merge(this.d3Labels)
+      .merge(this.d3Captions)
       .text((d: DatasetNode) => UtilsService.getFileExtension(d.name).slice(0, 5))
       .attr("x", (d) => d.x + this.nodeWidth / 2)
       .attr("y", (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
@@ -622,21 +643,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("pointer-events", "none")
       .style("opacity", (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
-    this.d3Labels.exit().remove();
+    this.d3Captions.exit().remove();
   }
 
-  renderPhenodataLabels(): void {
-    this.d3PhenodataLabels = this.d3PhenodataLabelsGroup
+  renderPhenodataCaptions(): void {
+    this.d3PhenodataCaptions = this.d3PhenodataCaptionsGroup
       .selectAll<SVGTextElement, {}>("text")
       .data(this.phenodataNodes, (d: DatasetNode) => d.datasetId);
 
-    this.d3PhenodataLabels
+    this.d3PhenodataCaptions
       .enter()
       .append("text")
-      .merge(this.d3PhenodataLabels)
+      .merge(this.d3PhenodataCaptions)
       .text("P")
-      .attr("x", (d) => this.getPhenodataLabelX(d))
-      .attr("y", (d) => this.getPhenodataLabelY(d))
+      .attr("x", (d) => this.getPhenodataCaptionX(d))
+      .attr("y", (d) => this.getPhenodataCaptionY(d))
       .attr("font-size", this.fontSize + "px")
       .attr("fill", (d) => (this.isSelectedDataset(d.dataset) ? "white" : "black"))
       .attr("font-weight", (d) => (this.isSelectedDataset(d.dataset) ? "600" : "400"))
@@ -644,7 +665,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("pointer-events", "none")
       .style("opacity", (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
-    this.d3PhenodataLabels.exit().remove();
+    this.d3PhenodataCaptions.exit().remove();
   }
 
   renderPhenodataWarnings(): void {
@@ -660,8 +681,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       // .text((d: any) => "\uf071")
       .text(() => "\uf06a")
 
-      .attr("x", (d) => this.getPhenodataLabelX(d) + 14)
-      .attr("y", (d) => this.getPhenodataLabelY(d) + 10)
+      .attr("x", (d) => this.getPhenodataCaptionX(d) + 14)
+      .attr("y", (d) => this.getPhenodataCaptionY(d) + 10)
       .attr("class", "fa")
       .attr("font-size", this.fontSize + 2 + "px")
       .attr("fill", (d) => (this.datasetService.hasGroupColumn(d.dataset) ? "#ffc107" : "#0dcaf0"))
@@ -689,6 +710,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
             this.groupsMenuItem,
+            this.labelsMenuItem,
 
             this.selectChildrenMenuItem,
             this.copySelectedToNewSessionMenuItem,
@@ -700,6 +722,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.renameMenuItem,
             this.convertMenuItem,
             this.groupsMenuItem,
+            this.labelsMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
             this.dividerMenuItem,
@@ -956,7 +979,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     selectedDatasets.attr("x", (d) => (d.x += dx)).attr("y", (d) => (d.y += dy));
 
-    this.d3Labels
+    this.d3Captions
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
       .attr("x", (d) => d.x + this.nodeWidth / 2)
       .attr("y", (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4);
@@ -966,10 +989,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", (d) => this.getPhenodataX(d))
       .attr("y", (d) => this.getPhenodataY(d));
 
-    this.d3PhenodataLabels
+    this.d3PhenodataCaptions
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
-      .attr("x", (d) => this.getPhenodataLabelX(d))
-      .attr("y", (d) => this.getPhenodataLabelY(d));
+      .attr("x", (d) => this.getPhenodataCaptionX(d))
+      .attr("y", (d) => this.getPhenodataCaptionY(d));
 
     this.d3PhenodataWarnings
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
@@ -994,6 +1017,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       )
       .attr("x2", (d) => d.target.x + this.nodeWidth / 2)
       .attr("y2", (d) => d.target.y);
+
+    // labels are drawn imperatively without per-node d3 selections, so re-render the whole layer on drag
+    this.renderLabels();
   }
 
   renderLinks(): void {
@@ -1109,10 +1135,216 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.renderLinks();
     this.renderDatasets();
     this.renderPhenodataNodes();
-    this.renderPhenodataLabels();
+    this.renderPhenodataCaptions();
     this.renderPhenodataLinks();
     this.renderPhenodataWarnings();
+    this.renderCaptions();
     this.renderLabels();
+  }
+
+  toggleLabelDisplayMode(): void {
+    this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
+    this.renderLabels();
+  }
+
+  renderLabels(): void {
+    this.refreshLabelLegend();
+
+    if (!this.d3LabelsGroup) {
+      return;
+    }
+    // simple full re-render: labels change rarely vs. positions
+    this.d3LabelsGroup.selectAll("*").remove();
+
+    if (!this.sessionData || !this.sessionData.labelsMap) {
+      return;
+    }
+
+    if (this.labelDisplayMode === "dots") {
+      this.renderLabelDots();
+    } else {
+      this.renderLabelPills();
+    }
+  }
+
+  legendDotColor(label: Label): string {
+    return getLabelColor(label.color).background;
+  }
+
+  toggleLegendOrientation(): void {
+    this.legendOrientation = this.legendOrientation === "vertical" ? "horizontal" : "vertical";
+  }
+
+  toggleLegendTitle(): void {
+    this.showLegendTitle = !this.showLegendTitle;
+  }
+
+  openLabelsModal(): void {
+    this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData);
+  }
+
+  private refreshLabelLegend(): void {
+    if (!this.sessionData || !this.sessionData.labelsMap) {
+      this.labelLegend = [];
+      return;
+    }
+    this.labelLegend = Array.from(this.sessionData.labelsMap.values()).sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? ""),
+    );
+  }
+
+  private renderLabelDots(): void {
+    const labelsMap = this.sessionData.labelsMap;
+    const maxVisible = 5;
+    const dotRadius = 7; // diameter matches the pill height (14)
+    const dotStep = 7; // horizontal advance per stacked dot; smaller = more overlap, last dot fully visible
+    const dotOverlap = 5; // pull dots up so they overlap the node's bottom edge by this much
+
+    this.datasetNodes.forEach((node: DatasetNode) => {
+      const labelIds: string[] = (node.dataset.labelIds ?? []).filter((id) => labelsMap.has(id));
+      if (labelIds.length === 0) {
+        return;
+      }
+      const visible: Label[] = labelIds.slice(0, maxVisible).map((id) => labelsMap.get(id));
+      const overflow = labelIds.length - visible.length;
+
+      const centerY = node.y + this.nodeHeight - dotOverlap + dotRadius;
+      let cursorX = node.x + dotRadius;
+
+      const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+
+      visible.forEach((label: Label) => {
+        const color = getLabelColor(label.color);
+        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        g.append("circle")
+          .attr("cx", cursorX)
+          .attr("cy", centerY)
+          .attr("r", dotRadius)
+          .style("fill", color.background)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("title").text(label.name ?? "");
+        cursorX += dotStep;
+      });
+
+      if (overflow > 0) {
+        const hiddenLabels = labelIds.slice(maxVisible).map((id) => labelsMap.get(id)?.name ?? "").join(", ");
+        const overflowColor = getLabelColor("grey");
+        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        g.append("circle")
+          .attr("cx", cursorX)
+          .attr("cy", centerY)
+          .attr("r", dotRadius)
+          .style("fill", overflowColor.background)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("text")
+          .attr("x", cursorX)
+          .attr("y", centerY + 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "9px")
+          .attr("font-weight", "500")
+          .style("fill", overflowColor.text)
+          .style("pointer-events", "none")
+          .text("+" + overflow);
+        g.append("title").text(hiddenLabels);
+      }
+    });
+  }
+
+  private renderLabelPills(): void {
+    const labelsMap = this.sessionData.labelsMap;
+    const maxVisible = 3;
+    const pillHeight = 14;
+    const pillStep = 5; // vertical advance per stacked pill; smaller = more overlap, last pill fully visible
+    const pillOverlap = 5; // pull the top of the stack up so it overlaps the node's bottom edge (matches dot rendering)
+    const horizontalPadding = 6;
+    const pillFontSize = 10;
+    const maxPillWidth = 70; // cap so long names don't bleed into neighbouring nodes
+
+    this.datasetNodes.forEach((node: DatasetNode) => {
+      const labelIds: string[] = (node.dataset.labelIds ?? []).filter((id) => labelsMap.has(id));
+      if (labelIds.length === 0) {
+        return;
+      }
+      const visible: Label[] = labelIds.slice(0, maxVisible).map((id) => labelsMap.get(id));
+      const overflow = labelIds.length - visible.length;
+
+      let baseY = node.y + this.nodeHeight - pillOverlap;
+      const cursorX = node.x;
+
+      const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+
+      visible.forEach((label: Label) => {
+        const color = getLabelColor(label.color);
+        const fullText = label.name ?? "";
+        const text = this.truncateToWidth(fullText, pillFontSize, horizontalPadding, maxPillWidth);
+        const pillWidth = this.estimatePillWidth(text, pillFontSize, horizontalPadding);
+        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        g.append("rect")
+          .attr("x", cursorX)
+          .attr("y", baseY)
+          .attr("width", pillWidth)
+          .attr("height", pillHeight)
+          .attr("rx", pillHeight / 2)
+          .attr("ry", pillHeight / 2)
+          .style("fill", color.background);
+        g.append("text")
+          .attr("x", cursorX + pillWidth / 2)
+          .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", pillFontSize + "px")
+          .attr("font-weight", "500")
+          .style("fill", color.text)
+          .style("pointer-events", "none")
+          .text(text);
+        // native SVG tooltip
+        g.append("title").text(fullText);
+        baseY += pillStep;
+      });
+
+      if (overflow > 0) {
+        const hiddenLabels = labelIds.slice(maxVisible).map((id) => labelsMap.get(id)?.name ?? "").join(", ");
+        const overflowText = "+" + overflow;
+        const overflowColor = getLabelColor("grey");
+        const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
+        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        g.append("rect")
+          .attr("x", cursorX)
+          .attr("y", baseY)
+          .attr("width", pillWidth)
+          .attr("height", pillHeight)
+          .attr("rx", pillHeight / 2)
+          .attr("ry", pillHeight / 2)
+          .style("fill", overflowColor.background);
+        g.append("text")
+          .attr("x", cursorX + pillWidth / 2)
+          .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", pillFontSize + "px")
+          .attr("font-weight", "500")
+          .style("fill", overflowColor.text)
+          .style("pointer-events", "none")
+          .text(overflowText);
+        g.append("title").text(hiddenLabels);
+      }
+    });
+  }
+
+  private truncateToWidth(text: string, fontSize: number, padding: number, maxWidth: number): string {
+    const value = text ?? "";
+    if (this.estimatePillWidth(value, fontSize, padding) <= maxWidth) {
+      return value;
+    }
+    const maxTextWidth = maxWidth - padding * 2;
+    const maxChars = Math.max(1, Math.floor(maxTextWidth / (fontSize * 0.55)) - 1);
+    return value.slice(0, maxChars).trimEnd() + "…";
+  }
+
+  private estimatePillWidth(text: string, fontSize: number, padding: number): number {
+    // rough estimate without measuring DOM: avg char width ~0.55 * fontSize
+    const textWidth = (text ?? "").length * fontSize * 0.55;
+    return Math.max(fontSize + padding * 2, Math.ceil(textWidth + padding * 2));
   }
 
   getDatasetNodes(
@@ -1463,11 +1695,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // return datasetNode.y + this.nodeHeight / 2 + this.fontSize / 4 + 3;
   }
 
-  private getPhenodataLabelX(datasetNode: DatasetNode): number {
+  private getPhenodataCaptionX(datasetNode: DatasetNode): number {
     return this.getPhenodataX(datasetNode) + this.nodeHeight / 2;
   }
 
-  private getPhenodataLabelY(datasetNode: DatasetNode): number {
+  private getPhenodataCaptionY(datasetNode: DatasetNode): number {
     return this.getPhenodataY(datasetNode) + this.nodeHeight / 2 + this.fontSize / 4;
   }
 
@@ -1484,11 +1716,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private getPhenodataWarningX(datasetNode: DatasetNode): number {
-    return this.getPhenodataLabelX(datasetNode) + 14;
+    return this.getPhenodataCaptionX(datasetNode) + 14;
   }
 
   private getPhenodataWarningY(datasetNode: DatasetNode): number {
-    return this.getPhenodataLabelY(datasetNode) + 10;
+    return this.getPhenodataCaptionY(datasetNode) + 10;
   }
 
   private isDatasetNode(object: Node): object is DatasetNode {
@@ -1612,6 +1844,44 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       title: "History&hellip;",
       action(d): void {
         self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData, self.tools);
+      },
+    };
+
+    const resolveDatasetsForLabelMenu = (d: any): Dataset[] => {
+      let datasets = self.selectionService.selectedDatasets;
+      if ((!datasets || datasets.length === 0) && d) {
+        datasets = [d.dataset];
+      }
+      return datasets ?? [];
+    };
+
+    this.labelsMenuItem = {
+      title: "Labels",
+      children(d: any): any[] {
+        const datasets = resolveDatasetsForLabelMenu(d);
+        const items: any[] = [
+          {
+            title: "Edit labels&hellip;",
+            action(dd: any): void {
+              self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData);
+            },
+          },
+        ];
+        const labelItems = self.labelsContextMenuService.buildItems(datasets, self.sessionData);
+        if (labelItems.length > 0) {
+          items.push({ divider: true });
+          for (const item of labelItems) {
+            items.push({
+              title: item.displayHtml,
+              action(dd: any): void {
+                self.labelsContextMenuService
+                  .toggleLabel(resolveDatasetsForLabelMenu(dd), item.label, self.sessionData)
+                  .subscribe();
+              },
+            });
+          }
+        }
+        return items;
       },
     };
 

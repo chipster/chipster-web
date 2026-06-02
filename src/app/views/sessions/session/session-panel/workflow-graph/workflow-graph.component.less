@@ -85,6 +85,73 @@ svg {
   padding-top: 15px;
 }
 
+.label-legend {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  z-index: 2;
+  max-height: 50%;
+  overflow-y: auto;
+}
+
+.label-legend:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.label-legend:focus {
+  outline: 2px solid #0d6efd;
+  outline-offset: 1px;
+}
+
+.label-legend-add-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.label-legend-title {
+  font-weight: 600;
+  color: #495057;
+}
+
+.label-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label-legend-horizontal .label-legend-items {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.label-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.label-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
 div.dataset-node-tooltip {
   text-align: center;
   padding: 1px 2px 1px 2px;
@@ -96,4 +163,15 @@ div.dataset-node-tooltip {
   pointer-events: none;
   position: absolute;
   white-space: nowrap;
+}
+
+// d3-context-menu's <hr> divider inherits browser-default margins (~0.5em);
+// tighten so the divider doesn't add a gap on top of the surrounding items' padding
+.d3-context-menu-theme ul hr {
+  margin: 2px 0;
+}
+
+// d3-context-menu defaults the submenu indicator triangle to red; use black
+.d3-context-menu-theme ul li.is-parent:after {
+  border-top-color: black;
 }
