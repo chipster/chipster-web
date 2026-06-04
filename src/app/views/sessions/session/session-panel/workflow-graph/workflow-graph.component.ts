@@ -9,6 +9,7 @@ import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { HotkeyService } from "../../../../../shared/services/hotkey.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
@@ -94,6 +95,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private toolsService: ToolsService,
     private datasetContextMenuService: DatasetContextMenuService,
     private labelsContextMenuService: LabelsContextMenuService,
+    private hotkeyService: HotkeyService,
   ) {}
 
   // actually selected datasets
@@ -175,6 +177,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   copySelectedToExistingSessionMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
+
+  private readonly unregisterHotkeys: Array<() => void> = [];
 
   static getOpacity(isVisible: boolean): number {
     if (isVisible) {
@@ -320,6 +324,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.updateSvgSize();
       }
     }, 0);
+
+    this.unregisterHotkeys.push(
+      this.hotkeyService.register("l", "Open labels", () => this.toggleLabelsModal()),
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -352,6 +360,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.removeDatasetNodeToolTips();
     this.subscriptions.forEach((subs) => subs.unsubscribe());
     this.subscriptions = [];
+    this.unregisterHotkeys.forEach((fn) => fn());
   }
 
   zoomIn(): void {
@@ -1192,6 +1201,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   openLabelsModal(): void {
     this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData);
+  }
+
+  toggleLabelsModal(): void {
+    this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData);
   }
 
   private refreshLabelLegend(): void {

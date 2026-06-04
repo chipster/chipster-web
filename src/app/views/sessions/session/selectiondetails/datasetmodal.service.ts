@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
@@ -39,10 +39,31 @@ export class DatasetModalService {
     modalRef.componentInstance.tools = tools;
   }
 
+  private labelsModalRef: NgbModalRef | null = null;
+
   public openLabelsModal(selectedDatasets: Dataset[], sessionData: SessionData): void {
-    const modalRef = this.ngbModal.open(LabelsModalComponent, {});
-    modalRef.componentInstance.sessionData = sessionData;
-    modalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
+    if (this.labelsModalRef) {
+      return;
+    }
+    this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
+    this.labelsModalRef.componentInstance.sessionData = sessionData;
+    this.labelsModalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
+    this.labelsModalRef.result.then(
+      () => {
+        this.labelsModalRef = null;
+      },
+      () => {
+        this.labelsModalRef = null;
+      },
+    );
+  }
+
+  public toggleLabelsModal(selectedDatasets: Dataset[], sessionData: SessionData): void {
+    if (this.labelsModalRef) {
+      this.labelsModalRef.dismiss();
+      return;
+    }
+    this.openLabelsModal(selectedDatasets, sessionData);
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
