@@ -78,7 +78,13 @@ export class LabelsModalComponent implements OnInit {
 
   deleteLabel(row: LabelRow): void {
     this.dialogModalService
-      .openBooleanModal("Delete label", `Delete label '${row.label.name}'?`, "Delete", "Cancel")
+      .openBooleanModal(
+        "Delete label",
+        `Delete label '${row.label.name}'?`,
+        "Delete",
+        "Cancel",
+        "It will be removed from the session and from all files that use it.",
+      )
       .then(
         () => this.confirmDeleteLabel(row),
         () => {},
