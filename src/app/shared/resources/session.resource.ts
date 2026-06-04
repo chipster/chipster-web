@@ -6,6 +6,7 @@ import { clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, from, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/operators";
+import { v4 as uuidv4 } from "uuid";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
 import { JobService } from "../../views/sessions/session/job.service";
@@ -612,11 +613,28 @@ export class SessionResource {
   }
 
   copyToExistingSession(targetSessionId, sessionData): Observable<Session> {
-    // create datasets
+    // copy labels first: mint a new labelId per source label, then rewrite every
+    // copied dataset's labelIds via the old->new map (dropping unmapped entries)
+    const sourceLabels: Label[] = Array.from(sessionData.labelsMap?.values() ?? []);
+    const labelIdMap = new Map<string, string>();
+    const labelCopies = sourceLabels.map((label: Label) => {
+      const newLabelId = uuidv4();
+      labelIdMap.set(label.labelId, newLabelId);
+      return { ...label, sessionId: null, labelId: newLabelId };
+    });
+
+    const createLabelsRequest = labelCopies.length > 0
+      ? forkJoin(labelCopies.map((l) => this.createLabel(targetSessionId, l)))
+      : of([]);
+
+    // create datasets (with remapped labelIds)
     const oldDatasets = Array.from(sessionData.datasetsMap.values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
       _clone.sessionId = null;
+      _clone.labelIds = (_clone.labelIds ?? [])
+        .map((id) => labelIdMap.get(id))
+        .filter((id): id is string => id != null);
       return _clone;
     });
 
@@ -625,7 +643,9 @@ export class SessionResource {
     // emit an empty array in case request completes without emitting anything
     // (don't know if this ever happends) otherwise this won't continue to the
     //  next mergeMap() when the session is empty
-    return createDatasetsRequest.pipe(defaultIfEmpty([])).pipe(
+    return createLabelsRequest.pipe(
+      mergeMap(() => createDatasetsRequest.pipe(defaultIfEmpty([]))),
+    ).pipe(
       mergeMap((createdDatasets: Dataset[]) => {
         log.info("created", createdDatasets.length, "datasets");
         // create dataset map for checking inputs later

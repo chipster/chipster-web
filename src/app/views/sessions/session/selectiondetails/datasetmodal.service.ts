@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, Session, Tool } from "chipster-js-common";
+import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
-import { mergeMap } from "rxjs/operators";
+import { map, mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
@@ -115,13 +115,22 @@ export class DatasetModalService {
   }
 
   public openCopySelectionToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
+    const hasLabels = selectedDatasets.some((d) => (d.labelIds ?? []).length > 0);
     this.dialogModalService
-      .openSessionNameModal("Copy Selected Files to a New Session", sessionData.session.name + "_part", "Copy")
+      .openSessionNameWithLabelsCheckboxModal(
+        "Copy Selected Files to a New Session",
+        sessionData.session.name + "_part",
+        "Copy",
+        hasLabels,
+      )
       .pipe(
-        mergeMap((name) => {
+        mergeMap(({ name, includeLabels }) => {
           log.info("copying selected datasets and jobs");
 
           const selectedSessionData = this.getSessionDataOfSelection(selectedDatasets, sessionData);
+          if (!includeLabels) {
+            this.scrubLabels(selectedSessionData);
+          }
 
           const copy = this.sessionResource.copySession(selectedSessionData, name, false);
 
@@ -140,26 +149,35 @@ export class DatasetModalService {
   }
 
   public openCopySelectionToExistingSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
+    const hasLabels = selectedDatasets.some((d) => (d.labelIds ?? []).length > 0);
     this.sessionResource
       .getSessions()
       .pipe(
         mergeMap((sessions) => {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
-          return this.dialogModalService.openOptionModal(
+          return this.dialogModalService.openOptionWithLabelsCheckboxModal(
             "Copy Selected files to and Existing Session",
             "Select a session into which the selected files will be copied. The files will be copied to the right side of the selected session.",
             sessionIdToNameMap,
             "Copy",
             "Select",
+            hasLabels,
           );
         }),
         // we only need datasets and sessionId, not jobs
-        mergeMap((targetSessionId: string) => this.sessionResource.loadSession(targetSessionId, false)),
-        mergeMap((targetSessionData) => {
+        mergeMap(({ selectedKey, includeLabels }) =>
+          this.sessionResource.loadSession(selectedKey, false).pipe(
+            map((targetSessionData) => ({ targetSessionData, includeLabels })),
+          ),
+        ),
+        mergeMap(({ targetSessionData, includeLabels }) => {
           log.info("copying selected datasets and jobs");
 
           const selectedSessionData = this.getSessionDataOfSelection(selectedDatasets, sessionData);
+          if (!includeLabels) {
+            this.scrubLabels(selectedSessionData);
+          }
 
           this.moveFilesSideBySide(targetSessionData, selectedSessionData);
 
@@ -183,6 +201,13 @@ export class DatasetModalService {
         },
         error: (err) => this.restErrorService.showError("Copying selection failed", err),
       });
+  }
+
+  private scrubLabels(sessionData: SessionData) {
+    sessionData.labelsMap = new Map();
+    sessionData.datasetsMap.forEach((dataset) => {
+      dataset.labelIds = [];
+    });
   }
 
   openMergeSessionToCurrentSessionModal(sessionData: SessionData) {
@@ -258,11 +283,24 @@ export class DatasetModalService {
       }),
     );
 
+    // narrow labelsMap to only labels referenced by the selected datasets
+    const referencedLabelIds = new Set(
+      selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []),
+    );
+    const filteredLabelsMap = new Map<string, Label>();
+    if (sessionData.labelsMap) {
+      sessionData.labelsMap.forEach((label, id) => {
+        if (referencedLabelIds.has(id)) {
+          filteredLabelsMap.set(id, label);
+        }
+      });
+    }
+
     return {
       session: sessionData.session,
       datasetsMap: selectedDatasetsMap,
       jobsMap: sourceJobs,
-      labelsMap: sessionData.labelsMap ?? new Map(),
+      labelsMap: filteredLabelsMap,
       datasetTypeTags: null,
       cachedFileHeaders: null,
     };

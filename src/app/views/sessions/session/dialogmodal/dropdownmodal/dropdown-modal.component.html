@@ -22,8 +22,17 @@
     <br />
     <br />
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary float-end" (click)="cancel()">Cancel</button>
-    <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save()">{{ buttonText }}</button>
+  <div class="form-check mb-3" *ngIf="checkboxLabel">
+    <input
+      id="dropdownmodal-checkbox"
+      type="checkbox"
+      class="form-check-input"
+      [(ngModel)]="checkboxValue"
+      [disabled]="checkboxDisabled" />
+    <label for="dropdownmodal-checkbox" class="form-check-label">{{ checkboxLabel }}</label>
   </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary float-end" (click)="cancel()">Cancel</button>
+  <button type="submit" [disabled]="!value" class="btn btn-info" (click)="save()">{{ buttonText }}</button>
 </div>
