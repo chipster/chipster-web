@@ -156,6 +156,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   legendLabelDisplayMode: "dots" | "pills" = "dots";
   legendOrientation: "vertical" | "horizontal" = "horizontal";
   showLegendTitle = true;
+  showTooltipLabels = true;
   labelLegend: Label[] = [];
 
   selectionRect: any;
@@ -1153,6 +1154,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.legendLabelDisplayMode = this.legendLabelDisplayMode === "dots" ? "pills" : "dots";
   }
 
+  toggleTooltipLabels(): void {
+    this.showTooltipLabels = !this.showTooltipLabels;
+  }
+
   renderLabels(): void {
     this.refreshLabelLegend();
 
@@ -1435,19 +1440,22 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const datasetLeft = element.getBoundingClientRect().left;
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
     const triangleHeight = this.datasetTooltipTriangle.node().getBoundingClientRect().height;
     const triangleWidth = this.datasetTooltipTriangle.node().getBoundingClientRect().width;
 
     this.datasetTooltip.transition().duration(delay).style("opacity", 0.9);
 
     if (dataset && !isPhenodatanode) {
-      this.datasetTooltip.html(dataset.name);
+      this.datasetTooltip.html(this.buildTooltipHtml(dataset));
     }
 
     if (isPhenodatanode) {
       this.datasetTooltip.html(`phenodata-${dataset.name}`);
     }
+
+    // measure after .html() so the height reflects the new content, not the previous hover's
+    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
+
     this.datasetTooltip
       .style("left", datasetLeft - 5 + "px")
       .style("top", datasetTop - tooltipHeight - triangleHeight + 3 + "px");
@@ -1462,6 +1470,37 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   hideTooltip(delay = 500): void {
     this.datasetTooltip.transition().duration(delay).style("opacity", 0);
     this.datasetTooltipTriangle.transition().duration(delay).style("opacity", 0);
+  }
+
+  private buildTooltipHtml(node: DatasetNode): string {
+    if (!this.showTooltipLabels) {
+      return node.name;
+    }
+    const labels = this.sessionData?.labelsMap
+      ? getSortedLabels(node.dataset.labelIds, this.sessionData.labelsMap)
+      : [];
+    if (labels.length === 0) {
+      return node.name;
+    }
+    const rows = labels
+      .map((label) => {
+        const color = getLabelColor(label.color).background;
+        const dot =
+          `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
+          `background:${color};margin-right:4px;vertical-align:middle"></span>`;
+        return `<div>${dot}${this.escapeTooltipText(label.name ?? "")}</div>`;
+      })
+      .join("");
+    return `<div style="text-align:left;">${node.name}<div style="margin-top:2px;color:rgba(255,255,255,0.7);font-size:11px;">${rows}</div></div>`;
+  }
+
+  private escapeTooltipText(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // creating tooltip for every node which will be hidden and when search is enabled, it will be shown

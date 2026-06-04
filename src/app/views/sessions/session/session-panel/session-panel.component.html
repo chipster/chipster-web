@@ -59,6 +59,9 @@
                 <button ngbDropdownItem (click)="workflowGraph.toggleLegendTitle()">
                   {{ workflowGraph.showLegendTitle ? "Hide labels title" : "Show labels title" }}
                 </button>
+                <button ngbDropdownItem (click)="workflowGraph.toggleTooltipLabels()">
+                  {{ workflowGraph.showTooltipLabels ? "Hide labels in tooltips" : "Show labels in tooltips" }}
+                </button>
               </div>
             </div>
 
