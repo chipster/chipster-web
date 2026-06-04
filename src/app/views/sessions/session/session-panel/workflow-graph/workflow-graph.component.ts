@@ -153,6 +153,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   selectionEnabled = false;
 
   labelDisplayMode: "dots" | "pills" = "dots";
+  legendLabelDisplayMode: "dots" | "pills" = "dots";
   legendOrientation: "vertical" | "horizontal" = "horizontal";
   showLegendTitle = true;
   labelLegend: Label[] = [];
@@ -1146,6 +1147,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   toggleLabelDisplayMode(): void {
     this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
     this.renderLabels();
+  }
+
+  toggleLegendLabelDisplayMode(): void {
+    this.legendLabelDisplayMode = this.legendLabelDisplayMode === "dots" ? "pills" : "dots";
   }
 
   renderLabels(): void {

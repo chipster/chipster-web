@@ -8,8 +8,13 @@
   <span class="label-legend-title" *ngIf="showLegendTitle">Labels</span>
   <span class="label-legend-items">
     <span class="label-legend-item" *ngFor="let label of labelLegend">
-      <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
-      <span class="label-legend-name">{{ label.name }}</span>
+      <ng-container *ngIf="legendLabelDisplayMode === 'dots'; else legendPill">
+        <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
+        <span class="label-legend-name">{{ label.name }}</span>
+      </ng-container>
+      <ng-template #legendPill>
+        <ch-label-pill [label]="label"></ch-label-pill>
+      </ng-template>
     </span>
   </span>
 </button>

@@ -50,6 +50,9 @@
                 <button ngbDropdownItem (click)="workflowGraph.toggleLabelDisplayMode()">
                   {{ workflowGraph.labelDisplayMode === "dots" ? "Show labels as text" : "Show labels as dots" }}
                 </button>
+                <button ngbDropdownItem (click)="workflowGraph.toggleLegendLabelDisplayMode()">
+                  {{ workflowGraph.legendLabelDisplayMode === "dots" ? "Show legend labels as pills" : "Show legend labels as dots" }}
+                </button>
                 <button ngbDropdownItem (click)="workflowGraph.toggleLegendOrientation()">
                   {{ workflowGraph.legendOrientation === "vertical" ? "Show legend horizontally" : "Show legend vertically" }}
                 </button>
