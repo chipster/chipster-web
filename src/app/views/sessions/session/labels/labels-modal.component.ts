@@ -24,6 +24,8 @@ export class LabelsModalComponent implements OnInit {
   @Input() sessionData: SessionData;
   @Input() selectedDatasets: Dataset[] = [];
 
+  readonly maxLabelsPerSession = 50;
+
   rows: LabelRow[] = [];
 
   saving = false;

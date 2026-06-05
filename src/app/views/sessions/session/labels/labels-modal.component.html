@@ -43,7 +43,14 @@
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-primary me-auto" (click)="openCreateLabel()">+ New label</button>
+  <button
+    type="button"
+    class="btn btn-primary me-auto"
+    [disabled]="sessionData.labelsMap.size >= maxLabelsPerSession"
+    [title]="sessionData.labelsMap.size >= maxLabelsPerSession ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached' : ''"
+    (click)="openCreateLabel()">
+    + New label
+  </button>
   <button *ngIf="hasSelection()" type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
   <button type="button" class="btn btn-primary" [disabled]="saving" (click)="confirm()">
     <span *ngIf="hasSelection()">Apply</span>
