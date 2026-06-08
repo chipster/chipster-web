@@ -12,6 +12,7 @@ import { ConfigService } from "./config.service";
 @Injectable()
 export class WebSocketService {
   topic: string;
+  private lastCloseCode: number | null = null;
 
   datasetStream$: Observable<SessionEvent>;
   jobStream$: Observable<SessionEvent>;
@@ -46,6 +47,7 @@ export class WebSocketService {
    */
   connect(listener, topic: string) {
     this.topic = topic;
+    this.lastCloseCode = null;
 
     // get the url of the websocket server
     this.configService
@@ -63,6 +65,11 @@ export class WebSocketService {
             openObserver: {
               next: (x) => {
                 log.info("websocket open", x);
+              },
+            },
+            closeObserver: {
+              next: (e: CloseEvent) => {
+                this.lastCloseCode = e.code;
               },
             },
           });
@@ -99,8 +106,22 @@ export class WebSocketService {
           log.info("websocket closed");
           // if not unsubscribed
           if (this.topic) {
-            // reconnect after clean close (server idle timeout)
-            this.connect(listener, topic);
+            if (this.lastCloseCode === 1011 || this.lastCloseCode === 1013) {
+              // 1011 UNEXPECTED_CONDITION (send error) or 1013 TRY_AGAIN_LATER (queue full) — events were lost, reload to recover
+              this.errorService.showErrorObject(
+                new ErrorMessage(
+                  null,
+                  "Connection lost, please reload the page.",
+                  false,
+                  [ErrorButton.Reload],
+                  [ErrorButton.ShowDetails],
+                  new Error(`WebSocket closed with code ${this.lastCloseCode}: some updates may have been missed`)
+                )
+              );
+            } else {
+              // reconnect after clean close (server idle timeout)
+              this.connect(listener, topic);
+            }
           }
         }
       );
