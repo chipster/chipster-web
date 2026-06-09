@@ -1346,9 +1346,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private renderLabelPills(): void {
     const labelsMap = this.sessionData.labelsMap;
-    const maxVisible = 3;
+    const maxVisible = 2;
     const pillHeight = 14;
-    const pillStep = 5; // vertical advance per stacked pill; smaller = more overlap, last pill fully visible
+    const pillStep = 17; // horizontal advance per stacked pill; ~2 chars of the pill underneath remain visible
     const pillOverlap = 5; // pull the top of the stack up so it overlaps the node's bottom edge (matches dot rendering)
     const horizontalPadding = 6;
     const pillFontSize = 10;
@@ -1362,8 +1362,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const visible: Label[] = labels.slice(0, maxVisible);
       const overflow = labels.length - visible.length;
 
-      let baseY = node.y + this.nodeHeight - pillOverlap;
-      const cursorX = node.x;
+      const baseY = node.y + this.nodeHeight - pillOverlap;
+      let cursorX = node.x;
 
       const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
 
@@ -1380,7 +1380,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("height", pillHeight)
           .attr("rx", pillHeight / 2)
           .attr("ry", pillHeight / 2)
-          .style("fill", color.background);
+          .style("fill", color.background)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
         g.append("text")
           .attr("x", cursorX + pillWidth / 2)
           .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
@@ -1392,7 +1394,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .text(text);
         // native SVG tooltip
         g.append("title").text(fullText);
-        baseY += pillStep;
+        cursorX += pillStep;
       });
 
       if (overflow > 0) {
@@ -1408,7 +1410,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("height", pillHeight)
           .attr("rx", pillHeight / 2)
           .attr("ry", pillHeight / 2)
-          .style("fill", overflowColor.background);
+          .style("fill", overflowColor.background)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
         g.append("text")
           .attr("x", cursorX + pillWidth / 2)
           .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
