@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
-import { catchError, map } from "rxjs/operators";
+import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
 import { JobsModalComponent } from "../jobs-modal/jobs-modal.component";
@@ -40,51 +40,6 @@ export class DialogModalService {
 
   openSessionNameModal(title, name, buttonText = "Rename"): Observable<string> {
     return this.openStringModal(title, "Session name", name, buttonText);
-  }
-
-  // Like openSessionNameModal, but with an "Include labels" checkbox under the name field.
-  // hasLabels controls the initial checkbox state and whether the checkbox is disabled.
-  openSessionNameWithLabelsCheckboxModal(
-    title: string,
-    name: string,
-    buttonText: string,
-    hasLabels: boolean,
-  ): Observable<{ name: string; includeLabels: boolean }> {
-    const modalRef = this.modalService.open(StringModalComponent);
-    modalRef.componentInstance.value = name;
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.description = "Session name";
-    modalRef.componentInstance.buttonText = buttonText;
-    modalRef.componentInstance.placeHolder = "";
-    modalRef.componentInstance.checkboxLabel = "Include labels";
-    modalRef.componentInstance.checkboxInitial = hasLabels;
-    modalRef.componentInstance.checkboxDisabled = !hasLabels;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result).pipe(
-      map((value: string) => ({ name: value, includeLabels: modalRef.componentInstance.checkboxValue })),
-    );
-  }
-
-  // Like openOptionModal, but with an "Include labels" checkbox under the dropdown.
-  openOptionWithLabelsCheckboxModal(
-    title: string,
-    description: string,
-    options: Map<any, string>,
-    buttonText: string,
-    placeholder: string,
-    hasLabels: boolean,
-  ): Observable<{ selectedKey: any; includeLabels: boolean }> {
-    const modalRef = this.modalService.open(DropdownModalComponent);
-    modalRef.componentInstance.options = options;
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.description = description;
-    modalRef.componentInstance.buttonText = buttonText;
-    modalRef.componentInstance.placeHolder = placeholder;
-    modalRef.componentInstance.checkboxLabel = "Include labels";
-    modalRef.componentInstance.checkboxInitial = hasLabels;
-    modalRef.componentInstance.checkboxDisabled = !hasLabels;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result).pipe(
-      map((selected: any) => ({ selectedKey: selected, includeLabels: modalRef.componentInstance.checkboxValue })),
-    );
   }
 
   openStringModal(title, description, value, buttonText) {

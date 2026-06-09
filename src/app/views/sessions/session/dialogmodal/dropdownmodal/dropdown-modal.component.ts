@@ -16,12 +16,6 @@ export class DropdownModalComponent implements OnInit {
   @Input()
   placeHolder: string;
 
-  // optional checkbox shown below the dropdown. Render only when checkboxLabel is set.
-  @Input() checkboxLabel: string = null;
-  @Input() checkboxInitial = true;
-  @Input() checkboxDisabled = false;
-  checkboxValue = true;
-
   optionKeys = [];
   value: any;
 
@@ -29,7 +23,6 @@ export class DropdownModalComponent implements OnInit {
 
   ngOnInit() {
     this.optionKeys = Array.from(this.options.keys());
-    this.checkboxValue = this.checkboxInitial;
   }
 
   getOptionName(key) {

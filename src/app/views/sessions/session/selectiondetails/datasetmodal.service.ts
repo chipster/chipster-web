@@ -3,7 +3,7 @@ import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
@@ -136,23 +136,13 @@ export class DatasetModalService {
   }
 
   public openCopySelectionToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
-    const hasLabels = selectedDatasets.some((d) => (d.labelIds ?? []).length > 0);
     this.dialogModalService
-      .openSessionNameWithLabelsCheckboxModal(
-        "Copy Selected Files to a New Session",
-        sessionData.session.name + "_part",
-        "Copy",
-        hasLabels,
-      )
+      .openSessionNameModal("Copy selected files to a new session", sessionData.session.name + "_part", "Copy")
       .pipe(
-        mergeMap(({ name, includeLabels }) => {
+        mergeMap((name: string) => {
           log.info("copying selected datasets and jobs");
 
           const selectedSessionData = this.getSessionDataOfSelection(selectedDatasets, sessionData);
-          if (!includeLabels) {
-            this.scrubLabels(selectedSessionData);
-          }
-
           const copy = this.sessionResource.copySession(selectedSessionData, name, false);
 
           // return observable of the new sessionId
@@ -170,35 +160,26 @@ export class DatasetModalService {
   }
 
   public openCopySelectionToExistingSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
-    const hasLabels = selectedDatasets.some((d) => (d.labelIds ?? []).length > 0);
     this.sessionResource
       .getSessions()
       .pipe(
         mergeMap((sessions) => {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
-          return this.dialogModalService.openOptionWithLabelsCheckboxModal(
-            "Copy Selected files to and Existing Session",
+          return this.dialogModalService.openOptionModal(
+            "Copy selected files to an existing session",
             "Select a session into which the selected files will be copied. The files will be copied to the right side of the selected session.",
             sessionIdToNameMap,
             "Copy",
             "Select",
-            hasLabels,
           );
         }),
         // we only need datasets and sessionId, not jobs
-        mergeMap(({ selectedKey, includeLabels }) =>
-          this.sessionResource.loadSession(selectedKey, false).pipe(
-            map((targetSessionData) => ({ targetSessionData, includeLabels })),
-          ),
-        ),
-        mergeMap(({ targetSessionData, includeLabels }) => {
+        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, false)),
+        mergeMap((targetSessionData) => {
           log.info("copying selected datasets and jobs");
 
           const selectedSessionData = this.getSessionDataOfSelection(selectedDatasets, sessionData);
-          if (!includeLabels) {
-            this.scrubLabels(selectedSessionData);
-          }
 
           this.moveFilesSideBySide(targetSessionData, selectedSessionData);
 
@@ -224,13 +205,6 @@ export class DatasetModalService {
       });
   }
 
-  private scrubLabels(sessionData: SessionData) {
-    sessionData.labelsMap = new Map();
-    sessionData.datasetsMap.forEach((dataset) => {
-      dataset.labelIds = [];
-    });
-  }
-
   openMergeSessionToCurrentSessionModal(sessionData: SessionData) {
     this.sessionResource
       .getSessions()
@@ -239,7 +213,7 @@ export class DatasetModalService {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
           return this.dialogModalService.openOptionModal(
-            "Select a Session to Merge into This Session",
+            "Select a session to merge into this session",
             "The selected session will be merged to the right side of current files.",
             sessionIdToNameMap,
             "Merge",

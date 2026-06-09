@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./stringmodal.component.html",
 })
-export class StringModalComponent implements AfterViewInit, OnInit {
+export class StringModalComponent implements AfterViewInit {
   @Input()
   buttonText: string;
   @Input()
@@ -16,20 +16,10 @@ export class StringModalComponent implements AfterViewInit, OnInit {
   @Input()
   placeHolder: string;
 
-  // optional checkbox shown below the input. Render only when checkboxLabel is set.
-  @Input() checkboxLabel: string = null;
-  @Input() checkboxInitial = true;
-  @Input() checkboxDisabled = false;
-  checkboxValue = true;
-
   @ViewChild("valueInput")
   valueInput;
 
   constructor(private activeModal: NgbActiveModal) {}
-
-  ngOnInit() {
-    this.checkboxValue = this.checkboxInitial;
-  }
 
   ngAfterViewInit() {
     setTimeout(() => {
