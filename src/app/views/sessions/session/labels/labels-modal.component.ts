@@ -8,6 +8,7 @@ import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { LabelEditorModalComponent } from "./label-editor-modal.component";
+import { LabelsContextMenuService } from "./labels-context-menu.service";
 
 type SelectionState = "checked" | "unchecked" | "indeterminate";
 
@@ -36,6 +37,7 @@ export class LabelsModalComponent implements OnInit {
     private sessionResource: SessionResource,
     private errorService: ErrorService,
     private dialogModalService: DialogModalService,
+    private labelsContextMenuService: LabelsContextMenuService,
   ) {}
 
   ngOnInit(): void {
@@ -155,18 +157,14 @@ export class LabelsModalComponent implements OnInit {
     const sessionId = this.sessionData.session.sessionId;
     const datasetUpdates: Dataset[] = [];
 
+    // Track which labels were actually applied/removed so the workflow
+    // toolbar's split-button can default to the most recent one. Prefer
+    // applied over removed since that's usually the user's main intent.
+    const tracking = { lastAppliedId: null as string | null, lastRemovedId: null as string | null };
+
     for (const dataset of this.selectedDatasets) {
       const before = new Set(dataset.labelIds ?? []);
-      const after = new Set(before);
-
-      for (const row of this.rows) {
-        if (row.selection === "checked") {
-          after.add(row.label.labelId);
-        } else if (row.selection === "unchecked") {
-          after.delete(row.label.labelId);
-        }
-        // 'indeterminate' = keep as-is for this dataset
-      }
+      const after = this.applyRowsTo(before, tracking);
 
       if (!this.setsEqual(before, after)) {
         dataset.labelIds = Array.from(after);
@@ -178,6 +176,8 @@ export class LabelsModalComponent implements OnInit {
       this.activeModal.close();
       return;
     }
+
+    const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
     this.saving = true;
     forkJoin(
@@ -193,6 +193,9 @@ export class LabelsModalComponent implements OnInit {
       .pipe(toArray())
       .subscribe({
         next: () => {
+          if (lastUsedId) {
+            this.labelsContextMenuService.recordLastUsedLabel(lastUsedId);
+          }
           this.saving = false;
           this.activeModal.close();
         },
@@ -204,6 +207,29 @@ export class LabelsModalComponent implements OnInit {
 
   cancel(): void {
     this.activeModal.dismiss();
+  }
+
+  private applyRowsTo(
+    before: Set<string>,
+    tracking: { lastAppliedId: string | null; lastRemovedId: string | null },
+  ): Set<string> {
+    const after = new Set(before);
+    for (const row of this.rows) {
+      const id = row.label.labelId;
+      if (row.selection === "checked") {
+        if (!before.has(id)) {
+          tracking.lastAppliedId = id;
+        }
+        after.add(id);
+      } else if (row.selection === "unchecked") {
+        if (before.has(id)) {
+          tracking.lastRemovedId = id;
+        }
+        after.delete(id);
+      }
+      // 'indeterminate' = keep as-is for this dataset
+    }
+    return after;
   }
 
   private setsEqual<T>(a: Set<T>, b: Set<T>): boolean {

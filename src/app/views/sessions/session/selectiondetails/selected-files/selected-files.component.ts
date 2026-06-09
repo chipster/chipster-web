@@ -62,6 +62,10 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe();
   }
 
+  trackLabelMenuItem(_index: number, item: LabelMenuItem): string {
+    return item.label.labelId;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
 

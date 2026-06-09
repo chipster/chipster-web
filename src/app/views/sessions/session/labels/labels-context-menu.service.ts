@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { Dataset, Label } from "chipster-js-common";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -13,18 +12,56 @@ export type LabelSelectionState = "checked" | "unchecked" | "indeterminate";
 export interface LabelMenuItem {
   label: Label;
   state: LabelSelectionState;
-  displayTitle: string;
+  // Standalone HTML string for non-Angular renderers (e.g. d3-context-menu).
+  // Angular templates should NOT bind this via [innerHTML]; use
+  // <ch-label-menu-item-content [item]="item"> instead so DOM updates only
+  // happen when actual values change.
   displayHtml: string;
-  displaySafeHtml: SafeHtml;
+  colorBg: string;
 }
 
 @Injectable()
 export class LabelsContextMenuService {
+  // Most recently toggled label (added or removed). Used by surfaces like the
+  // workflow toolbar's split-button to default the next action to whatever the
+  // user just did.
+  private lastUsedLabelId: string | null = null;
+
   constructor(
     private sessionResource: SessionResource,
     private errorService: ErrorService,
-    private sanitizer: DomSanitizer,
   ) {}
+
+  getLastUsedLabel(sessionData: SessionData): Label | null {
+    if (!this.lastUsedLabelId || !sessionData?.labelsMap) {
+      return null;
+    }
+    return sessionData.labelsMap.get(this.lastUsedLabelId) ?? null;
+  }
+
+  // Default label for surfaces that need to pick one (e.g. the workflow
+  // toolbar's split-button left part): the most recently toggled label if it
+  // still exists in this session, otherwise the alphabetically first label.
+  // Returns null if the session has no labels.
+  getDefaultLabel(sessionData: SessionData): Label | null {
+    const lastUsed = this.getLastUsedLabel(sessionData);
+    if (lastUsed) {
+      return lastUsed;
+    }
+    if (!sessionData?.labelsMap || sessionData.labelsMap.size === 0) {
+      return null;
+    }
+    return Array.from(sessionData.labelsMap.values()).sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? ""),
+    )[0];
+  }
+
+  // For callers that apply or remove labels without going through toggleLabel()
+  // (e.g. the Edit-labels modal which commits a batch of changes). Lets the
+  // workflow toolbar's split-button track those actions too.
+  recordLastUsedLabel(labelId: string): void {
+    this.lastUsedLabelId = labelId;
+  }
 
   buildItems(datasets: Dataset[], sessionData: SessionData): LabelMenuItem[] {
     const labels = Array.from(sessionData.labelsMap.values()).sort((a, b) =>
@@ -32,22 +69,20 @@ export class LabelsContextMenuService {
     );
     return labels.map((label) => {
       const state = this.computeState(datasets, label);
-      const html = this.buildHtml(label, state);
+      const colorBg = getLabelColor(label.color).background;
       return {
         label,
         state,
-        displayTitle: this.prefix(state) + (label.name ?? ""),
-        displayHtml: html,
-        displaySafeHtml: this.sanitizer.bypassSecurityTrustHtml(html),
+        displayHtml: this.buildHtml(label, state, colorBg),
+        colorBg,
       };
     });
   }
 
-  private buildHtml(label: Label, state: LabelSelectionState): string {
-    const color = getLabelColor(label.color).background;
+  private buildHtml(label: Label, state: LabelSelectionState, colorBg: string): string {
     const dot =
       `<span style="display:inline-block;width:0.6em;height:0.6em;border-radius:50%;` +
-      `background:${color};margin-right:0.25em;vertical-align:middle"></span>`;
+      `background:${colorBg};margin-right:0.25em;vertical-align:middle"></span>`;
     return `${this.checkboxHtml(state)}${dot}<span>${this.escapeHtml(label.name ?? "")}</span>`;
   }
 
@@ -85,6 +120,8 @@ export class LabelsContextMenuService {
     if (datasets.length === 0) {
       return of(undefined);
     }
+
+    this.lastUsedLabelId = label.labelId;
 
     const state = this.computeState(datasets, label);
     const shouldRemove = state === "checked";
@@ -134,12 +171,6 @@ export class LabelsContextMenuService {
       return "checked";
     }
     return "indeterminate";
-  }
-
-  private prefix(state: LabelSelectionState): string {
-    if (state === "checked") return "✓ ";
-    if (state === "indeterminate") return "– ";
-    return "  ";
   }
 
   private setsEqual<T>(a: Set<T>, b: Set<T>): boolean {

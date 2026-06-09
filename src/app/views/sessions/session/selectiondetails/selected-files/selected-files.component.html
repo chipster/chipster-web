@@ -37,10 +37,11 @@
             <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
             <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
             <button
-              *ngFor="let item of labelMenuItems"
+              *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
               ngbDropdownItem
-              (click)="toggleLabel(item)"
-              [innerHTML]="item.displaySafeHtml"></button>
+              (click)="toggleLabel(item)">
+              <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+            </button>
           </div>
         </div>
         <button ngbDropdownItem (click)="exportDatasets()">Export</button>
@@ -91,10 +92,11 @@
             <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
             <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
             <button
-              *ngFor="let item of labelMenuItems"
+              *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
               ngbDropdownItem
-              (click)="toggleLabel(item)"
-              [innerHTML]="item.displaySafeHtml"></button>
+              (click)="toggleLabel(item)">
+              <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+            </button>
           </div>
         </div>
         <button ngbDropdownItem (click)="selectChildren()">Select descendants</button>

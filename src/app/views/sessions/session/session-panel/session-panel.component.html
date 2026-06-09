@@ -80,6 +80,42 @@
               (click)="workflowGraph.zoomOut()">
               <span class="fas fa-lg fa-search-minus"></span>
             </button>
+
+            <!-- labels split button -->
+            <div ngbDropdown class="btn-group btn-group-sm float-end me-2" [autoClose]="'outside'">
+              <button
+                type="button"
+                class="btn btn-outline-secondary tool-bar-button"
+                [disabled]="!splitButtonLabel || !isDatasetsSelected()"
+                [title]="splitButtonLabel ? 'Apply or remove \'' + splitButtonLabel.name + '\'' : 'Labels'"
+                (click)="applySplitButtonLabel()">
+                <i class="fas fa-lg fa-tags" aria-hidden="true" [style.color]="labelsButtonIconColor"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary dropdown-toggle-split tool-bar-button"
+                ngbDropdownToggle
+                aria-haspopup="true"
+                aria-expanded="false"
+                title="Labels menu"></button>
+              <div ngbDropdownMenu>
+                <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
+                <ng-container *ngIf="labelMenuItems.length > 0">
+                  <div class="dropdown-divider"></div>
+                  <ng-container *ngIf="isDatasetsSelected(); else noSelectedFiles">
+                    <button
+                      *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
+                      ngbDropdownItem
+                      (click)="toggleLabel(item)">
+                      <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+                    </button>
+                  </ng-container>
+                  <ng-template #noSelectedFiles>
+                    <div class="dropdown-item-text text-muted small">No selected files</div>
+                  </ng-template>
+                </ng-container>
+              </div>
+            </div>
           </div>
 
           <div>

@@ -1,11 +1,14 @@
 import { Component, Input } from "@angular/core";
-import { Dataset, Module, Tool } from "chipster-js-common";
+import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import UtilsService from "../../../../shared/utilities/utils";
 import { GetSessionDataService } from "../get-session-data.service";
+import { getLabelColor } from "../labels/label-palette";
+import { LabelMenuItem, LabelsContextMenuService } from "../labels/labels-context-menu.service";
+import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
@@ -35,7 +38,46 @@ export class SessionPanelComponent {
     public selectionService: SelectionService,
     private restErrorService: RestErrorService,
     private workflowGraphService: WorkflowGraphService,
+    private labelsContextMenuService: LabelsContextMenuService,
+    private datasetModalService: DatasetModalService,
   ) {} // used by template
+
+  get labelMenuItems(): LabelMenuItem[] {
+    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);
+  }
+
+  get labelsButtonIconColor(): string | null {
+    const label = this.splitButtonLabel;
+    return label ? getLabelColor(label.color).background : null;
+  }
+
+  get splitButtonLabel(): Label | null {
+    return this.labelsContextMenuService.getDefaultLabel(this.sessionData);
+  }
+
+  applySplitButtonLabel(): void {
+    const label = this.splitButtonLabel;
+    if (!label) {
+      return;
+    }
+    this.labelsContextMenuService
+      .toggleLabel(this.selectionService.selectedDatasets, label, this.sessionData)
+      .subscribe();
+  }
+
+  trackLabelMenuItem(_index: number, item: LabelMenuItem): string {
+    return item.label.labelId;
+  }
+
+  toggleLabel(item: LabelMenuItem): void {
+    this.labelsContextMenuService
+      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)
+      .subscribe();
+  }
+
+  manageLabels(): void {
+    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData);
+  }
 
   search(value: any): void {
     this.datasetSearch = value;
