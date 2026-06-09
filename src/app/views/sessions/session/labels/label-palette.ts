@@ -5,13 +5,13 @@ export interface LabelColor {
   text: string;
 }
 
-export const DEFAULT_LABEL_COLOR_KEY = "orange";
+export const DEFAULT_LABEL_COLOR_KEY = "purple";
 
 // User-selectable label colors shown in the label editor.
 export const LABEL_PALETTE: LabelColor[] = [
+  { key: "purple", label: "Purple", background: "#6f42c1", text: "#ffffff" },
   { key: "orange", label: "Orange", background: "#fd7e14", text: "#212529" },
   { key: "danger", label: "Red", background: "#dc3545", text: "#ffffff" },
-  { key: "purple", label: "Purple", background: "#6f42c1", text: "#ffffff" },
   { key: "primary", label: "Blue", background: "#0d6efd", text: "#ffffff" },
   { key: "warning", label: "Yellow", background: "#ffc107", text: "#212529" },
   { key: "success", label: "Green", background: "#198754", text: "#ffffff" },
