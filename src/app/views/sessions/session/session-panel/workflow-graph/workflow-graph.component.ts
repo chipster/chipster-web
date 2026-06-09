@@ -155,10 +155,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   selectionEnabled = false;
 
   labelDisplayMode: "dots" | "pills" = "dots";
-  legendLabelDisplayMode: "dots" | "pills" = "dots";
-  legendOrientation: "vertical" | "horizontal" = "horizontal";
-  showLegendTitle = true;
-  showTooltipLabels = true;
+  showLegendPanel = true;
   labelLegend: Label[] = [];
 
   selectionRect: any;
@@ -1242,12 +1239,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.renderLabels();
   }
 
-  toggleLegendLabelDisplayMode(): void {
-    this.legendLabelDisplayMode = this.legendLabelDisplayMode === "dots" ? "pills" : "dots";
-  }
-
-  toggleTooltipLabels(): void {
-    this.showTooltipLabels = !this.showTooltipLabels;
+  toggleLegendPanel(): void {
+    this.showLegendPanel = !this.showLegendPanel;
   }
 
   renderLabels(): void {
@@ -1272,14 +1265,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   legendDotColor(label: Label): string {
     return getLabelColor(label.color).background;
-  }
-
-  toggleLegendOrientation(): void {
-    this.legendOrientation = this.legendOrientation === "vertical" ? "horizontal" : "vertical";
-  }
-
-  toggleLegendTitle(): void {
-    this.showLegendTitle = !this.showLegendTitle;
   }
 
   openLabelsModal(): void {
@@ -1569,9 +1554,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private buildTooltipHtml(node: DatasetNode): string {
-    if (!this.showTooltipLabels) {
-      return node.name;
-    }
     const labels = this.sessionData?.labelsMap
       ? getSortedLabels(node.dataset.labelIds, this.sessionData.labelsMap)
       : [];
