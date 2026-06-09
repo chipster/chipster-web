@@ -17,7 +17,7 @@ import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
-import { getLabelColor } from "../../labels/label-palette";
+import { OVERFLOW_LABEL_COLOR, getLabelColor } from "../../labels/label-palette";
 import { LabelsContextMenuService } from "../../labels/labels-context-menu.service";
 import { getSortedLabels } from "../../labels/labels-util";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -1336,7 +1336,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
       if (overflow > 0) {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
-        const overflowColor = getLabelColor("grey");
+        const overflowColor = OVERFLOW_LABEL_COLOR;
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("circle")
           .attr("cx", cursorX)
@@ -1413,7 +1413,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (overflow > 0) {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
         const overflowText = "+" + overflow;
-        const overflowColor = getLabelColor("grey");
+        const overflowColor = OVERFLOW_LABEL_COLOR;
         const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("rect")
