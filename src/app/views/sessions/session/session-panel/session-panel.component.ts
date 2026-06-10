@@ -6,7 +6,7 @@ import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import UtilsService from "../../../../shared/utilities/utils";
 import { GetSessionDataService } from "../get-session-data.service";
-import { getLabelColor } from "../labels/label-palette";
+import { resolveLabelColor } from "../labels/label-palette";
 import { LabelMenuItem, LabelsContextMenuService } from "../labels/labels-context-menu.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 import { SelectionHandlerService } from "../selection-handler.service";
@@ -48,7 +48,7 @@ export class SessionPanelComponent {
 
   get labelsButtonIconColor(): string | null {
     const label = this.splitButtonLabel;
-    return label ? getLabelColor(label.color).background : null;
+    return label ? resolveLabelColor(label.color) : null;
   }
 
   get splitButtonLabel(): Label | null {

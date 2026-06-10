@@ -5,7 +5,7 @@ import { catchError, map } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
-import { getLabelColor } from "./label-palette";
+import { resolveLabelColor } from "./label-palette";
 
 export type LabelSelectionState = "checked" | "unchecked" | "indeterminate";
 
@@ -69,7 +69,7 @@ export class LabelsContextMenuService {
     );
     return labels.map((label) => {
       const state = this.computeState(datasets, label);
-      const colorBg = getLabelColor(label.color).background;
+      const colorBg = resolveLabelColor(label.color);
       return {
         label,
         state,

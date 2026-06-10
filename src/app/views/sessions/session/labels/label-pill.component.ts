@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { Label } from "chipster-js-common";
-import { getLabelColor } from "./label-palette";
+import { resolveLabelColor, textColorForBackground } from "./label-palette";
 
 @Component({
   selector: "ch-label-pill",
@@ -11,10 +11,10 @@ export class LabelPillComponent {
   @Input() label: Label;
 
   get background(): string {
-    return getLabelColor(this.label?.color).background;
+    return resolveLabelColor(this.label?.color);
   }
 
   get text(): string {
-    return getLabelColor(this.label?.color).text;
+    return textColorForBackground(this.background);
   }
 }

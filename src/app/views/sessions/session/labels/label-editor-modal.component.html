@@ -21,13 +21,13 @@
     <label class="form-label">Color</label>
     <div class="d-flex flex-wrap gap-1">
       <button
-        *ngFor="let c of palette"
+        *ngFor="let c of displayPalette"
         type="button"
         class="ch-swatch"
-        [class.ch-swatch-selected]="color === c.key"
-        [style.background-color]="c.background"
-        [title]="c.label"
-        (click)="color = c.key"></button>
+        [class.ch-swatch-selected]="color === c.hex"
+        [style.background-color]="c.hex"
+        [title]="c.name"
+        (click)="color = c.hex"></button>
     </div>
   </div>
 

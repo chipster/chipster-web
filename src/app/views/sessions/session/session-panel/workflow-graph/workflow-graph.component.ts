@@ -17,7 +17,7 @@ import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
-import { OVERFLOW_LABEL_COLOR, getLabelColor } from "../../labels/label-palette";
+import { OVERFLOW_LABEL_COLOR, resolveLabelColor, textColorForBackground } from "../../labels/label-palette";
 import { LabelsContextMenuService } from "../../labels/labels-context-menu.service";
 import { getSortedLabels } from "../../labels/labels-util";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -1264,7 +1264,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   legendDotColor(label: Label): string {
-    return getLabelColor(label.color).background;
+    return resolveLabelColor(label.color);
   }
 
   openLabelsModal(): void {
@@ -1306,13 +1306,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
 
       visible.forEach((label: Label) => {
-        const color = getLabelColor(label.color);
+        const colorBg = resolveLabelColor(label.color);
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("circle")
           .attr("cx", cursorX)
           .attr("cy", centerY)
           .attr("r", dotRadius)
-          .style("fill", color.background)
+          .style("fill", colorBg)
           .style("stroke", "#ffffff")
           .style("stroke-width", "1");
         g.append("title").text(label.name ?? "");
@@ -1321,13 +1321,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
       if (overflow > 0) {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
-        const overflowColor = OVERFLOW_LABEL_COLOR;
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("circle")
           .attr("cx", cursorX)
           .attr("cy", centerY)
           .attr("r", dotRadius)
-          .style("fill", overflowColor.background)
+          .style("fill", OVERFLOW_LABEL_COLOR)
           .style("stroke", "#ffffff")
           .style("stroke-width", "1");
         g.append("text")
@@ -1336,7 +1335,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("text-anchor", "middle")
           .attr("font-size", "9px")
           .attr("font-weight", "500")
-          .style("fill", overflowColor.text)
+          .style("fill", textColorForBackground(OVERFLOW_LABEL_COLOR))
           .style("pointer-events", "none")
           .text("+" + overflow);
         g.append("title").text(hiddenLabels);
@@ -1368,7 +1367,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
 
       visible.forEach((label: Label) => {
-        const color = getLabelColor(label.color);
+        const bg = resolveLabelColor(label.color);
+        const fg = textColorForBackground(bg);
         const fullText = label.name ?? "";
         const text = this.truncateToWidth(fullText, pillFontSize, horizontalPadding, maxPillWidth);
         const pillWidth = this.estimatePillWidth(text, pillFontSize, horizontalPadding);
@@ -1380,7 +1380,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("height", pillHeight)
           .attr("rx", pillHeight / 2)
           .attr("ry", pillHeight / 2)
-          .style("fill", color.background)
+          .style("fill", bg)
           .style("stroke", "#ffffff")
           .style("stroke-width", "1");
         g.append("text")
@@ -1389,7 +1389,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("text-anchor", "middle")
           .attr("font-size", pillFontSize + "px")
           .attr("font-weight", "500")
-          .style("fill", color.text)
+          .style("fill", fg)
           .style("pointer-events", "none")
           .text(text);
         // native SVG tooltip
@@ -1400,7 +1400,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (overflow > 0) {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
         const overflowText = "+" + overflow;
-        const overflowColor = OVERFLOW_LABEL_COLOR;
         const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
         const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
         g.append("rect")
@@ -1410,7 +1409,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("height", pillHeight)
           .attr("rx", pillHeight / 2)
           .attr("ry", pillHeight / 2)
-          .style("fill", overflowColor.background)
+          .style("fill", OVERFLOW_LABEL_COLOR)
           .style("stroke", "#ffffff")
           .style("stroke-width", "1");
         g.append("text")
@@ -1419,7 +1418,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           .attr("text-anchor", "middle")
           .attr("font-size", pillFontSize + "px")
           .attr("font-weight", "500")
-          .style("fill", overflowColor.text)
+          .style("fill", textColorForBackground(OVERFLOW_LABEL_COLOR))
           .style("pointer-events", "none")
           .text(overflowText);
         g.append("title").text(hiddenLabels);
@@ -1566,7 +1565,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
     const rows = labels
       .map((label) => {
-        const color = getLabelColor(label.color).background;
+        const color = resolveLabelColor(label.color);
         const dot =
           `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
           `background:${color};margin-right:4px;vertical-align:middle"></span>`;

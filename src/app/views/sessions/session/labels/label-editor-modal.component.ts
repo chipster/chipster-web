@@ -5,7 +5,7 @@ import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
-import { DEFAULT_LABEL_COLOR_KEY, LABEL_PALETTE, LabelColor } from "./label-palette";
+import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette";
 
 @Component({
   selector: "ch-label-editor-modal",
@@ -17,10 +17,9 @@ export class LabelEditorModalComponent implements OnInit {
   // when set, the modal edits this label; when null, it creates a new one
   @Input() label: Label = null;
 
-  palette: LabelColor[] = LABEL_PALETTE;
   readonly maxNameLength = 30;
   name = "";
-  color: string = DEFAULT_LABEL_COLOR_KEY;
+  color: string = DEFAULT_LABEL_COLOR;
   saving = false;
 
   constructor(
@@ -32,19 +31,31 @@ export class LabelEditorModalComponent implements OnInit {
   ngOnInit(): void {
     if (this.label != null) {
       this.name = this.label.name ?? "";
-      this.color = this.label.color ?? DEFAULT_LABEL_COLOR_KEY;
+      this.color = this.label.color ?? DEFAULT_LABEL_COLOR;
     } else {
       // new label: pick the first palette color not yet used in the session
       const usedColors = new Set(
         Array.from(this.sessionData.labelsMap.values()).map((l) => l.color),
       );
-      const firstUnused = LABEL_PALETTE.find((c) => !usedColors.has(c.key));
-      this.color = firstUnused?.key ?? DEFAULT_LABEL_COLOR_KEY;
+      const firstUnused = LABEL_PALETTE.find((c) => !usedColors.has(c.hex));
+      this.color = firstUnused?.hex ?? DEFAULT_LABEL_COLOR;
     }
   }
 
   get isEdit(): boolean {
     return this.label != null;
+  }
+
+  // Picker contents. When editing a label whose stored color isn't in the
+  // palette (palette changed since the label was created, or the value came
+  // from outside this app), append an extra swatch for that color so the
+  // current selection stays visible. Disappears once the user picks any
+  // palette swatch.
+  get displayPalette(): LabelColor[] {
+    if (this.color && !LABEL_PALETTE.some((c) => c.hex === this.color)) {
+      return [...LABEL_PALETTE, { hex: this.color, name: "Current color" }];
+    }
+    return LABEL_PALETTE;
   }
 
   previewLabel(): Label {
