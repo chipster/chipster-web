@@ -5,8 +5,8 @@ export interface LabelColor {
 
 // User-selectable label colors shown in the label editor.
 export const LABEL_PALETTE: LabelColor[] = [
-  { hex: "#6f42c1", name: "Purple" },
   { hex: "#fd7e14", name: "Orange" },
+  { hex: "#6f42c1", name: "Purple" },
   { hex: "#dc3545", name: "Red" },
   { hex: "#0d6efd", name: "Blue" },
   { hex: "#ffc107", name: "Yellow" },
