@@ -86,17 +86,13 @@
                 <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
                 <ng-container *ngIf="labelMenuItems.length > 0">
                   <div class="dropdown-divider"></div>
-                  <ng-container *ngIf="isDatasetsSelected(); else noSelectedFiles">
-                    <button
-                      *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
-                      ngbDropdownItem
-                      (click)="toggleLabel(item)">
-                      <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
-                    </button>
-                  </ng-container>
-                  <ng-template #noSelectedFiles>
-                    <div class="dropdown-item-text text-muted small">No selected files</div>
-                  </ng-template>
+                  <button
+                    *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
+                    ngbDropdownItem
+                    [disabled]="!isDatasetsSelected()"
+                    (click)="toggleLabel(item)">
+                    <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+                  </button>
                 </ng-container>
                 <div class="dropdown-divider"></div>
                 <button ngbDropdownItem (click)="workflowGraph.toggleLabelDisplayMode()">
