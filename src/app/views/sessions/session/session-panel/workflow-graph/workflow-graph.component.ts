@@ -1280,9 +1280,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.labelLegend = [];
       return;
     }
-    this.labelLegend = Array.from(this.sessionData.labelsMap.values()).sort((a, b) =>
-      (a.name ?? "").localeCompare(b.name ?? ""),
-    );
+    const inUseIds = new Set<string>();
+    this.sessionData.datasetsMap.forEach((dataset) => {
+      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
+    });
+    this.labelLegend = Array.from(this.sessionData.labelsMap.values())
+      .filter((label) => inUseIds.has(label.labelId))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   }
 
   private renderLabelDots(): void {
