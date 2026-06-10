@@ -6,7 +6,6 @@ import { clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, from, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/operators";
-import { v4 as uuidv4 } from "uuid";
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
 import { JobService } from "../../views/sessions/session/job.service";
@@ -597,7 +596,8 @@ export class SessionResource {
     // create session
     return this.createSession(newSession).pipe(
       mergeMap((sessionId) => {
-        return this.copyToExistingSession(sessionId, sessionData);
+        // freshly created session has no labels yet
+        return this.copyToExistingSession(sessionId, sessionData, new Map<string, Label>());
       }),
       mergeMap((session) => {
         log.info("session copied, current state", session.state, temporary);
@@ -612,29 +612,30 @@ export class SessionResource {
     );
   }
 
-  copyToExistingSession(targetSessionId, sessionData): Observable<Session> {
-    // copy labels first: mint a new labelId per source label, then rewrite every
-    // copied dataset's labelIds via the old->new map (dropping unmapped entries)
+  copyToExistingSession(
+    targetSessionId: string,
+    sessionData: SessionData,
+    targetLabelsMap: Map<string, Label>,
+  ): Observable<Session> {
+    // Preserve source labelIds in the destination so that multiple copies of files
+    // sharing the same source label collapse onto one destination label. Drift
+    // policy: destination wins -- if a label with the same labelId already exists
+    // in the target, skip the create and let the copied file attach to whatever
+    // the destination's version looks like now.
     const sourceLabels: Label[] = Array.from(sessionData.labelsMap?.values() ?? []);
-    const labelIdMap = new Map<string, string>();
-    const labelCopies = sourceLabels.map((label: Label) => {
-      const newLabelId = uuidv4();
-      labelIdMap.set(label.labelId, newLabelId);
-      return { ...label, sessionId: null, labelId: newLabelId };
-    });
+    const labelsToCreate = sourceLabels
+      .filter((label: Label) => !targetLabelsMap.has(label.labelId))
+      .map((label: Label) => ({ ...label, sessionId: null }));
 
-    const createLabelsRequest = labelCopies.length > 0
-      ? forkJoin(labelCopies.map((l) => this.createLabel(targetSessionId, l)))
+    const createLabelsRequest = labelsToCreate.length > 0
+      ? forkJoin(labelsToCreate.map((l) => this.createLabel(targetSessionId, l)))
       : of([]);
 
-    // create datasets (with remapped labelIds)
+    // datasets keep their labelIds verbatim -- they now resolve in the destination
     const oldDatasets = Array.from(sessionData.datasetsMap.values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
       _clone.sessionId = null;
-      _clone.labelIds = (_clone.labelIds ?? [])
-        .map((id) => labelIdMap.get(id))
-        .filter((id): id is string => id != null);
       return _clone;
     });
 

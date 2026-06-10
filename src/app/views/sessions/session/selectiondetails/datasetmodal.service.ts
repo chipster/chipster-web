@@ -189,6 +189,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             targetSessionData.session.sessionId,
             selectedSessionData,
+            targetSessionData.labelsMap ?? new Map(),
           );
 
           // return observable of the new sessionId
@@ -227,7 +228,11 @@ export class DatasetModalService {
           // generate new Dataset and Job IDs so that we can merge the same datasets several times
           this.changeIds(sourceSessionData);
 
-          const copy = this.sessionResource.copyToExistingSession(sessionData.session.sessionId, sourceSessionData);
+          const copy = this.sessionResource.copyToExistingSession(
+            sessionData.session.sessionId,
+            sourceSessionData,
+            sessionData.labelsMap ?? new Map(),
+          );
 
           // return observable of the new sessionId
           return this.dialogModalService.openSpinnerModal("Merge session", copy);
