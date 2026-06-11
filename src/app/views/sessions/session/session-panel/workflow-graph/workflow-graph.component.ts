@@ -1271,6 +1271,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData);
   }
 
+  toggleLabelOnSelection(label: Label): void {
+    this.labelsContextMenuService
+      .toggleLabel(this.selectedDatasets ?? [], label, this.sessionData)
+      .subscribe();
+  }
+
   toggleLabelsModal(): void {
     this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData);
   }

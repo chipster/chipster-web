@@ -105,22 +105,9 @@ svg {
   align-items: flex-start;
   gap: 4px;
   width: 100%;
-  padding: 0;
-  padding-right: 20px; // leave room for the close button so titles don't underlap it
-  background: transparent;
-  border: 0;
-  font: inherit;
+  padding-right: 20px; // leave room for the close button so the title doesn't underlap it
   font-size: 12px;
   text-align: left;
-  cursor: pointer;
-  color: inherit;
-}
-.label-legend-body:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
-.label-legend-body:focus {
-  outline: 2px solid #0d6efd;
-  outline-offset: 1px;
 }
 
 .label-legend-close {
@@ -130,6 +117,22 @@ svg {
   padding: 2px;
   font-size: 0.7em;
   z-index: 1;
+}
+
+.label-legend-edit {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  padding: 2px 4px;
+  font-size: 0.8em;
+  background: transparent;
+  border: 0;
+  color: #6c757d;
+  cursor: pointer;
+  z-index: 1;
+}
+.label-legend-edit:hover {
+  color: #212529;
 }
 
 .label-legend-title {
@@ -148,6 +151,25 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 1px 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.label-legend-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+  outline: 1px solid #6c757d;
+  outline-offset: 1px;
+}
+.label-legend-item:disabled {
+  // Panel's main job is to display the legend, so disabled (no-selection)
+  // state must look identical to enabled -- no opacity fade or color shift.
+  cursor: default;
+  opacity: 1;
+  color: inherit;
 }
 
 .label-legend-dot {
