@@ -1361,7 +1361,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const pillOverlap = 5; // pull the top of the stack up so it overlaps the node's bottom edge (matches dot rendering)
     const horizontalPadding = 6;
     const pillFontSize = 10;
-    const maxPillWidth = 70; // cap so long names don't bleed into neighbouring nodes
+    const maxPillWidth = 40; // cap so long names don't bleed into neighbouring nodes' pills
 
     this.datasetNodes.forEach((node: DatasetNode) => {
       const labels = getSortedLabels(node.dataset.labelIds, labelsMap);
