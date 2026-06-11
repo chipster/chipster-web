@@ -29,6 +29,10 @@ export class SessionPanelComponent {
 
   datasetSearch: string;
 
+  // Whether the "Select files with label" submenu in the toolbar labels
+  // dropdown is currently open (controlled via mouseenter/mouseleave).
+  selectByLabelOpen = false;
+
   // noinspection JSUnusedLocalSymbols
   constructor(
     public sessionDataService: SessionDataService, // used by template
@@ -73,6 +77,14 @@ export class SessionPanelComponent {
     this.labelsContextMenuService
       .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)
       .subscribe();
+  }
+
+  selectFilesWithLabel(item: LabelMenuItem): void {
+    const labelId = item.label.labelId;
+    const matching = Array.from(this.sessionData.datasetsMap.values()).filter((d) =>
+      (d.labelIds ?? []).includes(labelId),
+    );
+    this.selectionHandlerService.setDatasetSelection(matching);
   }
 
   manageLabels(): void {

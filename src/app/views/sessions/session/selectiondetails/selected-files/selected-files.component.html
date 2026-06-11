@@ -34,14 +34,14 @@
             *ngIf="labelsSubmenuOpen"
             class="dropdown-menu show"
             style="position: absolute; left: 100%; top: 0; margin-left: 0">
-            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
-            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
             <button
               *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
               ngbDropdownItem
               (click)="toggleLabel(item)">
               <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
             </button>
+            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
+            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
           </div>
         </div>
         <button ngbDropdownItem (click)="exportDatasets()">Export</button>
@@ -89,14 +89,14 @@
             *ngIf="labelsSubmenuOpen"
             class="dropdown-menu show"
             style="position: absolute; left: 100%; top: 0; margin-left: 0">
-            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
-            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
             <button
               *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
               ngbDropdownItem
               (click)="toggleLabel(item)">
               <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
             </button>
+            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
+            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
           </div>
         </div>
         <button ngbDropdownItem (click)="selectChildren()">Select descendants</button>

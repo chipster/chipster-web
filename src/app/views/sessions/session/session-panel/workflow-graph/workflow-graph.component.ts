@@ -1989,17 +1989,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       title: "Labels",
       children(d: any): any[] {
         const datasets = resolveDatasetsForLabelMenu(d);
-        const items: any[] = [
-          {
-            title: "Edit labels&hellip;",
-            action(dd: any): void {
-              self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData);
-            },
-          },
-        ];
+        const items: any[] = [];
         const labelItems = self.labelsContextMenuService.buildItems(datasets, self.sessionData);
         if (labelItems.length > 0) {
-          items.push({ divider: true });
           for (const item of labelItems) {
             items.push({
               title: item.displayHtml,
@@ -2010,7 +2002,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               },
             });
           }
+          items.push({ divider: true });
         }
+        items.push({
+          title: "Edit labels&hellip;",
+          action(dd: any): void {
+            self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData);
+          },
+        });
         return items;
       },
     };

@@ -12,6 +12,10 @@ export type LabelSelectionState = "checked" | "unchecked" | "indeterminate";
 export interface LabelMenuItem {
   label: Label;
   state: LabelSelectionState;
+  // True if any dataset in the session has this label applied. Used by surfaces
+  // that offer "select files with this label" -- they disable the affordance
+  // when no files would match.
+  inUseInSession: boolean;
   // Standalone HTML string for non-Angular renderers (e.g. d3-context-menu).
   // Angular templates should NOT bind this via [innerHTML]; use
   // <ch-label-menu-item-content [item]="item"> instead so DOM updates only
@@ -67,12 +71,19 @@ export class LabelsContextMenuService {
     const labels = Array.from(sessionData.labelsMap.values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
+    // Precompute which labels are applied to at least one dataset in the session;
+    // saves O(labels * datasets) re-scans by callers that need it per row.
+    const inUseIds = new Set<string>();
+    sessionData.datasetsMap.forEach((dataset) => {
+      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
+    });
     return labels.map((label) => {
       const state = this.computeState(datasets, label);
       const colorBg = resolveLabelColor(label.color);
       return {
         label,
         state,
+        inUseInSession: inUseIds.has(label.labelId),
         displayHtml: this.buildHtml(label, state, colorBg),
         colorBg,
       };

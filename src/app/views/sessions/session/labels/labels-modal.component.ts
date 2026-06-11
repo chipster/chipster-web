@@ -42,9 +42,6 @@ export class LabelsModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.refreshRows();
-    if (this.rows.length === 0) {
-      this.openCreateLabel();
-    }
   }
 
   private refreshRows(): void {
