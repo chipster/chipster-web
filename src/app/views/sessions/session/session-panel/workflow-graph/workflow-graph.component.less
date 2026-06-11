@@ -91,29 +91,45 @@ svg {
   left: 0;
   right: 0;
   padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #dee2e6;
   border-radius: 4px;
-  font: inherit;
-  font-size: 12px;
-  text-align: left;
-  cursor: pointer;
   z-index: 2;
   max-height: 50%;
   overflow-y: auto;
 }
 
-.label-legend:hover {
-  background: rgba(255, 255, 255, 1);
+.label-legend-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  padding-right: 20px; // leave room for the close button so titles don't underlap it
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
 }
-
-.label-legend:focus {
+.label-legend-body:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+.label-legend-body:focus {
   outline: 2px solid #0d6efd;
   outline-offset: 1px;
+}
+
+.label-legend-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px;
+  font-size: 0.7em;
+  z-index: 1;
 }
 
 .label-legend-title {

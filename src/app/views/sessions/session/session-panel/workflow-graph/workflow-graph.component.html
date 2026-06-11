@@ -1,16 +1,20 @@
 <section id="workflowvisualization"></section>
 <ng-container *ngIf="showLegendPanel">
-  <button
-    type="button"
-    class="label-legend"
-    *ngIf="labelLegend.length > 0"
-    (click)="openLabelsModal()">
-    <span class="label-legend-title">Labels</span>
-    <span class="label-legend-items">
-      <span class="label-legend-item" *ngFor="let label of labelLegend">
-        <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
-        <span class="label-legend-name">{{ label.name }}</span>
+  <div class="label-legend" *ngIf="labelLegend.length > 0">
+    <button
+      type="button"
+      class="btn-close label-legend-close"
+      aria-label="Hide labels panel"
+      title="Hide labels panel"
+      (click)="toggleLegendPanel()"></button>
+    <button type="button" class="label-legend-body" (click)="openLabelsModal()">
+      <span class="label-legend-title">Labels</span>
+      <span class="label-legend-items">
+        <span class="label-legend-item" *ngFor="let label of labelLegend">
+          <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
+          <span class="label-legend-name">{{ label.name }}</span>
+        </span>
       </span>
-    </span>
-  </button>
+    </button>
+  </div>
 </ng-container>
