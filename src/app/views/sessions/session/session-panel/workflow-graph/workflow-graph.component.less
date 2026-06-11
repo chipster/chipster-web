@@ -166,10 +166,16 @@ svg {
 }
 .label-legend-item:disabled {
   // Panel's main job is to display the legend, so disabled (no-selection)
-  // state must look identical to enabled -- no opacity fade or color shift.
+  // state at rest must look identical to enabled -- no opacity fade or
+  // color shift. On hover the dot + name mute so the content reads as
+  // inert without changing the button's chrome.
   cursor: default;
   opacity: 1;
   color: inherit;
+}
+.label-legend-item:disabled:hover .label-legend-dot,
+.label-legend-item:disabled:hover .label-legend-name {
+  opacity: 0.5;
 }
 
 .label-legend-dot {
