@@ -12,6 +12,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { HotkeyService } from "../../../../../shared/services/hotkey.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
+import { PreferencesService } from "../../../../../shared/services/preferences.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
 import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
@@ -96,6 +97,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private datasetContextMenuService: DatasetContextMenuService,
     private labelsContextMenuService: LabelsContextMenuService,
     private hotkeyService: HotkeyService,
+    private preferencesService: PreferencesService,
   ) {}
 
   // actually selected datasets
@@ -155,7 +157,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   selectionEnabled = false;
 
   labelDisplayMode: "dots" | "pills" = "dots";
-  showLegendPanel = true;
+  showLabelPanel = true;
   labelLegend: Label[] = [];
 
   selectionRect: any;
@@ -193,6 +195,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     this.selectedDatasets$ = this.store.select("selectedDatasets");
+
+    // Load persisted label display preferences. Getters yield null when the
+    // user has no preference recorded yet, in which case the existing
+    // component defaults stay in effect.
+    this.preferencesService.getLabelDisplayMode().subscribe((mode) => {
+      if (mode != null) {
+        this.labelDisplayMode = mode;
+        this.renderLabels();
+      }
+    });
+    this.preferencesService.getShowLabelPanel().subscribe((value) => {
+      if (value != null) {
+        this.showLabelPanel = value;
+      }
+    });
 
     const section = d3.select("#workflowvisualization");
     this.scrollerDiv = section.append("div").classed("scroller-div", true);
@@ -1237,10 +1254,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   toggleLabelDisplayMode(): void {
     this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
     this.renderLabels();
+    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode);
   }
 
-  toggleLegendPanel(): void {
-    this.showLegendPanel = !this.showLegendPanel;
+  toggleLabelPanel(): void {
+    this.showLabelPanel = !this.showLabelPanel;
+    this.preferencesService.setShowLabelPanel(this.showLabelPanel);
   }
 
   renderLabels(): void {

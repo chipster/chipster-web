@@ -1,12 +1,12 @@
 <section id="workflowvisualization"></section>
-<ng-container *ngIf="showLegendPanel">
+<ng-container *ngIf="showLabelPanel">
   <div class="label-legend" *ngIf="labelLegend.length > 0">
     <button
       type="button"
       class="btn-close label-legend-close"
       aria-label="Hide labels panel"
       title="Hide labels panel"
-      (click)="toggleLegendPanel()"></button>
+      (click)="toggleLabelPanel()"></button>
     <div class="label-legend-body">
       <span class="label-legend-title">Labels</span>
       <span class="label-legend-items">
