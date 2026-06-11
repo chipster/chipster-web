@@ -22,7 +22,7 @@
             <ch-add-dataset-modal [sessionData]="sessionData"></ch-add-dataset-modal>
 
             <!-- context dropdown -->
-            <div ngbDropdown class="d-inline-block float-end">
+            <div ngbDropdown container="body" class="d-inline-block float-end">
               <button
                 type="button"
                 class="btn btn-sm btn-outline-secondary tool-bar-button no-caret-dropdown"
@@ -66,7 +66,7 @@
             </button>
 
             <!-- labels split button -->
-            <div ngbDropdown #labelsDropdown="ngbDropdown" class="btn-group btn-group-sm float-end me-2">
+            <div ngbDropdown #labelsDropdown="ngbDropdown" container="body" class="btn-group btn-group-sm float-end me-2">
               <button
                 type="button"
                 class="btn btn-outline-secondary tool-bar-button"
