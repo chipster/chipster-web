@@ -1,6 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
 @import "bootstrap-custom";
 
+/*
+Custom element component hosts default to display:inline. Left inline, they share a single
+inline formatting context, which lets a heavy reflow elsewhere (e.g. the PDF viewer's
+dynamic height) stretch an earlier host's box and push the layout down. Make the structural
+shell hosts block-level so each owns an independent box.
+*/
+ch-app-root,
+ch-navigation,
+ch-hotkey-cheatsheet,
+ch-error,
+ch-session {
+  display: block;
+}
+
 // allow absolute positioning inside the search field
 .tab-form-container {
   position: relative;
