@@ -401,7 +401,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Posts the four DEFAULT_LABELS into the session when it has none yet, so
+  // Creates the four DEFAULT_LABELS in the session when it has none yet, so
   // first-time users see usable labels immediately. The session must be
   // writable; the read-only path above never reaches this step (NEVER).
   private seedDefaultLabelsIfEmpty(sessionData: SessionData): Observable<SessionData> {
@@ -409,23 +409,24 @@ export class SessionComponent implements OnInit, OnDestroy {
       return of(sessionData);
     }
     const sessionId = sessionData.session.sessionId;
-    return forkJoin(
-      DEFAULT_LABELS.map((d) => {
-        const draft: Label = {
-          sessionId,
-          labelId: null,
-          name: d.name,
-          color: d.color,
-          created: null,
-        };
-        return this.sessionResource.createLabel(sessionId, draft).pipe(
-          tap((labelId: string) => {
-            sessionData.labelsMap.set(labelId, { ...draft, labelId });
-          }),
-          catchError(() => of(null)),
-        );
+    const drafts: Label[] = DEFAULT_LABELS.map((d) => ({
+      sessionId,
+      labelId: null,
+      name: d.name,
+      color: d.color,
+      created: null,
+    }));
+    return this.sessionResource.createLabels(sessionId, drafts).pipe(
+      // the bulk endpoint returns the assigned ids in the same order as the posted labels
+      tap((created: { labelId: string }[]) => {
+        created.forEach((c, i) => {
+          sessionData.labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
+        });
       }),
-    ).pipe(map(() => sessionData));
+      map(() => sessionData),
+      // seeding is best-effort; don't block opening the session if it fails
+      catchError(() => of(sessionData)),
+    );
   }
 
   /**
