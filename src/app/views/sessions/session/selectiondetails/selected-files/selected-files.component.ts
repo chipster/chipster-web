@@ -8,6 +8,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
+import { LabelMenuItem, LabelsContextMenuService } from "../../labels/labels-context-menu.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
@@ -36,6 +37,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   sourceJob: Job;
   modulesMap: Map<string, Module>;
+  labelsSubmenuOpen = false;
 
   constructor(
     public selectionService: SelectionService, // used in template
@@ -47,7 +49,22 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     private getSessionDataService: GetSessionDataService,
     private selectionHandlerService: SelectionHandlerService,
     private datasetContextMenuService: DatasetContextMenuService,
+    private labelsContextMenuService: LabelsContextMenuService,
   ) {}
+
+  get labelMenuItems(): LabelMenuItem[] {
+    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);
+  }
+
+  toggleLabel(item: LabelMenuItem): void {
+    this.labelsContextMenuService
+      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)
+      .subscribe();
+  }
+
+  trackLabelMenuItem(_index: number, item: LabelMenuItem): string {
+    return item.label.labelId;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
@@ -123,6 +140,10 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   selectToolAndParameters() {}
+
+  manageLabels() {
+    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData);
+  }
 
   selectChildren() {
     const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);

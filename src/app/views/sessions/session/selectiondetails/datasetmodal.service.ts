@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, Session, Tool } from "chipster-js-common";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
+import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
 import { EMPTY } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -11,6 +11,7 @@ import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
+import { LabelsModalComponent } from "../labels/labels-modal.component";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { RouteService } from "../../../../shared/services/route.service";
@@ -36,6 +37,33 @@ export class DatasetModalService {
     modalRef.componentInstance.dataset = dataset;
     modalRef.componentInstance.sessionData = sessionData;
     modalRef.componentInstance.tools = tools;
+  }
+
+  private labelsModalRef: NgbModalRef | null = null;
+
+  public openLabelsModal(selectedDatasets: Dataset[], sessionData: SessionData): void {
+    if (this.labelsModalRef) {
+      return;
+    }
+    this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
+    this.labelsModalRef.componentInstance.sessionData = sessionData;
+    this.labelsModalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
+    this.labelsModalRef.result.then(
+      () => {
+        this.labelsModalRef = null;
+      },
+      () => {
+        this.labelsModalRef = null;
+      },
+    );
+  }
+
+  public toggleLabelsModal(selectedDatasets: Dataset[], sessionData: SessionData): void {
+    if (this.labelsModalRef) {
+      this.labelsModalRef.dismiss();
+      return;
+    }
+    this.openLabelsModal(selectedDatasets, sessionData);
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
@@ -109,13 +137,12 @@ export class DatasetModalService {
 
   public openCopySelectionToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
     this.dialogModalService
-      .openSessionNameModal("Copy Selected Files to a New Session", sessionData.session.name + "_part", "Copy")
+      .openSessionNameModal("Copy selected files to a new session", sessionData.session.name + "_part", "Copy")
       .pipe(
-        mergeMap((name) => {
+        mergeMap((name: string) => {
           log.info("copying selected datasets and jobs");
 
           const selectedSessionData = this.getSessionDataOfSelection(selectedDatasets, sessionData);
-
           const copy = this.sessionResource.copySession(selectedSessionData, name, false);
 
           // return observable of the new sessionId
@@ -140,7 +167,7 @@ export class DatasetModalService {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
           return this.dialogModalService.openOptionModal(
-            "Copy Selected files to and Existing Session",
+            "Copy selected files to an existing session",
             "Select a session into which the selected files will be copied. The files will be copied to the right side of the selected session.",
             sessionIdToNameMap,
             "Copy",
@@ -148,7 +175,7 @@ export class DatasetModalService {
           );
         }),
         // we only need datasets and sessionId, not jobs
-        mergeMap((targetSessionId: string) => this.sessionResource.loadSession(targetSessionId, false)),
+        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, false)),
         mergeMap((targetSessionData) => {
           log.info("copying selected datasets and jobs");
 
@@ -162,6 +189,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             targetSessionData.session.sessionId,
             selectedSessionData,
+            targetSessionData.labelsMap ?? new Map(),
           );
 
           // return observable of the new sessionId
@@ -186,7 +214,7 @@ export class DatasetModalService {
           const sessionIdToNameMap = new Map(sessions.map((s) => [s.sessionId, s.name]));
 
           return this.dialogModalService.openOptionModal(
-            "Select a Session to Merge into This Session",
+            "Select a session to merge into this session",
             "The selected session will be merged to the right side of current files.",
             sessionIdToNameMap,
             "Merge",
@@ -200,7 +228,11 @@ export class DatasetModalService {
           // generate new Dataset and Job IDs so that we can merge the same datasets several times
           this.changeIds(sourceSessionData);
 
-          const copy = this.sessionResource.copyToExistingSession(sessionData.session.sessionId, sourceSessionData);
+          const copy = this.sessionResource.copyToExistingSession(
+            sessionData.session.sessionId,
+            sourceSessionData,
+            sessionData.labelsMap ?? new Map(),
+          );
 
           // return observable of the new sessionId
           return this.dialogModalService.openSpinnerModal("Merge session", copy);
@@ -251,10 +283,24 @@ export class DatasetModalService {
       }),
     );
 
+    // narrow labelsMap to only labels referenced by the selected datasets
+    const referencedLabelIds = new Set(
+      selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []),
+    );
+    const filteredLabelsMap = new Map<string, Label>();
+    if (sessionData.labelsMap) {
+      sessionData.labelsMap.forEach((label, id) => {
+        if (referencedLabelIds.has(id)) {
+          filteredLabelsMap.set(id, label);
+        }
+      });
+    }
+
     return {
       session: sessionData.session,
       datasetsMap: selectedDatasetsMap,
       jobsMap: sourceJobs,
+      labelsMap: filteredLabelsMap,
       datasetTypeTags: null,
       cachedFileHeaders: null,
     };

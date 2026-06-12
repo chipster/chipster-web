@@ -12,6 +12,8 @@ export class BooleanModalComponent implements AfterViewInit {
   @Input()
   message: string;
   @Input()
+  subMessage: string = null;
+  @Input()
   title: string;
 
   @ViewChild("submitButton")

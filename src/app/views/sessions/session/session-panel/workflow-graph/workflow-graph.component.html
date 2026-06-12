@@ -1,1 +1,36 @@
 <section id="workflowvisualization"></section>
+<ng-container *ngIf="showLabelPanel">
+  <div class="label-legend" *ngIf="labelLegend.length > 0">
+    <button
+      type="button"
+      class="btn-close label-legend-close"
+      aria-label="Hide labels panel"
+      title="Hide labels panel"
+      (click)="toggleLabelPanel()"></button>
+    <div class="label-legend-body">
+      <span class="label-legend-title">Labels</span>
+      <span class="label-legend-items">
+        <button
+          type="button"
+          class="label-legend-item"
+          *ngFor="let label of labelLegend"
+          [disabled]="!selectedDatasets || selectedDatasets.length === 0"
+          [title]="selectedDatasets && selectedDatasets.length > 0
+            ? 'Apply or remove \'' + label.name + '\''
+            : 'No files selected'"
+          (click)="toggleLabelOnSelection(label)">
+          <span class="label-legend-dot" [style.background-color]="legendDotColor(label)"></span>
+          <span class="label-legend-name">{{ label.name }}</span>
+        </button>
+      </span>
+    </div>
+    <button
+      type="button"
+      class="label-legend-edit"
+      aria-label="Edit labels"
+      title="Edit labels"
+      (click)="openLabelsModal()">
+      <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+    </button>
+  </div>
+</ng-container>

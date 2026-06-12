@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
+import { Dataset, EventType, Job, JobState, Label, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
@@ -11,6 +11,7 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../model/session/session-data";
+import { DEFAULT_LABELS } from "./labels/label-palette";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
 import { RouteService } from "../../../shared/services/route.service";
@@ -396,7 +397,35 @@ export class SessionComponent implements OnInit, OnDestroy {
           mergeMap(() => NEVER),
         );
       }),
+      mergeMap((sessionData) => this.seedDefaultLabelsIfEmpty(sessionData)),
     );
+  }
+
+  // Posts the four DEFAULT_LABELS into the session when it has none yet, so
+  // first-time users see usable labels immediately. The session must be
+  // writable; the read-only path above never reaches this step (NEVER).
+  private seedDefaultLabelsIfEmpty(sessionData: SessionData): Observable<SessionData> {
+    if (sessionData.labelsMap.size > 0) {
+      return of(sessionData);
+    }
+    const sessionId = sessionData.session.sessionId;
+    return forkJoin(
+      DEFAULT_LABELS.map((d) => {
+        const draft: Label = {
+          sessionId,
+          labelId: null,
+          name: d.name,
+          color: d.color,
+          created: null,
+        };
+        return this.sessionResource.createLabel(sessionId, draft).pipe(
+          tap((labelId: string) => {
+            sessionData.labelsMap.set(labelId, { ...draft, labelId });
+          }),
+          catchError(() => of(null)),
+        );
+      }),
+    ).pipe(map(() => sessionData));
   }
 
   /**
