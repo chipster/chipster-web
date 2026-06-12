@@ -547,6 +547,15 @@ export class SessionResource {
     );
   }
 
+  createLabels(sessionId: string, labels: Label[]): Observable<{ labelId: string }[]> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/labels/array`, labels, this.tokenService.getTokenParams(true)),
+      ),
+      map((response: {}) => response["labels"]),
+    );
+  }
+
   updateLabel(sessionId: string, label: Label): Observable<null> {
     return this.configService
       .getSessionDbUrl()
@@ -628,7 +637,7 @@ export class SessionResource {
       .map((label: Label) => ({ ...label, sessionId: null }));
 
     const createLabelsRequest = labelsToCreate.length > 0
-      ? forkJoin(labelsToCreate.map((l) => this.createLabel(targetSessionId, l)))
+      ? this.createLabels(targetSessionId, labelsToCreate)
       : of([]);
 
     // datasets keep their labelIds verbatim -- they now resolve in the destination
@@ -668,7 +677,7 @@ export class SessionResource {
 
         const createJobsRequest = jobCopies.length > 0 ? this.createJobs(targetSessionId, jobCopies) : of([]);
 
-        // see the comment of the forkJoin above
+        // see the defaultIfEmpty comment above
         return createJobsRequest.pipe(defaultIfEmpty([]));
       }),
       mergeMap((createdJobs: Job[]) => {
