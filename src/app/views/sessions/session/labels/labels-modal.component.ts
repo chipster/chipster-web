@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
-import { catchError, toArray } from "rxjs/operators";
+import { catchError, map, toArray } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
@@ -111,6 +111,64 @@ export class LabelsModalComponent implements OnInit {
         this.rows = this.rows.filter((r) => r !== row);
       },
       error: (err) => this.errorService.showError("Deleting label failed", err),
+    });
+  }
+
+  deleteAllLabels(): void {
+    const count = this.rows.length;
+    this.dialogModalService
+      .openBooleanModal(
+        "Delete all labels",
+        `Delete all ${count} label${count === 1 ? "" : "s"}?`,
+        "Delete all",
+        "Cancel",
+        "They will be removed from the session and from all files that use them.",
+      )
+      .then(
+        () => this.confirmDeleteAllLabels(),
+        () => {},
+      );
+  }
+
+  private confirmDeleteAllLabels(): void {
+    const sessionId = this.sessionData.session.sessionId;
+    const labelIds = this.rows.map((r) => r.label.labelId);
+
+    this.saving = true;
+    forkJoin(
+      labelIds.map((labelId) =>
+        this.sessionResource.deleteLabel(sessionId, labelId).pipe(
+          // emit the id on success, null on failure, so only labels that were
+          // actually deleted server-side get scrubbed from local state
+          map(() => labelId),
+          catchError((err) => {
+            this.errorService.showError("Deleting label failed", err);
+            return of(null);
+          }),
+        ),
+      ),
+    ).subscribe({
+      next: (results) => {
+        // mirror the local-state scrub done in confirmDeleteLabel, for every deleted id
+        const deleted = new Set(results.filter((id): id is string => id != null));
+        deleted.forEach((id) => this.sessionData.labelsMap.delete(id));
+        this.selectedDatasets.forEach((d) => {
+          if (d.labelIds) {
+            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
+          }
+        });
+        this.sessionData.datasetsMap.forEach((d) => {
+          if (d.labelIds) {
+            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
+          }
+        });
+        // keep any rows that weren't deleted (failed, or created meanwhile)
+        this.rows = this.rows.filter((r) => !deleted.has(r.label.labelId));
+        this.saving = false;
+      },
+      error: () => {
+        this.saving = false;
+      },
     });
   }
 

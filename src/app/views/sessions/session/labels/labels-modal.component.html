@@ -16,10 +16,10 @@
   <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
 </div>
 
-<div class="modal-body">
+<div class="modal-body pb-2">
   <div *ngIf="rows.length === 0" class="text-muted">No labels yet.</div>
 
-  <table class="table table-sm align-middle" *ngIf="rows.length > 0">
+  <table class="table table-sm align-middle mb-0" *ngIf="rows.length > 0">
     <tbody>
       <tr *ngFor="let row of rows">
         <td style="width: 2.5rem" *ngIf="hasSelection()">
@@ -40,6 +40,12 @@
       </tr>
     </tbody>
   </table>
+
+  <div *ngIf="rows.length > 1" class="text-end mt-2">
+    <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="saving" (click)="deleteAllLabels()">
+      Delete all
+    </button>
+  </div>
 </div>
 
 <div class="modal-footer">
