@@ -2,7 +2,7 @@ import { Component, Input } from "@angular/core";
 import { LabelMenuItem } from "./labels-context-menu.service";
 
 // Renders the three pieces of a label menu item (checkbox / color dot / name)
-// using Angular bindings. We avoid [innerHTML] here because the parent
+// using Angular bindings. [innerHTML] is avoided here because the parent
 // usually feeds these items from a getter that rebuilds them on every change
 // detection cycle; with [innerHTML] Angular would tear down and recreate the
 // button's children on every CD pass, which can leave a mousedown target
