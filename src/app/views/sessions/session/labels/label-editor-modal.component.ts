@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Label } from "chipster-js-common";
-import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
@@ -94,19 +93,21 @@ export class LabelEditorModalComponent implements OnInit {
       });
     } else {
       const newLabel: Label = { sessionId, labelId: null, name, color: this.color, created: null };
-      this.sessionResource
-        .createLabel(sessionId, newLabel)
-        .pipe(mergeMap((labelId) => this.sessionResource.getLabel(sessionId, labelId)))
-        .subscribe({
-          next: (created: Label) => {
-            this.sessionData.labelsMap.set(created.labelId, created);
-            this.activeModal.close(created);
-          },
-          error: (err) => {
-            this.saving = false;
-            this.errorService.showError("Creating label failed", err);
-          },
-        });
+      this.sessionResource.createLabel(sessionId, newLabel).subscribe({
+        next: (labelId: string) => {
+          // build the created label locally from the known fields instead of
+          // re-fetching it; the LABEL websocket event populates labelsMap with
+          // the authoritative copy (incl. server-set created), same as datasets
+          // and jobs
+          const created: Label = { ...newLabel, labelId };
+          this.sessionData.labelsMap.set(labelId, created);
+          this.activeModal.close(created);
+        },
+        error: (err) => {
+          this.saving = false;
+          this.errorService.showError("Creating label failed", err);
+        },
+      });
     }
   }
 
