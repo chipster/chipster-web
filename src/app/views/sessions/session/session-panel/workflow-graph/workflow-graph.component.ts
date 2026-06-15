@@ -1070,8 +1070,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x2", (d) => d.target.x + this.nodeWidth / 2)
       .attr("y2", (d) => d.target.y);
 
-    // labels are drawn imperatively without per-node d3 selections, so re-render the whole layer on drag
-    this.renderLabels();
+    // move only the dragged nodes' label groups by updating their transforms,
+    // instead of rebuilding the whole label layer on every drag tick
+    this.updateDraggedLabelPositions();
   }
 
   renderLinks(): void {
@@ -1257,6 +1258,33 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   }
 
+  // Per-node container for a node's label dots/pills. Children are drawn at
+  // node-relative coordinates and the container's transform places them at the
+  // node, so dragging only needs to update the transform (see
+  // updateDraggedLabelPositions) instead of rebuilding the whole layer.
+  private createNodeLabelGroup(node: DatasetNode): d3.Selection<SVGGElement, DatasetNode, HTMLElement, {}> {
+    const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+    return this.d3LabelsGroup
+      .append("g")
+      .attr("class", "node-labels")
+      .datum(node)
+      .attr("transform", `translate(${node.x},${node.y})`)
+      .style("opacity", opacity);
+  }
+
+  // Move the label groups of the dragged (selected) nodes by updating their
+  // transforms only, mirroring how captions and links are repositioned during
+  // a drag. Avoids the full label-layer rebuild on every drag tick.
+  private updateDraggedLabelPositions(): void {
+    if (!this.d3LabelsGroup) {
+      return;
+    }
+    this.d3LabelsGroup
+      .selectAll<SVGGElement, DatasetNode>("g.node-labels")
+      .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
+      .attr("transform", (d) => `translate(${d.x},${d.y})`);
+  }
+
   private renderLabelDots(): void {
     const labelsMap = this.sessionData.labelsMap;
     const maxVisible = 5;
@@ -1272,14 +1300,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const visible: Label[] = labels.slice(0, maxVisible);
       const overflow = labels.length - visible.length;
 
-      const centerY = node.y + this.nodeHeight - dotOverlap + dotRadius;
-      let cursorX = node.x + dotRadius;
+      // node-relative coordinates; createNodeLabelGroup's transform positions them
+      const centerY = this.nodeHeight - dotOverlap + dotRadius;
+      let cursorX = dotRadius;
 
-      const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+      const group = this.createNodeLabelGroup(node);
 
       visible.forEach((label: Label) => {
         const colorBg = resolveLabelColor(label.color);
-        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        const g = group.append("g");
         g.append("circle")
           .attr("cx", cursorX)
           .attr("cy", centerY)
@@ -1293,7 +1322,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
       if (overflow > 0) {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
-        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        const g = group.append("g");
         g.append("circle")
           .attr("cx", cursorX)
           .attr("cy", centerY)
@@ -1333,10 +1362,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       const visible: Label[] = labels.slice(0, maxVisible);
       const overflow = labels.length - visible.length;
 
-      const baseY = node.y + this.nodeHeight - pillOverlap;
-      let cursorX = node.x;
+      // node-relative coordinates; createNodeLabelGroup's transform positions them
+      const baseY = this.nodeHeight - pillOverlap;
+      let cursorX = 0;
 
-      const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+      const group = this.createNodeLabelGroup(node);
 
       visible.forEach((label: Label) => {
         const bg = resolveLabelColor(label.color);
@@ -1344,7 +1374,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         const fullText = label.name ?? "";
         const text = this.truncateToWidth(fullText, pillFontSize, horizontalPadding, maxPillWidth);
         const pillWidth = this.estimatePillWidth(text, pillFontSize, horizontalPadding);
-        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        const g = group.append("g");
         g.append("rect")
           .attr("x", cursorX)
           .attr("y", baseY)
@@ -1373,7 +1403,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
         const overflowText = "+" + overflow;
         const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
-        const g = this.d3LabelsGroup.append("g").style("opacity", opacity);
+        const g = group.append("g");
         g.append("rect")
           .attr("x", cursorX)
           .attr("y", baseY)
