@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
+import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
@@ -9,6 +9,7 @@ import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { DropdownCloseService } from "../../../../../shared/services/dropdown-close.service";
 import { HotkeyService } from "../../../../../shared/services/hotkey.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
@@ -98,6 +99,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private labelsContextMenuService: LabelsContextMenuService,
     private hotkeyService: HotkeyService,
     private preferencesService: PreferencesService,
+    private dropdownCloseService: DropdownCloseService,
+    private elementRef: ElementRef<HTMLElement>,
   ) {}
 
   // actually selected datasets
@@ -344,86 +347,27 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     // d3-drag (on the workflow background and on dataset rects) calls
-    // event.stopImmediatePropagation() on every mousedown AND on every
-    // mouseup (the mouseup listener is attached on window in capture phase),
-    // so ng-bootstrap's autoclose listeners on document never see workflow-
-    // area pointer events. The dropdown therefore stays open even when the
-    // user clearly clicks outside it.
+    // event.stopImmediatePropagation() on every mousedown, and during a drag
+    // gesture on every mouseup (its mouseup listener sits on window in capture
+    // phase, ahead of everything else), so ng-bootstrap's autoclose listeners
+    // on document never see workflow-area pointer events. An open dropdown
+    // would therefore stay open even when the user clearly clicks outside it.
     //
-    // Work around it by re-dispatching synthetic mousedown/mouseup events on
-    // document.body (target outside any dropdown panel) so ng-bootstrap's
-    // existing autoclose logic fires. Mousedown is re-dispatched immediately
-    // (capture-phase listener on document fires before d3-drag's target-phase
-    // listener stops propagation). Mouseup is re-dispatched in the next
-    // microtask so d3-drag's window-capture mouseup listener has time to run
-    // and remove itself first — otherwise the synthetic mouseup would
-    // re-trigger d3-drag's "end" handler.
-    document.addEventListener("mousedown", this.reDispatchWorkflowMousedown, true);
-    window.addEventListener("mouseup", this.reDispatchWorkflowMouseup, true);
+    // Close open dropdowns directly instead: a capture-phase listener on this
+    // component's own element fires before d3-drag's target-phase handler can
+    // stop the event, and DropdownCloseDirective relays the request to every
+    // ngbDropdown. No mouseup handling is needed because the close decision is
+    // made already on mousedown.
+    this.elementRef.nativeElement.addEventListener("mousedown", this.closeDropdownsOnMousedown, true);
   }
 
-  private workflowMousedownPending = false;
-
-  private readonly reDispatchWorkflowMousedown = (event: MouseEvent): void => {
-    if (this.isWorkflowMousedownReDispatch(event)) {
-      return;
+  private readonly closeDropdownsOnMousedown = (event: MouseEvent): void => {
+    // right-click doesn't autoclose dropdowns elsewhere (ng-bootstrap ignores
+    // button 2), so keep the same behavior here
+    if (event.button !== 2) {
+      this.dropdownCloseService.closeOpenDropdowns();
     }
-    const target = event.target as Element | null;
-    if (!target?.closest?.("#workflow-graph")) {
-      // Any non-workflow mousedown "consumes" the pending flag so it can't
-      // drift out of sync if a previous workflow mousedown never received
-      // a matching mouseup (e.g. user dragged off the browser window).
-      this.workflowMousedownPending = false;
-      return;
-    }
-    this.workflowMousedownPending = true;
-    const copy = new MouseEvent("mousedown", {
-      bubbles: true,
-      cancelable: true,
-      button: event.button,
-      clientX: event.clientX,
-      clientY: event.clientY,
-      view: window,
-    });
-    this.markWorkflowMousedownReDispatch(copy);
-    document.body.dispatchEvent(copy);
   };
-
-  private readonly reDispatchWorkflowMouseup = (event: MouseEvent): void => {
-    if (!this.workflowMousedownPending) {
-      return;
-    }
-    if (this.isWorkflowMousedownReDispatch(event)) {
-      return;
-    }
-    this.workflowMousedownPending = false;
-    const button = event.button;
-    const clientX = event.clientX;
-    const clientY = event.clientY;
-    // Defer to next microtask so d3-drag's mouseupped (also on window, capture)
-    // finishes and removes its window listeners first; otherwise our synthetic
-    // mouseup would re-trigger d3-drag's "end" handler.
-    Promise.resolve().then(() => {
-      const copy = new MouseEvent("mouseup", {
-        bubbles: true,
-        cancelable: true,
-        button,
-        clientX,
-        clientY,
-        view: window,
-      });
-      this.markWorkflowMousedownReDispatch(copy);
-      document.body.dispatchEvent(copy);
-    });
-  };
-
-  private isWorkflowMousedownReDispatch(event: MouseEvent): boolean {
-    return (event as MouseEvent & { __workflowReDispatch?: boolean }).__workflowReDispatch === true;
-  }
-
-  private markWorkflowMousedownReDispatch(event: MouseEvent): void {
-    (event as MouseEvent & { __workflowReDispatch?: boolean }).__workflowReDispatch = true;
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.zoomGroup) {
@@ -456,8 +400,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions.forEach((subs) => subs.unsubscribe());
     this.subscriptions = [];
     this.unregisterHotkeys.forEach((fn) => fn());
-    document.removeEventListener("mousedown", this.reDispatchWorkflowMousedown, true);
-    window.removeEventListener("mouseup", this.reDispatchWorkflowMouseup, true);
+    this.elementRef.nativeElement.removeEventListener("mousedown", this.closeDropdownsOnMousedown, true);
   }
 
   zoomIn(): void {
