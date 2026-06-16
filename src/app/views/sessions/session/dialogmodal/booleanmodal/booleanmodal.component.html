@@ -8,5 +8,5 @@
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary float-end" (click)="cancel()">{{ cancelButtonText }}</button>
-  <button type="submit" class="btn btn-info" (click)="save()" #submitButton>{{ okButtonText }}</button>
+  <button type="submit" class="btn {{ okButtonClass }}" (click)="save()" #submitButton>{{ okButtonText }}</button>
 </div>
