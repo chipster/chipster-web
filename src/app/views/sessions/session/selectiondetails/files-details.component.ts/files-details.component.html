@@ -1,5 +1,12 @@
 <div class="dataset-details">
   <table class="table table-sm table-borderless align-top">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Size</th>
+        <th *ngIf="showDate" scope="col">Date</th>
+      </tr>
+    </thead>
     <tbody>
       <tr *ngFor="let dataset of datasets">
         <td class="">{{ dataset.name }}</td>
