@@ -471,7 +471,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   deleteSession(session: Session) {
     this.dialogModalService
-      .openBooleanModal("Delete session", "Delete session " + session.name + "?", "Delete", "Cancel")
+      .openBooleanModal("Delete session", "Delete session " + session.name + "?", "Delete", "Cancel", "btn-danger")
       .then(
         () => {
           if (this.selectedSession === session) {

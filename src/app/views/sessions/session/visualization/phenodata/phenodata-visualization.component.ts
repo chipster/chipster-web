@@ -249,7 +249,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         this.zone.run(() => {
           const columnName = this.headers[col];
           this.stringModalService
-            .openBooleanModal("Delete column", `Are you sure you want to delete column '${columnName}'?`, "Delete", "Cancel")
+            .openBooleanModal(
+              "Delete column",
+              `Are you sure you want to delete column '${columnName}'?`,
+              "Delete",
+              "Cancel",
+              "btn-danger",
+            )
             .then(() => this.removeColumn(col), () => {});
         });
       },

@@ -93,7 +93,13 @@ export class SessionDetailsComponent {
 
   removeSessionModal() {
     this.dialogModalService
-      .openBooleanModal("Delete session", "Delete session " + this.sessionData.session.name + "?", "Delete", "Cancel")
+      .openBooleanModal(
+        "Delete session",
+        "Delete session " + this.sessionData.session.name + "?",
+        "Delete",
+        "Cancel",
+        "btn-danger",
+      )
       .then(
         () => {
           this.deleteSession.emit(this.session);
