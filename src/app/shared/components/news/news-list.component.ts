@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
+import { DialogModalService } from "../../../views/sessions/session/dialogmodal/dialogmodal.service";
 import { NewsService } from "../../services/news.service";
 import { NewsItem } from "./NewsItem";
 
@@ -19,6 +20,7 @@ export class NewsListComponent implements OnInit {
   constructor(
     private newsService: NewsService,
     private restErrorService: RestErrorService,
+    private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit(): void {
@@ -75,15 +77,24 @@ export class NewsListComponent implements OnInit {
       return;
     }
 
-    this.newsService.deleteNewsItem(news).subscribe({
-      next: () => {
-        log.info("delete news done");
-      },
-      error: (error) => {
-        log.warn("delete news failed", error);
-        this.restErrorService.showErrorAdmin("Delete news failed.", error);
-      },
-      complete: () => this.getNews(),
-    });
+    this.dialogModalService
+      .openBooleanModal("Delete news", `Delete news '${news.contents.title}'?`, "Delete", "Cancel", "btn-danger")
+      .then(
+        () => {
+          this.newsService.deleteNewsItem(news).subscribe({
+            next: () => {
+              log.info("delete news done");
+            },
+            error: (error) => {
+              log.warn("delete news failed", error);
+              this.restErrorService.showErrorAdmin("Delete news failed.", error);
+            },
+            complete: () => this.getNews(),
+          });
+        },
+        () => {
+          // modal dismissed
+        },
+      );
   }
 }
