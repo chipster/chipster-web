@@ -204,6 +204,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     super.clearPlot();
     this.svg = this.plot.append("svg");
     this.populatePlotData();
+    this.observePlotResize(this.plot.node());
   }
 
   // New Dataset Creation  from selected data points

@@ -249,6 +249,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     super.clearPlot();
     this.svg = this.plot.append("svg");
     this.populatePlotData();
+    this.observePlotResize(this.plot.node());
   }
 
   // new Dataset creation
