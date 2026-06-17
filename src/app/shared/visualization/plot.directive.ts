@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, HostListener, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Directive, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -38,6 +38,9 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
   protected unsubscribe: Subject<any> = new Subject();
   state: LoadState;
+
+  // Redraws the plot when its container changes size, see observePlotResize()
+  private resizeObserver: ResizeObserver;
 
   constructor(fileResource: FileResource, sessionDataService: SessionDataService) {
     this.fileResource = fileResource;
@@ -104,6 +107,10 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next(null);
     this.unsubscribe.complete();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
   }
 
   /** @description To check whether the file has the required column headers to create the visualization* */
@@ -215,9 +222,26 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   /** @description New Dataset Creation  from selected data points * */
   createDatasetFromSelected() {}
 
-  // Redraw the svg with the changed width of the window
-  @HostListener("window:resize", ["$event"])
-  onResize(event: any) {
-    this.redrawPlot();
+  /**
+   * Redraw the plot whenever its container changes size.
+   *
+   * The plot is drawn into a tab that ngbNav creates lazily. When the tab
+   * becomes visible the container doesn't necessarily have its final width
+   * yet, so the first draw can end up with a zero/wrong width and an empty
+   * plot. Observing the container redraws the plot once it gets its real
+   * size, and also takes care of redrawing on window resize.
+   *
+   * Safe to call repeatedly; the observer is only created once.
+   */
+  protected observePlotResize(element: Element) {
+    if (!element || this.resizeObserver) {
+      return;
+    }
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.tsv && this.selectedXAxisHeader) {
+        this.redrawPlot();
+      }
+    });
+    this.resizeObserver.observe(element);
   }
 }

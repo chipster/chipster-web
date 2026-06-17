@@ -36,6 +36,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
+  // Redraws the chart when its container changes size, see observeResize()
+  private resizeObserver: ResizeObserver;
+
   constructor(
     private expressionProfileService: ExpressionProfileService,
     private sessionDataService: SessionDataService,
@@ -68,6 +71,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
           if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
             this.drawLineChart(this.tsv);
+            this.observeResize();
             this.state = new LoadState(State.Ready);
           } else {
             this.state = new LoadState(
@@ -88,6 +92,34 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next(null);
     this.unsubscribe.complete();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
+  }
+
+  /**
+   * Redraw the chart whenever its container changes size.
+   *
+   * The chart is drawn into a tab that ngbNav creates lazily. When the tab
+   * becomes visible the container doesn't necessarily have its final width
+   * yet, so the first draw can end up with a zero/wrong width and an empty
+   * chart. Observing the container redraws the chart once it gets its real
+   * size, and also takes care of redrawing on window resize.
+   *
+   * Safe to call repeatedly; the observer is only created once.
+   */
+  private observeResize() {
+    const element = document.getElementById("expressionprofile");
+    if (!element || this.resizeObserver) {
+      return;
+    }
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.tsv) {
+        this.drawLineChart(this.tsv);
+      }
+    });
+    this.resizeObserver.observe(element);
   }
 
   drawLineChart(tsv: TSVFile) {
