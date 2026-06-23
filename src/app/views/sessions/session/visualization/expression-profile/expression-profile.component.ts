@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, Input, NgZone, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { filter, map, find, difference, uniq, includes, floor, intersection } from "lodash-es";
@@ -36,8 +36,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  // Redraws the chart when its container changes size, see observeResize()
+  // Redraws the chart when its container changes width, see observeResize()
   private resizeObserver: ResizeObserver;
+  private lastChartWidth: number;
 
   constructor(
     private expressionProfileService: ExpressionProfileService,
@@ -45,6 +46,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     private visualizationTSVService: VisualizationTSVService,
     private fileResource: FileResource,
     private restErrorService: RestErrorService,
+    private zone: NgZone,
   ) {}
 
   ngOnChanges() {
@@ -87,6 +89,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       );
 
     this.selectedGeneExpressions = [];
+
+    // reset the cached width so the resize observer redraws the new dataset
+    // even when the container returns to a width it had for a previous one
+    this.lastChartWidth = undefined;
   }
 
   ngOnDestroy() {
@@ -114,9 +120,17 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     if (!element || this.resizeObserver) {
       return;
     }
-    this.resizeObserver = new ResizeObserver(() => {
-      if (this.tsv) {
-        this.drawLineChart(this.tsv);
+    this.resizeObserver = new ResizeObserver((entries) => {
+      // Only width changes trigger a redraw: the chart height is fixed, so
+      // height-only changes (e.g. the selection list growing the panel) must
+      // not redraw, otherwise the current selection highlight would be lost.
+      const width = entries[0]?.contentRect.width;
+      if (width && width !== this.lastChartWidth && this.tsv) {
+        this.lastChartWidth = width;
+        // ResizeObserver fires outside Angular's zone; redraw inside it so the
+        // d3 drag handlers are re-registered in the zone (otherwise selecting
+        // would not trigger change detection) and bound state stays in sync.
+        this.zone.run(() => this.drawLineChart(this.tsv));
       }
     });
     this.resizeObserver.observe(element);
@@ -357,6 +371,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       startPoint = new Point(-1, -1);
       d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
     }
+
+    // the paths are recreated on every redraw, so re-apply the selection highlight
+    (this.selectedGeneExpressions ?? []).forEach((expression) => this.setSelectionStyle(expression.id));
   }
 
   createNewDataset() {

@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Directive, Input, NgZone, OnChanges, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -35,17 +35,20 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   protected fileResource: FileResource;
   protected sessionDataService: SessionDataService;
   private restErrorService: RestErrorService;
+  private zone: NgZone;
 
   protected unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
-  // Redraws the plot when its container changes size, see observePlotResize()
+  // Redraws the plot when its container changes width, see observePlotResize()
   private resizeObserver: ResizeObserver;
+  private lastPlotWidth: number;
 
   constructor(fileResource: FileResource, sessionDataService: SessionDataService) {
     this.fileResource = fileResource;
     this.sessionDataService = sessionDataService;
     this.restErrorService = AppInjector.get(RestErrorService);
+    this.zone = AppInjector.get(NgZone);
   }
 
   ngOnChanges() {
@@ -58,6 +61,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     this.unsubscribe.next(null);
 
     this.clearPlot();
+
+    // clear any previous selection so it isn't re-applied to a new dataset
+    this.selectedDataPointIds = undefined;
+    this.selectedDataRows = [];
+
+    // reset the cached width so the resize observer redraws the new dataset
+    // even when the container returns to a width it had for a previous one
+    this.lastPlotWidth = undefined;
 
     let rowLimit = 5000;
     if (showMore) {
@@ -223,13 +234,17 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   createDatasetFromSelected() {}
 
   /**
-   * Redraw the plot whenever its container changes size.
+   * Redraw the plot whenever its container changes width.
    *
    * The plot is drawn into a tab that ngbNav creates lazily. When the tab
    * becomes visible the container doesn't necessarily have its final width
    * yet, so the first draw can end up with a zero/wrong width and an empty
    * plot. Observing the container redraws the plot once it gets its real
-   * size, and also takes care of redrawing on window resize.
+   * width, and also takes care of redrawing on window resize.
+   *
+   * Only width changes trigger a redraw: the plot height is fixed, so
+   * height-only changes (e.g. the selection list growing the panel) must
+   * not redraw, otherwise the current selection highlight would be lost.
    *
    * Safe to call repeatedly; the observer is only created once.
    */
@@ -237,9 +252,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     if (!element || this.resizeObserver) {
       return;
     }
-    this.resizeObserver = new ResizeObserver(() => {
-      if (this.tsv && this.selectedXAxisHeader) {
-        this.redrawPlot();
+    this.resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width && width !== this.lastPlotWidth && this.tsv && this.selectedXAxisHeader) {
+        this.lastPlotWidth = width;
+        // ResizeObserver fires outside Angular's zone; redraw inside it so the
+        // d3 drag handlers are re-registered in the zone (otherwise selecting
+        // would not trigger change detection) and bound state stays in sync.
+        this.zone.run(() => this.redrawPlot());
       }
     });
     this.resizeObserver.observe(element);
