@@ -1219,7 +1219,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    if (this.labelDisplayMode === "dots") {
+    // Force dots in read-only mode (the session-list preview), so a saved
+    // "pills" preference doesn't leak into the preview.
+    if (this.labelDisplayMode === "dots" || !this.enabled) {
       this.renderLabelDots();
     } else {
       this.renderLabelPills();
