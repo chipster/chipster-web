@@ -6,7 +6,11 @@
   <div class="modal-body">
     <dl>
       <ng-container *ngFor="let shortcut of shortcuts">
-        <dt><kbd>{{ shortcut.key }}</kbd></dt>
+        <dt>
+          <ng-container *ngFor="let key of shortcut.keys; let last = last">
+            <kbd>{{ key }}</kbd><span *ngIf="!last"> / </span>
+          </ng-container>
+        </dt>
         <dd>{{ shortcut.description }}</dd>
       </ng-container>
     </dl>
