@@ -130,12 +130,13 @@ export class DialogModalService {
     return modalRef.result;
   }
 
-  openBooleanModal(title, message, okButtonText, cancelButtonText, subMessage: string = null) {
+  openBooleanModal(title, message, okButtonText, cancelButtonText, okButtonClass = "btn-info", subMessage: string = null) {
     const modalRef = this.modalService.open(BooleanModalComponent);
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.subMessage = subMessage;
     modalRef.componentInstance.okButtonText = okButtonText;
+    modalRef.componentInstance.okButtonClass = okButtonClass;
     modalRef.componentInstance.cancelButtonText = cancelButtonText;
 
     return modalRef.result;

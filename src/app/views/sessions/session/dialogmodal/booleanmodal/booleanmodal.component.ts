@@ -8,6 +8,8 @@ export class BooleanModalComponent implements AfterViewInit {
   @Input()
   okButtonText: string;
   @Input()
+  okButtonClass: string = "btn-info";
+  @Input()
   cancelButtonText: string;
   @Input()
   message: string;

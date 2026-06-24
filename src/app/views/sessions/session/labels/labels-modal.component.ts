@@ -84,6 +84,7 @@ export class LabelsModalComponent implements OnInit {
         `Delete label '${row.label.name}'?`,
         "Delete",
         "Cancel",
+        "btn-danger",
         "It will be removed from the session and from all files that use it.",
       )
       .then(
@@ -122,6 +123,7 @@ export class LabelsModalComponent implements OnInit {
         `Delete all ${count} label${count === 1 ? "" : "s"}?`,
         "Delete all",
         "Cancel",
+        "btn-danger",
         "They will be removed from the session and from all files that use them.",
       )
       .then(
