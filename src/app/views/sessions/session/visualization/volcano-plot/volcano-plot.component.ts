@@ -119,6 +119,9 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       height: 600,
     };
     const padding = 50;
+    // extra space below the plot area so the x-axis label isn't clipped by the
+    // svg's bottom edge (svg has overflow:hidden)
+    const xAxisLabelMargin = 20;
 
     const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
     const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
@@ -126,7 +129,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     self.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
-    this.svg.attr("width", size.width).attr("height", size.height).attr("id", "svg");
+    this.svg.attr("width", size.width).attr("height", size.height + xAxisLabelMargin).attr("id", "svg");
 
     // Adding the X-axis
     this.xScale = d3
