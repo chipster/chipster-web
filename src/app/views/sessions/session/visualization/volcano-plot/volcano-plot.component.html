@@ -29,18 +29,23 @@
       edgeR / DESeq2
     </div>
 
-    <div id="selectedGeneList" *ngIf="selectedDataRows && selectedDataRows.length > 0">
+    <div id="selectedGeneList">
       <h6 class="lighter mt-3">Selection</h6>
-      <div class="btn-group me-2 mb-3" role="group">
-        <button class="btn btn-primary btn-sm" (click)="createDatasetFromSelected()">Create file</button>
-      </div>
-      <p class="text-sm">{{ selectedDataRows.length }}/{{ plotData.length }} features selected</p>
-      <hr class="mt-1 mb-2" />
-      <div class="table table-sm">
-        <tr *ngFor="let gene of selectedDataRows">
-          <td class="text-sm">{{ gene.row[0] }}</td>
-        </tr>
-      </div>
+      <ng-container *ngIf="selectedDataRows && selectedDataRows.length > 0; else noSelection">
+        <div class="btn-group me-2 mb-3" role="group">
+          <button class="btn btn-primary btn-sm" (click)="createDatasetFromSelected()">Create file</button>
+        </div>
+        <p class="text-sm">{{ selectedDataRows.length }}/{{ plotData.length }} features selected</p>
+        <hr class="mt-1 mb-2" />
+        <div class="table table-sm">
+          <tr *ngFor="let gene of selectedDataRows">
+            <td class="text-sm">{{ gene.row[0] }}</td>
+          </tr>
+        </div>
+      </ng-container>
+      <ng-template #noSelection>
+        <p class="text-sm">Draw a rectangle to select data points.</p>
+      </ng-template>
     </div>
   </div>
 </div>
