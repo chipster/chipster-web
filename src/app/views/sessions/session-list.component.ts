@@ -494,9 +494,18 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   deleteRule(session: Session, rule: Rule) {
-    this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe(null, (error: any) => {
-      this.restErrorService.showError("Deleting the share failed", error);
-    });
+    this.dialogModalService
+      .openBooleanModal("Remove shared session", `Remove shared session '${session.name}'?`, "Remove", "Cancel")
+      .then(
+        () => {
+          this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe(null, (error: any) => {
+            this.restErrorService.showError("Deleting the share failed", error);
+          });
+        },
+        () => {
+          // modal dismissed
+        },
+      );
   }
 
   isSessionSelected(session: Session) {
