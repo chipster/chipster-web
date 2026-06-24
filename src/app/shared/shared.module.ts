@@ -4,6 +4,7 @@ import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { CoreModule } from "../core/core.module";
 import { AccountComponent } from "./components/account/account.component";
+import { DropdownCloseDirective } from "./directives/dropdown-close.directive";
 import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
 import { NewsItemComponent } from "./components/news/news-item.component";
@@ -69,6 +70,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     ActionToastComponent,
     NewsItemComponent,
     NewsListComponent,
+    DropdownCloseDirective,
   ],
   providers: [
     PipeService,
@@ -113,6 +115,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     ActionToastComponent,
     NewsItemComponent,
     NewsListComponent,
+    DropdownCloseDirective,
   ],
 })
 export class SharedModule {}

@@ -3,6 +3,7 @@ import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
+import { getSortedLabels } from "../../labels/labels-util";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
@@ -84,5 +85,13 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   showJob() {
     this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
+  }
+
+  editLabels(): void {
+    this.datasetModalService.openLabelsModal([this.dataset], this.sessionData);
+  }
+
+  getDatasetLabels() {
+    return getSortedLabels(this.dataset?.labelIds, this.sessionData.labelsMap);
   }
 }

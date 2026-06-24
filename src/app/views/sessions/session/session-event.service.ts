@@ -7,6 +7,7 @@ import {
   Rule,
   Session,
   SessionEvent,
+  Label,
   SessionState,
   WsEvent,
 } from "chipster-js-common";
@@ -29,6 +30,7 @@ export class SessionEventService {
   jobStream$: Observable<SessionEvent>;
   sessionStream$: Observable<SessionEvent>;
   ruleStream$: Observable<SessionEvent>;
+  labelStream$: Observable<SessionEvent>;
   wsSubject$: WebSocketSubject<WsEvent>;
   localSubject$: Subject<WsEvent>;
 
@@ -92,11 +94,19 @@ export class SessionEventService {
       refCount()
     );
 
+    this.labelStream$ = stream.pipe(
+      filter((wsData) => wsData.resourceType === Resource.Label),
+      mergeMap((data) => this.handleLabelEvent(data, this.sessionId, sessionData)),
+      publish(),
+      refCount()
+    );
+
     // update sessionData even if no one else subscribes
     this.datasetStream$.subscribe(null, (err) => this.errorService.showError("dataset event error", err));
     this.jobStream$.subscribe(null, (err) => this.errorService.showError("job event error", err));
     this.sessionStream$.subscribe(null, (err) => this.errorService.showError("session event error", err));
     this.ruleStream$.subscribe(null, (err) => this.errorService.showError("rule event error", err));
+    this.labelStream$.subscribe(null, (err) => this.errorService.showError("label event error", err));
   }
 
   /**
@@ -115,6 +125,10 @@ export class SessionEventService {
 
   getRuleStream() {
     return this.ruleStream$;
+  }
+
+  getLabelStream() {
+    return this.labelStream$;
   }
 
   getSelectedDatasetsContentsUpdatedStream(): Observable<string> {
@@ -239,6 +253,24 @@ export class SessionEventService {
     // dataset deleted, type tags can be removed
     sessionData.datasetTypeTags.delete(sessionEvent.resourceId);
     return observableOf(sessionEvent);
+  }
+
+  handleLabelEvent(event: any, sessionId: string, sessionData: SessionData): Observable<SessionEvent> {
+    if (event.type === EventType.Create || event.type === EventType.Update) {
+      return this.sessionResource.getLabel(sessionId, event.resourceId).pipe(
+        mergeMap((remote: Label) => {
+          const local = sessionData.labelsMap.get(event.resourceId);
+          sessionData.labelsMap.set(event.resourceId, remote);
+          return this.createEvent(event, local, remote);
+        })
+      );
+    }
+    if (event.type === EventType.Delete) {
+      const localCopy = sessionData.labelsMap.get(event.resourceId);
+      sessionData.labelsMap.delete(event.resourceId);
+      return this.createEvent(event, localCopy, null);
+    }
+    log.warn("unknown event type", event);
   }
 
   handleJobEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {

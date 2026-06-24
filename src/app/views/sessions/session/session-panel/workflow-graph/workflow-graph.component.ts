@@ -1,6 +1,6 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
+import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Job, Module, Tool } from "chipster-js-common";
+import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
 import d3ContextMenu from "d3-context-menu";
 import { max as _max, clone, cloneDeep } from "lodash-es";
@@ -9,13 +9,19 @@ import { mergeMap } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { DropdownCloseService } from "../../../../../shared/services/dropdown-close.service";
+import { HotkeyService } from "../../../../../shared/services/hotkey.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
+import { PreferencesService } from "../../../../../shared/services/preferences.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
 import { ToolsService } from "../../../../../shared/services/tools.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
+import { OVERFLOW_LABEL_COLOR, resolveLabelColor, textColorForBackground } from "../../labels/label-palette";
+import { LabelsContextMenuService } from "../../labels/labels-context-menu.service";
+import { getSortedLabels } from "../../labels/labels-util";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -90,6 +96,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     private getSessionDataService: GetSessionDataService,
     private toolsService: ToolsService,
     private datasetContextMenuService: DatasetContextMenuService,
+    private labelsContextMenuService: LabelsContextMenuService,
+    private hotkeyService: HotkeyService,
+    private preferencesService: PreferencesService,
+    private dropdownCloseService: DropdownCloseService,
+    private elementRef: ElementRef<HTMLElement>,
   ) {}
 
   // actually selected datasets
@@ -107,17 +118,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   d3PhenodataNodesGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3LinksGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3LinksDefsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
-  d3LabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
-  d3PhenodataLabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3CaptionsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3PhenodataCaptionsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataWarningsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3PhenodataLinksGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
+  d3LabelsGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3SelectionRectGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
   d3ZoomBackgroundGroup: d3.Selection<SVGGElement, {}, HTMLElement, {}>;
 
   d3Links: d3.Selection<SVGLineElement, Link, SVGGElement, {}>;
   d3PhenodataLinks: d3.Selection<SVGLineElement, DatasetNode, SVGGElement, {}>;
-  d3Labels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
-  d3PhenodataLabels: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
+  d3Captions: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
+  d3PhenodataCaptions: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataWarnings: d3.Selection<SVGTextElement, DatasetNode, SVGGElement, {}>;
   d3DatasetNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
   d3PhenodataNodes: d3.Selection<SVGRectElement, DatasetNode, SVGGElement, {}>;
@@ -147,6 +159,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   searchEnabled = false;
   selectionEnabled = false;
 
+  labelDisplayMode: "dots" | "pills" = "dots";
+  showLabelPanel = true;
+  labelLegend: Label[] = [];
+
   selectionRect: any;
 
   renameMenuItem: any;
@@ -155,6 +171,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   exportMenuItem: any;
   historyMenuItem: any;
   groupsMenuItem: any;
+  labelsMenuItem: any;
   dividerMenuItem: any;
   showJobMenuItem: any;
   selectChildrenMenuItem: any;
@@ -162,6 +179,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   copySelectedToExistingSessionMenuItem: any;
 
   subscriptions: Array<Subscription> = [];
+
+  private readonly unregisterHotkeys: Array<() => void> = [];
 
   static getOpacity(isVisible: boolean): number {
     if (isVisible) {
@@ -179,6 +198,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     this.selectedDatasets$ = this.store.select("selectedDatasets");
+
+    // Load persisted label display preferences. Getters yield null when the
+    // user has no preference recorded yet, in which case the existing
+    // component defaults stay in effect.
+    this.preferencesService.getLabelDisplayMode().subscribe((mode) => {
+      if (mode != null) {
+        this.labelDisplayMode = mode;
+        this.renderLabels();
+      }
+    });
+    this.preferencesService.getShowLabelPanel().subscribe((value) => {
+      if (value != null) {
+        this.showLabelPanel = value;
+      }
+    });
 
     const section = d3.select("#workflowvisualization");
     this.scrollerDiv = section.append("div").classed("scroller-div", true);
@@ -211,9 +245,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .append("g")
       .attr("class", "phenodata")
       .attr("id", "d3PhenodataNodesGroup");
-    this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "label");
-    this.d3PhenodataLabelsGroup = this.zoomGroup.append("g").attr("class", "phenodataLabel");
+    this.d3CaptionsGroup = this.zoomGroup.append("g").attr("class", "caption");
+    this.d3PhenodataCaptionsGroup = this.zoomGroup.append("g").attr("class", "phenodataCaption");
     this.d3PhenodataWarningsGroup = this.zoomGroup.append("g").attr("class", "phenodataWarning");
+    this.d3LabelsGroup = this.zoomGroup.append("g").attr("class", "labels");
 
     // remove old elements, otherwise jumping between Workflow and List tabs keeps adding more elements
     d3.select(".dataset-tooltip").remove();
@@ -252,6 +287,16 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.updateSvgSize();
           },
           (err) => this.errorService.showError("get dataset events failed", err),
+        ),
+      );
+
+      this.subscriptions.push(
+        this.sessionEventService.getLabelStream().subscribe(
+          () => {
+            // label name/color may have changed, redraw pills
+            this.renderLabels();
+          },
+          (err) => this.errorService.showError("get label events failed", err),
         ),
       );
 
@@ -297,87 +342,32 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     }, 0);
 
+    this.unregisterHotkeys.push(
+      this.hotkeyService.register("l", "Open labels", () => this.toggleLabelsModal()),
+    );
+
     // d3-drag (on the workflow background and on dataset rects) calls
-    // event.stopImmediatePropagation() on every mousedown AND on every
-    // mouseup (the mouseup listener is attached on window in capture phase),
-    // so ng-bootstrap's autoclose listeners on document never see workflow-
-    // area pointer events. The dropdown therefore stays open even when the
-    // user clearly clicks outside it.
+    // event.stopImmediatePropagation() on every mousedown, and during a drag
+    // gesture on every mouseup (its mouseup listener sits on window in capture
+    // phase, ahead of everything else), so ng-bootstrap's autoclose listeners
+    // on document never see workflow-area pointer events. An open dropdown
+    // would therefore stay open even when the user clearly clicks outside it.
     //
-    // Work around it by re-dispatching synthetic mousedown/mouseup events on
-    // document.body (target outside any dropdown panel) so ng-bootstrap's
-    // existing autoclose logic fires. Mousedown is re-dispatched immediately
-    // (capture-phase listener on document fires before d3-drag's target-phase
-    // listener stops propagation). Mouseup is re-dispatched in the next
-    // microtask so d3-drag's window-capture mouseup listener has time to run
-    // and remove itself first — otherwise the synthetic mouseup would
-    // re-trigger d3-drag's "end" handler.
-    document.addEventListener("mousedown", this.reDispatchWorkflowMousedown, true);
-    window.addEventListener("mouseup", this.reDispatchWorkflowMouseup, true);
+    // Close open dropdowns directly instead: a capture-phase listener on this
+    // component's own element fires before d3-drag's target-phase handler can
+    // stop the event, and DropdownCloseDirective relays the request to every
+    // ngbDropdown. No mouseup handling is needed because the close decision is
+    // made already on mousedown.
+    this.elementRef.nativeElement.addEventListener("mousedown", this.closeDropdownsOnMousedown, true);
   }
 
-  private workflowMousedownPending = false;
-
-  private readonly reDispatchWorkflowMousedown = (event: MouseEvent): void => {
-    if (this.isWorkflowMousedownReDispatch(event)) {
-      return;
+  private readonly closeDropdownsOnMousedown = (event: MouseEvent): void => {
+    // right-click doesn't autoclose dropdowns elsewhere (ng-bootstrap ignores
+    // button 2), so keep the same behavior here
+    if (event.button !== 2) {
+      this.dropdownCloseService.closeOpenDropdowns();
     }
-    const target = event.target as Element | null;
-    if (!target?.closest?.("#workflow-graph")) {
-      // Any non-workflow mousedown "consumes" the pending flag so it can't
-      // drift out of sync if a previous workflow mousedown never received
-      // a matching mouseup (e.g. user dragged off the browser window).
-      this.workflowMousedownPending = false;
-      return;
-    }
-    this.workflowMousedownPending = true;
-    const copy = new MouseEvent("mousedown", {
-      bubbles: true,
-      cancelable: true,
-      button: event.button,
-      clientX: event.clientX,
-      clientY: event.clientY,
-      view: window,
-    });
-    this.markWorkflowMousedownReDispatch(copy);
-    document.body.dispatchEvent(copy);
   };
-
-  private readonly reDispatchWorkflowMouseup = (event: MouseEvent): void => {
-    if (!this.workflowMousedownPending) {
-      return;
-    }
-    if (this.isWorkflowMousedownReDispatch(event)) {
-      return;
-    }
-    this.workflowMousedownPending = false;
-    const button = event.button;
-    const clientX = event.clientX;
-    const clientY = event.clientY;
-    // Defer to next microtask so d3-drag's mouseupped (also on window, capture)
-    // finishes and removes its window listeners first; otherwise our synthetic
-    // mouseup would re-trigger d3-drag's "end" handler.
-    Promise.resolve().then(() => {
-      const copy = new MouseEvent("mouseup", {
-        bubbles: true,
-        cancelable: true,
-        button,
-        clientX,
-        clientY,
-        view: window,
-      });
-      this.markWorkflowMousedownReDispatch(copy);
-      document.body.dispatchEvent(copy);
-    });
-  };
-
-  private isWorkflowMousedownReDispatch(event: MouseEvent): boolean {
-    return (event as MouseEvent & { __workflowReDispatch?: boolean }).__workflowReDispatch === true;
-  }
-
-  private markWorkflowMousedownReDispatch(event: MouseEvent): void {
-    (event as MouseEvent & { __workflowReDispatch?: boolean }).__workflowReDispatch = true;
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.zoomGroup) {
@@ -409,8 +399,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.removeDatasetNodeToolTips();
     this.subscriptions.forEach((subs) => subs.unsubscribe());
     this.subscriptions = [];
-    document.removeEventListener("mousedown", this.reDispatchWorkflowMousedown, true);
-    window.removeEventListener("mouseup", this.reDispatchWorkflowMouseup, true);
+    this.unregisterHotkeys.forEach((fn) => fn());
+    this.elementRef.nativeElement.removeEventListener("mousedown", this.closeDropdownsOnMousedown, true);
   }
 
   zoomIn(): void {
@@ -679,15 +669,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  renderLabels(): void {
-    this.d3Labels = this.d3LabelsGroup
+  renderCaptions(): void {
+    this.d3Captions = this.d3CaptionsGroup
       .selectAll<SVGTextElement, {}>("text")
       .data(this.datasetNodes, (d: DatasetNode) => d.datasetId);
 
-    this.d3Labels
+    this.d3Captions
       .enter()
       .append("text")
-      .merge(this.d3Labels)
+      .merge(this.d3Captions)
       .text((d: DatasetNode) => UtilsService.getFileExtension(d.name).slice(0, 5))
       .attr("x", (d) => d.x + this.nodeWidth / 2)
       .attr("y", (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4)
@@ -705,21 +695,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("pointer-events", "none")
       .style("opacity", (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
-    this.d3Labels.exit().remove();
+    this.d3Captions.exit().remove();
   }
 
-  renderPhenodataLabels(): void {
-    this.d3PhenodataLabels = this.d3PhenodataLabelsGroup
+  renderPhenodataCaptions(): void {
+    this.d3PhenodataCaptions = this.d3PhenodataCaptionsGroup
       .selectAll<SVGTextElement, {}>("text")
       .data(this.phenodataNodes, (d: DatasetNode) => d.datasetId);
 
-    this.d3PhenodataLabels
+    this.d3PhenodataCaptions
       .enter()
       .append("text")
-      .merge(this.d3PhenodataLabels)
+      .merge(this.d3PhenodataCaptions)
       .text("P")
-      .attr("x", (d) => this.getPhenodataLabelX(d))
-      .attr("y", (d) => this.getPhenodataLabelY(d))
+      .attr("x", (d) => this.getPhenodataCaptionX(d))
+      .attr("y", (d) => this.getPhenodataCaptionY(d))
       .attr("font-size", this.fontSize + "px")
       .attr("fill", (d) => (this.isSelectedDataset(d.dataset) ? "white" : "black"))
       .attr("font-weight", (d) => (this.isSelectedDataset(d.dataset) ? "600" : "400"))
@@ -727,7 +717,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .style("pointer-events", "none")
       .style("opacity", (d) => WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(d.datasetId)));
 
-    this.d3PhenodataLabels.exit().remove();
+    this.d3PhenodataCaptions.exit().remove();
   }
 
   renderPhenodataWarnings(): void {
@@ -743,8 +733,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       // .text((d: any) => "\uf071")
       .text(() => "\uf06a")
 
-      .attr("x", (d) => this.getPhenodataLabelX(d) + 14)
-      .attr("y", (d) => this.getPhenodataLabelY(d) + 10)
+      .attr("x", (d) => this.getPhenodataCaptionX(d) + 14)
+      .attr("y", (d) => this.getPhenodataCaptionY(d) + 10)
       .attr("class", "fa")
       .attr("font-size", this.fontSize + 2 + "px")
       .attr("fill", (d) => (this.datasetService.hasGroupColumn(d.dataset) ? "#ffc107" : "#0dcaf0"))
@@ -772,6 +762,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedDatasets && this.selectedDatasets.length > 1
         ? [
             this.groupsMenuItem,
+            this.labelsMenuItem,
 
             this.selectChildrenMenuItem,
             this.copySelectedToNewSessionMenuItem,
@@ -783,6 +774,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             this.renameMenuItem,
             this.convertMenuItem,
             this.groupsMenuItem,
+            this.labelsMenuItem,
             this.exportMenuItem,
             this.historyMenuItem,
             this.dividerMenuItem,
@@ -1039,7 +1031,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     selectedDatasets.attr("x", (d) => (d.x += dx)).attr("y", (d) => (d.y += dy));
 
-    this.d3Labels
+    this.d3Captions
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
       .attr("x", (d) => d.x + this.nodeWidth / 2)
       .attr("y", (d) => d.y + this.nodeHeight / 2 + this.fontSize / 4);
@@ -1049,10 +1041,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("x", (d) => this.getPhenodataX(d))
       .attr("y", (d) => this.getPhenodataY(d));
 
-    this.d3PhenodataLabels
+    this.d3PhenodataCaptions
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
-      .attr("x", (d) => this.getPhenodataLabelX(d))
-      .attr("y", (d) => this.getPhenodataLabelY(d));
+      .attr("x", (d) => this.getPhenodataCaptionX(d))
+      .attr("y", (d) => this.getPhenodataCaptionY(d));
 
     this.d3PhenodataWarnings
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
@@ -1077,6 +1069,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       )
       .attr("x2", (d) => d.target.x + this.nodeWidth / 2)
       .attr("y2", (d) => d.target.y);
+
+    // move only the dragged nodes' label groups by updating their transforms,
+    // instead of rebuilding the whole label layer on every drag tick
+    this.updateDraggedLabelPositions();
   }
 
   renderLinks(): void {
@@ -1192,10 +1188,262 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.renderLinks();
     this.renderDatasets();
     this.renderPhenodataNodes();
-    this.renderPhenodataLabels();
+    this.renderPhenodataCaptions();
     this.renderPhenodataLinks();
     this.renderPhenodataWarnings();
+    this.renderCaptions();
     this.renderLabels();
+  }
+
+  toggleLabelDisplayMode(): void {
+    this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
+    this.renderLabels();
+    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode);
+  }
+
+  toggleLabelPanel(): void {
+    this.showLabelPanel = !this.showLabelPanel;
+    this.preferencesService.setShowLabelPanel(this.showLabelPanel);
+  }
+
+  renderLabels(): void {
+    this.refreshLabelLegend();
+
+    if (!this.d3LabelsGroup) {
+      return;
+    }
+    // simple full re-render: labels change rarely vs. positions
+    this.d3LabelsGroup.selectAll("*").remove();
+
+    if (!this.sessionData || !this.sessionData.labelsMap) {
+      return;
+    }
+
+    // Force dots in read-only mode (the session-list preview), so a saved
+    // "pills" preference doesn't leak into the preview.
+    if (this.labelDisplayMode === "dots" || !this.enabled) {
+      this.renderLabelDots();
+    } else {
+      this.renderLabelPills();
+    }
+  }
+
+  legendDotColor(label: Label): string {
+    return resolveLabelColor(label.color);
+  }
+
+  openLabelsModal(): void {
+    this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData);
+  }
+
+  toggleLabelOnSelection(label: Label): void {
+    this.labelsContextMenuService
+      .toggleLabel(this.selectedDatasets ?? [], label, this.sessionData)
+      .subscribe();
+  }
+
+  toggleLabelsModal(): void {
+    this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData);
+  }
+
+  private refreshLabelLegend(): void {
+    if (!this.sessionData || !this.sessionData.labelsMap) {
+      this.labelLegend = [];
+      return;
+    }
+    const inUseIds = new Set<string>();
+    this.sessionData.datasetsMap.forEach((dataset) => {
+      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
+    });
+    this.labelLegend = Array.from(this.sessionData.labelsMap.values())
+      .filter((label) => inUseIds.has(label.labelId))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  }
+
+  // Per-node container for a node's label dots/pills. Children are drawn at
+  // node-relative coordinates and the container's transform places them at the
+  // node, so dragging only needs to update the transform (see
+  // updateDraggedLabelPositions) instead of rebuilding the whole layer.
+  private createNodeLabelGroup(node: DatasetNode): d3.Selection<SVGGElement, DatasetNode, HTMLElement, {}> {
+    const opacity = WorkflowGraphComponent.getOpacity(!this.filter || this.filter.has(node.datasetId));
+    return this.d3LabelsGroup
+      .append("g")
+      .attr("class", "node-labels")
+      .datum(node)
+      .attr("transform", `translate(${node.x},${node.y})`)
+      .style("opacity", opacity);
+  }
+
+  // Move the label groups of the dragged (selected) nodes by updating their
+  // transforms only, mirroring how captions and links are repositioned during
+  // a drag. Avoids the full label-layer rebuild on every drag tick.
+  private updateDraggedLabelPositions(): void {
+    if (!this.d3LabelsGroup) {
+      return;
+    }
+    this.d3LabelsGroup
+      .selectAll<SVGGElement, DatasetNode>("g.node-labels")
+      .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
+      .attr("transform", (d) => `translate(${d.x},${d.y})`);
+  }
+
+  private renderLabelDots(): void {
+    const labelsMap = this.sessionData.labelsMap;
+    const maxVisible = 5;
+    const dotRadius = 7; // diameter matches the pill height (14)
+    const dotStep = 7; // horizontal advance per stacked dot; smaller = more overlap, last dot fully visible
+    const dotOverlap = 5; // pull dots up so they overlap the node's bottom edge by this much
+
+    this.datasetNodes.forEach((node: DatasetNode) => {
+      const labels = getSortedLabels(node.dataset.labelIds, labelsMap);
+      if (labels.length === 0) {
+        return;
+      }
+      const visible: Label[] = labels.slice(0, maxVisible);
+      const overflow = labels.length - visible.length;
+
+      // node-relative coordinates; createNodeLabelGroup's transform positions them
+      const centerY = this.nodeHeight - dotOverlap + dotRadius;
+      let cursorX = dotRadius;
+
+      const group = this.createNodeLabelGroup(node);
+
+      visible.forEach((label: Label) => {
+        const colorBg = resolveLabelColor(label.color);
+        const g = group.append("g");
+        g.append("circle")
+          .attr("cx", cursorX)
+          .attr("cy", centerY)
+          .attr("r", dotRadius)
+          .style("fill", colorBg)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("title").text(label.name ?? "");
+        cursorX += dotStep;
+      });
+
+      if (overflow > 0) {
+        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
+        const g = group.append("g");
+        g.append("circle")
+          .attr("cx", cursorX)
+          .attr("cy", centerY)
+          .attr("r", dotRadius)
+          .style("fill", OVERFLOW_LABEL_COLOR)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("text")
+          .attr("x", cursorX)
+          .attr("y", centerY + 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "9px")
+          .attr("font-weight", "500")
+          .style("fill", textColorForBackground(OVERFLOW_LABEL_COLOR))
+          .style("pointer-events", "none")
+          .text("+" + overflow);
+        g.append("title").text(hiddenLabels);
+      }
+    });
+  }
+
+  private renderLabelPills(): void {
+    const labelsMap = this.sessionData.labelsMap;
+    const maxVisible = 2;
+    const pillHeight = 14;
+    const pillStep = 17; // horizontal advance per stacked pill; ~2 chars of the pill underneath remain visible
+    const pillOverlap = 5; // pull the top of the stack up so it overlaps the node's bottom edge (matches dot rendering)
+    const horizontalPadding = 6;
+    const pillFontSize = 10;
+    const maxPillWidth = 40; // cap so long names don't bleed into neighbouring nodes' pills
+
+    this.datasetNodes.forEach((node: DatasetNode) => {
+      const labels = getSortedLabels(node.dataset.labelIds, labelsMap);
+      if (labels.length === 0) {
+        return;
+      }
+      const visible: Label[] = labels.slice(0, maxVisible);
+      const overflow = labels.length - visible.length;
+
+      // node-relative coordinates; createNodeLabelGroup's transform positions them
+      const baseY = this.nodeHeight - pillOverlap;
+      let cursorX = 0;
+
+      const group = this.createNodeLabelGroup(node);
+
+      visible.forEach((label: Label) => {
+        const bg = resolveLabelColor(label.color);
+        const fg = textColorForBackground(bg);
+        const fullText = label.name ?? "";
+        const text = this.truncateToWidth(fullText, pillFontSize, horizontalPadding, maxPillWidth);
+        const pillWidth = this.estimatePillWidth(text, pillFontSize, horizontalPadding);
+        const g = group.append("g");
+        g.append("rect")
+          .attr("x", cursorX)
+          .attr("y", baseY)
+          .attr("width", pillWidth)
+          .attr("height", pillHeight)
+          .attr("rx", pillHeight / 2)
+          .attr("ry", pillHeight / 2)
+          .style("fill", bg)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("text")
+          .attr("x", cursorX + pillWidth / 2)
+          .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", pillFontSize + "px")
+          .attr("font-weight", "500")
+          .style("fill", fg)
+          .style("pointer-events", "none")
+          .text(text);
+        // native SVG tooltip
+        g.append("title").text(fullText);
+        cursorX += pillStep;
+      });
+
+      if (overflow > 0) {
+        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
+        const overflowText = "+" + overflow;
+        const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
+        const g = group.append("g");
+        g.append("rect")
+          .attr("x", cursorX)
+          .attr("y", baseY)
+          .attr("width", pillWidth)
+          .attr("height", pillHeight)
+          .attr("rx", pillHeight / 2)
+          .attr("ry", pillHeight / 2)
+          .style("fill", OVERFLOW_LABEL_COLOR)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "1");
+        g.append("text")
+          .attr("x", cursorX + pillWidth / 2)
+          .attr("y", baseY + pillHeight / 2 + pillFontSize / 3)
+          .attr("text-anchor", "middle")
+          .attr("font-size", pillFontSize + "px")
+          .attr("font-weight", "500")
+          .style("fill", textColorForBackground(OVERFLOW_LABEL_COLOR))
+          .style("pointer-events", "none")
+          .text(overflowText);
+        g.append("title").text(hiddenLabels);
+      }
+    });
+  }
+
+  private truncateToWidth(text: string, fontSize: number, padding: number, maxWidth: number): string {
+    const value = text ?? "";
+    if (this.estimatePillWidth(value, fontSize, padding) <= maxWidth) {
+      return value;
+    }
+    const maxTextWidth = maxWidth - padding * 2;
+    const maxChars = Math.max(1, Math.floor(maxTextWidth / (fontSize * 0.55)) - 1);
+    return value.slice(0, maxChars).trimEnd() + "…";
+  }
+
+  private estimatePillWidth(text: string, fontSize: number, padding: number): number {
+    // rough estimate without measuring DOM: avg char width ~0.55 * fontSize
+    const textWidth = (text ?? "").length * fontSize * 0.55;
+    return Math.max(fontSize + padding * 2, Math.ceil(textWidth + padding * 2));
   }
 
   getDatasetNodes(
@@ -1280,19 +1528,22 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const datasetLeft = element.getBoundingClientRect().left;
     const datasetTop = element.getBoundingClientRect().top;
     const datasetWidth = element.getBoundingClientRect().width;
-    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
     const triangleHeight = this.datasetTooltipTriangle.node().getBoundingClientRect().height;
     const triangleWidth = this.datasetTooltipTriangle.node().getBoundingClientRect().width;
 
     this.datasetTooltip.transition().duration(delay).style("opacity", 0.9);
 
     if (dataset && !isPhenodatanode) {
-      this.datasetTooltip.html(dataset.name);
+      this.datasetTooltip.html(this.buildTooltipHtml(dataset));
     }
 
     if (isPhenodatanode) {
       this.datasetTooltip.html(`phenodata-${dataset.name}`);
     }
+
+    // measure after .html() so the height reflects the new content, not the previous hover's
+    const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
+
     this.datasetTooltip
       .style("left", datasetLeft - 5 + "px")
       .style("top", datasetTop - tooltipHeight - triangleHeight + 3 + "px");
@@ -1307,6 +1558,34 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   hideTooltip(delay = 500): void {
     this.datasetTooltip.transition().duration(delay).style("opacity", 0);
     this.datasetTooltipTriangle.transition().duration(delay).style("opacity", 0);
+  }
+
+  private buildTooltipHtml(node: DatasetNode): string {
+    const labels = this.sessionData?.labelsMap
+      ? getSortedLabels(node.dataset.labelIds, this.sessionData.labelsMap)
+      : [];
+    if (labels.length === 0) {
+      return node.name;
+    }
+    const rows = labels
+      .map((label) => {
+        const color = resolveLabelColor(label.color);
+        const dot =
+          `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
+          `background:${color};margin-right:4px;vertical-align:middle"></span>`;
+        return `<div>${dot}${this.escapeTooltipText(label.name ?? "")}</div>`;
+      })
+      .join("");
+    return `<div style="text-align:left;">${node.name}<div style="margin-top:2px;color:rgba(255,255,255,0.7);font-size:11px;">${rows}</div></div>`;
+  }
+
+  private escapeTooltipText(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // creating tooltip for every node which will be hidden and when search is enabled, it will be shown
@@ -1546,11 +1825,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // return datasetNode.y + this.nodeHeight / 2 + this.fontSize / 4 + 3;
   }
 
-  private getPhenodataLabelX(datasetNode: DatasetNode): number {
+  private getPhenodataCaptionX(datasetNode: DatasetNode): number {
     return this.getPhenodataX(datasetNode) + this.nodeHeight / 2;
   }
 
-  private getPhenodataLabelY(datasetNode: DatasetNode): number {
+  private getPhenodataCaptionY(datasetNode: DatasetNode): number {
     return this.getPhenodataY(datasetNode) + this.nodeHeight / 2 + this.fontSize / 4;
   }
 
@@ -1567,11 +1846,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private getPhenodataWarningX(datasetNode: DatasetNode): number {
-    return this.getPhenodataLabelX(datasetNode) + 14;
+    return this.getPhenodataCaptionX(datasetNode) + 14;
   }
 
   private getPhenodataWarningY(datasetNode: DatasetNode): number {
-    return this.getPhenodataLabelY(datasetNode) + 10;
+    return this.getPhenodataCaptionY(datasetNode) + 10;
   }
 
   private isDatasetNode(object: Node): object is DatasetNode {
@@ -1695,6 +1974,43 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       title: "History&hellip;",
       action(d): void {
         self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData, self.tools);
+      },
+    };
+
+    const resolveDatasetsForLabelMenu = (d: any): Dataset[] => {
+      let datasets = self.selectionService.selectedDatasets;
+      if ((!datasets || datasets.length === 0) && d) {
+        datasets = [d.dataset];
+      }
+      return datasets ?? [];
+    };
+
+    this.labelsMenuItem = {
+      title: "Labels",
+      children(d: any): any[] {
+        const datasets = resolveDatasetsForLabelMenu(d);
+        const items: any[] = [];
+        const labelItems = self.labelsContextMenuService.buildItems(datasets, self.sessionData);
+        if (labelItems.length > 0) {
+          for (const item of labelItems) {
+            items.push({
+              title: item.displayHtml,
+              action(dd: any): void {
+                self.labelsContextMenuService
+                  .toggleLabel(resolveDatasetsForLabelMenu(dd), item.label, self.sessionData)
+                  .subscribe();
+              },
+            });
+          }
+          items.push({ divider: true });
+        }
+        items.push({
+          title: "Edit labels&hellip;",
+          action(dd: any): void {
+            self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData);
+          },
+        });
+        return items;
       },
     };
 

@@ -7,6 +7,7 @@ import { SharedModule } from "../../../../shared/shared.module";
 import { PlotService } from "../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../shared/visualization/visualizationTSV.service";
 import { LinkButtonModule } from "../link-button/link-button.module";
+import { LabelsModule } from "../labels/labels.module";
 import { DatasetParameterListComponent } from "../selectiondetails/dataset-parameter-list/dataset-parameter-list.component";
 import { FilesDetailsComponent } from "../selectiondetails/files-details.component.ts/files-details.component";
 import { SingleDatasetComponent } from "../selectiondetails/singledataset/single-dataset.component";
@@ -35,7 +36,7 @@ import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
 import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule, LabelsModule],
   declarations: [
     VisualizationsComponent,
     VennDiagramComponent,

@@ -1,0 +1,65 @@
+<div class="modal-header">
+  <h4 class="modal-title d-flex align-items-baseline" style="min-width: 0">
+    <span>Labels</span>
+    <ng-container *ngIf="hasSelection()">
+      <small class="text-muted ms-1">&mdash;</small>
+      <small
+        *ngIf="selectedDatasets.length === 1"
+        class="text-muted ms-1 text-truncate"
+        style="max-width: 20rem; min-width: 0"
+        [title]="selectedDatasets[0].name"
+        >{{ selectedDatasets[0].name }}</small
+      >
+      <small *ngIf="selectedDatasets.length > 1" class="text-muted ms-1">{{ selectedDatasets.length }} files selected</small>
+    </ng-container>
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body pb-2">
+  <div *ngIf="rows.length === 0" class="text-muted">No labels yet.</div>
+
+  <table class="table table-sm align-middle mb-0" *ngIf="rows.length > 0">
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td style="width: 2.5rem" *ngIf="hasSelection()">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            [checked]="row.selection === 'checked'"
+            [indeterminate]="row.selection === 'indeterminate'"
+            (change)="toggleRow(row)" />
+        </td>
+        <td>
+          <ch-label-pill [label]="row.label"></ch-label-pill>
+        </td>
+        <td class="text-end" style="width: 12rem">
+          <button type="button" class="btn btn-sm btn-outline-secondary me-1" (click)="openEditLabel(row)">Edit</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteLabel(row)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="rows.length > 1" class="text-end mt-2">
+    <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="saving" (click)="deleteAllLabels()">
+      Delete all
+    </button>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-primary me-auto"
+    [disabled]="sessionData.labelsMap.size >= maxLabelsPerSession"
+    [title]="sessionData.labelsMap.size >= maxLabelsPerSession ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached' : ''"
+    (click)="openCreateLabel()">
+    + New label
+  </button>
+  <button *ngIf="hasSelection()" type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="saving" (click)="confirm()">
+    <span *ngIf="hasSelection()">Apply</span>
+    <span *ngIf="!hasSelection()">Close</span>
+  </button>
+</div>
