@@ -13,7 +13,7 @@ import {
 } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject, never as observableNever, of as observableOf } from "rxjs";
-import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -200,8 +200,8 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
-          sessionData.datasetsMap.set(event.resourceId, remote);
+          // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
+          // is never visible in the UI before its type tags are ready
           return this.createEvent(event, null, remote);
         })
       );
@@ -216,9 +216,9 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
           const local = sessionData.datasetsMap.get(event.resourceId);
-          sessionData.datasetsMap.set(event.resourceId, remote);
+          // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
+          // is never visible in the UI before its type tags are ready
           return this.createEvent(event, local, remote);
         })
       );
@@ -242,12 +242,22 @@ export class SessionEventService {
         return observableOf(sessionEvent);
       }
 
-      // dataset created or updated, update type tags too
+      // dataset created or updated, update type tags and datasetsMap together
+      // so the dataset is never visible in the UI before its type tags are ready
       return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).pipe(
         map((typeTags) => {
           sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
+          sessionData.datasetsMap.set(newValue.datasetId, newValue);
           return sessionEvent;
-        })
+        }),
+        catchError((err) => {
+          if (err?.status === 404) {
+            // dataset was deleted before type tags were fetched, nothing to do
+            log.info("dataset deleted before type tags were fetched", newValue.datasetId);
+            return observableOf(sessionEvent);
+          }
+          throw err;
+        }),
       );
     }
     // dataset deleted, type tags can be removed
