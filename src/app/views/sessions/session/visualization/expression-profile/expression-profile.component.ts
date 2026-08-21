@@ -7,12 +7,12 @@ import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import TSVFile from "../../../../../model/tsv/TSVFile";
-import TSVRow from "../../../../../model/tsv/TSVRow";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { SessionDataService } from "../../session-data.service";
 import Point from "../model/point";
+import { SelectionRow } from "../model/selectionRow";
 import { ExpressionProfileService } from "./expression-profile.service";
 import GeneExpression from "./geneexpression";
 import Interval from "./interval";
@@ -31,7 +31,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   private tsv: TSVFile;
   selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
-  public viewSelectionList: Array<any>;
+  // symbols and identifiers of the selected rows, shown in the selection list
+  public viewSelectionList: Array<SelectionRow> = [];
+  // files without a symbol column show the identifier column only
+  public showSymbolColumn = false;
+  // total number of rows, shown next to the number of selected rows
+  public totalCount = 0;
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -71,6 +76,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
           this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+          this.totalCount = this.tsv.body.size();
           if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
             this.drawLineChart(this.tsv);
             this.observeResize();
@@ -89,6 +95,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       );
 
     this.selectedGeneExpressions = [];
+    this.viewSelectionList = [];
 
     // reset the cached width so the resize observer redraws the new dataset
     // even when the container returns to a width it had for a previous one
@@ -392,6 +399,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   resetSelections(): void {
     this.removeSelections(this.getSelectionIds());
     this.selectedGeneExpressions.length = 0;
+    this.setViewSelectionList();
   }
 
   removeSelections(ids: Array<string>): void {
@@ -403,6 +411,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     this.selectedGeneExpressions = map(selectedGeneIds, (id) =>
       this.visualizationTSVService.getGeneExpression(this.tsv, id),
     );
+    this.setViewSelectionList();
   }
 
   addSelections(ids: Array<string>) {
@@ -444,12 +453,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   setViewSelectionList(): void {
     const rowIds = this.selectedGeneExpressions.map((geneExpression: GeneExpression) => geneExpression.id);
-    const rawTSVRows = this.tsv.body.getTSVRows(rowIds);
-    const tsvSymbolIndex = this.tsv.getColumnIndex("symbol");
-    const tsvIdentifierIndex = this.tsv.getColumnIndex("identifier");
-    this.viewSelectionList = rawTSVRows.map((row: TSVRow) => ({
-      symbol: row.row[tsvSymbolIndex],
-      identifier: row.row[tsvIdentifierIndex],
-    }));
+    this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
+    this.viewSelectionList = this.visualizationTSVService.getSelectionRows(this.tsv, rowIds);
   }
 }

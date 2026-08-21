@@ -5,6 +5,7 @@ import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
+import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
 import Point from "../model/point";
@@ -29,9 +30,10 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     fileResource: FileResource,
     sessionDataService: SessionDataService,
     private plotService: PlotService,
+    visualizationTSVService: VisualizationTSVService,
     private restErrorService2: RestErrorService
   ) {
-    super(fileResource, sessionDataService);
+    super(fileResource, sessionDataService, visualizationTSVService);
   }
 
   ngOnChanges() {
@@ -224,6 +226,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     );
     // Populate the selected Data Rows
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
+    this.setViewSelectionList();
     this.resetSelectionRectangle();
     // change the color of the selected data points
     this.selectedDataPointIds.forEach((selectedId) => {

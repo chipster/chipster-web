@@ -24,10 +24,10 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     fileResource: FileResource,
     sessionDataService: SessionDataService,
     private plotService: PlotService,
-    private visualizationTSVService: VisualizationTSVService,
+    visualizationTSVService: VisualizationTSVService,
     private restErrorService2: RestErrorService
   ) {
-    super(fileResource, sessionDataService);
+    super(fileResource, sessionDataService, visualizationTSVService);
   }
 
   ngOnChanges() {
@@ -181,6 +181,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     );
     // Populate the selected gene list to show in the selected box view{
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
+    this.setViewSelectionList();
     this.resetSelectionRectangle();
 
     this.selectedDataPointIds.forEach((selectedId) => {
