@@ -152,6 +152,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // click of any mouse that moved even one pixel, its clickDistance being 0.
     const clickDistance = 4;
     const drag = d3.drag().clickDistance(clickDistance);
+
+    // Keep a drag from extending a text selection that starts somewhere else on
+    // the page, which scrolls the page instead of drawing the selection
+    // rectangle. d3 blocks selectstart, but a modifier click that extends an
+    // existing selection never fires it, and d3 doesn't preventDefault the
+    // mousedown itself. This has to be registered before the drag behaviour,
+    // which stops immediate propagation of mousedown.
+    this.svg.on("mousedown", (event) => event.preventDefault());
     this.svg.call(drag);
 
     // Creating the selection area
