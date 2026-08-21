@@ -15,6 +15,7 @@ import { PlotData } from "../../views/sessions/session/visualization/model/plotD
 import Point from "../../views/sessions/session/visualization/model/point";
 import { SelectionRow } from "../../views/sessions/session/visualization/model/selectionRow";
 import { FileResource } from "../resources/fileresource";
+import UtilsService from "../utilities/utils";
 import { VisualizationTSVService } from "./visualizationTSV.service";
 
 @Directive()
@@ -146,8 +147,11 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   drawPlot() {
     this.dataSelectionModeEnable = false;
 
-    // creating drag element
-    const drag = d3.drag();
+    // A click selects a single data point, so allow a little movement before a
+    // gesture counts as a rectangle selection. Without this d3 would swallow the
+    // click of any mouse that moved even one pixel, its clickDistance being 0.
+    const clickDistance = 4;
+    const drag = d3.drag().clickDistance(clickDistance);
     this.svg.call(drag);
 
     // Creating the selection area
@@ -196,13 +200,40 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     drag.on("end", (event) => {
       const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
-      // need to get the points that included in the band
-      this.resetSelections();
+      const sourceEvent = event.sourceEvent ?? event;
+      const isShift = UtilsService.isShiftKey(sourceEvent);
+
+      const dx = endPoint.x - startPoint.x;
+      const dy = endPoint.y - startPoint.y;
+      if (dx * dx + dy * dy <= clickDistance * clickDistance) {
+        // A click, not a rectangle selection. A click that hits a data point is
+        // handled by the data point's own click handler.
+        if (!sourceEvent.target?.classList?.contains("dot")) {
+          const nearbyId = this.getDataPointNear(endPoint);
+          if (nearbyId != null) {
+            // the data points are only a couple of pixels wide, so a click that
+            // narrowly misses one still selects it
+            this.selectDataPoint(sourceEvent, nearbyId);
+          } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
+            // a click on an empty area clears the selection, but shift and cmd
+            // clicks add to or toggle it, so they must not clear
+            this.resetSelections();
+          }
+        }
+        this.resetSelectionRectangle();
+        return;
+      }
 
       // define the points that are within the drag boundary
       this.dragEndPoint = new Point(endPoint.x, endPoint.y);
       this.dragStartPoint = new Point(startPoint.x, startPoint.y);
-      this.getSelectedDataSet();
+
+      // shift adds the data points in the rectangle to the current selection,
+      // otherwise the rectangle replaces it
+      const inRectangle = this.getDataPointsInDragRectangle();
+      const selected = this.selectedDataPointIds ?? [];
+      const ids = isShift ? selected.concat(inRectangle.filter((id) => !selected.includes(id))) : inRectangle;
+      this.showSelection(ids);
       this.resetSelectionRectangle();
     });
   }
@@ -210,7 +241,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   resetSelectionRectangle() {
     d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
   }
-  getSelectedDataSet() {}
+  /** @description ids of the data points inside the drag rectangle* */
+  abstract getDataPointsInDragRectangle(): Array<string>;
 
   setSelectionStyle(id: string) {}
 
@@ -222,6 +254,9 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
         this.removeSelectionStyle(id);
       }
     }
+    // also clear the ids, otherwise redrawPlot() re-applies the highlight of a
+    // selection that was cleared without selecting anything new
+    this.selectedDataPointIds = [];
     this.selectedDataRows = [];
     this.viewSelectionList = [];
   }
@@ -230,6 +265,59 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   setViewSelectionList(): void {
     this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
     this.viewSelectionList = this.visualizationTSVService.getSelectionRows(this.tsv, this.selectedDataPointIds);
+  }
+
+  /**
+   * @description select a single data point, e.g. when it is clicked
+   *
+   * Shift adds to the selection and ctrl or cmd toggles, like in the expression
+   * profile.
+   */
+  selectDataPoint(event, id: string): void {
+    const selected = this.selectedDataPointIds ?? [];
+    let ids: Array<string>;
+    if (UtilsService.isShiftKey(event)) {
+      ids = selected.includes(id) ? selected : selected.concat(id);
+    } else if (UtilsService.isCtrlKey(event)) {
+      ids = selected.includes(id) ? selected.filter((selectedId) => selectedId !== id) : selected.concat(id);
+    } else {
+      ids = [id];
+    }
+    this.showSelection(ids);
+  }
+
+  /**
+   * @description id of the data point closest to the given point, or null if none is close
+   *
+   * Hit tests against the drawn circles rather than the plot data, so that it
+   * needs to know neither the scales nor how a plot places its data points.
+   */
+  protected getDataPointNear(point: Point): string {
+    const tolerance = 5;
+    let closestId: string = null;
+    let closestDistance = tolerance * tolerance;
+    this.svg
+      .selectAll(".dot")
+      .nodes()
+      .forEach((dot) => {
+        const dx = Number(dot.getAttribute("cx")) - point.x;
+        const dy = Number(dot.getAttribute("cy")) - point.y;
+        const distance = dx * dx + dy * dy;
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestId = (d3.select(dot).datum() as PlotData).id;
+        }
+      });
+    return closestId;
+  }
+
+  /** @description show the given data points as the current selection* */
+  protected showSelection(ids: Array<string>): void {
+    (this.selectedDataPointIds ?? []).forEach((id) => this.removeSelectionStyle(id));
+    this.selectedDataPointIds = ids;
+    this.selectedDataRows = this.tsv.body.getTSVRows(ids);
+    this.setViewSelectionList();
+    ids.forEach((id) => this.setSelectionStyle(id));
   }
 
   setXAxisHeader(event) {

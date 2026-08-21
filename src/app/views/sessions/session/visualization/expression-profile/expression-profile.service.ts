@@ -102,4 +102,22 @@ export class ExpressionProfileService {
 
     return false;
   }
+
+  /*
+   * @description: distance from a point to a line segment
+   */
+  distanceToLine(point: Point, line: Line): number {
+    const lengthSquared = line.vx * line.vx + line.vy * line.vy;
+    if (lengthSquared === 0) {
+      return Math.hypot(point.x - line.start.x, point.y - line.start.y);
+    }
+
+    // how far along the line the closest point is, clamped to the segment
+    const position = Math.max(
+      0,
+      Math.min(1, ((point.x - line.start.x) * line.vx + (point.y - line.start.y) * line.vy) / lengthSquared),
+    );
+
+    return Math.hypot(point.x - (line.start.x + position * line.vx), point.y - (line.start.y + position * line.vy));
+  }
 }

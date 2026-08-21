@@ -155,7 +155,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     };
 
     // SVG-element
-    const drag = d3.drag();
+    // A click selects a single line, so allow a little movement before d3 counts
+    // the gesture as a drag and swallows the click. Its default is no movement
+    // at all.
+    const drag = d3.drag().clickDistance(4);
 
     const profile = d3.select("#expressionprofile");
 
@@ -258,19 +261,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .on("mouseout", (event, d: any) => {
         that.removeSelectionHoverStyle(d.id);
       })
-      .on("click", (event, d: GeneExpression) => {
-        const id = d.id;
-        const isCtrl = UtilsService.isCtrlKey(event);
-        const isShift = UtilsService.isShiftKey(event);
-        if (isShift) {
-          that.addSelections([id]);
-        } else if (isCtrl) {
-          that.toggleSelections([id.toString()]);
-        } else {
-          that.resetSelections();
-          that.addSelections([id]);
-        }
-      });
+      .on("click", (event, d: GeneExpression) => that.selectLine(event, d.id));
 
     // path animation
     // paths.each(function(d: any) { d.totalLength = this.getTotalLength(); })
@@ -328,12 +319,42 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         .attr("height", Math.abs(startPoint.y - endPoint.y));
     });
 
+    // The lines are one pixel wide, so a click that narrowly misses one should
+    // still select it. Only the intervals the box crosses need to be checked.
+    const closestLineId = (point: Point): string => {
+      const tolerance = 5;
+      const boxStart = new Point(point.x - tolerance, point.y - tolerance);
+      const boxEnd = new Point(point.x + tolerance, point.y + tolerance);
+      const intervalIndexes = that.expressionProfileService.getCrossingIntervals(boxStart, boxEnd, linearXScale, tsv);
+
+      let closestId: string = null;
+      let closestDistance = tolerance;
+      for (let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++) {
+        const lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
+        for (const line of lines) {
+          const distance = that.expressionProfileService.distanceToLine(point, line);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestId = line.lineId;
+          }
+        }
+      }
+      return closestId;
+    };
+
     drag.on("end", (event) => {
       const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
 
+      const sourceEvent = event.sourceEvent ?? event;
+      const isShift = UtilsService.isShiftKey(sourceEvent);
+
       if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
-        this.resetSelections();
+        // shift adds the lines in the rectangle to the current selection,
+        // otherwise the rectangle replaces it
+        if (!isShift) {
+          this.resetSelections();
+        }
         d3.selectAll(".path").attr("stroke-width", 1);
         const p1 = new Point(endPoint.x, endPoint.y);
         const p2 = new Point(startPoint.x, startPoint.y);
@@ -365,29 +386,27 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           ids = ids.concat(map(intersectingLines, (line: Line) => line.lineId));
         }
 
-        this.resetSelections();
         this.addSelections(uniq(ids));
 
         // remove duplicate ids
         resetSelectionRectangle();
       } else {
-        // A click on an empty area clears the selection, like in the scatter and
-        // volcano plots.
-        //
-        // The drag is registered on the whole svg, so this branch also runs for
-        // clicks that land on a line. Those must not clear the selection: d3 sets
-        // its clickDistance to 0, so moving the pointer even one pixel makes d3
-        // swallow the click event that the path's own handler would need to select
-        // the line again, and clearing here would leave nothing selected. Selecting
-        // a line is left to that handler.
+        // A click, not a rectangle selection. The drag is registered on the whole
+        // svg, so this branch also runs for clicks that land on a line, which the
+        // line's own click handler takes care of. A click that misses selects the
+        // closest line instead, and only a click with no line near it clears the
+        // selection, like in the scatter and volcano plots.
         //
         // Shift and cmd clicks add to or toggle the selection, so they must not
-        // clear it either. Ctrl never gets here, because d3 doesn't start a drag
-        // gesture when ctrl is held.
-        const sourceEvent = event.sourceEvent ?? event;
-        const isLine = sourceEvent.target?.classList?.contains("path");
-        if (!isLine && !UtilsService.isShiftKey(sourceEvent) && !UtilsService.isCtrlKey(sourceEvent)) {
-          this.resetSelections();
+        // clear it. Ctrl never gets here, because d3 doesn't start a drag gesture
+        // when ctrl is held.
+        if (!sourceEvent.target?.classList?.contains("path")) {
+          const nearbyId = closestLineId(endPoint);
+          if (nearbyId != null) {
+            this.selectLine(sourceEvent, nearbyId);
+          } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
+            this.resetSelections();
+          }
         }
         resetSelectionRectangle();
       }
@@ -413,6 +432,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   getSelectionIds(): Array<string> {
     return this.selectedGeneExpressions.map((expression: GeneExpression) => expression.id);
+  }
+
+  /**
+   * @description select one line, e.g. when it is clicked
+   *
+   * Shift adds to the selection and ctrl or cmd toggles.
+   */
+  selectLine(event, id: string): void {
+    if (UtilsService.isShiftKey(event)) {
+      this.addSelections([id]);
+    } else if (UtilsService.isCtrlKey(event)) {
+      this.toggleSelections([id]);
+    } else {
+      this.resetSelections();
+      this.addSelections([id]);
+    }
   }
 
   resetSelections(): void {
