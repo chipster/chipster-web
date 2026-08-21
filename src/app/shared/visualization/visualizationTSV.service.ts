@@ -10,6 +10,7 @@ import TSVRow from "../../model/tsv/TSVRow";
 import DomainBoundaries from "../../views/sessions/session/visualization/expression-profile/domainboundaries";
 import GeneExpression from "../../views/sessions/session/visualization/expression-profile/geneexpression";
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
+import { SelectionRow } from "../../views/sessions/session/visualization/model/selectionRow";
 
 @Injectable()
 export class VisualizationTSVService {
@@ -80,6 +81,29 @@ export class VisualizationTSVService {
   public getChipHeaders(tsv: TSVFile): Array<string> {
     const chipHeaderIndexes = this.getChipHeaderIndexes(tsv.headers);
     return tsv.headers.getItemsByIndexes(chipHeaderIndexes);
+  }
+
+  /*
+   * @description: does tsv-file contain a symbol column
+   */
+  public containsSymbolColumn(tsv: TSVFile): boolean {
+    return tsv.getColumnIndex("symbol") !== -1;
+  }
+
+  /*
+   * @description: symbol and identifier of the given rows, for the selection list next to a plot
+   *
+   * The symbol is left empty in files without a symbol column, see containsSymbolColumn().
+   * Files without an identifier column fall back to the first column, which is the identifier
+   * in files where the header row doesn't name it.
+   */
+  public getSelectionRows(tsv: TSVFile, rowIds: Array<string>): Array<SelectionRow> {
+    const symbolIndex = tsv.getColumnIndex("symbol");
+    const identifierIndex = tsv.getColumnIndex("identifier");
+    return tsv.body.getTSVRows(rowIds).map((row: TSVRow) => ({
+      symbol: symbolIndex !== -1 ? row.row[symbolIndex] : null,
+      identifier: identifierIndex !== -1 ? row.row[identifierIndex] : row.row[0],
+    }));
   }
 
   public getMinY(plotData: Array<PlotData>): number {

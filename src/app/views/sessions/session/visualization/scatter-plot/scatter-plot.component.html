@@ -5,7 +5,7 @@
     <div id="scatterplot"></div>
   </div>
   <div class="col-md-4" *ngIf="state.isReady()" id="setting">
-    <h6 class="lighter mb-0">Plot parameters</h6>
+    <h6 class="lighter mb-0">Parameters</h6>
     <label for="selectXaxis" class="text-sm">X-axis</label>
     <select
       class="form-control"
@@ -24,18 +24,27 @@
       <option class="text-sm" *ngFor="let header of chipHeaders">{{ header }}</option>
     </select>
     <div id="selectedGeneList">
-      <h6 class="lighter mt-3">Selection</h6>
+      <h6 class="lighter mt-4">Selection</h6>
       <ng-container *ngIf="selectedDataRows && selectedDataRows.length > 0; else noSelection">
-        <div class="btn-group me-2 mb-3" role="group">
-          <button class="btn btn-primary btn-sm" (click)="createDatasetFromSelected()">Create file</button>
+        <div class="d-flex align-items-center mb-3">
+          <p class="text-sm mb-0">{{ selectedDataRows.length }}/{{ plotData.length }} features</p>
+          <button class="btn btn-secondary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
         </div>
-        <p class="text-sm">{{ selectedDataRows.length }}/{{ plotData.length }} genes selected</p>
         <hr class="mt-1 mb-2" />
-        <div class="table table-sm">
-          <tr *ngFor="let gene of selectedDataRows">
-            <td class="text-sm">{{ gene.row[0] }}</td>
-          </tr>
-        </div>
+        <table class="table table-sm text-sm">
+          <thead>
+            <tr>
+              <th scope="col" *ngIf="showSymbolColumn">Symbol</th>
+              <th scope="col">Identifier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let selection of viewSelectionList">
+              <td *ngIf="showSymbolColumn">{{ selection.symbol }}</td>
+              <td>{{ selection.identifier }}</td>
+            </tr>
+          </tbody>
+        </table>
       </ng-container>
       <ng-template #noSelection>
         <p class="text-sm">Draw a rectangle to select data points.</p>
