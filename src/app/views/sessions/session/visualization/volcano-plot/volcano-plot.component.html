@@ -34,7 +34,7 @@
       <ng-container *ngIf="selectedDataRows && selectedDataRows.length > 0; else noSelection">
         <div class="d-flex align-items-center mb-3">
           <p class="text-sm mb-0">{{ selectedDataRows.length }}/{{ plotData.length }} features</p>
-          <button class="btn btn-secondary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
+          <button class="btn btn-primary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
         </div>
         <hr class="mt-1 mb-2" />
         <table class="table table-sm text-sm">
