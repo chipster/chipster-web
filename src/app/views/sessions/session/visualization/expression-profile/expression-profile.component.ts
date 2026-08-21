@@ -259,7 +259,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         that.removeSelectionHoverStyle(d.id);
       })
       .on("click", (event, d: GeneExpression) => {
-        console.log("click", event, d);
         const id = d.id;
         const isCtrl = UtilsService.isCtrlKey(event);
         const isShift = UtilsService.isShiftKey(event);
@@ -370,6 +369,26 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         this.addSelections(uniq(ids));
 
         // remove duplicate ids
+        resetSelectionRectangle();
+      } else {
+        // A click on an empty area clears the selection, like in the scatter and
+        // volcano plots.
+        //
+        // The drag is registered on the whole svg, so this branch also runs for
+        // clicks that land on a line. Those must not clear the selection: d3 sets
+        // its clickDistance to 0, so moving the pointer even one pixel makes d3
+        // swallow the click event that the path's own handler would need to select
+        // the line again, and clearing here would leave nothing selected. Selecting
+        // a line is left to that handler.
+        //
+        // Shift and cmd clicks add to or toggle the selection, so they must not
+        // clear it either. Ctrl never gets here, because d3 doesn't start a drag
+        // gesture when ctrl is held.
+        const sourceEvent = event.sourceEvent ?? event;
+        const isLine = sourceEvent.target?.classList?.contains("path");
+        if (!isLine && !UtilsService.isShiftKey(sourceEvent) && !UtilsService.isCtrlKey(sourceEvent)) {
+          this.resetSelections();
+        }
         resetSelectionRectangle();
       }
     });
