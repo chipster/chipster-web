@@ -170,6 +170,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("height", size.height)
       .attr("id", "svg")
       .style("margin-top", margin.top + "px")
+      // keep a drag from extending a text selection elsewhere on the page, which
+      // scrolls the page instead of drawing the selection rectangle. Must come
+      // before the drag, which stops immediate propagation of mousedown.
+      .on("mousedown", (event) => event.preventDefault())
       .call(drag);
 
     // Custom headers for x-axis
