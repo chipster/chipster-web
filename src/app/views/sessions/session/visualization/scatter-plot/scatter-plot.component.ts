@@ -161,27 +161,17 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .attr("fill", "red")
       .on("mouseover", (_d: any) => {})
       .on("mouseout", (_d: any) => {})
-      .on("click", (_d: PlotData) => {
-        // Need to store the datapoints what the user has clicked
-      });
+      .on("click", (event, d: PlotData) => this.selectDataPoint(event, d.id));
   }
 
-  getSelectedDataSet() {
-    this.selectedDataPointIds = this.plotService.getSelectedDataPoints(
+  getDataPointsInDragRectangle(): Array<string> {
+    return this.plotService.getSelectedDataPoints(
       this.dragStartPoint,
       this.dragEndPoint,
       this.xScale,
       this.yScale,
       this.plotData,
     );
-    // Populate the selected gene list to show in the selected box view{
-    this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
-    this.setViewSelectionList();
-    this.resetSelectionRectangle();
-
-    this.selectedDataPointIds.forEach((selectedId) => {
-      this.setSelectionStyle(selectedId);
-    });
   }
 
   setSelectionStyle(id: string) {

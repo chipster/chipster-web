@@ -201,10 +201,11 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
           return "red";
         }
         return "black";
-      });
+      })
+      .on("click", (event, d: PlotData) => this.selectDataPoint(event, d.id));
   }
 
-  getSelectedDataSet() {
+  getDataPointsInDragRectangle(): Array<string> {
     // convert infinity values to scale maximum so that those can be selected
     const limitedPlotData = this.plotData.map((val: PlotData) => {
       const limited = new PlotData();
@@ -213,21 +214,13 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       return limited;
     });
 
-    this.selectedDataPointIds = this.plotService.getSelectedDataPoints(
+    return this.plotService.getSelectedDataPoints(
       this.dragStartPoint,
       this.dragEndPoint,
       this.xScale,
       this.yScale,
       limitedPlotData,
     );
-    // Populate the selected Data Rows
-    this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);
-    this.setViewSelectionList();
-    this.resetSelectionRectangle();
-    // change the color of the selected data points
-    this.selectedDataPointIds.forEach((selectedId) => {
-      this.setSelectionStyle(selectedId);
-    });
   }
 
   setSelectionStyle(id: string) {
@@ -241,7 +234,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
   removeSelectionStyle(id: string) {
     // this need the coloring function
     d3.select("#dot" + id)
-      .classed("selected", true)
+      .classed("selected", false)
       .style("stroke", "none")
       .attr("r", 2);
   }
