@@ -13,7 +13,9 @@ import TSVRow from "../../model/tsv/TSVRow";
 import { SessionDataService } from "../../views/sessions/session/session-data.service";
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 import Point from "../../views/sessions/session/visualization/model/point";
+import { SelectionRow } from "../../views/sessions/session/visualization/model/selectionRow";
 import { FileResource } from "../resources/fileresource";
+import { VisualizationTSVService } from "./visualizationTSV.service";
 
 @Directive()
 export abstract class PlotDirective implements OnChanges, OnDestroy {
@@ -30,10 +32,15 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   dragEndPoint: Point;
   selectedDataPointIds: Array<string>;
   selectedDataRows: Array<TSVRow> = [];
+  // symbols and identifiers of the selected rows, shown in the selection list
+  viewSelectionList: Array<SelectionRow> = [];
+  // files without a symbol column show the identifier column only
+  showSymbolColumn = false;
 
   svgPadding = 50;
   protected fileResource: FileResource;
   protected sessionDataService: SessionDataService;
+  protected visualizationTSVService: VisualizationTSVService;
   private restErrorService: RestErrorService;
   private zone: NgZone;
 
@@ -44,9 +51,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   private resizeObserver: ResizeObserver;
   private lastPlotWidth: number;
 
-  constructor(fileResource: FileResource, sessionDataService: SessionDataService) {
+  constructor(
+    fileResource: FileResource,
+    sessionDataService: SessionDataService,
+    visualizationTSVService: VisualizationTSVService,
+  ) {
     this.fileResource = fileResource;
     this.sessionDataService = sessionDataService;
+    this.visualizationTSVService = visualizationTSVService;
     this.restErrorService = AppInjector.get(RestErrorService);
     this.zone = AppInjector.get(NgZone);
   }
@@ -65,6 +77,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // clear any previous selection so it isn't re-applied to a new dataset
     this.selectedDataPointIds = undefined;
     this.selectedDataRows = [];
+    this.viewSelectionList = [];
 
     // reset the cached width so the resize observer redraws the new dataset
     // even when the container returns to a width it had for a previous one
@@ -210,6 +223,13 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       }
     }
     this.selectedDataRows = [];
+    this.viewSelectionList = [];
+  }
+
+  /** @description update the selection list shown next to the plot* */
+  setViewSelectionList(): void {
+    this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
+    this.viewSelectionList = this.visualizationTSVService.getSelectionRows(this.tsv, this.selectedDataPointIds);
   }
 
   setXAxisHeader(event) {
