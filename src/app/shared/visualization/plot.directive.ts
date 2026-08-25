@@ -236,11 +236,25 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       this.dragEndPoint = new Point(endPoint.x, endPoint.y);
       this.dragStartPoint = new Point(startPoint.x, startPoint.y);
 
-      // shift adds the data points in the rectangle to the current selection,
-      // otherwise the rectangle replaces it
+      // Shift adds the data points in the rectangle to the current selection and
+      // cmd toggles them, otherwise the rectangle replaces the selection. Only
+      // cmd, because d3 doesn't start a drag gesture when ctrl is held.
+      //
+      // The lookups use sets, because a rectangle can cover every data point of
+      // the file and searching arrays of that size for each of them takes seconds.
       const inRectangle = this.getDataPointsInDragRectangle();
       const selected = this.selectedDataPointIds ?? [];
-      const ids = isShift ? selected.concat(inRectangle.filter((id) => !selected.includes(id))) : inRectangle;
+      const selectedIds = new Set(selected);
+      const notSelectedYet = inRectangle.filter((id) => !selectedIds.has(id));
+      let ids: Array<string>;
+      if (isShift) {
+        ids = selected.concat(notSelectedYet);
+      } else if (UtilsService.isCtrlKey(sourceEvent)) {
+        const rectangleIds = new Set(inRectangle);
+        ids = selected.filter((id) => !rectangleIds.has(id)).concat(notSelectedYet);
+      } else {
+        ids = inRectangle;
+      }
       this.showSelection(ids);
       this.resetSelectionRectangle();
     });
