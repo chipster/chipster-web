@@ -353,11 +353,13 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
       const sourceEvent = event.sourceEvent ?? event;
       const isShift = UtilsService.isShiftKey(sourceEvent);
+      const isCtrl = UtilsService.isCtrlKey(sourceEvent);
 
       if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
-        // shift adds the lines in the rectangle to the current selection,
-        // otherwise the rectangle replaces it
-        if (!isShift) {
+        // Shift adds the lines in the rectangle to the current selection and cmd
+        // toggles them, otherwise the rectangle replaces the selection. Only cmd,
+        // because d3 doesn't start a drag gesture when ctrl is held.
+        if (!isShift && !isCtrl) {
           this.resetSelections();
         }
         d3.selectAll(".path").attr("stroke-width", 1);
@@ -391,7 +393,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           ids = ids.concat(map(intersectingLines, (line: Line) => line.lineId));
         }
 
-        this.addSelections(uniq(ids));
+        if (isCtrl) {
+          this.toggleSelections(uniq(ids));
+        } else {
+          this.addSelections(uniq(ids));
+        }
 
         // remove duplicate ids
         resetSelectionRectangle();
@@ -409,7 +415,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
           const nearbyId = closestLineId(endPoint);
           if (nearbyId != null) {
             this.selectLine(sourceEvent, nearbyId);
-          } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
+          } else if (!isShift && !isCtrl) {
             this.resetSelections();
           }
         }
