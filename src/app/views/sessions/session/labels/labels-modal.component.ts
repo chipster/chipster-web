@@ -73,6 +73,11 @@ export class LabelsModalComponent implements OnInit {
     return this.selectedDatasets.length > 0;
   }
 
+  /** There is something to apply only if files are selected and there are labels to check */
+  canApply(): boolean {
+    return this.hasSelection() && this.rows.length > 0;
+  }
+
   toggleRow(row: LabelRow): void {
     row.selection = row.selection === "checked" ? "unchecked" : "checked";
   }

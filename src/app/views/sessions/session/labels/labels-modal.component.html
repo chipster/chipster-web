@@ -57,9 +57,14 @@
     (click)="openCreateLabel()">
     + New label
   </button>
-  <button *ngIf="hasSelection()" type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
-  <button type="button" class="btn btn-primary" [disabled]="saving" (click)="confirm()">
-    <span *ngIf="hasSelection()">Apply</span>
-    <span *ngIf="!hasSelection()">Close</span>
+  <button *ngIf="canApply()" type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+  <button
+    type="button"
+    class="btn"
+    [ngClass]="{ 'btn-primary': canApply(), 'btn-secondary': !canApply() }"
+    [disabled]="saving"
+    (click)="confirm()">
+    <span *ngIf="canApply()">Apply</span>
+    <span *ngIf="!canApply()">Close</span>
   </button>
 </div>
