@@ -169,7 +169,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("width", size.width)
       .attr("height", size.height)
       .attr("id", "svg")
-      .style("margin-top", margin.top + "px")
       // keep a drag from extending a text selection elsewhere on the page, which
       // scrolls the page instead of drawing the selection rectangle. Must come
       // before the drag, which stops immediate propagation of mousedown.
@@ -215,7 +214,9 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     // Y-axis and scale
     const yScale = d3
       .scaleLinear()
-      .range([graphArea.height, 0])
+      // the top of the range is margin.top, not 0, so that a line at the maximum
+      // value isn't drawn against the top edge of the svg, which clips it
+      .range([graphArea.height, margin.top])
       .domain([
         this.visualizationTSVService.getDomainBoundaries(tsv).min,
         this.visualizationTSVService.getDomainBoundaries(tsv).max,
