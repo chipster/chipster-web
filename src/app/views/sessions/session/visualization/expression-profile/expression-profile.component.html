@@ -6,7 +6,7 @@
   </div>
 
   <div class="col-md-3" id="selectedGeneList" *ngIf="state.isReady()">
-    <h6 class="lighter mt-3">Selection</h6>
+    <h6 class="lighter">Selection</h6>
     <ng-container *ngIf="selectedGeneExpressions && selectedGeneExpressions.length > 0; else noSelection">
       <div class="d-flex align-items-center mb-3">
         <p class="text-sm mb-0">{{ selectedGeneExpressions.length }}/{{ totalCount }} features</p>
