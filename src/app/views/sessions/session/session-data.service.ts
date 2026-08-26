@@ -147,9 +147,9 @@ export class SessionDataService {
     );
   }
 
-  deleteDatasets(datasets: Dataset[]) {
+  deleteDatasets(datasets: Dataset[], sessionId: string) {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
-      this.sessionResource.deleteDataset(this.getSessionId(), dataset.datasetId),
+      this.sessionResource.deleteDataset(sessionId, dataset.datasetId),
     );
     observableMerge(...deleteDatasets$).subscribe(
       () => {
@@ -254,29 +254,31 @@ export class SessionDataService {
   }
 
   // Added the delete dataset code here as two components are sharing the code
-  deleteDatasetsNow(deletedDatasets: Dataset[]) {
+  deleteDatasetsNow(deletedDatasets: Dataset[], sessionId: string) {
     // delete from the server
-    this.deleteDatasets(deletedDatasets);
+    this.deleteDatasets(deletedDatasets, sessionId);
   }
 
-  deleteDatasetsUndo(deletedDatasets: Dataset[]) {
+  deleteDatasetsUndo(deletedDatasets: Dataset[], sessionId: string) {
     // show datasets again in the workflowgraph
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(
-        this.getSessionId(),
-        Resource.Dataset,
-        dataset.datasetId,
-        EventType.Create,
-        FileState.Complete,
-      );
+      const wsEvent = new WsEvent(sessionId, Resource.Dataset, dataset.datasetId, EventType.Create, FileState.Complete);
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
   }
 
   openDeleteFilesConfirm(datasets: Dataset[]) {
+    /*
+    Remember the session that these datasets are deleted from.
+
+    The confirmation dialog isn't dismissed when the user opens another session, so we have
+    to remember the session already here, not when the user clicks the delete button.
+    */
+    const sessionId = this.getSessionId();
+
     this.dialogModalService.openDeleteFilesModal(datasets).then(
       () => {
-        this.deleteDatasetsLater(datasets);
+        this.deleteDatasetsLater(datasets, sessionId);
       },
       () => {
         // modal dismissed
@@ -287,12 +289,13 @@ export class SessionDataService {
   /**
    * Poor man's undo for the dataset deletion.
    *
-   * Hide the dataset from the client for ten
+   * Hide the dataset from the client for fifteen
    * seconds and delete from the server only after that. deleteDatasetsUndo() will
-   * cancel the timer and make the datasets visible again. Session copying and sharing
-   * should filter out these hidden datasets or we need a proper server side support for this.
+   * cancel the timer, and make the datasets visible again if the user is still in the same
+   * session. Session copying and sharing should filter out these hidden datasets or we need
+   * a proper server side support for this.
    */
-  deleteDatasetsLater(datasets: Dataset[]) {
+  deleteDatasetsLater(datasets: Dataset[], sessionId: string) {
     log.info("deleting datasets" + datasets);
     // make a copy so that further selection changes won't change the array
     const deletedDatasets = clone(datasets);
@@ -304,7 +307,7 @@ export class SessionDataService {
     // hide from the workflowgraph
     // state seems to be irrelevant when deleting
     deletedDatasets.forEach((dataset: Dataset) => {
-      const wsEvent = new WsEvent(this.getSessionId(), Resource.Dataset, dataset.datasetId, EventType.Delete, null);
+      const wsEvent = new WsEvent(sessionId, Resource.Dataset, dataset.datasetId, EventType.Delete, null);
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
@@ -344,7 +347,7 @@ export class SessionDataService {
 
     toast.onAction.pipe(filter((text) => text === BTN_UNDO)).subscribe({
       next: () => {
-        this.deleteDatasetsUndo(deletedDatasets);
+        this.deleteDatasetsUndo(deletedDatasets, sessionId);
         this.toastrService.clear(toast.toastId);
       },
       error: (err) => this.errorService.showError("error in dataset deletion", err),
@@ -356,7 +359,7 @@ export class SessionDataService {
       )
       .subscribe({
         next: () => {
-          this.deleteDatasetsNow(deletedDatasets);
+          this.deleteDatasetsNow(deletedDatasets, sessionId);
           this.toastrService.clear(toast.toastId);
         },
         error: (err) => this.errorService.showError("error in dataset deletion", err),
