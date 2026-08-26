@@ -191,7 +191,7 @@ export class SessionComponent implements OnInit, OnDestroy {
                 "delete old temporary-zip-export: " + dataset.name + ", state: " + dataset.state + ", age: " + millis,
               );
 
-              this.sessionDataService.deleteDatasets([dataset]);
+              this.sessionDataService.deleteDatasets([dataset], this.sessionData.session.sessionId);
             } else {
               log.info(
                 "keep recent temporary-zip-export: " +

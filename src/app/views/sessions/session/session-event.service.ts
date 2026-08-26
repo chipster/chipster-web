@@ -318,6 +318,15 @@ export class SessionEventService {
    * @param event
    */
   generateLocalEvent(event: WsEvent) {
+    if (event.sessionId !== this.sessionId) {
+      /*
+      The user has opened another session after this event was created. The event handling
+      above applies events to the currently open session without checking the event's
+      sessionId, so events of other sessions would corrupt it.
+      */
+      log.info("skip local event of another session", event.sessionId);
+      return;
+    }
     // incorrect typing? it really is an object, but the compiler wants a string
     this.localSubject$.next(event);
   }
