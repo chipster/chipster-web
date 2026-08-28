@@ -6,10 +6,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": false,
-    "moduleResolution": "node",
-    // vitest ships .d.ts files that reference exports-map subpaths, which the
-    // "node" module resolution cannot follow
-    "skipLibCheck": true,
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2022",
