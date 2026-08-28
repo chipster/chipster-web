@@ -69,6 +69,20 @@
         "plugin:@angular-eslint/template/recommended"
       ],
       "rules": {}
+    },
+    {
+      "files": [
+        "playwright.config.ts"
+      ],
+      "rules": {
+        // tooling config, its imports are dev dependencies on purpose
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            "devDependencies": true
+          }
+        ]
+      }
     }
   ]
 }
