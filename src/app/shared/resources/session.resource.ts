@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Dataset, Job, JobState, Label, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
-import { clone } from "lodash-es";
+import { chunk, clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, from, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/operators";
@@ -12,7 +12,6 @@ import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
-import _ from "lodash";
 import { SchedulerResource } from "./scheduler-resource";
 
 @Injectable()
@@ -63,7 +62,7 @@ export class SessionResource {
           .pipe(
             tap((x) => log.debug("sessionJobs", x)),
             // divede list if IDs to chunks
-            map((jobIds: []) => _.chunk(jobIds, 100)),
+            map((jobIds: []) => chunk(jobIds, 100)),
             // create a job request for each junk
             map((chunks: []) => {
               return chunks.map((chunkJobIds) => {
