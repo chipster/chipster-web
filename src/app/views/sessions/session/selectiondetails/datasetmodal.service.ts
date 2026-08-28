@@ -15,7 +15,7 @@ import { LabelsModalComponent } from "../labels/labels-modal.component";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { RouteService } from "../../../../shared/services/route.service";
-import _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
@@ -272,13 +272,13 @@ export class DatasetModalService {
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
-        const jobClone = _.cloneDeep(sessionData.jobsMap.get(jobId));
+        const jobClone = cloneDeep(sessionData.jobsMap.get(jobId));
         return [jobId, jobClone];
       }),
     );
     const selectedDatasetsMap: Map<string, Dataset> = new Map(
       selectedDatasets.map((dataset: Dataset) => {
-        const datasetClone = _.cloneDeep(dataset);
+        const datasetClone = cloneDeep(dataset);
         return [dataset.datasetId, datasetClone];
       }),
     );
