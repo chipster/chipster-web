@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { testtsv } from "./TSVFile.input.spec";
 import TSVFile from "./TSVFile";
 
