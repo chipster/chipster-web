@@ -8,10 +8,11 @@
     "build": "ng build --configuration production",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prettier": "npx prettier --check \"src/app/**/*.{ts,js,html}\"",
-    "prettier-write": "npx prettier --write \"src/app/**/*.{ts,js,html}\"",
-    "lint": "npx eslint --ext .ts,.js src/app/",
-    "lint-fix": "npx eslint --fix --ext .ts,.js src/app/"
+    "test:e2e": "playwright test",
+    "prettier": "npx prettier --check \"{src/app,e2e}/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
+    "prettier-write": "npx prettier --write \"{src/app,e2e}/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
+    "lint": "npx eslint --ext .ts,.js src/app/ e2e/ playwright.config.ts",
+    "lint-fix": "npx eslint --fix --ext .ts,.js src/app/ e2e/ playwright.config.ts"
   },
   "engines": {
     "node": ">=24",
@@ -66,6 +67,7 @@
     "@angular/cli": "^18.2.6",
     "@angular/compiler-cli": "^18.2.6",
     "@angular/language-service": "^18.2.6",
+    "@playwright/test": "1.62.1",
     "@types/d3": "^7",
     "@types/file-saver": "^2.0.5",
     "@types/flowjs": "^2.13.8",

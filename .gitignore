@@ -14,3 +14,8 @@ src/assets/manual-mylly
 src/assets/manual
 .vscode/settings.json
 
+# Playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
