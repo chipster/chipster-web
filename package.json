@@ -8,7 +8,6 @@
     "build": "ng build --configuration production",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "ng e2e",
     "prettier": "npx prettier --check \"src/app/**/*.{ts,js,html}\"",
     "prettier-write": "npx prettier --write \"src/app/**/*.{ts,js,html}\"",
     "lint": "npx eslint --ext .ts,.js src/app/",
