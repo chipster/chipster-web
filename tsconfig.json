@@ -7,6 +7,9 @@
     "esModuleInterop": true,
     "declaration": false,
     "moduleResolution": "node",
+    // vitest ships .d.ts files that reference exports-map subpaths, which the
+    // "node" module resolution cannot follow
+    "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2022",
@@ -20,6 +23,9 @@
     ],
     "useDefineForClassFields": false
   },
+  "exclude": [
+    "vitest.config.mts"
+  ],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
