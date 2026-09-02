@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { login } from "./login";
+
 /*
  * Smoke tests for the whole stack: the Angular app, chipster-web-server and
  * the database. The credentials are the defaults from the web server's
@@ -11,16 +13,18 @@ test("home page opens", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/home$/);
   await expect(page).toHaveTitle("Chipster");
-  await expect(page.getByRole("heading", { name: "Chipster", level: 1, exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sessions" })).toBeVisible();
+  /*
+   * assert parts that the home page itself renders unconditionally, not the
+   * h1 heading, which comes from the deployment-configurable home-header-path
+   */
+  await expect(page.getByRole("heading", { name: "Get started" })).toBeVisible();
+  await expect(page.locator("#getstarted").getByRole("button", { name: "Log In" })).toBeVisible();
+  // scoped to the navbar, because the home page adds its own Sessions link when logged in
+  await expect(page.locator("#navbar").getByRole("link", { name: "Sessions" })).toBeVisible();
 });
 
 test("logging in opens the session list", async ({ page }) => {
-  await page.goto("/login");
-
-  await page.locator("#username").fill("chipster");
-  await page.locator("#password").fill("chipster");
-  await page.getByRole("button", { name: "Log In" }).click();
+  await login(page, "chipster", "chipster");
 
   await expect(page).toHaveURL(/\/sessions$/);
   /*
@@ -34,12 +38,14 @@ test("logging in opens the session list", async ({ page }) => {
 });
 
 test("wrong password keeps the user on the login page", async ({ page }) => {
-  await page.goto("/login");
+  await login(page, "chipster", "not-the-password");
 
-  await page.locator("#username").fill("chipster");
-  await page.locator("#password").fill("not-the-password");
-  await page.getByRole("button", { name: "Log In" }).click();
-
-  await expect(page).toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { name: "Chipster login" })).toBeVisible();
+  /*
+   * wait for the auth service's rejection first: the URL and heading
+   * assertions below are true already before the login request completes, so
+   * on their own they would pass even if the password was never checked
+   */
+  await expect(page.getByText("Incorrect username or password")).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole("heading", { name: /login$/ })).toBeVisible();
 });
