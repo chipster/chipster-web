@@ -32,7 +32,11 @@
   display: block;
 }
 
-// this should come straight from the Bootstrap, why is something overriding it?
-.dropdown-item.disabled {
+// Match both the .disabled class (Bootstrap convention used by [class.disabled]
+// items) and the native :disabled pseudo-class (label entries use [disabled]
+// so colored inner spans fade uniformly with the rest of the button).
+.dropdown-item.disabled,
+.dropdown-item:disabled {
   color: #6c757d;
+  opacity: 0.5;
 }

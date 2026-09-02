@@ -25,6 +25,11 @@ export class HotkeyService {
     ) {
       return;
     }
+    // Ignore combinations with a command modifier so single-letter shortcuts
+    // don't swallow native browser shortcuts like Cmd/Ctrl+L and Cmd/Ctrl+F.
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
     const shortcut = this.shortcuts.get(event.key.toLowerCase());
     if (shortcut) {
       event.preventDefault();

@@ -23,6 +23,27 @@
         <button ngbDropdownItem (click)="renameDataset()">Rename&hellip;</button>
         <button ngbDropdownItem (click)="wrangleDataset()">Convert to Chipster format&hellip;</button>
         <button ngbDropdownItem (click)="defineDatasetGroups()">Define samples&hellip;</button>
+        <div
+          class="dropdown-submenu position-relative"
+          (mouseenter)="labelsSubmenuOpen = true"
+          (mouseleave)="labelsSubmenuOpen = false">
+          <button ngbDropdownItem class="d-flex justify-content-between align-items-center">
+            <span>Labels</span><span aria-hidden="true">&rsaquo;</span>
+          </button>
+          <div
+            *ngIf="labelsSubmenuOpen"
+            class="dropdown-menu show"
+            style="position: absolute; left: 100%; top: 0; margin-left: 0">
+            <button
+              *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
+              ngbDropdownItem
+              (click)="toggleLabel(item)">
+              <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+            </button>
+            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
+            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
+          </div>
+        </div>
         <button ngbDropdownItem (click)="exportDatasets()">Export</button>
         <button ngbDropdownItem (click)="showHistory()">History&hellip;</button>
         <div class="dropdown-divider"></div>
@@ -57,6 +78,27 @@
       </button>
       <div ngbDropdownMenu aria-labelledby="filesDropdownMenuButton">
         <button ngbDropdownItem (click)="defineDatasetGroups()">Define samples&hellip;</button>
+        <div
+          class="dropdown-submenu position-relative"
+          (mouseenter)="labelsSubmenuOpen = true"
+          (mouseleave)="labelsSubmenuOpen = false">
+          <button ngbDropdownItem class="d-flex justify-content-between align-items-center">
+            <span>Labels</span><span aria-hidden="true">&rsaquo;</span>
+          </button>
+          <div
+            *ngIf="labelsSubmenuOpen"
+            class="dropdown-menu show"
+            style="position: absolute; left: 100%; top: 0; margin-left: 0">
+            <button
+              *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
+              ngbDropdownItem
+              (click)="toggleLabel(item)">
+              <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+            </button>
+            <div *ngIf="labelMenuItems.length > 0" class="dropdown-divider"></div>
+            <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
+          </div>
+        </div>
         <button ngbDropdownItem (click)="selectChildren()">Select descendants</button>
         <button ngbDropdownItem (click)="copyToNewSession()">Copy to new session&hellip;</button>
         <button ngbDropdownItem (click)="copyToExistingSession()">Copy to existing session&hellip;</button>

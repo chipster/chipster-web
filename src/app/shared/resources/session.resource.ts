@@ -1,8 +1,8 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Dataset, Job, JobState, Rule, Session } from "chipster-js-common";
+import { Dataset, Job, JobState, Label, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
-import { clone } from "lodash-es";
+import { chunk, clone } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, from, of as observableOf, of } from "rxjs";
 import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/operators";
@@ -12,7 +12,6 @@ import { JobService } from "../../views/sessions/session/job.service";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
-import _ from "lodash";
 import { SchedulerResource } from "./scheduler-resource";
 
 @Injectable()
@@ -45,6 +44,13 @@ export class SessionResource {
           .get(`${url}/sessions/${sessionId}/datasets`, this.tokenService.getTokenParams(true))
           .pipe(tap((x) => log.debug("sessionDatasets", x)));
 
+        const sessionLabels$ = this.http
+          .get<Label[]>(`${url}/sessions/${sessionId}/labels`, this.tokenService.getTokenParams(true))
+          .pipe(
+            catchError(() => observableOf([] as Label[])),
+            tap((x) => log.debug("sessionLabels", x)),
+          );
+
         /* Get jobs in chunks
 
         Getting e.g. 1000 jobs from remote database may take longer than 30 timeout in Ingress.
@@ -56,7 +62,7 @@ export class SessionResource {
           .pipe(
             tap((x) => log.debug("sessionJobs", x)),
             // divede list if IDs to chunks
-            map((jobIds: []) => _.chunk(jobIds, 100)),
+            map((jobIds: []) => chunk(jobIds, 100)),
             // create a job request for each junk
             map((chunks: []) => {
               return chunks.map((chunkJobIds) => {
@@ -97,6 +103,7 @@ export class SessionResource {
           session: session$,
           datasets: sessionDatasets$,
           jobs: sessionJobs$,
+          labels: sessionLabels$,
           types: types$,
           jobQuota: jobQuota,
         });
@@ -105,6 +112,7 @@ export class SessionResource {
         const session: Session = param["session"] as Session;
         const datasets: Dataset[] = param["datasets"] as Dataset[];
         const jobs: Job[] = param["jobs"] as Job[];
+        const labels: Label[] = (param["labels"] as Label[]) ?? [];
         const types = param["types"] as Map<string, Map<string, string>>;
 
         const data = new SessionData();
@@ -133,6 +141,7 @@ export class SessionResource {
         data.session = session;
         data.datasetsMap = UtilsService.arrayToMap(completeDatasets, "datasetId");
         data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
+        data.labelsMap = UtilsService.arrayToMap(labels, "labelId");
 
         data.datasetTypeTags = types;
 
@@ -500,6 +509,81 @@ export class SessionResource {
       );
   }
 
+  getLabel(sessionId: string, labelId: string): Observable<Label> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/labels/${labelId}`,
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Label>,
+        ),
+      );
+  }
+
+  getLabels(sessionId: string): Observable<Label[]> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.get(
+              `${url}/sessions/${sessionId}/labels`,
+              this.tokenService.getTokenParams(true),
+            ) as Observable<Label[]>,
+        ),
+      );
+  }
+
+  createLabel(sessionId: string, label: Label): Observable<string> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/labels`, label, this.tokenService.getTokenParams(true)),
+      ),
+      map((response: { labelId: string }) => response.labelId),
+    );
+  }
+
+  createLabels(sessionId: string, labels: Label[]): Observable<{ labelId: string }[]> {
+    return this.configService.getSessionDbUrl().pipe(
+      mergeMap((url: string) =>
+        this.http.post(`${url}/sessions/${sessionId}/labels/array`, labels, this.tokenService.getTokenParams(true)),
+      ),
+      map((response: {}) => response["labels"]),
+    );
+  }
+
+  updateLabel(sessionId: string, label: Label): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.put(
+              `${url}/sessions/${sessionId}/labels/${label.labelId}`,
+              label,
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
+      );
+  }
+
+  deleteLabel(sessionId: string, labelId: string): Observable<null> {
+    return this.configService
+      .getSessionDbUrl()
+      .pipe(
+        mergeMap(
+          (url: string) =>
+            this.http.delete(
+              `${url}/sessions/${sessionId}/labels/${labelId}`,
+              this.tokenService.getTokenParams(false),
+            ) as Observable<null>,
+        ),
+      );
+  }
+
   copySession(sessionData: SessionData, name: string, temporary: boolean): Observable<string> {
     log.info(
       "copying session, original has:",
@@ -520,7 +604,8 @@ export class SessionResource {
     // create session
     return this.createSession(newSession).pipe(
       mergeMap((sessionId) => {
-        return this.copyToExistingSession(sessionId, sessionData);
+        // freshly created session has no labels yet
+        return this.copyToExistingSession(sessionId, sessionData, new Map<string, Label>());
       }),
       mergeMap((session) => {
         log.info("session copied, current state", session.state, temporary);
@@ -535,8 +620,26 @@ export class SessionResource {
     );
   }
 
-  copyToExistingSession(targetSessionId, sessionData): Observable<Session> {
-    // create datasets
+  copyToExistingSession(
+    targetSessionId: string,
+    sessionData: SessionData,
+    targetLabelsMap: Map<string, Label>,
+  ): Observable<Session> {
+    // Preserve source labelIds in the destination so that multiple copies of files
+    // sharing the same source label collapse onto one destination label. Drift
+    // policy: destination wins -- if a label with the same labelId already exists
+    // in the target, skip the create and let the copied file attach to whatever
+    // the destination's version looks like now.
+    const sourceLabels: Label[] = Array.from(sessionData.labelsMap?.values() ?? []);
+    const labelsToCreate = sourceLabels
+      .filter((label: Label) => !targetLabelsMap.has(label.labelId))
+      .map((label: Label) => ({ ...label, sessionId: null }));
+
+    const createLabelsRequest = labelsToCreate.length > 0
+      ? this.createLabels(targetSessionId, labelsToCreate)
+      : of([]);
+
+    // datasets keep their labelIds verbatim -- they now resolve in the destination
     const oldDatasets = Array.from(sessionData.datasetsMap.values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
@@ -549,7 +652,9 @@ export class SessionResource {
     // emit an empty array in case request completes without emitting anything
     // (don't know if this ever happends) otherwise this won't continue to the
     //  next mergeMap() when the session is empty
-    return createDatasetsRequest.pipe(defaultIfEmpty([])).pipe(
+    return createLabelsRequest.pipe(
+      mergeMap(() => createDatasetsRequest.pipe(defaultIfEmpty([]))),
+    ).pipe(
       mergeMap((createdDatasets: Dataset[]) => {
         log.info("created", createdDatasets.length, "datasets");
         // create dataset map for checking inputs later
@@ -571,7 +676,7 @@ export class SessionResource {
 
         const createJobsRequest = jobCopies.length > 0 ? this.createJobs(targetSessionId, jobCopies) : of([]);
 
-        // see the comment of the forkJoin above
+        // see the defaultIfEmpty comment above
         return createJobsRequest.pipe(defaultIfEmpty([]));
       }),
       mergeMap((createdJobs: Job[]) => {

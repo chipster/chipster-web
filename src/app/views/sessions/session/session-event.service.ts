@@ -7,12 +7,13 @@ import {
   Rule,
   Session,
   SessionEvent,
+  Label,
   SessionState,
   WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject, never as observableNever, of as observableOf } from "rxjs";
-import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -29,6 +30,7 @@ export class SessionEventService {
   jobStream$: Observable<SessionEvent>;
   sessionStream$: Observable<SessionEvent>;
   ruleStream$: Observable<SessionEvent>;
+  labelStream$: Observable<SessionEvent>;
   wsSubject$: WebSocketSubject<WsEvent>;
   localSubject$: Subject<WsEvent>;
 
@@ -92,11 +94,19 @@ export class SessionEventService {
       refCount()
     );
 
+    this.labelStream$ = stream.pipe(
+      filter((wsData) => wsData.resourceType === Resource.Label),
+      mergeMap((data) => this.handleLabelEvent(data, this.sessionId, sessionData)),
+      publish(),
+      refCount()
+    );
+
     // update sessionData even if no one else subscribes
     this.datasetStream$.subscribe(null, (err) => this.errorService.showError("dataset event error", err));
     this.jobStream$.subscribe(null, (err) => this.errorService.showError("job event error", err));
     this.sessionStream$.subscribe(null, (err) => this.errorService.showError("session event error", err));
     this.ruleStream$.subscribe(null, (err) => this.errorService.showError("rule event error", err));
+    this.labelStream$.subscribe(null, (err) => this.errorService.showError("label event error", err));
   }
 
   /**
@@ -115,6 +125,10 @@ export class SessionEventService {
 
   getRuleStream() {
     return this.ruleStream$;
+  }
+
+  getLabelStream() {
+    return this.labelStream$;
   }
 
   getSelectedDatasetsContentsUpdatedStream(): Observable<string> {
@@ -186,8 +200,8 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
-          sessionData.datasetsMap.set(event.resourceId, remote);
+          // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
+          // is never visible in the UI before its type tags are ready
           return this.createEvent(event, null, remote);
         })
       );
@@ -202,9 +216,9 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-
           const local = sessionData.datasetsMap.get(event.resourceId);
-          sessionData.datasetsMap.set(event.resourceId, remote);
+          // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
+          // is never visible in the UI before its type tags are ready
           return this.createEvent(event, local, remote);
         })
       );
@@ -228,17 +242,45 @@ export class SessionEventService {
         return observableOf(sessionEvent);
       }
 
-      // dataset created or updated, update type tags too
+      // dataset created or updated, update type tags and datasetsMap together
+      // so the dataset is never visible in the UI before its type tags are ready
       return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).pipe(
         map((typeTags) => {
           sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
+          sessionData.datasetsMap.set(newValue.datasetId, newValue);
           return sessionEvent;
-        })
+        }),
+        catchError((err) => {
+          if (err?.status === 404) {
+            // dataset was deleted before type tags were fetched, nothing to do
+            log.info("dataset deleted before type tags were fetched", newValue.datasetId);
+            return observableOf(sessionEvent);
+          }
+          throw err;
+        }),
       );
     }
     // dataset deleted, type tags can be removed
     sessionData.datasetTypeTags.delete(sessionEvent.resourceId);
     return observableOf(sessionEvent);
+  }
+
+  handleLabelEvent(event: any, sessionId: string, sessionData: SessionData): Observable<SessionEvent> {
+    if (event.type === EventType.Create || event.type === EventType.Update) {
+      return this.sessionResource.getLabel(sessionId, event.resourceId).pipe(
+        mergeMap((remote: Label) => {
+          const local = sessionData.labelsMap.get(event.resourceId);
+          sessionData.labelsMap.set(event.resourceId, remote);
+          return this.createEvent(event, local, remote);
+        })
+      );
+    }
+    if (event.type === EventType.Delete) {
+      const localCopy = sessionData.labelsMap.get(event.resourceId);
+      sessionData.labelsMap.delete(event.resourceId);
+      return this.createEvent(event, localCopy, null);
+    }
+    log.warn("unknown event type", event);
   }
 
   handleJobEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
@@ -276,6 +318,15 @@ export class SessionEventService {
    * @param event
    */
   generateLocalEvent(event: WsEvent) {
+    if (event.sessionId !== this.sessionId) {
+      /*
+      The user has opened another session after this event was created. The event handling
+      above applies events to the currently open session without checking the event's
+      sessionId, so events of other sessions would corrupt it.
+      */
+      log.info("skip local event of another session", event.sessionId);
+      return;
+    }
     // incorrect typing? it really is an object, but the compiler wants a string
     this.localSubject$.next(event);
   }

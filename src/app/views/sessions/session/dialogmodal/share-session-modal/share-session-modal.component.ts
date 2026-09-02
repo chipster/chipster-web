@@ -74,6 +74,9 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   saveRule() {
+    if (this.isNewRuleUsernameBlank()) {
+      return;
+    }
     this.newRule.username = this.newRule.username.trim();
     this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
       (resp) => {
@@ -117,6 +120,10 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   getUsername() {
     return this.tokenService.getUsername();
+  }
+
+  isNewRuleUsernameBlank() {
+    return !this.newRule?.username?.trim();
   }
 
   isDeleteEnabled(rule: Rule) {

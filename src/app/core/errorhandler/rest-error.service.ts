@@ -18,6 +18,10 @@ export class RestErrorService {
     return RestErrorService.isHttpError(error, 429);
   }
 
+  static isBadRequest(error: HttpErrorResponse | any) {
+    return RestErrorService.isHttpError(error, 400);
+  }
+
   static isHttpError(error: HttpErrorResponse | any, status: number) {
     return (error instanceof HttpErrorResponse || error instanceof Response) && error.status === status;
   }
@@ -72,12 +76,33 @@ export class RestErrorService {
       errorMessage.title = message;
       errorMessage.msg = this.getTooManyRequestsMessage(resp);
       errorMessage.buttons = [ErrorButton.ContactSupport];
+    } else if (RestErrorService.isBadRequest(resp)) {
+      // surface the backend's plain-text reason (e.g. "session has reached the
+      // maximum of 100 labels") so the user knows what to fix; Reload won't help
+      const reason = this.getServerErrorMessage(resp);
+      errorMessage.title = message;
+      errorMessage.msg = reason ?? "Bad request";
+      errorMessage.buttons = [ErrorButton.ContactSupport];
     }
 
     this.errorService.showErrorObject(errorMessage);
 
     // log
     log.info("rest error handled", message, resp);
+  }
+
+  /**
+   * Extract the server's error body as plain text, or null if there's none.
+   *
+   * The backend sends error details as text/plain (see BadRequestExceptionMapper),
+   * but the requests use Angular's default responseType "json", so a non-JSON body
+   * lands either directly in resp.error (string) or wrapped as resp.error.text after
+   * a failed JSON parse. Handle both.
+   */
+  private getServerErrorMessage(resp: any): string | null {
+    const body = typeof resp?.error === "string" ? resp.error : resp?.error?.text;
+    const trimmed = typeof body === "string" ? body.trim() : "";
+    return trimmed.length > 0 ? trimmed : null;
   }
 
   getTooManyRequestsMessage(resp) {

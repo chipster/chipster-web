@@ -85,6 +85,106 @@ svg {
   padding-top: 15px;
 }
 
+.label-legend {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  z-index: 2;
+  max-height: 50%;
+  overflow-y: auto;
+}
+
+.label-legend-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding-right: 20px; // leave room for the close button so the title doesn't underlap it
+  font-size: 12px;
+  text-align: left;
+}
+
+.label-legend-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px;
+  font-size: 0.7em;
+  z-index: 1;
+}
+
+.label-legend-edit {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  padding: 2px 4px;
+  font-size: 0.8em;
+  background: transparent;
+  border: 0;
+  color: #6c757d;
+  cursor: pointer;
+  z-index: 1;
+}
+.label-legend-edit:hover {
+  color: #212529;
+}
+
+.label-legend-title {
+  font-weight: 600;
+  color: #495057;
+}
+
+.label-legend-items {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.label-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.label-legend-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+  outline: 1px solid #6c757d;
+  outline-offset: 1px;
+}
+.label-legend-item:disabled {
+  // Panel's main job is to display the legend, so disabled (no-selection)
+  // state at rest must look identical to enabled -- no opacity fade or
+  // color shift. On hover the dot + name mute so the content reads as
+  // inert without changing the button's chrome.
+  cursor: default;
+  opacity: 1;
+  color: inherit;
+}
+.label-legend-item:disabled:hover .label-legend-dot,
+.label-legend-item:disabled:hover .label-legend-name {
+  opacity: 0.5;
+}
+
+.label-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
 div.dataset-node-tooltip {
   text-align: center;
   padding: 1px 2px 1px 2px;
@@ -96,4 +196,15 @@ div.dataset-node-tooltip {
   pointer-events: none;
   position: absolute;
   white-space: nowrap;
+}
+
+// d3-context-menu's <hr> divider inherits browser-default margins (~0.5em);
+// tighten so the divider doesn't add a gap on top of the surrounding items' padding
+.d3-context-menu-theme ul hr {
+  margin: 2px 0;
+}
+
+// d3-context-menu defaults the submenu indicator triangle to red; use black
+.d3-context-menu-theme ul li.is-parent:after {
+  border-top-color: black;
 }

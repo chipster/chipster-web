@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { testtsv } from "./TSVFile.input.spec";
 import TSVFile from "./TSVFile";
 import TSVHeaders from "./TSVHeaders";
@@ -25,11 +26,6 @@ describe("TSVHeaders", () => {
 
     it("should return empty array for empty input array", () => {
       expect(headers1.getItemsByIndexes([])).toEqual([]);
-    });
-
-    xit("should throw error with non array input", () => {
-      // should implement exception handler
-      expect(headers2.getItemsByIndexes(undefined)).toBe([]); // should throw error
     });
   });
 

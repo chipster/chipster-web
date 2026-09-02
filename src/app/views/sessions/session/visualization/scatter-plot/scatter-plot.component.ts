@@ -204,6 +204,9 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     super.clearPlot();
     this.svg = this.plot.append("svg");
     this.populatePlotData();
+    // the points are recreated on every redraw, so re-apply the selection highlight
+    this.selectedDataPointIds?.forEach((id) => this.setSelectionStyle(id));
+    this.observePlotResize(this.plot.node());
   }
 
   // New Dataset Creation  from selected data points

@@ -42,7 +42,11 @@
       </tr>
       <tr *ngIf="newRule">
         <th scope="row">
-          <input #usernameInput type="text" [(ngModel)]="newRule.username" (keyup.enter)="saveRule()" />
+          <input
+            #usernameInput
+            type="text"
+            [(ngModel)]="newRule.username"
+            (keyup.enter)="!isNewRuleUsernameBlank() && saveRule()" />
         </th>
         <td>
           <select [(ngModel)]="newRule.readWrite">
@@ -60,7 +64,7 @@
 
   <div *ngIf="newRule">
     <button class="btn btn-sm btn-secondary me-1" (click)="newRule = null">Cancel</button>
-    <button class="btn btn-sm btn-success" (click)="saveRule()">Save</button>
+    <button class="btn btn-sm btn-success" [disabled]="isNewRuleUsernameBlank()" (click)="saveRule()">Add</button>
   </div>
 
   <br />
