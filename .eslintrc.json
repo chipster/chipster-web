@@ -10,7 +10,8 @@
   "overrides": [
     {
       "files": [
-        "*.ts"
+        "*.ts",
+        "*.mts"
       ],
       "parser": "@typescript-eslint/parser",
       "plugins": [
@@ -72,14 +73,24 @@
     },
     {
       "files": [
-        "playwright.config.ts"
+        "playwright.config.ts",
+        "vitest.config.mts",
+        "e2e/**/*.ts"
       ],
       "rules": {
-        // tooling config, its imports are dev dependencies on purpose
+        // the node resolver doesn't understand the exports map of vitest
+        "import/no-unresolved": [
+          "error",
+          {
+            "ignore": ["^vitest/config$"]
+          }
+        ],
+        // tooling configs and e2e tests import dev dependencies on purpose
         "import/no-extraneous-dependencies": [
           "error",
           {
-            "devDependencies": true
+            "devDependencies": true,
+            "optionalDependencies": false
           }
         ]
       }

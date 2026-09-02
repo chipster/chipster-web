@@ -20,9 +20,6 @@
     ],
     "useDefineForClassFields": false
   },
-  "exclude": [
-    "vitest.config.mts"
-  ],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
