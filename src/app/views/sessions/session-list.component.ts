@@ -469,33 +469,51 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.lightSelectedSession = session;
   }
 
-  deleteSession(session: Session) {
-    this.dialogModalService
-      .openBooleanModal("Delete session", "Delete session " + session.name + "?", "Delete", "Cancel", "btn-danger")
-      .then(
-        () => {
-          if (this.selectedSession === session) {
-            this.selectedSession = null;
-          }
-          this.deletingSessions.add(session);
+  deleteSession(session: Session, sharedByUsername: string = null) {
+    // a pending incoming share deletes only our own rule, not the session itself
+    const isPendingShare = this.isAcceptVisible(sharedByUsername);
+    const confirm = isPendingShare
+      ? this.dialogModalService.openBooleanModal(
+          "Decline share",
+          `Decline the session '${session.name}' shared by ${sharedByUsername}?`,
+          "Decline",
+          "Cancel",
+        )
+      : this.dialogModalService.openBooleanModal(
+          "Delete session",
+          `Delete session ${session.name}?`,
+          "Delete",
+          "Cancel",
+          "btn-danger",
+        );
 
-          // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
-          // delete the session only from this user (i.e. the rule)
-          this.sessionDataService.deletePersonalRules(session).subscribe(null, (error: any) => {
-            // FIXME close preview if open
-            this.deletingSessions.delete(session);
-            this.restErrorService.showError("Deleting session failed", error);
-          });
-        },
-        () => {
-          // modal dismissed
-        },
-      );
+    confirm.then(
+      () => {
+        if (this.selectedSession === session) {
+          this.selectedSession = null;
+        }
+        this.deletingSessions.add(session);
+
+        // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
+        // delete the session only from this user (i.e. the rule)
+        this.sessionDataService.deletePersonalRules(session).subscribe(null, (error: any) => {
+          // FIXME close preview if open
+          this.deletingSessions.delete(session);
+          this.restErrorService.showError(
+            isPendingShare ? "Declining the share failed" : "Deleting session failed",
+            error,
+          );
+        });
+      },
+      () => {
+        // modal dismissed
+      },
+    );
   }
 
   deleteRule(session: Session, rule: Rule) {
     this.dialogModalService
-      .openBooleanModal("Remove shared session", `Remove shared session '${session.name}'?`, "Remove", "Cancel")
+      .openBooleanModal("Stop sharing", `Stop sharing with ${rule.username}?`, "Stop sharing", "Cancel")
       .then(
         () => {
           this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe(null, (error: any) => {
