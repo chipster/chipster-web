@@ -1,0 +1,18 @@
+# Commits that only reformat code. Ignore them in git blame:
+#
+#   git blame --ignore-revs-file .git-blame-ignore-revs <file>
+#
+# or configure it once per clone so it applies automatically:
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub honours this file in its blame view without any configuration.
+#
+# Only add commits whose diff is entirely mechanical formatter output, so
+# that blame keeps attributing every real change to its author.
+
+# Format src/app and e2e with Prettier
+637f29d077a1e211efb4ff41e3470cafaa13c78a
+
+# Format the files newly in Prettier scope
+971ef6884152a89913ffb2ff807ea4ab3c7e5035
