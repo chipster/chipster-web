@@ -108,7 +108,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     modalRef.result.then(
       () => {
         this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe(
-          (resp) => log.info("rule deleted"),
+          () => log.info("rule deleted"),
           (err) => this.restErrorService.showError("failed to delete the rule", err),
         );
       },

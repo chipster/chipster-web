@@ -77,10 +77,16 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
-        tap((userId) => (this.exampleSessionOwnerUserId = userId)),
+        tap((userId) => {
+          this.exampleSessionOwnerUserId = userId;
+        }),
         mergeMap(() => this.getSessionMap()),
-        tap((sessionMap) => (this.userEventData.sessions = sessionMap)),
-        tap(() => (this.sessionListLoading = false)),
+        tap((sessionMap) => {
+          this.userEventData.sessions = sessionMap;
+        }),
+        tap(() => {
+          this.sessionListLoading = false;
+        }),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions()),
       )
@@ -115,7 +121,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
           }
         }),
         // hide the spinner when unsubscribed (when the user has opened a session)
-        finalize(() => (this.workflowPreviewLoading = false)),
+        finalize(() => {
+          this.workflowPreviewLoading = false;
+        }),
       )
       .subscribe(
         () => {},
@@ -140,7 +148,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
    */
   getSessionMap() {
     const sessionMap = new Map<string, Session>();
-    const self = this;
 
     return this.sessionResource.getSessions().pipe(
       tap((sessions: Session[]) => {
@@ -180,8 +187,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   subscribeToEvents(): void {
     // start listening for remote changes
-    const sessions = this.userEventData.sessions;
-
     this.tokenService
       .getUsername$()
       .pipe(
@@ -371,7 +376,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSessionMouseout(session: Session) {
+  onSessionMouseout() {
     switch (this.mode) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         this.selectSession(null);
