@@ -1,0 +1,12 @@
+# Build and report output
+/dist
+/coverage
+/playwright-report
+/test-results
+
+# Vendored libraries and files served as-is. The Handsontable bundles
+# include minified builds, and the HTML under assets is plain HTML rather
+# than Angular templates, so Angular's whitespace removal does not apply
+# to it and htmlWhitespaceSensitivity "ignore" could change its rendered
+# spacing.
+/src/assets
