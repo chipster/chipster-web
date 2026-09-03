@@ -57,8 +57,12 @@
                           'visible-button':
                             buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)
                         }"
-                        (click)="deleteSession(session); sessionDropdown.close(); $event.stopImmediatePropagation()"
-                        title="Delete">
+                        (click)="
+                          deleteSession(session, sharedByUsername);
+                          sessionDropdown.close();
+                          $event.stopImmediatePropagation()
+                        "
+                        [title]="isAcceptVisible(sharedByUsername) ? 'Decline share' : 'Delete'">
                         <span class="fas fa-times"></span>
                       </button>
 
@@ -331,7 +335,7 @@
                 <button
                   class="btn btn-sm btn-outline-dark btn-no-border hidden float-end visible-button"
                   (click)="deleteRule(session, session.rules[0])"
-                  title="Revoke">
+                  title="Stop sharing">
                   <span class="fas fa-times"></span>
                 </button>
               </span>
