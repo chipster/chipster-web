@@ -9,10 +9,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "prepare": "git config core.hooksPath .githooks || true",
     "prettier": "npx prettier --check \"src/**/*.{ts,js,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
     "prettier-write": "npx prettier --write \"src/**/*.{ts,js,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
     "lint": "npx eslint --ext .ts,.js,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts",
     "lint-fix": "npx eslint --fix --ext .ts,.js,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts"
+  },
+  "lint-staged": {
+    "*.{ts,js,mts,html,less,css,scss}": "prettier --check"
   },
   "engines": {
     "node": ">=24",
@@ -84,6 +88,7 @@
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.23.4",
+    "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",
     "ts-node": "^10.4.0",
     "typescript": "5.5.4",

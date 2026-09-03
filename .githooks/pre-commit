@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Check that staged files are Prettier-formatted before committing.
+#
+# lint-staged does the work: it selects the staged files matching the
+# patterns in package.json, makes the working tree match the staged
+# content so the check sees what is actually being committed, and runs
+# Prettier once on just those files.
+#
+# Bypass with: git commit --no-verify
+#
+lint_staged=./node_modules/.bin/lint-staged
+
+if [ ! -x "$lint_staged" ]; then
+  echo "pre-commit: $lint_staged not found. Run 'npm ci' first." >&2
+  exit 1
+fi
+
+exec "$lint_staged"
