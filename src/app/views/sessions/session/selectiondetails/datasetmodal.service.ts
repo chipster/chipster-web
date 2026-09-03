@@ -67,12 +67,10 @@ export class DatasetModalService {
   }
 
   public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
-    if (
-      !(
-        this.typeTagService.has(sessionData, dataset, Tags.TEXT) ||
-        this.typeTagService.has(sessionData, dataset, Tags.TSV)
-      )
-    ) {
+    if (!(
+      this.typeTagService.has(sessionData, dataset, Tags.TEXT) ||
+      this.typeTagService.has(sessionData, dataset, Tags.TSV)
+    )) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
         "Convert only works for tab delimeted text files.",
@@ -284,9 +282,7 @@ export class DatasetModalService {
     );
 
     // narrow labelsMap to only labels referenced by the selected datasets
-    const referencedLabelIds = new Set(
-      selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []),
-    );
+    const referencedLabelIds = new Set(selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []));
     const filteredLabelsMap = new Map<string, Label>();
     if (sessionData.labelsMap) {
       sessionData.labelsMap.forEach((label, id) => {

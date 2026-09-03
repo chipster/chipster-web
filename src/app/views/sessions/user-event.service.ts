@@ -25,7 +25,7 @@ export class UserEventService {
     private webSocketService: WebSocketService,
     private sessionDataService: SessionDataService,
     private sessionEventService: SessionEventService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   unsubscribe() {
@@ -44,7 +44,7 @@ export class UserEventService {
       filter((wsData) => wsData.resourceType === Resource.Rule),
       mergeMap((data) => this.handleRuleEvent(data, data.sessionId, userEventData)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     // update userEventData even if no one else subscribes
@@ -62,8 +62,8 @@ export class UserEventService {
     return this.getRuleStream().pipe(
       mergeMap((wsEvent) =>
         // sessionEventService can update individual sessions, let's reuse that
-        this.sessionEventService.handleRuleEvent(wsEvent, session)
-      )
+        this.sessionEventService.handleRuleEvent(wsEvent, session),
+      ),
     );
   }
 
@@ -81,7 +81,7 @@ export class UserEventService {
           // get the session or latest rules
           userEventData.sessions.set(session.sessionId, session);
           return event;
-        })
+        }),
       );
     }
     if (event.type === EventType.Update) {
@@ -90,7 +90,7 @@ export class UserEventService {
           log.info("rule updated", session.name);
           userEventData.sessions.set(session.sessionId, session);
           return event;
-        })
+        }),
       );
     }
     if (event.type === EventType.Delete) {

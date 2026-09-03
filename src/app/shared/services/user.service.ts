@@ -19,7 +19,7 @@ export class UserService {
     private authenticationService: AuthenticationService,
     private sessionResource: SessionResource,
     private configService: ConfigService,
-    private authHttpClient: AuthHttpClientService
+    private authHttpClient: AuthHttpClientService,
   ) {}
 
   public updateLatestSession(sessionId: string, sourceSessionId?: string) {
@@ -49,7 +49,7 @@ export class UserService {
         mergeMap((user: User) => {
           user.latestSession = sessionId;
           return this.authenticationService.updateUser(user);
-        })
+        }),
       )
       .subscribe(
         () => {
@@ -58,7 +58,7 @@ export class UserService {
         (err) => {
           // maybe log is enough
           log.warn("updating latest session to sessionDb failed", err);
-        }
+        },
       );
   }
 
@@ -98,11 +98,11 @@ export class UserService {
                 }
                 log.info("no valid latest session id in sessionDb");
                 return observableOf(null);
-              })
+              }),
             );
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 
@@ -126,7 +126,7 @@ export class UserService {
 
         const url = authAdminUrl + "/admin/users";
         return this.authHttpClient.deleteAuth(url, httpParams);
-      })
+      }),
     );
   }
 }

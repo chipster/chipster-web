@@ -24,7 +24,7 @@ export class WebSocketService {
   constructor(
     private configService: ConfigService,
     private tokenService: TokenService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   unsubscribe() {
@@ -82,7 +82,7 @@ export class WebSocketService {
             return EMPTY;
           }
           return observableThrowError(err);
-        })
+        }),
       )
       .subscribe(
         (data) => {
@@ -98,8 +98,8 @@ export class WebSocketService {
               false,
               [ErrorButton.Reload],
               [ErrorButton.ShowDetails],
-              err
-            )
+              err,
+            ),
           );
         },
         () => {
@@ -115,15 +115,15 @@ export class WebSocketService {
                   false,
                   [ErrorButton.Reload],
                   [ErrorButton.ShowDetails],
-                  new Error(`WebSocket closed with code ${this.lastCloseCode}: some updates may have been missed`)
-                )
+                  new Error(`WebSocket closed with code ${this.lastCloseCode}: some updates may have been missed`),
+                ),
               );
             } else {
               // reconnect after clean close (server idle timeout)
               this.connect(listener, topic);
             }
           }
-        }
+        },
       );
   }
 

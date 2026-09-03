@@ -14,7 +14,7 @@ export class DatasetContextMenuService {
     private toolService: ToolService,
     private selectionHandlerService: SelectionHandlerService,
     private dialogModalService: DialogModalService,
-    private toolSelectionService: ToolSelectionService
+    private toolSelectionService: ToolSelectionService,
   ) {}
 
   getSourceJob(datasets: Dataset[], jobsMap: Map<string, Job>): Job {

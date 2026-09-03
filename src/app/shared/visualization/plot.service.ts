@@ -13,7 +13,7 @@ export class PlotService {
     dragEndPoint: Point,
     linearXScale: any,
     linearYScale: any,
-    plotData: Array<PlotData>
+    plotData: Array<PlotData>,
   ): Array<string> {
     const startXValue = linearXScale.invert(dragStartPoint.x);
     const endXValue = linearXScale.invert(dragEndPoint.x);
@@ -31,7 +31,7 @@ export class PlotService {
     const selectedDataPoints = plotData
       .filter(
         (val) =>
-          val.plotPoint.x <= maxX && val.plotPoint.x >= minX && val.plotPoint.y <= maxY && val.plotPoint.y >= minY
+          val.plotPoint.x <= maxX && val.plotPoint.x >= minX && val.plotPoint.y <= maxY && val.plotPoint.y >= minY,
       )
       .map((val) => val.id);
 

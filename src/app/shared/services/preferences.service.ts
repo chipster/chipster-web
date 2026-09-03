@@ -17,7 +17,12 @@ export class PreferencesService {
   constructor(private authenticationService: AuthenticationService) {}
 
   public updateNewsReadTime(readTime: Date): void {
-    this.setPreferenceValue(PreferencesService.KEY_NEWS, PreferencesService.KEY_NEWS_LAST_READ_TIME, readTime, "news read time");
+    this.setPreferenceValue(
+      PreferencesService.KEY_NEWS,
+      PreferencesService.KEY_NEWS_LAST_READ_TIME,
+      readTime,
+      "news read time",
+    );
   }
 
   public getNewsReadTime(): Observable<Date> {
@@ -25,19 +30,35 @@ export class PreferencesService {
   }
 
   public setLabelDisplayMode(mode: "dots" | "pills"): void {
-    this.setPreferenceValue(PreferencesService.KEY_LABELS, PreferencesService.KEY_LABELS_DISPLAY_MODE, mode, "label display mode");
+    this.setPreferenceValue(
+      PreferencesService.KEY_LABELS,
+      PreferencesService.KEY_LABELS_DISPLAY_MODE,
+      mode,
+      "label display mode",
+    );
   }
 
   public getLabelDisplayMode(): Observable<"dots" | "pills" | null> {
-    return this.getPreferenceValue<"dots" | "pills">(PreferencesService.KEY_LABELS, PreferencesService.KEY_LABELS_DISPLAY_MODE);
+    return this.getPreferenceValue<"dots" | "pills">(
+      PreferencesService.KEY_LABELS,
+      PreferencesService.KEY_LABELS_DISPLAY_MODE,
+    );
   }
 
   public setShowLabelPanel(value: boolean): void {
-    this.setPreferenceValue(PreferencesService.KEY_LABELS, PreferencesService.KEY_LABELS_SHOW_LABEL_PANEL, value, "labels panel visibility");
+    this.setPreferenceValue(
+      PreferencesService.KEY_LABELS,
+      PreferencesService.KEY_LABELS_SHOW_LABEL_PANEL,
+      value,
+      "labels panel visibility",
+    );
   }
 
   public getShowLabelPanel(): Observable<boolean | null> {
-    return this.getPreferenceValue<boolean>(PreferencesService.KEY_LABELS, PreferencesService.KEY_LABELS_SHOW_LABEL_PANEL);
+    return this.getPreferenceValue<boolean>(
+      PreferencesService.KEY_LABELS,
+      PreferencesService.KEY_LABELS_SHOW_LABEL_PANEL,
+    );
   }
 
   private getPreferenceValue<T>(rootKey: string, leafKey: string): Observable<T | null> {

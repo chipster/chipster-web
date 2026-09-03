@@ -15,7 +15,10 @@ export default class Vector2d {
     this._j = value;
   }
 
-  constructor(private _i: number, private _j: number) {
+  constructor(
+    private _i: number,
+    private _j: number,
+  ) {
     _i;
     _j;
   }

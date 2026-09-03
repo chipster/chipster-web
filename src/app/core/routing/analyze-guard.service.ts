@@ -12,11 +12,11 @@ import { UserService } from "../../shared/services/user.service";
  * Redirect to latest session or new session if no latest found.
  */
 @Injectable()
-export class AnalyzeGuard  {
+export class AnalyzeGuard {
   constructor(
     private routeService: RouteService,
     private sessionResource: SessionResource,
-    private userService: UserService
+    private userService: UserService,
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
@@ -38,9 +38,9 @@ export class AnalyzeGuard  {
             log.warn("creating new session failed, going to sessions list");
             this.routeService.navigateToSessions();
             return false;
-          })
+          }),
         );
-      })
+      }),
     );
   }
 

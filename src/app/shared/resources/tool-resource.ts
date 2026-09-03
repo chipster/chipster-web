@@ -7,7 +7,10 @@ import { ConfigService } from "../services/config.service";
 
 @Injectable()
 export class ToolResource {
-  constructor(private configService: ConfigService, private http: HttpClient) {}
+  constructor(
+    private configService: ConfigService,
+    private http: HttpClient,
+  ) {}
 
   getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();
@@ -25,8 +28,8 @@ export class ToolResource {
       mergeMap((apiUrl: string) =>
         this.http.get(`${apiUrl}/tools/${toolId}/source`, {
           responseType: "text",
-        })
-      )
+        }),
+      ),
     );
   }
 }

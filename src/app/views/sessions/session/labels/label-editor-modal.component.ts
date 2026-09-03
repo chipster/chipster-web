@@ -33,9 +33,7 @@ export class LabelEditorModalComponent implements OnInit {
       this.color = this.label.color ?? DEFAULT_LABEL_COLOR;
     } else {
       // new label: pick the first palette color not yet used in the session
-      const usedColors = new Set(
-        Array.from(this.sessionData.labelsMap.values()).map((l) => l.color),
-      );
+      const usedColors = new Set(Array.from(this.sessionData.labelsMap.values()).map((l) => l.color));
       const firstUnused = LABEL_PALETTE.find((c) => !usedColors.has(c.hex));
       this.color = firstUnused?.hex ?? DEFAULT_LABEL_COLOR;
     }

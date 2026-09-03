@@ -66,7 +66,7 @@ export default class VennDiagramUtils {
    */
   static getCirclesByPosition(circles: Array<VennCircle>, point: Point): Array<VennCircle> {
     return circles.filter(
-      (vennCircle: VennCircle) => Point.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius
+      (vennCircle: VennCircle) => Point.distance(vennCircle.circle.center, point) <= vennCircle.circle.radius,
     );
   }
 

@@ -9,13 +9,13 @@ import { AuthenticationService } from "../authentication/authentication-service"
 import { TokenService } from "../authentication/token.service";
 
 @Injectable()
-export class AuthGuard  {
+export class AuthGuard {
   constructor(
     private tokenService: TokenService,
     private router: Router,
     private authenticationService: AuthenticationService,
     private configService: ConfigService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
@@ -68,7 +68,7 @@ export class AuthGuard  {
             ", latest version:",
             latestVersion,
             ", accepted timestamp:",
-            user.termsAccepted
+            user.termsAccepted,
           );
           this.routeService.navigateAbsolute("/terms", { queryParams: { showAccept: "true" } });
           return false;
@@ -81,7 +81,7 @@ export class AuthGuard  {
           }
           this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);
           return of(false);
-        })
+        }),
       );
     }
     this.routeService.redirectToLoginAndBackWithCustomCurrentUrl(state.url);

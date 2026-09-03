@@ -40,7 +40,7 @@ export class StatisticsComponent implements OnInit {
     private configService: ConfigService,
     private errorHandlerService: RestErrorService,
     private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +52,7 @@ export class StatisticsComponent implements OnInit {
       },
       (err) => {
         this.errorHandlerService.showError("Failed to get ignoreUsers default", err);
-      }
+      },
     );
   }
 
@@ -76,8 +76,8 @@ export class StatisticsComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         mergeMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params)
-        )
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params),
+        ),
       )
       .subscribe(
         (result) => {
@@ -88,7 +88,7 @@ export class StatisticsComponent implements OnInit {
         (err) => {
           this.state = LoadState.Fail;
           this.errorHandlerService.showError("get statistics failed", err);
-        }
+        },
       );
   }
 }

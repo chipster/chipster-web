@@ -11,7 +11,10 @@ export class NewsModalComponent implements OnInit {
   @Input()
   news: NewsItem[];
 
-  constructor(private activeModal: NgbActiveModal, private preferencesService: PreferencesService) {}
+  constructor(
+    private activeModal: NgbActiveModal,
+    private preferencesService: PreferencesService,
+  ) {}
   ngOnInit(): void {
     // FIXME scroll ot the top (to the latest) if there are so many news that modal needs to scroll
     if (this.news != null && this.news.length > 0) {

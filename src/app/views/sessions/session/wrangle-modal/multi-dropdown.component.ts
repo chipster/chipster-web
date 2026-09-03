@@ -47,7 +47,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
     // see selectedItem declaration
     const selectedIndexesAsArray = [].concat(this.selectedIndexes).filter((index) => index != null);
     const includedIndexes = selectedIndexesAsArray.filter((index) =>
-      this.items.includes(this.indexToColumnItemMap.get(index))
+      this.items.includes(this.indexToColumnItemMap.get(index)),
     );
     if (selectedIndexesAsArray.length !== includedIndexes.length) {
       log.warn("selected column not included in options after options change", selectedIndexesAsArray, includedIndexes);
@@ -105,7 +105,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
 
   private addFilteredToSelectedIndexes(): void {
     this.selectedIndexes = this.selectedIndexes.concat(
-      this.filteredIndexes.filter((index) => !this.selectedIndexes.includes(index))
+      this.filteredIndexes.filter((index) => !this.selectedIndexes.includes(index)),
     );
     this.emit(this.selectedIndexes);
   }

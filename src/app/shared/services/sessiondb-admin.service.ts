@@ -9,7 +9,10 @@ import { ConfigService } from "./config.service";
 
 @Injectable()
 export class SessionDbAdminService {
-  constructor(private configService: ConfigService, private authHttpClient: AuthHttpClientService) {}
+  constructor(
+    private configService: ConfigService,
+    private authHttpClient: AuthHttpClientService,
+  ) {}
 
   deleteSessions(...userId: string[]): Observable<any> {
     log.info("delete sessions for", userId);
@@ -22,7 +25,7 @@ export class SessionDbAdminService {
 
         const url = sessionDbAdminUrl + "/admin/users/sessions";
         return this.authHttpClient.deleteAuth(url, httpParams);
-      })
+      }),
     );
   }
 
@@ -49,7 +52,7 @@ export class SessionDbAdminService {
 
         const url = sessionDbAdminUrl + "/admin/users/quota";
         return this.authHttpClient.getAuth(url, httpParams);
-      })
+      }),
     );
 
     return sessionDbUsers$;

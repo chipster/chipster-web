@@ -453,8 +453,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
-          const uptodateDatasets = selectedDatasets.map(
-            (dataset): Dataset => this.sessionData.datasetsMap.get(dataset.datasetId),
+          const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
+            this.sessionData.datasetsMap.get(dataset.datasetId),
           );
 
           this.store.dispatch({

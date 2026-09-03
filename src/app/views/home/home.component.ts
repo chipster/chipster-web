@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit {
     private tokenService: TokenService,
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page", this.homePath, this.homeFile);
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the home page", err)
+      (err) => this.errorService.showError("failed to get the path of the home page", err),
     );
 
     this.configService.get(ConfigService.KEY_HOME_HEADER_PATH).subscribe(
@@ -50,7 +50,7 @@ export class HomeComponent implements OnInit {
           log.info("loading custom home page header", this.homePath, this.homeFile);
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the home page header", err)
+      (err) => this.errorService.showError("failed to get the path of the home page header", err),
     );
 
     this.routerLinkSessions = this.routeService.getRouterLinkSessions();

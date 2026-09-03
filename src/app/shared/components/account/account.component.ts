@@ -8,7 +8,10 @@ import { TokenService } from "../../../core/authentication/token.service";
   styleUrls: ["./account.component.less"],
 })
 export class AccountComponent {
-  constructor(private tokenService: TokenService, private activeModal: NgbActiveModal) {}
+  constructor(
+    private tokenService: TokenService,
+    private activeModal: NgbActiveModal,
+  ) {}
 
   getAccountName(): string {
     return this.tokenService.getAccountName();

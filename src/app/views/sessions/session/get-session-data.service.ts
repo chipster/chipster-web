@@ -8,7 +8,7 @@ import { SessionDataService } from "./session-data.service";
 export class GetSessionDataService {
   constructor(
     private querySessionDataService: QuerySessionDataService,
-    private sessionDataService: SessionDataService
+    private sessionDataService: SessionDataService,
   ) {}
 
   private sessionData: SessionData;
@@ -55,7 +55,7 @@ export class GetSessionDataService {
     return this.querySessionDataService.getChildren(
       datasets,
       this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap),
-      this.sessionData.jobsMap
+      this.sessionData.jobsMap,
     );
   }
 }

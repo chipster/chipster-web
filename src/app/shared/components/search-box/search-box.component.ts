@@ -31,10 +31,8 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this.focusHotkey) {
-      this.unregisterHotkey = this.hotkeyService.register(
-        this.focusHotkey,
-        this.focusHotkeyDescription,
-        () => this.focus(),
+      this.unregisterHotkey = this.hotkeyService.register(this.focusHotkey, this.focusHotkeyDescription, () =>
+        this.focus(),
       );
     }
   }

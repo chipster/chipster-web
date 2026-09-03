@@ -17,7 +17,7 @@ export class AccessibilityComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private errorService: ErrorService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit() {
@@ -32,7 +32,7 @@ export class AccessibilityComponent implements OnInit {
           this.accessibilityPath = "assets/manual/";
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the accessibility page", err)
+      (err) => this.errorService.showError("failed to get the path of the accessibility page", err),
     );
   }
 }

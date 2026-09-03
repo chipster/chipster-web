@@ -14,7 +14,7 @@ export class AccessComponent implements OnInit {
   constructor(
     private errorService: ErrorService,
     private configService: ConfigService,
-    private routeService: RouteService
+    private routeService: RouteService,
   ) {}
 
   ngOnInit(): void {
@@ -27,7 +27,7 @@ export class AccessComponent implements OnInit {
       },
       (err) => {
         this.errorService.showError("Failed to get the access page path", err);
-      }
+      },
     );
   }
 }

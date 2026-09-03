@@ -5,7 +5,10 @@ import { TokenService } from "../../core/authentication/token.service";
 
 @Injectable()
 export class AuthHttpClientService {
-  constructor(private httpClient: HttpClient, private tokenService: TokenService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private tokenService: TokenService,
+  ) {}
 
   /**
    * Make unauthenticated GET request

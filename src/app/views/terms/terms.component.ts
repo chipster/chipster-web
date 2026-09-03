@@ -23,7 +23,7 @@ export class TermsComponent implements OnInit {
     private restErrorService: RestErrorService,
     private configService: ConfigService,
     private routeService: RouteService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -31,7 +31,7 @@ export class TermsComponent implements OnInit {
       (path) => {
         this.termsOfUse = path;
       },
-      (err) => this.restErrorService.showError("failed to get the configuration", err)
+      (err) => this.restErrorService.showError("failed to get the configuration", err),
     );
 
     this.route.queryParams
@@ -39,7 +39,7 @@ export class TermsComponent implements OnInit {
         filter((params) => {
           console.log(params);
           return params["showAccept"];
-        })
+        }),
       )
       .subscribe((params) => {
         this.showAccept = !!params.showAccept;
@@ -61,13 +61,13 @@ export class TermsComponent implements OnInit {
           user.termsVersion = latestVersion;
           user.termsAccepted = new Date().toISOString();
           return this.authenticationService.updateUser(user);
-        })
+        }),
       )
       .subscribe(
         () => {
           this.routeService.navigateAbsolute("/sessions");
         },
-        (err) => this.restErrorService.showError("updating the user object failed", err)
+        (err) => this.restErrorService.showError("updating the user object failed", err),
       );
   }
 }

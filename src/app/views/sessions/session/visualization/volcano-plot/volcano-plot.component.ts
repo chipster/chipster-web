@@ -29,7 +29,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     fileResource: FileResource,
     sessionDataService: SessionDataService,
     private plotService: PlotService,
-    private restErrorService2: RestErrorService
+    private restErrorService2: RestErrorService,
   ) {
     super(fileResource, sessionDataService);
   }
@@ -75,7 +75,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     this.volcanoPlotDataRows = this.volcanoPlotService.getVolcanoPlotDataRows(
       this.tsv,
       this.selectedXAxisHeader,
-      this.selectedYAxisHeader
+      this.selectedYAxisHeader,
     );
     this.volcanoPlotDataRows.forEach((dataRow) => {
       const curPlotData = new PlotData();
@@ -217,7 +217,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       this.dragEndPoint,
       this.xScale,
       this.yScale,
-      limitedPlotData
+      limitedPlotData,
     );
     // Populate the selected Data Rows
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);

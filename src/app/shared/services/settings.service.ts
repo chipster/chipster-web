@@ -18,7 +18,7 @@ export class SettingsService {
   public compactToolList$: BehaviorSubject<boolean> = new BehaviorSubject(true);
 
   public sessionListMode$: BehaviorSubject<SessionListMode> = new BehaviorSubject(
-    SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW
+    SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW,
   );
 
   public showDatasetSelectionTooltip$: BehaviorSubject<boolean> = new BehaviorSubject(false);
