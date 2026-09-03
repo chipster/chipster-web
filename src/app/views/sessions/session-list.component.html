@@ -38,7 +38,7 @@
               <tr
                 *ngFor="let session of sessionsByUser.get(sharedByUsername)"
                 (mouseover)="onSessionMouseover(session)"
-                (mouseout)="onSessionMouseout(session)"
+                (mouseout)="onSessionMouseout()"
                 (click)="onSessionClick(session)"
                 [ngClass]="{ highlight: rowHighlighted(session) }"
                 class="session-list-item"
@@ -55,7 +55,7 @@
                         class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                         [ngClass]="{
                           'visible-button':
-                            buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules)
+                            buttonsVisible(session) && this.sessionDataService.hasPersonalRule(session.rules),
                         }"
                         (click)="
                           deleteSession(session, sharedByUsername);
