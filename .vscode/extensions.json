@@ -1,0 +1,15 @@
+{
+  // Extensions VS Code offers to install when this workspace is opened.
+  "recommendations": [
+    // Formats with the repo's .prettierrc.json. Without it VS Code
+    // formats TypeScript and HTML with its own built-in formatter, which
+    // disagrees with Prettier and reintroduces the drift that made the
+    // first repo-wide formatting pass necessary.
+    "esbenp.prettier-vscode",
+
+    // VS Code has no built-in .editorconfig support, so without this the
+    // indent, final-newline and trailing-whitespace settings in
+    // .editorconfig are ignored.
+    "editorconfig.editorconfig"
+  ]
+}
