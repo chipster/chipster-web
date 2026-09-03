@@ -1,0 +1,42 @@
+name: Format
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# The check only reads the repository.
+permissions:
+  contents: read
+
+# A new push to a pull request makes an in-progress run redundant. Runs on
+# master are not cancelled, so that every commit on master keeps a result
+# even when merges land in quick succession.
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    # The check takes well under a minute; this only bounds a hung install.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # .nvmrc holds the Node version, and .npmrc sets engine-strict,
+          # so an older Node would fail the install rather than run the
+          # check against the wrong toolchain.
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Prettier is pure JavaScript, so the native postinstall steps that
+      # only the Angular build needs are skipped. This keeps the install
+      # quick and avoids running dependency scripts the check does not
+      # need.
+      - run: npm ci --ignore-scripts
+
+      - run: npm run prettier
