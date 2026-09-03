@@ -5,7 +5,7 @@ export default class VennCircle {
     public datasetId: string,
     public filename: string,
     public data: Array<Array<string>>,
-    public circle: Circle
+    public circle: Circle,
   ) {
     datasetId;
     filename;

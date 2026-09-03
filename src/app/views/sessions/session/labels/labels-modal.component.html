@@ -7,10 +7,12 @@
         *ngIf="selectedDatasets.length === 1"
         class="text-muted ms-1 text-truncate"
         style="max-width: 20rem; min-width: 0"
-        [title]="selectedDatasets[0].name"
-        >{{ selectedDatasets[0].name }}</small
-      >
-      <small *ngIf="selectedDatasets.length > 1" class="text-muted ms-1">{{ selectedDatasets.length }} files selected</small>
+        [title]="selectedDatasets[0].name">
+        {{ selectedDatasets[0].name }}
+      </small>
+      <small *ngIf="selectedDatasets.length > 1" class="text-muted ms-1">
+        {{ selectedDatasets.length }} files selected
+      </small>
     </ng-container>
   </h4>
   <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
@@ -53,7 +55,11 @@
     type="button"
     class="btn btn-primary me-auto"
     [disabled]="sessionData.labelsMap.size >= maxLabelsPerSession"
-    [title]="sessionData.labelsMap.size >= maxLabelsPerSession ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached' : ''"
+    [title]="
+      sessionData.labelsMap.size >= maxLabelsPerSession
+        ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached'
+        : ''
+    "
     (click)="openCreateLabel()">
     + New label
   </button>

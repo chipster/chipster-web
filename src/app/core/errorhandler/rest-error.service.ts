@@ -57,7 +57,7 @@ export class RestErrorService {
       true,
       [ErrorButton.Reload, ErrorButton.ContactSupport],
       [],
-      error
+      error,
     );
 
     if (error) {

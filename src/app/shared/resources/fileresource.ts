@@ -8,7 +8,11 @@ import { ConfigService } from "../services/config.service";
 
 @Injectable()
 export class FileResource {
-  constructor(private configService: ConfigService, private http: HttpClient, private tokenService: TokenService) {}
+  constructor(
+    private configService: ConfigService,
+    private http: HttpClient,
+    private tokenService: TokenService,
+  ) {}
 
   /**
    *
@@ -33,8 +37,8 @@ export class FileResource {
             headers: this.tokenService.getTokenHeader(),
             withCredentials: true,
             responseType: "arraybuffer",
-          })
-        )
+          }),
+        ),
       );
     }
     return apiUrl$.pipe(
@@ -43,8 +47,8 @@ export class FileResource {
           headers: this.tokenService.getTokenHeader(),
           withCredentials: true,
           responseType: "text",
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -72,8 +76,8 @@ export class FileResource {
             withCredentials: true,
             responseType: "arraybuffer",
             reportProgress: true,
-          })
-        )
+          }),
+        ),
       );
     }
     return apiUrl$.pipe(
@@ -83,8 +87,8 @@ export class FileResource {
           withCredentials: true,
           responseType: "text",
           reportProgress: true,
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -92,13 +96,13 @@ export class FileResource {
     const apiUrl$ = this.configService.getFileBrokerUrl();
     const size = data.length;
     return apiUrl$.pipe(
-      mergeMap((url: string) =>        
+      mergeMap((url: string) =>
         this.http.put(
           `${url}/sessions/${sessionId}/datasets/${datasetId}?flowTotalSize=${size}`,
           data,
-          this.tokenService.getTokenParams(true)
-        )
-      )
+          this.tokenService.getTokenParams(true),
+        ),
+      ),
     );
   }
 }

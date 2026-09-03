@@ -23,7 +23,7 @@ export class JobsComponent implements OnInit {
     private configService: ConfigService,
     private restErrorService: RestErrorService,
     private authHttpClient: AuthHttpClientService,
-    private sessionResource: SessionResource
+    private sessionResource: SessionResource,
   ) {}
 
   ngOnInit() {
@@ -46,7 +46,7 @@ export class JobsComponent implements OnInit {
           const scheduledJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=SCHEDULED");
           const runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=RUNNING");
           return forkJoin(newJobs$, waitingJobs$, scheduledJobs$, runningJobs$);
-        })
+        }),
       )
       .pipe(
         flatMap((newAndRunningJobs) => {
@@ -67,18 +67,18 @@ export class JobsComponent implements OnInit {
                       job.state = JobState.Error;
                       job.stateDetail = "Admin view error, see console";
                       return of(job);
-                    })
+                    }),
                   )
-              )
+              ),
           );
           return forkJoin(jobs$);
-        })
+        }),
       )
       .subscribe(
         (jobs) => {
           this.jobs = jobs;
         },
-        (err) => this.restErrorService.showError("get jobs failed", err)
+        (err) => this.restErrorService.showError("get jobs failed", err),
       );
   }
 

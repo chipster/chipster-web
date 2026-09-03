@@ -1,4 +1,13 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewEncapsulation,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
 import * as d3 from "d3";
@@ -342,9 +351,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       }
     }, 0);
 
-    this.unregisterHotkeys.push(
-      this.hotkeyService.register("l", "Open labels", () => this.toggleLabelsModal()),
-    );
+    this.unregisterHotkeys.push(this.hotkeyService.register("l", "Open labels", () => this.toggleLabelsModal()));
 
     // d3-drag (on the workflow background and on dataset rects) calls
     // event.stopImmediatePropagation() on every mousedown, and during a drag
@@ -1237,9 +1244,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   toggleLabelOnSelection(label: Label): void {
-    this.labelsContextMenuService
-      .toggleLabel(this.selectedDatasets ?? [], label, this.sessionData)
-      .subscribe();
+    this.labelsContextMenuService.toggleLabel(this.selectedDatasets ?? [], label, this.sessionData).subscribe();
   }
 
   toggleLabelsModal(): void {
@@ -1323,7 +1328,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
       if (overflow > 0) {
-        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
+        const hiddenLabels = labels
+          .slice(maxVisible)
+          .map((l: Label) => l.name ?? "")
+          .join(", ");
         const g = group.append("g");
         g.append("circle")
           .attr("cx", cursorX)
@@ -1402,7 +1410,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       });
 
       if (overflow > 0) {
-        const hiddenLabels = labels.slice(maxVisible).map((l: Label) => l.name ?? "").join(", ");
+        const hiddenLabels = labels
+          .slice(maxVisible)
+          .map((l: Label) => l.name ?? "")
+          .join(", ");
         const overflowText = "+" + overflow;
         const pillWidth = this.estimatePillWidth(overflowText, pillFontSize, horizontalPadding);
         const g = group.append("g");

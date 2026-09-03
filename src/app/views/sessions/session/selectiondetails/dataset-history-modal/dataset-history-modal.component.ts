@@ -53,8 +53,8 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     public querySessionDataService: QuerySessionDataService,
     public toolService: ToolService,
     public sessionDataService: SessionDataService,
-    public errorService: ErrorService
-  ) { }
+    public errorService: ErrorService,
+  ) {}
 
   ngOnInit(): void {
     this.historyOptionsMap = new Map();
@@ -92,7 +92,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
       () => {
         // fail
         this.errorService.showSimpleError("Copy to clipboard failed", "");
-      }
+      },
     );
   }
 
@@ -117,20 +117,17 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
         // sourceJob is null for uploaded files
         if (step.sourceJob) {
-          inputFilesString +=
-
-            step.sourceJob.inputs.reduce((inputs: string, input: JobInput) => {
-
-              console.log("input", input);
-              // jobs until 11/2023 have datasetName in input.displayName
-              if (input.datasetName == null) {
-                return inputs + "\t" + input.inputId + ": " + input.displayName + "\n";
-              }
-              if (input.displayName != null) {
-                return inputs + "\t" + input.displayName + ": " + input.datasetName + "\n";
-              }
-              return inputs + "\t" + input.inputId + ": " + input.datasetName + "\n";
-            }, "")
+          inputFilesString += step.sourceJob.inputs.reduce((inputs: string, input: JobInput) => {
+            console.log("input", input);
+            // jobs until 11/2023 have datasetName in input.displayName
+            if (input.datasetName == null) {
+              return inputs + "\t" + input.inputId + ": " + input.displayName + "\n";
+            }
+            if (input.displayName != null) {
+              return inputs + "\t" + input.displayName + ": " + input.datasetName + "\n";
+            }
+            return inputs + "\t" + input.inputId + ": " + input.datasetName + "\n";
+          }, "");
         }
 
         inputFilesString += "\n";
@@ -140,11 +137,11 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
       const parametersString =
         (this.historyOptionsMap.get("parameters").enabled
           ? this.historyOptionsMap.get("parameters").name +
-          ":\n" +
-          step.parameterList.reduce(
-            (params: string, param: JobParameter) => params + "\t" + param.displayName + ": " + param.value + "\n",
-            ""
-          )
+            ":\n" +
+            step.parameterList.reduce(
+              (params: string, param: JobParameter) => params + "\t" + param.displayName + ": " + param.value + "\n",
+              "",
+            )
           : "") + "\n";
 
       // date
@@ -162,8 +159,8 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
       const sourceCodeString =
         (this.historyOptionsMap.get("sourceCode").enabled
           ? this.historyOptionsMap.get("sourceCode").name +
-          ":\n" +
-          (step.sourceCode != null ? step.sourceCode : "not available").replace(/^/gm, "\t")
+            ":\n" +
+            (step.sourceCode != null ? step.sourceCode : "not available").replace(/^/gm, "\t")
           : "") + "\n";
 
       const stepString =

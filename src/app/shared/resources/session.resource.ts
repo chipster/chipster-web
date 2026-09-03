@@ -529,10 +529,9 @@ export class SessionResource {
       .pipe(
         mergeMap(
           (url: string) =>
-            this.http.get(
-              `${url}/sessions/${sessionId}/labels`,
-              this.tokenService.getTokenParams(true),
-            ) as Observable<Label[]>,
+            this.http.get(`${url}/sessions/${sessionId}/labels`, this.tokenService.getTokenParams(true)) as Observable<
+              Label[]
+            >,
         ),
       );
   }
@@ -635,9 +634,7 @@ export class SessionResource {
       .filter((label: Label) => !targetLabelsMap.has(label.labelId))
       .map((label: Label) => ({ ...label, sessionId: null }));
 
-    const createLabelsRequest = labelsToCreate.length > 0
-      ? this.createLabels(targetSessionId, labelsToCreate)
-      : of([]);
+    const createLabelsRequest = labelsToCreate.length > 0 ? this.createLabels(targetSessionId, labelsToCreate) : of([]);
 
     // datasets keep their labelIds verbatim -- they now resolve in the destination
     const oldDatasets = Array.from(sessionData.datasetsMap.values());
@@ -652,9 +649,7 @@ export class SessionResource {
     // emit an empty array in case request completes without emitting anything
     // (don't know if this ever happends) otherwise this won't continue to the
     //  next mergeMap() when the session is empty
-    return createLabelsRequest.pipe(
-      mergeMap(() => createDatasetsRequest.pipe(defaultIfEmpty([]))),
-    ).pipe(
+    return createLabelsRequest.pipe(mergeMap(() => createDatasetsRequest.pipe(defaultIfEmpty([])))).pipe(
       mergeMap((createdDatasets: Dataset[]) => {
         log.info("created", createdDatasets.length, "datasets");
         // create dataset map for checking inputs later

@@ -43,7 +43,7 @@ export class HistoryComponent implements OnInit {
     private auhtHttpClient: AuthHttpClientService,
     private formBuilder: UntypedFormBuilder,
     private modalService: NgbModal,
-    private tokenService: TokenService
+    private tokenService: TokenService,
   ) {}
 
   ngOnInit() {
@@ -138,8 +138,8 @@ export class HistoryComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams)
-        )
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams),
+        ),
       )
       .subscribe(
         (recordNumber) => {
@@ -147,7 +147,7 @@ export class HistoryComponent implements OnInit {
           this.collectionSize = Math.ceil(recordNumber / 500) * 10;
           this.updateJobs(filterParams);
         },
-        (err) => this.errorHandlerService.showError("get job numbers failed", err)
+        (err) => this.errorHandlerService.showError("get job numbers failed", err),
       );
   }
 
@@ -159,8 +159,8 @@ export class HistoryComponent implements OnInit {
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
         flatMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams)
-        )
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams),
+        ),
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {
@@ -168,7 +168,7 @@ export class HistoryComponent implements OnInit {
           this.jobs = jobHistoryList;
           this.updateTime = new Date();
         },
-        (err) => this.errorHandlerService.showError("failed to get jobs", err)
+        (err) => this.errorHandlerService.showError("failed to get jobs", err),
       );
   }
 

@@ -22,7 +22,7 @@ export class AuthenticationService {
     private tokenService: TokenService,
     private httpClient: HttpClient,
     private authHttpClient: AuthHttpClientService,
-    private restErrorService: RestErrorService
+    private restErrorService: RestErrorService,
   ) {
     this.init();
   }
@@ -47,7 +47,7 @@ export class AuthenticationService {
     return this.requestToken(username, password).pipe(
       map((token: string) => {
         this.saveToken(token);
-      })
+      }),
     );
   }
 
@@ -69,9 +69,9 @@ export class AuthenticationService {
           {
             headers: this.tokenService.getHttpBasicHeader(username, password),
             responseType: "text",
-          }
+          },
         );
-      })
+      }),
     );
   }
 
@@ -93,9 +93,9 @@ export class AuthenticationService {
             {
               headers: this.tokenService.getTokenHeader(),
               responseType: "text",
-            }
+            },
           );
-        })
+        }),
       )
       .subscribe(
         (response: string) => {
@@ -108,7 +108,7 @@ export class AuthenticationService {
           } else {
             log.info("refresh token failed", error.status, error.statusText);
           }
-        }
+        },
       );
   }
 
@@ -135,9 +135,9 @@ export class AuthenticationService {
             }
             // for now, throw others
             throw error;
-          })
+          }),
         );
-      })
+      }),
     );
   }
 
@@ -158,7 +158,7 @@ export class AuthenticationService {
         const url = `${authUrl}/users?userId=${userId}`;
 
         return <Observable<User>>this.authHttpClient.getAuth(url);
-      })
+      }),
     );
   }
 
@@ -172,7 +172,7 @@ export class AuthenticationService {
       catchError((err) => {
         this.restErrorService.showError("failed to get users", err);
         throw err;
-      })
+      }),
     );
   }
 
@@ -183,7 +183,7 @@ export class AuthenticationService {
         const userId = encodeURIComponent(this.tokenService.getUsername());
         const url = `${authUrl}/users?userId=${userId}`;
         return <Observable<User>>this.authHttpClient.putAuth(url, user);
-      })
+      }),
     );
   }
 

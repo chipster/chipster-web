@@ -55,9 +55,7 @@ export class LabelsContextMenuService {
     if (!sessionData?.labelsMap || sessionData.labelsMap.size === 0) {
       return null;
     }
-    return Array.from(sessionData.labelsMap.values()).sort((a, b) =>
-      (a.name ?? "").localeCompare(b.name ?? ""),
-    )[0];
+    return Array.from(sessionData.labelsMap.values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];
   }
 
   // For callers that apply or remove labels without going through toggleLabel()
@@ -103,9 +101,7 @@ export class LabelsContextMenuService {
       "box-sizing:border-box;vertical-align:middle;margin-right:0.75em;" +
       "text-align:center;line-height:11px;font-size:10px;font-weight:bold";
     if (state === "checked") {
-      return (
-        `<span style="${boxBase};border:1px solid #0d6efd;background:#0d6efd;color:#fff">✓</span>`
-      );
+      return `<span style="${boxBase};border:1px solid #0d6efd;background:#0d6efd;color:#fff">✓</span>`;
     }
     if (state === "indeterminate") {
       return (

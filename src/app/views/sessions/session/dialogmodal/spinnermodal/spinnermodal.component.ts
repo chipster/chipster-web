@@ -10,7 +10,10 @@ export class SpinnerModalComponent implements AfterViewInit {
   @Input() message: string;
   @Input() observable: Observable<any>;
 
-  constructor(private activeModal: NgbActiveModal, private restErrorService: RestErrorService) {}
+  constructor(
+    private activeModal: NgbActiveModal,
+    private restErrorService: RestErrorService,
+  ) {}
 
   ngAfterViewInit() {
     this.observable.subscribe(
@@ -20,7 +23,7 @@ export class SpinnerModalComponent implements AfterViewInit {
       (err) => {
         this.restErrorService.showError(`${this.message} failed`, err);
         this.activeModal.dismiss();
-      }
+      },
     );
   }
 }

@@ -36,7 +36,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     private uploadService: UploadService,
     private sessionWorkerResource: SessionWorkerResource,
     private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService
+    private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit() {
@@ -61,7 +61,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         },
         (reason) => {
           this.modalOpen = false;
-        }
+        },
       );
     }
 
@@ -127,7 +127,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
           }
 
           return of(null);
-        })
+        }),
       )
       .subscribe({
         error: (err) => {

@@ -32,12 +32,12 @@ export class TwoCircleVennDiagramService {
     const firstDrawPoint = VennDiagramUtils.getRightMostPoint(
       intersections.point1,
       intersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
     const secondDrawPoint = VennDiagramUtils.getLeftMostPoint(
       intersections.point1,
       intersections.point2,
-      selectionCircle.center
+      selectionCircle.center,
     );
 
     return `M ${firstDrawPoint.x} ${firstDrawPoint.y}

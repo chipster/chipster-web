@@ -41,7 +41,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     private restErrorService: RestErrorService,
     private datasetModalService: DatasetModalService,
     private toolService: ToolService,
-    private datasetContextMenuService: DatasetContextMenuService
+    private datasetContextMenuService: DatasetContextMenuService,
   ) {}
 
   ngOnInit() {

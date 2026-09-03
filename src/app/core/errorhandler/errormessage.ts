@@ -12,6 +12,6 @@ export class ErrorMessage {
     public dismissible: boolean,
     public buttons: ErrorButton[],
     public links: ErrorButton[],
-    public error: any
+    public error: any,
   ) {}
 }

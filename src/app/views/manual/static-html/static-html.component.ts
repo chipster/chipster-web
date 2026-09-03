@@ -23,7 +23,11 @@ export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges 
   html: SafeHtml;
   private anchors: any;
 
-  constructor(private elementRef: ElementRef, private router: Router, private activatedRoute: ActivatedRoute) {}
+  constructor(
+    private elementRef: ElementRef,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) {}
 
   ngAfterViewInit() {
     this.registerAnchorEventListeners();
@@ -48,7 +52,7 @@ export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges 
     if (!(event.target instanceof HTMLAnchorElement)) {
       log.warn(
         "Cannot handle click event, because this is not an anchor element. Is there an unclosed anchor on the page?",
-        event
+        event,
       );
       return;
     }

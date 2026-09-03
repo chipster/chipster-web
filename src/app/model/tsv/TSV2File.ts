@@ -61,7 +61,7 @@ export default class TSV2File {
     tsvArray: Array<Array<string>>,
     dataset: Dataset,
     sessionData: SessionData,
-    typeTagService: TypeTagService
+    typeTagService: TypeTagService,
   ): TSV2File {
     // all these neded when construction new TSV2File
     let headersWithIdentifierFix: Array<string>;
@@ -119,7 +119,7 @@ export default class TSV2File {
       hasHeadersHardcodedByType,
       body,
       isMissingHeaderColumn,
-      isFirstDataRowHeader
+      isFirstDataRowHeader,
     );
   }
 
@@ -131,7 +131,7 @@ export default class TSV2File {
     hasHeadersHardcodedByType: boolean,
     body: Array<Array<string>>,
     isMissingHeaderColumn: boolean,
-    isFirstDataRowHeader: boolean
+    isFirstDataRowHeader: boolean,
   ) {
     this.dataset = dataset;
     this.headers = headers;

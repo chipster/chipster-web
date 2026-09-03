@@ -19,7 +19,10 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   public notes: string;
   public readOnly: boolean;
 
-  constructor(private activeModal: NgbActiveModal, private sessionDataService: SessionDataService) {}
+  constructor(
+    private activeModal: NgbActiveModal,
+    private sessionDataService: SessionDataService,
+  ) {}
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened

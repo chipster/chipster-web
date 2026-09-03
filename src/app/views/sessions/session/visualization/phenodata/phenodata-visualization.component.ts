@@ -66,7 +66,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   get canReset(): boolean {
-    return this.hasEditableColumns || (this.originalPhenodataString != null && this.originalPhenodataString !== this.phenodataString);
+    return (
+      this.hasEditableColumns ||
+      (this.originalPhenodataString != null && this.originalPhenodataString !== this.phenodataString)
+    );
   }
   PhenodataState = PhenodataState; // for using the enum in template
   phenodataState: PhenodataState = PhenodataState.DATASET_NULL;
@@ -256,7 +259,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
               "Cancel",
               "btn-danger",
             )
-            .then(() => this.removeColumn(col), () => {});
+            .then(
+              () => this.removeColumn(col),
+              () => {},
+            );
         });
       },
       false,
@@ -299,43 +305,45 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         "Cancel",
         { text: "Reset to previous", disabled: this.originalPhenodataString === this.phenodataString },
       )
-      .then((action: number) => {
-        if (action === 1) {
-          const keepIndices = this.headers
-            .map((h, i) => (this.nonEditableColumns.includes(h) ? i : -1))
-            .filter((i) => i !== -1);
-          this.headers = keepIndices.map((i) => this.headers[i]);
-          this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
-          this.updateDataset();
-          this.updateViewAfterDelay();
-        } else if (action === 2) {
-          const removableIndices = this.headers
-            .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
-            .filter((i) => i !== -1);
-          this.rows.forEach((_row, rowIndex) => {
-            removableIndices.forEach((colIndex) => {
-              this.rows[rowIndex][colIndex] = "";
+      .then(
+        (action: number) => {
+          if (action === 1) {
+            const keepIndices = this.headers
+              .map((h, i) => (this.nonEditableColumns.includes(h) ? i : -1))
+              .filter((i) => i !== -1);
+            this.headers = keepIndices.map((i) => this.headers[i]);
+            this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
+            this.updateDataset();
+            this.updateViewAfterDelay();
+          } else if (action === 2) {
+            const removableIndices = this.headers
+              .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
+              .filter((i) => i !== -1);
+            this.rows.forEach((_row, rowIndex) => {
+              removableIndices.forEach((colIndex) => {
+                this.rows[rowIndex][colIndex] = "";
+              });
             });
-          });
-          this.updateDataset();
-          this.updateViewAfterDelay();
-          this.zone.run(() => this.updateWarnings());
-        } else if (action === 3 && this.originalPhenodataString != null) {
-          this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
-          this.phenodataString = this.originalPhenodataString;
-          this.sessionDataService.updateDataset(this.dataset).subscribe({
-            next: () => log.info("dataset phenodata updated"),
-            error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
-          });
-          this.updateViewAfterDelay();
-        }
-      }, () => {});
+            this.updateDataset();
+            this.updateViewAfterDelay();
+            this.zone.run(() => this.updateWarnings());
+          } else if (action === 3 && this.originalPhenodataString != null) {
+            this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
+            this.phenodataString = this.originalPhenodataString;
+            this.sessionDataService.updateDataset(this.dataset).subscribe({
+              next: () => log.info("dataset phenodata updated"),
+              error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
+            });
+            this.updateViewAfterDelay();
+          }
+        },
+        () => {},
+      );
   }
 
   private updateDataset() {
-    const phenodataString = [this.headers, ...this.rows]
-      .map((row) => row.map((cell) => cell ?? "").join("\t"))
-      .join("\n") + "\n";
+    const phenodataString =
+      [this.headers, ...this.rows].map((row) => row.map((cell) => cell ?? "").join("\t")).join("\n") + "\n";
 
     this.phenodataString = phenodataString;
 
@@ -503,8 +511,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
               (acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc),
               -1,
             );
-            const insertIndex =
-              name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : colHeaders.length;
+            const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : colHeaders.length;
             this.hot.alter("insert_col", insertIndex);
             // Handsontable inserts an undefined entry at insertIndex; replace it with the name.
             colHeaders[insertIndex] = name;

@@ -11,5 +11,8 @@ import { ToolService } from "../../sessions/session/tools/tool.service";
 export class ManualModalComponent {
   @Input() tool: Tool;
 
-  constructor(public activeModal: NgbActiveModal, public toolService: ToolService) {}
+  constructor(
+    public activeModal: NgbActiveModal,
+    public toolService: ToolService,
+  ) {}
 }

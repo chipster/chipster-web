@@ -66,7 +66,11 @@
             </button>
 
             <!-- labels split button -->
-            <div ngbDropdown #labelsDropdown="ngbDropdown" container="body" class="btn-group btn-group-sm float-end me-2">
+            <div
+              ngbDropdown
+              #labelsDropdown="ngbDropdown"
+              container="body"
+              class="btn-group btn-group-sm float-end me-2">
               <button
                 type="button"
                 class="btn btn-outline-secondary tool-bar-button"
@@ -102,7 +106,8 @@
                     ngbDropdownItem
                     class="d-flex justify-content-between align-items-center"
                     [disabled]="labelMenuItems.length === 0">
-                    <span>Select files by label</span><span aria-hidden="true" class="ms-3">&rsaquo;</span>
+                    <span>Select files by label</span>
+                    <span aria-hidden="true" class="ms-3">&rsaquo;</span>
                   </button>
                   <div
                     *ngIf="selectByLabelOpen"
@@ -115,7 +120,7 @@
                       (click)="selectFilesWithLabel(item); labelsDropdown.close()">
                       <span
                         class="d-inline-block align-middle"
-                        style="width:0.6em;height:0.6em;border-radius:50%;margin-right:0.5em"
+                        style="width: 0.6em; height: 0.6em; border-radius: 50%; margin-right: 0.5em"
                         [style.background]="item.colorBg"></span>
                       <span>{{ item.label.name }}</span>
                     </button>
@@ -164,7 +169,7 @@
               type="button "
               class="dataset-list-button list-group-item list-group-item-action"
               [ngClass]="{
-                active: selectionService.isSelectedDatasetById(dataset.datasetId)
+                active: selectionService.isSelectedDatasetById(dataset.datasetId),
               }"
               (click)="toggleDatasetSelection($event, dataset)"
               *ngFor="let dataset of getDatasetListSorted() | datasetsearch: datasetSearch">

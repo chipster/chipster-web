@@ -40,8 +40,8 @@ export class SessionEventService {
     private sessionResource: SessionResource,
     private websocketService: WebSocketService,
     private errorService: ErrorService,
-    private selectionService: SelectionService
-  ) { }
+    private selectionService: SelectionService,
+  ) {}
 
   unsubscribe() {
     this.websocketService.unsubscribe();
@@ -61,7 +61,7 @@ export class SessionEventService {
       () => {
         this.sessionHasChanged = true;
       },
-      (err) => this.errorService.showError("session change tracking failed", err)
+      (err) => this.errorService.showError("session change tracking failed", err),
     );
 
     this.datasetStream$ = stream.pipe(
@@ -70,35 +70,35 @@ export class SessionEventService {
       // update type tags before letting other parts of the client know about this change
       mergeMap((sessionEvent) => this.updateTypeTags(this.sessionId, sessionEvent, sessionData)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     this.jobStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Job),
       mergeMap((data) => this.handleJobEvent(data, this.sessionId, sessionData)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     this.sessionStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Session),
       mergeMap((data) => this.handleSessionEvent(data, this.sessionId, sessionData)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
       mergeMap((data) => this.handleRuleEvent(data, sessionData.session)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     this.labelStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Label),
       mergeMap((data) => this.handleLabelEvent(data, this.sessionId, sessionData)),
       publish(),
-      refCount()
+      refCount(),
     );
 
     // update sessionData even if no one else subscribes
@@ -139,10 +139,10 @@ export class SessionEventService {
           sessionEvent.event.type === EventType.Update &&
           sessionEvent.event.resourceType === Resource.Dataset &&
           this.selectionService.selectedDatasets.some(
-            (selectedDataset) => selectedDataset.datasetId === (sessionEvent.newValue as Dataset).datasetId
-          )
+            (selectedDataset) => selectedDataset.datasetId === (sessionEvent.newValue as Dataset).datasetId,
+          ),
       ),
-      map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId)
+      map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId),
     );
   }
 
@@ -157,7 +157,7 @@ export class SessionEventService {
         mergeMap((rule: Rule) => {
           session.rules.push(rule);
           return this.createEvent(event, null, rule);
-        })
+        }),
       );
     }
     if (event.type === EventType.Delete) {
@@ -177,7 +177,7 @@ export class SessionEventService {
             sessionData.session = remote;
             log.info("session updated", remote.name, remote.state);
             return this.createEvent(event, local, remote);
-          })
+          }),
         );
       }
       // nothing to do, the client reacts when the Rule is deleted
@@ -203,11 +203,10 @@ export class SessionEventService {
           // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
           // is never visible in the UI before its type tags are ready
           return this.createEvent(event, null, remote);
-        })
+        }),
       );
     }
     if (event.type === EventType.Update) {
-
       // accept only complete datasets, see SessionResource.loadSession()
       if (event.state !== FileState.Complete) {
         log.info("wait until upload is completed", event);
@@ -220,7 +219,7 @@ export class SessionEventService {
           // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
           // is never visible in the UI before its type tags are ready
           return this.createEvent(event, local, remote);
-        })
+        }),
       );
     }
     if (event.type === EventType.Delete) {
@@ -272,7 +271,7 @@ export class SessionEventService {
           const local = sessionData.labelsMap.get(event.resourceId);
           sessionData.labelsMap.set(event.resourceId, remote);
           return this.createEvent(event, local, remote);
-        })
+        }),
       );
     }
     if (event.type === EventType.Delete) {
@@ -289,7 +288,7 @@ export class SessionEventService {
         mergeMap((remote: Job) => {
           sessionData.jobsMap.set(event.resourceId, remote);
           return this.createEvent(event, null, remote);
-        })
+        }),
       );
     }
     if (event.type === EventType.Update) {
@@ -298,7 +297,7 @@ export class SessionEventService {
           const local = sessionData.jobsMap.get(event.resourceId);
           sessionData.jobsMap.set(event.resourceId, remote);
           return this.createEvent(event, local, remote);
-        })
+        }),
       );
     }
     if (event.type === EventType.Delete) {

@@ -15,7 +15,10 @@ const MAX_HEADER_LENGTH = 64 * 1024;
 
 @Injectable()
 export class TsvService {
-  constructor(private fileResource: FileResource, private typeTagService: TypeTagService) {}
+  constructor(
+    private fileResource: FileResource,
+    private typeTagService: TypeTagService,
+  ) {}
 
   getTSV(sessionId: string, dataset: Dataset): Observable<any> {
     return this.fileResource.getData(sessionId, dataset);
@@ -26,7 +29,7 @@ export class TsvService {
       map((tsvData: any) => {
         const parsedTSVData = d3.tsvParseRows(tsvData);
         return new TSVFile(parsedTSVData, dataset.datasetId, "dataset");
-      })
+      }),
     );
   }
 
@@ -35,7 +38,7 @@ export class TsvService {
       map((tsvData: any) => {
         const tsvArray = d3.tsvParseRows(tsvData);
         return this.getTSV2FileFromArray(dataset, sessionData, tsvArray);
-      })
+      }),
     );
   }
 
@@ -45,13 +48,13 @@ export class TsvService {
 
   getTSV2FileHeaders(dataset: Dataset, sessionData: SessionData): Observable<Array<SelectionOption>> {
     return this.getTSV2File(dataset, sessionData, MAX_HEADER_LENGTH).pipe(
-      map((tsv2File: TSV2File) => tsv2File.getHeadersForParameter())
+      map((tsv2File: TSV2File) => tsv2File.getHeadersForParameter()),
     );
   }
 
   getTSVFileHeaders(sessionId: string, dataset: Dataset): Observable<Array<string>> {
     return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).pipe(
-      map((tsvFile: TSVFile) => tsvFile.headers.headers)
+      map((tsvFile: TSVFile) => tsvFile.headers.headers),
     );
   }
 
@@ -62,7 +65,7 @@ export class TsvService {
 
   getTSV2FileHeadersForParameter(sessionId: string, dataset: Dataset): Observable<Array<string>> {
     return this.getTSVFile(sessionId, dataset, MAX_HEADER_LENGTH).pipe(
-      map((tsvFile: TSVFile) => tsvFile.headers.headers)
+      map((tsvFile: TSVFile) => tsvFile.headers.headers),
     );
   }
 }

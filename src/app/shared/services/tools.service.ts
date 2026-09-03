@@ -12,7 +12,10 @@ export class ToolsService {
   private modulesCache$: Observable<Module[]>;
   private modulesMapCache$: Observable<Map<string, Module>>;
 
-  constructor(private toolResource: ToolResource, private configService: ConfigService) {}
+  constructor(
+    private toolResource: ToolResource,
+    private configService: ConfigService,
+  ) {}
 
   getTools(): Observable<Tool[]> {
     if (!this.toolsCache$) {
@@ -25,7 +28,7 @@ export class ToolsService {
     if (!this.modulesCache$) {
       this.modulesCache$ = forkJoin(
         this.configService.getModules(), // names of the enabled modules
-        this.toolResource.getModules() // all modules from the server
+        this.toolResource.getModules(), // all modules from the server
       ).pipe(
         map((results) => {
           const enabledModules: string[] = results[0];
@@ -42,7 +45,7 @@ export class ToolsService {
               return module;
             });
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this.modulesCache$;
@@ -52,7 +55,7 @@ export class ToolsService {
     if (!this.modulesMapCache$) {
       this.modulesMapCache$ = this.getModules().pipe(
         map((modules: Module[]) => UtilsService.arrayToMap(modules, "moduleId")),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this.modulesMapCache$;

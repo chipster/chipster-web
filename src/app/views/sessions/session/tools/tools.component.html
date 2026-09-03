@@ -37,7 +37,7 @@
             *ngFor="let module of modules"
             [ngClass]="{
               'btn-primary': module.moduleId === selectedModule.moduleId,
-              'btn-light': module.moduleId !== selectedModule.moduleId
+              'btn-light': module.moduleId !== selectedModule.moduleId,
             }">
             <span class="text-nowrap">
               {{ module.name }}
@@ -110,7 +110,7 @@
             class="list-group-item list-group-item-action tool-list-item"
             [ngClass]="{
               active: category === selectedCategory,
-              compact: settingsService.compactToolList$.getValue()
+              compact: settingsService.compactToolList$.getValue(),
             }"
             (click)="selectCategoryAndFirstTool(category)"
             *ngFor="let category of selectedModule.categories"
@@ -133,7 +133,7 @@
               class="list-group-item list-group-item-action tool-list-item"
               [ngClass]="{
                 active: tool.name.id === selectedTool?.tool.name.id,
-                compact: settingsService.compactToolList$.getValue()
+                compact: settingsService.compactToolList$.getValue(),
               }"
               (click)="selectTool(tool)"
               *ngFor="let tool of selectedCategory.tools"

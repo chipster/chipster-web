@@ -80,7 +80,8 @@ export class JobListComponent implements OnChanges {
   }
 
   cancelJob(job: Job) {
-    this.sessionDataService.cancelJob(job)
+    this.sessionDataService
+      .cancelJob(job)
       .catch((err) => this.errorService.showError(`Cancelling job failed for: ${job.toolName}`, err));
   }
 

@@ -18,7 +18,10 @@ export class JobErrorModalComponent {
 
   JobState = JobState; // for using the enum in template
 
-  constructor(private activeModal: NgbActiveModal, private contactSupportService: ContactSupportService) {}
+  constructor(
+    private activeModal: NgbActiveModal,
+    private contactSupportService: ContactSupportService,
+  ) {}
 
   close() {
     this.activeModal.close();

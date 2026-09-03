@@ -24,7 +24,7 @@ export class ErrorComponent implements OnInit {
     private router: Router,
     private toastrService: ToastrService,
     private contactSupportService: ContactSupportService,
-    private dialogModalService: DialogModalService
+    private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit(): void {
@@ -34,7 +34,7 @@ export class ErrorComponent implements OnInit {
         this.toastIds.forEach((t) => this.toastrService.remove(t));
         this.toastIds = [];
       },
-      (err) => this.errorService.showError("getting router events failed", err)
+      (err) => this.errorService.showError("getting router events failed", err),
     );
 
     this.errorService
@@ -81,9 +81,9 @@ export class ErrorComponent implements OnInit {
                 log.error("unknown action", buttonText);
               }
               return EMPTY;
-            })
+            }),
           );
-        })
+        }),
       )
       .subscribe({
         error: (err) => {
@@ -105,7 +105,7 @@ export class ErrorComponent implements OnInit {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
       tap((logString) => {
         this.contactSupportService.openContactSupportModal(logString);
-      })
+      }),
     );
 
     return this.dialogModalService.openSpinnerModal("Collecting information", collectInfo$);
@@ -115,7 +115,7 @@ export class ErrorComponent implements OnInit {
     const collectInfo$ = this.errorMessageToString(errorMessage).pipe(
       tap((logString) => {
         this.dialogModalService.openPreModal(title, logString);
-      })
+      }),
     );
 
     return this.dialogModalService.openSpinnerModal("Collecting information", collectInfo$);
@@ -149,7 +149,7 @@ export class ErrorComponent implements OnInit {
       return from(StackTrace.fromError(error)).pipe(
         map((sf: []) => this.stackframesToString(sf)),
         map((stack) => info + "stack: \n" + stack + "\n"),
-        catchError((stackErr) => of(info + "stack: (failed to get the stack: " + stackErr + ")\n"))
+        catchError((stackErr) => of(info + "stack: (failed to get the stack: " + stackErr + ")\n")),
       );
     }
     return of(info);

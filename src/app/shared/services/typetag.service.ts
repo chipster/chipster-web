@@ -55,7 +55,7 @@ export class TypeTagService {
       log.warn("sessionData is null in isCompatible for " + dataset.name);
     } else if (sessionData.datasetTypeTags == null || sessionData.datasetTypeTags.size === 0) {
       log.warn(
-        "empty sessionData.datasetTypetags in isCompatible for " + dataset.name + " " + sessionData.datasetTypeTags
+        "empty sessionData.datasetTypetags in isCompatible for " + dataset.name + " " + sessionData.datasetTypeTags,
       );
     }
 

@@ -19,7 +19,7 @@ export class DatasetDetailsComponent implements OnInit {
     public selectionService: SelectionService,
     private sessionDataService: SessionDataService,
     private store: Store<any>,
-    private errorService: ErrorService
+    private errorService: ErrorService,
   ) {}
 
   ngOnInit() {
@@ -28,7 +28,7 @@ export class DatasetDetailsComponent implements OnInit {
       (datasets: Array<Dataset>) => {
         this.datasets = datasets;
       },
-      (err) => this.errorService.showError("failed to get the selected datasets from store", err)
+      (err) => this.errorService.showError("failed to get the selected datasets from store", err),
     );
   }
 

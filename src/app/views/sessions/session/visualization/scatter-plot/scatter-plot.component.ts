@@ -25,7 +25,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     sessionDataService: SessionDataService,
     private plotService: PlotService,
     private visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService
+    private restErrorService2: RestErrorService,
   ) {
     super(fileResource, sessionDataService);
   }
@@ -76,7 +76,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(
         geneRow.values[self.chipHeaders.indexOf(self.selectedXAxisHeader)],
-        geneRow.values[self.chipHeaders.indexOf(self.selectedYAxisHeader)]
+        geneRow.values[self.chipHeaders.indexOf(self.selectedYAxisHeader)],
       );
       self.plotData.push(curPlotData);
     });
@@ -160,8 +160,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .attr("cx", (d) => self.xScale(d.plotPoint.x))
       .attr("cy", (d) => self.yScale(d.plotPoint.y))
       .attr("fill", "red")
-      .on("mouseover", (d: any) => { })
-      .on("mouseout", (d: any) => { })
+      .on("mouseover", (d: any) => {})
+      .on("mouseout", (d: any) => {})
       .on("click", (d: PlotData) => {
         // Need to store the datapoints what the user has clicked
       });
@@ -174,7 +174,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       this.dragEndPoint,
       this.xScale,
       this.yScale,
-      this.plotData
+      this.plotData,
     );
     // Populate the selected gene list to show in the selected box view{
     this.selectedDataRows = this.tsv.body.getTSVRows(this.selectedDataPointIds);

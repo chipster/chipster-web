@@ -68,7 +68,7 @@ export class DatasetService {
 
     const contentRows = allRows.slice(1);
     return contentRows.every(
-      (row) => row.length === headers.length && row[groupIndex] != null && row[groupIndex] !== ""
+      (row) => row.length === headers.length && row[groupIndex] != null && row[groupIndex] !== "",
     );
   }
 
@@ -155,7 +155,7 @@ export class DatasetService {
     r1Files.forEach((r1File) => {
       const sampleName = r1File.name.substring(0, r1File.name.lastIndexOf(r1Token));
       const r2File = r2Files.find(
-        (r2File) => r2File.name.substring(0, r2File.name.lastIndexOf(r2Token)) === sampleName
+        (r2File) => r2File.name.substring(0, r2File.name.lastIndexOf(r2Token)) === sampleName,
       );
 
       if (r2File != null) {
@@ -181,7 +181,7 @@ export class DatasetService {
     // find files with / without sample data
     const sampleDataExistsPartitions = UtilsService.partitionArray(
       datasets,
-      (dataset) => this.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null
+      (dataset) => this.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null,
     );
     const sampleDataMissing = sampleDataExistsPartitions[1];
     const filesWithSampleData = sampleDataExistsPartitions[0];
@@ -200,7 +200,7 @@ export class DatasetService {
       (datasetAndSampleData) => {
         const sampleData = datasetAndSampleData[1];
         return sampleData.sampleId != null;
-      }
+      },
     );
     const datasetsAndSampleData = sampleIdExistsPartitions[0];
     const datasetsSampleIdMissing = sampleIdExistsPartitions[1];
@@ -234,7 +234,7 @@ export class DatasetService {
     const noMissingPairsPartitions = UtilsService.partitionArray(
       Array.from(pairedSamplesMap.values()),
       (pairedEndSample) =>
-        pairedEndSample.pairs.every((sampleFilePair) => sampleFilePair.r1File != null && sampleFilePair.r2File != null)
+        pairedEndSample.pairs.every((sampleFilePair) => sampleFilePair.r1File != null && sampleFilePair.r2File != null),
     );
     const pairedEndSamples: PairedEndSample[] = noMissingPairsPartitions[0];
     const pairMissingSamples: PairedEndSample[] = noMissingPairsPartitions[1];
@@ -282,7 +282,7 @@ export class DatasetService {
             (sampleData.direction === DatasetService.R2 && pairedEndSample.pairs[index].r2File != null)
           ) {
             throw new Error(
-              "File with the same direction already exists: " + dataset.name + " " + sampleData.direction
+              "File with the same direction already exists: " + dataset.name + " " + sampleData.direction,
             );
           }
           // add to the pair

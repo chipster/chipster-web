@@ -44,6 +44,7 @@ export function textColorForBackground(hex: string): string {
 // Defaults seeded into any session that opens with zero labels.
 // Names are positional ("Label 1" ... "Label N"); colors come from the first
 // N palette entries so the seed is consistent with the picker order.
-export const DEFAULT_LABELS: { name: string; color: string }[] = LABEL_PALETTE
-  .slice(0, 4)
-  .map((c, i) => ({ name: `Label ${i + 1}`, color: c.hex }));
+export const DEFAULT_LABELS: { name: string; color: string }[] = LABEL_PALETTE.slice(0, 4).map((c, i) => ({
+  name: `Label ${i + 1}`,
+  color: c.hex,
+}));

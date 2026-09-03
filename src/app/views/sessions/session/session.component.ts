@@ -1,7 +1,18 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, EventType, Job, JobState, Label, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
+import {
+  Dataset,
+  EventType,
+  Job,
+  JobState,
+  Label,
+  Module,
+  Rule,
+  Session,
+  SessionState,
+  Tool,
+} from "chipster-js-common";
 import log from "loglevel";
 import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";

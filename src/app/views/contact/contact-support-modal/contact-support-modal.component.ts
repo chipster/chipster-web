@@ -47,7 +47,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private configService: ConfigService,
     private dialogModalService: DialogModalService,
     private fb: UntypedFormBuilder,
-    @Inject(DOCUMENT) private document
+    @Inject(DOCUMENT) private document,
   ) {}
 
   ngOnInit() {
@@ -80,7 +80,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           }
         }),
         mergeMap(() => this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))),
-        tap((appId) => (this.appId = appId))
+        tap((appId) => (this.appId = appId)),
       )
       .subscribe({
         error: (err) => {
@@ -114,9 +114,9 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
             sessionUrl,
             this.supportForm.value.email,
             this.appId,
-            this.log
+            this.log,
           );
-        })
+        }),
       );
 
       this.activeModal.close();
@@ -166,8 +166,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
       map(
         () =>
           // return the url of the new session
-          this.getHostUrl() + "/analyze/" + copySessionId
-      )
+          this.getHostUrl() + "/analyze/" + copySessionId,
+      ),
     );
   }
 
