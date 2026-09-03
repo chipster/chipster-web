@@ -9,7 +9,7 @@
         <dt>
           <ng-container *ngFor="let key of shortcut.keys; let last = last">
             <kbd>{{ key }}</kbd>
-            <span *ngIf="!last">/</span>
+            <span *ngIf="!last">&nbsp;/&nbsp;</span>
           </ng-container>
         </dt>
         <dd>{{ shortcut.description }}</dd>
