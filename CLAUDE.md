@@ -101,7 +101,8 @@ file to be edited:
    `../chipster-web-server/conf/chipster-proxy.yaml` and points the
    `url-ext-*` and `url-admin-ext-*` addresses that service-locator hands out
    to the browser at the dev server. The backend has to be restarted to pick
-   them up.
+   them up. Those addresses are relative too, so they don't have to know the
+   port where the browser reaches the dev server.
 
 ### The bootstrap address
 
