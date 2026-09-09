@@ -92,6 +92,9 @@
           "configurations": {
             "production": {
               "buildTarget": "chipster-web:build:production"
+            },
+            "proxy": {
+              "proxyConfig": "proxy.conf.json"
             }
           }
         },

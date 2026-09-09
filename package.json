@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:proxy": "ng serve --configuration proxy",
     "build": "ng build --configuration production",
     "test": "vitest run",
     "test:watch": "vitest",
