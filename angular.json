@@ -87,7 +87,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "chipster-web:build"
+            "buildTarget": "chipster-web:build",
+            "proxyConfig": "proxy.conf.direct.json"
           },
           "configurations": {
             "production": {

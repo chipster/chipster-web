@@ -5,7 +5,7 @@ This file covers the **frontend** (Angular dev server, `chipster-web`). The back
 ## Two Setup Modes
 
 - **Servers in container** — everything runs inside the sandbox container (see below)
-- **Servers on host** — backend runs on the host; see the host-mode section and `../chipster-web-server/CLAUDE.md`
+- **Servers on host** — backend runs on the host; see "Host setup" below and `../chipster-web-server/CLAUDE.md`
 
 ---
 
@@ -70,18 +70,18 @@ To kill: `fuser -k 4200/tcp`
 There are two ways to serve the app.
 
 **`npm start`** (`ng serve`) — the default. The browser connects to each
-service on its own port, so every service port has to be reachable.
+service on its own port, so every service port has to be reachable (all but
+one, see the bootstrap address below).
 
-**`npm run start:proxy`** (`ng serve --configuration proxy`, or `-c proxy`) —
-the dev server also proxies the backend services, so the browser only needs the
-dev server port (4200). This keeps port forwarding simple when the dev
-environment runs on a remote VM, and it matches the deployments, where the
-ingress does the same proxying and prefix stripping.
+**`npm run start:proxy`** — the dev server also proxies the backend services,
+so the browser only needs the dev server port (4200). This keeps port
+forwarding simple when the dev environment runs on a remote VM, and it matches
+the deployments, where the ingress does the same proxying and prefix stripping.
 
-`proxy` is a configuration of the `serve` target in `angular.json`, setting
-only `proxyConfig`. The target's own options have none, so a plain `ng serve`
-behaves as it always has. Being a configuration, it composes with the others,
-e.g. `ng serve -c production,proxy`.
+`npm run start:proxy` is only a shorthand for `ng serve --configuration
+proxy`; either form works. `proxy` is a configuration of the `serve` target in
+`angular.json`, and all it does is replace the `proxyConfig` of the target's
+options, so it composes with `production` too.
 
 ### Proxy mode
 
@@ -93,21 +93,35 @@ The entries are matched by string prefix in the order they appear, first match
 winning, so a longer name has to precede any name it starts with — the
 `-admin` entries and `session-db-events` come before the plain service names.
 
-Switching modes takes three things that have to agree:
+Switching modes takes two things that have to agree, neither of which needs a
+file to be edited:
 
 1. the dev server: `npm run start:proxy` instead of `npm start`
-2. `service-locator` in `src/assets/conf/chipster.yaml` — `/service-locator`
-   for proxy mode, `http://localhost:8003` otherwise. Both are in the file,
-   one commented out. Every other service address comes from service-locator,
-   so this is the only address configured in the frontend.
-3. the `url-ext-*` and `url-admin-ext-*` keys in
-   `../chipster-web-server/conf/chipster.yaml`, which are the addresses
-   service-locator hands out to the browser. That file has the proxy-mode
-   block ready to uncomment.
+2. the backend: `./gradlew run -Pproxy`, which overlays
+   `../chipster-web-server/conf/chipster-proxy.yaml` and points the
+   `url-ext-*` and `url-admin-ext-*` addresses that service-locator hands out
+   to the browser at the dev server. The backend has to be restarted to pick
+   them up.
+
+### The bootstrap address
+
+The app reads only one service address itself, `service-locator` in
+`src/assets/conf/chipster.yaml`; everything else comes from service-locator.
+That address is relative (`/service-locator`), so that it needs no editing when
+the mode changes. The direct mode therefore needs a proxy too, but only for
+that one prefix: `proxy.conf.direct.json`, in the options of the `serve`
+target. Proxy mode replaces it with `proxy.conf.json`, which has the same entry
+and the rest of the services besides.
+
+Because of that address, both modes need the services to be reachable from the
+**dev server**, i.e. the dev server has to run wherever the backend runs. The
+targets of the proxy configs are resolved by the dev server, not the browser,
+so running the dev server in the container against a backend on the host (see
+host mode in `../chipster-web-server/CLAUDE.md`) would need them to point at
+`host.docker.internal` instead of `localhost`.
 
 The proxy config and the target options are read at startup, so restart the dev
-server after changing them. `url-ext-*` values likewise need a backend restart
-before service-locator hands them out.
+server after changing them.
 
 ---
 

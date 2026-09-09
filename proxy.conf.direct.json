@@ -1,0 +1,18 @@
+// Dev-server reverse proxy for the default (direct) serve mode.
+//
+// The frontend reads one service address itself, the service-locator address
+// in src/assets/conf/chipster.yaml, and gets every other address from
+// service-locator. That one address is relative, so that it works in both
+// serve modes without editing the file, which means the dev server has to
+// proxy it even in the direct mode. Everything else the browser requests
+// directly from the service ports, using the absolute url-ext-* addresses
+// service-locator hands out.
+//
+// Proxy mode uses proxy.conf.json instead, which has this same entry and the
+// rest of the services too.
+{
+  "/service-locator": {
+    "target": "http://localhost:8003",
+    "pathRewrite": { "^/service-locator": "" }
+  }
+}

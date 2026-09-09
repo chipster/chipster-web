@@ -8,10 +8,12 @@
 // port forwarding of a remote dev environment simple.
 //
 // The matching service addresses are configured in
-// chipster-web-server/conf/chipster.yaml as url-ext-* and url-admin-ext-*
-// keys. The frontend itself has no service addresses: it reads the
-// service-locator address from src/assets/conf/chipster.yaml and every other
-// address from service-locator.
+// chipster-web-server/conf/chipster-proxy.yaml as url-ext-* and
+// url-admin-ext-* keys, overlaid by "./gradlew run -Pproxy". The frontend
+// itself has no service addresses: it reads the relative service-locator
+// address from src/assets/conf/chipster.yaml and every other address from
+// service-locator. The direct serve mode needs that one address proxied too,
+// see proxy.conf.direct.json.
 //
 // ORDER MATTERS. The entries are matched in the order they appear here, by
 // plain string prefix, and the first match wins. A longer name has to come
