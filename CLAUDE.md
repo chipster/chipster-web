@@ -15,6 +15,8 @@ This file covers the **frontend** (Angular dev server, `chipster-web`). The back
 ```
 WORKSPACE=~/workspace PORTS=8000-8110,4200 ./sandbox.sh
 ```
+(`PORTS=4200` is enough when serving in proxy mode — see Angular
+Configuration below.)
 
 **Host setup** (backend on host, container for Claude Code only):
 ```
@@ -52,6 +54,11 @@ Must use `--host 0.0.0.0` — otherwise the server only binds to container-local
 cd /workspace/chipster-web && npm start -- --host 0.0.0.0
 ```
 
+In proxy mode (see Angular Configuration below), the same flag is needed:
+```
+cd /workspace/chipster-web && npm run start:proxy -- --host 0.0.0.0
+```
+
 **Ready signal:** There is no "Compiled successfully" log line with this Angular/Vite setup. The server is ready after the Vite dynamic import warnings (from `ng2-pdf-viewer.js`) finish printing. Verify by hitting `http://localhost:4200` rather than waiting for a log message.
 
 To kill: `fuser -k 4200/tcp`
@@ -60,21 +67,47 @@ To kill: `fuser -k 4200/tcp`
 
 ## Angular Configuration
 
-### Container mode
+There are two ways to serve the app.
 
-`src/assets/conf/chipster.yaml`:
-```yaml
-service-locator: http://localhost:8003
-```
+**`npm start`** (`ng serve`) — the default. The browser connects to each
+service on its own port, so every service port has to be reachable.
 
-### Host mode
+**`npm run start:proxy`** (`ng serve --configuration proxy`, or `-c proxy`) —
+the dev server also proxies the backend services, so the browser only needs the
+dev server port (4200). This keeps port forwarding simple when the dev
+environment runs on a remote VM, and it matches the deployments, where the
+ingress does the same proxying and prefix stripping.
 
-`src/assets/conf/chipster.yaml`:
-```yaml
-service-locator: http://localhost:8003
-```
+`proxy` is a configuration of the `serve` target in `angular.json`, setting
+only `proxyConfig`. The target's own options have none, so a plain `ng serve`
+behaves as it always has. Being a configuration, it composes with the others,
+e.g. `ng serve -c production,proxy`.
 
-The service-locator URL is used by the browser on the host, so `localhost` resolves correctly in both modes.
+### Proxy mode
+
+`proxy.conf.json` maps the prefixes to the service ports. It covers the public
+APIs under `/<service>` and the admin APIs (used by the `/admin` views) under
+`/<service>-admin`, the same prefixes as the ingress.
+
+The entries are matched by string prefix in the order they appear, first match
+winning, so a longer name has to precede any name it starts with — the
+`-admin` entries and `session-db-events` come before the plain service names.
+
+Switching modes takes three things that have to agree:
+
+1. the dev server: `npm run start:proxy` instead of `npm start`
+2. `service-locator` in `src/assets/conf/chipster.yaml` — `/service-locator`
+   for proxy mode, `http://localhost:8003` otherwise. Both are in the file,
+   one commented out. Every other service address comes from service-locator,
+   so this is the only address configured in the frontend.
+3. the `url-ext-*` and `url-admin-ext-*` keys in
+   `../chipster-web-server/conf/chipster.yaml`, which are the addresses
+   service-locator hands out to the browser. That file has the proxy-mode
+   block ready to uncomment.
+
+The proxy config and the target options are read at startup, so restart the dev
+server after changing them. `url-ext-*` values likewise need a backend restart
+before service-locator hands them out.
 
 ---
 

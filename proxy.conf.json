@@ -1,0 +1,115 @@
+// Dev-server reverse proxy for the backend services.
+//
+// This mirrors what the ingress does in the k3s deployment: all services are
+// reachable through a single origin under a path prefix named after the
+// service, and the prefix is stripped before the request reaches the service
+// (see chipster-openshift/k3s/helm/chipster/templates/ingress-route.yaml).
+// Because of this the browser only needs one port (4200), which keeps the
+// port forwarding of a remote dev environment simple.
+//
+// The matching service addresses are configured in
+// chipster-web-server/conf/chipster.yaml as url-ext-* and url-admin-ext-*
+// keys. The frontend itself has no service addresses: it reads the
+// service-locator address from src/assets/conf/chipster.yaml and every other
+// address from service-locator.
+//
+// ORDER MATTERS. The entries are matched in the order they appear here, by
+// plain string prefix, and the first match wins. A longer name has to come
+// before any name it starts with, so all of the "-admin" entries and
+// "session-db-events" precede the plain service names. (The stripPrefix
+// middleware of the deployment has the same requirement and the same note.)
+{
+  // Admin APIs. The admin view requests these for every service that
+  // service-locator gives an adminUri for. file-storage is left out, because
+  // it has no url-admin-ext-* address, in the deployment either.
+  "/web-server-admin": {
+    "target": "http://localhost:8100",
+    "pathRewrite": { "^/web-server-admin": "" }
+  },
+  "/auth-admin": {
+    "target": "http://localhost:8102",
+    "pathRewrite": { "^/auth-admin": "" }
+  },
+  "/service-locator-admin": {
+    "target": "http://localhost:8103",
+    "pathRewrite": { "^/service-locator-admin": "" }
+  },
+  "/session-db-admin": {
+    "target": "http://localhost:8104",
+    "pathRewrite": { "^/session-db-admin": "" }
+  },
+  "/scheduler-admin": {
+    "target": "http://localhost:8106",
+    "pathRewrite": { "^/scheduler-admin": "" }
+  },
+  "/file-broker-admin": {
+    "target": "http://localhost:8107",
+    "pathRewrite": { "^/file-broker-admin": "" }
+  },
+  "/toolbox-admin": {
+    "target": "http://localhost:8108",
+    "pathRewrite": { "^/toolbox-admin": "" }
+  },
+  "/session-worker-admin": {
+    "target": "http://localhost:8109",
+    "pathRewrite": { "^/session-worker-admin": "" }
+  },
+  "/type-service-admin": {
+    "target": "http://localhost:8110",
+    "pathRewrite": { "^/type-service-admin": "" }
+  },
+  "/job-history-admin": {
+    "target": "http://localhost:8114",
+    "pathRewrite": { "^/job-history-admin": "" }
+  },
+  "/backup-admin": {
+    "target": "http://localhost:8115",
+    "pathRewrite": { "^/backup-admin": "" }
+  },
+  "/s3-storage-admin": {
+    "target": "http://localhost:8117",
+    "pathRewrite": { "^/s3-storage-admin": "" }
+  },
+
+  // Websocket events. The endpoint is at the root of the service, and the
+  // query string (topic and token) must be kept.
+  "/session-db-events": {
+    "target": "ws://localhost:8005",
+    "ws": true,
+    "pathRewrite": { "^/session-db-events": "/" }
+  },
+
+  // Public APIs
+  "/service-locator": {
+    "target": "http://localhost:8003",
+    "pathRewrite": { "^/service-locator": "" }
+  },
+  "/auth": {
+    "target": "http://localhost:8002",
+    "pathRewrite": { "^/auth": "" }
+  },
+  "/session-db": {
+    "target": "http://localhost:8004",
+    "pathRewrite": { "^/session-db": "" }
+  },
+  "/scheduler": {
+    "target": "http://localhost:8006",
+    "pathRewrite": { "^/scheduler": "" }
+  },
+  "/file-broker": {
+    "target": "http://localhost:8007",
+    "pathRewrite": { "^/file-broker": "" }
+  },
+  "/toolbox": {
+    "target": "http://localhost:8008",
+    "pathRewrite": { "^/toolbox": "" }
+  },
+  "/session-worker": {
+    "target": "http://localhost:8009",
+    "pathRewrite": { "^/session-worker": "" }
+  },
+  "/type-service": {
+    "target": "http://localhost:8010",
+    "pathRewrite": { "^/type-service": "" }
+  }
+}
