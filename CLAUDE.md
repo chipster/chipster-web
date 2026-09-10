@@ -97,7 +97,7 @@ Switching modes takes two things that have to agree, neither of which needs a
 file to be edited:
 
 1. the dev server: `npm run start:proxy` instead of `npm start`
-2. the backend: `./gradlew run -Pproxy`, which overlays
+2. the backend: `./gradlew runProxy`, which overlays
    `../chipster-web-server/conf/chipster-proxy.yaml` and points the
    `url-ext-*` and `url-admin-ext-*` addresses that service-locator hands out
    to the browser at the dev server. The backend has to be restarted to pick
