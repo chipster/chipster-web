@@ -131,7 +131,10 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     self.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
-    this.svg.attr("width", size.width).attr("height", size.height + xAxisLabelMargin).attr("id", "svg");
+    this.svg
+      .attr("width", size.width)
+      .attr("height", size.height + xAxisLabelMargin)
+      .attr("id", "svg");
 
     // Adding the X-axis
     this.xScale = d3

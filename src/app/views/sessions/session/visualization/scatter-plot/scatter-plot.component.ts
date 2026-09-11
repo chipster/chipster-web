@@ -96,7 +96,10 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const xAxisLabelMargin = 20;
 
     // Define the SVG
-    this.svg.attr("width", size.width).attr("height", size.height + xAxisLabelMargin).attr("id", "svg");
+    this.svg
+      .attr("width", size.width)
+      .attr("height", size.height + xAxisLabelMargin)
+      .attr("id", "svg");
 
     this.xScale = d3
       .scaleLinear()
