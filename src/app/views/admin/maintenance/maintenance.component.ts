@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
-import { empty, from, Observable, of } from "rxjs";
+import { empty, from, Observable } from "rxjs";
 import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -80,7 +80,7 @@ export class MaintenanceComponent implements OnInit {
         mergeMap((storageId: string) => this.updateFileStorageFileStats(storageId, fileBroker)),
       )
       .subscribe({
-        next: (value) => {
+        next: (_value) => {
           const storagesSorted = Array.from(this.free)
             .map(([storageId, freeSpace]) => ({ storageId, freeSpace }))
             .sort((a, b) => a.freeSpace - b.freeSpace);
@@ -104,7 +104,7 @@ export class MaintenanceComponent implements OnInit {
         // don't cancel other requests even if one of them fails
         return empty();
       }),
-      map((idResp: Object) => (idResp ? idResp["storageId"] : null)),
+      map((idResp: object) => (idResp ? idResp["storageId"] : null)),
       tap((idOnStorage: string) => {
         this.idOnStorage.set(storageId, idOnStorage);
       }),
@@ -128,7 +128,7 @@ export class MaintenanceComponent implements OnInit {
 
   addStorageId(storageId: string) {
     log.info("add storageId", storageId, this.storageIds.indexOf(storageId));
-    if (this.storageIds.indexOf(storageId) == -1) {
+    if (this.storageIds.indexOf(storageId) === -1) {
       this.storageIds.push(storageId);
     }
 
@@ -142,7 +142,7 @@ export class MaintenanceComponent implements OnInit {
         // don't cancel other requests even if one of them fails
         return empty();
       }),
-      tap((status: Object) => {
+      tap((status: object) => {
         this.free.set(storageId, status["diskFree,fs=storage"]);
         this.total.set(storageId, status["diskTotal,fs=storage"]);
       }),
@@ -224,7 +224,7 @@ export class MaintenanceComponent implements OnInit {
       .getInternalService("file-broker", this.tokenService.getToken())
       .pipe(
         mergeMap((service: Service) => {
-          var url = service.adminUri + "/admin/storages/" + storageId + "/check";
+          let url = service.adminUri + "/admin/storages/" + storageId + "/check";
           if (deleteDatasetsOfMissingFiles) {
             url += "?deleteDatasetsOfMissingFiles=true";
           }
@@ -245,7 +245,7 @@ export class MaintenanceComponent implements OnInit {
   setCopyTarget(target: string) {
     this.copyTarget = target;
 
-    const totalFree = Array.from(this.free.values()).reduce((sum, value) => (sum += value), 0);
+    const totalFree = Array.from(this.free.values()).reduce((sum, value) => sum + value, 0);
     const preferredFree = totalFree / this.free.size;
     const sourceFree = this.free.get(this.copySource);
     const targetFree = this.free.get(this.copyTarget);
@@ -263,7 +263,7 @@ export class MaintenanceComponent implements OnInit {
    * @param storageId
    */
   isOrphanCheckAllowed(storageId: string) {
-    return storageId == this.idOnStorage.get(storageId);
+    return storageId === this.idOnStorage.get(storageId);
   }
 
   isBackupNowAllowed(storageId: string) {

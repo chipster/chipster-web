@@ -54,7 +54,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
     this.modalRef.componentInstance.fileAdded(file);
   }
 
-  fileSuccess(file: any) {
+  fileSuccess(_file: any) {
     // console.log("file success");
     // remove from the list
     // file.cancel();

@@ -69,7 +69,6 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
 
   populatePlotData() {
     this.plotData = [];
-    const self = this;
 
     // Extracting DataRows
     this.volcanoPlotDataRows = this.volcanoPlotService.getVolcanoPlotDataRows(
@@ -87,7 +86,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       for example) and clamp them down later when necessary (e.g. in selection).
       */
       curPlotData.plotPoint = new Point(dataRow.values[0], -Math.log10(dataRow.values[1]));
-      self.plotData.push(curPlotData);
+      this.plotData.push(curPlotData);
     });
     this.drawPlot();
   }
@@ -113,7 +112,6 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
   drawPlot() {
     super.drawPlot();
 
-    const self = this;
     const size = {
       width: document.getElementById("volcanoplot").offsetWidth,
       height: 600,
@@ -123,7 +121,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
     const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
 
-    self.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
+    this.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
 
     // Define the SVG
     this.svg.attr("width", size.width).attr("height", size.height).attr("id", "svg");
@@ -182,14 +180,14 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     // add the points
     this.svg
       .selectAll(".dot")
-      .data(self.plotData)
+      .data(this.plotData)
       .enter()
       .append("circle")
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", (d) => self.xScale(d.plotPoint.x))
-      .attr("cy", (d) => self.yScale(self.clampY(d.plotPoint.y)))
+      .attr("cx", (d) => this.xScale(d.plotPoint.x))
+      .attr("cy", (d) => this.yScale(this.clampY(d.plotPoint.y)))
       .attr("fill", (d) => {
         if (d.plotPoint.y >= -Math.log10(0.05) && Math.abs(d.plotPoint.x) >= 1) {
           if (d.plotPoint.x < 0) {
@@ -202,8 +200,6 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
   }
 
   getSelectedDataSet() {
-    const self = this;
-
     // convert infinity values to scale maximum so that those can be selected
     const limitedPlotData = this.plotData.map((val: PlotData) => {
       const limited = new PlotData();
@@ -224,7 +220,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     this.resetSelectionRectangle();
     // change the color of the selected data points
     this.selectedDataPointIds.forEach((selectedId) => {
-      self.setSelectionStyle(selectedId);
+      this.setSelectionStyle(selectedId);
     });
   }
 

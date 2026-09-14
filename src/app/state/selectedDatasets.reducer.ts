@@ -15,7 +15,11 @@ export function selectedDatasets(state: Array<Dataset> = [], { type, payload }) 
     case TOGGLE_SELECTED_DATASET:
       forEach(payload, (payloadDataset: Dataset) => {
         const index = findIndex(stateDatasets, (dataset: Dataset) => dataset.datasetId === payloadDataset.datasetId);
-        index === -1 ? stateDatasets.push(payloadDataset) : stateDatasets.splice(index, 1);
+        if (index === -1) {
+          stateDatasets.push(payloadDataset);
+        } else {
+          stateDatasets.splice(index, 1);
+        }
       });
       return stateDatasets;
 

@@ -57,7 +57,7 @@ export class UploadService {
       fileAdded(file, event, flow);
     });
     // noinspection JSUnusedLocalSymbols
-    flow.on("fileSuccess", (file, message) => {
+    flow.on("fileSuccess", (file, _message) => {
       // console.log(file, message);
       fileSuccess(file);
     });

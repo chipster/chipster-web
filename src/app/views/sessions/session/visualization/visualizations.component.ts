@@ -52,7 +52,9 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     this.configService
       .get("visualization-blacklist")
       .pipe(
-        tap((blacklist) => (this.visualizationBlacklist = blacklist as unknown as string[])),
+        tap((blacklist) => {
+          this.visualizationBlacklist = blacklist as unknown as string[];
+        }),
         mergeMap(() => this.store.select("selectedDatasets")),
         takeUntil(this.unsubscribe),
       )

@@ -94,7 +94,7 @@ export class ToolListAccordionComponent implements OnInit {
     }
   }
 
-  selectTool(tool: Tool) {
+  selectTool(_tool: Tool) {
     // FIXME after tool selection refactoring
     // const toolSelection: ToolSelection = {
     //   tool: tool,

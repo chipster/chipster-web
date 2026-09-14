@@ -42,6 +42,7 @@ export class RunOptionsComponent implements OnChanges {
     } else {
       return this.validatedTool.singleJobValidation.message;
     }
+    return undefined;
   }
 
   getRunForEachSampleDescription(): string {

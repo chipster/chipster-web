@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Dataset, PhenodataUtils } from "chipster-js-common";
+import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { QuerySessionDataService } from "./query-session-data.service";
 import { SessionDataService } from "./session-data.service";

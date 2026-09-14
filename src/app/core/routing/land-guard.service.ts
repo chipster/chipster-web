@@ -13,7 +13,7 @@ export class LandGuard {
     private routeService: RouteService,
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+  canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
     if (this.tokenService.isTokenValid()) {
       this.routeService.navigateToAnalyze();
     } else {

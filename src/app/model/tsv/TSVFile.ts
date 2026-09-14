@@ -29,8 +29,6 @@ export default class TSVFile {
     const normalizedHeaders = this.getNormalizeHeaders(tsv);
     this.headers = new TSVHeaders(normalizedHeaders);
     this.body = new TSVBody(tail(tsv));
-    datasetId;
-    filename;
   }
 
   /*

@@ -13,7 +13,6 @@ import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
-import { error } from "jquery";
 
 @Component({
   selector: "ch-login",

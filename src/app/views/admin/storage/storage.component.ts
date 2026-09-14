@@ -496,7 +496,7 @@ export class StorageComponent implements OnInit {
     let username;
     try {
       username = this.authenticationService.getUsername(userId);
-    } catch (err) {
+    } catch {
       username = userId;
     }
     return username;

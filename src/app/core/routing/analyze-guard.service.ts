@@ -19,7 +19,7 @@ export class AnalyzeGuard {
     private userService: UserService,
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> {
     return this.userService.getLatestSession().pipe(
       mergeMap((latestSessionId: string) => {
         if (latestSessionId !== null) {

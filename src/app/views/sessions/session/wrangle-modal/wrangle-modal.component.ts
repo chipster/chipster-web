@@ -160,14 +160,16 @@ export class WrangleModalComponent implements OnInit {
   }
 
   getCellClass(params): string {
-    if (this.selectedIdentifiers.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)) {
+    if (
+      this.selectedIdentifiers.some((columnItem: ColumnItem) => parseInt(params.colDef.field, 10) === columnItem.index)
+    ) {
       return "identifier";
     }
-    if (this.selectedSamples.some((columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index)) {
+    if (this.selectedSamples.some((columnItem: ColumnItem) => parseInt(params.colDef.field, 10) === columnItem.index)) {
       return "sample";
     }
     const columnInOthers = this.selectedOthers.some(
-      (columnItem: ColumnItem) => parseInt(params.colDef.field) === columnItem.index,
+      (columnItem: ColumnItem) => parseInt(params.colDef.field, 10) === columnItem.index,
     );
     if ((this.includeOthers() && columnInOthers) || (!this.includeOthers() && !columnInOthers)) {
       return "include";
@@ -281,7 +283,7 @@ export class WrangleModalComponent implements OnInit {
 
     return Array.from(nonUniquesSet)
       .slice(0, 5)
-      .reduce((all, identifier) => (all += identifier + " "), "")
+      .reduce((all, identifier) => all + identifier + " ", "")
       .slice(0, -1);
   }
   /**
@@ -400,7 +402,7 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private includeOthers(): boolean {
-    return this.includeExclude.value == this.INCLUDE;
+    return this.includeExclude.value === this.INCLUDE;
   }
 
   private updatePreviewStyles(): void {

@@ -4,7 +4,6 @@ import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
-import log from "loglevel";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
 
@@ -150,6 +149,8 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       case "storage":
         this.validatedTool.tool.storage = this.resources[id].value / this.resources[id].outputRatio;
         break;
+      default:
+        break;
     }
 
     this.resourceChangedThrottle.next(null);
@@ -164,6 +165,8 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       case "storage":
         this.resetStorage();
         break;
+      default:
+        break;
     }
 
     this.resourcesChanged.emit();
@@ -176,6 +179,8 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
         return this.isResetSlotsVisible();
       case "storage":
         return this.isResetStorageVisible();
+      default:
+        return false;
     }
   }
 
@@ -186,6 +191,8 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
         return this.validatedTool.resourcesValidationResults.get("slots");
       case "storage":
         return this.validatedTool.resourcesValidationResults.get("storage");
+      default:
+        return null;
     }
   }
 

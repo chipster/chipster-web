@@ -39,7 +39,7 @@
               type="button"
               class="btn btn-outline-dark btn-no-border btn-sm"
               (click)="file.pause()"
-              *ngIf="file.progress() != 0 && !file.paused && !file.isComplete()">
+              *ngIf="file.progress() !== 0 && !file.paused && !file.isComplete()">
               <i class="fas fa-pause" aria-hidden="true"></i>
             </button>
             <button

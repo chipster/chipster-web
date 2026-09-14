@@ -140,7 +140,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // Creating the selection area
     const dragGroup = this.svg.append("g").attr("id", "dragGroup");
 
-    const band = dragGroup
+    dragGroup
       .append("rect")
       .attr("width", 0)
       .attr("height", 0)
@@ -199,9 +199,9 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   }
   getSelectedDataSet() {}
 
-  setSelectionStyle(id: string) {}
+  setSelectionStyle(_id: string) {}
 
-  removeSelectionStyle(id: string) {}
+  removeSelectionStyle(_id: string) {}
 
   resetSelections(): void {
     if (this.selectedDataPointIds) {

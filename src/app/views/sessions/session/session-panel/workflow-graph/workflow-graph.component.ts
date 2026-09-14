@@ -1036,7 +1036,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       dy = -(minY - this.workflowGraphService.nodeMinY);
     }
 
-    selectedDatasets.attr("x", (d) => (d.x += dx)).attr("y", (d) => (d.y += dy));
+    selectedDatasets
+      .attr("x", (d) => {
+        d.x += dx;
+        return d.x;
+      })
+      .attr("y", (d) => {
+        d.y += dy;
+        return d.y;
+      });
 
     this.d3Captions
       .filter((d) => this.selectionService.isSelectedDatasetById(d.dataset.datasetId))
@@ -1900,7 +1908,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.deleteMenuItem = {
-      title(d): string {
+      title(_d): string {
         // Use pending selection if available (context menu about to open), otherwise use current selection
         const datasets = self.pendingContextMenuSelection || self.selectionService.selectedDatasets;
         const count = datasets.length;
@@ -1930,7 +1938,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.showJobMenuItem = {
       title: "Show job",
-      action(d): void {
+      action(_d): void {
         self.datasetContextMenuService.showJob(self.selectedDatasetSourceJob, self.tools, self.sessionData);
       },
       disabled(): boolean {
@@ -1952,7 +1960,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         let datasets = self.selectionService.selectedDatasets;
 
         // context menu can be opened for one dataset also without selection
-        if (datasets.length == 0) {
+        if (datasets.length === 0) {
           datasets = [d.dataset];
         }
 
@@ -1966,7 +1974,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         let datasets = self.selectionService.selectedDatasets;
 
         // context menu can be opened for one dataset also without selection
-        if (datasets.length == 0) {
+        if (datasets.length === 0) {
           datasets = [d.dataset];
         }
 

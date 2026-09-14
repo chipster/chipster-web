@@ -75,7 +75,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const isFileSaverSupported = !!new Blob();
-    } catch (e) {
+    } catch {
       this.errorService.showSimpleError("Not supported", "Save as text file not supported by your web browser.");
       return;
     }

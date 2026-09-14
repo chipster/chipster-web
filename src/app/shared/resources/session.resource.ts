@@ -119,7 +119,7 @@ export class SessionResource {
 
         const completeDatasets = datasets.filter(this.isDatasetComplete);
 
-        if (datasets.length != completeDatasets.length) {
+        if (datasets.length !== completeDatasets.length) {
           /*
           Skip non-complete datasets
 
@@ -156,11 +156,10 @@ export class SessionResource {
     }
 
     if (dataset.state != null) {
-      return dataset.state == FileState.Complete;
-    } else {
-      // old dataset without state, let's assume it's COMPLETE
-      return true;
+      return dataset.state === FileState.Complete;
     }
+    // old dataset without state, let's assume it's COMPLETE
+    return true;
   }
 
   /**
@@ -173,11 +172,11 @@ export class SessionResource {
    * @param observables
    * @returns {Observable<any>}
    */
-  forkJoinWithoutCancel(observables: Object): Observable<unknown> {
+  forkJoinWithoutCancel(observables: object): Observable<unknown> {
     const errors = [];
     const catchedObservables = {};
 
-    for (const key in observables) {
+    for (const key of Object.keys(observables)) {
       catchedObservables[key] = observables[key].pipe(
         catchError((err) => {
           errors.push(err);
@@ -242,12 +241,12 @@ export class SessionResource {
       );
   }
 
-  getStats(): Observable<Object> {
+  getStats(): Observable<object> {
     return this.configService
       .getSessionDbUrl()
       .pipe(
         mergeMap((url: string) =>
-          this.http.get<Object>(`${url}/sessions/stats`, this.tokenService.getTokenParams(true)),
+          this.http.get<object>(`${url}/sessions/stats`, this.tokenService.getTokenParams(true)),
         ),
       );
   }
@@ -255,7 +254,9 @@ export class SessionResource {
   getExampleSessions(): Observable<Array<Session>> {
     let appId: string;
     return this.configService.get(ConfigService.KEY_APP_ID).pipe(
-      tap((id) => (appId = id)),
+      tap((id) => {
+        appId = id;
+      }),
       mergeMap(() => this.configService.getSessionDbUrl()),
       mergeMap((url: string) =>
         this.http.get<Session[]>(`${url}/sessions?appId=${appId}`, this.tokenService.getTokenParams(true)),

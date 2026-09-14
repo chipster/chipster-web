@@ -72,7 +72,9 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
           }
           return this.configService.getManualPath();
         }),
-        tap((path) => (this.assetsPath = path)),
+        tap((path) => {
+          this.assetsPath = path;
+        }),
         mergeMap(() => {
           log.debug(
             "route changed",
@@ -176,7 +178,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
         link.target = "_blank";
         link.href = this.assetsPath + href;
         // convert to absolute
-        link.href = link.href;
+        link.setAttribute("href", link.href);
       }
     });
 

@@ -60,9 +60,9 @@ export class SessionService {
     let datasetId;
 
     // get read-write token for the session
-    var zipDataset$ = this.sessionWorkerResource.packageSession(sessionId).pipe(
+    const zipDataset$ = this.sessionWorkerResource.packageSession(sessionId).pipe(
       tap((json: any) => {
-        let errors = json["errors"];
+        const errors = json["errors"];
 
         if (errors.length > 0) {
           this.restErrorService.showError("failed to create zip package", errors);
@@ -71,11 +71,12 @@ export class SessionService {
         // session-worker responds with datasetId
         datasetId = json["datasetId"];
         log.info("zip session datasetId", datasetId);
+        return undefined;
       }),
       mergeMap(() => this.sessionResource.getDataset(sessionId, datasetId)),
     );
 
-    let downloadUrl$ = this.dialogModalService
+    const downloadUrl$ = this.dialogModalService
       // show spinner the zip file is completed
       .openSpinnerModal("Packaging session", zipDataset$)
       .pipe(mergeMap((dataset) => this.getDownloadUrl(sessionId, dataset)));
