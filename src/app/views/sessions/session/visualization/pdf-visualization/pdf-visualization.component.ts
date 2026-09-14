@@ -106,7 +106,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   pageRendered(event: any) {
-    let viewport = event.source.viewport;
+    const viewport = event.source.viewport;
 
     // calcualte the total height of all visible pages
     if (this.showAll) {

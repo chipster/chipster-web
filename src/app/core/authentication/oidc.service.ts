@@ -85,7 +85,7 @@ export class OidcService {
     // forms by default use GET query strings
     form.method = "POST";
     form.action = url;
-    for (const key in payload) {
+    for (const key of Object.keys(payload)) {
       log.info("add form field", key, payload[key]);
       const input = document.createElement("input");
       input.name = this.keyLoginSessionId;
@@ -145,7 +145,7 @@ export class OidcService {
           this.routeService.navigateAbsolute(returnUrl);
         },
         error: (err) => {
-          var message = "failed to complete OIDC login";
+          let message = "failed to complete OIDC login";
           if (err.error != null) {
             //
             message += " (" + err.error + ")";

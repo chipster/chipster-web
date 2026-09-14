@@ -77,6 +77,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     if (this.data) {
       return this.data.length;
     }
+    return undefined;
   }
 
   getSizeFull() {

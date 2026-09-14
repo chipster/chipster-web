@@ -18,10 +18,7 @@ export default class Vector2d {
   constructor(
     private _i: number,
     private _j: number,
-  ) {
-    _i;
-    _j;
-  }
+  ) {}
 
   /*
    * @description: crossproduct of this and other vector.

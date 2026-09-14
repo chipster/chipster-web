@@ -112,7 +112,7 @@ export class VolcanoPlotService {
     flatValues.forEach((yval) => {
       const curYval = -Math.log10(yval);
       // log(0) would be Infinity
-      if (yval != 0) {
+      if (yval !== 0) {
         logValues.push(curYval);
       }
     });

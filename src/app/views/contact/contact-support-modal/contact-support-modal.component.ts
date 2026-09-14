@@ -80,7 +80,9 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           }
         }),
         mergeMap(() => this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))),
-        tap((appId) => (this.appId = appId)),
+        tap((appId) => {
+          this.appId = appId;
+        }),
       )
       .subscribe({
         error: (err) => {
@@ -143,7 +145,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     let copySessionId: string;
     const userId = this.user.auth + "/" + this.user.username;
     const utcDate = new Date().toISOString().split("T")[0];
-    const appHostUrl = this.document.location.protocol + "//" + this.document.location.hostname;
 
     // the "preview" version of the sessionData is enough
     return this.sessionResource.loadSession(sessionId, true).pipe(

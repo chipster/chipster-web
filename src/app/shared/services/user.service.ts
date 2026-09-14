@@ -66,7 +66,9 @@ export class UserService {
     let sessions;
     return this.sessionResource.getSessions().pipe(
       // sessions are needed to check if possibly found latest session still exists
-      tap((s) => (sessions = s)),
+      tap((s) => {
+        sessions = s;
+      }),
       mergeMap(() => this.sessionResource.getExampleSessions()),
       tap((exampleSessions) => {
         sessions = sessions.concat(exampleSessions);

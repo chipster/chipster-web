@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { combineAll } from "rxjs/operators";
 
 @Injectable()
 export class SpreadsheetService {

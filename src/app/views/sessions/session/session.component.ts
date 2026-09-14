@@ -191,7 +191,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         dataset.metadataFiles.forEach((mf) => {
           if (mf.name === "temporary-zip-export") {
             const created = UtilsService.parseISOStringToDate(dataset.created);
-            let now = new Date();
+            const now = new Date();
 
             const millis = UtilsService.millisecondsBetweenDates(created, now);
             const days = 3;
@@ -492,6 +492,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           if (dialogResult.button === deleteButton) {
             return this.deleteTempSession();
           }
+          return undefined;
         }),
         catchError((err) => {
           if (err === undefined || err === 0 || err === 1) {

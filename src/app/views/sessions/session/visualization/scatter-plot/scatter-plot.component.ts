@@ -43,12 +43,11 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
   }
 
   checkTSVHeaders() {
-    const self = this;
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       // Extracting header name without chip prefix
       this.visualizationTSVService.getChipHeaders(this.tsv).forEach((chipHeader) => {
         chipHeader = chipHeader.replace("chip.", "");
-        self.chipHeaders.push(chipHeader);
+        this.chipHeaders.push(chipHeader);
       });
       if (this.chipHeaders.length >= 2) {
         this.selectedXAxisHeader = this.chipHeaders[0];
@@ -66,7 +65,6 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
   // Load the data points for the scatterPlot
   populatePlotData() {
     this.plotData = [];
-    const self = this;
     const geneValue = this.visualizationTSVService.getGeneExpressions(this.tsv);
     const orderedGenesValues = this.visualizationTSVService.orderBodyByFirstValue(geneValue);
 
@@ -75,17 +73,16 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       const curPlotData = new PlotData();
       curPlotData.id = geneRow.id;
       curPlotData.plotPoint = new Point(
-        geneRow.values[self.chipHeaders.indexOf(self.selectedXAxisHeader)],
-        geneRow.values[self.chipHeaders.indexOf(self.selectedYAxisHeader)],
+        geneRow.values[this.chipHeaders.indexOf(this.selectedXAxisHeader)],
+        geneRow.values[this.chipHeaders.indexOf(this.selectedYAxisHeader)],
       );
-      self.plotData.push(curPlotData);
+      this.plotData.push(curPlotData);
     });
     this.drawPlot();
   }
 
   drawPlot() {
     super.drawPlot();
-    const self = this;
     const size = {
       width: document.getElementById("scatterplot").offsetWidth,
       height: 600,
@@ -99,8 +96,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .scaleLinear()
       .range([padding, size.width - padding])
       .domain([
-        this.visualizationTSVService.getMinX(self.plotData),
-        this.visualizationTSVService.getMaxX(self.plotData),
+        this.visualizationTSVService.getMinX(this.plotData),
+        this.visualizationTSVService.getMaxX(this.plotData),
       ])
       .nice();
     const xAxis = d3
@@ -120,8 +117,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .scaleLinear()
       .range([size.height - padding, padding])
       .domain([
-        this.visualizationTSVService.getMinY(self.plotData),
-        this.visualizationTSVService.getMaxY(self.plotData),
+        this.visualizationTSVService.getMinY(this.plotData),
+        this.visualizationTSVService.getMaxY(this.plotData),
       ])
       .nice();
     const yAxis = d3.axisLeft(this.yScale).ticks(10).tickSize(-size.width).tickSizeOuter(0).tickPadding(5);
@@ -151,24 +148,23 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     // Add the points in the svg
     this.svg
       .selectAll(".dot")
-      .data(self.plotData)
+      .data(this.plotData)
       .enter()
       .append("circle")
       .attr("class", "dot")
       .attr("id", (d: PlotData) => "dot" + d.id)
       .attr("r", 2)
-      .attr("cx", (d) => self.xScale(d.plotPoint.x))
-      .attr("cy", (d) => self.yScale(d.plotPoint.y))
+      .attr("cx", (d) => this.xScale(d.plotPoint.x))
+      .attr("cy", (d) => this.yScale(d.plotPoint.y))
       .attr("fill", "red")
-      .on("mouseover", (d: any) => {})
-      .on("mouseout", (d: any) => {})
-      .on("click", (d: PlotData) => {
+      .on("mouseover", (_d: any) => {})
+      .on("mouseout", (_d: any) => {})
+      .on("click", (_d: PlotData) => {
         // Need to store the datapoints what the user has clicked
       });
   }
 
   getSelectedDataSet() {
-    const self = this;
     this.selectedDataPointIds = this.plotService.getSelectedDataPoints(
       this.dragStartPoint,
       this.dragEndPoint,
@@ -181,7 +177,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     this.resetSelectionRectangle();
 
     this.selectedDataPointIds.forEach((selectedId) => {
-      self.setSelectionStyle(selectedId);
+      this.setSelectionStyle(selectedId);
     });
   }
 

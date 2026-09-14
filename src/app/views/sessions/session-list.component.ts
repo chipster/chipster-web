@@ -359,6 +359,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
           }
         }
         break;
+      default:
+        break;
     }
   }
 
@@ -373,6 +375,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
         this.lightSelectSession(session);
         break;
+      default:
+        break;
     }
   }
 
@@ -386,6 +390,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
         break;
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
         break;
+      default:
+        break;
     }
   }
 
@@ -397,6 +403,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
         return this.isSessionLightSelected(session);
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
         return this.isSessionLightSelected(session);
+      default:
+        return false;
     }
   }
 
@@ -408,6 +416,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
         return this.isSessionLightSelected(session);
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
         return this.isSessionLightSelected(session);
+      default:
+        return false;
     }
   }
 
@@ -427,6 +437,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
         return "Click to open";
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
         return "Click to preview";
+      default:
+        return "";
     }
   }
 

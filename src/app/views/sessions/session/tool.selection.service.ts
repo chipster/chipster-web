@@ -174,7 +174,7 @@ export class ToolSelectionService {
       let regExp: RegExp;
       try {
         regExp = new RegExp("[^\\p{L}\\p{N}+_:.,*() -]", "u");
-      } catch (e) {
+      } catch {
         log.warn("failed to create RegExp, parameter validation failed");
         return {
           valid: true,
@@ -320,7 +320,7 @@ export class ToolSelectionService {
     toolWithValidatedParameters: SelectedToolWithValidatedParameters,
     quotas: JobQuota,
   ): SelectedToolWithValidatedResources {
-    let resourceValidations = this.getResourceValidations(toolWithValidatedParameters, quotas);
+    const resourceValidations = this.getResourceValidations(toolWithValidatedParameters, quotas);
     const resourcesValid = Array.from(resourceValidations.values()).every((result: ValidationResult) => result.valid);
 
     return {
@@ -374,11 +374,10 @@ export class ToolSelectionService {
         valid: false,
         message: "Value too high",
       };
-    } else {
-      return {
-        valid: true,
-      };
     }
+    return {
+      valid: true,
+    };
   }
 
   validateInputs(toolWithInputs: SelectedToolWithInputs): ValidationResult {
@@ -648,7 +647,7 @@ export class ToolSelectionService {
     datasets: Dataset[],
     originalToolWithInputs: SelectedToolWithInputs,
     sessionData: SessionData,
-    sampleName?: string,
+    _sampleName?: string,
   ): ValidatedTool {
     const newSelectedTool: SelectedTool = {
       tool: originalToolWithInputs.tool,

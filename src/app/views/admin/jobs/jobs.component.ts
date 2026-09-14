@@ -38,7 +38,11 @@ export class JobsComponent implements OnInit {
     // do is replaced with tap in rxjs v6, check jobList
     this.configService
       .getSessionDbUrl()
-      .pipe(tap((url) => (sessionDbUrl = url)))
+      .pipe(
+        tap((url) => {
+          sessionDbUrl = url;
+        }),
+      )
       .pipe(
         flatMap((url) => {
           const newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=NEW");

@@ -1,4 +1,4 @@
-import { Injectable, Input } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
 import { cloneDeep } from "lodash-es";

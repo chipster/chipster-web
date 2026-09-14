@@ -66,7 +66,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
     return item.label.labelId;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     this.datasetName = this.dataset.name;
 
     this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset], this.sessionData.jobsMap);

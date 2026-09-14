@@ -3,7 +3,7 @@ import { Dataset, Job } from "chipster-js-common";
 import { some } from "lodash-es";
 import { Injectable, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 
 @Injectable()
@@ -27,7 +27,9 @@ export class SelectionService implements OnDestroy {
       .select("selectedDatasets")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
-        (datasets: Array<Dataset>) => (this.selectedDatasets = datasets),
+        (datasets: Array<Dataset>) => {
+          this.selectedDatasets = datasets;
+        },
         (error: any) => this.errorService.showError("Error fetching datasets from store", error),
       );
 

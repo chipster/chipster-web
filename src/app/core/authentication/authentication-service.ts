@@ -123,7 +123,7 @@ export class AuthenticationService {
         const url = `${authUrl}/tokens/check`;
 
         return this.httpClient.get<any>(url, this.tokenService.getTokenParams(false)).pipe(
-          map((response: any) => {
+          map((_response: any) => {
             log.info("token is valid");
             return true;
           }),

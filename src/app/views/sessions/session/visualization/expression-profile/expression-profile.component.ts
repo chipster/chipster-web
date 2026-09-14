@@ -137,7 +137,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   drawLineChart(tsv: TSVFile) {
-    const that = this;
     // Configurate svg and graph-area
     const expressionprofileWidth = document.getElementById("expressionprofile").offsetWidth;
     const margin = { top: 10, right: 0, bottom: 150, left: 40 };
@@ -228,7 +227,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const geneExpressions = this.visualizationTSVService.getGeneExpressions(tsv);
     const orderedExpressionGenes = this.visualizationTSVService.orderBodyByFirstValue(geneExpressions);
 
-    const paths = pathsGroup
+    pathsGroup
       .selectAll(".path")
       .data(orderedExpressionGenes)
       .enter()
@@ -246,10 +245,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         return color(colorIndex);
       })
       .on("mouseover", (event, d: any) => {
-        that.setSelectionHoverStyle(d.id);
+        this.setSelectionHoverStyle(d.id);
       })
       .on("mouseout", (event, d: any) => {
-        that.removeSelectionHoverStyle(d.id);
+        this.removeSelectionHoverStyle(d.id);
       })
       .on("click", (event, d: GeneExpression) => {
         console.log("click", event, d);
@@ -257,12 +256,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         const isCtrl = UtilsService.isCtrlKey(event);
         const isShift = UtilsService.isShiftKey(event);
         if (isShift) {
-          that.addSelections([id]);
+          this.addSelections([id]);
         } else if (isCtrl) {
-          that.toggleSelections([id.toString()]);
+          this.toggleSelections([id.toString()]);
         } else {
-          that.resetSelections();
-          that.addSelections([id]);
+          this.resetSelections();
+          this.addSelections([id]);
         }
       });
 
@@ -282,7 +281,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("transform", "translate(" + margin.left + ",0)");
 
     // Create selection rectangle
-    const band = dragGroup
+    dragGroup
       .append("rect")
       .attr("width", 0)
       .attr("height", 0)
@@ -291,7 +290,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .attr("class", "band")
       .attr("id", "band");
 
-    const bandPos = [-1, -1];
     let startPoint = new Point(-1, -1); // startpoint for dragging
 
     // Register drag handlers
@@ -329,10 +327,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
         this.resetSelections();
         d3.selectAll(".path").attr("stroke-width", 1);
-        const p1 = new Point(endPoint.x, endPoint.y);
-        const p2 = new Point(startPoint.x, startPoint.y);
 
-        const intervalIndexes = that.expressionProfileService.getCrossingIntervals(
+        const intervalIndexes = this.expressionProfileService.getCrossingIntervals(
           endPoint,
           startPoint,
           linearXScale,
@@ -342,7 +338,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
         // create intervals
         for (let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++) {
-          const lines = that.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
+          const lines = this.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
           const intervalStartIndex = chipValueIndex;
 
           const rectangle = new Rectangle(endPoint.x, endPoint.y, startPoint.x, startPoint.y);
@@ -352,7 +348,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         let ids: Array<string> = []; // path ids found in each interval (not unique list)
         for (const interval of intervals) {
           const intersectingLines = filter(interval.lines, (line: Line) =>
-            that.expressionProfileService.isIntersecting(line, interval.rectangle),
+            this.expressionProfileService.isIntersecting(line, interval.rectangle),
           );
 
           // Line ids intersecting with selection as an array

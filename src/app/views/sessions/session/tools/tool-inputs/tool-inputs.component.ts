@@ -51,10 +51,9 @@ export class ToolInputsComponent implements OnChanges {
 
     // remove user selected file from other bindings
     const otherBindingModels = this.bindingModels.filter((bindingModel) => bindingModel !== userEditedBinding);
-    otherBindingModels.forEach(
-      (bindingModel) =>
-        (bindingModel.boundDatasets = difference(bindingModel.boundDatasets, userEditedBinding.boundDatasets)),
-    );
+    otherBindingModels.forEach((bindingModel) => {
+      bindingModel.boundDatasets = difference(bindingModel.boundDatasets, userEditedBinding.boundDatasets);
+    });
 
     // bind the rest of the inputs if there's only one way to bind them
     // will update bindingModels
@@ -102,7 +101,7 @@ export class ToolInputsComponent implements OnChanges {
     }
 
     // check that for each unbound input, a unique file would be bound
-    const datasetIdsToBeBound: String[] = [].concat(...compatibleUnboundDatasets).map((dataset) => dataset.datasetId);
+    const datasetIdsToBeBound: string[] = [].concat(...compatibleUnboundDatasets).map((dataset) => dataset.datasetId);
 
     if (!UtilsService.onlyHasUniqueValues(datasetIdsToBeBound)) {
       return;

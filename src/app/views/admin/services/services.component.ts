@@ -100,10 +100,10 @@ export class ServicesComponent implements OnInit {
     if (service) {
       const statusObj = this.getStatusObject(service);
       if (statusObj) {
-        let version = statusObj["chipsterBuildVersion"];
+        const version = statusObj["chipsterBuildVersion"];
         if (version) {
           if (service.role === "toolbox") {
-            let toolsBinVersion = statusObj["toolsBinVersion"];
+            const toolsBinVersion = statusObj["toolsBinVersion"];
             return version + " (tools-bin: " + toolsBinVersion + ")";
           }
           return version;

@@ -157,7 +157,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private hotkeyService: HotkeyService,
   ) {
     // prevent dropdowns from closing on click inside the dropdown
-    // eslint-disable-next-line no-param-reassign
     dropdownConfig.autoClose = "outside";
   }
 

@@ -140,7 +140,7 @@ export default class UtilsService {
     const minute = minutes % 60;
     const hour = hours % 24;
 
-    if (days == 1) {
+    if (days === 1) {
       return "a day";
     }
 
@@ -148,7 +148,7 @@ export default class UtilsService {
       return days + " days";
     }
 
-    if (hour == 1) {
+    if (hour === 1) {
       return "an hour";
     }
 
@@ -156,7 +156,7 @@ export default class UtilsService {
       return hour + " hours";
     }
 
-    if (minute == 1) {
+    if (minute === 1) {
       return "a minute";
     }
 
@@ -164,7 +164,7 @@ export default class UtilsService {
       return minute + " minutes";
     }
 
-    if (second == 1) {
+    if (second === 1) {
       return "a second";
     }
 
@@ -176,7 +176,7 @@ export default class UtilsService {
       return lessThanSecond;
     }
 
-    if (millisecond == 0) {
+    if (millisecond === 0) {
       return zero;
     }
 
@@ -184,7 +184,7 @@ export default class UtilsService {
     return "" + milliseconds;
   }
 
-  static getCommonPrefix(array: String[]) {
+  static getCommonPrefix(array: string[]) {
     const A = array.concat().sort();
     const a1 = A[0];
     const a2 = A[A.length - 1];

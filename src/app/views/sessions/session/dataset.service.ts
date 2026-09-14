@@ -206,7 +206,7 @@ export class DatasetService {
     const datasetsSampleIdMissing = sampleIdExistsPartitions[1];
 
     // if sampleId is missing -> consider it as sample data is missing
-    datasetsSampleIdMissing.forEach(([dataset, sampleData]) => {
+    datasetsSampleIdMissing.forEach(([dataset, _sampleData]) => {
       log.warn("sampleId missing for", dataset.name);
       sampleDataMissing.push(dataset);
     });
@@ -249,7 +249,7 @@ export class DatasetService {
 
   private getPairedSamplesMap(pairedEndFilesWithSampleData): Map<string, PairedEndSample> {
     const pairedSamplesMap = new Map<string, PairedEndSample>();
-    pairedEndFilesWithSampleData.map(([dataset, sampleData]) => {
+    pairedEndFilesWithSampleData.forEach(([dataset, sampleData]) => {
       // check direction field
       if (sampleData.direction !== DatasetService.R1 && sampleData.direction !== DatasetService.R2) {
         throw new Error("Illegal sample direction value: " + sampleData.value + " for " + dataset.name);
