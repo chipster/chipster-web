@@ -13,8 +13,8 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "prettier": "npx prettier --check \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
     "prettier-write": "npx prettier --write \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
-    "lint": "npx eslint --ext .ts,.js,.mjs,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts proxy.conf.mjs",
-    "lint-fix": "npx eslint --fix --ext .ts,.js,.mjs,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts proxy.conf.mjs"
+    "lint": "npx eslint src/ e2e/ playwright.config.ts vitest.config.mts proxy.conf.mjs",
+    "lint-fix": "npx eslint --fix src/ e2e/ playwright.config.ts vitest.config.mts proxy.conf.mjs"
   },
   "lint-staged": {
     "*.{ts,js,mjs,mts,html,less,css,scss}": "prettier --check"
@@ -64,11 +64,8 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.6",
-    "@angular-eslint/builder": "^18.3.1",
-    "@angular-eslint/eslint-plugin": "^18.3.1",
-    "@angular-eslint/eslint-plugin-template": "^18.3.1",
-    "@angular-eslint/schematics": "^18.3.1",
-    "@angular-eslint/template-parser": "^18.3.1",
+    "@angular-eslint/builder": "^18.4.3",
+    "@angular-eslint/schematics": "^18.4.3",
     "@angular/cli": "^18.2.6",
     "@angular/compiler-cli": "^18.2.6",
     "@angular/language-service": "^18.2.6",
@@ -82,17 +79,17 @@
     "@types/node": "^20.10.8",
     "@types/pako": "^2.0.3",
     "@types/pdf": "0.0.31",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.23.4",
+    "angular-eslint": "^18.4.3",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^17.12.0",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",
     "ts-node": "^10.4.0",
     "typescript": "5.5.4",
+    "typescript-eslint": "^8.70.0",
     "vitest": "^4.1.11"
   }
 }
