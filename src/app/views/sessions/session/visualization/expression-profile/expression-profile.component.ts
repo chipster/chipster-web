@@ -1,7 +1,7 @@
 import { Component, Input, NgZone, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
-import { filter, map, find, difference, uniq, includes, floor, intersection } from "lodash-es";
+import { filter, map, find, difference, uniq, includes, floor, intersection, range, flatMap, minBy } from "lodash-es";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -322,6 +322,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         .attr("height", Math.abs(startPoint.y - endPoint.y));
     });
 
+    const resetSelectionRectangle = (): void => {
+      startPoint = new Point(-1, -1);
+      d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
+    };
+
     // The lines are one pixel wide, so a click that narrowly misses one should
     // still select it. Only the intervals the box crosses need to be checked.
     const closestLineId = (point: Point): string => {
@@ -330,19 +335,20 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const boxEnd = new Point(point.x + tolerance, point.y + tolerance);
       const intervalIndexes = this.expressionProfileService.getCrossingIntervals(boxStart, boxEnd, linearXScale, tsv);
 
-      let closestId: string = null;
-      let closestDistance = tolerance;
-      for (let chipValueIndex = intervalIndexes.start; chipValueIndex < intervalIndexes.end; chipValueIndex++) {
-        const lines = this.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale);
-        for (const line of lines) {
-          const distance = this.expressionProfileService.distanceToLine(point, line);
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestId = line.lineId;
-          }
-        }
-      }
-      return closestId;
+      /*
+       * getCrossingIntervals() clamps the start up to zero but leaves the end as
+       * it is, so a click outside the plot can give an end smaller than the
+       * start. range() counts down from such a pair, so clamp it: the click
+       * crosses no interval at all and there is nothing to measure.
+       */
+      const end = Math.max(intervalIndexes.start, intervalIndexes.end);
+      const distanceTo = (line: Line) => this.expressionProfileService.distanceToLine(point, line);
+      const lines = flatMap(range(intervalIndexes.start, end), (chipValueIndex: number) =>
+        this.expressionProfileService.createLines(tsv, chipValueIndex, linearXScale, yScale),
+      );
+      const closest = minBy(lines, distanceTo);
+
+      return closest != null && distanceTo(closest) < tolerance ? closest.lineId : null;
     };
 
     drag.on("end", (event) => {
@@ -418,11 +424,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         resetSelectionRectangle();
       }
     });
-
-    function resetSelectionRectangle() {
-      startPoint = new Point(-1, -1);
-      d3.select(".band").attr("width", 0).attr("height", 0).attr("x", 0).attr("y", 0);
-    }
 
     // the paths are recreated on every redraw, so re-apply the selection highlight
     (this.selectedGeneExpressions ?? []).forEach((expression) => this.setSelectionStyle(expression.id));
