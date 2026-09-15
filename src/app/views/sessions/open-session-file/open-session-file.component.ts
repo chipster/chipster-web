@@ -99,7 +99,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
           // let the caller know if this was the last one
           if (this.fileStatus.size === this.finishedFiles.size) {
-            const sessionIds = Array.from(this.finishedFiles).map((f) => file.chipsterSessionId);
+            const sessionIds = Array.from(this.finishedFiles).map((f) => f.chipsterSessionId);
             this.fileStatus.clear();
             this.finishedFiles.clear();
             this.done.emit(sessionIds);
