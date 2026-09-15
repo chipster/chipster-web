@@ -1,10 +1,10 @@
 <div *ngIf="!state.isReady(); then statusTemplate"></div>
 
 <div class="row">
-  <div class="col-8">
+  <div class="col-md-8">
     <div id="volcanoplot"></div>
   </div>
-  <div class="col-4" *ngIf="state.isReady()" id="setting">
+  <div class="col-md-4" *ngIf="state.isReady()" id="setting">
     <h6 class="lighter mb-0">Parameters</h6>
     <label for="selectXaxis" class="text-sm">Fold Change</label>
     <select
