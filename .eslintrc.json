@@ -72,6 +72,36 @@
       "rules": {}
     },
     {
+      // plain ES modules run by Node, such as the dev-server proxy configuration
+      "files": [
+        "*.mjs"
+      ],
+      "env": {
+        "node": true,
+        "es2022": true
+      },
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+      },
+      "extends": [
+        "eslint:recommended",
+        "airbnb-base",
+        "plugin:import/recommended",
+        "prettier"
+      ],
+      "rules": {
+        // http-proxy hands the response of the service out to be edited in place
+        "no-param-reassign": [
+          "error",
+          {
+            "props": true,
+            "ignorePropertyModificationsFor": ["proxyRes"]
+          }
+        ]
+      }
+    },
+    {
       "files": [
         "playwright.config.ts",
         "vitest.config.mts",
