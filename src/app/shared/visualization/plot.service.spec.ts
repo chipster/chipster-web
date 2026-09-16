@@ -32,4 +32,24 @@ describe("pointerPosition", () => {
     const point = pointerPosition({ sourceEvent: { changedTouches: [{ clientX: 30, clientY: 40 }] } }, node);
     expect({ x: point.x, y: point.y }).toEqual(expected);
   });
+
+  it("should read the coordinates of the touch that the gesture follows", () => {
+    const event = {
+      identifier: 2,
+      sourceEvent: {
+        changedTouches: [
+          { identifier: 1, clientX: 300, clientY: 400 },
+          { identifier: 2, clientX: 30, clientY: 40 },
+        ],
+      },
+    };
+    const point = pointerPosition(event, node);
+    expect({ x: point.x, y: point.y }).toEqual(expected);
+  });
+
+  it("should fall back to the first touch when the gesture names no identifier", () => {
+    const event = { sourceEvent: { changedTouches: [{ identifier: 1, clientX: 30, clientY: 40 }] } };
+    const point = pointerPosition(event, node);
+    expect({ x: point.x, y: point.y }).toEqual(expected);
+  });
 });
