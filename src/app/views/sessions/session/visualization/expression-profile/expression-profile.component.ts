@@ -156,8 +156,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     // SVG-element
     // A click selects a single line, so allow a little movement before d3 counts
     // the gesture as a drag and swallows the click. Its default is no movement
-    // at all.
-    const drag = d3.drag().clickDistance(4);
+    // at all. The same threshold decides whether the finished gesture was a click
+    // or a selection rectangle, like in the scatter and volcano plots.
+    const clickDistance = 4;
+    const drag = d3.drag().clickDistance(clickDistance);
 
     const profile = d3.select("#expressionprofile");
 
@@ -295,27 +297,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     let startPoint = new Point(-1, -1); // startpoint for dragging
 
     // Register drag handlers
+    drag.on("start", (event) => {
+      const pos = d3.pointer(event, document.getElementById("dragGroup"));
+      startPoint = new Point(pos[0], pos[1]);
+    });
+
     drag.on("drag", (event) => {
       const pos = d3.pointer(event, document.getElementById("dragGroup"));
       const endPoint = new Point(pos[0], pos[1]);
 
-      if (endPoint.x < startPoint.x) {
-        d3.select(".band").attr("transform", "translate(" + endPoint.x + "," + startPoint.y + ")");
-      }
-      if (endPoint.y < startPoint.y) {
-        d3.select(".band").attr("transform", "translate(" + endPoint.x + "," + endPoint.y + ")");
-      }
-      if (endPoint.y < startPoint.y && endPoint.x > startPoint.x) {
-        d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + endPoint.y + ")");
-      }
-
-      // set new position of band when user initializes drag
-      if (startPoint.x === -1) {
-        startPoint = new Point(endPoint.x, endPoint.y);
-        d3.select(".band").attr("transform", "translate(" + startPoint.x + "," + startPoint.y + ")");
-      }
+      // the rectangle is drawn from its upper left corner, whichever corner the
+      // gesture started from
+      const minX = Math.min(startPoint.x, endPoint.x);
+      const minY = Math.min(startPoint.y, endPoint.y);
 
       d3.select(".band")
+        .attr("transform", "translate(" + minX + "," + minY + ")")
         .transition()
         .duration(1)
         .attr("width", Math.abs(startPoint.x - endPoint.x))
@@ -359,7 +356,14 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const isShift = UtilsService.isShiftKey(sourceEvent);
       const isCtrl = UtilsService.isCtrlKey(sourceEvent);
 
-      if (startPoint.x !== -1 && startPoint.y !== -1 && startPoint.x !== endPoint.x && startPoint.y !== endPoint.y) {
+      // d3 reports a drag for every mousemove, so the gesture is a click until it
+      // has moved further than the click threshold. Comparing the coordinates
+      // themselves would make a one pixel drift a rectangle that selects nothing,
+      // and a truly horizontal or vertical drag a click.
+      const dx = endPoint.x - startPoint.x;
+      const dy = endPoint.y - startPoint.y;
+
+      if (dx * dx + dy * dy > clickDistance * clickDistance) {
         // Shift adds the lines in the rectangle to the current selection and cmd
         // toggles them, otherwise the rectangle replaces the selection. Only cmd,
         // because d3 doesn't start a drag gesture when ctrl is held.
