@@ -161,6 +161,31 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // mousedown itself. This has to be registered before the drag behaviour,
     // which stops immediate propagation of mousedown.
     this.svg.on("mousedown", (event) => event.preventDefault());
+
+    // The drag behaviour ignores a gesture that is made with ctrl held, so a ctrl
+    // click never reaches the drag handler, which is the only place that selects a
+    // data point. Toggle the selection here instead.
+    //
+    // The gesture is left filtered, because a ctrl press opens the context menu
+    // on macOS, and the menu takes the mouseup that would end the gesture: d3
+    // would keep the capturing mousemove listener it registers on the window,
+    // which stops the propagation of every mousemove of the app, and the block it
+    // puts on selecting text, until the next press on the plot.
+    //
+    // Only ctrl, not the modifier of the selection in general: cmd is not
+    // filtered, so a cmd click comes through the drag handler and would be
+    // toggled here a second time, back to where it started.
+    this.svg.on("click", (event) => {
+      if (!event.ctrlKey) {
+        return;
+      }
+      const nearbyId = this.getDataPointNear(pointerPosition(event, document.getElementById("dragGroup")));
+      if (nearbyId != null) {
+        // a ctrl click on an empty area toggles nothing, like a cmd click there
+        this.selectDataPoint(event, nearbyId);
+      }
+    });
+
     this.svg.call(drag);
 
     // Creating the selection area

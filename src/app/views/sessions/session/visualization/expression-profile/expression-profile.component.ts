@@ -346,6 +346,20 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       return closest != null && distanceTo(closest) < tolerance ? closest.lineId : null;
     };
 
+    // The drag behaviour ignores a gesture that is made with ctrl held, so a ctrl
+    // click never reaches the drag handler below, which is the only place that
+    // selects a line. Toggle the selection here instead, and only for ctrl, see
+    // the same handler and the reasons for it in plot.directive.ts.
+    svg.on("click", (event) => {
+      if (!event.ctrlKey) {
+        return;
+      }
+      const nearbyId = closestLineId(pointerPosition(event, document.getElementById("dragGroup")));
+      if (nearbyId != null) {
+        this.selectLine(event, nearbyId);
+      }
+    });
+
     drag.on("end", (event) => {
       const endPoint = pointerPosition(event, document.getElementById("dragGroup"));
 
@@ -416,7 +430,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         //
         // Shift and cmd clicks add to or toggle the selection, so they must not
         // clear it. Ctrl never gets here, because d3 doesn't start a drag gesture
-        // when ctrl is held.
+        // when ctrl is held; the click handler above takes care of a ctrl click.
+        //
         // Look around both ends of the gesture, preferring the press: a click
         // that starts on a line means that line, however the mouse drifted before
         // the release, and the drift can take the release further away than the
