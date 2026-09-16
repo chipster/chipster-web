@@ -163,8 +163,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
       .attr("cy", (d) => this.yScale(d.plotPoint.y))
       .attr("fill", "red")
       .on("mouseover", (_d: any) => {})
-      .on("mouseout", (_d: any) => {})
-      .on("click", (event, d: PlotData) => this.selectDataPoint(event, d.id));
+      .on("mouseout", (_d: any) => {});
   }
 
   getDataPointsInDragRectangle(): Array<string> {
