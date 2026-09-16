@@ -13,6 +13,7 @@ import TSVRow from "../../model/tsv/TSVRow";
 import { SessionDataService } from "../../views/sessions/session/session-data.service";
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 import Point from "../../views/sessions/session/visualization/model/point";
+import { pointerPosition } from "./plot.service";
 import { SelectionRow } from "../../views/sessions/session/visualization/model/selectionRow";
 import { FileResource } from "../resources/fileresource";
 import UtilsService from "../utilities/utils";
@@ -183,16 +184,13 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
     drag.on("start", (event) => {
       // Set new position of band
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-      startPoint = new Point(pos[0], pos[1]);
+      startPoint = pointerPosition(event, document.getElementById("dragGroup"));
     });
 
     drag.on("drag", (event) => {
       this.dataSelectionModeEnable = true; // change the tab for showing selected gene
 
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-
-      const endPoint = new Point(pos[0], pos[1]);
+      const endPoint = pointerPosition(event, document.getElementById("dragGroup"));
 
       const minX = Math.min(startPoint.x, endPoint.x);
       const minY = Math.min(startPoint.y, endPoint.y);
@@ -206,8 +204,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     });
 
     drag.on("end", (event) => {
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-      const endPoint = new Point(pos[0], pos[1]);
+      const endPoint = pointerPosition(event, document.getElementById("dragGroup"));
       const sourceEvent = event.sourceEvent ?? event;
       const isShift = UtilsService.isShiftKey(sourceEvent);
 

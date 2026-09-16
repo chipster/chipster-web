@@ -9,6 +9,7 @@ import { LoadState, State } from "../../../../../model/loadstate";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import UtilsService from "../../../../../shared/utilities/utils";
+import { pointerPosition } from "../../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
 import { SessionDataService } from "../../session-data.service";
 import Point from "../model/point";
@@ -297,13 +298,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // Register drag handlers
     drag.on("start", (event) => {
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-      startPoint = new Point(pos[0], pos[1]);
+      startPoint = pointerPosition(event, document.getElementById("dragGroup"));
     });
 
     drag.on("drag", (event) => {
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-      const endPoint = new Point(pos[0], pos[1]);
+      const endPoint = pointerPosition(event, document.getElementById("dragGroup"));
 
       // the rectangle is drawn from its upper left corner, whichever corner the
       // gesture started from
@@ -348,8 +347,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     };
 
     drag.on("end", (event) => {
-      const pos = d3.pointer(event, document.getElementById("dragGroup"));
-      const endPoint = new Point(pos[0], pos[1]);
+      const endPoint = pointerPosition(event, document.getElementById("dragGroup"));
 
       const sourceEvent = event.sourceEvent ?? event;
       const isShift = UtilsService.isShiftKey(sourceEvent);
