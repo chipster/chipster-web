@@ -220,10 +220,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
         // the elements the press and the release landed on, which is the svg as
         // soon as the mouse moved off a data point, even by less than the click
         // distance.
-        const nearbyId = this.getDataPointNear(endPoint);
+        //
+        // The data points are only a couple of pixels wide, so a click that
+        // narrowly misses one still selects it. Look around both ends of the
+        // gesture, preferring the press: a click that starts on a data point means
+        // that data point, however the mouse drifted before the release, and the
+        // drift can take the release further away than the tolerance.
+        const nearbyId = this.getDataPointNear(startPoint) ?? this.getDataPointNear(endPoint);
         if (nearbyId != null) {
-          // the data points are only a couple of pixels wide, so a click that
-          // narrowly misses one still selects it
           this.selectDataPoint(sourceEvent, nearbyId);
         } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
           // a click on an empty area clears the selection, but shift and cmd
