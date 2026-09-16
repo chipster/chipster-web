@@ -421,7 +421,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         // that starts on a line means that line, however the mouse drifted before
         // the release, and the drift can take the release further away than the
         // tolerance.
-        const nearbyId = closestLineId(startPoint) ?? closestLineId(endPoint);
+        //
+        // The release is worth a search of its own only when it is somewhere
+        // else. A click of a mouse that didn't move at all is the common case,
+        // and both ends of it would give the same answer.
+        const moved = dx !== 0 || dy !== 0;
+        const nearbyId = closestLineId(startPoint) ?? (moved ? closestLineId(endPoint) : null);
         if (nearbyId != null) {
           this.selectLine(sourceEvent, nearbyId);
         } else if (!isShift && !isCtrl) {
