@@ -59,4 +59,21 @@ describe("VisualizationTSVService", () => {
       expect(service.getSelectionRows(withSymbol, [])).toEqual([]);
     });
   });
+
+  describe("getSelectionRowsFromTSVRows", () => {
+    it("should return the same rows as the lookup by id", () => {
+      const rowIds = ["0", "2"];
+      expect(service.getSelectionRowsFromTSVRows(withSymbol, withSymbol.body.getTSVRows(rowIds))).toEqual(
+        service.getSelectionRows(withSymbol, rowIds),
+      );
+    });
+
+    it("should keep the order of the given rows", () => {
+      const reversed = withSymbol.body.getTSVRows(["0", "1"]).reverse();
+      expect(service.getSelectionRowsFromTSVRows(withSymbol, reversed)).toEqual([
+        { symbol: "symbol2", identifier: "id2" },
+        { symbol: "symbol1", identifier: "id1" },
+      ]);
+    });
+  });
 });
