@@ -144,7 +144,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   getBGZFBlocks(arrayBuffer: ArrayBuffer) {
     const fileLimit = arrayBuffer.byteLength - 18;
-    let totalSize = 0;
     const blockSizeList = [];
 
     while (this.filePos < fileLimit) {
@@ -158,13 +157,12 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       blockSizeList.push(blockSize);
 
       const compressedData = arrayBuffer.slice(this.filePos, this.filePos + this.BLOCK_HEADER_LENGTH + blockSize);
-      totalSize += compressedData.byteLength;
 
       // some blocks still behave differently, so pako still throws some error as incorrect header check
       try {
         const unCompressedData = pako.inflate(new Uint8Array(compressedData));
         this.blockList.push(unCompressedData);
-      } catch (e) {
+      } catch {
         // console.log(e);
         break;
       }
@@ -186,29 +184,12 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
     while (offset < MAX_GZIP_BLOCK_SIZE) {
       const bamRecord = new BamRecord();
-      let blockSize;
-      let blockEnd;
-      let refID;
-      let pos;
-      let bmn;
-      let bin;
-      let mq;
-      let nl;
-      let flag_nc;
-      let flag;
-      let nc;
-      let lseq;
-      let nextRefID;
-      let nextPos;
       let readName;
       let j;
       let p;
-      let lengthOnRef;
       let cigar;
       let c;
-      let cigarArray;
       let seq;
-      let seqBytes;
 
       const CIGAR_DECODER = ["M", "I", "D", "N", "S", "H", "P", "=", "X", "?", "?", "?", "?", "?", "?", "?"];
       const SECRET_DECODER = ["=", "A", "C", "x", "G", "x", "x", "x", "T", "x", "x", "x", "x", "x", "x", "N"];
@@ -217,59 +198,54 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
         return;
       }
 
-      blockSize = this.readInt(this.plain, offset);
+      const blockSize = this.readInt(this.plain, offset);
       if (blockSize > MAX_GZIP_BLOCK_SIZE) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
-      blockEnd = offset + blockSize + 4;
+      const blockEnd = offset + blockSize + 4;
 
       if (blockSize > MAX_GZIP_BLOCK_SIZE || blockEnd > MAX_GZIP_BLOCK_SIZE) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 
-      refID = this.readInt(this.plain, offset + 4);
-      pos = this.readInt(this.plain, offset + 8);
+      const refID = this.readInt(this.plain, offset + 4);
+      const pos = this.readInt(this.plain, offset + 8);
 
       if (refID < 0) {
         this.state = new LoadState(State.Fail, "Loading the Bam records failed");
         return;
       }
 
-      bmn = this.readInt(this.plain, offset + 12);
-      bin = (bmn & 0xffff0000) >> 16;
-      mq = (bmn & 0xff00) >> 8;
-      nl = bmn & 0xff;
+      const bmn = this.readInt(this.plain, offset + 12);
+      const mq = (bmn & 0xff00) >> 8;
+      const nl = bmn & 0xff;
 
-      flag_nc = this.readInt(this.plain, offset + 16);
-      flag = (flag_nc & 0xffff0000) >> 16;
-      nc = flag_nc & 0xffff;
+      const flag_nc = this.readInt(this.plain, offset + 16);
+      const flag = (flag_nc & 0xffff0000) >> 16;
+      const nc = flag_nc & 0xffff;
 
-      lseq = this.readInt(this.plain, offset + 20);
-      nextRefID = this.readInt(this.plain, offset + 24);
-      nextPos = this.readInt(this.plain, offset + 28);
+      const lseq = this.readInt(this.plain, offset + 20);
+      const nextRefID = this.readInt(this.plain, offset + 24);
+      const nextPos = this.readInt(this.plain, offset + 28);
 
       readName = "";
       for (j = 0; j < nl - 1; ++j) {
         readName += String.fromCharCode(this.plain[offset + 36 + j]);
       }
       p = offset + 36 + nl;
-      lengthOnRef = 0;
       cigar = "";
 
       // nc Number of cigarOpp
 
-      cigarArray = [];
+      const cigarArray = [];
       for (c = 0; c < nc; ++c) {
         const cigop = this.readInt(this.plain, p);
         // what is the uppermost byte?
         // var opLen = ((cigop & 0x00ffffff) >> 4);
         const opLen = cigop >> 4;
         const opLtr = CIGAR_DECODER[cigop & 0xf];
-        if (opLtr === "M" || opLtr === "EQ" || opLtr === "X" || opLtr === "D" || opLtr === "N" || opLtr === "=") {
-          lengthOnRef += opLen;
-        }
         cigar = cigar + opLen + opLtr;
         p += 4;
         cigarArray.push({ len: opLen, ltr: opLtr });
@@ -277,7 +253,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       bamRecord.cigar = cigar;
 
       seq = "";
-      seqBytes = (lseq + 1) >> 1;
+      const seqBytes = (lseq + 1) >> 1;
       for (j = 0; j < seqBytes; ++j) {
         // Getting the higher and lower four bits as each character is decoded with 4 bits
         const sb = this.plain[p + j];
@@ -291,7 +267,6 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       p += seqBytes;
 
       // Decoding the base Quality
-      const self = this;
       let qual = "";
 
       if (lseq === 1 && String.fromCharCode(this.plain[p + j] + 33) === "*") {
@@ -351,7 +326,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
       offset = blockEnd;
 
       for (const x in tags) {
-        if (tags.hasOwnProperty(x)) {
+        if (Object.prototype.hasOwnProperty.call(tags, x)) {
           typeTag += x + ":" + tags[x] + " ";
         }
       }
