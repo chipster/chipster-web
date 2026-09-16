@@ -93,15 +93,17 @@ The entries are matched by string prefix in the order they appear, first match
 winning, so a longer name has to precede any name it starts with — the
 `-admin` entries and `session-db-events` come before the plain service names.
 
-The file is JavaScript rather than JSON because it gives the HTTP entries a
-shared keep-alive agent, which JSON cannot hold. Without the agent every
-proxied response carries `connection: close` and the dev server closes the
-browser's connection after each response, which a port forwarder can turn
-into truncated large responses (`ERR_INCOMPLETE_CHUNKED_ENCODING`,
-`ERR_CONTENT_LENGTH_MISMATCH`). The file explains the mechanism. The Angular
-CLI reads `.json` and `.mjs` alike, so only the extension changed.
+The file is JavaScript rather than JSON because the HTTP entries carry two
+things JSON cannot hold: a hook that drops the `Connection` and `Keep-Alive`
+headers of the service's response before they reach the browser, and a shared
+keep-alive agent for the connections to the services. Without the hook the
+dev server closed the browser's connection after every response that a service
+had closed on its side, which a port forwarder can turn into truncated large
+responses (`ERR_INCOMPLETE_CHUNKED_ENCODING`, `ERR_CONTENT_LENGTH_MISMATCH`).
+The file explains the mechanism. The Angular CLI reads `.json` and `.mjs`
+alike, so only the extension changed.
 
-`proxy.conf.direct.json` has no agent, so the direct mode still closes the
+`proxy.conf.direct.json` has neither, so the direct mode still closes the
 connection after every response. That mode proxies only the service-locator
 address, whose response is a couple of kilobytes, so the truncation has never
 shown up there; the file says the same.

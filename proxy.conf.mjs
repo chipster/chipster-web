@@ -21,28 +21,46 @@
 // "session-db-events" precede the plain service names. (The stripPrefix
 // middleware of the deployment has the same requirement and the same note.)
 //
-// This is JavaScript rather than JSON only because of the agent below, which
-// is not a value JSON can hold. The Angular CLI reads either.
+// This is JavaScript rather than JSON because of the agent and the hook
+// below, which are not values JSON can hold. The Angular CLI reads either.
 import { Agent } from "node:http";
+
+// Keep the connection of the browser open after every response.
+//
+// The dev server closes the connection of the browser right after the last
+// byte of a response whose headers say "Connection: close", and a port
+// forwarder can pass that close on before it has flushed the tail of a large
+// response, which the browser then reports as ERR_INCOMPLETE_CHUNKED_ENCODING
+// or ERR_CONTENT_LENGTH_MISMATCH. http-proxy copies the headers of the
+// response of the service to the response of the browser, "Connection"
+// included, so the browser was told to close whenever the service did.
+//
+// "Connection" and "Keep-Alive" describe one hop only, so neither belongs in
+// the response of the browser. Without them http-proxy answers with the
+// "Connection" the browser itself asked for, keep-alive, whatever the service
+// said about its own connection. Vite calls "configure" once per entry with
+// the http-proxy instance, and http-proxy emits "proxyRes" before it writes
+// the headers.
+const keepBrowserConnection = (proxy) =>
+  proxy.on("proxyRes", (proxyRes) => {
+    delete proxyRes.headers.connection;
+    delete proxyRes.headers["keep-alive"];
+  });
 
 // Reuse the connections to the services.
 //
 // Without an agent http-proxy opens a new connection for every request and
-// Node marks it "Connection: close". The service echoes the header,
-// http-proxy copies it to the response of the browser, and the dev server
-// then closes the connection of the browser right after the last byte of
-// every response. A port forwarder can pass that close on before it has
-// flushed the tail of a large response, which the browser then reports as
-// ERR_INCOMPLETE_CHUNKED_ENCODING or ERR_CONTENT_LENGTH_MISMATCH.
+// marks it "Connection: close", which the service echoes and closes. The hook
+// above already keeps that from reaching the browser; the agent is what keeps
+// the connections to the services open between requests.
 //
-// Setting the header in the configuration instead would not help: http-proxy
-// overrides it unless it asks for an upgrade.
-//
-// Retire a pooled connection after 25 seconds, before the services close one
-// after 30. A connection that a service closes just as a request picks it up
-// fails with ECONNRESET, which the dev server turns into an empty 500. The
-// timeout reaches only the sockets waiting in the pool, so a slow response is
-// not cut off.
+// Retire a pooled connection after 25 seconds, before the Grizzly and Jetty
+// services close one after 30. A connection that a service closes just as a
+// request picks it up fails with ECONNRESET, which the dev server turns into
+// an empty 500. The timeout reaches only the sockets waiting in the pool, so
+// a slow response is not cut off. type-service is a Node server that closes
+// after 5 seconds and says so in a Keep-Alive header, which the agent honours
+// by retiring those connections earlier on its own.
 const agent = new Agent({ keepAlive: true, timeout: 25000 });
 
 /**
@@ -54,6 +72,7 @@ const service = (prefix, port) => [
     target: `http://localhost:${port}`,
     pathRewrite: { [`^${prefix}`]: "" },
     agent,
+    configure: keepBrowserConnection,
   },
 ];
 
