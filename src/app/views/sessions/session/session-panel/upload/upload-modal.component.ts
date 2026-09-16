@@ -38,7 +38,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit() {
     this.flow.on("progress", this.update);
     this.flow.on("fileRemoved", this.update);
-    this.flow.on("error", (message, file, chunk) => this.update);
+    this.flow.on("error", this.update);
     this.flow.on("complete", this.complete);
   }
 
