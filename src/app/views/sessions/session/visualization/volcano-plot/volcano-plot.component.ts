@@ -204,8 +204,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
           return "red";
         }
         return "black";
-      })
-      .on("click", (event, d: PlotData) => this.selectDataPoint(event, d.id));
+      });
   }
 
   getDataPointsInDragRectangle(): Array<string> {

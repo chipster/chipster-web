@@ -266,8 +266,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       })
       .on("mouseout", (event, d: any) => {
         this.removeSelectionHoverStyle(d.id);
-      })
-      .on("click", (event, d: GeneExpression) => this.selectLine(event, d.id));
+      });
 
     // path animation
     // paths.each(function(d: any) { d.totalLength = this.getTotalLength(); })
@@ -409,21 +408,22 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         resetSelectionRectangle();
       } else {
         // A click, not a rectangle selection. The drag is registered on the whole
-        // svg, so this branch also runs for clicks that land on a line, which the
-        // line's own click handler takes care of. A click that misses selects the
-        // closest line instead, and only a click with no line near it clears the
+        // svg, so this branch handles every click, whether it landed on a line or
+        // not. The lines cannot handle their own, because the browser dispatches
+        // the click on the closest common ancestor of the elements the press and
+        // the release landed on, which is the svg as soon as the mouse moved off a
+        // line, even by less than the click distance. A click that misses selects
+        // the closest line, and only a click with no line near it clears the
         // selection, like in the scatter and volcano plots.
         //
         // Shift and cmd clicks add to or toggle the selection, so they must not
         // clear it. Ctrl never gets here, because d3 doesn't start a drag gesture
         // when ctrl is held.
-        if (!sourceEvent.target?.classList?.contains("path")) {
-          const nearbyId = closestLineId(endPoint);
-          if (nearbyId != null) {
-            this.selectLine(sourceEvent, nearbyId);
-          } else if (!isShift && !isCtrl) {
-            this.resetSelections();
-          }
+        const nearbyId = closestLineId(endPoint);
+        if (nearbyId != null) {
+          this.selectLine(sourceEvent, nearbyId);
+        } else if (!isShift && !isCtrl) {
+          this.resetSelections();
         }
         resetSelectionRectangle();
       }

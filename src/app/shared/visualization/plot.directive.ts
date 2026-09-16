@@ -214,19 +214,21 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       const dx = endPoint.x - startPoint.x;
       const dy = endPoint.y - startPoint.y;
       if (dx * dx + dy * dy <= clickDistance * clickDistance) {
-        // A click, not a rectangle selection. A click that hits a data point is
-        // handled by the data point's own click handler.
-        if (!sourceEvent.target?.classList?.contains("dot")) {
-          const nearbyId = this.getDataPointNear(endPoint);
-          if (nearbyId != null) {
-            // the data points are only a couple of pixels wide, so a click that
-            // narrowly misses one still selects it
-            this.selectDataPoint(sourceEvent, nearbyId);
-          } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
-            // a click on an empty area clears the selection, but shift and cmd
-            // clicks add to or toggle it, so they must not clear
-            this.resetSelections();
-          }
+        // A click, not a rectangle selection. This handles every click, whether
+        // it hit a data point or not, because the data points cannot handle their
+        // own: the browser dispatches the click on the closest common ancestor of
+        // the elements the press and the release landed on, which is the svg as
+        // soon as the mouse moved off a data point, even by less than the click
+        // distance.
+        const nearbyId = this.getDataPointNear(endPoint);
+        if (nearbyId != null) {
+          // the data points are only a couple of pixels wide, so a click that
+          // narrowly misses one still selects it
+          this.selectDataPoint(sourceEvent, nearbyId);
+        } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
+          // a click on an empty area clears the selection, but shift and cmd
+          // clicks add to or toggle it, so they must not clear
+          this.resetSelections();
         }
         this.resetSelectionRectangle();
         return;
