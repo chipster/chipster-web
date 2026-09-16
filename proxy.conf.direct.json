@@ -8,8 +8,16 @@
 // directly from the service ports, using the absolute url-ext-* addresses
 // service-locator hands out.
 //
-// Proxy mode uses proxy.conf.json instead, which has this same entry and the
+// Proxy mode uses proxy.conf.mjs instead, which has this same entry and the
 // rest of the services too.
+//
+// No keep-alive agent here, unlike proxy.conf.mjs, so the responses of this
+// one entry still say "Connection: close" and the dev server closes the
+// connection of the browser after each of them. Nothing has gone wrong with a
+// truncated response here, because the service list is a couple of kilobytes,
+// and an agent is not a JSON value, so adding one would turn this file into
+// JavaScript for a case that has never needed it. Should this mode ever
+// truncate a response too, see the explanation in proxy.conf.mjs.
 {
   "/service-locator": {
     "target": "http://localhost:8003",

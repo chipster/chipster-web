@@ -85,13 +85,26 @@ options, so it composes with `production` too.
 
 ### Proxy mode
 
-`proxy.conf.json` maps the prefixes to the service ports. It covers the public
+`proxy.conf.mjs` maps the prefixes to the service ports. It covers the public
 APIs under `/<service>` and the admin APIs (used by the `/admin` views) under
 `/<service>-admin`, the same prefixes as the ingress.
 
 The entries are matched by string prefix in the order they appear, first match
 winning, so a longer name has to precede any name it starts with — the
 `-admin` entries and `session-db-events` come before the plain service names.
+
+The file is JavaScript rather than JSON because it gives the HTTP entries a
+shared keep-alive agent, which JSON cannot hold. Without the agent every
+proxied response carries `connection: close` and the dev server closes the
+browser's connection after each response, which a port forwarder can turn
+into truncated large responses (`ERR_INCOMPLETE_CHUNKED_ENCODING`,
+`ERR_CONTENT_LENGTH_MISMATCH`). The file explains the mechanism. The Angular
+CLI reads `.json` and `.mjs` alike, so only the extension changed.
+
+`proxy.conf.direct.json` has no agent, so the direct mode still closes the
+connection after every response. That mode proxies only the service-locator
+address, whose response is a couple of kilobytes, so the truncation has never
+shown up there; the file says the same.
 
 Switching modes takes two things that have to agree, neither of which needs a
 file to be edited:
@@ -111,7 +124,7 @@ The app reads only one service address itself, `service-locator` in
 That address is relative (`/service-locator`), so that it needs no editing when
 the mode changes. The direct mode therefore needs a proxy too, but only for
 that one prefix: `proxy.conf.direct.json`, in the options of the `serve`
-target. Proxy mode replaces it with `proxy.conf.json`, which has the same entry
+target. Proxy mode replaces it with `proxy.conf.mjs`, which has the same entry
 and the rest of the services besides.
 
 Because of that address, both modes need the services to be reachable from the

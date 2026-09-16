@@ -3,7 +3,7 @@ terms-of-use-path: assets/html/terms-of-use-v1.html
 terms-of-use-version: 2
 # A relative address, so that it works in both of the dev server modes without
 # editing this file: the dev server proxies it to the service-locator port (see
-# proxy.conf.direct.json and proxy.conf.json). In the deployments this whole
+# proxy.conf.direct.json and proxy.conf.mjs). In the deployments this whole
 # file is replaced by the web-server-app secret of the Helm chart, which has an
 # absolute address.
 service-locator: /service-locator
