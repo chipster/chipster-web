@@ -419,7 +419,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
         // Shift and cmd clicks add to or toggle the selection, so they must not
         // clear it. Ctrl never gets here, because d3 doesn't start a drag gesture
         // when ctrl is held.
-        const nearbyId = closestLineId(endPoint);
+        // Look around both ends of the gesture, preferring the press: a click
+        // that starts on a line means that line, however the mouse drifted before
+        // the release, and the drift can take the release further away than the
+        // tolerance.
+        const nearbyId = closestLineId(startPoint) ?? closestLineId(endPoint);
         if (nearbyId != null) {
           this.selectLine(sourceEvent, nearbyId);
         } else if (!isShift && !isCtrl) {
