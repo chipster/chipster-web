@@ -16,10 +16,16 @@ import { PlotData } from "../../views/sessions/session/visualization/model/plotD
  * changedTouches is the right list for both ends of a tap: it holds the touch
  * that started at touchstart and the one that was lifted at touchend, where
  * touches is already empty.
+ *
+ * A drag event names the touch that the gesture follows in its identifier, so
+ * pick that one from the list. Otherwise a second finger anywhere on the plot
+ * would move the position of the first one, and the gesture would measure from
+ * one finger to the other.
  */
 export function pointerPosition(event: any, node: Element): Point {
   const sourceEvent = event.sourceEvent ?? event;
-  const touch = sourceEvent.changedTouches?.[0] ?? sourceEvent.touches?.[0];
+  const touches: Array<any> = Array.from(sourceEvent.changedTouches ?? sourceEvent.touches ?? []);
+  const touch = touches.find((candidate) => candidate.identifier === event.identifier) ?? touches[0];
   const pos = d3.pointer(touch ?? event, node);
   return new Point(pos[0], pos[1]);
 }
