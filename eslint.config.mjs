@@ -12,7 +12,7 @@ export default tseslint.config(
     ignores: ["projects/**/*", "dist/**/*", ".angular/**/*", "coverage/**/*", "src/assets/**/*"],
   },
   {
-    files: ["**/*.ts", "**/*.mts", "**/*.js"],
+    files: ["**/*.ts", "**/*.mts"],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -77,6 +77,19 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+    },
+  },
+  {
+    // plain javascript, like tooling scripts and this config. these are not
+    // part of tsconfig.json, so the type-aware typescript block above can't
+    // parse them.
+    files: ["**/*.js", "**/*.mjs"],
+    extends: [eslint.configs.recommended],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
   },
   {
