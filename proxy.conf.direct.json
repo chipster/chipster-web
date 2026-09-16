@@ -11,14 +11,9 @@
 // Proxy mode uses proxy.conf.mjs instead, which has this same entry and the
 // rest of the services too.
 //
-// No header hook and no keep-alive agent here, unlike proxy.conf.mjs, so the
-// responses of this one entry still say "Connection: close" and the dev server
-// closes the connection of the browser after each of them. Nothing has gone
-// wrong with a truncated response here, because the service list is a couple
-// of kilobytes, and neither a function nor an agent is a JSON value, so adding
-// them would turn this file into JavaScript for a case that has never needed
-// it. Should this mode ever truncate a response too, see the explanation in
-// proxy.conf.mjs.
+// No header hook and no keep-alive agent here, unlike proxy.conf.mjs: the
+// service list is a couple of kilobytes and has never been truncated, and
+// neither is a JSON value. Should that change, see proxy.conf.mjs.
 {
   "/service-locator": {
     "target": "http://localhost:8003",
