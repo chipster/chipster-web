@@ -154,17 +154,26 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     const clickDistance = 4;
     const drag = d3.drag().clickDistance(clickDistance);
 
-    // Keep a drag from extending a text selection that starts somewhere else on
-    // the page, which scrolls the page instead of drawing the selection
-    // rectangle. d3 blocks selectstart, but a modifier click that extends an
-    // existing selection never fires it, and d3 doesn't preventDefault the
-    // mousedown itself. This has to be registered before the drag behaviour,
-    // which stops immediate propagation of mousedown.
-    this.svg.on("mousedown", (event) => event.preventDefault());
+    // where the press of the gesture landed, and whether the drag behaviour took
+    // the gesture, see the click handler below
+    let pressPoint: Point = null;
+    let gestureStarted = false;
 
-    // The drag behaviour ignores a gesture that is made with ctrl held, so a ctrl
+    // The preventDefault() keeps a drag from extending a text selection that
+    // starts somewhere else on the page, which scrolls the page instead of
+    // drawing the selection rectangle. d3 blocks selectstart, but a modifier
+    // click that extends an existing selection never fires it, and d3 doesn't
+    // preventDefault the mousedown itself. This has to be registered before the
+    // drag behaviour, which stops immediate propagation of mousedown.
+    this.svg.on("mousedown", (event) => {
+      event.preventDefault();
+      pressPoint = pointerPosition(event, document.getElementById("dragGroup"));
+      gestureStarted = false;
+    });
+
+    // The drag behaviour ignores a gesture that is made with ctrl held, so such a
     // click never reaches the drag handler, which is the only place that selects a
-    // data point. Toggle the selection here instead.
+    // data point. Handle the clicks it declined here instead.
     //
     // The gesture is left filtered, because a ctrl press opens the context menu
     // on macOS, and the menu takes the mouseup that would end the gesture: d3
@@ -172,14 +181,24 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // which stops the propagation of every mousemove of the app, and the block it
     // puts on selecting text, until the next press on the plot.
     //
-    // Only ctrl, not the modifier of the selection in general: cmd is not
-    // filtered, so a cmd click comes through the drag handler and would be
-    // toggled here a second time, back to where it started.
+    // A gesture of its own tells that the drag handler has the press, whatever
+    // the modifiers were, so nothing is selected twice. Reading the modifiers
+    // instead would miss a modifier that was pressed or released mid-click, which
+    // the drag behaviour decided on at the press: a cmd click that ends with ctrl
+    // held would be toggled here a second time, back to where it started.
     this.svg.on("click", (event) => {
-      if (!event.ctrlKey) {
+      if (gestureStarted || pressPoint == null) {
         return;
       }
-      const nearbyId = this.getDataPointNear(pointerPosition(event, document.getElementById("dragGroup")));
+      const releasePoint = pointerPosition(event, document.getElementById("dragGroup"));
+      const dx = releasePoint.x - pressPoint.x;
+      const dy = releasePoint.y - pressPoint.y;
+      if (dx * dx + dy * dy > clickDistance * clickDistance) {
+        // a drag, which draws no rectangle when the behaviour declined it, so it
+        // selects nothing rather than a data point that happens to be near its end
+        return;
+      }
+      const nearbyId = this.getDataPointNear(pressPoint) ?? this.getDataPointNear(releasePoint);
       if (nearbyId != null) {
         // a ctrl click on an empty area toggles nothing, like a cmd click there
         this.selectDataPoint(event, nearbyId);
@@ -208,6 +227,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // Register for drag handlers
 
     drag.on("start", (event) => {
+      gestureStarted = true;
+
       // Set new position of band
       startPoint = pointerPosition(event, document.getElementById("dragGroup"));
     });

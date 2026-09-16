@@ -162,6 +162,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const clickDistance = 4;
     const drag = d3.drag().clickDistance(clickDistance);
 
+    // where the press of the gesture landed, and whether the drag behaviour took
+    // the gesture, see the click handler further down
+    let pressPoint: Point = null;
+    let gestureStarted = false;
+
     const profile = d3.select("#expressionprofile");
 
     profile.select("svg").remove();
@@ -174,7 +179,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       // keep a drag from extending a text selection elsewhere on the page, which
       // scrolls the page instead of drawing the selection rectangle. Must come
       // before the drag, which stops immediate propagation of mousedown.
-      .on("mousedown", (event) => event.preventDefault())
+      .on("mousedown", (event) => {
+        event.preventDefault();
+        pressPoint = pointerPosition(event, document.getElementById("dragGroup"));
+        gestureStarted = false;
+      })
       .call(drag);
 
     // Custom headers for x-axis
@@ -298,6 +307,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
     // Register drag handlers
     drag.on("start", (event) => {
+      gestureStarted = true;
+
       startPoint = pointerPosition(event, document.getElementById("dragGroup"));
     });
 
@@ -346,15 +357,21 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       return closest != null && distanceTo(closest) < tolerance ? closest.lineId : null;
     };
 
-    // The drag behaviour ignores a gesture that is made with ctrl held, so a ctrl
+    // The drag behaviour ignores a gesture that is made with ctrl held, so such a
     // click never reaches the drag handler below, which is the only place that
-    // selects a line. Toggle the selection here instead, and only for ctrl, see
-    // the same handler and the reasons for it in plot.directive.ts.
+    // selects a line. Handle the clicks it declined here instead, see the same
+    // handler and the reasons for it in plot.directive.ts.
     svg.on("click", (event) => {
-      if (!event.ctrlKey) {
+      if (gestureStarted || pressPoint == null) {
         return;
       }
-      const nearbyId = closestLineId(pointerPosition(event, document.getElementById("dragGroup")));
+      const releasePoint = pointerPosition(event, document.getElementById("dragGroup"));
+      const dx = releasePoint.x - pressPoint.x;
+      const dy = releasePoint.y - pressPoint.y;
+      if (dx * dx + dy * dy > clickDistance * clickDistance) {
+        return;
+      }
+      const nearbyId = closestLineId(pressPoint) ?? closestLineId(releasePoint);
       if (nearbyId != null) {
         this.selectLine(event, nearbyId);
       }
