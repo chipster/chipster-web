@@ -1,5 +1,5 @@
 import TSVRow from "./TSVRow";
-import { map, filter, find, includes } from "lodash-es";
+import { map, filter, find } from "lodash-es";
 
 export default class TSVBody {
   rows: Array<TSVRow>;
@@ -21,9 +21,14 @@ export default class TSVBody {
 
   /*
    * @description: Get rows with ids
+   *
+   * The ids go to a set first, because a selection rectangle can cover every row
+   * of the file and searching an array of that size for each of them takes
+   * seconds.
    */
   public getTSVRows(ids: Array<string>): Array<TSVRow> {
-    return filter(this.rows, (row: TSVRow) => includes(ids, row.id.toString()));
+    const idSet = new Set(ids);
+    return filter(this.rows, (row: TSVRow) => idSet.has(row.id.toString()));
   }
 
   /*

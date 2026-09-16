@@ -292,7 +292,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   /** @description update the selection list shown next to the plot* */
   setViewSelectionList(): void {
     this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
-    this.viewSelectionList = this.visualizationTSVService.getSelectionRows(this.tsv, this.selectedDataPointIds);
+    // from the rows of showSelection(), which has just looked them up
+    this.viewSelectionList = this.visualizationTSVService.getSelectionRowsFromTSVRows(this.tsv, this.selectedDataRows);
   }
 
   /**

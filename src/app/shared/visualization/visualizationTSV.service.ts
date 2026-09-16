@@ -98,9 +98,18 @@ export class VisualizationTSVService {
    * in files where the header row doesn't name it.
    */
   public getSelectionRows(tsv: TSVFile, rowIds: Array<string>): Array<SelectionRow> {
+    return this.getSelectionRowsFromTSVRows(tsv, tsv.body.getTSVRows(rowIds));
+  }
+
+  /**
+   * @description selection list of rows that have already been looked up
+   *
+   * Saves a pass over the body when the caller has the rows at hand.
+   */
+  public getSelectionRowsFromTSVRows(tsv: TSVFile, rows: Array<TSVRow>): Array<SelectionRow> {
     const symbolIndex = tsv.getColumnIndex("symbol");
     const identifierIndex = tsv.getColumnIndex("identifier");
-    return tsv.body.getTSVRows(rowIds).map((row: TSVRow) => ({
+    return rows.map((row: TSVRow) => ({
       symbol: symbolIndex !== -1 ? row.row[symbolIndex] : null,
       identifier: identifierIndex !== -1 ? row.row[identifierIndex] : row.row[0],
     }));
