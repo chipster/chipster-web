@@ -1,7 +1,28 @@
 import { Injectable } from "@angular/core";
+import * as d3 from "d3";
 import Point from "../../views/sessions/session/visualization/model/point";
 import { VisualizationTSVService } from "./visualizationTSV.service";
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
+
+/**
+ * @description position of the mouse or the finger, in the coordinates of the given node
+ *
+ * d3.pointer() reads clientX and clientY of the event, which a touch event
+ * doesn't have: its coordinates are in its touch lists. Without this a tap gives
+ * NaN coordinates, and because every comparison with NaN is false, the tap is
+ * taken for a selection rectangle, which then selects nothing and clears the
+ * selection instead.
+ *
+ * changedTouches is the right list for both ends of a tap: it holds the touch
+ * that started at touchstart and the one that was lifted at touchend, where
+ * touches is already empty.
+ */
+export function pointerPosition(event: any, node: Element): Point {
+  const sourceEvent = event.sourceEvent ?? event;
+  const touch = sourceEvent.changedTouches?.[0] ?? sourceEvent.touches?.[0];
+  const pos = d3.pointer(touch ?? event, node);
+  return new Point(pos[0], pos[1]);
+}
 
 @Injectable()
 export class PlotService {
