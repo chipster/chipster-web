@@ -11,13 +11,13 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "prepare": "git config core.hooksPath .githooks || true",
-    "prettier": "npx prettier --check \"src/**/*.{ts,js,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
-    "prettier-write": "npx prettier --write \"src/**/*.{ts,js,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,html}\" \"*.{ts,mts}\"",
+    "prettier": "npx prettier --check \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
+    "prettier-write": "npx prettier --write \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
     "lint": "npx eslint --ext .ts,.js,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts",
     "lint-fix": "npx eslint --fix --ext .ts,.js,.mts src/app/ e2e/ playwright.config.ts vitest.config.mts"
   },
   "lint-staged": {
-    "*.{ts,js,mts,html,less,css,scss}": "prettier --check"
+    "*.{ts,js,mjs,mts,html,less,css,scss}": "prettier --check"
   },
   "engines": {
     "node": ">=24",
