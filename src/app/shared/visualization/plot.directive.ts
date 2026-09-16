@@ -223,7 +223,12 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
         // gesture, preferring the press: a click that starts on a data point means
         // that data point, however the mouse drifted before the release, and the
         // drift can take the release further away than the tolerance.
-        const nearbyId = this.getDataPointNear(startPoint) ?? this.getDataPointNear(endPoint);
+        //
+        // The release is worth a look of its own only when it is somewhere else.
+        // A click of a mouse that didn't move at all is the common case, and both
+        // ends of it would give the same answer.
+        const moved = dx !== 0 || dy !== 0;
+        const nearbyId = this.getDataPointNear(startPoint) ?? (moved ? this.getDataPointNear(endPoint) : null);
         if (nearbyId != null) {
           this.selectDataPoint(sourceEvent, nearbyId);
         } else if (!isShift && !UtilsService.isCtrlKey(sourceEvent)) {
