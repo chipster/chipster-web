@@ -7,7 +7,7 @@ export default class BamRecord {
   flag: number;
   pos: number;
   mapQ: number;
-  nextSegment: string;
+  nextSegment: number;
   nextSegPos: number;
   typeTag: any;
 }

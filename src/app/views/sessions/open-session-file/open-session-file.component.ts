@@ -56,10 +56,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
       this.modalOpen = true;
 
       this.modalRef.result.then(
-        (result) => {
+        () => {
           this.modalOpen = false;
         },
-        (reason) => {
+        () => {
           this.modalOpen = false;
         },
       );

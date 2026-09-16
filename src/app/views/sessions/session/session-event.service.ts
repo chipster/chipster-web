@@ -166,6 +166,7 @@ export class SessionEventService {
       return this.createEvent(event, rule, null);
     }
     log.warn("unknown event type", event);
+    return undefined;
   }
 
   handleSessionEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
@@ -188,6 +189,7 @@ export class SessionEventService {
       return observableNever();
     }
     log.warn("unknown event type", event);
+    return undefined;
   }
 
   handleDatasetEvent(event: any, sessionId: string, sessionData: SessionData): Observable<SessionEvent> {
@@ -228,6 +230,7 @@ export class SessionEventService {
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
+    return undefined;
   }
 
   updateTypeTags(sessionId, sessionEvent, sessionData) {
@@ -280,6 +283,7 @@ export class SessionEventService {
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
+    return undefined;
   }
 
   handleJobEvent(event: any, sessionId: any, sessionData: SessionData): Observable<SessionEvent> {
@@ -306,6 +310,7 @@ export class SessionEventService {
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event.type, event);
+    return undefined;
   }
 
   /**
