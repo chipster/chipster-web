@@ -26,7 +26,6 @@ export default tseslint.config(
         ...globals.browser,
       },
       parserOptions: {
-        project: ["tsconfig.json"],
         ecmaVersion: 2020,
         sourceType: "module",
       },
@@ -57,8 +56,6 @@ export default tseslint.config(
       // the fields of one is allowed, as angular and d3 code does that a lot
       "no-param-reassign": "error",
       "no-return-assign": ["error", "always"],
-      "no-var": "error",
-      "prefer-const": "error",
       radix: "error",
       // imports have to be declared in package.json, so that they don't
       // depend on what other packages happen to pull in
@@ -71,9 +68,6 @@ export default tseslint.config(
       // injection hides that, so the session services have grown 17 of these.
       // warn to keep them visible until they are untangled.
       "import/no-cycle": "warn",
-
-      // our angular components don't use default export
-      "import/prefer-default-export": "off",
 
       // neither of these was enforced before the airbnb configs were dropped,
       // and the codebase has hundreds of both. warn to keep them visible and
@@ -104,6 +98,19 @@ export default tseslint.config(
         ...globals.browser,
         ...globals.node,
       },
+    },
+    settings: {
+      // the typescript resolver here too: the node one doesn't read the
+      // exports map of typescript-eslint, which this config itself imports
+      "import/resolver": {
+        typescript: true,
+      },
+    },
+    rules: {
+      // typescript-eslint's recommended set errors on both of these for
+      // typescript, but nothing does for plain javascript
+      "no-var": "error",
+      "prefer-const": "error",
     },
   },
   {
