@@ -109,23 +109,20 @@ export class HistoryComponent implements OnInit {
   }
 
   appendStringParam(params, attribute, value, comparison) {
-    if (attribute != null && attribute.length > 0 && value != null && value.length > 0) {
-      const paramValue = comparison === this.comparisonIsNot ? "!" + value : value;
-
-      params = params.append(attribute, paramValue);
+    if (attribute == null || attribute.length === 0 || value == null || value.length === 0) {
+      return params;
     }
-    return params;
+    const paramValue = comparison === this.comparisonIsNot ? "!" + value : value;
+    return params.append(attribute, paramValue);
   }
 
   appendDateTimeParam(params, date, time, comparison) {
-    if (date && time) {
-      const name = "created";
-      // can't use new Date(date + "T" + time), because that would assume it to be local time)
-      const value = date + "T" + time + ":00.000Z";
-
-      params = params.append(name, comparison + value);
+    if (!date || !time) {
+      return params;
     }
-    return params;
+    // can't use new Date(date + "T" + time), because that would assume it to be local time)
+    const value = date + "T" + time + ":00.000Z";
+    return params.append("created", comparison + value);
   }
 
   updateJobCountAndJobs() {
@@ -151,14 +148,12 @@ export class HistoryComponent implements OnInit {
 
   updateJobs(filterParams) {
     // set the page number for which getting the record
-    filterParams = filterParams.append("page", this.page.toString());
+    const pageParams = filterParams.append("page", this.page.toString());
 
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) =>
-          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", filterParams),
-        ),
+        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", pageParams)),
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {
