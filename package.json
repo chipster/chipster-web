@@ -57,7 +57,8 @@
     "stacktrace-js": "^2.0.0",
     "tslib": "^2.3.0",
     "uuid": "^10.0.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.3",
+    "zone.js": "~0.14.10"
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"
