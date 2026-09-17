@@ -57,6 +57,9 @@ export default tseslint.config(
       "no-var": "error",
       "prefer-const": "error",
       radix: "error",
+      // imports have to be declared in package.json, so that they don't
+      // depend on what other packages happen to pull in
+      "import/no-extraneous-dependencies": ["error", { devDependencies: false, optionalDependencies: false }],
 
       // our angular components don't use default export
       "import/prefer-default-export": "off",
@@ -109,9 +112,9 @@ export default tseslint.config(
     },
   },
   {
-    files: ["playwright.config.ts", "vitest.config.mts", "e2e/**/*.ts"],
+    files: ["playwright.config.ts", "vitest.config.mts", "e2e/**/*.ts", "**/*.spec.ts"],
     rules: {
-      // tooling configs and e2e tests import dev dependencies on purpose
+      // tooling configs and tests import dev dependencies on purpose
       "import/no-extraneous-dependencies": ["error", { devDependencies: true, optionalDependencies: false }],
     },
   },

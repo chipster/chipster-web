@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import { timeout } from "d3-timer";
+import { timeout } from "d3";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
