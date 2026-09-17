@@ -53,6 +53,9 @@ export default tseslint.config(
       "guard-for-in": "error",
       "no-console": "warn",
       "no-else-return": "error",
+      // rebinding a parameter hides which value a later line reads. mutating
+      // the fields of one is allowed, as angular and d3 code does that a lot
+      "no-param-reassign": "error",
       "no-return-assign": ["error", "always"],
       "no-var": "error",
       "prefer-const": "error",

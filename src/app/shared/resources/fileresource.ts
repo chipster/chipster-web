@@ -53,19 +53,17 @@ export class FileResource {
   }
 
   getLimitedData(sessionId: string, dataset: Dataset, maxBytes: number, isReqArrayBuffer?: boolean): Observable<any> {
-    if (maxBytes) {
-      maxBytes = Math.min(maxBytes, dataset.size);
-
-      if (maxBytes === 0) {
-        // 0-0 range would produce 416 - Requested range not satisfiable
-        return observableOf("");
-      }
+    // don't ask for more than the file has
+    const limit = maxBytes ? Math.min(maxBytes, dataset.size) : maxBytes;
+    if (maxBytes && limit === 0) {
+      // 0-0 range would produce 416 - Requested range not satisfiable
+      return observableOf("");
     }
 
     const apiUrl$ = this.configService.getFileBrokerUrl();
     let headers = this.tokenService.getTokenHeader();
-    if (maxBytes) {
-      headers = headers.set("range", `bytes=0-${maxBytes}`);
+    if (limit) {
+      headers = headers.set("range", `bytes=0-${limit}`);
     }
 
     if (isReqArrayBuffer) {

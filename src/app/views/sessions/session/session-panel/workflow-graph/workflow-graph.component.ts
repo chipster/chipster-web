@@ -1028,21 +1028,18 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const minX = d3.min(datasetArray, (d) => d.x);
     const minY = d3.min(datasetArray, (d) => d.y);
 
-    if (minX + dx < this.workflowGraphService.nodeMinX) {
-      dx = -(minX - this.workflowGraphService.nodeMinX);
-    }
-
-    if (minY + dy < this.workflowGraphService.nodeMinY) {
-      dy = -(minY - this.workflowGraphService.nodeMinY);
-    }
+    const clampedDx =
+      minX + dx < this.workflowGraphService.nodeMinX ? -(minX - this.workflowGraphService.nodeMinX) : dx;
+    const clampedDy =
+      minY + dy < this.workflowGraphService.nodeMinY ? -(minY - this.workflowGraphService.nodeMinY) : dy;
 
     selectedDatasets
       .attr("x", (d) => {
-        d.x += dx;
+        d.x += clampedDx;
         return d.x;
       })
       .attr("y", (d) => {
-        d.y += dy;
+        d.y += clampedDy;
         return d.y;
       });
 
