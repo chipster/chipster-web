@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
-import { catchError, flatMap, tap } from "rxjs/operators";
+import { catchError, mergeMap, tap } from "rxjs/operators";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { IdPair } from "../../../model/id-pair";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -44,7 +44,7 @@ export class JobsComponent implements OnInit {
         }),
       )
       .pipe(
-        flatMap((url) => {
+        mergeMap((url) => {
           const newJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=NEW");
           const waitingJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=WAITING");
           const scheduledJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=SCHEDULED");
@@ -53,7 +53,7 @@ export class JobsComponent implements OnInit {
         }),
       )
       .pipe(
-        flatMap((newAndRunningJobs) => {
+        mergeMap((newAndRunningJobs) => {
           const newJobs = newAndRunningJobs[0];
           const waitingJobs = newAndRunningJobs[1];
           const scheduledJobs = newAndRunningJobs[2];

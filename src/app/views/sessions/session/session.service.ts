@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
 import { forkJoin, NEVER, Observable } from "rxjs";
-import { flatMap, map, mergeMap, tap } from "rxjs/operators";
+import { map, mergeMap, tap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -29,7 +29,7 @@ export class SessionService {
     this.dialogModalService
       .openSessionNameModal("Rename session", session.name)
       .pipe(
-        flatMap((name: string) => {
+        mergeMap((name: string) => {
           session.name = name;
 
           // 'save' temp session when renaming it
@@ -47,7 +47,7 @@ export class SessionService {
     this.dialogModalService
       .openNotesModal(session)
       .pipe(
-        flatMap((notes: string) => {
+        mergeMap((notes: string) => {
           session.notes = notes;
           return this.updateSession(session);
         }),
