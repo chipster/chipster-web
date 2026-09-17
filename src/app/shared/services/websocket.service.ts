@@ -81,7 +81,7 @@ export class WebSocketService {
           if (err.code === 1001 && err.reason === "Idle Timeout") {
             return EMPTY;
           }
-          return observableThrowError(err);
+          return observableThrowError(() => err);
         }),
       )
       .subscribe(

@@ -15,7 +15,7 @@ import { FileState } from "chipster-js-common/lib/model/dataset";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
-import { Observable, forkJoin, from as observableFrom, merge as observableMerge, of } from "rxjs";
+import { Observable, forkJoin, from as observableFrom, lastValueFrom, merge as observableMerge, of } from "rxjs";
 import { catchError, concatMap, filter, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -134,7 +134,7 @@ export class SessionDataService {
   }
 
   cancelJob(job: Job) {
-    return this.sessionResource.cancelJob(this.sessionId, job).toPromise();
+    return lastValueFrom(this.sessionResource.cancelJob(this.sessionId, job));
   }
 
   deleteJobs(jobs: Job[]) {
@@ -168,7 +168,7 @@ export class SessionDataService {
   }
 
   updateJob(job: Job) {
-    return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
+    return lastValueFrom(this.sessionResource.updateJob(this.getSessionId(), job));
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {

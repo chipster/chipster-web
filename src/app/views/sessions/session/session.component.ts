@@ -121,7 +121,7 @@ export class SessionComponent implements OnInit, OnDestroy {
               const modulesMap$ = this.toolsService.getModulesMap();
               const exampleSessionOwner$ = this.configService.get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID);
 
-              return forkJoin(sessionData$, tools$, modules$, modulesMap$, exampleSessionOwner$);
+              return forkJoin([sessionData$, tools$, modules$, modulesMap$, exampleSessionOwner$]);
             }),
           );
         }),

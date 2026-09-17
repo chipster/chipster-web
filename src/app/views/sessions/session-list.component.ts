@@ -107,7 +107,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         debounceTime(500),
         filter(() => this.selectedSession !== null),
         mergeMap((session) =>
-          forkJoin(this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap()),
+          forkJoin([this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap()]),
         ),
         tap((results) => {
           const sData = results[0];

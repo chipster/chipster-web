@@ -104,10 +104,10 @@ export class SessionService {
    * time.
    */
   getDatasetUrl(sessionId: string, dataset: Dataset): Observable<string> {
-    return forkJoin(
+    return forkJoin([
       this.sessionResource.getTokenForDataset(sessionId, dataset.datasetId),
       this.configService.getFileBrokerUrl(),
-    ).pipe(
+    ]).pipe(
       map((results) => {
         const [datasetToken, url] = results;
         return `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}?token=${datasetToken}`;

@@ -12,7 +12,7 @@ import {
   WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
-import { Observable, Subject, never as observableNever, of as observableOf } from "rxjs";
+import { NEVER, Observable, Subject, of as observableOf } from "rxjs";
 import { catchError, filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -182,11 +182,11 @@ export class SessionEventService {
         );
       }
       // nothing to do, the client reacts when the Rule is deleted
-      return observableNever();
+      return NEVER;
     }
     if (event.type === EventType.Delete) {
       // nothing to do, the client reacts when the Rule is deleted
-      return observableNever();
+      return NEVER;
     }
     log.warn("unknown event type", event);
     return undefined;
@@ -197,7 +197,7 @@ export class SessionEventService {
       // accept only complete datasets, see SessionResource.loadSession()
       if (event.state !== FileState.Complete) {
         log.info("wait until upload is completed", event);
-        return observableNever();
+        return NEVER;
       }
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
@@ -212,7 +212,7 @@ export class SessionEventService {
       // accept only complete datasets, see SessionResource.loadSession()
       if (event.state !== FileState.Complete) {
         log.info("wait until upload is completed", event);
-        return observableNever();
+        return NEVER;
       }
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
