@@ -66,6 +66,11 @@ export default tseslint.config(
       // an inner variable with the name of an outer one is usually a mistake,
       // and reads as one even when it isn't
       "@typescript-eslint/no-shadow": "error",
+      // a cycle breaks only when one of its modules needs a value from
+      // another while it's still being evaluated. angular's dependency
+      // injection hides that, so the session services have grown 17 of these.
+      // warn to keep them visible until they are untangled.
+      "import/no-cycle": "warn",
 
       // our angular components don't use default export
       "import/prefer-default-export": "off",
