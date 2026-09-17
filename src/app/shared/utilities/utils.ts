@@ -40,24 +40,24 @@ export default class UtilsService {
       return selectedItems.length === 0;
     }
 
-    function selectionContains(item: any) {
-      return selectedItems.includes(item);
+    function selectionContains(element: any) {
+      return selectedItems.includes(element);
     }
 
-    function removeFromSelection(item: any) {
-      const index = selectedItems.indexOf(item);
+    function removeFromSelection(element: any) {
+      const index = selectedItems.indexOf(element);
       selectedItems.splice(index, 1);
     }
 
-    function addToSelection(item: any) {
-      if (!selectionContains(item)) {
-        selectedItems.push(item);
+    function addToSelection(element: any) {
+      if (!selectionContains(element)) {
+        selectedItems.push(element);
       }
     }
 
-    function setSelection(item: any) {
+    function setSelection(element: any) {
       selectedItems.length = 0;
-      selectedItems.push(item);
+      selectedItems.push(element);
     }
 
     if (this.isCtrlKey(event)) {

@@ -34,8 +34,8 @@ export class QuerySessionDataService {
    * @param dataset
    */
   getPhenodata(sessionData: SessionData, dataset: Dataset): string {
-    return PhenodataUtils.getPhenodata(dataset, sessionData.jobsMap, sessionData.datasetsMap, (dataset) =>
-      this.isPhenodataType(sessionData, dataset),
+    return PhenodataUtils.getPhenodata(dataset, sessionData.jobsMap, sessionData.datasetsMap, (candidate) =>
+      this.isPhenodataType(sessionData, candidate),
     );
   }
 
@@ -47,8 +47,8 @@ export class QuerySessionDataService {
    * @param dataset
    */
   getPhenodataDataset(sessionData: SessionData, dataset: Dataset): Dataset {
-    return PhenodataUtils.getPhenodataDataset(dataset, sessionData.jobsMap, sessionData.datasetsMap, (dataset) =>
-      this.isPhenodataType(sessionData, dataset),
+    return PhenodataUtils.getPhenodataDataset(dataset, sessionData.jobsMap, sessionData.datasetsMap, (candidate) =>
+      this.isPhenodataType(sessionData, candidate),
     );
   }
 
@@ -57,7 +57,7 @@ export class QuerySessionDataService {
       dataset,
       sessionData.jobsMap,
       sessionData.datasetsMap,
-      (dataset) => this.isPhenodataType(sessionData, dataset),
+      (candidate) => this.isPhenodataType(sessionData, candidate),
     );
   }
 
