@@ -111,6 +111,11 @@ export default tseslint.config(
       // typescript, but nothing does for plain javascript
       "no-var": "error",
       "prefer-const": "error",
+      // and these have no typescript-aware version, so the listing of the
+      // typescript block doesn't reach here
+      "no-param-reassign": "error",
+      "no-shadow": "error",
+      "import/no-extraneous-dependencies": ["error", { devDependencies: false, optionalDependencies: false }],
     },
   },
   {
@@ -130,7 +135,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["playwright.config.ts", "vitest.config.mts", "e2e/**/*.ts", "**/*.spec.ts"],
+    files: ["playwright.config.ts", "vitest.config.mts", "eslint.config.mjs", "e2e/**/*.ts", "**/*.spec.ts"],
     rules: {
       // tooling configs and tests import dev dependencies on purpose
       "import/no-extraneous-dependencies": ["error", { devDependencies: true, optionalDependencies: false }],
