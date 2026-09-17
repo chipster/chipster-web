@@ -49,7 +49,7 @@ export class JobsComponent implements OnInit {
           const waitingJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=WAITING");
           const scheduledJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=SCHEDULED");
           const runningJobs$: Observable<IdPair[]> = <any>this.authHttpClient.getAuth(url + "/jobs?state=RUNNING");
-          return forkJoin(newJobs$, waitingJobs$, scheduledJobs$, runningJobs$);
+          return forkJoin([newJobs$, waitingJobs$, scheduledJobs$, runningJobs$]);
         }),
       )
       .pipe(

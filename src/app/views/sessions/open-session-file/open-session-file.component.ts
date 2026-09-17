@@ -84,7 +84,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
       .pipe(
         mergeMap((response) => {
           if (response.errors.length > 0) {
-            return throwError(response.errors);
+            return throwError(() => response.errors);
           }
 
           log.log("extracted, warnings: ", response.warnings, response, file);

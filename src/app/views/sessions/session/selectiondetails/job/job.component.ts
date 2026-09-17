@@ -4,7 +4,7 @@ import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-com
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
 import log from "loglevel";
-import { Observable, Subject, empty } from "rxjs";
+import { EMPTY, Observable, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -29,7 +29,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
-  duration: Observable<string> = empty();
+  duration: Observable<string> = EMPTY;
   tool: Tool;
   parameterLimit = 12;
   rSessionInfoVisible = false;
@@ -166,7 +166,7 @@ export class JobComponent implements OnInit, OnDestroy {
     this.state = null;
     this.failed = false;
     this.screenOutput = null;
-    this.duration = empty();
+    this.duration = EMPTY;
   }
 
   close() {

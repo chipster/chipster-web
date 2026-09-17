@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
-import { empty, from, Observable } from "rxjs";
+import { EMPTY, from, Observable } from "rxjs";
 import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -102,7 +102,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("storage id request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       map((idResp: object) => (idResp ? idResp["storageId"] : null)),
       tap((idOnStorage: string) => {
@@ -117,7 +117,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("file stats request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       tap((fileStats: FileStats) => {
         this.fileStorageFileStats.set(storageId, fileStats);
@@ -140,7 +140,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("storage status request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       tap((status: object) => {
         this.free.set(storageId, status["diskFree,fs=storage"]);
