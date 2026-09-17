@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
-import { flatMap, map } from "rxjs/operators";
+import { map, mergeMap } from "rxjs/operators";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
@@ -57,7 +57,7 @@ export class SessionDetailsComponent {
     this.dialogModalService
       .openSessionNameModal("Duplicate session", this.session.name + "_copy", "Duplicate")
       .pipe(
-        flatMap((name) => {
+        mergeMap((name) => {
           let copyOrUpdate$;
           if (!this.sessionService.isTemporary(this.sessionData.session)) {
             log.info("duplicate for normal session, copying session");

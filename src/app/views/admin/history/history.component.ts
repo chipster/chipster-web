@@ -3,7 +3,7 @@ import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
-import { flatMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
@@ -132,7 +132,7 @@ export class HistoryComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) =>
+        mergeMap((service) =>
           this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams),
         ),
       )
@@ -153,7 +153,9 @@ export class HistoryComponent implements OnInit {
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
       .pipe(
-        flatMap((service) => this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", pageParams)),
+        mergeMap((service) =>
+          this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", pageParams),
+        ),
       )
       .subscribe(
         (jobHistoryList: JobHistory[]) => {
