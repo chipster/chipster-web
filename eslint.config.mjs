@@ -60,6 +60,9 @@ export default tseslint.config(
       // imports have to be declared in package.json, so that they don't
       // depend on what other packages happen to pull in
       "import/no-extraneous-dependencies": ["error", { devDependencies: false, optionalDependencies: false }],
+      // an inner variable with the name of an outer one is usually a mistake,
+      // and reads as one even when it isn't
+      "@typescript-eslint/no-shadow": "error",
 
       // our angular components don't use default export
       "import/prefer-default-export": "off",

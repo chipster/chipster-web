@@ -155,7 +155,7 @@ export class DatasetService {
     r1Files.forEach((r1File) => {
       const sampleName = r1File.name.substring(0, r1File.name.lastIndexOf(r1Token));
       const r2File = r2Files.find(
-        (r2File) => r2File.name.substring(0, r2File.name.lastIndexOf(r2Token)) === sampleName,
+        (candidate) => candidate.name.substring(0, candidate.name.lastIndexOf(r2Token)) === sampleName,
       );
 
       if (r2File != null) {
