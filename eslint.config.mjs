@@ -88,14 +88,13 @@ export default tseslint.config(
     },
   },
   {
-    // plain javascript, like tooling scripts and this config. these are not
-    // part of tsconfig.json, so the type-aware typescript block above can't
-    // parse them.
+    // plain javascript run by node, like this config and the dev-server proxy
+    // configuration. these are not part of tsconfig.json, so the type-aware
+    // typescript block above can't parse them.
     files: ["**/*.js", "**/*.mjs"],
-    extends: [eslint.configs.recommended],
+    extends: [eslint.configs.recommended, importPlugin.flatConfigs.recommended],
     languageOptions: {
       globals: {
-        ...globals.browser,
         ...globals.node,
       },
     },
