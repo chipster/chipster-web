@@ -24,12 +24,12 @@ export class DatasetDetailsComponent implements OnInit {
 
   ngOnInit() {
     const datasets$ = this.store.select("selectedDatasets");
-    datasets$.subscribe(
-      (datasets: Array<Dataset>) => {
+    datasets$.subscribe({
+      next: (datasets: Array<Dataset>) => {
         this.datasets = datasets;
       },
-      (err) => this.errorService.showError("failed to get the selected datasets from store", err),
-    );
+      error: (err) => this.errorService.showError("failed to get the selected datasets from store", err),
+    });
   }
 
   deleteDatasets() {

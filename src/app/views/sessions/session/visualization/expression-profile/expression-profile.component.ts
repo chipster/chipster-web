@@ -73,8 +73,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
           this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
           this.totalCount = this.tsv.body.size();
@@ -89,11 +89,11 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
             );
           }
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
 
     this.selectedGeneExpressions = [];
     this.viewSelectionList = [];

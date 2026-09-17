@@ -79,8 +79,8 @@ export class JobComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // job selection events, get's current selection upon subscription
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      (selectedJobs: Array<Job>) => {
+    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe({
+      next: (selectedJobs: Array<Job>) => {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
         this.inputListForView = [];
@@ -107,21 +107,21 @@ export class JobComponent implements OnInit, OnDestroy {
         }
         this.update(jobId);
       },
-      (err) => this.errorService.showError("updating selected jobs failed", err),
-    );
+      error: (err) => this.errorService.showError("updating selected jobs failed", err),
+    });
 
     // job modification events
     this.sessionEventService
       .getJobStream()
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (sessionEvent: SessionEvent) => {
+      .subscribe({
+        next: (sessionEvent: SessionEvent) => {
           if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
             this.update(this.job.jobId);
           }
         },
-        (err) => this.errorService.showError("getting job events failed", err),
-      );
+        error: (err) => this.errorService.showError("getting job events failed", err),
+      });
   }
 
   // get job from session data and update state fields

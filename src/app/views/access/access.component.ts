@@ -18,16 +18,16 @@ export class AccessComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.configService.get(ConfigService.KEY_ACCESS_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_ACCESS_PATH).subscribe({
+      next: (path) => {
         if (path) {
           this.file = this.routeService.basename(path);
           this.manualPath = this.routeService.dirname(path) + "/";
         }
       },
-      (err) => {
+      error: (err) => {
         this.errorService.showError("Failed to get the access page path", err);
       },
-    );
+    });
   }
 }

@@ -70,16 +70,16 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.sessionDataService
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (url) => {
+      .subscribe({
+        next: (url) => {
           this.src = url;
           this.urlReady = true;
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Loading, "Loading pdf file failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {

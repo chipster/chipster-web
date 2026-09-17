@@ -51,15 +51,15 @@ export class UserService {
           return this.authenticationService.updateUser(user);
         }),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           log.info("update latest session to sessionDb successful");
         },
-        (err) => {
+        error: (err) => {
           // maybe log is enough
           log.warn("updating latest session to sessionDb failed", err);
         },
-      );
+      });
   }
 
   getLatestSession(): Observable<string> {

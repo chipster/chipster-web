@@ -48,7 +48,7 @@ export class UserEventService {
     );
 
     // update userEventData even if no one else subscribes
-    this.ruleStream$.subscribe(null, (err) => this.errorService.showError("error in rule events", err));
+    this.ruleStream$.subscribe({ error: (err) => this.errorService.showError("error in rule events", err) });
   }
 
   getRuleStream() {

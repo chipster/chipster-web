@@ -27,12 +27,12 @@ export class TermsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe({
+      next: (path) => {
         this.termsOfUse = path;
       },
-      (err) => this.restErrorService.showError("failed to get the configuration", err),
-    );
+      error: (err) => this.restErrorService.showError("failed to get the configuration", err),
+    });
 
     this.route.queryParams
       .pipe(
@@ -63,11 +63,11 @@ export class TermsComponent implements OnInit {
           return this.authenticationService.updateUser(user);
         }),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.routeService.navigateAbsolute("/sessions");
         },
-        (err) => this.restErrorService.showError("updating the user object failed", err),
-      );
+        error: (err) => this.restErrorService.showError("updating the user object failed", err),
+      });
   }
 }

@@ -97,11 +97,11 @@ export class AuthenticationService {
           );
         }),
       )
-      .subscribe(
-        (response: string) => {
+      .subscribe({
+        next: (response: string) => {
           this.tokenService.setAuthToken(response);
         },
-        (error: any) => {
+        error: (error: any) => {
           if (error.status === 403) {
             log.info("got forbidden when trying to refresh token, stopping periodic token refresh");
             this.stopTokenRefresh();
@@ -109,7 +109,7 @@ export class AuthenticationService {
             log.info("refresh token failed", error.status, error.statusText);
           }
         },
-      );
+      });
   }
 
   checkToken(): Observable<boolean> {

@@ -26,24 +26,24 @@ export class SelectionService implements OnDestroy {
     this.store
       .select("selectedDatasets")
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (datasets: Array<Dataset>) => {
+      .subscribe({
+        next: (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
         },
-        (error: any) => this.errorService.showError("Error fetching datasets from store", error),
-      );
+        error: (error: any) => this.errorService.showError("Error fetching datasets from store", error),
+      });
 
     // Sync selected jobs from store
     this.selectedJobs$ = this.store.select("selectedJobs");
     this.store
       .select("selectedJobs")
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (jobs: Array<Job>) => {
+      .subscribe({
+        next: (jobs: Array<Job>) => {
           this.selectedJobs = jobs;
         },
-        (err) => this.errorService.showError("Error fetching selected jobs from store", err),
-      );
+        error: (err) => this.errorService.showError("Error fetching selected jobs from store", err),
+      });
   }
 
   isJobSelected(): boolean {

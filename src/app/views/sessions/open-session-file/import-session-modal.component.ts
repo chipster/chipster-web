@@ -33,16 +33,16 @@ export class ImportSessionModalComponent {
 
     this.fileStatus.set(file, "Creating session");
 
-    this.sessionResource.createSession(session).subscribe(
-      (sessionId) => {
+    this.sessionResource.createSession(session).subscribe({
+      next: (sessionId) => {
         // progress bar is enough for the upload status
         this.fileStatus.set(file, undefined);
         this.uploadService.startUpload(sessionId, file, true);
       },
-      (err) => {
+      error: (err) => {
         this.error(file, err);
       },
-    );
+    });
   }
 
   getFiles() {
@@ -58,12 +58,12 @@ export class ImportSessionModalComponent {
   cancel(file: any) {
     file.cancel();
     this.fileStatus.delete(file);
-    this.sessionResource.deleteSession(file.chipsterSessionId).subscribe(
-      () => {
+    this.sessionResource.deleteSession(file.chipsterSessionId).subscribe({
+      next: () => {
         console.log("session deleted");
       },
-      (err) => this.restErrorService.showError("session delete failed", err),
-    );
+      error: (err) => this.restErrorService.showError("session delete failed", err),
+    });
   }
 
   closeModal() {

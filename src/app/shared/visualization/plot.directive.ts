@@ -102,8 +102,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
           this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
           if (this.tsv.body.size() > rowLimit) {
@@ -123,11 +123,11 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
             this.checkTSVHeaders(); // will set this.state
           }
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {

@@ -20,11 +20,11 @@ export class UsersComponent implements OnInit {
   ngOnInit() {
     this.users = [];
 
-    this.authenticationService.getUsers().subscribe(
-      (users: User[]) => {
+    this.authenticationService.getUsers().subscribe({
+      next: (users: User[]) => {
         this.users = users;
       },
-      (err) => this.restErrorService.showError("get users failed", err),
-    );
+      error: (err) => this.restErrorService.showError("get users failed", err),
+    });
   }
 }

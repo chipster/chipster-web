@@ -16,14 +16,14 @@ export class SpinnerModalComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    this.observable.subscribe(
-      (result) => {
+    this.observable.subscribe({
+      next: (result) => {
         this.activeModal.close(result);
       },
-      (err) => {
+      error: (err) => {
         this.restErrorService.showError(`${this.message} failed`, err);
         this.activeModal.dismiss();
       },
-    );
+    });
   }
 }

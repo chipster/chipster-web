@@ -63,8 +63,8 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (result: any) => {
           const arrayBuffer = result;
 
           if (arrayBuffer) {
@@ -84,11 +84,11 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
             this.state = new LoadState(State.Ready, "Loading Bam file complete");
           }
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Fail, "Loading bam file failed");
           this.errorHandlerService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {

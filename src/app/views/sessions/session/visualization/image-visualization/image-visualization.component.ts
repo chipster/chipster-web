@@ -38,16 +38,16 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
     this.sessionDataService
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (url) => {
+      .subscribe({
+        next: (url) => {
           this.src = url;
           this.state = new LoadState(State.Ready);
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Fail, "Loading image file failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {
