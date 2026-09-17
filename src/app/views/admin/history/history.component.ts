@@ -110,11 +110,9 @@ export class HistoryComponent implements OnInit {
 
   appendStringParam(params, attribute, value, comparison) {
     if (attribute != null && attribute.length > 0 && value != null && value.length > 0) {
-      if (comparison === this.comparisonIsNot) {
-        value = "!" + value;
-      }
+      const paramValue = comparison === this.comparisonIsNot ? "!" + value : value;
 
-      params = params.append(attribute, value);
+      params = params.append(attribute, paramValue);
     }
     return params;
   }

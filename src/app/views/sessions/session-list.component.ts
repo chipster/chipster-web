@@ -229,11 +229,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .openSessionNameModal("New session", defaultName, "Create")
       .pipe(
         mergeMap((name) => {
-          if (!name) {
-            name = defaultName;
-          }
-
-          session = new Session(name);
+          session = new Session(name || defaultName);
           session.state = SessionState.Ready;
           return this.sessionResource.createSession(session);
         }),

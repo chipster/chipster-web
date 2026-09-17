@@ -91,13 +91,13 @@ export class WorkflowGraphService {
     // layout nodes with parents
     // sort by the creation date to make parents precede their children in the array and to make this
     // more deterministic
-    datasets = datasets
+    const sortedDatasets = [...datasets]
       .sort((a, b) => UtilsService.compareStringNullSafe(a.created, b.created))
       .filter((d) => d.x == null && d.y == null);
 
     const datasetsToUpdate = [];
 
-    datasets.forEach((d) => {
+    sortedDatasets.forEach((d) => {
       datasetsToUpdate.push(...this.doLayoutRecursive(d.datasetId, datasetMap, jobMap));
     });
 

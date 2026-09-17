@@ -592,13 +592,9 @@ export class SessionResource {
       sessionData.jobsMap.size,
       "jobs",
     );
-    if (!name) {
-      name = "unnamed session";
-    }
-
     const newSession: Session = clone(sessionData.session);
     newSession.sessionId = null;
-    newSession.name = name;
+    newSession.name = name || "unnamed session";
     newSession.state = SessionState.Import;
 
     // create session

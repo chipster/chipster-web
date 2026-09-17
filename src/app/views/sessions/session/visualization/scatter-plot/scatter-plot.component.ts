@@ -46,8 +46,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       // Extracting header name without chip prefix
       this.visualizationTSVService.getChipHeaders(this.tsv).forEach((chipHeader) => {
-        chipHeader = chipHeader.replace("chip.", "");
-        this.chipHeaders.push(chipHeader);
+        this.chipHeaders.push(chipHeader.replace("chip.", ""));
       });
       if (this.chipHeaders.length >= 2) {
         this.selectedXAxisHeader = this.chipHeaders[0];
