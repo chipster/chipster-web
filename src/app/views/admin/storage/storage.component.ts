@@ -457,13 +457,13 @@ export class StorageComponent implements OnInit {
           this.authHttpClient.getAuth(service.adminUri + "/admin/users/sessions?userId=" + encodeURIComponent(user)),
         ),
       )
-      .subscribe(
-        (result: any[]) => {
+      .subscribe({
+        next: (result: any[]) => {
           this.sessions = result[0]?.sessions;
           this.userSessionsState = new LoadState(State.Ready);
         },
-        (err) => this.restErrorService.showError("get quotas failed", err),
-      );
+        error: (err) => this.restErrorService.showError("get quotas failed", err),
+      });
   }
 
   getFilteredCount(gridApi: GridApi): number {

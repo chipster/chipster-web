@@ -49,8 +49,8 @@ export class NavigationComponent implements OnInit {
 
   ngOnInit() {
     // apply configurable styles
-    this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_CUSTOM_CSS).subscribe({
+      next: (path) => {
         if (path) {
           log.info("load custom css from", path);
           const link = document.createElement("link");
@@ -62,27 +62,27 @@ export class NavigationComponent implements OnInit {
           document.getElementsByTagName("head")[0].appendChild(link);
         }
       },
-      (err) => {
+      error: (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the custom css path", err);
         this.errorService.showError("failed to get the custom css path", err);
       },
-    );
+    });
 
-    this.configService.get(ConfigService.KEY_APP_NAME).subscribe(
-      (name) => {
+    this.configService.get(ConfigService.KEY_APP_NAME).subscribe({
+      next: (name) => {
         if (name) {
           this.appName = name;
           document.title = name;
           this.appNameReady = true;
         }
       },
-      (err) => {
+      error: (err) => {
         // why error service doesn't show these reliably?
         log.error("failed to get the app name", err);
         this.errorService.showError("failed to get the app name", err);
       },
-    );
+    });
 
     // news
     if (this.isLoggedIn()) {

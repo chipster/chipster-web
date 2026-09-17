@@ -90,8 +90,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions()),
       )
-      .subscribe(null, (error: any) => {
-        this.restErrorService.showError("Updating sessions failed", error);
+      .subscribe({
+        error: (error: any) => {
+          this.restErrorService.showError("Updating sessions failed", error);
+        },
       });
 
     // Need to check this part very carefully!!!!!!!
@@ -125,13 +127,13 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.workflowPreviewLoading = false;
         }),
       )
-      .subscribe(
-        () => {},
-        (error: any) => {
+      .subscribe({
+        next: () => {},
+        error: (error: any) => {
           this.workflowPreviewFailed = true;
           this.restErrorService.showError("Loading session preview failed", error);
         },
-      );
+      });
   }
 
   /**
@@ -194,8 +196,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
         mergeMap(() => this.userEventService.getRuleStream()),
         takeUntil(this.unsubscribe),
       )
-      .subscribe(
-        (wsEvent: WsEvent) => {
+      .subscribe({
+        next: (wsEvent: WsEvent) => {
           this.updateSessions();
           const sessionId = wsEvent.sessionId;
           // if the session was just removed
@@ -208,10 +210,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
             });
           }
         },
-        (err) => {
+        error: (err) => {
           this.restErrorService.showError("Error in event handling", err);
         },
-      );
+      });
   }
 
   ngOnDestroy() {
@@ -238,20 +240,22 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.openSession(sessionId);
         }),
       )
-      .subscribe(null, (error: any) => {
-        this.restErrorService.showError("Creating a new session failed", error);
+      .subscribe({
+        error: (error: any) => {
+          this.restErrorService.showError("Creating a new session failed", error);
+        },
       });
   }
 
   updateStats() {
-    this.sessionResource.getStats().subscribe(
-      (stats: {}) => {
+    this.sessionResource.getStats().subscribe({
+      next: (stats: {}) => {
         this.stats = stats;
       },
-      (error: any) => {
+      error: (error: any) => {
         this.restErrorService.showError("failed to get session statistics", error);
       },
-    );
+    });
   }
 
   updateSessions() {
@@ -446,8 +450,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
   acceptSession(session: Session) {
     const rule = session.rules[0];
     rule.sharedBy = null;
-    this.sessionResource.updateRule(session.sessionId, rule).subscribe(null, (error: any) => {
-      this.restErrorService.showError("Failed to accept the share", error);
+    this.sessionResource.updateRule(session.sessionId, rule).subscribe({
+      error: (error: any) => {
+        this.restErrorService.showError("Failed to accept the share", error);
+      },
     });
   }
 
@@ -509,13 +515,15 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
         // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
         // delete the session only from this user (i.e. the rule)
-        this.sessionDataService.deletePersonalRules(session).subscribe(null, (error: any) => {
-          // FIXME close preview if open
-          this.deletingSessions.delete(session);
-          this.restErrorService.showError(
-            isPendingShare ? "Declining the share failed" : "Deleting session failed",
-            error,
-          );
+        this.sessionDataService.deletePersonalRules(session).subscribe({
+          error: (error: any) => {
+            // FIXME close preview if open
+            this.deletingSessions.delete(session);
+            this.restErrorService.showError(
+              isPendingShare ? "Declining the share failed" : "Deleting session failed",
+              error,
+            );
+          },
         });
       },
       () => {
@@ -529,8 +537,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
       .openBooleanModal("Stop sharing", `Stop sharing with ${rule.username}?`, "Stop sharing", "Cancel")
       .then(
         () => {
-          this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe(null, (error: any) => {
-            this.restErrorService.showError("Deleting the share failed", error);
+          this.sessionResource.deleteRule(session.sessionId, rule.ruleId).subscribe({
+            error: (error: any) => {
+              this.restErrorService.showError("Deleting the share failed", error);
+            },
           });
         },
         () => {
@@ -584,8 +594,10 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionResource
       .getSession(session.sessionId)
       .pipe(tap((s) => this.dialogModalService.openSharingModal(s, this.userEventService.applyRuleStreamOfSession(s))))
-      .subscribe(null, (err) => {
-        this.restErrorService.showError("Get session failed", err);
+      .subscribe({
+        error: (err) => {
+          this.restErrorService.showError("Get session failed", err);
+        },
       });
   }
 
@@ -609,15 +621,15 @@ export class SessionListComponent implements OnInit, OnDestroy {
           return this.dialogModalService.openSpinnerModal("Duplicate session", copySessionObservable);
         }),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           log.info("updating sessions after duplicate");
           this.updateSessions();
         },
-        (err) => {
+        error: (err) => {
           this.restErrorService.showError("Duplicate session failed", err);
         },
-      );
+      });
   }
 
   sessionMenuOpenChange(open: boolean) {

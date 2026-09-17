@@ -44,16 +44,16 @@ export class StatisticsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.configService.get(ConfigService.KEY_STATISTICS_IGNORE_USERS).subscribe(
-      (usersString) => {
+    this.configService.get(ConfigService.KEY_STATISTICS_IGNORE_USERS).subscribe({
+      next: (usersString) => {
         if (usersString) {
           this.ignoreUsersControl.setValue(usersString);
         }
       },
-      (err) => {
+      error: (err) => {
         this.errorHandlerService.showError("Failed to get ignoreUsers default", err);
       },
-    );
+    });
   }
 
   public onSubmit(): void {
@@ -79,16 +79,16 @@ export class StatisticsComponent implements OnInit {
           this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/statistics", params),
         ),
       )
-      .subscribe(
-        (result) => {
+      .subscribe({
+        next: (result) => {
           this.userCount = result["userCount"];
           this.jobCount = result["jobCount"];
           this.state = LoadState.Ready;
         },
-        (err) => {
+        error: (err) => {
           this.state = LoadState.Fail;
           this.errorHandlerService.showError("get statistics failed", err);
         },
-      );
+      });
   }
 }

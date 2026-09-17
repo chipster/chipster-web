@@ -40,7 +40,7 @@ export class SessionService {
           return this.updateSession(session);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("Rename session failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Rename session failed", err) });
   }
 
   openNotesModalAndUpdate(session: Session) {
@@ -52,7 +52,7 @@ export class SessionService {
           return this.updateSession(session);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("Failed to edit session notes", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Failed to edit session notes", err) });
   }
 
   downloadSession(sessionId: string) {
@@ -124,13 +124,13 @@ export class SessionService {
   }
 
   download(url$: Observable<string>) {
-    url$.subscribe(
-      (url) => {
+    url$.subscribe({
+      next: (url) => {
         window.location.href = url;
       },
-      (err) => {
+      error: (err) => {
         this.errorService.showError("starting download failed", err);
       },
-    );
+    });
   }
 }

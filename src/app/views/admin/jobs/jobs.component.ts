@@ -78,12 +78,12 @@ export class JobsComponent implements OnInit {
           return forkJoin(jobs$);
         }),
       )
-      .subscribe(
-        (jobs) => {
+      .subscribe({
+        next: (jobs) => {
           this.jobs = jobs;
         },
-        (err) => this.restErrorService.showError("get jobs failed", err),
-      );
+        error: (err) => this.restErrorService.showError("get jobs failed", err),
+      });
   }
 
   isRunning(job: Job) {

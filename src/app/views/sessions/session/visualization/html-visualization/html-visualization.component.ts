@@ -41,19 +41,19 @@ export class HtmlvisualizationComponent implements OnChanges, OnDestroy {
     this.sessionDataService
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (url) => {
+      .subscribe({
+        next: (url) => {
           this.linkSrc = url;
           // we have to encode the url to get in one piece to the other side, because it contains
           // a query parameter itself
           this.src = encodeURIComponent(url);
           this.state = new LoadState(State.Ready);
         },
-        (error: any) => {
+        error: (error: any) => {
           this.state = new LoadState(State.Fail, "Loading html file failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {

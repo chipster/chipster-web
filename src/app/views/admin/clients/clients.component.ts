@@ -27,8 +27,8 @@ export class ClientsComponent implements OnInit {
     this.configService
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
       .pipe(mergeMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
-      .subscribe(
-        (topics: any[]) => {
+      .subscribe({
+        next: (topics: any[]) => {
           this.users = [];
 
           // filter out server topics and get values as an array
@@ -53,7 +53,7 @@ export class ClientsComponent implements OnInit {
             });
           });
         },
-        (err) => this.restErrorService.showError("get clients failed", err),
-      );
+        error: (err) => this.restErrorService.showError("get clients failed", err),
+      });
   }
 }

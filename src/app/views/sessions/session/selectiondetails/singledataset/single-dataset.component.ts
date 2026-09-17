@@ -67,7 +67,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
     this.sessionDataService
       .updateDataset(dataset)
-      .subscribe(null, (err) => this.restErrorService.showError("saving notes failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("saving notes failed", err) });
     input.placeholder = this.notesPlaceholderInactive;
   }
 

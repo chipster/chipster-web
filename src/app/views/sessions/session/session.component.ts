@@ -126,8 +126,8 @@ export class SessionComponent implements OnInit, OnDestroy {
           );
         }),
       )
-      .subscribe(
-        (results) => {
+      .subscribe({
+        next: (results) => {
           // save loaded stuff
           this.sessionData = results[0];
           this.tools = results[1];
@@ -147,7 +147,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           // ready to go
           this.state = ComponentState.READY;
         },
-        (error: Error) => {
+        error: (error: Error) => {
           if (RestErrorService.isNotFound(error)) {
             this.state = ComponentState.NOT_FOUND;
           } else {
@@ -155,11 +155,11 @@ export class SessionComponent implements OnInit, OnDestroy {
             this.restErrorService.showError("Loading session failed", error);
           }
         },
-      );
+      });
 
     // subscribe to view settings
-    this.settingsService.showToolsPanel$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      (showToolsPanel: boolean) => {
+    this.settingsService.showToolsPanel$.pipe(takeUntil(this.unsubscribe)).subscribe({
+      next: (showToolsPanel: boolean) => {
         if (showToolsPanel) {
           this.split3Visible = true;
           this.split1Size = 30;
@@ -172,8 +172,8 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.split3Size = 33;
         }
       },
-      (err) => this.errorService.showError("tool panel error", err),
-    );
+      error: (err) => this.errorService.showError("tool panel error", err),
+    });
   }
 
   /**
@@ -325,8 +325,8 @@ export class SessionComponent implements OnInit, OnDestroy {
       .getJobStream()
       .pipe(takeUntil(this.unsubscribe))
 
-      .subscribe(
-        (change) => {
+      .subscribe({
+        next: (change) => {
           const event = change.event;
           const oldValue = change.oldValue as Job;
           const newValue = change.newValue as Job;
@@ -368,8 +368,8 @@ export class SessionComponent implements OnInit, OnDestroy {
             }
           }
         },
-        (err) => this.errorService.showError("session event error", err),
-      );
+        error: (err) => this.errorService.showError("session event error", err),
+      });
   }
 
   getJob(jobId: string): Job {
@@ -460,12 +460,12 @@ export class SessionComponent implements OnInit, OnDestroy {
   public onDeleteSession(): void {
     this.state = ComponentState.DELETING_SESSION;
 
-    this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe(
-      () => {
+    this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe({
+      next: () => {
         log.debug("delete session request done");
       },
-      (err) => this.restErrorService.showError("delete session failed", err),
-    );
+      error: (err) => this.restErrorService.showError("delete session failed", err),
+    });
   }
 
   askKeepOrDiscardSession(): Observable<boolean> {

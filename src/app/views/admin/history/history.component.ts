@@ -136,14 +136,14 @@ export class HistoryComponent implements OnInit {
           this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory/rowcount", filterParams),
         ),
       )
-      .subscribe(
-        (recordNumber) => {
+      .subscribe({
+        next: (recordNumber) => {
           this.jobNumber = recordNumber;
           this.collectionSize = Math.ceil(recordNumber / 500) * 10;
           this.updateJobs(filterParams);
         },
-        (err) => this.errorHandlerService.showError("get job numbers failed", err),
-      );
+        error: (err) => this.errorHandlerService.showError("get job numbers failed", err),
+      });
   }
 
   updateJobs(filterParams) {
@@ -157,14 +157,14 @@ export class HistoryComponent implements OnInit {
           this.auhtHttpClient.getAuthWithParams(service.adminUri + "/admin/jobhistory", pageParams),
         ),
       )
-      .subscribe(
-        (jobHistoryList: JobHistory[]) => {
+      .subscribe({
+        next: (jobHistoryList: JobHistory[]) => {
           this.jobListLoading = false;
           this.jobs = jobHistoryList;
           this.updateTime = new Date();
         },
-        (err) => this.errorHandlerService.showError("failed to get jobs", err),
-      );
+        error: (err) => this.errorHandlerService.showError("failed to get jobs", err),
+      });
   }
 
   reset() {

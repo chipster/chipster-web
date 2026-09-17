@@ -22,17 +22,17 @@ export class ContactComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe({
+      next: (path) => {
         if (path) {
           this.contactFile = this.routeService.basename(path);
           this.contactPath = this.routeService.dirname(path) + "/";
         }
       },
-      (err) => {
+      error: (err) => {
         this.errorService.showError("failed to get the contact page path", err);
       },
-    );
+    });
   }
 
   isLoggedIn() {

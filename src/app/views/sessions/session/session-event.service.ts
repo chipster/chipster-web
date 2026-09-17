@@ -57,12 +57,12 @@ export class SessionEventService {
     this.websocketService.connect(this.localSubject$, "sessions/" + sessionId);
 
     // track any changes to session
-    stream.subscribe(
-      () => {
+    stream.subscribe({
+      next: () => {
         this.sessionHasChanged = true;
       },
-      (err) => this.errorService.showError("session change tracking failed", err),
-    );
+      error: (err) => this.errorService.showError("session change tracking failed", err),
+    });
 
     this.datasetStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Dataset),
@@ -102,11 +102,11 @@ export class SessionEventService {
     );
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe(null, (err) => this.errorService.showError("dataset event error", err));
-    this.jobStream$.subscribe(null, (err) => this.errorService.showError("job event error", err));
-    this.sessionStream$.subscribe(null, (err) => this.errorService.showError("session event error", err));
-    this.ruleStream$.subscribe(null, (err) => this.errorService.showError("rule event error", err));
-    this.labelStream$.subscribe(null, (err) => this.errorService.showError("label event error", err));
+    this.datasetStream$.subscribe({ error: (err) => this.errorService.showError("dataset event error", err) });
+    this.jobStream$.subscribe({ error: (err) => this.errorService.showError("job event error", err) });
+    this.sessionStream$.subscribe({ error: (err) => this.errorService.showError("session event error", err) });
+    this.ruleStream$.subscribe({ error: (err) => this.errorService.showError("rule event error", err) });
+    this.labelStream$.subscribe({ error: (err) => this.errorService.showError("label event error", err) });
   }
 
   /**

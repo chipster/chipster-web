@@ -27,13 +27,13 @@ export class TabService {
     // window has to be opened synchronously, otherwise the pop-up blocker will prevent it
     const win: any = window.open("", "_blank");
     if (win) {
-      url$.subscribe(
-        (url) => {
+      url$.subscribe({
+        next: (url) => {
           // but we can set it's location later asynchronously
           win.location.href = url;
         },
-        (err) => this.restErrorService.showError("opening a new tab failed", err),
-      );
+        error: (err) => this.restErrorService.showError("opening a new tab failed", err),
+      });
     } else {
       // popup blocker prevented this
       this.errorService.showError(popupErrorText, null);

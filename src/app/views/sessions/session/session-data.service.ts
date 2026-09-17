@@ -139,24 +139,24 @@ export class SessionDataService {
 
   deleteJobs(jobs: Job[]) {
     const deleteJobs$ = jobs.map((job: Job) => this.sessionResource.deleteJob(this.getSessionId(), job.jobId));
-    observableMerge(...deleteJobs$).subscribe(
-      () => {
+    observableMerge(...deleteJobs$).subscribe({
+      next: () => {
         log.info("Job deleted");
       },
-      (err) => this.restErrorService.showError("delete jobs failed", err),
-    );
+      error: (err) => this.restErrorService.showError("delete jobs failed", err),
+    });
   }
 
   deleteDatasets(datasets: Dataset[], sessionId: string) {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(sessionId, dataset.datasetId),
     );
-    observableMerge(...deleteDatasets$).subscribe(
-      () => {
+    observableMerge(...deleteDatasets$).subscribe({
+      next: () => {
         log.info("Dataset deleted");
       },
-      (err) => this.restErrorService.showError("delete datasets failed", err),
-    );
+      error: (err) => this.restErrorService.showError("delete datasets failed", err),
+    });
   }
 
   updateDataset(dataset: Dataset) {

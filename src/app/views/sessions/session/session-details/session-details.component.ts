@@ -77,14 +77,14 @@ export class SessionDetailsComponent {
           return this.dialogModalService.openSpinnerModal("Duplicate session", copyOrUpdate$);
         }),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           if (newSessionId != null) {
             this.routeService.navigateToSession(newSessionId);
           }
         },
-        (err) => this.restErrorService.showError("Duplicate session failed", err),
-      );
+        error: (err) => this.restErrorService.showError("Duplicate session failed", err),
+      });
   }
 
   downloadSession() {

@@ -79,8 +79,8 @@ export class UploadService {
   }
 
   startUpload(sessionId: string, file: any, temporary: boolean) {
-    forkJoin([this.configService.getFileBrokerUrl(), this.createDataset(sessionId, file.name)]).subscribe(
-      (value: [string, Dataset]) => {
+    forkJoin([this.configService.getFileBrokerUrl(), this.createDataset(sessionId, file.name)]).subscribe({
+      next: (value: [string, Dataset]) => {
         const url = value[0];
         const dataset = value[1];
         file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
@@ -94,8 +94,8 @@ export class UploadService {
         file.chipsterDatasetId = dataset.datasetId;
         file.resume();
       },
-      (err) => this.restErrorService.showError("upload failed", err),
-    );
+      error: (err) => this.restErrorService.showError("upload failed", err),
+    });
   }
 
   private createDataset(sessionId: string, name: string): Observable<Dataset> {

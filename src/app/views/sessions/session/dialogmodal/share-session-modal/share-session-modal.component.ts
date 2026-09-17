@@ -40,12 +40,12 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit() {
     this.rules = this.session.rules;
-    this.ruleStream$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      () => {
+    this.ruleStream$.pipe(takeUntil(this.unsubscribe)).subscribe({
+      next: () => {
         this.rules = this.session.rules;
       },
-      (err) => this.errorService.showError("getting rule events failed", err),
-    );
+      error: (err) => this.errorService.showError("getting rule events failed", err),
+    });
   }
 
   ngOnDestroy() {
@@ -78,13 +78,13 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
     this.newRule.username = this.newRule.username.trim();
-    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe(
-      (resp) => {
+    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe({
+      next: (resp) => {
         log.info("rule created", resp);
         this.newRule = null;
       },
-      (err) => this.restErrorService.showError("failed to add a new rule", err),
-    );
+      error: (err) => this.restErrorService.showError("failed to add a new rule", err),
+    });
   }
 
   addNewRule() {
@@ -107,10 +107,10 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     modalRef.componentInstance.cancelButtonText = "Cancel";
     modalRef.result.then(
       () => {
-        this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe(
-          () => log.info("rule deleted"),
-          (err) => this.restErrorService.showError("failed to delete the rule", err),
-        );
+        this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe({
+          next: () => log.info("rule deleted"),
+          error: (err) => this.restErrorService.showError("failed to delete the rule", err),
+        });
       },
       () => {
         // modal dismissed

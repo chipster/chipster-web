@@ -98,8 +98,8 @@ export class WrangleModalComponent implements OnInit {
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, this.dataset.size)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (result: any) => {
           // sanity check
 
           if (result.length !== this.dataset.size) {
@@ -152,11 +152,11 @@ export class WrangleModalComponent implements OnInit {
 
           this.state = new LoadState(State.Ready);
         },
-        (error: Response) => {
+        error: (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   getCellClass(params): string {

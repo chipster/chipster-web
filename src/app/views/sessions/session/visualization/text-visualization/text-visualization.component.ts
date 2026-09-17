@@ -56,16 +56,16 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (response: any) => {
+      .subscribe({
+        next: (response: any) => {
           this.data = response;
           this.state = new LoadState(State.Ready);
         },
-        (error: Response) => {
+        error: (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.errorHandlerService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngOnDestroy() {
