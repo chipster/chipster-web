@@ -1,7 +1,7 @@
 import { Component, Input, NgZone, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
-import { filter, map, find, difference, uniq, includes, floor, intersection, range, flatMap, minBy } from "lodash-es";
+import { filter, map, find, difference, uniq, floor, intersection, range, flatMap, minBy } from "lodash-es";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -512,9 +512,13 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       this.removeSelectionStyle(id);
     }
 
-    const selectedGeneIds = filter(this.getSelectionIds(), (selectionId) => !includes(ids, selectionId));
-    this.selectedGeneExpressions = map(selectedGeneIds, (id) =>
-      this.visualizationTSVService.getGeneExpression(this.tsv, id),
+    /*
+     * The gene expressions of the remaining selection are in this array already,
+     * so drop the removed ones instead of looking them all up again.
+     */
+    const removedIds = new Set(ids);
+    this.selectedGeneExpressions = this.selectedGeneExpressions.filter(
+      (geneExpression: GeneExpression) => !removedIds.has(geneExpression.id),
     );
     this.setViewSelectionList();
   }
@@ -522,9 +526,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   addSelections(ids: Array<string>) {
     const selectionIds = this.getSelectionIds();
     const missingSelectionIds = difference(ids, selectionIds);
-    const missingGeneExpressions = map(missingSelectionIds, (id) =>
-      this.visualizationTSVService.getGeneExpression(this.tsv, id),
-    );
+    // look up the rows of the whole selection at once, a row at a time takes seconds over a large file
+    const missingGeneExpressions = this.visualizationTSVService.getGeneExpressionsByIds(this.tsv, missingSelectionIds);
     this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
     missingSelectionIds.forEach((id) => {
       this.setSelectionStyle(id);

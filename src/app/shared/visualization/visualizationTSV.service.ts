@@ -60,6 +60,18 @@ export class VisualizationTSVService {
   }
 
   /*
+   * create new GeneExpressions from data with the given ids
+   *
+   * The rows are looked up in one pass and the chip header indexes are searched
+   * once, unlike in a loop of getGeneExpression(). The results are in the order
+   * of the file, not in the order of the ids.
+   */
+  public getGeneExpressionsByIds(tsv: TSVFile, ids: Array<string>): Array<GeneExpression> {
+    const chipIndexes = this.getChipHeaderIndexes(tsv.headers);
+    return map(tsv.body.getTSVRows(ids), (row: TSVRow) => this.getGeneExpressionsByIndex(row, chipIndexes));
+  }
+
+  /*
    * Return a single GeneExpression based on id for the TSVRow and the values in indexes of row
    */
   getGeneExpressionsByIndex(row: TSVRow, indexes: Array<number>): GeneExpression {
