@@ -13,7 +13,7 @@ import {
 } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, of as observableOf } from "rxjs";
-import { catchError, filter, map, mergeMap, publish, refCount } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -52,7 +52,7 @@ export class SessionEventService {
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(publish(), refCount());
+    const stream = this.localSubject$.asObservable();
 
     this.websocketService.connect(this.localSubject$, "sessions/" + sessionId);
 
@@ -69,36 +69,31 @@ export class SessionEventService {
       mergeMap((data) => this.handleDatasetEvent(data, this.sessionId, sessionData)),
       // update type tags before letting other parts of the client know about this change
       mergeMap((sessionEvent) => this.updateTypeTags(this.sessionId, sessionEvent, sessionData)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     this.jobStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Job),
       mergeMap((data) => this.handleJobEvent(data, this.sessionId, sessionData)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     this.sessionStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Session),
       mergeMap((data) => this.handleSessionEvent(data, this.sessionId, sessionData)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
       mergeMap((data) => this.handleRuleEvent(data, sessionData.session)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     this.labelStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Label),
       mergeMap((data) => this.handleLabelEvent(data, this.sessionId, sessionData)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     // update sessionData even if no one else subscribes
