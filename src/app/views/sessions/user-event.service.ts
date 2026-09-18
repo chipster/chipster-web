@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject, of } from "rxjs";
-import { filter, map, mergeMap, publish, refCount } from "rxjs/operators";
+import { filter, map, mergeMap, share } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { SessionResource } from "../../shared/resources/session.resource";
@@ -36,15 +36,14 @@ export class UserEventService {
     this.topic = topic;
 
     this.localSubject$ = new Subject();
-    const stream = this.localSubject$.pipe(publish(), refCount());
+    const stream = this.localSubject$.asObservable();
 
     this.webSocketService.connect(this.localSubject$, "users/" + topic);
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
       mergeMap((data) => this.handleRuleEvent(data, data.sessionId, userEventData)),
-      publish(),
-      refCount(),
+      share(),
     );
 
     // update userEventData even if no one else subscribes
