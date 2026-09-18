@@ -81,15 +81,15 @@ export class WebSocketService {
           if (err.code === 1001 && err.reason === "Idle Timeout") {
             return EMPTY;
           }
-          return observableThrowError(err);
+          return observableThrowError(() => err);
         }),
       )
-      .subscribe(
-        (data) => {
+      .subscribe({
+        next: (data) => {
           log.info("websocket event", data);
           listener.next(data);
         },
-        (err) => {
+        error: (err) => {
           log.info("websocket error", err);
           this.errorService.showErrorObject(
             new ErrorMessage(
@@ -102,7 +102,7 @@ export class WebSocketService {
             ),
           );
         },
-        () => {
+        complete: () => {
           log.info("websocket closed");
           // if not unsubscribed
           if (this.topic) {
@@ -124,7 +124,7 @@ export class WebSocketService {
             }
           }
         },
-      );
+      });
   }
 
   /**

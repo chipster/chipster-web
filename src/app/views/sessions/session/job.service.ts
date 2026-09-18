@@ -57,7 +57,8 @@ export class JobService {
         }
         const millis = UtilsService.millisecondsBetweenDates(startDate, now);
         return UtilsService.millisecondsToHumanFriendly(millis, "now", "now");
-      }, distinctUntilChanged()),
+      }),
+      distinctUntilChanged(),
     );
   }
 

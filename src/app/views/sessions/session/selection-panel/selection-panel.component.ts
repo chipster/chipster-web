@@ -72,8 +72,8 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
     //     err => this.errorService.showError("dataset selection failed", err)
     //   );
 
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      (selectedJobs: Array<Job>) => {
+    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe({
+      next: (selectedJobs: Array<Job>) => {
         this.selectedJobs = selectedJobs;
         if (this.selectedJobs.length > 0) {
           this.showFile = false;
@@ -83,8 +83,8 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
           this.showJob = false;
         }
       },
-      (err) => this.errorService.showError("job selection failed", err),
-    );
+      error: (err) => this.errorService.showError("job selection failed", err),
+    });
   }
 
   ngOnDestroy() {

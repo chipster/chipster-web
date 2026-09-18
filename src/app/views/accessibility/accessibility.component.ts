@@ -21,8 +21,8 @@ export class AccessibilityComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_ACCESSIBILITY_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_ACCESSIBILITY_PATH).subscribe({
+      next: (path) => {
         if (path || false) {
           this.accessibilityFile = this.routeService.basename(path);
           this.accessibilityPath = this.routeService.dirname(path) + "/";
@@ -32,7 +32,7 @@ export class AccessibilityComponent implements OnInit {
           this.accessibilityPath = "assets/manual/";
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the accessibility page", err),
-    );
+      error: (err) => this.errorService.showError("failed to get the path of the accessibility page", err),
+    });
   }
 }

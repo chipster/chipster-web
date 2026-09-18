@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
 import { forkJoin, NEVER, Observable } from "rxjs";
-import { flatMap, map, mergeMap, tap } from "rxjs/operators";
+import { map, mergeMap, tap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -29,7 +29,7 @@ export class SessionService {
     this.dialogModalService
       .openSessionNameModal("Rename session", session.name)
       .pipe(
-        flatMap((name: string) => {
+        mergeMap((name: string) => {
           session.name = name;
 
           // 'save' temp session when renaming it
@@ -40,19 +40,19 @@ export class SessionService {
           return this.updateSession(session);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("Rename session failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Rename session failed", err) });
   }
 
   openNotesModalAndUpdate(session: Session) {
     this.dialogModalService
       .openNotesModal(session)
       .pipe(
-        flatMap((notes: string) => {
+        mergeMap((notes: string) => {
           session.notes = notes;
           return this.updateSession(session);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("Failed to edit session notes", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Failed to edit session notes", err) });
   }
 
   downloadSession(sessionId: string) {
@@ -104,10 +104,10 @@ export class SessionService {
    * time.
    */
   getDatasetUrl(sessionId: string, dataset: Dataset): Observable<string> {
-    return forkJoin(
+    return forkJoin([
       this.sessionResource.getTokenForDataset(sessionId, dataset.datasetId),
       this.configService.getFileBrokerUrl(),
-    ).pipe(
+    ]).pipe(
       map((results) => {
         const [datasetToken, url] = results;
         return `${url}/sessions/${sessionId}/datasets/${dataset.datasetId}?token=${datasetToken}`;
@@ -124,13 +124,13 @@ export class SessionService {
   }
 
   download(url$: Observable<string>) {
-    url$.subscribe(
-      (url) => {
+    url$.subscribe({
+      next: (url) => {
         window.location.href = url;
       },
-      (err) => {
+      error: (err) => {
         this.errorService.showError("starting download failed", err);
       },
-    );
+    });
   }
 }

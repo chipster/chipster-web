@@ -113,8 +113,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     this.fileResource
       .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (result: any) => {
           this.gotFullFile = result.length === this.dataset.size;
 
           if (!this.getTruncatedFile && !this.gotFullFile) {
@@ -194,11 +194,11 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
           });
           this.state = new LoadState(State.Ready);
         },
-        (error: Response) => {
+        error: (error: Response) => {
           this.state = new LoadState(State.Fail, "Loading data failed");
           this.restErrorService.showError(this.state.message, error);
         },
-      );
+      });
   }
 
   ngAfterViewInit() {

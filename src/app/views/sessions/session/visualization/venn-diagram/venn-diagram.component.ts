@@ -101,8 +101,8 @@ export class VennDiagramComponent implements OnChanges {
       this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset),
     );
 
-    observableForkJoin(tsvObservables).subscribe(
-      (resultTSVs: Array<any>) => {
+    observableForkJoin(tsvObservables).subscribe({
+      next: (resultTSVs: Array<any>) => {
         this.files = resultTSVs
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map(
@@ -124,10 +124,10 @@ export class VennDiagramComponent implements OnChanges {
           }
         }
       },
-      (error: any) => {
+      error: (error: any) => {
         this.restErrorService.showError("Fetching TSV-files failed", error);
       },
-    );
+    });
   }
 
   drawVennDiagram(files: Array<TSVFile>) {
@@ -269,7 +269,7 @@ export class VennDiagramComponent implements OnChanges {
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
       .createDerivedDataset("venn.tsv", this.selectedDatasets, "Venn-Diagram", tsvData)
-      .subscribe(null, (err) => this.restErrorService.showError("Create file failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("Create file failed", err) });
   }
 
   createVennCircles(files: Array<TSVFile>, visualizationAreaCenter: Point, radius: number): Array<VennCircle> {

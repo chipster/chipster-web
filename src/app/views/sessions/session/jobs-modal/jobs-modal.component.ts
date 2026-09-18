@@ -88,12 +88,12 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sessionEventService
       .getJobStream()
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.updateJobs();
         },
-        (err) => this.errorService.showError("failed to update jobs", err),
-      );
+        error: (err) => this.errorService.showError("failed to update jobs", err),
+      });
   }
 
   ngOnDestroy() {

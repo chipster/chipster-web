@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { forkJoin, never, Observable } from "rxjs";
+import { forkJoin, Observable } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
@@ -36,7 +36,7 @@ export class SessionWorkerResource {
       ),
       catchError((e) => {
         this.restErrorService.showError("package session failed", e);
-        throw never();
+        throw e;
       }),
     );
   }
@@ -54,7 +54,7 @@ export class SessionWorkerResource {
       tap((x) => console.log("extractSession()", x)),
       catchError((e) => {
         this.restErrorService.showError("extract session failed", e);
-        throw never();
+        throw e;
       }),
     );
   }

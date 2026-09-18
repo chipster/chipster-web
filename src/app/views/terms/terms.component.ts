@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
-import { filter, flatMap } from "rxjs/operators";
+import { filter, mergeMap } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -27,12 +27,12 @@ export class TermsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe({
+      next: (path) => {
         this.termsOfUse = path;
       },
-      (err) => this.restErrorService.showError("failed to get the configuration", err),
-    );
+      error: (err) => this.restErrorService.showError("failed to get the configuration", err),
+    });
 
     this.route.queryParams
       .pipe(
@@ -53,21 +53,21 @@ export class TermsComponent implements OnInit {
     this.configService
       .get(ConfigService.KEY_TERMS_OF_USE_VERSION)
       .pipe(
-        flatMap((v) => {
+        mergeMap((v) => {
           latestVersion = v;
           return this.authenticationService.getUser();
         }),
-        flatMap((user: User) => {
+        mergeMap((user: User) => {
           user.termsVersion = latestVersion;
           user.termsAccepted = new Date().toISOString();
           return this.authenticationService.updateUser(user);
         }),
       )
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.routeService.navigateAbsolute("/sessions");
         },
-        (err) => this.restErrorService.showError("updating the user object failed", err),
-      );
+        error: (err) => this.restErrorService.showError("updating the user object failed", err),
+      });
   }
 }

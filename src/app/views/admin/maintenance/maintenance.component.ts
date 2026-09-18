@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
-import { empty, from, Observable } from "rxjs";
+import { EMPTY, from, Observable } from "rxjs";
 import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -102,7 +102,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("storage id request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       map((idResp: object) => (idResp ? idResp["storageId"] : null)),
       tap((idOnStorage: string) => {
@@ -117,7 +117,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("file stats request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       tap((fileStats: FileStats) => {
         this.fileStorageFileStats.set(storageId, fileStats);
@@ -140,7 +140,7 @@ export class MaintenanceComponent implements OnInit {
       catchError((err) => {
         log.error("storage status request error", err);
         // don't cancel other requests even if one of them fails
-        return empty();
+        return EMPTY;
       }),
       tap((status: object) => {
         this.free.set(storageId, status["diskFree,fs=storage"]);
@@ -152,15 +152,15 @@ export class MaintenanceComponent implements OnInit {
 
   backupDb(role: string) {
     // the backup service takes care of db backups
-    this.backup("backup", "/admin/backup/" + role).subscribe(null, (err) =>
-      this.restErrorService.showError("backup start failed", err),
-    );
+    this.backup("backup", "/admin/backup/" + role).subscribe({
+      error: (err) => this.restErrorService.showError("backup start failed", err),
+    });
   }
 
   backupStorage(storageId: string) {
     this.backup("file-broker", "/admin/storages/" + storageId + "/backup")
       .pipe(mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId)))
-      .subscribe(null, (err) => this.restErrorService.showError("backup start failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("backup start failed", err) });
   }
 
   backup(backupService: string, path: string) {
@@ -188,7 +188,7 @@ export class MaintenanceComponent implements OnInit {
         ),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId)),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("disable backup failed", err) });
   }
 
   enableBackups(storageId: string) {
@@ -200,7 +200,7 @@ export class MaintenanceComponent implements OnInit {
         ),
         mergeMap(() => this.updateFileStorageFileStatsOfOne(storageId)),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("disable backup failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("disable backup failed", err) });
   }
 
   deleteOldOrphanFiles(storageId: string) {
@@ -211,7 +211,7 @@ export class MaintenanceComponent implements OnInit {
           this.authHttpClient.postAuth(service.adminUri + "/admin/storages/" + storageId + "/delete-orphans", null),
         ),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("delete orphans failed", err) });
   }
 
   storageCheck(
@@ -239,7 +239,7 @@ export class MaintenanceComponent implements OnInit {
           return this.authHttpClient.postAuth(url, null);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("storage check failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("storage check failed", err) });
   }
 
   setCopyTarget(target: string) {
@@ -323,7 +323,7 @@ export class MaintenanceComponent implements OnInit {
           return this.authHttpClient.postAuth(url, null);
         }),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("copy failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("copy failed", err) });
   }
 
   sessionDbCheckOrphans() {
@@ -332,7 +332,7 @@ export class MaintenanceComponent implements OnInit {
       .pipe(
         mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + "/admin/check-orphans", null)),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("check orphans failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("check orphans failed", err) });
   }
 
   sessionDbDeleteOrphans() {
@@ -341,7 +341,7 @@ export class MaintenanceComponent implements OnInit {
       .pipe(
         mergeMap((service: Service) => this.authHttpClient.postAuth(service.adminUri + "/admin/delete-orphans", null)),
       )
-      .subscribe(null, (err) => this.restErrorService.showError("delete orphans failed", err));
+      .subscribe({ error: (err) => this.restErrorService.showError("delete orphans failed", err) });
   }
 }
 export class FileStats {

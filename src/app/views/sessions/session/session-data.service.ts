@@ -15,7 +15,7 @@ import { FileState } from "chipster-js-common/lib/model/dataset";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ProgressAnimationType, ToastrService } from "ngx-toastr";
-import { Observable, forkJoin, from as observableFrom, merge as observableMerge, of } from "rxjs";
+import { Observable, forkJoin, from as observableFrom, lastValueFrom, merge as observableMerge, of } from "rxjs";
 import { catchError, concatMap, filter, mergeMap, takeUntil } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -134,29 +134,29 @@ export class SessionDataService {
   }
 
   cancelJob(job: Job) {
-    return this.sessionResource.cancelJob(this.sessionId, job).toPromise();
+    return lastValueFrom(this.sessionResource.cancelJob(this.sessionId, job));
   }
 
   deleteJobs(jobs: Job[]) {
     const deleteJobs$ = jobs.map((job: Job) => this.sessionResource.deleteJob(this.getSessionId(), job.jobId));
-    observableMerge(...deleteJobs$).subscribe(
-      () => {
+    observableMerge(...deleteJobs$).subscribe({
+      next: () => {
         log.info("Job deleted");
       },
-      (err) => this.restErrorService.showError("delete jobs failed", err),
-    );
+      error: (err) => this.restErrorService.showError("delete jobs failed", err),
+    });
   }
 
   deleteDatasets(datasets: Dataset[], sessionId: string) {
     const deleteDatasets$ = datasets.map((dataset: Dataset) =>
       this.sessionResource.deleteDataset(sessionId, dataset.datasetId),
     );
-    observableMerge(...deleteDatasets$).subscribe(
-      () => {
+    observableMerge(...deleteDatasets$).subscribe({
+      next: () => {
         log.info("Dataset deleted");
       },
-      (err) => this.restErrorService.showError("delete datasets failed", err),
-    );
+      error: (err) => this.restErrorService.showError("delete datasets failed", err),
+    });
   }
 
   updateDataset(dataset: Dataset) {
@@ -168,7 +168,7 @@ export class SessionDataService {
   }
 
   updateJob(job: Job) {
-    return this.sessionResource.updateJob(this.getSessionId(), job).toPromise();
+    return lastValueFrom(this.sessionResource.updateJob(this.getSessionId(), job));
   }
 
   getDatasetUrl(dataset: Dataset): Observable<string> {

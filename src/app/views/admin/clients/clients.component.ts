@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { clone } from "lodash-es";
-import { flatMap } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
@@ -26,9 +26,9 @@ export class ClientsComponent implements OnInit {
   ngOnInit() {
     this.configService
       .getInternalService(Role.SESSION_DB, this.tokenService.getToken())
-      .pipe(flatMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
-      .subscribe(
-        (topics: any[]) => {
+      .pipe(mergeMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
+      .subscribe({
+        next: (topics: any[]) => {
           this.users = [];
 
           // filter out server topics and get values as an array
@@ -53,7 +53,7 @@ export class ClientsComponent implements OnInit {
             });
           });
         },
-        (err) => this.restErrorService.showError("get clients failed", err),
-      );
+        error: (err) => this.restErrorService.showError("get clients failed", err),
+      });
   }
 }

@@ -58,8 +58,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
         mergeMap(() => this.store.select("selectedDatasets")),
         takeUntil(this.unsubscribe),
       )
-      .subscribe(
-        (datasets: Array<Dataset>) => {
+      .subscribe({
+        next: (datasets: Array<Dataset>) => {
           this.selectedDatasets = datasets;
           this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
           // check if the previous visualization is still compatible
@@ -106,8 +106,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           // changes to show some part of tool section
           this.scrollFix.emit();
         },
-        (err) => this.errorService.showError("visualization change failed", err),
-      );
+        error: (err) => this.errorService.showError("visualization change failed", err),
+      });
 
     this.visualizationEventService
       .getPhenodataSelectedStream()

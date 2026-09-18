@@ -12,7 +12,7 @@ import {
   WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
-import { Observable, Subject, never as observableNever, of as observableOf } from "rxjs";
+import { NEVER, Observable, Subject, of as observableOf } from "rxjs";
 import { catchError, filter, map, mergeMap, publish, refCount } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -57,12 +57,12 @@ export class SessionEventService {
     this.websocketService.connect(this.localSubject$, "sessions/" + sessionId);
 
     // track any changes to session
-    stream.subscribe(
-      () => {
+    stream.subscribe({
+      next: () => {
         this.sessionHasChanged = true;
       },
-      (err) => this.errorService.showError("session change tracking failed", err),
-    );
+      error: (err) => this.errorService.showError("session change tracking failed", err),
+    });
 
     this.datasetStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Dataset),
@@ -102,11 +102,11 @@ export class SessionEventService {
     );
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe(null, (err) => this.errorService.showError("dataset event error", err));
-    this.jobStream$.subscribe(null, (err) => this.errorService.showError("job event error", err));
-    this.sessionStream$.subscribe(null, (err) => this.errorService.showError("session event error", err));
-    this.ruleStream$.subscribe(null, (err) => this.errorService.showError("rule event error", err));
-    this.labelStream$.subscribe(null, (err) => this.errorService.showError("label event error", err));
+    this.datasetStream$.subscribe({ error: (err) => this.errorService.showError("dataset event error", err) });
+    this.jobStream$.subscribe({ error: (err) => this.errorService.showError("job event error", err) });
+    this.sessionStream$.subscribe({ error: (err) => this.errorService.showError("session event error", err) });
+    this.ruleStream$.subscribe({ error: (err) => this.errorService.showError("rule event error", err) });
+    this.labelStream$.subscribe({ error: (err) => this.errorService.showError("label event error", err) });
   }
 
   /**
@@ -182,11 +182,11 @@ export class SessionEventService {
         );
       }
       // nothing to do, the client reacts when the Rule is deleted
-      return observableNever();
+      return NEVER;
     }
     if (event.type === EventType.Delete) {
       // nothing to do, the client reacts when the Rule is deleted
-      return observableNever();
+      return NEVER;
     }
     log.warn("unknown event type", event);
     return undefined;
@@ -197,7 +197,7 @@ export class SessionEventService {
       // accept only complete datasets, see SessionResource.loadSession()
       if (event.state !== FileState.Complete) {
         log.info("wait until upload is completed", event);
-        return observableNever();
+        return NEVER;
       }
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
@@ -212,7 +212,7 @@ export class SessionEventService {
       // accept only complete datasets, see SessionResource.loadSession()
       if (event.state !== FileState.Complete) {
         log.info("wait until upload is completed", event);
-        return observableNever();
+        return NEVER;
       }
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(

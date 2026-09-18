@@ -4,7 +4,7 @@ import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-com
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
 import log from "loglevel";
-import { Observable, Subject, empty } from "rxjs";
+import { EMPTY, Observable, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -29,7 +29,7 @@ export class JobComponent implements OnInit, OnDestroy {
   failed: boolean;
   state: string;
   screenOutput: string;
-  duration: Observable<string> = empty();
+  duration: Observable<string> = EMPTY;
   tool: Tool;
   parameterLimit = 12;
   rSessionInfoVisible = false;
@@ -79,8 +79,8 @@ export class JobComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // job selection events, get's current selection upon subscription
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe(
-      (selectedJobs: Array<Job>) => {
+    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe({
+      next: (selectedJobs: Array<Job>) => {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
         this.inputListForView = [];
@@ -107,21 +107,21 @@ export class JobComponent implements OnInit, OnDestroy {
         }
         this.update(jobId);
       },
-      (err) => this.errorService.showError("updating selected jobs failed", err),
-    );
+      error: (err) => this.errorService.showError("updating selected jobs failed", err),
+    });
 
     // job modification events
     this.sessionEventService
       .getJobStream()
       .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (sessionEvent: SessionEvent) => {
+      .subscribe({
+        next: (sessionEvent: SessionEvent) => {
           if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
             this.update(this.job.jobId);
           }
         },
-        (err) => this.errorService.showError("getting job events failed", err),
-      );
+        error: (err) => this.errorService.showError("getting job events failed", err),
+      });
   }
 
   // get job from session data and update state fields
@@ -166,7 +166,7 @@ export class JobComponent implements OnInit, OnDestroy {
     this.state = null;
     this.failed = false;
     this.screenOutput = null;
-    this.duration = empty();
+    this.duration = EMPTY;
   }
 
   close() {

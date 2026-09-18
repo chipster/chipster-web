@@ -19,11 +19,11 @@ export class ToolSourceComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe(
-      (sourceCode) => {
+    this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe({
+      next: (sourceCode) => {
         this.source = sourceCode;
       },
-      (err) => this.restErrorService.showError("get source code failed", err),
-    );
+      error: (err) => this.restErrorService.showError("get source code failed", err),
+    });
   }
 }

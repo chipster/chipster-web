@@ -59,15 +59,15 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     // return url is needed in all cases, so start with it
-    this.getReturnUrl$().subscribe(
-      (url) => {
+    this.getReturnUrl$().subscribe({
+      next: (url) => {
         this.returnUrl = url;
 
         // if already logged in -> redirect
         if (this.tokenService.isLoggedIn()) {
           // check also from server that token is actually valid
-          this.authenticationService.checkToken().subscribe(
-            (tokenValid: boolean) => {
+          this.authenticationService.checkToken().subscribe({
+            next: (tokenValid: boolean) => {
               if (tokenValid) {
                 // existing token is valid, continue
                 this.redirect();
@@ -78,19 +78,19 @@ export class LoginComponent implements OnInit {
                 this.continueInit();
               }
             },
-            (error) => {
+            error: (error) => {
               log.warn("checking token failed", error);
               this.initFailed = true;
               this.restErrorService.showError("Initializing login page failed", error);
             },
-          );
+          });
         } else {
           // no local token -> continue
           this.continueInit();
         }
       },
-      (err) => this.errorService.showError("failed to get the return url", err),
-    );
+      error: (err) => this.errorService.showError("failed to get the return url", err),
+    });
   }
 
   private continueInit() {
@@ -141,14 +141,14 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
-    this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe(
-      () => {
+    this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe({
+      next: () => {
         // Route to Session creation page
         log.info("logged in");
         this.newsService.updateNews();
         this.redirect();
       },
-      (errorResponse: HttpErrorResponse) => {
+      error: (errorResponse: HttpErrorResponse) => {
         if (RestErrorService.isForbidden(errorResponse)) {
           this.error = "Incorrect username or password";
         } else {
@@ -156,7 +156,7 @@ export class LoginComponent implements OnInit {
           log.error(errorResponse);
         }
       },
-    );
+    });
   }
 
   // Hack for the Enter key press for the button type='button'

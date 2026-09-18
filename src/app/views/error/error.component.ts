@@ -29,13 +29,13 @@ export class ErrorComponent implements OnInit {
 
   ngOnInit(): void {
     // clear errors when navigating to a new url
-    this.router.events.pipe(filter((event) => event instanceof NavigationStart)).subscribe(
-      () => {
+    this.router.events.pipe(filter((event) => event instanceof NavigationStart)).subscribe({
+      next: () => {
         this.toastIds.forEach((t) => this.toastrService.remove(t));
         this.toastIds = [];
       },
-      (err) => this.errorService.showError("getting router events failed", err),
-    );
+      error: (err) => this.errorService.showError("getting router events failed", err),
+    });
 
     this.errorService
       .getErrors()

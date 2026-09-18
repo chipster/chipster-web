@@ -71,7 +71,7 @@ export class WorkflowGraphService {
 
       this.sessionDataService
         .updateDatasets(datasetsToUpdate)
-        .subscribe(null, (err) => this.restErrorService.showError("updating dataset position failed", err));
+        .subscribe({ error: (err) => this.restErrorService.showError("updating dataset position failed", err) });
     }
   }
 

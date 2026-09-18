@@ -288,30 +288,30 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.enabled) {
       this.subscriptions.push(
-        this.sessionEventService.getDatasetStream().subscribe(
-          () => {
+        this.sessionEventService.getDatasetStream().subscribe({
+          next: () => {
             this.update();
             this.renderGraph();
             // dataset may have been moved outside of the svg area
             this.updateSvgSize();
           },
-          (err) => this.errorService.showError("get dataset events failed", err),
-        ),
+          error: (err) => this.errorService.showError("get dataset events failed", err),
+        }),
       );
 
       this.subscriptions.push(
-        this.sessionEventService.getLabelStream().subscribe(
-          () => {
+        this.sessionEventService.getLabelStream().subscribe({
+          next: () => {
             // label name/color may have changed, redraw pills
             this.renderLabels();
           },
-          (err) => this.errorService.showError("get label events failed", err),
-        ),
+          error: (err) => this.errorService.showError("get label events failed", err),
+        }),
       );
 
       this.subscriptions.push(
-        this.selectedDatasets$.subscribe(
-          (datasets: Array<Dataset>) => {
+        this.selectedDatasets$.subscribe({
+          next: (datasets: Array<Dataset>) => {
             this.selectedDatasets = datasets;
             this.selectionEnabled = true;
             this.update();
@@ -327,8 +327,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
               this.jobsMap,
             );
           },
-          (err) => this.errorService.showError("get dataset selections failed", err),
-        ),
+          error: (err) => this.errorService.showError("get dataset selections failed", err),
+        }),
       );
     }
 
@@ -1181,13 +1181,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       return d.dataset;
     });
 
-    this.sessionDataService.updateDatasets(movedDatasets).subscribe(null, (err) => {
-      this.restErrorService.showError("dataset upate error", err);
+    this.sessionDataService.updateDatasets(movedDatasets).subscribe({
+      error: (err) => {
+        this.restErrorService.showError("dataset upate error", err);
 
-      // update failed. Restore the original positions
-      originalDatasets.forEach((d) => this.sessionData.datasetsMap.set(d.datasetId, d));
-      this.update();
-      this.renderGraph();
+        // update failed. Restore the original positions
+        originalDatasets.forEach((d) => this.sessionData.datasetsMap.set(d.datasetId, d));
+        this.update();
+        this.renderGraph();
+      },
     });
 
     // update scroll limits if datasets were moved

@@ -21,8 +21,8 @@ export class PrivacyNoticeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.configService.get(ConfigService.KEY_PRIVACE_NOTICE_PATH).subscribe(
-      (path) => {
+    this.configService.get(ConfigService.KEY_PRIVACE_NOTICE_PATH).subscribe({
+      next: (path) => {
         if (path || false) {
           this.htmlFile = this.routeService.basename(path);
           this.htmlPath = this.routeService.dirname(path) + "/";
@@ -31,7 +31,7 @@ export class PrivacyNoticeComponent implements OnInit {
           log.error("app config " + ConfigService.KEY_PRIVACE_NOTICE_PATH + " is not set");
         }
       },
-      (err) => this.errorService.showError("failed to get the path of the privacy notice page", err),
-    );
+      error: (err) => this.errorService.showError("failed to get the path of the privacy notice page", err),
+    });
   }
 }
