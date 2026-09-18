@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
-import { catchError, map, mergeMap, publishReplay, refCount, tap } from "rxjs/operators";
+import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { AuthHttpClientService } from "../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RestErrorService } from "../errorhandler/rest-error.service";
@@ -14,8 +14,6 @@ const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 @Injectable()
 export class AuthenticationService {
   private tokenRefreshSchedulerId: number;
-
-  private user$: Observable<User>;
 
   constructor(
     private configService: ConfigService,
@@ -36,8 +34,6 @@ export class AuthenticationService {
       token = null;
     }
     this.saveToken(token);
-
-    this.user$ = this.getUser().pipe(publishReplay(1), refCount());
   }
 
   // Do the authentication here based on userid and password
