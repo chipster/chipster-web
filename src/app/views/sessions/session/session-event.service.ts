@@ -12,7 +12,7 @@ import {
   WsEvent,
 } from "chipster-js-common";
 import log from "loglevel";
-import { EMPTY, Observable, Subject, of as observableOf } from "rxjs";
+import { EMPTY, Observable, Subject, defer, of as observableOf } from "rxjs";
 import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
@@ -66,42 +66,69 @@ export class SessionEventService {
 
     this.datasetStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Dataset),
-      mergeMap((data) => this.handleDatasetEvent(data, this.sessionId, sessionData)),
-      // update type tags before letting other parts of the client know about this change
-      mergeMap((sessionEvent) => this.updateTypeTags(this.sessionId, sessionEvent, sessionData)),
+      mergeMap((data) =>
+        this.handleOrDrop("dataset event error", () =>
+          this.handleDatasetEvent(data, this.sessionId, sessionData).pipe(
+            // update type tags before letting other parts of the client know about this change
+            mergeMap((sessionEvent) => this.updateTypeTags(this.sessionId, sessionEvent, sessionData)),
+          ),
+        ),
+      ),
       share(),
     );
 
     this.jobStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Job),
-      mergeMap((data) => this.handleJobEvent(data, this.sessionId, sessionData)),
+      mergeMap((data) =>
+        this.handleOrDrop("job event error", () => this.handleJobEvent(data, this.sessionId, sessionData)),
+      ),
       share(),
     );
 
     this.sessionStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Session),
-      mergeMap((data) => this.handleSessionEvent(data, this.sessionId, sessionData)),
+      mergeMap((data) =>
+        this.handleOrDrop("session event error", () => this.handleSessionEvent(data, this.sessionId, sessionData)),
+      ),
       share(),
     );
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
-      mergeMap((data) => this.handleRuleEvent(data, sessionData.session)),
+      mergeMap((data) => this.handleOrDrop("rule event error", () => this.handleRuleEvent(data, sessionData.session))),
       share(),
     );
 
     this.labelStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Label),
-      mergeMap((data) => this.handleLabelEvent(data, this.sessionId, sessionData)),
+      mergeMap((data) =>
+        this.handleOrDrop("label event error", () => this.handleLabelEvent(data, this.sessionId, sessionData)),
+      ),
       share(),
     );
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe({ error: (err) => this.errorService.showError("dataset event error", err) });
-    this.jobStream$.subscribe({ error: (err) => this.errorService.showError("job event error", err) });
-    this.sessionStream$.subscribe({ error: (err) => this.errorService.showError("session event error", err) });
-    this.ruleStream$.subscribe({ error: (err) => this.errorService.showError("rule event error", err) });
-    this.labelStream$.subscribe({ error: (err) => this.errorService.showError("label event error", err) });
+    this.datasetStream$.subscribe();
+    this.jobStream$.subscribe();
+    this.sessionStream$.subscribe();
+    this.ruleStream$.subscribe();
+    this.labelStream$.subscribe();
+  }
+
+  /**
+   * Handle one event, and report and drop it if the handling fails, so that
+   * the stream stays alive for the events that follow. Without this, one
+   * failed request or one handler that throws would end the stream for
+   * everyone subscribed to it. The handler runs inside defer(), so a throw
+   * before it returns an observable is caught too.
+   */
+  private handleOrDrop<T>(message: string, handle: () => Observable<T>): Observable<T> {
+    return defer(handle).pipe(
+      catchError((err) => {
+        this.errorService.showError(message, err);
+        return EMPTY;
+      }),
+    );
   }
 
   /**
