@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
-import { map, mergeMap, publishReplay, refCount, shareReplay, take } from "rxjs/operators";
+import { map, mergeMap, shareReplay, take } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigurationResource } from "../resources/configurationresource";
 
@@ -37,7 +37,7 @@ export class ConfigService {
     if (!this.chipsterConf$) {
       this.chipsterConf$ = this.configurationResource
         .getConfiguration("chipster.yaml")
-        .pipe(publishReplay(1), refCount());
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
     }
     return this.chipsterConf$;
   }
@@ -53,8 +53,7 @@ export class ConfigService {
     if (!this.publicServices$) {
       this.publicServices$ = this.getChipsterConfiguration().pipe(
         mergeMap((conf) => this.configurationResource.getPublicServices(conf)),
-        publishReplay(1),
-        refCount(),
+        shareReplay({ bufferSize: 1, refCount: true }),
       );
     }
     return this.publicServices$;
@@ -63,8 +62,7 @@ export class ConfigService {
   getInternalServices(token: string): Observable<Service[]> {
     return this.getConfiguration().pipe(
       mergeMap((conf) => this.configurationResource.getInternalServices(conf, token)),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
   }
 
