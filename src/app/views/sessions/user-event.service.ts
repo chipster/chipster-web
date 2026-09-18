@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
-import { Observable, Subject, of } from "rxjs";
-import { filter, map, mergeMap, share } from "rxjs/operators";
+import { EMPTY, Observable, Subject, defer, of } from "rxjs";
+import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { SessionResource } from "../../shared/resources/session.resource";
@@ -42,12 +42,20 @@ export class UserEventService {
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
-      mergeMap((data) => this.handleRuleEvent(data, data.sessionId, userEventData)),
+      mergeMap((data) =>
+        // report a failed event and drop it, so that the stream stays alive for the events that follow
+        defer(() => this.handleRuleEvent(data, data.sessionId, userEventData)).pipe(
+          catchError((err) => {
+            this.errorService.showError("error in rule events", err);
+            return EMPTY;
+          }),
+        ),
+      ),
       share(),
     );
 
     // update userEventData even if no one else subscribes
-    this.ruleStream$.subscribe({ error: (err) => this.errorService.showError("error in rule events", err) });
+    this.ruleStream$.subscribe();
   }
 
   getRuleStream() {
