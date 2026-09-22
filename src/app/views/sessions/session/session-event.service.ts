@@ -13,7 +13,7 @@ import {
 } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, defer, of as observableOf } from "rxjs";
-import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, share, tap } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -36,6 +36,13 @@ export class SessionEventService {
 
   sessionHasChanged = false;
 
+  /**
+   * handleOrDrop() messages that are currently shown to the user, so that an ongoing
+   * failure doesn't stack a new toast for every event. Cleared again when an event of
+   * the same kind succeeds.
+   */
+  private reportedErrors = new Set<string>();
+
   constructor(
     private sessionResource: SessionResource,
     private websocketService: WebSocketService,
@@ -49,6 +56,7 @@ export class SessionEventService {
 
   setSessionData(sessionId: string, sessionData: SessionData) {
     this.sessionHasChanged = false;
+    this.reportedErrors.clear();
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
@@ -108,11 +116,23 @@ export class SessionEventService {
     );
 
     // update sessionData even if no one else subscribes
-    this.datasetStream$.subscribe();
-    this.jobStream$.subscribe();
-    this.sessionStream$.subscribe();
-    this.ruleStream$.subscribe();
-    this.labelStream$.subscribe();
+    // handleOrDrop() reports the failures of individual events, but report also if the
+    // stream itself errors, because then it stops updating sessionData altogether
+    this.datasetStream$.subscribe({
+      error: (err) => this.errorService.showError("dataset event stream failed", err),
+    });
+    this.jobStream$.subscribe({
+      error: (err) => this.errorService.showError("job event stream failed", err),
+    });
+    this.sessionStream$.subscribe({
+      error: (err) => this.errorService.showError("session event stream failed", err),
+    });
+    this.ruleStream$.subscribe({
+      error: (err) => this.errorService.showError("rule event stream failed", err),
+    });
+    this.labelStream$.subscribe({
+      error: (err) => this.errorService.showError("label event stream failed", err),
+    });
   }
 
   /**
@@ -121,11 +141,25 @@ export class SessionEventService {
    * failed request or one handler that throws would end the stream for
    * everyone subscribed to it. The handler runs inside defer(), so a throw
    * before it returns an observable is caught too.
+   *
+   * Only the first failure of each kind is shown to the user, because the stream stays
+   * alive and a persistent failure (an expired token, session-db down) would otherwise
+   * show a new error for every event. A successful event arms the message again.
    */
   private handleOrDrop<T>(message: string, handle: () => Observable<T>): Observable<T> {
     return defer(handle).pipe(
+      // the next event of this kind is reported again. complete() instead of next(), because
+      // handlers return EMPTY when there is nothing to do, which is a success too
+      tap({ complete: () => this.reportedErrors.delete(message) }),
       catchError((err) => {
-        this.errorService.showError(message, err);
+        if (this.reportedErrors.has(message)) {
+          // the error is already on the screen, showing it again for every event would
+          // fill the screen with toasts, because these don't time out
+          log.warn(message + " (repeated, not shown to the user)", err);
+        } else {
+          this.reportedErrors.add(message);
+          this.errorService.showError(message, err);
+        }
         return EMPTY;
       }),
     );

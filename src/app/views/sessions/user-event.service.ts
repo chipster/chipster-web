@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, defer, of } from "rxjs";
-import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, share, tap } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { SessionResource } from "../../shared/resources/session.resource";
@@ -20,6 +20,13 @@ export class UserEventService {
   localSubject$: Subject<WsEvent>;
   userEventData: UserEventData;
 
+  /**
+   * handleOrDrop() messages that are currently shown to the user, so that an ongoing
+   * failure doesn't stack a new toast for every event. Cleared again when an event of
+   * the same kind succeeds.
+   */
+  private reportedErrors = new Set<string>();
+
   constructor(
     private sessionResource: SessionResource,
     private webSocketService: WebSocketService,
@@ -34,6 +41,7 @@ export class UserEventService {
 
   connect(topic: string, userEventData: UserEventData) {
     this.topic = topic;
+    this.reportedErrors.clear();
 
     this.localSubject$ = new Subject();
     const stream = this.localSubject$.asObservable();
@@ -43,23 +51,49 @@ export class UserEventService {
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
       mergeMap((data) =>
-        // report a failed event and drop it, so that the stream stays alive for the events that follow
-        defer(() => this.handleRuleEvent(data, data.sessionId, userEventData)).pipe(
-          catchError((err) => {
-            this.errorService.showError("error in rule events", err);
-            return EMPTY;
-          }),
-        ),
+        this.handleOrDrop("error in rule events", () => this.handleRuleEvent(data, data.sessionId, userEventData)),
       ),
       share(),
     );
 
-    // update userEventData even if no one else subscribes
-    this.ruleStream$.subscribe();
+    // update userEventData even if no one else subscribes. handleOrDrop() reports the
+    // failures of individual events, but report also if the stream itself errors, because
+    // then it stops updating userEventData altogether
+    this.ruleStream$.subscribe({
+      error: (err) => this.errorService.showError("rule event stream failed", err),
+    });
   }
 
   getRuleStream() {
     return this.ruleStream$;
+  }
+
+  /**
+   * Handle one event, and report and drop it if the handling fails, so that the stream stays
+   * alive for the events that follow. The handler runs inside defer(), so a throw before it
+   * returns an observable is caught too.
+   *
+   * Only the first failure of each kind is shown to the user, because the stream stays alive
+   * and a persistent failure (an expired token, session-db down) would otherwise show a new
+   * error for every event. A successful event arms the message again.
+   */
+  private handleOrDrop<T>(message: string, handle: () => Observable<T>): Observable<T> {
+    return defer(handle).pipe(
+      // the next event of this kind is reported again. complete() instead of next(), because
+      // handlers return EMPTY when there is nothing to do, which is a success too
+      tap({ complete: () => this.reportedErrors.delete(message) }),
+      catchError((err) => {
+        if (this.reportedErrors.has(message)) {
+          // the error is already on the screen, showing it again for every event would
+          // fill the screen with toasts, because these don't time out
+          log.warn(message + " (repeated, not shown to the user)", err);
+        } else {
+          this.reportedErrors.add(message);
+          this.errorService.showError(message, err);
+        }
+        return EMPTY;
+      }),
+    );
   }
 
   /**
