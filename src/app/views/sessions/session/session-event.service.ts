@@ -13,7 +13,7 @@ import {
 } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, defer, of as observableOf } from "rxjs";
-import { catchError, filter, map, mergeMap, share, tap } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, share } from "rxjs/operators";
 import { WebSocketSubject } from "rxjs/webSocket";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
@@ -37,11 +37,13 @@ export class SessionEventService {
   sessionHasChanged = false;
 
   /**
-   * handleOrDrop() messages that are currently shown to the user, so that an ongoing
-   * failure doesn't stack a new toast for every event. Cleared again when an event of
-   * the same kind succeeds.
+   * When each handleOrDrop() message was last shown to the user, so that an ongoing
+   * failure doesn't stack a new toast for every event. These toasts don't time out.
    */
-  private reportedErrors = new Set<string>();
+  private lastReported = new Map<string, number>();
+
+  /** Show the same handleOrDrop() message again only after this many milliseconds */
+  private static readonly ERROR_INTERVAL_MS = 30 * 1000;
 
   constructor(
     private sessionResource: SessionResource,
@@ -56,7 +58,7 @@ export class SessionEventService {
 
   setSessionData(sessionId: string, sessionData: SessionData) {
     this.sessionHasChanged = false;
-    this.reportedErrors.clear();
+    this.lastReported.clear();
     this.sessionId = sessionId;
 
     this.localSubject$ = new Subject();
@@ -142,22 +144,21 @@ export class SessionEventService {
    * everyone subscribed to it. The handler runs inside defer(), so a throw
    * before it returns an observable is caught too.
    *
-   * Only the first failure of each kind is shown to the user, because the stream stays
+   * The same message is shown at most once in ERROR_INTERVAL_MS, because the stream stays
    * alive and a persistent failure (an expired token, session-db down) would otherwise
-   * show a new error for every event. A successful event arms the message again.
+   * show a new error for every event.
    */
   private handleOrDrop<T>(message: string, handle: () => Observable<T>): Observable<T> {
     return defer(handle).pipe(
-      // the next event of this kind is reported again. complete() instead of next(), because
-      // handlers return EMPTY when there is nothing to do, which is a success too
-      tap({ complete: () => this.reportedErrors.delete(message) }),
       catchError((err) => {
-        if (this.reportedErrors.has(message)) {
-          // the error is already on the screen, showing it again for every event would
-          // fill the screen with toasts, because these don't time out
+        const now = Date.now();
+        const last = this.lastReported.get(message);
+        if (last != null && now - last < SessionEventService.ERROR_INTERVAL_MS) {
+          // the error is probably still on the screen, showing it again for every event
+          // would fill the screen with toasts, because these don't time out
           log.warn(message + " (repeated, not shown to the user)", err);
         } else {
-          this.reportedErrors.add(message);
+          this.lastReported.set(message, now);
           this.errorService.showError(message, err);
         }
         return EMPTY;
