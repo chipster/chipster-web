@@ -1,11 +1,15 @@
 #!/bin/sh
 #
-# Check that staged files are Prettier-formatted before committing.
+# Check staged files with Prettier and ESLint before committing.
 #
 # lint-staged does the work: it selects the staged files matching the
 # patterns in package.json, makes the working tree match the staged
-# content so the check sees what is actually being committed, and runs
-# Prettier once on just those files.
+# content so the checks see what is actually being committed, and runs
+# each tool once on just those files.
+#
+# ESLint fails the commit on errors only, not on the warnings that
+# eslint.config.mjs leaves non-blocking on purpose. Run `npm run lint` to
+# see those: lint-staged prints nothing for a check that passes.
 #
 # Bypass with: git commit --no-verify
 #
