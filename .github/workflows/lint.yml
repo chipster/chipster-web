@@ -1,0 +1,42 @@
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# The check only reads the repository.
+permissions:
+  contents: read
+
+# A new push to a pull request makes an in-progress run redundant. Runs on
+# master are not cancelled, so that every commit on master keeps a result
+# even when merges land in quick succession.
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    # The lint itself takes about a minute, the rest is the install.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # .nvmrc holds the Node version, and .npmrc sets engine-strict,
+          # so an older Node would fail the install rather than run the
+          # check against the wrong toolchain.
+          node-version-file: .nvmrc
+          cache: npm
+
+      # ESLint and its plugins are pure JavaScript, so the native postinstall
+      # steps that only the Angular build needs are skipped, same as in the
+      # format workflow. The type-aware parts of the config read
+      # tsconfig.json rather than a build, so nothing here needs them.
+      - run: npm ci --ignore-scripts
+
+      - run: npm run lint
