@@ -320,7 +320,7 @@ export class SessionEventService {
       );
     }
     // dataset deleted, type tags can be removed
-    sessionData.datasetTypeTags.delete(sessionEvent.resourceId);
+    sessionData.datasetTypeTags.delete(sessionEvent.event.resourceId);
     return observableOf(sessionEvent);
   }
 
