@@ -102,9 +102,15 @@ export class UserEventService {
    */
   applyRuleStreamOfSession(session: Session) {
     return this.getRuleStream().pipe(
+      // the stream has the events of all our sessions, but this is about one of them.
+      // session-db looks up the rule by its own id, so it would happily return a rule
+      // of another session
+      filter((wsEvent) => wsEvent.sessionId === session.sessionId),
       mergeMap((wsEvent) =>
         // sessionEventService can update individual sessions, let's reuse that
-        this.sessionEventService.handleRuleEvent(wsEvent, session),
+        this.handleOrDrop("error in session sharing events", () =>
+          this.sessionEventService.handleRuleEvent(wsEvent, session),
+        ),
       ),
     );
   }
