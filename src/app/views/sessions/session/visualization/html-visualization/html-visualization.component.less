@@ -1,3 +1,13 @@
 .scroller {
   overflow-x: auto;
+
+  iframe {
+    border: none;
+    width: 100%;
+    // before the content reports its size, and a fallback when no useful size ever arrives:
+    // the content replaced the document with document.write and lost the size reporter script,
+    // or the content sizes itself to the viewport, in which case its measurement just repeats
+    // the height of the iframe itself
+    height: 70vh;
+  }
 }
