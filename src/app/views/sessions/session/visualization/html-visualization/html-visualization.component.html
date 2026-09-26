@@ -2,13 +2,12 @@
   <div class="scroller">
     <!--
       The sandbox attribute must be a static attribute (not a binding) and must not include
-      "allow-same-origin", see the comment in the component class.
+      "allow-same-origin", see the comment in the component class. The component sets the
+      content (srcdoc).
     -->
     <iframe
       #htmlframe
-      *ngIf="src"
-      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-forms"
-      [src]="src"></iframe>
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-forms"></iframe>
   </div>
 </div>
 
