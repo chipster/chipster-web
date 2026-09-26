@@ -19,6 +19,7 @@ import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { NativeElementService } from "../../../../../shared/services/native-element.service";
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
+import { escapeHtml, unescapeHtml } from "../../../../../shared/utilities/html";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { GetSessionDataService } from "../../get-session-data.service";
@@ -47,12 +48,46 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: any;
   rows: Array<Array<string>> = [];
-  headers: string[] = [];
+  /*
+   The column headers as Handsontable renders them, i.e. HTML-escaped, because
+   Handsontable renders its headers as HTML and these come from the user.
+
+   Handsontable owns this array: alter() splices it when a column is added or
+   removed, and so does the undo of those, which is why it has to be an array
+   and not a function that Handsontable would also accept. It is never
+   replaced, only mutated (the headers setter too), so the table and the
+   component always hold the same one, also between reset() and the rebuild
+   of the table. The headers as text are derived from it, see headers below,
+   so that there is no second copy to keep in sync.
+   */
+  readonly escapedHeaders: string[] = [];
   latestEdit = 0;
   deferredUpdatesTimerId: number | undefined = undefined;
   nonEditableColumns = ["sample", "original_name"];
   private originalPhenodataString: string | null = null;
   private originalDatasetId: string | null = null;
+
+  /**
+   * The column headers as text, derived from escapedHeaders
+   *
+   * The undo of a column removal puts a null back for a header that was
+   * empty, hence the ?? "".
+   */
+  get headers(): string[] {
+    return this.escapedHeaders.map((header) => unescapeHtml(header ?? ""));
+  }
+
+  set headers(headers: string[]) {
+    this.escapedHeaders.splice(0, this.escapedHeaders.length, ...headers.map(escapeHtml));
+  }
+
+  /**
+   * One header as text, for the Handsontable callbacks that run for every cell
+   * and shouldn't unescape the whole row each time
+   */
+  private headerAt(col: number): string {
+    return unescapeHtml(this.escapedHeaders[col] ?? "");
+  }
 
   get hasEditableColumns(): boolean {
     return this.headers.some((h) => !this.nonEditableColumns.includes(h));
@@ -161,24 +196,24 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
   }
 
-  private getWidth(array: string[][], headers: string[]) {
-    return this.spreadsheetService.guessWidth(headers, array) + 100;
+  private getWidth() {
+    return this.spreadsheetService.guessWidth(this.headers, this.rows) + 100;
   }
 
-  private getHeight(array: string[][]) {
-    return array.length * 23 + 50; // extra for header-row and borders
+  private getHeight() {
+    return this.rows.length * 23 + 50; // extra for header-row and borders
   }
 
-  private updateSize(array: string[][], headers: string[]) {
+  private updateSize() {
     const container = document.getElementById("tableContainer");
     if (!container) {
       return;
     }
-    container.style.width = this.getWidth(array, headers) + "px";
-    container.style.height = this.getHeight(array) + "px";
+    container.style.width = this.getWidth() + "px";
+    container.style.height = this.getHeight() + "px";
   }
 
-  private getSettings(array: string[][], headers: string[]) {
+  private getSettings() {
     const columnSorting = this.sortingEnabled
       ? {
           column: this.sortColumn,
@@ -188,8 +223,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       : { columnSorting: true };
 
     return {
-      data: array,
-      colHeaders: headers,
+      data: this.rows,
+      // the array itself, not a copy, see the comment of escapedHeaders
+      colHeaders: this.escapedHeaders,
       columnSorting,
       manualColumnResize: true,
       sortIndicator: true,
@@ -197,11 +233,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       scrollColHeaders: false,
       scrollCompatibilityMode: false,
       renderAllRows: false,
-      width: this.getWidth(array, headers),
-      height: this.getHeight(array),
+      width: this.getWidth(),
+      height: this.getHeight(),
 
       afterGetColHeader: (col: number, TH: any) => {
-        if (this.nonEditableColumns.includes(headers[col])) {
+        if (this.nonEditableColumns.includes(this.headerAt(col))) {
           // removal not allowed
           return;
         }
@@ -209,7 +245,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       },
 
       cells: (_row: number, col: number) => {
-        if (this.nonEditableColumns.includes(headers[col])) {
+        if (this.nonEditableColumns.includes(this.headerAt(col))) {
           return { readOnly: true };
         }
         return {};
@@ -250,7 +286,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       "click",
       () => {
         this.zone.run(() => {
-          const columnName = this.headers[col];
+          const columnName = this.headerAt(col);
           this.stringModalService
             .openBooleanModal(
               "Delete column",
@@ -277,6 +313,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   removeColumn(index: number) {
     this.zone.runOutsideAngular(() => {
+      // removes the header from escapedHeaders too
       this.hot.alter("remove_col", index);
     });
 
@@ -308,13 +345,15 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .then(
         (action: number) => {
           if (action === 1) {
-            const keepIndices = this.headers
+            const headers = this.headers;
+            const keepIndices = headers
               .map((h, i) => (this.nonEditableColumns.includes(h) ? i : -1))
               .filter((i) => i !== -1);
-            this.headers = keepIndices.map((i) => this.headers[i]);
+            this.headers = keepIndices.map((i) => headers[i]);
             this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
             this.updateDataset();
-            this.updateViewAfterDelay();
+            // right away: the table still has all the columns, but its headers not
+            this.updateView();
           } else if (action === 2) {
             const removableIndices = this.headers
               .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
@@ -445,13 +484,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
 
     // for now, show the phenodata table only for own phenodata
-    const settings = this.getSettings(this.rows, this.headers);
+    const settings = this.getSettings();
     if (this.phenodataState === PhenodataState.OWN_PHENODATA) {
       this.zone.runOutsideAngular(() => {
         this.hot = new Handsontable(container, settings);
+        // the column changes rely on this, see escapedHeaders
+        if (this.hot.getSettings().colHeaders !== this.escapedHeaders) {
+          log.error("Handsontable copied the headers, adding and removing columns won't be saved correctly");
+        }
       });
 
-      this.updateSize(this.rows, this.headers);
+      this.updateSize();
 
       this.zone.runOutsideAngular(() => {
         if (this.hot) {
@@ -506,21 +549,16 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .pipe(
         tap((name) => {
           this.zone.runOutsideAngular(() => {
-            const colHeaders = (this.hot.getSettings() as ht.Options).colHeaders as Array<string>;
-            const lastNonEditableIdx = colHeaders.reduce(
+            const headers = this.headers;
+            const lastNonEditableIdx = headers.reduce(
               (acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc),
               -1,
             );
-            const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : colHeaders.length;
+            const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : headers.length;
+            // inserts an undefined header into escapedHeaders, replaced with the name below
             this.hot.alter("insert_col", insertIndex);
-            // Handsontable inserts an undefined entry at insertIndex; replace it with the name.
-            colHeaders[insertIndex] = name;
-            this.hot.updateSettings(
-              {
-                colHeaders,
-              },
-              false,
-            );
+            this.escapedHeaders[insertIndex] = escapeHtml(name);
+            this.hot.render();
           });
 
           this.updateDataset();
