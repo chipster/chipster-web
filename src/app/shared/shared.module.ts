@@ -20,7 +20,6 @@ import { LocalDatePipe } from "./pipes/local-date.pipe";
 import { ModulePipe } from "./pipes/modulepipe.pipe";
 import { SecondsPipe } from "./pipes/secondspipe.pipe";
 import { ToolPipe } from "./pipes/toolpipe.pipe";
-import { TrustedResourcePipe } from "./pipes/trustedresource.pipe";
 import { ConfigurationResource } from "./resources/configurationresource";
 import { FileResource } from "./resources/fileresource";
 import { SessionResource } from "./resources/session.resource";
@@ -52,7 +51,6 @@ import { SchedulerResource } from "./resources/scheduler-resource";
   imports: [CommonModule, CoreModule, FormsModule],
   declarations: [
     BytesPipe,
-    TrustedResourcePipe,
     LocalDatePipe,
     DatasetsearchPipe,
     ToolPipe,
@@ -98,7 +96,6 @@ import { SchedulerResource } from "./resources/scheduler-resource";
   ],
   exports: [
     BytesPipe,
-    TrustedResourcePipe,
     LocalDatePipe,
     DatasetsearchPipe,
     ToolPipe,
