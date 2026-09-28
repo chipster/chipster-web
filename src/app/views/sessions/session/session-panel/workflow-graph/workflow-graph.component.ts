@@ -25,6 +25,7 @@ import { PipeService } from "../../../../../shared/services/pipeservice.service"
 import { PreferencesService } from "../../../../../shared/services/preferences.service";
 import { SettingsService } from "../../../../../shared/services/settings.service";
 import { ToolsService } from "../../../../../shared/services/tools.service";
+import { escapeHtml } from "../../../../../shared/utilities/html";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
 import { DatasetService } from "../../dataset.service";
@@ -1556,10 +1557,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (isPhenodatanode) {
-      this.datasetTooltip.html(`phenodata-${dataset.name}`);
+      this.datasetTooltip.text(`phenodata-${dataset.name}`);
     }
 
-    // measure after .html() so the height reflects the new content, not the previous hover's
+    // measure after setting the content so the height reflects the new content, not the previous hover's
     const tooltipHeight = this.datasetTooltip.node().getBoundingClientRect().height;
 
     this.datasetTooltip
@@ -1582,8 +1583,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     const labels = this.sessionData?.labelsMap
       ? getSortedLabels(node.dataset.labelIds, this.sessionData.labelsMap)
       : [];
+    const name = escapeHtml(node.name ?? "");
     if (labels.length === 0) {
-      return node.name;
+      return name;
     }
     const rows = labels
       .map((label) => {
@@ -1591,19 +1593,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         const dot =
           `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
           `background:${color};margin-right:4px;vertical-align:middle"></span>`;
-        return `<div>${dot}${this.escapeTooltipText(label.name ?? "")}</div>`;
+        return `<div>${dot}${escapeHtml(label.name ?? "")}</div>`;
       })
       .join("");
-    return `<div style="text-align:left;">${node.name}<div style="margin-top:2px;color:rgba(255,255,255,0.7);font-size:11px;">${rows}</div></div>`;
-  }
-
-  private escapeTooltipText(s: string): string {
-    return s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+    return `<div style="text-align:left;">${name}<div style="margin-top:2px;color:rgba(255,255,255,0.7);font-size:11px;">${rows}</div></div>`;
   }
 
   // creating tooltip for every node which will be hidden and when search is enabled, it will be shown
@@ -1625,16 +1618,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr("class", "dataset-node-tooltip")
       .attr("id", dataset.datasetId)
       .style("opacity", 0)
-      .html("tooltip");
+      .text(dataset.name);
 
     const datasetLeft = datasetClientRects.get(dataset.datasetId).left;
     const datasetTop = datasetClientRects.get(dataset.datasetId).top;
 
     const tooltipHeight = 24;
-
-    if (dataset) {
-      this.datasetToolTipArray[id].dataNodeToolTip.html(dataset.name);
-    }
 
     this.datasetToolTipArray[id].dataNodeToolTip
       .style("left", datasetLeft - svgClientRect.left - 5 + "px")
@@ -1727,7 +1716,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   setCurrentToolTipName(id: number, boundingClientRects: Map<string, ClientRect>): void {
     // First set the full name again
-    this.datasetToolTipArray[id].dataNodeToolTip.html(this.datasetToolTipArray[id].datasetName);
+    this.datasetToolTipArray[id].dataNodeToolTip.text(this.datasetToolTipArray[id].datasetName);
 
     const curRect = boundingClientRects.get(this.datasetToolTipArray[id].datasetId);
 
@@ -1742,7 +1731,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         const rectB = boundingClientRects.get(this.datasetToolTipArray[k].datasetId);
 
         if (this.workflowGraphService.isOverLapping(curRect, rectB)) {
-          this.datasetToolTipArray[id].dataNodeToolTip.html(
+          this.datasetToolTipArray[id].dataNodeToolTip.text(
             this.datasetToolTipArray[id].datasetName.split(".")[0].slice(0, 5) + "...",
           );
         }

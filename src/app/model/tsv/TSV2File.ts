@@ -17,36 +17,32 @@ export default class TSV2File {
   private hasHeadersHardcodedByType = false;
 
   /**
-   * Replace "" -> <empty>, " " -> <space>, multiple " " -> <spaces>
+   * Replace a header that would be invisible with a placeholder:
+   * "" -> emptyPlaceholder, " " -> <space>, other whitespace-only -> <spaces>
+   *
+   * Plain text, the callers escape it where it's rendered as HTML. The
+   * wrangle modal also writes these into the header row and the phenodata
+   * of the files it creates.
    */
-  private static spreadSheetReplace(headers: Array<string>): Array<string> {
-    return headers.map((header) => {
-      if (header === "") {
-        return "&lt;empty&gt;";
-      }
-
-      if (header === " ") {
-        return "&lt;space&gt;";
-      }
-      if (/^\s$/.test(header)) {
-        return "&lt;spaces&gt;";
-      }
-
-      return header;
-    });
-  }
-
-  private static parameterReplace(header): string {
+  private static replaceInvisible(header: string, emptyPlaceholder: string): string {
     if (header === "") {
-      return "untitled";
+      return emptyPlaceholder;
     }
     if (header === " ") {
       return "<space>";
     }
-    if (/^\s$/.test(header)) {
+    if (/^\s+$/.test(header)) {
       return "<spaces>";
     }
     return header;
+  }
+
+  private static spreadSheetReplace(headers: Array<string>): Array<string> {
+    return headers.map((header) => TSV2File.replaceInvisible(header, "<empty>"));
+  }
+
+  private static parameterReplace(header: string): string {
+    return TSV2File.replaceInvisible(header, "untitled");
   }
 
   private static getIsMissingHeaderColumn(tsvArray: Array<Array<string>>): boolean {

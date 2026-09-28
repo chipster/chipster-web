@@ -12,6 +12,7 @@ import { NativeElementService } from "../../../../../shared/services/native-elem
 import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.service";
 import { TsvService } from "../../../../../shared/services/tsv.service";
 import { Tags, TypeTagService } from "../../../../../shared/services/typetag.service";
+import { escapeHtml } from "../../../../../shared/utilities/html";
 import { SessionDataService } from "../../session-data.service";
 import { VisualizationModalService } from "../visualizationmodal.service";
 
@@ -234,7 +235,8 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
     return {
       data: content,
-      colHeaders: headers,
+      // Handsontable renders the headers as HTML, but they come from the file
+      colHeaders: headers?.map(escapeHtml),
       columnSorting: true,
       manualColumnResize: true,
       sortIndicator: true,

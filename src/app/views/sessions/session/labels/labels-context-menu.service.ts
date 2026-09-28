@@ -5,6 +5,7 @@ import { catchError, map } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
+import { escapeHtml } from "../../../../shared/utilities/html";
 import { resolveLabelColor } from "./label-palette";
 
 export type LabelSelectionState = "checked" | "unchecked" | "indeterminate";
@@ -92,7 +93,7 @@ export class LabelsContextMenuService {
     const dot =
       `<span style="display:inline-block;width:0.6em;height:0.6em;border-radius:50%;` +
       `background:${colorBg};margin-right:0.25em;vertical-align:middle"></span>`;
-    return `${this.checkboxHtml(state)}${dot}<span>${this.escapeHtml(label.name ?? "")}</span>`;
+    return `${this.checkboxHtml(state)}${dot}<span>${escapeHtml(label.name ?? "")}</span>`;
   }
 
   private checkboxHtml(state: LabelSelectionState): string {
@@ -112,15 +113,6 @@ export class LabelsContextMenuService {
       );
     }
     return `<span style="${boxBase};border:1px solid #adb5bd;background:#fff"></span>`;
-  }
-
-  private escapeHtml(s: string): string {
-    return s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
   }
 
   toggleLabel(datasets: Dataset[], label: Label, sessionData: SessionData): Observable<void> {
