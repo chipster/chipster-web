@@ -25,24 +25,20 @@ export class RunOptionsComponent implements OnChanges {
   }
 
   getRunSingleDescription(): string {
-    if (this.validatedTool.singleJobValidation.valid === true) {
-      if (this.validatedTool.tool.inputs.length === 0 || this.validatedTool.inputBindings.length === 0) {
-        return "Runs the tool once.";
-      }
-      if (this.validatedTool.selectedDatasets.length === 1) {
-        return "Runs the tool once. Uses the one selected file as the tool input.";
-      }
-      if (this.validatedTool.selectedDatasets.length > 1) {
-        return (
-          "Runs the tool once. Uses all the " +
-          this.validatedTool.selectedDatasets.length +
-          " selected files as the tool inputs."
-        );
-      }
-    } else {
+    if (this.validatedTool.singleJobValidation.valid !== true) {
       return this.validatedTool.singleJobValidation.message;
     }
-    return undefined;
+    if (this.validatedTool.tool.inputs.length === 0 || this.validatedTool.selectedDatasets.length === 0) {
+      return "Runs the tool once.";
+    }
+    if (this.validatedTool.selectedDatasets.length === 1) {
+      return "Runs the tool once. Uses the one selected file as the tool input.";
+    }
+    return (
+      "Runs the tool once. Uses all the " +
+      this.validatedTool.selectedDatasets.length +
+      " selected files as the tool inputs."
+    );
   }
 
   getRunForEachSampleDescription(): string {
