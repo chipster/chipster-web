@@ -1,6 +1,7 @@
-import { APIRequestContext, expect, Page, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 
 import { login } from "./login";
+import { Api, createDataset, createSession, datasetNode, deleteSession, getApi, openSession } from "./session";
 
 /*
  * Dataset names and the headers of a file are user input, and a session can be
@@ -12,42 +13,6 @@ import { login } from "./login";
 const PAYLOAD = `<img src="x" onerror="window.xssCount = (window.xssCount || 0) + 1">`;
 // label names are limited to 30 characters
 const SHORT_PAYLOAD = `<img src="x" onerror="z()">`;
-
-interface Api {
-  request: APIRequestContext;
-  headers: { Authorization: string };
-}
-
-async function getApi(page: Page): Promise<Api> {
-  await expect(page).toHaveURL(/\/sessions$/);
-  const token = await page.evaluate(() => localStorage.getItem("ch-auth-token"));
-  return {
-    request: page.request,
-    headers: { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") },
-  };
-}
-
-async function createSession(api: Api, name: string): Promise<string> {
-  const response = await api.request.post("/session-db/sessions/", { headers: api.headers, data: { name } });
-  expect(response.ok()).toBe(true);
-  return (await response.json()).sessionId;
-}
-
-async function createDataset(api: Api, sessionId: string, dataset: object, content: string): Promise<string> {
-  const response = await api.request.post(`/session-db/sessions/${sessionId}/datasets`, {
-    headers: api.headers,
-    data: dataset,
-  });
-  expect(response.ok()).toBe(true);
-  const datasetId = (await response.json()).datasetId;
-
-  const upload = await api.request.put(
-    `/file-broker/sessions/${sessionId}/datasets/${datasetId}?flowTotalSize=${Buffer.byteLength(content)}`,
-    { headers: api.headers, data: content },
-  );
-  expect(upload.ok()).toBe(true);
-  return datasetId;
-}
 
 async function getPhenodataRows(api: Api, sessionId: string, datasetId: string): Promise<string[][]> {
   const response = await api.request.get(`/session-db/sessions/${sessionId}/datasets/${datasetId}`, {
@@ -67,19 +32,6 @@ async function expectNotParsed(page: Page) {
   await expect(page.locator('img[src="x"]')).toHaveCount(0);
 }
 
-/*
- * The analyze view waits for the tool modules of toolbox, which take a few
- * seconds in the dev setup, before it draws anything
- */
-async function openSession(page: Page, sessionId: string, datasetId: string) {
-  await page.goto(`/analyze/${sessionId}`);
-  await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
-}
-
-function datasetNode(page: Page, datasetId: string) {
-  return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
-}
-
 test.describe.configure({ timeout: 90_000 });
 
 let api: Api;
@@ -97,8 +49,7 @@ test.afterEach(async () => {
   const sessionToDelete = sessionId;
   sessionId = undefined;
   if (sessionToDelete) {
-    const response = await api.request.delete(`/session-db/sessions/${sessionToDelete}`, { headers: api.headers });
-    expect(response.ok()).toBe(true);
+    await deleteSession(api, sessionToDelete);
   }
 });
 
