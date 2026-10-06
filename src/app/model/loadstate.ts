@@ -14,12 +14,12 @@ export class LoadState {
 
   public state: State;
   private _message: string;
-  public buttonText;
+  public buttonTexts: string[];
 
-  constructor(state: State, message?: string, buttonText?: string) {
+  constructor(state: State, message?: string, buttonTexts: string[] = []) {
     this.state = state;
     this._message = message;
-    this.buttonText = buttonText;
+    this.buttonTexts = buttonTexts;
   }
 
   get message(): string {

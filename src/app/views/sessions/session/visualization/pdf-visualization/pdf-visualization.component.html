@@ -70,9 +70,6 @@
   style="height: {{ height }}px"></pdf-viewer>
 
 <ng-template #statusTemplate>
-  <ch-status [state]="state" (buttonEvent)="showHere()"></ch-status>
-  <button *ngIf="state.isTooLarge()" class="btn btn-secondary btn-sm mt-3 ms-2" (click)="openNewTab()">
-    Open in new tab
-  </button>
+  <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
   <progress *ngIf="state.isLoading()" value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
 </ng-template>

@@ -44,6 +44,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   public readonly maxZoom: number = 4.0;
   // large pdf files may take a long time to render or even freeze the browser
   private readonly autoShowLimit = 10 * 1024 * 1024;
+  private readonly showHereText = "Show here";
+  private readonly openNewTabText = "Open in new tab";
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -77,7 +79,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         "This PDF is large (" +
           this.bytesPipe.transform(this.dataset.size) +
           "). Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
-        "Show here",
+        [this.showHereText, this.openNewTabText],
       );
       return;
     }
@@ -85,12 +87,15 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.load();
   }
 
-  showHere() {
-    this.load();
-  }
-
-  openNewTab() {
-    this.sessionDataService.openNewTab(this.dataset);
+  onStatusButton(buttonText: string) {
+    if (buttonText === this.showHereText) {
+      // load only once, even if the button is clicked again before it disappears
+      if (this.state.isTooLarge()) {
+        this.load();
+      }
+    } else if (buttonText === this.openNewTabText) {
+      this.sessionDataService.openNewTab(this.dataset);
+    }
   }
 
   private load() {
