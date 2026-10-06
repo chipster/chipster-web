@@ -65,6 +65,7 @@
   [fit-to-page]="true"
   [page]="page"
   (after-load-complete)="pdfLoadComplete($event)"
+  (error)="pdfLoadFailed($event)"
   (page-rendered)="pageRendered($event)"
   (on-progress)="onProgress($event)"
   style="height: {{ height }}px"></pdf-viewer>

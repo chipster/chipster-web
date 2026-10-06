@@ -138,6 +138,12 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     }
   }
 
+  pdfLoadFailed(error: any) {
+    this.urlReady = false;
+    this.state = new LoadState(State.Fail, "Loading pdf file failed");
+    this.restErrorService.showError(this.state.message, error);
+  }
+
   pageRendered(event: any) {
     const viewport = event.source.viewport;
 
