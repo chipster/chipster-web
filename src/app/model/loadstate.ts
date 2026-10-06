@@ -37,4 +37,8 @@ export class LoadState {
   isFail(): boolean {
     return this.state === State.Fail;
   }
+
+  isTooLarge(): boolean {
+    return this.state === State.TooLarge;
+  }
 }

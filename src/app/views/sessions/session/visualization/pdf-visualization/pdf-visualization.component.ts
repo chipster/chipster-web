@@ -4,6 +4,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SessionDataService } from "../../session-data.service";
 
 @Component({
@@ -41,16 +42,18 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   private readonly showSinglePagesText: string = "Show single page";
   public readonly minZoom: number = 0.1;
   public readonly maxZoom: number = 4.0;
+  // large pdf files may take a long time to render or even freeze the browser
+  private readonly autoShowLimit = 10 * 1024 * 1024;
 
   constructor(
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
+    private bytesPipe: BytesPipe,
   ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.urlReady = false;
     this.loadedBytes = 0;
     this.totalBytes = 0;
@@ -67,6 +70,31 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
       return;
     }
 
+    // ask before showing large files
+    if (this.dataset.size > this.autoShowLimit) {
+      this.state = new LoadState(
+        State.TooLarge,
+        "This PDF is large (" +
+          this.bytesPipe.transform(this.dataset.size) +
+          "). Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
+        "Show here",
+      );
+      return;
+    }
+
+    this.load();
+  }
+
+  showHere() {
+    this.load();
+  }
+
+  openNewTab() {
+    this.sessionDataService.openNewTab(this.dataset);
+  }
+
+  private load() {
+    this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.sessionDataService
       .getDatasetUrl(this.dataset)
       .pipe(takeUntil(this.unsubscribe))
@@ -76,7 +104,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
           this.urlReady = true;
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Loading, "Loading pdf file failed");
+          this.state = new LoadState(State.Fail, "Loading pdf file failed");
           this.restErrorService.showError(this.state.message, error);
         },
       });
