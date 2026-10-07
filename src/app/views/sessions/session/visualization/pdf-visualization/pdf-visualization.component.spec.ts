@@ -45,6 +45,17 @@ describe("PdfVisualizationComponent", () => {
     component.ngOnChanges();
   }
 
+  function buttonTexts(): string[] {
+    return component.state.buttons.map((button) => button.text);
+  }
+
+  // like the status component does, when the button with this text is clicked
+  function click(buttonText: string) {
+    const button = component.state.buttons.find((candidate) => candidate.text === buttonText);
+    expect(button, "button " + buttonText).toBeDefined();
+    component.onStatusButton(button.action);
+  }
+
   describe("selecting a file", () => {
     it("shows an empty file without loading it", () => {
       select(0);
@@ -64,7 +75,7 @@ describe("PdfVisualizationComponent", () => {
       select(limit + 1);
 
       expect(component.state.isTooLarge()).toBe(true);
-      expect(component.state.buttonTexts).toEqual(["Show here", "Open in new tab"]);
+      expect(buttonTexts()).toEqual(["Show here", "Open in new tab"]);
       expect(urlRequests.length).toBe(0);
     });
 
@@ -89,21 +100,23 @@ describe("PdfVisualizationComponent", () => {
     });
 
     it("loads the file with Show here", () => {
-      component.onStatusButton("Show here");
+      click("Show here");
 
       expect(component.state.isLoading()).toBe(true);
       expect(urlRequests.length).toBe(1);
     });
 
     it("loads the file only once when Show here is clicked twice", () => {
-      component.onStatusButton("Show here");
-      component.onStatusButton("Show here");
+      // the button is gone after the first click, but a second click may be on its way already
+      const showHere = component.state.buttons[0];
+      component.onStatusButton(showHere.action);
+      component.onStatusButton(showHere.action);
 
       expect(urlRequests.length).toBe(1);
     });
 
     it("opens the file in a new tab and keeps the prompt", () => {
-      component.onStatusButton("Open in new tab");
+      click("Open in new tab");
 
       expect(openedInNewTab).toEqual([component.dataset]);
       expect(component.state.isTooLarge()).toBe(true);

@@ -3,9 +3,15 @@ import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
-import { LoadState, State } from "../../../../../model/loadstate";
+import { LoadState, State, StatusButton } from "../../../../../model/loadstate";
 import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SessionDataService } from "../../session-data.service";
+
+// actions of the status buttons
+enum ButtonAction {
+  ShowHere = "showHere",
+  OpenNewTab = "openNewTab",
+}
 
 @Component({
   selector: "ch-pdf-visualization",
@@ -44,8 +50,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   public readonly maxZoom: number = 4.0;
   // large pdf files may take a long time to render or even freeze the browser
   private readonly autoShowLimit = 10 * 1024 * 1024;
-  private readonly showHereText = "Show here";
-  private readonly openNewTabText = "Open in new tab";
+  private readonly showHereButton: StatusButton = { text: "Show here", action: ButtonAction.ShowHere };
+  private readonly openNewTabButton: StatusButton = { text: "Open in new tab", action: ButtonAction.OpenNewTab };
 
   constructor(
     private sessionDataService: SessionDataService,
@@ -79,7 +85,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         "This PDF is large (" +
           this.bytesPipe.transform(this.dataset.size) +
           "). Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
-        [this.showHereText, this.openNewTabText],
+        [this.showHereButton, this.openNewTabButton],
       );
       return;
     }
@@ -87,13 +93,13 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.load();
   }
 
-  onStatusButton(buttonText: string) {
-    if (buttonText === this.showHereText) {
+  onStatusButton(action: string) {
+    if (action === ButtonAction.ShowHere) {
       // load only once, even if the button is clicked again before it disappears
       if (this.state.isTooLarge()) {
         this.load();
       }
-    } else if (buttonText === this.openNewTabText) {
+    } else if (action === ButtonAction.OpenNewTab) {
       this.sessionDataService.openNewTab(this.dataset);
     }
   }

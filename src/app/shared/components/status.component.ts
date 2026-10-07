@@ -1,16 +1,16 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { LoadState } from "../../model/loadstate";
+import { LoadState, StatusButton } from "../../model/loadstate";
 
 @Component({
   selector: "ch-status",
   template: `
     <div>{{ state.message }}</div>
     <button
-      *ngFor="let buttonText of state.buttonTexts; let first = first"
+      *ngFor="let button of state.buttons; let first = first"
       class="btn btn-secondary btn-sm mt-3"
       [class.ms-2]="!first"
-      (click)="onButton(buttonText)">
-      {{ buttonText }}
+      (click)="onButton(button)">
+      {{ button.text }}
     </button>
   `,
   styles: [
@@ -24,10 +24,10 @@ import { LoadState } from "../../model/loadstate";
 export class StatusComponent {
   @Input() state: LoadState;
 
-  // emits the text of the clicked button
+  // emits the action of the clicked button
   @Output() buttonEvent = new EventEmitter<string>();
 
-  onButton(buttonText: string) {
-    this.buttonEvent.emit(buttonText);
+  onButton(button: StatusButton) {
+    this.buttonEvent.emit(button.action);
   }
 }

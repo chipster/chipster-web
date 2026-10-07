@@ -116,7 +116,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
               this.state = new LoadState(
                 State.TooLarge,
                 "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
-                ["Show anyway"],
+                [{ text: "Show anyway", action: "showAnyway" }],
               );
             }
           } else {

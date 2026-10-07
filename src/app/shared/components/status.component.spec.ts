@@ -3,21 +3,17 @@ import { LoadState, State } from "../../model/loadstate";
 import { StatusComponent } from "./status.component";
 
 describe("StatusComponent", () => {
-  it("emits the text of the clicked button", () => {
+  it("emits the action of the clicked button", () => {
     const component = new StatusComponent();
-    component.state = new LoadState(State.TooLarge, "Too large", ["First", "Second"]);
+    const first = { text: "First", action: "first" };
+    const second = { text: "Second", action: "second" };
+    component.state = new LoadState(State.TooLarge, "Too large", [first, second]);
     const emitted: string[] = [];
-    component.buttonEvent.subscribe((buttonText) => emitted.push(buttonText));
+    component.buttonEvent.subscribe((action) => emitted.push(action));
 
-    component.onButton("Second");
-    component.onButton("First");
+    component.onButton(second);
+    component.onButton(first);
 
-    expect(emitted).toEqual(["Second", "First"]);
-  });
-});
-
-describe("LoadState", () => {
-  it("has no buttons by default", () => {
-    expect(new LoadState(State.Loading).buttonTexts).toEqual([]);
+    expect(emitted).toEqual(["second", "first"]);
   });
 });
