@@ -79,10 +79,16 @@ describe("PdfVisualizationComponent", () => {
       expect(urlRequests.length).toBe(0);
     });
 
-    it("shows the size of a large file in the prompt", () => {
+    it("shows the limit and the size of a large file in the prompt", () => {
       select(11 * 1024 * 1024);
 
-      expect(component.state.message).toContain("This PDF is large (11.0 MB).");
+      expect(component.state.message).toContain("This PDF is larger than 10 MB (11.0 MB).");
+    });
+
+    it("never shows the size of a large file below the limit", () => {
+      select(limit + 1);
+
+      expect(component.state.message).toContain("This PDF is larger than 10 MB (10.1 MB).");
     });
 
     it("shows the pdf when its url arrives", () => {

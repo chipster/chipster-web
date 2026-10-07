@@ -42,8 +42,8 @@ function createPdf(text: string, paddingBytes = 0): Buffer {
 }
 
 const SMALL_PDF = createPdf("Small test PDF");
-// 11.0 MB, over the limit of 10 MB
-const LARGE_PDF = createPdf("Large test PDF", 11 * 1024 * 1024);
+// over the limit of 10 MB, and clearly over 11 MB so that the prompt shows 11.1 MB
+const LARGE_PDF = createPdf("Large test PDF", 11 * 1024 * 1024 + 2048);
 
 function pdfVisualization(page: Page) {
   return page.locator("ch-pdf-visualization");
@@ -114,7 +114,7 @@ test("a large pdf file is shown only when asked", async ({ page, context }) => {
 
   const visualization = pdfVisualization(page);
   await expect(visualization.locator("ch-status")).toContainText(
-    "This PDF is large (11.0 MB). Showing it here may be slow or make the page unresponsive. " +
+    "This PDF is larger than 10 MB (11.1 MB). Showing it here may be slow or make the page unresponsive. " +
       "Opening it in a new tab is recommended.",
   );
   await expect(visualization.locator("ch-status").getByRole("button")).toHaveText(["Show here", "Open in new tab"]);

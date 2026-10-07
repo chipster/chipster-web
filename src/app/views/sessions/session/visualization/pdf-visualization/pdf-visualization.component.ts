@@ -80,10 +80,13 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
     // ask before showing large files
     if (this.dataset.size > this.autoShowLimit) {
+      // the size is rounded up, so that it's never shown below the limit
       this.state = new LoadState(
         State.TooLarge,
-        "This PDF is large (" +
-          this.bytesPipe.transform(this.dataset.size) +
+        "This PDF is larger than " +
+          this.bytesPipe.transform(this.autoShowLimit, 0) +
+          " (" +
+          this.bytesPipe.transform(this.dataset.size, 1, true) +
           "). Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
         [this.showHereButton, this.openNewTabButton],
       );
