@@ -1,5 +1,6 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ViewChild } from "@angular/core";
 import { Dataset } from "chipster-js-common";
+import type { PdfViewerComponent } from "ng2-pdf-viewer";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -32,8 +33,11 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   /* any positive value will do, the height of the component will be fixed
   after the page is rendered. Cannot be 0, otherwise page won't be rendered. */
   height = 500;
-  // add one dummy item, because page numbers start from 1
-  unscaledPageHeights = [0];
+
+  // the pdf.js viewer inside it knows the size of each page. Found by the template
+  // reference, so that only the type is imported, without pdf.js itself.
+  @ViewChild("pdfViewer")
+  pdfViewerComponent: PdfViewerComponent;
 
   loadedBytes: number;
   totalBytes: number;
@@ -44,6 +48,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   state: LoadState;
   urlReady = false;
 
+  // pdf.js puts a 10px bottom margin under each page when the page borders are removed
+  private readonly pageMargin = 10;
   private readonly showAllPagesText: string = "Show all pages";
   private readonly showSinglePagesText: string = "Show single page";
   public readonly minZoom: number = 0.1;
@@ -142,14 +148,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   pdfLoadComplete(pdf: any) {
     this.totalPages = pdf.numPages;
     this.state = new LoadState(State.Ready);
-
-    // store page heights
-    for (let i = 1; i <= this.totalPages; i++) {
-      pdf.getPage(i).then((page) => {
-        // 0: x, 1: y, 2: width, 3: height
-        this.unscaledPageHeights[i] = page.view[3];
-      });
-    }
   }
 
   pdfLoadFailed(error: any) {
@@ -159,30 +157,56 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.restErrorService.showError(this.state.message, error);
   }
 
-  pageRendered(event: any) {
-    const viewport = event.source.viewport;
+  /*
+   * The pdf-viewer element doesn't grow with its content, so its height is set
+   * to the height of the pages it shows. The page views of pdf.js have the size
+   * of each page at the current zoom, so that there's no need to ask the pdf for
+   * the pages.
+   *
+   * The rendered page isn't necessarily the one that is shown: on a single
+   * page, pdf.js renders also the next page in advance.
+   */
+  pageRendered() {
+    this.updateHeight();
+  }
 
-    // calcualte the total height of all visible pages
+  /*
+   * Until pdf.js has fetched a page, its page view has the size of the first
+   * page. pdf.js fetches all pages after the first one is rendered, and tells
+   * when they are all there.
+   */
+  pagesLoaded() {
+    this.updateHeight();
+  }
+
+  private updateHeight() {
+    const viewer = this.pdfViewerComponent?.pdfViewer;
+    if (!viewer || viewer.pagesCount === 0) {
+      return;
+    }
     if (this.showAll) {
       let totalHeight = 0;
-
-      // sum of all pages
-      for (let i = 1; i <= this.totalPages; i++) {
-        if (i < this.unscaledPageHeights.length) {
-          // we could get the scaled height of page directly from viewport.height, but only after the page is rendered
-          // viewport.scale is different than this.zoom, maybe calcualated from page width and the container width?
-          // <div class="page"> has 10px bottom margin
-          totalHeight += this.unscaledPageHeights[i] * viewport.scale + 10;
-        } else {
-          console.log("no height for page " + i);
-        }
+      for (let i = 0; i < viewer.pagesCount; i++) {
+        totalHeight += this.pageHeight(viewer.getPageView(i));
       }
-
       this.height = totalHeight;
     } else {
-      // height of the current page, see more comments above
-      this.height = this.unscaledPageHeights[this.page] * viewport.scale + 10;
+      const pageView = viewer.getPageView(this.page - 1);
+      if (pageView) {
+        this.height = this.pageHeight(pageView);
+      }
     }
+  }
+
+  // pdf.js rounds the size of each page to whole pixels, so the sum of the exact sizes could be a few pixels short
+  private pageHeight(pageView: { viewport: { height: number } }): number {
+    return Math.round(pageView.viewport.height) + this.pageMargin;
+  }
+
+  // pdf.js changes the page itself too, for example when a link in the pdf is clicked
+  onPageChange(page: number) {
+    this.page = page;
+    this.updateHeight();
   }
 
   onProgress(progressData: any) {
@@ -190,12 +214,14 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.totalBytes = progressData.total;
   }
 
+  // a page that was rendered in advance isn't rendered again, so the height is updated here too
   previousPage() {
     if (this.page > 1) {
       this.page -= 1;
     } else {
       this.page = 1;
     }
+    this.updateHeight();
   }
 
   nextPage() {
@@ -204,6 +230,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     } else {
       this.page = this.totalPages;
     }
+    this.updateHeight();
   }
 
   zoomIn() {

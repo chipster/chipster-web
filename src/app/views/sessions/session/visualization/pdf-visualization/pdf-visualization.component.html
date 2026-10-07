@@ -58,6 +58,7 @@
   </div>
 </div>
 <pdf-viewer
+  #pdfViewer
   *ngIf="urlReady"
   [src]="src"
   [zoom]="zoom"
@@ -66,7 +67,9 @@
   [page]="page"
   (after-load-complete)="pdfLoadComplete($event)"
   (error)="pdfLoadFailed($event)"
-  (page-rendered)="pageRendered($event)"
+  (page-rendered)="pageRendered()"
+  (pagesloaded)="pagesLoaded()"
+  (pageChange)="onPageChange($event)"
   (on-progress)="onProgress($event)"
   style="height: {{ height }}px"></pdf-viewer>
 
