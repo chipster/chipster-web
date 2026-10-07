@@ -99,18 +99,13 @@ test("a small pdf file is shown directly", async ({ page }) => {
 
 test("a large pdf file is shown only when asked", async ({ page, context }) => {
   const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
+  const filePath = `/file-broker/sessions/${sessionId}/datasets/${datasetId}`;
 
-  // requests for the file's contents, from this page or from a new tab
+  // requests for the file's contents from this page
   const pageFileRequests: string[] = [];
-  const contextFileRequests: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes(`/file-broker/sessions/${sessionId}/datasets/${datasetId}`)) {
+    if (request.url().includes(filePath)) {
       pageFileRequests.push(request.url());
-    }
-  });
-  context.on("request", (request) => {
-    if (request.url().includes(`/file-broker/sessions/${sessionId}/datasets/${datasetId}`)) {
-      contextFileRequests.push(request.url());
     }
   });
 
@@ -126,11 +121,15 @@ test("a large pdf file is shown only when asked", async ({ page, context }) => {
   await expect(visualization.locator("progress")).toHaveCount(0);
   await expect(visualization.locator("pdf-viewer")).toHaveCount(0);
 
-  // the new tab gets the file, and the prompt stays in case the user wants to show it here too
+  // the new tab gets the file, and the prompt stays in case the user wants to show it here too.
+  // The new tab may request the file before Playwright hands it over as a popup, so the request is
+  // waited for from the context, from before the click. The context sees the requests of this page
+  // too, but pageFileRequests shows below that this page didn't make it.
   const popupPromise = page.waitForEvent("popup");
+  const fileRequest = context.waitForEvent("request", (request) => request.url().includes(filePath));
   await visualization.getByRole("button", { name: "Open in new tab" }).click();
   const popup = await popupPromise;
-  await expect.poll(() => contextFileRequests.length).toBeGreaterThan(0);
+  await fileRequest;
   await popup.close();
   await expect(visualization.getByRole("button", { name: "Show here" })).toBeVisible();
   // the file was requested only by the new tab
