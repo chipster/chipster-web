@@ -140,6 +140,35 @@ describe("PdfVisualizationComponent", () => {
       expect(shownErrors).toEqual(["Loading pdf file failed"]);
     });
 
+    it("offers to try again or to open the file in a new tab after a failure", () => {
+      select(limit + 1);
+      click("Show here");
+      urlRequests[0].error(new Error("test failure"));
+
+      expect(buttonTexts()).toEqual(["Try again", "Open in new tab"]);
+
+      click("Open in new tab");
+      expect(openedInNewTab).toEqual([component.dataset]);
+      expect(component.state.isFail()).toBe(true);
+
+      click("Try again");
+      expect(component.state.isLoading()).toBe(true);
+      expect(urlRequests.length).toBe(2);
+    });
+
+    it("starts again from nothing when trying again", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+      component.onProgress({ loaded: 600, total: 1000 });
+      component.pdfLoadFailed(new Error("test failure"));
+
+      click("Try again");
+
+      expect(component.loadedBytes).toBe(0);
+      expect(component.totalBytes).toBe(0);
+      expect(component.urlReady).toBe(false);
+    });
+
     it("ends in the fail state when the pdf viewer fails", () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");

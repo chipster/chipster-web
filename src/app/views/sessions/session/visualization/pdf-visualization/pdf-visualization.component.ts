@@ -51,6 +51,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   // large pdf files may take a long time to render or even freeze the browser
   private readonly autoShowLimit = 10 * 1024 * 1024;
   private readonly showHereButton: StatusButton = { text: "Show here", action: ButtonAction.ShowHere };
+  private readonly tryAgainButton: StatusButton = { text: "Try again", action: ButtonAction.ShowHere };
   private readonly openNewTabButton: StatusButton = { text: "Open in new tab", action: ButtonAction.OpenNewTab };
 
   constructor(
@@ -62,12 +63,9 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.urlReady = false;
-    this.loadedBytes = 0;
-    this.totalBytes = 0;
+    this.resetLoad();
 
     this.page = 1;
-    this.totalPages = null;
     this.zoom = 1;
     this.showAll = false;
     this.setShowAllButtonText();
@@ -98,8 +96,9 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   onStatusButton(action: string) {
     if (action === ButtonAction.ShowHere) {
-      // load only once, even if the button is clicked again before it disappears
-      if (this.state.isTooLarge()) {
+      // only from the states that show the button, so that a second click
+      // before the button disappears doesn't start a second load
+      if (this.state.isTooLarge() || this.state.isFail()) {
         this.load();
       }
     } else if (action === ButtonAction.OpenNewTab) {
@@ -107,7 +106,16 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     }
   }
 
+  // forget the loaded file, or the failed attempt when trying again
+  private resetLoad() {
+    this.urlReady = false;
+    this.loadedBytes = 0;
+    this.totalBytes = 0;
+    this.totalPages = null;
+  }
+
   private load() {
+    this.resetLoad();
     this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.sessionDataService
       .getDatasetUrl(this.dataset)
@@ -117,10 +125,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
           this.src = url;
           this.urlReady = true;
         },
-        error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading pdf file failed");
-          this.restErrorService.showError(this.state.message, error);
-        },
+        error: (error: any) => this.pdfLoadFailed(error),
       });
   }
 
@@ -149,7 +154,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   pdfLoadFailed(error: any) {
     this.urlReady = false;
-    this.state = new LoadState(State.Fail, "Loading pdf file failed");
+    // keep the way out, so that the user doesn't have to select the file again
+    this.state = new LoadState(State.Fail, "Loading pdf file failed", [this.tryAgainButton, this.openNewTabButton]);
     this.restErrorService.showError(this.state.message, error);
   }
 

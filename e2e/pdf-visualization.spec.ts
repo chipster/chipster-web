@@ -62,6 +62,8 @@ async function expectRendered(page: Page) {
 async function expectFailed(page: Page) {
   const visualization = pdfVisualization(page);
   await expect(visualization.getByText("Loading pdf file failed")).toBeVisible({ timeout: 30_000 });
+  // the user can still try again or open the file in a new tab
+  await expect(visualization.locator("ch-status").getByRole("button")).toHaveText(["Try again", "Open in new tab"]);
   await expect(visualization.locator("progress")).toHaveCount(0);
   await expect(visualization.locator("pdf-viewer")).toHaveCount(0);
 }
