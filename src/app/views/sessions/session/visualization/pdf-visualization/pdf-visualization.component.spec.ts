@@ -1,0 +1,287 @@
+import { Dataset } from "chipster-js-common";
+import type { PdfViewerComponent } from "ng2-pdf-viewer";
+import { Subject } from "rxjs";
+import { beforeEach, describe, expect, it } from "vitest";
+import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
+import { State } from "../../../../../model/loadstate";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { SessionDataService } from "../../session-data.service";
+import { PdfVisualizationComponent } from "./pdf-visualization.component";
+
+describe("PdfVisualizationComponent", () => {
+  const limit = 10 * 1024 * 1024;
+
+  let component: PdfVisualizationComponent;
+  let urlRequests: Subject<string>[];
+  let openedInNewTab: Dataset[];
+  let shownErrors: string[];
+
+  beforeEach(() => {
+    urlRequests = [];
+    openedInNewTab = [];
+    shownErrors = [];
+
+    const sessionDataServiceStub = {
+      getDatasetUrl: () => {
+        const request = new Subject<string>();
+        urlRequests.push(request);
+        return request;
+      },
+      openNewTab: (dataset: Dataset) => {
+        openedInNewTab.push(dataset);
+      },
+    } as unknown as SessionDataService;
+
+    const restErrorServiceStub = {
+      showError: (message: string) => {
+        shownErrors.push(message);
+      },
+    } as unknown as RestErrorService;
+
+    component = new PdfVisualizationComponent(sessionDataServiceStub, restErrorServiceStub, new BytesPipe());
+  });
+
+  function select(size: number) {
+    component.dataset = { datasetId: "d1", name: "file.pdf", size } as Dataset;
+    component.ngOnChanges();
+  }
+
+  // a pdf.js viewer whose page views have the given heights at the current zoom
+  function viewer(pageHeights: number[]) {
+    return {
+      pagesCount: pageHeights.length,
+      getPageView: (index: number) => ({ viewport: { height: pageHeights[index] } }),
+    } as unknown as PdfViewerComponent["pdfViewer"];
+  }
+
+  function buttonTexts(): string[] {
+    return component.state.buttons.map((button) => button.text);
+  }
+
+  // like the status component does, when the button with this text is clicked
+  function click(buttonText: string) {
+    const button = component.state.buttons.find((candidate) => candidate.text === buttonText);
+    expect(button, "button " + buttonText).toBeDefined();
+    component.onStatusButton(button.action);
+  }
+
+  describe("selecting a file", () => {
+    it("shows an empty file without loading it", () => {
+      select(0);
+
+      expect(component.state.state).toBe(State.EmptyFile);
+      expect(urlRequests.length).toBe(0);
+    });
+
+    it("loads a file at the limit directly", () => {
+      select(limit);
+
+      expect(component.state.isLoading()).toBe(true);
+      expect(urlRequests.length).toBe(1);
+    });
+
+    it("asks before loading a file over the limit", () => {
+      select(limit + 1);
+
+      expect(component.state.isTooLarge()).toBe(true);
+      expect(buttonTexts()).toEqual(["Show here", "Open in new tab"]);
+      expect(urlRequests.length).toBe(0);
+    });
+
+    it("shows the limit and the size of a large file in the prompt", () => {
+      select(11 * 1024 * 1024);
+
+      expect(component.state.message).toContain("This PDF is larger than 10 MB (11.0 MB).");
+    });
+
+    it("never shows the size of a large file below the limit", () => {
+      select(limit + 1);
+
+      expect(component.state.message).toContain("This PDF is larger than 10 MB (10.1 MB).");
+    });
+
+    it("shows the pdf when its url arrives", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+
+      expect(component.urlReady).toBe(true);
+      expect(component.src).toBe("http://localhost/file.pdf");
+    });
+
+    it("is ready when the pdf is loaded", () => {
+      select(1000);
+      component.pdfLoadComplete({ numPages: 6 });
+
+      expect(component.state.isReady()).toBe(true);
+      expect(component.totalPages).toBe(6);
+    });
+  });
+
+  describe("height", () => {
+    // Letter, A4 and Letter landscape at the same zoom
+    const pageHeights = [1056, 1123.5, 816];
+
+    beforeEach(() => {
+      select(1000);
+      component.pdfLoadComplete({ numPages: 3 });
+      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
+    });
+
+    it("is the height of the shown page and its margin on a single page", () => {
+      component.pageRendered();
+
+      expect(component.height).toBe(1066);
+    });
+
+    it("isn't the height of the next page when it's rendered in advance", () => {
+      component.pageRendered();
+      // pdf.js renders also the next page on a single page, but page 1 is still shown
+      component.pageRendered();
+
+      expect(component.height).toBe(1066);
+    });
+
+    it("follows the shown page, also without a new rendering", () => {
+      component.nextPage();
+      expect(component.height).toBe(1134);
+
+      component.nextPage();
+      expect(component.height).toBe(826);
+
+      component.previousPage();
+      expect(component.height).toBe(1134);
+    });
+
+    it("follows the page when pdf.js changes it, for example for a link in the pdf", () => {
+      component.pageRendered();
+
+      component.onPageChange(3);
+
+      expect(component.page).toBe(3);
+      expect(component.height).toBe(826);
+    });
+
+    it("rounds the height of each page to whole pixels like pdf.js", () => {
+      // the exact sum would be 2 * (1004.4 + 10) = 2028.8, but pdf.js lays out 2 * (1004 + 10)
+      component.pdfViewerComponent = { pdfViewer: viewer([1004.4, 1004.4]) } as PdfViewerComponent;
+      component.toggleShowAll();
+      component.pageRendered();
+      expect(component.height).toBe(2028);
+
+      // and rounds a half pixel up
+      component.pdfViewerComponent = { pdfViewer: viewer([1067.5, 1067.5]) } as PdfViewerComponent;
+      component.pagesLoaded();
+      expect(component.height).toBe(2 * 1078);
+    });
+
+    it("is the height of all pages and their margins when all pages are shown", () => {
+      component.toggleShowAll();
+      component.pageRendered();
+
+      expect(component.height).toBe(1066 + 1134 + 826);
+    });
+
+    it("is updated when all pages are loaded", () => {
+      component.toggleShowAll();
+      // until the other pages are fetched, their page views have the size of the first page
+      component.pdfViewerComponent = { pdfViewer: viewer([1056, 1056, 1056]) } as PdfViewerComponent;
+      component.pageRendered();
+      expect(component.height).toBe(3 * 1066);
+
+      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
+      component.pagesLoaded();
+
+      expect(component.height).toBe(1066 + 1134 + 826);
+    });
+
+    it("isn't changed without a viewer", () => {
+      component.pageRendered();
+      component.pdfViewerComponent = undefined;
+      component.nextPage();
+      component.pagesLoaded();
+
+      expect(component.height).toBe(1066);
+    });
+  });
+
+  describe("prompt buttons", () => {
+    beforeEach(() => {
+      select(limit + 1);
+    });
+
+    it("loads the file with Show here", () => {
+      click("Show here");
+
+      expect(component.state.isLoading()).toBe(true);
+      expect(urlRequests.length).toBe(1);
+    });
+
+    it("loads the file only once when Show here is clicked twice", () => {
+      // the button is gone after the first click, but a second click may be on its way already
+      const showHere = component.state.buttons[0];
+      component.onStatusButton(showHere.action);
+      component.onStatusButton(showHere.action);
+
+      expect(urlRequests.length).toBe(1);
+    });
+
+    it("opens the file in a new tab and keeps the prompt", () => {
+      click("Open in new tab");
+
+      expect(openedInNewTab).toEqual([component.dataset]);
+      expect(component.state.isTooLarge()).toBe(true);
+      expect(urlRequests.length).toBe(0);
+    });
+  });
+
+  describe("failures", () => {
+    it("ends in the fail state when the url request fails", () => {
+      select(1000);
+      urlRequests[0].error(new Error("test failure"));
+
+      expect(component.state.isFail()).toBe(true);
+      expect(component.state.message).toBe("Loading pdf file failed");
+      expect(shownErrors).toEqual(["Loading pdf file failed"]);
+    });
+
+    it("offers to try again or to open the file in a new tab after a failure", () => {
+      select(limit + 1);
+      click("Show here");
+      urlRequests[0].error(new Error("test failure"));
+
+      expect(buttonTexts()).toEqual(["Try again", "Open in new tab"]);
+
+      click("Open in new tab");
+      expect(openedInNewTab).toEqual([component.dataset]);
+      expect(component.state.isFail()).toBe(true);
+
+      click("Try again");
+      expect(component.state.isLoading()).toBe(true);
+      expect(urlRequests.length).toBe(2);
+    });
+
+    it("starts again from nothing when trying again", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+      component.onProgress({ loaded: 600, total: 1000 });
+      component.pdfLoadFailed(new Error("test failure"));
+
+      click("Try again");
+
+      expect(component.loadedBytes).toBe(0);
+      expect(component.totalBytes).toBe(0);
+      expect(component.urlReady).toBe(false);
+    });
+
+    it("ends in the fail state when the pdf viewer fails", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+      component.pdfLoadFailed(new Error("test failure"));
+
+      expect(component.state.isFail()).toBe(true);
+      expect(component.state.message).toBe("Loading pdf file failed");
+      expect(component.urlReady).toBe(false);
+      expect(shownErrors).toEqual(["Loading pdf file failed"]);
+    });
+  });
+});
