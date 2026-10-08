@@ -1,7 +1,7 @@
 import { expect, Page, test } from "@playwright/test";
 
 import { login } from "./login";
-import { Api, createDataset, createSession, datasetNode, getApi, openSession } from "./session";
+import { Api, createDataset, createSession, datasetNode, deleteDataset, getApi, openSession } from "./session";
 
 /*
  * Dataset names and the headers of a file are user input, and a session can be
@@ -85,6 +85,19 @@ test("a dataset name is shown as text in the workflow graph", async ({ page }) =
   // full names, or "<img ..." when the tags overlap and are shortened to their first five characters
   await expect(page.locator(".dataset-node-tooltip")).toHaveText([/^<img/, /^<img/]);
 
+  await expectNotParsed(page);
+});
+
+test("a deleted file's name is shown as text in the undo toast", async ({ page }) => {
+  const name = PAYLOAD + ".txt";
+  const datasetId = await createDataset(api, sessionId, { name, x: 100, y: 100 }, "text\n");
+
+  await openSession(page, sessionId, datasetId);
+  await deleteDataset(page, datasetId);
+
+  await expect(page.locator("ch-toasts .toast").filter({ hasText: "Deleted file" })).toContainText(
+    "Deleted file " + name,
+  );
   await expectNotParsed(page);
 });
 

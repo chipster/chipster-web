@@ -53,3 +53,15 @@ export async function openSession(page: Page, sessionId: string, datasetId: stri
 export function datasetNode(page: Page, datasetId: string) {
   return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
 }
+
+/*
+ * Delete a file the way a user does, from the Selected Files menu. The file
+ * disappears right away, but it's deleted on the server only when the undo
+ * toast closes.
+ */
+export async function deleteDataset(page: Page, datasetId: string) {
+  await datasetNode(page, datasetId).click();
+  await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
+  await page.locator(".dropdown-menu.show").getByText("Delete", { exact: true }).click();
+  await page.locator(".modal-footer").getByRole("button", { name: "Delete" }).click();
+}
