@@ -19,7 +19,7 @@ Run `npm test` to execute the unit tests via [Vitest](https://vitest.dev). Use `
 
 ## Running end-to-end tests
 
-Run `npm run test:e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev). They drive a real browser against a running dev environment, so start the Angular dev server and chipster-web-server first. Chromium comes from the dev container image, see PLAYWRIGHT_BROWSERS_PATH.
+Run `npm run test:e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev). They drive a real browser against a running dev environment, so start chipster-web-server and the Angular dev server first, both in the same mode (proxy or direct, see CLAUDE.md). Chromium comes from the dev container image, see PLAYWRIGHT_BROWSERS_PATH.
 
 ## Formatting
 

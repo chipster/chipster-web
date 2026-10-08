@@ -8,6 +8,9 @@ import { login } from "./login";
  * security/users file.
  */
 
+// these test the login itself, so they start logged out, unlike the other specs
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test("home page opens", async ({ page }) => {
   await page.goto("/");
 

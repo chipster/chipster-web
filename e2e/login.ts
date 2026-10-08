@@ -1,5 +1,9 @@
 import { expect, Page } from "@playwright/test";
 
+// the browser states that auth.setup.ts saves after logging in
+export const USER_STATE = "playwright/.auth/chipster.json";
+export const ADMIN_STATE = "playwright/.auth/admin.json";
+
 /*
  * Fill in the local login form and submit. The form is shown directly only
  * when the auth service has no OIDC providers configured; with providers,
