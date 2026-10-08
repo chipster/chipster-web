@@ -15,4 +15,4 @@ log.setDefaultLevel(log.levels.INFO);
 
 platformBrowser()
   .bootstrapModule(AppModule)
-  .catch((err) => console.log(err));
+  .catch((err) => log.error(err));
