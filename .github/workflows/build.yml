@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# The check only reads the repository.
+permissions:
+  contents: read
+
+# A new push to a pull request makes an in-progress run redundant. Runs on
+# master are not cancelled, so that every commit on master keeps a result
+# even when merges land in quick succession.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ng-build:
+    runs-on: ubuntu-latest
+    # The build and the type check take about a minute together, the rest is
+    # the install.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # .nvmrc holds the Node version, and .npmrc sets engine-strict,
+          # so an older Node would fail the install rather than run the
+          # build with the wrong toolchain.
+          node-version-file: .nvmrc
+          cache: npm
+
+      # The dependency scripts are skipped, same as in the other workflows.
+      # The build doesn't need them.
+      - run: npm ci --ignore-scripts
+
+      # The production build type-checks the code reachable from main.ts and
+      # the templates (strictTemplates) with the Angular compiler. Vitest only
+      # strips the types and lint doesn't compile, so nothing else catches
+      # these errors. The build also fails when the output goes over the error
+      # limit of a size budget in angular.json; the warning limits only print.
+      - run: npm run build
+
+      # The build only sees what main.ts imports, so the unit test specs and
+      # the end-to-end tests are type-checked here. tsconfig.json has no
+      # include list, so tsc checks every TypeScript file in the project.
+      # Templates are not checked here, the build above does that.
+      - run: npx tsc --noEmit -p tsconfig.json
