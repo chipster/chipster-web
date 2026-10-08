@@ -1,12 +1,22 @@
+import { ElementRef } from "@angular/core";
 import { Dataset } from "chipster-js-common";
-import type { PdfViewerComponent } from "ng2-pdf-viewer";
 import { Subject } from "rxjs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { State } from "../../../../../model/loadstate";
 import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SessionDataService } from "../../session-data.service";
+import { PdfViewerService } from "./pdf-viewer.service";
 import { PdfVisualizationComponent } from "./pdf-visualization.component";
+
+// a viewer opened by the component, which the test loads or fails
+interface OpenedViewer {
+  url: string;
+  name: string;
+  closed: boolean;
+  load(): Promise<void>;
+  fail(error: Error): Promise<void>;
+}
 
 describe("PdfVisualizationComponent", () => {
   const limit = 10 * 1024 * 1024;
@@ -15,11 +25,13 @@ describe("PdfVisualizationComponent", () => {
   let urlRequests: Subject<string>[];
   let openedInNewTab: Dataset[];
   let shownErrors: string[];
+  let viewers: OpenedViewer[];
 
   beforeEach(() => {
     urlRequests = [];
     openedInNewTab = [];
     shownErrors = [];
+    viewers = [];
 
     const sessionDataServiceStub = {
       getDatasetUrl: () => {
@@ -38,20 +50,51 @@ describe("PdfVisualizationComponent", () => {
       },
     } as unknown as RestErrorService;
 
-    component = new PdfVisualizationComponent(sessionDataServiceStub, restErrorServiceStub, new BytesPipe());
+    const pdfViewerServiceStub = {
+      open: (target: HTMLElement, url: string, name: string) => {
+        let resolve: () => void;
+        let reject: (error: Error) => void;
+        const loaded = new Promise<void>((res, rej) => {
+          resolve = res;
+          reject = rej;
+        });
+        const viewer: OpenedViewer = {
+          url,
+          name,
+          closed: false,
+          // the component sees the result after its own promise callbacks have run
+          load: () => {
+            resolve();
+            return loaded.then(() => undefined);
+          },
+          fail: (error: Error) => {
+            reject(error);
+            return loaded.catch(() => undefined);
+          },
+        };
+        viewers.push(viewer);
+        return {
+          loaded,
+          close: () => {
+            viewer.closed = true;
+          },
+        };
+      },
+    } as unknown as PdfViewerService;
+
+    component = new PdfVisualizationComponent(
+      sessionDataServiceStub,
+      restErrorServiceStub,
+      new BytesPipe(),
+      pdfViewerServiceStub,
+    );
+    // the template isn't rendered in these tests, and the stub viewer doesn't need a real element
+    component.viewerContainer = new ElementRef({} as HTMLElement);
   });
 
   function select(size: number) {
     component.dataset = { datasetId: "d1", name: "file.pdf", size } as Dataset;
     component.ngOnChanges();
-  }
-
-  // a pdf.js viewer whose page views have the given heights at the current zoom
-  function viewer(pageHeights: number[]) {
-    return {
-      pagesCount: pageHeights.length,
-      getPageView: (index: number) => ({ viewport: { height: pageHeights[index] } }),
-    } as unknown as PdfViewerComponent["pdfViewer"];
   }
 
   function buttonTexts(): string[] {
@@ -100,107 +143,54 @@ describe("PdfVisualizationComponent", () => {
       expect(component.state.message).toContain("This PDF is larger than 10 MB (10.1 MB).");
     });
 
-    it("shows the pdf when its url arrives", () => {
+    it("opens the pdf in the viewer when its url arrives", () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
 
-      expect(component.urlReady).toBe(true);
-      expect(component.src).toBe("http://localhost/file.pdf");
+      expect(viewers.map((viewer) => [viewer.url, viewer.name])).toEqual([["http://localhost/file.pdf", "file.pdf"]]);
+      expect(component.state.isLoading()).toBe(true);
     });
 
-    it("is ready when the pdf is loaded", () => {
+    it("is ready when the viewer has loaded the pdf", async () => {
       select(1000);
-      component.pdfLoadComplete({ numPages: 6 });
+      urlRequests[0].next("http://localhost/file.pdf");
+      await viewers[0].load();
 
       expect(component.state.isReady()).toBe(true);
-      expect(component.totalPages).toBe(6);
     });
   });
 
-  describe("height", () => {
-    // Letter, A4 and Letter landscape at the same zoom
-    const pageHeights = [1056, 1123.5, 816];
-
-    beforeEach(() => {
+  describe("viewer", () => {
+    it("is closed when another file is selected", () => {
       select(1000);
-      component.pdfLoadComplete({ numPages: 3 });
-      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
+      urlRequests[0].next("http://localhost/file.pdf");
+
+      select(2000);
+
+      expect(viewers[0].closed).toBe(true);
     });
 
-    it("is the height of the shown page and its margin on a single page", () => {
-      component.pageRendered();
+    it("is closed when the visualization is closed", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
 
-      expect(component.height).toBe(1066);
+      component.ngOnDestroy();
+
+      expect(viewers[0].closed).toBe(true);
     });
 
-    it("isn't the height of the next page when it's rendered in advance", () => {
-      component.pageRendered();
-      // pdf.js renders also the next page on a single page, but page 1 is still shown
-      component.pageRendered();
+    it("of the previous file doesn't change the state of the next one", async () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/first.pdf");
+      select(2000);
+      urlRequests[1].next("http://localhost/second.pdf");
 
-      expect(component.height).toBe(1066);
-    });
+      await viewers[0].load();
+      expect(component.state.isLoading()).toBe(true);
 
-    it("follows the shown page, also without a new rendering", () => {
-      component.nextPage();
-      expect(component.height).toBe(1134);
-
-      component.nextPage();
-      expect(component.height).toBe(826);
-
-      component.previousPage();
-      expect(component.height).toBe(1134);
-    });
-
-    it("follows the page when pdf.js changes it, for example for a link in the pdf", () => {
-      component.pageRendered();
-
-      component.onPageChange(3);
-
-      expect(component.page).toBe(3);
-      expect(component.height).toBe(826);
-    });
-
-    it("rounds the height of each page to whole pixels like pdf.js", () => {
-      // the exact sum would be 2 * (1004.4 + 10) = 2028.8, but pdf.js lays out 2 * (1004 + 10)
-      component.pdfViewerComponent = { pdfViewer: viewer([1004.4, 1004.4]) } as PdfViewerComponent;
-      component.toggleShowAll();
-      component.pageRendered();
-      expect(component.height).toBe(2028);
-
-      // and rounds a half pixel up
-      component.pdfViewerComponent = { pdfViewer: viewer([1067.5, 1067.5]) } as PdfViewerComponent;
-      component.pagesLoaded();
-      expect(component.height).toBe(2 * 1078);
-    });
-
-    it("is the height of all pages and their margins when all pages are shown", () => {
-      component.toggleShowAll();
-      component.pageRendered();
-
-      expect(component.height).toBe(1066 + 1134 + 826);
-    });
-
-    it("is updated when all pages are loaded", () => {
-      component.toggleShowAll();
-      // until the other pages are fetched, their page views have the size of the first page
-      component.pdfViewerComponent = { pdfViewer: viewer([1056, 1056, 1056]) } as PdfViewerComponent;
-      component.pageRendered();
-      expect(component.height).toBe(3 * 1066);
-
-      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
-      component.pagesLoaded();
-
-      expect(component.height).toBe(1066 + 1134 + 826);
-    });
-
-    it("isn't changed without a viewer", () => {
-      component.pageRendered();
-      component.pdfViewerComponent = undefined;
-      component.nextPage();
-      component.pagesLoaded();
-
-      expect(component.height).toBe(1066);
+      await viewers[0].fail(new Error("closed"));
+      expect(component.state.isLoading()).toBe(true);
+      expect(shownErrors).toEqual([]);
     });
   });
 
@@ -260,27 +250,28 @@ describe("PdfVisualizationComponent", () => {
       expect(urlRequests.length).toBe(2);
     });
 
-    it("starts again from nothing when trying again", () => {
+    it("opens a new viewer when trying again", async () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
-      component.onProgress({ loaded: 600, total: 1000 });
-      component.pdfLoadFailed(new Error("test failure"));
+      await viewers[0].fail(new Error("test failure"));
 
       click("Try again");
+      urlRequests[1].next("http://localhost/file.pdf");
 
-      expect(component.loadedBytes).toBe(0);
-      expect(component.totalBytes).toBe(0);
-      expect(component.urlReady).toBe(false);
+      expect(viewers.length).toBe(2);
+      expect(viewers[1].closed).toBe(false);
+      await viewers[1].load();
+      expect(component.state.isReady()).toBe(true);
     });
 
-    it("ends in the fail state when the pdf viewer fails", () => {
+    it("ends in the fail state when the pdf viewer fails", async () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
-      component.pdfLoadFailed(new Error("test failure"));
+      await viewers[0].fail(new Error("test failure"));
 
       expect(component.state.isFail()).toBe(true);
       expect(component.state.message).toBe("Loading pdf file failed");
-      expect(component.urlReady).toBe(false);
+      expect(viewers[0].closed).toBe(true);
       expect(shownErrors).toEqual(["Loading pdf file failed"]);
     });
   });

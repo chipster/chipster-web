@@ -22,7 +22,6 @@
           "options": {
             "allowedCommonJsDependencies": [
               "mousetrap",
-              "pdfjs-dist",
               "oidc-client",
               "stacktrace-js",
               "loglevel",
@@ -35,7 +34,14 @@
             "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
             "polyfills": ["src/polyfills.ts", "@angular/localize/init"],
-            "assets": ["src/assets"],
+            "assets": [
+              "src/assets",
+              {
+                "glob": "pdfium.wasm",
+                "input": "node_modules/@embedpdf/snippet/dist",
+                "output": "assets/embedpdf"
+              }
+            ],
             "styles": [
               "src/styles.scss",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",

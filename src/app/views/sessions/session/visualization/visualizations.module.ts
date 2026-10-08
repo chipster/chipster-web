@@ -2,7 +2,6 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { PdfViewerModule } from "ng2-pdf-viewer";
 import { SharedModule } from "../../../../shared/shared.module";
 import { PlotService } from "../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../shared/visualization/visualizationTSV.service";
@@ -36,7 +35,7 @@ import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
 import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule, LabelsModule],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, LabelsModule],
   declarations: [
     VisualizationsComponent,
     VennDiagramComponent,
