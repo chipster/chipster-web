@@ -65,9 +65,9 @@
     "fsevents": "^2.3.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.21",
     "@angular-eslint/builder": "^18.4.3",
     "@angular-eslint/schematics": "^18.4.3",
+    "@angular/build": "^18.2.21",
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.14",
     "@angular/language-service": "^18.2.14",
@@ -88,6 +88,7 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.12.0",
+    "less": "^4.2.0",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",
     "ts-node": "^10.4.0",
