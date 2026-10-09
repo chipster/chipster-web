@@ -55,6 +55,19 @@
       </ng-template>
     </li>
 
+    <!-- TEMPORARY: to compare the pdf viewer that grows with its pages, see PdfGrowVisualizationComponent -->
+    <li [ngbNavItem]="getTabId('pdf-grow')" *ngIf="isTabVisible('pdf-grow')">
+      <a ngbNavLink>
+        <i class="far fa-file-pdf"></i>
+        PDF (grow)
+      </a>
+      <ng-template ngbNavContent>
+        <div class="visualization-panel">
+          <ch-pdf-grow-visualization [dataset]="selectionService.selectedDatasets[0]"></ch-pdf-grow-visualization>
+        </div>
+      </ng-template>
+    </li>
+
     <li [ngbNavItem]="getTabId('html')" *ngIf="isTabVisible('html')">
       <a ngbNavLink>HTML</a>
       <ng-template ngbNavContent>

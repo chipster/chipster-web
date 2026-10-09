@@ -1,0 +1,12 @@
+// the viewer loads in here while the status is shown, and is shown when the file is loaded
+.pdf-viewer {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+// the service sets the height of the viewer to the height of its pages
+.pdf-viewer-ready {
+  height: auto;
+  visibility: visible;
+}

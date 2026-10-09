@@ -1,0 +1,7 @@
+<ng-container *ngIf="!state.isReady()">
+  <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
+  <!-- the size of the dataset, because the response may not tell it -->
+  <progress *ngIf="state.isLoading()" [value]="loadedBytes" [max]="dataset.size"></progress>
+</ng-container>
+<!-- the viewer has its own toolbar for zooming, paging and searching -->
+<div #viewerContainer class="pdf-viewer" [class.pdf-viewer-ready]="state.isReady()"></div>

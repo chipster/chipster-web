@@ -19,6 +19,8 @@ import { HtmlvisualizationComponent } from "./html-visualization/html-visualizat
 import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
 import { NewTabVisualizationComponent } from "./new-tab-visualization/new-tab-visualization.component";
 import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
+// TEMPORARY: to compare the pdf viewer that grows with its pages
+import { PdfGrowVisualizationComponent } from "./pdf-grow-visualization/pdf-grow-visualization.component";
 import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
 import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
 import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
@@ -40,6 +42,7 @@ import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
     VisualizationsComponent,
     VennDiagramComponent,
     PdfVisualizationComponent,
+    PdfGrowVisualizationComponent,
     NewTabVisualizationComponent,
     HtmlvisualizationComponent,
     TextVisualizationComponent,

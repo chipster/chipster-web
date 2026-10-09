@@ -75,6 +75,15 @@ export default class VisualizationConstants {
       anyInputCountSupported: false,
       supportedInputFileCounts: [1],
     },
+    // TEMPORARY: to compare the pdf viewer that grows with its pages, see PdfGrowVisualizationComponent
+    {
+      id: "pdf-grow",
+      name: "PDF (grow)",
+      typeTags: [Tags.PDF],
+      supportAllTypes: false,
+      anyInputCountSupported: false,
+      supportedInputFileCounts: [1],
+    },
     {
       id: "html",
       name: "Html",
