@@ -1,47 +1,39 @@
 @if (state.isReady()) {
   <div>
     <!-- preview and modal full file -->
-    <!-- prettier-ignore -->
     @if (gotFullFile && !limitRows && rowCount > 0) {
-<span style="font-size: smaller">
-    Showing all {{ rowCount }} rows@if (limitColumns) {
-<span> and the first {{ columnLimit }} columns</span>
-}.
-  </span>
-}
+      <!-- prettier-ignore -->
+      <span style="font-size: smaller">
+        Showing all {{ rowCount }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}.
+      </span>
+    }
     @if (gotFullFile && !limitRows && rowCount === 0) {
       <span style="font-size: smaller">No data rows.</span>
     }
 
     <!-- preview, full file, but preview limiting visible rows -->
-    <!-- prettier-ignore -->
     @if (!modalMode && gotFullFile && limitRows) {
-<span style="font-size: smaller">
-    Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows@if (limitColumns) {
-<span> and the first {{ columnLimit }} columns</span>
-}.
-  </span>
-}
+      <!-- prettier-ignore -->
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}.
+      </span>
+    }
 
     <!-- preview, line count maybe available in full screen-->
-    <!-- prettier-ignore -->
     @if (!modalMode && !gotFullFile) {
-<span style="font-size: smaller">
-    Showing the first {{ rowCount }} rows@if (limitColumns) {
-<span> and the first {{ columnLimit }} columns</span>
-}.
-  </span>
-}
+      <!-- prettier-ignore -->
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}.
+      </span>
+    }
 
     <!-- modal, total count not available -->
-    <!-- prettier-ignore -->
     @if (modalMode && !gotFullFile) {
-<span style="font-size: smaller">
-    Showing the first {{ rowCount }} rows@if (limitColumns) {
-<span> and the first {{ columnLimit }} columns</span>
-}. File is too big for total row count.
-  </span>
-}
+      <!-- prettier-ignore -->
+      <span style="font-size: smaller">
+        Showing the first {{ rowCount }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}. File is too big for total row count.
+      </span>
+    }
 
     <!-- full screen text and link for preview-->
     @if (!modalMode && (!gotFullFile || limitRows)) {
