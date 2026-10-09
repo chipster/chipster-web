@@ -136,7 +136,7 @@
             <td class="p-0">
               <table class="table table-sm">
                 <tbody>
-                  @for (appVersion of getApplicationVersions(); track appVersion) {
+                  @for (appVersion of getApplicationVersions(); track $index) {
                     <tr>
                       @if (appVersion.application !== "R Session Info") {
                         <td class="label-td">

@@ -40,7 +40,7 @@
             <!-- session rows -->
             <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
               <tbody>
-                @for (session of sessionsByUser.get(sharedByUsername); track session) {
+                @for (session of sessionsByUser.get(sharedByUsername); track session.sessionId) {
                   <tr
                     (mouseover)="onSessionMouseover(session)"
                     (mouseout)="onSessionMouseout()"
@@ -310,7 +310,7 @@
 
             <div>
               <!-- Create new element for each paragraph to preserve new line characters -->
-              @for (line of selectedSession.notes?.split("\n"); track line) {
+              @for (line of selectedSession.notes?.split("\n"); track $index) {
                 <p>
                   {{ line }}
                 </p>
@@ -350,7 +350,7 @@
               <th></th>
             </tr>
           }
-          @for (session of sessionShares; track session) {
+          @for (session of sessionShares; track session.sessionId) {
             <tr [ngClass]="{ highlight: rowHighlighted(session) }" class="session-list-item">
               <td>
                 <span>{{ session.rules[0].username }}</span>

@@ -88,7 +88,7 @@
                 title="Labels menu"></button>
               <div ngbDropdownMenu>
                 @if (labelMenuItems.length > 0) {
-                  @for (item of labelMenuItems; track trackLabelMenuItem($index, item)) {
+                  @for (item of labelMenuItems; track item.label.labelId) {
                     <button ngbDropdownItem [disabled]="!isDatasetsSelected()" (click)="toggleLabel(item)">
                       <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
                     </button>
@@ -109,7 +109,7 @@
                   </button>
                   @if (selectByLabelOpen) {
                     <div class="dropdown-menu show" style="position: absolute; left: 100%; top: 0; margin-left: 0">
-                      @for (item of labelMenuItems; track trackLabelMenuItem($index, item)) {
+                      @for (item of labelMenuItems; track item.label.labelId) {
                         <button
                           ngbDropdownItem
                           [disabled]="!item.inUseInSession"

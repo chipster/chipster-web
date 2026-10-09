@@ -43,7 +43,7 @@
       <tr>
         <td class="lighter">Notes:</td>
         <td width="100%">
-          @for (line of session.notes?.split("\n"); track line) {
+          @for (line of session.notes?.split("\n"); track $index) {
             <p class="mb-1">
               {{ line }}
             </p>

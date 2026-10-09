@@ -15,7 +15,7 @@
         id="selectXaxis"
         [(ngModel)]="selectedXAxisHeader"
         (ngModelChange)="setXAxisHeader($event)">
-        @for (fcHeader of volcanoPlotFCHeaders; track fcHeader) {
+        @for (fcHeader of volcanoPlotFCHeaders; track $index) {
           <option>{{ fcHeader }}</option>
         }
       </select>
@@ -26,7 +26,7 @@
         id="selectYaxis"
         [(ngModel)]="selectedYAxisHeader"
         (ngModelChange)="setYAxisHeader($event)">
-        @for (pheader of volcanoPlotPHeaders; track pheader) {
+        @for (pheader of volcanoPlotPHeaders; track $index) {
           <option>{{ pheader }}</option>
         }
       </select>

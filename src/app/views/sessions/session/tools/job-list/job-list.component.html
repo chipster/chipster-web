@@ -17,7 +17,7 @@
   </thead>
   <tbody>
     <!-- add id to be able to scroll to the selected job -->
-    @for (job of jobsSorted; track job) {
+    @for (job of jobsSorted; track job.jobId) {
       <tr
         class="cursor-pointer hoverable-row"
         (click)="selectJob(job)"

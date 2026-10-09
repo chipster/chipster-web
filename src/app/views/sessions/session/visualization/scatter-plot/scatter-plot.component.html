@@ -15,7 +15,7 @@
         id="selectXaxis"
         [(ngModel)]="selectedXAxisHeader"
         (ngModelChange)="setXAxisHeader($event)">
-        @for (header of chipHeaders; track header) {
+        @for (header of chipHeaders; track $index) {
           <option>{{ header }}</option>
         }
       </select>
@@ -26,7 +26,7 @@
         id="selectYaxis"
         [(ngModel)]="selectedYAxisHeader"
         (ngModelChange)="setYAxisHeader($event)">
-        @for (header of chipHeaders; track header) {
+        @for (header of chipHeaders; track $index) {
           <option class="text-sm">{{ header }}</option>
         }
       </select>

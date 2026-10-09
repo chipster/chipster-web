@@ -20,7 +20,7 @@
   <div class="mb-3">
     <label class="form-label">Color</label>
     <div class="d-flex flex-wrap gap-1">
-      @for (c of displayPalette; track c) {
+      @for (c of displayPalette; track c.hex) {
         <button
           type="button"
           class="ch-swatch"

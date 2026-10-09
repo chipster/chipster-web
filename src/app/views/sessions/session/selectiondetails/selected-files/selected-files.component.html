@@ -36,7 +36,7 @@
             </button>
             @if (labelsSubmenuOpen) {
               <div class="dropdown-menu show" style="position: absolute; left: 100%; top: 0; margin-left: 0">
-                @for (item of labelMenuItems; track trackLabelMenuItem($index, item)) {
+                @for (item of labelMenuItems; track item.label.labelId) {
                   <button ngbDropdownItem (click)="toggleLabel(item)">
                     <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
                   </button>
@@ -94,7 +94,7 @@
             </button>
             @if (labelsSubmenuOpen) {
               <div class="dropdown-menu show" style="position: absolute; left: 100%; top: 0; margin-left: 0">
-                @for (item of labelMenuItems; track trackLabelMenuItem($index, item)) {
+                @for (item of labelMenuItems; track item.label.labelId) {
                   <button ngbDropdownItem (click)="toggleLabel(item)">
                     <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
                   </button>
