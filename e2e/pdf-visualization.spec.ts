@@ -9,21 +9,62 @@ import { Api, createDataset, createSession, datasetNode, deleteSession, getApi, 
  * user chooses.
  */
 
+interface PdfPage {
+  text: string;
+  // a link to another page of the pdf, by its number
+  pageLink?: number;
+  // a link to a web page
+  webLink?: string;
+}
+
+// pages are Letter size, in points from the bottom left corner
+const PAGE_WIDTH = 612;
+const PAGE_HEIGHT = 792;
+// the areas of the links on a page, from the left and the bottom, so that the test can click them
+const PAGE_LINK = { x: 70, y: 657, width: 180, height: 25 };
+const WEB_LINK = { x: 70, y: 595, width: 180, height: 25 };
+
 /*
- * A one-page pdf file with the given text. The padding goes to an unreferenced
- * stream, so that it makes the file larger without making it any slower to render.
+ * A pdf file with the given pages, each showing its text and its links. The
+ * padding goes to an unreferenced stream, so that it makes the file larger
+ * without making it any slower to render.
  */
-function createPdf(text: string, paddingBytes = 0): Buffer {
+function createPdfPages(pages: PdfPage[], paddingBytes = 0): Buffer {
   const padding = ("%" + "x".repeat(1000) + "\n").repeat(Math.floor(paddingBytes / 1002));
-  const content = `BT /F1 24 Tf 72 720 Td (${text}) Tj ET`;
+  // 1: catalog, 2: page tree, 3: font, then a page and its content for each page, then links and padding
+  const pageObject = (i: number) => 4 + 2 * i;
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [4 0 R] /Count 1 >>",
+    `<< /Type /Pages /Kids [${pages.map((_, i) => `${pageObject(i)} 0 R`).join(" ")}] /Count ${pages.length} >>`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R /Resources << /Font << /F1 3 0 R >> >> >>",
-    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
-    `<< /Length ${padding.length} >>\nstream\n${padding}\nendstream`,
   ];
+  const linkObjects: string[] = [];
+  const addLink = (area: typeof PAGE_LINK, text: string, action: string): string => {
+    const rect = `${area.x} ${area.y} ${area.x + area.width} ${area.y + area.height}`;
+    linkObjects.push(`<< /Type /Annot /Subtype /Link /Rect [${rect}] /Border [0 0 0] ${action} >>`);
+    return `\nBT /F1 18 Tf ${area.x + 2} ${area.y + 5} Td (${text}) Tj ET`;
+  };
+  const annotations = pages.map(() => [] as string[]);
+  pages.forEach((page, i) => {
+    let content = `BT /F1 24 Tf 72 ${PAGE_HEIGHT - 72} Td (${page.text}) Tj ET`;
+    if (page.pageLink) {
+      // /Fit shows the whole target page
+      content += addLink(PAGE_LINK, `Go to page ${page.pageLink}`, `/Dest [${pageObject(page.pageLink - 1)} 0 R /Fit]`);
+      annotations[i].push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
+    }
+    if (page.webLink) {
+      content += addLink(WEB_LINK, "Open web page", `/A << /S /URI /URI (${page.webLink}) >>`);
+      annotations[i].push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
+    }
+    const annots = annotations[i].length > 0 ? ` /Annots [${annotations[i].join(" ")}]` : "";
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] ` +
+        `/Contents ${pageObject(i) + 1} 0 R /Resources << /Font << /F1 3 0 R >> >>${annots} >>`,
+      `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+    );
+  });
+  objects.push(...linkObjects);
+  objects.push(`<< /Length ${padding.length} >>\nstream\n${padding}\nendstream`);
 
   // all ASCII, so string lengths are byte offsets
   let pdf = "%PDF-1.4\n";
@@ -39,9 +80,21 @@ function createPdf(text: string, paddingBytes = 0): Buffer {
   return Buffer.from(pdf, "ascii");
 }
 
+// a one-page pdf file with the given text
+function createPdf(text: string, paddingBytes = 0): Buffer {
+  return createPdfPages([{ text }], paddingBytes);
+}
+
 const SMALL_PDF = createPdf("Small test PDF");
 // over the limit of 10 MB, and clearly over 11 MB so that the prompt shows 11.1 MB
 const LARGE_PDF = createPdf("Large test PDF", 11 * 1024 * 1024 + 2048);
+
+const WEB_PAGE = "https://example.org/linked-from-pdf";
+const LINKS_PDF = createPdfPages([
+  { text: "Page 1", pageLink: 3, webLink: WEB_PAGE },
+  { text: "Page 2" },
+  { text: "Page 3" },
+]);
 
 function pdfVisualization(page: Page) {
   return page.locator("ch-pdf-visualization");
@@ -60,6 +113,19 @@ async function expectRendered(page: Page) {
   // the toolbar is shown when the viewer is ready, the image when a page is rendered
   await expect(viewer(page).getByRole("button", { name: "Zoom In" })).toBeVisible({ timeout: 30_000 });
   await expect(viewer(page).locator("img").first()).toBeVisible();
+}
+
+// click the middle of an area of the first page, given in pdf points from the bottom left corner
+async function clickOnFirstPage(page: Page, area: typeof PAGE_LINK) {
+  const firstPage = viewer(page).locator("img").first();
+  // a click at a position doesn't scroll to it like a click on an element
+  await firstPage.scrollIntoViewIfNeeded();
+  const box = await firstPage.boundingBox();
+  const scale = box.width / PAGE_WIDTH;
+  await page.mouse.click(
+    box.x + (area.x + area.width / 2) * scale,
+    box.y + (PAGE_HEIGHT - area.y - area.height / 2) * scale,
+  );
 }
 
 async function expectFailed(page: Page) {
@@ -202,4 +268,51 @@ test("the viewer of the previous file is closed when another file is selected", 
   await selectDataset(page, secondId);
   await expectRendered(page);
   await expect(viewer(page)).toHaveCount(1);
+});
+
+test("the links in a pdf file go to their page or open their web page", async ({ page, context }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "links.pdf", x: 100, y: 100 }, LINKS_PDF);
+  // the web page isn't loaded from the internet
+  await context.route(WEB_PAGE, (route) => route.fulfill({ body: "linked page" }));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  const popupPromise = page.waitForEvent("popup");
+  await clickOnFirstPage(page, WEB_LINK);
+  const popup = await popupPromise;
+  expect(popup.url()).toBe(WEB_PAGE);
+  await popup.close();
+
+  await clickOnFirstPage(page, PAGE_LINK);
+  // the number of the shown page, next to the buttons for the previous and the next page
+  await expect(viewer(page).locator('input[pattern="[0-9]*"]')).toHaveValue("3");
+});
+
+test("the progress of the download is shown", async ({ page }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  // slow enough to see the download progressing, the file is about 11 MB
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: 4 * 1024 * 1024,
+    uploadThroughput: -1,
+  });
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+
+  const progress = pdfVisualization(page).locator("progress");
+  await expect(progress).toHaveAttribute("max", String(LARGE_PDF.length));
+  // somewhere between the start and the end
+  await expect
+    .poll(async () => {
+      const value = Number(await progress.getAttribute("value"));
+      return value > 0 && value < LARGE_PDF.length;
+    })
+    .toBe(true);
+  await expectRendered(page);
 });

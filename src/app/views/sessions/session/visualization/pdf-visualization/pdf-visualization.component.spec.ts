@@ -14,6 +14,7 @@ interface OpenedViewer {
   url: string;
   name: string;
   closed: boolean;
+  progress(loadedBytes: number): void;
   load(): Promise<void>;
   fail(error: Error): Promise<void>;
 }
@@ -51,7 +52,7 @@ describe("PdfVisualizationComponent", () => {
     } as unknown as RestErrorService;
 
     const pdfViewerServiceStub = {
-      open: (target: HTMLElement, url: string, name: string) => {
+      open: (target: HTMLElement, url: string, name: string, onProgress: (loadedBytes: number) => void) => {
         let resolve: () => void;
         let reject: (error: Error) => void;
         const loaded = new Promise<void>((res, rej) => {
@@ -62,6 +63,7 @@ describe("PdfVisualizationComponent", () => {
           url,
           name,
           closed: false,
+          progress: onProgress,
           // the component sees the result after its own promise callbacks have run
           load: () => {
             resolve();
@@ -75,6 +77,7 @@ describe("PdfVisualizationComponent", () => {
         viewers.push(viewer);
         return {
           loaded,
+          crashed: new Promise<void>(() => undefined),
           close: () => {
             viewer.closed = true;
           },
@@ -157,6 +160,39 @@ describe("PdfVisualizationComponent", () => {
       await viewers[0].load();
 
       expect(component.state.isReady()).toBe(true);
+    });
+  });
+
+  describe("progress", () => {
+    it("shows the bytes downloaded so far", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+
+      viewers[0].progress(600);
+
+      expect(component.loadedBytes).toBe(600);
+    });
+
+    it("starts from nothing when trying again", async () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/file.pdf");
+      viewers[0].progress(600);
+      await viewers[0].fail(new Error("test failure"));
+
+      click("Try again");
+
+      expect(component.loadedBytes).toBe(0);
+    });
+
+    it("of the previous file isn't shown for the next one", () => {
+      select(1000);
+      urlRequests[0].next("http://localhost/first.pdf");
+      select(2000);
+      urlRequests[1].next("http://localhost/second.pdf");
+
+      viewers[0].progress(600);
+
+      expect(component.loadedBytes).toBe(0);
     });
   });
 

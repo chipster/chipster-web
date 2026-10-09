@@ -29,6 +29,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   private viewer: PdfViewer | undefined;
 
+  loadedBytes = 0;
+
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
 
@@ -94,6 +96,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   private load() {
     this.closeViewer();
+    this.loadedBytes = 0;
     this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.sessionDataService
       .getDatasetUrl(this.dataset)
@@ -105,7 +108,16 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   private openViewer(url: string) {
-    const viewer = this.pdfViewerService.open(this.viewerContainer.nativeElement, url, this.dataset.name);
+    const viewer = this.pdfViewerService.open(
+      this.viewerContainer.nativeElement,
+      url,
+      this.dataset.name,
+      (loadedBytes) => {
+        if (this.viewer === viewer) {
+          this.loadedBytes = loadedBytes;
+        }
+      },
+    );
     this.viewer = viewer;
     viewer.loaded.then(
       () => {
@@ -120,6 +132,17 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         }
       },
     );
+    viewer.crashed.then(() => {
+      if (this.viewer === viewer) {
+        this.closeViewer();
+        // trying again would crash again
+        this.state = new LoadState(
+          State.Fail,
+          "This PDF is too large to show here. Opening it in a new tab is recommended.",
+          [this.openNewTabButton],
+        );
+      }
+    });
   }
 
   ngOnDestroy() {

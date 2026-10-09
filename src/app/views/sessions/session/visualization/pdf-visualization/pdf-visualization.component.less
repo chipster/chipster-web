@@ -6,7 +6,9 @@
 }
 
 .pdf-viewer-ready {
-  // the viewer scrolls the pages inside, so it needs a height of its own, like the html visualization
-  height: 70vh;
+  // the viewer scrolls the pages inside, so it needs a height of its own. The visualization panel is at least as tall
+  // as the window (see styles.scss), and this is the height of its content, without its padding and border, so that
+  // the viewer reaches the bottom of the panel.
+  height: calc(~"100vh - 32px");
   visibility: visible;
 }
