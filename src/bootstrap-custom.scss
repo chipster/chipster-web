@@ -27,8 +27,3 @@ $table-active-bg: $primary;
 
 // Import all the bootstrap (functions will be imported again)
 @import "../node_modules/bootstrap/scss/bootstrap";
-
-// This is herebecause when having directly in the angular.json
-// the bootstrap stuff didn't seem to get loaded before ngx-toaster --> errors.
-// https://github.com/scttcper/ngx-toastr/issues/318
-@import "../node_modules/ngx-toastr/toastr-bs5-alert.scss";
