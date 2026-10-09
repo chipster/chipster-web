@@ -26,16 +26,6 @@ export interface Api {
 }
 
 /*
- * The dev server closes an idle keep-alive connection after a few seconds,
- * and a request that picks the connection up just then fails with ECONNRESET.
- * A browser sends such a request again on its own, the request context of
- * Playwright only when told to, and it retries nothing but ECONNRESET. Only
- * the idempotent methods are retried: a POST that reached the service before
- * the reset would create its object twice.
- */
-const MAX_RETRIES = 2;
-
-/*
  * The token is read from the browser state that auth.setup.ts saved, so no
  * page has to be loaded for it. The request context has to have the baseURL
  * of the app, for the relative addresses of the proxy mode.
@@ -48,7 +38,7 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
   const headers = { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") };
 
   // the only address the app itself knows, see src/assets/conf/chipster.yaml
-  const response = await request.get("/service-locator/services", { maxRetries: MAX_RETRIES });
+  const response = await request.get("/service-locator/services");
   expect(response.ok()).toBe(true);
   // the public address of each service, e.g. "/session-db" or "http://localhost:8004"
   const services = new Map<string, string>();
@@ -63,12 +53,12 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
     expect(service, `service-locator has no public address for ${role}`).toBeDefined();
     return service;
   };
-  const send = (method: string, role: string, path: string, data?: unknown, maxRetries = MAX_RETRIES) =>
-    request.fetch(address(role) + path, { method, headers, data, maxRetries });
+  const send = (method: string, role: string, path: string, data?: unknown) =>
+    request.fetch(address(role) + path, { method, headers, data });
   return {
     address,
     get: (role, path) => send("GET", role, path),
-    post: (role, path, data) => send("POST", role, path, data, 0),
+    post: (role, path, data) => send("POST", role, path, data),
     put: (role, path, data) => send("PUT", role, path, data),
     delete: (role, path) => send("DELETE", role, path),
   };

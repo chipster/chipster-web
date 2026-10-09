@@ -1,8 +1,13 @@
+import { join } from "node:path";
+
 import { expect, Page } from "@playwright/test";
 
-// the browser states that auth.setup.ts saves after logging in
-export const USER_STATE = "playwright/.auth/chipster.json";
-export const ADMIN_STATE = "playwright/.auth/admin.json";
+/*
+ * The browser states that auth.setup.ts saves after logging in. Absolute, so
+ * that they land in the git-ignored directory wherever Playwright is run from.
+ */
+export const USER_STATE = join(__dirname, "../playwright/.auth/chipster.json");
+export const ADMIN_STATE = join(__dirname, "../playwright/.auth/admin.json");
 
 /*
  * Fill in the local login form and submit. The form is shown directly only

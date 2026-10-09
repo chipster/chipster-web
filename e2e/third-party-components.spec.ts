@@ -1,4 +1,5 @@
 import { Page } from "@playwright/test";
+import { parse } from "yaml";
 
 import { expect, test } from "./fixtures";
 import { ADMIN_STATE } from "./login";
@@ -92,7 +93,11 @@ test("tools can be chosen from the module dropdown and the search (ng-select)", 
    */
   const modulesResponse = await api.get("toolbox", "/modules");
   expect(modulesResponse.ok()).toBe(true);
-  const modules = await modulesResponse.json();
+  // only the modules that the configuration of the app enables, like ToolsService does
+  const confResponse = await page.request.get("/assets/conf/chipster.yaml");
+  expect(confResponse.ok()).toBe(true);
+  const enabled: string[] = parse(await confResponse.text()).modules;
+  const modules = (await modulesResponse.json()).filter((module) => enabled.includes(module.name));
   expect(modules.length).toBeGreaterThan(1);
   const otherModule = modules[1];
   const toolsOf = (module) => module.categories.flatMap((category) => category.tools);
@@ -173,19 +178,7 @@ test("a pdf file is rendered and paged (ng2-pdf-viewer)", async ({ page, api, se
   await expect(pdf.locator("pdf-viewer .page[data-page-number='2'] canvas")).toBeVisible();
 });
 
-test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", async ({
-  page,
-  pageErrors,
-  api,
-  sessionId,
-}) => {
-  /*
-   * Sometimes session-db fails the update of the new dataset that file-broker
-   * makes after the upload with an OptimisticLockException on the File, and
-   * the app shows the error. A race in the backend, not in the components.
-   */
-  pageErrors.allowFailedRequest(500, "file-broker", `/sessions/${sessionId}/datasets/`);
-  pageErrors.allowErrorMessage("Convert to Chipster format failed");
+test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", async ({ page, api, sessionId }) => {
   const content = "gene\tchip.a\tchip.b\tnote\ng1\t1\t2\tx\ng2\t3\t4\ty\n";
   const datasetId = await createDataset(api, sessionId, { name: "table.tsv", x: 100, y: 100 }, content);
   await openSession(page, sessionId, datasetId);
@@ -220,9 +213,23 @@ test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", a
   await expect(samples.locator(".ng-value-label")).toHaveText(["chip.a", "chip.b"]);
 
   await convert.click();
+  let datasets: Awaited<ReturnType<typeof getDatasets>>;
   await expect
-    .poll(async () => (await getDatasets(api, sessionId)).map((d) => d.name).sort())
+    .poll(async () => {
+      datasets = await getDatasets(api, sessionId);
+      return datasets.map((d) => d.name).sort();
+    })
     .toEqual(["table-converted.tsv", "table.tsv"]);
+
+  /*
+   * the identifier first, without a header of its own, then the samples, and
+   * not the other column, which wasn't selected for inclusion. The dataset is
+   * created before its content is uploaded, so wait for the content too.
+   */
+  const converted = datasets.find((d) => d.name === "table-converted.tsv");
+  await expect
+    .poll(async () => (await api.get("file-broker", `/sessions/${sessionId}/datasets/${converted.datasetId}`)).text())
+    .toBe("chip.a\tchip.b\ng1\t1\t2\ng2\t3\t4");
 });
 
 test("the admin storage grid lists users and opens their sessions (ag-grid)", async ({
@@ -267,6 +274,8 @@ test("the admin storage grid lists users and opens their sessions (ag-grid)", as
     await expect(modal.getByRole("heading", { name: `Sessions of ${userId}` })).toBeVisible();
     await expect(modal.getByRole("cell", { name: sessionId })).toBeVisible();
   } finally {
+    // read the errors of the admin's pages before they are closed
+    await pageErrors.settle();
     await adminContext.close();
   }
 });
