@@ -4,7 +4,9 @@
 <div class="modal-body">
   <div class="form-group">
     <label class="fw-semibold">{{ message }}</label>
-    <div *ngIf="subMessage" class="text-muted small mt-1">{{ subMessage }}</div>
+    @if (subMessage) {
+      <div class="text-muted small mt-1">{{ subMessage }}</div>
+    }
   </div>
 </div>
 <div class="modal-footer">

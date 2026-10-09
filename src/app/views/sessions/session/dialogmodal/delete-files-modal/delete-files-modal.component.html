@@ -1,23 +1,31 @@
 <div class="modal-header">
   <h4 class="modal-title">
     <span>Delete file</span>
-    <span *ngIf="datasets.length > 1">s</span>
+    @if (datasets.length > 1) {
+      <span>s</span>
+    }
   </h4>
 </div>
 <div class="modal-body">
   <div class="form-group">
-    <div *ngIf="datasets.length === 1">
-      Are you sure you want to delete
-      <span class="fw-bold">{{ datasets[0].name }}</span>
-      <span>?</span>
-    </div>
-
-    <div *ngIf="datasets.length > 1">
-      <div class="mb-3">Are you sure you want to delete {{ datasets.length }} files?</div>
-      <div *ngFor="let dataset of datasets">
-        <span class="fw-bold">{{ dataset.name }}</span>
+    @if (datasets.length === 1) {
+      <div>
+        Are you sure you want to delete
+        <span class="fw-bold">{{ datasets[0].name }}</span>
+        <span>?</span>
       </div>
-    </div>
+    }
+
+    @if (datasets.length > 1) {
+      <div>
+        <div class="mb-3">Are you sure you want to delete {{ datasets.length }} files?</div>
+        @for (dataset of datasets; track dataset) {
+          <div>
+            <span class="fw-bold">{{ dataset.name }}</span>
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>
 <div class="modal-footer">

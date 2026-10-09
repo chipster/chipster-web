@@ -1,7 +1,9 @@
 <div class="mb-1 d-flex justify-content-between align-items-center">
   <span class="text-sm fw-bold">Jobs running: {{ runningJobCount }}</span>
 
-  <button *ngIf="runningJobCount > 0" class="btn btn-sm btn-secondary" (click)="cancelAllJobs()">Cancel all</button>
+  @if (runningJobCount > 0) {
+    <button class="btn btn-sm btn-secondary" (click)="cancelAllJobs()">Cancel all</button>
+  }
 </div>
 <table class="table bg-white table-bordered table-sm text-sm">
   <thead>
@@ -15,33 +17,34 @@
   </thead>
   <tbody>
     <!-- add id to be able to scroll to the selected job -->
-    <tr
-      *ngFor="let job of jobsSorted"
-      class="cursor-pointer hoverable-row"
-      (click)="selectJob(job)"
-      [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }"
-      attr.id="job-id-{{ job.jobId }}">
-      <td>{{ job.toolName }}</td>
-      <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
-        {{ job.created | localDate }}
-      </td>
+    @for (job of jobsSorted; track job) {
+      <tr
+        class="cursor-pointer hoverable-row"
+        (click)="selectJob(job)"
+        [ngClass]="{ 'table-active': isSelectedJobById(job.jobId) }"
+        attr.id="job-id-{{ job.jobId }}">
+        <td>{{ job.toolName }}</td>
+        <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
+          {{ job.created | localDate }}
+        </td>
 
-      <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
-        {{ getDurationObservable(job) | async }}
-      </td>
+        <td class="text-sm" [ngClass]="isSelectedJobById(job.jobId) ? 'text-light' : 'lighter'">
+          {{ getDurationObservable(job) | async }}
+        </td>
 
-      <td>
-        {{ job.state }}
-      </td>
-      <td valign="top" *ngIf="isRunning(job); else blankTemplate">
-        <ch-link-button class="cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
-          Cancel
-        </ch-link-button>
-      </td>
-    </tr>
-
-    <ng-template #blankTemplate>
-      <td style="padding-left: 10px">&nbsp;</td>
-    </ng-template>
+        <td>
+          {{ job.state }}
+        </td>
+        @if (isRunning(job)) {
+          <td valign="top">
+            <ch-link-button class="cancel-button" (click)="$event.stopImmediatePropagation(); cancelJob(job)">
+              Cancel
+            </ch-link-button>
+          </td>
+        } @else {
+          <td style="padding-left: 10px">&nbsp;</td>
+        }
+      </tr>
+    }
   </tbody>
 </table>

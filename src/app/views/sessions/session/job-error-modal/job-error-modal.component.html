@@ -13,8 +13,10 @@
 
   <button class="btn btn-sm btn-secondary" (click)="contactSupport()">Contact support</button>
 
-  <div *ngIf="screenOutputVisible" class="mt-3">
-    <h5>Screen output</h5>
-    <pre style="white-space: pre-wrap">{{ job.screenOutput }}</pre>
-  </div>
+  @if (screenOutputVisible) {
+    <div class="mt-3">
+      <h5>Screen output</h5>
+      <pre style="white-space: pre-wrap">{{ job.screenOutput }}</pre>
+    </div>
+  }
 </div>

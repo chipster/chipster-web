@@ -17,11 +17,14 @@ import { LabelMenuItem } from "./labels-context-menu.service";
       [style.background]="checkboxBackground"
       [style.color]="checkboxColor"
       [style.position]="item.state === 'indeterminate' ? 'relative' : null">
-      <ng-container *ngIf="item.state === 'checked'">✓</ng-container>
-      <span
-        *ngIf="item.state === 'indeterminate'"
-        class="d-block"
-        style="position:absolute;top:50%;left:50%;width:7px;height:2px;margin-top:-1px;margin-left:-3.5px;background:#fff"></span>
+      @if (item.state === "checked") {
+        ✓
+      }
+      @if (item.state === "indeterminate") {
+        <span
+          class="d-block"
+          style="position:absolute;top:50%;left:50%;width:7px;height:2px;margin-top:-1px;margin-left:-3.5px;background:#fff"></span>
+      }
     </span>
     <span
       class="d-inline-block align-middle"

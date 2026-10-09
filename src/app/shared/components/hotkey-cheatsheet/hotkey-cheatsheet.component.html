@@ -5,15 +5,17 @@
   </div>
   <div class="modal-body">
     <dl>
-      <ng-container *ngFor="let shortcut of shortcuts">
+      @for (shortcut of shortcuts; track shortcut) {
         <dt>
-          <ng-container *ngFor="let key of shortcut.keys; let last = last">
+          @for (key of shortcut.keys; track key; let last = $last) {
             <kbd>{{ key }}</kbd>
-            <span *ngIf="!last">&nbsp;/&nbsp;</span>
-          </ng-container>
+            @if (!last) {
+              <span>&nbsp;/&nbsp;</span>
+            }
+          }
         </dt>
         <dd>{{ shortcut.description }}</dd>
-      </ng-container>
+      }
     </dl>
   </div>
   <div class="modal-footer">
