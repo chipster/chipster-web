@@ -12,7 +12,11 @@ export const ADMIN_STATE = "playwright/.auth/admin.json";
  */
 export async function login(page: Page, username: string, password: string): Promise<void> {
   await page.goto("/login");
+  await submitLoginForm(page, username, password);
+}
 
+// the same on a login page that is open already, e.g. after a redirect that has to keep its returnUrl
+export async function submitLoginForm(page: Page, username: string, password: string): Promise<void> {
   const usernameField = page.locator("#username");
   // the auth method button is "<app-name> login", e.g. "Chipster login"
   const localLoginButton = page.getByRole("button", { name: /login$/ });
