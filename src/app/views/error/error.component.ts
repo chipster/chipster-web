@@ -1,13 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { NavigationStart, Router } from "@angular/router";
 import log from "loglevel";
-import { ToastrService } from "ngx-toastr";
 import { EMPTY, from, Observable, of } from "rxjs";
-import { catchError, filter, map, mergeMap, tap } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, take, takeUntil, tap } from "rxjs/operators";
 import * as StackTrace from "stacktrace-js";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
 import { RouteService } from "../../shared/services/route.service";
+import { ToastService } from "../../shared/services/toast.service";
 import { ContactSupportService } from "../contact/contact-support.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 
@@ -16,26 +16,17 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
   template: "",
 })
 export class ErrorComponent implements OnInit {
-  toastIds: number[] = [];
-
   constructor(
     private errorService: ErrorService,
     private routeService: RouteService,
     private router: Router,
-    private toastrService: ToastrService,
+    private toastService: ToastService,
     private contactSupportService: ContactSupportService,
     private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit(): void {
-    // clear errors when navigating to a new url
-    this.router.events.pipe(filter((event) => event instanceof NavigationStart)).subscribe({
-      next: () => {
-        this.toastIds.forEach((t) => this.toastrService.remove(t));
-        this.toastIds = [];
-      },
-      error: (err) => this.errorService.showError("getting router events failed", err),
-    });
+    const navigationStart$ = this.router.events.pipe(filter((event) => event instanceof NavigationStart));
 
     this.errorService
       .getErrors()
@@ -46,25 +37,19 @@ export class ErrorComponent implements OnInit {
           const msg = error.msg || "Something went wrong";
           const title = error.title || "";
 
-          const options = {
+          const toast = this.toastService.warning(msg, title, {
             closeButton: dismissible,
-            disableTimeOut: true,
+            timeout: 0,
             tapToDismiss: dismissible && error.buttons.length === 0,
-            buttons: [],
-            links: [],
-          };
+            buttons: error.buttons.map((button) => ({ text: button })),
+            links: error.links.map((link) => ({ text: link })),
+          });
 
-          options.buttons = error.buttons.map((button) => ({
-            text: button,
-          }));
+          // clear the error when navigating to a new url
+          navigationStart$.pipe(take(1), takeUntil(toast.afterClosed)).subscribe(() => {
+            this.toastService.close(toast);
+          });
 
-          options.links = error.links.map((link) => ({
-            text: link,
-          }));
-
-          const toast = this.toastrService.warning(msg, title, options);
-
-          this.toastIds.push(toast.toastId);
           return toast.onAction.pipe(
             mergeMap((buttonText) => {
               if (buttonText === ErrorButton.LogIn) {
@@ -72,8 +57,7 @@ export class ErrorComponent implements OnInit {
               } else if (buttonText === ErrorButton.Reload) {
                 this.reload();
               } else if (buttonText === ErrorButton.ContactSupport) {
-                // don't use remove(), beause that would apparently cancel the onAction observable
-                this.toastrService.clear(toast.toastId);
+                this.toastService.close(toast);
                 return this.contactSupport(error);
               } else if (buttonText === ErrorButton.ShowDetails) {
                 return this.showDetails(title + " details", error);
@@ -88,7 +72,7 @@ export class ErrorComponent implements OnInit {
       .subscribe({
         error: (err) => {
           // just log when the error dialog fails
-          log.error("error from toastr", err);
+          log.error("error from toast", err);
         },
       });
   }

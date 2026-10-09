@@ -1,0 +1,62 @@
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <ngb-toast
+    *ngFor="let toast of toastService.toasts"
+    #ngbToast="ngbToast"
+    class="ch-toast"
+    [class.ch-toast-info]="toast.type === 'info'"
+    [class.ch-toast-warning]="toast.type === 'warning'"
+    [class.ch-toast-dismissible]="toast.options.tapToDismiss"
+    [autohide]="isTimerRunning(toast)"
+    [delay]="toast.options.timeout"
+    (hidden)="toastService.close(toast)"
+    (mouseenter)="hovered.add(toast)"
+    (mouseleave)="pointerLeft(toast)"
+    (click)="dismiss(toast, ngbToast)">
+    <div class="d-flex align-items-start">
+      <i
+        class="fas fa-lg me-3 mt-2"
+        [class.fa-info-circle]="toast.type === 'info'"
+        [class.fa-exclamation-triangle]="toast.type === 'warning'"
+        aria-hidden="true"></i>
+      <div class="flex-grow-1 ch-toast-text">
+        <div *ngIf="toast.title" class="fw-bold">{{ toast.title }}</div>
+        <div *ngIf="toast.message.length > 0">
+          <ng-container *ngFor="let part of toast.message">
+            <b *ngIf="part.bold">{{ part.text }}</b>
+            <ng-container *ngIf="!part.bold">{{ part.text }}</ng-container>
+          </ng-container>
+        </div>
+        <div *ngFor="let link of toast.options.links">
+          <button type="button" class="btn btn-link p-0" (click)="action(toast, link.text, $event)">
+            <i *ngIf="link.icon" [class]="link.icon"></i>
+            {{ link.text }}
+          </button>
+        </div>
+      </div>
+      <button
+        *ngIf="toast.options.closeButton"
+        type="button"
+        class="btn-close flex-shrink-0 ms-2"
+        aria-label="Close"
+        (click)="$event.stopPropagation(); ngbToast.hide()"></button>
+    </div>
+
+    <div *ngIf="toast.options.buttons.length > 0" class="d-flex justify-content-end flex-wrap gap-2 mt-2">
+      <button
+        *ngFor="let button of toast.options.buttons"
+        type="button"
+        class="btn btn-sm"
+        [ngClass]="button.class || 'btn-secondary'"
+        (click)="action(toast, button.text, $event)">
+        <i *ngIf="button.icon" [class]="button.icon"></i>
+        {{ button.text }}
+      </button>
+    </div>
+
+    <!-- restarts with the timer, because it's created again when the timer starts again -->
+    <div
+      *ngIf="toast.options.progressBar && isTimerRunning(toast)"
+      class="ch-toast-progress"
+      [style.animation-duration.ms]="toast.options.timeout"></div>
+  </ngb-toast>
+</div>

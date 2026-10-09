@@ -1,10 +1,10 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { NgbToast } from "@ng-bootstrap/ng-bootstrap";
 import { CoreModule } from "../core/core.module";
 import { AccountComponent } from "./components/account/account.component";
 import { DropdownCloseDirective } from "./directives/dropdown-close.directive";
-import { ActionToastComponent } from "./components/action-toast";
 import { DummyRouteComponent } from "./components/dummy-route.component";
 import { NewsItemComponent } from "./components/news/news-item.component";
 import { NewsListComponent } from "./components/news/news-list.component";
@@ -12,6 +12,7 @@ import { HotkeyCheatsheetComponent } from "./components/hotkey-cheatsheet/hotkey
 import { SearchBoxComponent } from "./components/search-box/search-box.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { StatusComponent } from "./components/status.component";
+import { ToastsComponent } from "./components/toasts/toasts.component";
 import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
 import { BytesPipe } from "./pipes/bytes.pipe";
 import { CategoryPipe } from "./pipes/categorypipe.pipe";
@@ -48,7 +49,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
  */
 
 @NgModule({
-  imports: [CommonModule, CoreModule, FormsModule],
+  imports: [CommonModule, CoreModule, FormsModule, NgbToast],
   declarations: [
     BytesPipe,
     LocalDatePipe,
@@ -64,7 +65,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     AccountComponent,
     ToolSourceComponent,
     DummyRouteComponent,
-    ActionToastComponent,
+    ToastsComponent,
     NewsItemComponent,
     NewsListComponent,
     DropdownCloseDirective,
@@ -108,7 +109,7 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     SettingsComponent,
     AccountComponent,
     ToolSourceComponent,
-    ActionToastComponent,
+    ToastsComponent,
     NewsItemComponent,
     NewsListComponent,
     DropdownCloseDirective,

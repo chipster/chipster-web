@@ -2,10 +2,10 @@ import { Component, ElementRef, Input, OnChanges, ViewChild } from "@angular/cor
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
-import { ToastrService } from "ngx-toastr";
 import { forkJoin as observableForkJoin } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import TSVFile, { NoColumnError } from "../../../../../model/tsv/TSVFile";
+import { ToastService } from "../../../../../shared/services/toast.service";
 import { TsvService } from "../../../../../shared/services/tsv.service";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
@@ -45,7 +45,7 @@ export class VennDiagramComponent implements OnChanges {
 
   constructor(
     private tsvService: TsvService,
-    private toastrService: ToastrService,
+    private toastService: ToastService,
     private venndiagramService: VennDiagramService,
     private sessionDataService: SessionDataService,
     private restErrorService: RestErrorService,
@@ -117,8 +117,8 @@ export class VennDiagramComponent implements OnChanges {
           this.drawVennDiagram(this.files);
         } catch (err) {
           if (err instanceof NoColumnError) {
-            // use toastrService directly, because our ErrorService doesn't show info-level messages
-            this.toastrService.info(err.message, "Column not found");
+            // use ToastService directly, because our ErrorService doesn't show info-level messages
+            this.toastService.info(err.message, "Column not found");
           } else {
             throw err;
           }
