@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures";
 import { login } from "./login";
 
 /*
@@ -7,6 +6,9 @@ import { login } from "./login";
  * the database. The credentials are the defaults from the web server's
  * security/users file.
  */
+
+// these test the login itself, so they start logged out, unlike the other specs
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test("home page opens", async ({ page }) => {
   await page.goto("/");
@@ -37,7 +39,9 @@ test("logging in opens the session list", async ({ page }) => {
   await expect(page.getByRole("button", { name: "chipster", exact: true })).toBeVisible();
 });
 
-test("wrong password keeps the user on the login page", async ({ page }) => {
+test("wrong password keeps the user on the login page", async ({ page, pageErrors }) => {
+  // the browser logs the rejected login request
+  pageErrors.allowFailedRequest(403, "auth", "/tokens");
   await login(page, "chipster", "not-the-password");
 
   /*

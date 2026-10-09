@@ -1,6 +1,7 @@
-import { APIRequestContext, expect, Page, test } from "@playwright/test";
+import { Page } from "@playwright/test";
 
-import { login } from "./login";
+import { expect, test } from "./fixtures";
+import { Api, createDataset, datasetNode, openSession } from "./session-api";
 
 /*
  * Dataset names and the headers of a file are user input, and a session can be
@@ -13,46 +14,8 @@ const PAYLOAD = `<img src="x" onerror="window.xssCount = (window.xssCount || 0) 
 // label names are limited to 30 characters
 const SHORT_PAYLOAD = `<img src="x" onerror="z()">`;
 
-interface Api {
-  request: APIRequestContext;
-  headers: { Authorization: string };
-}
-
-async function getApi(page: Page): Promise<Api> {
-  await expect(page).toHaveURL(/\/sessions$/);
-  const token = await page.evaluate(() => localStorage.getItem("ch-auth-token"));
-  return {
-    request: page.request,
-    headers: { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") },
-  };
-}
-
-async function createSession(api: Api, name: string): Promise<string> {
-  const response = await api.request.post("/session-db/sessions/", { headers: api.headers, data: { name } });
-  expect(response.ok()).toBe(true);
-  return (await response.json()).sessionId;
-}
-
-async function createDataset(api: Api, sessionId: string, dataset: object, content: string): Promise<string> {
-  const response = await api.request.post(`/session-db/sessions/${sessionId}/datasets`, {
-    headers: api.headers,
-    data: dataset,
-  });
-  expect(response.ok()).toBe(true);
-  const datasetId = (await response.json()).datasetId;
-
-  const upload = await api.request.put(
-    `/file-broker/sessions/${sessionId}/datasets/${datasetId}?flowTotalSize=${Buffer.byteLength(content)}`,
-    { headers: api.headers, data: content },
-  );
-  expect(upload.ok()).toBe(true);
-  return datasetId;
-}
-
 async function getPhenodataRows(api: Api, sessionId: string, datasetId: string): Promise<string[][]> {
-  const response = await api.request.get(`/session-db/sessions/${sessionId}/datasets/${datasetId}`, {
-    headers: api.headers,
-  });
+  const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);
   const dataset = await response.json();
   const content: string = dataset.metadataFiles.find((f) => f.name === "phenodata.tsv").content;
   // only the final newline, trimEnd() would take the empty cells of the last row too
@@ -67,46 +30,11 @@ async function expectNotParsed(page: Page) {
   await expect(page.locator('img[src="x"]')).toHaveCount(0);
 }
 
-/*
- * The analyze view waits for the tool modules of toolbox, which take a few
- * seconds in the dev setup, before it draws anything
- */
-async function openSession(page: Page, sessionId: string, datasetId: string) {
-  await page.goto(`/analyze/${sessionId}`);
-  await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
-}
-
-function datasetNode(page: Page, datasetId: string) {
-  return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
-}
-
-test.describe.configure({ timeout: 90_000 });
-
-let api: Api;
-let sessionId: string | undefined;
-
-test.beforeEach(async ({ page }) => {
-  await login(page, "chipster", "chipster");
-  api = await getApi(page);
-  sessionId = await createSession(api, "e2e escape user text");
-});
-
-test.afterEach(async () => {
-  // cleared right away, so that a later test whose setup fails before
-  // creating its own session doesn't delete this one again
-  const sessionToDelete = sessionId;
-  sessionId = undefined;
-  if (sessionToDelete) {
-    const response = await api.request.delete(`/session-db/sessions/${sessionToDelete}`, { headers: api.headers });
-    expect(response.ok()).toBe(true);
-  }
-});
-
-test("a dataset name is shown as text in the workflow graph", async ({ page }) => {
+test("a dataset name is shown as text in the workflow graph", async ({ page, api, sessionId }) => {
   const name = PAYLOAD + ".txt";
-  const labelResponse = await api.request.post(`/session-db/sessions/${sessionId}/labels`, {
-    headers: api.headers,
-    data: { name: SHORT_PAYLOAD, color: "#0d6efd" },
+  const labelResponse = await api.post("session-db", `/sessions/${sessionId}/labels`, {
+    name: SHORT_PAYLOAD,
+    color: "#0d6efd",
   });
   expect(labelResponse.ok()).toBe(true);
   const labelId = (await labelResponse.json()).labelId;
@@ -136,7 +64,7 @@ test("a dataset name is shown as text in the workflow graph", async ({ page }) =
   await expectNotParsed(page);
 });
 
-test("the headers of a file are shown as text in the spreadsheet", async ({ page }) => {
+test("the headers of a file are shown as text in the spreadsheet", async ({ page, api, sessionId }) => {
   const content = `gene\t${PAYLOAD}\t\tvalue\ng1\t1\t2\t3\n`;
   const datasetId = await createDataset(api, sessionId, { name: "headers.tsv", x: 100, y: 100 }, content);
 
@@ -150,7 +78,7 @@ test("the headers of a file are shown as text in the spreadsheet", async ({ page
   await expectNotParsed(page);
 });
 
-test("phenodata headers are shown as text and columns can be added and removed", async ({ page }) => {
+test("phenodata headers are shown as text and columns can be added and removed", async ({ page, api, sessionId }) => {
   const phenodata = `sample\toriginal_name\t${PAYLOAD}\ns1\ta.cel\tP1\ns2\tb.cel\tP2\n`;
   const datasetId = await createDataset(
     api,
