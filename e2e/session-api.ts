@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
 import type { Session } from "chipster-js-common";
+import { parse } from "yaml";
 
 import { USER_STATE } from "./login";
 
@@ -34,11 +35,19 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
   const state = JSON.parse(readFileSync(stateFile, "utf8"));
   const token = state.origins
     .flatMap((origin) => origin.localStorage)
-    .find((entry) => entry.name === "ch-auth-token").value;
+    .find((entry) => entry.name === "ch-auth-token")?.value;
+  expect(token, `no ch-auth-token in ${stateFile}`).toBeDefined();
   const headers = { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") };
 
-  // the only address the app itself knows, see src/assets/conf/chipster.yaml
-  const response = await request.get("/service-locator/services");
+  /*
+   * The only address the app itself knows, from its configuration. It's
+   * relative in the dev environment and on k3s, but a deployment can have
+   * service-locator on a host of its own.
+   */
+  const confResponse = await request.get("/assets/conf/chipster.yaml");
+  expect(confResponse.ok()).toBe(true);
+  const serviceLocator: string = parse(await confResponse.text())["service-locator"];
+  const response = await request.get(serviceLocator.replace(/\/$/, "") + "/services");
   expect(response.ok()).toBe(true);
   // the public address of each service, e.g. "/session-db" or "http://localhost:8004"
   const services = new Map<string, string>();
