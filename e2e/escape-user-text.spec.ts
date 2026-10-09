@@ -30,8 +30,6 @@ async function expectNotParsed(page: Page) {
   await expect(page.locator('img[src="x"]')).toHaveCount(0);
 }
 
-test.describe.configure({ timeout: 90_000 });
-
 test("a dataset name is shown as text in the workflow graph", async ({ page, api, sessionId }) => {
   const name = PAYLOAD + ".txt";
   const labelResponse = await api.post("session-db", `/sessions/${sessionId}/labels`, {

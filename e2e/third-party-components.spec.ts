@@ -12,8 +12,6 @@ import { createDataset, datasetNode, getDatasets, getSession, openSession } from
  * component renders and does its basic job, not the app logic around it.
  */
 
-test.describe.configure({ timeout: 90_000 });
-
 // the dataset Actions menu of the Selected Files panel
 async function openDatasetMenu(page: Page) {
   await page.locator("#fileDropdownMenuButton").click();
@@ -87,15 +85,24 @@ test("tools can be chosen from the module dropdown and the search (ng-select)", 
   /*
    * the tool names come from the toolbox, so that the test doesn't depend on
    * which tools a deployment has: the second module for the dropdown, and for
-   * the search the second tool of the first module, because the first one is
-   * selected already when the module is opened
+   * the search a tool of the first module other than its first tool, which is
+   * selected already when the module is opened. Many tools are in more than
+   * one module, and the search lists each of their modules, so the tool is one
+   * that the modules list once.
    */
   const modulesResponse = await api.get("toolbox", "/modules");
   expect(modulesResponse.ok()).toBe(true);
   const modules = await modulesResponse.json();
   expect(modules.length).toBeGreaterThan(1);
   const otherModule = modules[1];
-  const [, searchedTool] = modules[0].categories.flatMap((category) => category.tools);
+  const toolsOf = (module) => module.categories.flatMap((category) => category.tools);
+  const listings = new Map<string, number>();
+  for (const tool of modules.flatMap(toolsOf)) {
+    listings.set(tool.name.id, (listings.get(tool.name.id) ?? 0) + 1);
+  }
+  const searchedTool = toolsOf(modules[0])
+    .slice(1)
+    .find((tool) => listings.get(tool.name.id) === 1);
   expect(searchedTool).toBeDefined();
 
   const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "text\n");

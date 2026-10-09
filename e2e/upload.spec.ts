@@ -7,8 +7,6 @@ import { datasetNode, getDatasetContent, getDatasets, openSession } from "./sess
  * modal.
  */
 
-test.describe.configure({ timeout: 90_000 });
-
 test("a file uploaded from the Add file menu becomes a dataset", async ({ page, api, sessionId }) => {
   // more than one line and a tab, so that a truncated or mangled upload shows
   const content = "gene\tvalue\n" + Array.from({ length: 100 }, (_, i) => `g${i}\t${i}`).join("\n") + "\n";

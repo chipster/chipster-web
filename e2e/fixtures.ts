@@ -38,18 +38,20 @@ const KNOWN_FAILED_REQUESTS: FailedRequest[] = [
 export interface PageErrors {
   // allow the console error of a failed request in the current test
   allowFailedRequest(status: number, role: string, path: string): void;
-  // allow the error that the app shows with this title, see ErrorService.showError()
-  allowErrorMessage(title: string): void;
+  // allow the error that the app shows with this message, the first argument of ErrorService.showError()
+  allowErrorMessage(message: string): void;
   // check the pages of a context that the test created itself too
   watch(context: BrowserContext): void;
+  // wait until the errors logged so far have been read, before their pages are closed
+  settle(): Promise<void>;
 }
 
 interface PageError {
   text: string;
   // the address of the failed request for "Failed to load resource"
   url?: string;
-  // the title of an ErrorMessage that the app logged
-  title?: string;
+  // the message of an ErrorMessage that the app logged
+  message?: string;
 }
 
 interface TestFixtures {
@@ -79,7 +81,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   // a SessionState of chipster-js-common, the default is a normal session
   sessionState: [undefined, { option: true }],
 
-  sessionId: async ({ api, context, sessionState }, use, testInfo) => {
+  sessionId: async ({ api, context, sessionState, pageErrors }, use, testInfo) => {
     const sessionId = await createSession(api, `e2e ${testInfo.title}`, sessionState);
     await use(sessionId);
 
@@ -87,6 +89,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
      * close the pages first, the app would react to the deletion otherwise,
      * and its requests for the session that is gone would show up as errors
      */
+    await pageErrors.settle();
     for (const page of context.pages()) {
       await page.close();
     }
@@ -98,8 +101,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   pageErrors: [
     async ({ api, baseURL, context }, use) => {
       const errors: Promise<PageError>[] = [];
-      const allowedRequests = [...KNOWN_FAILED_REQUESTS];
-      const allowedTitles: string[] = [];
+      // the address is relative in the proxy mode and absolute in the direct mode
+      const requestPrefix = (r: FailedRequest) => new URL(api.address(r.role) + r.path, baseURL).href;
+      const allowedRequests = KNOWN_FAILED_REQUESTS.map((r) => ({ status: r.status, prefix: requestPrefix(r) }));
+      const allowedMessages: string[] = [];
 
       const listen = (page: Page) => {
         page.on("pageerror", (error) => errors.push(Promise.resolve({ text: `uncaught: ${error.message}` })));
@@ -109,12 +114,16 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
           }
           const url = message.location().url;
           if (message.text() === "ErrorMessage") {
-            // the console shows only the class name of the object, read its title from the page
-            const title = message
+            /*
+             * the console shows only the class name of the object, read its
+             * message from the page. ErrorService.showError() leaves the title
+             * null and puts its argument in msg, showSimpleError() sets both.
+             */
+            const text = message
               .args()[0]
-              .evaluate((m: { title: string }) => m.title)
+              .evaluate((m: { title?: string; msg?: string }) => m.title ?? m.msg)
               .catch(() => undefined);
-            errors.push(title.then((t) => ({ text: `console: ErrorMessage "${t}"`, title: t })));
+            errors.push(text.then((t) => ({ text: `console: ErrorMessage "${t}"`, message: t })));
           } else {
             errors.push(Promise.resolve({ text: `console: ${message.text()} (${url})`, url }));
           }
@@ -128,20 +137,20 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       watch(context);
 
       await use({
-        allowFailedRequest: (status, role, path) => allowedRequests.push({ status, role, path }),
-        allowErrorMessage: (title) => allowedTitles.push(title),
+        // the address is resolved right away, so that a wrong role fails the test that allows it
+        allowFailedRequest: (status, role, path) =>
+          allowedRequests.push({ status, prefix: requestPrefix({ status, role, path }) }),
+        allowErrorMessage: (message) => allowedMessages.push(message),
         watch,
+        settle: async () => {
+          await Promise.all(errors);
+        },
       });
 
-      // the address is relative in the proxy mode and absolute in the direct mode
       const isAllowedRequest = (error: PageError) =>
-        allowedRequests.some(
-          (r) =>
-            error.text.includes(`status of ${r.status} `) &&
-            error.url?.startsWith(new URL(api.address(r.role) + r.path, baseURL).href),
-        );
+        allowedRequests.some((r) => error.text.includes(`status of ${r.status} `) && error.url?.startsWith(r.prefix));
       const unexpected = (await Promise.all(errors))
-        .filter((error) => !isAllowedRequest(error) && !allowedTitles.includes(error.title))
+        .filter((error) => !isAllowedRequest(error) && !allowedMessages.includes(error.message))
         .map((error) => error.text);
       expect(unexpected, "errors on the page").toEqual([]);
     },

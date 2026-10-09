@@ -9,8 +9,6 @@ import { createDataset, datasetNode, getSession, openSession } from "./session-a
  * ModifiedSessionGuard asks before leaving a temporary session with changes.
  */
 
-test.describe.configure({ timeout: 90_000 });
-
 test.describe("logged out", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -65,7 +63,7 @@ test.describe("modified temporary session", () => {
     await modal.getByRole("button", { name: "Discard changes" }).click();
     await expect(page).toHaveURL(/\/sessions$/);
 
-    // discarding deletes the user's rule, so the session is gone for the user
-    await expect.poll(async () => (await api.get("session-db", `/sessions/${sessionId}`)).status()).not.toBe(200);
+    // discarding deletes the user's rule, and session-db deletes a session that has no rules left
+    await expect.poll(async () => (await api.get("session-db", `/sessions/${sessionId}`)).status()).toBe(404);
   });
 });

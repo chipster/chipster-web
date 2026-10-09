@@ -8,8 +8,6 @@ import { createDataset, datasetNode, deleteDataset, openSession } from "./sessio
  * from the events.
  */
 
-test.describe.configure({ timeout: 90_000 });
-
 test("datasets added and deleted elsewhere appear and disappear without a reload", async ({ page, api, sessionId }) => {
   const firstId = await createDataset(api, sessionId, { name: "first.txt", x: 100, y: 100 }, "first\n");
   await openSession(page, sessionId, firstId);

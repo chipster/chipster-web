@@ -30,6 +30,8 @@ const chromium = {
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // the session view takes a while to open in the dev setup, and some tests open it more than once
+  timeout: 90_000,
   use: {
     baseURL,
     /*
