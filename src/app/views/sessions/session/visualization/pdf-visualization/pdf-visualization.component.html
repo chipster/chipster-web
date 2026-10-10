@@ -57,21 +57,18 @@
     <div class="col-md-5"></div>
   </div>
 </div>
-<pdf-viewer
-  #pdfViewer
+<ch-pdf-viewer
   *ngIf="urlReady"
   [src]="src"
   [zoom]="zoom"
-  [show-all]="showAll"
-  [fit-to-page]="true"
+  [showAll]="showAll"
   [page]="page"
-  (after-load-complete)="pdfLoadComplete($event)"
-  (error)="pdfLoadFailed($event)"
-  (page-rendered)="pageRendered()"
-  (pagesloaded)="pagesLoaded()"
+  (loaded)="pdfLoadComplete($event)"
+  (loadFailed)="pdfLoadFailed($event)"
+  (heightChange)="height = $event"
   (pageChange)="onPageChange($event)"
-  (on-progress)="onProgress($event)"
-  style="height: {{ height }}px"></pdf-viewer>
+  (loadProgress)="onProgress($event)"
+  style="height: {{ height }}px"></ch-pdf-viewer>
 
 <ng-template #statusTemplate>
   <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
