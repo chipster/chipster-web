@@ -86,6 +86,14 @@ button.no-caret-dropdown::after {
   padding: 0.25rem 1.25rem;
 }
 
+/*
+The stylesheet of pdf.js, loaded when a pdf is shown, makes the color scheme of
+the whole page follow the system, light or dark. The app has only a light one.
+*/
+html:root {
+  color-scheme: normal;
+}
+
 .visualization-panel {
   position: relative; /* required for pdf vizualization */
   padding: 15px;

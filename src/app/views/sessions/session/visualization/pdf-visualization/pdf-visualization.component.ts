@@ -143,8 +143,12 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.unsubscribe.complete();
   }
 
+  get canShowAll(): boolean {
+    return this.totalPages <= this.maxShowAllPages;
+  }
+
   toggleShowAll() {
-    if (!this.showAll && this.totalPages > this.maxShowAllPages) {
+    if (!this.showAll && !this.canShowAll) {
       return;
     }
     this.showAll = !this.showAll;
