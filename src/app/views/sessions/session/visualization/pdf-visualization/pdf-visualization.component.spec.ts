@@ -139,6 +139,17 @@ describe("PdfVisualizationComponent", () => {
       expect(component.showAll).toBe(false);
       expect(component.showAllButtonText).toBe("Show all pages");
     });
+
+    it("shows all pages only up to the limit", () => {
+      component.pdfLoadComplete({ numPages: 50 });
+      component.toggleShowAll();
+      expect(component.showAll).toBe(true);
+      component.toggleShowAll();
+
+      component.pdfLoadComplete({ numPages: 51 });
+      component.toggleShowAll();
+      expect(component.showAll).toBe(false);
+    });
   });
 
   describe("prompt buttons", () => {

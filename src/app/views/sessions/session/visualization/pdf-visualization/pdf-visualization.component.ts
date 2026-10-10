@@ -49,6 +49,12 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   private readonly showSinglePagesText: string = "Show single page";
   public readonly minZoom: number = 0.1;
   public readonly maxZoom: number = 4.0;
+  /*
+   * All pages are rendered at once when they are shown, which could take too
+   * much memory for a long pdf, and pdf.js wouldn't show more than 10000 pages
+   * at once anyway.
+   */
+  public readonly maxShowAllPages = 50;
   // large pdf files may take a long time to render or even freeze the browser
   private readonly autoShowLimit = 10 * 1024 * 1024;
   private readonly showHereButton: StatusButton = { text: "Show here", action: ButtonAction.ShowHere };
@@ -138,6 +144,9 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   toggleShowAll() {
+    if (!this.showAll && this.totalPages > this.maxShowAllPages) {
+      return;
+    }
     this.showAll = !this.showAll;
     this.setShowAllButtonText();
   }
